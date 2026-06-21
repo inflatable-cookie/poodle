@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen backfill: both Rust specimens to full state coverage with real js_password_requirements/PasswordRequirements::from_spec — all-met, none-met, mixed, loading, error, empty(no-policy), and the xs→xl size ladder; GPUI keeps live TextInput Default; both use min-len-12 policy + description (exercises description path). Both previews build clean (0 err). -->
 <!-- pass 41: both Rust targets verified — size ladder (xs→xl) on spec drives padding/title/body/indent/rhythm; GPUI uses ✓/✗ + Jetstream check/x non-color indicators; title only in requirements branch; hint gated on requirements; label wording aligned to Svelte; no strength meter (Svelte ignores minStrengthScore — parity authority). Jetstream render_probe tests cover met/unmet icons, tone via indicator, size ladder, all-met. GPUI builds; jet 7/7 pass. Remaining JsEl/GPUI rem literals (list gap 0.125, row gap 0.375, indicator box 0.875/0.75) are layout micro-approximations with no Svelte token. -->
 # Parity: PasswordRequirements
 
@@ -45,8 +46,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (live `TextInput` + checklist), Loading, Error, plus a **size ladder** (xs→xl via `SpecimenLayout showSizes`) (`PasswordRequirementsSpecimen.svelte:18-48`).
-- GPUI covers: Default (static password `ClayRules123!`), Loading, Error — **missing: size ladder** (no size variants; spec can't express size). Uses min-length 12 policy like Svelte.
-- Jetstream covers: Partially met, All met, Loading — **missing: Error state, size ladder, description rendering.** Uses min-length **8** policy (Svelte/GPUI use 12) and no `description`, so the description path is never exercised.
+- GPUI covers (backfilled): Default (live `TextInput` + checklist), All met, None met, Mixed, Loading, Error, Empty (no policy), and the xs→xl **size ladder**. Min-length 12 policy + description.
+- Jetstream covers (backfilled): All met, None met, Mixed, Loading, Error, Empty (no policy), and the xs→xl **size ladder**. Now uses min-length **12** policy + `description` (matches Svelte/GPUI; description path exercised).
 
 ## Notes
 

@@ -130,6 +130,7 @@ pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
 pub mod toggle_group;
+pub mod token_input;
 pub mod toolbar;
 pub mod tooltip;
 pub mod tree;
@@ -372,6 +373,7 @@ fn render_specimen(
         "toast-host" => Some(toast_host::render(theme)),
         "toast-stack" => Some(toast_stack::render(theme)),
         "toggle-group" => Some(toggle_group::render(theme)),
+        "token-input" => Some(token_input::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
         "tooltip" => Some(tooltip::render(theme)),
         "tree" => Some(tree::render(state, theme)),

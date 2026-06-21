@@ -69,6 +69,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("duration-hm"),
                 ),
         )
+        // --- Empty / zero (default zero display) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Empty / zero"),
+                    theme,
+                ))
+                .child(
+                    DurationInput::from_spec(
+                        DurationInputSpec::new().with_show_seconds(true),
+                        theme,
+                    )
+                    .with_id("duration-empty"),
+                ),
+        )
         // --- Disabled ---
         .child(
             div()

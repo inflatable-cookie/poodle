@@ -130,7 +130,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | checkbox | ok | 1 | 1 | ok |
 | code | fixed | 2 | 2 | ok |
 | code-input | fixed | 0 | 0 | ok |
-| collapse-toggle | fixed | 0 | 1 | gap |
+| collapse-toggle | fixed | 0 | 1 | ok |
 | collapsible | fixed | 2 | 2 | ok |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
@@ -150,7 +150,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | dialog | ok | 0 | 0 | ok |
 | dock-region | ok | 2 | 2 | gap |
 | drawer | ok | 0 | 0 | ok |
-| duration-input | fixed | 2 | 2 | gap |
+| duration-input | fixed | 2 | 2 | ok |
 | editable-label | ok | 2 | 2 | ok |
 | editable-list | fixed | 4 | 3 | ok |
 | embed-input | fixed | 1 | 1 | gap |
@@ -194,10 +194,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | number-input | gap | 1 | 2 | ok |
 | order-by | fixed | 2 | 2 | ok |
 | page-header | fixed | 1 | 1 | ok |
-| page-loading | ok | 0 | 0 | gap |
+| page-loading | ok | 0 | 0 | ok |
 | pagination | fixed | 0 | 1 | ok |
 | pagination-summary | fixed | 2 | 2 | ok |
-| password-requirements | ok | 0 | 0 | gap |
+| password-requirements | ok | 0 | 0 | ok |
 | picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | ok |
 | popover | fixed | 0 | 0 | ok |

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=3 specimen=gap | pass: real TextInput draft control, token row, per-token remove button, read-only hides remove, token-resolved size/density padding+gap+font -->
+<!-- parity consv=fixed gpui=2 jetstream=3 specimen=gap | pass: real TextInput draft control, token row, per-token remove button, read-only hides remove, token-resolved size/density padding+gap+font. Specimens: GPUI specimen rebuilt to full coverage (Default/Multiple-separators/Empty/Max-length/Long/Read-only/Disabled + Sizes/Densities tabs) + builds clean; Jetstream specimen CREATED + registered (pub mod + dispatch + PRIMITIVES entry) with real js_token_input across all states, but build BLOCKED by external jetstream-renderer wgpu break — flag stays gap until Jetstream preview builds clean. -->
 # Parity: TokenInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -47,14 +47,14 @@ Now a real token entry surface (pills + remove buttons + live `TextInput` draft)
 - [x] FIXED — states: disabled (opacity), read-only (hides remove, non-editable draft), empty (placeholder only), populated (pills before draft). Probe-tested.
 - [ ] Hidden form-input payload slots when `name` is set — no DOM/form channel in Jetstream. Accepted.
 - [ ] Commit semantics: separator split, Enter/Tab commit, Backspace-removes-last, blur commit, trim, dedupe. Preview-loop: draft editing/commit + remove-click handling live in the preview event loop (the `poodle-token-remove-*` ids are emitted as hit targets).
-- [ ] Build the Jetstream specimen (`packages/jetstream/preview/src/specimens/token_input.rs`) covering all contract states; register it. (preview crate — out of the components-only build scope this pass.)
+- [x] DONE: Jetstream specimen (`packages/jetstream/preview/src/specimens/token_input.rs`) built covering all contract states (Default/Multiple-separators/Empty/Max-length/Long/Read-only/Disabled + Sizes/Densities) and registered (`pub mod`, `"token-input"` dispatch arm, PRIMITIVES registry entry). Build not yet re-verified — external `jetstream-renderer` wgpu break blocks the preview link (see status line).
 - accepted: no ARIA channel.
 
 ## Specimen parity
 
 - Svelte covers: Default (+ Field + live JSON), Multiple separators, Narrow and long values, Read only, Disabled, Sizes snippet, Densities snippet (`TokenInputSpecimen.svelte`).
-- GPUI covers: Default, long-value (sm), read-only (compact), disabled — but every one renders the static stub (no editing, no remove, no focus). — missing: multiple-separators, sizes group, densities group, **and all are non-functional** (no real input).
-- Jetstream covers: **NONE** — no specimen file exists. Fully missing.
+- GPUI covers (rewritten): Default (populated + id/name), Multiple separators, Empty (placeholder only), Max length (8), Narrow + long values, Read only, Disabled, plus Sizes (xs–xl) and Densities tabs via `specimen_layout`. Every example is the real `TokenInput` (real `Pill` chips + `x` remove + real `TextInput` draft). Builds clean. Commit/remove wiring stays consumer-owned (preview event loop).
+- Jetstream covers (created + registered): new `specimens/token_input.rs` — Default, Multiple separators, Empty, Max length, Narrow + long values, Read only, Disabled, Sizes (xs–xl), Densities. Every example is the real `js_token_input` (real `js_pill` chips + `×` remove + real `js_text_input` draft); registered via `pub mod token_input`, the `"token-input"` dispatch arm, and a PRIMITIVES registry entry. **Build NOT verified** — external `jetstream-renderer`/`jetstream-platform` (sibling repo) fails to compile against a newer `wgpu`; every error is under `/Dev/projects/jetstream/crates/`, none Poodle-side. Re-verify once the sibling finishes its wgpu migration.
 
 ## Notes
 

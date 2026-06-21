@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap | pass: both targets size/density padding+gap from contract rem scales; Jetstream gained panel-mix fill + full border + radius.surface + block padding + vertical orientation; roving focus remains the one accepted runtime-owned gap each -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap | pass: both targets size/density padding+gap from contract rem scales; Jetstream gained panel-mix fill + full border + radius.surface + block padding + vertical orientation; roving focus remains the one accepted runtime-owned gap each. Specimens: GPUI specimen rebuilt (Formatting/Actions/Vertical/Sizes/Densities) + builds clean; Jetstream specimen rewritten to real composed primitives (Formatting/Actions/Sizes/Densities/Vertical) but build BLOCKED by external jetstream-renderer wgpu break — flag stays gap until Jetstream preview builds clean. -->
 # Parity: Toolbar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -47,8 +47,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Formatting toolbar (ghost icon buttons + separator), Actions toolbar (secondary + separator + primary), Sizes snippet, Densities snippet (`ToolbarSpecimen.svelte`).
-- GPUI covers: Horizontal (ghost B/I/U + separator + align arrows), With primary action (Discard/Save draft + separator + Publish), Sizes, Densities, click-action feedback. — missing: nothing material; uses glyph labels (`B`/`I`/`U`/arrows) instead of real icon buttons (icon-registry gap, not a contract gap).
-- Jetstream covers: Start aligned (default), End aligned. — missing: **Sizes** group, **Densities** group, **separator** usage, **primary-action** layout, icon-button items. Specimen exercises the Rust-only `alignment` prop rather than the contract's Formatting/Actions specimens (§13).
+- GPUI covers: Horizontal (ghost B/I/U + separator + align arrows), With primary action (Discard/Save draft + separator + Publish), **Vertical orientation** (added), Sizes, Densities, click-action feedback. Builds clean. — uses glyph labels (`B`/`I`/`U`/arrows) instead of real icon buttons (GPUI icon set lacks `bold`/`italic`/`align-*` SVGs — icon-registry gap, not a contract gap).
+- Jetstream covers (rewritten): **Formatting toolbar** (real `js_icon_button` Bold/Italic/Underline + `js_separator` + Align left/center/right), **Actions toolbar** (secondary text buttons + separator + primary Publish), **Sizes** (xs–xl), **Densities** (compact/default/comfortable), **Vertical orientation**. All items compose real primitives (`js_icon_button`/`js_button`/`js_separator`) inside real `js_toolbar`; no hand-rolled boxes, no Rust-only `alignment` groups. **Build NOT verified** — external `jetstream-renderer`/`jetstream-platform` (sibling repo) fails to compile against a newer `wgpu` (`wgpu::Maintain` removed, `BindingType::AccelerationStructure` signature change, `request_adapter` now returns `Result`); every error is under `/Dev/projects/jetstream/crates/`, none Poodle-side. Re-verify once the sibling finishes its wgpu migration.
 
 ## Notes
 

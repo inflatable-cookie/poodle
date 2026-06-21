@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen=ok: GPUI preview builds clean; GPUI specimen gained Empty/zero group (already had
+     Invalid). Jetstream specimen gained Empty/zero, Invalid, full xs–xl Sizes, and Densities
+     groups; the poodle-jetstream-preview crate compiled clean, but a full Jetstream preview build
+     is currently blocked by an external sibling break in
+     /Dev/projects/jetstream/crates/jetstream-platform/src/gpu.rs:61 (in-progress wgpu upgrade) —
+     unrelated to Poodle. No "with steppers" group on any target: steppers are not part of the
+     DurationInput anatomy (contract increment/decrement is keyboard ArrowUp/ArrowDown, no stepper
+     buttons). No literal placeholder API; "empty" = default zero (00:00[:00]) display. -->
 <!-- pass 39: Jetstream mirrors GPUI — invalid-state border via spec.border_token
      (status.danger); separator 2-row spacer+glyph grid; segment-focus accent-12% highlight;
      size-driven field width + padding (density on inline only); line-heights 1. 5 probe tests
@@ -61,11 +69,11 @@
 ## Specimen parity
 
 - Svelte covers: Hours/minutes/seconds (bound + total readout + onChange), Hours-and-minutes-only (`showSeconds=false`), Disabled, Last-change readout, plus size + density sweeps.
-- GPUI covers: Full (H:M:S) + seconds caption, Hours-and-minutes-only, Disabled, plus size + density sweeps. — missing: **invalid-state** group, interactive onChange readout.
-- Jetstream covers: With value (HM), With seconds, Sizes (Sm/Md/Lg), Disabled. — missing: **invalid-state** group, hours-and-minutes-only labeled group, total-seconds/onChange readout.
+- GPUI covers: Full (H:M:S) + seconds caption, Hours-and-minutes-only, Empty/zero, Invalid (out-of-bounds danger border), Disabled, plus size + density sweeps. — parity OK. Interactive onChange readout still lives in the preview event loop.
+- Jetstream covers: Value display (H:M), Segments (H:M:S), Empty/zero, Invalid (out-of-bounds danger border), Disabled, Sizes (xs–xl), Densities (compact/default/comfortable). — parity OK. total-seconds/onChange readout is a preview-loop concern; no stepper group (not in anatomy).
 
 ## Notes
 
-- No target's specimen demonstrates the **invalid** (out-of-bounds danger border) state — Svelte included.
+- The **invalid** (out-of-bounds danger border) state is now demonstrated on both Rust targets via `ValidationState::Invalid` + `with_min_total_seconds`; Svelte specimen still omits it.
 - GPUI is the weakest on sizing: field width and root pad-y are fixed regardless of `size`, so the GPUI size-sweep specimen visually under-differentiates. Jetstream is fully size-responsive but lacks all interaction.
 - consv=fixed: stale contract size-table values (md/sm field width), the `pattern` note Svelte does not honor, and the separator spacer/glyph split are now reconciled to Svelte.

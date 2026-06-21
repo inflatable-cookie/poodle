@@ -107,6 +107,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "time-field", display_name: "TimeField", description: "Time-of-day input.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "time-zone-select", display_name: "TimeZoneSelect", description: "Timezone selection.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "toggle-group", display_name: "ToggleGroup", description: "Mutually exclusive toggles.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "token-input", display_name: "TokenInput", description: "Tokenizing multi-value text entry.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch.", tier: Tier::Primitive, has_specimen: true },

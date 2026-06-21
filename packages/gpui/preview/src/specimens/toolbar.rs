@@ -8,8 +8,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, Separator, Toolbar};
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, RuleTone, SeparatorOrientation,
-    SeparatorSpec, ToolbarSpec,
+    ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, Orientation, RuleTone,
+    SeparatorOrientation, SeparatorSpec, ToolbarSpec,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -186,6 +186,55 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 cx.notify();
                             },
                         )),
+                    ),
+                ),
+        )
+        // --- Vertical orientation ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Vertical orientation"),
+                    theme,
+                ))
+                .child(
+                    Toolbar::from_spec(
+                        ToolbarSpec::new()
+                            .with_orientation(Orientation::Vertical)
+                            .with_aria_label("Vertical toolbar"),
+                        theme,
+                    )
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size(ControlSize::Sm)
+                                .with_label("\u{2190}"),
+                            theme,
+                        )
+                        .with_id("toolbar-vert-align-left"),
+                    )
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size(ControlSize::Sm)
+                                .with_label("\u{2194}"),
+                            theme,
+                        )
+                        .with_id("toolbar-vert-align-center"),
+                    )
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size(ControlSize::Sm)
+                                .with_label("\u{2192}"),
+                            theme,
+                        )
+                        .with_id("toolbar-vert-align-right"),
                     ),
                 ),
         )

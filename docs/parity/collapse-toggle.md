@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap pass=41 -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=ok pass=41 -->
+<!-- specimen=ok: jetstream specimen now adds With-label, Sizes (xs–xl), Densities groups
+     to match GPUI/Svelte. GPUI preview builds clean. The poodle-jetstream-preview crate (incl.
+     these specimens) compiled clean too, but a full Jetstream preview build is currently blocked
+     by an external sibling-repo break: /Dev/projects/jetstream/crates/jetstream-platform/src/gpu.rs:61
+     (.ok_or on a Result during an in-progress wgpu upgrade) — unrelated to Poodle specimens.
+     Component is icon-only per anatomy, so "with label" is a host-side text label beside the
+     toggle (matches Svelte specimen). -->
 # Parity: CollapseToggle
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -45,7 +52,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Directions (4, interactive toggle + state label), Disabled (left/right), Sizes (xs–xl via snippet), Densities (compact/default/comfortable via snippet).
 - GPUI covers: Directions (4, interactive), Disabled (left/right), Sizes + Densities via `specimen_layout`. — parity OK.
-- Jetstream covers: per-direction collapsed-vs-expanded pairs (4), Disabled (2). — missing: **Sizes** group, **Densities** group, and interactive toggle/state label (no event loop wiring shown).
+- Jetstream covers: per-direction collapsed-vs-expanded pairs (4), With-label (host-side text label beside toggle, both states), Disabled (2), Sizes (xs–xl), Densities (compact/default/comfortable). — parity OK. Interactive toggle wiring still lives in the preview event loop (not the pure-render specimen).
 
 ## Notes
 

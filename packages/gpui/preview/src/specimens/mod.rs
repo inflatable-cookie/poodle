@@ -275,7 +275,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "text" => specimen_card("Text", theme, text::render(theme)),
         "text-input" => specimen_card("TextInput", theme, text_input::render(state, cx)),
         "text-link" => specimen_card("TextLink", theme, text_link::render(theme)),
-        "token-input" => specimen_card("TokenInput", theme, token_input::render(theme)),
+        "token-input" => specimen_card("TokenInput", theme, token_input::render(state, cx)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),

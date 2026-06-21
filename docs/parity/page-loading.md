@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap | pass: both targets rebuilt — GPUI strips inline-card chrome, composes Progress primitive, gates cancel on can_cancel + correct elevation-overlay token; Jetstream composes ring Spinner + Progress primitive, adds presentation branch, cancel chrome, token border-width (shadow approximated, JsEl delta) -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok | pass: both targets rebuilt — GPUI strips inline-card chrome, composes Progress primitive, gates cancel on can_cancel + correct elevation-overlay token; Jetstream composes ring Spinner + Progress primitive, adds presentation branch, cancel chrome, token border-width (shadow approximated, JsEl delta) -->
+<!-- specimen backfill: both Rust specimens to full coverage with real js_page_loading/PageLoading::from_spec — Inline, Indeterminate, Determinate (progress bar), standalone With-cancel, and xs→xl size ladder (size drives message font). Jetstream gained the Inline + standalone With-cancel groups it lacked. Both previews build clean (0 err). -->
 # Parity: PageLoading
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -45,8 +46,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers (`PageLoadingSpecimen.svelte`): Inline (toggle), Indeterminate (overlay), Determinate (animated 0→100 progress), With cancel button (interactive `onCancel`). Full §12 coverage plus inline.
-- GPUI covers (`page_loading_specimen.rs`): Inline, Indeterminate, Determinate (static `value=64`), With cancel button. Matches Svelte groups (progress is static, not animated — acceptable for build-only preview).
-- Jetstream covers (`page_loading.rs`): **Indeterminate**, **Determinate (45%) + cancel** — only 2 groups. Missing: **Inline presentation** group, **standalone With-cancel** group. Both Jetstream specimens wrap in a fixed-height div, so the always-overlay impl is masked.
+- GPUI covers (`page_loading_specimen.rs`): Inline, Indeterminate, Determinate (static `value=64`), With cancel button, plus the xs→xl **size ladder**. Matches Svelte groups (progress is static, not animated — acceptable for build-only preview).
+- Jetstream covers (`page_loading.rs`, backfilled): Inline, Indeterminate, Determinate (45%), standalone With-cancel, plus the xs→xl **size ladder**. The previously-missing Inline and standalone With-cancel groups are now present; overlay groups remain wrapped in a fixed-height div to bound the `.grow()` scrim.
 
 ## Notes
 
