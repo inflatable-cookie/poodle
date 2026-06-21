@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 43: specimen=gap→ok. Both Rust targets backfilled to full contract-state
+     coverage with REAL js_range_slider/RangeSlider (no hand-rolled fill — two thumbs +
+     between-fill window come from the spec low/high). Jetstream gained With-step
+     (25–45, 18–65, step 5), a positions group (narrow/full/low/high), custom
+     min/max+step (0–500 step 50), the xs–xl size matrix, and densities. GPUI gained
+     a positions group + custom-bounds group (size/density grids already supplied by
+     specimen_layout). Both build clean (0 err). Live value readout / drag stay a
+     preview-loop concern on the static Jetstream target (accepted). -->
 <!-- pass 42: contract §6 reconciled to Svelte — `aria-orientation` is no longer
      required on the inputs (orientation rides on `data-orientation` only, matching
      Svelte + the Slider contract); §9 Known-Svelte-gap note replaced with an
@@ -75,8 +83,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (`[20,80]`, live `$lo – $hi`), With step (`[23,43]` min18 max65 step5, live `Ages`), Disabled (`[30,70]`), plus all five Sizes via the `sizes` snippet. Interactive `onValueChange` wired.
-- GPUI covers: Default (interactive, live value text), With step, Disabled, plus Sizes + Densities groups via `specimen_layout`. — missing: nothing material vs Svelte; broadest coverage of the three. Note: the value-text labels use `color_to_hsla(text_secondary)` + `text_sm()`, fine for a preview chrome label.
-- Jetstream covers: Default (20–80), Narrow (45–55), Full (0–100), Low end (0–25), High end (75–100), Disabled. — missing: **With step** group, **Sizes** group, and any **interactivity/live value** (all static, no drag, no `step`/`size` exercised). `range_slider.rs:54-57` specimen group helper hardcodes `text_size(11.0)` (preview chrome label, not the component).
+- GPUI covers: Default (interactive, live value text), With step (interactive), a Positions group (narrow/full/low/high, pass 43), custom min/max+step (0–500, step 50, pass 43), Disabled, plus Sizes + Densities groups via `specimen_layout`. Broadest coverage of the three. The value-text labels use `color_to_hsla(text_secondary)` + `text_sm()`, a preview chrome label.
+- Jetstream now covers (pass 43): Default (20–80), With step (25–45, 18–65, step 5), a Positions group (narrow 45–55 / full 0–100 / low 0–25 / high 75–100), custom min/max+step (0–500, step 50), Disabled (30–70), the xs–xl Sizes matrix, and Densities — all REAL `js_range_slider` with the two thumbs + between-fill window resolved from the spec low/high (no hand-rolled fill). `step` and `size` are now exercised. The only Svelte item not mirrored is **interactivity / live value**, impossible on the static render-only Jetstream target (accepted). The group helper's `text_size(11.0)` is preview chrome (label, not the component). `specimen=ok`.
 
 ## Notes
 

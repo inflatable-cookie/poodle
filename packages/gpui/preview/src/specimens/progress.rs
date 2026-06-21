@@ -74,6 +74,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- With label / value text ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With label / value text"),
+                    theme,
+                ))
+                .child(Progress::from_spec(
+                    {
+                        let mut spec = ProgressSpec::new().with_value(3.0);
+                        spec.max = 5.0;
+                        spec.aria_label = Some("3 of 5 steps complete".to_string());
+                        spec.value_text = Some("3 of 5 steps".to_string());
+                        spec
+                    },
+                    theme,
+                )),
+        )
         .into_any_element();
 
     specimen_layout(

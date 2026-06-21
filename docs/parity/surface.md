@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap | pass: GPUI+Jetstream fill/border/shadow now token-resolved (SurfaceSpec mix-ratio methods added); only the accepted no-ARIA limit remains per target -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok | pass: GPUI+Jetstream specimens backfilled to full real-prop coverage (tone panel/canvas/elevated, border subtle/default/none, padding none/sm/md/lg, region role) with real Surface/js_surface; both previews build clean -->
 # Parity: Surface
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -47,8 +47,8 @@ Note: `surface.rs` is clean of pixel/`hsla`/`rgb` literals; the closed gaps were
 ## Specimen parity
 
 - Svelte covers: Panel tone (default), Canvas tone, Elevated tone, No border (`SurfaceSpecimen.svelte`, 4 groups — matches contract §13 exactly).
-- GPUI covers: Panel, Canvas, Elevated, No border (`gpui/.../surface.rs`, all 4 contract groups). — missing: nothing structural; visual parity blocked by the tone/shadow gaps above.
-- Jetstream covers: Panel tone, Elevated tone, "With border" (`SurfaceBorder::Default`) (`jetstream/.../surface.rs`, 3 groups). — missing: **Canvas tone** group, **No border** group. Also substitutes a non-contract "With border" group; specimens omit `padding`/`border` args so they render default `padding="md"`, `border="subtle"` regardless of label.
+- GPUI covers: Panel, Canvas, Elevated (4 contract groups) **plus** Border emphasis (subtle/default/none), Padding scale (none/sm/md/lg), and Region role (`asRole=region` + label) (`gpui/.../surface.rs`, 6 groups). All real `Surface::from_spec`; props explicit (no silent default fallback). Visual parity on tone/shadow tracked by the gaps above; specimen coverage `ok`.
+- Jetstream covers: Panel tone, Canvas tone, Elevated tone **plus** Border emphasis (subtle/default/none), Padding scale (none/sm/md/lg), and Region role (`jetstream/.../surface.rs`, 6 groups). All real `js_surface` with explicit `tone`/`border`/`padding`. The old non-contract "With border" group that omitted args (rendering defaults regardless of label) is **removed**; specimen coverage `ok`.
 
 ## Notes
 

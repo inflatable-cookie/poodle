@@ -64,7 +64,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(Rating::from_spec(
-                    RatingSpec::new().with_value(7.0).with_max(10),
+                    RatingSpec::new().with_default_value(7.0).with_max(10),
+                    theme,
+                )),
+        )
+        // --- Half-star steps (fractional fill) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Half-star steps"),
+                    theme,
+                ))
+                .child(Rating::from_spec(
+                    RatingSpec::new()
+                        .with_value(3.5)
+                        .with_step(0.5)
+                        .with_allow_clear(true),
                     theme,
                 )),
         )
@@ -78,7 +96,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Clearable"),
                     theme,
                 ))
-                .child(Rating::from_spec(RatingSpec::new().with_value(2.0), theme)),
+                .child(Rating::from_spec(
+                    RatingSpec::new()
+                        .with_default_value(4.0)
+                        .with_allow_clear(true),
+                    theme,
+                )),
+        )
+        // --- Readonly ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Readonly"),
+                    theme,
+                ))
+                .child(Rating::from_spec(
+                    RatingSpec::new().with_value(4.0).with_readonly(true),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(
@@ -91,7 +129,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(Rating::from_spec(
-                    RatingSpec::new().with_value(2.0).with_disabled(true),
+                    RatingSpec::new()
+                        .with_default_value(2.0)
+                        .with_disabled(true),
                     theme,
                 )),
         )

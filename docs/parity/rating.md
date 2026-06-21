@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=ok -->
+<!-- specimen: both Rust targets backfilled to contract §13 set with real js_rating/Rating — Default, 10-star, Half-star (step=0.5 fractional fill), Clearable, Readonly, Disabled (+ Jetstream sizes row; GPUI sizes/density via specimen_layout panes). Both build clean. -->
 # Parity: Rating
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

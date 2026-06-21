@@ -138,6 +138,62 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
+        // --- Positions (narrow / full / low / high) ---
+        // Static dual-thumb sliders: both thumbs + the between-fill window
+        // resolved from the spec low/high alone (all 0..100).
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Positions (narrow / full / low / high)"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(45.0, 55.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_aria_label("Narrow range"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(0.0, 100.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_aria_label("Full range"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(0.0, 25.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_aria_label("Low range"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(75.0, 100.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_aria_label("High range"),
+                    theme,
+                )),
+        )
+        // --- Custom min / max + step ---
+        // Bounds 0..500, [100, 350], step 50; fill from 20% to 70%.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom min / max + step (0–500, step 50)"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(100.0, 350.0)
+                        .with_bounds(0.0, 500.0)
+                        .with_step(50.0)
+                        .with_aria_label("Budget range"),
+                    theme,
+                )),
+        )
         // --- Disabled ---
         .child(
             div()

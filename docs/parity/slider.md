@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 43: specimen=gap→ok. Both Rust targets backfilled to full contract-state
+     coverage with REAL js_slider/Slider (no hand-rolled fill — track fill + thumb
+     come from the spec value). Jetstream gained With-step (step 10), value low/mid/high
+     (10/50/90), custom min/max+step (50–200 step 25), the xs–xl size matrix, and
+     densities. GPUI gained value low/mid/high + custom-bounds groups (size/density
+     grids already supplied by specimen_layout). Both build clean (0 err). Live value
+     readout stays a preview-loop concern on the static Jetstream target (accepted). -->
 <!-- pass 42: GPUI slider keyboard CLOSED — Arrow Left/Down/Right/Up + Home/End +
      PageUp/PageDown now fire `on_change` with step-snapped (anchored at min),
      clamped values (contract §6 + §11 Tier-1); the sibling RangeSlider already
@@ -70,8 +77,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (Volume 65, live readout), With step (Opacity 100, step 10, live readout), Disabled (40), and a `sizes` snippet (value 50 across xs–sm–md–lg–xl). Densities suppressed (`showDensities={false}`). (`SliderSpecimen.svelte`)
-- GPUI covers: Default (Volume 65, interactive `on_change` + readout), With step (Opacity, step 10, interactive), Disabled (40), plus `specimen_layout` size grid (value 60) and density grid (value 60). — missing: **value-readout text uses a hand-built `div().text_sm()`** which is fine, but parity matches Svelte well; no vertical specimen (none in Svelte either). Closest to Svelte of the three.
-- Jetstream covers: Default (50%), Low value (10%), High value (90%), Disabled (50). — missing: **With step** group (Svelte's step=10 case), **live value readout** under each slider (Jetstream sliders are static so no readout is possible), and the **size grid** (xs–xl) that Svelte + GPUI both show. Group labels also diverge (Default/Low/High vs Svelte's Default/With step/Disabled). `specimen=gap`.
+- GPUI covers: Default (Volume 65, interactive `on_change` + readout), With step (Opacity, step 10, interactive), value low/mid/high (10/50/90, pass 43), custom min/max+step (50–200, step 25, pass 43), Disabled (40), plus `specimen_layout` size grid (value 60) and density grid (value 60). Value-readout text uses a hand-built `div().text_sm()` (preview chrome label, not the component). No vertical specimen (none in Svelte either). Broadest coverage of the three.
+- Jetstream now covers (pass 43): Default (Volume 65, step 1), With step (Opacity 100, step 10), value low/mid/high (10/50/90), custom min/max+step (50–200, step 25), Disabled (40), the xs–xl Sizes matrix, and Densities — all REAL `js_slider` with track fill + thumb resolved from the spec value (no hand-rolled fill). Group labels now align with the contract §13 states (Default / With step / Disabled). The only Svelte item not mirrored is the **live value readout**, which is impossible on the static render-only Jetstream target (accepted, no interaction loop). `specimen=ok`.
 
 ## Notes
 

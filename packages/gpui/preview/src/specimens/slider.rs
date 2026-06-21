@@ -102,6 +102,70 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Opacity: {:.0}%", opacity)),
                 ),
         )
+        // --- Value (low / mid / high) ---
+        // Static sliders showing proportional track fill + thumb resolved from
+        // the spec value alone (all 0..100): 10% / 50% / 90%.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Value (low / mid / high)"),
+                    theme,
+                ))
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(10.0)
+                            .with_bounds(0.0, 100.0),
+                        theme,
+                    )
+                    .aria_label("Low value")
+                    .with_id("slider-value-low"),
+                )
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(50.0)
+                            .with_bounds(0.0, 100.0),
+                        theme,
+                    )
+                    .aria_label("Mid value")
+                    .with_id("slider-value-mid"),
+                )
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(90.0)
+                            .with_bounds(0.0, 100.0),
+                        theme,
+                    )
+                    .aria_label("High value")
+                    .with_id("slider-value-high"),
+                ),
+        )
+        // --- Custom min / max + step ---
+        // Bounds 50..200, value 125, step 25; fill at (125-50)/(200-50) = 50%.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom min / max + step (50–200, step 25)"),
+                    theme,
+                ))
+                .child(
+                    Slider::from_spec(
+                        {
+                            let mut spec = SliderSpec::new(125.0).with_bounds(50.0, 200.0);
+                            spec.step = 25.0;
+                            spec.aria_label = Some("Temperature".to_string());
+                            spec
+                        },
+                        theme,
+                    )
+                    .with_id("slider-bounds"),
+                ),
+        )
         // --- Disabled ---
         .child(
             div()

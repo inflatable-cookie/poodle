@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok | pass: GPUI+Jetstream specimens backfilled — horizontal+vertical, subtle+default tone, decorative+semantic, all real Separator/js_separator; both previews build clean -->
 <!-- pass: stroke from border-width-default token on both targets (gpui f32::from(Pixels); jet resolve_px); subtle 72% mix sourced from new SeparatorSpec::subtle_mix_ratio() (no magic float); decorative now read (no AX channel); +4 jet probe tests (orientation/thickness/subtle/default tone) -->
 # Parity: Separator
 
@@ -36,8 +36,8 @@ Svelte matches the contract exactly. All three props (`orientation` default `"ho
 ## Specimen parity
 
 - Svelte covers: Horizontal (default subtle), Vertical, Decorative. (Note: Svelte does not show the `default` tone explicitly — both tones share the divider, default tone untested in Svelte specimen.)
-- GPUI covers: Horizontal (subtle only), Vertical (two dividers), Decorative. — missing: **`default` tone** group (only subtle rendered).
-- Jetstream covers: Horizontal (Subtle + **Default tone**), Vertical. — missing: **Decorative** group. (Jetstream is the only target exercising `default` tone.)
+- GPUI covers: Horizontal (default), Tone emphasis (subtle + default), Vertical, Vertical (default tone), Decorative, Semantic (`decorative=false`) (`gpui/.../separator.rs`, 6 groups). All real `Separator::from_spec`; both tones, both orientations, and both decorative/semantic modes exercised. Specimen coverage `ok`.
+- Jetstream covers: Horizontal (default), Tone emphasis (subtle + default), Vertical (subtle + default dividers), Decorative, Semantic (`decorative=false`) (`jetstream/.../separator.rs`, 5 groups). All real `js_separator`. Specimen coverage `ok`.
 
 ## Notes
 

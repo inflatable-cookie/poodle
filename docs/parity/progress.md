@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=ok -->
+<!-- specimen: both Rust targets backfilled to contract §13 set with real js_progress/Progress — Determinate 0/35/72/100 (on default max=100; fixed Jetstream's pre-normalized 0.25..1.0 bug so fill is spec-resolved), Indeterminate, Custom max (3 of 5 = 60%), label/value-text, sizes row. Both build clean. -->
 <!-- pass: ProgressSpec gained track_fill/track_mix/track_mix_ratio + indicator_gradient_accent_ratio + min_height_rem(size); GPUI now renders the contract accent gradient + spec-owned track mix + size-driven height; Jetstream renders spec-owned track mix + size height ladder + indeterminate 40% bar (gradient on indeterminate bar; determinate widget fill stays solid — runtime quad limit). Probe tests added. -->
 # Parity: Progress
 

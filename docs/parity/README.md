@@ -201,10 +201,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | ok |
 | popover | fixed | 0 | 0 | ok |
-| progress | fixed | 0 | 1 | gap |
+| progress | fixed | 0 | 1 | ok |
 | radio-group | ok | 1 | 1 | ok |
-| range-slider | fixed | 1 | 1 | gap |
-| rating | ok | 1 | 2 | gap |
+| range-slider | fixed | 1 | 1 | ok |
+| rating | ok | 1 | 2 | ok |
 | region | ok | 1 | 0 | ok |
 | relation-picker | fixed | 2 | 2 | gap |
 | remediation-banner | gap | 0 | 0 | ok |
@@ -213,10 +213,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | segmented-control | fixed | 0 | 0 | ok |
 | select | ok | 0 | 0 | ok |
 | selection-summary | fixed | 0 | 0 | gap |
-| separator | ok | 0 | 0 | gap |
+| separator | ok | 0 | 0 | ok |
 | sidebar-nav | fixed | 0 | 1 | ok |
 | skeleton | fixed | 0 | 0 | ok |
-| slider | fixed | 1 | 1 | gap |
+| slider | fixed | 1 | 1 | ok |
 | spacer | ok | 2 | 2 | gap |
 | spinner | fixed | 2 | 2 | ok |
 | split-button | fixed | 0 | 0 | gap |
@@ -225,7 +225,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | state-tile | gap | 0 | 0 | ok |
 | status-bar | fixed | 0 | 0 | ok |
 | status-indicator | fixed | 0 | 0 | ok |
-| surface | fixed | 1 | 1 | gap |
+| surface | fixed | 1 | 1 | ok |
 | switch | fixed | 0 | 0 | ok |
 | tab-strip | gap | 0 | 0 | gap |
 | table | fixed | 0 | 0 | ok |
