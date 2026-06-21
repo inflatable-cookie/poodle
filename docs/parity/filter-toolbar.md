@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: toggle dims/radius + actions gap + sticky shadow + density gap/padding all token-resolved on GPUI, header focus ring added; Jetstream gained collapse chevron, density-aware padding/gaps, summary flex-grow, token summary font; jetstream probe tests added -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | pass: GPUI specimen gained Densities group; Jetstream specimen replaced stand-in label chips with REAL controls (js_text_input search, js_select filters, js_icon_button refresh action, js_button Reset-all secondary) and gained Sizes + Densities groups. Both specimens now cover responsive-grid / collapsible+actions / collapsed / secondary / sizes / densities; both previews build clean -->
 # Parity: FilterToolbar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -49,8 +49,8 @@ Divergences in the density token table — Svelte authoritative, contract is wro
 ## Specimen parity
 
 - Svelte covers: Responsive grid, Collapsible with actions (expanded, bindable), Explicit collapsed state, With secondary slot, Sizes, Densities (`FilterToolbarSpecimen.svelte`).
-- GPUI covers: Responsive grid, Sizes, Collapsible+actions (expanded), Explicit collapsed, With secondary — missing: **Densities** group; collapse toggle is not interactive (no `on_toggle` wired, so collapsed↔expanded cannot be exercised).
-- Jetstream covers: Expanded with summary, Collapsed with actions, With secondary, Empty — missing: **Sizes** group, **Densities** group; uses stand-in `chip` labels not real TextInput/Select (acceptable: primitives noted as dependency), hardcoded `text_size(11.0)` group labels + `text_size(11.0)` Refresh action (specimen literal).
+- GPUI covers (`filter_toolbar_specimen.rs`): Responsive grid, **Densities**, Sizes, Collapsible+actions (expanded), Explicit collapsed, With secondary. All grid slots are real `TextInput`/`Select`; refresh = real `IconButton`; Reset all = real `Button`. (Collapse toggle is still not interactive in preview — no `on_toggle` wired; that's a preview-loop follow-up, not a specimen coverage gap.)
+- Jetstream covers (`filter_toolbar.rs`): Responsive grid, Collapsible with actions, Collapsed by default, With secondary, **Sizes**, **Densities**. Stand-in `chip` labels are GONE — grid slots are real `js_text_input` (search) + `js_select` (status/type/owner); header action = real `js_icon_button` refresh; secondary = real `js_button` Reset all. Group eyebrow labels still use a `text_size(11.0)` literal (specimen chrome, not a component value).
 
 ## Notes
 

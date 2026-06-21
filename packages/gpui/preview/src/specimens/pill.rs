@@ -257,6 +257,99 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )),
                 ),
         )
+        // --- Solid vs subtle ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Solid vs subtle"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .gap(px(8.0))
+                        .items_center()
+                        .child(Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Solid")
+                                .with_tone(PillTone::Info)
+                                .with_appearance(PillAppearance::Solid),
+                            theme,
+                        ))
+                        .child(Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Subtle")
+                                .with_tone(PillTone::Info)
+                                .with_appearance(PillAppearance::Subtle),
+                            theme,
+                        ))
+                        .child(Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Solid")
+                                .with_tone(PillTone::Success)
+                                .with_appearance(PillAppearance::Solid),
+                            theme,
+                        ))
+                        .child(Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Subtle")
+                                .with_tone(PillTone::Success)
+                                .with_appearance(PillAppearance::Subtle),
+                            theme,
+                        )),
+                ),
+        )
+        // --- Removable (x) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Removable"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .gap(px(8.0))
+                        .items_center()
+                        .child(
+                            Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("Tag")
+                                    .with_removable(true),
+                                theme,
+                            )
+                            .on_remove(|_e, _w, _cx| {}),
+                        )
+                        .child(
+                            Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("Filter")
+                                    .with_tone(PillTone::Info)
+                                    .with_removable(true),
+                                theme,
+                            )
+                            .on_remove(|_e, _w, _cx| {}),
+                        )
+                        .child(
+                            Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("Selected")
+                                    .with_selected(true)
+                                    .with_removable(true),
+                                theme,
+                            )
+                            .on_remove(|_e, _w, _cx| {}),
+                        ),
+                ),
+        )
         .into_any_element();
 
     specimen_layout(

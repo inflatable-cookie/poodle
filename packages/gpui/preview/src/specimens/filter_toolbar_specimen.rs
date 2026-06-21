@@ -3,8 +3,8 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, FilterToolbar, IconButton, Select, TextInput};
 use poodle_specs::FilterToolbarSpec;
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ChoiceOption, ControlSize, EyebrowSpec, IconButtonSpec, SelectSpec,
-    TextInputSpec,
+    ButtonSpec, ButtonVariant, ChoiceOption, ControlDensity, ControlSize, EyebrowSpec,
+    IconButtonSpec, SelectSpec, TextInputSpec,
 };
 
 /// Static filter option sets reused across specimen sections.
@@ -118,6 +118,49 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 theme,
                                 &format!("size-status-{key}"),
                                 status_options(),
+                            )),
+                        );
+                    }
+                    col
+                }),
+        )
+        // --- Densities ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Densities"),
+                    theme,
+                ))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(12.0));
+                    for &(key, density) in densities {
+                        col = col.child(
+                            FilterToolbar::from_spec(
+                                FilterToolbarSpec::new()
+                                    .with_summary_text(format!("Toolbar at {key}"))
+                                    .with_aria_label(format!("Filter toolbar at {key}"))
+                                    .with_collapsible(false)
+                                    .with_density(density),
+                                theme,
+                            )
+                            .with_child(search_input(theme, &format!("density-search-{key}")))
+                            .with_child(select_input(
+                                theme,
+                                &format!("density-status-{key}"),
+                                status_options(),
+                            ))
+                            .with_child(select_input(
+                                theme,
+                                &format!("density-type-{key}"),
+                                type_options(),
                             )),
                         );
                     }

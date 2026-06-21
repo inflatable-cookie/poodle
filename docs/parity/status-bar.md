@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: spec reshaped to contract props (summary/aria/chrome/size/density), both targets rebuilt chrome-aware, height dropped, padding/gap/font token-resolved, summary-as-leading-fallback; jetstream probe tests added -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | pass: both Rust specimens backfilled to full contract coverage (no-chrome / chrome via component flag / summary-only / sizes / densities); GPUI chrome no longer wrapper-faked, meta items inherit bar font; Jetstream leading uses real StatusIndicator tone dots, trailing sized from spec.font_size_rem (no 11.0 literal); both previews build clean -->
 # Parity: StatusBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -52,8 +52,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (no chrome), With chrome, Summary only, plus `sizes`/`densities` variant snippets (`StatusBarSpecimen.svelte:8-60`). Leading = branch + error items; trailing = cursor/encoding/language metadata.
-- GPUI covers: Default (no chrome), With chrome (faked via outer wrapper border), Summary only (`specimens/status_bar.rs:28-121`). — missing: **size variants**, **density variants**; chrome is wrapper-faked, not component-driven.
-- Jetstream covers: "With summary", "Minimal" (`specimens/shell_status_bar.rs:22-43`). — missing: **chrome group**, **summary-only-without-items** (its "Minimal" still labels itself summary), **size variants**, **density variants**. Trailing labels use raw `text_size(11.0)` (`:14-20`) — specimen-level hardcode.
+- GPUI covers (`specimens/status_bar.rs`): Default (no chrome), With chrome, Summary only, **Sizes** (xs–xl), **Densities** (compact/default/comfortable). Chrome is now component-driven via `.chrome(true)` + `with_chrome(true)` (no wrapper border). Leading = real `StatusIndicator` info/success tone dots; trailing meta items are plain text children inheriting the bar's resolved font (no `text_xs()` hardcode).
+- Jetstream covers (`specimens/shell_status_bar.rs`): Default (no chrome), With chrome, Summary only, **Sizes** (xs–xl), **Densities** (compact/default/comfortable). Leading = real `js_status_indicator` info/success tone dots; trailing metadata sized from `spec.font_size_rem()` (Svelte `font-size: inherit`) — the prior `text_size(11.0)` literal is gone.
 
 ## Notes
 

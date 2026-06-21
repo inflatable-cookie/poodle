@@ -146,6 +146,100 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
+        // --- Success tone ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Success tone"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .flex_wrap()
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_label("Success primary"),
+                                theme,
+                            )
+                            .with_id("success-primary"),
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_label("Success secondary"),
+                                theme,
+                            )
+                            .with_id("success-secondary"),
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_label("Success ghost"),
+                                theme,
+                            )
+                            .with_id("success-ghost"),
+                        ),
+                ),
+        )
+        // --- Warning tone ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Warning tone"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .flex_wrap()
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_tone(ButtonTone::Warning)
+                                    .with_label("Warning primary"),
+                                theme,
+                            )
+                            .with_id("warning-primary"),
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_tone(ButtonTone::Warning)
+                                    .with_label("Warning secondary"),
+                                theme,
+                            )
+                            .with_id("warning-secondary"),
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_tone(ButtonTone::Warning)
+                                    .with_label("Warning ghost"),
+                                theme,
+                            )
+                            .with_id("warning-ghost"),
+                        ),
+                ),
+        )
         // --- With icons ---
         .child(
             div()

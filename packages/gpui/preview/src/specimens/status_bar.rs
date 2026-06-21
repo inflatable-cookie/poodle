@@ -1,122 +1,133 @@
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
-use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::StatusIndicator;
 use poodle_gpui_components::{Eyebrow, StatusBar};
 use poodle_specs::ShellStatusBarSpec;
-use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, StatusIndicatorSpec, StatusTone};
+
+/// A branch indicator (info tone dot) + diagnostics indicator (success tone dot),
+/// matching the contract §12 "Default" leading region.
+fn leading_items(theme: &GpuiThemeProvider) -> Div {
+    let branch = StatusIndicatorSpec::new()
+        .with_status(StatusTone::Info)
+        .with_label("main");
+    let diagnostics = StatusIndicatorSpec::new()
+        .with_status(StatusTone::Success)
+        .with_label("0 errors");
+    div()
+        .flex()
+        .items_center()
+        .gap(px(8.0))
+        .child(StatusIndicator::from_spec(branch, theme))
+        .child(StatusIndicator::from_spec(diagnostics, theme))
+}
+
+/// Trailing cursor/encoding/language metadata. Plain text children that inherit
+/// the bar's resolved font-size + secondary text color (Svelte `font-size:
+/// inherit`); no per-item size/color overrides.
+fn trailing_meta(items: &[&str]) -> Div {
+    let mut row = div().flex().items_center().gap(px(8.0));
+    for item in items {
+        row = row.child(div().child(item.to_string()));
+    }
+    row
+}
+
+fn group(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
+        .child(content)
+}
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
 
-    let mut branch_indicator = StatusIndicatorSpec::new().with_status(StatusTone::Info);
-    branch_indicator.label = Some("main".to_string());
-
-    let mut diagnostics_indicator = StatusIndicatorSpec::new().with_status(StatusTone::Success);
-    diagnostics_indicator.label = Some("0 errors".to_string());
-
-    let meta_item = |text: &str| {
-        div()
-            .text_xs()
-            .text_color(color_to_hsla(text_secondary))
-            .child(text.to_string())
-    };
+    let sizes: &[(&str, ControlSize)] = &[
+        ("xs", ControlSize::Xs),
+        ("sm", ControlSize::Sm),
+        ("md", ControlSize::Md),
+        ("lg", ControlSize::Lg),
+        ("xl", ControlSize::Xl),
+    ];
+    let densities: &[(&str, ControlDensity)] = &[
+        ("compact", ControlDensity::Compact),
+        ("default", ControlDensity::Default),
+        ("comfortable", ControlDensity::Comfortable),
+    ];
 
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Default (no chrome)"),
-                    theme,
-                ))
-                .child(
-                    StatusBar::from_spec(ShellStatusBarSpec::new().with_summary("Ready"), theme)
-                        .with_leading_items(
-                            div()
-                                .flex()
-                                .items_center()
-                                .gap(px(8.0))
-                                .child(StatusIndicator::from_spec(branch_indicator.clone(), theme))
-                                .child(StatusIndicator::from_spec(
-                                    diagnostics_indicator.clone(),
-                                    theme,
-                                )),
-                        )
-                        .with_trailing_items(
-                            div()
-                                .flex()
-                                .items_center()
-                                .gap(px(8.0))
-                                .child(meta_item("Ln 42, Col 18"))
-                                .child(meta_item("UTF-8"))
-                                .child(meta_item("TypeScript")),
-                        ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With chrome"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .border_1()
-                        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
-                        .rounded(px(6.0))
-                        .overflow_hidden()
-                        .child(
-                            StatusBar::from_spec(
-                                ShellStatusBarSpec::new().with_summary("Ready"),
-                                theme,
-                            )
-                            .with_leading_items(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(8.0))
-                                    .child(StatusIndicator::from_spec(branch_indicator, theme))
-                                    .child(StatusIndicator::from_spec(
-                                        diagnostics_indicator,
-                                        theme,
-                                    )),
-                            )
-                            .with_trailing_items(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(8.0))
-                                    .child(meta_item("Ln 42, Col 18"))
-                                    .child(meta_item("UTF-8"))
-                                    .child(meta_item("TypeScript")),
-                            ),
-                        ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Summary only"),
-                    theme,
-                ))
-                .child(StatusBar::from_spec(
-                    ShellStatusBarSpec::new().with_summary("3 items selected"),
-                    theme,
-                )),
-        )
+        // --- Default (no chrome): full bar, blends into container ---
+        .child(group(
+            theme,
+            "Default (no chrome)",
+            StatusBar::from_spec(ShellStatusBarSpec::new().with_summary("Ready"), theme)
+                .with_leading_items(leading_items(theme))
+                .with_trailing_items(trailing_meta(&["Ln 42, Col 18", "UTF-8", "TypeScript"])),
+        ))
+        // --- With chrome: component-driven border-top + 94% panel bg ---
+        .child(group(
+            theme,
+            "With chrome",
+            StatusBar::from_spec(
+                ShellStatusBarSpec::new().with_summary("Ready").with_chrome(true),
+                theme,
+            )
+            .chrome(true)
+            .with_leading_items(leading_items(theme))
+            .with_trailing_items(trailing_meta(&["Ln 42, Col 18", "UTF-8", "TypeScript"])),
+        ))
+        // --- Summary only: leading region shows summary text, no trailing ---
+        .child(group(
+            theme,
+            "Summary only",
+            StatusBar::from_spec(
+                ShellStatusBarSpec::new().with_summary("3 items selected"),
+                theme,
+            ),
+        ))
+        // --- Sizes: font-size + padding-block scale ---
+        .child(group(theme, "Sizes", {
+            let mut col = div().flex().flex_col().gap(px(12.0));
+            for &(key, size) in sizes {
+                col = col.child(
+                    StatusBar::from_spec(
+                        ShellStatusBarSpec::new().with_summary("Status bar").with_chrome(true),
+                        theme,
+                    )
+                    .chrome(true)
+                    .with_size(size)
+                    .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"])),
+                );
+                let _ = key;
+            }
+            col
+        }))
+        // --- Densities: padding-inline + gap scale (height unchanged) ---
+        .child(group(theme, "Densities", {
+            let mut col = div().flex().flex_col().gap(px(12.0));
+            for &(key, density) in densities {
+                col = col.child(
+                    StatusBar::from_spec(
+                        ShellStatusBarSpec::new().with_summary("Status bar").with_chrome(true),
+                        theme,
+                    )
+                    .chrome(true)
+                    .with_density(density)
+                    .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"])),
+                );
+                let _ = key;
+            }
+            col
+        }))
 }

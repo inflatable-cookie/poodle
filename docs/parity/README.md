@@ -121,7 +121,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | box | ok | 0 | 0 | fixed |
 | breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
-| button | fixed | 2 | 2 | gap |
+| button | fixed | 2 | 2 | ok |
 | calendar | fixed | 2 | 2 | gap |
 | callout | fixed | 2 | 2 | ok |
 | card | fixed | 2 | 2 | ok |
@@ -161,7 +161,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | field | ok | 1 | 1 | gap |
 | field-set | fixed | 1 | 1 | gap |
 | file-upload | ok | 0 | 0 | ok |
-| filter-toolbar | fixed | 0 | 0 | gap |
+| filter-toolbar | fixed | 0 | 0 | ok |
 | form-actions | ok | 1 | 1 | gap |
 | form-dialog | ok | 0 | 0 | ok |
 | form-layout | fixed | 2 | 2 | ok |
@@ -199,7 +199,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | pagination-summary | fixed | 2 | 2 | gap |
 | password-requirements | ok | 0 | 0 | gap |
 | picker-shell | gap | 0 | 0 | gap |
-| pill | fixed | 0 | 0 | gap |
+| pill | fixed | 0 | 0 | ok |
 | popover | fixed | 0 | 0 | gap |
 | progress | fixed | 0 | 1 | gap |
 | radio-group | ok | 1 | 1 | ok |
@@ -223,7 +223,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | split-view | fixed | 2 | 2 | ok |
 | stack | fixed | 2 | 2 | ok |
 | state-tile | gap | 0 | 0 | ok |
-| status-bar | fixed | 0 | 0 | gap |
+| status-bar | fixed | 0 | 0 | ok |
 | status-indicator | fixed | 0 | 0 | ok |
 | surface | fixed | 1 | 1 | gap |
 | switch | fixed | 0 | 0 | ok |
