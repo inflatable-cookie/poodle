@@ -67,6 +67,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                 }),
         )
+        // --- Open (calendar + time) ---
+        // Static open state so the composed real Calendar + TimeInput
+        // section is always visible for review without interaction.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Open (calendar + time)"),
+                    theme,
+                ))
+                .child({
+                    let value = DateTimeValue::new(
+                        Some("2026-03-14".to_string()),
+                        Some("14:30".to_string()),
+                    );
+                    let mut spec = DateTimePickerSpec::new().with_default_value(value);
+                    spec.open = Some(true);
+                    spec.aria_label = Some("Open date time picker".to_string());
+                    DateTimePicker::from_spec(spec, theme).with_id("open")
+                }),
+        )
         // --- Disabled ---
         .child(
             div()

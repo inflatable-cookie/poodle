@@ -71,6 +71,35 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                 }),
         )
+        // --- Open (range calendar + start/end time) ---
+        // Static open state so the composed real range Calendar plus the
+        // paired START/END TimeInput sections are always visible for review.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Open (range calendar + start/end time)"),
+                    theme,
+                ))
+                .child({
+                    let range = DateTimeRangeValue::new(
+                        DateTimeValue::new(
+                            Some("2026-03-10".to_string()),
+                            Some("09:00".to_string()),
+                        ),
+                        DateTimeValue::new(
+                            Some("2026-03-14".to_string()),
+                            Some("17:00".to_string()),
+                        ),
+                    );
+                    let mut spec = DateTimeRangePickerSpec::new().with_default_value(range);
+                    spec.open = Some(true);
+                    spec.aria_label = Some("Open range picker".to_string());
+                    DateTimeRangePicker::from_spec(spec, theme).with_id("open")
+                }),
+        )
         // --- Disabled ---
         .child(
             div()

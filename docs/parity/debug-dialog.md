@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
 <!-- pass: GPUI rebuilt to compose Dialog primitive (title/close/lg-width) wrapping a Code block; gap tokenized (space.stack.md); value-as-String reclassified accepted (Rust has no `unknown`). max_height wired into both targets' Code blocks via new DebugDialogSpec::max_height_px(). -->
 # Parity: DebugDialog
 
@@ -49,7 +49,7 @@ Now composes the Dialog primitive: trigger Button + Dialog (title / close button
 ## Specimen parity
 
 - Svelte covers: with debug value (object → JSON), custom trigger (`triggerVariant="secondary"`, `triggerSize="xs"`, custom `maxHeight`), hidden-when-null.
-- GPUI covers: "Asset payload" (title + trigger-label + value) and default-hidden. — missing: **custom trigger variant/size**, **maxHeight customization**, and (blocked) the dialog-open path since no Dialog is rendered.
+- GPUI covers: labeled groups — "With debug value" (title + trigger-label + nested-array value), "Custom trigger" (`trigger_variant=Secondary`, `trigger_size=Xs`, `max_height="18rem"`), "Hidden when null" (renders nothing). **GPUI specimen complete** — mirrors all three Svelte groups; real Button + Dialog + Code composition (the component now renders the Dialog surface with `default_open(true)`), no fakes.
 - Jetstream covers: nothing — no specimen exists.
 
 ## Notes

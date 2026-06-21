@@ -62,6 +62,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- Open (calendar + time + zone) ---
+        // Static open state so the composed real Calendar + TimeInput +
+        // TimeZoneSelect fields are always visible for review without interaction.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Open (calendar + time + zone)"),
+                    theme,
+                ))
+                .child(DateTimeZonePicker::from_spec(
+                    DateTimeZonePickerSpec::new()
+                        .with_default_value(ZonedDateTimeValue::new(
+                            Some("2026-03-23".into()),
+                            Some("14:30".into()),
+                            Some("America/New_York".into()),
+                        ))
+                        .with_open(true),
+                    theme,
+                )),
+        )
         // --- Disabled ---
         .child(
             div()

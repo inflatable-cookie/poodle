@@ -69,6 +69,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                 }),
         )
+        // --- Open (range calendar) ---
+        // Static open state so the composed real Calendar (mode="range")
+        // surface is always visible for review without interaction.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Open (range calendar)"),
+                    theme,
+                ))
+                .child({
+                    let range = DateRangeValue::new(
+                        Some("2026-03-03".to_string()),
+                        Some("2026-03-19".to_string()),
+                    );
+                    let mut spec = DateRangePickerSpec::new()
+                        .with_default_value(range)
+                        .with_open(true);
+                    spec.aria_label = Some("Open range picker".to_string());
+                    DateRangePicker::from_spec(spec, theme).with_id("open")
+                }),
+        )
         // --- Disabled ---
         .child(
             div()

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=1 specimen=gap --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
 # Parity: ErrorBoundary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -31,7 +31,7 @@ Svelte implements the full contract — props `children` (required Snippet), `ti
 ## Specimen parity
 
 - Svelte covers: Normal children (stable content), Caught render error (interactive "Throw again" button + real throw + working reset to "Recovered child content."). Both states, interactive.
-- GPUI covers: Normal child, Error state (forced via `with_error_message`). Both states but **statically** — no real throw, no working reset.
+- GPUI covers: labeled groups — "Normal children" (real `Surface` border=subtle + padding=md wrapping a `Text` child, passed through), "Caught render error" (`EmptyState` fallback with custom title + retry, forced via `with_error_message`), "Default fallback" (default title/retry from the spec). **GPUI specimen complete** — both contract states plus a default-title variant, real EmptyState fallback (icon + title + message + retry action), no fakes. Error remains props-driven (GPUI cannot catch render panics) and retry is a static action (accepted runtime delta) — statically rendered, no real throw / working reset.
 - Jetstream covers: **nothing** (no specimen).
 
 ## Notes

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap --><!-- pass: both targets gain trustedHtml state, real Skeleton(block) loading, ratio-derived placeholder height; unsanctioned pill+heading removed; token-resolved -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap --><!-- pass: both targets gain trustedHtml state, real Skeleton(block) loading, ratio-derived placeholder height; unsanctioned pill+heading removed; token-resolved --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
 # Parity: EmbedPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -45,7 +45,7 @@
 ## Specimen parity
 
 - Svelte covers: YouTube, Vimeo, Trusted raw embed (`trustedHtml` + `aspectRatio="auto"`), Loading, Error, Empty (custom message). 6 cases incl. trusted.
-- GPUI covers: YouTube, Vimeo, Generic iframe (raw `original_embed`), Loading, Error, Empty (custom). 6 cases. — missing: **trustedHtml** path (uses raw-embed instead).
+- GPUI covers: YouTube, Vimeo, Generic iframe (raw `original_embed`), **Trusted raw embed (`with_trusted_html` + `with_auto_aspect_ratio`)**, Loading, Error, Empty (custom). 7 cases. **GPUI specimen complete** — every contract state plus the trustedHtml priority slot now exercised; matches the Svelte specimen's case set.
 - Jetstream covers: YouTube, Loading, Empty (default message). 3 cases. — missing: **Vimeo, Error, raw embed, custom empty message, trustedHtml** (weakest coverage).
 
 ## Notes

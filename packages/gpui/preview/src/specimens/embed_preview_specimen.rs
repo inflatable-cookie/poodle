@@ -52,6 +52,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        // --- Trusted raw embed (caller-sanitized HTML, auto aspect) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Trusted raw embed"), theme))
+                .child(
+                    EmbedPreview::from_spec(
+                        EmbedPreviewSpec::new()
+                            .with_trusted_html(r#"<iframe title="Audio embed" src="about:blank"></iframe>"#)
+                            .with_auto_aspect_ratio(),
+                        theme,
+                    )
+                )
+        )
         // --- Loading state ---
         .child(
             div().flex().flex_col().gap(px(8.0))

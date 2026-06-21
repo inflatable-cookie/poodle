@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap --><!-- pass: both targets compose real TextInput(rows=3)+Pill, split danger/success status, token-resolved spacing; only preview-loop callbacks remain -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap --><!-- pass: both targets compose real TextInput(rows=3)+Pill, split danger/success status, token-resolved spacing; only preview-loop callbacks remain --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
 # Parity: EmbedInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -47,7 +47,7 @@
 ## Specimen parity
 
 - Svelte covers: Supported-providers table, Detection matrix (4 samples), live input, Field wrapper, Restricted providers, Parsed-result dump, plus size + density snippets.
-- GPUI covers: Supported-providers table, Detection matrix (4 `.with_detected_parse`), live input placeholder, Field wrapper, Restricted providers, Preset states (incl. custom parsed). Broad. — missing: nothing major vs Svelte (specimen is rich, though it leaks many hardcoded px + a `Menlo` font literal in the harness).
+- GPUI covers: Supported-providers table, Detection matrix (4 `.with_detected_parse`), live input placeholder, Field wrapper, Restricted providers, **States group (empty / resolved-success / external error / disabled)**, Preset states (incl. custom parsed). **GPUI specimen complete** — full contract Specimen-Definitions coverage plus an explicit visual-states group; the only Svelte axis absent is size/density snippets, which `EmbedInputSpec` exposes no builder for (no `with_size`/`with_density`), so it is intentionally not faked. (Harness still leaks some hardcoded px + a `Menlo` font literal — cosmetic, not a fake component.)
 - Jetstream covers: With URL (detected), Empty (2 groups). — missing: **detection matrix, Field wrapper, restricted providers, provider table** (weakest coverage).
 
 ## Notes

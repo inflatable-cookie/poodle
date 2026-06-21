@@ -1,4 +1,7 @@
 <!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- specimen: GPUI specimen done (added static "Open (range calendar)" group composing the
+     real range Calendar; full contract state coverage, no fake grid); Jetstream pending
+     engine recovery — specimen=gap kept until Jetstream Sizes/Densities/open land. -->
 <!-- pass 41: both Rust targets closed. GPUI — indicator `calendar` Icon → `chevron-down`
      (text-secondary, per-size `date_picker_indicator_font_rem`); partial-range `"<start> – …"`
      → `"<start> – End date"` (Svelte parity, start-only ⇒ placeholder); shadow already
@@ -51,7 +54,7 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 ## Specimen parity
 
 - Svelte covers: Default, With default range, Disabled, Sizes, Densities (`DateRangePickerSpecimen.svelte`).
-- GPUI covers: Default (open-toggle), With default range (open-toggle), Disabled, Sizes, Densities. — full parity.
+- GPUI covers: Default (open-toggle), With default range (open-toggle), **Open (range calendar)** (static open, composes the real range `Calendar`), Disabled, Sizes, Densities. — GPUI specimen complete; full contract state coverage with real components. Jetstream pending engine recovery.
 - Jetstream covers: With range, Placeholder, Disabled. — missing: **Sizes** and **Densities** groups; no open/overlay demonstration.
 
 ## Notes

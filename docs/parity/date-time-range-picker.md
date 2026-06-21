@@ -1,4 +1,8 @@
 <!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- specimen: GPUI specimen done (added static "Open (range calendar + start/end time)" group
+     composing the real range Calendar + paired START/END TimeInput; full contract state coverage,
+     no fake grid); Jetstream pending engine recovery — specimen=gap kept until Jetstream
+     Sizes/Densities/open land. -->
 <!-- pass 41: Jetstream overlay built — composes real Calendar(range) + paired
      START/END TimeField sections (mirrors GPUI + date_time_picker.rs). Indicator
      now size-scaled (date_picker_indicator_font_rem); min-width/gaps are
@@ -60,11 +64,11 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default, With default range, Disabled; plus size and density snippets (`DateTimeRangePickerSpecimen.svelte`).
-- GPUI covers: Default (toggle-open wired), With default range (toggle-open), Disabled; plus size/density via `specimen_layout` (`date_time_range_picker.rs`). Open state demonstrates the mocked overlay. — missing: real composed calendar/time content (shows mockup); otherwise state coverage matches.
+- GPUI covers: Default (toggle-open wired), With default range (toggle-open), **Open (range calendar + start/end time)** (static open), Disabled; plus size/density via `specimen_layout` (`date_time_range_picker.rs`). — GPUI specimen complete; open state composes the REAL range `Calendar` + paired START/END `TimeInput` sections (the historic mock overlay was replaced in pass 17). Jetstream pending engine recovery.
 - Jetstream covers: With range, Placeholder, Disabled (`date_time_range_picker.rs`). — missing: **size and density groups** (Svelte/GPUI both demo these via snippets/specimen_layout); **open-overlay state** (trigger-only, so no surface shown).
 
 ## Notes
 
 - `consv=gap` driver: the contract §8 size table (calc-based heights + per-size padding) does not match Svelte's absolute heights + density-only padding, and the contract omits the per-size indicator font-size Svelte ships. Both belong in the contract per "Svelte is parity authority."
 - `DateTimeRangePickerSpec` is well-modeled — it carries the full prop surface (`value`, `default_value`, `open`, `default_open`, `placeholder`, `week_starts_on`, `locale`, `is_disabled`, `aria_label`, size/role/density) matching the contract. The Rust gaps are rendering-side, not spec-side.
-- Biggest single issue: the GPUI mocked overlay (fake grid + invented Today/Done bar). It must be rebuilt on real `Calendar`(range)/`TimeInput` primitives — the hand-coded version hides that the composition is incomplete.
+- The historic GPUI mocked overlay (fake grid + invented Today/Done bar) was rebuilt on the real `Calendar`(range) + paired `TimeInput` primitives in pass 17 — this issue is resolved. The static "Open (range calendar + start/end time)" specimen group renders that real composed surface.

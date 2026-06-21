@@ -130,6 +130,42 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        // --- Visual states (empty / resolved / external error / disabled) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("States"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(12.0))
+                        .child(state_row(
+                            "Empty",
+                            EmbedInputSpec::new()
+                                .with_placeholder("Paste a URL or embed code..."),
+                            theme,
+                        ))
+                        .child(state_row(
+                            "Resolved (success)",
+                            EmbedInputSpec::new()
+                                .with_value("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                                .with_detected_parse(),
+                            theme,
+                        ))
+                        .child(state_row(
+                            "Error (external)",
+                            EmbedInputSpec::new()
+                                .with_value("not a url")
+                                .with_error("Could not parse embed source"),
+                            theme,
+                        ))
+                        .child(state_row(
+                            "Disabled",
+                            EmbedInputSpec::new()
+                                .with_value("https://vimeo.com/76979871")
+                                .with_disabled(true)
+                                .with_detected_parse(),
+                            theme,
+                        ))
+                )
+        )
         // --- Preset examples (previously the "Default" block) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -251,6 +287,10 @@ fn provider_row(
 }
 
 fn example_row(label: impl Into<String>, spec: EmbedInputSpec, theme: &GpuiThemeProvider) -> Div {
+    state_row(label, spec, theme)
+}
+
+fn state_row(label: impl Into<String>, spec: EmbedInputSpec, theme: &GpuiThemeProvider) -> Div {
     let label = label.into();
     div()
         .flex()

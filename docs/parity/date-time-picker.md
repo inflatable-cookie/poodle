@@ -1,4 +1,7 @@
 <!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- specimen: GPUI specimen done (added static "Open (calendar + time)" group composing the
+     real Calendar + TimeInput; full contract state coverage, no fake grid); Jetstream pending
+     engine recovery — specimen=gap kept until Jetstream Sizes/Densities/open land. -->
 <!-- pass 41: GPUI indicator glyph aligned to chevron-down (contract §2/§8 disclosure
      chevron, matches sibling pickers) — last GPUI todo closed. Jetstream built out: the
      overlay now composes the REAL Calendar + a Time Section (contract Time Label + composed
@@ -56,10 +59,10 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 ## Specimen parity
 
 - Svelte covers: Default, With default value, Disabled, Sizes, Densities (`DateTimePickerSpecimen.svelte`).
-- GPUI covers: Default (open-toggle → fake overlay), With default value (open-toggle), Disabled, Sizes, Densities. — open-state demonstrates a mockup, not real Calendar/TimeInput.
+- GPUI covers: Default (open-toggle), With default value (open-toggle), **Open (calendar + time)** (static open, composes the real `Calendar` + `TimeInput` section), Disabled, Sizes, Densities. — GPUI specimen complete; open-state demonstrates the REAL composed Calendar + TimeInput (the historic fake overlay was already replaced in pass 17). Jetstream pending engine recovery.
 - Jetstream covers: With value, Placeholder, Disabled. — missing: **Sizes** and **Densities** groups; no open/overlay demonstration.
 
 ## Notes
 
-- The GPUI mock overlay is the single biggest defect across all three assigned components: it hides the missing Calendar/TimeInput composition behind hardcoded placeholder UI, which CLAUDE.md flags as "worse than no specimen". Until the spec resolves a real composed surface, the open-state block should be gutted to the real primitives or left closed.
+- The historic GPUI mock overlay was replaced in pass 17 — the open state now composes the real `Calendar` + `TimeField` (TimeInput). The static "Open (calendar + time)" specimen group renders that real composed surface for review. (This note previously flagged the mock overlay as the biggest defect; that defect is resolved.)
 - `consv=gap` driver: contract size-table per-size padding overrides (orthogonality violation, not in Svelte) plus undocumented partial-value prompt strings.
