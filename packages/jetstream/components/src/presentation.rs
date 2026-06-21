@@ -89,6 +89,75 @@ pub fn size_font_rem(size: ControlSize) -> f32 {
     }
 }
 
+// ── Switch size scale ─────────────────────────────────────────────
+//
+// Contract §8 "Size adjustments" — flat rem literals per size, mirroring the
+// Svelte `.poodle-switch[data-size]` overrides (track w/h, thumb diameter,
+// thumb translateX travel). Track padding is `0.125rem` at every size. Mirrors
+// `poodle_gpui::presentation::switch_*` exactly so both Rust targets resolve
+// identical switch geometry from a single source of truth.
+
+/// Switch track width in rem per size. Contract §8: xs 1.75, sm 2, md 2.25,
+/// lg 2.75, xl 3.
+pub fn switch_track_w_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.75,
+        ControlSize::Sm => 2.0,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.75,
+        ControlSize::Xl => 3.0,
+    }
+}
+
+/// Switch track height in rem per size. Contract §8: xs 1, sm 1.125, md 1.375,
+/// lg 1.625, xl 1.75.
+pub fn switch_track_h_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.0,
+        ControlSize::Sm => 1.125,
+        ControlSize::Md => 1.375,
+        ControlSize::Lg => 1.625,
+        ControlSize::Xl => 1.75,
+    }
+}
+
+/// Switch thumb diameter in rem per size. Contract §8: xs 0.75, sm 0.875,
+/// md 1.125, lg 1.375, xl 1.5.
+pub fn switch_thumb_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.125,
+        ControlSize::Lg => 1.375,
+        ControlSize::Xl => 1.5,
+    }
+}
+
+/// Switch thumb travel (translateX) in rem per size. Contract §8: xs 0.75,
+/// sm 0.875, md 0.875, lg 1.125, xl 1.25.
+pub fn switch_travel_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
+
+/// Switch label font-size in rem per size. Contract §8 "Label size variants":
+/// xs 0.75, sm 0.75, md 0.8125, lg 0.875, xl 0.875. Distinct from the shared
+/// `size_font_rem` ladder (which differs at xs and xl).
+pub fn switch_label_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.875,
+    }
+}
+
 /// Get the min-width in rem for a given control size.
 ///
 /// Matches the Svelte Button CSS per-size min-width declarations.

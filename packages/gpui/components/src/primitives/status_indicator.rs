@@ -2,9 +2,11 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{StatusIndicatorSpec, StatusTone};
+use poodle_specs::{
+    ControlDensity, ControlSize, SemanticControlSizeRole, StatusIndicatorSpec, StatusTone,
+};
 
-use crate::presentation::rem_to_px;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI status indicator (colored dot + optional label).
@@ -52,6 +54,18 @@ impl StatusIndicator {
         self.spec.typography = v;
         self
     }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = Some(v);
+        self
+    }
+    pub fn size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = Some(v);
+        self
+    }
 }
 
 impl IntoElement for StatusIndicator {
@@ -64,10 +78,15 @@ impl IntoElement for StatusIndicator {
         let status_color = resolve_color(theme, spec.status_color_token());
         let label_color = resolve_color(theme, spec.label_color_token());
 
-        // Contract: gap 0.4375rem — resolved from spec
-        let gap = px(rem_to_px(spec.gap_rem()));
-        let dot_size = px(rem_to_px(spec.dot_size_rem()));
-        let label_font_size = px(rem_to_px(spec.label_font_size_rem()));
+        // Contract §8: dot/gap/label metrics resolve from the effective size
+        // (size override → size_role against the inherited scale) and density.
+        let effective_size =
+            resolve_semantic_size(spec.size.unwrap_or(ControlSize::Md), spec.size_role);
+        let effective_density = spec.density.unwrap_or(ControlDensity::Default);
+
+        let gap = px(rem_to_px(spec.gap_rem_for(effective_size, effective_density)));
+        let dot_size = px(rem_to_px(spec.dot_size_rem_for(effective_size)));
+        let label_font_size = px(rem_to_px(spec.label_font_size_rem_for(effective_size)));
 
         let mut row = div().flex().items_center().gap(gap);
 

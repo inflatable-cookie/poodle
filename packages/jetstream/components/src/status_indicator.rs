@@ -7,9 +7,9 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::StatusIndicatorSpec;
+use poodle_specs::{ControlDensity, ControlSize, StatusIndicatorSpec};
 
-use crate::presentation::rem_to_px;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::resolve_color;
 
 /// Build a status indicator element from a StatusIndicatorSpec.
@@ -28,12 +28,17 @@ use crate::theme_ext::resolve_color;
 /// - Label font-size: 0.75rem (12px), font-weight 600, line-height 1.3
 pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let status_color = resolve_color(theme, spec.status_color_token());
-    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_primary = resolve_color(theme, spec.label_color_token());
 
-    // Contract: dot dimensions (via spec helper rem values → px)
-    let dot_size = rem_to_px(spec.dot_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let label_size = rem_to_px(spec.label_font_size_rem());
+    // Contract §8: dot/gap/label metrics resolve from the effective size
+    // (size override → size_role against the inherited scale) and density.
+    let effective_size =
+        resolve_semantic_size(spec.size.unwrap_or(ControlSize::Md), spec.size_role);
+    let effective_density = spec.density.unwrap_or(ControlDensity::Default);
+
+    let dot_size = rem_to_px(spec.dot_size_rem_for(effective_size));
+    let gap = rem_to_px(spec.gap_rem_for(effective_size, effective_density));
+    let label_size = rem_to_px(spec.label_font_size_rem_for(effective_size));
 
     // Contract: dot with box-shadow glow (18% of status color)
     let dot = ui_element::div()
@@ -69,14 +74,25 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::StatusTone;
+    use crate::render_probe::{probe, ProbeColor};
+    use poodle_specs::{ControlSize, StatusTone};
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
+    fn probe_color(theme: &JetstreamThemeProvider, token: &str) -> ProbeColor {
+        let c = resolve_color(theme, token);
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
+    }
+
     #[test]
-    fn dot_is_9px() {
+    fn dot_is_9px_at_md() {
         let el = js_status_indicator(
             &StatusIndicatorSpec::new().with_status(StatusTone::Success),
             &theme(),
@@ -93,9 +109,69 @@ mod tests {
             &StatusIndicatorSpec::new().with_status(StatusTone::Neutral),
             &theme,
         );
-        // Neutral status should resolve to text-secondary, not accent-base
+        // Neutral status resolves to text-secondary, not accent-base.
         let dot = &el.children[0];
-        let expected: jetstream_runtime::game_ui::Color = resolve_color(&theme, "color.text.secondary").into();
+        let expected: jetstream_runtime::game_ui::Color =
+            resolve_color(&theme, "color.text.secondary").into();
         assert_eq!(dot.style.background, Some(expected));
+    }
+
+    #[test]
+    fn tone_variants_resolve_distinct_status_colors() {
+        // Contract §4: each tone maps to its status token.
+        let th = theme();
+        let cases = [
+            (StatusTone::Info, "color.status.info"),
+            (StatusTone::Success, "color.status.success"),
+            (StatusTone::Warning, "color.status.warning"),
+            (StatusTone::Danger, "color.status.danger"),
+            (StatusTone::Pending, "color.accent.base"),
+        ];
+        for (tone, token) in cases {
+            let el = js_status_indicator(&StatusIndicatorSpec::new().with_status(tone), &th);
+            let tree = probe(&el, 120.0, 24.0);
+            let expected = probe_color(&th, token);
+            assert!(
+                tree.has_background(expected, 0.01),
+                "tone {tone:?} dot should resolve {token}; nodes: {}",
+                tree.to_json()
+            );
+        }
+    }
+
+    #[test]
+    fn label_text_renders() {
+        let el = js_status_indicator(
+            &StatusIndicatorSpec::new()
+                .with_status(StatusTone::Success)
+                .with_label("Online"),
+            &theme(),
+        );
+        let tree = probe(&el, 160.0, 24.0);
+        assert!(
+            tree.has_text("Online"),
+            "label text missing; texts: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn dot_size_scales_with_size() {
+        // Contract §8: xs dot = 0.375rem (6px), xl dot = 0.8125rem (13px).
+        let xs = js_status_indicator(
+            &StatusIndicatorSpec::new()
+                .with_status(StatusTone::Success)
+                .with_size(ControlSize::Xs),
+            &theme(),
+        );
+        assert_eq!(xs.children[0].layout.size.width, taffy::Dimension::length(6.0));
+
+        let xl = js_status_indicator(
+            &StatusIndicatorSpec::new()
+                .with_status(StatusTone::Success)
+                .with_size(ControlSize::Xl),
+            &theme(),
+        );
+        assert_eq!(xl.children[0].layout.size.width, taffy::Dimension::length(13.0));
     }
 }

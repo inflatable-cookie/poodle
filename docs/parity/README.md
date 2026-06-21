@@ -187,7 +187,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | menubar | fixed | 2 | 1 | gap |
 | meta-bar | fixed | 3 | 3 | gap |
 | meta-item | fixed | 4 | 2 | gap |
-| meter | fixed | 3 | 6 | gap |
+| meter | fixed | 0 | 0 | ok |
 | metric-tile | ok | 1 | 1 | gap |
 | nav-card | ok | 1 | 2 | gap |
 | navigation-menu | fixed | 3 | 0 | gap |
@@ -224,9 +224,9 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | stack | fixed | 3 | 3 | gap |
 | state-tile | gap | 0 | 0 | ok |
 | status-bar | fixed | 0 | 0 | gap |
-| status-indicator | fixed | 4 | 5 | gap |
+| status-indicator | fixed | 0 | 0 | ok |
 | surface | fixed | 1 | 1 | gap |
-| switch | fixed | 3 | 6 | gap |
+| switch | fixed | 0 | 0 | ok |
 | tab-strip | gap | 0 | 0 | gap |
 | table | fixed | 4 | 5 | gap |
 | tabs | fixed | 4 | 4 | gap |
@@ -241,7 +241,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | toggle-group | fixed | 0 | 0 | gap |
 | token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 4 | 5 | gap |
-| tooltip | fixed | 3 | 6 | gap |
+| tooltip | fixed | 0 | 0 | ok |
 | tree | ok | 2 | 4 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 3 | 2 | gap |

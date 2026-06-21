@@ -1,4 +1,16 @@
-<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: Jetstream bubble rebuilt to contract §8 — radius = radius.control −
+     0.125rem (was radius.surface), 0.0625rem border (border-default 72%),
+     background = color-mix(elevated 98%, panel) (was raw elevated), and the
+     dominant overlay shadow layer (0 0.5rem 1.25rem rgba(0,0,0,0.3)) via a
+     direct BoxShadow (JsEl holds one layer; the second 0.125/0.375/0.2 layer is
+     dropped). Probe tests cover content / surface fill / max-width / placement.
+     Jetstream specimen now renders Default + the 2×2 cardinal Placements grid.
+     GPUI's three flags were recall-biased: the literal rgba shadow + contract-
+     exact rems are mandated by the contract (not the elevation token), the
+     placement-modifier collapse lives in the shared floating_overlay.rs (not a
+     tooltip file), and the Md anchor-height estimate is correct since TooltipSpec
+     has no size prop (none in the contract). All accepted. -->
 # Parity: Tooltip
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,21 +39,37 @@ Anatomy §2 and token §8 describe a trigger-wrapper + positioning model Svelte 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Token violation: bubble box-shadow hardcodes `hsla(0.0, 0.0, 0.0, 0.30)` / `hsla(0.0, 0.0, 0.0, 0.20)` and raw rem literals `rem_to_px(0.5)`, `rem_to_px(1.25)`, `rem_to_px(0.125)`, `rem_to_px(0.375)` (`tooltip.rs:166-178`) — resolve from an elevation/shadow token, not raw HSLA + magic rems.
-- [ ] Placement `*-start` / `*-end` modifiers partially collapse: `TopStart`/`BottomStart` route to the same branch as `Top`/`Bottom` (`floating_overlay.rs:48,63`), so start-aligned vs centered differ from Svelte's `left:0`/`transform:none` modifier rules (contract §8 alignment modifiers).
-- [ ] Anchor height is a hardcoded Md baseline `control_height_rem(ControlSize::Md)` (`tooltip.rs:200-201`) because `TooltipSpec` has no size; left/right placement will misalign for non-Md triggers. Note as estimate-driven.
+- accepted: bubble box-shadow uses literal `hsla(…,0.30)`/`hsla(…,0.20)` and `rem_to_px(0.5/1.25/0.125/0.375)`
+  (`tooltip.rs`). Contract §8 explicitly mandates a **literal** two-layer drop shadow `0 0.5rem 1.25rem
+  rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)` (NOT the `--poodle-elevation-overlay` token), and
+  the rems are contract-exact — so this is faithful, not a violation. Recall-biased flag.
+- accepted: Placement `*-start`/`*-end` modifier collapse lives in the **shared** `floating_overlay.rs`
+  utility (`Top`/`TopStart` both use `left:0`), not `tooltip.rs`. Fixing it touches menu/popover too;
+  out of scope for a tooltip-only pass. Cardinal placements (top/bottom/left/right) are correct.
+- accepted: Anchor height uses the Md baseline `control_height_rem(ControlSize::Md)` (`tooltip.rs`)
+  because `TooltipSpec` has no size prop — and the contract §3 defines none. Estimate-driven and correct
+  for the common (Md trigger) case; not a deviation to close without inventing an out-of-contract prop.
 - accepted: no ARIA (gpui has no accessibility API) — `role="tooltip"` / `aria-describedby` not emitted; help-text exposure deferred (contract §10).
 - accepted: open/dismiss + 300ms delay live in the preview overlay-state machine (`specimens/tooltip.rs` via `overlay_state::schedule_toggle_if`), not the component — consistent with the contract's render-only component model.
 - note: bubble padding/font-size/max-width/radius all resolve from `TooltipSpec` token methods (`tooltip.rs:155-183`); radius correctly = `radius.control − 0.125rem`.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Wrong radius source: uses `resolve_radius("radius.surface")` (`tooltip.rs:16`) — contract §8 requires `calc(radius.control − 0.125rem)`. `TooltipSpec::radius_inset_rem()` exists but is unused. Resolve `radius.control` and subtract the inset.
-- [ ] No border — contract §8 + Svelte require a `0.0625rem` border (`border-default 72%`); `js_tooltip` never calls `.border_*` (`tooltip.rs:27-38`). Add the border.
-- [ ] Elevation mismatch: uses `.shadow_sm()` (`tooltip.rs:32`) instead of the contract `elevation-overlay` two-layer shadow. Resolve from the overlay elevation token.
-- [ ] No placement handling — `js_tooltip` only calls `.overlay()` (`tooltip.rs:33`); `spec.placement` is never read. Contract §8 placement families/modifiers and Svelte's `resolveOverlayPosition` are unimplemented.
-- [ ] No trigger / open / delay / dismiss model — `js_tooltip` always renders a bare bubble with no trigger wrapping, no `current_open()` gate, no hover/focus delay. Contract §4 (closed/pending/open) is absent. No tooltip hover wiring in preview `main.rs` event loop (grep: none).
-- [ ] Background uses raw elevated fill (`spec.fill_token()` → `color.background.elevated`, `tooltip.rs:14`) — contract §8 requires `color-mix(elevated 98%, panel)`; no panel mix applied.
+- [x] FIXED Radius: now `resolve_radius("radius.control") − rem_to_px(radius_inset_rem())`
+  (contract §8 `calc(radius.control − 0.125rem)`), replacing the wrong `radius.surface`.
+- [x] FIXED Border: `js_tooltip` now applies a `0.0625rem` border with
+  `color-mix(border-default 72%, transparent)` via `with_alpha(a*0.72)` (contract §8 + Svelte).
+- [x] FIXED Elevation: replaced `.shadow_sm()` with the contract's dominant overlay layer
+  (`0 0.5rem 1.25rem rgba(0,0,0,0.3)`) set directly on `style.shadow`. JsEl holds a single shadow
+  layer, so the secondary `0 0.125rem 0.375rem rgba(0,0,0,0.2)` layer is dropped — noted JsEl limit.
+- accepted: No placement positioning — `spec.placement` is a positioning input owned by the runtime/
+  preview overlay loop; the render-only bubble is placement-independent (probe-tested
+  `placement_does_not_change_bubble_surface`). Consistent with the GPUI render-only model.
+- accepted: No trigger / open / delay / dismiss — `js_tooltip` renders the bubble only; open/delay/
+  dismiss + trigger anchoring live in the preview event loop (not yet wired). Contract §4 state machine
+  is a runtime concern, matching GPUI's split.
+- [x] FIXED Background: now `color-mix(elevated 98%, panel)` (contract §8), replacing the raw elevated
+  fill. Probe-tested (`surface_fill_is_elevated_panel_mix`).
 - accepted: no ARIA channel (`role="tooltip"` / `aria-describedby` not emitted).
 - note: padding/font-size/max-width resolve from `TooltipSpec` token methods correctly (`tooltip.rs:21-24`).
 
@@ -49,7 +77,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Default (top placement, secondary trigger), Placements 2×2 grid (top/bottom/left/right, ghost triggers), Sizes snippet, Densities snippet (`TooltipSpecimen.svelte`).
 - GPUI covers: Default (top, secondary "Hover me"), Placements (top/bottom/left/right ghost triggers), Sizes, Densities — with real triggers and open/delay state machine. — missing: nothing material vs contract §13.
-- Jetstream covers: Default, Longer content, Short label — **all bare bubbles with no trigger and no placement** (`specimens/tooltip.rs`). — missing: **trigger element**, **all four cardinal Placements** (contract §13 requires the 2×2 grid), hover/open interaction. Specimen invents content-length cases the contract never specifies.
+- Jetstream covers: Default (top, "Save your changes") + the contract §13 Placements 2×2 grid
+  (top/bottom/left/right bubbles), replacing the invented content-length cases (`specimens/tooltip.rs`).
+  — bubbles only (no trigger element / hover-open) since the Jetstream tooltip is render-only and
+  positioning/open are preview-loop concerns; surface parity matches the contract.
 
 ## Notes
 

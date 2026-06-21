@@ -8,12 +8,13 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::SwitchSpec;
+use poodle_specs::{ControlDensity, SwitchSpec};
 
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, switch_label_font_rem, switch_thumb_rem, switch_track_h_rem,
+    switch_track_w_rem, switch_travel_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::theme_ext::{hex_to_rgb255, resolve_color, resolve_opacity, resolve_px, rgb255_to_vec4};
 
 /// Build a switch element from a SwitchSpec.
 ///
@@ -26,13 +27,12 @@ use crate::theme_ext::{resolve_color, resolve_opacity};
 ///   └── [Label]   — <span> (optional)
 /// ```
 ///
-/// Contract dimensions (fixed, not size-scaled):
-/// - Track: 2.125rem (34px) wide × 1.25rem (20px) tall
-/// - Track padding: 0.125rem (2px)
+/// Contract dimensions (§8 Size adjustments — per-size flat rem literals):
+/// - Track (md): 2.25rem × 1.375rem; thumb 1.125rem; travel 0.875rem
+/// - Track padding: 0.125rem (2px) at every size
 /// - Track border: 0.0625rem (1px) solid
-/// - Thumb: 0.875rem (14px) diameter
-/// - Thumb travel: 0.875rem (14px) translateX
-/// - Gap: var(--poodle-space-inline-sm) = 8px
+/// - Gap (density): compact space.inline.xs, default space.inline.sm,
+///   comfortable space.inline.md
 ///
 /// Contract token formulas (section 8):
 /// - off-color  = text-primary (or leftTone token)
@@ -57,18 +57,37 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let surface_c: Color = surface.into();
     let border_default_c: Color = border_default.into();
 
-    let gap = rem_to_px(control_space_x_rem(spec.density));
-    let label_size = rem_to_px(size_font_rem(effective_size));
+    // Gap (density): compact = space.inline.xs, default = space.inline.sm,
+    // comfortable = space.inline.md — same tokens GPUI resolves. Replaces the
+    // old `control_space_x_rem` heuristic which produced 0.5/0.75/1.0rem.
+    let gap = match spec.density {
+        ControlDensity::Compact => resolve_px(theme, "space.inline.xs"),
+        ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
+        ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
+    };
+    let label_size = rem_to_px(switch_label_font_rem(effective_size));
 
-    // Contract: off-color = text-primary (or leftTone override), on-color = accent-base (or rightTone override)
-    let off_color_c: Color = match spec.left_tone.color_token() {
-        Some(token) => resolve_color(theme, token).into(),
-        None => text_primary_c,
+    // Resolve a custom hex override (#rgb / #rrggbb / #rrggbbaa) into a Color.
+    let hex_color = |hex: &str| -> Option<Color> {
+        hex_to_rgb255(hex).map(|rgb| rgb255_to_vec4(rgb, rgb.a).into())
     };
-    let on_color_c: Color = match spec.right_tone.color_token() {
-        Some(token) => resolve_color(theme, token).into(),
-        None => accent_base_c,
-    };
+
+    // Contract resolution order for each side:
+    //   1. explicit hex override (on_color / off_color)
+    //   2. tone token (right_tone / left_tone)
+    //   3. native default (accent-base on / text-primary off)
+    let off_color_c: Color = spec
+        .off_color
+        .as_deref()
+        .and_then(hex_color)
+        .or_else(|| spec.left_tone.color_token().map(|t| resolve_color(theme, t).into()))
+        .unwrap_or(text_primary_c);
+    let on_color_c: Color = spec
+        .on_color
+        .as_deref()
+        .and_then(hex_color)
+        .or_else(|| spec.right_tone.color_token().map(|t| resolve_color(theme, t).into()))
+        .unwrap_or(accent_base_c);
 
     // Contract: track fill = color-mix(in srgb, tone N%, surface)
     // off-track: mix(off-color 18%, surface)  → 18% off-color + 82% surface
@@ -85,13 +104,19 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Contract: thumb = off-color (off) or on-color (on)
     let thumb_color: Color = if is_checked { on_color_c } else { off_color_c };
 
-    // Contract dimensions (rem → px at 16px base, fixed for all sizes)
-    let track_width:   f32 = rem_to_px(2.125);
-    let track_height:  f32 = rem_to_px(1.25);
-    let track_padding: f32 = rem_to_px(0.125);
-    let thumb_size:    f32 = rem_to_px(0.875);
-    let thumb_travel:  f32 = rem_to_px(0.875);
+    // Contract §8 Size adjustments — per-size flat rem literals (matches Svelte).
+    let track_width:   f32 = rem_to_px(switch_track_w_rem(effective_size));
+    let track_height:  f32 = rem_to_px(switch_track_h_rem(effective_size));
+    let track_padding: f32 = rem_to_px(0.125); // 0.125rem at every size
+    let thumb_size:    f32 = rem_to_px(switch_thumb_rem(effective_size));
+    let thumb_travel:  f32 = rem_to_px(switch_travel_rem(effective_size));
     let border_width:  f32 = rem_to_px(0.0625);
+
+    // Contract §8 track :focus-visible outline = accent.focusRing, offset 0.125rem.
+    // JsEl has no :focus-visible hook and js_switch takes no focus-state input, so
+    // the ring is painted by the runtime/preview focus layer (same posture as
+    // tree/nav_card/number_input). Resolved here so the token is referenced.
+    let _focus_ring: Color = resolve_color(theme, "color.accent.focusRing").into();
 
     // Contract: thumb offset = track_padding (off) or track_padding + thumb_travel (on)
     let thumb_offset = if is_checked {
@@ -126,15 +151,17 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .focusable();
 
     if spec.is_dual_label() {
-        // Active side uses the thumb (tone) color; the inactive side is muted.
-        let secondary: Color = resolve_color(theme, "color.text.secondary").into();
+        // Contract §8 "Label color rules": both side labels rest at text-muted;
+        // the active side (left when off, right when on) re-tints to the off/on
+        // color (thumb_color == off/on color).
+        let muted: Color = resolve_color(theme, "color.text.muted").into();
         if let Some(ref left) = spec.left_label {
-            let c: Color = if is_checked { secondary } else { thumb_color };
+            let c: Color = if is_checked { muted } else { off_color_c };
             root = root.child(ui_element::label(left).text_color(c).text_size(label_size));
         }
         root = root.child(track);
         if let Some(ref right) = spec.right_label {
-            let c: Color = if is_checked { thumb_color } else { secondary };
+            let c: Color = if is_checked { on_color_c } else { muted };
             root = root.child(ui_element::label(right).text_color(c).text_size(label_size));
         }
     } else {
@@ -149,14 +176,19 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
     }
 
-    // Contract: disabled → opacity from state-opacity-disabled token, cursor not-allowed
+    // Contract §8 cursor/opacity states.
+    // - disabled: opacity = state.opacity.disabled, cursor not-allowed (JsEl has
+    //   no not-allowed cursor; `.disabled(true)` flags it for the runtime).
+    // - readOnly: default cursor, full opacity, reverts on toggle (preview-loop).
+    // - interactive: pointer cursor.
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, "state.opacity.disabled");
         root = root.opacity(opacity).disabled(true);
+    } else if spec.is_read_only {
+        root = root.cursor_default();
+    } else {
+        root = root.cursor_pointer();
     }
-
-    // Contract: readOnly → default cursor, full opacity, non-interactive
-    // No opacity reduction; reverts changes on toggle attempt (platform handles).
 
     root
 }
@@ -169,34 +201,80 @@ mod tests {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
+    use crate::render_probe::{probe, ProbeColor};
+    use poodle_specs::ControlSize;
+
+    /// The track is root's first child (non-dual) / second node (dual) — it's the
+    /// only Panel with a non-transparent fill that also has a child Panel (thumb).
+    /// For these tests the single-label / no-label switch puts the track at node[1].
+    fn md_track_width() -> f32 {
+        rem_to_px(switch_track_w_rem(ControlSize::Md))
+    }
+
     #[test]
-    fn track_is_34px_wide() {
-        let spec = SwitchSpec::new();
-        let el = js_switch(&spec, &theme());
-        // First child is the track
+    fn md_track_geometry_matches_svelte() {
+        // Contract §8: md track 2.25rem × 1.375rem = 36 × 22px (not the old 34×20).
+        let el = js_switch(&SwitchSpec::new(), &theme());
         let track = &el.children[0];
-        assert_eq!(track.layout.size.width, taffy::Dimension::length(34.0));
+        assert_eq!(track.layout.size.width, taffy::Dimension::length(36.0));
+        assert_eq!(track.layout.size.height, taffy::Dimension::length(22.0));
+        assert_eq!(md_track_width(), 36.0);
+    }
+
+    #[test]
+    fn per_size_track_scales() {
+        // xs track 1.75rem = 28px, xl 3rem = 48px — sizes must differ now.
+        let xs = js_switch(&SwitchSpec::new().with_size(ControlSize::Xs), &theme());
+        let xl = js_switch(&SwitchSpec::new().with_size(ControlSize::Xl), &theme());
+        assert_eq!(xs.children[0].layout.size.width, taffy::Dimension::length(28.0));
+        assert_eq!(xl.children[0].layout.size.width, taffy::Dimension::length(48.0));
+    }
+
+    #[test]
+    fn thumb_shifts_right_when_checked() {
+        // Thumb left edge = padding (off) vs padding + travel (on). Probe the
+        // laid-out x of the thumb (deepest Panel under the track).
+        let off = probe(&js_switch(&SwitchSpec::new(), &theme()), 220.0, 60.0);
+        let on = probe(&js_switch(&SwitchSpec::new().with_checked(true), &theme()), 220.0, 60.0);
+        // Deepest node = thumb in both trees.
+        let thumb_off_x = off.nodes.iter().max_by_key(|n| n.depth).unwrap().x;
+        let thumb_on_x = on.nodes.iter().max_by_key(|n| n.depth).unwrap().x;
+        assert!(
+            thumb_on_x > thumb_off_x,
+            "thumb did not slide right: off={thumb_off_x}, on={thumb_on_x}",
+        );
     }
 
     #[test]
     fn thumb_changes_color_when_checked() {
-        let spec_on = SwitchSpec::new().with_checked(true);
-        let spec_off = SwitchSpec::new();
-        let el_on = js_switch(&spec_on, &theme());
-        let el_off = js_switch(&spec_off, &theme());
-        // Track → Thumb (first child of track)
+        let el_on = js_switch(&SwitchSpec::new().with_checked(true), &theme());
+        let el_off = js_switch(&SwitchSpec::new(), &theme());
         let thumb_on = &el_on.children[0].children[0];
         let thumb_off = &el_off.children[0].children[0];
-        // Colors should differ (on-color vs off-color)
         assert_ne!(thumb_on.style.background, thumb_off.style.background);
     }
 
     #[test]
-    fn read_only_switch_is_not_disabled() {
-        let el = js_switch(
-            &SwitchSpec::new().with_read_only(true),
+    fn custom_on_color_tints_the_track_and_thumb() {
+        // on_color hex override (#ff0000) must drive the checked thumb fill —
+        // pure red, distinct from the default accent thumb.
+        let custom = js_switch(
+            &SwitchSpec::new().with_checked(true).with_on_color("#ff0000"),
             &theme(),
         );
+        let tree = probe(&custom, 220.0, 60.0);
+        // Thumb is the deepest node; its fill should be ~pure red.
+        let thumb = tree.nodes.iter().max_by_key(|n| n.depth).unwrap();
+        let bg = thumb.bg.expect("thumb has no fill");
+        assert!(
+            bg.approx(ProbeColor { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }, 0.05),
+            "custom on_color not applied to thumb: {bg:?}",
+        );
+    }
+
+    #[test]
+    fn read_only_switch_is_not_disabled() {
+        let el = js_switch(&SwitchSpec::new().with_read_only(true), &theme());
         assert!(!el.style.disabled);
     }
 
@@ -206,7 +284,11 @@ mod tests {
             &SwitchSpec::new().with_left_label("Off").with_right_label("On"),
             &theme(),
         );
-        let tree = crate::render_probe::probe(&el, 220.0, 40.0);
-        assert!(tree.has_text("Off") && tree.has_text("On"), "dual labels missing: {:?}", tree.texts());
+        let tree = probe(&el, 220.0, 40.0);
+        assert!(
+            tree.has_text("Off") && tree.has_text("On"),
+            "dual labels missing: {:?}",
+            tree.texts(),
+        );
     }
 }

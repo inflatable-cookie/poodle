@@ -4,7 +4,10 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, SwitchSpec, SwitchTone};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, switch_label_font_rem, switch_thumb_rem, switch_track_h_rem,
+    switch_track_w_rem, switch_travel_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI switch/toggle component backed by `SwitchSpec`.
@@ -132,7 +135,7 @@ impl IntoElement for Switch {
         let border = resolve_color(theme, "color.border.default");
         let surface_bg = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
-        let label_size = px(rem_to_px(size_font_rem(effective_size)));
+        let label_size = px(rem_to_px(switch_label_font_rem(effective_size)));
 
         let is_checked = spec.current_checked();
         let is_interactive = !spec.is_disabled && !spec.is_read_only;
@@ -143,24 +146,18 @@ impl IntoElement for Switch {
             format!("poodle-switch-{}", spec.label.as_deref().unwrap_or("anon"))
         };
 
-        // Per-size track geometry from the contract size table.
-        // Md baseline: 34×20px track, 2px padding, 14px thumb (matches Svelte).
-        // Other sizes scale from the icon-size tokens with non-linear per-size geometry.
-        let icon_xs = resolve_px(theme, "size.icon.xs");
-        let icon_sm = resolve_px(theme, "size.icon.sm");
-        let icon_lg = resolve_px(theme, "size.icon.lg");
-        let icon_xl = resolve_px(theme, "size.icon.xl");
-        let (track_w, track_h, track_padding, thumb_size) = match effective_size {
-            ControlSize::Xs => (icon_xs * 1.75, icon_xs * 0.875, px(rem_to_px(0.0625)),  icon_xs * 0.75 - px(rem_to_px(0.125))),
-            ControlSize::Sm => (icon_sm * 1.875, icon_sm + px(rem_to_px(0.125)),          px(rem_to_px(0.09375)), icon_sm - px(rem_to_px(0.1875))),
-            ControlSize::Md => (px(rem_to_px(2.125)), px(rem_to_px(1.25)),                px(rem_to_px(0.125)), px(rem_to_px(0.875))),
-            ControlSize::Lg => (icon_lg * 2.25 + px(rem_to_px(0.25)), icon_lg + px(rem_to_px(0.5)), px(rem_to_px(0.1875)), icon_lg),
-            ControlSize::Xl => (icon_xl * 2.5 + px(rem_to_px(0.375)), icon_xl + px(rem_to_px(0.75)), px(rem_to_px(0.25)), icon_xl + px(rem_to_px(0.125))),
-        };
+        // Per-size track geometry — flat rem literals from the contract §8 Size
+        // adjustments table (matches Svelte `.poodle-switch[data-size]`). Track
+        // padding is 0.125rem at every size; thumb travel comes from the table.
+        let track_w = px(rem_to_px(switch_track_w_rem(effective_size)));
+        let track_h = px(rem_to_px(switch_track_h_rem(effective_size)));
+        let track_padding = px(rem_to_px(0.125));
+        let thumb_size = px(rem_to_px(switch_thumb_rem(effective_size)));
+        let thumb_travel = px(rem_to_px(switch_travel_rem(effective_size)));
         let track_radius = track_h / 2.0;
         let thumb_radius = thumb_size / 2.0;
         let knob_offset = if is_checked {
-            track_w - thumb_size - track_padding
+            track_padding + thumb_travel
         } else {
             track_padding
         };

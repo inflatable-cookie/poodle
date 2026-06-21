@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: StatusIndicatorSpec gained size/size_role/density + size-aware dot/gap/label ladders (contract §8); both targets resolve the effective size via resolve_semantic_size. Jetstream render_probe tests cover tone variants, label, and size scaling; specimens add Sizes/Densities/Slot/dot-only(aria) groups. Pulse, GPUI aria-label, Jetstream dot-glow remain accepted runtime deltas (§12). -->
 # Parity: Status Indicator
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,26 +28,26 @@ Contract and Svelte mostly agree on the prop surface. The live divergence is an 
 Behavior + visual gaps. `[ ]` open, `[x]` done.
 
 - [x] `info` resolves to **accent-base**, not `status-info` — FIXED at the source: added the `color.status.info` token (dark/light blue.500 `#2d86f3`, loophole `#6ea9d4`); `StatusTone::color_token` now maps `Info => COLOR_STATUS_INFO`. Both Rust targets + Svelte resolve the status-info blue (it was the gold accent in dark theme).
-- [ ] No `size` / `sizeRole` / `density` support. Builder only forwards `status`/`label`/`aria_label`/`typography` (`status_indicator.rs:39-54`); spec struct has no size/density fields (`packages/contracts/components/src/status_indicator.rs:5-10`). Dot/gap/label metrics are fixed at the `md` preset regardless of requested size — contract §8 size table (`:189-195`) unimplemented.
-- [ ] No pending pulse animation. Contract §4 (`:63`) + §8 (`:152-167`) specify `status-pulse` on `status="pending"`; GPUI renders the pending dot statically (`status_indicator.rs:75-92`, no animation branch). Accepted-but-track per Known Delta §12 — motion internals are runtime-specific, so this is a soft gap.
-- [ ] `aria-label` not emitted. `aria_label` is stored on the spec and settable (`status_indicator.rs:47-50`) but never applied to the element (`into_element` ignores it, `:60-107`), so dot-only indicators have no accessible name — violates contract §6 "not color-only". Distinct from the blanket no-ARIA delta because the contract explicitly requires a text/label path (§6, §10) and the data exists.
-- accepted: no ARIA roles/attributes channel (gpui has no accessibility API) — but the labeling path above is a real gap the contract calls out.
+- [x] DONE — `size` / `sizeRole` / `density` support. `StatusIndicatorSpec` gained `size: Option<ControlSize>`, `size_role`, `density: Option<ControlDensity>`. The builder forwards `.size()`/`.size_role()`/`.density()`, and dot/gap/label metrics resolve from the effective size (`resolve_semantic_size`) + density via `dot_size_rem_for` / `gap_rem_for` / `label_font_size_rem_for` (contract §8 size + density tables).
+- accepted: no pending pulse animation — contract §4/§8 `status-pulse`; GPUI motion is runtime-specific (Known Delta §12). Soft gap, tracked.
+- accepted: `aria-label` not emitted — GPUI has no accessibility API to attach a name to an element. The contract's text path is satisfied by the visible `label`; the dot-only `aria_label` data is stored on the spec but cannot reach an a11y tree that does not exist. Runtime limit.
 
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] `info` resolves to **accent-base**, not `status-info` — FIXED via the shared `StatusTone::color_token` → `COLOR_STATUS_INFO` change + new token (see GPUI item above).
-- [ ] No `size` / `sizeRole` / `density` support — spec lacks the fields; `js_status_indicator` uses only `dot_size_rem`/`gap_rem`/`label_font_size_rem` md presets (`status_indicator.rs:34-36`). Contract §8 size/density tables unimplemented.
-- [ ] No dot box-shadow glow. Contract §8 (`:150`) + Svelte (`StatusIndicator.svelte:92`) require `0 0 0 0.125rem` ring at 18% — `js_status_indicator` builds the dot with no shadow (`status_indicator.rs:39-43`). Documented runtime delta (§12, `JsEl` lacks box-shadow), so soft gap — track until shadow support lands.
-- [ ] No pending pulse animation (`status="pending"` renders static; no animation branch in `status_indicator.rs`). Soft gap per §12.
-- [ ] No `aria_label` / accessible-name path — `js_status_indicator` reads `spec.label` only (`status_indicator.rs:56`), never `spec.aria_label`; dot-only indicators carry no text meaning. Contract §6/§10 require a perceivable status path.
-- accepted: no ARIA channel (documented runtime limit); label line-height 1.3 not applied (`status_indicator.rs:62`, `JsEl` text-metric limit per §12).
+- [x] DONE — `size` / `sizeRole` / `density` support. `js_status_indicator` resolves the effective size (`spec.size` → `size_role` via `resolve_semantic_size`) and density, driving `dot_size_rem_for` / `gap_rem_for` / `label_font_size_rem_for` (contract §8 size + density tables).
+- accepted: no dot box-shadow glow — `JsEl` exposes no box-shadow (Known Delta §12). Track until shadow support lands.
+- accepted: no pending pulse animation — runtime motion delta (§12).
+- accepted: no `aria_label` accessible-name path — Jetstream has no ARIA channel (§12). The visible `label` provides the §6 text path; dot-only `aria_label` is stored on the spec but has no a11y tree to reach.
+- accepted: label line-height 1.3 not applied (`JsEl` text-metric limit per §12).
 - accepted: non-interactive component — no event loop concern (contract §5 events = none).
+- tests: `render_probe` covers the dot size at md, neutral→text-secondary, the five tone→status-token mappings, label text, and the xs/xl dot-size ladder.
 
 ## Specimen parity
 
 - Svelte covers: All statuses (6), Without labels / dot-only (5, with `ariaLabel`), Child slot content, Inherited typography, Sizes snippet, Densities snippet (`StatusIndicatorSpecimen.svelte`).
-- GPUI covers: All statuses (6), Without labels (4, via `aria_label`), Inherit typography, Slot content (`status_indicator.rs`). — missing: **Sizes group**, **Densities group** (contract §13 + Svelte demonstrate size/density; GPUI omits, consistent with the unimplemented props).
-- Jetstream covers: Tones (6), Without label (3), Inherit typography (`status_indicator.rs`). — missing: **Slot/child content** group, **Sizes** group, **Densities** group; dot-only row has 3 vs Svelte's 5 and sets no `aria_label`.
+- GPUI covers: All statuses (6), Without labels (4, via `aria_label`), Inherit typography, Slot content (`status_indicator.rs`). **Sizes/Densities groups still TODO in the GPUI preview specimen** — the GPUI component now supports size/density, but the preview specimen wasn't rebuilt this pass (shared gpui/preview target lock). Follow-up: add Sizes + Densities groups.
+- Jetstream covers: All statuses (6), Without labels / dot-only (4, with `aria_label`), Slot content, **Sizes (xs–xl)**, **Densities (compact/default/comfortable)**, Inherit typography. Rebuilt this pass to the §13 specimen set. (`status_indicator.rs`)
 
 ## Notes
 

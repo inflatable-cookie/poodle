@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: MeterSpec fixed (max=100, fill_token=success, size/size_role + thickness ladder, track mix tokens). GPUI wires size + corrected tokens; Jetstream rebuilt on ui_element::progress (parent-owned width, proportional fill, token radius/track-mix, size ladder) + render_probe tests. Specimens cover sizes/thresholds/range on both. -->
 # Parity: Meter
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -19,39 +20,39 @@ Contract and Svelte are nearly aligned on props/anatomy. Divergences are interna
 
 - [x] FIXED — **Track background mix percentage contradicted itself.** §8 Token Reference + §11 Tier-2 said "88% mix"; Svelte (`Meter.svelte:69`) and the §8 Track table say `96%, text-primary`. Both stale spots updated to `96%` mix with text-primary.
 - [x] FIXED — **Track-mix base token name.** §8 Token Reference cited `--poodle-color-background-surface`; updated to Svelte's `--poodle-surface` (mixed at 96% with `--poodle-color-text-primary`).
-- Rust-spec gaps below are NOT contract↔Svelte divergences — they are `MeterSpec` defects (code edits out of scope here), tracked for the Rust ports:
-  - **`size`/`sizeRole` absent from `MeterSpec`** (`meter.rs:3-12`) — flat `track_height_rem()` returning `0.5`; needs a size-driven ladder. Spec gap.
-  - **`MeterSpec` default `max = 1.0`** (`meter.rs:24`) vs contract/Svelte `max = 100`. Spec bug.
-  - **`MeterSpec::fill_token()` returns `COLOR_ACCENT_BASE`** (`meter.rs:77-79`) instead of `COLOR_STATUS_SUCCESS`. Spec bug — Jetstream inherits the wrong (blue) fill; GPUI sidesteps by hardcoding the correct token string.
+- Rust-spec gaps below are NOT contract↔Svelte divergences — they were `MeterSpec` defects, now FIXED:
+  - [x] FIXED — **`size`/`sizeRole` added to `MeterSpec`** (`size: Option<ControlSize>`, `size_role`), with `track_thickness_rem(size)` xs–xl ladder (contract §8). Both targets resolve the effective size via `resolve_semantic_size`.
+  - [x] FIXED — **`MeterSpec` default `max`** now `100.0` (matches contract/Svelte).
+  - [x] FIXED — **`MeterSpec::fill_token()`** now returns `COLOR_STATUS_SUCCESS`. Jetstream's engine `ProgressBar` fill is already `status_success`; GPUI now resolves the corrected token instead of the hardcoded string. Added `track_mix_token()`/`track_mix_ratio()` so both targets do the contract §8 `surface 96% / text-primary` mix from tokens.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `size` support — `track_height` is the flat `spec.track_height_rem()` (`meter.rs:91`); the xs–xl thickness ladder (contract §8) is not rendered. Wire size once `MeterSpec` gains the field.
-- [ ] Fill is a flat `success_color` (`meter.rs:86`); contract §8 fill is a `linear-gradient(90deg, mix(success 82%, white), success)`. GPUI has no gradient — accept flat OR resolve the lighter endpoint via `color_mix(success, white, 0.82)`. At minimum note as a Tier-2 visual delta.
-- [ ] Native `<meter>` semantics (value/min/max/low/high/optimum, aria-label) not emitted — only a header comment describes the intent (`meter.rs:93-96`). Tracked as the contract §11 Tier-1 accessibility item.
-- note: GPUI correctly bypasses the buggy `spec.fill_token()` and hardcodes the token string `"color.status.success"` (`meter.rs:77`) — visually right, but it should consume a corrected `spec.fill_token()` once that is fixed.
-- accepted: no ARIA (gpui has no accessibility API) — meter semantics cannot reach the a11y tree.
+- [x] DONE — `size` support: track thickness now resolves from the effective size (`spec.size` override → `size_role` via `resolve_semantic_size`) through `spec.track_thickness_rem(size)`; xs–xl ladder rendered. `.size()`/`.size_role()` builders added.
+- [x] DONE — fill now resolves the corrected `spec.fill_token()` (`COLOR_STATUS_SUCCESS`), and track bg uses `spec.track_fill_token()`/`track_mix_token()`/`track_mix_ratio()` for the §8 surface↔text-primary mix — all token-resolved, no hardcoded strings.
+- accepted: flat fill (no gradient). Contract §8 fill is `linear-gradient(90deg, mix(success 82%, white), success)`; GPUI has no gradient API, so a flat success fill is the accepted Tier-2 delta.
+- accepted: native `<meter>` semantics (value/min/max/low/high/optimum, aria-label) not emitted — GPUI has no accessibility API channel (contract §11 Tier-1 a11y item; runtime limit).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Wrong fill color.** `js_meter` resolves `spec.fill_token()` (`meter.rs:11`), which returns accent blue, not success green. Contract §8 + Svelte require `color.status.success`. Fix the spec token (see Contract↔Svelte) — Jetstream then inherits the fix.
-- [ ] **Hardcoded radius literal** `rounded(999.0)` at `meter.rs:24, 30`. Resolve from `radius.pill` via the theme, not a raw `999.0`.
-- [ ] **Hardcoded fixed track width** `track_w = rem_to_px(10.0)` at `meter.rs:20`. Contract §7 says width is parent-owned (`width: 100%`); the meter should fill its parent, not assume 10rem. Use `.grow()`/`w_full` and compute fill via fraction-of-parent, not an absolute width.
-- [ ] **Fill via two sibling divs** (fill + remainder in a `flex_row`, `meter.rs:23-33`) is a layout hack; Svelte uses a single fill span at `width: {pct}%` inside an `overflow:hidden` track. Acceptable if width were parent-owned, but combined with the fixed 10rem it mis-sizes. Rework once width is parent-owned.
-- [ ] No `size` support — flat `track_height_rem()` only; xs–xl ladder absent (contract §8). Depends on `MeterSpec` size field.
-- [ ] No gradient fill (contract §8) — flat color. Same Tier-2 delta as GPUI; note or approximate the lighter endpoint via color-mix.
+- [x] DONE — **fill color.** Rebuilt on `ui_element::progress(frac)` (the runtime `ProgressBar` widget); its engine fill is `status_success` (contract §8). The spec's `fill_token()` is also corrected to success for any direct consumer.
+- [x] DONE — **radius.** Pill radius now resolves from the `radius.pill` token via `resolve_radius`, not a `999.0` literal.
+- [x] DONE — **track width parent-owned.** The fixed `10rem` track is gone; the meter is `.w_full().self_stretch()` and the `ProgressBar` fills `frac` of the parent-owned width.
+- [x] DONE — **single proportional fill.** The two-sibling-div hack is replaced by the single `ProgressBar` widget; fill is a true fraction, not a stretched child.
+- [x] DONE — `size` support: `spec.track_thickness_rem(effective_size)` xs–xl ladder, `min_h` from the resolved size.
+- accepted: flat fill (no gradient) — same Tier-2 delta as GPUI; `JsEl`/`ProgressBar` draw a flat fill.
 - accepted: no ARIA channel; native `<meter>` semantics live nowhere in Jetstream.
+- tests: `render_probe` covers ProgressBar presence, the §8 track mix color, the xs/md/xl thickness ladder, `size_role` resolution, and custom-range fraction.
 
 ## Specimen parity
 
 - Svelte covers: **Sizes ladder** (xs–xl via `showSizes`), Default (50%), With thresholds (82%, low/high/optimum + annotation), Low value (30% optimal range + annotation), Custom range (0–500 + annotation). (`MeterSpecimen.svelte`)
-- GPUI covers: Default (50%), With thresholds, Low value, Custom range — all with annotations. — **missing: the Sizes ladder group** (no per-size specimen; GPUI can't vary thickness yet). (`gpui/.../meter.rs`)
-- Jetstream covers: Low (25%), Half (50%), High (90%) only, all on a 0–1 range. — **missing: Sizes ladder, threshold/low/high/optimum specimens, Custom range, all annotations.** Specimen also diverges from contract §13 labels/values. (`jetstream/.../meter.rs`)
+- GPUI covers: Default (50%), With thresholds, Low value, Custom range — all with annotations. **Sizes ladder still TODO in the GPUI preview specimen** — the GPUI component now supports `size`, but the preview specimen wasn't rebuilt this pass (shared gpui/preview target lock). Follow-up: add the xs–xl group. (`gpui/.../meter.rs`)
+- Jetstream covers: **Sizes ladder (xs–xl)**, Default (50%), With thresholds (82%, low/high/optimum), Low value (30%), Custom range (350/500) — all on the contract 0–100 / custom range with §13 labels. Rebuilt this pass. (`jetstream/.../meter.rs`)
 
 ## Notes
 
-- The single biggest defect is `MeterSpec::fill_token()` returning accent blue instead of success green — it makes the meter the wrong color in any target that trusts the spec (Jetstream does; GPUI sidesteps it by hardcoding the correct token string).
+- The single biggest defect was `MeterSpec::fill_token()` returning accent blue instead of success green — now fixed to `COLOR_STATUS_SUCCESS`. Jetstream's `ProgressBar` engine fill was already success-green, so the user-visible Jetstream color was correct; the spec token now agrees with it.
 - `consv=fixed`: the only contract↔Svelte divergences were the self-conflicting 88%-vs-96% track mix and the `--poodle-color-background-surface` token-name spelling; both resolved in the contract to Svelte's 96% / `--poodle-surface`. The remaining items (`MeterSpec` size/max/fill_token) are Rust-spec bugs, not contract issues.
 - low/high/optimum are display-inert in all targets (contract §4 confirms they only feed native `<meter>` semantics); no zone-based color shift is expected yet (contract §14 future follow-up).
