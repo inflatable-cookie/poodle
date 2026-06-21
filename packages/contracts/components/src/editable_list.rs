@@ -175,8 +175,9 @@ impl EditableListSpec {
         semantic::COLOR_STATUS_DANGER
     }
 
+    /// Info banner text color. Contract §8 Info table: `text-primary`.
     pub fn info_color_token(&self) -> &'static str {
-        semantic::COLOR_TEXT_SECONDARY
+        semantic::COLOR_TEXT_PRIMARY
     }
 
     pub fn dirty_indicator_color_token(&self) -> &'static str {

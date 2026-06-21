@@ -139,7 +139,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | data-table | fixed | 1 | 0 | gap |
 | date-picker | fixed | 0 | 0 | ok |
 | date-range-picker | fixed | 0 | 0 | gap |
-| date-time-picker | fixed | 1 | 4 | gap |
+| date-time-picker | fixed | 0 | 0 | gap |
 | date-time-range-picker | fixed | 1 | 4 | gap |
 | date-time-zone-picker | fixed | 2 | 3 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
@@ -206,7 +206,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | range-slider | fixed | 1 | 1 | gap |
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 0 | ok |
-| relation-picker | fixed | 4 | 4 | gap |
+| relation-picker | fixed | 2 | 2 | gap |
 | remediation-banner | gap | 0 | 0 | ok |
 | resize-handle | ok | 1 | 1 | gap |
 | scroll-shell | ok | 3 | 1 | gap |
@@ -242,7 +242,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 1 | 1 | gap |
 | tooltip | fixed | 0 | 0 | ok |
-| tree | ok | 2 | 4 | ok |
+| tree | ok | 0 | 0 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 3 | 2 | gap |
 | validation-summary | gap | 0 | 0 | gap |

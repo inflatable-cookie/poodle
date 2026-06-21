@@ -51,6 +51,12 @@ impl DateTimePickerSpec {
         self.value.as_ref().unwrap_or(&self.default_value)
     }
 
+    /// Effective open state: the controlled `open` when set, otherwise the
+    /// uncontrolled `default_open`. Mirrors `current_value`'s resolution.
+    pub fn current_open(&self) -> bool {
+        self.open.unwrap_or(self.default_open)
+    }
+
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;
         self

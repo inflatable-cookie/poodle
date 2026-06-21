@@ -38,7 +38,7 @@ use crate::presentation::{
     resolve_semantic_size,
 };
 use crate::text_input::js_text_input;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -114,12 +114,24 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     }
 
     // ── Error / info banners (contract §8) ──
+    //
+    // Both panels carry a tinted border + tinted background per contract,
+    // resolved via color-mix over the danger/accent tokens (no flat fills).
+    let surface = resolve_color(theme, "color.background.surface");
+    let transparent = glam::Vec4::ZERO;
+    let panel_border_w = rem_to_px(0.0625);
     if let Some(ref error) = spec.error_message {
         let danger = resolve_color(theme, spec.error_color_token());
+        // border color-mix(danger 40%, transparent); bg color-mix(danger 8%, surface).
+        let panel_border = color_mix(danger, transparent, 0.40);
+        let panel_bg = color_mix(danger, surface, 0.08);
         root = root.child(
             ui_element::div()
                 .p(panel_pad)
                 .rounded(surface_radius)
+                .border(panel_border_w)
+                .border_color(panel_border)
+                .bg(panel_bg)
                 .child(
                     ui_element::label(error)
                         .text_size(panel_font)
@@ -128,10 +140,17 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
         );
     } else if let Some(ref info) = spec.info_message {
         let info_color = resolve_color(theme, spec.info_color_token());
+        let accent = resolve_color(theme, "color.accent.base");
+        // border color-mix(accent 22%, transparent); bg color-mix(accent 6%, surface).
+        let panel_border = color_mix(accent, transparent, 0.22);
+        let panel_bg = color_mix(accent, surface, 0.06);
         root = root.child(
             ui_element::div()
                 .p(panel_pad)
                 .rounded(surface_radius)
+                .border(panel_border_w)
+                .border_color(panel_border)
+                .bg(panel_bg)
                 .child(
                     ui_element::label(info)
                         .text_size(panel_font)
@@ -450,7 +469,7 @@ mod tests {
     }
 
     #[test]
-    fn error_banner_renders() {
+    fn error_banner_renders_with_tinted_panel() {
         let th = theme();
         let el = js_editable_list(
             &EditableListSpec::new()
@@ -461,10 +480,18 @@ mod tests {
         );
         let tree = probe(&el, 400.0, 400.0);
         assert!(tree.has_text("Something failed"), "error message renders");
+        // Contract §8: error panel carries a tinted (color-mix danger 8%/surface)
+        // background — not a bare text row. Assert some panel has a visible fill.
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|n| n.kind == "Panel" && n.bg.map_or(false, |c| c.a > 0.0)),
+            "error panel should have a tinted background fill"
+        );
     }
 
     #[test]
-    fn info_banner_renders() {
+    fn info_banner_renders_with_tinted_panel() {
         let th = theme();
         let el = js_editable_list(
             &EditableListSpec::new()
@@ -475,6 +502,14 @@ mod tests {
         );
         let tree = probe(&el, 400.0, 400.0);
         assert!(tree.has_text("Drag to reorder"), "info message renders");
+        // Contract §8: info panel carries a tinted (color-mix accent 6%/surface)
+        // background fill.
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|n| n.kind == "Panel" && n.bg.map_or(false, |c| c.a > 0.0)),
+            "info panel should have a tinted background fill"
+        );
     }
 
     #[test]

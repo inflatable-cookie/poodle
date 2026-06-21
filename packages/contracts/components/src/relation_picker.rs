@@ -2,6 +2,82 @@ use crate::composite_types::{BrowseState, PickerItemSpec, PickerVariant, Selecti
 use crate::picker_shell::PickerShellSpec;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+/// One option inside a toolbar filter (`PickerFilterConfig.options`).
+/// Mirrors Svelte `PickerFilterOption`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PickerFilterOption {
+    pub id: String,
+    pub label: String,
+}
+
+impl PickerFilterOption {
+    pub fn new(id: impl Into<String>, label: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            label: label.into(),
+        }
+    }
+}
+
+/// One labeled filter control rendered in the picker toolbar. Each entry
+/// becomes a labeled `Select` over its `options`. Mirrors Svelte
+/// `PickerFilterConfig` (§3 Types).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PickerFilterConfig {
+    pub key: String,
+    pub label: String,
+    pub options: Vec<PickerFilterOption>,
+    /// When true (default), the option list is prefixed with an "All" entry.
+    pub include_all: bool,
+    /// Label for the synthesized "All" option (defaults to "All").
+    pub all_label: Option<String>,
+}
+
+impl PickerFilterConfig {
+    pub fn new(
+        key: impl Into<String>,
+        label: impl Into<String>,
+        options: Vec<PickerFilterOption>,
+    ) -> Self {
+        Self {
+            key: key.into(),
+            label: label.into(),
+            options,
+            include_all: true,
+            all_label: None,
+        }
+    }
+
+    pub fn with_include_all(mut self, include_all: bool) -> Self {
+        self.include_all = include_all;
+        self
+    }
+
+    pub fn with_all_label(mut self, all_label: impl Into<String>) -> Self {
+        self.all_label = Some(all_label.into());
+        self
+    }
+
+    /// Sentinel value used by the "All" option (matches Svelte `"__all__"`).
+    pub const ALL_VALUE: &'static str = "__all__";
+
+    /// Resolve the full option set for this filter, prepending the "All"
+    /// option when `include_all` is set. Mirrors Svelte `getFilterOptions`.
+    pub fn resolved_options(&self) -> Vec<(String, String)> {
+        let mut out = Vec::new();
+        if self.include_all {
+            out.push((
+                Self::ALL_VALUE.to_string(),
+                self.all_label.clone().unwrap_or_else(|| "All".to_string()),
+            ));
+        }
+        for option in &self.options {
+            out.push((option.id.clone(), option.label.clone()));
+        }
+        out
+    }
+}
+
 /// One row in a drill-down level — e.g. a category or subcategory the
 /// user can navigate into before reaching leaf `PickerItemSpec`s.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -139,8 +215,26 @@ pub struct RelationPickerSpec {
     pub variant: PickerVariant,
     pub state: BrowseState,
     pub aria_label: Option<String>,
+    /// Placeholder text for the main search field (Svelte `searchPlaceholder`,
+    /// default "Search picker results").
+    pub search_placeholder: String,
+    /// Toolbar filter controls; each renders a labeled `Select` over its
+    /// options. Mirrors Svelte `filters` (default empty).
+    pub filters: Vec<PickerFilterConfig>,
+    /// Current value for each filter, keyed by filter `key`. A missing key (or
+    /// the `__all__` sentinel) means "All". Mirrors Svelte `filterValues`.
+    pub filter_values: std::collections::BTreeMap<String, String>,
     pub confirm_label: String,
     pub cancel_label: String,
+    /// Overrides the default selection-mode footer note text. When `None`, no
+    /// footer note is rendered. Mirrors Svelte `footerNote` (default `null`).
+    pub footer_note: Option<String>,
+    /// When false, the confirm/cancel footer is not rendered (Svelte
+    /// `showFooter`, default true).
+    pub show_footer: bool,
+    /// When false, the selection-summary region is not rendered (Svelte
+    /// `showSelectionSummary`, default true).
+    pub show_selection_summary: bool,
     /// Optional drill-down configuration. When present the picker
     /// renders a breadcrumbed navigation instead of the flat `items`
     /// list and the caller owns `drill_down_path` as the current state.
@@ -165,8 +259,14 @@ impl RelationPickerSpec {
             variant: PickerVariant::Inline,
             state: BrowseState::Ready,
             aria_label: None,
+            search_placeholder: String::from("Search picker results"),
+            filters: Vec::new(),
+            filter_values: std::collections::BTreeMap::new(),
             confirm_label: String::from("Confirm selection"),
             cancel_label: String::from("Cancel"),
+            footer_note: None,
+            show_footer: true,
+            show_selection_summary: true,
             drill_down: None,
             drill_down_path: Vec::new(),
             size: ControlSize::Md,
@@ -237,6 +337,49 @@ impl RelationPickerSpec {
     pub fn with_cancel_label(mut self, cancel_label: impl Into<String>) -> Self {
         self.cancel_label = cancel_label.into();
         self
+    }
+
+    pub fn with_search_placeholder(mut self, placeholder: impl Into<String>) -> Self {
+        self.search_placeholder = placeholder.into();
+        self
+    }
+
+    pub fn with_filters(mut self, filters: Vec<PickerFilterConfig>) -> Self {
+        self.filters = filters;
+        self
+    }
+
+    pub fn with_filter_value(
+        mut self,
+        key: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Self {
+        self.filter_values.insert(key.into(), value.into());
+        self
+    }
+
+    pub fn with_footer_note(mut self, note: impl Into<String>) -> Self {
+        self.footer_note = Some(note.into());
+        self
+    }
+
+    pub fn with_show_footer(mut self, show_footer: bool) -> Self {
+        self.show_footer = show_footer;
+        self
+    }
+
+    pub fn with_show_selection_summary(mut self, show: bool) -> Self {
+        self.show_selection_summary = show;
+        self
+    }
+
+    /// Current value for a filter, falling back to the `__all__` sentinel
+    /// (Svelte `filterValues[filter.key] ?? "__all__"`).
+    pub fn filter_value(&self, key: &str) -> &str {
+        self.filter_values
+            .get(key)
+            .map(String::as_str)
+            .unwrap_or(PickerFilterConfig::ALL_VALUE)
     }
 
     pub fn selected_item_count(&self) -> usize {
@@ -340,5 +483,68 @@ impl RelationPickerSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn defaults_match_contract() {
+        let spec = RelationPickerSpec::new(vec![]);
+        assert_eq!(spec.search_placeholder, "Search picker results");
+        assert!(spec.filters.is_empty());
+        assert!(spec.filter_values.is_empty());
+        assert_eq!(spec.footer_note, None);
+        assert!(spec.show_footer);
+        assert!(spec.show_selection_summary);
+    }
+
+    #[test]
+    fn filter_resolved_options_prepends_all_by_default() {
+        let filter = PickerFilterConfig::new(
+            "kind",
+            "Kind",
+            vec![
+                PickerFilterOption::new("a", "Alpha"),
+                PickerFilterOption::new("b", "Beta"),
+            ],
+        );
+        let opts = filter.resolved_options();
+        assert_eq!(opts[0], (PickerFilterConfig::ALL_VALUE.to_string(), "All".to_string()));
+        assert_eq!(opts[1], ("a".to_string(), "Alpha".to_string()));
+        assert_eq!(opts.len(), 3);
+    }
+
+    #[test]
+    fn filter_include_all_false_and_custom_all_label() {
+        let no_all =
+            PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
+                .with_include_all(false);
+        assert_eq!(no_all.resolved_options().len(), 1);
+
+        let custom =
+            PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
+                .with_all_label("Any");
+        assert_eq!(custom.resolved_options()[0].1, "Any");
+    }
+
+    #[test]
+    fn filter_value_falls_back_to_all_sentinel() {
+        let spec = RelationPickerSpec::new(vec![]).with_filter_value("kind", "a");
+        assert_eq!(spec.filter_value("kind"), "a");
+        assert_eq!(spec.filter_value("missing"), PickerFilterConfig::ALL_VALUE);
+    }
+
+    #[test]
+    fn footer_and_summary_toggles() {
+        let spec = RelationPickerSpec::new(vec![])
+            .with_footer_note("Pick up to 3")
+            .with_show_footer(false)
+            .with_show_selection_summary(false);
+        assert_eq!(spec.footer_note.as_deref(), Some("Pick up to 3"));
+        assert!(!spec.show_footer);
+        assert!(!spec.show_selection_summary);
     }
 }

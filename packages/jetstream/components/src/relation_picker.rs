@@ -13,8 +13,8 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
-    BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, ControlSize, PickerItemSpec,
-    RelationPickerSpec, SelectionMode, TextInputSpec,
+    BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlSize, PickerItemSpec,
+    RelationPickerSpec, SelectSpec, SelectionMode, TextInputSpec,
 };
 
 use crate::button::js_button;
@@ -25,6 +25,7 @@ use crate::presentation::{
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
     relation_picker_title_size_rem, resolve_semantic_size,
 };
+use crate::select::js_select;
 use crate::selection_summary::js_selection_summary;
 use crate::text_input::js_text_input;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
@@ -62,7 +63,7 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
     );
 
     let selection_items = spec.selection_summary_items();
-    let selection = if !selection_items.is_empty() {
+    let selection = if spec.show_selection_summary && !selection_items.is_empty() {
         Some(js_selection_summary(
             &poodle_specs::SelectionSummarySpec::new(selection_items)
                 .with_clear_action(poodle_specs::RemediationAction::new("clear", "Clear"))
@@ -145,24 +146,55 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
         }
     }
 
-    let footer_actions = ui_element::div()
-        .flex_row()
-        .gap(rem_to_px(control_space_x_rem(spec.density)))
-        .justify_end()
-        .child(js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_size(ControlSize::Sm)
-                .with_label(&spec.cancel_label),
-            theme,
-        ))
-        .child(js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Primary)
-                .with_size(ControlSize::Sm)
-                .with_label(&spec.confirm_label),
-            theme,
-        ));
+    // Footer (FormActions): optional footer note (Svelte `footerNote`) plus the
+    // cancel/confirm action row. Gated on `show_footer`.
+    let footer = if spec.show_footer {
+        let inline_gap = rem_to_px(control_space_x_rem(spec.density));
+        let actions = ui_element::div()
+            .flex_row()
+            .flex_wrap()
+            .gap(inline_gap)
+            .justify_end()
+            .child(js_button(
+                &ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_size(ControlSize::Sm)
+                    .with_label(&spec.cancel_label),
+                theme,
+            ))
+            .child(js_button(
+                &ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(ControlSize::Sm)
+                    .with_label(&spec.confirm_label),
+                theme,
+            ));
+
+        if let Some(ref note) = spec.footer_note {
+            // Note grows to fill, actions pinned to the trailing edge
+            // (Svelte note `flex: 1 1 18rem` + actions `margin-left: auto`).
+            Some(
+                ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .flex_wrap()
+                    .gap(inline_gap)
+                    .justify_between()
+                    .child(
+                        ui_element::div().grow().min_w_0().child(
+                            ui_element::label(note)
+                                .text_color(text_secondary)
+                                .text_size(desc_font),
+                        ),
+                    )
+                    .child(actions),
+            )
+        } else {
+            Some(actions)
+        }
+    } else {
+        None
+    };
 
     js_picker_shell(
         &spec.as_picker_shell(),
@@ -171,7 +203,7 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
         selection,
         body,
         None,
-        Some(footer_actions),
+        footer,
     )
 }
 
@@ -251,12 +283,38 @@ fn build_search(
         .with_size(effective_size)
         .with_size_role(spec.size_role)
         .with_density(spec.density)
-        .with_placeholder("Search picker results")
+        .with_placeholder(spec.search_placeholder.clone())
         .with_show_clear_button(true);
     if !spec.query.is_empty() {
         search_spec = search_spec.with_value(spec.query.clone());
     }
-    col.child(js_text_input(&search_spec, theme))
+    col = col.child(js_text_input(&search_spec, theme));
+
+    // Toolbar filter controls — one labeled Select per `filters` entry (Svelte
+    // `.poodle-relation-picker__filters`). Value change is preview-owned.
+    if !spec.filters.is_empty() {
+        let mut filters_row = ui_element::div()
+            .flex_row()
+            .flex_wrap()
+            .gap(rem_to_px(control_space_x_rem(spec.density)));
+        for filter in &spec.filters {
+            let options = filter
+                .resolved_options()
+                .into_iter()
+                .map(|(value, label)| ChoiceOption::new(value, label))
+                .collect::<Vec<_>>();
+            let mut select_spec = SelectSpec::new(options)
+                .with_value(spec.filter_value(&filter.key).to_string())
+                .with_size(effective_size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density);
+            select_spec.aria_label = Some(format!("{} filter", filter.label));
+            filters_row = filters_row.child(js_select(&select_spec, theme));
+        }
+        col = col.child(filters_row);
+    }
+
+    col
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -526,6 +584,106 @@ mod tests {
         assert!(
             tree.find_token("poodle-relation-candidate-btn").is_none(),
             "non-ready state must not render candidates"
+        );
+    }
+
+    #[test]
+    fn toolbar_renders_filter_controls() {
+        use poodle_specs::{PickerFilterConfig, PickerFilterOption};
+        let filters = vec![PickerFilterConfig::new(
+            "kind",
+            "Kind",
+            vec![
+                PickerFilterOption::new("forms", "Forms"),
+                PickerFilterOption::new("layout", "Layout"),
+            ],
+        )];
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items()).with_filters(filters),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // Filter Select with no chosen value renders the synthesized "All"
+        // trigger label (Svelte `getFilterOptions` prepends "All").
+        assert!(
+            tree.has_text("All"),
+            "filter select 'All' trigger missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn filter_renders_selected_value_label() {
+        use poodle_specs::{PickerFilterConfig, PickerFilterOption};
+        let filters = vec![PickerFilterConfig::new(
+            "kind",
+            "Kind",
+            vec![PickerFilterOption::new("forms", "Forms")],
+        )];
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_filters(filters)
+                .with_filter_value("kind", "forms"),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // The chosen filter value resolves to its option label in the trigger.
+        assert!(
+            tree.has_text("Forms"),
+            "selected filter label missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn footer_note_renders_when_set() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items()).with_footer_note("Choose up to three items."),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        assert!(
+            tree.has_text("Choose up to three items."),
+            "footer note missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn show_footer_false_hides_actions() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_show_footer(false)
+                .with_cancel_label("Cancel"),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // Confirm/cancel buttons live in the footer; suppressed entirely.
+        assert!(
+            !tree.has_text("Cancel"),
+            "footer should be absent when show_footer=false: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn show_selection_summary_false_hides_summary() {
+        let with_summary = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_selected_ids(vec!["btn".into()]),
+            &theme(),
+        );
+        let without_summary = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_selected_ids(vec!["btn".into()])
+                .with_show_selection_summary(false),
+            &theme(),
+        );
+        // The summary chip carries a `×` remove glyph; absent when suppressed.
+        assert!(probe(&with_summary, 480.0, 520.0).has_text("×"));
+        assert!(
+            !probe(&without_summary, 480.0, 520.0).has_text("×"),
+            "selection summary should be hidden when show_selection_summary=false"
         );
     }
 }

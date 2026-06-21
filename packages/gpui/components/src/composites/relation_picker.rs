@@ -14,7 +14,7 @@ use crate::presentation::{
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
     relation_picker_title_size_rem, resolve_semantic_size,
 };
-use crate::primitives::{Button, Checkbox, Icon, TextInput};
+use crate::primitives::{Button, Checkbox, Icon, Select, TextInput};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// Candidate / drill copy strong label weight (Svelte `strong { font-weight: 500 }`).
@@ -204,7 +204,7 @@ impl IntoElement for RelationPicker {
             .with_id("relation-picker-search")
             .with_input_type("search")
             .with_leading_icon("search")
-            .with_placeholder("Search picker results")
+            .with_placeholder(spec.search_placeholder.clone())
             .with_show_clear_button(true);
         search_spec.size = effective_size;
         search_spec.size_role = spec.size_role;
@@ -215,8 +215,33 @@ impl IntoElement for RelationPicker {
         search_col =
             search_col.child(div().w_full().child(TextInput::from_spec(search_spec, theme)));
 
+        // Toolbar filter controls — one labeled Select per `filters` entry
+        // (Svelte `.poodle-relation-picker__filters`). Value change is
+        // consumer-owned (render-only here).
+        if !spec.filters.is_empty() {
+            let mut filters_row = div()
+                .flex()
+                .flex_wrap()
+                .gap(px(rem_to_px(control_space_x_rem(spec.density))));
+            for filter in &spec.filters {
+                let options = filter
+                    .resolved_options()
+                    .into_iter()
+                    .map(|(value, label)| poodle_specs::ChoiceOption::new(value, label))
+                    .collect::<Vec<_>>();
+                let mut select_spec = poodle_specs::SelectSpec::new(options)
+                    .with_value(spec.filter_value(&filter.key).to_string())
+                    .with_size(effective_size)
+                    .with_size_role(spec.size_role)
+                    .with_density(spec.density);
+                select_spec.aria_label = Some(format!("{} filter", filter.label));
+                filters_row = filters_row.child(Select::from_spec(select_spec, theme));
+            }
+            search_col = search_col.child(filters_row);
+        }
+
         let selection_items = spec.selection_summary_items();
-        let selection_el = if !selection_items.is_empty() {
+        let selection_el = if spec.show_selection_summary && !selection_items.is_empty() {
             Some(
                 SelectionSummary::from_spec(
                     poodle_specs::SelectionSummarySpec::new(selection_items)
@@ -305,28 +330,50 @@ impl IntoElement for RelationPicker {
             Some(list.into_any_element())
         };
 
-        let footer_actions = div()
-            .flex()
-            .items_center()
-            .gap(gap)
-            .child(Button::from_spec(
-                poodle_specs::ButtonSpec::new()
-                    .with_variant(ButtonVariant::Ghost)
-                    .with_size(ControlSize::Sm)
-                    .with_label(spec.cancel_label.clone()),
-                theme,
-            ))
-            .child(Button::from_spec(
-                poodle_specs::ButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_size(ControlSize::Sm)
-                    .with_label(spec.confirm_label.clone()),
-                theme,
-            ));
+        // Footer (FormActions): optional footer note (Svelte `footerNote`) +
+        // the cancel/confirm action row. Gated on `show_footer`.
+        let footer_el = if spec.show_footer {
+            let footer_actions = div()
+                .flex()
+                .items_center()
+                .gap(gap)
+                .child(Button::from_spec(
+                    poodle_specs::ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Sm)
+                        .with_label(spec.cancel_label.clone()),
+                    theme,
+                ))
+                .child(Button::from_spec(
+                    poodle_specs::ButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_size(ControlSize::Sm)
+                        .with_label(spec.confirm_label.clone()),
+                    theme,
+                ));
 
-        let mut shell = PickerShell::from_spec(spec.as_picker_shell(), theme)
-            .with_toolbar(search_col)
-            .with_footer(footer_actions);
+            let mut footer = div().flex().items_center().flex_wrap().gap(gap).w_full();
+            if let Some(ref note) = spec.footer_note {
+                footer = footer.child(
+                    div()
+                        .flex_grow()
+                        .min_w_0()
+                        .text_size(desc_font)
+                        .text_color(text_secondary)
+                        .child(note.clone()),
+                );
+            }
+            // Push actions to the trailing edge (Svelte `margin-left: auto`).
+            Some(footer.child(div().ml_auto().child(footer_actions)))
+        } else {
+            None
+        };
+
+        let mut shell =
+            PickerShell::from_spec(spec.as_picker_shell(), theme).with_toolbar(search_col);
+        if let Some(footer) = footer_el {
+            shell = shell.with_footer(footer);
+        }
         if let Some(selection) = selection_el {
             shell = shell.with_selection(selection);
         }

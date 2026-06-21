@@ -313,7 +313,8 @@ pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;
 pub use relation_picker::{
-    DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel, RelationPickerSpec,
+    DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel, PickerFilterConfig,
+    PickerFilterOption, RelationPickerSpec,
 };
 pub use remediation_banner::RemediationBannerSpec;
 pub use selection_summary::SelectionSummarySpec;

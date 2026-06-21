@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=3 specimen=gap | pass: Jetstream rebuilt to GPUI anatomy (handle/conditional-remove/header/banners/add-row/counter), all geometry token-resolved, 13 render_probe tests -->
+<!-- parity consv=fixed gpui=4 jetstream=3 specimen=gap | pass: error/info banners now carry contract §8 tinted border+bg (color-mix danger/accent over surface) on BOTH targets; info text color fixed text-secondary→text-primary; GPUI header gains its color-mix bottom border. Remaining gpui=4/jet=3 are all interaction/a11y/feature-scope (preview-loop/accepted), confirmed against contract — no renderable-anatomy gaps left -->
 # Parity: EditableList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -39,6 +39,7 @@ open items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
 
 ### Resolved in buildout pass
 
+- [x] FIXED (banner pass 2026-06-21) Error/info banners now match contract §8: error panel `border color-mix(danger 40%, transparent)` + `bg color-mix(danger 8%, surface)`; info panel `border color-mix(accent 22%, transparent)` + `bg color-mix(accent 6%, surface)`; previously the panels had padding+radius+text only (no border, no fill). Info text color corrected `text-secondary` → `text-primary` (`EditableListSpec::info_color_token`, contract §8 Info table). Workflow header gains its contract bottom border `0.0625rem solid color-mix(border-default 76%, transparent)` (`border_b` + `pb 0.5rem`).
 - [x] FIXED Row anatomy composes real primitives: handle = `grip-vertical` 6-dot grip `Icon` sized to the contract handle-size square; content = label text (ellipsis); remove = ghost `IconButton` (icon `x`, `Chrome` size role), shown only when `is_editable || is_removable`.
 - [x] FIXED Add row composes the real `TextInput` (placeholder, size/density, disabled) + primary `Button` (`add_label`), not hand-rolled input/button divs.
 - [x] FIXED Workflow header composes real secondary/primary `Button` primitives (own their geometry/typography/fill/foreground) — removed hardcoded `gpui::white()` submit text and the hand-rolled action row.
@@ -64,9 +65,11 @@ items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
 - [ ] No window-nav (Previous/label/Next), no long-list warning, no `windowSize`/`longListThreshold`/`longListWarningText`. (feature scope — not yet built)
 - accepted: no ARIA — the `JsEl` builder has no accessibility sink; `<ul role=listbox>`/`<li role=option>`, live region, and aria-labels are omitted.
 - accepted: interaction (add/remove/reorder/submit) would live in preview event loop; absent here.
+- accepted (JsEl limit): the workflow header's contract `border-bottom` is not expressible — `JsEl::border` is all-sides only (no per-side border), so the Jetstream header omits the bottom rule. GPUI renders it via `border_b`.
 
 ### Resolved in buildout pass
 
+- [x] FIXED (banner pass 2026-06-21) Error/info banners now carry the contract §8 tinted border + background (error: `color-mix(danger 40%, transparent)` border, `color-mix(danger 8%, surface)` bg; info: `color-mix(accent 22%, transparent)` border, `color-mix(accent 6%, surface)` bg) — previously padding+radius+text only. Info text color corrected to `text-primary`. 2 `render_probe` tests now assert a tinted panel `bg` fill (`a > 0`), not just the message text.
 - [x] FIXED Drag handle now rendered — `grip-vertical` 6-dot grip Icon, sized to the contract handle-size square, shown only when `reorderable`.
 - [x] FIXED Remove button now conditional — ghost `IconButton` (icon `x`, chrome size role), shown only when `editable || removable` (was unconditional).
 - [x] FIXED Workflow header composes real secondary/primary `js_button` (cancel + submit, submit disabled unless dirty, "Saving…" while submitting); error/info banners rendered (`role` semantics N/A in Jetstream).

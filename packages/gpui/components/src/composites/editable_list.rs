@@ -37,7 +37,7 @@ use crate::presentation::{
     editable_list_item_x_rem, editable_list_item_y_rem, editable_list_list_gap_rem, rem_to_px,
     resolve_semantic_size,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius, resolve_px};
 
 /// A real GPUI editable list component backed by `EditableListSpec`.
 pub struct EditableList {
@@ -240,6 +240,10 @@ impl IntoElement for EditableList {
                 theme,
             );
 
+            // Header bottom border: 0.0625rem solid
+            // color-mix(border-default 76%, transparent) (contract §8 Header).
+            let border_default = resolve_color(theme, "color.border.default");
+            let header_border = color_mix(border_default, gpui::transparent_black(), 0.76);
             let header = div()
                 .flex()
                 .flex_row()
@@ -247,28 +251,49 @@ impl IntoElement for EditableList {
                 .justify_end()
                 .gap(row_gap)
                 .w_full()
+                .pb(px(rem_to_px(0.5)))
+                .border_b(px(rem_to_px(0.0625)))
+                .border_color(header_border)
                 .child(cancel_btn)
                 .child(submit_btn);
             root = root.child(header);
         }
 
         // ── Error / info banners (contract §8) ────────────────────
+        //
+        // Both panels carry a tinted border + tinted background per contract,
+        // resolved via color-mix over the danger/accent tokens (no flat fills).
+        let surface = resolve_color(theme, "color.background.surface");
+        let panel_border_w = px(rem_to_px(0.0625));
         if let Some(ref error) = spec.error_message {
             let danger = resolve_color(theme, spec.error_color_token());
+            // border color-mix(danger 40%, transparent); bg color-mix(danger 8%, surface).
+            let panel_border = color_mix(danger, gpui::transparent_black(), 0.40);
+            let panel_bg = color_mix(danger, surface, 0.08);
             root = root.child(
                 div()
                     .p(panel_pad)
                     .rounded(surface_radius)
+                    .border(panel_border_w)
+                    .border_color(panel_border)
+                    .bg(panel_bg)
                     .text_size(panel_font)
                     .text_color(danger)
                     .child(error.clone()),
             );
         } else if let Some(ref info) = spec.info_message {
             let info_color = resolve_color(theme, spec.info_color_token());
+            let accent = resolve_color(theme, "color.accent.base");
+            // border color-mix(accent 22%, transparent); bg color-mix(accent 6%, surface).
+            let panel_border = color_mix(accent, gpui::transparent_black(), 0.22);
+            let panel_bg = color_mix(accent, surface, 0.06);
             root = root.child(
                 div()
                     .p(panel_pad)
                     .rounded(surface_radius)
+                    .border(panel_border_w)
+                    .border_color(panel_border)
+                    .bg(panel_bg)
                     .text_size(panel_font)
                     .text_color(info_color)
                     .child(info.clone()),

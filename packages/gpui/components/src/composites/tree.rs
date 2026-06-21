@@ -415,7 +415,9 @@ impl IntoElement for Tree {
             indent: px(indent),
             row_gap: px(row_gap),
             row_pad_inline: px(row_pad_inline),
-            row_radius: control_radius - px(2.0),
+            // Contract: row radius = control radius − 0.125rem (2px at root). Use
+            // rem_to_px so it tracks the root font size, not a raw px literal.
+            row_radius: control_radius - px(rem_to_px(0.125)),
             show_guides: spec.show_guides,
             show_icons: spec.show_icons,
             row_color: resolve_color(theme, spec.row_color_token()),

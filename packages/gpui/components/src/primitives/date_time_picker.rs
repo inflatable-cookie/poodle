@@ -200,7 +200,9 @@ impl IntoElement for DateTimePicker {
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
+                // Contract §2/§8 Indicator = a disclosure chevron (matches the
+                // sibling date/time pickers), not a calendar glyph.
+                Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
                     .with_color(icon_muted),
             );
 

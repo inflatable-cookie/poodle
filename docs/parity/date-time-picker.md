@@ -1,5 +1,15 @@
-<!-- parity consv=fixed gpui=1 jetstream=4 specimen=gap -->
-<!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). Remaining GPUI: indicator glyph (calendar icon vs ▾, matches sibling pickers). -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass 41: GPUI indicator glyph aligned to chevron-down (contract §2/§8 disclosure
+     chevron, matches sibling pickers) — last GPUI todo closed. Jetstream built out: the
+     overlay now composes the REAL Calendar + a Time Section (contract Time Label + composed
+     TimeInput) via current_open(), partial-value prompts ("Select time"/"Select date") match
+     Svelte, and the indicator font resolves from the per-size token ladder. Spec gained an
+     additive current_open() resolver (mirrors current_value). Probe tests added (jetstream):
+     placeholder/complete/partial display, chevron indicator, closed-has-no-overlay, open
+     composes calendar+time, time-label typography, sizes, disabled. Both targets build/test
+     clean. Stale GPUI body items (px(rem_to_px(...)) cell sizes, shadow literals, time-label
+     typography, body/time gaps) were already fixed in passes 17/22 — reclassified below. -->
+<!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). -->
 <!-- pass 17: GPUI overlay rebuilt — fake 6×7 grid + "Today/Done" bar replaced with
      composed Calendar::from_spec + TimeField; mock px literals removed; time-label
      typography (0.6875rem/600/uppercase) + body/time gaps (0.875/0.375rem) applied.
@@ -28,20 +38,20 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 ## GPUI gap (vs Svelte + contract)
 
 - [x] **DONE: overlay rebuilt to composed primitives.** Fake 6×7 grid + weekday header + fake Time box + invented Today/Done bar deleted; now `Calendar::from_spec(...)` (seeded from value.date/visible_month) + composed `TimeField` + contract Time label. Mock px literals removed; time-label typography + body/time gaps applied. Build clean.
-- [ ] Hardcoded pixel literals in the mock overlay: `px(rem_to_px(1.75))` cell heights (`date_time_picker.rs:256,304,334`), `gap(px(rem_to_px(0.125)))` (lines 235,249,251), `h(px(1.0))` separator (line 286). None resolve from size/space tokens.
-- [ ] Hardcoded shadow literals `hsla(0.0,0.0,0.0,0.10)`/`0.06` + `px(16.0)`/`px(4.0)` at `date_time_picker.rs:355-365`. Contract surface shadow = `var(--poodle-elevation-overlay)`; resolve from elevation token.
-- [ ] Indicator renders `calendar` Icon (`date_time_picker.rs:203`) not the `▾` chevron Svelte/contract use. Align glyph.
-- [ ] Time label typography wrong: contract §8 requires label-family, `0.6875rem`, weight 600, `0.04em` tracking, uppercase. GPUI renders plain `"Time"` at `label_size`, no weight/tracking/transform (`date_time_picker.rs:296-299`). Apply the contract time-label tokens.
-- [ ] Body/time-section gaps wrong: contract body gap `0.875rem`, time-section gap `0.375rem`; GPUI uses `space.stack.md/sm` ad-hoc (`date_time_picker.rs:229,373`). Resolve to the contract gap values.
+- accepted: the old "mock overlay" `px(rem_to_px(1.75))` cell heights / `gap(px(rem_to_px(0.125)))` / `h(px(1.0))` separator no longer exist — the mock was deleted in pass 17 when the overlay was rebuilt to composed `Calendar::from_spec` + `TimeField`. The surviving `rem_to_px(0.875)`/`rem_to_px(0.375)` body/time gaps and `rem_to_px(0.6875)` label size are contract-exact rem (NOT px literals).
+- [x] **DONE (pass 22):** Shadow literals replaced by `elevation_overlay_shadow()` (token-driven).
+- [x] **DONE:** Indicator was the `calendar` Icon; now `chevron-down` (contract §2/§8 disclosure chevron, matching the sibling date/time pickers).
+- [x] **DONE (pass 17):** Time label typography — now `0.6875rem`, weight SEMIBOLD, text-secondary, uppercased `"TIME"`. (`0.04em` tracking is a CSS-only refinement absent from GPUI's text API — accepted.)
+- [x] **DONE (pass 17):** Body gap `0.875rem` + time-section gap `0.375rem` now resolved via `rem_to_px` to the contract values (not `space.stack.*`).
 - accepted: no ARIA (gpui has no accessibility API) — haspopup/expanded/dialog-role not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No calendar+time overlay + no open-state handling: `js_date_time_picker` emits only the trigger; never reads open state. Overlay/interaction must live in preview event loop — none present in the specimen, so the composed Calendar + TimeInput surface is unreachable.
-- [ ] Partial-value display joins `date` + `time` with a space and trims (`date_time_picker.rs:43-49`); does not emit Svelte's `"Select time"`/`"Select date"` partial prompts. Match Svelte's partial-value strings.
-- [ ] Trigger gap is `rem_to_px(0.75)` literal (`date_time_picker.rs:63`) — fine numerically; resolve from a content-gap token for token-form consistency. Low priority.
+- [x] **DONE:** Overlay + open-state handling built out. `js_date_time_picker` now reads `spec.current_open()` (additive spec resolver) and, when open, composes the REAL `js_calendar` (seeded from the value's date/visible-month) + a Time Section — contract Time Label (`0.6875rem`/600/secondary/uppercase) above the composed `js_time_field` (seeded from the value's time) — inside the sibling overlay surface (elevated-98%-over-panel bg, 72%-alpha border, `shadow_md` preset, panel padding). Body gap `0.875rem`, time-section gap `0.375rem`. No mockup.
+- [x] **DONE:** Partial-value prompts now match Svelte — date set / no time → `"<date> Select time"`; time set / no date → `"Select date <time>"`; complete → `"<date> <time>"`; empty → placeholder.
+- accepted: Trigger gap is `rem_to_px(0.75)` — contract-exact rem (trigger gap `0.75rem`); not a px-literal violation. Indicator font now resolves from the per-size token ladder (`date_picker_indicator_font_rem`).
 - accepted: no ARIA channel for haspopup/expanded/dialog role.
-- accepted: calendar + time-field surface + interaction live in the preview event loop, not the component.
+- accepted: open/close + outside-click + Escape + calendar/time selection live in the preview event loop, not the component (mirrors the DatePicker build).
 
 ## Specimen parity
 

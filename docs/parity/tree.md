@@ -1,4 +1,11 @@
-<!-- parity consv=ok gpui=2 jetstream=4 specimen=ok -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 41: tree render gaps closed. GPUI row-radius now control_radius − rem_to_px(0.125)
+     (no raw px(2.0)). Jetstream rename-box border now accent-base (selected_fill_token),
+     and the drop indicator (before/after accent line + inside accent-12% fill) now renders
+     from spec.drop_target_value/drop_position, mirroring GPUI. Remaining items are accepted
+     Known Deltas (selected inset ring, virtual scroll) or preview-loop interaction. Probe
+     tests added (jetstream): indentation, twisty glyph, selected fill, rename border, drop
+     indicator. consv stays ok; both Rust targets build/test clean. -->
 # Parity: Tree
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,8 +34,8 @@ Recently overhauled — all four target files are new/uncommitted. Contract and 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Selected inset ring omitted — `render_row` applies only the accent fill (`tree.rs:840-842`), no `inset 0 0 0 0.0625rem accent-20%` box-shadow. Documented as the "Selected inset ring is Svelte-only" Known Delta (§12), so accepted, but the contract still lists it; leave the delta noted.
-- [ ] `row_radius` uses `control_radius - px(2.0)` (`tree.rs:418`) — the `2.0` is a raw px literal for the contract's `- 0.125rem`. Use `rem_to_px(0.125)` like Jetstream (`tree.rs:96`) instead of a hardcoded `2.0`.
+- accepted: Selected inset ring omitted — `render_row` applies only the accent fill (`tree.rs:840-842`), no `inset 0 0 0 0.0625rem accent-20%` box-shadow. "Selected inset ring is Svelte-only" Known Delta (§12).
+- [x] **DONE:** `row_radius` was `control_radius - px(2.0)` (raw literal); now `control_radius - px(rem_to_px(0.125))` for the contract's `- 0.125rem`, matching the Jetstream form.
 - accepted: drag preview chip colors/metrics are raw px literals (`px(8.0)`/`py(2.0)`/`rounded(px(4.0))`, `tree.rs:95-97`) — internal floating-cursor preview, not a contract-specified surface.
 - accepted: no ARIA (gpui has no accessibility API) — role/level/selected/expanded conveyed visually only (§6 + Known Delta).
 - accepted: no virtual scrolling (no windowing primitive; Known Delta) — renders all visible rows.
@@ -36,10 +43,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Inline-rename editor box border uses `m.focus_ring` for the border color (`tree.rs:285`); contract `.tree__rename` border is `accent-base` (`selected_fill_token`), not the focus ring. Use the accent token.
-- [ ] Inline-rename editor renders a fake caret by appending `"|"` to the text (`tree.rs:289`) — cosmetic stand-in, not a real cursor. Acceptable for the immediate-mode runtime but flag: prefer a token-driven caret element over a literal glyph.
-- [ ] Selected inset ring omitted — accent fill only (`tree.rs:315-317`); same Svelte-only Known Delta as GPUI. Noted, accepted.
-- [ ] Drop-indicator rendering absent — `js_tree` never reads `spec.drop_target_value` / `spec.drop_position`; GPUI draws the before/after line + inside fill but Jetstream draws no drag indicator. Contract §8 "Drop indicator" + GPUI parity expect it. Add the indicator (or note as a runtime gap if the app loop owns it).
+- [x] **DONE:** Inline-rename editor box border was `m.focus_ring`; now `m.selected_fill` (accent-base, `selected_fill_token`) per contract `.tree__rename`.
+- accepted: Inline-rename editor renders a fake caret by appending `"|"` to the text — cosmetic stand-in for the immediate-mode runtime (no real input cursor primitive). Token-driven caret element would be a follow-up.
+- accepted: Selected inset ring omitted — accent fill only; same Svelte-only Known Delta as GPUI (§12).
+- [x] **DONE:** Drop indicator now renders — `js_tree` reads `spec.drop_target_value` / `spec.drop_position`: before/after draws an absolute `0.125rem` accent line at the row top/bottom (`-0.0625rem` inset); inside applies an `accent-base 12%` fill. Mirrors GPUI; drag/drop state owned by the preview loop.
 - accepted: interaction (click/keyboard/drag) lives in the preview event loop + shell token routing (`tree:` / `tree-twisty:` / `tree-check:` ids), not the component — documented in the file header and specimen.
 - accepted: no ARIA (immediate-mode runtime has no a11y tree; Known Delta).
 - accepted: no virtual scrolling (Known Delta).
