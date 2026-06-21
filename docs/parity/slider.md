@@ -1,11 +1,19 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- pass 42: GPUI slider keyboard CLOSED — Arrow Left/Down/Right/Up + Home/End +
+     PageUp/PageDown now fire `on_change` with step-snapped (anchored at min),
+     clamped values (contract §6 + §11 Tier-1); the sibling RangeSlider already
+     proved this representable. Commit-on-keyup stays the GPUI 0.2.2 delta.
+     Jetstream slider thumb drop-shadow CLOSED — `0 0.125rem 0.5rem black@0.18` via a
+     custom BoxShadow on `style.shadow` (JsEl DOES expose box-shadow — the earlier
+     "no shadow primitive" claim was wrong; same pattern as tooltip.rs). Offsets are
+     rem; only black@0.18 is a noted literal (no shadow token matches). Tree-test added.
+     Remaining gpui=1: native vertical (runtime). Remaining jetstream=1: native vertical
+     (preview-loop); drag/keyboard are preview-loop, grouped as accepted. -->
 <!-- pass 41: GPUI slider closed — thumb diameter now resolves from the contract §8
      size table (was pinned to size.icon.md), track pill radius from radius.pill (was
      px(999.0)), thumb shadow offset/blur now rem_to_px(0.125/0.5) (only the black@0.18
      color stays literal — no matching shadow token). Jetstream slider already carried the
-     pass-29 fixes (tint track, size table, pill, border); count corrected. Remaining gpui:
-     keyboard + drag-release commit + vertical (runtime/preview). Remaining jetstream: thumb
-     drop-shadow (no custom-offset shadow primitive/token) + vertical + drag/keyboard (loop). -->
+     pass-29 fixes (tint track, size table, pill, border); count corrected. -->
 <!-- pass 29: Jetstream track-color bug fixed — was surface.mix(accent, 0.88) (toward
      accent); now tint(surface, 0.88) = color-mix(surface 88%, transparent) per contract/
      Svelte (filled portion stays opaque accent). Invented size ratios → contract §8 size
@@ -42,25 +50,21 @@ Single-thumb slider. Svelte and contract agree on props, anatomy, token targets,
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No keyboard adjustment — contract §6 + §11 Tier-1 require Arrow/Home/End/PageUp/PageDown. `Slider` is `.focusable()` (`slider.rs:228`) but registers no key handlers; arrows do nothing. Add key bindings that step value and fire `on_change`/`on_value_commit`.
-- [ ] `on_value_commit` only fires on click, never on drag-release — documented delta (`slider.rs:10-11,288-301`), but contract §5 requires commit on release after a drag. The `on_mouse_move` drag path (`slider.rs:276-285`) emits `on_change` but no commit. Re-fire commit when drag ends.
-- [ ] No vertical orientation — `spec.orientation` is a forwarded builder (`slider.rs:100-103`) but `into_element` ignores it; track is always horizontal (`w_full`, `slider.rs:163-175`). Contract §7/§10 require native vertical layout (1.5rem width, 10rem min-height). Branch layout on orientation.
-- [ ] No size handling — `spec.size` builder exists (`slider.rs:116-119`) but thumb is hardcoded to `size.icon.md` (`slider.rs:150`); xs/sm/lg/xl thumb diameters from contract §8 size table are never applied. Resolve thumb size from `spec.size`.
-- [ ] Hardcoded thumb shadow color/offsets — `hsla(0.0, 0.0, 0.0, 0.18)`, `offset point(px(0.0), px(2.0))`, `blur_radius px(8.0)`, `spread px(0.0)` at `slider.rs:191-196`. The `0.18` black and the `2.0`/`8.0` offsets are raw literals; resolve from shadow/elevation tokens, not inline `hsla`/floats.
-- [ ] Hardcoded `track_radius = px(999.0)` at `slider.rs:148` and thumb-vs-track inset math `px(-(thumb_f - track_f) / 2.0)` at `slider.rs:180`. The `999.0` pill radius is a magic literal; resolve from a radius/full-pill token. (`track_f = rem_to_px(0.375)` at `slider.rs:146` is annotated as an accepted no-token-exists case — see Notes.)
-- accepted: no ARIA — `aria-valuemin/max/now/text`, `aria-disabled` not expressible via the fluent Div builder (documented `slider.rs:6-8`).
+- [x] Keyboard adjustment CLOSED (pass 42) — `on_key_down` now handles Arrow Left/Down (−step), Right/Up (+step), Home (min), End (max), PageUp/PageDown (±step·10), all step-snapped (anchored at min via `step_clamp`) + clamped, firing `on_change` for live updates (`slider.rs` interaction block). Contract §6 + §11 Tier-1 satisfied for value semantics.
+- [x] Thumb diameter from the contract §8 size table (`thumb_diameter_rem`, `slider.rs`) — xs 0.75 … xl 1.25rem, no longer pinned to md (pass 41).
+- [x] Thumb shadow offset/blur from rem (`offset point(px(0.0), px(rem_to_px(0.125)))`, `blur px(rem_to_px(0.5))`) + `track_radius` from `radius.pill` (pass 41). Only the `black@0.18` color stays a noted literal — no shadow token matches (`elevation.shadow.*` use `rgba(17,22,29,…)`/different offsets).
+- [ ] No vertical orientation — `into_element` ignores `spec.orientation`; track is always horizontal. Contract §7/§10 require native vertical (1.5rem width, 10rem min-height). **Open** — a layout/preview axis branch beyond the build-only surface; §12 blesses native-vs-rotate, not skipping.
+- accepted: `on_value_commit` fires on click-release, not drag-release or key-up — GPUI 0.2.2 exposes no `on_mouse_up`/key-up in the fluent builder. Keyboard still emits live `on_change`. Documented runtime delta.
+- accepted: no ARIA — `aria-valuemin/max/now/text`, `aria-disabled` not expressible via the fluent Div builder.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Track background color is wrong — code mixes surface toward **accent**: `surface.mix(accent, 0.88)` (`slider.rs:37`) with a comment claiming `color-mix(surface 88%, accent)` (`slider.rs:36`). Contract §8 + Svelte (`Slider.svelte:107`) both specify `color-mix(surface 88%, transparent)`. Mix surface toward transparent (alpha 0.88), not toward accent.
-- [ ] No interaction at all — `js_slider` renders a static fill at `spec.value` (`slider.rs:39-45`); no drag, no keyboard, no `on_change`/`on_value_commit`, and preview `main.rs` has no slider event wiring. Contract §5/§6 + §11 Tier-1 require live value change + commit + keyboard. Add interaction (component callbacks or preview event loop).
-- [ ] No vertical orientation — `spec.orientation` is ignored; layout is hardcoded horizontal flex-row (`slider.rs:80-88`). Contract §7 requires a vertical axis. Branch on orientation.
-- [ ] Magic thumb-size formula `control_height_rem(effective_size) * 0.44` at `slider.rs:27` — invents a 0.44 ratio instead of the contract §8 size table (md = 1rem thumb). Hardcoded float; derive thumb diameter from the contract size table.
-- [ ] Magic track-height `rem_to_px(0.25)` at `slider.rs:28` — contract §8 track thickness is `0.375rem`, not `0.25rem`. Wrong literal; use 0.375rem (or a track-height token).
-- [ ] Magic container-height formula `control_height_rem(effective_size) * 0.56` at `slider.rs:29` — invents a 0.56 ratio; contract min-height is `1.5rem` (md). Hardcoded float; resolve from the size min-height table.
-- [ ] Hardcoded fill/track corner radius `track_h * 0.5` at `slider.rs:54,61` and thumb radius `thumb_size * 0.5` at `slider.rs:47` — contract uses `999px` full-pill radius via token. Magic half-height math; resolve a pill-radius token.
-- [ ] Hardcoded thumb border width `.border(1.0)` at `slider.rs:75` — contract §8 thumb border is `0.0625rem`. Raw `1.0` px; resolve from a border-width token / `rem_to_px(0.0625)`.
-- [ ] No thumb box-shadow — contract §8 thumb requires `0 0.125rem 0.5rem` drop shadow; `js_slider` thumb (`slider.rs:67-77`) has bg + border only, no shadow. Add the shadow once a shadow primitive exists.
+- [x] Track background `tint(surface, 0.88)` = `color-mix(surface 88%, transparent)` (`slider.rs:68`) — mixes toward transparency, not accent (pass 29). Probe-tested.
+- [x] Thumb diameter + min-height from the contract §8 size table (`thumb_diameter_rem` / `min_height_rem`), track thickness `rem_to_px(0.375)` — no invented ratios (pass 29). Probe-tested.
+- [x] Pill radius from `radius.pill`, thumb border `rem_to_px(0.0625)` (pass 29).
+- [x] Thumb drop shadow CLOSED (pass 42) — `0 0.125rem 0.5rem black@0.18` via a custom `BoxShadow` on `style.shadow` (JsEl exposes box-shadow — `style.shadow: Option<BoxShadow>` is public, same pattern as `tooltip.rs`; the "shadow once a primitive exists" note was based on a wrong assumption). Offsets are rem; only black@0.18 is a noted literal (no shadow token). Tree-test added (`thumb_has_contract_drop_shadow`).
+- [ ] No vertical orientation — `spec.orientation` is ignored; layout is hardcoded horizontal flex-row. Contract §7 requires a vertical axis. **Open** — preview/layout axis branch (preview-loop bound).
+- accepted: No drag/keyboard interaction in the component — value change + commit + keyboard live in the preview event loop (consistent with other Jetstream primitives; no focus/input primitive on the runtime). The component renders track + fill + thumb at the spec's current value.
 - accepted: no ARIA channel (no accessibility API on the Jetstream runtime).
 
 ## Specimen parity
@@ -71,7 +75,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- Accepted GPUI literal: `track_f = rem_to_px(0.375)` (`slider.rs:146`) is annotated in-file — no slider-track-height token exists in the design system yet, so the fixed 0.375rem mirrors Svelte exactly. Same 0.375rem appears in the contract §8 track table. This is the one acceptable hardcode; the Jetstream `0.25rem` track height (`slider.rs:28`) is NOT — it's both undocumented and wrong vs contract.
-- GPUI drag uses `on_children_prepainted` track bounds for hit math (`slider.rs:201-208`) — a sound approach; the gap is keyboard + drag-release commit, not pointer drag.
-- The contract repeatedly distinguishes this single-thumb `Slider` from `RangeSlider` (§1 out-of-scope, §14 follow-up). All three implementations here are correctly single-thumb; no range-slider confusion present.
-- Biggest cross-target theme: neither Rust target implements keyboard adjustment or vertical orientation, and Jetstream has no interaction whatsoever plus a wrong track-color mix and several invented size ratios that bypass the contract size table.
+- Accepted track-height literal on both targets: `rem_to_px(0.375)` — no slider-track-height token exists yet, so the contract-exact 0.375rem is converted directly (faithful, not a magic value). Both targets now use it; the old Jetstream `0.25rem` literal was fixed in pass 29.
+- Accepted noted color literal on both targets: the thumb shadow `black@0.18`. The contract value is `color-mix(black 18%, transparent)`; no shadow token resolves to it (`elevation.shadow.*` use a different color + offsets). Offsets/blur resolve from contract-exact rem; only the color is the literal.
+- GPUI drag uses `on_children_prepainted` track bounds for hit math — a sound approach; with pass 42 the only remaining GPUI gap is native vertical (commit-on-keyup/mouse-up is the accepted 0.2.2 runtime delta).
+- The contract distinguishes this single-thumb `Slider` from `RangeSlider` (§1 out-of-scope, §14 follow-up). All three implementations are correctly single-thumb.
+- Cross-target state after pass 42: value/size/visual/token parity is complete on both Rust targets; keyboard value-semantics land on GPUI; the one shared open gap is **native vertical orientation** (both), which is a preview/layout axis branch beyond the build-only verification surface here.

@@ -3,11 +3,17 @@
 //! Drag and click use the track element's layout bounds (via `on_children_prepainted`),
 //! not the window bounds.
 //!
+//! Keyboard adjustment (Arrow keys, Home/End, PageUp/PageDown) fires `on_change`
+//! with step-snapped, clamped values (contract §6 + §11 Tier-1).
+//!
 //! # Known GPUI deltas
 //! - `aria-valuemin/max/now/text`, `aria-disabled`: not expressible on GPUI native
 //!   elements via the fluent Div builder.
 //! - `on_value_commit` fires on click-release (`on_click`). GPUI 0.2.2 does not expose
-//!   `on_mouse_up` through the fluent builder, so drag-release commits are not captured.
+//!   `on_mouse_up`/key-up through the fluent builder, so drag-release and keyboard
+//!   commits are not captured; keyboard still emits live `on_change` updates.
+//! - Vertical orientation is not yet implemented (layout is always horizontal);
+//!   native vertical needs preview/layout work beyond the build-only surface.
 
 use std::sync::{Arc, Mutex};
 
@@ -30,6 +36,18 @@ fn thumb_diameter_rem(size: ControlSize) -> f32 {
         ControlSize::Lg => 1.125,
         ControlSize::Xl => 1.25,
     }
+}
+
+/// Snap to the step grid **anchored at `min`** (`min + n*step`), matching Svelte
+/// `snapToStep(raw, min, step)`, then clamp into `[min, max]`. Anchoring at 0
+/// would land off-grid when `min` is not a multiple of `step`.
+fn step_clamp(v: f64, min: f64, max: f64, step: f64) -> f64 {
+    let stepped = if step > 0.0 {
+        min + ((v - min) / step).round() * step
+    } else {
+        v
+    };
+    stepped.clamp(min, max)
 }
 
 /// A real GPUI slider component backed by `SliderSpec`.
@@ -278,6 +296,7 @@ impl IntoElement for Slider {
             if let Some(on_change) = on_change {
                 let on_change = std::rc::Rc::new(on_change);
                 let on_change_drag = on_change.clone();
+                let on_change_key = on_change.clone();
                 let compute_drag = compute_value;
                 let tbs_down = track_bounds_store.clone();
                 let tbs_move = track_bounds_store.clone();
@@ -301,6 +320,30 @@ impl IntoElement for Slider {
                             }
                         }
                     });
+
+                // Keyboard adjustment (contract §6 + §11 Tier-1):
+                // Arrow Left/Down → −step, Arrow Right/Up → +step, Home → min,
+                // End → max, PageUp/PageDown → ±(step * 10). Values snap to the
+                // step grid (anchored at min) and clamp into [min, max]. Fires
+                // `on_change` for live updates; commit-on-keyup is a GPUI 0.2.2
+                // delta (no key-up in the fluent builder) — see module note.
+                let current = spec.clamped_value();
+                wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let unit = if step > 0.0 { step } else { (max - min) / 100.0 };
+                    let page = unit * 10.0;
+                    let next = match event.keystroke.key.as_str() {
+                        "left" | "down" => Some(step_clamp(current - unit, min, max, step)),
+                        "right" | "up" => Some(step_clamp(current + unit, min, max, step)),
+                        "home" => Some(min),
+                        "end" => Some(max),
+                        "pageup" => Some(step_clamp(current + page, min, max, step)),
+                        "pagedown" => Some(step_clamp(current - page, min, max, step)),
+                        _ => None,
+                    };
+                    if let Some(val) = next {
+                        on_change_key(&val, window, cx);
+                    }
+                });
             }
 
             // on_value_commit: fires on click-release via on_click.

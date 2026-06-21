@@ -11,7 +11,7 @@
 //! Drag/keyboard interaction is preview-event-loop bound; this renders the
 //! track + fill + thumb at the spec's current value only.
 
-use jetstream_runtime::game_ui::Color;
+use jetstream_runtime::game_ui::{BoxShadow, Color};
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, SliderSpec};
@@ -91,11 +91,23 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .bg(track_bg)
         .rounded_r(pill);
 
+    // Contract §8 thumb drop shadow: `0 0.125rem 0.5rem color-mix(black 18%,
+    // transparent)`. Offset/blur resolve from contract-exact rem; black@0.18 has
+    // no dedicated shadow token (elevation.shadow.* use a different color +
+    // offsets), so the color is the one noted literal — matches the GPUI target.
+    let thumb_shadow = BoxShadow {
+        offset_x: 0.0,
+        offset_y: rem_to_px(0.125),
+        blur: rem_to_px(0.5),
+        spread: 0.0,
+        color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+    };
+
     // Thumb: absolutely positioned at the fill/remainder junction.
     // top offsets the thumb vertically to center on the track.
     let thumb_top = -(thumb_r - track_h * 0.5);
     let thumb_left = fill_w - thumb_r;
-    let thumb = ui_element::div()
+    let mut thumb = ui_element::div()
         .absolute()
         .top(thumb_top)
         .left(thumb_left)
@@ -106,6 +118,7 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border(border_w)
         .border_color(border_default)
         .cursor_pointer();
+    thumb.style.shadow = Some(thumb_shadow);
 
     // Track row: relative container holding fill, remainder, and thumb.
     let track = ui_element::div()
@@ -187,6 +200,44 @@ mod tests {
             tree.has_background(accent_probe, 0.01),
             "filled track segment should be the accent color: {}",
             tree.to_json()
+        );
+    }
+
+    /// Walk the raw JsEl tree (the probe flattens away `style.shadow`) and
+    /// collect every node carrying a box shadow.
+    fn shadows(el: &JsEl, out: &mut Vec<jetstream_runtime::game_ui::BoxShadow>) {
+        if let Some(s) = el.style.shadow {
+            out.push(s);
+        }
+        for c in &el.children {
+            shadows(c, out);
+        }
+    }
+
+    #[test]
+    fn thumb_has_contract_drop_shadow() {
+        let th = theme();
+        let el = js_slider(&SliderSpec::new(50.0), &th);
+        let mut found = Vec::new();
+        shadows(&el, &mut found);
+
+        // Contract §8 thumb shadow: 0 0.125rem 0.5rem black@0.18.
+        let shadow = found
+            .iter()
+            .find(|s| {
+                (s.offset_y - rem_to_px(0.125)).abs() < 0.5
+                    && (s.blur - rem_to_px(0.5)).abs() < 0.5
+            })
+            .expect("thumb should carry the contract drop shadow");
+        assert!((shadow.offset_x).abs() < 0.001, "shadow has no horizontal offset");
+        assert!((shadow.spread).abs() < 0.001, "shadow has no spread");
+        assert!(
+            (shadow.color.w - 0.18).abs() < 0.001,
+            "shadow color is black mixed to 18% alpha"
+        );
+        assert!(
+            shadow.color.x < 0.001 && shadow.color.y < 0.001 && shadow.color.z < 0.001,
+            "shadow color is black"
         );
     }
 

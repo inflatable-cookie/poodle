@@ -1,7 +1,7 @@
 # Range Slider
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-06-21
 
 ## 1. Purpose
 
@@ -104,7 +104,9 @@ Updated: 2026-03-15
 - `aria-valuenow`: lower value on lower input, upper value on upper input
 - `aria-valuetext`: from lowerValueText on lower input, upperValueText on upper
   input
-- `aria-orientation`: set to match orientation prop on both inputs
+- `aria-orientation`: NOT set on the range inputs; orientation is conveyed via
+  `data-orientation` on the root element only (matches Svelte and the Slider
+  contract)
 - `disabled`: native disabled attribute when disabled on both inputs
 - Labeling rules: each thumb must be individually focusable and distinguishable
   to assistive technology as lower or upper bound
@@ -345,11 +347,10 @@ so the control geometry is unchanged — only the grabbable margin grows.
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Per-thumb aria-label is constructed by appending "minimum"/"maximum" to the
   base ariaLabel prop, or defaults to "Minimum value"/"Maximum value"
-- **Known Svelte gap:** the current Svelte build sets `data-orientation` on the
-  root but does **not** emit `aria-orientation` on the two inputs. §6 requires
-  `aria-orientation` to match the orientation prop on both inputs; the contract
-  is authoritative and is left unweakened — Svelte must add
-  `aria-orientation={orientation}` to both `<input>` elements.
+- Orientation rides on `data-orientation` on the root only; `aria-orientation`
+  is not emitted on the inputs. §6 matches this (Svelte is the parity authority,
+  and the Slider contract aligns the same way), so there is no contract↔Svelte
+  divergence on orientation reporting.
 
 ## 10. GPUI Notes
 

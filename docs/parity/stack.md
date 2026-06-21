@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok | pass: direction-aware align default closed on both (StackSpec.align → Option<Alignment> + resolved_align()); Jetstream row/justify/wrap specimens added; probe tests for gap + row-align default -->
 # Parity: Stack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -34,7 +34,7 @@ Component code is token-clean — zero hardcoded px/color literals in `stack.rs`
 
 - [ ] No `overflow` support — `OverflowMode` prop absent from `StackSpec` and builder; Svelte sets `overflow` inline (`Stack.svelte:60`).
 - [ ] No `width`/`height`/`minWidth`/`minHeight` sizing builders — Svelte exposes all four (`Stack.svelte:37-40`); `Stack` (`stack.rs:42-74`) forwards only direction/gap/align/justify/wrap/padding/role/aria.
-- [ ] Direction-aware align default not applied — Svelte defaults row to `center` (`Stack.svelte:48`); GPUI honors `StackSpec` default `Alignment::Stretch` for all directions (`stack.rs:113-124`, spec default `stack.rs:38`). Resolve align default by direction.
+- [x] FIXED Direction-aware align default — `StackSpec.align` is now `Option<Alignment>` (default `None`); `resolved_align()` applies `column → stretch`, `row → center` per Svelte (`Stack.svelte:48`). GPUI `stack.rs` matches via `spec.resolved_align()`.
 - accepted: no ARIA (gpui has no accessibility API) — `role`/`aria_label` stored in spec but not emitted.
 - accepted: row-vs-column gap token split (`stack_gap`/`inline_gap`) is the shared Rust spec behavior, not a GPUI-local bug; tracked in Contract↔Svelte token reconciliation.
 
@@ -44,15 +44,15 @@ Component code is token-clean — zero hardcoded px/color literals in `stack.rs`
 
 - [x] DONE: `direction` (flex_col/flex_row), `justify` (Start/End/Center/SpaceBetween → justify_start/end/center/between), and `wrap` (flex_wrap) now wired. Probe-tested: row lays children horizontally, column vertically.
 - [ ] No `overflow`/`width`/`height`/`minWidth`/`minHeight` sizing — these are **not on `StackSpec`** (the contract sync added them to the contract, but the Rust spec lacks the fields). Add to `StackSpec` first, then both Rust targets can resolve.
-- [ ] Direction-aware align default not applied — defaults to spec `Alignment::Stretch` for all cases (`stack.rs:19-24`); Svelte rows default to `center`.
-- [ ] No `role`/`aria_label` channel — spec carries them; `js_stack` drops both.
+- [x] FIXED Direction-aware align default — `js_stack` now calls `spec.resolved_align()`; row with no explicit align resolves to `center`, column to `stretch`. Probe-tested (`row_align_default_centers_children_on_cross_axis`, `column_align_default_stretches`).
+- [ ] No `role`/`aria_label` channel — spec carries them; `js_stack` drops both. JsEl has no ARIA channel (accepted delta — Stack is a non-interactive layout primitive).
 - accepted: interaction n/a — Stack is a non-interactive layout primitive (no event loop wiring needed).
 
 ## Specimen parity
 
 - Svelte covers: Column (default md), Column large-gap center-aligned, Row, Row justify=between, Row wrapping (`StackSpecimen.svelte`).
 - GPUI covers: Column default, Column large-gap center, Row, Row justify=between, Row wrapping (`gpui/.../stack.rs`) — full parity with Svelte. Specimen scaffolding uses raw `px(8.0)`/`px(24.0)` for the eyebrow layout (`stack.rs:30,42` etc.), but that is harness chrome, not the Stack under test.
-- Jetstream covers: Default gap, Small gap, Center aligned (`jetstream/.../stack.rs:19-29`) — missing: **Row direction**, **Row justify=between**, **Row wrapping** groups. Cannot demonstrate them until `js_stack` supports direction/justify/wrap. Specimen item helper also hardcodes `px(8.0)`/`py(4.0)`/`rounded(4.0)` and `text_size(11.0)` (`stack.rs:16-17,33`) — harness chrome, but worth noting it does not exercise the token path.
+- Jetstream covers: Default gap, Small gap, Center aligned, **Row direction**, **Row justify=between**, **Row wrapping** (`jetstream/.../stack.rs`) — now full parity with Svelte (`js_stack` supports direction/justify/wrap). Specimen item helper still hardcodes `px(8.0)`/`py(4.0)`/`rounded(4.0)` and `text_size(11.0)` — harness chrome, not the Stack under test.
 
 ## Notes
 

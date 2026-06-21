@@ -49,7 +49,7 @@ impl Stack {
         self
     }
     pub fn align(mut self, v: Alignment) -> Self {
-        self.spec.align = v;
+        self.spec.align = Some(v);
         self
     }
     pub fn justify(mut self, v: LayoutJustify) -> Self {
@@ -109,8 +109,8 @@ impl IntoElement for Stack {
             el = el.gap(resolve_px(theme, gap_token));
         }
 
-        // Cross-axis alignment
-        match spec.align {
+        // Cross-axis alignment (direction-aware default when unset)
+        match spec.resolved_align() {
             Alignment::Start => {
                 el = el.items_start();
             }

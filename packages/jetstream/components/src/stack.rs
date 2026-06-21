@@ -23,7 +23,9 @@ pub fn js_stack(spec: &StackSpec, theme: &JetstreamThemeProvider, children: Vec<
         el = el.gap(resolve_px(theme, gap_token));
     }
 
-    match spec.align {
+    // Cross-axis alignment (direction-aware default when unset:
+    // column → stretch, row → center, per Svelte authority).
+    match spec.resolved_align() {
         Alignment::Start => { el = el.items_start(); }
         Alignment::Center => { el = el.items_center(); }
         Alignment::End => { el = el.items_end(); }
@@ -96,6 +98,61 @@ mod tests {
         assert!(
             pos(&tree, "B").y > pos(&tree, "A").y,
             "column should place B below A"
+        );
+    }
+
+    #[test]
+    fn gap_separates_children_by_resolved_space() {
+        // Md column gap resolves from the stack-gap token; consecutive
+        // children must be separated by more than zero on the main axis.
+        let el = js_stack(
+            &StackSpec::new().with_gap(PaddingScale::Md),
+            &theme(),
+            vec![ui_element::label("A"), ui_element::label("B")],
+        );
+        let tree = probe(&el, 300.0, 200.0);
+        let a = pos(&tree, "A");
+        let b = pos(&tree, "B");
+        assert!(
+            b.y >= a.y + a.h,
+            "B must start at or below A's bottom edge (gap applied)"
+        );
+        assert!(b.y - (a.y + a.h) > 0.0, "a non-zero gap must separate children");
+    }
+
+    #[test]
+    fn row_align_default_centers_children_on_cross_axis() {
+        // Row with no explicit align must resolve to Center (Svelte authority),
+        // so a short child sits vertically centred in a tall container, not at top.
+        let el = js_stack(
+            &StackSpec::new().with_direction(StackDirection::Row),
+            &theme(),
+            vec![ui_element::label("A")],
+        );
+        let tree = probe(&el, 300.0, 200.0);
+        let a = pos(&tree, "A");
+        let child_center = a.y + a.h / 2.0;
+        assert!(
+            child_center > a.h,
+            "default row align should centre the child, not pin it to the top \
+             (center={child_center}, child_h={})",
+            a.h
+        );
+    }
+
+    #[test]
+    fn column_align_default_stretches() {
+        // Column with no explicit align resolves to Stretch — children fill
+        // the cross axis. The label should be wider than its intrinsic text.
+        assert_eq!(
+            StackSpec::new().resolved_align(),
+            poodle_specs::Alignment::Stretch
+        );
+        assert_eq!(
+            StackSpec::new()
+                .with_direction(StackDirection::Row)
+                .resolved_align(),
+            poodle_specs::Alignment::Center
         );
     }
 }

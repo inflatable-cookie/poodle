@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::stack::js_stack;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{Alignment, ControlSize, PaddingScale, StackSpec};
+use poodle_specs::{Alignment, ControlSize, LayoutJustify, PaddingScale, StackDirection, StackSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -25,6 +25,28 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
         .child(group("Center aligned", secondary,
             js_stack(&StackSpec::new().with_align(Alignment::Center), theme, vec![item("Centered"), item("Items")])
+        ))
+        .child(group("Row direction", secondary,
+            js_stack(&StackSpec::new().with_direction(StackDirection::Row), theme,
+                vec![item("Left"), item("Middle"), item("Right")])
+        ))
+        .child(group("Row justify=between", secondary,
+            js_stack(
+                &StackSpec::new()
+                    .with_direction(StackDirection::Row)
+                    .with_justify(LayoutJustify::SpaceBetween),
+                theme,
+                vec![item("Start"), item("End")],
+            )
+        ))
+        .child(group("Row wrapping", secondary,
+            js_stack(
+                &StackSpec::new()
+                    .with_direction(StackDirection::Row)
+                    .with_wrap(true),
+                theme,
+                vec![item("One"), item("Two"), item("Three"), item("Four"), item("Five"), item("Six")],
+            )
         ))
 }
 

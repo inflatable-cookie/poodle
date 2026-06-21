@@ -20,7 +20,9 @@ pub enum LayoutJustify {
 pub struct StackSpec {
     pub direction: StackDirection,
     pub gap: PaddingScale,
-    pub align: Alignment,
+    /// Cross-axis alignment. `None` resolves to a direction-aware default
+    /// (`Column` → `Stretch`, `Row` → `Center`) per Svelte authority.
+    pub align: Option<Alignment>,
     pub justify: Option<LayoutJustify>,
     pub wrap: bool,
     pub padding: PaddingScale,
@@ -33,7 +35,7 @@ impl Default for StackSpec {
         Self {
             direction: StackDirection::Column,
             gap: PaddingScale::Md,
-            align: Alignment::Stretch,
+            align: None,
             justify: None,
             wrap: false,
             padding: PaddingScale::None,
@@ -57,7 +59,7 @@ impl StackSpec {
         self
     }
     pub fn with_align(mut self, align: Alignment) -> Self {
-        self.align = align;
+        self.align = Some(align);
         self
     }
     pub fn with_justify(mut self, justify: LayoutJustify) -> Self {
@@ -86,6 +88,15 @@ impl StackSpec {
             StackDirection::Column => self.gap.stack_gap(),
             StackDirection::Row => self.gap.inline_gap(),
         }
+    }
+
+    /// Cross-axis alignment with the direction-aware default applied when
+    /// `align` is unset (Svelte: `column` → `stretch`, `row` → `center`).
+    pub fn resolved_align(&self) -> Alignment {
+        self.align.unwrap_or(match self.direction {
+            StackDirection::Column => Alignment::Stretch,
+            StackDirection::Row => Alignment::Center,
+        })
     }
 
     pub fn resolved_padding(&self) -> Inset {
