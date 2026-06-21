@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=2 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 43: Jetstream rebuilt to match GPUI — composes js_dialog (role=AlertDialog, width=Sm) +
+     js_buttons (ghost cancel / primary tone-driven confirm: Danger→Danger, Warning→Default);
+     js_alert_dialog_working entry (label swap + buttons disabled + dismissal gated); item-detail
+     row. Additive AlertDialogSpec.item_label/item_value (+with_item_detail) — GPUI re-verified.
+     3 probe tests; specs 61, jet 156, gpui clean. Click/dismiss = preview-loop. -->
 <!-- pass 19: GPUI rebuilt — was a hand-rolled card with hsla/px literals; now composes
      the real Dialog (role=AlertDialog, width=Sm) + two composed Buttons (ghost cancel /
      primary confirm). Tone-driven confirm (danger→Danger), working state (label swap +

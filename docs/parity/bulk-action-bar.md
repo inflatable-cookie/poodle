@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 43: Jetstream rebuilt to match GPUI — ghost js_icon_buttons (toned_icon_button helper
+     for danger/warning), select-all (check-check) + clear (x), count "{N} selected" + "of {M}",
+     accent fill color-mix(panel 93%, text-primary), per-action + bar-wide disabled gating
+     (actions_disabled/is_unavailable + state.opacity.disabled), resolved_icon fallback
+     (trash-2/circle). 3 probe tests; jet 156. Click wiring = preview-loop. -->
 <!-- pass 21: GPUI rebuilt — actions now composed ghost IconButtons (danger tone for
      destructive), select-all + the missing clear-"×" control added (ghost IconButtons),
      total text "of {N}". Additive spec fields: BulkAction.icon (+resolved_icon fallback

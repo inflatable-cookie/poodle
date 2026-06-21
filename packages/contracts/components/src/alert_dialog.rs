@@ -13,6 +13,13 @@ pub struct AlertDialogSpec {
     pub open: Option<bool>,
     pub title: String,
     pub description: Option<String>,
+    /// Optional highlighted detail-item label rendered ahead of the body
+    /// content (contract §2/§8 `itemLabel`). Renders only when both
+    /// `item_label` and `item_value` are present.
+    pub item_label: Option<String>,
+    /// Optional highlighted detail-item value paired with `item_label`
+    /// (contract §2/§8 `itemValue`).
+    pub item_value: Option<String>,
     pub tone: AlertDialogTone,
     pub confirm_label: String,
     pub cancel_label: String,
@@ -28,6 +35,8 @@ impl Default for AlertDialogSpec {
             open: None,
             title: String::new(),
             description: None,
+            item_label: None,
+            item_value: None,
             tone: AlertDialogTone::default(),
             confirm_label: "Confirm".to_string(),
             cancel_label: "Cancel".to_string(),
@@ -74,6 +83,18 @@ impl AlertDialogSpec {
 
     pub fn with_aria_label(mut self, label: impl Into<String>) -> Self {
         self.aria_label = Some(label.into());
+        self
+    }
+
+    /// Highlighted detail-item row (`itemLabel`/`itemValue`) rendered ahead of
+    /// the body content (contract §2/§8). Both halves are required to render.
+    pub fn with_item_detail(
+        mut self,
+        label: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Self {
+        self.item_label = Some(label.into());
+        self.item_value = Some(value.into());
         self
     }
 

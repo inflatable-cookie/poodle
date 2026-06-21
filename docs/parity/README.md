@@ -113,14 +113,14 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 |---|---|---|---|---|
 | accordion | fixed | 6 | 8 | gap |
 | action-discovery-panel | fixed | 6 | 9 | gap |
-| alert-dialog | fixed | 2 | 10 | gap |
+| alert-dialog | fixed | 2 | 2 | gap |
 | app-header | fixed | 2 | 2 | gap |
 | audio-player | ok | 2 | 2 | gap |
 | avatar | ok | 4 | 3 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 2 | 3 | gap |
 | breadcrumbs | fixed | 5 | 7 | gap |
-| bulk-action-bar | fixed | 2 | 9 | gap |
+| bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 4 | 7 | gap |
 | calendar | fixed | 3 | 3 | gap |
 | callout | fixed | 7 | 9 | gap |
