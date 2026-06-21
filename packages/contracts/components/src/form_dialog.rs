@@ -1,4 +1,4 @@
-use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::{ControlDensity, ControlSize, DialogWidth, SemanticControlSizeRole};
 
 /// FormDialog — dialog wrapping a form with submit/cancel actions.
 ///
@@ -18,6 +18,10 @@ pub struct FormDialogSpec {
     pub error: Option<String>,
     pub success: Option<String>,
     pub aria_label: Option<String>,
+    /// Custom dialog surface width. Forwarded to the composed Dialog as a
+    /// `DialogWidth` preset (contract §3/§8 custom width). `None` uses the
+    /// Dialog default (Md = 34rem).
+    pub width: Option<DialogWidth>,
     /// Number of FormLayout columns (ignored when bare is true).
     pub columns: u32,
     /// When true, skip the FormLayout wrapper and suppress default
@@ -44,6 +48,7 @@ impl Default for FormDialogSpec {
             error: None,
             success: None,
             aria_label: None,
+            width: None,
             columns: 6,
             is_bare: false,
             show_default_actions: true,
@@ -100,6 +105,10 @@ impl FormDialogSpec {
     }
     pub fn with_aria_label(mut self, v: impl Into<String>) -> Self {
         self.aria_label = Some(v.into());
+        self
+    }
+    pub fn with_width(mut self, v: DialogWidth) -> Self {
+        self.width = Some(v);
         self
     }
     pub fn with_columns(mut self, v: u32) -> Self {

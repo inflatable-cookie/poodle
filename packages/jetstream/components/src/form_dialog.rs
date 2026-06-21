@@ -3,29 +3,34 @@
 //! Contract: `docs/contracts/components/form-dialog.md`
 //! Reference: `packages/gpui/components/src/composites/form_dialog.rs`
 //!
-//! Composes js_dialog + js_form_layout. Provides default submit/cancel actions
-//! or accepts a custom actions slot. ALL sizing from tokens.
+//! Composes `js_dialog` (shell: backdrop + panel + header + close + separator),
+//! `js_form_layout` (body: fields + error/success callouts), and `js_button` /
+//! `js_form_actions` (footer: default submit/cancel row) or a caller-owned custom
+//! actions slot. ALL sizing/colors resolve from tokens.
 
-use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{FormDialogSpec, FormLayoutSpec};
-
-use crate::form_layout::js_form_layout;
-use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, DialogSpec, FormActionAlign, FormActionsSpec, FormDialogSpec,
+    FormLayoutSpec,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+
+use crate::button::js_button;
+use crate::dialog::js_dialog;
+use crate::form_actions::js_form_actions;
+use crate::form_layout::js_form_layout;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::resolve_color;
 
 /// Build a FormDialog element from a FormDialogSpec with field children and optional
 /// custom actions override.
 ///
 /// Contract anatomy:
 /// ```text
-/// [Dialog]  backdrop + panel
-///   ├── [Header]   title + optional subtitle
+/// [Dialog]  backdrop + panel (composed via js_dialog)
+///   ├── [Header]   title + optional subtitle/description + close button
 ///   ├── [Body]     FormLayout (or bare content) + optional error/success callouts
-///   └── [Actions]  custom slot OR default submit/cancel row
+///   └── [Actions]  custom slot OR default submit/cancel row (js_button)
 /// ```
 pub fn js_form_dialog(
     spec: &FormDialogSpec,
@@ -35,31 +40,23 @@ pub fn js_form_dialog(
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let space_x = rem_to_px(panel_space_x_rem(spec.density));
-    let space_y = rem_to_px(panel_space_y_rem(spec.density));
+    let section_gap = rem_to_px(size_font_rem(effective_size));
 
-    let accent: Color = resolve_color(theme, "color.accent.base").into();
-    let panel_bg: Color = resolve_color(theme, "color.background.panel").into();
-    let text_primary = resolve_color(theme, "color.text.primary");
     let text_secondary = resolve_color(theme, "color.text.secondary");
-    let border = resolve_color(theme, "color.border.default");
-    let fill = resolve_color(theme, "color.background.elevated");
-    let radius = resolve_radius(theme, "radius.surface");
-    let backdrop: Color = resolve_color(theme, "color.background.overlay").into();
 
-    let title_gap = rem_to_px(0.5);
-    let section_gap = rem_to_px(1.0);
-    let actions_gap = resolve_px(theme, "space.inline.sm");
-
-    // ── Body ──
+    // ── Body ──────────────────────────────────────────────────────────────────
+    // Subtitle (when present) is rendered inline at the top of the body; the
+    // Dialog `description` slot is then suppressed to avoid a duplicate
+    // announcement (contract §9). When no subtitle, the description flows to the
+    // Dialog header.
     let body: JsEl = if spec.is_bare {
-        // Bare mode: children rendered directly
+        // Bare mode: children rendered directly, no FormLayout wrapper.
         let mut col = ui_element::div().flex_col().gap(section_gap);
         if let Some(ref subtitle) = spec.subtitle {
             col = col.child(
                 ui_element::label(subtitle)
                     .text_size(font_size)
-                    .text_color(text_secondary)
+                    .text_color(text_secondary),
             );
         }
         for child in children {
@@ -74,120 +71,220 @@ pub fn js_form_dialog(
             description: None,
             ..FormLayoutSpec::default()
         };
-        let mut wrapper = ui_element::div().flex_col().gap(title_gap);
+        let form = js_form_layout(&layout_spec, theme, children, None);
         if let Some(ref subtitle) = spec.subtitle {
-            wrapper = wrapper.child(
-                ui_element::label(subtitle)
-                    .text_size(font_size)
-                    .text_color(text_secondary)
-            );
+            ui_element::div()
+                .flex_col()
+                .gap(section_gap)
+                .child(
+                    ui_element::label(subtitle)
+                        .text_size(font_size)
+                        .text_color(text_secondary),
+                )
+                .child(form)
+        } else {
+            form
         }
-        wrapper = wrapper.child(js_form_layout(&layout_spec, theme, children, None));
-        wrapper
     };
 
-    // ── Actions ──
+    // ── Actions ───────────────────────────────────────────────────────────────
+    // Custom slot replaces the default row entirely; otherwise the default
+    // ghost-Cancel + primary-Submit pair is composed from `js_button` and laid
+    // out by `js_form_actions` with top separation removed so the row sits flush
+    // on the Dialog footer rail (contract §7 nested-FormActions padding-top: 0).
     let actions: Option<JsEl> = if let Some(custom) = custom_actions {
         Some(ui_element::div().w_full().child(custom))
     } else if spec.show_default_actions {
         let submit_disabled = spec.is_submitting || spec.is_disabled;
-        let control_radius = resolve_radius(theme, "radius.control");
-        let btn_px = rem_to_px(0.75);
-        let btn_py = rem_to_px(0.375);
 
-        // Cancel
-        let cancel = ui_element::button(&spec.cancel_label)
-            .text_size(font_size)
-            .text_color(text_primary)
-            .pl(btn_px).pr(btn_px).pt(btn_py).pb(btn_py)
-            .rounded(control_radius)
-            .bg(Color::TRANSPARENT)
-            .cursor_pointer();
+        // Cancel — ghost Button, disabled during submitting (Svelte parity).
+        let cancel = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label(spec.cancel_label.clone())
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density)
+                .with_disabled(spec.is_submitting),
+            theme,
+        );
 
-        // Submit
-        let submit_bg = if submit_disabled {
-            accent.mix(panel_bg, 0.5)
-        } else {
-            accent
-        };
+        // Submit — primary Button. Label flips to "Submitting…" and the button
+        // is disabled while submitting or explicitly disabled.
         let submit_label = if spec.is_submitting {
             "Submitting\u{2026}".to_string()
         } else {
             spec.submit_label.clone()
         };
-        let mut submit_btn = ui_element::button(&submit_label)
-            .text_size(font_size)
-            .text_color(Color::WHITE)
-            .bg(submit_bg)
-            .pl(btn_px).pr(btn_px).pt(btn_py).pb(btn_py)
-            .rounded(control_radius);
-        if !submit_disabled {
-            submit_btn = submit_btn.cursor_pointer();
-        } else {
-            let opacity = resolve_opacity(theme, "state.opacity.disabled");
-            submit_btn = submit_btn.opacity(opacity);
-        }
+        let submit = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_label(submit_label)
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density)
+                .with_disabled(submit_disabled),
+            theme,
+        );
 
-        Some(
-            ui_element::div()
-                .flex_row()
-                .justify_end()
-                .gap(actions_gap)
-                .child(cancel)
-                .child(submit_btn)
-        )
+        let row_spec = FormActionsSpec::new()
+            .with_align(FormActionAlign::End)
+            .with_density(spec.density)
+            // Sit flush on the Dialog footer rail; the Dialog draws the divider.
+            .with_top_separation(false);
+        Some(js_form_actions(&row_spec, theme, vec![cancel, submit]))
     } else {
         None
     };
 
-    // ── Panel ──
-    let mut panel = ui_element::div()
-        .bg(fill)
-        .border(1.0).border_color(border)
-        .rounded(radius)
-        .pl(space_x).pr(space_x).pt(space_y).pb(space_y)
-        .flex_col().gap(section_gap)
-        .min_w(rem_to_px(25.0))
-        .shadow_lg();
+    // ── Dialog shell ────────────────────────────────────────────────────────────
+    // Compose js_dialog for the surface, backdrop, header (title + description +
+    // close), and the action separator. Submitting blocks Escape/backdrop dismiss
+    // (contract §6); dismiss wiring itself lives in the host preview loop.
+    let mut dialog_spec = DialogSpec::new()
+        .with_default_open(true)
+        .with_show_close_button(true)
+        .with_size(spec.size)
+        .with_size_role(spec.size_role)
+        .with_density(spec.density)
+        .with_dismiss_on_escape(!spec.is_submitting)
+        .with_dismiss_on_backdrop(!spec.is_submitting);
 
-    // Title
     if !spec.title.is_empty() {
-        panel = panel.child(
-            ui_element::label(&spec.title)
-                .text_color(text_primary)
-                .text_size(rem_to_px(size_font_rem(effective_size) + 0.125))
-                .text_weight(600)
-        );
+        dialog_spec = dialog_spec.with_title(spec.title.clone());
     }
-
-    // Description: subtitle for non-bare (bare mode renders it inside body already)
-    if !spec.is_bare {
-        if let Some(desc_text) = spec.subtitle.as_deref().or(spec.description.as_deref()) {
-            panel = panel.child(
-                ui_element::label(desc_text)
-                    .text_color(text_secondary)
-                    .text_size(font_size)
-            );
+    // Subtitle takes precedence over description; when a subtitle is rendered
+    // inline in the body, suppress the Dialog description to avoid duplication.
+    if spec.subtitle.is_none() {
+        if let Some(ref description) = spec.description {
+            dialog_spec = dialog_spec.with_description(description.clone());
         }
     }
-
-    panel = panel.child(body);
-
-    if let Some(actions_el) = actions {
-        // Thin separator
-        panel = panel.child(
-            ui_element::div()
-                .h(1.0)
-                .bg(border)
-        );
-        panel = panel.child(actions_el);
+    if let Some(width) = spec.width {
+        dialog_spec = dialog_spec.with_width(width);
+    }
+    if let Some(ref aria) = spec.aria_label {
+        dialog_spec = dialog_spec.with_aria_label(aria.clone());
     }
 
-    // Backdrop + centered panel
-    ui_element::div()
-        .bg(backdrop)
-        .overlay()
-        .items_center()
-        .justify_center()
-        .child(panel)
+    js_dialog(&dialog_spec, theme, vec![body], actions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::DialogWidth;
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn field_stub() -> Vec<JsEl> {
+        vec![ui_element::label("Email")]
+    }
+
+    #[test]
+    fn renders_title_body_and_default_actions() {
+        let th = theme();
+        let spec = FormDialogSpec::new("Add new user")
+            .with_submit_label("Add user")
+            .with_cancel_label("Cancel");
+        let el = js_form_dialog(&spec, &th, field_stub(), None);
+        let tree = probe(&el, 800.0, 600.0);
+
+        // Title from the composed Dialog header.
+        assert!(tree.has_text("Add new user"), "title missing: {:?}", tree.texts());
+        // Body field slot made it through.
+        assert!(tree.has_text("Email"), "body field slot missing: {:?}", tree.texts());
+        // Default footer actions: ghost Cancel + primary Submit.
+        assert!(tree.has_text("Cancel"), "cancel action missing: {:?}", tree.texts());
+        assert!(tree.has_text("Add user"), "submit action missing: {:?}", tree.texts());
+        assert!(tree.count_kind("Button") >= 2, "expected at least 2 action buttons");
+    }
+
+    #[test]
+    fn submitting_flips_submit_label() {
+        let th = theme();
+        let spec = FormDialogSpec::new("Create account")
+            .with_submit_label("Create")
+            .with_submitting(true);
+        let el = js_form_dialog(&spec, &th, field_stub(), None);
+        let tree = probe(&el, 800.0, 600.0);
+        assert!(
+            tree.has_text("Submitting\u{2026}"),
+            "submit label should flip to submitting state: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn error_message_surfaces_in_body() {
+        let th = theme();
+        let spec = FormDialogSpec::new("Create account")
+            .with_error("A user with this email already exists.");
+        let el = js_form_dialog(&spec, &th, field_stub(), None);
+        let tree = probe(&el, 800.0, 600.0);
+        assert!(
+            tree.has_text("A user with this email already exists."),
+            "error callout missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn no_default_actions_uses_custom_slot() {
+        let th = theme();
+        let spec = FormDialogSpec::new("Edit workspace settings")
+            .with_subtitle("Update shared defaults for this workspace.")
+            .with_show_default_actions(false);
+        let custom = ui_element::label("Custom footer");
+        let el = js_form_dialog(&spec, &th, field_stub(), Some(custom));
+        let tree = probe(&el, 800.0, 600.0);
+        // Subtitle rendered, custom footer present, default Submit absent.
+        assert!(
+            tree.has_text("Update shared defaults for this workspace."),
+            "subtitle missing: {:?}",
+            tree.texts()
+        );
+        assert!(tree.has_text("Custom footer"), "custom actions missing: {:?}", tree.texts());
+        assert!(!tree.has_text("Submit"), "default submit should be suppressed");
+    }
+
+    #[test]
+    fn custom_width_widens_surface() {
+        let th = theme();
+        let narrow = js_form_dialog(&FormDialogSpec::new("Narrow"), &th, field_stub(), None);
+        let wide = js_form_dialog(
+            &FormDialogSpec::new("Wide").with_width(DialogWidth::Xl),
+            &th,
+            field_stub(),
+            None,
+        );
+        // The dialog panel is the second node (root = backdrop overlay).
+        let narrow_tree = probe(&narrow, 1200.0, 800.0);
+        let wide_tree = probe(&wide, 1200.0, 800.0);
+        let narrow_panel = &narrow_tree.nodes[1];
+        let wide_panel = &wide_tree.nodes[1];
+        assert!(
+            wide_panel.w > narrow_panel.w,
+            "Xl width ({}) should exceed default width ({})",
+            wide_panel.w,
+            narrow_panel.w
+        );
+    }
+
+    #[test]
+    fn bare_mode_skips_form_layout_wrapper() {
+        let th = theme();
+        let spec = FormDialogSpec::new("Bare").with_bare(true);
+        let el = js_form_dialog(&spec, &th, field_stub(), None);
+        let tree = probe(&el, 800.0, 600.0);
+        // Body field slot still rendered directly.
+        assert!(tree.has_text("Email"), "bare body content missing: {:?}", tree.texts());
+        // bare auto-suppresses default actions only when show_default_actions
+        // is also cleared by the host; default true still renders the row here,
+        // so just assert the dialog built without panicking and shows the title.
+        assert!(tree.has_text("Bare"), "title missing in bare mode: {:?}", tree.texts());
+    }
 }

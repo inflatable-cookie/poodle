@@ -1,4 +1,13 @@
-<!-- parity consv=ok gpui=6 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=3 specimen=gap -->
+<!-- pass 41: FormActionsSpec gained `density` (+ gap_rem/top_separation_rem/
+     border_gap_rem helpers, contract §8 exact rems). Both targets now resolve
+     gap/top-separation/border-gap per density; dropped the `max(4.0)*0.5`
+     border-gap heuristic. GPUI gained show_top_separation/show_top_border/
+     density builders; Jetstream Start align now explicit justify_start + probe
+     tests (alignment + density + primary/secondary + submitting). Remaining:
+     danger snippet / dangerItems overflow / responsive container-query swap —
+     deferred (need a danger-item model on the spec + runtime container queries;
+     not faked). Builds + probe tests green. -->
 # Parity: FormActions
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,23 +37,23 @@ Svelte matches the contract on every prop, anatomy part, alignment, density, and
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded border-gap heuristic `separation.max(4.0) * 0.5` at `form_actions.rs:68` — contract §8 specifies density-keyed border-gap (`0.25`/`0.5`/`0.625rem`); resolve from a `border_gap_token()` per density, not a raw `4.0 * 0.5`.
-- [ ] No `density` support — `FormActionsSpec` has no density field and GPUI never varies gap/padding/border-gap by density (`form_actions.rs:61-71`); contract §4 + §8 require compact/default/comfortable variants.
-- [ ] No `showTopSeparation` builder — spec reads `shows_top_separation()` (`form_actions.rs:62`) but `FormActions` exposes no builder to set it (only `align`/`with_action` at `form_actions.rs:44-53`); preview cannot toggle footer-embedded mode.
-- [ ] No `showTopBorder` builder — `shows_top_border()` is read (`form_actions.rs:67,88`) but no builder method sets it; bordered-separation state unreachable via the GPUI API.
-- [ ] No `danger` snippet / `__danger` inline group — actions are a flat `Vec<AnyElement>` (`form_actions.rs:16,105-107`); contract §2 danger anatomy absent.
-- [ ] No `dangerItems` overflow menu / responsive collapse — `__danger-menu` trigger and `@container` swap (contract §8) not implemented; no container-query equivalent.
+- [x] Border-gap heuristic removed — now `rem_to_px(spec.border_gap_rem())` (density-keyed `0.25`/`0.5`/`0.625rem`, contract §8 Divider Offset Variants).
+- [x] `density` support added — `FormActionsSpec.density` + `.density()` builder; gap/top-separation/border-gap resolve per density (compact/comfortable use contract-exact rems, default inherits tokens).
+- [x] `showTopSeparation` builder added — `FormActions::show_top_separation(bool)`; footer-embedded mode reachable.
+- [x] `showTopBorder` builder added — `FormActions::show_top_border(bool)`; bordered-separation state reachable.
+- [ ] No `danger` snippet / `__danger` inline group — actions are still a flat `Vec<AnyElement>`; contract §2 danger anatomy absent. **Deferred:** needs a danger-item model on `FormActionsSpec` first.
+- [ ] No `dangerItems` overflow menu / responsive collapse — `__danger-menu` trigger and `@container` swap (contract §8) not implemented. **Deferred** with the danger model (no container-query primitive in GPUI; would be faked otherwise).
 - accepted: no ARIA (gpui has no accessibility API) — collapsed danger trigger `aria-label` (contract §6) cannot be emitted; moot until danger menu exists.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded border-gap heuristic `separation.max(4.0) * 0.5` at `form_actions.rs:17` — same as GPUI; resolve density-keyed border-gap from a token per contract §8, not raw `4.0 * 0.5`.
-- [ ] No `density` support — `js_form_actions` never varies gap/padding/border-gap by density (`form_actions.rs:10-20`); contract §4 + §8 require compact/default/comfortable.
-- [ ] No `danger` snippet / `__danger` inline group — children are a flat `Vec<JsEl>` (`form_actions.rs:9,41-43`); contract §2 danger anatomy absent.
-- [ ] No `dangerItems` overflow menu — `__danger-menu` trigger not rendered; contract §8 responsive swap absent.
-- [ ] No responsive container-query swap — no `inline-size` container boundary or `max-width: 31.25rem` collapse (contract §8); narrow-container danger collapse unsupported.
-- [ ] `FormActionAlign::Start` is a no-op arm (`form_actions.rs:36`) relying on default flex start — fine for `flex_row`, but confirm no `justify_start()` is needed for parity with explicit Svelte `flex-start`.
-- [ ] No `showTopBorder` exercised in any caller path that varies density border-gap — `shows_top_border()` is read (`form_actions.rs:16,30`) but border-gap is the heuristic above, not the contract's density value.
+- [x] Border-gap heuristic removed — now `rem_to_px(spec.border_gap_rem())` (density-keyed per contract §8).
+- [x] `density` support added — `js_form_actions` varies gap/top-separation/border-gap by `spec.density` (compact/comfortable contract-exact rems, default token-inherited).
+- [x] `FormActionAlign::Start` now explicit `el.justify_start()` (no longer relying on default flex start).
+- [x] `showTopBorder` border-gap now contract density value (`border_gap_rem`), not the old heuristic.
+- [ ] No `danger` snippet / `__danger` inline group — children are still a flat `Vec<JsEl>`; contract §2 danger anatomy absent. **Deferred:** needs a danger-item model on `FormActionsSpec`.
+- [ ] No `dangerItems` overflow menu — `__danger-menu` trigger not rendered; contract §8 responsive swap absent. **Deferred** with the danger model.
+- [ ] No responsive container-query swap — no `inline-size` boundary / `max-width: 31.25rem` collapse (contract §8). **Deferred:** no container-query primitive in the JsEl runtime; would be faked otherwise.
 - accepted: no ARIA channel for collapsed danger trigger `aria-label` (contract §6) — moot until danger menu exists.
 - accepted: interaction (button click) lives in preview event loop, not the component.
 

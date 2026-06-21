@@ -10,7 +10,10 @@ use poodle_specs::{
     CodeInputSpec, ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState,
 };
 
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{
+    code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::theme_ext::{
     focus_ring_shadow, resolve_color, resolve_opacity, resolve_px, resolve_radius,
 };
@@ -89,6 +92,10 @@ impl CodeInput {
         self.spec.mask = v;
         self
     }
+    pub fn numbers_only(mut self, v: bool) -> Self {
+        self.spec.numbers_only = v;
+        self
+    }
     pub fn disabled(mut self, v: bool) -> Self {
         self.spec.is_disabled = v;
         self
@@ -147,35 +154,27 @@ impl IntoElement for CodeInput {
         // ── Resolve effective size ────────────────────────────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        // ── Slot dimensions based on size (from Svelte CSS) ───────
-        // Svelte: slots are square, each size = control-height for that size
-        // xs=1.5rem, sm=1.75rem, md=2.25rem, lg=2.75rem, xl=3.25rem
-        let slot_size = rem_to_px(control_height_rem(effective_size));
+        // ── Slot dimensions based on size (contract §7) ───────────
+        // Slots are square at every size: xs 1.5, sm 1.75, md 2.25, lg 2.75,
+        // xl 3.25rem (md matches control-height md).
+        let slot_size = rem_to_px(code_input_slot_size_rem(effective_size));
         let slot_width = slot_size;
         let slot_height = slot_size;
-        let font_size = match effective_size {
-            ControlSize::Xs => rem_to_px(0.8125),
-            ControlSize::Sm => rem_to_px(0.875),
-            ControlSize::Md => rem_to_px(1.0),
-            ControlSize::Lg => rem_to_px(1.125),
-            ControlSize::Xl => rem_to_px(1.25),
-        };
+        let font_size = rem_to_px(code_input_slot_font_rem(effective_size));
 
-        // ── Gap between slots (density-aware) ─────────────────────
-        // Svelte: compact→0.25rem, comfortable→space.inline.md; default interpolated at 0.375rem
+        // ── Gap between slots (density-aware, contract §7) ────────
+        // compact 0.25rem (space.inline.xs), default space.inline.sm,
+        // comfortable space.inline.md.
         let slot_gap = match spec.density {
-            ControlDensity::Compact => px(rem_to_px(0.25)),
-            ControlDensity::Default => px(rem_to_px(0.375)),
+            ControlDensity::Compact => resolve_px(theme, "space.inline.xs"),
+            ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
             ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
         };
 
         // ── Split gap: extra margin after middle digit for 6-digit codes ─
-        // compact→space.inline.sm(8px), default→space.inline.md(12px), comfortable→space.inline.lg(16px)
-        let split_extra_margin = match spec.density {
-            ControlDensity::Compact => resolve_px(theme, "space.inline.sm"),
-            ControlDensity::Default => resolve_px(theme, "space.inline.md"),
-            ControlDensity::Comfortable => resolve_px(theme, "space.inline.lg"),
-        };
+        // Contract §7 Slot — split-after: margin-right = space.inline.md (fixed,
+        // not density-scaled). Produces the 3+3 grouping.
+        let split_extra_margin = resolve_px(theme, "space.inline.md");
 
         // ── Token resolution ──────────────────────────────────────
         let border_color = resolve_color(theme, "color.border.default");
@@ -204,13 +203,8 @@ impl IntoElement for CodeInput {
         };
         let active_ring_color = if is_invalid { danger_color } else { focus_ring };
 
-        // ── Sanitize value (digits only, clamped to length) ───────
-        let current_value = spec.current_value();
-        let digits: Vec<char> = current_value
-            .chars()
-            .filter(|c| c.is_ascii_digit())
-            .take(spec.length)
-            .collect();
+        // ── Sanitize value (per numbers_only, clamped to length) ──
+        let digits: Vec<char> = spec.sanitized_chars();
 
         // ── Determine active slot index ───────────────────────────
         let active_idx = self
@@ -302,6 +296,7 @@ impl IntoElement for CodeInput {
         if !spec.is_disabled {
             let current_val = String::from_iter(digits.iter());
             let length = spec.length;
+            let numbers_only = spec.numbers_only;
             let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
                 self.on_change.map(|h| std::rc::Rc::from(h));
             let on_complete_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
@@ -326,7 +321,12 @@ impl IntoElement for CodeInput {
                         && !event.keystroke.modifiers.control
                     {
                         let ch = key.chars().next().unwrap();
-                        if ch.is_ascii_digit() && current_val.len() < length {
+                        let accepted = if numbers_only {
+                            ch.is_ascii_digit()
+                        } else {
+                            ch.is_ascii_alphanumeric()
+                        };
+                        if accepted && current_val.len() < length {
                             let new_val = format!("{}{}", current_val, ch);
                             if let Some(ref handler) = change_handler {
                                 handler(&new_val, window, cx);

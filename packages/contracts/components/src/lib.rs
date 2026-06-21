@@ -146,7 +146,9 @@ pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
 pub use banner::BannerSpec;
-pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
+pub use breadcrumbs::{
+    BreadcrumbItem, BreadcrumbsSpec, ELLIPSIS_VALUE as BREADCRUMBS_ELLIPSIS_VALUE,
+};
 pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
 pub use button::ButtonSpec;
 pub use calendar::{CalendarMode, CalendarSpec};

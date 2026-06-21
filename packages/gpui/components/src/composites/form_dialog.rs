@@ -6,7 +6,10 @@ use crate::composites::FormLayout;
 use crate::primitives::{Button, Dialog};
 use crate::theme_ext::{resolve_color, resolve_px};
 use gpui::*;
-use poodle_specs::{ButtonSpec, ButtonVariant};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DialogWidth, FormDialogSpec,
+    SemanticControlSizeRole,
+};
 use poodle_gpui::GpuiThemeProvider;
 
 pub struct FormDialog {
@@ -20,6 +23,12 @@ pub struct FormDialog {
     disabled: bool,
     error_message: Option<String>,
     success_message: Option<String>,
+    aria_label: Option<String>,
+    /// Custom surface width preset; forwarded to the composed Dialog.
+    width: Option<DialogWidth>,
+    size: ControlSize,
+    size_role: SemanticControlSizeRole,
+    density: ControlDensity,
     children: Vec<AnyElement>,
     /// When true, skip the FormLayout wrapper and render children
     /// directly. Used for custom body layouts.
@@ -53,6 +62,11 @@ impl FormDialog {
             disabled: false,
             error_message: None,
             success_message: None,
+            aria_label: None,
+            width: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
             children: Vec::new(),
             bare: false,
             columns: 6,
@@ -61,6 +75,34 @@ impl FormDialog {
             on_submit: None,
             on_cancel: None,
         }
+    }
+
+    /// Build a FormDialog from a `FormDialogSpec`, copying every prop the
+    /// spec carries (title, labels, submitting, error/success, aria_label,
+    /// width, columns, bare, size/density). Children and click handlers are
+    /// attached separately via the fluent builders.
+    pub fn from_spec(spec: &FormDialogSpec, theme: &GpuiThemeProvider) -> Self {
+        let mut this = Self::new(theme);
+        if !spec.title.is_empty() {
+            this.title = Some(spec.title.clone());
+        }
+        this.subtitle = spec.subtitle.clone();
+        this.description = spec.description.clone();
+        this.submit_label = spec.submit_label.clone();
+        this.cancel_label = spec.cancel_label.clone();
+        this.submitting = spec.is_submitting;
+        this.disabled = spec.is_disabled;
+        this.error_message = spec.error.clone();
+        this.success_message = spec.success.clone();
+        this.aria_label = spec.aria_label.clone();
+        this.width = spec.width;
+        this.size = spec.size;
+        this.size_role = spec.size_role;
+        this.density = spec.density;
+        this.bare = spec.is_bare;
+        this.columns = spec.columns;
+        this.show_default_actions = spec.show_default_actions;
+        this
     }
     pub fn title(mut self, v: impl Into<String>) -> Self {
         self.title = Some(v.into());
@@ -96,6 +138,22 @@ impl FormDialog {
     }
     pub fn success_message(mut self, v: impl Into<String>) -> Self {
         self.success_message = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.aria_label = Some(v.into());
+        self
+    }
+    pub fn width(mut self, v: DialogWidth) -> Self {
+        self.width = Some(v);
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.size = v;
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.density = v;
         self
     }
     pub fn bare(mut self, v: bool) -> Self {
@@ -151,14 +209,36 @@ impl IntoElement for FormDialog {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let body_size = resolve_px(theme, "typography.body.size");
 
-        // Compose with Dialog primitive — title/description handled by Dialog
-        let mut dialog = Dialog::new(theme).default_open(true);
+        // Compose with Dialog primitive — title/description handled by Dialog.
+        // Forward width / aria_label / size / density / submitting-dismiss.
+        let mut dialog = Dialog::new(theme)
+            .default_open(true)
+            .show_close_button(true)
+            .size(self.size)
+            .with_size_role(self.size_role)
+            .with_density(self.density)
+            // Submitting blocks Escape + backdrop dismiss (contract §6).
+            .dismiss_on_escape(!self.submitting)
+            .dismiss_on_backdrop(!self.submitting);
+
+        if let Some(ref width) = self.width {
+            dialog = dialog.width(*width);
+        }
+        if let Some(ref aria) = self.aria_label {
+            dialog = dialog.aria_label(aria.clone());
+        }
 
         if let Some(ref title) = self.title {
             dialog = dialog.title(title.clone());
         }
-        if let Some(ref description) = self.description {
-            dialog = dialog.description(description.clone());
+        // Subtitle takes precedence over description for the Dialog's
+        // description slot (contract §9). When a subtitle is shown inline
+        // in the body we suppress the Dialog description to avoid a
+        // duplicate announcement.
+        if self.subtitle.is_none() {
+            if let Some(ref description) = self.description {
+                dialog = dialog.description(description.clone());
+            }
         }
 
         // Body: either a bare vertical stack of children or the
@@ -180,7 +260,7 @@ impl IntoElement for FormDialog {
             }
             col.into_any_element()
         } else {
-            let mut form_layout = FormLayout::new(theme);
+            let mut form_layout = FormLayout::new(theme).columns(self.columns as usize);
             if let Some(ref error) = self.error_message {
                 form_layout = form_layout.error(error.clone());
             }
@@ -200,8 +280,6 @@ impl IntoElement for FormDialog {
             for child in self.children {
                 form_layout = form_layout.with_child(child);
             }
-            // Propagate columns to FormLayout if it exposes one.
-            let _ = self.columns;
             wrapper.child(form_layout).into_any_element()
         };
 

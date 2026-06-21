@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass 41: both targets — square slot ladder (code_input_slot_size_rem), slot font ladder (code_input_slot_font_rem), token-resolved density gap (xs→sm→md inline), fixed split-after (space.inline.md) on Jetstream, active slot uses accent.border, numbers_only spec flag drives alphanumeric on both. Remaining: real input / paste / autofill / slot-click caret + monospace font + caret are runtime/preview-loop gaps (accepted). -->
 # Parity: CodeInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -29,23 +30,25 @@ Svelte slot geometry and the default label disagree with the contract. Svelte is
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded rem-float font literals `rem_to_px(0.8125/0.875/1.0/1.125/1.25)` at `code_input.rs:157-161` and density gaps `px(rem_to_px(0.25/0.375))` at `code_input.rs:167-168` — resolve from typography/space tokens, not raw rem floats.
-- [ ] Slot sizing uses `control_height_rem` for both width and height (`code_input.rs:153-155`), so md = control-height square. Svelte md is fixed `2.25rem` square; verify control-height md == 2.25rem or the slots drift from Svelte at every size.
-- [ ] No real input / paste / autofill / one-time-code autocomplete (contract §5/§6) — only a focusable group with `on_key_down` digit handling (`code_input.rs:301-343`). Auto-advance + backspace-retreat are approximated via key events; clicking a slot to place caret is absent.
-- [ ] No slot-click-to-focus or in-place replacement (contract §5) — slots are non-interactive `div`s; `active_index` is preview-driven (`code_input.rs:124`), not click-driven.
-- [ ] Numbers-only is hardcoded — `digits` filters `is_ascii_digit()` (`code_input.rs:209-213`/`329`); spec has no `numbers_only`/alphanumeric path, so contract `numbersOnly={false}` (alphanumeric) is unsupported.
+- [x] FIXED Font + gap resolve from ladders/tokens — `code_input_slot_font_rem` for slot font; density gap now `space.inline.xs`/`sm`/`md` (compact/default/comfortable) and split-after = `space.inline.md` (both token-resolved), no raw rem-float density literals.
+- [x] FIXED Slot sizing uses the explicit square ladder `code_input_slot_size_rem` (xs 1.5 → xl 3.25rem; md 2.25rem matches Svelte) instead of `control_height_rem`, so width == height == contract value at every size.
+- [x] FIXED `numbers_only` spec flag added — `sanitized_chars()` filters digits when true, all chars when false; the key handler accepts alphanumeric in non-numbers-only mode. Contract `numbersOnly={false}` now supported.
+- accepted: No real input / paste / autofill / one-time-code autocomplete (contract §5/§6) — focusable group with `on_key_down` approximates auto-advance + backspace-retreat; paste/autofill/slot-click caret are runtime concerns (preview-loop).
+- accepted: No slot-click-to-focus / in-place replacement — `active_index` is preview-driven; caret placement is a runtime concern.
 - accepted: no ARIA (gpui has no accessibility API) — `role="group"`, `aria-label`, `aria-invalid`, `aria-disabled` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded literals: `border_width = rem_to_px(0.0625)` `code_input.rs:70`, font `* 1.5` magic multiplier `code_input.rs:69`, gap `* 0.5` heuristic `code_input.rs:71`, error `text_size(rem_to_px(0.75))` `code_input.rs:131`, error gap `rem_to_px(0.5)` `code_input.rs:136` — resolve from tokens, drop magic multipliers.
-- [ ] Slot width is an ad-hoc `slot_width_rem` table (xs `1.25`→xl `3.0`, lines 21-29) that matches **neither** Svelte (square, md `2.25`) nor the contract. Slots are non-square and undersized. **Fix: use Svelte's square per-size values.**
-- [ ] Slot height = `control_height + size_height_offset` (`code_input.rs:66-67`); combined with the separate width table this yields non-square slots unlike Svelte's square slots.
-- [ ] Font size is `size_font_rem × 1.5` (`code_input.rs:69`); contract slot font is `1rem` at md with a per-size table. The `×1.5` heuristic does not track the contract size ladder.
-- [ ] No 3+3 split-after gap for 6-digit codes (Svelte `--split-after` at index 2); all slots evenly spaced.
-- [ ] No real input / paste / autofill / autocomplete / slot-click — visual slot grid only (component header acknowledges runtime ownership, lines 42-43). Auto-advance/backspace/onComplete not present in the component.
-- [ ] No hint/label rendering — only the slot row and (on error) an error label (`code_input.rs:129-147`); contract composes a `Field` wrapper with label/hint. Active slot uses `color.accent.base` (`code_input.rs:103`) where Svelte uses `color.accent.border`.
-- accepted: no ARIA channel; interaction (typing, paste, focus movement) lives in preview event loop.
+- [x] FIXED Magic multipliers dropped — font from `code_input_slot_font_rem`, gap from the density token ladder (`space.inline.xs/sm/md`), error font from `typography.label.size`, error gap from `space.inline.sm`. `border_width = rem_to_px(0.0625)` is the contract-exact 1px border (kept).
+- [x] FIXED Slot width now uses the square ladder `code_input_slot_size_rem` (md 2.25rem), matching Svelte and the contract.
+- [x] FIXED Slot height uses the same square ladder (width == height), removing the `control_height + offset` non-square drift.
+- [x] FIXED Font size uses `code_input_slot_font_rem` (md 1rem) — the `×1.5` heuristic is gone.
+- [x] FIXED 3+3 split-after gap added — index 2 gets `mr(space.inline.md)` when `length == 6`.
+- [x] FIXED Active slot now uses `color.accent.border` (was `accent.base`), matching Svelte; only the invalid case overrides slot colors (Valid/Pending branches removed).
+- accepted: No real input / paste / autofill / autocomplete / slot-click — visual slot grid only; interaction (typing, paste, focus movement) lives in the preview event loop.
+- accepted: No hint/label rendering — the `Field` wrapper (label/hint) is a runtime composition concern; the component renders the slot row + error label.
+- accepted: no ARIA channel; interaction lives in preview event loop.
+- note (runtime gap): monospace font-family + text caret are engine gaps (Jetstream has no font-family/caret control) — cells, distributed value, and active-slot highlight render; the caret/monospace do not.
 
 ## Specimen parity
 
@@ -57,4 +60,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - `consv=fixed`: the stale slot geometry (now square `2.25rem` md + square per-size table), default label (`Authenticator code`), root-gap token, slot font-weight, 3+3 split-after, and validation-derived slot colors are all reconciled to Svelte. Remaining gpui/jetstream todos are code-side.
 - Both Rust targets render visual slot grids only; real-input ownership (paste, autofill, one-time-code, slot-click caret placement) is a documented runtime concern but means Tier-1 auto-advance/backspace/onComplete parity is only partially met (GPUI via key events, Jetstream not at all).
-- `numbersOnly={false}` (alphanumeric) is unsupported on both Rust targets — the spec lacks the flag and both hardcode digit filtering.
+- `numbersOnly={false}` (alphanumeric) is now supported on both Rust targets — `CodeInputSpec.numbers_only` (default true) drives `sanitized_chars()`; GPUI's key handler also accepts alphanumeric in that mode.

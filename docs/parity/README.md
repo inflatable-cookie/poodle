@@ -119,7 +119,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | avatar | ok | 4 | 3 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 2 | 3 | gap |
-| breadcrumbs | fixed | 5 | 7 | gap |
+| breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 4 | 7 | gap |
 | calendar | fixed | 3 | 3 | gap |
@@ -129,7 +129,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | card-toggle-group | fixed | 2 | 7 | gap |
 | checkbox | ok | 4 | 5 | gap |
 | code | fixed | 2 | 2 | gap |
-| code-input | fixed | 5 | 7 | gap |
+| code-input | fixed | 0 | 0 | gap |
 | collapse-toggle | fixed | 4 | 6 | gap |
 | collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
@@ -162,8 +162,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | field-set | fixed | 6 | 6 | gap |
 | file-upload | ok | 0 | 0 | ok |
 | filter-toolbar | fixed | 0 | 0 | gap |
-| form-actions | ok | 6 | 7 | gap |
-| form-dialog | ok | 3 | 9 | gap |
+| form-actions | ok | 2 | 3 | gap |
+| form-dialog | ok | 0 | 1 | gap |
 | form-layout | fixed | 2 | 2 | gap |
 | form-shell | gap | 0 | 0 | gap |
 | grid | fixed | 4 | 4 | gap |

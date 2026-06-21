@@ -16,6 +16,10 @@ pub struct CodeInputSpec {
     pub hint: Option<String>,
     pub error: Option<String>,
     pub mask: bool,
+    /// When true (default), the value sanitizes to digits only. Set false to
+    /// allow arbitrary alphanumeric characters. Mirrors the Svelte
+    /// `numbersOnly` prop.
+    pub numbers_only: bool,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub autocomplete: String,
@@ -36,6 +40,7 @@ impl Default for CodeInputSpec {
             hint: None,
             error: None,
             mask: false,
+            numbers_only: true,
             is_disabled: false,
             aria_label: None,
             autocomplete: String::from("one-time-code"),
@@ -92,6 +97,22 @@ impl CodeInputSpec {
         self
     }
 
+    pub fn with_numbers_only(mut self, numbers_only: bool) -> Self {
+        self.numbers_only = numbers_only;
+        self
+    }
+
+    /// The current value sanitized per `numbers_only` and clamped to `length`.
+    /// When `numbers_only` is true, only ASCII digits are kept; otherwise all
+    /// characters are retained. This is the slot-distribution source of truth.
+    pub fn sanitized_chars(&self) -> Vec<char> {
+        self.current_value()
+            .chars()
+            .filter(|c| !self.numbers_only || c.is_ascii_digit())
+            .take(self.length)
+            .collect()
+    }
+
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
         self
@@ -134,14 +155,9 @@ impl CodeInputSpec {
         }
     }
 
-    /// Whether the code has been fully entered (all digits filled).
+    /// Whether the code has been fully entered (all slots filled).
     pub fn is_complete(&self) -> bool {
-        let sanitized_len = self
-            .current_value()
-            .chars()
-            .filter(|c| c.is_ascii_digit())
-            .count();
-        sanitized_len >= self.length
+        self.sanitized_chars().len() >= self.length
     }
 
     /// The effective accessible label for the input group.
@@ -149,13 +165,9 @@ impl CodeInputSpec {
         self.aria_label.as_deref().unwrap_or(self.label.as_str())
     }
 
-    /// Count of filled digit positions.
+    /// Count of filled slot positions.
     pub fn filled_count(&self) -> usize {
-        self.current_value()
-            .chars()
-            .filter(|c| c.is_ascii_digit())
-            .count()
-            .min(self.length)
+        self.sanitized_chars().len()
     }
 
     // ── Token methods ────────────────────────────────────────

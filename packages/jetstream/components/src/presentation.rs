@@ -264,6 +264,79 @@ pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── Breadcrumbs size / density scales ────────────────────────────
+//
+// Contract §8 size + density tables (mirrors the Svelte
+// `.poodle-breadcrumbs[data-size]` / `[data-density]` overrides). The list/item
+// gap is size-driven; density overrides it when not `default`. Font-size is a
+// breadcrumbs-specific ladder where md == `typography.body.size` (0.875rem).
+// Mirrors `poodle_gpui::presentation` exactly.
+
+/// List/item gap in rem per size. Contract §8: xs 0.25, sm 0.375, md
+/// `space.inline.sm` (0.5), lg 0.625, xl 0.75.
+pub fn breadcrumbs_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// List/item gap override in rem per density, or `None` for `default` (use the
+/// size gap). Contract §8: compact 0.25, comfortable 0.75.
+pub fn breadcrumbs_density_gap_rem(density: ControlDensity) -> Option<f32> {
+    match density {
+        ControlDensity::Compact => Some(0.25),
+        ControlDensity::Default => None,
+        ControlDensity::Comfortable => Some(0.75),
+    }
+}
+
+/// List font-size in rem per size. Contract §8: xs 0.6875, sm 0.78125, md
+/// `typography.body.size` (0.875), lg 1, xl 1.125.
+pub fn breadcrumbs_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.78125,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 1.0,
+        ControlSize::Xl => 1.125,
+    }
+}
+
+// ── CodeInput size / density scales ──────────────────────────────
+//
+// Contract §7 size + density tables (mirrors the Svelte
+// `.poodle-code-input[data-size]` / `[data-density]` overrides). Slots are
+// square at every size; the gap is density-driven. Mirrors
+// `poodle_gpui::presentation` exactly.
+
+/// Square slot width/height in rem per size. Contract §7: xs 1.5, sm 1.75,
+/// md 2.25, lg 2.75, xl 3.25.
+pub fn code_input_slot_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.75,
+        ControlSize::Xl => 3.25,
+    }
+}
+
+/// Slot digit font-size in rem per size. Contract §7: xs 0.8125, sm 0.875,
+/// md 1, lg 1.125, xl 1.25.
+pub fn code_input_slot_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.8125,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
+
 // ── EditableList size / density scales ───────────────────────────
 //
 // Contract §8 "Size Adjustments" / "Density Adjustments". Mirrors

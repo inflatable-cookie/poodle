@@ -3,8 +3,9 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{FormActionAlign, FormActionsSpec};
+use poodle_specs::{ControlDensity, FormActionAlign, FormActionsSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI form actions bar backed by `FormActionsSpec`.
@@ -46,6 +47,28 @@ impl FormActions {
         self
     }
 
+    /// Toggle the top padding that separates the action row from the
+    /// field stack above (contract `showTopSeparation`). When false the
+    /// row sits flush on a footer rail.
+    pub fn show_top_separation(mut self, v: bool) -> Self {
+        self.spec.show_top_separation = v;
+        self
+    }
+
+    /// Toggle the subtle top divider + offset before the row
+    /// (contract `showTopBorder`).
+    pub fn show_top_border(mut self, v: bool) -> Self {
+        self.spec.show_top_border = v;
+        self
+    }
+
+    /// Spacing density (contract §4 + §8). Controls inline gap, top
+    /// separation, and border gap; does not change child button size.
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+
     /// Add an action element (typically a Button).
     pub fn with_action(mut self, action: impl IntoElement) -> Self {
         self.actions.push(action.into_any_element());
@@ -58,14 +81,25 @@ impl IntoElement for FormActions {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let gap = theme.resolve_space(self.spec.action_gap_token());
+        // Density-keyed gap: compact/comfortable use contract-exact rems,
+        // default inherits the inline-md token (contract §8).
+        let gap = match self.spec.gap_rem() {
+            Some(rem) => rem_to_px(rem),
+            None => theme.resolve_space(self.spec.action_gap_token()),
+        };
+        // Density-keyed top separation: compact/comfortable use contract
+        // rems, default inherits stack-sm token (contract §8).
         let separation = if self.spec.shows_top_separation() {
-            theme.resolve_space(self.spec.stack_separation_token())
+            match self.spec.top_separation_rem() {
+                Some(rem) => rem_to_px(rem),
+                None => theme.resolve_space(self.spec.stack_separation_token()),
+            }
         } else {
             0.0
         };
+        // Density-keyed divider offset (contract §8 Divider Offset Variants).
         let border_gap = if self.spec.shows_top_border() {
-            separation.max(4.0) * 0.5
+            rem_to_px(self.spec.border_gap_rem())
         } else {
             0.0
         };

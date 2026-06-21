@@ -1,9 +1,20 @@
-<!-- parity consv=ok gpui=3 jetstream=9 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap -->
 <!-- pass 20: GPUI action buttons now composed Button::from_spec (ghost cancel /
      primary submit), submit label flips to "Submitting…" + both disabled while
      submitting; dropped px(12/6)/white()/manual-disabled-fill/hand-rolled-spinner
      literals; body gaps → space.stack.md. Build clean. Remaining GPUI: width/aria/
      controlled-open. -->
+<!-- pass 41: FormDialogSpec gained `width: Option<DialogWidth>` (+ with_width).
+     GPUI: added `from_spec` consuming FormDialogSpec; wired width/aria_label/size/
+     density to the composed Dialog; columns now passed to FormLayout; submitting
+     blocks Escape+backdrop dismiss. Jetstream: REBUILT to compose js_dialog (shell
+     + backdrop + header + close + separator) + js_button (ghost cancel / primary
+     submit) + js_form_actions (footer rail, top-separation off) + js_form_layout
+     (body). Dropped hand-rolled panel/backdrop, Color::TRANSPARENT/WHITE, btn_px/py,
+     border 1.0 / h 1.0, accent.mix(_,0.5), rem literals → tokens/Button. Width via
+     DialogWidth preset; aria/size/density forwarded. 6 probe tests (title/body slot/
+     default actions/submitting/error/custom-width/bare). Remaining Jetstream:
+     real Field/TextInput body in specimen + controlled-open (preview-loop). -->
 # Parity: FormDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -35,31 +46,28 @@ Svelte matches the contract on every prop, default, snippet, callback, state, an
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Does not consume `FormDialogSpec` — hand-rolled builder (`form_dialog.rs:12-145`). Spec exists (`contracts/components/src/form_dialog.rs`) with all props; GPUI ignores it, so `open`/`columns`/`aria_label`/`size`/`size_role`/`density`/`width` have no path. Refactor to a `from_spec` constructor.
-- [ ] No `width` support — Dialog primitive exposes `.width(DialogWidth)` (`primitives/dialog.rs:121`) but FormDialog never calls it; contract §3/§8 custom width unreachable.
-- [ ] No `ariaLabel` plumbing — Dialog primitive exposes `.aria_label()` (`primitives/dialog.rs:105`); FormDialog never forwards it.
-- [ ] `columns` accepted but discarded — `let _ = self.columns;` at `form_dialog.rs:208`; never passed to `FormLayout`. Contract §7 requires passthrough.
-- [ ] Cancel/Submit are hand-rolled `div`s (`form_dialog.rs:219-268`), not the `Button` primitive. Contract anatomy §2 requires ghost Cancel + primary Submit `Button`s; reuse `Button` for variant/tone/token parity.
-- [ ] Hardcoded button paddings `.px(px(12.0))`/`.py(px(6.0))` at `form_dialog.rs:224-225,253-254` — resolve from Button/control padding tokens.
-- [ ] Hardcoded gaps `.gap(px(12.0))` (body, `:172`,`:195`) and `.gap(px(6.0))` (submit spinner row, `:260`) — resolve from `space.*` tokens.
-- [ ] Hardcoded color `gpui::white()` for submit-button text (`form_dialog.rs:250`) and spinner mix base (`:263`) — resolve from an on-accent text token, not a raw white literal.
-- [ ] Disabled/submitting uses raw `.opacity(0.5)` for cancel (`form_dialog.rs:228`) and `color_mix(accent, panel_bg, 0.5)` for submit fill (`:241-244`) — use `disabled_opacity_token()` (`state.opacity.disabled`), not a hardcoded `0.5`.
+- [x] `from_spec` constructor added — `FormDialog::from_spec(&FormDialogSpec, theme)` copies title/labels/submitting/error/success/aria_label/width/columns/bare/size/density; `open` stays host-owned (immediate mode).
+- [x] `width` support added — `FormDialog::width(DialogWidth)` (+ spec field) forwarded to `Dialog::width()`; contract §3/§8 custom width reachable via preset.
+- [x] `ariaLabel` plumbing added — `FormDialog::aria_label()` forwarded to `Dialog::aria_label()`.
+- [x] `columns` now passed through — `FormLayout::new(theme).columns(self.columns as usize)` (contract §7).
+- [x] Cancel/Submit are composed `Button`s (ghost/primary) — fixed pass 20; reconfirmed.
+- [x] Button paddings/gaps/colors/disabled-opacity — fixed pass 20 (Button tokens + `space.inline.sm` + no white/0.5 literals).
+- [x] Submitting now blocks Escape + backdrop dismiss via `Dialog::dismiss_on_escape(!submitting)` / `dismiss_on_backdrop(!submitting)` (contract §6).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_modal`/`aria-labelledby`/`aria-describedby` and Escape/backdrop dismiss are delegated to/handled by the Dialog primitive, not FormDialog.
 - accepted: controlled `open` / `onOpenChange` round-trip lives in the host app, not the component (matches GPUI immediate-mode pattern).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Does not compose `js_dialog` despite the module doc claiming "Composes js_dialog + js_form_layout" (`form_dialog.rs:6`). It hand-renders its own backdrop + panel + separator (`:142-192`). Result: dialog surface/backdrop/close-button/focus-trap diverge from the Dialog contract. Compose `js_dialog` for the shell.
-- [ ] No `js_button` — Cancel/Submit are raw `ui_element::button` divs (`form_dialog.rs:98-122`). Contract §2 requires ghost Cancel + primary Submit `Button`s; use `js_button` so tone/variant/tokens match.
-- [ ] No `width` support — `FormDialogSpec` has no `width` field and the panel uses a fixed `min_w(rem_to_px(25.0))` (`form_dialog.rs:149`); contract §3/§8 custom width is unreachable. Add a width field/token and wire it.
-- [ ] No `aria_label` / `columns` / `size` / `density` applied to the dialog shell — `columns` reaches `FormLayoutSpec` (`:71`) but `aria_label` is never read and `size`/`density` only size the body font, not the (absent) Dialog shell.
-- [ ] Hardcoded gaps via raw floats: `title_gap = rem_to_px(0.5)` (`:50`), `section_gap = rem_to_px(1.0)` (`:51`) — resolve from `space.stack.*` tokens, not literal rem.
-- [ ] Hardcoded button paddings `btn_px = rem_to_px(0.75)` / `btn_py = rem_to_px(0.375)` (`form_dialog.rs:94-95`) — resolve from control padding tokens.
-- [ ] Hardcoded `.border(1.0)` panel border width (`:145`) and `.h(1.0)` separator (`:179`) — resolve from a border-width token.
-- [ ] Hardcoded color literals `Color::TRANSPARENT` cancel bg (`:103`) and `Color::WHITE` submit text (`:119`) — resolve cancel ghost bg + on-accent text from tokens.
-- [ ] Disabled/submitting submit fill uses raw `accent.mix(panel_bg, 0.5)` (`form_dialog.rs:107-111`) — the `0.5` is a literal; cancel button is never disabled/dimmed during submitting (Svelte disables both, `FormDialog.svelte:159,168`).
+- [x] Now composes `js_dialog` for the shell — backdrop + panel + header (title/description) + close button + action separator all come from the Dialog primitive. Hand-rolled backdrop/panel/separator removed.
+- [x] Now uses `js_button` — Cancel (ghost) + Submit (primary) composed from `js_button`; tone/variant/tokens match the Button contract. Submit label flips to "Submitting…"; both disabled while submitting (cancel via `is_submitting`, contract parity with Svelte).
+- [x] `width` support added — `FormDialogSpec.width: Option<DialogWidth>` (+ `with_width`); forwarded to `DialogSpec::with_width()`. Probe-verified (Xl surface wider than default).
+- [x] `aria_label` / `size` / `density` now forwarded to the composed `DialogSpec`; `columns` reaches `FormLayoutSpec`.
+- [x] Raw-float gaps removed — body/section gap now derives from the size-font scale; the Dialog primitive owns panel padding/gaps from tokens.
+- [x] Button paddings/colors/disabled-opacity now resolved inside `js_button` (no `btn_px`/`btn_py`, no `Color::TRANSPARENT`/`Color::WHITE`, no `accent.mix(_,0.5)` literal).
+- [x] Panel border + separator come from `js_dialog` (no local `.border(1.0)`/`.h(1.0)` literals).
 - accepted: no ARIA channel (no accessibility API in jetstream runtime).
-- accepted: open/close + Escape + backdrop-click dismiss not wired — `jetstream/preview/src/main.rs` Escape only exits the app or dismisses the tree context menu (`main.rs:411,449`); no FormDialog dismiss path. Specimen renders the dialog inline, always-open.
+- accepted: open/close + Escape + backdrop-click dismiss not wired in the preview loop — submitting-blocks-dismiss intent is encoded on the `DialogSpec` (`dismiss_on_escape`/`dismiss_on_backdrop`), but the host preview loop owns the actual dismiss path. Specimen renders the dialog inline, always-open.
+- [ ] Specimen still uses a hand-rolled `field()` stub rather than real `Field`/`TextInput` — borderline mockup per repo "no fakes" rule; swap for composed components (specimen-only, not the component).
 
 ## Specimen parity
 
