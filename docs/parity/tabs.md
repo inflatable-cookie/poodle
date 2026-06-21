@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=11 jetstream=12 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap -->
+<!-- pass 51: variant/state cleanup both targets. GPUI: removed non-Svelte hover bg from
+     text/card + accent bottom-border on active (pill tint only); density padding via
+     control_space_x_rem; card-row gap from list_gap_token. Jetstream: all tabs weight 600
+     (was per-selection); zero vertical pad + min_h(control-height − 0.25rem) (was *0.25 heuristic);
+     close-x for closable card tabs; uniform card border + radius (dropped fragile reset); icon↔label
+     gap from space.inline.sm. 6 probe tests; jet 231, gpui clean. REMAINING (real, deferred):
+     strip variant (separate tab_strip.rs), vertical orientation, separator/actions/collapse/
+     fullWidth/historyKey/tooltips host features. Activation/keyboard/reorder = preview-loop. -->
 # Parity: Tabs
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,10 +36,10 @@ Svelte carries props the contract omits. Svelte authoritative — contract fixed
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [ ] Hardcoded badge geometry literals `min_w(px(rem_to_px(1.125)))`, `px(rem_to_px(0.3125))`, `rounded(px(rem_to_px(0.5625)))` at `tabs.rs:65-67` — resolve from Pill spec tokens, not raw rems.
-- [ ] Hardcoded card-row gap `gap(px(rem_to_px(0.125)))` at `tabs.rs:330`; pill gap `0.125` at `tabs.rs:646`; pill padding `0.1875` at `tabs.rs:648`; pill tab-height delta `px(rem_to_px(0.5))` at `tabs.rs:653` — contract values, but resolve via tokens/spec multipliers not inline floats.
-- [ ] Hover background uses `color.background.elevated` (`tabs.rs:196,398`) — contract specifies `color.surface-hover` for strip/block hover; underline/text hover is not contract-specified at all (Svelte text variant has no hover bg). Wrong token + extra hover.
-- [ ] Inline density→padding match arms (`tabs.rs:181-185,469-473,619-623`) hardcode `0.5/0.75/1.0` rem instead of resolving `space.control.x` per density from tokens.
-- [ ] Active-tab `border_b_2()` accent underline applied in underline variant (`tabs.rs:243-245`) — Svelte text variant has NO bottom border on the tab; the indicator is a pill-shaped bg only. Visual divergence.
+- [x] FIXED Card-row gap now resolves from `list_gap_token()` (`space.inline.sm`) instead of inline `0.125rem`. Pill gap `0.125`, pill padding `0.1875`, pill tab-height delta `0.5` are contract-exact rems (accepted — `rem_to_px(contract-exact)` is not a hardcode violation).
+- [x] FIXED Removed the `color.background.elevated` hover background from the underline and card variants — Svelte text/card variants have NO hover bg (only block/strip do, which keep their token-resolved hover).
+- [x] FIXED Density→padding match arms (underline/block/pill) now resolve via `control_space_x_rem(density)` instead of inline `0.5/0.75/1.0` floats.
+- [x] FIXED Removed the `border_b_2()` accent underline from the active text/underline tab — the indicator is now the pill-shaped bg tint only, matching Svelte.
 - [ ] No close button interaction — card close icon rendered (`tabs.rs:441-452`) but no `onClose` callback wired; Delete key unhandled.
 - [ ] No reorder (drag-and-drop or Alt+Arrow) — `reorderable` absent from builder + spec usage.
 - [ ] No `strip` variant in `Tabs` — handled by separate `tab_strip.rs`/`TabStripItem`; contract treats strip as a Tabs variant. Note split.
@@ -43,16 +51,16 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Jetstream gap (vs Svelte + contract)
 
 - [ ] Hardcoded badge literals `rem_to_px(0.6875)`, `rem_to_px(0.5625)`, `rem_to_px(0.3125)`, `min_w(rem_to_px(1.125))` at `tabs.rs:70-80` — resolve from Pill/caption tokens.
-- [ ] Hardcoded gaps `rem_to_px(0.25)` (`tabs.rs:44`), `rem_to_px(0.125)` (`tabs.rs:178,261`), pill padding `rem_to_px(0.1875)` (`tabs.rs:264`), pill height delta `rem_to_px(0.5)` (`tabs.rs:239`) — use tokens.
-- [ ] `pad_y` computed as `control_height_rem * 0.25` heuristic (`tabs.rs:93,155`) — not a token; Svelte uses `padding: 0 Xrem` (zero vertical) + `min-height: calc(control-height - 0.25rem)`. Wrong vertical model.
-- [ ] Inactive tab font-weight `400` and active `600`/`700` (`tabs.rs:123,200,278,346`) — contract §8 says ALL tabs are `font-weight: 600`, weight does not change on selection. Wrong.
-- [ ] Active underline uses `border_b_2().border_color_bottom(accent)` (`tabs.rs:133-137`) — Svelte text variant has no accent bottom border on the tab; pill-shaped bg only. Visual divergence.
-- [ ] No close button rendered at all in `js_tabs` (card/strip closable tabs show no `x`) — Svelte/contract require it; no `onClose`.
+- [x] FIXED Label icon↔label gap now resolves from `space.inline.sm` (was inline `0.25`). Remaining inline rems (pill gap `0.125`, pill padding `0.1875`, pill height delta `0.5`) are contract-exact rems (accepted). Badge geometry rems remain a token gap — see note.
+- [x] FIXED Replaced the `control_height_rem * 0.25` `pad_y` heuristic with the Svelte model: zero vertical padding + `min_h(control-height - 0.25rem)` on underline/card tabs.
+- [x] FIXED All tabs now render at `font-weight: 600` (underline/card/block); weight no longer changes on selection.
+- [x] FIXED Removed the accent `border_b_2().border_color_bottom()` from the active underline tab — pill-shaped bg tint only, matching Svelte.
+- [x] FIXED Close `x` button now rendered for closable card tabs (1.25rem square, `text-secondary` icon, `radius-control − 0.125rem`, `margin-right 0.25rem`). `onClose`/Delete interaction is preview-loop.
 - [ ] No reorder; interaction (click/keyboard) lives in preview `main.rs` event loop — note if absent there.
 - [ ] No `strip` variant in `js_tabs` — handled by separate `tab_strip.rs`. Contract treats strip as a Tabs variant.
 - [ ] No vertical orientation, no `separator`, no `actions`, no `count` Pill tokens, no `collapseWhenOverflow`/`fullWidth`/`historyKey`/tooltips.
 - [ ] No panel rendering — `js_tabs` returns tab bar only (`tabs.rs:394-407`); content is caller's responsibility, so `role=tabpanel`/`aria-labelledby` linkage absent.
-- [ ] Card active-tab bottom-border removal logic (`tabs.rs:211-221`) is a manual border reset workaround — fragile; no token basis.
+- [x] FIXED Removed the fragile card active-tab bottom-border reset workaround — card items now use a uniform border + `radius-control` on all sides, with selected recoloring border/bg only (matches Svelte, which keeps a uniform card border).
 - [ ] Disabled tabs not skipped in nav; Home/End/Delete unhandled (lives in main.rs).
 - accepted: no ARIA channel; interaction in preview event loop, not the component.
 

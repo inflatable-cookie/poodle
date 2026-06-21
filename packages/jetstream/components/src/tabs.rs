@@ -14,10 +14,9 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{TabVariant, TabsSpec};
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, panel_space_x_rem, rem_to_px,
-    resolve_semantic_size, size_font_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, tint};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
@@ -41,7 +40,8 @@ fn build_tab_label(
             .text_color(text_color);
     }
 
-    let gap = rem_to_px(0.25);
+    // Contract §8 Tab button: gap = space.inline.sm between icon and label.
+    let gap = resolve_px(theme, "space.inline.sm");
     let mut row = ui_element::div()
         .flex_row()
         .items_center()
@@ -84,13 +84,42 @@ fn build_tab_label(
     row
 }
 
+/// Build the optional close button for a closable tab.
+///
+/// Contract Close button: 1.25rem square, icon-only `x`, `text-secondary`
+/// color, radius `calc(radius-control - 0.125rem)`, margin-right `0.25rem`.
+/// Interaction (click / Delete) lives in the preview event loop.
+fn build_close_button(theme: &JetstreamThemeProvider, font_size: f32) -> JsEl {
+    let icon_color = resolve_color(theme, "color.text.secondary");
+    let radius = (resolve_radius(theme, "radius.control") - rem_to_px(0.125)).max(0.0);
+    let box_sz = rem_to_px(1.25);
+    ui_element::button("")
+        .w(box_sz)
+        .h(box_sz)
+        .mr(rem_to_px(0.25))
+        .rounded(radius)
+        .flex_row()
+        .items_center()
+        .justify_center()
+        .focusable()
+        .cursor_pointer()
+        .child(
+            ui_element::icon("x")
+                .w(font_size)
+                .h(font_size)
+                .text_color(icon_color),
+        )
+}
+
 // ── Underline variant ───────────────────────────────────────────────────────
 
 fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let pad_y = rem_to_px(control_height_rem(effective_size) * 0.25); // ~quarter height for vert rhythm
+    // Contract §8 Tab button: padding `0 control-x` (zero vertical) +
+    // min-height `calc(control-height - 0.25rem)`.
+    let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
 
     let accent = resolve_color(theme, spec.indicator_token());
     let border = resolve_color(theme, spec.list_border_token());
@@ -115,25 +144,23 @@ fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
         let mut tab_el = ui_element::button("")
             .flex_row()
             .items_center()
-            .pt(pad_y)
-            .pb(pad_y)
+            .min_h(min_h)
             .pl(pad_x)
             .pr(pad_x)
             .text_size(font_size)
-            .text_weight(if is_active { 600 } else { 400 })
+            // Contract §8: ALL tabs font-weight 600 — weight does not change on selection.
+            .text_weight(600)
             .text_color(text_color)
             .rounded(radius)
             .focusable()
             .cursor_pointer()
             .child(build_tab_label(tab, theme, text_color, font_size));
 
-        // Active indicator: 2px colored bottom border + subtle bg tint.
+        // Contract Tab — Text variant (selected): pill-shaped bg tint only.
+        // No accent bottom border on the tab itself (the list carries the baseline).
         if is_active {
             let active_bg = tint(accent, 0.18);
-            tab_el = tab_el
-                .bg(active_bg)
-                .border_b_2()
-                .border_color_bottom(accent);
+            tab_el = tab_el.bg(active_bg);
         }
 
         if is_disabled {
@@ -151,8 +178,10 @@ fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
 fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(panel_space_x_rem(spec.density));
-    let pad_y = rem_to_px(control_height_rem(effective_size) * 0.25);
+    // Svelte card tab: padding `0 var(--poodle-tabs-control-x)` (density-based);
+    // min-height from base tab button `calc(control-height - 0.25rem)`.
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
 
     let accent = resolve_color(theme, spec.indicator_token());
     let border = resolve_color(theme, spec.list_border_token());
@@ -188,36 +217,30 @@ fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             (card_default_bg, card_default_border)
         };
 
-        // Card: top radius only (rounded top corners, square bottom).
+        // Contract Item — Card variant: uniform border + radius-control on all sides;
+        // selected recolors border/bg only (no bottom-edge removal). Svelte matches.
         let mut tab_el = ui_element::button("")
             .flex_row()
             .items_center()
-            .pt(pad_y)
-            .pb(pad_y)
+            .gap(resolve_px(theme, "space.inline.sm"))
+            .min_h(min_h)
             .pl(pad_x)
             .pr(pad_x)
             .text_size(font_size)
-            .text_weight(if is_active { 600 } else { 400 })
+            // Contract §8: ALL tabs font-weight 600.
+            .text_weight(600)
             .text_color(text_color)
             .bg(bg)
             .border_1()
             .border_color(bc)
-            .rounded_each([radius, radius, 0.0, 0.0]) // top-left, top-right, bottom-right, bottom-left
+            .rounded(radius)
             .focusable()
             .cursor_pointer()
             .child(build_tab_label(tab, theme, text_color, font_size));
 
-        // Active card: hide bottom border so it visually merges with the content area.
-        if is_active {
-            // Override bottom border width to 0 by setting it via individual width.
-            // The easiest approach: keep border_1 but set border_widths[2] = 0
-            // by using specific side calls — we'll do border_t_1 + border_l_1 + border_r_1
-            // instead of border_1 for the active tab.
-            tab_el = tab_el
-                .border(0.0) // reset uniform
-                .border_t_1()
-                .border_l_1()
-                .border_r_1();
+        // Contract Close button: rendered when the tab is closable.
+        if tab.is_closable {
+            tab_el = tab_el.child(build_close_button(theme, font_size));
         }
 
         if is_disabled {
@@ -343,7 +366,8 @@ fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .px(pad_x)
             .h(control_height)
             .text_size(font_size)
-            .text_weight(if is_active { 700 } else { 400 }) // active is bold per spec
+            // Contract §8: ALL tabs font-weight 600 — weight does not change on selection.
+            .text_weight(600)
             .text_color(text_color)
             .focusable()
             .cursor_pointer()
@@ -404,4 +428,142 @@ pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     ui_element::div()
         .flex_col()
         .child(tab_bar)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::{probe, ProbeColor};
+    use crate::theme_ext::{resolve_color, tint};
+    use poodle_specs::{TabDefinition, TabVariant, TabsSpec};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn three_tabs() -> Vec<TabDefinition> {
+        vec![
+            TabDefinition::new("a", "Overview"),
+            TabDefinition::new("b", "Features"),
+            TabDefinition::new("c", "Pricing"),
+        ]
+    }
+
+    /// Active text/underline tab carries the accent-18% background tint
+    /// (the variant treatment + active indicator).
+    #[test]
+    fn underline_active_tab_has_accent_tint() {
+        let th = theme();
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Underline)
+            .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        assert!(tree.has_text("Overview"));
+        assert!(tree.has_text("Features"));
+
+        let accent = resolve_color(&th, spec.indicator_token());
+        let want = tint(accent, 0.18);
+        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        assert!(
+            tree.has_background(want, 0.02),
+            "active underline tab missing accent-18% tint; bgs: {}",
+            tree.to_json()
+        );
+    }
+
+    /// Pill active tab carries accent-18% fill — confirms variant treatment differs
+    /// from the underline path while sharing the active-indicator tint.
+    #[test]
+    fn pill_active_tab_has_accent_fill() {
+        let th = theme();
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Pill)
+            .with_value("b");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        let accent = resolve_color(&th, spec.indicator_token());
+        let want = tint(accent, spec.pill_active_bg_opacity());
+        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        assert!(
+            tree.has_background(want, 0.02),
+            "active pill tab missing accent fill; tree: {}",
+            tree.to_json()
+        );
+    }
+
+    /// Block active tab carries the accent-into-surface selected fill.
+    #[test]
+    fn block_active_tab_has_selected_fill() {
+        let th = theme();
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Block)
+            .with_value("c");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        let accent = resolve_color(&th, spec.indicator_token());
+        let surface = resolve_color(&th, "color.background.surface");
+        let want = blend(accent, surface, spec.block_selected_accent_mix());
+        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        assert!(
+            tree.has_background(want, 0.02),
+            "active block tab missing selected fill; tree: {}",
+            tree.to_json()
+        );
+    }
+
+    /// Closable card tab renders the `x` close-button icon.
+    #[test]
+    fn card_closable_tab_renders_close_icon() {
+        let th = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "index.ts"),
+            TabDefinition::new("b", "App.svelte").with_closable(true),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        assert!(tree.has_text("App.svelte"));
+        assert!(
+            tree.has_text("x"),
+            "closable card tab missing close icon; icons: {:?}",
+            tree.texts()
+        );
+    }
+
+    /// Count badge renders the numeric label next to the tab text.
+    #[test]
+    fn tab_count_badge_renders() {
+        let th = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "Inbox").with_count(12),
+            TabDefinition::new("b", "Sent"),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        assert!(tree.has_text("Inbox"));
+        assert!(
+            tree.has_text("12"),
+            "count badge text missing; texts: {:?}",
+            tree.texts()
+        );
+    }
+
+    /// Disabled tab still renders its label (and is dimmed via opacity, which
+    /// the probe does not surface — structure is the assertable signal).
+    #[test]
+    fn disabled_tab_still_renders() {
+        let th = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "Overview"),
+            TabDefinition::new("b", "FAQ").with_disabled(true),
+        ])
+        .with_variant(TabVariant::Underline)
+        .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+        assert!(tree.has_text("FAQ"));
+    }
 }

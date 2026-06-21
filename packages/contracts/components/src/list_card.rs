@@ -24,6 +24,35 @@ impl Default for LeadingFill {
     }
 }
 
+/// Card layout mode. Contract §3/§4: `compact` is a dense single-line variant;
+/// `stacked` is a square-ish tile with leading on top and a bottom utility rail.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ListCardLayout {
+    Default,
+    Compact,
+    Stacked,
+}
+
+impl Default for ListCardLayout {
+    fn default() -> Self {
+        Self::Default
+    }
+}
+
+/// Selection-indicator mode. Contract §3: `Checkbox` renders a checkbox
+/// selection indicator when the card is selectable.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SelectionIndicator {
+    None,
+    Checkbox,
+}
+
+impl Default for SelectionIndicator {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ListCardSpec {
     pub title: String,
@@ -50,6 +79,14 @@ pub struct ListCardSpec {
     /// When true the card renders a trailing drag handle used to
     /// reorder items in a list.
     pub show_reorder_handle: bool,
+    /// Layout mode. Contract §3: default / compact / stacked.
+    pub layout: ListCardLayout,
+    /// Accent emphasis state. Contract §3/§4/§8 Root highlighted: tints border,
+    /// paints an accent-to-transparent gradient, and adds an inset accent ring.
+    pub is_highlighted: bool,
+    /// Selection-indicator mode. Contract §3: when `Checkbox` and selectable,
+    /// renders a checkbox selection indicator.
+    pub selection_indicator: SelectionIndicator,
 }
 
 impl Default for ListCardSpec {
@@ -71,6 +108,9 @@ impl Default for ListCardSpec {
             is_selectable: false,
             is_selected: false,
             show_reorder_handle: false,
+            layout: ListCardLayout::Default,
+            is_highlighted: false,
+            selection_indicator: SelectionIndicator::None,
         }
     }
 }
@@ -162,6 +202,21 @@ impl ListCardSpec {
         self
     }
 
+    pub fn with_layout(mut self, layout: ListCardLayout) -> Self {
+        self.layout = layout;
+        self
+    }
+
+    pub fn with_highlighted(mut self, highlighted: bool) -> Self {
+        self.is_highlighted = highlighted;
+        self
+    }
+
+    pub fn with_selection_indicator(mut self, indicator: SelectionIndicator) -> Self {
+        self.selection_indicator = indicator;
+        self
+    }
+
     pub fn has_href(&self) -> bool {
         self.href.is_some()
     }
@@ -214,5 +269,95 @@ impl ListCardSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    /// Title color token. Contract §8 Title: `color.text.primary`.
+    pub fn corner_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    /// Default sash ribbon background. Contract §8 Sash: positive/green.
+    pub fn sash_bg_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_SUCCESS
+    }
+
+    /// Sash text + solid-leading icon color. Contract §8: `#fff`.
+    /// No pure-white semantic token exists; the inverse-text token is the
+    /// closest token surface for on-accent foreground. See NOTE in list_card.rs.
+    pub fn on_accent_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_INVERSE
+    }
+
+    /// Accent base used for highlighted ring/gradient + leading. Contract §8.
+    pub fn accent_base_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    /// Leading radius token for rounded-square shape. Contract §8.
+    pub fn leading_radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    /// Pill radius for circle leading + checkbox indicator. Contract §8.
+    pub fn pill_radius_token(&self) -> &'static str {
+        semantic::RADIUS_PILL
+    }
+
+    /// Selection-indicator box edge. Contract §8 Selection Indicator (size icon md).
+    pub fn selection_indicator_size_token(&self) -> &'static str {
+        semantic::SIZE_ICON_MD
+    }
+
+    // ── Exact dimensions (contract §7/§8) ──────────────────────────────
+    // No tokens exist for these contract-exact rem values; the rem literal is
+    // the contract source of truth and `rem_to_px` resolves it at the call site.
+
+    /// Leading square edge length in rem. Contract §7: circle 2rem,
+    /// rounded-square 2.75rem. Compact layout shrinks one step.
+    pub fn leading_size_rem(&self) -> f32 {
+        let base = match self.leading_shape {
+            LeadingShape::Circle => 2.0,
+            LeadingShape::RoundedSquare => 2.75,
+        };
+        if self.layout == ListCardLayout::Compact {
+            base - 0.25
+        } else {
+            base
+        }
+    }
+
+    /// Leading icon glyph font-size in rem. Contract §8 Leading: `0.875rem`.
+    pub fn leading_font_size_rem(&self) -> f32 {
+        0.875
+    }
+
+    /// Body column gap in rem. Contract §8 Body: `0.0625rem`.
+    pub fn body_gap_rem(&self) -> f32 {
+        0.0625
+    }
+
+    /// Header row gap in rem. Contract §8 Header: `0.375rem`.
+    pub fn header_gap_rem(&self) -> f32 {
+        0.375
+    }
+
+    /// Footer row gap in rem. Contract §8 Footer: `0.5rem`.
+    pub fn footer_gap_rem(&self) -> f32 {
+        0.5
+    }
+
+    /// Subtitle / meta font-size in rem. Contract §8: `0.75rem`.
+    pub fn small_font_size_rem(&self) -> f32 {
+        0.75
+    }
+
+    /// Tint ratio for leading background. Contract §8 Leading: `accent 12%`.
+    pub fn leading_tint_ratio(&self) -> f32 {
+        0.12
+    }
+
+    /// Not-live opacity. Contract §4/§8: `0.72`.
+    pub fn not_live_opacity(&self) -> f32 {
+        0.72
     }
 }

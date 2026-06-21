@@ -2,7 +2,7 @@ use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::NavCardSpec;
+use poodle_specs::{ControlDensity, NavCardSpec};
 
 pub struct NavCard {
     spec: NavCardSpec,
@@ -11,6 +11,8 @@ pub struct NavCard {
     hover_border_color: Hsla,
     hover_fill: Hsla,
     radius: Pixels,
+    icon_radius: Pixels,
+    badge_radius: Pixels,
     title_color: Hsla,
     description_color: Hsla,
     icon_bg: Hsla,
@@ -44,6 +46,8 @@ impl NavCard {
         let hover_border_color = resolve_color(theme, spec.hover_border_token());
         let hover_fill = resolve_color(theme, spec.hover_fill_token());
         let radius = resolve_radius(theme, spec.radius_token());
+        let icon_radius = resolve_radius(theme, spec.icon_radius_token());
+        let badge_radius = resolve_radius(theme, spec.badge_radius_token());
         let title_color = resolve_color(theme, spec.title_color_token());
         let description_color = resolve_color(theme, spec.description_color_token());
         let icon_bg = resolve_color(theme, spec.icon_bg_token());
@@ -61,6 +65,8 @@ impl NavCard {
             hover_border_color,
             hover_fill,
             radius,
+            icon_radius,
+            badge_radius,
             title_color,
             description_color,
             icon_bg,
@@ -91,6 +97,11 @@ impl NavCard {
         self
     }
 
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+
     pub fn with_icon(mut self, icon: impl IntoElement) -> Self {
         self.icon = Some(icon.into_any_element());
         self
@@ -106,12 +117,15 @@ impl IntoElement for NavCard {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let is_disabled = self.spec.is_disabled;
+        let spec = &self.spec;
+        let is_disabled = spec.is_disabled;
         let fill = self.fill;
         let border_color = self.border_color;
         let hover_border_color = self.hover_border_color;
         let hover_fill = self.hover_fill;
         let radius = self.radius;
+        let icon_radius = self.icon_radius;
+        let badge_radius = self.badge_radius;
         let title_color = self.title_color;
         let description_color = self.description_color;
         let icon_bg = self.icon_bg;
@@ -120,78 +134,96 @@ impl IntoElement for NavCard {
         let focus_ring_color = self.focus_ring_color;
         let badge_bg = self.badge_bg;
         let badge_color = self.badge_color;
+        let _ = self.body_size;
 
-        // Icon slot: 2rem square, rounded, accent-tinted background
+        // ── Density-aware geometry (contract §8 Density Overrides table) ──
+        let root_gap = px(rem_to_px(spec.root_gap_rem()));
+        let pad_x = px(rem_to_px(spec.padding_x_rem()));
+        let pad_y = px(rem_to_px(spec.padding_y_rem()));
+        let content_gap = px(rem_to_px(spec.content_gap_rem()));
+        let title_gap = px(rem_to_px(spec.title_gap_rem()));
+        let icon_size = px(rem_to_px(spec.icon_size_rem()));
+        let icon_font = px(rem_to_px(spec.icon_font_size_rem()));
+        let badge_font = px(rem_to_px(spec.badge_font_size_rem()));
+        let arrow_size = px(rem_to_px(1.0));
+        let title_font = self.label_size; // contract §8 Title: typography.label.size
+
+        // Group name so the arrow can reveal on ROOT hover (contract §8 Arrow root-hover).
+        let group_name: SharedString = format!("nav-card-{}", spec.title).into();
+
+        // Icon slot: density-sized square, accent-tinted background, control radius.
         let icon_slot = div()
-            .w(px(rem_to_px(2.0)))
-            .h(px(rem_to_px(2.0)))
-            .rounded(px(rem_to_px(0.5)))
+            .w(icon_size)
+            .h(icon_size)
+            .rounded(icon_radius)
             .bg(icon_bg.opacity(0.12))
             .flex()
             .items_center()
             .justify_center()
             .flex_shrink_0()
+            .text_size(icon_font)
             .children(self.icon);
 
-        // Title row with optional badge
-        let mut title_row = div().flex().flex_row().items_center().gap(px(rem_to_px(0.5))).child(
+        // Title row with optional badge — weight 600 (SEMIBOLD), title gap from density.
+        let mut title_row = div().flex().flex_row().items_center().gap(title_gap).child(
             div()
-                .text_size(self.body_size)
-                .font_weight(FontWeight::BOLD)
+                .text_size(title_font)
+                .font_weight(FontWeight::SEMIBOLD)
                 .text_color(title_color)
-                .child(self.spec.title.clone()),
+                .child(spec.title.clone()),
         );
 
-        if let Some(badge) = &self.spec.badge {
+        if let Some(badge) = &spec.badge {
             title_row = title_row.child(
                 div()
                     .px(px(rem_to_px(0.375)))
-                    .py(px(rem_to_px(0.125)))
-                    .rounded(px(9999.0))
+                    .py(px(rem_to_px(0.0625)))
+                    .rounded(badge_radius)
                     .bg(badge_bg.opacity(0.16))
-                    .text_size(px(rem_to_px(0.6875)))
-                    .font_weight(FontWeight::MEDIUM)
+                    .text_size(badge_font)
+                    .font_weight(FontWeight::SEMIBOLD)
                     .text_color(badge_color)
                     .child(badge.clone()),
             );
         }
 
-        // Content column: title row + optional description
+        // Content column: title row + optional description, content gap from density.
         let mut content = div()
             .flex()
             .flex_col()
-            .gap(px(rem_to_px(0.25)))
+            .gap(content_gap)
             .flex_grow()
+            .min_w_0()
             .child(title_row);
 
-        if let Some(desc) = &self.spec.description {
+        if let Some(desc) = &spec.description {
             content = content.child(
                 div()
-                    .text_size(self.label_size)
+                    .text_size(px(rem_to_px(spec.description_font_size_rem())))
                     .text_color(description_color)
                     .child(desc.clone()),
             );
         }
 
-        // Arrow indicator
+        // Arrow: 1rem square, hidden at rest, revealed on ROOT hover via group_hover.
         let arrow = div()
-            .text_size(self.body_size)
+            .text_size(arrow_size)
             .text_color(arrow_color)
             .flex_shrink_0()
             .opacity(0.0)
+            .group_hover(group_name.clone(), |s| s.opacity(1.0))
             .child("\u{2192}");
 
         // Root element
         let mut root = div()
-            .id(ElementId::Name(
-                format!("nav-card-{}", self.spec.title).into(),
-            ))
+            .id(ElementId::Name(format!("nav-card-{}", spec.title).into()))
+            .group(group_name)
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(rem_to_px(0.75)))
-            .px(px(rem_to_px(1.0)))
-            .py(px(rem_to_px(0.875)))
+            .gap(root_gap)
+            .px(pad_x)
+            .py(pad_y)
             .bg(fill)
             .border_1()
             .border_color(border_color.opacity(0.32))
@@ -217,11 +249,6 @@ impl IntoElement for NavCard {
                     .bg(color_mix(hover_fill, fill, 0.52))
                     .border_color(color_mix(hover_border_color, border_color, 0.28))
             });
-
-            // Show arrow on hover via group
-            // Note: GPUI hover on child visibility requires the arrow to be
-            // handled via the hover style on the root. We set arrow opacity
-            // to 0 by default and rely on the root hover state.
 
             if let Some(handler) = self.on_click {
                 root = root.on_click(move |_event, window, app| {

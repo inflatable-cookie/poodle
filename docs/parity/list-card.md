@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=7 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
 # Parity: ListCard
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,30 +25,31 @@ Svelte had several props/snippets the contract §3 did not document. Svelte is a
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded leading dimensions: `leading_size` = `px(32.0)`/`px(44.0)`, `leading_radius` = `px(16.0)`/`px(6.0)` (`list_card.rs:159-166`). Contract §7 says 2rem/2.75rem — resolve from rem/tokens, not raw px. `leadingSizeOffset` prop is entirely unsupported (spec lacks the field).
-- [ ] Hardcoded sash dimensions + wrong placement: `w(px(rem_to_px(6.0)))`, `py(px(rem_to_px(0.125)))`, `text_size(px(rem_to_px(0.5625)))`, `line_height(px(rem_to_px(0.75)))` (`list_card.rs:251-258`). Worse, the sash is positioned `top(0) right(0)` with **no rotation** (`:248-249`); contract §8 sash is `top: 0.34375rem; left: -2.25rem; transform: rotate(-45deg)` — a diagonal top-left ribbon. GPUI sash is a plain top-right block, visually wrong.
-- [ ] not-live values wrong: GPUI uses `opacity(0.6)` (`list_card.rs:378`); contract §4/§8 specify `opacity: 0.72`, plus `filter: grayscale(1)` and a `0.1875rem dashed` border — greyscale filter is absent and opacity is 0.6 not 0.72.
-- [ ] No `layout` support (compact/stacked) — `ListCardSpec` has no `layout` field; contract §4 compact/stacked states + §7 stacked utility rail are unimplemented.
-- [ ] No `accentColor` applied to leading: GPUI parses hex only for the sash (`parse_hex_to_hsla` at `:240-245`); the leading accent uses `leading_tint_bg_token()` (theme accent), ignoring `spec.accent_color`. Contract §3 `accentColor` overrides leading bg/icon.
-- [ ] Reorder handle hardcoded px: `w(px(3.0)) h(px(3.0)) rounded(px(1.5))`, `gap(px(2.0))`, `opacity(0.6)` (`list_card.rs:337-353`). Resolve dot size/gap from tokens.
-- [ ] Root vertical padding `py(px(rem_to_px(0.625)))` (`list_card.rs:277`) — contract padding is `0.625rem 0.75rem`; horizontal uses `space.inline.md` which must equal `0.75rem` or it diverges. Verify the token resolves to the contract value; otherwise add an explicit list-card padding token.
-- accepted: no ARIA (gpui has no accessibility API) — role/aria-pressed/aria-disabled/anchor semantics not emitted (documented in `:264-269`).
+- [x] DONE Leading dimensions — `leading_size_rem()` (circle 2rem / square 2.75rem, compact −0.25rem); radius = pill (circle) / `radius.control` (square). No raw px. (`leadingSizeOffset` prop still unmodeled — see remaining.)
+- [x] DONE Sash placement + tokens — moved to top-left (`top 0.34375rem; left 0`), px/py/font from contract-exact rem, color from `sash_bg_token()` + hex override. NOTE: GPUI 0.2.2 `div` has no rotation, so the diagonal `rotate(-45deg)` is a platform gap (now a corner block, not a ribbon).
+- [x] DONE not-live opacity — now `not_live_opacity()` = 0.72 (was 0.6). Dashed border kept. NOTE: `filter: grayscale(1)` and the thicker `0.1875rem` dashed stroke have no GPUI div API — platform gaps.
+- [x] DONE `layout` support — `ListCardLayout` field; `stacked` switches root to `flex_col`/top-leading, `compact` shrinks leading.
+- [x] DONE `accentColor` on leading — `parse_hex_color(spec.accent_color)` overrides leading bg + icon color; falls back to theme accent.
+- [x] DONE Reorder handle — dot size `0.1875rem`, gap from `space.inline.xs` token. No raw px.
+- [x] DONE Root padding — `0.625rem` y kept; x from `space.inline.md` (= `0.75rem`, contract-exact). Verified token resolves to 0.75rem.
+- [ ] `leadingSizeOffset` prop still unmodeled (spec lacks the field) — leading ladder offset unimplemented. (Remaining.)
+- accepted: no ARIA (gpui has no accessibility API) — role/aria-pressed/aria-disabled/anchor semantics not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-`js_list_card` is a reduced subset — it renders leading + title/subtitle + meta only, missing most of the card.
+`js_list_card` rebuilt — leading (shape/fill/accent) + body + meta + selection + sash + reorder handle + hover/highlighted/not-live states.
 
-- [ ] Leading size ignores shape: `leading_size = rem_to_px(1.5)` for both shapes (`list_card.rs:28`). Contract §7: circle 2rem, rounded-square 2.75rem. `spec.leading_shape` only affects radius, not size.
-- [ ] Magic tint ratio `tint(leading_accent, 0.14)` (`list_card.rs:35`) — contract leading tint is `accent 12%`. Use 0.12.
-- [ ] Hardcoded text-block gap `gap(rem_to_px(0.125))` (`list_card.rs:62`) — contract body gap is `0.0625rem`, not 0.125rem; resolve from a token.
-- [ ] Solid leading icon color uses `color.text.on-accent` (`list_card.rs:40`) — contract solid color is `#fff`. Confirm the token resolves white; if not, mismatch.
-- [ ] No badges, no footer (counters), no trailing/actions snippets — contract §2 anatomy parts absent.
-- [ ] No sash, no reorder handle, no selectable/selected indicator, no not-live state — all major contract states unimplemented.
-- [ ] No hover state, no focus ring — contract §8 interactive-hover + focus tables unimplemented (cursor only).
-- [ ] No `layout` (compact/stacked) — not in spec; unimplemented.
-- [ ] No `accentColor` custom theming — leading always uses token accent.
-- [ ] Meta uses `typography.caption.size` (`list_card.rs:25`) — contract meta is `0.75rem`/`tabular-nums`; verify caption == 0.75rem and add tabular-nums.
-- accepted: interaction (click/keyboard) lives in preview `main.rs` event loop.
+- [x] DONE Leading size follows shape — `leading_size_rem()` (circle 2rem / square 2.75rem, compact shrinks). Not a fixed 1.5rem.
+- [x] DONE Tint ratio — `leading_tint_ratio()` = 0.12 (was 0.14).
+- [x] DONE Body gap — `body_gap_rem()` = 0.0625 (was 0.125).
+- [x] DONE Solid leading icon color — now `on_accent_color_token()` (`color.text.inverse`, the closest on-accent token; no pure-white token exists — NOTE in spec).
+- [~] PARTIAL badges/footer/trailing — these are host snippets (no JsEl snippet API); meta is rendered. badges/footer counters still need a data channel. (Remaining — not spec-modeled.)
+- [x] DONE Sash + reorder handle + selectable/selected indicator + not-live — all now rendered. Sash is a top-left block (JsEl has no rotate — NOTE); not-live = opacity 0.72 (no dashed/grayscale in JsEl — NOTE).
+- [x] DONE Hover state — interactive cards set hover bg + border (`color-mix` 82% / border-default 52%). Focus ring color surfaced; painted by preview focus layer (JsEl focusable is single-affordance — NOTE).
+- [x] DONE `layout` (compact/stacked) — `ListCardLayout` field; stacked = column, compact = tighter gap + smaller leading.
+- [x] DONE `accentColor` — `hex_to_rgb255(spec.accent_color)` overrides leading bg/icon.
+- [x] DONE Meta font — now `small_font_size_rem()` = 0.75rem (was caption 0.6875). NOTE: `tabular-nums` has no JsEl API.
+- accepted: interaction (click/keyboard) lives in preview event loop.
 
 ## Specimen parity
 

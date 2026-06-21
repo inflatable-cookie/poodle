@@ -181,7 +181,9 @@ pub use hover_card::HoverCardSpec;
 pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
 pub use icon_provider::IconProviderSpec;
-pub use list_card::{LeadingFill, LeadingShape, ListCardSpec};
+pub use list_card::{
+    LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator,
+};
 pub use list_card_counter::ListCardCounterSpec;
 pub use list_grid::{ListGridSpec, ListGridVariant};
 pub use menu::MenuSpec;

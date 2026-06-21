@@ -9,13 +9,13 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, IconSize, IconSpec, Orientation, TabActivationMode,
-    TabDefinition, TabVariant, TabsSpec,
+    ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant,
+    TabsSpec,
 };
 
 use super::icon::Icon;
 use crate::presentation::{
-    control_height_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
+    control_height_rem, control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -178,22 +178,16 @@ impl Tabs {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
         // Svelte: tabs-control-x is density-based (compact=0.5, default=0.75, comfortable=1.0rem)
-        let inline_padding = px(rem_to_px(match self.spec.density {
-            poodle_specs::ControlDensity::Compact => 0.5,
-            poodle_specs::ControlDensity::Default => 0.75,
-            poodle_specs::ControlDensity::Comfortable => 1.0,
-        }));
+        let inline_padding = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let control_y = resolve_px(theme, "space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border = resolve_color(theme, self.spec.list_border_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let elevated = resolve_color(theme, "color.background.elevated");
         let radius = resolve_radius(theme, "radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
-        let hover_bg = elevated;
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
@@ -223,7 +217,9 @@ impl Tabs {
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
-                // Svelte: pill-shaped highlight with accent 18% bg, text-primary color
+                // Svelte text variant (selected): pill-shaped highlight with
+                // accent 18% bg + text-primary. NO accent bottom border on the
+                // tab — the indicator is the bg tint only.
                 let active_bg = Hsla {
                     a: accent.a * 0.18,
                     ..accent
@@ -233,16 +229,9 @@ impl Tabs {
                     tab = tab
                         .text_color(text_primary)
                         .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
-                        .rounded(radius)
-                        .border_b_2()
-                        .border_color(accent);
+                        .rounded(radius);
                 } else {
-                    tab = tab
-                        .text_color(text_primary)
-                        .bg(active_bg)
-                        .rounded(radius)
-                        .border_b_2()
-                        .border_color(accent);
+                    tab = tab.text_color(text_primary).bg(active_bg).rounded(radius);
                 }
             } else {
                 tab = tab.text_color(text_secondary);
@@ -258,7 +247,8 @@ impl Tabs {
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                tab = tab.cursor_pointer().hover(move |s| s.bg(hover_bg));
+                // Svelte text variant has no hover background.
+                tab = tab.cursor_pointer();
 
                 if let Some(ref handler) = self.on_change {
                     let handler = handler.clone();
@@ -320,14 +310,14 @@ impl Tabs {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let surface_bg = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
-        let elevated = resolve_color(theme, "color.background.elevated");
         let radius = resolve_radius(theme, "radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        let mut tab_row = div().flex().items_end().gap(px(rem_to_px(0.125)));
+        // Card-row inter-item gap = list gap (space.inline.sm per contract §8 List).
+        let mut tab_row = div().flex().items_end().gap(resolve_px(theme, self.spec.list_gap_token()));
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 
@@ -395,7 +385,8 @@ impl Tabs {
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else if !is_active {
-                tab = tab.cursor_pointer().hover(move |s| s.bg(elevated));
+                // Svelte card variant has no hover background.
+                tab = tab.cursor_pointer();
             }
 
             if !is_disabled {
@@ -465,12 +456,8 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        // Svelte: --poodle-tabs-control-x is density-only (0.5/0.75/1.0rem)
-        let inline_padding = px(rem_to_px(match self.spec.density {
-            ControlDensity::Compact => 0.5,
-            ControlDensity::Default => 0.75,
-            ControlDensity::Comfortable => 1.0,
-        }));
+        // Svelte: --poodle-tabs-control-x is density-based (0.5/0.75/1.0rem)
+        let inline_padding = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -615,12 +602,8 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        // Svelte: --poodle-tabs-control-x is density-only (0.5/0.75/1.0rem)
-        let control_x = px(rem_to_px(match self.spec.density {
-            ControlDensity::Compact => 0.5,
-            ControlDensity::Default => 0.75,
-            ControlDensity::Comfortable => 1.0,
-        }));
+        // Svelte: --poodle-tabs-control-x is density-based (0.5/0.75/1.0rem)
+        let control_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());

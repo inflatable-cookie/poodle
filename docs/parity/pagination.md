@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=8 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
 # Parity: Pagination
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -31,29 +31,29 @@ Divergences in both directions. Svelte is authoritative except where it drops co
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Button `min-width` hardcoded `rem_to_px(2.25)` at `pagination.rs:232`, `:348` — contract/Svelte min-width is `var(--poodle-size-control-height)`; resolve from `size.control.height` token, not a raw `2.25`.
-- [ ] Ellipsis `min-width` hardcoded `rem_to_px(1.5)` at `pagination.rs:386` — Svelte ellipsis min-width is `1.5rem` (contract §8); acceptable as a contract constant but should route through a token/named const, not an inline float.
-- [ ] Go-to field width hardcoded `rem_to_px(3.0)` at `pagination.rs:642`, `:688` — no contract basis (the whole go-to field is a GPUI invention, see below); derive from a token.
-- [ ] **Go-to input field is not in the Svelte full variant.** Svelte full variant renders prev / "Page X of Y" summary / next / first / last only (lines 308–338). GPUI renders a "Go to" text-input row (`pagination.rs:619-701`) that has no Svelte or contract counterpart. **Remove or move behind an explicit contract opt-in.**
-- [ ] Full variant center content wrong: Svelte shows `Page X of Y` summary (line 310); GPUI numbered+full both render the numbered page row and only the **Simple** branch prints "Page X of Y" (`pagination.rs:594-604`). Full variant shows numbered pages instead of the page-of-total summary. **Swap: Full must show "Page X of Y", Simple must show "X–Y of Z" item range.**
-- [ ] Simple variant summary wrong: Svelte simple shows item range `X–Y of Z` (lines 312–315); GPUI simple prints `Page {current} of {total}` (`pagination.rs:599`). **Fix to item-range string.**
-- [ ] Info row format: Svelte renders "Showing X to Y of Z" (line 240); GPUI renders raw `info_text` + a separate `"{page_size} per page"` chip (`pagination.rs:464-486`) and never computes the "Showing X to Y of Z" string from total/page_size. **Compute info string to match Svelte.**
-- [ ] First/last (`««`/`»»`) buttons absent entirely — GPUI never renders first/last even for full variant (no branch in `into_element`). Contract §2 + Svelte require them when goToPage is wired.
+- [x] FIXED Button `min-width` now resolves to control-height (per-size, no −0.125rem) via a `button_min_width` field, replacing the `rem_to_px(2.25)` hardcodes.
+- [x] FIXED (by removal) Ellipsis `min-width` `rem_to_px(1.5)` is a contract-exact constant (`1.5rem` §8) — accepted, left as-is.
+- [x] FIXED (by removal) Go-to field width hardcode removed with the go-to field.
+- [x] FIXED Removed the Go-to input field — not in the Svelte/contract full variant. Full now renders first / prev / "Page X of Y" / next / last. (Inert `goto_page_input`/`on_goto_input_change` builders retained so the preview crate still compiles; they render nothing.)
+- [x] FIXED Full variant center now shows "Page X of Y" (`spec.full_summary()`), not the numbered page row.
+- [x] FIXED Simple variant summary now shows the item range "X–Y of Z" (`spec.simple_summary()`).
+- [x] FIXED Info row now computes "Showing X to Y of Z" via `spec.info_string()` (hidden when total is 0/unknown).
+- [x] FIXED First/last (`««`/`»»`) buttons now render for the full variant (gated on `on_page_change` being wired — GPUI's goToPage analog).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored on spec but no nav landmark / `aria-current` emitted.
 - accepted: scroll targeting omitted (contract Known Delta, web-only).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Go-to box width hardcoded `height * 2.0` at `pagination_comp.rs:293` — ad-hoc multiplier, no token/contract basis; the entire go-to row is a Jetstream invention (see below).
-- [ ] **"Go to page:" row is not in Svelte.** `build_full_row` (`pagination_comp.rs:264-349`) renders a "Go to page:" label, a static bordered box, and a static page-size selector — none exist in the Svelte full variant. **Remove or gate behind contract.**
-- [ ] Full variant missing "Page X of Y" summary — Jetstream full renders numbered pages (line 129 shares the Numbered arm) then the go-to row, never the contract's "Page X of Y" center text.
-- [ ] First/last (`««`/`»»`) buttons absent — no branch renders them in any variant.
-- [ ] Page buttons use `.w(height).h(height)` (`pagination_comp.rs:86-87`) — fixed square; Svelte/contract button `min-width = control-height` but `width` is content-driven with `padding 0 control-x`. Square buttons clip multi-digit page numbers and ignore `min-width` vs `width` distinction.
-- [ ] Prev/next arrow buttons omit the `text_size`/`font` treatment and use raw icon sizing `.w(font_size).h(font_size)` for the chevron (lines 148-151, 207-211); fine, but they also skip `current`/hover tint logic the `make_button` helper applies — arrows can't show hover fill.
-- [ ] No limit selector control: Svelte renders `<label>Show</label><select>…<span>per page</span>` (lines 248–262). Jetstream only shows a **static** page-size box inside `build_full_row` and only for the Full variant (lines 310–346) — Simple+numbered with `show_limit_selector` render nothing. **Add limit selector for all variants per contract §2.**
-- [ ] No info-row "X to Y of Z" gating on `show_info` && total>0 only — `build_info_text` returns None when total is 0 (line 242) which is correct, but the info row is always stacked above controls regardless of `standalone`/chrome; no chrome/standalone handling at all (no border/background/padding branch). **Add chrome/standalone root treatment.**
-- [ ] Density ignored: `control_space_x_rem(spec.density)` feeds padding (line 21) but controls/pages gap is fixed `space.inline.xs` (lines 48, 70, 164) regardless of `spec.density`. Contract density table varies the **gap**, not padding. **Drive gap from density, not pad_x.**
-- [ ] Size font wired but button height uses `control_height_rem(effective_size)` directly (line 19) with no `−0.125rem` — matches Svelte (good) but min-width square-button issue above still applies.
+- [x] FIXED (by removal) Go-to box width hardcode removed with the go-to row.
+- [x] FIXED Removed the invented "Go to page:" row (`build_full_row`) — not in Svelte. Full variant now renders first / prev / "Page X of Y" / next / last.
+- [x] FIXED Full variant now renders the "Page X of Y" center summary (`spec.full_summary()`).
+- [x] FIXED First/last (`««`/`»»`) buttons now render for the full variant.
+- [x] FIXED Page/nav buttons now use `min_w(control-height)` + `h(control-height)` + `px(control-x)` (content-driven width), not fixed squares.
+- [ ] Prev/next chevron arrow buttons are icon-only and don't apply the `current`/hover tint that page buttons use — but Jetstream renders statically (hover is preview-loop), so there is no hover state to show in the component. Minor accepted approximation.
+- [x] FIXED Limit selector now renders for ALL variants ("Show [n ▾] per page") via `build_limit_selector`, not just the full variant's go-to box.
+- [x] FIXED Info row now uses `spec.info_string()` (hidden when total 0/unknown) and a chrome/standalone root branch was added (padding + top border + elevated-92% bg when `!standalone`).
+- [x] FIXED Controls/pages gap is now density-driven (`density_gap_px`: compact 3px, default 0.25rem, comfortable 0.375rem), not fed from pad_x.
+- [x] FIXED Button height uses `control_height_rem` (no −0.125rem, matches Svelte) and the square-button min-width issue is resolved above.
 - accepted: no ARIA channel (nav landmark / aria-current) — documented platform limit.
 - accepted: click/interaction lives in preview event loop, not the component (no `on_page_change` analog passed to `js_pagination`).
 

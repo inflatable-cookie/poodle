@@ -164,6 +164,65 @@ impl PaginationSpec {
         matches!(self.variant, PaginationVariant::Full)
     }
 
+    /// Resolved items-per-page, defaulting to 20 (matches Svelte `effectiveLimit`).
+    pub fn effective_limit(&self) -> usize {
+        self.page_size.unwrap_or(20).max(1)
+    }
+
+    /// First item index shown on the current page (1-based). 0 when total is 0.
+    pub fn showing_from(&self) -> usize {
+        match self.total_items {
+            Some(0) => 0,
+            _ => (self.current_page.saturating_sub(1)) * self.effective_limit() + 1,
+        }
+    }
+
+    /// Last item index shown on the current page. Clamped to total when known.
+    pub fn showing_to(&self) -> usize {
+        let raw = self.current_page * self.effective_limit();
+        match self.total_items {
+            Some(total) => raw.min(total),
+            None => raw,
+        }
+    }
+
+    /// Info-row text — "Showing X to Y of Z" (or "Showing X to Y" when total
+    /// is unknown). `None` when total is 0 (the info row is hidden). Matches
+    /// the Svelte info block; an explicit `info_text` override takes precedence.
+    pub fn info_string(&self) -> Option<String> {
+        if let Some(ref text) = self.info_text {
+            return Some(text.clone());
+        }
+        match self.total_items {
+            Some(0) => None,
+            Some(total) => Some(format!(
+                "Showing {} to {} of {}",
+                self.showing_from(),
+                self.showing_to(),
+                total
+            )),
+            None => Some(format!(
+                "Showing {} to {}",
+                self.showing_from(),
+                self.showing_to()
+            )),
+        }
+    }
+
+    /// Simple-variant center summary — item range "X–Y of Z" (or "X–Y" when
+    /// total is unknown). Matches Svelte simple summary.
+    pub fn simple_summary(&self) -> String {
+        match self.total_items {
+            Some(total) => format!("{}–{} of {}", self.showing_from(), self.showing_to(), total),
+            None => format!("{}–{}", self.showing_from(), self.showing_to()),
+        }
+    }
+
+    /// Full-variant center summary — "Page X of Y". Matches Svelte full summary.
+    pub fn full_summary(&self) -> String {
+        format!("Page {} of {}", self.current_page, self.total_pages)
+    }
+
     // Token methods
 
     pub fn button_fill_token(&self) -> &'static str {
@@ -276,5 +335,88 @@ impl PaginationSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ellipsis_truncates_middle_of_range() {
+        // siblingCount=1, current=5 of 20 → 1 … 4 5 6 … 20
+        let spec = PaginationSpec::new()
+            .with_current_page(5)
+            .with_total_pages(20)
+            .with_sibling_count(1);
+        let items = spec.visible_pages();
+        assert_eq!(
+            items,
+            vec![
+                PageItem::Page(1),
+                PageItem::Ellipsis,
+                PageItem::Page(4),
+                PageItem::Page(5),
+                PageItem::Page(6),
+                PageItem::Ellipsis,
+                PageItem::Page(20),
+            ]
+        );
+    }
+
+    #[test]
+    fn few_pages_have_no_ellipsis() {
+        let spec = PaginationSpec::new()
+            .with_current_page(2)
+            .with_total_pages(3);
+        let items = spec.visible_pages();
+        assert_eq!(
+            items,
+            vec![PageItem::Page(1), PageItem::Page(2), PageItem::Page(3)]
+        );
+        assert!(!items.contains(&PageItem::Ellipsis));
+    }
+
+    #[test]
+    fn simple_summary_is_item_range() {
+        // page=3, limit=25, total=248 → showing 51..75
+        let spec = PaginationSpec::new()
+            .with_current_page(3)
+            .with_total_pages(10)
+            .with_page_size(25)
+            .with_total_items(248);
+        assert_eq!(spec.showing_from(), 51);
+        assert_eq!(spec.showing_to(), 75);
+        assert_eq!(spec.simple_summary(), "51–75 of 248");
+        assert_eq!(spec.info_string().as_deref(), Some("Showing 51 to 75 of 248"));
+    }
+
+    #[test]
+    fn full_summary_is_page_of_total() {
+        let spec = PaginationSpec::new()
+            .with_current_page(1)
+            .with_total_pages(7);
+        assert_eq!(spec.full_summary(), "Page 1 of 7");
+    }
+
+    #[test]
+    fn info_hidden_when_total_zero() {
+        let spec = PaginationSpec::new()
+            .with_current_page(1)
+            .with_total_pages(1)
+            .with_total_items(0);
+        assert_eq!(spec.info_string(), None);
+        assert_eq!(spec.showing_from(), 0);
+    }
+
+    #[test]
+    fn showing_to_clamps_to_total_on_last_page() {
+        // total=248, limit=25, page=10 → last item is 248 not 250
+        let spec = PaginationSpec::new()
+            .with_current_page(10)
+            .with_total_pages(10)
+            .with_page_size(25)
+            .with_total_items(248);
+        assert_eq!(spec.showing_to(), 248);
     }
 }

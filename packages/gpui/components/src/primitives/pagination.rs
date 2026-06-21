@@ -15,12 +15,11 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ChoiceOption, ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec,
-    SelectSpec, SemanticControlSizeRole, TextInputSpec,
+    SelectSpec, SemanticControlSizeRole,
 };
 
 use super::icon::Icon;
 use super::select::Select;
-use super::text_input::TextInput;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
@@ -42,12 +41,18 @@ pub struct Pagination {
     disabled_opacity: f32,
     radius: Pixels,
     button_height: Pixels,
+    /// Contract `.pagination__button` min-width = `var(--poodle-size-control-height)`.
+    button_min_width: Pixels,
     font_size: Pixels,
     button_padding: Pixels,
     // Callback
     on_page_change: Option<std::rc::Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
-    /// Displayed value for the Full variant "go to page" field. When empty, shows `current_page`.
+    /// Retained for the preview builder API only. The Full variant no longer
+    /// renders a "go to page" field (it is not in the Svelte/contract surface —
+    /// Full shows prev / "Page X of Y" / next + first/last); these are inert.
+    #[allow(dead_code)]
     goto_page_input: String,
+    #[allow(dead_code)]
     on_goto_input_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     limit_selector_open: bool,
     on_limit_open_change:
@@ -87,6 +92,8 @@ impl Pagination {
         // Contract: height = control-height + size offset - 0.125rem
         let button_height =
             base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(rem_to_px(0.125));
+        // Contract: min-width = control-height (per size, no −0.125rem).
+        let button_min_width = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let base_pad = resolve_px(theme, "space.control.x");
         let button_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
@@ -104,6 +111,7 @@ impl Pagination {
             disabled_opacity: resolve_opacity(theme, spec.disabled_opacity_token()),
             radius: resolve_radius(theme, spec.radius_token()),
             button_height,
+            button_min_width,
             font_size,
             button_padding,
             spec,
@@ -228,8 +236,8 @@ impl Pagination {
             .flex()
             .items_center()
             .justify_center()
-            // Contract: min-width 2.25rem
-            .min_w(px(rem_to_px(2.25)))
+            // Contract: min-width = control-height
+            .min_w(self.button_min_width)
             .h(button_height)
             .px(self.button_padding)
             .bg(fill)
@@ -345,7 +353,7 @@ impl Pagination {
             .flex()
             .items_center()
             .justify_center()
-            .min_w(px(rem_to_px(2.25))) // 2.25rem
+            .min_w(self.button_min_width) // contract: min-width = control-height
             .h(button_height)
             .px(self.button_padding)
             .bg(fill)
@@ -400,8 +408,6 @@ impl IntoElement for Pagination {
     fn into_element(self) -> Self::Element {
         use poodle_specs::PaginationVariant;
 
-        let goto_page_input = self.goto_page_input.clone();
-        let on_goto_input_change = self.on_goto_input_change.clone();
         let limit_selector_open = self.limit_selector_open;
         let on_limit_open_change = self.on_limit_open_change.clone();
         let on_page_size_change = self.on_page_size_change.clone();
@@ -410,7 +416,6 @@ impl IntoElement for Pagination {
         let is_first = self.spec.is_first_page();
         let is_last = self.spec.is_last_page();
         let current_page = self.spec.current_page;
-        let total_pages = self.spec.total_pages;
         let theme = &self.theme;
 
         let text_secondary = crate::theme_ext::resolve_color(theme, "color.text.secondary");
@@ -460,29 +465,17 @@ impl IntoElement for Pagination {
                 .py(pad_y);
         }
 
-        // Info text block — gated on show_info.
-        if self.spec.show_info && (self.spec.info_text.is_some() || self.spec.page_size.is_some()) {
-            let mut info = div().flex().items_center().gap(gap_md);
-
-            if let Some(ref text) = self.spec.info_text {
-                info = info.child(
+        // Info row — Svelte "Showing X to Y of Z". Hidden when total is 0/unknown
+        // (info_string returns None). Gated on show_info.
+        if self.spec.show_info {
+            if let Some(text) = self.spec.info_string() {
+                root = root.child(
                     div()
                         .text_size(label_size)
                         .text_color(text_secondary)
-                        .child(text.clone()),
+                        .child(text),
                 );
             }
-
-            if let Some(page_size) = self.spec.page_size {
-                info = info.child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child(format!("{page_size} per page")),
-                );
-            }
-
-            root = root.child(info);
         }
 
         // Limit selector — contract order: before primary controls. Interactive when
@@ -561,143 +554,75 @@ impl IntoElement for Pagination {
             }
         }
 
-        // Prev button — label differs between simple and numbered variants.
-        let prev_page = if current_page > 1 {
-            current_page - 1
-        } else {
-            1
-        };
-        let prev_id = "poodle-pg-prev";
+        let is_full = matches!(self.spec.variant, PaginationVariant::Full);
+        let prev_page = current_page.saturating_sub(1).max(1);
+        let next_page = (current_page + 1).min(self.spec.total_pages);
+
+        // First button (`««`) — full variant only, when navigation is wired.
+        // GPUI's on_page_change is the goToPage analog (contract: shown when
+        // controller has goToPage).
+        if is_full && self.on_page_change.is_some() {
+            root = root.child(self.render_text_nav_button("««", is_first, 1, "poodle-pg-first"));
+        }
+
+        // Prev button — chevron for numbered/full, "Prev" text for simple.
         if self.spec.is_simple() {
-            root = root.child(self.render_text_nav_button("Prev", is_first, prev_page, prev_id));
+            root = root.child(self.render_text_nav_button("Prev", is_first, prev_page, "poodle-pg-prev"));
         } else {
-            root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, prev_id));
+            root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, "poodle-pg-prev"));
         }
 
-        // Numbered pages only render on Numbered and Full variants.
-        if !self.spec.is_simple() {
-            let mut pages_container = div().flex().flex_row().items_center().gap(gap_sm); // 0.25rem
-
-            for item in &visible {
-                match item {
-                    PageItem::Page(page) => {
-                        pages_container = pages_container.child(self.render_page_button(*page));
-                    }
-                    PageItem::Ellipsis => {
-                        pages_container = pages_container.child(self.render_ellipsis());
-                    }
-                }
-            }
-
-            root = root.child(pages_container);
-        } else {
-            // Simple variant: show "Page X of Y" text between prev/next.
-            root = root.child(
-                div()
-                    .text_size(label_size)
-                    .text_color(text_secondary)
-                    .child(format!(
-                        "Page {} of {}",
-                        current_page, self.spec.total_pages
-                    )),
-            );
-        }
-
-        // Next button
-        let next_page = if current_page < self.spec.total_pages {
-            current_page + 1
-        } else {
-            self.spec.total_pages
-        };
-        let next_id = "poodle-pg-next";
-        if self.spec.is_simple() {
-            root = root.child(self.render_text_nav_button("Next", is_last, next_page, next_id));
-        } else {
-            root = root.child(self.render_nav_button("chevron-right", is_last, next_page, next_id));
-        }
-
-        // Full variant: "Go to page" — interactive when parent wires draft + handlers.
-        if matches!(self.spec.variant, PaginationVariant::Full) {
-            let goto_display = if goto_page_input.is_empty() {
-                current_page.to_string()
-            } else {
-                goto_page_input.clone()
-            };
-            let interactive_goto = on_goto_input_change.is_some()
-                && self.on_page_change.is_some()
-                && !self.spec.is_loading;
-
-            if interactive_goto {
-                let input_spec = TextInputSpec::new()
-                    .with_value(goto_display)
-                    .with_aria_label("Go to page")
-                    .with_id("poodle-pg-goto")
-                    .with_size(self.spec.size)
-                    .with_size_role(self.spec.size_role)
-                    .with_density(self.spec.density);
-
-                let on_draft = on_goto_input_change.clone();
-                let on_jump = self.on_page_change.clone();
-                let min_w_field = crate::theme_ext::resolve_px(theme, "size.control.minWidth")
-                    .max(px(rem_to_px(3.0)));
-
-                let mut goto_input = TextInput::from_spec(input_spec, theme)
-                    .with_id("pg-goto")
-                    .on_change(move |s, window, cx| {
-                        if let Some(ref h) = on_draft {
-                            h(s, window, cx);
+        // Center content — variant-specific.
+        match self.spec.variant {
+            PaginationVariant::Numbered => {
+                let mut pages_container = div().flex().flex_row().items_center().gap(gap_sm);
+                for item in &visible {
+                    match item {
+                        PageItem::Page(page) => {
+                            pages_container = pages_container.child(self.render_page_button(*page));
                         }
-                    });
-
-                if let Some(ref jump) = on_jump {
-                    let jump = jump.clone();
-                    goto_input = goto_input.on_submit(move |s, window, cx| {
-                        let page: usize = s.trim().parse().unwrap_or(current_page);
-                        let clamped = page.max(1).min(total_pages);
-                        jump(&clamped, window, cx);
-                    });
+                        PageItem::Ellipsis => {
+                            pages_container = pages_container.child(self.render_ellipsis());
+                        }
+                    }
                 }
-
+                root = root.child(pages_container);
+            }
+            PaginationVariant::Full => {
+                // Contract: full center summary = "Page X of Y".
                 root = root.child(
                     div()
-                        .flex()
-                        .items_center()
-                        .gap(gap_md)
-                        .child(
-                            div()
-                                .text_size(label_size)
-                                .text_color(text_secondary)
-                                .child("Go to"),
-                        )
-                        .child(div().w(min_w_field).child(goto_input)),
-                );
-            } else {
-                root = root.child(
-                    div()
-                        .flex()
-                        .items_center()
-                        .gap(gap_md)
-                        .child(
-                            div()
-                                .text_size(label_size)
-                                .text_color(text_secondary)
-                                .child("Go to"),
-                        )
-                        .child(
-                            div()
-                                .min_w(px(rem_to_px(3.0)))
-                                .h(self.button_height)
-                                .px(gap_md)
-                                .border_1()
-                                .border_color(border_color)
-                                .rounded(radius_control)
-                                .flex()
-                                .items_center()
-                                .text_size(label_size)
-                                .child(format!("{current_page}")),
-                        ),
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(self.spec.full_summary()),
                 );
             }
+            PaginationVariant::Simple => {
+                // Contract: simple center summary = item range "X–Y of Z".
+                root = root.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(self.spec.simple_summary()),
+                );
+            }
+        }
+
+        // Next button — chevron for numbered/full, "Next" text for simple.
+        if self.spec.is_simple() {
+            root = root.child(self.render_text_nav_button("Next", is_last, next_page, "poodle-pg-next"));
+        } else {
+            root = root.child(self.render_nav_button("chevron-right", is_last, next_page, "poodle-pg-next"));
+        }
+
+        // Last button (`»»`) — full variant only, when navigation is wired.
+        if is_full && self.on_page_change.is_some() {
+            root = root.child(self.render_text_nav_button(
+                "»»",
+                is_last,
+                self.spec.total_pages,
+                "poodle-pg-last",
+            ));
         }
 
         root.into_any_element()
