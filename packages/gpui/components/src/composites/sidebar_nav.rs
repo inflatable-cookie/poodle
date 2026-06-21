@@ -10,7 +10,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_specs::{SidebarNavGroup, SidebarNavSpec};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{
     focus_ring_shadow, resolve_color, resolve_opacity, resolve_radius,
 };
@@ -85,42 +85,29 @@ impl IntoElement for SidebarNav {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        // ── Active-state alpha factors (contract color-mix percentages) ───
+        const ACTIVE_BG_ALPHA: f32 = 0.10; // accent-base @ 10%
+        const ACTIVE_RING_ALPHA: f32 = 0.20; // inset ring accent-base @ 20%
+        const HOVER_BG_ALPHA: f32 = 0.60; // elevated @ 60%
+        const SEPARATOR_ALPHA: f32 = 0.54; // border-subtle @ 54%
 
-        // ── Size-dependent layout (from Svelte CSS) ───────────────
-        let (item_height, item_font, title_font) = match effective_size {
-            ControlSize::Xs => (rem_to_px(1.375), rem_to_px(0.6875), rem_to_px(0.46875)),
-            ControlSize::Sm => (rem_to_px(1.625), rem_to_px(0.75), rem_to_px(0.5)),
-            ControlSize::Md => (rem_to_px(1.875), rem_to_px(0.8125), rem_to_px(0.5625)),
-            ControlSize::Lg => (rem_to_px(2.125), rem_to_px(0.875), rem_to_px(0.59375)),
-            ControlSize::Xl => (rem_to_px(2.375), rem_to_px(0.9375), rem_to_px(0.625)),
-        };
+        // ── Size / density geometry (contract §8 tables, token-resolved rem) ─
+        let item_height = rem_to_px(spec.item_height_rem());
+        let item_font = rem_to_px(spec.item_font_rem());
+        let title_font = rem_to_px(spec.title_font_rem());
 
-        // ── Density-dependent spacing (from Svelte CSS) ───────────
-        let (group_gap, item_pad_x, item_pad_y, title_spacing, title_gap) = match spec.density {
-            ControlDensity::Compact => (
-                rem_to_px(0.625),
-                rem_to_px(0.5),
-                rem_to_px(0.3125),
-                0.2_f32, // letter-spacing em
-                rem_to_px(0.125),
-            ),
-            ControlDensity::Default => (
-                rem_to_px(0.75),
-                rem_to_px(0.75),
-                rem_to_px(0.375),
-                0.18_f32,
-                rem_to_px(0.1875),
-            ),
-            ControlDensity::Comfortable => (
-                rem_to_px(0.875),
-                rem_to_px(0.875),
-                rem_to_px(0.4375),
-                0.16_f32,
-                rem_to_px(0.25),
-            ),
-        };
-        let _ = title_spacing; // GPUI does not have letter-spacing; used in Svelte only
+        let group_gap = rem_to_px(spec.group_gap_rem());
+        let item_pad_x = rem_to_px(spec.item_pad_inline_rem());
+        let item_pad_y = rem_to_px(spec.item_pad_block_rem());
+        let title_gap = rem_to_px(spec.title_gap_rem());
+        // Contract group internal gap `0.3125rem`; list gap `0.125rem`;
+        // separator margin-top `0.125rem`; rail width `0.1875rem` (3px).
+        let group_internal_gap = rem_to_px(0.3125);
+        let list_gap = rem_to_px(0.125);
+        let separator_mt = rem_to_px(0.125);
+        let item_radius_offset = rem_to_px(0.125); // calc(radius-control - 0.125rem)
+        // Root horizontal padding (contract `0.375rem`).
+        let nav_pad_x = rem_to_px(0.375);
 
         // ── Token resolution ──────────────────────────────────────
         let item_color = resolve_color(theme, spec.item_color_token());
@@ -129,46 +116,55 @@ impl IntoElement for SidebarNav {
         let separator_color = resolve_color(theme, spec.separator_color_token());
         let active_indicator_color = resolve_color(theme, spec.active_indicator_color_token());
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
-        let elevated_bg = resolve_color(theme, "color.background.elevated");
-        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let hover_fill = resolve_color(theme, spec.hover_fill_token());
+        let active_fill = resolve_color(theme, spec.active_fill_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let control_radius = resolve_radius(theme, "radius.control");
-        let item_radius = control_radius - px(2.0); // contract: calc(radius-control - 0.125rem)
+        let item_radius = (control_radius - px(item_radius_offset)).max(px(0.0));
 
-        // Active item background: accent at 10% (alpha reduction only)
-        let active_bg = Hsla { a: active_indicator_color.a * 0.10, ..active_indicator_color };
-        // Hover background: elevated at 60% (alpha reduction only)
-        let hover_bg = Hsla { a: elevated_bg.a * 0.60, ..elevated_bg };
+        // Active item background: accent at 10%; inset ring accent at 20%.
+        let active_bg = Hsla { a: active_fill.a * ACTIVE_BG_ALPHA, ..active_fill };
+        let active_ring = Hsla { a: active_fill.a * ACTIVE_RING_ALPHA, ..active_fill };
+        // Hover background: elevated at 60%.
+        let hover_bg = Hsla { a: hover_fill.a * HOVER_BG_ALPHA, ..hover_fill };
 
         let visible_groups = spec.visible_groups();
         let multi_group = visible_groups.len() > 1;
 
         // ── Root nav container ────────────────────────────────────
+        // Contract root padding: `var(--space-panel-y) 0.375rem`.
+        // space-panel-y is density-driven (compact 0.5 / default 0.75 / comfortable 1rem).
         let panel_y = rem_to_px(match spec.density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,
         });
-
-        // Svelte: nav has 0.375rem (6px) horizontal padding
         let mut nav = div()
             .flex()
             .flex_col()
             .gap(px(group_gap))
             .min_w(px(0.0))
             .py(px(panel_y))
-            .px(px(rem_to_px(0.375)));
+            .px(px(nav_pad_x));
 
         for (group_idx, group) in visible_groups.iter().enumerate() {
-            // Svelte: group section internal gap = 2px (title → list)
-            let mut section = div().flex().flex_col().gap(px(2.0)).min_w(px(0.0));
+            // Contract group section internal gap = 0.3125rem (title → list).
+            let mut section = div()
+                .flex()
+                .flex_col()
+                .gap(px(group_internal_gap))
+                .min_w(px(0.0));
 
-            // Separator between groups
+            // Separator between groups: top border + top padding.
             if multi_group && group_idx > 0 {
                 section = section
-                    .mt(px(2.0))
-                    .pt(px(group_gap - 2.0))
+                    .mt(px(separator_mt))
+                    .pt(px(group_gap - separator_mt))
                     .border_t_1()
-                    .border_color(Hsla { a: separator_color.a * 0.54, ..separator_color });
+                    .border_color(Hsla {
+                        a: separator_color.a * SEPARATOR_ALPHA,
+                        ..separator_color
+                    });
             }
 
             // Group title
@@ -185,21 +181,27 @@ impl IntoElement for SidebarNav {
                 );
             }
 
-            // Items list
-            let mut list = div().flex().flex_col().gap(px(2.0)).min_w(px(0.0));
+            // Items list (contract list gap 0.125rem)
+            let mut list = div().flex().flex_col().gap(px(list_gap)).min_w(px(0.0));
 
             for item in &group.items {
                 let is_active = spec.is_active(&item.value);
                 let item_id = SharedString::from(format!("sidebar-nav-{}", item.value));
 
+                // Reserve a 3px (0.1875rem) left border on every item so active
+                // ↔ inactive does not shift horizontally; transparent until active.
+                // Contract: active indicator is a LEFT BORDER on the item itself.
                 let mut el = div()
                     .id(item_id)
                     .focusable()
+                    .relative()
                     .w_full()
                     .min_w(px(0.0))
                     .min_h(px(item_height))
                     .px(px(item_pad_x))
                     .py(px(item_pad_y))
+                    .border_l_3()
+                    .border_color(gpui::transparent_black())
                     .rounded(item_radius)
                     .bg(gpui::transparent_black())
                     .text_color(item_color)
@@ -215,10 +217,22 @@ impl IntoElement for SidebarNav {
                 el = el.focus(move |s| s.shadow(focus_ring_shadow(fr)));
 
                 if is_active {
+                    // Active: accent left rail + bg fill + bolder weight, plus an
+                    // inset accent@20% ring emulated as a full-bleed bordered overlay
+                    // (GPUI BoxShadow has no inset variant).
                     el = el
                         .text_color(item_active_color)
                         .font_weight(FontWeight::SEMIBOLD)
-                        .bg(active_bg);
+                        .bg(active_bg)
+                        .border_color(active_indicator_color)
+                        .child(
+                            div()
+                                .absolute()
+                                .inset_0()
+                                .border_1()
+                                .border_color(active_ring)
+                                .rounded(item_radius),
+                        );
                 }
 
                 if item.is_disabled {
@@ -238,22 +252,6 @@ impl IntoElement for SidebarNav {
                             handler(&val, window, cx);
                         });
                     }
-                }
-
-                // Active indicator rail (left accent bar)
-                if is_active {
-                    let indicator = active_indicator_color;
-                    el = el.relative().child(
-                        div()
-                            .absolute()
-                            .left(px(2.0))
-                            .top(px(4.0))
-                            .bottom(px(4.0))
-                            // Svelte: left border = 3px (0.1875rem)
-                            .w(px(3.0))
-                            .rounded(px(999.0))
-                            .bg(indicator),
-                    );
                 }
 
                 el = el.child(item.label.clone());

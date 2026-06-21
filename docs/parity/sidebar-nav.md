@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=ok pass=41 -->
 # Parity: SidebarNav
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,28 +28,28 @@ Class-name prefix divergence + one callback-naming divergence. Svelte is authori
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded item-radius offset `px(2.0)` at `sidebar_nav.rs:135` (`control_radius - px(2.0)`) — contract item radius is `calc(radius-control - 0.125rem)`; resolve `0.125rem` via `rem_to_px(0.125)`, not raw `2.0`.
-- [ ] Hardcoded section/separator magic numbers at `sidebar_nav.rs:163,167,171,189` — group internal gap `px(2.0)`, separator `mt px(2.0)`, `pt px(group_gap - 2.0)`, list gap `px(2.0)`. Contract: group gap `0.3125rem`, list gap `0.125rem`, separator margin-top `0.125rem`, pad-top `calc(group-gap - 0.125rem)`. Replace each `2.0` with `rem_to_px(...)` of the contract rem value; group gap should be `rem_to_px(0.3125)` not `2.0`.
-- [ ] Hardcoded active-rail indicator literals at `sidebar_nav.rs:249-254` — `left(px(2.0))`, `top(px(4.0))`, `bottom(px(4.0))`, `w(px(3.0))`, `rounded(px(999.0))`. Width should be `rem_to_px(0.1875)` (contract 3px left border); the inset/pill (4px insets, 999 radius) is a GPUI-only invention not in contract — either token-resolve or document as Known Delta.
-- [ ] Missing active inset box-shadow — contract §8 `.sidebar-nav__item--active` requires `box-shadow: inset 0 0 0 0.0625rem accent@20%`; GPUI applies only `bg(active_bg)` + rail (`sidebar_nav.rs:217-222`), no inset border shadow. Add an inset ring (accent at 0.20 alpha).
-- [ ] Active background alpha hardcoded `* 0.10` and hover `* 0.60` at `sidebar_nav.rs:138,140` and separator `* 0.54` at `:171` — these alpha factors are magic float literals; contract derives them from `color-mix` percentages (10%, 60%, 54%). Acceptable as literal-from-contract but flag: lift to named consts so they trace to contract values.
-- [ ] Active rail uses absolute-positioned child pill instead of a left border on the item itself — contract §8 note + §10 GPUI Notes mandate "active indicator is a left border (not a pseudo-element)". GPUI renders a separate `absolute` div (`sidebar_nav.rs:246-256`). Switch to `border_l` + `border_color` on the item to match contract intent (also removes the `top/bottom px(4.0)` magic insets).
+- [x] FIXED item-radius offset — `control_radius - px(rem_to_px(0.125))` (contract `calc(radius-control - 0.125rem)`); raw `2.0` gone.
+- [x] FIXED section/separator magic numbers — group internal gap `rem_to_px(0.3125)`, list gap `rem_to_px(0.125)`, separator `mt rem_to_px(0.125)` + `pt (group_gap - separator_mt)`. All keyed off the spec's contract §8 density helpers (`group_gap_rem`, etc.).
+- [x] FIXED active rail — now a 3px (`rem_to_px(0.1875)`) **left border** on the item itself via `border_l_3()` + `border_color(accent)`, with a transparent 3px left border reserved on inactive items. The absolute pill (4px insets, 999 radius) is gone.
+- [x] FIXED active inset box-shadow — contract `inset 0 0 0 0.0625rem accent@20%` rendered as a full-bleed absolutely-positioned `inset_0` child with a 1px border at accent@20% (GPUI `BoxShadow` has no inset variant — this is the faithful substitute).
+- [x] FIXED alpha factors — `ACTIVE_BG_ALPHA 0.10`, `ACTIVE_RING_ALPHA 0.20`, `HOVER_BG_ALPHA 0.60`, `SEPARATOR_ALPHA 0.54` are now named consts tracing to contract color-mix percentages; hover/active/separator fills resolve from `hover_fill_token`/`active_fill_token`/`separator_color_token`.
+- [x] FIXED size table keys off raw `data-size` (Svelte CSS behavior), not the chrome-resolved size — was rendering Sm geometry for a Md sidebar. Item/font/title resolve from `spec.item_height_rem`/`item_font_rem`/`title_font_rem` (raw size).
 - accepted: no ARIA (gpui has no accessibility API) — `aria-current="page"`, nav role, group `aria-label`, native `disabled` not emitted.
-- accepted: letter-spacing for group titles dropped (`title_spacing` discarded at `sidebar_nav.rs:123`; GPUI has no letter-spacing API).
+- accepted: letter-spacing for group titles dropped (GPUI has no letter-spacing API).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] **DONE: item height across all 5 sizes** — added `sidebar_item_height_rem(size)` (xs 1.375 / sm 1.625 / md 1.875 / lg 2.125 / xl 2.375) and use it instead of `control_height_rem`. Probe-verified the rendered item height matches the sidebar table. (GPUI has the same bug — should adopt the same values, ideally via a shared `poodle-specs` helper.)
-- [ ] **Group gap wrong / not density-scaled** — `sidebar_nav.rs:24` uses `resolve_px(theme, "space.stack.md")` (single fixed token) but contract §8 Density table requires group-gap = 0.625/0.75/0.875rem per compact/default/comfortable. Resolve per-density from the density value, not a fixed stack token.
-- [ ] **Missing horizontal nav padding** — `sidebar_nav.rs:42-46` root sets only `pt/pb(pad_y)`, no horizontal padding. Contract §8 root `padding: var(--space-panel-y) 0.375rem`. Add `pl/pr(rem_to_px(0.375))`.
-- [ ] **Group internal gap wrong** — `sidebar_nav.rs:49` uses `gap(rem_to_px(0.3125))` (correct value) but item-list gap at `:73` uses `item_gap = rem_to_px(0.125)` (correct). OK — but title→list gap is collapsed: title uses `mb(title_mb=0.1875)` (`:26,68`) which is hardcoded for default density only; contract title-gap is density-scaled (0.125/0.1875/0.25rem). Scale `title_mb` by density.
-- [ ] **Separator pad/margin hardcoded + wrong shape** — `sidebar_nav.rs:53-58` renders a standalone 1px divider child with `mb(rem_to_px(0.25))`, no top spacing/pad. Contract §8 separator = `margin-top 0.125rem` + `padding-top calc(group-gap - 0.125rem)` + `border-top` on the group itself. Reimplement as top border + top padding on the group element (matching Svelte adjacent-sibling rule), not a floating divider div.
-- [ ] **Missing active inset box-shadow** — `sidebar_nav.rs:88-94` active branch sets bg + left border only; contract requires `box-shadow inset 0 0 0 0.0625rem accent@20%`. Add inset ring if JsEl supports it.
-- [ ] **Missing hover state** — no `.hover(...)` treatment; contract §4/§8 hover = text-primary + elevated@60% bg. Jetstream items have no hover branch (`sidebar_nav.rs:102-106` only handles disabled/enabled focusable). Add hover styling.
-- [ ] **Missing focus ring** — contract §6/§8 focus-visible = `border-width-focus solid accent-focusRing`, offset 0.125rem. Jetstream sets `.focusable()` (`:105`) but no focus-ring shadow/outline. Add focus-ring resolution (cf. GPUI `focus_ring_shadow`).
-- [ ] **`tint(accent, 0.10)` / `tint(separator, 0.54)` alpha literals** at `sidebar_nav.rs:92,57` — magic factors; trace to contract color-mix percentages (10%, 54%) via named consts.
-- [ ] **No `value` / no `onValueChange` wiring** — `js_sidebar_nav` renders only; selection is not flipped and no callback exists. The specimen (`jetstream/.../sidebar_nav.rs`) passes a static `with_value("projects")` and never updates it — selection is not interactive. Note whether the preview main.rs event loop is expected to own click→reselect; currently absent.
-- [ ] **No item radius parity check on left-border item** — active item uses `border_l(2.0)` (`:93`) but contract left border is `0.1875rem` (3px), and inactive items get no transparent left border (so active/inactive shift horizontally by 2px). Use `rem_to_px(0.1875)` and reserve a transparent left border on inactive items to prevent layout shift.
+- [x] DONE item height across all 5 sizes — now `spec.item_height_rem()` (xs 1.375 / sm 1.625 / md 1.875 / lg 2.125 / xl 2.375), promoted to a shared `poodle-specs` helper keyed off raw `data-size` (both targets use it). Probe-verified md = 30px, not control-height 36px.
+- [x] FIXED group gap density-scaled — `rem_to_px(spec.group_gap_rem())` (0.625/0.75/0.875rem), not a fixed `space.stack.md` token.
+- [x] FIXED horizontal nav padding — root now `pl/pr(rem_to_px(0.375))` (contract `padding: var(--space-panel-y) 0.375rem`); panel-y density-driven.
+- [x] FIXED title→list gap density-scaled — title `mb(rem_to_px(spec.title_gap_rem()))` (0.125/0.1875/0.25rem).
+- [x] FIXED separator shape — reimplemented as `border_t_1()` + `mt(0.125rem)` + `pt(group_gap - 0.125rem)` on the group element (Svelte adjacent-sibling rule), not a floating divider div.
+- [x] FIXED active inset box-shadow — emulated as a 1px all-side border at accent@20% (`tint(accent, 0.20)`) plus the 3px accent left rail; JsEl has no inset shadow.
+- [x] FIXED hover state — `.hover(|s| s.text_color(text-primary).bg(elevated@60%))` (contract §4/§8).
+- [x] FIXED focus ring — `.active(|s| s.border_color(accent-focusRing))` resolves the focus-ring color (probe captures layout only, so verified by construction; runtime focus styling owned by the loop).
+- [x] FIXED alpha literals — `ACTIVE_BG_ALPHA 0.10`, `ACTIVE_RING_ALPHA 0.20`, `HOVER_BG_ALPHA 0.60`, `SEPARATOR_ALPHA 0.54` named consts tracing to contract color-mix percentages.
+- [x] FIXED left-border parity — active rail `border_l(rem_to_px(0.1875))` (3px) + `border_color_left(accent)`; inactive items reserve a transparent 3px left border (no shift). Per-side border widths are draw-only in Jetstream layout, so no geometry shift regardless.
+- [ ] No `value` / `onValueChange` wiring — `js_sidebar_nav` renders the active state for the current `value` but click→reselect lives in the preview `main.rs` event loop (still absent). Note.
 - accepted: no ARIA channel (`aria-current`, nav role, group `aria-label`) — documented platform limit.
 - accepted: interaction (click→select) lives in preview event loop, not the component.
 
@@ -57,7 +57,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers (`SidebarNavSpecimen.svelte`): single-group plain list, multi-group with titles + separator, active item, sizes snippet (all 5 via SpecimenLayout), densities snippet (all 3), interactive `onValueChange` reselection. **No disabled-item specimen** — contract §12 "Disabled Items" specimen is not demonstrated in Svelte either.
 - GPUI covers (`gpui/.../sidebar_nav.rs`): single-group catalogue, grouped verification nav, active item. — missing: **sizes**, **densities**, **disabled item**, interactive reselection (no `on_select` wired in specimen).
-- Jetstream covers (`jetstream/.../sidebar_nav.rs`): grouped (Workspace/Settings) with active item, no-selection variant, **one disabled item** (Team). — missing: **single untitled group / plain list**, **sizes**, **densities**, interactive reselection.
+- Jetstream covers (`jetstream/.../sidebar_nav.rs`): **plain list** (single untitled group, active item), grouped (Workspace/Settings) with active item + **one disabled item** (Team), no-selection variant. Probe tests cover item-height (sidebar table, not control-height), group-title uppercasing + item labels, active accent@10% background, title-font < item-font, and disabled item presence. — still missing: **sizes**/**densities** grids, interactive reselection (preview-loop).
 
 ## Notes
 
@@ -65,3 +65,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - No component references icons, badges, or counts — the prompt's "may compose sub-parts (icons/badges/counts)" does not apply; SidebarNav anatomy is label-only per contract §2.
 - Biggest single Jetstream bug: item height pulled from `control_height_rem` instead of the contract's sidebar-specific height table — every size is too tall (Md 2.25rem vs 1.875rem).
 - `consv=fixed`: the cosmetic/documentation drivers are resolved (`poodle-` class prefix added throughout §2/§8; `onValueChange` and bindable-`value` documented in §3). Anatomy, states, ARIA, and token tables all match Svelte.
+- Pass 41: promoted the size/density tables to additive `SidebarNavSpec` helpers so both targets resolve from one place — `item_height_rem`/`item_font_rem`/`title_font_rem` (keyed off raw `data-size`, matching Svelte CSS), `group_gap_rem`/`item_pad_inline_rem`/`item_pad_block_rem`/`title_gap_rem`, plus token methods (`hover_fill`/`active_fill`/`disabled_opacity`) and `effective_size`. Unit-tested in poodle-specs. No token gaps. Both targets rebuilt: GPUI active rail = real left border + inset-ring overlay; Jetstream uses per-side border widths/colors for rail + ring. Known Delta: neither target supports a native CSS-style inset box-shadow, so the ring is a 1px border substitute.

@@ -13,14 +13,24 @@ use std::sync::{Arc, Mutex};
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::SliderSpec;
+use poodle_specs::{ControlSize, SliderSpec};
 
-use poodle_adapter::ThemeProvider;
-
-use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 static SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// Thumb diameter in rem per the contract §8 size table (matches Svelte +
+/// the Jetstream target). lg/xl scale up from the md 1rem base.
+fn thumb_diameter_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
 
 /// A real GPUI slider component backed by `SliderSpec`.
 pub struct Slider {
@@ -145,9 +155,13 @@ impl IntoElement for Slider {
         // the fixed value is retained to match the Svelte reference exactly.
         let track_f: f32 = rem_to_px(0.375); // 6 px
         let track_height = px(track_f);
-        let track_radius = px(999.0); // Svelte: border-radius: 999px (full pill)
+        // Full pill radius resolved from the radius.pill token (not a 999.0 literal).
+        let track_radius = resolve_radius(theme, "radius.pill");
 
-        let thumb_f = theme.resolve_space("size.icon.md");
+        // Thumb diameter from the contract §8 size table (resolves per spec.size),
+        // not a fixed size.icon.md — xs/sm/lg/xl now render their own diameter.
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let thumb_f: f32 = rem_to_px(thumb_diameter_rem(effective_size));
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
 
@@ -187,11 +201,15 @@ impl IntoElement for Slider {
                     .bg(elevated_bg)
                     .border_1()
                     .border_color(border)
-                    // Svelte: 0 0.125rem 0.5rem shadow
+                    // Contract §8 thumb box-shadow: 0 0.125rem 0.5rem
+                    // color-mix(black 18%, transparent). Offset/blur resolve from
+                    // rem; the black@0.18 has no dedicated shadow token (the
+                    // elevation.* tokens use a different color + offsets), so it
+                    // is the one noted literal here — see parity doc Notes.
                     .shadow(vec![gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.18),
-                        offset: point(px(0.0), px(2.0)),
-                        blur_radius: px(8.0),
+                        offset: point(px(0.0), px(rem_to_px(0.125))),
+                        blur_radius: px(rem_to_px(0.5)),
                         spread_radius: px(0.0),
                     }]),
             );

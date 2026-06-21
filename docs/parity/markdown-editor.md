@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=11 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=ok pass=41 -->
 # Parity: MarkdownEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,39 +25,39 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded tool-button dims — `.w(px(28.0)).h(px(28.0))` at `markdown_editor.rs:111-112`. Contract §8 tool size varies by size (`1.5/1.75/2/2.25/2.5rem`); resolve from a size-scaled token, drop literal `28.0`.
-- [ ] Hardcoded toolbar vertical padding `.py(px(6.0))` at `markdown_editor.rs:193`; contract toolbar-Y is density-driven (`0.25/0.375/0.5rem`). Resolve from density token.
-- [ ] Hardcoded tool/mode gap `.gap(px(2.0))` at `markdown_editor.rs:197` and `218`; contract tool gap density-driven (`0.0625/0.125/0.1875rem`). Resolve from density token.
-- [ ] Hardcoded separator dims — `.w(px(1.0)).h(px(16.0))` at `markdown_editor.rs:150`; also the separator itself is not in contract anatomy (§2) — remove the invented separator or justify it.
-- [ ] Split divider hardcoded `.w(px(1.0))` at `markdown_editor.rs:298`; contract uses `border-right: 0.0625rem` on the textarea. Use a border, resolved width.
-- [ ] Pane padding uses `panel_space_x/y_rem(density)` (`markdown_editor.rs:81-82`) not the contract pane-X/pane-Y density table (`0.625/0.75/0.875rem`). Resolve from the dedicated pane density values.
-- [ ] `min_height` parse only strips `"px"` (`markdown_editor.rs:128-133`) and falls back to `200.0`; contract `minHeight` default is `"12rem"` and is a CSS length. Parse rem, default to `12rem`-equivalent.
-- [ ] Edit pane is a non-editable `div` rendering `display.to_string()` with ad-hoc key-event char appending (`markdown_editor.rs:248-288`) — not a real textarea; no selection, no toolbar insertion, no monospace font-family from `typography.code.family`. Accepted as runtime limit BUT font-family + placeholder color tokens are still missing.
-- [ ] Tool buttons missing `aria-label`/`title` and are not disabled in preview mode — contract §6 requires per-action aria-label + native disabled in preview; GPUI `toolbar_btn` (`markdown_editor.rs:108-122`) emits neither label nor disabled state.
-- [ ] Toolbar formatting buttons are inert — no `on_click` wired to insert markdown syntax (contract §5 / Tier-1 "toolbar actions produce correct markdown"). Only mode buttons have handlers.
-- [ ] Preview pane renders raw markdown text, not rendered HTML elements (h1/h2/code/blockquote styling from contract §8 "Preview Rendered Elements" all absent). Accepted as Tier-3 rendering freedom only if a renderer is plugged; currently shows source text — note as visual gap.
+- [x] FIXED tool-button dims — now `px(rem_to_px(spec.tool_size_rem()))` (contract §8 size table `1.5/1.75/2/2.25/2.5rem`); literal `28.0` gone.
+- [x] FIXED toolbar vertical/horizontal padding — `toolbar_y_rem()`/`toolbar_x_rem()` density values (`0.25/0.375/0.5` × `0.375/0.5/0.625rem`).
+- [x] FIXED tool/mode gap — density `tool_gap_rem()` (`0.0625/0.125/0.1875rem`); mode-switcher also gets `mode_x_rem()`/`mode_y_rem()` padding.
+- [x] FIXED invented separator removed — not in contract anatomy; tools now render in one container in contract order (bold/italic/heading/link/code/quote/list).
+- [x] FIXED split divider — textarea now uses `border_r_1()` + `border-subtle` (contract `border-right: 0.0625rem`), no standalone divider div.
+- [x] FIXED pane padding — `pane_pad_rem()` (`0.625/0.75/0.875rem`), not `panel_space_*`.
+- [x] FIXED min-height — `spec.min_height_rem()` parses rem/px and defaults to `12rem` (contract), no `200.0` px fallback.
+- [x] FIXED placeholder + font-size tokens — placeholder color = `text.tertiary`, preview-empty = `text.tertiary`, textarea `0.8125rem` / preview `0.875rem`. (Monospace font-family: GPUI text on a `div` has no font-family API here — Known Delta.)
+- [x] FIXED tool buttons disabled in preview — `tools_disabled()` dims to `0.4` + `Arrow` cursor; hover = accent@12% (was the bogus `color.bg.hover` token which resolves to **black** — real bug fixed).
+- [ ] Toolbar formatting buttons remain inert (no `on_click` markdown insertion) — Tier-1 "toolbar actions produce correct markdown" lives in the preview event loop. Note.
+- [ ] Preview pane shows source text, not parsed HTML (contract §8 "Preview Rendered Elements") — Tier-3 rendering freedom; a markdown→HTML renderer plugs in at the preview loop. Note.
 - accepted: no ARIA (gpui has no accessibility API).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Tool buttons use ASCII glyph labels `["B","I","H","#","<>","\u{201C}","\u{2022}"]` (`markdown_editor.rs:71`) instead of the contract icons (bold/italic/heading/link/code/quote/list). Render `Icon` primitives, not letters. Order also differs from contract (heading before link/code, here `#` then `<>`).
-- [ ] Hardcoded toolbar gap `rem_to_px(0.5)` at `markdown_editor.rs:62`; matches contract `0.5rem` literal but should resolve from token. Low-priority literal.
-- [ ] Hardcoded tool font-size `rem_to_px(0.75)` (`markdown_editor.rs:79`), textarea `rem_to_px(0.8125)` (`lines 157/163`), preview `rem_to_px(0.875)` (`lines 186/192`) — contract values but hardcoded literals; resolve from typography tokens.
-- [ ] Toolbar uses full `.border(1.0)` (`markdown_editor.rs:67`) — contract is `border-bottom` only. Apply bottom border only.
-- [ ] Toolbar bg via `tint(elevated, 0.72)` (`markdown_editor.rs:39`) — `tint` is a manual color-mix helper; contract is `color-mix(...elevated 72%, transparent)`. Verify tint matches the transparent-mix semantics, not a solid lighten.
-- [ ] Disabled opacity hardcoded `.opacity(0.48)` at `markdown_editor.rs:54`; contract uses `state.opacity.disabled` token. Resolve from token, not literal `0.48`.
-- [ ] Tool buttons disabled-opacity hardcoded `.opacity(0.4)` at `markdown_editor.rs:83`; contract tool `:disabled` opacity `0.4` — still a literal, resolve a token.
-- [ ] No textarea/edit interactivity, no markdown insertion, no rendered-HTML preview (preview shows source text). Accepted: interaction lives in preview `main.rs` event loop — but note `main.rs` has no markdown-editor wiring, so mode switching/typing is not exercisable.
+- [x] FIXED tool buttons — now real `Icon` glyphs in contract order (bold/italic/heading/link/code/quote/list), not ASCII letters.
+- [x] FIXED tool/textarea/preview font-sizes — `0.75 / 0.8125 / 0.875rem` resolved via `rem_to_px`; toolbar gap `0.5rem` (contract literal).
+- [x] FIXED toolbar border — `border_b_1()` (bottom only), was full `.border(1.0)`.
+- [x] FIXED toolbar bg — `tint(elevated, 0.72)` is alpha-only (matches `color-mix(elevated 72%, transparent)`), confirmed not a solid lighten.
+- [x] FIXED disabled opacity — root uses `resolve_opacity("state.opacity.disabled")`, not literal `0.48`; tool `:disabled` `0.4` from contract.
+- [x] FIXED edit pane is now a `text_input` (value + placeholder), preview pane shows source; split textarea gets right border. Three probe-verified panes (edit/preview/split).
+- [ ] No real text editing / markdown insertion / rendered-HTML preview — interaction belongs to the preview `main.rs` event loop (still no md wiring there). Note.
 - accepted: ARIA channel absent; real text editing belongs to preview event loop.
 
 ## Specimen parity
 
 - Svelte covers: Split view (pre-filled), Edit mode (empty + placeholder), Preview mode (disabled tools), Disabled (`MarkdownEditorSpecimen.svelte`-equivalent — note: the actual Svelte specimen file should be confirmed; registry-driven).
 - GPUI covers: Interactive (split, stateful mode + value, char counter), Edit only, Preview only, Disabled — broadest coverage; mode switching is wired and interactive. — missing: nothing major vs contract specimen set.
-- Jetstream covers: Edit mode, Split mode, Empty placeholder — missing: **Preview mode** group, **Disabled** group; tool buttons show letters not icons so visual parity with toolbar is broken; hardcoded `text_size(11.0)` group labels.
+- Jetstream covers: Edit mode, Split mode (with char-count status), **Preview mode** (tools disabled), Empty placeholder, **Disabled** — now full contract specimen set; tool buttons render real icons. Probe tests cover all seven tool icons + three mode icons, placeholder/value text, preview-empty copy, and split dual-pane.
 
 ## Notes
 
 - GPUI/Jetstream both render the preview pane as plain source text rather than parsed HTML — this is the single biggest visual divergence. The contract §8 "Preview Rendered Elements" table (h1–hr styling) is entirely unrealized in both Rust targets. Markdown→HTML rendering is Tier-3 freedom, but showing unparsed source is arguably "worse than no preview". Flag for product decision.
 - GPUI is the only target with a working interactive specimen (stateful mode + value via AppState). Jetstream has no editor wiring in `main.rs`.
 - Spec `MarkdownEditorSpec` has `render_html_label: Option<String>` as a stand-in for the `renderHtml` callback — acceptable since callbacks can't cross the spec boundary, but neither Rust target reads it.
+- Pass 41: added additive pure helpers to `MarkdownEditorSpec` so both targets resolve the contract §8 tables from one place: `tool_size_rem`, `mode_x_rem`, `toolbar_x/y_rem`, `tool_gap_rem`, `mode_y_rem`, `pane_pad_rem`, `min_height_rem` (parses rem/px, defaults `12rem`), `effective_size`, `shows_editor/shows_preview/tools_disabled`, `char_count`, plus token methods (`tool_color/tool_hover_color/tool_hover_fill/textarea_color/placeholder_color/preview_empty_color/split_divider/toolbar_border/focus_ring`). Unit-tested in poodle-specs. No token gaps — all values map to existing semantic tokens; the only Known Delta is GPUI lacking a `div` font-family API (monospace textarea) and GPUI/Jetstream lacking inset rendering for the preview HTML tree.

@@ -9,6 +9,11 @@ use poodle_specs::MarkdownEditorSpec;
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
+    let split_spec = MarkdownEditorSpec::new()
+        .with_value("# Notes\n\nSide-by-side **editing** with `code` and a [link](url).")
+        .with_mode("split");
+    let split_status = format!("Mode: split | {} chars", split_spec.char_count());
+
     div().flex_col().gap(24.0)
         .child(group("Edit mode", secondary,
             js_markdown_editor(
@@ -18,11 +23,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
             )
         ))
-        .child(group("Split mode", secondary,
+        .child(group_with_status("Split mode", secondary, &split_status,
+            js_markdown_editor(&split_spec, theme)
+        ))
+        .child(group("Preview mode (tools disabled)", secondary,
             js_markdown_editor(
                 &MarkdownEditorSpec::new()
-                    .with_value("## Preview\n\nSide-by-side editing.")
-                    .with_mode("split"),
+                    .with_value("# Preview\n\nRendered output; toolbar tools are disabled here.")
+                    .with_mode("preview"),
                 theme,
             )
         ))
@@ -33,10 +41,25 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
             )
         ))
+        .child(group("Disabled", secondary,
+            js_markdown_editor(
+                &MarkdownEditorSpec::new()
+                    .with_value("Read-only content")
+                    .with_disabled(true),
+                theme,
+            )
+        ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
+}
+
+fn group_with_status(title: &str, text_secondary: glam::Vec4, status: &str, content: JsEl) -> JsEl {
+    div().flex_col().gap(8.0)
+        .child(label(title).text_color(text_secondary).text_size(11.0))
+        .child(content)
+        .child(label(status).text_color(text_secondary).text_size(11.0))
 }

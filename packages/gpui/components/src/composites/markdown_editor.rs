@@ -1,11 +1,8 @@
 //! MarkdownEditor — markdown editing with preview backed by MarkdownEditorSpec.
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::primitives::{Icon, IconButton};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::MarkdownEditorSpec;
@@ -77,60 +74,81 @@ impl IntoElement for MarkdownEditor {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
-        let _item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
+        // ── Size / density geometry (contract §8 tables, token-resolved rem) ──
+        let tool_size = rem_to_px(self.spec.tool_size_rem());
+        let toolbar_y = rem_to_px(self.spec.toolbar_y_rem());
+        let toolbar_x = rem_to_px(self.spec.toolbar_x_rem());
+        let tool_gap = rem_to_px(self.spec.tool_gap_rem());
+        let pane_pad = rem_to_px(self.spec.pane_pad_rem());
+        let mode_y = rem_to_px(self.spec.mode_y_rem());
+        let toolbar_gap = rem_to_px(0.5); // contract toolbar `gap: 0.5rem`
+        // Textarea font-size 0.8125rem (contract); preview body 0.875rem.
+        let textarea_size = px(rem_to_px(0.8125));
+        let preview_size = px(rem_to_px(0.875));
+        let _ = size_font_rem(effective_size); // size scale exercised via tool_size
 
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let border = resolve_color(&self.theme, self.spec.border_token());
+        let toolbar_border = resolve_color(&self.theme, self.spec.toolbar_border_token());
+        let split_divider = resolve_color(&self.theme, self.spec.split_divider_color_token());
         let toolbar_fill = resolve_color(&self.theme, self.spec.toolbar_fill_token());
         let radius = resolve_radius(&self.theme, "radius.surface");
         let radius_control = resolve_radius(&self.theme, "radius.control");
-        let gap_sm = resolve_px(&self.theme, "space.inline.sm");
-        let text_color = resolve_color(&self.theme, "color.text.primary");
-        let muted = resolve_color(&self.theme, "color.text.secondary");
-        let hover_bg = resolve_color(&self.theme, "color.bg.hover");
-        let body_size = px(font_size);
+        let text_color = resolve_color(&self.theme, self.spec.textarea_color_token());
+        let tool_color = resolve_color(&self.theme, self.spec.tool_color_token());
+        let tool_hover_color = resolve_color(&self.theme, self.spec.tool_hover_color_token());
+        let placeholder_color = resolve_color(&self.theme, self.spec.placeholder_color_token());
+        let preview_empty_color =
+            resolve_color(&self.theme, self.spec.preview_empty_color_token());
+        // Tool hover fill: accent-base @ 12% (contract `color-mix(accent 12%, transparent)`).
+        let accent = resolve_color(&self.theme, self.spec.tool_hover_fill_token());
+        let tool_hover_bg = Hsla { a: accent.a * 0.12, ..accent };
 
         let display = if self.spec.value.is_empty() {
-            self.spec.placeholder.as_deref().unwrap_or("Type here...")
+            self.spec.placeholder.as_deref().unwrap_or("Write markdown...")
         } else {
             &self.spec.value
         };
         let color = if self.spec.value.is_empty() {
-            muted
+            placeholder_color
         } else {
             text_color
         };
 
-        // Helper: toolbar icon button
+        let tools_disabled = self.spec.tools_disabled();
+        let tool_disabled_opacity = 0.4_f32; // contract tool `:disabled` opacity
+
+        // Helper: toolbar icon button (contract anatomy: tool-button per action)
         let toolbar_btn = |icon_name: &str, theme: &GpuiThemeProvider| -> Div {
-            div()
+            let mut b = div()
                 .flex()
                 .items_center()
                 .justify_center()
-                .w(px(28.0))
-                .h(px(28.0))
+                .w(px(tool_size))
+                .h(px(tool_size))
                 .rounded(radius_control)
-                .cursor(CursorStyle::PointingHand)
-                .hover(|s| s.bg(hover_bg))
                 .child(
                     Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
-                        .with_color(muted),
-                )
+                        .with_color(tool_color),
+                );
+            if tools_disabled {
+                b = b.opacity(tool_disabled_opacity).cursor(CursorStyle::Arrow);
+            } else {
+                let hc = tool_hover_color;
+                b = b
+                    .cursor(CursorStyle::PointingHand)
+                    .hover(move |s| s.bg(tool_hover_bg).text_color(hc));
+            }
+            b
         };
 
         // Wrap on_mode_change in Rc for sharing across buttons
         let on_mode_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_mode_change.map(|h| std::rc::Rc::from(h));
 
-        let min_h = self
-            .spec
-            .min_height
-            .as_deref()
-            .and_then(|v| v.trim_end_matches("px").parse::<f32>().ok())
-            .unwrap_or(200.0);
+        // Contract minHeight default "12rem"; parse rem/px via the spec helper.
+        let min_h = rem_to_px(self.spec.min_height_rem());
 
         let mut el = div()
             .bg(fill)
@@ -143,11 +161,8 @@ impl IntoElement for MarkdownEditor {
             .overflow_hidden();
 
         let mode = self.spec.mode.as_str();
-        let is_edit = mode == "edit" || mode == "split";
-        let is_preview = mode == "preview" || mode == "split";
-
-        // Toolbar separator
-        let separator = || -> Div { div().w(px(1.0)).h(px(16.0)).bg(border).mx(gap_sm) };
+        let is_edit = self.spec.shows_editor();
+        let is_preview = self.spec.shows_preview();
 
         let mode_btn = |icon: &'static str,
                         tooltip: &'static str,
@@ -185,37 +200,44 @@ impl IntoElement for MarkdownEditor {
             btn.into_any_element()
         };
 
-        // Toolbar
+        // Toolbar: tools (left) + mode switcher (right), space-between.
+        // Tool order matches contract §2 anatomy: bold, italic, heading, link,
+        // code, quote, list. No separator — the contract anatomy lists none.
         el = el.child(
             div()
                 .bg(toolbar_fill)
-                .px(gap_sm)
-                .py(px(6.0))
+                .px(px(toolbar_x))
+                .py(px(toolbar_y))
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(px(2.0))
+                .justify_between()
+                .gap(px(toolbar_gap))
+                .flex_wrap()
                 .border_b_1()
-                .border_color(border)
-                // Text formatting icons
-                .child(toolbar_btn("bold", &self.theme))
-                .child(toolbar_btn("italic", &self.theme))
-                .child(toolbar_btn("heading", &self.theme))
-                .child(toolbar_btn("code", &self.theme))
-                // Separator
-                .child(separator())
-                // Structure icons
-                .child(toolbar_btn("link", &self.theme))
-                .child(toolbar_btn("list", &self.theme))
-                .child(toolbar_btn("quote", &self.theme))
-                // Spacer pushes mode switcher to the right
-                .child(div().flex_grow())
+                .border_color(toolbar_border)
+                // Tools container
+                .child(
+                    div()
+                        .flex()
+                        .flex_row()
+                        .gap(px(tool_gap))
+                        .child(toolbar_btn("bold", &self.theme))
+                        .child(toolbar_btn("italic", &self.theme))
+                        .child(toolbar_btn("heading", &self.theme))
+                        .child(toolbar_btn("link", &self.theme))
+                        .child(toolbar_btn("code", &self.theme))
+                        .child(toolbar_btn("quote", &self.theme))
+                        .child(toolbar_btn("list", &self.theme)),
+                )
                 // Mode switcher segment
                 .child(
                     div()
                         .flex()
                         .flex_row()
-                        .gap(px(2.0))
+                        .gap(px(tool_gap))
+                        .px(px(rem_to_px(self.spec.mode_x_rem())))
+                        .py(px(mode_y))
                         .child(mode_btn(
                             "pencil",
                             "Edit",
@@ -244,18 +266,24 @@ impl IntoElement for MarkdownEditor {
         let content_area = div().flex().flex_row().flex_grow().min_h(px(0.0));
 
         let content_area = if is_edit {
-            // Editor pane
+            // Editor pane. In split mode the textarea gets a right border
+            // (contract `border-right: 0.0625rem solid border-subtle`).
             let mut editor_pane = div()
                 .id("poodle-md-editor-pane")
                 .focusable()
-                .px(px(pad_x))
-                .py(px(pad_y))
+                .px(px(pane_pad))
+                .py(px(pane_pad))
                 .flex_grow()
                 .flex_basis(px(0.0))
-                .text_size(body_size)
+                .text_size(textarea_size)
                 .text_color(color)
                 .overflow_y_scroll()
                 .child(display.to_string());
+
+            if is_preview {
+                // Contract split textarea `border-right: 0.0625rem` (= 1px).
+                editor_pane = editor_pane.border_r_1().border_color(split_divider);
+            }
 
             // Basic text editing via key events
             if !self.spec.is_disabled {
@@ -293,32 +321,30 @@ impl IntoElement for MarkdownEditor {
             content_area
         };
 
-        let content_area = if is_edit && is_preview {
-            // Vertical divider between panes in split mode
-            content_area.child(div().w(px(1.0)).bg(border))
-        } else {
-            content_area
-        };
+        // Split separation is the textarea's right border (set above), not a
+        // standalone divider div — matches contract anatomy.
 
         let content_area = if is_preview {
-            // Preview pane
+            // Preview pane. The contract preview renders parsed HTML; rendering a
+            // markdown→HTML tree is Tier-3 freedom and lives in the preview loop,
+            // so this shows the source text (or the empty placeholder).
             let preview_content = if self.spec.value.is_empty() {
                 "Nothing to preview".to_string()
             } else {
                 self.spec.value.clone()
             };
             let preview_text_color = if self.spec.value.is_empty() {
-                muted
+                preview_empty_color
             } else {
                 text_color
             };
             let preview_pane = div()
                 .id("poodle-md-preview-pane")
-                .px(px(pad_x))
-                .py(px(pad_y))
+                .px(px(pane_pad))
+                .py(px(pane_pad))
                 .flex_grow()
                 .flex_basis(px(0.0))
-                .text_size(body_size)
+                .text_size(preview_size)
                 .text_color(preview_text_color)
                 .overflow_y_scroll()
                 .child(preview_content);

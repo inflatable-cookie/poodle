@@ -19,12 +19,11 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlSize, Orientation, RangeSliderSpec};
 
-use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 static RANGE_SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 =
     std::sync::atomic::AtomicU32::new(0);
@@ -40,9 +39,24 @@ fn range_drag_map() -> &'static Mutex<HashMap<String, DragThumb>> {
     MAP.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
+/// Thumb diameter in rem per the contract §8 size table (matches Svelte +
+/// the single Slider). lg/xl scale up from the md 1rem base.
+fn thumb_diameter_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
+
+/// Snap to the step grid **anchored at `min`** (`min + n*step`), matching
+/// Svelte `snapToStep(raw, min, step)`. Anchoring at 0 would land off-grid
+/// when `min` is not a multiple of `step` (e.g. min=18, step=5).
 fn step_clamp(v: f64, min: f64, max: f64, step: f64) -> f64 {
     let stepped = if step > 0.0 {
-        (v / step).round() * step
+        min + ((v - min) / step).round() * step
     } else {
         v
     };
@@ -185,10 +199,13 @@ impl IntoElement for RangeSlider {
         // No per-size token exists for slider track height yet.
         let track_height_f: f32 = rem_to_px(0.375); // 6 px
         let track_height = px(track_height_f);
-        let track_radius = px(track_height_f / 2.0);
+        // Full pill radius from radius.pill (contract §8 border-radius: 999px).
+        let track_radius = resolve_radius(theme, "radius.pill");
 
-        // Thumb dimensions
-        let thumb_f = theme.resolve_space("size.icon.md");
+        // Thumb diameter from the contract §8 size table (resolves per spec.size),
+        // not a fixed size.icon.md — xs/sm/lg/xl now render their own diameter.
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let thumb_f: f32 = rem_to_px(thumb_diameter_rem(effective_size));
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
 
@@ -198,11 +215,14 @@ impl IntoElement for RangeSlider {
         let track_bounds_store: Arc<Mutex<Option<Bounds<Pixels>>>> = Arc::new(Mutex::new(None));
         let track_bounds_for_prepaint = track_bounds_store.clone();
 
-        // Thumb style: elevated background + border-default (matches single Slider)
+        // Thumb style: elevated background + border-default (matches single Slider).
+        // Contract §8 thumb box-shadow: 0 0.125rem 0.5rem color-mix(black 18%,
+        // transparent). Offset/blur resolve from rem; black@0.18 has no dedicated
+        // shadow token (elevation.* differ), so it is the one noted literal.
         let thumb_shadow = vec![gpui::BoxShadow {
             color: hsla(0.0, 0.0, 0.0, 0.18),
-            offset: point(px(0.0), px(2.0)),
-            blur_radius: px(8.0),
+            offset: point(px(0.0), px(rem_to_px(0.125))),
+            blur_radius: px(rem_to_px(0.5)),
             spread_radius: px(0.0),
         }];
 

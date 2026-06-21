@@ -1,4 +1,16 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=gap gpui=3 jetstream=3 specimen=gap -->
+<!-- pass 41: Jetstream range-slider rebuilt to match the single Slider — track 0.375rem
+     (was 0.25), track bg tint(surface,0.88)=color-mix(surface 88%, transparent) (was
+     .mix(accent) tint bug), thumb diameter from the §8 size table (was control_height*0.44),
+     container min-height from the size table (was *0.56), pill radius from radius.pill,
+     thumb border 0.0625rem (was 1.0px), step snapping anchored at min. Between-fill is the
+     middle of three fixed-px flex-row segments (lo|fill|hi) — JsEl has no percent/offset, so
+     the leading lo segment supplies the fill's offset start (no ProgressBar needed; left-only
+     fill can't offset). Probe-tested (two thumbs, offset+proportional fill, transparent track,
+     disabled opacity). GPUI closed: thumb diameter → §8 size table, shadow offset/blur → rem,
+     step_clamp anchored at min (was anchored at 0). Remaining gpui: vertical + per-thumb
+     focus/Home-End (runtime). Remaining jetstream: focus ring + per-thumb keyboard + vertical
+     (no focus/shadow primitive; interaction is preview-loop). -->
 # Parity: RangeSlider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

@@ -22,8 +22,23 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ]).with_label("Settings"),
     ];
 
+    // Single untitled group → continuous plain list (contract specimen).
+    let plain = vec![SidebarNavGroup::new("docs", vec![
+        SidebarNavItem::new("overview", "Overview"),
+        SidebarNavItem::new("components", "Components"),
+        SidebarNavItem::new("tokens", "Tokens"),
+        SidebarNavItem::new("guides", "Guides"),
+    ])];
+
     div().flex_col().gap(24.0)
-        .child(group("With active item", secondary,
+        .child(group("Plain list (untitled, active item)", secondary,
+            js_sidebar_nav(
+                &SidebarNavSpec::new(plain)
+                    .with_value("components"),
+                theme,
+            )
+        ))
+        .child(group("Grouped, with active item + disabled", secondary,
             js_sidebar_nav(
                 &SidebarNavSpec::new(groups.clone())
                     .with_value("projects"),

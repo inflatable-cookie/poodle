@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=6 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- pass 41: GPUI slider closed — thumb diameter now resolves from the contract §8
+     size table (was pinned to size.icon.md), track pill radius from radius.pill (was
+     px(999.0)), thumb shadow offset/blur now rem_to_px(0.125/0.5) (only the black@0.18
+     color stays literal — no matching shadow token). Jetstream slider already carried the
+     pass-29 fixes (tint track, size table, pill, border); count corrected. Remaining gpui:
+     keyboard + drag-release commit + vertical (runtime/preview). Remaining jetstream: thumb
+     drop-shadow (no custom-offset shadow primitive/token) + vertical + drag/keyboard (loop). -->
 <!-- pass 29: Jetstream track-color bug fixed — was surface.mix(accent, 0.88) (toward
      accent); now tint(surface, 0.88) = color-mix(surface 88%, transparent) per contract/
      Svelte (filled portion stays opaque accent). Invented size ratios → contract §8 size
