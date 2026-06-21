@@ -1,4 +1,7 @@
-<!-- parity consv=ok gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=5 jetstream=5 specimen=gap -->
+<!-- pass 47: js_eyebrow now uppercases content (.to_uppercase()) matching Svelte
+     `text-transform: uppercase` + GPUI — JsEl has no CSS transform. Cross-cutting:
+     fixes every eyebrow section title across consumers. Probe-tested. -->
 # Parity: Eyebrow
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

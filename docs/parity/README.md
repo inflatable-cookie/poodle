@@ -157,7 +157,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | embed-preview | fixed | 7 | 5 | gap |
 | empty-state | ok | 2 | 5 | ok |
 | error-boundary | ok | 2 | 1 | gap |
-| eyebrow | ok | 5 | 6 | gap |
+| eyebrow | ok | 5 | 5 | gap |
 | field | ok | 6 | 6 | gap |
 | field-set | fixed | 6 | 6 | gap |
 | file-upload | ok | 8 | 8 | gap |
