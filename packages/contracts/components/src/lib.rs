@@ -260,7 +260,7 @@ pub use types::{
     PopoverInitialFocus, PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole,
     SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
-    TabVariant, TimeZoneOption, ValidationState, ZonedDateTimeValue,
+    TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
 };
 
 // Composite exports

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap | pass: ButtonTone::Success now renders correctly via SplitButtonSpec's shared fill/border/text_token path (probe round-trip verified, 2 tests in jetstream split_button.rs). Listed gaps below (menu/loading/hover/divider/padding) unchanged — out of scope for this success-tone pass. -->
 # Parity: SplitButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

@@ -198,9 +198,18 @@ impl IntoElement for Button {
                 // fill: color-mix(status-danger 16%, background-surface)
                 let danger = resolve_color(theme, "color.status.danger");
                 let surface = resolve_color(theme, "color.background.surface");
-                let border_default = resolve_color(theme, "color.border.default");
                 let fill = color_mix(danger, surface, 0.16);
+                let border_default = resolve_color(theme, "color.border.default");
                 // idle border: plain border-default (contract §8 Tone: danger)
+                (fill, border_default, base_text)
+            }
+            (ButtonVariant::Secondary, ButtonTone::Success) => {
+                // Success mirrors danger: color-mix(status-success 16%, surface),
+                // idle border plain border-default (icon-button.md §8 Tone: success).
+                let success = resolve_color(theme, "color.status.success");
+                let surface = resolve_color(theme, "color.background.surface");
+                let fill = color_mix(success, surface, 0.16);
+                let border_default = resolve_color(theme, "color.border.default");
                 (fill, border_default, base_text)
             }
             (ButtonVariant::Primary, _) => {
@@ -212,6 +221,11 @@ impl IntoElement for Button {
                 // Ghost×danger: text uses status-danger instead of text-primary
                 let danger_text = resolve_color(theme, "color.status.danger");
                 (base_fill, base_border, danger_text)
+            }
+            (ButtonVariant::Ghost, ButtonTone::Success) => {
+                // Ghost×success: text uses status-success
+                let success_text = resolve_color(theme, "color.status.success");
+                (base_fill, base_border, success_text)
             }
             _ => (base_fill, base_border, base_text),
         };
@@ -248,6 +262,14 @@ impl IntoElement for Button {
                     Hsla { a: 0.28, ..danger },
                 )
             }
+            (ButtonVariant::Ghost, ButtonTone::Success) => {
+                let success = resolve_color(theme, "color.status.success");
+                (
+                    Hsla { a: 0.12, ..success },
+                    Hsla { a: 0.18, ..success },
+                    Hsla { a: 0.28, ..success },
+                )
+            }
             (ButtonVariant::Secondary, ButtonTone::Danger) => {
                 let danger = resolve_color(theme, "color.status.danger");
                 let surface = resolve_color(theme, "color.background.surface");
@@ -258,12 +280,29 @@ impl IntoElement for Button {
                     color_mix(danger, border_default, 0.62),
                 )
             }
+            (ButtonVariant::Secondary, ButtonTone::Success) => {
+                let success = resolve_color(theme, "color.status.success");
+                let surface = resolve_color(theme, "color.background.surface");
+                let border_default = resolve_color(theme, "color.border.default");
+                (
+                    color_mix(success, surface, 0.24),
+                    color_mix(success, surface, 0.32),
+                    color_mix(success, border_default, 0.62),
+                )
+            }
             (ButtonVariant::Primary, ButtonTone::Danger) => {
                 let danger = resolve_color(theme, "color.status.danger");
                 let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
                 let black = Hsla { h: 0.0, s: 0.0, l: 0.0, a: 1.0 };
                 let hf = color_mix(danger, white, 0.88);
                 (hf, color_mix(danger, black, 0.88), color_mix_black(hf, 0.86))
+            }
+            (ButtonVariant::Primary, ButtonTone::Success) => {
+                let success = resolve_color(theme, "color.status.success");
+                let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
+                let black = Hsla { h: 0.0, s: 0.0, l: 0.0, a: 1.0 };
+                let hf = color_mix(success, white, 0.88);
+                (hf, color_mix(success, black, 0.88), color_mix_black(hf, 0.86))
             }
             _ => {
                 let hf = color_mix(fill, elevated, 0.84);
@@ -356,14 +395,12 @@ impl IntoElement for Button {
             el = el
                 .cursor_pointer()
                 .hover(move |s| {
+                    // Contract §8 Hover box-shadow:
+                    // var(--poodle-treatment-interactive-shadow-active,
+                    //     var(--poodle-button-shadow)) — token-derived, no raw hsla.
                     s.bg(hover_fill)
                         .border_color(hover_border)
-                        .shadow(vec![gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 1.0, 0.10),
-                            offset: point(px(0.0), px(1.0)),
-                            blur_radius: px(0.0),
-                            spread_radius: px(0.0),
-                        }])
+                        .shadow(crate::theme_ext::button_hover_shadow())
                 })
                 // Contract: active press effect — use relative positioning to avoid layout shift
                 .active(move |s| s.bg(active_fill));

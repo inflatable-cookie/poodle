@@ -20,7 +20,7 @@ use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
     size_font_rem, size_min_width_rem, size_padding_x_offset_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Build a Jetstream button element from a ButtonSpec.
 ///
@@ -35,29 +35,36 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tone = spec.effective_tone();
-    let is_danger_tone = tone == ButtonTone::Danger;
+
+    // Status family for danger/success secondary color-mix (button.md §8
+    // Tone: danger; icon-button.md §8 Tone: success). `Default` has no status mix.
+    let status_token = match tone {
+        ButtonTone::Danger => Some("color.status.danger"),
+        ButtonTone::Success => Some("color.status.success"),
+        ButtonTone::Default => None,
+    };
 
     // ── Variant × tone colors (contract) ──
-    let fill: Color = match (spec.variant, is_danger_tone) {
+    let fill: Color = match (spec.variant, status_token) {
         (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
-        (ButtonVariant::Secondary, true) => {
-            // Danger secondary: color-mix(status-danger 16%, background-surface)
-            let danger: Color = resolve_color(theme, "color.status.danger").into();
+        (ButtonVariant::Secondary, Some(status)) => {
+            // Danger/Success secondary: color-mix(status 16%, background-surface)
+            let status_color: Color = resolve_color(theme, status).into();
             let surface: Color = resolve_color(theme, "color.background.surface").into();
-            danger.mix(surface, 0.16)
+            status_color.mix(surface, 0.16)
         }
         _ => resolve_color(theme, spec.resolved_fill_token()).into(),
     };
 
     let text_color: Color = resolve_color(theme, spec.resolved_text_token()).into();
 
-    let border_color: Color = match (spec.variant, is_danger_tone) {
+    let border_color: Color = match (spec.variant, status_token) {
         (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
-        (ButtonVariant::Secondary, true) => {
-            // Danger secondary: color-mix(status-danger 46%, border-default)
-            let danger: Color = resolve_color(theme, "color.status.danger").into();
+        (ButtonVariant::Secondary, Some(status)) => {
+            // Danger/Success secondary: color-mix(status 46%, border-default)
+            let status_color: Color = resolve_color(theme, status).into();
             let border_default: Color = resolve_color(theme, "color.border.default").into();
-            danger.mix(border_default, 0.46)
+            status_color.mix(border_default, 0.46)
         }
         _ => resolve_color(theme, spec.resolved_border_token()).into(),
     };
@@ -75,12 +82,20 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let base_pad_x = rem_to_px(control_space_x_rem(spec.density));
     let pad_x = base_pad_x + rem_to_px(size_padding_x_offset_rem(effective_size));
 
-    // Padding adjustments when icons present (contract: reduce by 2px on icon side)
-    let pad_left = if spec.leading_icon.is_some() { pad_x - 2.0 } else { pad_x };
-    let pad_right = if spec.trailing_icon.is_some() { pad_x - 2.0 } else { pad_x };
+    // Icon-side padding reduction (contract §8): reduce padding on the side that
+    // carries an icon by `space.button.iconInset` (0.125rem). `has_leading` is
+    // true when a leading icon OR the loading spinner is present; `has_trailing`
+    // when a trailing icon OR the chevron is present (matches Svelte
+    // `data-has-leading`/`data-has-trailing`).
+    let icon_inset = resolve_px(theme, ButtonSpec::icon_side_inset_token());
+    let has_leading = spec.leading_icon.is_some() || spec.is_loading;
+    let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
+    let pad_left = if has_leading { pad_x - icon_inset } else { pad_x };
+    let pad_right = if has_trailing { pad_x - icon_inset } else { pad_x };
 
     let radius = resolve_radius(theme, spec.radius_token());
-    let gap = rem_to_px(control_space_x_rem(spec.density)) * 0.5; // inner gap is half of control space
+    // Inner gap between label and icons (contract §8: `space.button.gap` = 0.375rem).
+    let gap = resolve_px(theme, ButtonSpec::content_gap_token());
 
     // Font size from presentation helper, driven by effective size
     let label_size = rem_to_px(size_font_rem(effective_size));
@@ -88,7 +103,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let icon_size = rem_to_px(size_font_rem(effective_size)); // icon tracks font size
     let is_disabled = spec.is_disabled || spec.is_loading;
 
-    let has_icons = spec.leading_icon.is_some() || spec.trailing_icon.is_some() || spec.is_loading;
+    let has_icons = has_leading || has_trailing;
     let label_text = spec.label.clone().unwrap_or_default();
 
     // ── Build element ──
@@ -170,6 +185,18 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                     .text_color(text_color)
             );
         }
+
+        // Chevron (contract §2 anatomy + §8 Chevron): trailing disclosure
+        // indicator, `chevron-down` glyph at 0.5 opacity, after all other content.
+        if spec.chevron {
+            el = el.child(
+                ui_element::icon("chevron-down")
+                    .w(icon_size)
+                    .h(icon_size)
+                    .text_color(text_color)
+                    .opacity(0.5),
+            );
+        }
     }
 
     el
@@ -237,5 +264,88 @@ mod tests {
             .with_leading_icon("+");
         let el = js_button(&spec, &theme);
         assert!(!el.children.is_empty(), "Button with leading icon should have children");
+    }
+
+    #[test]
+    fn primary_success_fills_with_status_success() {
+        let theme = test_theme();
+        let success: Color = resolve_color(&theme, "color.status.success").into();
+        let el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_tone(ButtonTone::Success)
+                .with_label("Confirm"),
+            &theme,
+        );
+        let bg = el.style.background.expect("bg set");
+        assert!(
+            (bg.r - success.r).abs() < 0.02
+                && (bg.g - success.g).abs() < 0.02
+                && (bg.b - success.b).abs() < 0.02,
+            "primary success fill should be status-success, got {bg:?}"
+        );
+    }
+
+    #[test]
+    fn ghost_success_recolors_text() {
+        let theme = test_theme();
+        let success: Color = resolve_color(&theme, "color.status.success").into();
+        let el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_tone(ButtonTone::Success)
+                .with_label("Approve"),
+            &theme,
+        );
+        let txt = el.style.text_color.expect("text color set");
+        assert!(
+            (txt.r - success.r).abs() < 0.02 && (txt.g - success.g).abs() < 0.02,
+            "ghost success text should be status-success, got {txt:?}"
+        );
+        // Ghost stays transparent-filled regardless of tone.
+        if let Some(bg) = el.style.background {
+            assert!(bg.a < 0.01, "ghost success fill stays transparent");
+        }
+    }
+
+    #[test]
+    fn secondary_success_fill_differs_from_default() {
+        let theme = test_theme();
+        let default_el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_label("x"),
+            &theme,
+        );
+        let success_el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_tone(ButtonTone::Success)
+                .with_label("x"),
+            &theme,
+        );
+        let d = default_el.style.background.expect("default bg");
+        let s = success_el.style.background.expect("success bg");
+        // Secondary success is color-mix(success 16%, surface) — tinted away from plain surface.
+        assert!(
+            (d.r - s.r).abs() > 0.001 || (d.g - s.g).abs() > 0.001 || (d.b - s.b).abs() > 0.001,
+            "secondary success fill must differ from default secondary surface"
+        );
+    }
+
+    #[test]
+    fn chevron_renders_trailing_glyph() {
+        use crate::render_probe::probe;
+        let theme = test_theme();
+        let el = js_button(
+            &ButtonSpec::new().with_label("Options").with_chevron(true),
+            &theme,
+        );
+        let tree = probe(&el, 160.0, 48.0);
+        assert!(
+            tree.has_text("chevron-down"),
+            "chevron should render the chevron-down glyph: {:?}",
+            tree.texts()
+        );
     }
 }

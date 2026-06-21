@@ -146,6 +146,25 @@ impl IntoElement for IconButton {
                 (base_fill, darkened)
             }
             ButtonVariant::Ghost => (gpui::transparent_black(), gpui::transparent_black()),
+            // Secondary danger/success: color-mix(status 16%, surface) fill and
+            // color-mix(status 46%, border-default) border (icon-button.md §8
+            // Tone: danger / Tone: success). Default secondary uses token values.
+            ButtonVariant::Secondary => match tone {
+                ButtonTone::Danger | ButtonTone::Success => {
+                    let status = if tone == ButtonTone::Success {
+                        resolve_color(theme, "color.status.success")
+                    } else {
+                        resolve_color(theme, "color.status.danger")
+                    };
+                    let surface = resolve_color(theme, "color.background.surface");
+                    let border_default = resolve_color(theme, "color.border.default");
+                    (
+                        color_mix(status, surface, 0.16),
+                        color_mix(status, border_default, 0.46),
+                    )
+                }
+                ButtonTone::Default => (base_fill, base_border),
+            },
             _ => (base_fill, base_border),
         };
 

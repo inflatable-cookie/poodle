@@ -60,3 +60,61 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
 
     el
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use jetstream_runtime::game_ui::Color;
+    use poodle_specs::{ButtonTone, ButtonVariant};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    #[test]
+    fn success_tone_round_trips_through_split_button() {
+        let th = theme();
+        let success: Color = resolve_color(&th, "color.status.success").into();
+        // Primary + Success resolves the success fill via the shared
+        // `ButtonVariant::fill_token(tone)` path, proving the new tone round-trips
+        // through SplitButtonSpec.
+        let el = js_split_button(
+            &SplitButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_tone(ButtonTone::Success)
+                .with_label("Save"),
+            &th,
+        );
+        let bg = el.style.background.expect("split-button bg set");
+        assert!(
+            (bg.r - success.r).abs() < 0.02
+                && (bg.g - success.g).abs() < 0.02
+                && (bg.b - success.b).abs() < 0.02,
+            "primary success split-button fill should be status-success, got {bg:?}"
+        );
+    }
+
+    #[test]
+    fn default_and_success_fills_differ() {
+        let th = theme();
+        let default_el = js_split_button(
+            &SplitButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_label("Save"),
+            &th,
+        );
+        let success_el = js_split_button(
+            &SplitButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_tone(ButtonTone::Success)
+                .with_label("Save"),
+            &th,
+        );
+        let d = default_el.style.background.expect("default bg");
+        let s = success_el.style.background.expect("success bg");
+        assert!(
+            (d.r - s.r).abs() > 0.001 || (d.g - s.g).abs() > 0.001 || (d.b - s.b).abs() > 0.001,
+            "success split-button fill must differ from accent default"
+        );
+    }
+}

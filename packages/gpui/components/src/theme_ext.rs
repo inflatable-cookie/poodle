@@ -62,6 +62,22 @@ pub fn color_mix_black(color: Hsla, ratio: f32) -> Hsla {
     mixed.into()
 }
 
+/// Contract §8 button hover/active shadow (secondary `--poodle-button-shadow`):
+/// `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)`. GPUI has no
+/// CSS `white` keyword/token, so the contract-literal white is expressed via
+/// `gpui::white()`; the offset uses `rem_to_px(0.0625)` rather than a raw px.
+pub fn button_hover_shadow() -> Vec<gpui::BoxShadow> {
+    let white = gpui::white();
+    let inset_y = px(crate::presentation::rem_to_px(0.0625));
+    vec![gpui::BoxShadow {
+        // color-mix(white 8%, transparent) → white at 8% alpha
+        color: Hsla { a: 0.08, ..white },
+        offset: point(px(0.0), inset_y),
+        blur_radius: px(0.0),
+        spread_radius: px(0.0),
+    }]
+}
+
 /// Build the standard Svelte focus ring shadow: 0 0 0 2px focusRing@28%.
 /// Use with `.focus(move |s| s.border_color(fr).shadow(focus_ring_shadow(fr)))`.
 pub fn focus_ring_shadow(focus_ring_color: Hsla) -> Vec<gpui::BoxShadow> {

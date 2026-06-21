@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap | pass: ButtonTone::Success added cross-cutting; GPUI hover-shadow token-resolved + success branches; Jetstream icon-inset/gap tokenized, has_leading/has_trailing + chevron + success tone. Remaining GPUI: truncate/fit/maxWidth, warning tone, interactive toggle. Remaining Jetstream: pressed/toggle, truncate/fit/maxWidth, warning tone. -->
 # Parity: Button
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,20 +25,22 @@ Svelte has props/behavior the contract does not document. Svelte is authoritativ
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded hover shadow color literal `hsla(0.0, 0.0, 1.0, 0.10)` at `button.rs:362` — resolve from a token, not a raw HSLA.
+- [x] FIXED Hardcoded hover shadow literal `hsla(0.0, 0.0, 1.0, 0.10)` — replaced with `theme_ext::button_hover_shadow()` encoding contract §8 `inset 0 0.0625rem 0 color-mix(white 8%, transparent)` (white via `gpui::white()`, offset via `rem_to_px(0.0625)`). No raw HSLA in the hover path.
+- [x] FIXED `success` tone — explicit `Success` branches added to both `(variant, tone)` matches (base colors + hover/active), mirroring danger with `color.status.success`. Shared `ButtonTone::Success` resolves base tokens; component applies the secondary 16%/24%/32% color-mixes.
 - [ ] No `truncate` / `fit` / `maxWidth` support (props absent from builder + spec usage).
-- [ ] No `warning` tone branch — only `Danger` handled in the variant/tone match (`button.rs:196-279`); warning falls through to default.
+- [ ] No `warning` tone branch — `warning` falls through to default. (`ButtonTone` has no `Warning` arm; separate cross-cutting pass.)
 - [ ] `pressed`/toggle: spec exposes `is_toggle_mode()`/`current_pressed()` and pressed fill is applied (`button.rs:228-237`), but there is no toggle builder method (`pressed`/`default_pressed`) and click does not flip pressed state — toggle is render-only, not interactive.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_expanded` stored but not emitted (documented in file header).
 - accepted: active `translateY` omitted (contract Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded icon-inset literal `pad_x - 2.0` at `button.rs:79-80` — use `ButtonSpec::icon_side_inset_token()` resolved to px, not raw `2.0`.
-- [ ] Gap is ad-hoc `control_space_x_rem * 0.5` at `button.rs:83` — contract gap is `0.375rem` via a content-gap token (GPUI uses `ButtonSpec::content_gap_token()`); resolve from token, drop the `* 0.5` heuristic.
-- [ ] Icon-side padding only reduced when `leading_icon`/`trailing_icon` present; does not account for `is_loading` (leading) or `chevron` (trailing) like Svelte/`has_leading`/`has_trailing`.
-- [ ] No `chevron` rendering — contract §2 anatomy + specimen require a trailing chevron; `js_button` never reads `spec.chevron`.
-- [ ] No `warning` tone — only `is_danger_tone` branch exists (`button.rs:38-63`).
+- [x] FIXED Hardcoded icon-inset literal `pad_x - 2.0` — now `resolve_px(theme, ButtonSpec::icon_side_inset_token())` (`space.button.iconInset` = 0.125rem).
+- [x] FIXED Ad-hoc gap `control_space_x_rem * 0.5` — now `resolve_px(theme, ButtonSpec::content_gap_token())` (`space.button.gap` = 0.375rem); `* 0.5` heuristic dropped.
+- [x] FIXED Icon-side padding now uses `has_leading` (leading icon OR loading) and `has_trailing` (trailing icon OR chevron), matching Svelte `data-has-leading`/`data-has-trailing`.
+- [x] FIXED `chevron` rendering — `js_button` now reads `spec.chevron` and emits a trailing `chevron-down` glyph at 0.5 opacity (contract §2/§8).
+- [x] FIXED `success` tone — danger/success share a `status_token` path; secondary success applies `color-mix(success 16%, surface)` fill + `color-mix(success 46%, border-default)` border; primary/ghost success via shared token methods.
+- [ ] No `warning` tone — `ButtonTone` has no `Warning` arm (separate cross-cutting pass).
 - [ ] No pressed/toggle accent treatment (`is_toggle_mode`/`current_pressed` unused).
 - [ ] No `truncate`/`fit`/`maxWidth` support.
 - accepted: no ARIA channel for `aria_expanded` (documented in header).

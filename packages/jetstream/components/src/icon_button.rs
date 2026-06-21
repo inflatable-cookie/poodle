@@ -3,9 +3,9 @@
 //! Contract: `docs/contracts/components/icon-button.md`
 //! Reference: `packages/svelte/components/src/IconButton.svelte`
 //!
-//! Resolves variant (ghost/primary/secondary), tone (default/danger), pressed,
-//! loading, disabled, focus, hover, and the per-size square from tokens. No
-//! hardcoded hsla; the only literals are contract-exact rem deltas fed through
+//! Resolves variant (ghost/primary/secondary), tone (default/danger/success),
+//! pressed, loading, disabled, focus, hover, and the per-size square from tokens.
+//! No hardcoded hsla; the only literals are contract-exact rem deltas fed through
 //! `rem_to_px` (allowed per CLAUDE.md).
 //!
 //! ## Accepted limits (probe-verified only)
@@ -13,9 +13,6 @@
 //!   the spec but the `JsEl` builder has no accessibility metadata sink.
 //! - **No tooltip**: the contract tooltip surface is host/overlay-driven; the
 //!   `tooltip` text is carried on the spec for consumer wiring.
-//! - **Success tone**: the shared `ButtonTone` enum has no `Success` arm yet, so
-//!   the contract's success tone is not expressible without a cross-cutting
-//!   shared-type change. Tracked as a token/type gap.
 //! - **Click/keyboard activation** lives in the preview `main.rs` event loop.
 
 use jetstream_runtime::game_ui::Color;
@@ -45,7 +42,6 @@ fn icon_button_size_delta_rem(size: ControlSize) -> f32 {
 pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tone = spec.tone;
-    let is_danger = tone == ButtonTone::Danger;
 
     // ── Square size: md control-height ± contract per-size delta ──
     let md_height = rem_to_px(control_height_rem(ControlSize::Md));
@@ -67,30 +63,45 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
     let text_primary: Color = resolve_color(theme, "color.text.primary").into();
     let text_inverse: Color = resolve_color(theme, "color.text.inverse").into();
 
+    // Status-tone family (icon-button.md §8 Tone: danger / Tone: success).
+    // `Default` carries no status tint. The `Danger` compat variant maps to danger.
+    let status: Option<Color> = match (spec.variant, tone) {
+        (ButtonVariant::Danger, _) => Some(danger),
+        (_, ButtonTone::Danger) => Some(danger),
+        (_, ButtonTone::Success) => {
+            Some(resolve_color(theme, "color.status.success").into())
+        }
+        (_, ButtonTone::Default) => None,
+    };
+
     // ── Variant × tone fill / border / text (contract §8) ──
-    let (mut fill, mut border, mut text_color) = match (spec.variant, is_danger) {
+    let (mut fill, mut border, mut text_color) = match (spec.variant, status) {
         // Ghost base: transparent fill + border; default text primary.
-        (ButtonVariant::Ghost, false) => (Color::TRANSPARENT, Color::TRANSPARENT, text_primary),
-        // Ghost danger: transparent fill/border, danger text.
-        (ButtonVariant::Ghost, true) => (Color::TRANSPARENT, Color::TRANSPARENT, danger),
+        (ButtonVariant::Ghost, None) => (Color::TRANSPARENT, Color::TRANSPARENT, text_primary),
+        // Ghost danger/success: transparent fill/border, status-colored glyph.
+        (ButtonVariant::Ghost, Some(s)) => (Color::TRANSPARENT, Color::TRANSPARENT, s),
         // Primary base: accent fill, accent-84%-black border, inverse text.
-        (ButtonVariant::Primary, false) => {
+        (ButtonVariant::Primary, None) => {
             (accent, accent.mix(Color::BLACK, 0.84), text_inverse)
         }
-        // Primary danger: solid danger fill, danger-84%-black border, inverse text.
-        (ButtonVariant::Primary, true) => {
-            (danger, danger.mix(Color::BLACK, 0.84), text_inverse)
+        // Primary danger/success: solid status fill, status-84%-black border, inverse text.
+        (ButtonVariant::Primary, Some(s)) => {
+            (s, s.mix(Color::BLACK, 0.84), text_inverse)
         }
-        // Danger compat variant ≈ primary danger.
-        (ButtonVariant::Danger, _) => {
+        // Danger compat variant ≈ primary status (status is Some(danger) here).
+        (ButtonVariant::Danger, Some(s)) => {
+            (s, s.mix(Color::BLACK, 0.84), text_inverse)
+        }
+        (ButtonVariant::Danger, None) => {
+            // Unreachable: Danger variant always yields Some(danger) above.
             (danger, danger.mix(Color::BLACK, 0.84), text_inverse)
         }
         // Secondary base: surface fill, border-default, text primary.
-        (ButtonVariant::Secondary, false) => (surface, border_default, text_primary),
-        // Secondary danger: danger-16%-surface fill, danger-46%-border, text primary.
-        (ButtonVariant::Secondary, true) => (
-            danger.mix(surface, 0.16),
-            danger.mix(border_default, 0.46),
+        (ButtonVariant::Secondary, None) => (surface, border_default, text_primary),
+        // Secondary danger/success: status-16%-surface fill, status-46%-border, text primary.
+        (ButtonVariant::Secondary, Some(s)) => (
+            s.mix(surface, 0.16),
+            s.mix(border_default, 0.46),
             text_primary,
         ),
     };
@@ -223,6 +234,46 @@ mod tests {
         assert!(
             (txt.r - danger.r).abs() < 0.02,
             "ghost danger text should be status-danger"
+        );
+    }
+
+    #[test]
+    fn success_tone_recolors_ghost_glyph() {
+        let th = theme();
+        let success: Color = resolve_color(&th, "color.status.success").into();
+        let el = js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("check")
+                .with_tone(ButtonTone::Success),
+            &th,
+        );
+        // Ghost success keeps transparent fill but a success-colored glyph.
+        let txt = el.style.text_color.expect("text color set");
+        assert!(
+            (txt.r - success.r).abs() < 0.02 && (txt.g - success.g).abs() < 0.02,
+            "ghost success glyph should be status-success, got {txt:?}"
+        );
+        let bg = el.style.background.expect("bg set");
+        assert!(bg.a < 0.01, "ghost success fill stays transparent");
+    }
+
+    #[test]
+    fn primary_success_fills_with_status_success() {
+        let th = theme();
+        let success: Color = resolve_color(&th, "color.status.success").into();
+        let el = js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("check")
+                .with_variant(ButtonVariant::Primary)
+                .with_tone(ButtonTone::Success),
+            &th,
+        );
+        let bg = el.style.background.expect("bg set");
+        assert!(
+            (bg.r - success.r).abs() < 0.02
+                && (bg.g - success.g).abs() < 0.02
+                && (bg.b - success.b).abs() < 0.02,
+            "primary success fill should be status-success, got {bg:?}"
         );
     }
 

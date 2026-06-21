@@ -233,7 +233,7 @@ impl RenderComponent<TriStateSwitchSpec> for GpuiAdapter {
         theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
         let mut s = map_style(style);
-        let track = theme.resolve_color(spec.track_fill_token());
+        let track = theme.resolve_color(spec.root_bg_token());
         s.background = Some(track.into());
         GpuiElementHandle::new("tri-state-switch", "TriStateSwitchSpec")
     }

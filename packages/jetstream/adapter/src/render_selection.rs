@@ -98,7 +98,7 @@ impl RenderComponent<TriStateSwitchSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TriStateSwitchSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
-        let c = theme.resolve_color(spec.track_fill_token());
+        let c = theme.resolve_color(spec.root_bg_token());
         mapped.visuals.background = Some(JetstreamColor::from(c));
         JetstreamNodeHandle::new("tri-state-switch", "TriStateSwitchSpec", WidgetKind::Button, mapped)
     }

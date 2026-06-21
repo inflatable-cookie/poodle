@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=2 specimen=gap | pass: GPUI pressed treatment + glyph-size fixed; Jetstream rebuilt (variant/tone/pressed/loading/border, 9 render_probe tests). Remaining: success tone (shared ButtonTone has no Success arm) -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: success tone closed on both targets — ButtonTone::Success added cross-cutting; GPUI + Jetstream resolve ghost-text/primary-fill via shared token methods and apply the secondary 16%/46% color-mixes. Remaining: specimen coverage only (Jetstream loading/pressed specimens). -->
 # Parity: IconButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -29,7 +29,7 @@ Fix pass (2026-06-21): pressed treatment rewritten to the contract §8 table,
 glyph size now derives from the supporting-size mapping, and the ad-hoc inset
 shadow literals are gone.
 
-- [ ] No `success` tone — variant/tone color resolution uses the shared `ButtonVariant::{fill,border,text}_token(tone)` methods, but the shared `ButtonTone` enum has only `Default`/`Danger` (no `Success`). Adding a `Success` arm is a cross-cutting shared-type change (touches Button/SplitButton/AlertDialog/ConfirmAction in both targets + all exhaustive matches), out of scope for an icon-button-only pass. (deferred — shared-type change)
+- [x] FIXED `success` tone — `ButtonTone::Success` added to the shared enum. Ghost-text and primary-fill resolve via `ButtonVariant::{fill,border,text}_token(tone)`; the secondary base now applies `color-mix(success 16%, surface)` fill + `color-mix(success 46%, border-default)` border per icon-button.md §8 (same path also fixes the pre-existing secondary-danger mix).
 - accepted: no ARIA (gpui has no accessibility API) — `aria-label`/`aria-pressed`/`aria-busy` not emitted.
 - accepted: no tooltip — `spec.tooltip` carried for consumer wiring; contract §2 tooltip surface + §6 `role="tooltip"`/`aria-describedby` + 300ms delay are host/overlay-driven (contract §11 Tier 3).
 - accepted: glyph uses the `IconSize` token scale (Sm/Md/Lg) derived from the supporting-size mapping rather than a literal `width:45%` of the square — the contract glyph %-sizing is a CSS detail; GPUI sizes icons by token. Visual result is comparable (contract §12 known-delta: icon rendering is platform-owned).
@@ -49,7 +49,7 @@ contract-faithful component — per-variant × tone fill/border/text, pressed,
 loading/spinner, border, hover/active, and the contract per-size square all
 resolve from tokens. 9 `render_probe` tests cover the closed gaps.
 
-- [ ] No `success` tone — same shared-type limit as GPUI: `ButtonTone` has only `Default`/`Danger`. Danger tone is handled; success is deferred pending the shared enum change. (deferred — shared-type change)
+- [x] FIXED `success` tone — `js_icon_button` now resolves danger/success via a shared `status` color: ghost success = transparent fill + success glyph, primary success = solid success fill, secondary success = `success 16% surface` fill + `success 46% border`. Probe-verified (`success_tone_recolors_ghost_glyph`, `primary_success_fills_with_status_success`).
 - accepted: no focus-visible outline — the `JsEl` builder exposes `.hover`/`.active` but no `.focus` state modifier, so the contract §8 focus ring is not expressible in Jetstream. `.focusable()` is set for hit-testing.
 - accepted: no ARIA channel; no tooltip surface (host/overlay-driven).
 - accepted: click/keyboard interaction lives in preview `main.rs` event loop.
@@ -73,6 +73,6 @@ resolve from tokens. 9 `render_probe` tests cover the closed gaps.
 
 ## Notes
 
-- Remaining gap on both targets is `success` tone, blocked on the shared `ButtonTone` enum (only `Default`/`Danger`). Adding `Success` is a cross-cutting change (Button/SplitButton/AlertDialog/ConfirmAction + every exhaustive `match`); deferred to a dedicated shared-type pass.
+- `success` tone is now closed on both targets — `ButtonTone::Success` was added cross-cutting (Button/SplitButton/IconButton + the three exhaustive `ButtonVariant::*_token` matches; alert-dialog/confirm-action/bulk-action-bar map *to* ButtonTone and were unaffected). Both impls resolve it from `color.status.success`.
 - Jetstream is no longer a stub — `js_icon_button` now resolves variant/tone/pressed/loading/border/hover from tokens, so the specimen demonstrates real differences (mockup risk closed). Probe-verified (9 tests).
 - GPUI pressed treatment now matches the contract §8 table exactly (solid accent, `accent 85% black` border, inverse text, no shadow); glyph size derives from the supporting-size mapping. Build-verified.

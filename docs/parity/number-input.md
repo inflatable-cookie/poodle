@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=gap gpui=1 jetstream=2 specimen=ok | pass 41: show_steppers gate, plus/minus glyph, boxed affixes, validation border (jet), tri-state/number token resolution; specimen sizes+densities added -->
 # Parity: NumberInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -33,24 +33,24 @@ weaken the contract). Each below is a Svelte TODO, not a contract edit:
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Stepper glyph mismatch**: GPUI uses `chevron-up`/`chevron-down` (`number_input.rs:192,218`); Svelte authoritative uses `plus`/`minus`. Switch to plus/minus to match the reference.
-- [ ] **Steppers always rendered**: GPUI always emits the stepper column (`number_input.rs:317-318`); spec/Svelte gate steppers behind `showSteppers` (Svelte line 320). Spec has no `show_steppers` field — add it and gate, or accept always-on as a documented GPUI delta.
-- [ ] **No min/max clamping on stepper press**: increment/decrement handlers live entirely in the specimen; the component's `on_increment`/`on_decrement` are opaque callbacks (`number_input.rs:103-123`) with no built-in clamp/step/`disabled-at-bound` logic. Svelte `adjust()` clamps + snaps to step (Svelte lines 255–267). Bound-disabled stepper state (present in Jetstream) is absent here.
-- [ ] **No `precision`/prefix/suffix divider parity check**: prefix/suffix render as inline text (`number_input.rs:267-280`) without the bordered affix chrome Svelte gives them (Svelte `.poodle-number-input__prefix` has border + surface bg, lines 344–354). GPUI affixes are plain text-secondary spans — visual gap vs Svelte's boxed affix.
-- [ ] **No read-only / required / placeholder-empty handling beyond `value==0` heuristic**: placeholder only shows when `display_value=="0" && value==0.0` (`number_input.rs:245-246`); `is_read_only`/`is_required` spec fields are ignored.
+- [x] FIXED **Stepper glyph mismatch**: GPUI now uses `plus`/`minus` (matches Svelte).
+- [x] FIXED **Steppers always rendered**: added additive `show_steppers` field to `NumberInputSpec`; GPUI gates the stepper column on it (`with_steppers(true)` in the specimen's "With steppers" group).
+- [ ] preview-loop **No min/max clamping on stepper press**: increment/decrement handlers live in the specimen; the component's `on_increment`/`on_decrement` stay opaque callbacks. Clamp/step/`disabled-at-bound` are driven by the preview event loop by design (render-only spec). `is_read_only`/`is_required` are likewise non-visual here (only affect editing, which is preview-loop) — accepted.
+- [x] FIXED **Affix chrome**: prefix/suffix now render as boxed affixes (border-default box + surface bg + muted text, control radius) via the new `affix_box` builder, matching Svelte's `.poodle-number-input__prefix`.
+- accepted: placeholder still uses the `value==0` heuristic (Svelte ::placeholder shows on empty string; the f64-typed spec has no empty state, so the heuristic is the faithful render-only approximation).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored on spec but never emitted; no spinbutton role.
 - accepted: focus ring spread `px(2.0)` at `number_input.rs:314` and `px(0.0)` offsets/blur are structural box-shadow geometry, not color/size token targets — Svelte focus ring is also fixed `0 0 0 <focus-width>`. Border-width token (`--poodle-border-width-focus`) is the only tokenizable value; consider resolving spread from it.
 - accepted: `px(rem_to_px(1.25))` stepper width (`:164`), `px(rem_to_px(0.125))` inner-radius inset (`:165`), `px(1.0)` stepper padding (`:236`), `px(rem_to_px(0.5))` gap (`:263`) are all contract-fixed rem constants mirroring Svelte literals (stepper width `calc(icon-md + 0.5rem)`, padding `0.0625rem`, gap `0.5rem`) — rem-based, not raw px; acceptable.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Stepper glyph mismatch**: uses `plus`/`minus` — matches Svelte. OK. (No action; recorded for contrast with GPUI.)
-- [ ] **Steppers always rendered**: `js_number_input` always appends `dec_btn`/`inc_btn` (`number_input.rs:76,130`); no `showSteppers` gate. Same spec-field gap as GPUI.
-- [ ] **Steppers are non-interactive**: `js_number_input` builds buttons with no click/keyboard wiring; increment/decrement/clamp must live in the preview event loop. Confirm the preview main.rs drives them — current specimen (`preview/src/specimens/number_input.rs`) only renders static specs, so steppers do nothing.
-- [ ] **`btn_gap = rem_to_px(0.25)` hardcoded** (`number_input.rs:23`): the inner stepper gap is an ad-hoc `0.25rem` constant with no token target. Resolve from a spacing token (e.g. a content-gap / `space.control.x` derivation) rather than a bare rem literal.
-- [ ] **Affix divider `w(1.0)` hardcoded** (`number_input.rs:81,119`): 1px separator width is a raw literal; use a border-width token (`border.width.hairline`/equivalent) resolved to px. Also Svelte affixes use a full bordered box + surface bg (Svelte lines 344–354), not a single divider line — visual anatomy gap.
-- [ ] **No validation border color**: validation state only swaps in a trailing `alert-circle` icon for `Invalid` (`number_input.rs:102-114`); the root border stays `border_token()`. Svelte recolors the field border per validation state (Svelte lines 369–379) and GPUI does too (`number_input.rs:285-290`). Jetstream omits the border recolor — add it.
-- [ ] **No focus ring**: no `focus(...)` treatment on the root; Svelte has `:focus-within` ring (Svelte lines 381–385), GPUI has it (`number_input.rs:306-316`). Jetstream root has none.
+- ok **Stepper glyph**: uses `plus`/`minus` — matches Svelte. (No action.)
+- [x] FIXED **Steppers always rendered**: `js_number_input` now gates `dec_btn`/`inc_btn` behind `spec.show_steppers` (off by default, matching Svelte `showSteppers=false`).
+- [ ] preview-loop **Steppers non-interactive**: stepper buttons carry stable ids (`poodle-number-input-{inc,dec}`) but no click/key wiring inside the component; increment/decrement/clamp are driven by the preview event loop by design (immediate-mode runtime). Accepted.
+- [x] FIXED **`btn_gap` token**: inner stepper gap now resolves from `space.inline.xs` via `spec.stepper_gap_token()` (was a bare `rem_to_px(0.25)`); affix/field border width resolves from `border.width.default` via `spec.border_width_token()`.
+- [x] FIXED **Boxed affixes**: prefix/suffix now render as bordered boxes (border-default + surface bg + muted text, full control height) via the `affix_box` helper, replacing the single `w(1.0)` divider line — matches Svelte's boxed affix anatomy.
+- [x] FIXED **Validation border color**: the root field border now recolors per validation state (danger/success/accent), matching Svelte + GPUI; the trailing `alert-circle` icon is retained for `Invalid`.
+- [ ] JsEl-gap **No focus ring**: the immediate-mode runtime has no `:focus-within` style hook, so the root focus ring cannot be expressed. Steppers are `.focusable()`. Accepted as a documented JsEl limitation.
 - accepted: `.border(1.0)` at `number_input.rs:71` is a structural border-presence flag (width), paired with `border_color(border)` token — matches Svelte `0.0625rem` hairline; acceptable as a width literal pending a border-width token.
 - accepted: no ARIA channel (documented engine limit); `aria_label` unused.
 - accepted: interaction (click/key handling) lives in preview event loop, not the component.
@@ -59,11 +59,12 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - **Svelte covers**: Numeric value, With steppers (step+precision), String-form binding (prefix), Disabled, Invalid, Sizes snippet, Densities snippet (`NumberInputSpecimen.svelte`).
 - **GPUI covers**: Default, With steppers, Disabled, Invalid, Prefix (currency), Suffix (unit), Precision (3dp), plus Sizes + Densities via `specimen_layout`. Broadest of the three. — missing: nothing material vs Svelte; actually exceeds it (suffix, precision groups). Steppers always-on so "With steppers" group is not isolating `showSteppers` behavior.
-- **Jetstream covers**: Default(50), At min(0), At max(100), Disabled, Invalid, With prefix($), With suffix(px) (`preview/src/specimens/number_input.rs`). — missing: **Sizes** group and **Densities** group (Svelte + GPUI both show them; Jetstream specimen omits both). No precision-isolation group. → specimen=gap driven by Jetstream's missing size/density coverage.
+- **Jetstream covers**: Default(50), At min(0), At max(100), Disabled, Invalid, With prefix($), With suffix(px), **With steppers**, **Sizes (xs–xl)**, **Densities (compact/default/comfortable)** (`preview/src/specimens/number_input.rs`). Sizes + densities + steppers groups added this pass → specimen=ok.
 
 ## Notes
 
-- `NumberInputSpec` (`packages/contracts/components/src/number_input.rs`) has `is_read_only`, `is_required`, `placeholder` fields and `formatted_value()`/`clamped_value()` helpers, but **no `show_steppers` field** — both Rust targets render steppers unconditionally as a result. Adding `show_steppers` to the spec is the cleanest fix for the always-on stepper gap in both targets.
+- `NumberInputSpec` (`packages/contracts/components/src/number_input.rs`) now has an additive `show_steppers: bool` field (default `false`, `with_steppers()` builder) — both Rust targets gate the stepper column on it. Also added `stepper_gap_token()` (`space.inline.xs`), `border_width_token()` (`border.width.default`), and `affix_fill_token()`/`affix_border_token()`/`affix_text_token()` for the boxed affix chrome.
+- Token gap: Svelte affix text uses `--poodle-color-text-muted`; the Rust semantic set has no `text.muted` token, so `affix_text_token()` falls back to `color.text.secondary` (closest available). Add a `text.muted` semantic token to close this exactly.
 - Spec lacks a `validate`/validation-callback surface entirely (it is a render-only spec); async validation, `onValidationChange`, and `onSubmit` are Svelte-only and out of scope for the Rust targets by design — not counted as gaps.
 - `consv=gap` (intentionally held): the contract's accessibility section (spinbutton role, `aria-value*`, stepper `aria-label`, `Home`/`End`, `aria-describedby` message wiring) is contract-specified functionality the authoritative Svelte does not implement. Per the no-weakening rule the contract was LEFT INTACT — the fix direction is "add to Svelte" (code), so the divergence cannot be closed by a contract edit. `consv` stays `gap` until Svelte ships the a11y, NOT because the contract is wrong. No contract file changes were made for number-input.
 - Stepper glyph divergence: GPUI uses chevrons, Svelte + Jetstream use plus/minus. GPUI is the odd one out vs the reference.

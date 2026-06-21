@@ -208,13 +208,16 @@ pub enum ButtonVariant {
     Danger,
 }
 
-/// Button tone (default or danger). The tone modifies variant colors.
+/// Button tone (default, danger, or success). The tone modifies variant colors.
 /// Contract: variant × tone combinations produce different visual treatments.
+/// `Success` mirrors `Danger` but resolves the `color.status.success` family
+/// (button.md / icon-button.md §8 Tone: success).
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum ButtonTone {
     #[default]
     Default,
     Danger,
+    Success,
 }
 
 impl ButtonVariant {
@@ -225,7 +228,12 @@ impl ButtonVariant {
             (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => {
                 semantic::COLOR_STATUS_DANGER
             }
-            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_BACKGROUND_SURFACE,
+            (Self::Primary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
+            // Secondary success/danger return surface here; the status-tinted
+            // color-mix (16% status, surface) is applied in the component.
+            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success) => {
+                semantic::COLOR_BACKGROUND_SURFACE
+            }
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
         }
@@ -238,7 +246,9 @@ impl ButtonVariant {
             (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => {
                 semantic::COLOR_STATUS_DANGER
             }
+            (Self::Primary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
             (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Secondary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
         }
@@ -248,8 +258,11 @@ impl ButtonVariant {
     pub fn text_token(self, tone: ButtonTone) -> &'static str {
         match (self, tone) {
             (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Ghost, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
             (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
-            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_TEXT_PRIMARY,
+            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success) => {
+                semantic::COLOR_TEXT_PRIMARY
+            }
             (Self::Primary, _) | (Self::Danger, _) => semantic::COLOR_TEXT_INVERSE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
         }
@@ -334,6 +347,49 @@ impl CheckState {
             Self::Unchecked => "false",
             Self::Checked => "true",
             Self::Mixed => "mixed",
+        }
+    }
+}
+
+/// The ternary value of a `TriStateSwitch`, in fixed display order.
+///
+/// The contract (`tri-state-switch.md`) names the three positions
+/// `excluded | default | included`. `TriStateSwitchSpec` still stores a
+/// `CheckState` for backward compatibility with existing call sites, but
+/// this enum gives the component its real semantic surface
+/// (`Unchecked → Excluded`, `Mixed → Default`, `Checked → Included`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TriStateValue {
+    Excluded,
+    Default,
+    Included,
+}
+
+impl TriStateValue {
+    /// Fixed segment index (excluded 0, default 1, included 2).
+    pub fn index(self) -> usize {
+        match self {
+            Self::Excluded => 0,
+            Self::Default => 1,
+            Self::Included => 2,
+        }
+    }
+
+    /// Map from the legacy `CheckState` storage.
+    pub fn from_check_state(state: CheckState) -> Self {
+        match state {
+            CheckState::Unchecked => Self::Excluded,
+            CheckState::Mixed => Self::Default,
+            CheckState::Checked => Self::Included,
+        }
+    }
+
+    /// Back to the legacy `CheckState` storage.
+    pub fn to_check_state(self) -> CheckState {
+        match self {
+            Self::Excluded => CheckState::Unchecked,
+            Self::Default => CheckState::Mixed,
+            Self::Included => CheckState::Checked,
         }
     }
 }

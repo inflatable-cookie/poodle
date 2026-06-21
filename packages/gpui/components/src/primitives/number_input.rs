@@ -160,6 +160,11 @@ impl IntoElement for NumberInput {
         };
         let text_secondary = resolve_color(theme, "color.text.secondary");
 
+        // Boxed-affix chrome (Svelte: border-default box + surface bg + muted text).
+        let affix_text = resolve_color(theme, spec.affix_text_token());
+        let affix_bg = resolve_color(theme, spec.affix_fill_token());
+        let affix_border = resolve_color(theme, spec.affix_border_token());
+
         // Contract: stepper width 1.25rem, radius = control - 0.125rem
         let stepper_width = px(rem_to_px(1.25));
         let stepper_inner_radius = control_radius - px(rem_to_px(0.125));
@@ -189,7 +194,7 @@ impl IntoElement for NumberInput {
             .cursor_pointer()
             .hover(move |s| s.bg(elevated))
             .child(
-                Icon::from_spec(IconSpec::new("chevron-up").with_size(IconSize::Sm), theme)
+                Icon::from_spec(IconSpec::new("plus").with_size(IconSize::Sm), theme)
                     .with_color(text_primary),
             );
 
@@ -215,7 +220,7 @@ impl IntoElement for NumberInput {
             .cursor_pointer()
             .hover(move |s| s.bg(elevated))
             .child(
-                Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
+                Icon::from_spec(IconSpec::new("minus").with_size(IconSize::Sm), theme)
                     .with_color(text_primary),
             );
 
@@ -264,8 +269,25 @@ impl IntoElement for NumberInput {
             .text_size(body_size)
             .line_height(body_line_height);
 
+        // Boxed affix builder — Svelte `.poodle-number-input__prefix`: bordered
+        // box with surface bg + muted text, vertically centered, control radius.
+        let affix_box = |label: String| {
+            div()
+                .px(control_padding_x)
+                .h_full()
+                .flex()
+                .items_center()
+                .justify_center()
+                .border_1()
+                .border_color(affix_border)
+                .rounded(control_radius)
+                .bg(affix_bg)
+                .text_color(affix_text)
+                .child(label)
+        };
+
         if let Some(ref prefix) = spec.prefix {
-            value_row = value_row.child(div().text_color(text_secondary).child(prefix.clone()));
+            value_row = value_row.child(affix_box(prefix.clone()));
         }
 
         value_row = value_row.child(
@@ -276,7 +298,7 @@ impl IntoElement for NumberInput {
         );
 
         if let Some(ref suffix) = spec.suffix {
-            value_row = value_row.child(div().text_color(text_secondary).child(suffix.clone()));
+            value_row = value_row.child(affix_box(suffix.clone()));
         }
 
         let value_display = value_row;
@@ -314,8 +336,12 @@ impl IntoElement for NumberInput {
                     spread_radius: px(2.0),
                 }])
             })
-            .child(value_display)
-            .child(steppers);
+            .child(value_display);
+
+        // Contract / Svelte: steppers gated behind `showSteppers`.
+        if spec.show_steppers {
+            wrapper = wrapper.child(steppers);
+        }
 
         // Contract: ArrowUp increments, ArrowDown decrements
         if !spec.is_disabled {

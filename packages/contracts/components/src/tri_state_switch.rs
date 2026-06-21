@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{CheckState, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{
+    CheckState, ControlDensity, ControlSize, SemanticControlSizeRole, TriStateValue,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TriStateSwitchSpec {
@@ -108,12 +110,71 @@ impl TriStateSwitchSpec {
         self.state.aria_checked()
     }
 
-    pub fn track_fill_token(&self) -> &'static str {
-        match self.state {
-            CheckState::Checked => semantic::COLOR_ACCENT_BASE,
-            CheckState::Mixed => semantic::COLOR_ACCENT_HOVER,
-            CheckState::Unchecked => semantic::COLOR_BACKGROUND_SURFACE,
-        }
+    /// The ternary value in contract terms (excluded/default/included),
+    /// derived from the legacy `CheckState` storage.
+    pub fn value(&self) -> TriStateValue {
+        TriStateValue::from_check_state(self.state)
+    }
+
+    /// Selected segment index (excluded 0, default 1, included 2). Drives the
+    /// sliding-capsule offset (`translateX(index * 100%)` in Svelte).
+    pub fn selected_index(&self) -> usize {
+        self.value().index()
+    }
+
+    // ── Per-state semantic colors (contract §8 root custom props) ──
+    //
+    // excluded → status-danger, default → text-primary, included →
+    // status-success. Honor the optional per-instance color overrides when
+    // present (the override string is a hex value parsed by the targets).
+
+    pub fn excluded_color_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_DANGER
+    }
+
+    pub fn default_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn included_color_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_SUCCESS
+    }
+
+    /// Track base color the per-state fills blend over.
+    /// Contract: `color-mix(canvas 70%, black)`. Targets resolve
+    /// `background.canvas` then mix toward black at this ratio.
+    pub fn track_base_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_CANVAS
+    }
+
+    /// Root track background base, mixed toward black.
+    /// Contract: `color-mix(canvas 75%, black)`.
+    pub fn root_bg_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_CANVAS
+    }
+
+    pub fn border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_DEFAULT
+    }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn unselected_text_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn label_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    pub fn label_weight_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_WEIGHT
     }
 
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {

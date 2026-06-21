@@ -4,10 +4,35 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CheckState, ControlSize, TriStateSwitchSpec};
+use poodle_specs::{CheckState, ControlDensity, ControlSize, TriStateSwitchSpec, TriStateValue};
 
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{color_mix, parse_hex_color, resolve_color, resolve_opacity, resolve_px};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{
+    color_mix, color_mix_black, parse_hex_color, resolve_color, resolve_opacity, resolve_px,
+};
+
+/// Per-size `--poodle-tri-state-min-content-width` (contract §8 size scale).
+/// Distinct from the text-input `size_min_width_rem` ladder.
+fn tri_state_min_content_width_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 2.5,
+        ControlSize::Sm => 2.625,
+        ControlSize::Md => 3.0,
+        ControlSize::Lg => 3.375,
+        ControlSize::Xl => 3.75,
+    }
+}
+
+/// `--poodle-tri-state-track-inset` per density (contract §8).
+fn tri_state_track_inset_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.0625,
+        ControlDensity::Default => 0.125,
+        ControlDensity::Comfortable => 0.1875,
+    }
+}
 
 /// A real GPUI tri-state switch component backed by `TriStateSwitchSpec`.
 ///
@@ -99,7 +124,6 @@ impl IntoElement for TriStateSwitch {
         let inline_gap = resolve_px(theme, "space.inline.sm");
 
         let border_color = resolve_color(theme, "color.border.default");
-        let surface_bg = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let danger = resolve_color(theme, "color.status.danger");
@@ -111,16 +135,15 @@ impl IntoElement for TriStateSwitch {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
-        let track_padding = px(rem_to_px(0.125));
-        // Segment width scales with effective size
-        let segment_min_w: Pixels = match effective_size {
-            ControlSize::Xs => px(rem_to_px(3.5)),
-            ControlSize::Sm => px(rem_to_px(4.0)),
-            ControlSize::Md => px(rem_to_px(4.5)),
-            ControlSize::Lg => px(rem_to_px(5.0)),
-            ControlSize::Xl => px(rem_to_px(5.5)),
-        };
-        let segment_h = control_height - px(rem_to_px(0.25));
+        // Contract §8: track-inset is density-driven.
+        let track_padding = px(rem_to_px(tri_state_track_inset_rem(spec.density)));
+        // Contract: segment density spacing (padding + min-width term).
+        let segment_x = px(rem_to_px(control_space_x_rem(spec.density)));
+        // Contract: segment min-width = min-content-width + x*2.
+        let segment_min_w =
+            px(rem_to_px(tri_state_min_content_width_rem(effective_size))) + segment_x * 2.0;
+        // Contract: segment min-height = track-height - inset*2.
+        let segment_h = control_height - track_padding * 2.0;
         let segment_radius = segment_h / 2.0;
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
         let track_w = segment_min_w * 3.0 + track_padding * 2.0;
@@ -142,20 +165,25 @@ impl IntoElement for TriStateSwitch {
             .and_then(parse_hex_color)
             .unwrap_or(success);
 
-        let track_bg = color_mix(text_primary, surface_bg, 0.18);
-        // Svelte: color-mix(X 14%, canvas-70%-black) — ratios 14/8/14
-        let excluded_bg = color_mix(excluded_color, surface_bg, 0.14);
-        let default_bg = color_mix(default_color, surface_bg, 0.08);
-        let included_bg = color_mix(included_color, surface_bg, 0.14);
+        // Contract §8 track recipe (canvas/black, not surface):
+        //   root bg      = color-mix(canvas 75%, black)
+        //   per-state    = color-mix(state X%, color-mix(canvas 70%, black))
+        let canvas = resolve_color(theme, spec.root_bg_token());
+        let track_base = color_mix_black(canvas, 0.70);
+        let track_bg = color_mix_black(canvas, 0.75);
+        // Svelte: ratios 14/8/14 over the canvas-70%-black base.
+        let excluded_bg = color_mix(excluded_color, track_base, 0.14);
+        let default_bg = color_mix(default_color, track_base, 0.08);
+        let included_bg = color_mix(included_color, track_base, 0.14);
 
-        let (selected_index, selection_bg, selection_border) = match spec.state {
-            CheckState::Unchecked => (
+        let (selected_index, selection_bg, selection_border) = match spec.value() {
+            TriStateValue::Excluded => (
                 0.0,
                 excluded_bg,
                 color_mix(excluded_color, border_color, 0.58),
             ),
-            CheckState::Mixed => (1.0, default_bg, border_color),
-            CheckState::Checked => (
+            TriStateValue::Default => (1.0, default_bg, border_color),
+            TriStateValue::Included => (
                 2.0,
                 included_bg,
                 color_mix(included_color, border_color, 0.58),
@@ -174,17 +202,26 @@ impl IntoElement for TriStateSwitch {
             .bg(selection_bg)
             .border_1()
             .border_color(selection_border)
+            // Contract §8 selection box-shadow:
+            //   inset 0 0.0625rem 0 color-mix(white 8%, transparent)
+            //   0 0.125rem 0.5rem color-mix(black 18%, transparent)
             .shadow(vec![
                 BoxShadow {
-                    color: hsla(0.0, 0.0, 1.0, 0.08),
-                    offset: point(px(0.0), px(0.0)),
+                    color: Hsla {
+                        a: 0.08,
+                        ..gpui::white()
+                    },
+                    offset: point(px(0.0), px(rem_to_px(0.0625))),
                     blur_radius: px(0.0),
-                    spread_radius: px(1.0),
+                    spread_radius: px(0.0),
                 },
                 BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.18),
-                    offset: point(px(0.0), px(2.0)),
-                    blur_radius: px(8.0),
+                    color: Hsla {
+                        a: 0.18,
+                        ..gpui::black()
+                    },
+                    offset: point(px(0.0), px(rem_to_px(0.125))),
+                    blur_radius: px(rem_to_px(0.5)),
                     spread_radius: px(0.0),
                 },
             ]);
@@ -196,7 +233,8 @@ impl IntoElement for TriStateSwitch {
                 .flex()
                 .items_center()
                 .justify_center()
-                .px(px(rem_to_px(0.875)))
+                // Contract: segment padding `0 var(--poodle-tri-state-x)` (density).
+                .px(segment_x)
                 .rounded(segment_radius)
                 .text_size(label_size)
                 .font_weight(FontWeight::MEDIUM)

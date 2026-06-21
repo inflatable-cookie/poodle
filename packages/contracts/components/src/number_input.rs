@@ -26,6 +26,10 @@ pub struct NumberInputSpec {
     /// field (e.g. "kg").
     pub suffix: Option<String>,
     pub validation_state: ValidationState,
+    /// When true, the +/- stepper buttons are rendered. Matches Svelte
+    /// `showSteppers` (default `false`). Gates the stepper column on
+    /// both Rust targets.
+    pub show_steppers: bool,
     pub aria_label: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
@@ -47,6 +51,7 @@ impl Default for NumberInputSpec {
             prefix: None,
             suffix: None,
             validation_state: ValidationState::None,
+            show_steppers: false,
             aria_label: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
@@ -75,6 +80,11 @@ impl NumberInputSpec {
 
     pub fn with_step(mut self, step: f64) -> Self {
         self.step = step;
+        self
+    }
+
+    pub fn with_steppers(mut self, show_steppers: bool) -> Self {
+        self.show_steppers = show_steppers;
         self
     }
 
@@ -164,6 +174,24 @@ impl NumberInputSpec {
         semantic::COLOR_BACKGROUND_ELEVATED
     }
 
+    /// Affix (prefix/suffix) box fill — Svelte `.poodle-number-input__prefix`
+    /// uses `background-surface`.
+    pub fn affix_fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    /// Affix box border — Svelte affix uses `border-default`.
+    pub fn affix_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_DEFAULT
+    }
+
+    /// Affix text color. Svelte uses `--poodle-color-text-muted`; the Rust
+    /// semantic set has no `text.muted` token, so `text.secondary` is the
+    /// closest available stand-in (token gap, noted in parity doc).
+    pub fn affix_text_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
     pub fn stepper_icon_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_PRIMARY
     }
@@ -182,6 +210,18 @@ impl NumberInputSpec {
 
     pub fn horizontal_padding_token(&self) -> &'static str {
         semantic::SPACE_CONTROL_X
+    }
+
+    /// Inner gap between a stepper button and the field edge / value.
+    /// Svelte stepper column has no extra inline gap; the Jetstream layout
+    /// uses the smallest inline space token here instead of a bare rem.
+    pub fn stepper_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
+    /// Hairline width token for affix dividers / field border (1px).
+    pub fn border_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_DEFAULT
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

@@ -107,6 +107,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         NumberInputSpec::new(price)
                             .with_min(0.0)
                             .with_step(0.01)
+                            .with_steppers(true)
                             .with_aria_label("Price"),
                         theme,
                     )

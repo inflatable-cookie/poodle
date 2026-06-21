@@ -121,7 +121,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | box | ok | 2 | 3 | gap |
 | breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
-| button | fixed | 4 | 7 | gap |
+| button | fixed | 3 | 3 | gap |
 | calendar | fixed | 3 | 3 | gap |
 | callout | fixed | 2 | 2 | gap |
 | card | fixed | 2 | 2 | gap |
@@ -169,7 +169,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | grid | fixed | 4 | 4 | gap |
 | hover-card | ok | 4 | 6 | ok |
 | icon | ok | 2 | 1 | gap |
-| icon-button | fixed | 1 | 2 | gap |
+| icon-button | fixed | 0 | 0 | gap |
 | icon-provider | fixed | 1 | 1 | gap |
 | inline-list-section | fixed | 6 | 1 | gap |
 | inline-remediation | ok | 1 | 6 | gap |
@@ -191,7 +191,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | metric-tile | ok | 1 | 1 | gap |
 | nav-card | ok | 1 | 2 | gap |
 | navigation-menu | fixed | 5 | 4 | gap |
-| number-input | gap | 5 | 6 | gap |
+| number-input | gap | 1 | 2 | ok |
 | order-by | fixed | 2 | 2 | ok |
 | page-header | fixed | 1 | 1 | ok |
 | page-loading | ok | 0 | 0 | gap |
@@ -243,7 +243,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | toolbar | fixed | 4 | 5 | gap |
 | tooltip | fixed | 3 | 6 | gap |
 | tree | ok | 2 | 4 | ok |
-| tri-state-switch | fixed | 5 | 6 | gap |
+| tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 3 | 2 | gap |
 | validation-summary | gap | 0 | 0 | gap |
 | video-player | fixed | 7 | 3 | gap |
