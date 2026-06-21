@@ -2,7 +2,9 @@ use crate::app_state::AppState;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui_components::{Button, Checkbox, Eyebrow, Field, FormLayout, TextInput};
-use poodle_specs::{ButtonSpec, ButtonVariant, CheckboxSpec, EyebrowSpec, TextInputSpec};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, CheckboxSpec, EyebrowSpec, TextInputSpec, ValidationState,
+};
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -254,24 +256,36 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     FormLayout::new(theme)
                         .error("Unable to save. Please fix the errors below.")
+                        .with_field_error("Email", "This email is already in use")
+                        .with_field_error("Role", "A role is required")
                         .columns(2)
                         .with_child(
-                            Field::new("fl-err-email", "Email", theme).with_control(
-                                TextInput::from_spec(
-                                    TextInputSpec::new().with_value("taken@example.com"),
-                                    theme,
-                                )
-                                .with_id("fl-err-email"),
-                            ),
+                            Field::new("fl-err-email", "Email", theme)
+                                .validation_state(ValidationState::Invalid)
+                                .error("This email is already in use")
+                                .with_control(
+                                    TextInput::from_spec(
+                                        TextInputSpec::new()
+                                            .with_value("taken@example.com")
+                                            .with_validation_state(ValidationState::Invalid),
+                                        theme,
+                                    )
+                                    .with_id("fl-err-email"),
+                                ),
                         )
                         .with_child(
-                            Field::new("fl-err-role", "Role", theme).with_control(
-                                TextInput::from_spec(
-                                    TextInputSpec::new().with_placeholder("Select a role..."),
-                                    theme,
-                                )
-                                .with_id("fl-err-role"),
-                            ),
+                            Field::new("fl-err-role", "Role", theme)
+                                .validation_state(ValidationState::Invalid)
+                                .error("A role is required")
+                                .with_control(
+                                    TextInput::from_spec(
+                                        TextInputSpec::new()
+                                            .with_placeholder("Select a role...")
+                                            .with_validation_state(ValidationState::Invalid),
+                                        theme,
+                                    )
+                                    .with_id("fl-err-role"),
+                                ),
                         )
                         .with_actions(
                             Button::from_spec(
