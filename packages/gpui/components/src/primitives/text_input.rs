@@ -229,14 +229,11 @@ impl IntoElement for TextInput {
         let border_default = resolve_color(theme, spec.border_token());
         let surface_raw = resolve_color(theme, spec.fill_token());
         // Svelte treatment-interactive-subtle values:
-        //   fill: surface 82%, fill-hover: surface 88%
+        //   fill: surface 82%
         //   border: border-default 72%, border-hover: border-default 92%
+        // (No hover fill: Svelte hover is border-only — see hover block below.)
         let surface_bg = Hsla {
             a: surface_raw.a * 0.82,
-            ..surface_raw
-        };
-        let hover_bg = Hsla {
-            a: surface_raw.a * 0.88,
             ..surface_raw
         };
         let border = Hsla {
@@ -337,34 +334,38 @@ impl IntoElement for TextInput {
             } else {
                 format!("{}", char_len)
             };
-            // Svelte: font-size: 0.6875rem (same as xs body size)
+            // Char-count font from the spec token (typography-code-xs ≈ 0.6875rem),
+            // not an inline rem literal (parity: text_input.rs:344).
+            let count_font = resolve_px(theme, spec.char_count_font_size_token());
             inner = inner.child(
                 div()
                     .text_color(count_color)
-                    .text_size(px(rem_to_px(0.6875)))
+                    .text_size(count_font)
                     .whitespace_nowrap()
                     .child(count_text),
             );
         }
 
-        // Validation indicator (circle-check, circle-x, or spinner)
+        // Validation indicator — icons match Svelte (authoritative): `check`/`x`;
+        // pending uses the shared ring spinner in accent (parity: align to
+        // check/x, not circle-check/circle-x).
         match spec.validation_state {
             ValidationState::Valid => {
-                let success_color = resolve_color(theme, "color.status.success");
+                let success_color = resolve_color(theme, spec.validation_indicator_color_token());
                 inner = inner.child(
-                    Icon::from_spec(IconSpec::new("circle-check").with_size(IconSize::Sm), theme)
+                    Icon::from_spec(IconSpec::new("check").with_size(IconSize::Sm), theme)
                         .with_color(success_color),
                 );
             }
             ValidationState::Invalid => {
-                let danger_color = resolve_color(theme, "color.status.danger");
+                let danger_color = resolve_color(theme, spec.validation_indicator_color_token());
                 inner = inner.child(
-                    Icon::from_spec(IconSpec::new("circle-x").with_size(IconSize::Sm), theme)
+                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
                         .with_color(danger_color),
                 );
             }
             ValidationState::Pending => {
-                let accent_color = resolve_color(theme, "color.accent.base");
+                let accent_color = resolve_color(theme, spec.validation_indicator_color_token());
                 inner = inner.child(
                     Spinner::from_spec(
                         SpinnerSpec::new()
@@ -416,16 +417,13 @@ impl IntoElement for TextInput {
             .px(inline_padding)
             .rounded(control_radius);
 
-        // Brand-raised treatment: gradient fill + subtle shadow
+        // Brand-raised treatment: gradient fill + token-resolved subtle shadow.
+        // Uses the shared `brand_raised_interactive_shadow` helper instead of an
+        // inline hsla literal (parity: text_input.rs:424).
         if theme.brand_raised {
             el = el
                 .bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg))
-                .shadow(vec![gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 1.0, 0.08),
-                    offset: point(px(0.0), px(-1.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(0.0),
-                }]);
+                .shadow(crate::theme_ext::brand_raised_interactive_shadow());
         } else {
             el = el.bg(surface_bg);
         }
@@ -436,28 +434,18 @@ impl IntoElement for TextInput {
             .text_size(body_size)
             .line_height(body_line_height)
             .text_color(text_primary)
-            .hover(move |s| {
-                s.bg(hover_bg)
-                    .border_color(hover_border)
-                    .shadow(vec![gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 1.0, 0.10),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(0.0),
-                        spread_radius: px(0.0),
-                    }])
-            })
+            // Svelte hover is border-only — the root has no hover shadow/bg change
+            // (contract §4 "no explicit hover style on root", delegated to focus).
+            // We keep a subtle hover border emphasis but drop the invented hover
+            // shadow (parity: text_input.rs:443).
+            .hover(move |s| s.border_color(hover_border))
+            // Focus: border-focus + fill-focus + the shared token-resolved focus
+            // ring shadow (0 0 0 focus-width focusRing@28%), replacing the inline
+            // hsla literal (parity: text_input.rs:454).
             .focus(move |s| {
                 s.border_color(focus_ring)
                     .bg(focus_bg)
-                    .shadow(vec![gpui::BoxShadow {
-                        color: Hsla {
-                            a: focus_ring.a * 0.28,
-                            ..focus_ring
-                        },
-                        offset: point(px(0.0), px(0.0)),
-                        blur_radius: px(0.0),
-                        spread_radius: px(2.0),
-                    }])
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             })
             .child(inner);
 

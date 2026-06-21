@@ -295,7 +295,9 @@ pub use markdown_editor::MarkdownEditorSpec;
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::MediaPickerSpec;
 pub use media_preview::MediaPreviewSpec;
-pub use media_thumbnail::MediaThumbnailSpec;
+pub use media_thumbnail::{
+    MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec,
+};
 pub use metric_tile::{MetricTileSpec, MetricTrend};
 pub use page_header::{PageHeaderAlign, PageHeaderSpec};
 pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};

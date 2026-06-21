@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
 # Parity: MediaThumbnail
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -57,5 +57,20 @@ Skeletal — a fixed box with optional title only (`media_thumbnail.rs:15-26`). 
 
 ## Notes
 
-- `MediaThumbnailSpec` (`media_thumbnail.rs:6-15`) is missing `presentation`, `fit`, and the three frame-dimension props — the upstream blocker for both Rust targets reaching parity.
-- Jetstream impl is effectively a placeholder (box + title); per CLAUDE.md it under-implements rather than fakes, which is acceptable, but it covers almost none of the contract.
+- RESOLVED (2026-06-21): `MediaThumbnailSpec` gained additive `presentation`
+  (`MediaPresentation`), `fit` (`MediaFit`), `frame_width` (`MediaFrameWidth`),
+  `frame_min_height`, `frame_max_height` plus helper/token accessors
+  (`fallback_icon`, `shows_play_indicator`, `aspect_ratio_pair`,
+  `frame_height_for_width`, badge/play/frame/placeholder token methods). Both
+  Rust targets rebuilt against tokens: ratio-derived frame (no magic px),
+  fallback Icon per kind, placeholder, badge (uppercased, surface-mix fill,
+  control radius), play indicator (audio/video), loading grid spinner, error/
+  empty state postures, compact caption-hiding, non-compact caption with meta.
+  Jetstream covered by 6 render_probe tests.
+- Residual (preview-loop only): the frame's radial+panel gradient and the light-
+  theme overrides are approximated by the flat panel fill on both Rust targets
+  (no radial-gradient primitive); the loading spinner animation runs only in the
+  preview loop. ARIA remains accepted-out (not required for this component).
+- The Rust `AspectRatio` enum has no `auto` variant; `aspect_ratio_pair()` maps
+  every variant to a concrete ratio. `auto` is a Svelte/contract-only value and
+  was intentionally left out of the shared enum (shared module, out of scope).

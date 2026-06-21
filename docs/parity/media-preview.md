@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
 # Parity: MediaPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -53,5 +53,22 @@ Skeletal — surface box + title label only (`media_preview.rs:15-22`). Almost n
 
 ## Notes
 
-- `consv=fixed`: contract↔Svelte is clean. The cross-surface inconsistency to resolve is the Rust-only `footer_actions` region (spec + GPUI), which has no contract/Svelte basis and must be removed Rust-side (not contractualized).
-- `MediaPreviewSpec` (`media_preview.rs:4-16`) is missing `eyebrow`, `caption`, `variant`, `size`, `sizeRole`, `density` — the upstream blocker. Both Rust targets also fail to compose `Card`/`MediaThumbnail` as the contract requires; the GPUI footer + Jetstream skeleton are the two correctness problems.
+- RESOLVED (2026-06-21): `MediaPreviewSpec` gained additive `eyebrow`,
+  `caption`, `variant` (`CardVariant`), `size` (`ControlSize`), `size_role`,
+  `density` (`ControlDensity`) plus size/density rem tables (`eyebrow_size_rem`,
+  `title_size_rem`, `body_size_rem`, `meta_padding_rem`, `header_gap_rem`,
+  `section_gap_rem`) and meta/title token accessors. Both Rust targets now
+  compose Card (GPUI `Card` primitive / Jetstream `js_card`) with a nested
+  MediaThumbnail in the media slot, a header (eyebrow uppercased / title /
+  description + pill-styled meta chips with surface-mix bg + control radius),
+  and a body caption. `thumbnail_meta` prepends to the meta list. Jetstream
+  covered by 4 render_probe tests.
+- The fabricated footer region is no longer rendered by either target (matches
+  the contract, which carries no footer). The `footer_actions` spec field +
+  `with_footer_actions`/`has_footer_actions` are RETAINED (additive) because the
+  GPUI preview `demo_view.rs` and the contracts smoke test still reference them
+  and could not be build-verified in this pass (gpui preview target lock /
+  skipped build). Follow-up: drop the field once the preview can be rebuilt.
+- Residual (preview-loop only): inherited from MediaThumbnail (frame gradient,
+  spinner animation); light-theme meta box-shadow override is not painted. ARIA
+  remains accepted-out.

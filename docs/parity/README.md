@@ -164,7 +164,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | filter-toolbar | fixed | 7 | 6 | gap |
 | form-actions | ok | 6 | 7 | gap |
 | form-dialog | ok | 3 | 9 | gap |
-| form-layout | fixed | 8 | 8 | gap |
+| form-layout | fixed | 2 | 2 | gap |
 | form-shell | gap | 10 | 12 | gap |
 | grid | fixed | 4 | 4 | gap |
 | hover-card | ok | 4 | 6 | ok |
@@ -181,8 +181,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | markdown-editor | fixed | 11 | 8 | gap |
 | media-browse-panel | ok | 2 | 4 | gap |
 | media-picker | fixed | 8 | 8 | gap |
-| media-preview | fixed | 9 | 8 | gap |
-| media-thumbnail | ok | 8 | 9 | gap |
+| media-preview | fixed | 1 | 1 | gap |
+| media-thumbnail | ok | 1 | 1 | gap |
 | menu | fixed | 2 | 5 | ok |
 | menubar | fixed | 3 | 6 | gap |
 | meta-bar | fixed | 3 | 3 | gap |
@@ -231,7 +231,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | table | fixed | 4 | 5 | gap |
 | tabs | fixed | 11 | 12 | gap |
 | text | ok | 4 | 2 | gap |
-| text-input | fixed | 8 | 9 | gap |
+| text-input | fixed | 2 | 2 | gap |
 | text-link | ok | 4 | 4 | gap |
 | time-ago | fixed | 4 | 4 | gap |
 | time-input | fixed | 4 | 5 | gap |

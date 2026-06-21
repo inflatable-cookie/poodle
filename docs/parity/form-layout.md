@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 50: both targets. Additive FormLayoutSpec.field_errors (+with_field_error(s)/
+     has_field_errors) + layout token methods. Both now compose the real Callout (error/success)
+     + FormActions primitives (was inline banner/actions); added accessible field-errors summary
+     (danger-toned heading + "field: message" items); min-width from size.select.minWidth (was raw
+     180px); default columns 6; dropped non-contract title prop. 7 Jetstream probe tests; specs 61,
+     jet 209, gpui clean. -->
 # Parity: FormLayout
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

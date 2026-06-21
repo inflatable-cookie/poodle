@@ -3,16 +3,26 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{AspectRatio, MediaKind, MediaState, MediaThumbnailSpec};
+use poodle_specs::{AspectRatio, MediaFit, MediaFrameWidth, MediaKind, MediaPresentation, MediaState, MediaThumbnailSpec};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::primitives::Spinner;
+use crate::presentation::rem_to_px;
+use crate::primitives::{Icon, Spinner};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+
+/// Base frame width (rem) used to derive an intrinsic height from the aspect
+/// ratio when no explicit pixel width is given. GPUI has no CSS `aspect-ratio`,
+/// so the frame grows to its parent (`w_full`) while the ratio drives a
+/// min-height. The `xl` preset (contract `frameWidth="xl"` → `min(100%, 24rem)`)
+/// uses 24rem; `fill` uses a 20rem reference so the height is reasonable.
+const FRAME_FILL_REF_REM: f32 = 20.0;
+const FRAME_XL_REM: f32 = 24.0;
 
 /// A real GPUI media thumbnail component backed by `MediaThumbnailSpec`.
 ///
-/// Renders a thumbnail frame with aspect ratio constraints, fallback content
-/// when media is not ready, optional badge, and caption.
+/// Renders a framed preview surface with aspect-ratio-derived height, a
+/// fallback icon placeholder, optional badge and play indicator, loading/error
+/// state posture, and an optional caption.
 pub struct MediaThumbnail {
     spec: MediaThumbnailSpec,
     theme: GpuiThemeProvider,
@@ -80,6 +90,14 @@ impl MediaThumbnail {
         self.spec.show_caption = v;
         self
     }
+    pub fn presentation(mut self, v: MediaPresentation) -> Self {
+        self.spec.presentation = v;
+        self
+    }
+    pub fn fit(mut self, v: MediaFit) -> Self {
+        self.spec.fit = v;
+        self
+    }
 
     pub fn with_image(mut self, image: impl IntoElement) -> Self {
         self.image_content = Some(image.into_any_element());
@@ -94,33 +112,64 @@ impl IntoElement for MediaThumbnail {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let frame_bg = resolve_color(theme, spec.frame_fill_token());
+        // Frame background: contract §9 is a radial+panel gradient. GPUI has no
+        // radial-gradient element, so we paint the flat panel base layer and
+        // note the gradient as preview-loop.
+        let frame_bg = resolve_color(theme, spec.frame_panel_token());
+        let border = resolve_color(theme, spec.frame_border_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let border = resolve_color(theme, "color.border.subtle");
-        let accent = resolve_color(theme, "color.accent.base");
+        let placeholder_color = resolve_color(theme, spec.placeholder_icon_token());
+
         let body_size = resolve_px(theme, "typography.body.size");
         let label_size = resolve_px(theme, "typography.label.size");
         let caption_size = resolve_px(theme, "typography.caption.size");
-        let radius_control = resolve_radius(theme, "radius.control");
-        let gap_sm = resolve_px(theme, "space.inline.sm");
-        let gap_md = resolve_px(theme, "space.inline.md");
 
-        // Aspect ratio sizing
-        let (frame_w, frame_h) = match spec.aspect_ratio {
-            AspectRatio::Square => (px(160.0), px(160.0)),
-            AspectRatio::Landscape => (px(220.0), px(148.0)),
-            AspectRatio::Portrait => (px(148.0), px(220.0)),
-            AspectRatio::Video => (px(280.0), px(157.0)),
+        // Frame radius: calc(radius.surface − 0.125rem).
+        let frame_radius = (resolve_radius(theme, spec.frame_radius_token())
+            - px(rem_to_px(spec.frame_radius_inset_rem())))
+        .max(px(0.0));
+
+        let gap_root = resolve_px(theme, "space.stack.sm");
+        let gap_state = gap_root;
+        let badge_inset = px(rem_to_px(if spec.is_compact() { 0.5 } else { 0.625 }));
+        let badge_pad_x = px(rem_to_px(0.625));
+        let play_inset = px(rem_to_px(0.625));
+        let play_size = px(rem_to_px(2.0));
+        let placeholder_pad_y = resolve_px(theme, "space.panel.y");
+        let placeholder_pad_x = resolve_px(theme, "space.panel.x");
+        let badge_radius = resolve_radius(theme, spec.badge_radius_token());
+        let play_radius = resolve_radius(theme, spec.play_radius_token());
+
+        // Frame width / height: derive a reference width then compute height
+        // from the aspect ratio (contract §9 Aspect Ratios). `Fill`/`Xl` grow
+        // to the parent (`w_full`) with a ratio-derived min-height.
+        let (ref_width_px, explicit_width): (f32, Option<Pixels>) = match spec.frame_width {
+            MediaFrameWidth::Fill => (rem_to_px(FRAME_FILL_REF_REM), None),
+            MediaFrameWidth::Xl => (rem_to_px(FRAME_XL_REM), None),
+            MediaFrameWidth::Px(w) => (w, Some(px(w))),
         };
+        let derived_h = spec.frame_height_for_width(ref_width_px);
+        let frame_h = spec
+            .frame_min_height
+            .map(|m| m.max(derived_h))
+            .unwrap_or(derived_h);
+        let frame_h = spec
+            .frame_max_height
+            .map(|m| frame_h.min(m))
+            .unwrap_or(frame_h);
 
-        let mut container = div().flex().flex_col().gap(gap_md).overflow_hidden();
+        let root_gap = if spec.is_compact() { px(0.0) } else { gap_root };
+        let mut container = div().flex().flex_col().gap(root_gap).overflow_hidden();
 
-        // Thumbnail frame
+        // ── Frame ──────────────────────────────────────────────
         let mut frame = div()
-            .w(frame_w)
-            .h(frame_h)
-            .rounded(radius_control)
+            .map(|el| match explicit_width {
+                Some(w) => el.w(w),
+                None => el.w_full(),
+            })
+            .h(px(frame_h))
+            .rounded(frame_radius)
             .bg(frame_bg)
             .border_1()
             .border_color(border)
@@ -131,85 +180,140 @@ impl IntoElement for MediaThumbnail {
             .relative();
 
         if spec.shows_fallback_copy() {
-            // Fallback state
-            let kind_label = match spec.kind {
-                MediaKind::Image => "Image",
-                MediaKind::Audio => "Audio",
-                MediaKind::Video => "Video",
-                MediaKind::Document => "Document",
-                MediaKind::Embed => "Embed",
-            };
-            frame = frame.child(
+            // ── State display (loading / error / empty) ─────────
+            let state_bg = resolve_color(theme, "color.background.surface").opacity(0.78);
+            let mut state = div()
+                .w_full()
+                .h_full()
+                .flex()
+                .flex_col()
+                .gap(gap_state)
+                .map(|el| {
+                    if spec.is_compact() {
+                        el.items_center().justify_center().p(px(rem_to_px(0.875)))
+                    } else {
+                        el.items_start()
+                            .justify_end()
+                            .px(placeholder_pad_x)
+                            .py(placeholder_pad_y)
+                    }
+                })
+                .bg(state_bg);
+
+            if spec.state == MediaState::Loading {
+                state = state.child(Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Grid)
+                        .with_size(if spec.is_compact() {
+                            SpinnerSize::Sm
+                        } else {
+                            SpinnerSize::Md
+                        })
+                        .with_tone(SpinnerTone::Accent),
+                    theme,
+                ));
+            }
+
+            state = state.child(
                 div()
-                    .flex()
-                    .flex_col()
-                    .items_center()
-                    .gap(gap_sm)
-                    .when(spec.state == MediaState::Loading, |el| {
-                        el.child(Spinner::from_spec(
-                            SpinnerSpec::new()
-                                .with_variant(SpinnerVariant::Grid)
-                                .with_size(if spec.show_caption {
-                                    SpinnerSize::Md
-                                } else {
-                                    SpinnerSize::Sm
-                                })
-                                .with_tone(SpinnerTone::Accent),
-                            theme,
-                        ))
-                    })
-                    .child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(text_primary)
-                            .child(spec.resolved_state_title().to_string()),
-                    )
-                    .when(spec.resolved_state_message().is_some(), |el| {
-                        el.child(
-                            div()
-                                .text_size(label_size)
-                                .text_color(text_secondary.opacity(0.85))
-                                .child(spec.resolved_state_message().unwrap().to_string()),
-                        )
-                    })
-                    .child(
-                        div()
-                            .text_size(caption_size)
-                            .text_color(text_secondary.opacity(0.7))
-                            .child(format!("[{}]", kind_label)),
-                    ),
+                    .text_size(body_size)
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
+                    .child(spec.resolved_state_title().to_string()),
             );
+
+            if spec.state_message_visible() {
+                state = state.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(spec.resolved_state_message().unwrap().to_string()),
+                );
+            }
+
+            frame = frame.child(state);
         } else if let Some(image) = self.image_content {
             frame = frame.child(image);
+        } else {
+            // ── Placeholder fallback icon (contract §9) ─────────
+            frame = frame.child(
+                div()
+                    .w_full()
+                    .h_full()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .px(placeholder_pad_x)
+                    .py(placeholder_pad_y)
+                    .child(
+                        Icon::new(spec.fallback_icon(), theme)
+                            .with_px_size(rem_to_px(1.75))
+                            .with_color(placeholder_color),
+                    ),
+            );
         }
 
-        // Badge overlay
-        if let Some(ref badge_label) = spec.badge_label {
+        // ── Play indicator (audio/video, contract §3) ──────────
+        if spec.shows_play_indicator() {
+            let play_bg = resolve_color(theme, spec.play_fill_token()).opacity(0.78);
+            let play_color = resolve_color(theme, spec.play_color_token());
             frame = frame.child(
                 div()
                     .absolute()
-                    .top(px(10.0))
-                    .right(px(10.0))
-                    .px(gap_md)
-                    .py(px(2.0))
-                    .rounded(radius_control)
-                    .bg(accent)
-                    .text_size(label_size)
-                    .text_color(gpui::white())
-                    .child(badge_label.clone()),
+                    .left(play_inset)
+                    .bottom(play_inset)
+                    .w(play_size)
+                    .h(play_size)
+                    .rounded(play_radius)
+                    .bg(play_bg)
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(
+                        Icon::new(spec.play_indicator_icon(), theme)
+                            .with_px_size(rem_to_px(0.9375))
+                            .with_color(play_color),
+                    ),
+            );
+        }
+
+        // ── Badge overlay (contract §9) ────────────────────────
+        if let Some(ref badge_label) = spec.badge_label {
+            let badge_bg = resolve_color(theme, spec.badge_fill_token()).opacity(0.74);
+            let badge_color = resolve_color(theme, spec.badge_text_token());
+            frame = frame.child(
+                div()
+                    .absolute()
+                    .top(badge_inset)
+                    .right(badge_inset)
+                    .h(px(rem_to_px(1.5)))
+                    .px(badge_pad_x)
+                    .rounded(badge_radius)
+                    .bg(badge_bg)
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .text_size(px(rem_to_px(0.6875)))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(badge_color)
+                    .child(badge_label.to_uppercase()),
             );
         }
 
         container = container.child(frame);
 
-        // Caption
+        // ── Caption (non-compact, contract §3/§9) ──────────────
         if spec.caption_visible() {
-            let mut caption = div().w(frame_w).flex().flex_col().gap(px(2.0));
+            let mut caption = div()
+                .w_full()
+                .flex()
+                .flex_col()
+                .gap(px(rem_to_px(0.125)));
 
             if let Some(ref title) = spec.title {
                 caption = caption.child(
                     div()
-                        .text_size(body_size)
+                        .text_size(caption_size.max(px(rem_to_px(0.875))))
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(text_primary)
                         .overflow_x_hidden()

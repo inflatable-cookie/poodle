@@ -1,24 +1,27 @@
 //! MediaPreview — real GPUI component backed by MediaPreviewSpec.
+//!
+//! Composes the `Card` primitive (contract §10) with a nested `MediaThumbnail`
+//! in the media slot, a header (eyebrow / title / description + pill metadata),
+//! and a body (caption). Size and density resolve from the spec's contract-exact
+//! rem tables.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction,
+    CardSpec, ControlDensity, MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec,
 };
 
 use crate::composites::MediaThumbnail;
+use crate::presentation::rem_to_px;
+use crate::primitives::Card;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI media preview component backed by `MediaPreviewSpec`.
-///
-/// Renders a full media preview with a viewport area, title, description,
-/// metadata row, and optional footer actions.
 pub struct MediaPreview {
     spec: MediaPreviewSpec,
     theme: GpuiThemeProvider,
     media_content: Option<AnyElement>,
-    on_action: Option<Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for MediaPreview {
@@ -34,7 +37,6 @@ impl MediaPreview {
             spec: MediaPreviewSpec::new(kind, title),
             theme: theme.clone(),
             media_content: None,
-            on_action: None,
         }
     }
 
@@ -43,7 +45,6 @@ impl MediaPreview {
             spec,
             theme: theme.clone(),
             media_content: None,
-            on_action: None,
         }
     }
 
@@ -64,12 +65,16 @@ impl MediaPreview {
         self.spec.description = Some(v.into());
         self
     }
-    pub fn metadata(mut self, v: Vec<String>) -> Self {
-        self.spec.metadata = v;
+    pub fn eyebrow(mut self, v: impl Into<String>) -> Self {
+        self.spec.eyebrow = Some(v.into());
         self
     }
-    pub fn footer_actions(mut self, v: Vec<RemediationAction>) -> Self {
-        self.spec.footer_actions = v;
+    pub fn caption(mut self, v: impl Into<String>) -> Self {
+        self.spec.caption = Some(v.into());
+        self
+    }
+    pub fn metadata(mut self, v: Vec<String>) -> Self {
+        self.spec.metadata = v;
         self
     }
     pub fn aspect_ratio(mut self, v: poodle_specs::AspectRatio) -> Self {
@@ -92,17 +97,21 @@ impl MediaPreview {
         self.spec.state_message = Some(v.into());
         self
     }
-
-    pub fn with_media_content(mut self, content: impl IntoElement) -> Self {
-        self.media_content = Some(content.into_any_element());
+    pub fn variant(mut self, v: poodle_specs::CardVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn size(mut self, v: poodle_specs::ControlSize) -> Self {
+        self.spec.size = Some(v);
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = Some(v);
         self
     }
 
-    pub fn on_action(
-        mut self,
-        handler: impl Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static,
-    ) -> Self {
-        self.on_action = Some(Box::new(handler));
+    pub fn with_media_content(mut self, content: impl IntoElement) -> Self {
+        self.media_content = Some(content.into_any_element());
         self
     }
 }
@@ -114,76 +123,65 @@ impl IntoElement for MediaPreview {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "space.inline.md");
+        let text_primary = resolve_color(theme, spec.title_color_token());
+        let text_secondary = resolve_color(theme, spec.secondary_text_token());
+        let meta_fill = resolve_color(theme, spec.meta_fill_token()).opacity(0.70);
+        let meta_radius = resolve_radius(theme, spec.meta_radius_token());
         let inline_gap = resolve_px(theme, "space.inline.sm");
-        let body_size = resolve_px(theme, "typography.body.size");
-        let heading_size = resolve_px(theme, "typography.heading.size");
-        let label_size = resolve_px(theme, "typography.label.size");
-        let control_radius = resolve_radius(theme, "radius.control");
 
-        let text_primary = resolve_color(theme, "color.text.primary");
-        let text_secondary = resolve_color(theme, "color.text.secondary");
-        let border = resolve_color(theme, "color.border.subtle");
-        let accent = resolve_color(theme, "color.accent.base");
+        let eyebrow_size = px(rem_to_px(spec.eyebrow_size_rem()));
+        let title_size = px(rem_to_px(spec.title_size_rem()));
+        let body_size = px(rem_to_px(spec.body_size_rem()));
+        let (meta_pad_y, meta_pad_x) = spec.meta_padding_rem();
+        let header_gap = px(rem_to_px(spec.header_gap_rem()));
+        let section_gap = px(rem_to_px(spec.section_gap_rem()));
 
-        let mut container = div()
-            .w_full()
-            .flex()
-            .flex_col()
-            .gap(px(12.0))
-            .border_1()
-            .border_color(border)
-            .rounded(control_radius)
-            .overflow_hidden();
-
-        // Media viewport
+        // ── Media slot: nested MediaThumbnail (contract §3/§10) ──
         let mut thumbnail = MediaThumbnail::from_spec(
             MediaThumbnailSpec::new(spec.kind)
                 .with_state(spec.state)
                 .with_aspect_ratio(spec.aspect_ratio)
                 .with_show_caption(false),
             theme,
-        );
+        )
+        .title(spec.title.clone());
 
         if let Some(ref state_title) = spec.state_title {
             thumbnail = thumbnail.state_title(state_title);
         }
-
         if let Some(ref state_message) = spec.state_message {
             thumbnail = thumbnail.state_message(state_message);
         }
-
         if let Some(ref badge) = spec.badge {
             thumbnail = thumbnail.badge_label(badge);
         }
-
         if let Some(media) = self.media_content {
             thumbnail = thumbnail.with_image(media);
         }
 
-        container = container.child(thumbnail);
+        // ── Header: heading block + pill metadata ──────────────
+        let mut heading = div().flex().flex_col().gap(section_gap);
 
-        // Info section
-        let mut info = div()
-            .w_full()
-            .flex()
-            .flex_col()
-            .gap(px(6.0))
-            .px(inline_padding)
-            .py(inline_padding);
+        if let Some(ref eyebrow) = spec.eyebrow {
+            heading = heading.child(
+                div()
+                    .text_size(eyebrow_size)
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_secondary)
+                    .child(eyebrow.to_uppercase()),
+            );
+        }
 
-        // Title
-        info = info.child(
+        heading = heading.child(
             div()
-                .text_size(heading_size)
+                .text_size(title_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),
         );
 
-        // Description
         if let Some(ref description) = spec.description {
-            info = info.child(
+            heading = heading.child(
                 div()
                     .text_size(body_size)
                     .text_color(text_secondary)
@@ -191,69 +189,60 @@ impl IntoElement for MediaPreview {
             );
         }
 
-        // Metadata row
-        if spec.thumbnail_meta.is_some() || !spec.metadata.is_empty() {
-            let mut meta_row = div().flex().items_center().gap(inline_gap);
+        let mut header = div().flex().flex_col().gap(header_gap).child(heading);
 
-            let metadata_items = self
-                .spec
+        if spec.thumbnail_meta.is_some() || !spec.metadata.is_empty() {
+            let mut meta_list = div().flex().flex_wrap().gap(inline_gap);
+
+            let items = spec
                 .thumbnail_meta
                 .iter()
                 .cloned()
-                .chain(spec.metadata.iter().cloned())
-                .collect::<Vec<_>>();
+                .chain(spec.metadata.iter().cloned());
 
-            for (i, meta) in metadata_items.iter().enumerate() {
-                if i > 0 {
-                    meta_row = meta_row.child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(text_secondary.opacity(0.5))
-                            .child("\u{00B7}"),
-                    );
-                }
-                meta_row = meta_row.child(
+            for item in items {
+                meta_list = meta_list.child(
                     div()
-                        .text_size(label_size)
+                        .px(px(rem_to_px(meta_pad_x)))
+                        .py(px(rem_to_px(meta_pad_y)))
+                        .rounded(meta_radius)
+                        .bg(meta_fill)
+                        .text_size(body_size)
                         .text_color(text_secondary)
-                        .child(meta.clone()),
+                        .child(item),
                 );
             }
 
-            info = info.child(meta_row);
+            header = header.child(meta_list);
         }
 
-        container = container.child(info);
-
-        // Footer actions
-        if spec.has_footer_actions() {
-            let mut footer = div()
-                .w_full()
+        // ── Body: caption ──────────────────────────────────────
+        let body = spec.caption.as_ref().map(|caption| {
+            div()
                 .flex()
-                .items_center()
-                .gap(inline_gap)
-                .px(inline_padding)
-                .py(px(8.0))
-                .border_t_1()
-                .border_color(border);
+                .flex_col()
+                .gap(section_gap)
+                .child(
+                    div()
+                        .text_size(body_size)
+                        .text_color(text_secondary)
+                        .child(caption.clone()),
+                )
+        });
 
-            for action in &spec.footer_actions {
-                let action_id = SharedString::from(format!("media-preview-{}", action.id));
-                let btn = div()
-                    .id(action_id)
-                    .cursor_pointer()
-                    .text_size(label_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(accent)
-                    .when(action.is_disabled, |el| el.opacity(0.5))
-                    .child(action.label.clone());
+        // ── Compose Card (contract §10) ────────────────────────
+        let card = Card::from_spec(
+            CardSpec::new()
+                .with_variant(spec.variant)
+                .with_density(spec.resolved_density())
+                .with_media(true)
+                .with_aria_label(spec.title.clone()),
+            theme,
+        )
+        .with_media(thumbnail)
+        .with_header(header)
+        .when_some(body, |card, body| card.with_body(body));
 
-                footer = footer.child(btn);
-            }
-
-            container = container.child(footer);
-        }
-
-        container.into_any_element()
+        card.into_any_element()
     }
 }

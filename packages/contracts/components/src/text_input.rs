@@ -352,12 +352,53 @@ impl TextInputSpec {
         semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
     }
 
+    /// Char-count color. Contract §8 specifies `text-muted`; no `color.text.muted`
+    /// semantic token is exported, so the most-muted available text role
+    /// (`text-tertiary`, neutral.400) is used. TOKEN GAP: add `color.text.muted`.
     pub fn char_count_color_token(&self) -> &'static str {
-        semantic::COLOR_TEXT_SECONDARY
+        semantic::COLOR_TEXT_TERTIARY
     }
 
     pub fn char_count_over_color_token(&self) -> &'static str {
         semantic::COLOR_STATUS_DANGER
+    }
+
+    /// Char-count font size. Contract §8 char-count uses `typography-code-xs`
+    /// (`0.6875rem`); `typography.caption.size` resolves to the same `0.6875rem`
+    /// primitive (`font.size.xs`), so it is the token-resolved match for the
+    /// counter size without a per-component literal.
+    pub fn char_count_font_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_CAPTION_SIZE
+    }
+
+    /// Root + affix-separator border width. Contract §8 root border is
+    /// `0.0625rem solid`; `border.width.default` resolves to `0.0625rem`.
+    pub fn border_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_DEFAULT
+    }
+
+    /// Affix separator color. Contract §8 (reconciled to Svelte) uses a solid
+    /// `border-default` separator, not the muted `border-subtle`.
+    pub fn affix_separator_solid_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_DEFAULT
+    }
+
+    /// Pending validation indicator color. Contract §8 + Svelte use `accent-base`
+    /// for the pending spinner (not `text-secondary`).
+    pub fn pending_indicator_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    /// Validation indicator color for the current validation state. Mirrors the
+    /// §8 "Validation Indicator state colors" table: pending→accent-base,
+    /// valid→status-success, invalid→status-danger, none→icon-muted.
+    pub fn validation_indicator_color_token(&self) -> &'static str {
+        match self.validation_state {
+            ValidationState::Pending => semantic::COLOR_ACCENT_BASE,
+            ValidationState::Valid => semantic::COLOR_STATUS_SUCCESS,
+            ValidationState::Invalid => semantic::COLOR_STATUS_DANGER,
+            ValidationState::None => semantic::COLOR_ICON_MUTED,
+        }
     }
 
     pub fn focus_fill_token(&self) -> &'static str {

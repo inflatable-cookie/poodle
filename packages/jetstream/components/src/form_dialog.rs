@@ -72,6 +72,7 @@ pub fn js_form_dialog(
             error: spec.error.clone(),
             success: spec.success.clone(),
             description: None,
+            ..FormLayoutSpec::default()
         };
         let mut wrapper = ui_element::div().flex_col().gap(title_gap);
         if let Some(ref subtitle) = spec.subtitle {

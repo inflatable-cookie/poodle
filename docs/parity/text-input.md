@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 50: both targets. Additive TextInputSpec token methods (char_count_font_size,
+     border_width, affix_separator_solid, pending/validation_indicator_color). Validation icons
+     → Svelte check/x (was circle-check/circle-x); pending → ring spinner (accent); affix
+     separators + root border from border.width.default; char-count font from caption token.
+     GPUI dropped invented hover shadow + inline hsla (brand-raised/focus-ring → shared helpers).
+     8 Jetstream probe tests; specs 61, jet 209, gpui clean. focus-within + caret = preview-loop. -->
 # Parity: TextInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
