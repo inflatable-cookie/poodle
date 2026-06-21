@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::date_picker::js_date_picker;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::DatePickerSpec;
+use poodle_specs::{ControlDensity, ControlSize, DatePickerSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -25,9 +25,30 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             spec.is_disabled = true;
             js_date_picker(&spec, theme)
         }))
-        // Open
+        // Open (composes the real Calendar surface)
         .child(group("Open", secondary,
-            js_date_picker(&DatePickerSpec::new().with_default_open(true), theme)
+            js_date_picker(
+                &DatePickerSpec::new()
+                    .with_default_value("2026-03-21")
+                    .with_default_open(true),
+                theme,
+            )
+        ))
+        // Sizes
+        .child(group("Sizes", secondary,
+            div().flex_col().gap(8.0)
+                .child(js_date_picker(&DatePickerSpec::new().with_size(ControlSize::Xs), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_size(ControlSize::Sm), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_size(ControlSize::Md), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_size(ControlSize::Lg), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_size(ControlSize::Xl), theme))
+        ))
+        // Densities
+        .child(group("Densities", secondary,
+            div().flex_col().gap(8.0)
+                .child(js_date_picker(&DatePickerSpec::new().with_density(ControlDensity::Compact), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_density(ControlDensity::Default), theme))
+                .child(js_date_picker(&DatePickerSpec::new().with_density(ControlDensity::Comfortable), theme))
         ))
 }
 

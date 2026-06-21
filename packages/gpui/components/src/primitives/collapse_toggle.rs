@@ -7,13 +7,13 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec,
+    CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSpec,
     SemanticControlSizeRole,
 };
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI collapse toggle component backed by `CollapseToggleSpec`.
 pub struct CollapseToggle {
@@ -100,15 +100,11 @@ impl IntoElement for CollapseToggle {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // ── Resolve effective size ───────────────────────────────
-        let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
-
         // ── Resolve tokens ───────────────────────────────────────
         let text_color = resolve_color(theme, spec.text_color_token());
         let hover_text = resolve_color(theme, spec.text_color_hover_token());
         let hover_fill = resolve_color(theme, spec.hover_fill_token());
         let radius = resolve_radius(theme, spec.radius_token());
-        let icon_size = resolve_px(theme, spec.icon_size_token());
 
         let is_disabled = spec.is_disabled;
 
@@ -122,17 +118,19 @@ impl IntoElement for CollapseToggle {
             format!("poodle-collapse-toggle-{}", icon_name)
         };
 
-        // ── Compact square button sized to icon + small padding ──
-        // Contract: "compact button sized to icon", Svelte uses padding: 0.125rem (2px)
-        let padding = px(rem_to_px(0.125));
-        let button_size = icon_size + padding * 2.0;
+        // ── Contract §7-8: inline-flex sized to icon + padding ───
+        // Vertical padding is the size-table value; horizontal padding is the
+        // density `padding-inline` (which equals the base for compact/default
+        // and widens only for comfortable). Density never alters button height.
+        let pad_y = px(rem_to_px(spec.padding_rem()));
+        let pad_x = px(rem_to_px(spec.padding_inline_rem()));
 
         // ── Build root element ───────────────────────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
-            .w(button_size)
-            .h(button_size)
+            .px(pad_x)
+            .py(pad_y)
             .rounded(radius)
             .bg(gpui::transparent_black())
             .text_color(text_color)
@@ -155,16 +153,19 @@ impl IntoElement for CollapseToggle {
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
+            // Contract §4 defines only :hover (no active state).
             el = el
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_fill).text_color(hover_text))
-                .active(move |s| s.bg(hover_fill));
+                .hover(move |s| s.bg(hover_fill).text_color(hover_text));
         }
 
-        // ── Direction Icon (chevron) ─────────────────────────────
+        // ── Direction Icon (chevron) — scales with effective size ─
         el = el.child(
-            Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
-                .with_color(text_color),
+            Icon::from_spec(
+                IconSpec::new(icon_name).with_size(spec.effective_icon_size()),
+                theme,
+            )
+            .with_color(text_color),
         );
 
         // ── Click + keyboard handler ────────────────────────────

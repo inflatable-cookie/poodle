@@ -3,15 +3,14 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    CalendarWeekStart, ControlDensity, ControlSize, DatePickerSpec, IconSize, IconSpec,
-    SemanticControlSizeRole,
+    CalendarWeekStart, ControlDensity, ControlSize, DatePickerSpec, SemanticControlSizeRole,
 };
 
 use super::calendar::Calendar;
 use super::icon::Icon;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
+    date_picker_indicator_font_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_height_offset_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -141,7 +140,6 @@ impl IntoElement for DatePicker {
         let border = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let icon_muted = resolve_color(theme, "color.icon.muted");
         let accent = resolve_color(theme, "color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
@@ -199,12 +197,15 @@ impl IntoElement for DatePicker {
             text_primary
         };
 
+        let indicator_px = rem_to_px(date_picker_indicator_font_rem(effective_size));
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                // Contract: calendar icon indicator (not chevron)
-                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
-                    .with_color(icon_muted),
+                // Contract §2 + Svelte: disclosure chevron indicator (text-secondary,
+                // per-size indicator font-size).
+                Icon::new("chevron-down", theme)
+                    .with_px_size(indicator_px)
+                    .with_color(text_secondary),
             );
 
         if let Some(handler) = self.on_toggle {

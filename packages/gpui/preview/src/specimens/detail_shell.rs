@@ -172,10 +172,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    div().h(px(100.0)).child(DetailShell::from_spec(
+                    div().h(px(120.0)).child(DetailShell::from_spec(
                         DetailShellSpec::new()
                             .with_title("Error")
-                            .with_state(DetailState::Error),
+                            .with_state(DetailState::Error)
+                            .with_state_title("Failed to load")
+                            .with_state_message("Something went wrong. Please try again."),
                         theme,
                     )),
                 ),

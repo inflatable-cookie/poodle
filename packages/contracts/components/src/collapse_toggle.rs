@@ -1,3 +1,4 @@
+use crate::icon::IconSize;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
@@ -124,11 +125,67 @@ impl CollapseToggleSpec {
         }
     }
 
+    // ── Size / density resolution ────────────────────────────
+    //
+    // Mirrors the Svelte `resolveSemanticControlSize` and the
+    // `.poodle-collapse-toggle[data-size]` / `[data-density]` padding ladders in
+    // `CollapseToggle.svelte` verbatim. The arithmetic is duplicated here (rather
+    // than referencing a per-target presentation module) so both Rust targets
+    // resolve identical geometry from a single spec source of truth.
+
+    /// Effective control size after applying `size_role` to the base `size`.
+    /// Defaults to `Md`; `Chrome` role (the default) shifts one stop smaller.
+    pub fn effective_size(&self) -> ControlSize {
+        match (self.size, self.size_role) {
+            (s, SemanticControlSizeRole::Control) => s,
+
+            (ControlSize::Xs, SemanticControlSizeRole::Chrome) => ControlSize::Xs,
+            (ControlSize::Sm, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
+            (ControlSize::Md, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
+            (ControlSize::Lg, SemanticControlSizeRole::Chrome) => ControlSize::Md,
+            (ControlSize::Xl, SemanticControlSizeRole::Chrome) => ControlSize::Lg,
+
+            (ControlSize::Xs, SemanticControlSizeRole::Prominent) => ControlSize::Sm,
+            (ControlSize::Sm, SemanticControlSizeRole::Prominent) => ControlSize::Md,
+            (ControlSize::Md, SemanticControlSizeRole::Prominent) => ControlSize::Lg,
+            (ControlSize::Lg, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
+            (ControlSize::Xl, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
+        }
+    }
+
+    /// Full button padding in rem for the effective size (contract §8 size table:
+    /// xs 0.0625, sm/md 0.125, lg 0.1875, xl 0.25).
+    pub fn padding_rem(&self) -> f32 {
+        match self.effective_size() {
+            ControlSize::Xs => 0.0625,
+            ControlSize::Sm => 0.125,
+            ControlSize::Md => 0.125,
+            ControlSize::Lg => 0.1875,
+            ControlSize::Xl => 0.25,
+        }
+    }
+
+    /// Horizontal (inline) padding in rem for the density (contract §8 density
+    /// table: comfortable 0.375, compact/default 0.125 = base). Density only
+    /// overrides `padding-inline`; it never touches vertical padding or height.
+    pub fn padding_inline_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Comfortable => 0.375,
+            ControlDensity::Compact | ControlDensity::Default => 0.125,
+        }
+    }
+
+    /// The chevron icon size, scaling with the effective control size to match
+    /// Svelte's `<Icon size={resolvedSize} />`.
+    pub fn effective_icon_size(&self) -> IconSize {
+        IconSize::from(self.effective_size())
+    }
+
     // ── Token methods ────────────────────────────────────────
 
-    /// Small icon size for the chevron.
+    /// Icon size token for the chevron, scaled by the effective control size.
     pub fn icon_size_token(&self) -> &'static str {
-        semantic::SIZE_ICON_SM
+        self.effective_icon_size().size_token()
     }
 
     /// Radius for the toggle button (small, like the Svelte radius-sm).

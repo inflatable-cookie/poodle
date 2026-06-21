@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap pass=41 -->
 # Parity: CollapseToggle
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,20 +25,20 @@ Mostly aligned; the divergences are in the size/density padding model — contra
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Padding hardcoded flat `px(rem_to_px(0.125))` at `collapse_toggle.rs:127` — ignores the size table (`xs`/`lg`/`xl`) and density (`comfortable` 0.375rem). Resolve padding from a size/density-derived token, not a constant `0.125`.
-- [ ] Square-button model: `button_size = icon_size + padding * 2.0` (`:128`) forces equal w/h instead of `padding` on a content-sized inline-flex; with the flat padding this also makes size/density inert on dimensions.
-- [ ] Icon forced to `IconSize::Sm` (`:166`) regardless of `resolved_size`; Svelte passes `size={resolvedSize}` so the chevron scales with size. Pass the effective size to the Icon.
-- [ ] Hover/active reuse `hover_fill` for `active` (`:160-161`); contract has no active state — Svelte only defines `:hover`. Drop the `active` branch (cosmetic, low priority).
+- [x] FIXED Padding now resolves from `spec.padding_rem()` (size table) for vertical and `spec.padding_inline_rem()` (density) for horizontal via `px`/`py` — no flat constant.
+- [x] FIXED Dropped the square `button_size` model; the button is now a content-sized inline-flex (`px`/`py` only), so size/density drive real dimensions.
+- [x] FIXED Icon now uses `spec.effective_icon_size()` (scales with the effective control size) instead of forced `IconSize::Sm`.
+- [x] FIXED Dropped the `active` branch; only `:hover` remains, matching the contract/Svelte.
 - accepted: no ARIA (gpui has no accessibility API) — `aria-expanded`/`aria-label` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Wrong sizing model: button sized to `control_height_rem(effective_size)` at `collapse_toggle.rs:18` — contract §7 says "sized to icon plus padding", no control-height. Size to icon + resolved padding instead.
-- [ ] No padding token at all — element has no `pl`/`pr`/`pt`/`pb`; relies on the oversized square. The contract §8 padding (size + density `padding-inline`) is unimplemented.
-- [ ] No hover state (`background` surface-hover, `color` text-default) — contract §8 Root-hover unimplemented (`js_collapse_toggle` never sets a hover treatment).
-- [ ] No focus ring — `.focusable()` set (`:26`) but no `outline`/ring color from `focus_ring_color_token()`; contract §6 requires accent focus ring at 0.0625rem offset.
-- [ ] No background/`border-radius` is wrong-rooted: `radius` resolved (`:13`) and applied, but no transparent idle `background` token and no density (`comfortable`) branch.
-- [ ] Disabled only drops opacity (`:34-37`); contract disabled also sets `cursor: default` — Jetstream leaves `cursor_pointer()` from `:27` active under disabled.
+- [x] FIXED Dropped the `control_height_rem` square; the button is now sized to icon + resolved padding (`px`/`py`), per contract §7.
+- [x] FIXED Padding now applied: `px(spec.padding_inline_rem())` + `py(spec.padding_rem())` (size table + density inline), no longer relying on a fixed square.
+- [x] FIXED Hover treatment added via `.hover(|s| s.bg(hover_fill).text_color(hover_text))` (surface-hover bg + default text color).
+- [ ] JsEl gap: no `focus`/`outline` primitive, so the contract §6 accent focus ring is not rendered. `.focusable()` is still set for the runtime's own focus handling. (Approximated — noted.)
+- [x] FIXED Idle background is transparent (JsEl `button` default); the density `comfortable` branch is now expressed through `padding_inline_rem()`.
+- [x] FIXED Disabled now sets `.cursor_default()` (and drops to opacity 0.4); `cursor_pointer()` only applies in the enabled branch.
 - accepted: click/keyboard toggle lives in preview event loop, not the component.
 
 ## Specimen parity
@@ -49,5 +49,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=fixed`: the contract density table now correctly reads `padding-inline` (was claiming full `padding`); this was a density-orthogonality contract bug, not a Svelte bug. Remaining gpui/jetstream todos are code-side.
-- GPUI/Jetstream both collapse size and density into a fixed square; neither reproduces the icon+padding intrinsic sizing. This is the root cause behind their missing size/density visual differentiation.
+- `consv=fixed`: the contract density table now correctly reads `padding-inline` (was claiming full `padding`); this was a density-orthogonality contract bug, not a Svelte bug.
+- Pass 41: both targets now resolve the icon+padding intrinsic sizing. Added additive `CollapseToggleSpec` helpers — `effective_size()`, `padding_rem()` (size table), `padding_inline_rem()` (density inline, height-preserving), `effective_icon_size()` — and `icon_size_token()` now scales with the effective size (was a fixed `SIZE_ICON_SM`). GPUI: content-sized inline-flex, scaled chevron, hover-only, no active. Jetstream: same geometry + hover + disabled cursor; Jetstream probe tests cover chevron direction-by-state, per-direction names, density widens inline padding only (height unchanged), size scales vertical padding, disabled still renders chevron. Lone open todo is the Jetstream focus ring (no JsEl `outline` primitive).

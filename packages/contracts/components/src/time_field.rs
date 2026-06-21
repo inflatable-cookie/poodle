@@ -5,7 +5,7 @@
 
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TimeFieldSpec {
@@ -17,7 +17,6 @@ pub struct TimeFieldSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
-    pub validation_state: ValidationState,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -34,7 +33,6 @@ impl Default for TimeFieldSpec {
             is_disabled: false,
             aria_label: None,
             described_by: None,
-            validation_state: ValidationState::None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -57,11 +55,6 @@ impl TimeFieldSpec {
         self
     }
 
-    pub fn with_validation_state(mut self, validation_state: ValidationState) -> Self {
-        self.validation_state = validation_state;
-        self
-    }
-
     pub fn current_value(&self) -> Option<&str> {
         self.value.as_deref().or(self.default_value.as_deref())
     }
@@ -71,7 +64,10 @@ impl TimeFieldSpec {
     }
 
     pub fn border_token(&self) -> &'static str {
-        self.validation_state.border_token()
+        // Contract §8 + Svelte: the time input border is always the default
+        // border color. There is no validation/invalid state in the contract
+        // or in TimeInput.svelte, so the border never recolors.
+        semantic::COLOR_BORDER_DEFAULT
     }
 
     pub fn radius_token(&self) -> &'static str {

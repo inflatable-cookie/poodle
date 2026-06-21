@@ -1,10 +1,10 @@
-//! TimeField specimen — with value, placeholder, disabled, sizes.
+//! TimeField specimen — with value, placeholder, min/max, sizes, densities, disabled.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::time_field::js_time_field;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, TimeFieldSpec};
+use poodle_specs::{ControlDensity, ControlSize, TimeFieldSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -20,12 +20,30 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             div().w(200.0)
                 .child(js_time_field(&TimeFieldSpec::new(), theme))
         ))
-        // Sizes
+        // With min/max constraints
+        .child(group("With min/max constraints", secondary,
+            div().w(200.0).child(js_time_field(&{
+                let mut s = TimeFieldSpec::new().with_default_value("09:00");
+                s.min = Some("08:00".to_string());
+                s.max = Some("18:00".to_string());
+                s
+            }, theme))
+        ))
+        // Sizes (full ladder, xs..xl)
         .child(group("Sizes", secondary,
             div().flex_col().gap(8.0)
+                .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xs), theme)))
                 .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Sm), theme)))
                 .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Md), theme)))
                 .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Lg), theme)))
+                .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xl), theme)))
+        ))
+        // Densities
+        .child(group("Densities", secondary,
+            div().flex_col().gap(8.0)
+                .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_density(ControlDensity::Compact), theme)))
+                .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_density(ControlDensity::Default), theme)))
+                .child(div().w(200.0).child(js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_density(ControlDensity::Comfortable), theme)))
         ))
         // Disabled
         .child(group("Disabled", secondary, {

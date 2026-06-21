@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::detail_shell::js_detail_shell;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, DetailShellSpec};
+use poodle_specs::{ControlSize, DetailShellSpec, DetailState};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -20,12 +20,39 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     theme,
                     Some(label("Header area").text_color(text_primary).text_size(body_font).text_weight(600).p(rem_to_px(0.75))),
                     Some(label("Content area").text_color(secondary).text_size(body_font).p(rem_to_px(0.75))),
+                    None,
+                )
+            )
+        ))
+        .child(group("Loading state", secondary,
+            div().h(160.0).child(
+                js_detail_shell(
+                    &DetailShellSpec::new().with_title("Loading").with_state(DetailState::Loading),
+                    theme,
+                    None,
+                    None,
+                    None,
+                )
+            )
+        ))
+        .child(group("Error state (custom title + message)", secondary,
+            div().h(160.0).child(
+                js_detail_shell(
+                    &DetailShellSpec::new()
+                        .with_title("Error")
+                        .with_state(DetailState::Error)
+                        .with_state_title("Failed to load")
+                        .with_state_message("Something went wrong. Please try again."),
+                    theme,
+                    None,
+                    None,
+                    None,
                 )
             )
         ))
         .child(group("Empty shell", secondary,
             div().h(120.0).child(
-                js_detail_shell(&DetailShellSpec::new(), theme, None, None)
+                js_detail_shell(&DetailShellSpec::new(), theme, None, None, None)
             )
         ))
 }

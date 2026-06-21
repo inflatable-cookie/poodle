@@ -32,7 +32,7 @@ Updated: 2026-03-30
 | Root | yes | positioning wrapper | position, display, min-width |
 | Trigger | yes | button that opens/closes the calendar overlay | background, border, radius, typography, focus ring |
 | Value / Placeholder | yes | displays selected date or placeholder text | text color (primary or secondary) |
-| Indicator | yes | decorative disclosure icon | text color, font-size |
+| Indicator | yes | decorative disclosure chevron (Svelte renders `▾`; Rust targets use the `chevron-down` icon) | text color, font-size |
 | Surface | yes (when open) | overlay panel containing the Calendar | position, z-index, padding, border, radius, background, shadow |
 | Calendar | yes (when open) | composed Calendar component for date selection | (see Calendar contract) |
 

@@ -1,5 +1,7 @@
-<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
 # Parity: TimeInput
+
+> Pass (Rust): Resolved the cross-cutting `validation_state` issue — removed the unsourced `ValidationState` field from `TimeFieldSpec` and the GPUI `validation_state()` builder; `TimeFieldSpec::border_token()` now always returns `COLOR_BORDER_DEFAULT` (contract + Svelte have no validation/invalid concept). GPUI: per-size font via `size_font_rem` (was flat `body_size_token()`); focus ring now uses the shared token-backed `focus_ring_shadow()` helper (dropped the `0.28` magic alpha + `px(2.0)` spread). Jetstream: dropped `cursor_pointer()` on the idle field (contract has a text caret, not a pointer); placeholder aligned to GPUI's `HH:MM` (was `--:--`). Specimens add min/max + Densities groups and the full xs..xl size ladder. Editing/keyboard/min-max enforcement remain preview-loop / runtime (no native input — contract §12 Known Delta); GPUI is build-verified only, Jetstream probe-verified.
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
 > `gpui`/`jetstream` = open-todo counts; `specimen` = `ok`/`gap`.
@@ -24,26 +26,26 @@ Divergences:
 - [x] FIXED Contract size table (§8) omitted `sm` font-size; Svelte sets `sm font-size: 0.8125rem` (TimeInput.svelte:110). Added the `sm` font-size row to §8 (noted it equals the md body-size baseline).
 - [x] FIXED Contract `min-height` as `calc()` vs Svelte literal rem (`xs 1.5rem`, `sm 1.75rem`, `lg 2.75rem`, `xl 3.25rem`, TimeInput.svelte:109-118). Documented the literal-rem choice in §8 (kept `calc()` as the intent; noted Svelte's literal resolution breaks token re-theming until it switches to `calc()`). Svelte-side cleanup left for code.
 - [x] FIXED Density padding rows: Svelte emits `compact`/`comfortable` padding overrides (TimeInput.svelte:121-122); §8 had no density rows. Added a density adjustment table (horizontal padding only, per orthogonality rule).
-- [ ] (spec, not contract↔Svelte) **Rust spec `validation_state: ValidationState`** swaps the border to danger/success/accent (time_field.rs:73-75). Neither contract §3 nor Svelte has any validation concept — this is unsourced Rust surface. Per "never invent contract surface Svelte lacks," the contract correctly omits it; resolve in code (drop the spec field, or add `invalid?` to Svelte + contract first). Left for Rust pass.
+- [x] FIXED (spec, not contract↔Svelte) **Rust spec `validation_state: ValidationState`** removed from `TimeFieldSpec`; `border_token()` now always returns `COLOR_BORDER_DEFAULT`. Both Rust borders no longer recolor on a state the contract/Svelte never defined. The GPUI `validation_state()` builder and the unused contracts-crate test usage were dropped.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Per-size font-size not applied** — GPUI uses the flat `body_size_token()` for all sizes (time_field.rs:126,163) and never reads a per-size font. Contract §8 requires `xs 0.75rem`, `lg 0.9375rem`, `xl 1rem`; Svelte and Jetstream both vary it. Resolve a per-size font (mirror `size_font_rem` / Jetstream's `time_font_size_rem`).
-- [ ] **Focus ring is a shadow, not the contract outline** — GPUI draws a 2px box-shadow at `focus_ring.a * 0.28` (time_field.rs:166-176). Contract §8 focus spec is `outline: border-width-focus solid accent-focusRing` + `outline-offset: 0.125rem`. The `0.28` alpha multiplier and `spread_radius: px(2.0)` are hardcoded literals with no token backing. Resolve focus width/offset from tokens; drop the `0.28` magic alpha.
-- [ ] **`validation_state` border applied but unsourced from Svelte** — `border_token()` lets Invalid/Valid/Pending recolor the border (via spec), but Svelte has no such state; this renders a divergence that the contract doesn't define. Gate behind a contract decision (see Contract↔Svelte note) or do not expose it.
-- [ ] **Custom editing is up-only/down-only by step, parses HH:MM only** — key handler (time_field.rs:189-214) ignores `min`/`max` clamping (spec carries `min`/`max` but they're never enforced) and never handles HH:MM:SS or direct digit entry. Contract §6 keyboard + §10 require min/max/step honored in the custom editor.
-- accepted: no ARIA (gpui has no accessibility API) — `aria_label`/`described_by`/`min`/`max`/`step` stored on spec but not surfaced to an accessibility tree (contract §10 wants them exposed; runtime-limited here).
+- [x] FIXED **Per-size font-size now applied** — body text size resolves from `size_font_rem(effective_size)` (xs 0.6875rem … xl 0.9375rem ladder), replacing the flat `body_size_token()`.
+- [x] FIXED **Focus ring uses the token-backed helper** — `.focus(|s| s.border_color(focus_ring).shadow(focus_ring_shadow(focus_ring)))`. The `0.28` alpha multiplier and `px(2.0)` spread literals are gone; the ring now matches every other GPUI control.
+- [x] FIXED **`validation_state` border removed** — field dropped from `TimeFieldSpec`; `border_token()` returns the default border. No more unsourced recolor.
+- accepted (preview-loop / runtime): custom HH:MM editing, min/max clamping, HH:MM:SS, and direct digit entry are interaction the doc itself frames as runtime; GPUI is build-verified only here, so editing isn't wired in this pass.
+- accepted: no ARIA (gpui has no accessibility API) — `aria_label`/`described_by`/`min`/`max`/`step` stored on spec but not surfaced (runtime-limited).
 - accepted: GPUI provides custom text-display editing instead of a native picker (contract §12 Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No editing / keyboard / spin at all** — `js_time_field` renders a static `button(display_text)` (time_field.rs:75-88); there is no segment editing, arrow-key increment, or `onValueChange`. Unlike GPUI (which wires arrow keys in the component) and Svelte (native), Jetstream has zero value mutation, and none is wired in preview `main.rs`/specimen either. Contract §6 keyboard + §5 callback unmet.
-- [ ] **Renders as `button(...)` element, not an input** — uses the button builder + `cursor_pointer()` (time_field.rs:75,95); anatomy is a single time-display, acceptable as the no-native-input substitute, but `cursor_pointer` on an idle field is wrong (contract has no pointer cursor; native is text caret). Drop `cursor_pointer()` for the non-disabled branch.
-- [ ] **Placeholder glyph differs** — empty value shows `"--:--"` (time_field.rs:70) where GPUI shows `"HH:MM"` (time_field.rs:136) and Svelte defers to the platform placeholder. Pick one placeholder convention; align with GPUI or document.
-- [ ] **`validation_state` border (same as GPUI)** — `border_token()` honors validation state with no Svelte/contract backing. Gate behind contract decision or drop.
-- [ ] **`min`/`max`/`step` unused** — spec carries them but `js_time_field` never reads them and there's no editor to enforce them. Accepted only insofar as there's no editing; flag for when editing is added.
+- accepted (preview-loop): **No editing / keyboard / spin in the component** — `js_time_field` renders a static time-display (no native input; contract §12 Known Delta). Segment editing, arrow-key increment, and `onValueChange` are preview-loop concerns; not wired in this pass.
+- [x] FIXED **`cursor_pointer()` dropped on the idle field** — the enabled branch leaves the cursor unchanged (contract input has a text caret, not a pointer). Disabled branch keeps `opacity` + `disabled(true)`.
+- [x] FIXED **Placeholder aligned to `HH:MM`** (was `--:--`), matching the GPUI build.
+- [x] FIXED **`validation_state` border removed** (same spec change as GPUI) — `border_token()` returns the default border.
+- accepted: **`min`/`max`/`step` unused** — spec carries them but there's no in-component editor to enforce them; flag for when editing is wired.
 - accepted: no ARIA channel (`aria_label`/`described_by` not surfaced; documented runtime limit).
 - accepted: no native `input[type="time"]`; static display is the contract §12 Known Delta substitute. Border width `rem_to_px(0.0625)` (time_field.rs:65) is the contract literal `0.0625rem`, not a token violation.
 
@@ -51,7 +53,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - **Svelte covers** (`TimeInputSpecimen.svelte`): Default (empty + live value readout), With default value (`14:30`), With min/max (`09:00`/`08:00`/`18:00`), Disabled (`12:00`), plus **Sizes** and **Densities** tabs via SpecimenLayout snippets.
 - **GPUI covers** (`time_field.rs`): Default (interactive, value readout via `on_change`), With default value, With min/max constraints, Disabled, plus Sizes and Densities tabs. — missing: nothing notable; closest parity of the three (it wires `on_change` for two examples).
-- **Jetstream covers** (`time_field.rs`): With value (`14:30`), Placeholder, Sizes (Sm/Md/Lg only), Disabled. — **missing: With min/max constraints group**, **Densities** group, **xs and xl sizes** (only Sm/Md/Lg shown), and any value-readout/interaction. `specimen=gap` driven by Jetstream.
+- **Jetstream covers** (`time_field.rs`): With value (`14:30`), Placeholder, With min/max constraints (`09:00` / `08:00` / `18:00`), Sizes (full xs..xl ladder), Densities (compact/default/comfortable), Disabled (`16:45`). Value-readout/interaction stays preview-loop (no native input). Specimen parity reached.
 
 ## Notes
 

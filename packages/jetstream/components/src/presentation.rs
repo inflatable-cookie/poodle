@@ -89,6 +89,21 @@ pub fn size_font_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// DatePicker indicator (disclosure chevron) font-size in rem per size.
+///
+/// Contract `date-picker.md` §8 size table "indicator `font-size`" column:
+/// xs 0.625, sm 0.6875, md 0.75, lg 0.8125, xl 0.875. Distinct from the trigger
+/// `size_font_rem` ladder. Mirrors `poodle_gpui::presentation::date_picker_indicator_font_rem`.
+pub fn date_picker_indicator_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.625,
+        ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
+
 // ── Switch size scale ─────────────────────────────────────────────
 //
 // Contract §8 "Size adjustments" — flat rem literals per size, mirroring the

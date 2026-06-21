@@ -65,9 +65,9 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> Js
     let border_width = rem_to_px(0.0625); // Contract: 0.0625rem solid
 
     // ── Display text ──
-    let display_text = spec
-        .current_value()
-        .unwrap_or("--:--");
+    // Placeholder mirrors the GPUI build's "HH:MM" hint (the native picker has
+    // no equivalent; this is the no-native-input substitute, contract §12).
+    let display_text = spec.current_value().unwrap_or("HH:MM");
     let has_value = spec.current_value().is_some();
     let display_color = if has_value { text_color } else { placeholder_color };
 
@@ -88,11 +88,11 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> Js
         .focusable();
 
     // ── Disabled state ──
+    // No pointer cursor on the idle field: the contract input has a text caret,
+    // not a pointer, so the enabled branch leaves the cursor unchanged.
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         el = el.opacity(opacity).disabled(true);
-    } else {
-        el = el.cursor_pointer();
     }
 
     el
@@ -101,6 +101,7 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> Js
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_probe::probe;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
@@ -111,6 +112,39 @@ mod tests {
         let spec = TimeFieldSpec::new().with_default_value("14:30");
         let el = js_time_field(&spec, &theme());
         assert!(el.style.background.is_some());
+    }
+
+    #[test]
+    fn populated_field_displays_value() {
+        let spec = TimeFieldSpec::new().with_default_value("14:30");
+        let tree = probe(&js_time_field(&spec, &theme()), 200.0, 60.0);
+        assert!(tree.has_text("14:30"), "value missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn empty_field_shows_hhmm_placeholder() {
+        let tree = probe(&js_time_field(&TimeFieldSpec::new(), &theme()), 200.0, 60.0);
+        assert!(tree.has_text("HH:MM"), "placeholder missing: {:?}", tree.texts());
+        // Legacy "--:--" convention dropped in favor of GPUI-aligned "HH:MM".
+        assert!(!tree.has_text("--:--"));
+    }
+
+    #[test]
+    fn sizes_produce_different_fonts() {
+        let xs = probe(
+            &js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xs), &theme()),
+            200.0,
+            60.0,
+        );
+        let xl = probe(
+            &js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xl), &theme()),
+            200.0,
+            60.0,
+        );
+        let xs_font = xs.nodes.iter().find_map(|n| n.text_size);
+        let xl_font = xl.nodes.iter().find_map(|n| n.text_size);
+        assert!(xs_font.is_some() && xl_font.is_some());
+        assert!(xl_font > xs_font, "xl font {xl_font:?} should exceed xs {xs_font:?}");
     }
 
     #[test]

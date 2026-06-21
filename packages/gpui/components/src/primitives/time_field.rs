@@ -5,14 +5,13 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{
-    ControlDensity, ControlSize, SemanticControlSizeRole, TimeFieldSpec, ValidationState,
-};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, TimeFieldSpec};
 
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{focus_ring_shadow, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI time field component backed by `TimeFieldSpec`.
 pub struct TimeField {
@@ -81,10 +80,6 @@ impl TimeField {
         self.spec.described_by = Some(v.into());
         self
     }
-    pub fn validation_state(mut self, v: ValidationState) -> Self {
-        self.spec.validation_state = v;
-        self
-    }
     pub fn size(mut self, v: ControlSize) -> Self {
         self.spec.size = v;
         self
@@ -123,7 +118,8 @@ impl IntoElement for TimeField {
         let base_pad = resolve_px(theme, "space.control.x");
         let control_padding_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = resolve_px(theme, spec.body_size_token());
+        // Contract §8: font-size varies per size (xs 0.75rem … xl 1rem).
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let surface_bg = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
@@ -162,18 +158,11 @@ impl IntoElement for TimeField {
             .items_center()
             .text_size(body_size)
             .text_color(text_primary)
-            // Contract: focus = border + shadow ring at 28% opacity
-            .focus(move |s| {
-                s.border_color(focus_ring).shadow(vec![gpui::BoxShadow {
-                    color: Hsla {
-                        a: focus_ring.a * 0.28,
-                        ..focus_ring
-                    },
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(2.0),
-                }])
-            });
+            // Contract §8 focus: outline border-width-focus solid accent-focusRing
+            // with 0.125rem offset. GPUI has no CSS outline; the shared
+            // focus_ring_shadow helper renders the token-backed ring (matching
+            // every other GPUI control) instead of hardcoded alpha/spread.
+            .focus(move |s| s.border_color(focus_ring).shadow(focus_ring_shadow(focus_ring)));
 
         if spec.is_disabled {
             field = field

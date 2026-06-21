@@ -1,5 +1,7 @@
-<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
 # Parity: DatePicker
+
+> Pass (Rust): GPUI indicator switched to `chevron-down` icon (per-size font, text-secondary); contract §2 wording named the chevron. The earlier "hardcoded shadow literals" todo was stale — the surface already uses `elevation_overlay_shadow()` + `color_mix`. Surface-as-flow-child and missing outside-click remain accepted platform deltas. Jetstream rebuilt: chevron-down icon (was `📅`), root `min_w(14rem)`, `spec.placeholder` (no ellipsis), `current_value()`, disabled branch (opacity + `disabled(true)`), trigger gap `0.75rem`, per-size indicator font, and — per "No Mockups" — composes the REAL `js_calendar` surface when `current_open()` (token bg/border via `color_mix`, `shadow_md()` for elevation). Specimens add Sizes + Densities; With value / Disabled / Open now render their states. JsEl gap: no token→box-shadow path, `shadow_md()` preset substitutes for `elevation-overlay`.
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
 > `gpui`/`jetstream` = open-todo counts; `specimen` = `ok`/`gap`.
@@ -23,28 +25,30 @@ Props, callbacks, ARIA, and anatomy all align. Size token-form reconciled. FIXED
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Indicator deviates from Svelte: renders a `calendar` Icon (`date_picker.rs:206`) instead of the `▾` chevron glyph the contract anatomy + Svelte use. Either align GPUI to chevron or amend contract; pick one and make all three match.
-- [ ] Hardcoded shadow literals: `hsla(0.0,0.0,0.0,0.10)` / `hsla(0.0,0.0,0.0,0.06)` plus `px(16.0)`/`px(4.0)` blur at `date_picker.rs:253-263`. Contract surface shadow is `var(--poodle-elevation-overlay)` — resolve from an elevation token, not raw HSLA + float px.
-- [ ] Surface is rendered as a flow-child (`wrapper.child(cal_surface)`, `date_picker.rs:267`), not an absolutely-positioned overlay at `top: calc(100% + 0.375rem)`. Anchored-below overlay positioning is an accepted platform delta, but the calendar currently pushes layout instead of floating; confirm it visually anchors.
-- [ ] No outside-click dismissal in the component (Svelte closes on document `mousedown` outside root). Toggle/Escape live on the trigger; outside-click is absent. Mark accepted if preview owns it, else add.
+- [x] FIXED Indicator now renders the `chevron-down` Icon (was the `calendar` Icon) with the per-size indicator font (`date_picker_indicator_font_rem`) and `text-secondary` color, matching contract §2 + Svelte's `▾`. Contract §2 wording updated to name the chevron.
+- [x] STALE/already-fixed The "hardcoded shadow literals" claim no longer holds: the calendar surface uses `crate::theme_ext::elevation_overlay_shadow()` (token-backed) + `color_mix` for border/background. No raw HSLA or float-px shadow literals remain in `date_picker.rs`.
+- accepted: Surface rendered as a flow-child (flex-col + gap) rather than an absolute overlay — anchored-below overlay positioning is an accepted platform delta (§12 Known Deltas).
+- accepted: outside-click dismissal lives in the preview event loop, not the component (toggle/Escape on the trigger; preview owns outside-click).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_haspopup`/`aria_expanded`/`role="dialog"` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Indicator is an emoji literal `📅` (`date_picker.rs:35`) — diverges from both the contract chevron and the sibling Jetstream pickers (range/datetime use `ui_element::icon("chevron-down")`). Replace with the registry chevron icon for cross-target + cross-component consistency.
-- [ ] Missing root `min-width: 14rem` — `js_date_picker` returns the bare trigger with no `min_w` wrapper (`date_picker.rs:28`), unlike `js_date_range_picker`/`js_date_time_picker` which apply `min_w(rem_to_px(16.0))`. Add `min_w(rem_to_px(14.0))` per contract §7/§8 root.
-- [ ] Display fallback hardcodes `"Select date..."` (`date_picker.rs:25`) instead of `spec.placeholder` (contract default `"Select date"`). Use `spec.placeholder`; also drop the trailing ellipsis that diverges from Svelte.
-- [ ] Reads `spec.value` directly (`date_picker.rs:25`) instead of `spec.current_value()` — ignores `default_value`/`open` resolution that the spec exposes and that the specimen relies on (the "With value" specimen passes `with_default_value`, so the trigger shows the placeholder, not the date). Use `current_value()`.
-- [ ] No disabled treatment: `is_disabled` is never read in `js_date_picker` — no opacity reduction, no `disabled(true)`. Contract requires reduced opacity (`state.opacity.disabled`) + non-interactive. The specimen's "Disabled" group renders identically to enabled. Add disabled branch (range/datetime impls already do this).
-- [ ] Gap is `rem_to_px(0.25)` literal (`date_picker.rs:33`); contract trigger gap is `0.75rem`. Use `0.75` or a content-gap token.
+- [x] FIXED Indicator is now `ui_element::icon("chevron-down")` (was the `📅` emoji), sized by `date_picker_indicator_font_rem`, `text-secondary` color.
+- [x] FIXED Root now wraps the trigger in `min_w(rem_to_px(14.0))` per contract §7/§8.
+- [x] FIXED Display uses `spec.placeholder` (default `"Select date"`, no ellipsis) when no value.
+- [x] FIXED Reads `spec.current_value()` (honors `default_value`); the "With value" specimen now shows the date.
+- [x] FIXED Disabled branch added — `opacity(state.opacity.disabled)` + `disabled(true)`; "Disabled" specimen now renders the state.
+- [x] FIXED Trigger gap is `rem_to_px(0.75)` (was `0.25`).
+- [x] FIXED (No Mockups) When `current_open()`, composes the REAL `js_calendar` inside a token-resolved surface (radius.surface, `color_mix(elevated 98%, panel)` bg, border-default×0.72, `shadow_md()`, panel-x/y padding). No fake grid.
 - accepted: no ARIA channel for haspopup/expanded/dialog role.
-- accepted: open-state calendar surface + interaction live in the preview event loop, not the component.
+- accepted: open/close, outside-click, Escape, and date-selection interaction live in the preview event loop, not the component.
+- JsEl gap: the runtime has no token→box-shadow resolution; `shadow_md()` preset stands in for `elevation-overlay` on the surface.
 
 ## Specimen parity
 
 - Svelte covers: Default (with selected-value readout), With default value, Disabled, plus Sizes + Densities snippets (`DatePickerSpecimen.svelte`).
 - GPUI covers: Default (open-toggle + selected readout, interactive), With default value (open-toggle), Disabled, Sizes, Densities. — closest parity of the three.
-- Jetstream covers: Empty, With value, Disabled, Open. — missing: **Sizes** and **Densities** groups (Svelte/GPUI show both); "With value" + "Disabled" currently mis-render because the component ignores `current_value()`/`is_disabled` (see gaps), so they don't demonstrate their states.
+- Jetstream covers: Empty, With value, Disabled, Open (real composed Calendar), Sizes (xs..xl), Densities. "With value" + "Disabled" now render their states (component reads `current_value()`/`is_disabled`). Specimen parity reached.
 
 ## Notes
 

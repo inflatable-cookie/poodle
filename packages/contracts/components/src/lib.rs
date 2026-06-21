@@ -737,8 +737,7 @@ mod tests {
     fn time_and_date_time_specs_preserve_public_values() {
         let time = TimeFieldSpec::new()
             .with_default_value("09:30")
-            .with_step(300)
-            .with_validation_state(ValidationState::Pending);
+            .with_step(300);
         let date_time = DateTimeValue::new(
             Some(String::from("2026-03-12")),
             Some(String::from("09:30")),

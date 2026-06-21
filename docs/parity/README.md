@@ -130,14 +130,14 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | checkbox | ok | 4 | 5 | gap |
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 0 | 0 | gap |
-| collapse-toggle | fixed | 4 | 6 | gap |
+| collapse-toggle | fixed | 0 | 1 | gap |
 | collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
 | confirm-action | ok | 0 | 0 | gap |
 | context-menu | ok | 2 | 5 | gap |
 | data-table | fixed | 1 | 0 | gap |
-| date-picker | fixed | 4 | 6 | gap |
+| date-picker | fixed | 0 | 0 | ok |
 | date-range-picker | fixed | 3 | 3 | gap |
 | date-time-picker | fixed | 1 | 4 | gap |
 | date-time-range-picker | fixed | 1 | 4 | gap |
@@ -146,7 +146,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | detail-item | fixed | 3 | 5 | gap |
 | detail-section | fixed | 3 | 3 | gap |
 | detail-section-group | fixed | 4 | 1 | gap |
-| detail-shell | ok | 4 | 6 | gap |
+| detail-shell | ok | 0 | 1 | ok |
 | dialog | ok | 2 | 3 | gap |
 | dock-region | ok | 2 | 2 | gap |
 | drawer | ok | 0 | 0 | gap |
@@ -234,7 +234,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | text-input | fixed | 2 | 2 | gap |
 | text-link | ok | 4 | 4 | gap |
 | time-ago | fixed | 4 | 4 | gap |
-| time-input | fixed | 4 | 5 | gap |
+| time-input | fixed | 0 | 0 | ok |
 | time-zone-select | fixed | 0 | 0 | gap |
 | toast-host | fixed | 3 | 4 | gap |
 | toast-stack | ok | 1 | 3 | gap |

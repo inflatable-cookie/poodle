@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=ok pass=41 -->
 # Parity: DetailShell
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,35 +20,35 @@ Perfect parity. All props match 1:1: `title` (`null`), `scrollMode` (`"body"`), 
 
 State strings are hardcoded; several props unexposed; padding uses raw px.
 
-- [ ] Hardcoded header padding `px(16.0)` / `px(12.0)` at `detail_shell.rs:104-105` and body padding `px(16.0)` / `px(12.0)` at `:131` — resolve from panel-padding tokens.
-- [ ] Hardcoded state-region spacing `px(8.0)` (`detail_shell.rs:144`), `px(32.0)` (`:145`, `:165`, `:178`) — resolve from tokens.
-- [ ] `stateTitle` / `stateMessage` not exposed — state messages are hardcoded English strings ("Detail state", "An error occurred…", "No content available."); pipe through the spec props.
-- [ ] `scrollMode` not exposed — contract emits `data-scroll-mode`; GPUI has no equivalent. Add to spec + apply.
-- accepted: no ARIA (gpui has no accessibility API). `header`/`children` slots present; `stateContent` is partial (hardcoded states instead of custom slot).
+- [x] FIXED Header/body padding now resolves from `space.panel.x`/`space.panel.y`; the root + region stacking gap is `space.stack.lg`. No raw px.
+- [x] FIXED State-region spacing now token-resolved: doubled `space.panel.y` / 1.5× `space.panel.x` padding, `space.stack.lg` inner gap, `space.stack.md` spinner→copy gap.
+- [x] FIXED `state_title`/`state_message` added to `DetailShellSpec` and piped through; the default heading falls back to "Detail state" (`effective_state_title()`). Hardcoded English strings removed.
+- [x] FIXED `scrollMode` exposed via `scroll_owner` → `scroll_mode_value()` and applied: `Shell` scrolls the shell, `Content` scrolls the body region (`overflow_y_scroll`).
+- accepted: no ARIA (gpui has no accessibility API). Now supports a real `with_state_content` custom slot in addition to the default state copy, and the state region renders its subtle surface + `radius-surface` corners.
 
 ## Jetstream gap (vs Svelte + contract)
 
 Barebones pass-through: `div().bg().flex_col().grow()` wrapping optional header + content. Most of the contract is unimplemented.
 
-- [ ] No `state` handling — loading/empty/error states not rendered at all.
-- [ ] No `stateContent` slot, no `stateTitle`/`stateMessage`.
-- [ ] No `title` rendering (header text from `title` prop).
-- [ ] No `scrollMode` handling.
-- [ ] No `ariaLabel` (Jetstream emits no role either — note once).
-- [ ] No internal structure — no separators, no token-resolved padding between header/body.
-- accepted: interaction/state transitions would live in preview `main.rs` event loop, but the states themselves must render in the component first.
+- [x] FIXED Full `state` machine: ready renders the body slot; empty/loading/error render the state region instead.
+- [x] FIXED `state_content` custom slot added (5th param) plus `state_title`/`state_message` (default "Detail state" fallback).
+- [x] FIXED `title` now rendered as a heading-sized label in the header region.
+- [x] FIXED `scrollMode` handled — `Shell` scrolls the shell, `Content` scrolls the body region (`overflow_scroll`).
+- [ ] JsEl gap: no role/aria primitive, so `ariaLabel` is not emitted. (Noted — accepted runtime limit.)
+- [x] FIXED Token-resolved internal structure: header/body padding from panel tokens, `space.stack.lg` region gap, state region with `color-mix` surface, doubled padding, and `radius-surface` corners. Loading prepends the shared grid `Spinner`.
+- accepted: interaction/state transitions would live in preview `main.rs` event loop, but the states themselves now render in the component.
 
 ## Specimen parity
 
 - Svelte covers: layout structure (4 region placeholders), multi-section with header (PageHeader + 3 DetailSections), loading (Spinner + message), error (custom stateTitle/stateMessage).
-- GPUI covers: layout structure, multi-section with header, loading, error (hardcoded message), empty (hardcoded message). — missing: **custom stateTitle/stateMessage** (hardcoded instead).
-- Jetstream covers: nothing beyond header/content pass-through — no state variants, no title, no slots demonstrated. — missing: **all state variants**, **title**, **header/content/stateContent demonstration**.
+- GPUI covers: layout structure, multi-section with header, loading, error (now custom `stateTitle`/`stateMessage`). — parity OK.
+- Jetstream covers: header+content, loading, error (custom title+message), empty shell. — parity OK.
 
 ## Specimen note
 
-GPUI actually exceeds Svelte on the empty-state demo but regresses by hardcoding the error message where Svelte passes custom text. Jetstream specimen is effectively a stub.
+GPUI error specimen now passes custom `stateTitle`/`stateMessage` (matches Svelte). Jetstream specimen demonstrates header+content, loading, error (custom title+message), and empty shell.
 
 ## Notes
 
 - `consv=ok`: contract and Svelte match.
-- Jetstream is the larger gap — it implements ~2 of the component's behaviors (header + body slots) and none of the state machine.
+- Pass 41: both targets now implement the full state machine. Added additive `DetailShellSpec` fields `state_title`/`state_message` plus helpers (`scroll_mode_value`, `effective_state_title`) and state-region token methods (stack gap, surface fill + mix, radius, padding, border, message/title colors). GPUI: token-resolved padding, state region with `color-mix` surface + `radius-surface`, custom `with_state_content` slot, scroll-owner overflow. Jetstream: full header/body/state rendering, grid spinner on loading, custom state slot, scroll-owner overflow; `js_detail_shell` gained a 5th `state_content` param (specimen updated). Probe tests cover ready header+body, non-ready hides body, custom error title+message, loading spinner, custom state-content override. Lone open todo is the Jetstream `ariaLabel` (no JsEl role primitive).
