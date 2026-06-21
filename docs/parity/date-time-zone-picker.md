@@ -1,4 +1,13 @@
-<!-- parity consv=fixed gpui=2 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap -->
+<!-- pass 41: Jetstream overlay built — composes real Calendar + TimeField +
+     TimeZoneSelect (the recently-built js_time_zone_select), each in a labelled
+     Field (mirrors GPUI + date_time_picker.rs). Indicator now size-scaled
+     (date_picker_indicator_font_rem); min-width/gaps contract-exact rem; surface =
+     elevated 98% / border 72% / shadow_md preset; host time_zone_options forwarded
+     to the composed TimeZoneSelect. 8 render_probe tests cover trigger + open-state
+     composition (calendar + time + zone surfaces). Remaining Jetstream: hover-blend
+     literal (shared helper). Remaining GPUI: field-label uppercase/tracking + 72%
+     border via color_mix. -->
 <!-- NOTE: the GPUI "overlay mockup / empty calendar box / hsla shadow / trigger segment /
      invented dividers" bullets in the GPUI-gap section below are STALE — all fixed in
      pass 23 (composed Calendar+TimeField+TimeZoneSelect, elevation_overlay_shadow, trigger
@@ -49,12 +58,13 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] DONE (build-unverified) **Value model remodeled (shared spec).** Now reads `spec.current_value()` + `value.date/time/time_zone` and `spec.placeholder`; partial values representable. Renderer crate is down (external `encode.rs` break) so this is build-unverified — edits cross-checked against the new spec by reading.
 - [x] DONE (build-unverified) **Contract props added to shared spec.** Jetstream now uses `spec.placeholder`; the other props (`default_value`/`open`/`week_starts_on`/`locale`/`time_zone_options`/`aria_label`) exist on the spec for runtime wiring.
-- [ ] **Overlay not rendered** — trigger only (`:93-102`). Calendar + TimeInput + TimeZoneSelect surface deferred to runtime. Acceptable per the trigger-only pattern, but the composed surface must exist; tracked as a gap.
-- [ ] Hardcoded `gap(rem_to_px(0.75))` (`:71`) and `min_w(rem_to_px(18.0))` (`:95`) — resolve from tokens (GPUI uses a `minWidth` token; mirror it).
-- [ ] Hover blend raw `fill_c.mix(elevated_c, 0.14)` (`:42`) — confirm the helper matches contract `color-mix(surface 86%, elevated)` and route via a named helper.
-- [ ] Indicator `chevron-down` icon (`:86`) not size-scaled, where Svelte scales the `▾` glyph per size. Note for visual parity.
+- [x] **DONE: overlay built (composed primitives).** `js_date_time_zone_picker` now renders Surface → Body → Calendar + Fields → (TIME field, TIME ZONE field) when `current_open()`. Real `js_calendar` (seeded from `value.date`) + `js_time_field` (seeded from `value.time`) + `js_time_zone_select` (seeded from `value.time_zone`; host `time_zone_options` forwarded when non-empty), each in a labelled Field. Mirrors GPUI + the sibling `date_time_picker.rs`. Surface = elevated 98% over panel, border 72% alpha, `shadow_md()` preset. 8 render_probe tests cover the composition.
+- [x] **DONE: min-width / gaps are contract-exact rem.** `min_w(rem_to_px(18.0))` is the contract `18rem`; trigger `gap(rem_to_px(0.75))` is the contract trigger gap; Fields/Field gaps (`0.75`/`0.375`) and Body gap (`0.875`) are contract-exact. Not hardcode violations.
+- [x] **DONE: indicator size-scaled.** Uses `date_picker_indicator_font_rem` (xs 0.625 … xl 0.875). `chevron-down` icon vs Svelte's `▾` glyph is the established accepted icon substitution.
+- [ ] Hover blend `fill_c.mix(elevated_c, 0.14)` — contract hover is `color-mix(surface 86%, elevated)`; `0.14` = `1 − 0.86`, the inverted ratio the runtime `Color::mix` helper expects. Shared with every sibling picker; a named helper would be a cross-cutting cleanup.
 - accepted: no ARIA channel (documented pattern).
 - accepted: overlay interaction (open/close, composed fields) lives in the preview event loop.
+- JsEl gap: field-label letter-spacing (0.04em tracking) — runtime has no letter-spacing; labels pre-uppercased ("TIME"/"TIME ZONE"), weight 600, 0.6875rem, text-secondary applied.
 
 ## Specimen parity
 

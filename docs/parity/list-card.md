@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- pass 41: leadingSizeOffset modeled — additive `leading_size_offset: i32` on
+     ListCardSpec, consumed by `leading_size_rem()` (±2 steps × 0.25rem, clamped,
+     box ≥ 1rem); both targets inherit it through the spec helper. Jetstream gains
+     a render_probe test (offset ±1 shifts the leading box 2→2.25/1.75rem).
+     Remaining per target = host-snippet/runtime-limit gaps only (badges/footer/
+     trailing need a JsEl/GPUI snippet data channel; sash rotate(-45deg), not-live
+     grayscale + thick dashed stroke = JsEl/GPUI runtime limits, noted in code).
+     contracts cargo test + gpui build + jetstream list_card tests all pass. -->
 # Parity: ListCard
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -32,7 +40,9 @@ Svelte had several props/snippets the contract §3 did not document. Svelte is a
 - [x] DONE `accentColor` on leading — `parse_hex_color(spec.accent_color)` overrides leading bg + icon color; falls back to theme accent.
 - [x] DONE Reorder handle — dot size `0.1875rem`, gap from `space.inline.xs` token. No raw px.
 - [x] DONE Root padding — `0.625rem` y kept; x from `space.inline.md` (= `0.75rem`, contract-exact). Verified token resolves to 0.75rem.
-- [ ] `leadingSizeOffset` prop still unmodeled (spec lacks the field) — leading ladder offset unimplemented. (Remaining.)
+- [x] DONE `leadingSizeOffset` — additive `leading_size_offset: i32` on `ListCardSpec`; `leading_size_rem()` applies `offset.clamp(-2,2) * 0.25rem` over the shape base (box kept ≥ 1rem). GPUI's `leading_el` already reads `spec.leading_size_rem()`, so the offset flows through with no further GPUI code change.
+- accepted (runtime limit): badges / footer / trailing are host snippets — GPUI takes `with_footer`/`with_trailing` host elements but has no badges data channel; the contract badges/corner clusters are host-composed, not spec-modeled.
+- accepted (runtime limit): sash `rotate(-45deg)` — GPUI 0.2.2 `div` has no rotation transform; rendered as a top-left block. not-live `grayscale(1)` filter + the thicker `0.1875rem` dashed stroke have no GPUI div API.
 - accepted: no ARIA (gpui has no accessibility API) — role/aria-pressed/aria-disabled/anchor semantics not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
@@ -43,7 +53,8 @@ Svelte had several props/snippets the contract §3 did not document. Svelte is a
 - [x] DONE Tint ratio — `leading_tint_ratio()` = 0.12 (was 0.14).
 - [x] DONE Body gap — `body_gap_rem()` = 0.0625 (was 0.125).
 - [x] DONE Solid leading icon color — now `on_accent_color_token()` (`color.text.inverse`, the closest on-accent token; no pure-white token exists — NOTE in spec).
-- [~] PARTIAL badges/footer/trailing — these are host snippets (no JsEl snippet API); meta is rendered. badges/footer counters still need a data channel. (Remaining — not spec-modeled.)
+- [x] DONE `leadingSizeOffset` — flows through `spec.leading_size_rem()` (additive `leading_size_offset` field; ±2 steps × 0.25rem, clamped). render_probe test asserts offset ±1 shifts the leading box 2→2.25/1.75rem.
+- accepted (runtime limit): badges/footer/trailing are host snippets — JsEl has no snippet/data channel for them, so they are not spec-modeled (meta/subtitle ARE rendered). Same class of gap as GPUI.
 - [x] DONE Sash + reorder handle + selectable/selected indicator + not-live — all now rendered. Sash is a top-left block (JsEl has no rotate — NOTE); not-live = opacity 0.72 (no dashed/grayscale in JsEl — NOTE).
 - [x] DONE Hover state — interactive cards set hover bg + border (`color-mix` 82% / border-default 52%). Focus ring color surfaced; painted by preview focus layer (JsEl focusable is single-affordance — NOTE).
 - [x] DONE `layout` (compact/stacked) — `ListCardLayout` field; stacked = column, compact = tighter gap + smaller leading.
@@ -59,6 +70,6 @@ Svelte had several props/snippets the contract §3 did not document. Svelte is a
 
 ## Notes
 
-- `ListCardSpec` (`packages/contracts/components/src/list_card.rs`) is missing fields for `layout`, `leading_size_offset`, `selection_indicator`, `highlighted`, and the context-menu cluster — so neither Rust target *can* implement those without spec changes. The token methods that exist are well-used (GPUI resolves fill/border/hover/leading from them); the gaps are unmodeled features and a handful of hardcoded dimensions.
+- `ListCardSpec` (`packages/contracts/components/src/list_card.rs`) now models `layout`, `leading_size_offset`, `selection_indicator`, and `highlighted`. The remaining unmodeled surface is the context-menu cluster (Svelte-owned overlay; needs a menu/interaction channel both Rust targets lack) plus the host-snippet clusters (badges/footer/corner/trailing) — these are runtime-limit gaps, not hardcoded-value gaps. Token methods are well-used (both targets resolve fill/border/hover/leading/accent/sash from them).
 - The GPUI sash is the most visible visual bug: it renders a top-right unrotated block instead of the contract's diagonal top-left ribbon. Fix placement + `rotate(-45deg)`.
 - Jetstream is the priority: bring `js_list_card` up to at least badges/footer/sash/not-live/selectable and expand the specimen to mirror Svelte's groups (it currently renders a single basic row, which misrepresents the component's surface).

@@ -347,6 +347,40 @@ mod tests {
     }
 
     #[test]
+    fn leading_size_offset_shifts_leading_box() {
+        let th = theme();
+        // Contract §3 leadingSizeOffset: +1 step grows the leading box by 0.25rem,
+        // -1 step shrinks it; circle base is 2rem.
+        let has_box = |t: &crate::render_probe::ProbeTree, edge: f32| {
+            t.nodes
+                .iter()
+                .any(|n| (n.w - edge).abs() < 0.5 && (n.h - edge).abs() < 0.5)
+        };
+        let base = probe(&js_list_card(&spec(), &th), 360.0, 96.0);
+        assert!(has_box(&base, rem_to_px(2.0)), "base circle leading 2rem missing");
+
+        let bigger = probe(
+            &js_list_card(&spec().with_leading_size_offset(1), &th),
+            360.0,
+            96.0,
+        );
+        assert!(
+            has_box(&bigger, rem_to_px(2.25)),
+            "offset +1 should grow leading to 2.25rem"
+        );
+
+        let smaller = probe(
+            &js_list_card(&spec().with_leading_size_offset(-1), &th),
+            360.0,
+            96.0,
+        );
+        assert!(
+            has_box(&smaller, rem_to_px(1.75)),
+            "offset -1 should shrink leading to 1.75rem"
+        );
+    }
+
+    #[test]
     fn sash_ribbon_renders_text() {
         let th = theme();
         let tree = probe(

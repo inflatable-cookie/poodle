@@ -60,6 +60,13 @@ pub struct ListCardSpec {
     pub meta: Option<String>,
     pub leading_shape: LeadingShape,
     pub leading_fill: LeadingFill,
+    /// Relative leading-size step offset from the resolved card size.
+    /// Contract §3 `leadingSizeOffset` (default 0): rounded to whole steps and
+    /// clamped to the `xs`→`xl` ladder; shifts the leading block + inner icon
+    /// together without changing title/meta typography. Each step is 0.25rem on
+    /// the leading box (the ladder's nominal step), clamped so the box stays
+    /// positive.
+    pub leading_size_offset: i32,
     pub accent_color: Option<String>,
     pub is_interactive: bool,
     pub is_disabled: bool,
@@ -97,6 +104,7 @@ impl Default for ListCardSpec {
             meta: None,
             leading_shape: LeadingShape::Circle,
             leading_fill: LeadingFill::Tint,
+            leading_size_offset: 0,
             accent_color: None,
             is_interactive: false,
             is_disabled: false,
@@ -142,6 +150,12 @@ impl ListCardSpec {
 
     pub fn with_leading_fill(mut self, fill: LeadingFill) -> Self {
         self.leading_fill = fill;
+        self
+    }
+
+    /// Contract §3 `leadingSizeOffset`: relative leading-size step offset.
+    pub fn with_leading_size_offset(mut self, offset: i32) -> Self {
+        self.leading_size_offset = offset;
         self
     }
 
@@ -314,16 +328,21 @@ impl ListCardSpec {
 
     /// Leading square edge length in rem. Contract §7: circle 2rem,
     /// rounded-square 2.75rem. Compact layout shrinks one step.
+    /// `leadingSizeOffset` (contract §3) shifts the box by whole 0.25rem steps,
+    /// clamped to the `xs`→`xl` ladder span (±2 steps from the shape base, box
+    /// kept ≥ 1rem so it never collapses).
     pub fn leading_size_rem(&self) -> f32 {
         let base = match self.leading_shape {
             LeadingShape::Circle => 2.0,
             LeadingShape::RoundedSquare => 2.75,
         };
-        if self.layout == ListCardLayout::Compact {
-            base - 0.25
+        let compact_adjust = if self.layout == ListCardLayout::Compact {
+            -0.25
         } else {
-            base
-        }
+            0.0
+        };
+        let step = self.leading_size_offset.clamp(-2, 2) as f32;
+        (base + compact_adjust + step * 0.25).max(1.0)
     }
 
     /// Leading icon glyph font-size in rem. Contract §8 Leading: `0.875rem`.

@@ -1,4 +1,5 @@
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// MediaBrowsePanel — grid of selectable media items with loading/error/empty states.
 
@@ -107,5 +108,41 @@ impl MediaBrowsePanelSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+
+    // ── Token methods ──────────────────────────────────────────
+
+    /// Meta and state-copy font-size token. Contract §8 Meta / State `p`:
+    /// `0.8125rem` (13px) — the `typography.label.size` token, not caption (11px).
+    pub fn meta_font_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    /// Item border color token. Contract §8 Item: `0.0625rem solid border-subtle`.
+    pub fn item_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    /// Item radius token. Contract §8 Item: `radius-surface`.
+    pub fn item_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    /// Item background base. Contract §8 Item background mixes
+    /// `background-panel 92%` with transparent.
+    pub fn item_bg_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    /// Item hover/focus background base. Contract §8 Item `:hover`/`:focus-visible`
+    /// mixes `background-elevated 90%` with transparent.
+    pub fn item_hover_bg_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_ELEVATED
+    }
+
+    /// Item hover/focus border. Contract §8 Item `:hover`/`:focus-visible`:
+    /// `border-color: border-focus`.
+    pub fn item_focus_border_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
     }
 }

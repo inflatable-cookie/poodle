@@ -55,6 +55,12 @@ impl DateTimeRangePickerSpec {
         self.value.as_ref().unwrap_or(&self.default_value)
     }
 
+    /// Effective open state: controlled `open` if set, otherwise `default_open`.
+    /// Mirrors `DateTimeZonePickerSpec::current_open`.
+    pub fn current_open(&self) -> bool {
+        self.open.unwrap_or(self.default_open)
+    }
+
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;
         self

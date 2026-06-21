@@ -92,14 +92,16 @@ impl IntoElement for MediaBrowsePanel {
         }));
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let surface_bg = resolve_color(theme, "color.background.panel");
-        let elevated_bg = resolve_color(theme, "color.background.elevated");
-        let border_subtle = resolve_color(theme, "color.border.subtle");
-        let border_focus = resolve_color(theme, "color.accent.focusRing");
-        let radius = resolve_px(theme, "radius.surface");
-        // Contract §8 Item / Meta font-size = 0.8125rem (13px). Resolved from the
-        // caption typography token rather than a literal.
-        let meta_size = resolve_px(theme, "typography.caption.size");
+        let surface_bg = resolve_color(theme, spec.item_bg_token());
+        let elevated_bg = resolve_color(theme, spec.item_hover_bg_token());
+        let border_subtle = resolve_color(theme, spec.item_border_token());
+        let border_focus = resolve_color(theme, spec.item_focus_border_token());
+        let radius = resolve_px(theme, spec.item_radius_token());
+        // Contract §8 Meta / State `p` font-size = 0.8125rem (13px). Resolved from
+        // the label typography token (13px). NOTE: `typography.caption.size` is
+        // 11px and is not mapped in the GPUI adapter (would resolve to 0px), so it
+        // must NOT be used here.
+        let meta_size = resolve_px(theme, spec.meta_font_token());
 
         // Contract §8: item border `0.0625rem solid border-subtle` (full alpha);
         // background `color-mix(in srgb, background-panel 92%, transparent)`.

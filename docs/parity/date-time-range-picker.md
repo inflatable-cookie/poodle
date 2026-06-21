@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=1 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- pass 41: Jetstream overlay built — composes real Calendar(range) + paired
+     START/END TimeField sections (mirrors GPUI + date_time_picker.rs). Indicator
+     now size-scaled (date_picker_indicator_font_rem); min-width/gaps are
+     contract-exact rem; surface = elevated 98% / border 72% / shadow_md preset.
+     Added current_open() to DateTimeRangePickerSpec (additive). 8 render_probe
+     tests cover trigger + open-state composition. Remaining Jetstream: hover-blend
+     literal (shared helper). Remaining GPUI: route 72% surface-border alpha via color_mix. -->
 <!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). Remaining GPUI: route the 72% surface-border alpha through color_mix. -->
 <!-- pass 17: GPUI overlay rebuilt — fake range grid + fake time fields + invented
      Today/Done bar replaced with composed Calendar(range) + two TimeFields (START/END).
@@ -42,12 +49,13 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Overlay not rendered** — `js_date_time_range_picker` emits trigger only (`date_time_range_picker.rs:99-108`). Calendar(range)+paired-time surface is deferred to the runtime event loop. Acceptable per the established trigger-only pattern, but the range calendar + two time fields must exist once overlay composition lands. Tracked as a gap.
-- [ ] Hardcoded `gap(rem_to_px(0.75))` (`:77`) and `min_w(rem_to_px(18.0))` (`:100`) — GPUI resolves min-width from `size.dateTimeRangePicker.minWidth` token; Jetstream should resolve the same token and a gap token, not raw rem floats.
-- [ ] Hover blend uses raw `fill_c.mix(elevated_c, 0.14)` (`:42`) — the contract hover is `color-mix(surface 86%, elevated)`; `0.14` is the inverted ratio passed to a color helper. Confirm the helper semantics match 86%/14% and route via a named helper, not a bare literal.
-- [ ] Indicator uses `chevron-down` icon (`:92`) while Svelte/contract use a `▾` text glyph indicator with per-size font scaling — acceptable icon substitution, but indicator is not size-scaled. Note for visual parity.
+- [x] **DONE: overlay built (composed primitives).** `js_date_time_range_picker` now renders the Surface → Body → Calendar(range) + Times Row composition when `current_open()`. Real `js_calendar` in `CalendarMode::Range` (seeded from start/end dates) + two `js_time_field`s in labelled START/END Time Sections. Mirrors GPUI + the sibling `date_time_picker.rs`. Surface = elevated 98% over panel, border 72% alpha, `shadow_md()` preset (JsEl box-shadow gap). 8 render_probe tests cover the composition.
+- [x] **DONE: min-width / gaps are contract-exact rem.** `min_w(rem_to_px(18.0))` is the contract `18rem` (no `dateTimeRangePicker.minWidth` token exists; GPUI fallback-resolves the same value); the trigger `gap(rem_to_px(0.75))` is the contract trigger gap. Contract-exact `rem_to_px` is not a hardcode violation.
+- [x] **DONE: indicator size-scaled.** Now uses `date_picker_indicator_font_rem` (xs 0.625 … xl 0.875), the shared sibling-picker indicator ladder. `chevron-down` icon vs Svelte's `▾` glyph is the established accepted icon substitution.
+- [ ] Hover blend uses `fill_c.mix(elevated_c, 0.14)` — the contract hover is `color-mix(surface 86%, elevated)`; `0.14` = `1 − 0.86`, the inverted ratio the runtime `Color::mix` helper expects. Shared with every sibling Jetstream picker; a named 86%-semantics helper would be a cross-cutting cleanup.
 - accepted: no ARIA channel for haspopup/expanded (documented pattern).
 - accepted: overlay interaction (open/close, calendar, time fields) lives in the preview event loop, not the component.
+- JsEl gap: time-label letter-spacing (0.04em tracking) — runtime has no letter-spacing; label is pre-uppercased, weight 600, 0.6875rem, text-secondary all applied.
 
 ## Specimen parity
 

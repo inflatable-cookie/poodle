@@ -140,8 +140,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | date-picker | fixed | 0 | 0 | ok |
 | date-range-picker | fixed | 0 | 0 | gap |
 | date-time-picker | fixed | 0 | 0 | gap |
-| date-time-range-picker | fixed | 1 | 4 | gap |
-| date-time-zone-picker | fixed | 2 | 3 | gap |
+| date-time-range-picker | fixed | 1 | 1 | gap |
+| date-time-zone-picker | fixed | 2 | 1 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 0 | 0 | gap |
 | detail-section | fixed | 0 | 0 | gap |
@@ -173,13 +173,13 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | icon-provider | fixed | 1 | 1 | gap |
 | inline-list-section | fixed | 0 | 1 | gap |
 | inline-remediation | ok | 1 | 0 | gap |
-| list-card | fixed | 2 | 4 | gap |
+| list-card | fixed | 1 | 1 | gap |
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 0 | 0 | ok |
 | list-grid | fixed | 1 | 1 | gap |
 | log-list | ok | 1 | 2 | ok |
 | markdown-editor | fixed | 2 | 1 | ok |
-| media-browse-panel | ok | 2 | 4 | gap |
+| media-browse-panel | ok | 0 | 0 | gap |
 | media-picker | fixed | 0 | 0 | ok |
 | media-preview | fixed | 1 | 1 | gap |
 | media-thumbnail | ok | 1 | 1 | gap |

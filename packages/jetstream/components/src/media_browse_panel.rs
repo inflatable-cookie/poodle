@@ -10,18 +10,21 @@ use crate::button::js_button;
 use crate::callout::js_callout;
 use crate::media_thumbnail::js_media_thumbnail;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_radius, tint};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius, tint};
 
 pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let body_font = rem_to_px(size_font_rem(effective_size));
-    let label_font = rem_to_px(0.8125);
+    // Contract §8 Meta / State `p` font-size = 0.8125rem (13px) — resolved from
+    // the label typography token rather than a literal.
+    let label_font = resolve_px(theme, spec.meta_font_token());
+    // Contract §8 Size Adjustments: xs 8.5 / sm 10 / md 11 / lg 12 / xl 13.
     let min_column = rem_to_px(match effective_size {
         poodle_specs::ControlSize::Xs => 8.5,
         poodle_specs::ControlSize::Sm => 10.0,
         poodle_specs::ControlSize::Md => 11.0,
-        poodle_specs::ControlSize::Lg => 12.5,
-        poodle_specs::ControlSize::Xl => 14.0,
+        poodle_specs::ControlSize::Lg => 12.0,
+        poodle_specs::ControlSize::Xl => 13.0,
     });
 
     // Density-driven spacing from contract
@@ -33,9 +36,9 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
 
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let text_primary = resolve_color(theme, "color.text.primary");
-    let border_subtle = resolve_color(theme, "color.border.subtle");
-    let radius = resolve_radius(theme, "radius.surface");
-    let panel_bg = resolve_color(theme, "color.background.panel");
+    let border_subtle = resolve_color(theme, spec.item_border_token());
+    let radius = resolve_radius(theme, spec.item_radius_token());
+    let panel_bg = resolve_color(theme, spec.item_bg_token());
 
     // Root
     let mut el = ui_element::div().flex_col().self_stretch().min_h(rem_to_px(18.0));
@@ -87,14 +90,16 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
         return el.child(state);
     }
 
-    // Ready: render grid
+    // Ready: render grid. Contract §8 Grid `margin-top` equals the grid gap.
     let mut grid = ui_element::div()
         .flex_row()
         .flex_wrap()
-        .gap(rem_to_px(grid_gap));
+        .gap(rem_to_px(grid_gap))
+        .mt(rem_to_px(grid_gap));
 
+    // Contract §8 Item background `color-mix(background-panel 92%, transparent)`.
+    let panel_bg_tinted = tint(panel_bg, 0.92);
     for item in &spec.items {
-        let panel_bg_tinted = tint(panel_bg, 0.92);
         let mut card = ui_element::button("")
             .flex_col()
             .gap(rem_to_px(item_gap))
@@ -151,10 +156,12 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
         } else {
             spec.load_more_label.as_str()
         };
+        // Contract §8 Actions `margin-top` equals the grid gap.
         let actions = ui_element::div()
             .flex_row()
             .justify_center()
             .self_stretch()
+            .mt(rem_to_px(grid_gap))
             .child(
                 js_button(
                     &ButtonSpec::new()
@@ -171,4 +178,122 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
     }
 
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::{ControlSize, MediaBrowseItem};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn items() -> Vec<MediaBrowseItem> {
+        vec![
+            MediaBrowseItem::new("a", "hero.png", "image").with_meta("3.1 MB"),
+            MediaBrowseItem::new("b", "clip.mp4", "video").with_meta("128 MB"),
+        ]
+    }
+
+    fn base() -> MediaBrowsePanelSpec {
+        MediaBrowsePanelSpec::new().with_items(items())
+    }
+
+    #[test]
+    fn ready_renders_items_label_and_meta() {
+        let th = theme();
+        let tree = probe(&js_media_browse_panel(&base(), &th), 480.0, 320.0);
+        assert!(!tree.is_empty(), "probe produced no nodes");
+        assert!(tree.has_text("hero.png"), "label missing: {:?}", tree.texts());
+        assert!(tree.has_text("3.1 MB"), "meta missing: {:?}", tree.texts());
+        assert!(tree.has_text("clip.mp4"), "second label missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn loading_state_shows_copy() {
+        let th = theme();
+        let spec = MediaBrowsePanelSpec::new().with_loading(true);
+        let tree = probe(&js_media_browse_panel(&spec, &th), 480.0, 320.0);
+        assert!(tree.has_text("Loading media..."), "loading copy missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn error_state_renders_message() {
+        let th = theme();
+        let spec = MediaBrowsePanelSpec::new().with_error("Failed to load media");
+        let tree = probe(&js_media_browse_panel(&spec, &th), 480.0, 320.0);
+        assert!(
+            tree.has_text("Failed to load media"),
+            "error callout message missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn empty_state_renders_message() {
+        let th = theme();
+        let spec = MediaBrowsePanelSpec::new().with_empty_message("Nothing here");
+        let tree = probe(&js_media_browse_panel(&spec, &th), 480.0, 320.0);
+        assert!(tree.has_text("Nothing here"), "empty copy missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn load_more_label_switches_while_loading() {
+        let th = theme();
+        let idle = base().with_has_more(true).with_load_more_label("Load more");
+        let idle_tree = probe(&js_media_browse_panel(&idle, &th), 480.0, 320.0);
+        assert!(idle_tree.has_text("Load more"), "load-more label missing: {:?}", idle_tree.texts());
+
+        let busy = base().with_has_more(true).with_loading(true);
+        let busy_tree = probe(&js_media_browse_panel(&busy, &th), 480.0, 320.0);
+        assert!(
+            busy_tree.has_text("Loading..."),
+            "load-more should switch to Loading...: {:?}",
+            busy_tree.texts()
+        );
+    }
+
+    #[test]
+    fn meta_font_is_label_size_not_caption() {
+        let th = theme();
+        // Contract §8 meta/state font = 0.8125rem = 13px = typography.label.size.
+        // Regression guard: caption (11px) and the old 0px GPUI-adapter miss are wrong.
+        let expected = resolve_px(&th, MediaBrowsePanelSpec::new().meta_font_token());
+        assert!((expected - 13.0).abs() < 0.01, "label token should be 13px, got {expected}");
+        let tree = probe(&js_media_browse_panel(&base(), &th), 480.0, 320.0);
+        let meta = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("3.1 MB"))
+            .expect("meta node present");
+        assert!(
+            meta.text_size.map(|s| (s - expected).abs() < 0.01).unwrap_or(false),
+            "meta font should resolve to {expected}px, got {:?}",
+            meta.text_size
+        );
+    }
+
+    #[test]
+    fn lg_min_column_matches_contract() {
+        let th = theme();
+        // Contract §8 Size Adjustments: lg min-column = 12rem (192px), not 12.5rem.
+        // Probe one item at a viewport narrower than the min so the min-width floor
+        // is exposed as the item's computed width (flex can't shrink below it).
+        let one = vec![MediaBrowseItem::new("a", "hero.png", "image").with_meta("3.1 MB")];
+        let spec = MediaBrowsePanelSpec::new().with_items(one).with_size(ControlSize::Lg);
+        let tree = probe(&js_media_browse_panel(&spec, &th), 120.0, 320.0);
+        let target = rem_to_px(12.0); // 192px
+        let stale = rem_to_px(12.5); // 200px — the bug we fixed
+        let widths: Vec<f32> = tree.nodes.iter().map(|n| n.w).collect();
+        assert!(
+            widths.iter().any(|w| (w - target).abs() < 0.5),
+            "expected an item floored at lg min-column {target}px; widths: {widths:?}"
+        );
+        assert!(
+            !widths.iter().any(|w| (w - stale).abs() < 0.5),
+            "no item should sit at the stale 12.5rem ({stale}px) min-column; widths: {widths:?}"
+        );
+    }
 }
