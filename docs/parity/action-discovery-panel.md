@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 46: built out on BOTH targets. Additive ActionDiscoveryPanelSpec.active_id
+     (+with_active_id). GPUI: active-item state (accent bg + ring), per-size badge/kbd chips,
+     EmptyState for error/empty/no-results, 5 skeleton rows; dropped px(14)/opacity(0.72)/px(1)
+     literals. Jetstream: was title-only stub → full items (title+subtitle+disabled), js_skeleton
+     ×10 loading, js_empty_state states, accent badge + kbd chips, active accent bg+ring. 4 probe
+     tests; specs 61, jet 173, gpui clean. Activation/keyboard = preview-loop; GPUI active ring
+     outset (no inset primitive); js_eyebrow verbatim vs GPUI uppercase (Eyebrow-primitive delta). -->
 # Parity: ActionDiscoveryPanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

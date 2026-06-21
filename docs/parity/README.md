@@ -112,7 +112,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | component | consv | gpui | jet | spec |
 |---|---|---|---|---|
 | accordion | fixed | 6 | 8 | gap |
-| action-discovery-panel | fixed | 6 | 9 | gap |
+| action-discovery-panel | fixed | 2 | 2 | gap |
 | alert-dialog | fixed | 2 | 2 | gap |
 | app-header | fixed | 2 | 2 | gap |
 | audio-player | ok | 2 | 2 | gap |

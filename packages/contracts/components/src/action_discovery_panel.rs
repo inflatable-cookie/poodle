@@ -8,6 +8,10 @@ pub struct ActionDiscoveryPanelSpec {
     pub sections: Vec<ActionDiscoverySection>,
     pub state: DiscoveryState,
     pub empty_message: Option<String>,
+    /// Id of the currently active/highlighted action item (contract §9
+    /// active-item accent treatment). Keyboard nav that mutates this lives in
+    /// the consuming app's event loop; the spec only carries the resolved id.
+    pub active_id: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -19,6 +23,7 @@ impl Default for ActionDiscoveryPanelSpec {
             sections: Vec::new(),
             state: DiscoveryState::Ready,
             empty_message: None,
+            active_id: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -41,6 +46,11 @@ impl ActionDiscoveryPanelSpec {
 
     pub fn with_empty_message(mut self, empty_message: impl Into<String>) -> Self {
         self.empty_message = Some(empty_message.into());
+        self
+    }
+
+    pub fn with_active_id(mut self, active_id: impl Into<String>) -> Self {
+        self.active_id = Some(active_id.into());
         self
     }
 
