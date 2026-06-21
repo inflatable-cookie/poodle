@@ -2,11 +2,15 @@
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::meta_bar::js_meta_bar;
+use poodle_jetstream_components::code::js_code;
+use poodle_jetstream_components::meta_bar::{js_meta_bar, js_meta_bar_sep};
 use poodle_jetstream_components::meta_item::js_meta_item;
+use poodle_jetstream_components::pill::js_pill;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, MetaBarSpec, MetaItemSpec};
+use poodle_specs::{
+    CodeSpec, ControlSize, InlineTypographyMode, MetaBarSpec, MetaItemSpec, PillSpec, PillTone,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -34,6 +38,37 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 ],
             )
         ))
+        .child(group("Rich children (Code + Pill suppression)", secondary,
+            // Code value + a Pill that opts out of its leading dot
+            // (Svelte `:has(.poodle-pill)` suppression) via js_meta_bar_sep.
+            js_meta_bar_sep(
+                &MetaBarSpec::new(),
+                theme,
+                vec![
+                    (
+                        js_meta_item(
+                            &MetaItemSpec::new().with_label("ID"),
+                            theme,
+                            Some(js_code(
+                                &CodeSpec::new()
+                                    .with_content("proj_01JX9G9NVV")
+                                    .with_inline(true),
+                                theme,
+                            )),
+                        ),
+                        true,
+                    ),
+                    (
+                        js_pill(
+                            &PillSpec::new().with_label("Active").with_tone(PillTone::Success),
+                            theme,
+                        ),
+                        false, // pill suppresses its leading dot
+                    ),
+                    (item("Owner", "Tom"), true),
+                ],
+            )
+        ))
         .child(group("Without separators", secondary,
             js_meta_bar(
                 &MetaBarSpec::new().with_show_separators(false),
@@ -44,6 +79,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     item("Size", "48 MB"),
                 ],
             )
+        ))
+        .child(group("Inherited typography (inline in copy)", secondary,
+            div().flex_row().gap(8.0).items_center().text_size(20.0)
+                .child(label("Owned by").text_color(secondary))
+                .child(js_meta_item(
+                    &MetaItemSpec::new()
+                        .with_label("Team")
+                        .with_typography(InlineTypographyMode::Inherit),
+                    theme,
+                    Some(label("Platform").text_color(primary).text_size(20.0)),
+                ))
+                .child(label("since 2024").text_color(secondary))
         ))
         .child(group("Single item", secondary,
             js_meta_bar(

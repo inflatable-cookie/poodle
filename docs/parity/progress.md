@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
+<!-- pass: ProgressSpec gained track_fill/track_mix/track_mix_ratio + indicator_gradient_accent_ratio + min_height_rem(size); GPUI now renders the contract accent gradient + spec-owned track mix + size-driven height; Jetstream renders spec-owned track mix + size height ladder + indeterminate 40% bar (gradient on indeterminate bar; determinate widget fill stays solid — runtime quad limit). Probe tests added. -->
 # Parity: Progress
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,19 +28,20 @@ Props/anatomy/ARIA largely agree. Divergences are in token mix ratios and one in
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Indicator is a solid accent fill, not the contract gradient.** Contract §8 indicator background = `linear-gradient(90deg, color-mix(accent 88%, white), accent)`; GPUI fills flat `accent` (`progress.rs:91,116,127`). No gradient surface on the spec — add an `indicator_gradient_*` token method, then apply it.
-- [ ] **Determinate fill uses width, not `scaleX`.** Contract §8 + §11 Tier-3 allow width-vs-transform freedom, but the size token resolution is bypassed: `bar_height` is hardcoded via inline `match` on size (`progress.rs:85-89`) instead of a `ProgressSpec` height token method. Add a size→min-height token method on the spec and resolve from it.
-- [ ] **Track bg mix ratio is correct (0.96) but `track_bg` reassembles the mix from two raw token lookups** (`progress.rs:92-95`) instead of a single `track_fill_token()` on the spec. Add `ProgressSpec::track_fill_token()` so the mix is spec-owned, not component-owned.
+- [x] **Indicator is a solid accent fill, not the contract gradient.** FIXED: indicator now fills `gpui::linear_gradient(90deg, color-mix(accent 88%, white), accent)` via `mix_white(accent, spec.indicator_gradient_accent_ratio())`. Ratio (0.88) is a spec method.
+- [x] **Determinate height via inline match.** FIXED: `bar_height` resolves from `ProgressSpec::min_height_rem(effective_size)` (size→height ladder owned by the spec; xs/sm 0.375, md 0.5, lg/xl 0.75rem). Width-vs-transform fill remains an allowed Tier-3 choice.
+- [x] **Track bg reassembled from raw lookups.** FIXED: track mix is spec-owned — `color_mix(resolve(track_fill_token), resolve(track_mix_token), track_mix_ratio())`. No raw string lookups in the component.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label`/`value_text`/`value`/`max` stored on spec but no `role="progressbar"`/aria-value emission. Contract §6 + §10 ask for native a11y mapping; not wired.
 - accepted: indeterminate animation timing differs (1.2s `ease_in_out`, slide -40%→140%) — contract §12 Known Delta permits this. Matches intent.
 
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] **Determinate fill is broken — every value renders a full bar.** FIXED: determinate now renders the runtime `ui_element::progress(frac)` ProgressBar widget, which fills proportionally (JsEl has no percent sizing, so the hand-built child could only ever be 100%). Verified by `determinate_renders_progressbar_widget` via the render_probe harness.
-- [ ] **Track background is wrong color AND wrong mix.** Contract/Svelte: `color-mix(surface 96%, text-primary)`. Jetstream: `tint(surface, 0.80)` (`progress.rs:38`), which only multiplies surface alpha by 0.8 (`theme_ext.rs:29-31`) — it never mixes toward `text-primary`, producing a translucent surface instead of the contrast track. Header comment also mislabels it "color-mix(surface 80%, elevated)" (`progress.rs:27,37`). **Fix: resolve `text-primary` and color-mix at 96%, mirroring GPUI `color_mix`.**
-- [ ] **Indicator is solid accent, not the contract gradient** (`progress.rs:60-63,68-73`) — same gap as GPUI; needs an indicator-gradient token.
-- [ ] **Track height ignores effective size.** `track_height = rem_to_px(0.5)` hardcodes the `md` value (`progress.rs:41`); `_effective_size` is computed then discarded (`progress.rs:33`). xs/sm (0.375rem) and lg/xl (0.75rem) all render at 8px. **Fix: resolve height from effective size like GPUI's match.**
-- [ ] **Indeterminate renders a static full-width accent bar** (`progress.rs:65-74`) — no width-40% and no animation, so it is visually identical to a completed determinate bar. Animation is an accepted runtime limit, but the missing `width: 40%` static treatment is not — apply the 40% width so it is at least distinguishable.
+- [x] **Track background wrong color AND wrong mix.** FIXED: now `color_mix(resolve(track_fill_token /*surface*/), resolve(track_mix_token /*text-primary*/), track_mix_ratio() /*0.96*/)` — mirrors GPUI's sRGB mix (Jetstream mixes in linear space, a minor documented cross-target delta). No more `tint(surface, 0.80)`. Verified by `track_background_is_spec_resolved_mix`.
+- [x] **Track height ignores effective size.** FIXED: `track_height = rem_to_px(ProgressSpec::min_height_rem(effective_size))` — size ladder owned by the spec, identical to GPUI. Verified by `track_height_follows_size_ladder`.
+- [x] **Indeterminate renders a static full-width accent bar.** FIXED: indeterminate now renders a 40%-width accent bar via a flex row (bar `flex_grow 0.4` + trailing spacer `0.6`), so it is distinguishable from a complete determinate bar and the bar carries the contract accent gradient. Continuous slide animation remains a §12 runtime delta. Verified by `indeterminate_renders_partial_width_bar`.
+- preview-loop: indeterminate slide animation (`translateX(-100%→250%)`, 1.2s) lives in the runtime loop, not the static component (§12 Known Delta).
+- accepted: **determinate fill is solid accent, not the contract gradient.** The runtime `ProgressBar` widget shares one GPU quad between the `background_gradient` channel and the fill-fraction, so forcing a gradient would recolor the whole track rather than just the filled portion. The gradient IS applied on the (hand-built) indeterminate bar where it paints correctly. Spec exposes `indicator_gradient_accent_ratio()` for both targets; GPUI honors it on determinate too.
 - accepted: no ARIA channel (`role`/aria-value) — no accessibility surface in Jetstream.
 - accepted: continuous indeterminate animation lives in the runtime, not the component (§12 Known Delta) — but see static-width todo above.
 

@@ -11,6 +11,12 @@ use poodle_specs::{ControlDensity, ControlSize, ProgressSpec, SemanticControlSiz
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color};
 
+/// Mix a color toward white at `ratio` (proportion of `color` retained),
+/// matching CSS `color-mix(in srgb, color {ratio*100}%, white)`.
+fn mix_white(color: Hsla, ratio: f32) -> Hsla {
+    color_mix(color, gpui::white(), ratio)
+}
+
 /// A real GPUI progress bar component backed by `ProgressSpec`.
 pub struct Progress {
     spec: ProgressSpec,
@@ -81,18 +87,24 @@ impl IntoElement for Progress {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        // Svelte: three-tier height — xs/sm=0.375rem (6px), md=0.5rem (8px), lg/xl=0.75rem (12px)
-        let bar_height = px(rem_to_px(match effective_size {
-            ControlSize::Xs | ControlSize::Sm => 0.375,
-            ControlSize::Md => 0.5,
-            ControlSize::Lg | ControlSize::Xl => 0.75,
-        }));
+        // Contract §8 Size Variants — height ladder owned by the spec.
+        let bar_height = px(rem_to_px(ProgressSpec::min_height_rem(effective_size)));
 
         let accent = resolve_color(theme, spec.indicator_fill_token());
-        let surface = resolve_color(theme, "color.background.surface");
-        let text_primary = resolve_color(theme, "color.text.primary");
-        // Contract: track bg = color-mix(surface 96%, text-primary)
-        let track_bg = color_mix(surface, text_primary, 0.96);
+        // Contract §8 Root: track bg = color-mix(surface 96%, text-primary).
+        // Mix ratio + both endpoints are spec-owned token methods.
+        let surface = resolve_color(theme, spec.track_fill_token());
+        let track_mix = resolve_color(theme, spec.track_mix_token());
+        let track_bg = color_mix(surface, track_mix, spec.track_mix_ratio());
+
+        // Contract §8 Indicator: linear-gradient(90deg,
+        //   color-mix(accent 88%, white), accent).
+        let gradient_lead = mix_white(accent, spec.indicator_gradient_accent_ratio());
+        let indicator_fill = gpui::linear_gradient(
+            90.0,
+            gpui::linear_color_stop(gradient_lead, 0.0),
+            gpui::linear_color_stop(accent, 1.0),
+        );
 
         let progress = spec.normalized_progress();
 
@@ -107,12 +119,12 @@ impl IntoElement for Progress {
         match progress {
             Some(p) => {
                 let pct = p.clamp(0.0, 1.0) as f32;
-                // Determinate: solid accent fill at percentage width
+                // Determinate: contract accent gradient fill at percentage width.
                 track = track.child(
                     div()
                         .h_full()
                         .rounded(px(999.0))
-                        .bg(accent)
+                        .bg(indicator_fill)
                         .w(relative(pct)),
                 );
             }
@@ -123,7 +135,7 @@ impl IntoElement for Progress {
                     div()
                         .h_full()
                         .rounded(px(999.0))
-                        .bg(accent)
+                        .bg(indicator_fill)
                         .w(relative(0.4))
                         .with_animation(
                             "progress-indeterminate",

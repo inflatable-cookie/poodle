@@ -36,12 +36,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 theme,
                             )),
                     )
-                    .with_child(Pill::from_spec(
-                        PillSpec::new()
-                            .with_label("Active")
-                            .with_tone(PillTone::Success),
-                        theme,
-                    ))
+                    // Pill children suppress their leading dot (Svelte
+                    // `:has(.poodle-pill)`), so opt this Pill out via separator=false.
+                    .with_child_sep(
+                        Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Active")
+                                .with_tone(PillTone::Success),
+                            theme,
+                        ),
+                        false,
+                    )
                     .with_child(
                         MetaItem::from_spec(MetaItemSpec::new().with_label("Owner"), theme)
                             .with_value(div().child("Clay")),

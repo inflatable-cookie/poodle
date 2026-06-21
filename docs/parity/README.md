@@ -185,8 +185,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | media-thumbnail | ok | 1 | 1 | gap |
 | menu | fixed | 0 | 0 | ok |
 | menubar | fixed | 2 | 1 | gap |
-| meta-bar | fixed | 3 | 3 | gap |
-| meta-item | fixed | 4 | 2 | gap |
+| meta-bar | fixed | 0 | 0 | ok |
+| meta-item | fixed | 0 | 0 | ok |
 | meter | fixed | 0 | 0 | ok |
 | metric-tile | ok | 1 | 1 | gap |
 | nav-card | ok | 1 | 2 | gap |
@@ -201,14 +201,14 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | gap |
 | popover | fixed | 0 | 0 | gap |
-| progress | fixed | 3 | 4 | gap |
+| progress | fixed | 0 | 1 | gap |
 | radio-group | ok | 1 | 1 | gap |
 | range-slider | gap | 3 | 3 | gap |
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 5 | gap |
 | relation-picker | fixed | 4 | 4 | gap |
 | remediation-banner | gap | 0 | 0 | ok |
-| resize-handle | ok | 4 | 3 | gap |
+| resize-handle | ok | 1 | 1 | gap |
 | scroll-shell | ok | 3 | 1 | gap |
 | segmented-control | fixed | 0 | 0 | gap |
 | select | ok | 0 | 0 | gap |

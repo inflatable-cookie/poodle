@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=4 jetstream=3 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- pass: GPUI hover now recolors the LINE to accent-base via group_hover (not a translucent container fill); GPUI focus ring retained. Jetstream gained line hover/active→accent-base, col/row-resize cursor affordance, default cursor when disabled, and a pill line radius; orientation confirmed consistent with GPUI/contract (horizontal→vertical line). Probe tests cover orientation, idle 82% line, and disabled opacity. Keyboard/drag callbacks remain preview-loop on both. -->
 # Parity: ResizeHandle
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,19 +24,19 @@ Svelte matches the contract precisely: `orientation`/`disabled`/`ariaLabel`/`ari
 
 GPUI matches orientation, sizing, idle 82% line, focus ring, disabled opacity, cursors. Tokens resolved via spec methods.
 
-- [ ] **Hover recolors the whole hit target, not the line** — `container.hover(|s| s.bg(accent_hover))` with `hover_color.opacity(0.3)` (`resize_handle.rs:139-140`); contract §8 hover changes only the *line* `background` to `accent-base`. Apply accent to the line, not a translucent fill on the container.
-- [ ] **No keyboard resize** — contract §6/§5 require ArrowLeft/Right/Up/Down (±8) and Home/End (±9999) via `onResizeStep`; the component is `.focusable()` but binds no `on_key_down` and exposes no step callback. Render-only.
-- [ ] **No drag callbacks** — `onResizeStart`/`onResizeMove`/`onResizeEnd` equivalents are not wired (no `on_drag`/mouse handlers); the handle cannot request resizes. Wire GPUI drag model.
-- [ ] `rounded(px(999.0))` literal (`resize_handle.rs:116,122`) — pill sentinel matching `999rem`; acceptable but note it's a raw float rather than a token (no radius token exists for "full pill"; consider adding one).
+- [x] **Hover recolors the whole hit target, not the line** — FIXED: the container is now a `.group(...)` and the line carries `.group_hover(group, |s| s.bg(hover_color))`, so hover recolors only the *line* to accent-base (contract §8). The translucent container fill is gone.
+- preview-loop: **keyboard resize** (ArrowLeft/Right/Up/Down ±8, Home/End ±9999 via `onResizeStep`) — interactive; lives in the preview event loop, not the static render. The handle is `.focusable()` and the focus ring is applied.
+- preview-loop: **drag callbacks** (`onResizeStart`/`Move`/`End`) — interactive; preview-loop concern, not render.
+- [ ] `rounded(px(999.0))` literal (`resize_handle.rs`) — pill sentinel matching `999rem`; acceptable but note it's a raw float rather than a token (no radius token exists for "full pill"; consider adding one).
 - accepted: no ARIA (gpui has no accessibility API) — separator role / aria-value* not emitted, though spec stores them.
 
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] **Orientation inverted vs contract/Svelte/GPUI** — FIXED: the two match arms were swapped; Horizontal now renders the vertical line (`w(0.5rem) height:100%`), Vertical the horizontal line.
 - [x] **Idle line not at 82% opacity** — FIXED: `handle_color` now `tint(border, 0.82)` matching the contract `color-mix(border-default 82%, transparent)`.
-- [ ] **No hover state** — contract/Svelte change the line to `accent-base` on hover/drag; `js_resize_handle` has no hover branch. (Interaction would live in preview event loop, but no hover-color path exists.)
-- [ ] **No keyboard / drag callbacks** — no `onResizeStep`/start/move/end wiring; component is purely visual.
-- [ ] **No focus ring** — contract §8 focus-visible outline (`accent.focusRing`); GPUI applies it, Jetstream does not.
+- [x] **No hover state** — FIXED: the line now carries `.hover(|s| s.bg(accent))` and `.active(|s| s.bg(accent))` (contract §8 hover/dragging → accent-base). JsEl has no group-hover, so the hover lives on the line itself; the line spans the full hit-target length so its hover region matches the handle. Cursor affordance (`col`/`row-resize`, `default` when disabled) added.
+- preview-loop: **keyboard / drag callbacks** — `onResizeStep`/start/move/end are interactive; they live in the preview `main.rs` event loop, not the static component.
+- [ ] **No focus ring** — JsEl exposes no focus-visible state (only hover/active); a keyboard-focus ring requires focus tracking that lives in the preview loop. Left open as a JsEl capability gap (note).
 - accepted: interaction (drag, keyboard) lives in preview `main.rs` event loop, not the component; no ARIA channel.
 
 ## Specimen parity

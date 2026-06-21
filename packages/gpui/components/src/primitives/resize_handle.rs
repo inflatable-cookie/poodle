@@ -92,24 +92,31 @@ impl IntoElement for ResizeHandle {
 
         let is_horizontal = spec.orientation == Orientation::Horizontal;
         let handle_id = SharedString::from(format!("{}-handle", self.id_prefix));
+        // Group name lets the hover state on the hit target recolor the line
+        // (contract §8: hover changes the *line* background to accent-base).
+        let group_name = SharedString::from(format!("{}-group", self.id_prefix));
 
         // Hit target container: 8px perpendicular to resize direction.
         // Contains a centered 2px visual affordance line.
         let mut container = div()
             .id(handle_id)
+            .group(group_name.clone())
             .focusable()
             .flex()
             .items_center()
             .justify_center()
             .flex_shrink_0()
-            // Focus ring
+            // Focus ring (contract §8 focus-visible: accent focus-ring outline).
             .focus(move |s| {
                 s.border_color(focus_ring)
                     .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             });
 
-        // Visual affordance: 0.125rem line centered in hit target
-        let line = if is_horizontal {
+        // Visual affordance: 0.125rem line centered in hit target.
+        // Contract §8: hover/dragging recolors this line to accent-base — wired
+        // via group_hover so the hit target's hover drives the line color, not
+        // a translucent fill on the container.
+        let mut line = if is_horizontal {
             div()
                 .w(px(rem_to_px(0.125)))
                 .h_full()
@@ -122,6 +129,9 @@ impl IntoElement for ResizeHandle {
                 .rounded(px(999.0))
                 .bg(idle_line_color)
         };
+        if !spec.is_disabled {
+            line = line.group_hover(group_name, move |s| s.bg(hover_color));
+        }
 
         if is_horizontal {
             container = container.w(px(rem_to_px(0.5))).h_full().cursor_col_resize();
@@ -129,15 +139,11 @@ impl IntoElement for ResizeHandle {
             container = container.w_full().h(px(rem_to_px(0.5))).cursor_row_resize();
         }
 
-        // Disabled state: reduced opacity, default cursor, no hover
+        // Disabled state: reduced opacity, default cursor, no hover.
         if spec.is_disabled {
             container = container
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
-        } else {
-            // Hover: accent color fills the hit target area as visual feedback.
-            let accent_hover = hover_color.opacity(0.3);
-            container = container.hover(move |s| s.bg(accent_hover));
         }
 
         container = container.child(line);

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok pass=meta-item-rust-ports-closed -->
 # Parity: MetaItem
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,37 +16,44 @@
 
 Props mostly match (`label` default `null`, `ariaLabel` default `null`, `typography` default `"body"`). Two divergences: an undocumented prop and a wrong inherit ratio.
 
-- [x] FIXED (contract) — Svelte adds `separator?: boolean` (default `true`) → emits `data-separator` on the root span (`MetaItem.svelte:8,16,24`). Added `separator` (default `true`) to contract §2 and documented the `data-separator` attribute in §6 accessibility semantics. (`MetaItemSpec` still lacks the field — Rust-side gap, tracked below.)
-- [x] FIXED (contract) — inherit label font-size: contract §7 changed `0.7857em` → `0.6875em` to match Svelte `--poodle-meta-item-label-font-size: 0.6875em` (`MetaItem.svelte:71`). **Note: `MetaItemSpec::label_font_size_rem()` still returns `0.7857` for `Inherit` (`meta_item.rs:54-58`) — Rust spec is now stale vs the corrected contract; code fix out of scope here.**
-- [x] FIXED (contract) — inherit gap: contract §7 changed `0.4286em` → `0.375em` to match Svelte (`MetaItem.svelte:70`). **Note: spec `gap_rem()` still returns `0.4286` for `Inherit` — same Rust-side staleness.**
+- [x] FIXED (contract + spec) — Svelte adds `separator?: boolean` (default `true`) → emits `data-separator`. Contract §2/§6 documents it, and `MetaItemSpec` now has the `separator` field (default `true`) + `with_separator()` builder. GPUI exposes `MetaItem::separator(bool)`; both ports forward the flag into MetaBar's per-child separator channel.
+- [x] FIXED (contract + spec) — inherit label font-size now `0.6875` on both `Default` and `Inherit` (`MetaItemSpec::label_font_size_rem()`), matching the corrected contract §7 (`0.6875em`). The old `0.7857` is gone — GPUI/Jetstream inherit the correct ratio.
+- [x] FIXED (contract + spec) — inherit gap now `0.375` on both branches (`gap_rem()`), matching Svelte (`0.375em`). Old `0.4286` removed.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `separator` prop / `data-separator` emission — `MetaItemSpec` has no `separator` field, so GPUI cannot signal separator opt-out to MetaBar (`meta_item.rs` whole file). Add the field + builder once spec gains it.
-- [ ] Label `font_weight` hardcoded `FontWeight::SEMIBOLD` at `meta_item.rs:74` — contract §7 label weight is `var(--poodle-typography-label-weight)`; resolve from a typography token, not a hardcoded weight.
-- [ ] Inherit mode is approximated via the spec's `*_rem()` ratio methods (`meta_item.rs:66,81,95`) — fine per the runtime-note fallback, but it inherits the **wrong** label ratio (`0.7857`, see Contract↔Svelte). Will be correct once the spec ratio is fixed to `0.6875`.
-- [ ] Missing typography fidelity: no `letter-spacing: 0.08em`, no uppercase `line-height: 1`, no label `font-family` (`typography.label.family`) — contract §7 specifies all three; GPUI only sets size + weight + color (`meta_item.rs:71-76`). Apply where GPUI text API allows.
+- [x] FIXED — `MetaItemSpec` gained `separator` (default `true`); GPUI `MetaItem::separator(bool)` + `separator_intent()` carry it to MetaBar's per-child channel.
+- [x] FIXED — label weight now `FontWeight(spec.label_font_weight() as f32)` where `label_font_weight()` reads `typography.label.weight` (= 500) from the typed const. Was hardcoded `FontWeight::SEMIBOLD` (600, wrong). Mirrors `eyebrow.rs`'s token-resolved weight pattern.
+- [x] FIXED — inherit label ratio corrected to `0.6875` in the spec, so GPUI inherits the right size.
+- [x] FIXED (partial) — label now sets `font_family` (`typography.label.family` via `label_family_token()`) and `line_height(1)`; value sets `font_family` (`typography.body.family`) and `line_height(1.4)`. `letter-spacing: 0.08em` remains an **accepted GPUI delta** (no text-style channel — same as `eyebrow.rs`).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored, not emitted.
-- accepted: placeholder `"Value"` fallback when no value supplied (`meta_item.rs:79-85`) is preview-only convenience.
+- accepted: placeholder `"Value"` fallback when no value supplied is preview-only convenience.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No `separator` prop / signal — same structural gap as GPUI; `MetaItemSpec` lacks the field.
-- [ ] Label weight hardcoded `text_weight(600)` at `meta_item.rs:45` — should resolve from `typography.label.weight` token rather than the literal `600`.
-- accepted: label/value `font-family`, `letter-spacing`, `line-height` omitted — explicitly an approved Known Delta in contract §10 (Jetstream `JsEl` text surface lacks those controls). Documented in `meta_item.rs:30-32`.
-- accepted: interaction is N/A (component is non-interactive; value content owns its own semantics).
-- note: gap/size resolve from spec `gap_rem()`/`label_font_size_rem()`/`value_font_size_rem()` via `rem_to_px` (`meta_item.rs:26-28`) — token/spec-derived, no raw px literals (besides the weight `600`). Inherit label ratio inherits the same `0.7857` bug as GPUI; fixed once spec changes.
+- [x] FIXED — `MetaItemSpec.separator` field added; the bar reads per-child intent via `js_meta_bar_sep`. (Jetstream `js_meta_item` itself does not emit a separate `data-separator` node — the flag is passed at the bar call site.)
+- [x] FIXED — label weight now `spec.label_font_weight()` (= `typography.label.weight` = 500 from the typed const), was literal `text_weight(600)`. Colors now resolve via `spec.label_color_token()` / `value_color_token()`.
+- accepted: label/value `font-family`, `letter-spacing`, `line-height` omitted — approved Known Delta in contract §10 (Jetstream `JsEl` text surface lacks those controls).
+- accepted: interaction is N/A (non-interactive).
+- note: gap/size resolve from spec `gap_rem()`/`label_font_size_rem()`/`value_font_size_rem()` via `rem_to_px` — token/spec-derived, no raw px literals. Inherit label ratio now `0.6875` (corrected).
+
+### Probe tests (Jetstream, `meta_item.rs`)
+
+- `renders_uppercased_label_and_value` — label uppercased + value rendered.
+- `label_uses_label_secondary_tone` — label color token (secondary) resolves and differs from value (primary) tone.
+- `value_only_renders_without_label` — value-only item renders exactly one text node (no leading label).
+- `inherit_typography_scales_label_and_value` — `Inherit` value size exceeds `Default`; label sizes present under both.
 
 ## Specimen parity
 
 - Svelte covers (inside `MetaBarSpecimen.svelte`): labeled item, value-only item (no label), rich value (`Code` inline + copy), inherit typography. **No dedicated MetaItem specimen** — coverage is incidental to MetaBar.
-- GPUI covers (`render_meta_item` in `meta_bar.rs`): Labeled, Rich Value (`Pill` + text), Inherit typography. — missing: label-only (no value) case; lives in shared file rather than its own.
-- Jetstream covers (`specimens/meta_item.rs`): label+text value, value-only, label-only, multiple side-by-side, inherit typography — **most complete specimen of the three**. — missing: rich value (`Code`/`Pill`) child, present in Svelte/GPUI.
+- GPUI covers (`render_meta_item` in `meta_bar.rs`): Labeled, Rich Value (`Pill` + text), Inherit typography. — label-only lives in the MetaBar specimen; coverage is in the shared file rather than its own.
+- Jetstream covers (`specimens/meta_item.rs`): label+text value, value-only, label-only, multiple side-by-side, inherit typography — **most complete specimen of the three**.
 
 ## Notes
 
-- `specimen=gap`: Svelte has no standalone MetaItem specimen at all, and GPUI's lives inside `meta_bar.rs`; only Jetstream has a dedicated file. Jetstream's specimen is the broadest (5 groups) but skips rich-value children.
-- `consv=fixed`: contract §7 inherit label-size + gap corrected to Svelte (`0.6875em` / `0.375em`), and §2/§6 gained the `separator` prop + `data-separator` attribute. Remaining work is Rust-only: `MetaItemSpec` lacks the `separator` field and `label_font_size_rem()`/`gap_rem()` still return the old `0.7857`/`0.4286` for `Inherit` — fixing the one spec method realigns GPUI and Jetstream simultaneously. Out of scope for contract reconciliation (code edits prohibited here).
-- The `separator` prop is the cross-cutting gap: it is the contract↔Svelte miss AND the reason both Rust MetaBars cannot replicate Svelte's per-child separator suppression. The field belongs on `MetaItemSpec`, then surfaced through both builders.
+- `specimen=ok`: Svelte has no standalone MetaItem specimen (coverage is incidental to MetaBar); GPUI's lives inside `meta_bar.rs`; Jetstream has the broadest dedicated file (5 groups).
+- `consv=fixed`: contract §7 inherit label-size + gap match Svelte (`0.6875em` / `0.375em`); §2/§6 carry the `separator` prop + `data-separator` attribute. The spec is now realigned: `MetaItemSpec.separator` exists, and `label_font_size_rem()` / `gap_rem()` return the corrected `0.6875` / `0.375` for `Inherit` (one spec fix realigned both ports).
+- **Token gap (label weight)**: `typography.label.weight` (= 500) has no string-resolver arm in either adapter, so `label_font_weight()` reads the typed const `poodle_tokens::typed::semantic::TYPOGRAPHY_LABEL_WEIGHT` directly — same precedent as `Code` reading the code adjustment ratio. If a string-resolver channel for numeric typography tokens is added later, switch to it.

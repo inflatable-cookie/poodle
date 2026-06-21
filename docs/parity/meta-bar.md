@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok pass=meta-bar-rust-ports-closed -->
 # Parity: MetaBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,28 +25,36 @@ Both props match (`ariaLabel` default `null`, `showSeparators` default `true`). 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded radius literal `rounded(px(999.0))` at `meta_bar.rs:72` — pill-radius for the dot should resolve from a token, not a raw `999.0`.
-- [ ] Hardcoded opacity literal `separator_color.a * 0.72` at `meta_bar.rs:73-74` — the 72% separator mix is a magic number; move to a token or named constant. Svelte uses `color-mix(... 72%, transparent)`; the value should be sourced, not inlined.
-- [ ] Separator is positional (`idx > 0`), not per-child opt-in. GPUI draws a dot before every non-first child regardless of child kind, so the Svelte pill-suppression (`:has(.poodle-pill)`) and `data-separator` opt-out are absent (`meta_bar.rs:70-79`). Dots render before pills, unlike Svelte.
+- [x] FIXED — dot radius now `resolve_radius(theme, "radius.pill")` (was `rounded(px(999.0))`). Token-sourced.
+- [x] FIXED — the 72% separator mix is now a named `SEPARATOR_DOT_MIX` const with a contract §7 citation (was inline `* 0.72`). No token carries the 72% factor (it is a contract literal) — noted token gap, see Notes.
+- [x] FIXED — separator is now per-child opt-in. `MetaBar` stores `(child, separator)` pairs; the dot draws only when `idx > 0 && show_separators && separator`. New `with_child_sep` / `with_children_sep` builders + `MetaItem::separator()` carry the `data-separator` intent. The specimen opts the `Pill` out via `with_child_sep(pill, false)` (Svelte `:has(.poodle-pill)`).
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored on spec but not emitted.
-- accepted: dot uses `rem_to_px(0.25)` (derived from rem, fine) and gap resolves from `space.inline.sm` token (`meta_bar.rs:67`) — token-correct; only `999.0`/`0.72` are literals.
+- accepted: dot uses `rem_to_px(0.25)` (derived from rem, fine) and gap resolves from `space.inline.sm` token — token-correct.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded radius literal `rounded(999.0)` at `meta_bar.rs:45` — same pill-radius literal as GPUI; resolve from a token.
-- [ ] Hardcoded opacity literal `separator_color.a * 0.72` at `meta_bar.rs:29` — same 72% magic number as GPUI; source it.
-- [ ] Separator is positional (`idx > 0`), not per-child opt-in (`meta_bar.rs:39-48`) — no pill suppression, no `data-separator` opt-out; dots render before every non-first child including pills.
+- [x] FIXED — dot radius now `resolve_radius(theme, "radius.pill")` (was `rounded(999.0)`). Token-sourced.
+- [x] FIXED — 72% mix now the named `SEPARATOR_DOT_MIX` const (was inline `* 0.72`). Same contract-literal token gap as GPUI.
+- [x] FIXED — separator is now per-child opt-in via new `js_meta_bar_sep(spec, theme, Vec<(JsEl, bool)>)`. `js_meta_bar` delegates with all-`true` flags (back-compat). Dot draws only when `idx > 0 && show_separators && separator`. Specimen demonstrates pill suppression (`separator=false`). Covered by `per_child_opt_out_suppresses_its_dot` probe test.
 - accepted: no ARIA channel for `aria_label`.
-- accepted: gap resolves from `space.inline.sm` token (`meta_bar.rs:26`), dot size via `rem_to_px(0.25)` — token/rem-derived, fine.
+- accepted: gap resolves from `space.inline.sm` token, dot size via `rem_to_px(0.25)` — token/rem-derived.
+
+### Probe tests (Jetstream, `meta_bar.rs`)
+
+- `renders_items_with_separator_dots_between_them` — labels (uppercased) + values render; dot bg = text-secondary @ 72%.
+- `show_separators_false_suppresses_dots` — no dot bg when separators off.
+- `per_child_opt_out_suppresses_its_dot` — `js_meta_bar_sep` with `false` flags draws no dots.
+- `first_child_never_gets_a_leading_dot` — single item, no leading dot.
 
 ## Specimen parity
 
 - Svelte covers: Header metadata (separators on, with `Code`+copy, `Pill`, plain `MetaItem`s), No separators, Inherited typography (inline inside running copy). (`MetaBarSpecimen.svelte`)
-- GPUI covers: Header metadata, No separators — **missing: Inherited-typography group**, and no specimen exercises a `Pill` sitting after a `MetaItem` to show separator-suppression (pill gets a dot here, unlike Svelte). (`meta_bar.rs` `render`)
-- Jetstream covers: With separators (default), Without separators, Single item — **missing: rich `Code`/`Pill` children** (only text items), **missing: Inherited-typography group**. (`jetstream/.../specimens/meta_bar.rs`)
+- GPUI covers: Header metadata (now with `Pill` separator-suppression via `with_child_sep(pill, false)`), No separators. Inherited-typography lives in the MetaItem specimen (`render_meta_item`). (`meta_bar.rs` `render`)
+- Jetstream covers: With separators (default), **Rich children (Code + Pill suppression)** (new), Without separators, **Inherited typography** (new, inline in copy), Single item. (`jetstream/.../specimens/meta_bar.rs`)
 
 ## Notes
 
-- `consv=fixed`: contract now documents the per-`MetaItem` `data-separator` opt-out, pill suppression, pill-context typography injection, and the full separator/root token table (§4 + §7). Both Rust ports still copy the simpler "dot before every non-first child" model, so they remain a gap against Svelte for any `Pill` child — tracked in the Jetstream/GPUI sections, not contract↔Svelte.
-- `MetaBarSpec` has no field to carry per-child separator intent, so even fixing the Rust ports needs the child elements (not just the bar) to signal opt-out — a structural gap, not a one-line fix.
-- Neither Rust port injects pill typography context (no equivalent of `setPillContext`); pills inside the bar will not pick up MetaBar's inherit sizing.
+- `consv=fixed`: contract documents the per-`MetaItem` `data-separator` opt-out, pill suppression, pill-context typography injection, and the full separator/root token table (§4 + §7).
+- Per-child separator intent now rides on the builder (`with_child_sep` / `js_meta_bar_sep` take `(child, separator)` pairs) rather than `MetaBarSpec`. `MetaItem` carries its own `separator` (new `MetaItemSpec.separator` field, default `true`); the caller forwards it to the bar. Pill suppression is expressed by passing `separator=false` for pill children (the Rust ports cannot introspect child subtrees for `.poodle-pill` the way Svelte's `:has()` does, so the opt-out is explicit at the call site — noted delta).
+- **Token gap**: no semantic token carries the `72%` separator-dot mix factor — it is a contract literal (`color-mix(... 72%, transparent)`). Both ports name it `SEPARATOR_DOT_MIX` rather than inlining a magic number. Add a `color.text.separatorDot` (or opacity) token if this factor should be themeable.
+- Neither Rust port injects pill typography context (no equivalent of `setPillContext`); pills inside the bar will not pick up MetaBar's inherit sizing — unchanged, structural.
