@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 45: Jetstream rebuilt to match GPUI — each option composes js_card (interactive/
+     selected, Card owns the fill — dropped selected_fill swap) with a radio indicator (ring +
+     dot from indicator_size_rem/dot_size_rem/indicator_border_rem), title + optional description;
+     single-select via current_value; density grid gap; per-item/group disabled. 3 probe tests
+     (title, selected≠unselected, custom indicator size); jet 169. Selection/arrow-nav = preview-loop. -->
 <!-- pass 24: GPUI rebuilt — options compose Card::from_spec(interactive/selected)
      (mirrors card_toggle_group); dropped invented 12%-accent fill (Card owns it);
      indicator/dot/font dims from additive spec helpers (indicator_size_rem/dot_size_rem/

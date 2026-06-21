@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=9 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=7 specimen=gap -->
+<!-- pass 45: GPUI rebuilt to the card-radio-group pattern — each option wraps composed
+     Card::from_spec(interactive/selected) in a focusable option container (id, flex_1,
+     cursor, on_toggle), Card owns the selected fill (no invented fill); title + optional
+     description at title_font_rem/description_font_rem; multi-select model kept (values
+     Vec<String>); flex-wrap grid + density gap; per-item/group disabled. Additive
+     CardToggleGroupSpec: with_size/size_role/density + title/description_font_rem. specs 61,
+     gpui clean. count-pill/columns remain (not in shared spec). -->
 # Parity: CardToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

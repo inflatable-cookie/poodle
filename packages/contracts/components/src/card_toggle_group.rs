@@ -73,4 +73,43 @@ impl CardToggleGroupSpec {
     pub fn is_selected(&self, value: &str) -> bool {
         self.values.iter().any(|item| item == value)
     }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
+    /// Title font-size in rem for the given effective size.
+    /// Contract §7 Size Adjustments: xs 0.6875 · sm 0.75 · md 0.875 · lg 1 · xl 1.125.
+    pub fn title_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 1.0,
+            ControlSize::Xl => 1.125,
+        }
+    }
+
+    /// Description font-size in rem for the given effective size.
+    /// Contract §7 Size Adjustments: xs 0.625 · sm 0.6875 · md 0.75 · lg 0.875 · xl 0.9375.
+    pub fn description_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.625,
+            ControlSize::Sm => 0.6875,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.875,
+            ControlSize::Xl => 0.9375,
+        }
+    }
 }
