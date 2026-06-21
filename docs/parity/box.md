@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=3 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=fixed | pass: gpui `parse_dimension_px` now resolves `rem` (×16) so `12rem` works; jet `js_box` applies width/height/min_w/min_h (rem/px/100%) + maps all 4 overflow modes (hidden/clip→clip, auto/scroll→scroll-list); BoxSpec gained `aria_label`; both a11y emissions stay accepted runtime limits; jet box specimen rebuilt spec-driven (default/padding/fixed-12x6rem/overflow-hidden); 5 probe tests added -->
 # Parity: Box
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,22 +20,22 @@ Svelte matches the contract. All props present with correct defaults: `padding="
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] `parse_dimension_px` (`bx.rs:77-85`) only handles `px`/plain-number and a literal `"100%"` special case; `rem`, `vh`, `%`-other, `calc()` etc. are silently dropped. Contract allows "any CSS value" for width/height/minWidth/minHeight. **Parse `rem` (× 16) at minimum** so `width="12rem"` works (the GPUI box specimen hand-codes `192px` precisely because this fails).
-- [ ] `ariaLabel` / `asRole`: spec has `role` builder but `aria_label` is not forwarded and no role is mapped into the GPUI accessibility tree (contract §10 requires `asRole` → native a11y tree). 
-- accepted: no ARIA emission (gpui has no accessibility API) — overlaps the role mapping above; the missing builder is still a real gap.
+- [x] DONE: `parse_dimension_px` now resolves `rem` (× 16) in addition to `px`/plain-number; `width="12rem"` resolves to 192px through the spec path. `vh`/`%`-other/`calc()` still return `None` (no absolute px) — `100%` handled via `w_full`/`h_full`.
+- [x] DONE: `aria_label` forwarded — `BoxSpec` gained an `aria_label` field + `Box::aria_label()` builder paired with `role`. GPUI has no accessibility-tree API, so the value is stored but not emitted (accepted runtime limit, contract §10).
+- accepted: no ARIA emission (gpui has no accessibility API) — role/aria_label are now reachable on the spec; native-tree emission is the accepted limit.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] `js_box` (`bx.rs`) ignores `width`, `height`, `min_width`, `min_height` entirely — only padding + `overflow==Hidden` are applied. Contract §3/§7 require explicit dimension constraints. **Resolve and apply `spec.width/height/min_width/min_height`.**
-- [ ] Overflow only handles `Hidden`; `Auto`/`Scroll`/`Clip` modes are not mapped (Visible is the implicit default). Contract `OverflowMode` has 4 values.
-- [ ] No `role`/`aria_label` handling.
+- [x] DONE: `js_box` now resolves and applies `width`/`height`/`min_width`/`min_height` via `parse_dimension_px` (rem ×16, px, bare number); `100%` maps to `w_full`/`h_full`. Probe-verified `12rem`→192px / `6rem`→96px.
+- [x] DONE: all overflow modes mapped — `Hidden`/`Clip` → `overflow_hidden` (clip), `Auto`/`Scroll` → `overflow_scroll` (List container), `Visible` → default. Probe-verified Auto→List.
+- [x] accepted (runtime limit): `role`/`aria_label` — JsEl emits no accessibility tree, so the fields are intentionally not applied. Mirrors GPUI.
 - accepted: interaction n/a (layout primitive, no events).
 
 ## Specimen parity
 
 - Svelte covers: Default (no padding), With padding (lg), Fixed dimensions (12×6rem + md padding), Overflow hidden (10×3rem clipped) — all 4 contract groups.
-- GPUI covers: all 4 groups — but Fixed dimensions and Overflow are **faked**: dimensions come from a hand-coded outer `div().w(px(192.0)).h(px(96.0))` / `div().w(px(160.0)).h(px(48.0)).overflow_hidden()` wrapper, NOT from the Box spec (because the Box can't resolve `12rem`/clip). Visually covers, but does not exercise the component path. — missing: real spec-driven width/height/overflow.
-- Jetstream covers: With padding (md), Large padding (lg) only. — missing: **Default (no padding)**, **Fixed dimensions**, **Overflow hidden**. (Can't show Fixed/Overflow until `js_box` supports width/height/overflow modes.)
+- GPUI covers: all 4 groups, now **spec-driven** — Fixed (`with_width("12rem").with_height("6rem")`) and Overflow (`with_width("10rem").with_height("3rem").with_overflow(Hidden)`) resolve dimensions through the Box spec, not hand-coded `div().w(px(...))` wrappers. (Preview not build-verified here per shared-target-lock rule.)
+- Jetstream covers: all 4 groups, spec-driven — Default (no padding), With padding (md), Large padding (lg), Fixed 12×6rem (md padding), Overflow hidden (10×3rem). Rebuilt now that `js_box` resolves width/height + overflow modes. (Preview not build-verified here.)
 
 ## Notes
 

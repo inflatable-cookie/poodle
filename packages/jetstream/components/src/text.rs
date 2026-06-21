@@ -10,7 +10,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{TextSpec, TextWeight};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// Build a text element from a `TextSpec`.
 ///
@@ -39,6 +39,14 @@ pub fn js_text(spec: &TextSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.overflow_hidden();
     }
 
+    // `spacing="compact"` renders a stacked grid with a `space.stack.sm` gap
+    // between child paragraphs (contract §3). Wrap the label in a flex-column
+    // carrying the resolved gap so multi-paragraph content stacks compactly.
+    if let Some(token) = spec.spacing_gap_token() {
+        let gap = resolve_px(theme, token);
+        return ui_element::div().flex_col().gap(gap).child(el);
+    }
+
     el
 }
 
@@ -46,7 +54,7 @@ pub fn js_text(spec: &TextSpec, theme: &JetstreamThemeProvider) -> JsEl {
 mod tests {
     use super::*;
     use crate::render_probe::probe;
-    use poodle_specs::{TextSize, TextTone};
+    use poodle_specs::{TextSize, TextSpacing, TextTone};
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
@@ -72,5 +80,33 @@ mod tests {
     fn size_maps_to_font_px() {
         let el = js_text(&TextSpec::new("x").with_size(TextSize::Xs), &theme());
         assert_eq!(el.style.text_size, Some(rem_to_px(0.75)));
+    }
+
+    #[test]
+    fn weight_maps_to_css_value() {
+        use poodle_specs::TextWeight;
+        let el = js_text(&TextSpec::new("x").with_weight(TextWeight::Bold), &theme());
+        assert_eq!(el.style.text_weight, Some(700));
+    }
+
+    #[test]
+    fn compact_spacing_wraps_in_gapped_column() {
+        // spacing="compact" wraps the label in a flex-column carrying the
+        // resolved space.stack.sm gap; default spacing renders a bare label.
+        let th = theme();
+        let gap = resolve_px(&th, poodle_tokens::semantic::SPACE_STACK_SM);
+        assert!(gap > 0.0, "stack-sm token resolves > 0");
+
+        let plain = js_text(&TextSpec::new("p"), &th);
+        let plain_tree = probe(&plain, 200.0, 80.0);
+        assert_eq!(plain_tree.nodes[0].kind, "Label", "default is a bare label");
+
+        let compact = js_text(
+            &TextSpec::new("p").with_spacing(TextSpacing::Compact),
+            &th,
+        );
+        let tree = probe(&compact, 200.0, 80.0);
+        assert_eq!(tree.nodes[0].kind, "Panel", "compact wraps in a container");
+        assert!(tree.has_text("p"), "label survives the wrap: {:?}", tree.texts());
     }
 }

@@ -4,7 +4,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{TextSpec, TextWeight};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 pub struct Text {
     spec: TextSpec,
@@ -36,11 +36,21 @@ impl IntoElement for Text {
             TextWeight::Bold => FontWeight::BOLD,
         };
 
+        // `spacing="compact"` renders a stacked grid with a `space.stack.sm` gap
+        // between child paragraphs (contract §3). GPUI uses a flex column gap.
+        let spacing_gap = self
+            .spec
+            .spacing_gap_token()
+            .map(|token| resolve_px(&self.theme, token));
+
+        // `element` (p/span/div) has no rendering effect in GPUI — there is no DOM
+        // semantics layer, so every variant renders one node (matches Jetstream).
         div()
             .text_size(px(rem_to_px(self.spec.font_size_rem())))
             .line_height(relative(self.spec.line_height()))
             .font_weight(weight)
             .text_color(color)
+            .when_some(spacing_gap, |el, gap| el.flex().flex_col().gap(gap))
             .when(self.spec.clamp.is_some(), |el| el.overflow_hidden())
             .child(self.spec.content)
             .into_any_element()

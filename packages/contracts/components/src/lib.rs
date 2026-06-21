@@ -232,7 +232,7 @@ pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
 pub use tabs::TabsSpec;
-pub use text::{TextElement, TextLeading, TextSize, TextSpec, TextTone, TextWeight};
+pub use text::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight};
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;

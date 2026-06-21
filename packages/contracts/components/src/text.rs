@@ -66,6 +66,21 @@ impl Default for TextLeading {
     }
 }
 
+/// Compact-grid spacing for child paragraphs (contract §2 `spacing`).
+/// `None` is the default (no gap); `Compact` renders a stacked grid with a
+/// `space.stack.sm` gap between children.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TextSpacing {
+    None,
+    Compact,
+}
+
+impl Default for TextSpacing {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct TextSpec {
     pub content: String,
@@ -74,6 +89,7 @@ pub struct TextSpec {
     pub size: TextSize,
     pub weight: TextWeight,
     pub leading: TextLeading,
+    pub spacing: TextSpacing,
     pub clamp: Option<u8>,
 }
 
@@ -110,9 +126,23 @@ impl TextSpec {
         self
     }
 
+    pub fn with_spacing(mut self, spacing: TextSpacing) -> Self {
+        self.spacing = spacing;
+        self
+    }
+
     pub fn with_clamp(mut self, clamp: u8) -> Self {
         self.clamp = Some(clamp.clamp(1, 3));
         self
+    }
+
+    /// Stack gap token for `spacing="compact"`, else `None`.
+    /// Contract §3: compact renders a grid with `--poodle-space-stack-sm` gap.
+    pub fn spacing_gap_token(&self) -> Option<&'static str> {
+        match self.spacing {
+            TextSpacing::None => None,
+            TextSpacing::Compact => Some(poodle_tokens::semantic::SPACE_STACK_SM),
+        }
     }
 
     pub fn color_token(&self) -> &'static str {

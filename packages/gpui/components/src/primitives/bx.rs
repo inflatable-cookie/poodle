@@ -66,6 +66,13 @@ impl Box {
         self.spec.role = Some(v.into());
         self
     }
+    /// Accessible name (contract §3 `ariaLabel`), paired with `role`. GPUI has no
+    /// accessibility-tree API, so this is stored on the spec but not emitted —
+    /// an accepted runtime limit (matches contract §10 a11y note).
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
@@ -73,13 +80,19 @@ impl Box {
     }
 }
 
-/// Try to parse a Dimension string as px (e.g. "100px" -> Some(100.0), "50%" -> None).
+/// Try to resolve a Dimension string to logical px.
+///
+/// Handles `px`, `rem` (× 16 at the standard base), and bare numbers (px).
+/// Percentage / `calc()` / viewport units are not absolute px — they return
+/// `None` (callers handle `100%` separately via `w_full`/`h_full`).
 fn parse_dimension_px(dim: &Dimension) -> Option<f32> {
     let s = dim.as_str().trim();
     if let Some(stripped) = s.strip_suffix("px") {
         stripped.trim().parse::<f32>().ok()
+    } else if let Some(stripped) = s.strip_suffix("rem") {
+        stripped.trim().parse::<f32>().ok().map(|rem| rem * 16.0)
     } else {
-        // Try plain number as px
+        // Try plain number as px.
         s.parse::<f32>().ok()
     }
 }

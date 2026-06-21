@@ -1,4 +1,14 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass 41: both Rust targets closed. GPUI — indicator `calendar` Icon → `chevron-down`
+     (text-secondary, per-size `date_picker_indicator_font_rem`); partial-range `"<start> – …"`
+     → `"<start> – End date"` (Svelte parity, start-only ⇒ placeholder); shadow already
+     `elevation_overlay_shadow()` (stale todo). Jetstream — rebuilt on the DatePicker template:
+     now composes the REAL Calendar (mode="range") surface on `current_open()` (no fake grid),
+     chevron indicator at per-size font + text-secondary, `shadow_md()` ≈ elevation-overlay,
+     panel-space padding; partial-range `"- ..."` → `"– End date"` (en-dash). 8 probe tests
+     (trigger placeholder/complete/partial, chevron, closed=no surface, open=real range calendar
+     w/ accent endpoints, disabled, sizes). Remaining: specimen Sizes/Densities groups (gap);
+     overlay anchoring + open/select interaction = preview-loop. -->
 # Parity: DateRangePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,19 +32,21 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Indicator renders a `calendar` Icon (`date_range_picker.rs:201`) instead of the `▾` chevron Svelte/contract use. Align glyph across targets.
-- [ ] Hardcoded shadow literals `hsla(0.0,0.0,0.0,0.10)`/`0.06` + `px(16.0)`/`px(4.0)` at `date_range_picker.rs:247-257`. Contract surface shadow = `var(--poodle-elevation-overlay)`; resolve from elevation token, not raw HSLA + float px.
-- [ ] Partial-range display uses `"<start> – …"` ellipsis (`date_range_picker.rs:148`) where Svelte uses the literal `" – End date"` text. Match Svelte's partial string.
+- [x] FIXED Indicator was a `calendar` Icon — now the `chevron-down` disclosure indicator (matching `▾`), colored `text-secondary` and sized per-size via `date_picker_indicator_font_rem` (shared with DatePicker; contract §8 indicator font table). Glyph now aligns across targets.
+- [x] FIXED (stale todo) Surface shadow already resolves the elevation token — `overlay.shadow(elevation_overlay_shadow())` (token-driven `ELEVATION_OVERLAY`), not raw HSLA + float px. No literal shadow remains.
+- [x] FIXED Partial-range display now matches Svelte: `"<start> – End date"` (formatted start, en-dash, literal `End date`) while only start is chosen; a missing start falls back to the placeholder (no `… – end` branch — Svelte never shows end-only).
 - accepted: no ARIA (gpui has no accessibility API) — haspopup/expanded/dialog-role not emitted.
 - accepted: overlay renders as flow-child (`wrapper.child(overlay)`), anchored-below positioning is a platform delta.
+- accepted: open/range-select interaction lives in the preview event loop (`on_toggle` wired; range commits via composed Calendar's `on_range_select`).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No calendar overlay + no open-state handling: `js_date_range_picker` only emits the trigger; never reads `spec.current_open()`. Interaction/overlay must live in preview event loop — confirm a handler exists, else the "open" range-calendar is unreachable (none present in the specimen).
-- [ ] Partial-range display joins with `"<start> - <end-or-...>"` (`date_range_picker.rs:43-49`) using `"..."` for the missing bound; Svelte uses `" – End date"`. Match Svelte's partial string + en-dash separator (uses ASCII hyphen here).
-- [ ] Trigger gap is `rem_to_px(0.75)` literal (`date_range_picker.rs:63`); fine numerically but should resolve from a content-gap token like other token reads. Low priority — flag for token-form consistency.
+- [x] FIXED No calendar overlay / open-state handling — `js_date_range_picker` now reads `spec.current_open()` and, when open, composes the **real Calendar primitive** (`js_calendar` with `mode="range"`, week-start + seeded range forwarded, visible-month anchored to the range start) inside a token-styled surface (radius.surface, border color-mix 72%, background color-mix(elevated 98%, panel), `shadow_md()` ≈ elevation-overlay, panel-space padding). Per CLAUDE.md "No Mockups" the surface is the actual Calendar, never a faked grid. Rebuilt on the DatePicker template.
+- [x] FIXED Partial-range display now `"<start> – End date"` (en-dash + literal `End date`); complete range `"<start> – <end>"`; missing start ⇒ placeholder. Was the ASCII-hyphen `"<start> - ..."` ellipsis form.
+- [x] FIXED Indicator was `icon.muted` + `size_font_rem(supporting_visual)`; now `text-secondary` at the per-size `date_picker_indicator_font_rem` scale (contract §8 indicator font table), matching DatePicker/GPUI.
+- accepted: trigger gap `rem_to_px(0.75)` is the contract-exact trigger gap (§8 Trigger `gap: 0.75rem`); `rem_to_px` of a contract-exact rem is not a hardcode violation. No content-gap token exists for it.
 - accepted: no ARIA channel for haspopup/expanded/dialog role.
-- accepted: range-calendar surface + selection interaction live in the preview event loop, not the component.
+- accepted: range-calendar selection + open/close + outside-click/Escape interaction live in the preview event loop, not the component.
 
 ## Specimen parity
 

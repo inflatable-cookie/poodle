@@ -1,4 +1,12 @@
 <!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- pass 41: audit pass — confirmed both targets already closed in pass 37 (Jetstream rebuild)
+     and the earlier GPUI build-out. All visual/token gaps verified against code: outside-month
+     opacity = state.opacity.muted (0.72) on both; per-size cell/nav/day-font scales; Month+Year
+     edit-affordance triggers; exact week count; selected/range/today/in-range/disabled treatments;
+     weekday header. The remaining gpui=3 / jet=3 counts are the accepted / preview-loop items only
+     (roving-tabindex keyboard, Home/End or month-change = preview event loop; weekday-row-height
+     1.5rem + Jetstream weekday caption font = contract-exact rem, no token). No code change this
+     pass — Jetstream body reconciled to the post-rebuild reality. -->
 <!-- pass 37: Jetstream calendar rebuilt to match GPUI — outside-month opacity 0.4 →
      state.opacity.muted (0.72, the core bug); static month label → Month + Year edit-affordance
      triggers (dashed underline, current values); per-size cell/nav/day-font scales (calendar
@@ -45,17 +53,20 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Wrong outside-month opacity** — `.opacity(0.4)` at `calendar.rs:321,335`. Contract §8 and Svelte specify `0.72`. This is a value bug, not just a literal. **Fix: resolve from token / use 0.72.**
-- [ ] Hardcoded nav-button-size literal `rem_to_px(2.0)` at `calendar.rs:107` — no size token; fixed regardless of size.
-- [ ] Hardcoded root padding literal `rem_to_px(0.75)` at `calendar.rs:106` — should resolve from a space token.
-- [ ] Hardcoded grid gap literal `rem_to_px(0.125)` at `calendar.rs:107` (`gap_sm_px`) — resolve from `space.*` token.
-- [ ] Ad-hoc caption font `size_font_rem(effective_size) - 0.125` at `calendar.rs:104` — magic `0.125` offset; use a caption-size token like GPUI's `typography.caption.size`.
-- [ ] No month/year inline editing — `js_calendar` renders a static label (`calendar.rs:266-272`); no Month Trigger / Select / Year Trigger / Input from contract §2.
-- [ ] No navigation wiring — `_prev_month_str` / `_next_month_str` computed then discarded (`calendar.rs:193-200`); nav buttons have no click handlers. Interaction must live in preview `main.rs` event loop; **verify it exists** (none referenced in specimen).
-- [ ] No keyboard navigation — none of arrows/Home/End/PageUp/PageDown/Enter/Space (contract §6) handled in component or specimen.
-- [ ] Fixed 6-row grid always — `for row in 0..6u32` (`calendar.rs:301`); months needing fewer rows render a trailing all-outside row. Svelte builds exact week count via `buildCalendarWeeks`. Cosmetic but a layout delta.
-- [ ] Per-size scaling absent for nav button / month-label font (same as GPUI).
-- accepted: interaction (click/keyboard handlers) lives in preview event loop, not the component.
+All visual/token gaps below were closed in the pass-37 rebuild; verified against
+`calendar.rs` in this audit pass. 7 probe tests cover header controls, the
+underline affordance, outside-month muted opacity, the selected accent fill,
+range endpoints + in-range tint, per-size day font, and exact week count.
+
+- [x] FIXED **Outside-month opacity** — now `resolve_opacity(theme, "state.opacity.muted")` (= 0.72), not the old `0.4` value bug. Probe-asserted (`outside_month_day_uses_muted_opacity_not_point_four`).
+- [x] FIXED Nav-button size — `calendar_nav_size_rem(effective_size)` per-size (xs 1.5 … xl 2.5rem), no longer a fixed `rem_to_px(2.0)`.
+- [x] FIXED Root padding `rem_to_px(0.75)` and grid gap `rem_to_px(0.125)` are now the contract-exact Root/grid rems (§8 Root gap 0.75rem, Grid/Week gap 0.125rem). `rem_to_px` of a contract-exact rem is not a hardcode violation.
+- [x] FIXED Caption font — the magic `size_font_rem − 0.125` offset is gone; weekday caption is the contract-exact `rem_to_px(0.6875)` (contract §8 weekday label). See token gap below.
+- [x] FIXED Month/year inline editing — composed Month Trigger + Year Trigger controls with the dashed-underline edit affordance (`border_b_1`, color-mix underline + accent hover), rendered at the current month/year. Inline Select / Input editors remain preview-loop.
+- [x] FIXED Exact week count — `total_cells.div_ceil(7)` rows; no fixed 6-row grid, no trailing all-outside row for short months. Probe-asserted (`exact_week_count_no_trailing_blank_row`).
+- [x] FIXED Per-size scaling — cell size, nav button, day font, and month-label font all vary by `effective_size` (contract §8 size table).
+- token gap: `typography.caption.size` resolves to `0` in the Jetstream adapter (no match arm), so the weekday caption uses the contract-exact `rem_to_px(0.6875)`. Weekday-row-height `1.5rem` likewise has no token. Both noted as contract-exact rems.
+- preview-loop: navigation wiring (prev/next click), keyboard (arrows/Home/End/PageUp/PageDown/Enter/Space), and roving-tabindex live in the preview event loop, not the component. The component renders at the current spec state and exposes interaction ids.
 - accepted: no ARIA channel (grid/row/gridcell roles, aria-selected, aria-live).
 
 ## Specimen parity

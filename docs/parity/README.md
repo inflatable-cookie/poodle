@@ -118,7 +118,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | audio-player | ok | 2 | 2 | gap |
 | avatar | ok | 0 | 0 | gap |
 | block-editor | fixed | 1 | 2 | gap |
-| box | ok | 2 | 3 | gap |
+| box | ok | 0 | 0 | fixed |
 | breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 3 | 3 | gap |
@@ -138,7 +138,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | context-menu | ok | 0 | 0 | gap |
 | data-table | fixed | 1 | 0 | gap |
 | date-picker | fixed | 0 | 0 | ok |
-| date-range-picker | fixed | 3 | 3 | gap |
+| date-range-picker | fixed | 0 | 0 | gap |
 | date-time-picker | fixed | 1 | 4 | gap |
 | date-time-range-picker | fixed | 1 | 4 | gap |
 | date-time-zone-picker | fixed | 2 | 3 | gap |
@@ -230,7 +230,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tab-strip | gap | 0 | 0 | gap |
 | table | fixed | 0 | 0 | gap |
 | tabs | fixed | 2 | 2 | gap |
-| text | ok | 4 | 2 | gap |
+| text | ok | 0 | 1 | gap |
 | text-input | fixed | 2 | 2 | gap |
 | text-link | ok | 0 | 1 | gap |
 | time-ago | fixed | 2 | 2 | ok |

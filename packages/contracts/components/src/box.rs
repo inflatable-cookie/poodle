@@ -9,6 +9,8 @@ pub struct BoxSpec {
     pub min_height: Option<Dimension>,
     pub overflow: Overflow,
     pub role: Option<String>,
+    /// Accessible name (contract §3 `ariaLabel`), used when `role` is set.
+    pub aria_label: Option<String>,
 }
 
 impl Default for BoxSpec {
@@ -21,6 +23,7 @@ impl Default for BoxSpec {
             min_height: None,
             overflow: Overflow::Visible,
             role: None,
+            aria_label: None,
         }
     }
 }
@@ -62,6 +65,11 @@ impl BoxSpec {
 
     pub fn with_role(mut self, role: impl Into<String>) -> Self {
         self.role = Some(role.into());
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
         self
     }
 

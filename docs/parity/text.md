@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap | pass: TextSpec gained `spacing` (compact stack-sm gap); both targets render it; gpui specimen detoned (stack-sm gap token, +muted/warning/sm/weights/inline/clamp); clamp+element stay accepted runtime limits; jet probe tests cover size/tone/weight/spacing -->
 # Parity: Text
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -31,10 +31,10 @@ match between contract §2–§4 and `Text.svelte`. No divergence.
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `spacing` support — `TextSpec` (`packages/contracts/components/src/text.rs:69-78`) has no `spacing` field and the builder never renders the compact grid; add `spacing` to spec + a `--poodle-space-stack-sm`-resolved `gap` branch in `text.rs:39-46`.
-- [ ] `clamp` only sets `overflow_hidden` (`text.rs:44`) and ignores the 1/2/3 line count — no line-clamp limit applied; resolve the clamp value into a max-height/line cap so `clamp=1|2|3` differ.
-- [ ] No `as`/element variants — builder always emits `div()` (`text.rs:39`); `TextSpec.element` (`text.rs:72`) is never read, so `as="p"|"span"|"div"` collapse to one node. Honor `spec.element`.
-- [ ] Specimen-side token violation: hardcoded `gap(px(10.0))` at `packages/gpui/preview/src/specimens/text.rs:10` — resolve from a stack-spacing token, not raw `10.0`.
+- [x] DONE: `spacing` support — added `TextSpacing` enum + `spacing` field + `spacing_gap_token()` to `TextSpec`; GPUI builder resolves `space.stack.sm` and applies `flex().flex_col().gap()` when compact.
+- [ ] accepted (runtime limit): `clamp` sets `overflow_hidden` only and ignores the 1/2/3 line count — GPUI/gpui has no `-webkit-line-clamp` analogue, so the N-line cap degrades to clipping. Matches Jetstream; not closable without a line-clamp API.
+- [ ] accepted (N/A): `as`/element variants — GPUI has no DOM/semantics layer, so `p`/`span`/`div` have no rendering difference (Svelte's only delta is the HTML tag). Builder collapses to one node by design, same as Jetstream. `spec.element` is carried for portability.
+- [x] DONE: specimen token violation fixed — `gap(px(10.0))` → `resolve_px(theme, "space.stack.sm")`; specimen also gained muted+warning tones, sm size, medium/bold weights, inline span, compact-spacing, and clamp demos.
 - accepted: no ARIA (gpui has no accessibility API) — matches contract §4 (Text adds none anyway).
 - note: `font_size_rem()`/`line_height()` return f32 literals in `TextSpec` (`text.rs:128-141`); these are spec-owned contract constants (§3), and the builder resolves them via `rem_to_px` (`text.rs:40`) rather than hardcoding in the component — acceptable, not a literal-in-component violation.
 
@@ -44,9 +44,10 @@ Component is entirely absent — dominant gap.
 
 - [x] DONE: created `packages/jetstream/components/src/text.rs` with `js_text(spec, theme)`, registered `pub mod text;` in lib.rs.
 - [x] DONE: resolves color from `TextSpec::color_token()` (all six tones) + `font_size_rem()`/`line_height()` via `rem_to_px`, weights mapped 400/500/600/700. Probe-tested.
-- [ ] Implement `spacing="compact"` (stack-sm gap grid) and `clamp` 1/2/3 line limiting — and add `spacing` to `TextSpec` first (missing from spec). `clamp` currently degrades to overflow-hidden (same as GPUI).
-- [ ] Add `packages/jetstream/preview/src/specimens/text.rs` covering tones, sizes, leading, weight, inline, clamp; none exists.
+- [x] DONE: `spacing="compact"` — `js_text` wraps the label in a `flex_col().gap()` carrying the resolved `space.stack.sm` when compact (`TextSpec` now has the `spacing` field). `clamp` still degrades to overflow-hidden (no JsEl line-clamp — accepted runtime limit, same as GPUI).
+- [ ] Add `packages/jetstream/preview/src/specimens/text.rs` (+ register in `specimens/mod.rs`) covering tones, sizes, leading, weight, inline, clamp, compact spacing; none exists. (Preview can't be build-verified in this environment.)
 - accepted: no ARIA channel — matches contract §4.
+- note: probe tests added in `text.rs` cover content→label, danger tone→status color, size→font px, weight→css value, and compact→gapped-column wrap.
 
 ## Specimen parity
 

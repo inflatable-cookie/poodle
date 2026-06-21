@@ -3,15 +3,15 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize,
-    IconSpec, SemanticControlSizeRole,
+    CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue,
+    SemanticControlSizeRole,
 };
 
 use super::calendar::Calendar;
 use super::icon::Icon;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
+    date_picker_indicator_font_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_height_offset_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -134,21 +134,25 @@ impl IntoElement for DateRangePicker {
         let border = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let icon_muted = resolve_color(theme, "color.icon.muted");
         let accent = resolve_color(theme, "color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
-        // Contract: hover = color-mix(surface 84%, elevated)
+        // Contract: hover = color-mix(surface 86%, elevated)
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
+        // Value display mirrors Svelte's `valueLabel`: show range text only when
+        // a start exists; partial range (start chosen, end pending) renders the
+        // literal `"<start> – End date"` (en-dash + literal "End date"); a
+        // missing start always falls back to the placeholder.
         let range = spec.current_value();
-        let display_text = match (&range.start, &range.end) {
-            (Some(start), Some(end)) => format!("{} – {}", start, end),
-            (Some(start), None) => format!("{} – …", start),
-            (None, Some(end)) => format!("… – {}", end),
-            (None, None) => spec.placeholder.clone(),
+        let display_text = match &range.start {
+            Some(start) => match &range.end {
+                Some(end) => format!("{} – {}", start, end),
+                None => format!("{} – End date", start),
+            },
+            None => spec.placeholder.clone(),
         };
-        let is_placeholder = range.start.is_none() && range.end.is_none();
+        let is_placeholder = range.start.is_none();
         let is_open = spec.current_open();
         let is_disabled = spec.is_disabled;
 
@@ -195,11 +199,15 @@ impl IntoElement for DateRangePicker {
             text_primary
         };
 
+        // Contract §2 + Svelte: disclosure chevron indicator (`▾`),
+        // text-secondary, per-size indicator font-size.
+        let indicator_px = rem_to_px(date_picker_indicator_font_rem(effective_size));
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
-                    .with_color(icon_muted),
+                Icon::new("chevron-down", theme)
+                    .with_px_size(indicator_px)
+                    .with_color(text_secondary),
             );
 
         if let Some(handler) = self.on_toggle {
