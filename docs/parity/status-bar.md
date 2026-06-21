@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: spec reshaped to contract props (summary/aria/chrome/size/density), both targets rebuilt chrome-aware, height dropped, padding/gap/font token-resolved, summary-as-leading-fallback; jetstream probe tests added -->
 # Parity: StatusBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,25 +27,26 @@ The contract and Svelte agree on anatomy, ARIA resolution, the chrome modifier, 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `chrome` mode — bar always draws bg + border-top (`status_bar.rs:81-94`); cannot render the no-chrome transparent variant. Specimen fakes chrome with an outer wrapper border (`specimens/status_bar.rs:75-79`) instead of the component's own `border-top`.
-- [ ] Hardcoded height `.h(px(rem_to_px(1.5)))` at `status_bar.rs:90` — contract has no fixed height; remove and let padding (`0.375rem 0.75rem`) drive it.
-- [ ] Padding wrong: only `.px(space.inline.sm)` (`status_bar.rs:92`), no vertical padding. Contract default is `0.375rem 0.75rem`; horizontal should be `0.75rem`, not `space.inline.sm`. Resolve padding-block + padding-inline from tokens.
-- [ ] Raw rem literals not token-resolved: gap `px(rem_to_px(0.375))` (`status_bar.rs:97,123`) and summary `text_size(px(rem_to_px(0.8125)))` (`status_bar.rs:107`). Contract gap = `space.inline.md` (root) / `space.inline.sm` (inner); font-size `0.8125rem` should resolve from a token, not a rem literal.
-- [ ] Root gap wrong axis: contract root gap is `space-inline-md` between leading/trailing (`StatusBar.svelte:62`); GPUI uses `justify_between` + per-section `0.375rem` and never applies the md root gap.
-- [ ] No size/density variants — spec carries neither, so the size font/padding-block table and density padding-inline/gap table (contract §8) are unreachable.
-- accepted: no ARIA (gpui has no accessibility API) — `<footer>` landmark + `aria-label` resolution (contract §6) not emitted.
+- [x] DONE `chrome` mode — bar is transparent unless `spec.chrome`; chrome paints `color_mix(panel, transparent, 0.94)` bg + token-resolved `border_t_1` border (`status_bar.rs`). No more wrapper-faked chrome path needed.
+- [x] DONE Fixed height removed — height is content + padding driven (`0.375rem 0.75rem` default).
+- [x] DONE Padding token/scale resolved — `py(padding_block_rem)` (size-scaled) + `px(padding_inline_rem)` (density-scaled); horizontal default `0.75rem`.
+- [x] DONE Gap + font token-resolved — root gap = `root_gap_token` (`space.inline.md`) with density override; inner gap = `space.inline.sm`; font = `font_size_rem` (default `0.8125rem`). No raw rem literals (rem comes from contract-exact spec scale methods).
+- [x] DONE Root gap applied on the correct axis — `.gap(root_gap)` between leading/trailing, with `justify_between` + `flex_wrap`.
+- [x] DONE Size/density variants — spec now carries `size`/`size_role`/`density`; size drives font + padding-block, density drives padding-inline + gap (contract §8 tables).
+- accepted: no ARIA (gpui has no accessibility API) — `<footer>` landmark + `aria-label` resolution (contract §6) not emitted (spec exposes `resolved_aria_label()` for the channel that can carry it).
+- note (specimen, preview crate — not touched here, shared target lock): specimen still fakes chrome via outer wrapper border and lacks size/density groups; should adopt `.chrome(true)` + size/density specimens.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No `chrome` mode — bar always draws bg + `border(1.0)` border (`shell_status_bar.rs:25-30`); cannot render the no-chrome transparent variant, and border is a full box border, not contract's `border-top` only.
-- [ ] Hardcoded border width `.border(1.0)` at `shell_status_bar.rs:27` — raw float literal; contract border is `0.0625rem` (chrome only). Resolve from a token.
-- [ ] Hardcoded height `let bar_height = rem_to_px(1.5)` at `shell_status_bar.rs:20` then `.h(bar_height)` (`:28`) — contract has no fixed height; drop it.
-- [ ] Raw rem literals, none token-resolved: `pad_x = rem_to_px(0.5)` (`:21`), `gap = rem_to_px(0.375|0.5)` (`:22`), `font_size = rem_to_px(0.6875)` (`:23`). Contract padding `0.375rem 0.75rem`, root gap `space-inline-md`, inner gap `space-inline-sm`, font-size `0.8125rem` — all must resolve from tokens. Font size `0.6875rem` is the **xs** size value, wrong for the default bar.
-- [ ] Padding x-only via `pad_x` (`shell_status_bar.rs:29`); no vertical padding. Contract default `0.375rem 0.75rem`; horizontal should be `0.75rem`, not `0.5rem`.
-- [ ] Gap heuristic `is_dense()` (`shell_status_bar.rs:22`, spec `:45-47` = item count > 3) is invented — contract density is an explicit `compact|default|comfortable` prop, not derived from item count.
-- [ ] Layout deviates from contract: summary is rendered as a third grow child between leading and trailing (`shell_status_bar.rs:40-50`) with a spacer fallback. Contract/Svelte put summary **inside** the leading region as a fallback when no leading snippet exists (`StatusBar.svelte:41-47`); summary and leading items are never both shown.
-- [ ] No size/density variant tables (spec lacks the props).
-- accepted: no ARIA channel — `<footer>` landmark / `aria-label` resolution absent.
+- [x] DONE `chrome` mode — bar transparent unless `spec.chrome`; chrome paints `color_mix(panel, transparent, 0.94)` + `border_t_1` + `border_color_top` (top-only, not a full box border).
+- [x] DONE Border width — chrome border uses `border_t_1` (1px = the resolved `0.0625rem` at 16px base). JsEl exposes only a fixed-1px top setter, so width is approximated at 1px + per-side top color set explicitly (noted in code; runtime crate is out of scope to extend).
+- [x] DONE Fixed height dropped — content + padding driven.
+- [x] DONE Token/scale-resolved: `padding_inline_rem` (density), `padding_block_rem` (size), `root_gap_token` + `density_gap_rem`, `inner_gap_token` (`space.inline.sm`), `font_size_rem` (default `0.8125rem`, was wrongly the xs `0.6875`).
+- [x] DONE Padding y now present — `py(padding_block_rem)`; horizontal default `0.75rem`.
+- [x] DONE `is_dense()` heuristic removed — density is now the explicit `compact|default|comfortable` prop.
+- [x] DONE Layout matches contract — summary is the leading-region fallback (`label` inside `leading_row` only when no leading slot content), never a third grow child; summary and leading items are never both shown.
+- [x] DONE Size/density variant tables — spec carries the props; size→font+padding-block, density→padding-inline+gap.
+- accepted: no ARIA channel — `<footer>` landmark / `aria-label` resolution absent (`resolved_aria_label()` available spec-side).
 - accepted: this component dispatches no events (contract §5); nothing interaction-side to wire in `main.rs`.
 
 ## Specimen parity

@@ -1,13 +1,19 @@
 //! Skeleton — Jetstream placeholder component backed by SkeletonSpec.
 //!
-//! Jetstream cannot animate, so skeletons render as static gray boxes.
+//! NOTE: JsEl cannot animate and has no gradient fill, so skeletons render as a
+//! static flat tone (the contract shimmer mid-tone) with no motion. The shimmer
+//! sweep is a preview-loop / Known-Delta concern, not represented here.
+//! NOTE: JsEl has no percentage-width support; contract percentage widths
+//! (40/60/60/20%, 80/100/60%, etc.) are approximated with proportional
+//! `flex_basis` seeds inside growing cells. Relative proportions are faithful;
+//! absolute widths depend on the laid-out container width.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{ControlSize, SkeletonPreset, SkeletonSpec};
+use poodle_specs::{SkeletonPreset, SkeletonSpec};
 
-use crate::presentation::{control_height_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
 /// Parse a CSS-style dimension string ("2rem", "200px") into logical pixels.
 /// Returns None if the string is not a recognised form.
@@ -17,49 +23,54 @@ fn parse_dim(s: &str) -> Option<f32> {
     } else if let Some(px_str) = s.strip_suffix("px") {
         px_str.trim().parse::<f32>().ok()
     } else {
-        None
+        s.trim().parse::<f32>().ok()
     }
+}
+
+/// Contract §8 shimmer fill: flat mid-tone between the base outer stop
+/// (`background-elevated 88%`) and the centre highlight (`background-surface
+/// 92%, white`). JsEl has no gradient, so one flat tone stands in. Public so
+/// consumers rendering skeleton rows (e.g. loading panels) can match the exact
+/// resolved fill instead of guessing the legacy `fill_token()`.
+pub fn shimmer_fill(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> glam::Vec4 {
+    let base = resolve_color(theme, spec.shimmer_base_token());
+    let base = glam::Vec4::new(base.x, base.y, base.z, base.w * 0.88);
+    let surface = resolve_color(theme, spec.shimmer_highlight_token());
+    let white = glam::Vec4::new(1.0, 1.0, 1.0, 1.0);
+    let highlight = color_mix(surface, white, 0.92);
+    color_mix(highlight, base, 0.5)
 }
 
 /// Build a single skeleton shape element (fill + radius already resolved by caller).
 fn single_shape(fill: glam::Vec4, radius: f32, spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let default_height = resolve_px(theme, spec.default_height_token());
-
+    let _ = theme;
     let parsed_w = spec.width.as_deref().and_then(parse_dim);
     let parsed_h = spec.height.as_deref().and_then(parse_dim);
 
-    let mut el = ui_element::div()
-        .bg(fill)
-        .rounded(radius);
+    let mut el = ui_element::div().bg(fill).rounded(radius);
 
     match spec.shape.as_str() {
+        // Contract §7: circle resolves 2.5rem × 2.5rem default.
         "circle" => {
-            // Width == height; use parsed height if provided, else default_height
-            let side = parsed_h.unwrap_or(default_height);
+            let side = parsed_w.or(parsed_h).unwrap_or(rem_to_px(2.5));
             el = el.w(side).h(side);
-            // radius_token already resolves to RADIUS_PILL so rounded() gives full circle
+            // radius_token() resolves RADIUS_PILL so rounded() gives a full circle.
         }
-        "text" => {
-            // Narrow height, grows to fill width
-            let h = parsed_h.unwrap_or(rem_to_px(0.75));
-            el = el.h(h);
-            if let Some(w) = parsed_w {
-                el = el.w(w);
-            } else {
-                el = el.grow();
+        // Contract §7: block resolves 100% × 6rem default.
+        "block" => {
+            el = el.h(parsed_h.unwrap_or(rem_to_px(6.0)));
+            match parsed_w {
+                Some(w) => el = el.w(w),
+                // Full width without cross-axis stretch (keeps the fixed height).
+                None => el = el.w_full(),
             }
         }
+        // Contract §7: line (and legacy "text"/"rectangle") resolves 100% × 0.875rem.
         _ => {
-            // rectangle (default)
-            if let Some(h) = parsed_h {
-                el = el.h(h);
-            } else {
-                el = el.min_h(default_height);
-            }
-            if let Some(w) = parsed_w {
-                el = el.w(w);
-            } else {
-                el = el.grow();
+            el = el.h(parsed_h.unwrap_or(rem_to_px(0.875)));
+            match parsed_w {
+                Some(w) => el = el.w(w),
+                None => el = el.w_full(),
             }
         }
     }
@@ -68,93 +79,294 @@ fn single_shape(fill: glam::Vec4, radius: f32, spec: &SkeletonSpec, theme: &Jets
 }
 
 pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let fill = resolve_color(theme, spec.fill_token());
+    let fill = shimmer_fill(spec, theme);
     let radius = resolve_radius(theme, spec.radius_token());
-    // Shared gap for preset layouts
-    let gap_sm = resolve_px(theme, "space.stack.sm");
-    let gap_md = resolve_px(theme, "space.inline.sm");
+    let pill_radius = resolve_radius(theme, "radius.pill");
+    let surface_radius = resolve_radius(theme, "radius.surface");
 
-    // Helper: a basic rectangle skeleton block with shared fill/radius
-    let rect = |w_px: Option<f32>, h_px: f32| -> JsEl {
-        let mut el = ui_element::div().bg(fill).rounded(radius).h(h_px);
-        match w_px {
-            Some(w) => el = el.w(w),
-            None => el = el.grow(),
-        }
-        el
+    // Contract preset gaps — exact rem (no space token maps these precisely).
+    let gap_075 = rem_to_px(0.75);
+    let gap_0625 = rem_to_px(0.625);
+    let gap_05 = rem_to_px(0.5);
+    let gap_0375 = rem_to_px(0.375);
+    let gap_025 = rem_to_px(0.25);
+
+    let line_h = rem_to_px(0.875); // contract base line / cell height
+    let line_sm_h = rem_to_px(0.6875); // contract skeleton--line-sm
+
+    // Fixed-width skeleton block.
+    let rect = |w_px: f32, h_px: f32| -> JsEl {
+        ui_element::div().bg(fill).rounded(radius).w(w_px).h(h_px)
     };
-
-    // Helper: a circle skeleton block
+    // Proportional-width cell for ROW contexts: `pct` (0..1) drives a flex-basis
+    // seed inside a growing flex row, approximating the contract's percentage
+    // widths (table-row cells). Main-axis grow only — height stays fixed.
+    let cell_pct = |pct: f32, h_px: f32| -> JsEl {
+        ui_element::div()
+            .bg(fill)
+            .rounded(radius)
+            .h(h_px)
+            .flex_grow()
+            .flex_basis(pct * 100.0)
+    };
+    // Full-width line for COLUMN contexts (list-text / card body). JsEl has no
+    // percentage width, so the contract's per-line widths (60/40%, 80/100/60%)
+    // are approximated as full-width lines; the height (line vs line-sm) is exact.
+    let line_full = |h_px: f32| -> JsEl {
+        ui_element::div().bg(fill).rounded(radius).w_full().h(h_px)
+    };
+    // Circle skeleton block using the resolved pill radius (not a literal).
     let circle = |side: f32| -> JsEl {
-        ui_element::div().bg(fill).rounded(9999.0).w(side).h(side)
+        ui_element::div().bg(fill).rounded(pill_radius).w(side).h(side)
     };
 
-    if let Some(ref preset) = spec.preset {
-        match preset {
-            SkeletonPreset::AvatarLine => {
-                // flex-row: circle avatar + flex-col of two text lines
-                let avatar_side = rem_to_px(2.0);
-                let text_col = ui_element::div()
-                    .flex_col()
-                    .gap(gap_sm)
-                    .child(rect(Some(rem_to_px(8.0)), rem_to_px(0.875)))  // title ~80%
-                    .child(rect(Some(rem_to_px(5.0)), rem_to_px(0.75)));  // subtitle ~50%
+    let Some(ref preset) = spec.preset else {
+        return single_shape(fill, radius, spec, theme);
+    };
 
-                ui_element::div()
-                    .flex_row()
-                    .items_center()
-                    .gap(gap_md)
-                    .child(circle(avatar_side))
-                    .child(text_col)
-            }
+    match preset {
+        // Contract: avatar 2.25rem circle + single 10rem line, row, 0.75rem gap.
+        SkeletonPreset::AvatarLine => ui_element::div()
+            .flex_row()
+            .items_center()
+            .gap(gap_075)
+            .child(circle(rem_to_px(2.25)))
+            .child(rect(rem_to_px(10.0), line_h)),
 
-            SkeletonPreset::ListItem => {
-                // flex-row: small icon circle + growing text line
-                let icon_side = rem_to_px(1.25);
-                ui_element::div()
-                    .flex_row()
-                    .items_center()
-                    .gap(gap_md)
-                    .child(circle(icon_side))
-                    .child(rect(None, rem_to_px(0.875)))
-            }
-
-            SkeletonPreset::TableRow => {
-                // flex-row: 4 equal-width growing blocks at control height
-                let row_h = rem_to_px(control_height_rem(ControlSize::Md));
-                ui_element::div()
-                    .flex_row()
-                    .gap(gap_md)
-                    .child(rect(None, row_h))
-                    .child(rect(None, row_h))
-                    .child(rect(None, row_h))
-                    .child(rect(None, row_h))
-            }
-
-            SkeletonPreset::Card => {
-                // flex-col: tall image area + title line + subtitle line
-                ui_element::div()
-                    .flex_col()
-                    .gap(gap_sm)
-                    .child(rect(None, rem_to_px(8.0)))          // image area
-                    .child(rect(None, rem_to_px(1.0)))          // title
-                    .child(rect(Some(rem_to_px(6.0)), rem_to_px(0.75))) // subtitle
-            }
-
-            SkeletonPreset::DetailSection => {
-                // flex-col: header line + spec.lines text lines
-                let mut col = ui_element::div()
-                    .flex_col()
-                    .gap(gap_sm)
-                    .child(rect(Some(rem_to_px(5.0)), rem_to_px(1.0))); // header
-
-                for _ in 0..spec.lines {
-                    col = col.child(rect(None, rem_to_px(0.875)));
-                }
-                col
-            }
+        // Contract: avatar 2.25rem circle + primary line 60% + line-sm 40%.
+        SkeletonPreset::ListItem => {
+            let text_col = ui_element::div()
+                .flex_col()
+                .gap(gap_0375)
+                .flex_grow()
+                .child(line_full(line_h)) // primary line (contract 60%)
+                .child(line_full(line_sm_h)); // secondary line-sm (contract 40%)
+            ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(gap_075)
+                .child(circle(rem_to_px(2.25)))
+                .child(text_col)
         }
-    } else {
-        single_shape(fill, radius, spec, theme)
+
+        // Contract: 4 cells, height 0.875rem, widths 40/60/60/20%, 0.75rem gap.
+        SkeletonPreset::TableRow => ui_element::div()
+            .flex_row()
+            .gap(gap_075)
+            .child(cell_pct(0.40, line_h))
+            .child(cell_pct(0.60, line_h))
+            .child(cell_pct(0.60, line_h))
+            .child(cell_pct(0.20, line_h)),
+
+        // Contract: block-header 6rem + body 3 lines (80/100/60%) + 2 footer pills.
+        SkeletonPreset::Card => {
+            let block_radius = (surface_radius - rem_to_px(0.375)).max(0.0);
+            let header = ui_element::div()
+                .bg(fill)
+                .rounded(block_radius)
+                .h(rem_to_px(6.0))
+                .w_full();
+            let body = ui_element::div()
+                .flex_col()
+                .gap(gap_0375)
+                .child(line_full(line_h)) // contract 80%
+                .child(line_full(line_h)) // contract 100%
+                .child(line_full(line_h)); // contract 60%
+            let pill = || {
+                ui_element::div()
+                    .bg(fill)
+                    .rounded(pill_radius)
+                    .w(rem_to_px(3.5))
+                    .h(rem_to_px(1.25))
+            };
+            let footer = ui_element::div()
+                .flex_row()
+                .gap(gap_05)
+                .pt(gap_025)
+                .child(pill())
+                .child(pill());
+            ui_element::div()
+                .flex_col()
+                .gap(gap_075)
+                .p(rem_to_px(1.0))
+                .child(header)
+                .child(body)
+                .child(footer)
+        }
+
+        // Contract: heading 8rem×1rem + `lines` rows of label(6rem) + value(max 14rem).
+        SkeletonPreset::DetailSection => {
+            let mut col = ui_element::div()
+                .flex_col()
+                .gap(gap_0625)
+                .child(rect(rem_to_px(8.0), rem_to_px(1.0))); // heading
+
+            for _ in 0..spec.lines {
+                let label = ui_element::div()
+                    .bg(fill)
+                    .rounded(radius)
+                    .w(rem_to_px(6.0))
+                    .h(rem_to_px(0.75))
+                    .flex_shrink_0();
+                let value = ui_element::div()
+                    .bg(fill)
+                    .rounded(radius)
+                    .h(rem_to_px(0.75))
+                    .flex_grow()
+                    .max_w(rem_to_px(14.0));
+                let row = ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .gap(rem_to_px(1.0))
+                    .child(label)
+                    .child(value);
+                col = col.child(row);
+            }
+            col
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn spec() -> SkeletonSpec {
+        SkeletonSpec::new()
+    }
+
+    #[test]
+    fn line_shape_resolves_default_height_0875rem() {
+        let th = theme();
+        let s = spec().with_shape("line");
+        let tree = probe(&js_skeleton(&s, &th), 200.0, 60.0);
+        let node = &tree.nodes[0];
+        assert!((node.h - rem_to_px(0.875)).abs() < 0.5, "line height = {}", node.h);
+    }
+
+    #[test]
+    fn circle_shape_is_square_at_25rem_default() {
+        let th = theme();
+        let s = spec().with_shape("circle");
+        let tree = probe(&js_skeleton(&s, &th), 200.0, 200.0);
+        let n = &tree.nodes[0];
+        assert!((n.w - n.h).abs() < 0.5, "circle not square: {}x{}", n.w, n.h);
+        assert!((n.w - rem_to_px(2.5)).abs() < 0.5, "circle side = {}", n.w);
+    }
+
+    #[test]
+    fn block_shape_resolves_6rem_height() {
+        let th = theme();
+        let s = spec().with_shape("block");
+        let tree = probe(&js_skeleton(&s, &th), 200.0, 200.0);
+        assert!((tree.nodes[0].h - rem_to_px(6.0)).abs() < 0.5, "block height = {}", tree.nodes[0].h);
+    }
+
+    #[test]
+    fn explicit_width_height_override_defaults() {
+        let th = theme();
+        let s = spec().with_shape("line").with_width("8rem").with_height("3rem");
+        let tree = probe(&js_skeleton(&s, &th), 400.0, 200.0);
+        let n = &tree.nodes[0];
+        assert!((n.w - rem_to_px(8.0)).abs() < 0.5, "w = {}", n.w);
+        assert!((n.h - rem_to_px(3.0)).abs() < 0.5, "h = {}", n.h);
+    }
+
+    #[test]
+    fn avatar_line_preset_is_avatar_plus_single_line() {
+        let th = theme();
+        let s = spec().with_preset(SkeletonPreset::AvatarLine);
+        let tree = probe(&js_skeleton(&s, &th), 400.0, 80.0);
+        // root + avatar circle + one line = 3 panels.
+        assert_eq!(tree.count_kind("Panel"), 3, "{}", tree.to_json());
+        // avatar is a 2.25rem square.
+        let av = rem_to_px(2.25);
+        assert!(
+            tree.nodes.iter().any(|n| (n.w - av).abs() < 0.5 && (n.h - av).abs() < 0.5),
+            "missing 2.25rem avatar"
+        );
+    }
+
+    #[test]
+    fn list_item_preset_has_avatar_and_two_lines() {
+        let th = theme();
+        let s = spec().with_preset(SkeletonPreset::ListItem);
+        let tree = probe(&js_skeleton(&s, &th), 400.0, 80.0);
+        // root + avatar + text col + 2 lines = 5 panels.
+        assert_eq!(tree.count_kind("Panel"), 5, "{}", tree.to_json());
+        // one line uses the line-sm height.
+        assert!(
+            tree.nodes.iter().any(|n| (n.h - rem_to_px(0.6875)).abs() < 0.5),
+            "missing line-sm (0.6875rem)"
+        );
+    }
+
+    #[test]
+    fn table_row_preset_has_four_cells() {
+        let th = theme();
+        let s = spec().with_preset(SkeletonPreset::TableRow);
+        let tree = probe(&js_skeleton(&s, &th), 400.0, 40.0);
+        // root + 4 cells = 5 panels.
+        assert_eq!(tree.count_kind("Panel"), 5, "{}", tree.to_json());
+        // all cells at the 0.875rem line height.
+        let cells = tree.nodes.iter().filter(|n| (n.h - rem_to_px(0.875)).abs() < 0.5).count();
+        assert_eq!(cells, 4, "expected 4 cells at 0.875rem");
+    }
+
+    #[test]
+    fn card_preset_has_header_three_body_lines_and_two_pills() {
+        let th = theme();
+        let s = spec().with_preset(SkeletonPreset::Card);
+        let tree = probe(&js_skeleton(&s, &th), 320.0, 240.0);
+        // root + header + body-col + 3 body lines + footer-row + 2 pills = 9 panels.
+        assert_eq!(tree.count_kind("Panel"), 9, "{}", tree.to_json());
+        // header is 6rem tall.
+        assert!(
+            tree.nodes.iter().any(|n| (n.h - rem_to_px(6.0)).abs() < 0.5),
+            "missing 6rem block header"
+        );
+        // two pills at 3.5rem × 1.25rem.
+        let pills = tree
+            .nodes
+            .iter()
+            .filter(|n| (n.w - rem_to_px(3.5)).abs() < 0.5 && (n.h - rem_to_px(1.25)).abs() < 0.5)
+            .count();
+        assert_eq!(pills, 2, "expected 2 footer pills");
+    }
+
+    #[test]
+    fn detail_section_preset_emits_lines_rows() {
+        let th = theme();
+        let s = spec().with_preset(SkeletonPreset::DetailSection).with_lines(4);
+        let tree = probe(&js_skeleton(&s, &th), 400.0, 240.0);
+        // heading at 8rem wide.
+        assert!(
+            tree.nodes.iter().any(|n| (n.w - rem_to_px(8.0)).abs() < 0.5),
+            "missing 8rem heading"
+        );
+        // 4 label cells at 6rem wide (flex-shrink-0).
+        let labels = tree.nodes.iter().filter(|n| (n.w - rem_to_px(6.0)).abs() < 0.5).count();
+        assert_eq!(labels, 4, "expected 4 detail-row labels");
+    }
+
+    #[test]
+    fn per_shape_radius_resolves_correctly() {
+        assert_eq!(
+            spec().with_shape("circle").radius_token(),
+            poodle_tokens::semantic::RADIUS_PILL
+        );
+        assert_eq!(
+            spec().with_shape("line").radius_token(),
+            poodle_tokens::semantic::RADIUS_CONTROL
+        );
+        assert_eq!(
+            spec().with_shape("block").radius_token(),
+            poodle_tokens::semantic::RADIUS_SURFACE
+        );
     }
 }

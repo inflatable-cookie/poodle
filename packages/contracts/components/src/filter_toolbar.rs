@@ -116,16 +116,118 @@ impl FilterToolbarSpec {
         semantic::RADIUS_SURFACE
     }
 
+    /// Base root gap token. Density `compact`/`comfortable` override this via
+    /// `density_gap_rem` / `density_controls_gap` below; `default` density
+    /// uses `space.inline.sm` (contract §8 density table), the un-scoped base
+    /// rule uses `space.stack.sm`.
     pub fn gap_token(&self) -> &'static str {
-        semantic::SPACE_STACK_SM
+        match self.density {
+            ControlDensity::Default => semantic::SPACE_INLINE_SM,
+            // Compact/comfortable resolve a literal rem via `density_gap_rem`;
+            // this token is the fallback only.
+            _ => semantic::SPACE_STACK_SM,
+        }
     }
 
     pub fn controls_gap_token(&self) -> &'static str {
-        semantic::SPACE_INLINE_SM
+        match self.density {
+            ControlDensity::Comfortable => semantic::SPACE_INLINE_MD,
+            // Compact resolves a literal rem via `density_controls_gap_rem`.
+            _ => semantic::SPACE_INLINE_SM,
+        }
+    }
+
+    /// Actions slot gap token (`space.inline.xs`, 0.25rem). Contract §8.
+    pub fn actions_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
+    /// Sticky elevation shadow token (`elevation.surface`). Contract §8
+    /// `.filter-toolbar[data-sticky="true"]`.
+    pub fn sticky_shadow_token(&self) -> &'static str {
+        semantic::ELEVATION_SURFACE
+    }
+
+    /// Collapse-toggle hit-area size token (`size.icon.md`). Drives the
+    /// chevron toggle's square tap target.
+    pub fn toggle_size_token(&self) -> &'static str {
+        semantic::SIZE_ICON_MD
+    }
+
+    /// Collapse-toggle corner radius token (`radius.control`).
+    pub fn toggle_radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    /// Focus-ring color token for the header button (`accent.focusRing`).
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    /// Focus-ring width token for the header button (`border.width.focus`).
+    pub fn focus_ring_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_FOCUS
     }
 
     pub fn summary_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY
+    }
+
+    // ── Density rem scales (contract §8 density table) ────────────
+    //
+    // Returned as rem; the renderer converts via `rem_to_px`. Density
+    // altering vertical padding here is the documented compositional
+    // exception (panel-internal padding).
+
+    /// Root gap in rem for the current density. Compact 0.25, comfortable
+    /// resolves `space.inline.md`; default resolves `gap_token`.
+    pub fn density_gap_rem(&self) -> Option<f32> {
+        match self.density {
+            ControlDensity::Compact => Some(0.25),
+            _ => None,
+        }
+    }
+
+    /// Controls-grid gap in rem for the current density. Compact 0.25;
+    /// otherwise resolves `controls_gap_token`.
+    pub fn density_controls_gap_rem(&self) -> Option<f32> {
+        match self.density {
+            ControlDensity::Compact => Some(0.25),
+            _ => None,
+        }
+    }
+
+    /// Root padding-block in rem. Contract §8: compact 0.5, default 0.75,
+    /// comfortable 1.0.
+    pub fn padding_block_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 1.0,
+        }
+    }
+
+    /// Root padding-inline in rem. Contract §8: compact 0.75, default 1.0,
+    /// comfortable 1.25.
+    pub fn padding_inline_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.75,
+            ControlDensity::Default => 1.0,
+            ControlDensity::Comfortable => 1.25,
+        }
+    }
+
+    /// Summary font-size in rem for the current size. Contract §8 size table:
+    /// xs 0.6875, sm 0.71875, md (default label-size 0.8125), lg 0.8125,
+    /// xl 0.875.
+    pub fn summary_font_size_rem(&self) -> f32 {
+        match self.size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.71875,
+            ControlSize::Md => 0.8125,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

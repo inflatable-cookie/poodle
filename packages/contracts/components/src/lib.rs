@@ -1012,7 +1012,9 @@ mod tests {
         let summary = PaginationSummarySpec::new(2, 25, 67);
 
         assert!(toolbar.is_grid_visible());
-        assert_eq!(toolbar.gap_token(), semantic::SPACE_STACK_SM);
+        // Default density resolves the contract §8 density-table root gap
+        // (space.inline.sm), not the un-scoped base (space.stack.sm).
+        assert_eq!(toolbar.gap_token(), semantic::SPACE_INLINE_SM);
         assert_eq!(summary.start_index(), 26);
         assert_eq!(summary.end_index(), 50);
     }

@@ -12,9 +12,9 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::FilterToolbarSpec;
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
-use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
+use crate::presentation::rem_to_px;
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{elevation_surface_shadow, resolve_color, resolve_px, resolve_radius};
 
 pub struct FilterToolbar {
     spec: FilterToolbarSpec,
@@ -144,20 +144,27 @@ impl IntoElement for FilterToolbar {
         let spec = &self.spec;
         let _effective_size_role = spec.size_role;
 
-        let panel_px = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let panel_py = px(rem_to_px(panel_space_y_rem(spec.density)));
+        // Contract §8 density table: root padding-block/inline, root gap,
+        // and controls gap all vary by density.
+        let panel_px = px(rem_to_px(spec.padding_inline_rem()));
+        let panel_py = px(rem_to_px(spec.padding_block_rem()));
 
-        let stack_sm = resolve_px(theme, spec.gap_token());
-        // Svelte: header row and filter grid use space.inline.sm (8px) not inline.md (12px)
-        let inline_sm = resolve_px(theme, "space.inline.sm");
-        let _inline_md = resolve_px(theme, spec.controls_gap_token());
-        let summary_size = px(rem_to_px(match spec.size {
-            ControlSize::Xs => 0.6875,
-            ControlSize::Sm => 0.71875,
-            ControlSize::Md => 0.75,
-            ControlSize::Lg => 0.8125,
-            ControlSize::Xl => 0.875,
-        }));
+        // Root gap: density compact resolves a literal rem, otherwise the
+        // density-aware gap token (default → inline.sm, comfortable → inline.md).
+        let root_gap = match spec.density_gap_rem() {
+            Some(rem) => px(rem_to_px(rem)),
+            None => resolve_px(theme, spec.gap_token()),
+        };
+        // Header row gap: space.inline.sm.
+        let header_gap = resolve_px(theme, "space.inline.sm");
+        // Controls grid gap: density compact resolves a literal rem, otherwise
+        // the density-aware controls gap token.
+        let controls_gap = match spec.density_controls_gap_rem() {
+            Some(rem) => px(rem_to_px(rem)),
+            None => resolve_px(theme, spec.controls_gap_token()),
+        };
+        let actions_gap = resolve_px(theme, spec.actions_gap_token());
+        let summary_size = px(rem_to_px(spec.summary_font_size_rem()));
 
         let elevated_bg = resolve_color(theme, spec.background_token());
         let bg = Hsla {
@@ -168,6 +175,11 @@ impl IntoElement for FilterToolbar {
         let radius = resolve_radius(theme, spec.radius_token());
         let summary_color = resolve_color(theme, spec.summary_color_token());
         let icon_muted = resolve_color(theme, "color.icon.muted");
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let focus_ring_width = resolve_px(theme, spec.focus_ring_width_token());
+        // Collapse-toggle hit-area + corner radius, both token-resolved.
+        let toggle_size = resolve_px(theme, spec.toggle_size_token());
+        let toggle_radius = resolve_radius(theme, spec.toggle_radius_token());
 
         let is_expanded = spec.is_grid_visible();
 
@@ -176,7 +188,7 @@ impl IntoElement for FilterToolbar {
             .w_full()
             .flex()
             .flex_col()
-            .gap(stack_sm)
+            .gap(root_gap)
             .px(panel_px)
             .py(panel_py)
             .bg(bg)
@@ -184,14 +196,9 @@ impl IntoElement for FilterToolbar {
             .border_color(border)
             .rounded(radius);
 
-        // Sticky elevation — reuse dialog shadow for now as a soft elevation.
+        // Sticky elevation — token-resolved `elevation.surface` shadow.
         if spec.sticky {
-            toolbar = toolbar.shadow(vec![gpui::BoxShadow {
-                color: hsla(0.0, 0.0, 0.0, 0.06),
-                offset: point(px(0.0), px(2.0)),
-                blur_radius: px(8.0),
-                spread_radius: px(0.0),
-            }]);
+            toolbar = toolbar.shadow(elevation_surface_shadow());
         }
 
         // ── Header row ───────────────────────────────────────────
@@ -199,9 +206,11 @@ impl IntoElement for FilterToolbar {
             spec.collapsible || spec.summary_text.is_some() || self.actions.is_some();
 
         if needs_header {
-            let mut header_row = div().flex().items_center().gap(inline_sm);
+            // Build the header content into a child list, then attach it to a
+            // stateful (collapsible, focus-ring-bearing) or plain container.
+            let mut header_children: Vec<AnyElement> = Vec::new();
 
-            // Collapse toggle (chevron)
+            // Collapse toggle (chevron) — token-resolved hit-area + radius.
             if spec.collapsible {
                 let chevron_name = if is_expanded {
                     "chevron-down"
@@ -212,55 +221,79 @@ impl IntoElement for FilterToolbar {
                     Icon::from_spec(IconSpec::new(chevron_name).with_size(IconSize::Sm), theme)
                         .with_color(icon_muted);
 
-                let mut toggle_btn = div()
-                    .id("filter-toolbar-toggle")
-                    .w(px(20.0))
-                    .h(px(20.0))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .rounded(px(4.0))
-                    .cursor_pointer()
-                    .child(icon);
-
-                if let Some(ref handler) = self.on_toggle {
-                    let handler = handler.clone();
-                    toggle_btn = toggle_btn.on_click(move |event, window, cx| {
-                        handler(event, window, cx);
-                    });
-                }
-
-                header_row = header_row.child(toggle_btn);
+                header_children.push(
+                    div()
+                        .w(toggle_size)
+                        .h(toggle_size)
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .rounded(toggle_radius)
+                        .child(icon)
+                        .into_any_element(),
+                );
             }
 
             // Summary text
             if let Some(ref summary) = spec.summary_text {
-                header_row = header_row.child(
+                header_children.push(
                     div()
                         .flex_1()
                         .text_size(summary_size)
                         .text_color(summary_color)
-                        .child(summary.clone()),
+                        .child(summary.clone())
+                        .into_any_element(),
                 );
             } else {
                 // Reserve the flex-1 so actions still anchor right.
-                header_row = header_row.child(div().flex_1());
+                header_children.push(div().flex_1().into_any_element());
             }
 
             // Actions slot
             if let Some(actions) = self.actions {
-                header_row = header_row.child(
+                header_children.push(
                     div()
                         .flex()
                         .items_center()
-                        // Svelte: actions gap = 0.25rem (4px)
-                        .gap(px(4.0))
+                        // Contract §8 actions gap = space.inline.xs (0.25rem).
+                        .gap(actions_gap)
                         .flex_shrink_0()
-                        .child(actions),
+                        .child(actions)
+                        .into_any_element(),
                 );
             }
 
-            toolbar = toolbar.child(header_row);
+            if spec.collapsible {
+                // The whole header row is the toggle target and carries the
+                // focus ring (contract §6). GPUI has no ARIA channel, but the
+                // focus-visible outline is reproduced here.
+                let mut header_row = div()
+                    .id("filter-toolbar-header")
+                    .flex()
+                    .items_center()
+                    .gap(header_gap)
+                    .cursor_pointer()
+                    .focusable()
+                    .focus(move |s| s.border(focus_ring_width).border_color(focus_ring))
+                    .children(header_children);
+
+                if let Some(ref handler) = self.on_toggle {
+                    let handler = handler.clone();
+                    header_row = header_row.on_click(move |event, window, cx| {
+                        handler(event, window, cx);
+                    });
+                }
+
+                toolbar = toolbar.child(header_row);
+            } else {
+                toolbar = toolbar.child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(header_gap)
+                        .children(header_children),
+                );
+            }
         }
 
         // Capture "had children" before draining them so the secondary
@@ -274,7 +307,7 @@ impl IntoElement for FilterToolbar {
             // doesn't have CSS grid so flex-wrap with min-width on each
             // child is the closest equivalent to the Svelte implementation.
             let min_item_width = px(rem_to_px(spec.min_item_width_rem));
-            let mut grid = div().flex().flex_wrap().gap(inline_sm).w_full();
+            let mut grid = div().flex().flex_wrap().gap(controls_gap).w_full();
 
             for child in self.children {
                 grid = grid.child(

@@ -161,7 +161,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | field | ok | 6 | 6 | gap |
 | field-set | fixed | 6 | 6 | gap |
 | file-upload | ok | 0 | 0 | ok |
-| filter-toolbar | fixed | 7 | 6 | gap |
+| filter-toolbar | fixed | 0 | 0 | gap |
 | form-actions | ok | 6 | 7 | gap |
 | form-dialog | ok | 3 | 9 | gap |
 | form-layout | fixed | 2 | 2 | gap |
@@ -210,12 +210,12 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | remediation-banner | gap | 1 | 8 | gap |
 | resize-handle | ok | 4 | 3 | gap |
 | scroll-shell | ok | 3 | 1 | gap |
-| segmented-control | fixed | 6 | 8 | gap |
+| segmented-control | fixed | 0 | 0 | gap |
 | select | ok | 4 | 6 | gap |
 | selection-summary | fixed | 5 | 6 | gap |
 | separator | ok | 3 | 2 | gap |
 | sidebar-nav | fixed | 0 | 1 | ok |
-| skeleton | fixed | 6 | 8 | gap |
+| skeleton | fixed | 0 | 0 | gap |
 | slider | fixed | 3 | 3 | gap |
 | spacer | ok | 2 | 2 | gap |
 | spinner | fixed | 5 | 6 | gap |
@@ -223,7 +223,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | split-view | fixed | 6 | 6 | gap |
 | stack | fixed | 3 | 3 | gap |
 | state-tile | gap | 1 | 8 | gap |
-| status-bar | fixed | 6 | 8 | gap |
+| status-bar | fixed | 0 | 0 | gap |
 | status-indicator | fixed | 4 | 5 | gap |
 | surface | fixed | 6 | 5 | gap |
 | switch | fixed | 3 | 6 | gap |

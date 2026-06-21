@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ChoiceOption, ControlSize, SegmentedControlSpec};
 
 use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, size_padding_x_offset_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
@@ -100,9 +100,9 @@ impl IntoElement for SegmentedControl {
 
         // Contract: root bg = color-mix(surface 93%, text-primary)
         // Contract: root border = color-mix(border-subtle 84%, transparent)
-        // Contract: inner radius = calc(radius-control - 0.125rem)
+        // Contract §8 Label: inner radius = calc(radius-control - 0.125rem)
         let control_radius = resolve_radius(theme, "radius.control");
-        let inner_radius = (control_radius - px(2.0)).max(px(0.0));
+        let inner_radius = (control_radius - px(rem_to_px(0.125))).max(px(0.0));
 
         let accent = resolve_color(theme, self.spec.selected_fill_token());
         let border_subtle = resolve_color(theme, "color.border.subtle");
@@ -113,6 +113,16 @@ impl IntoElement for SegmentedControl {
         let elevated = resolve_color(theme, "color.background.elevated");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
+
+        // Contract §8 selected Label: box-shadow inset 0 0.0625rem 0
+        // color-mix(white 12%, transparent). No `white` token exists; `text.inverse`
+        // is the closest semantic (white in the dark theme). Mixed to 12% alpha.
+        // GPUI BoxShadow has no inset flag, so the highlight is approximated as a
+        // 1px top edge line (offset y = 0.0625rem, blur 0) — same pattern as accordion.
+        let selected_inset_highlight = Hsla {
+            a: text_inverse.a * 0.12,
+            ..text_inverse
+        };
 
         // Contract: root bg = surface 93% mix with text-primary
         let root_bg = color_mix(surface_bg, text_primary, 0.93);
@@ -136,7 +146,10 @@ impl IntoElement for SegmentedControl {
         let segment_height = control_height - px(rem_to_px(0.25));
         // Svelte: font-size is fixed at 0.75rem for all sizes (not size-responsive)
         let segment_font_size = px(rem_to_px(0.75));
-        let segment_pad_x = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
+        // Contract §8 Label padding-x = `--poodle-segmented-control-x`, which Svelte
+        // derives from density (0.5/0.75/1rem), not size. Match the authoritative
+        // density-driven source (was incorrectly size-offset before).
+        let segment_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let mut row = div()
             .flex()
@@ -146,6 +159,7 @@ impl IntoElement for SegmentedControl {
             .border_color(root_border)
             .bg(root_bg)
             .h(control_height)
+            .gap(px(rem_to_px(0.125))) // Svelte: gap: 0.125rem between segments
             .p(px(rem_to_px(0.125))); // Svelte: padding: 0.125rem
 
         if is_disabled {
@@ -162,14 +176,15 @@ impl IntoElement for SegmentedControl {
             let is_opt_disabled = option.is_disabled;
             let seg_id = SharedString::from(format!("{}-{}", self.id_prefix, option.value));
 
-            // Contract: font + padding resolved from effective size
+            // Contract §8 Label. No per-segment border in the authoritative Svelte;
+            // focus is rendered as a ring shadow only (contract focus uses `outline`,
+            // which does not affect layout), so segments never inflate or shift.
             let mut seg = div()
                 .id(seg_id)
                 .focusable()
-                .border_1()
-                .border_color(gpui::transparent_black())
                 .px(segment_pad_x)
                 .h(segment_height)
+                .rounded(inner_radius)
                 .text_size(segment_font_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .flex()
@@ -178,19 +193,23 @@ impl IntoElement for SegmentedControl {
                 .whitespace_nowrap()
                 .overflow_x_hidden()
                 .text_ellipsis()
-                .focus(move |s| {
-                    s.border_color(focus_ring)
-                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
-                });
+                .focus(move |s| s.shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             // equal_width: every segment takes an equal share of the row.
+            // When false, segments size to their content (contract §7).
             if self.spec.equal_width {
                 seg = seg.flex_1();
             }
 
+            // Per-option accessible-name override (contract §6). GPUI has no
+            // accessibility channel, so `aria_label` cannot be emitted; reading it
+            // here documents the intent without affecting render. `title` tooltip
+            // is blocked on the shared ChoiceOption spec lacking the field.
+            let _aria_label = option.aria_label.as_deref();
+
             if is_selected {
-                // Contract: selected segment with inset shadow
-                // Brand-raised treatment: gradient fill for selected segment
+                // Contract §8 selected Label: accent bg, inverse text, inset highlight.
+                // Brand-raised treatment: gradient fill for selected segment.
                 if theme.brand_raised && !is_disabled && !is_opt_disabled {
                     use crate::theme_ext::{
                         brand_raised_primary_fill, brand_raised_primary_shadow,
@@ -198,17 +217,16 @@ impl IntoElement for SegmentedControl {
                     seg = seg
                         .bg(brand_raised_primary_fill(accent))
                         .text_color(text_inverse)
-                        .rounded(inner_radius)
                         .shadow(brand_raised_primary_shadow());
                 } else {
+                    // Contract: box-shadow inset 0 0.0625rem 0 color-mix(white 12%).
                     seg = seg
                         .bg(accent)
                         .text_color(text_inverse)
-                        .rounded(inner_radius)
                         .shadow(vec![gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.12),
-                            offset: point(px(0.0), px(1.0)),
-                            blur_radius: px(2.0),
+                            color: selected_inset_highlight,
+                            offset: point(px(0.0), px(rem_to_px(0.0625))),
+                            blur_radius: px(0.0),
                             spread_radius: px(0.0),
                         }]);
                 }
@@ -249,15 +267,6 @@ impl IntoElement for SegmentedControl {
                             handler(&nav_values[idx], window, cx);
                         }
                     });
-                }
-            }
-
-            // Add separator between non-selected items
-            if i > 0 && !is_selected {
-                let prev_selected = current_value.as_deref()
-                    == self.spec.options.get(i - 1).map(|o| o.value.as_str());
-                if !prev_selected {
-                    row = row.child(div().w(px(1.0)).h_full().bg(root_border));
                 }
             }
 

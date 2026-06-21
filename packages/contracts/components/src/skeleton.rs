@@ -81,10 +81,18 @@ impl SkeletonSpec {
         semantic::COLOR_BACKGROUND_SURFACE
     }
 
+    /// Per-shape border radius token. Accepts both the contract shape
+    /// vocabulary (`line`/`block`/`circle`) and the legacy Rust vocabulary
+    /// (`text`/`rectangle`) so existing callers keep working:
+    /// - `line` / `text`  → `radius.control` (contract base skeleton radius)
+    /// - `circle`         → `radius.pill`    (contract `999rem`)
+    /// - `block` / other  → `radius.surface` (contract `calc(radius-surface − 0.25rem)`;
+    ///   no token exists for the exact `−0.25rem` calc — closest is `radius.surface`)
     pub fn radius_token(&self) -> &'static str {
         match self.shape.as_str() {
             "circle" => semantic::RADIUS_PILL,
-            "text" => semantic::RADIUS_CONTROL,
+            "line" | "text" => semantic::RADIUS_CONTROL,
+            // "block", "rectangle", and anything else
             _ => semantic::RADIUS_SURFACE,
         }
     }
@@ -93,5 +101,21 @@ impl SkeletonSpec {
     /// Uses body typography size token for consistency.
     pub fn default_height_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    /// Shimmer gradient base colour (the dimmer outer stops, contract §8:
+    /// `color-mix(background-elevated 88%, transparent)`). Targets that cannot
+    /// render a true gradient use this as the flat skeleton fill, so both Rust
+    /// targets resolve the base tone from one place.
+    pub fn shimmer_base_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_ELEVATED
+    }
+
+    /// Shimmer gradient highlight colour (the brighter centre stop, contract §8:
+    /// `color-mix(background-surface 92%, white)`). The moving sweep blends from
+    /// `shimmer_base_token` toward this; on non-animating targets it is the
+    /// static highlight tone.
+    pub fn shimmer_highlight_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
     }
 }

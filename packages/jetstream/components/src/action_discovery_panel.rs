@@ -409,7 +409,9 @@ mod tests {
             tree.texts()
         );
         // Skeleton fill panels present — two per row, five rows = 10 fills.
-        let skeleton_fill = resolve_color(&th, SkeletonSpec::new().fill_token());
+        // Match the skeleton's actual resolved shimmer fill (contract mid-tone),
+        // not the legacy flat `fill_token()`.
+        let skeleton_fill = crate::skeleton::shimmer_fill(&SkeletonSpec::new(), &th);
         let target = crate::render_probe::ProbeColor {
             r: skeleton_fill.x,
             g: skeleton_fill.y,
