@@ -1,79 +1,106 @@
-//! MetricTile specimen — metric tiles with trend indicators.
+//! MetricTile specimen — metric tiles with trend indicators and sparklines.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::metric_tile::js_metric_tile;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{MetricTileSpec, MetricTrend};
+use poodle_specs::{ControlDensity, MetricTileSpec, MetricTrend};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
-        // Plain metrics — no trend
-        .child(group("Plain (no trend)", secondary,
+        // Basic tiles — label + value, no trend (contract §12)
+        .child(group("Basic tiles", secondary,
             div().flex_row().gap(12.0).items_start()
-                .child(js_metric_tile(&MetricTileSpec::new("Total Users", "1,284"), theme))
-                .child(js_metric_tile(&MetricTileSpec::new("Active", "947"), theme))
-                .child(js_metric_tile(&MetricTileSpec::new("Revenue", "$12.4k"), theme))
+                .child(js_metric_tile(&MetricTileSpec::new("Components", "85"), theme))
+                .child(js_metric_tile(&MetricTileSpec::new("Coverage", "94%"), theme))
+                .child(js_metric_tile(&MetricTileSpec::new("Open issues", "12"), theme))
+                .child(js_metric_tile(&MetricTileSpec::new("Build time", "1.8s"), theme))
         ))
 
-        // With trend: up
-        .child(group("Trend: Up", secondary,
+        // With trend indicators — up / down / flat tones (contract §12)
+        .child(group("With trend indicators", secondary,
             div().flex_row().gap(12.0).items_start()
                 .child(js_metric_tile(
-                    &MetricTileSpec::new("Plays", "84,203")
+                    &MetricTileSpec::new("Active users", "2,847")
                         .with_trend(MetricTrend::Up)
-                        .with_trend_label("+12.4%"),
+                        .with_trend_label("+12.3%"),
                     theme,
                 ))
                 .child(js_metric_tile(
-                    &MetricTileSpec::new("Downloads", "2,108")
-                        .with_trend(MetricTrend::Up)
-                        .with_trend_label("+8.1%"),
-                    theme,
-                ))
-        ))
-
-        // With trend: down
-        .child(group("Trend: Down", secondary,
-            div().flex_row().gap(12.0).items_start()
-                .child(js_metric_tile(
-                    &MetricTileSpec::new("Churn", "4.2%")
+                    &MetricTileSpec::new("Error rate", "0.04%")
                         .with_trend(MetricTrend::Down)
-                        .with_trend_label("-0.8%"),
+                        .with_trend_label("-8%"),
                     theme,
                 ))
                 .child(js_metric_tile(
-                    &MetricTileSpec::new("Errors", "17")
-                        .with_trend(MetricTrend::Down)
-                        .with_trend_label("-41%"),
-                    theme,
-                ))
-        ))
-
-        // With trend: flat
-        .child(group("Trend: Flat", secondary,
-            div().flex_row().gap(12.0).items_start()
-                .child(js_metric_tile(
-                    &MetricTileSpec::new("Retention", "73%")
+                    &MetricTileSpec::new("Latency", "42ms")
                         .with_trend(MetricTrend::Flat)
                         .with_trend_label("No change"),
                     theme,
                 ))
+                .child(js_metric_tile(
+                    &MetricTileSpec::new("Revenue", "$14.2k")
+                        .with_trend(MetricTrend::Up)
+                        .with_trend_label("+3.1%"),
+                    theme,
+                ))
         ))
 
-        // Trend without label
-        .child(group("Trend without label", secondary,
+        // With sparklines — incl. no-trend "Memory" (contract §12)
+        .child(group("With sparklines", secondary,
             div().flex_row().gap(12.0).items_start()
                 .child(js_metric_tile(
-                    &MetricTileSpec::new("Sessions", "12,400")
-                        .with_trend(MetricTrend::Up),
+                    &MetricTileSpec::new("Requests/min", "1,204")
+                        .with_trend(MetricTrend::Up)
+                        .with_trend_label("+5%")
+                        .with_sparkline(vec![800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0]),
                     theme,
                 ))
                 .child(js_metric_tile(
-                    &MetricTileSpec::new("Bounces", "38%")
-                        .with_trend(MetricTrend::Down),
+                    &MetricTileSpec::new("CPU usage", "62%")
+                        .with_trend(MetricTrend::Down)
+                        .with_trend_label("-4%")
+                        .with_sparkline(vec![75.0, 72.0, 68.0, 70.0, 65.0, 63.0, 62.0]),
+                    theme,
+                ))
+                // Sparkline without trend (contract §12 "Memory")
+                .child(js_metric_tile(
+                    &MetricTileSpec::new("Memory", "4.2 GB")
+                        .with_sparkline(vec![3.8, 3.9, 4.0, 4.1, 4.0, 4.1, 4.2]),
+                    theme,
+                ))
+        ))
+
+        // Density — compact / default / comfortable (contract §3/§8)
+        .child(group("Density", secondary,
+            div().flex_row().gap(12.0).items_start()
+                .children([
+                    ControlDensity::Compact,
+                    ControlDensity::Default,
+                    ControlDensity::Comfortable,
+                ].into_iter().map(|density| {
+                    js_metric_tile(
+                        &MetricTileSpec::new("Requests/min", "1,204")
+                            .with_trend(MetricTrend::Up)
+                            .with_trend_label("+5%")
+                            .with_sparkline(vec![800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0])
+                            .with_density(density),
+                        theme,
+                    )
+                }))
+        ))
+
+        // Trend without label — arrow tone only, no text (extra)
+        .child(group("Trend without label", secondary,
+            div().flex_row().gap(12.0).items_start()
+                .child(js_metric_tile(
+                    &MetricTileSpec::new("Sessions", "12,400").with_trend(MetricTrend::Up),
+                    theme,
+                ))
+                .child(js_metric_tile(
+                    &MetricTileSpec::new("Bounces", "38%").with_trend(MetricTrend::Down),
                     theme,
                 ))
         ))

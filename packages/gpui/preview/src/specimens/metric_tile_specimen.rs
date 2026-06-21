@@ -2,14 +2,14 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, MetricTile};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{MetricTileSpec, MetricTrend};
+use poodle_specs::{ControlDensity, MetricTileSpec, MetricTrend};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Basic tiles ---
+        // --- Basic tiles (contract §12) ---
         .child(
             div()
                 .flex()
@@ -25,31 +25,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .gap(px(12.0))
                         .flex_wrap()
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Total Users", "12,847"),
+                            MetricTileSpec::new("Components", "85"),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Active Sessions", "342"),
+                            MetricTileSpec::new("Coverage", "94%"),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Conversion Rate", "3.2%"),
+                            MetricTileSpec::new("Open issues", "12"),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Revenue", "$48,290"),
+                            MetricTileSpec::new("Build time", "1.8s"),
                             theme,
                         )),
                 ),
         )
-        // --- With trend ---
+        // --- With trend indicators (contract §12: up / down / flat / up) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With trend"),
+                    EyebrowSpec::new().with_content("With trend indicators"),
                     theme,
                 ))
                 .child(
@@ -58,33 +58,39 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .gap(px(12.0))
                         .flex_wrap()
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Monthly Revenue", "$48,290")
+                            MetricTileSpec::new("Active users", "2,847")
                                 .with_trend(MetricTrend::Up)
-                                .with_trend_label("+12.4%"),
+                                .with_trend_label("+12.3%"),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Bounce Rate", "38%")
+                            MetricTileSpec::new("Error rate", "0.04%")
                                 .with_trend(MetricTrend::Down)
-                                .with_trend_label("\u{2212}3.1%"),
+                                .with_trend_label("-8%"),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Avg Session", "2m 14s")
+                            MetricTileSpec::new("Latency", "42ms")
                                 .with_trend(MetricTrend::Flat)
-                                .with_trend_label("no change"),
+                                .with_trend_label("No change"),
+                            theme,
+                        ))
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Revenue", "$14.2k")
+                                .with_trend(MetricTrend::Up)
+                                .with_trend_label("+3.1%"),
                             theme,
                         )),
                 ),
         )
-        // --- With sparkline ---
+        // --- With sparklines (contract §12: incl. no-trend "Memory") ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With sparkline"),
+                    EyebrowSpec::new().with_content("With sparklines"),
                     theme,
                 ))
                 .child(
@@ -93,25 +99,65 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .gap(px(12.0))
                         .flex_wrap()
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Weekly Signups", "1,284")
+                            MetricTileSpec::new("Requests/min", "1,204")
                                 .with_trend(MetricTrend::Up)
-                                .with_trend_label("+18%")
+                                .with_trend_label("+5%")
                                 .with_sparkline(vec![
-                                    32.0, 40.0, 36.0, 48.0, 52.0, 60.0, 58.0, 66.0, 72.0, 78.0,
-                                    82.0, 88.0,
+                                    800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0,
                                 ]),
                             theme,
                         ))
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("API Latency", "184ms")
+                            MetricTileSpec::new("CPU usage", "62%")
                                 .with_trend(MetricTrend::Down)
-                                .with_trend_label("\u{2212}22ms")
-                                .with_sparkline(vec![
-                                    220.0, 214.0, 230.0, 206.0, 198.0, 200.0, 192.0, 186.0, 188.0,
-                                    184.0,
-                                ]),
+                                .with_trend_label("-4%")
+                                .with_sparkline(vec![75.0, 72.0, 68.0, 70.0, 65.0, 63.0, 62.0]),
+                            theme,
+                        ))
+                        // No-trend sparkline (contract §12 "Memory")
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Memory", "4.2 GB").with_sparkline(vec![
+                                3.8, 3.9, 4.0, 4.1, 4.0, 4.1, 4.2,
+                            ]),
                             theme,
                         )),
+                ),
+        )
+        // --- Density (contract §3/§8: compact / default / comfortable) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Density"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(12.0))
+                        .flex_wrap()
+                        .children(
+                            [
+                                ("Compact", ControlDensity::Compact),
+                                ("Default", ControlDensity::Default),
+                                ("Comfortable", ControlDensity::Comfortable),
+                            ]
+                            .into_iter()
+                            .map(|(_, density)| {
+                                MetricTile::from_spec(
+                                    MetricTileSpec::new("Requests/min", "1,204")
+                                        .with_trend(MetricTrend::Up)
+                                        .with_trend_label("+5%")
+                                        .with_sparkline(vec![
+                                            800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0,
+                                        ])
+                                        .with_density(density),
+                                    theme,
+                                )
+                            }),
+                        ),
                 ),
         )
 }

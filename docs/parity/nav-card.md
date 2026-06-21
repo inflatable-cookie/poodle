@@ -1,4 +1,6 @@
-<!-- parity consv=ok gpui=1 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=ok -->
+<!-- specimen pass: both Rust nav-card specimens build clean with real js_nav_card / NavCard — icon+title+description, numeric badge, disabled, link (href), and compact/default/comfortable density variants. Trailing arrow rendered by the component. No selected/active group (no such prop in contract/spec — not faked). -->
+
 # Parity: NavCard
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

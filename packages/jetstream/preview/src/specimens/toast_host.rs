@@ -2,38 +2,99 @@
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::toast_host::js_toast_host;
 use poodle_jetstream_components::theme_ext::*;
+use poodle_jetstream_components::toast_host::js_toast_host;
 use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastStackSpec, ToastTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let border = resolve_color(theme, "color.border.default");
+    let panel = resolve_color(theme, "color.background.panel");
 
-    let toasts = vec![
-        Toast::new("1", "Saved").with_message("Changes saved.").with_tone(ToastTone::Success),
-        Toast::new("2", "Warning").with_message("Disk space low.").with_tone(ToastTone::Warning),
-    ];
+    // Contract §12 "Default (Bottom-End)": success + danger (sticky) toasts.
+    let bottom_end = ToastStackSpec::new().with_toasts(vec![
+        Toast::new("be-1", "Saved")
+            .with_tone(ToastTone::Success)
+            .with_message("Your changes were saved."),
+        Toast::new("be-2", "Publishing failed")
+            .with_tone(ToastTone::Danger)
+            .with_message("This one stays until you dismiss it."),
+    ]);
 
-    div().flex_col().gap(24.0)
-        .child(group("Bottom-end (default)", secondary,
-            js_toast_host(
-                &ToastHostSpec::new(),
-                theme,
-                &ToastStackSpec::new().with_toasts(toasts.clone()),
-            )
+    // Remaining anchors so all four corners are demonstrated.
+    let bottom_start = ToastStackSpec::new().with_toasts(vec![Toast::new("bs-1", "Sync delayed")
+        .with_tone(ToastTone::Warning)
+        .with_message("Background sync is running behind.")]);
+    let top_end = ToastStackSpec::new().with_toasts(vec![Toast::new("te-1", "Update applied")
+        .with_tone(ToastTone::Success)
+        .with_message("You are on the latest version.")]);
+    // Contract §12 "Top-Start Placement": single info toast.
+    let top_start = ToastStackSpec::new().with_toasts(vec![Toast::new("ts-1", "Heads up")
+        .with_tone(ToastTone::Info)
+        .with_message("Anchored to the top-left corner.")]);
+
+    // Contract §12 "With Action": toast carrying an action affordance.
+    let with_action = ToastStackSpec::new().with_toasts(vec![Toast::new("act-1", "Publishing failed")
+        .with_tone(ToastTone::Danger)
+        .with_message("We could not publish your changes.")
+        .with_action_label("Retry")]);
+
+    let anchored = |placement: ToastHostPlacement, stack: &ToastStackSpec| {
+        // `position: fixed` is not representable in a specimen; the host's
+        // absolute() corner placement is demonstrated relative to this bordered
+        // surface instead. (note)
+        surface(border, panel).child(js_toast_host(
+            &ToastHostSpec::new().with_placement(placement),
+            theme,
+            stack,
         ))
-        .child(group("Top-start", secondary,
-            js_toast_host(
-                &ToastHostSpec::new()
-                    .with_placement(ToastHostPlacement::TopStart),
-                theme,
-                &ToastStackSpec::new().with_toasts(toasts),
-            )
+    };
+
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "Bottom-end (sticky danger)",
+            secondary,
+            anchored(ToastHostPlacement::BottomEnd, &bottom_end),
+        ))
+        .child(group(
+            "Bottom-start",
+            secondary,
+            anchored(ToastHostPlacement::BottomStart, &bottom_start),
+        ))
+        .child(group(
+            "Top-end",
+            secondary,
+            anchored(ToastHostPlacement::TopEnd, &top_end),
+        ))
+        .child(group(
+            "Top-start",
+            secondary,
+            anchored(ToastHostPlacement::TopStart, &top_start),
+        ))
+        .child(group(
+            "With action",
+            secondary,
+            anchored(ToastHostPlacement::BottomEnd, &with_action),
         ))
 }
 
+/// Relative bordered surface a host anchors inside.
+fn surface(border: glam::Vec4, panel: glam::Vec4) -> JsEl {
+    div()
+        .relative()
+        .min_h(220.0)
+        .border_1()
+        .border_color(border)
+        .rounded(8.0)
+        .bg(panel)
+}
+
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

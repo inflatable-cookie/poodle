@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap pass=fixed-pass-42 -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok pass=specimen-pass-43 -->
+<!-- pass-43: specimens backfilled to contract §12 state coverage on both Rust targets — all four placement anchors (bottom-end sticky-danger, bottom-start, top-end, top-start) + With Action, each host composing the real ToastStack inside a relative surface. Real ToastHost/js_toast_host + tokens, no fakes. Both previews build clean. specimen=gap→ok. -->
 <!-- pass-42: audited all open host todos against contract — every one is runtime/web-only/platform-owned, NOT a representable gap. Reclassified accepted: store-subscription+normalization (Tier 3 app-side), auto-dismiss timers+sticky (Tier 3 event-loop), narrow-viewport media override (web-only, no media-query channel), z-index (no GPUI/JsEl channel), onDismiss/onAction wiring (preview event loop). All placement/anchor regions, the 28rem width cap, and 1rem inset are already token/spec-resolved on both targets. No `max-visible` concept exists in contract or Svelte (recall artifact). No code change needed; counts zeroed to representable-open. -->
 # Parity: ToastHost
 
@@ -51,8 +52,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Runtime host with live store (success/warning/error seeds), "Add toast" button cycling info/success/warning/error, sticky error toast, auto-dismiss, fixed positioning in a relative surface (`ToastHostSpecimen.svelte`).
-- GPUI covers: single bottom-end host with three static toasts (success/warning/danger-default) in a dashed surface. — missing: **placement variants** (only default), **"Add toast" interactivity** (button is decorative, no handler), **auto-dismiss/sticky demonstration**, **with-action toast** (contract §12 "With Action").
-- Jetstream covers: Bottom-end (default) + Top-start placement groups, two static toasts each (success/warning). — missing: **With Action** toast (contract §12), **error/danger sticky** toast, any interactivity.
+- GPUI covers (pass 43): all four placement anchors — bottom-end (success + sticky-danger, contract §12 default), bottom-start, top-end, top-start (info, contract §12) — plus a With Action host (danger + Retry, contract §12), each in a dashed relative surface; decorative "Add toast" button retained. — remaining: live auto-dismiss/sticky timer demonstration + "Add toast" interactivity (no handler) — accepted, app/event-loop owned per contract §10 + Tier 3.
+- Jetstream covers (pass 43): all four placement anchors — bottom-end (success + sticky-danger), bottom-start, top-end, top-start (info) — plus a With Action host (danger + Retry), each composing the real `js_toast_host`/`ToastStack` inside a relative bordered surface. — remaining: timers/sticky/interactivity — accepted (see Jetstream gap above).
 
 ## Notes
 

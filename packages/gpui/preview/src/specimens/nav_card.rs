@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, Icon, NavCard};
-use poodle_specs::{EyebrowSpec, IconSpec, NavCardSpec};
+use poodle_specs::{ControlDensity, EyebrowSpec, IconSpec, NavCardSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
@@ -79,5 +79,74 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_href("#"),
                     theme,
                 )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Numeric badge"),
+                    theme,
+                ))
+                .child(
+                    NavCard::from_spec(
+                        NavCardSpec::new()
+                            .with_title("Composites")
+                            .with_description("Higher-order components built from primitives.")
+                            .with_badge("12"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("layers"), theme)),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Density variants (compact / default / comfortable)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(8.0))
+                        .child(
+                            NavCard::from_spec(
+                                NavCardSpec::new()
+                                    .with_title("Components")
+                                    .with_description("Browse all available components.")
+                                    .with_badge("New")
+                                    .with_density(ControlDensity::Compact),
+                                theme,
+                            )
+                            .with_icon(Icon::from_spec(IconSpec::new("layers"), theme)),
+                        )
+                        .child(
+                            NavCard::from_spec(
+                                NavCardSpec::new()
+                                    .with_title("Components")
+                                    .with_description("Browse all available components.")
+                                    .with_badge("New")
+                                    .with_density(ControlDensity::Default),
+                                theme,
+                            )
+                            .with_icon(Icon::from_spec(IconSpec::new("layers"), theme)),
+                        )
+                        .child(
+                            NavCard::from_spec(
+                                NavCardSpec::new()
+                                    .with_title("Components")
+                                    .with_description("Browse all available components.")
+                                    .with_badge("New")
+                                    .with_density(ControlDensity::Comfortable),
+                                theme,
+                            )
+                            .with_icon(Icon::from_spec(IconSpec::new("layers"), theme)),
+                        ),
+                ),
         )
 }

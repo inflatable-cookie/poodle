@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap pass=fixed-pass-41 -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok pass=fixed-pass-41 -->
+<!-- specimen=ok: both Rust specimens backfilled to contract §12 — basic tiles (4, contract labels), trend up/down/flat (+tone), sparklines incl. no-trend "Memory", density (compact/default/comfortable); jetstream sparkline now renders (bar-strip). Real js_metric_tile/MetricTile builders + tokens only, no hand-rolled tiles. Both targets build clean. -->
 # Parity: MetricTile
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

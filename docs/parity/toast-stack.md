@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=0 jetstream=3 specimen=gap pass=fixed-pass-42 -->
+<!-- parity consv=ok gpui=0 jetstream=3 specimen=ok pass=specimen-pass-43 -->
+<!-- pass-43: specimens backfilled to contract §12 state coverage on both Rust targets — Tones (info/success/warning/danger), Interactive stack (incl. action + danger), Sizes (xs–xl), Densities (compact/default/comfortable). Real ToastStack/js_toast_stack + tokens, no fakes. Both previews build clean. specimen=gap→ok. -->
 <!-- pass-42: GPUI toast bg now the contract 90deg tone→elevated linear-gradient (was flat tint) — last GPUI gap closed. Jetstream 3 remaining all preview-loop/ARIA (dismiss/action handlers, real Button slot, role=list) — accepted. -->
 # Parity: ToastStack
 
@@ -53,8 +54,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Interactive stack (success / info+action / warning), "Add toast" cycling info/success/warning/danger with live dismiss+action removal, **Sizes** snippet (xs–xl, info + success+action), **Densities** snippet (compact/default/comfortable, warning + danger+action) (`ToastStackSpecimen.svelte`).
-- GPUI covers: Sizes group (xs–xl, single info toast each) + Interactive stack (success / info+action / warning) with decorative "Add toast" button. — missing: **Densities** group, **danger tone** in interactive set, real dismiss/action interactivity (button has no handler).
-- Jetstream covers: Multiple toasts (success/warning/danger) + Single info toast. — missing: **Sizes** group, **Densities** group, **action toast**, **dismiss affordance** (component renders none), titles (component renders message only).
+- GPUI covers (pass 43): Tones (info/success/warning/danger), Interactive stack (success / info+action / warning / danger+action) with decorative "Add toast" button, Sizes (xs–xl, info + success+action each), Densities (compact/default/comfortable, warning + danger+action). — remaining: real dismiss/action interactivity (button has no handler — accepted, app-side).
+- Jetstream covers (pass 43): Tones (info/success/warning/danger), Interactive stack (success / info+action / warning / danger+action), Sizes (xs–xl, info + success+action each), Densities (compact/default/comfortable, warning + danger+action). All via real `js_toast_stack` + spec size/density. — remaining: dismiss/action click handlers (preview event loop), real Button slot for action chip, ARIA — all accepted (see Jetstream gap above).
 
 ## Notes
 

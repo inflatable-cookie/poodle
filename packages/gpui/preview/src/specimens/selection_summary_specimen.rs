@@ -4,7 +4,9 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, SelectionSummary};
-use poodle_specs::{ControlSize, EyebrowSpec, SelectionSummaryItem, SelectionSummarySpec};
+use poodle_specs::{
+    ControlSize, EyebrowSpec, RemediationAction, SelectionSummaryItem, SelectionSummarySpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -13,6 +15,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
+        // --- Multiple items selected: count via chip row, clear control + remove/clear wired ---
         .child(
             div()
                 .flex()
@@ -22,17 +25,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Multiple items selected"),
                     theme,
                 ))
+                .child(
+                    SelectionSummary::from_spec(
+                        SelectionSummarySpec::new(vec![
+                            SelectionSummaryItem::new("1", "Button"),
+                            SelectionSummaryItem::new("2", "Card"),
+                            SelectionSummaryItem::new("3", "Dialog"),
+                            SelectionSummaryItem::new("4", "Table"),
+                            SelectionSummaryItem::new("5", "Tabs"),
+                        ])
+                        .with_clear_action(RemediationAction::new("clear", "Clear")),
+                        theme,
+                    )
+                    .on_remove(|_id, _ev, _window, _app| {})
+                    .on_clear(|_ev, _window, _app| {}),
+                ),
+        )
+        // --- Empty state: reserved-height container, "No selection" placeholder ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Empty state"),
+                    theme,
+                ))
                 .child(SelectionSummary::from_spec(
-                    SelectionSummarySpec::new(vec![
-                        SelectionSummaryItem::new("1", "Button"),
-                        SelectionSummaryItem::new("2", "Card"),
-                        SelectionSummaryItem::new("3", "Dialog"),
-                        SelectionSummaryItem::new("4", "Table"),
-                        SelectionSummaryItem::new("5", "Tabs"),
-                    ]),
+                    SelectionSummarySpec::new(vec![]),
                     theme,
                 )),
         )
+        // --- Single item ---
         .child(
             div()
                 .flex()
@@ -42,14 +66,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Single item"),
                     theme,
                 ))
-                .child(SelectionSummary::from_spec(
-                    SelectionSummarySpec::new(vec![SelectionSummaryItem::new(
-                        "1",
-                        "Primary button",
-                    )]),
-                    theme,
-                )),
+                .child(
+                    SelectionSummary::from_spec(
+                        SelectionSummarySpec::new(vec![SelectionSummaryItem::new(
+                            "1",
+                            "Primary button",
+                        )])
+                        .with_clear_action(RemediationAction::new("clear", "Clear")),
+                        theme,
+                    )
+                    .on_clear(|_ev, _window, _app| {}),
+                ),
         )
+        // --- Sizes (all 5 of the contract size ladder) ---
         .child(
             div()
                 .flex()
@@ -75,7 +104,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     SelectionSummaryItem::new("1", "Button"),
                                     SelectionSummaryItem::new("2", "Card"),
                                     SelectionSummaryItem::new("3", "Dialog"),
-                                ]),
+                                ])
+                                .with_clear_action(RemediationAction::new("clear", "Clear")),
                                 theme,
                             )
                             .with_size(size)
@@ -83,6 +113,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 ),
         )
+        // --- Truncated (max 3 visible): "+3 more" overflow + clear link ---
         .child(
             div()
                 .flex()
@@ -101,7 +132,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         SelectionSummaryItem::new("e", "Epsilon"),
                         SelectionSummaryItem::new("f", "Zeta"),
                     ])
-                    .with_max_visible_items(3),
+                    .with_max_visible_items(3)
+                    .with_clear_action(RemediationAction::new("clear", "Clear")),
                     theme,
                 )),
         )
