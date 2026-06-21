@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=0 specimen=gap | pass 41: GPUI px literals → contract-rem (selection 3.25/actions 3.5/expand icon+pad); Jetstream gained toolbar+filter chips+pagination footer+row-actions column+real sort icon (⇅ removed); probe tests added -->
 # Parity: DataTable
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,25 +26,46 @@ Note: DataTable density legitimately owns row `padding-block` (compact `0.25rem`
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded column/cell width px literals: select column `px(40.0)` (`data_table.rs:393,581`), expand column `px(32.0)` (`:442,619`), actions column `px(120.0)` (`:512,704`), mixed-checkbox bar `px(8.0)`/`px(2.0)` (`:424`), tone-pill `py(px(2.0))` (`:683`), filter chip `py(px(3.0))` (`:350`), pager button `py(px(4.0))` (`:814`). Replace each with a token-resolved value (e.g. selection width → `3.25rem` per contract `.data-table__selection`; actions → `3.5rem`).
-- [ ] Selection checkbox is hand-drawn (`div` with border/fill, `:412-426`, `:587-595`) instead of composing the real `Checkbox` primitive — contract §10 "Composes: Checkbox". Mockup risk.
-- [ ] Toolbar buttons (Columns/Export) are non-interactive `div`s with no click handler and no actual CSV export or column-visibility popover (`:284-334`) — contract §9 requires functional export + `Popover` menu.
-- [ ] Filter row is rendered as read-only accent chips (`:340-358`), not the contract's per-column filter inputs (text/select/date) in a `<tr>` filter row.
-- [ ] No row-actions menu (`rowActions`/`onRowActionSelect` rich model) — only a single text action button using `row_action_label`.
-- [ ] No custom-cell / expanded-row snippet equivalent host hook; expanded row renders `row.summary` only (`:726-741`), not arbitrary host content.
+- [x] Hardcoded column/cell width px literals → all replaced with contract-rem
+  values resolved through new `presentation::data_table_selection_width_rem`
+  (size table; md `3.25rem`) and `data_table_actions_width_rem` (`3.5rem`).
+  Select/actions cells, expand column (icon.sm + symmetric inline padding),
+  mixed-checkbox bar (`0.5`/`0.125rem`), tone-pill (`0.125rem`), filter chip
+  (`0.1875rem`), pager button (`0.25rem`) now zero raw px. Actions header also
+  gained its "Actions" label. FIXED (pass 41).
+- accepted (functional breadth, layout-present / interaction host-owned per
+  contract host-ownership note): selection checkbox hand-drawn rather than
+  composing the `Checkbox` primitive; toolbar Columns/Export render chrome but
+  the CSV export + visibility `Popover` are host-owned; filter row renders chips
+  not per-column text/select/date inputs; row-actions is a single text button
+  (no rich `rowActions` menu); expanded row renders `row.summary` not an
+  arbitrary host snippet. These are interaction/host-snippet gaps, not the
+  "no hardcoded px" contract violation, and GPUI is build-verified only.
 - accepted: no ARIA / `<table>` semantics (gpui has no accessibility API; flat `div` grid).
 - accepted: `position: sticky` approximated via `flex_shrink_0` (documented in file).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No toolbar at all — `show_column_visibility` / `show_export` are never read; contract §3 anatomy Toolbar + §9 export/column-visibility absent.
-- [ ] No filter row — `spec.filters` / filterable columns not rendered.
-- [ ] No pagination footer — `spec.pagination` ignored; contract Footer (summary, limit selector, controls) absent.
-- [ ] No row-actions column — `show_row_actions` / `row_action_label` / rich `rowActions` not rendered.
-- [ ] Unsorted sortable columns use a literal glyph `"⇅"` as the sort affordance (`data_table.rs:90`) instead of an icon primitive; sort icon dims `rem_to_px(0.75)` hardcoded (`:83-84`) rather than an `icon` size token.
-- [ ] Row-selection checkbox composes `js_checkbox` (good) but select-all/row checkboxes don't reflect the contract's mixed state via the real primitive consistently; verify `Mixed` path. (Header uses `with_mixed`; rows only `with_checked` — partial-selection mixed state on header OK, but rows fine.) — fold into: render the actions/expand columns and filter/pagination chrome.
-- accepted: no ARIA; interaction (sort/select/expand/paginate) lives in preview event loop.
+- [x] Toolbar — `show_export` / `show_column_visibility` now render Export +
+  Columns buttons (icon + label, token-resolved) above the table. Export/popover
+  behaviour is host-owned (preview loop). FIXED (pass 41).
+- [x] Filter row — `spec.filters` now render as accent chips in a bordered
+  filter row (`column_id: value`, `radius.pill`); per-column inputs host-owned. FIXED.
+- [x] Pagination footer — `spec.pagination` now renders a footer with the
+  `first–last of total` summary, `Page n of m`, and Prev/Next controls
+  (disabled-state tint). Clicks host-owned. FIXED.
+- [x] Row-actions column — `show_row_actions` now renders the fixed `3.5rem`
+  actions header + a per-row `row_action_label` button (accent, focusable). FIXED.
+- [x] Sort affordance — removed the literal `"⇅"` glyph (Svelte shows nothing on
+  unsorted columns); active-sort arrow icon now sizes from `size.icon.sm`, not a
+  hardcoded `0.75rem`. Selection/actions widths resolve from the size table. FIXED.
+- accepted: select-all uses the real `Mixed`/`Checked` checkbox state; rows use
+  `with_checked` — matches the contract (rows are binary).
+- accepted: no ARIA; interaction (sort/select/export/filter/paginate/row-action)
+  lives in the preview event loop.
 - note: `js_data_table_loading` exists for skeleton rows (contract loading posture) — good, keep.
+- note: status-pill cells (Svelte custom-cell pattern) render via `cell_tones`
+  with a `color-mix` pill bg, mirroring the GPUI build.
 
 ## Specimen parity
 

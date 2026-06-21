@@ -10,7 +10,10 @@ use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
 };
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{
+    data_table_actions_width_rem, data_table_selection_width_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -246,6 +249,20 @@ impl IntoElement for DataTable {
         let gap_lg = resolve_px(theme, "space.inline.lg");
         let icon_sm = resolve_px(theme, "size.icon.sm");
 
+        // Contract §11 column widths (token/contract-rem resolved, never literal px):
+        //   selection column → size-table width (md 3.25rem)
+        //   actions column   → fixed 3.5rem
+        //   expand column    → icon + symmetric inline padding (GPUI-only affordance)
+        let selection_width = px(rem_to_px(data_table_selection_width_rem(effective_size)));
+        let actions_width = px(rem_to_px(data_table_actions_width_rem()));
+        let expand_width = px(f32::from(icon_sm) + f32::from(inline_padding) * 2.0);
+        // Small inset paddings expressed as contract-exact rem (no raw px):
+        let pill_py = px(rem_to_px(0.125)); // status pill vertical inset (2px @16)
+        let chip_py = px(rem_to_px(0.1875)); // filter chip vertical inset (3px @16)
+        let pager_py = px(rem_to_px(0.25)); // pager button vertical inset (4px @16)
+        let mixed_bar_w = px(rem_to_px(0.5)); // mixed-state bar (8px @16)
+        let mixed_bar_h = px(rem_to_px(0.125)); // mixed-state bar (2px @16)
+
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -347,7 +364,7 @@ impl IntoElement for DataTable {
                         .items_center()
                         .gap(gap_sm)
                         .px(gap_sm)
-                        .py(px(3.0))
+                        .py(chip_py)
                         .rounded(radius_pill)
                         .bg(chip_bg)
                         .text_size(label_size)
@@ -390,7 +407,7 @@ impl IntoElement for DataTable {
             let check_id = SharedString::from("dt-select-all");
             let mut check_cell = div()
                 .id(check_id)
-                .w(px(40.0))
+                .w(selection_width)
                 .flex()
                 .items_center()
                 .justify_center()
@@ -421,7 +438,7 @@ impl IntoElement for DataTable {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(div().w(px(8.0)).h(px(2.0)).bg(gpui::white()));
+                    .child(div().w(mixed_bar_w).h(mixed_bar_h).bg(gpui::white()));
             }
             check_cell = check_cell.child(check_box);
 
@@ -439,7 +456,7 @@ impl IntoElement for DataTable {
         // Expand column placeholder when any row might expand
         let has_expandable = !spec.expanded_row_ids.is_empty() || on_row_expand.is_some();
         if has_expandable {
-            header_row = header_row.child(div().w(px(32.0)));
+            header_row = header_row.child(div().w(expand_width));
         }
 
         for col in &visible_columns {
@@ -509,11 +526,12 @@ impl IntoElement for DataTable {
         if spec.show_row_actions {
             header_row = header_row.child(
                 div()
-                    .w(px(120.0))
+                    .w(actions_width)
                     .px(inline_padding)
                     .py(cell_py)
                     .text_size(header_font)
-                    .text_color(text_secondary),
+                    .text_color(text_secondary)
+                    .child("Actions"),
             );
         }
 
@@ -578,7 +596,7 @@ impl IntoElement for DataTable {
                     let box_border = if is_selected { accent } else { border_color };
                     let mut check_cell = div()
                         .id(check_id)
-                        .w(px(40.0))
+                        .w(selection_width)
                         .flex()
                         .items_center()
                         .justify_center()
@@ -616,7 +634,7 @@ impl IntoElement for DataTable {
                     };
                     let mut expand_cell = div()
                         .id(expand_id)
-                        .w(px(32.0))
+                        .w(expand_width)
                         .flex()
                         .items_center()
                         .justify_center()
@@ -680,7 +698,7 @@ impl IntoElement for DataTable {
                                 .items_center()
                                 .flex_shrink_0()
                                 .px(gap_sm)
-                                .py(px(2.0))
+                                .py(pill_py)
                                 .rounded(radius_pill)
                                 .bg(tone_bg)
                                 .text_size(label_size)
@@ -701,7 +719,7 @@ impl IntoElement for DataTable {
                     let action_id = SharedString::from(format!("dt-action-{}", row.id));
                     let mut action_btn = div()
                         .id(action_id)
-                        .w(px(120.0))
+                        .w(actions_width)
                         .px(inline_padding)
                         .py(cell_py)
                         .text_size(label_size)
@@ -756,6 +774,7 @@ impl IntoElement for DataTable {
                 radius_control,
                 gap_sm,
                 gap_md,
+                pager_py,
                 on_page_change.clone(),
             );
             outer = outer.child(pager);
@@ -775,6 +794,7 @@ fn render_pager(
     radius_control: Pixels,
     gap_sm: Pixels,
     gap_md: Pixels,
+    pager_py: Pixels,
     on_page_change: Option<std::rc::Rc<dyn Fn(u32, &mut Window, &mut App)>>,
 ) -> Div {
     let first = pagination.first_item();
@@ -811,7 +831,7 @@ fn render_pager(
         let mut btn = div()
             .id(SharedString::from(id.to_string()))
             .px(gap_sm)
-            .py(px(4.0))
+            .py(pager_py)
             .rounded(radius_control)
             .border_1()
             .border_color(border_color)

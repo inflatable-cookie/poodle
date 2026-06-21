@@ -136,7 +136,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | command-palette | fixed | 2 | 2 | gap |
 | confirm-action | ok | 2 | 7 | gap |
 | context-menu | ok | 2 | 5 | gap |
-| data-table | fixed | 6 | 6 | gap |
+| data-table | fixed | 1 | 0 | gap |
 | date-picker | fixed | 4 | 6 | gap |
 | date-range-picker | fixed | 3 | 3 | gap |
 | date-time-picker | fixed | 1 | 4 | gap |
@@ -149,7 +149,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | detail-shell | ok | 4 | 6 | gap |
 | dialog | ok | 2 | 3 | gap |
 | dock-region | ok | 2 | 2 | gap |
-| drawer | ok | 6 | 6 | gap |
+| drawer | ok | 0 | 0 | gap |
 | duration-input | fixed | 2 | 2 | gap |
 | editable-label | ok | 2 | 2 | gap |
 | editable-list | fixed | 4 | 3 | gap |
@@ -158,8 +158,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | empty-state | ok | 2 | 5 | ok |
 | error-boundary | ok | 2 | 1 | gap |
 | eyebrow | ok | 5 | 5 | gap |
-| field | ok | 6 | 6 | gap |
-| field-set | fixed | 6 | 6 | gap |
+| field | ok | 1 | 1 | gap |
+| field-set | fixed | 1 | 1 | gap |
 | file-upload | ok | 0 | 0 | ok |
 | filter-toolbar | fixed | 0 | 0 | gap |
 | form-actions | ok | 2 | 3 | gap |

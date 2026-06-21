@@ -2,10 +2,11 @@
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::drawer::js_drawer;
+use poodle_jetstream_components::drawer::{js_drawer, js_drawer_with_actions};
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, DrawerSpec};
+use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, DrawerEdge, DrawerSpec};
+use poodle_jetstream_components::button::js_button;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -34,6 +35,41 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
                 Some(
                     label("Settings content area.").text_color(text_primary).text_size(body_font)
+                ),
+            )
+        ))
+        // Right edge with footer actions (Cancel / Save)
+        .child(group("Right edge with actions", secondary,
+            js_drawer_with_actions(
+                &DrawerSpec::new()
+                    .with_title("Settings")
+                    .with_description("Configure your preferences."),
+                theme,
+                Some(
+                    label("Body content area.").text_color(text_primary).text_size(body_font)
+                ),
+                Some(
+                    div().flex_row().gap(8.0)
+                        .child(js_button(
+                            &ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Cancel"),
+                            theme,
+                        ))
+                        .child(js_button(
+                            &ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save"),
+                            theme,
+                        ))
+                ),
+            )
+        ))
+        // Left edge (navigation), no actions
+        .child(group("Left edge", secondary,
+            js_drawer(
+                &DrawerSpec::new()
+                    .with_edge(DrawerEdge::Left)
+                    .with_title("Navigation"),
+                theme,
+                Some(
+                    label("Navigation links here.").text_color(text_primary).text_size(body_font)
                 ),
             )
         ))

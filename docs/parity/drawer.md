@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap | pass 41: both targets gained size-table title font + header margin-bottom + actions footer row; GPUI backdrop/fallback-text token-resolved + edge sizing for top/bottom; Jetstream dropped close-x, edge-anchored 28/24rem sizing, probe tests added -->
 # Parity: Drawer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,23 +23,39 @@ Svelte tracks the contract closely; one minor mechanical divergence worth noting
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded shadow color literals `hsla(0.0, 0.0, 0.0, 0.12)` / `0.08` at `drawer.rs:186,192` — resolve `elevation-dialog` from a shadow token, not raw HSLA + raw `px(8.0)`/`px(24.0)` blur/offset.
-- [ ] Hardcoded backdrop color `hsla(0.0, 0.0, 0.5)` at `drawer.rs:263` — contract backdrop is `color.background.overlay`; resolve via `spec.backdrop_fill_token()` (Jetstream does this), not a raw 0.5 alpha.
-- [ ] Hardcoded surface min-width `px(rem_to_px(28.0))` at `drawer.rs:166` — contract `min(28rem, 100vw)`; the 28rem is a literal, and there is no `top`/`bottom` edge override to `min(24rem,…)` (only left/right width handled; edge sizing for top/bottom missing).
-- [ ] No `size` handling — `effective_size` resolved at `drawer.rs:136` then unused; contract §8 size table (header title font-size xs→xl) not applied. Title uses flat `heading_size` (`drawer.rs:208`).
-- [ ] No header bottom-margin / actions row — surface stacks title+description+content with a flat `gap(stack_gap)` (`drawer.rs:182`); contract header `margin-bottom: space-stack-md` and `.drawer__actions` row (flex-end, wrap) are absent.
-- [ ] Main-area fallback text `px(rem_to_px(0.75))` at `drawer.rs:251` — hardcoded 0.75rem; preview-scaffold leak inside the component, resolve from a caption token.
+- accepted: shadow uses `theme_ext::elevation_dialog_shadow()` which is already
+  token-resolved from the typed `ELEVATION_DIALOG` table (offset/blur/color come
+  from the token, not raw HSLA) — the old `:186,192` literals no longer exist.
+- [x] Backdrop color → now `resolve_color(theme, spec.backdrop_fill_token())`
+  (`color.background.overlay`), no raw `hsla(…,0.5)`. FIXED (pass 41).
+- [x] Surface sizing → edge-anchored: left/right `min_w(28rem)` + `h_full`;
+  top/bottom now `w_full` + `h(24rem)` (`min(24rem,100vh)`). Backdrop/inline
+  rows also switch to column direction for top/bottom edges. FIXED.
+- [x] `size` handling → header title font now resolves from the contract §8
+  size table via new `presentation::drawer_title_font_rem` (md `1rem`), replacing
+  the flat `heading_size`. FIXED.
+- [x] Header bottom-margin / actions row → header is now a grid block with
+  `margin-bottom: space-stack-md`; new `with_actions(...)` slot renders the
+  `.drawer__actions` footer (flex-end, wrap, `margin-top: space-stack-md`). FIXED.
+- [x] Main-area fallback text → now uses `typography.body.size`, not a hardcoded
+  `0.75rem`. FIXED.
 - accepted: no ARIA (gpui has no accessibility API) — `role="dialog"`/`aria-modal` not emittable.
 - accepted: edge slide motion curve differs (contract Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Ad-hoc panel sizing `rem_to_px(18.0|32.0|24.0)` at `drawer.rs:32-36` — contract surface is `min(28rem,100vw)` (left/right) and `min(24rem,100vh)` (top/bottom), not a per-`size` 18/24/32rem switch. Resolve fixed dims from contract values, not a size heuristic.
-- [ ] Hardcoded panel inner gap `rem_to_px(0.75)` at `drawer.rs:48` and header gap `rem_to_px(0.25)` at `drawer.rs:82` — contract header gap is `0.375rem`; resolve from space tokens.
-- [ ] Title font is `size_font_rem(size) + 0.1875` literal offset at `drawer.rs:19` — contract header title is `1rem` (size-table driven); drop the ad-hoc +0.1875rem.
-- [ ] Renders a close-`x` icon in the header (`drawer.rs:39-43,106`) — not in contract anatomy (no close button part); Svelte has no close icon. Remove or add to contract.
-- [ ] No `margin-bottom` between header and body, no `.drawer__actions` footer row — contract Actions part absent; `actions` snippet equivalent never composed.
-- [ ] No `size` table application (header title font-size per size) and no density-to-gap mapping beyond panel padding.
+- [x] Panel sizing → edge-anchored: left/right `w(28rem)` + `h_full`; top/bottom
+  `h(24rem)` + `w_full`. Dropped the per-`size` 18/24/32rem switch. FIXED (pass 41).
+- [x] Panel inner gap now `space.stack.sm`; header internal gap now the contract
+  `0.375rem`. FIXED.
+- [x] Title font now resolves from the contract §8 size table via
+  `presentation::drawer_title_font_rem` (md `1rem`); dropped the ad-hoc
+  `+0.1875rem` offset. FIXED.
+- [x] Close-`x` icon removed — not in contract anatomy / not in Svelte. Header is
+  now title + description only. FIXED.
+- [x] Header `margin-bottom: space-stack-md` + new `actions` slot
+  (`js_drawer_with_actions`) rendering the `.drawer__actions` footer (flex-end,
+  wrap, `margin-top: space-stack-md`). FIXED.
 - accepted: no ARIA channel (`role="dialog"`).
 - accepted: open/close + focus trap + scroll-lock interaction lives in preview event loop, not the component.
 
@@ -47,7 +63,7 @@ Svelte tracks the contract closely; one minor mechanical divergence worth noting
 
 - Svelte covers: Right edge (trigger + title + description + actions Cancel/Save), Left edge (trigger + title, no actions). Interactive open/close.
 - GPUI covers: Right edge (title + description + content + main-area Cancel/Save), Left edge (edge + title + content). Interactive via `overlay_state`. — missing: actions rendered as `main_content` rather than a footer actions row (no `.drawer__actions` part demonstrated).
-- Jetstream covers: With title and content, With description, Empty content. — missing: **Left edge** variant, **actions footer** group, interactive open/close (static render only).
+- Jetstream covers: With title and content, With description, **Right edge with actions** (Cancel/Save footer), **Left edge** (Navigation), Empty content. — remaining: interactive open/close (static render only; preview-loop).
 
 ## Notes
 

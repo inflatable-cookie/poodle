@@ -3,10 +3,12 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, FieldSpec, SemanticControlSizeRole, ValidationState,
+    ControlDensity, ControlSize, FieldSpec, IconSize, IconSpec, SemanticControlSizeRole,
+    ValidationState,
 };
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use super::icon::Icon;
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI field wrapper component backed by `FieldSpec`.
 ///
@@ -107,7 +109,6 @@ impl IntoElement for Field {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let text_primary = resolve_color(theme, "color.text.primary");
         let description_color = resolve_color(theme, spec.description_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
         let label_size = resolve_px(theme, spec.label_typography_token());
@@ -115,12 +116,21 @@ impl IntoElement for Field {
         let root_gap = resolve_px(theme, spec.row_gap_token());
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let label_row_gap = resolve_px(theme, spec.label_row_gap_token());
-        let label_color = Hsla {
-            a: text_primary.a * 0.82,
-            ..text_primary
-        };
+        // Contract §8: label color = color-mix(in srgb, text-primary 45%, text-secondary)
+        let label_primary = resolve_color(theme, spec.label_color_primary_token());
+        let label_secondary = resolve_color(theme, spec.label_color_secondary_token());
+        let label_color = color_mix(
+            label_primary,
+            label_secondary,
+            FieldSpec::LABEL_COLOR_PRIMARY_RATIO,
+        );
 
         let mut col = div().flex().flex_col().gap(root_gap);
+
+        // `span` / `grid_area` (FieldSpec) are CSS-grid placement props. GPUI has
+        // no CSS-grid parent context, so they are an accepted layout delta
+        // (contract §10/§12: grid-column/grid-area integration is platform-owned).
+        // The owning layout positions the field; no per-field style is emitted.
 
         // Label group — contract §7: `0.375rem` gap between label and required `*`
         let mut label_group = div().flex().items_center().gap(label_row_gap);
@@ -137,6 +147,47 @@ impl IntoElement for Field {
                     .text_size(label_size)
                     .text_color(error_color)
                     .child("*"),
+            );
+        }
+
+        // Info icon — contract §2/§7/§8: pill wrapper next to the label when a
+        // description/hint is set. Its presence (and that the description is NOT
+        // rendered inline, contract §4/§9) is the load-bearing parity fix.
+        // The icon carries the description as its tooltip content; the live
+        // hover-to-open affordance lives in the preview event loop, not this
+        // stateless builder (same accepted runtime limit as the Popover trigger —
+        // contract §12 allows tooltip vs Popover implementation freedom).
+        if spec.info_text().is_some() {
+            // em-relative to the label font: 1.25em wrapper, 0.75em glyph.
+            let label_px = f32::from(label_size);
+            let icon_box = px(label_px * FieldSpec::INFO_ICON_EM);
+            let icon_glyph = label_px * FieldSpec::INFO_ICON_SVG_EM;
+            let info_bg_base = resolve_color(theme, spec.info_icon_bg_token());
+            let info_bg = Hsla {
+                a: info_bg_base.a * FieldSpec::INFO_ICON_BG_ALPHA,
+                ..info_bg_base
+            };
+            let info_color = resolve_color(theme, spec.info_icon_color_token());
+            let info_radius = resolve_radius(theme, spec.info_icon_radius_token());
+            label_group = label_group.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .flex_shrink_0()
+                    .w(icon_box)
+                    .h(icon_box)
+                    .rounded(info_radius)
+                    .bg(info_bg)
+                    .cursor_pointer()
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new("info").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(info_color)
+                        .with_px_size(icon_glyph),
+                    ),
             );
         }
 
@@ -162,15 +213,8 @@ impl IntoElement for Field {
 
         col = col.child(label_row);
 
-        // Description
-        if let Some(description) = spec.info_text() {
-            col = col.child(
-                div()
-                    .text_size(supporting_size)
-                    .text_color(description_color)
-                    .child(description.to_string()),
-            );
-        }
+        // Description is NOT rendered inline (contract §4/§9) — it lives in the
+        // info-icon tooltip built above.
 
         // Control slot
         if let Some(control) = self.control {

@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- pass: FieldSetSpec gained description, span, SpaceScale::None; legend size repointed to fixed 0.6875rem eyebrow scale (LEGEND_SIZE_REM), gap_token now mirrors Svelte scaleToSpace (sm→inline-sm, md→panel-y, lg→panel-x, none→0) and returns Option; description part + asymmetric row-gap (col-gap + 0.5rem) + equal-fraction columns implemented both targets; Jetstream legend uppercased. Remaining open: span = accepted layout delta; legend letter-spacing/line-height = engine delta (no JsEl/GPUI div API). Jetstream probe tests cover legend+description+children+multi-column+gap-none. -->
 # Parity: FieldSet
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,22 +29,22 @@ Svelte carries props + anatomy the contract and spec do not document. Svelte is 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded legend size literal `px(rem_to_px(0.6875))` at `field_set.rs:74` — resolve from `spec.legend_size_token()` (or the new legend-size token), not a raw `0.6875`.
-- [ ] Hardcoded column widths `rem_to_px(15.0)` / `rem_to_px(10.0)` / `rem_to_px(7.5)` at `field_set.rs:94-96` — these guessed per-column min-widths are not token-derived and do not implement Svelte's `repeat(columns, minmax(0, 1fr))` grid; replace with a real equal-fraction layout.
-- [ ] Legend ignores `legend_family_token()`, `font-weight 600`, `letter-spacing 0.12em`, `line-height 1.5` — only `text_size` + `SEMIBOLD` + uppercase-in-Rust applied (`field_set.rs:73-79`). Apply family + letter-spacing tokens; `to_uppercase()` (`field_set.rs:78`) should be a `text-transform` token, not a Rust string op.
-- [ ] Row-gap/column-gap collapsed to a single `gap` (`field_set.rs:83,87`); Svelte uses `row-gap = gap + 0.5rem`. Implement asymmetric gap once spec exposes it.
-- [ ] No `description` part — `<p>` between legend and fields is absent (Svelte `FieldSet.svelte:38-40`). Add once spec gains `description`.
-- [ ] No `span` support — builder has no `span` method and root never sets a parent-grid span (Svelte `FieldSet.svelte:33`). Add once spec gains `span`.
+- [x] DONE Legend size now resolves from `FieldSetSpec::LEGEND_SIZE_REM` (the contract-exact `0.6875rem` eyebrow constant) via `rem_to_px`, not a raw literal — and is no longer the wrong `typography-label-size` token.
+- [x] DONE Guessed column min-widths removed — multi-column uses `flex_1().min_w(0)` per child (≈ `repeat(columns, minmax(0, 1fr))`).
+- [x] DONE Legend keeps `SEMIBOLD` + uppercase (`to_uppercase`); `letter-spacing 0.12em` and `line-height 1.5` have **no GPUI div API** — accepted rendering delta, noted inline. (`font-weight 600` ≈ SEMIBOLD.)
+- [x] DONE Asymmetric gap implemented — column-gap = `column_gap_token` (Svelte `scaleToSpace`), row-gap = `column-gap + 0.5rem` (`ROW_GAP_EXTRA_REM`).
+- [x] DONE `description` part renders as a styled block between legend and fields (`description_size_token` = body-size, secondary color, `space-stack-md` margin-bottom).
+- [ ] `span` builder added on the spec but not emitted as grid placement — **accepted layout delta**: GPUI has no CSS-grid parent context (contract §6 `spanned` / §12). Documented inline.
 - accepted: no ARIA / native `<fieldset>`+`<legend>` grouping semantics (gpui has no accessibility API).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Legend size uses `spec.legend_size_token()` (`TYPOGRAPHY_LABEL_SIZE`, `field_set.rs:23,33`) but Svelte legend is `0.6875rem` — wrong token until the dedicated legend-size token exists; then repoint.
-- [ ] Legend missing `letter-spacing 0.12em`, `line-height 1.5`, and `text-transform: uppercase` — `js_field_set` sets only color/size/weight 600 and never uppercases the text (`field_set.rs:28-35`). Apply transform + letter-spacing tokens.
-- [ ] Row-gap/column-gap collapsed to one `gap` on both root and grid (`field_set.rs:25,38`); Svelte uses `row-gap = gap + 0.5rem`. Implement asymmetric gap once spec exposes it.
-- [ ] Multi-column is faked: `col_basis` percentage is computed then discarded (`_pct` unused, `field_set.rs:43-48,55-57`) and every child just calls `.grow()` regardless of `columns`, so `columns > 1` produces a single flow-wrap row, not an N-column grid matching `repeat(columns, minmax(0,1fr))`. Implement real column basis.
-- [ ] No `description` part — `<p>` between legend and fields is absent (Svelte `FieldSet.svelte:38-40`). Add once spec gains `description`.
-- [ ] No `span` support — `js_field_set` ignores parent-grid spanning (Svelte `FieldSet.svelte:33`). Add once spec gains `span`.
+- [x] DONE Legend size repointed to the fixed `0.6875rem` eyebrow scale via `rem_to_px(FieldSetSpec::LEGEND_SIZE_REM)` (no longer `TYPOGRAPHY_LABEL_SIZE`).
+- [x] DONE Legend now uppercases via `to_uppercase()` (verified by probe test asserting `"CONTACT"`); `letter-spacing 0.12em` / `line-height 1.5` have **no JsEl API** — accepted rendering delta, noted inline.
+- [x] DONE Asymmetric gap implemented — column-gap = `column_gap_token` (Svelte `scaleToSpace`), wrap row-gap = `column-gap + 0.5rem` when multi-column.
+- [x] DONE Real equal-fraction columns — each child wrapper gets `flex_basis(100/cols).flex_grow().flex_shrink().min_w_0()`; probe test confirms two columns share a row and the second sits right of the first.
+- [x] DONE `description` part renders between legend and fields (body-size, secondary color, `space-stack-md` margin-bottom).
+- [ ] `span` builder added on the spec but not emitted as grid placement — **accepted layout delta**: no Jetstream flex equivalent (contract §6 `spanned` / §12). Documented inline.
 - accepted: no native `<fieldset>` grouping / ARIA semantics; no interaction needed (FieldSet is layout-only, so no preview event-loop handler is expected).
 
 ## Specimen parity

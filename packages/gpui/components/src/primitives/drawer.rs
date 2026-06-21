@@ -4,7 +4,10 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
-use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{
+    drawer_title_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
@@ -15,6 +18,8 @@ pub struct Drawer {
     theme: GpuiThemeProvider,
     /// The content to show inside the drawer panel.
     content: Option<AnyElement>,
+    /// The footer actions row (`.drawer__actions`) — flex-end, wraps.
+    actions: Option<AnyElement>,
     /// The main area content (shown next to the drawer).
     main_content: Option<AnyElement>,
     /// Called when the drawer open state should change.
@@ -34,6 +39,7 @@ impl Drawer {
             spec: DrawerSpec::new(),
             theme: theme.clone(),
             content: None,
+            actions: None,
             main_content: None,
             on_open_change: None,
         }
@@ -44,6 +50,7 @@ impl Drawer {
             spec,
             theme: theme.clone(),
             content: None,
+            actions: None,
             main_content: None,
             on_open_change: None,
         }
@@ -104,6 +111,13 @@ impl Drawer {
         self
     }
 
+    /// Footer action buttons rendered in the `.drawer__actions` row
+    /// (contract anatomy: Actions part — flex-end, wrap).
+    pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
+        self.actions = Some(actions.into_any_element());
+        self
+    }
+
     pub fn with_main_content(mut self, main: impl IntoElement) -> Self {
         self.main_content = Some(main.into_any_element());
         self
@@ -138,8 +152,13 @@ impl IntoElement for Drawer {
         // Svelte: drawer uses panel-y for vertical, panel-x for horizontal (not both from panel-x)
         let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let _body_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Contract §8 size table: header title font-size per size (md == 1rem).
+        let title_size = px(rem_to_px(drawer_title_font_rem(effective_size)));
 
         let stack_gap = resolve_px(theme, "space.stack.sm");
+        // Contract: header margin-bottom + actions margin-top = space.stack.md.
+        let stack_md = resolve_px(theme, "space.stack.md");
+        let actions_gap = resolve_px(theme, "space.inline.sm");
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let panel_bg = resolve_color(theme, "color.background.panel");
@@ -147,7 +166,6 @@ impl IntoElement for Drawer {
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let body_size = resolve_px(theme, "typography.body.size");
-        let heading_size = resolve_px(theme, "typography.heading.size");
 
         // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
         //         treatment-surface-elevated-border = color-mix(border-default 78%, transparent)
@@ -158,14 +176,23 @@ impl IntoElement for Drawer {
         };
 
         let is_left = spec.edge == DrawerEdge::Left || spec.edge == DrawerEdge::Top;
+        let is_vertical_edge = spec.edge == DrawerEdge::Top || spec.edge == DrawerEdge::Bottom;
 
-        // Contract: drawer radius = 0, min-width min(28rem, 100vw) ≈ 448px, shadow
+        // Contract: drawer radius = 0, shadow. Edge-anchored sizing:
+        //   left/right → width min(28rem, 100vw), height 100vh
+        //   top/bottom → width 100vw, height min(24rem, 100vh)
+        // GPUI has no viewport-relative units in the component, so the rem
+        // ceiling resolves to a fixed dimension (the `100vw`/`100vh` cap is
+        // applied by the host layout box the drawer fills).
         let mut drawer_panel = div()
             .id("poodle-drawer-panel")
             .focusable()
-            .min_w(px(rem_to_px(28.0))) // Contract: min(28rem, 100vw)
-            .h_full()
             .rounded(px(0.0)); // Contract: drawer radius = 0
+        if is_vertical_edge {
+            drawer_panel = drawer_panel.w_full().h(px(rem_to_px(24.0))); // min(24rem, 100vh)
+        } else {
+            drawer_panel = drawer_panel.min_w(px(rem_to_px(28.0))).h_full(); // min(28rem, 100vw)
+        }
 
         // Brand-raised treatment: gradient fill for elevated surface
         if theme.brand_raised {
@@ -186,25 +213,28 @@ impl IntoElement for Drawer {
         // Contract: all-around border (0.0625rem solid border-default 78%)
         drawer_panel = drawer_panel.border_1().border_color(border);
 
-        // Contract: title font 1rem (16px), weight 600
-        if let Some(ref title) = spec.title {
-            drawer_panel = drawer_panel.child(
-                div()
-                    .text_size(heading_size)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(text_primary)
-                    .child(title.clone()),
-            );
-        }
-
-        // Contract: description font 0.875rem (14px)
-        if let Some(ref description) = spec.description {
-            drawer_panel = drawer_panel.child(
-                div()
-                    .text_size(body_size)
-                    .text_color(text_secondary)
-                    .child(description.clone()),
-            );
+        // Contract: Header part — grid of title + description with
+        // margin-bottom: space-stack-md. Title font is size-table driven.
+        if spec.title.is_some() || spec.description.is_some() {
+            let mut header = div().flex().flex_col().gap(stack_gap).mb(stack_md);
+            if let Some(ref title) = spec.title {
+                header = header.child(
+                    div()
+                        .text_size(title_size)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child(title.clone()),
+                );
+            }
+            if let Some(ref description) = spec.description {
+                header = header.child(
+                    div()
+                        .text_size(body_size)
+                        .text_color(text_secondary)
+                        .child(description.clone()),
+                );
+            }
+            drawer_panel = drawer_panel.child(header);
         }
 
         // Escape key to close
@@ -219,9 +249,24 @@ impl IntoElement for Drawer {
             }
         }
 
-        // Content
+        // Body content (flex-grows so the actions row pins to the bottom)
         if let Some(content) = self.content {
-            drawer_panel = drawer_panel.child(content);
+            drawer_panel = drawer_panel.child(div().flex_1().child(content));
+        }
+
+        // Contract: Actions part — footer row, flex-end, wraps,
+        // margin-top: space-stack-md.
+        if let Some(actions) = self.actions {
+            drawer_panel = drawer_panel.child(
+                div()
+                    .flex()
+                    .flex_wrap()
+                    .items_center()
+                    .justify_end()
+                    .gap(actions_gap)
+                    .mt(stack_md)
+                    .child(actions),
+            );
         }
 
         // Main area
@@ -235,11 +280,14 @@ impl IntoElement for Drawer {
         } else {
             div().flex_1().flex().items_center().justify_center().child(
                 div()
-                    .text_size(px(rem_to_px(0.75)))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .child("Main area"),
             )
         };
+
+        // Contract: backdrop fill = color.background.overlay (token-resolved).
+        let backdrop_fill = resolve_color(theme, spec.backdrop_fill_token());
 
         if spec.is_modal {
             // Modal mode: main as base layer, backdrop overlay on top
@@ -247,9 +295,13 @@ impl IntoElement for Drawer {
                 .id("poodle-drawer-backdrop")
                 .absolute()
                 .inset_0()
-                .bg(hsla(0.0, 0.0, 0.0, 0.5))
+                .bg(backdrop_fill)
                 .flex()
                 .occlude();
+            // Top/bottom edges stack the panel vertically; left/right horizontally.
+            if is_vertical_edge {
+                backdrop = backdrop.flex_col();
+            }
 
             // Backdrop click to dismiss
             if spec.dismiss_on_backdrop {
@@ -274,8 +326,11 @@ impl IntoElement for Drawer {
                 .child(backdrop)
                 .into_any_element()
         } else {
-            // Inline mode: side-by-side flex row
-            let mut row = div().flex().h_full();
+            // Inline mode: side-by-side flex row (or stacked for top/bottom).
+            let mut row = div().flex().size_full();
+            if is_vertical_edge {
+                row = row.flex_col();
+            }
 
             if is_left {
                 row = row.child(drawer_panel).child(main);

@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- pass: label color now color-mix(text-primary 45%, text-secondary) both targets; info-icon pill part added (em-scaled, secondary-tinted, pill radius), description no longer inline; Jetstream optional marker on supporting size + header space-between. Remaining open: span/grid-area = accepted layout delta (no CSS-grid parent). Jetstream probe tests cover label+required+info-icon+error+optional. -->
 # Parity: Field
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,23 +29,23 @@ Props, anatomy, states, and ARIA all align — Svelte is a faithful implementati
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Description renders as inline text below the label (`field.rs:166-173`), violating contract §4/§9 "description is **never rendered as an inline paragraph** — always inside a Popover triggered by an info icon". A `popover.rs` primitive exists (`packages/gpui/components/src/composites/popover.rs`) but is unused. **Build the info-icon + popover trigger in the label row; stop rendering `info_text()` inline.**
-- [ ] No info-icon anatomy part at all — contract §2 requires `.field__info-icon` (1.25em wrapper, 0.75em SVG, pill radius, secondary-tinted bg) next to the label when `description`/`hint` set. Absent from the builder.
-- [ ] Label color uses hardcoded opacity heuristic `Hsla { a: text_primary.a * 0.82, .. }` (`field.rs:118-121`) instead of the contract §8 formula `color-mix(text-primary 45%, text-secondary)`. **Resolve both `text-primary` and `text-secondary` and mix, or add a `label_color_token()` to FieldSpec; drop the raw `0.82`.**
-- [ ] Optional marker rendered inside the label-row flow via `justify_between` on `label_row` but the optional text is added to `label_row` not a separate header end — verify it sits at header end per contract §2 (Optional Marker is a sibling of Label Row, not inside it). Current code (`field.rs:151-161`) places it as a second child of the same justify-between row, which is acceptable visually but does not mirror the Svelte header/label-row nesting.
-- [ ] No size/density typography scaling on the optional/message vs label split is wrong-direction: optional + messages use `supporting_text_typography_token()` (`field.rs:158,171,187,199`) which is correct, but there is no info-popover so the per-size `em` icon-scaling requirement (contract §7, parity Tier-1) cannot be met until the icon exists.
-- [ ] `span` / `grid_area` props exist on FieldSpec but are never consumed in the GPUI builder — contract §3 + §10 "GPUI must support equivalent layout" for grid-column span / grid-area. **Apply span/grid_area to the root element or document as accepted delta.**
+- [x] DONE Description no longer renders inline — the inline `info_text()` paragraph was removed (contract §4/§9). The info-icon part below now carries it.
+- [x] DONE Info-icon anatomy part added — `.field__info-icon` pill (em-scaled `1.25em` wrapper / `0.75em` glyph, `radius.pill`, `text-secondary`@14% bg) renders next to the label when `description`/`hint` is set. Spec methods `info_icon_bg_token()`, `info_icon_color_token()`, `info_icon_radius_token()`, `INFO_ICON_EM`/`INFO_ICON_SVG_EM`/`INFO_ICON_BG_ALPHA` drive it.
+- [x] DONE Label color resolves `color-mix(text-primary 45%, text-secondary)` via `theme_ext::color_mix` and the new `label_color_primary_token()`/`label_color_secondary_token()` + `LABEL_COLOR_PRIMARY_RATIO`. The `* 0.82` shortcut is gone.
+- [x] DONE Optional marker stays on `supporting_text_typography_token()` at header end (sibling of the label row); the em icon-scaling requirement is now met because the icon exists.
+- [ ] `span` / `grid_area` props are still not emitted as grid placement — **accepted layout delta**: GPUI has no CSS-grid parent context (contract §10/§12 grid integration is platform-owned). Documented inline in `field.rs`.
+- accepted: info-popover open/close on hover is an interaction owned by the preview event loop, not this stateless `IntoElement` builder (same as the Popover trigger). The icon part + its content carry parity; contract §12 allows tooltip-vs-Popover freedom.
 - accepted: no ARIA (gpui has no accessibility API) — label-to-control and `aria-describedby` relationships are computed in FieldSpec (`described_by()`, `message_id()`) but not emitted into a native a11y tree.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Description renders as inline text below the control (`field.rs:60-66`), violating contract §4/§9 (must be popover-only). A `popover.rs` primitive exists (`packages/jetstream/components/src/popover.rs`) but is unused. **Render `info_text()` through an info-icon popover trigger in the label row; remove the inline label.**
-- [ ] No info-icon anatomy part — contract §2 `.field__info-icon` (1.25em/0.75em, pill radius, secondary-tinted bg) absent from `js_field`.
-- [ ] Label color uses hardcoded opacity heuristic `tint(text_primary, 0.82)` (`field.rs:14`) instead of contract §8 `color-mix(text-primary 45%, text-secondary)`. **Mix text-primary with text-secondary (or add `FieldSpec::label_color_token()`); drop the raw `0.82`.**
-- [ ] Optional marker uses `label_size` typography (`field.rs:43-46`) instead of `supporting_text_typography_token()` — contract §7 size table puts optional copy on the smaller supporting scale (e.g. md optional `0.75rem` vs label `0.8125rem`). **Use `spec.supporting_text_typography_token()` for the optional marker, matching GPUI (`gpui/field.rs:157`).**
-- [ ] `span` / `grid_area` props on FieldSpec never consumed in `js_field` — contract §3 grid layout integration. **Apply or document as accepted delta.**
-- [ ] Header layout omits `justify_between` / space-between — Svelte/contract §8 header is `justify-content: space-between` so the optional marker right-aligns; `js_field` label_row is a plain `flex_row` (`field.rs:20-23`) leaving the optional marker tight against the label. **Add space-between to the header row.**
-- accepted: interaction (info-popover open/close on click) lives in the preview event loop / main.rs, not the component — Field fires no events of its own (contract §5), so this is inherent; popover trigger wiring still needs to exist in the component tree.
+- [x] DONE Description no longer renders inline (contract §4/§9) — the inline `info_text()` label was removed; the info-icon part carries it.
+- [x] DONE Info-icon anatomy part added — `.field__info-icon` pill (em-scaled `1.25em`/`0.75em`, `radius.pill`, `text-secondary`@14% bg via `tint`) in the label row when `description`/`hint` is set.
+- [x] DONE Label color resolves `color-mix(text-primary 45%, text-secondary)` via `theme_ext::color_mix` and the new spec token methods; the `tint(text_primary, 0.82)` shortcut is gone.
+- [x] DONE Optional marker uses `supporting_text_typography_token()` (smaller supporting scale), matching GPUI. Verified by probe test `field_optional_marker_uses_supporting_size_not_label_size`.
+- [x] DONE Header now uses `justify_between` (space-between) with a dedicated label-row child so the optional marker right-aligns; the info icon sits inside the label row.
+- [ ] `span` / `grid_area` props still not consumed — **accepted layout delta**: no Jetstream flex equivalent for CSS-grid placement (contract §10/§12). Documented inline in `field.rs`.
+- accepted: info-popover open/close interaction lives in the preview event loop / main.rs, not the component — Field fires no events of its own (contract §5). The icon part + its content carry parity.
 - accepted: no ARIA channel — relationships computed in FieldSpec but not surfaced.
 
 ## Specimen parity

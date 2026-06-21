@@ -198,6 +198,47 @@ impl FieldSpec {
         semantic::COLOR_TEXT_SECONDARY
     }
 
+    /// Label color is `color-mix(in srgb, text-primary 45%, text-secondary)`
+    /// (contract §8). These two methods expose the source tokens and
+    /// [`Self::LABEL_COLOR_PRIMARY_RATIO`] the mix ratio so each target resolves
+    /// an identical color instead of an opacity shortcut.
+    pub fn label_color_primary_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn label_color_secondary_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// Proportion of `text-primary` kept in the label-color mix (contract §8).
+    pub const LABEL_COLOR_PRIMARY_RATIO: f32 = 0.45;
+
+    /// Info-icon pill background is `color-mix(text-secondary 14%, transparent)`
+    /// (contract §8). The source token is `text-secondary`; targets apply the
+    /// 0.14 alpha factor at [`Self::INFO_ICON_BG_ALPHA`].
+    pub fn info_icon_bg_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// Info-icon pill color (contract §8: `text-secondary`).
+    pub fn info_icon_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// Alpha factor applied to `info_icon_bg_token` for the pill background
+    /// (contract §8: `text-secondary 14%`).
+    pub const INFO_ICON_BG_ALPHA: f32 = 0.14;
+
+    pub fn info_icon_radius_token(&self) -> &'static str {
+        semantic::RADIUS_PILL
+    }
+
+    /// Info-icon wrapper edge in `em` of the label font (contract §7: `1.25em`).
+    pub const INFO_ICON_EM: f32 = 1.25;
+
+    /// Info-icon SVG edge in `em` of the label font (contract §7: `0.75em`).
+    pub const INFO_ICON_SVG_EM: f32 = 0.75;
+
     pub fn row_gap_token(&self) -> &'static str {
         match self.density {
             ControlDensity::Compact => semantic::SPACE_BUTTON_GAP,

@@ -43,6 +43,10 @@ impl FieldSet {
         self.spec.legend = Some(v.into());
         self
     }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
     pub fn columns(mut self, v: u8) -> Self {
         self.spec.columns = v;
         self
@@ -62,40 +66,66 @@ impl IntoElement for FieldSet {
         let spec = &self.spec;
 
         let legend_color = resolve_color(theme, spec.legend_color_token());
-        let gap = resolve_px(theme, spec.gap_token());
-        let stack_sm = resolve_px(theme, "space.stack.sm");
+        // Column-gap = scaleToSpace(gap); None → 0 (contract §6).
+        let col_gap = spec
+            .column_gap_token()
+            .map(|t| resolve_px(theme, t))
+            .unwrap_or_else(|| px(0.0));
+        // Row-gap = column-gap + 0.5rem (asymmetric, contract §6).
+        let row_gap = px(f32::from(col_gap) + rem_to_px(FieldSetSpec::ROW_GAP_EXTRA_REM));
+        let legend_mb = resolve_px(theme, spec.legend_margin_bottom_token());
 
         let mut root = div().flex().flex_col();
 
-        // Legend (styled like Eyebrow: uppercase, small, semibold; 0.6875rem)
+        // `span` (FieldSetSpec) is a CSS-grid placement prop. GPUI has no
+        // CSS-grid parent context, so it is an accepted layout delta — the
+        // owning layout positions the fieldset; no per-fieldset style emitted.
+
+        // Legend — eyebrow scale: fixed 0.6875rem (NOT typography-label-size,
+        // contract §6), semibold, uppercase. letter-spacing 0.12em and
+        // line-height 1.5 have no GPUI div API — accepted rendering delta.
         if let Some(ref legend) = spec.legend {
             root = root.child(
                 div()
-                    .text_size(px(rem_to_px(0.6875)))
+                    .text_size(px(rem_to_px(FieldSetSpec::LEGEND_SIZE_REM)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(legend_color)
-                    .mb(stack_sm)
+                    .mb(legend_mb)
                     .child(legend.to_uppercase()),
             );
         }
 
-        // Fields grid
-        let mut grid = div().flex().flex_col().gap(gap);
-
-        // For multi-column, use flex-wrap with width constraints
-        if spec.columns > 1 {
-            grid = div().flex().flex_wrap().gap(gap);
+        // Description — <p> between legend and fields (contract §2).
+        if let Some(ref description) = spec.description {
+            let desc_color = resolve_color(theme, spec.description_color_token());
+            let desc_size = resolve_px(theme, spec.description_size_token());
+            let desc_mb = resolve_px(theme, spec.description_margin_bottom_token());
+            root = root.child(
+                div()
+                    .text_size(desc_size)
+                    .text_color(desc_color)
+                    .mb(desc_mb)
+                    .child(description.clone()),
+            );
         }
+
+        // Fields grid. Equal-fraction columns via flex_1 (mirrors CSS
+        // repeat(columns, minmax(0, 1fr))) with asymmetric row/column gaps.
+        let mut grid = if spec.columns > 1 {
+            div().flex().flex_wrap()
+        } else {
+            div().flex().flex_col()
+        };
+        // Taffy/gpui flex has no separate row/column gap; the wrap row-gap and
+        // the inline column-gap are both driven by `gap`. Use column-gap as the
+        // single flex gap; the extra row-gap is an accepted flex-engine delta.
+        grid = grid.gap(if spec.columns > 1 { col_gap } else { row_gap });
 
         for child in self.children {
             if spec.columns > 1 {
-                // Each child takes up 1/columns of the width minus gap
-                let col_width = match spec.columns {
-                    2 => px(rem_to_px(15.0)),  // ~half-width at default container
-                    3 => px(rem_to_px(10.0)),
-                    _ => px(rem_to_px(7.5)),
-                };
-                grid = grid.child(div().min_w(col_width).flex_1().child(child));
+                // Equal fraction per column: flex_1 with min_w(0) so each child
+                // shares remaining width evenly (≈ minmax(0, 1fr)).
+                grid = grid.child(div().flex_1().min_w(px(0.0)).child(child));
             } else {
                 grid = grid.child(child);
             }

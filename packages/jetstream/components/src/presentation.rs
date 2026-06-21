@@ -406,6 +406,47 @@ pub fn editable_list_item_gap_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── DataTable size scale ─────────────────────────────────────────
+//
+// Contract §11 "Size Variants": the selection column width per size
+// (md == `3.25rem`) and the fixed actions column width (`3.5rem`, all
+// sizes). Mirrors `poodle_gpui::presentation::data_table_*`.
+
+/// Selection (checkbox) column width in rem per size. Contract §11 size
+/// table: xs 2.5, sm 2.75, md 3.25, lg 3.625, xl 4.
+pub fn data_table_selection_width_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 2.5,
+        ControlSize::Sm => 2.75,
+        ControlSize::Md => 3.25,
+        ControlSize::Lg => 3.625,
+        ControlSize::Xl => 4.0,
+    }
+}
+
+/// Row-actions column width in rem. Contract `.data-table__actions`
+/// is a fixed `3.5rem` across all sizes.
+pub fn data_table_actions_width_rem() -> f32 {
+    3.5
+}
+
+// ── Drawer size scale ────────────────────────────────────────────
+//
+// Contract §8 "Size adjustments": the drawer header title font-size per
+// size. md == `1rem`. Mirrors `poodle_gpui::presentation::drawer_title_font_rem`.
+
+/// Drawer header title font-size in rem per size. Contract §8 size table:
+/// xs 0.8125, sm 0.875, md 1, lg 1.0625, xl 1.125.
+pub fn drawer_title_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.8125,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.0625,
+        ControlSize::Xl => 1.125,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0
