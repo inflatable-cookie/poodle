@@ -1,5 +1,5 @@
 <!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
-<!-- pass: TimeZoneSelectSpec grown to Select-parity (options/search_query/aria/name + shared default_time_zone_options() + to_select_spec()); gpui now renders selectable filtered zones + search input + correct placeholder + on_change/on_search channels; jetstream delegates to js_select (full dropdown/search/grouping/indicator); both probe/build-verified -->
+<!-- pass: TimeZoneSelectSpec grown to Select-parity (options/search_query/aria/name + shared default_time_zone_options() + to_select_spec()); gpui now renders selectable filtered zones + search input + correct placeholder + on_change/on_search channels; jetstream delegates to js_select (full dropdown/search/grouping/indicator); both probe/build-verified. GPUI specimen done; Jetstream pending engine recovery — specimen flag stays gap until Jetstream preview builds clean. -->
 # Parity: TimeZoneSelect
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -54,7 +54,7 @@ GPUI hand-rolls a trigger + dropdown (Known Delta — no `Select` primitive comp
 ## Specimen parity
 
 - Svelte covers: Default (interactive, value echoed below), Pre-selected (`America/New_York`), Disabled, plus Sizes and Densities snippets (`TimeZoneSelectSpecimen.svelte`). Real `Select`, so open/search/keyboard all live.
-- GPUI covers: Default (toggleable open via `tz-select-open` state), Pre-selected, Disabled, Sizes, Densities (`specimens/time_zone_select.rs`). — missing: searchable/query demo, value-pick interaction (open list isn't selectable).
+- GPUI covers: Default (toggleable open via `tz-select-open` state), Pre-selected, **Open (searchable, selected)** — statically-open dropdown with live `search_query="amer"` filtering the real zone list plus the selected zone highlighted with a check, Disabled, Sizes, Densities (`specimens/time_zone_select.rs`). Every group is the real `TimeZoneSelect`; the open list is selectable (rows fire `on_change`) and the search input is the real `TextInput`. Builds clean. **GPUI specimen complete.** Commit/select/query state stays consumer-owned (preview channels).
 - Jetstream covers: With value, Placeholder, Disabled (`specimens/time_zone_select.rs`). — missing: **open/dropdown state**, **Sizes** group, **Densities** group, searchable demo. Closed-chrome only.
 
 ## Notes

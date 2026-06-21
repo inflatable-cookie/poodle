@@ -44,14 +44,16 @@ Contract §6 only tokenizes Border + Root gap. Title/message font-sizes and root
 ## Specimen parity
 
 - Svelte covers: **none** (no Svelte component).
-- GPUI covers: **none** (no GPUI component).
-- Jetstream covers: Info suggestion, Warning with action (+ referenced fields), Danger (`inline_remediation.rs` specimen, 3 groups). The specimen now renders the corrected contract anatomy (left border, no icon, Button action) since it calls the unchanged `js_inline_remediation` signature.
+- GPUI covers: **done** — `inline_remediation_specimen.rs` (registered as `inline-remediation`, Form tag). 6 groups: tones (info/warning/danger), actionless, with-action, referenced-fields (with count hint), disabled-action. There is no GPUI `InlineRemediation` *component* yet, so the specimen materializes the contract anatomy directly from real, token-resolved primitives (left-border via `border_token()`, gap via `gap_token()`, padding/typography via `space.panel.*`/`typography.*`, plus a real `Button` for the action — the same construction the Jetstream `js_inline_remediation` uses). Zero hand-coded visual values.
+- Jetstream covers: Info suggestion, Warning with action (+ referenced fields), Danger (`inline_remediation.rs` specimen, 3 groups). The specimen renders the corrected contract anatomy (left border, no icon, Button action) via the unchanged `js_inline_remediation` signature.
 - Jetstream probe tests (`inline_remediation.rs` `#[cfg(test)]`): title + message + zero-icon anatomy; message uses secondary text; action renders as a real Button with its interaction id; tone drives the border token. All pass.
 
-specimen=gap remains because two of three targets still have no specimen (GPUI has no implementation; Svelte is intentionally absent). The Jetstream specimen itself is now contract-faithful.
+**GPUI specimen done; Jetstream pending engine recovery.**
+
+specimen=gap remains: Svelte is intentionally absent and the Jetstream engine is externally build-blocked (cannot be runtime-verified here). The GPUI specimen now exists and builds (`packages/gpui/preview` → 0 errors).
 
 ## Notes
 
 - This is the inverse of the usual parity case: the **authoritative reference (Svelte) is intentionally missing**, so the contract alone is the source of truth and Jetstream is graded against it directly. The prior Jetstream liberties (full border, leading icon, label-as-action, magic tint) are now removed — Jetstream matches the contract anatomy.
-- Remaining open decision (gpui=1): either (a) build a GPUI `InlineRemediation` resolving `border_token()`/`gap_token()`, or (b) formally retire it in favor of `Callout`/`RemediationBanner`. The contract's §8 Known Delta leans toward (b). Not resolved in this pass (scoped to Jetstream).
+- Remaining open decision (gpui=1): either (a) build a GPUI `InlineRemediation` *component* resolving `border_token()`/`gap_token()`, or (b) formally retire it in favor of `Callout`/`RemediationBanner`. The contract's §8 Known Delta leans toward (b). The GPUI **specimen** now exists (built from real token-resolved primitives) even though the component does not — so the preview demonstrates the contract anatomy regardless of which way the decision lands. The gpui=1 todo is about the component, not the specimen.
 - consv=ok is a "contract is self-consistent" signal, not "Svelte parity achieved" — there is no Svelte to compare.

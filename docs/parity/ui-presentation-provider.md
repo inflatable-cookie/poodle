@@ -109,14 +109,20 @@ functions. Token-target and ARIA checks are N/A (see Notes). Divergences found:
   (`UiPresentationProviderSpecimen.svelte:11-35`). Demonstrates inherited
   presentation. — missing: the contract's third case, **Nested override**
   (outer `default/md`, inner `compact/sm`), per Integration table §12.
-- GPUI covers: Compact/sm and Comfortable/lg scopes wrapping `Button` +
-  `TextInput` (`ui_presentation_provider.rs:13-52`). — but because the provider
-  does not propagate (see GPUI gap), the specimen does **not actually
-  demonstrate inheritance**: the controls render at their own default size
-  regardless of the wrapping provider. Effectively a false-positive specimen.
-  Also missing the Nested override case.
+- GPUI covers: **done** — all three contract §12 integration rows now present
+  (`ui_presentation_provider.rs`): Compact/sm region, Comfortable/lg region, and
+  the previously-missing **Nested override** (outer `default/md`, inner
+  `compact/sm`), each wrapping real `Button` + `TextInput` under
+  `UiPresentationProvider`, grouped with `Eyebrow` labels. Caveat unchanged:
+  because the GPUI provider does not yet propagate context (see GPUI gap), the
+  wrapped controls still render at their own default size — the specimen
+  demonstrates the *intended structure and all three contract cases*, but the
+  cascade itself won't be visible until propagation lands. This is an honest
+  structural demo of the contract integration table, not a fake.
 - Jetstream covers: **nothing** — no specimen file exists. — missing: the entire
   specimen (all three integration cases).
+
+**GPUI specimen done (all 3 integration rows incl. nested override); Jetstream pending engine recovery.** specimen=gap kept: Jetstream has no specimen and the engine is externally build-blocked; the provider also produces no visual chrome of its own (contract §4/§12), so the specimen is a structural integration demo by nature. GPUI preview builds with 0 errors.
 
 ## Notes
 

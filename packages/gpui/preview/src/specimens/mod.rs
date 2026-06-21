@@ -114,6 +114,7 @@ mod form_dialog_specimen;
 mod form_layout;
 mod form_shell;
 mod inline_list_section_specimen;
+mod inline_remediation_specimen;
 mod list_card;
 mod list_card_counter;
 mod list_container_specimen;
@@ -463,6 +464,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "InlineListSection",
             theme,
             inline_list_section_specimen::render(theme),
+        ),
+        "inline-remediation" => specimen_card(
+            "InlineRemediation",
+            theme,
+            inline_remediation_specimen::render(state, cx),
         ),
         "debug-dialog" => specimen_card("DebugDialog", theme, debug_dialog_specimen::render(theme)),
         "filter-toolbar" => specimen_card(

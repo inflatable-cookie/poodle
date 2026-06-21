@@ -33,8 +33,10 @@ IconProvider is a pure context boundary with no DOM output, no tokens, no states
 ## Specimen parity
 
 - Svelte covers: registry provision + descendant Icon resolution (129 lines — demonstrates icons rendering under a provider).
-- GPUI covers: 35-line specimen — but since the provider is a pass-through, it cannot demonstrate registry scoping; verify it actually shows provided icons resolving.
+- GPUI covers: **done (as far as the contract allows)** — `icon_provider.rs` wraps three real `Icon`s (`search`/`calendar`/`clock`) inside a real `IconProvider` boundary, labeled with an `Eyebrow`, plus an honest note that GPUI uses a shared/global icon registry today so the provider is a no-visual compatibility boundary. Contract §4/§7 say IconProvider produces **no visual output** — there is no renderable surface to demonstrate beyond "icons resolve under the provider", which this specimen does. No additional groups are meaningful; adding more would be invented visuals. Left as-is.
 - Jetstream covers: **none** — no specimen, matching the missing component.
+
+**GPUI specimen done (non-visual provider — icons-under-boundary demo is the full extent); Jetstream pending engine recovery.** specimen=gap kept: Jetstream has no specimen/component and the engine is externally build-blocked. GPUI preview builds with 0 errors.
 
 ## Notes
 

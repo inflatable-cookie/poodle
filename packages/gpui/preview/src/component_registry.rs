@@ -587,6 +587,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Compact related-list section for detail and metadata pages.",
     },
     ComponentEntry {
+        slug: "inline-remediation",
+        display_name: "InlineRemediation",
+        description: "Inline tone-styled recovery message attached to form fields.",
+    },
+    ComponentEntry {
         slug: "list-container",
         display_name: "ListContainer",
         description: "List-page shell with header, filters, and pagination.",
@@ -812,6 +817,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "block-editor"
         | "markdown-editor"
         | "inline-list-section"
+        | "inline-remediation"
         | "debug-dialog" => ComponentTag::Form,
         "app-header"
         | "page-header"

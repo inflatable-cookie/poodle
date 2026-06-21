@@ -54,6 +54,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- Open (searchable): trigger expanded, live query filters the zone
+        //     list, selected zone highlighted with a check. Rendered statically
+        //     open so the dropdown anatomy (search field + filtered options +
+        //     selected indicator) is visible without interaction. ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                // Reserve vertical room for the absolutely-positioned dropdown
+                // so it does not overlap the following examples.
+                .pb(px(240.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Open (searchable, selected)"),
+                    theme,
+                ))
+                .child(TimeZoneSelect::from_spec(
+                    TimeZoneSelectSpec::new()
+                        .with_value("America/New_York")
+                        .with_open(true)
+                        .with_search_query("amer"),
+                    theme,
+                )),
+        )
         // --- Disabled ---
         .child(
             div()
