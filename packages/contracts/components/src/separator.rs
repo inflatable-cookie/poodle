@@ -46,4 +46,18 @@ impl SeparatorSpec {
     pub fn resolved_stroke_width(&self) -> &'static str {
         semantic::BORDER_WIDTH_DEFAULT
     }
+
+    /// Mix ratio applied to the subtle tone, matching the Svelte
+    /// `color-mix(in srgb, border-subtle 72%, transparent)` treatment
+    /// (`Separator.svelte`). `Default` tone uses the full color (ratio 1.0).
+    /// Single source of truth so both Rust targets stop hardcoding `0.72`.
+    ///
+    /// Note: there is no dedicated semantic token for this 72% subtle mix in
+    /// the token set; it is a contract-fixed constant carried on the spec.
+    pub fn subtle_mix_ratio(&self) -> f32 {
+        match self.tone {
+            RuleTone::Subtle => 0.72,
+            RuleTone::Default => 1.0,
+        }
+    }
 }

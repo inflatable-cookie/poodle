@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=2 jetstream=3 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: backdrop→overlay token (gpui); jet per-section gaps (header mb=stack.md, actions mt=stack.lg, gap=inline.sm), chrome-sized close button, removed non-contract 1px divider, max-height 42rem cap + body min-width-0; +7 jet probe tests -->
 # Parity: Dialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,19 +21,20 @@ All contract props present in Svelte with matching types/defaults: `open`, `defa
 
 ## GPUI gap (vs Svelte + contract)
 
-Robust impl; shadow/gap/color values align with `elevation-dialog` token semantics but are written as raw literals.
+Robust impl; all token-resolved.
 
-- [ ] Shadow color literals `hsla(0.0, 0.0, 0.0, 0.12)` (`dialog.rs:249`) and `hsla(0.0, 0.0, 0.0, 0.08)` (`dialog.rs:255`), plus offset/blur floats `px(8.0)`/`px(24.0)`/`px(2.0)`/`px(8.0)` (`dialog.rs:250-258`) — resolve the dialog elevation from a token, not raw HSLA + float stack.
-- [ ] Backdrop fill literal `hsla(0.0, 0.0, 0.0, 0.5)` at `dialog.rs:395` — resolve from `--poodle-color-background-overlay` token.
+- [x] Shadow — already token-resolved via `theme_ext::elevation_dialog_shadow()` (typed `ELEVATION_DIALOG`); the prior raw-HSLA stack referenced by the stale line numbers no longer exists in the code.
+- [x] Backdrop fill now resolves `spec.backdrop_fill_token()` (`color.background.overlay`) instead of the `hsla(0,0,0,0.5)` literal.
 - accepted: no ARIA (gpui has no accessibility API) — role/aria-modal not emitted; focus trap is platform-owned (Tier 3).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Uniform panel gap `gap(rem_to_px(1.0))` at `dialog.rs:49` — contract uses distinct gaps (header 0.375rem, actions ~0.5rem); resolve per-section gaps from tokens rather than a flat 1rem.
-- [ ] Close button sized by ad-hoc `icon_size * 1.5` (`dialog.rs:118-119`) — contract close button is an `IconButton` at chrome size (one step down); compute from size token, not a 1.5 multiplier.
-- [ ] Divider `h(1.0)` before actions (`dialog.rs:148`) — not in contract (Svelte divider is CSS treatment); reconcile to a token-resolved border or remove.
+- [x] Flat panel `gap(rem_to_px(1.0))` removed — per-section token spacing now: header internal gap `0.375rem` + `margin-bottom = space.stack.md`; actions internal gap `space.inline.sm` + `margin-top = space.stack.lg`.
+- [x] Close button is now chrome-sized: square at `control_height_rem(chrome_size)` (one stop down from the dialog size via `resolve_semantic_size`), glyph at `size_font_rem(chrome_size)`, `radius.control` corners, hit-test id `poodle-dialog-close`. No `*1.5` multiplier.
+- [x] Non-contract 1px pre-actions divider removed (Svelte has none).
+- additive: panel `max-height` capped at `42rem` (contract §7 rem term; the 80vh term is viewport-owned by the centering parent) + `overflow-y-hidden`; body children wrapped in a `min-width-0` body container (contract §8 `.dialog__body`).
 - accepted: no ARIA / aria-modal at runtime.
-- accepted: escape + backdrop dismissal handled in preview `main.rs` event loop, not the component.
+- accepted: escape + backdrop dismissal handled in preview `main.rs` event loop, not the component (preview-loop).
 
 ## Specimen parity
 

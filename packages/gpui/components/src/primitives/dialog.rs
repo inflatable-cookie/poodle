@@ -374,12 +374,14 @@ impl IntoElement for Dialog {
             }
         }
 
-        // Backdrop overlay — full-viewport scrim with centered dialog
+        // Backdrop overlay — full-viewport scrim with centered dialog.
+        // Svelte: backdrop background = var(--poodle-color-background-overlay).
+        let backdrop_fill = resolve_color(theme, spec.backdrop_fill_token());
         let mut backdrop = div()
             .id("poodle-dialog-backdrop")
             .absolute()
             .inset_0()
-            .bg(hsla(0.0, 0.0, 0.0, 0.5))
+            .bg(backdrop_fill)
             .flex()
             .items_center()
             .justify_center()

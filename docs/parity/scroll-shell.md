@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=3 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=0 specimen=gap -->
+<!-- pass: both targets rebuilt to the 3-layer Root→Viewport→Content anatomy (contract §2). Content wrapper added; horizontal/both gets a non-shrinking row (max-content analogue). GPUI: Root clips (overflow_hidden + radius), Viewport scrolls per-axis + padding + focus ring. Jetstream same minus focus. Keyboard scroll remains open (needs stateful ScrollHandle host). gpui build + jetstream probe (4) green. -->
 # Parity: ScrollShell
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -21,19 +22,19 @@ Svelte matches the contract: `direction`/`padding`/`asRole`/`label`/`focusable`/
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI does real scrolling: `overflow_y_scroll`/`overflow_x_scroll`/`overflow_scroll` per direction, `min_h_0`/`min_w_0` to allow shrink, focus ring on focusable, padding + radius from tokens.
+GPUI does real scrolling: `overflow_y_scroll`/`overflow_x_scroll`/`overflow_scroll` per direction, `min_h_0`/`min_w_0` to allow shrink, focus ring on focusable, padding + radius from tokens. Now built as the 3-layer anatomy.
 
-- [ ] **No Content layer / horizontal `min-width: max-content`** — contract §2 anatomy requires a Content wrapper; for horizontal/both it must set `min-width: max-content` so content does not collapse (contract §8). GPUI appends children directly to the viewport (`scroll_shell.rs:119-121`); horizontal row relies on child `flex_shrink_0` in the specimen instead.
-- [ ] **No keyboard scrolling** — contract §6 requires Arrow/Page/Home/End scrolling when the viewport is focused; `.focusable()` adds focus ring only (`scroll_shell.rs:104-109`), no key handlers. Contract §10 explicitly says GPUI must add this where the platform doesn't.
-- [ ] **No `overscroll-behavior: contain` equivalent** — scroll chaining not prevented. Contract §12 marks this an allowed delta "where possible" — note but try.
+- [x] DONE: **Content layer + horizontal max-content** — rebuilt to Root→Viewport→Content (contract §2). Root clips (`overflow_hidden` + `radius.surface`), Viewport owns per-axis overflow + padding + focus ring, Content wraps children; for horizontal/both the Content is a non-shrinking row (`flex_row().flex_shrink_0()`) — gpui's `min-width: max-content` analogue. Vertical Content is `flex_col().w_full()`.
+- [ ] **No keyboard scrolling** — contract §6 requires Arrow/Page/Home/End when the viewport is focused; `.focusable()` adds the focus ring only. gpui's `track_scroll`/`ScrollHandle` (offset/set_offset) makes this feasible, but the handle must persist across frames — the stateless `IntoElement` shell recreates it each render and loses offset. Needs a stateful host (Entity owning the ScrollHandle) before key handlers can be wired faithfully. Left open.
+- accepted: **`overscroll-behavior: contain`** — gpui exposes no overscroll-contain API; scroll chaining can't be prevented. Contract §12 marks this an allowed "where possible" delta.
 - accepted: no ARIA (gpui has no accessibility API) — region role / aria-label not emitted, though spec stores them.
 - accepted: scrollbar visuals platform-native (contract §12 Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] DONE: no longer a stub — `js_scroll_shell` now wires `spec.direction` (axis + scroll), `overflow_scroll` (per-axis), `resolved_padding()` (token-resolved inset, probe-verified to offset children), and `radius.surface`.
-- [ ] No focus ring / focusable / horizontal content `max-content` — focus/focusable live in the preview event loop; `max-content` for horizontal scroll needs non-shrinking children. Accepted/preview-side.
-- accepted: interaction (keyboard scroll) lives in preview `main.rs` event loop; no ARIA channel; scrollbar visuals platform-native.
+- [x] DONE: `js_scroll_shell` wires `spec.direction` (axis + scroll), `overflow_scroll` (per-axis), `resolved_padding()` (token-resolved inset, probe-verified to offset children), and `radius.surface`.
+- [x] DONE: rebuilt to the 3-layer anatomy (Root→Viewport→Content). Content wrapper added; horizontal/both gets a non-shrinking row (`flex_row().flex_shrink_0()`) as the `max-content` analogue, vertical is `flex_col().w_full()`. Probe-tested: `three_layer_anatomy` (child depth ≥ 3), `horizontal_lays_out_in_a_row`.
+- accepted: focus ring / focusable / keyboard scroll live in the preview `main.rs` event loop; no ARIA channel; scrollbar visuals platform-native.
 
 ## Specimen parity
 

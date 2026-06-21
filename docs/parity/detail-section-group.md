@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=4 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: GPUI now resolves min_column_width + caps columns via flex_basis(relative(1/N)); forwarded builders added. Jetstream column min switched item_min→min_column_width; max_columns cap noted as JsEl gap (no % flex-basis). Spec gained with_min_column_width/with_item_min_column_width/with_aria_label + min/item_min_column_width_rem(). gpui build + spec test + jetstream probe (4) green. -->
 # Parity: DetailSectionGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,18 +23,19 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-Renders grid as flex-row / stack as flex-col, but ignores most sizing props.
+Grid columns now resolve `min_column_width` and cap at `max_columns`; stack forces one column.
 
-- [ ] Hardcoded `min_w(px(224.0))` at `detail_section_group.rs:36` — ignores `spec.min_column_width`; always forces 14rem. Resolve from spec.
-- [ ] `max_columns` not constraining layout — flex-wrap + flex-1 allows unlimited columns; cap per `spec.max_columns`.
-- [ ] `item_min_column_width` not propagated to descendant DetailSections (Svelte injects a CSS custom property). Forward it.
-- [ ] No `with_density`/`with_layout`/sizing builders on the component — only `from_spec()` + `child()`; props settable only via spec constructor.
+- [x] DONE: hardcoded `min_w(px(224.0))` replaced with `min_w(px(rem_to_px(spec.min_column_width_rem())))` — column min now resolves from `spec.min_column_width`.
+- [x] DONE: `max_columns` capped via `flex_basis(relative(1.0 / N - 0.01))` + `flex_grow().flex_shrink_0()` (mirrors `form_layout` precedent) so at most N columns fit before wrapping.
+- [x] DONE: forwarded builders added (`density`/`layout`/`max_columns`/`min_column_width`/`item_min_column_width`) alongside `from_spec()` + `child()`.
+- accepted: `item_min_column_width` descendant forwarding — GPUI has no CSS-custom-property channel to inject `--poodle-detail-section-item-min` into descendant DetailSections; the value lives on the spec but cannot be forwarded without a render-time prop bus.
 - accepted: no ARIA (gpui has no accessibility API); no responsive collapse (Svelte has a 34rem container query — host-driven delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] DONE: `js_detail_section_group(spec, theme, children)` created — grid/stack layout, density gap, item min-width parsed from the spec rem string (not a hardcoded px). Registered in lib.rs, probe-tested.
-- [ ] Add the Jetstream specimen `packages/jetstream/preview/src/specimens/detail_section_group.rs` covering grid, stack, column-cap, and density variants.
+- [x] DONE: `js_detail_section_group(spec, theme, children)` — grid/stack layout, density gap, column min now resolves from `min_column_width` (was `item_min_column_width`, a contract drift) via the shared spec `min_column_width_rem()`. Stack branch added (single column, `w_full`). Registered in lib.rs, probe-tested (4 tests).
+- accepted: `max_columns` cap is approximated — JsEl has no percentage flex-basis/max-width, so the column count can't be bounded to N by fraction the way GPUI (`flex_basis(relative(1/N))`) or the Svelte grid does. Wrapping + `min_w` keeps columns legible; hard cap is a JsEl-layout gap.
+- [ ] Add the Jetstream specimen `packages/jetstream/preview/src/specimens/detail_section_group.rs` covering grid, stack, column-cap, and density variants. (Preview crate not built here.)
 
 ## Specimen parity
 

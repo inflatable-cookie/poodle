@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=3 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: stroke from border-width-default token on both targets (gpui f32::from(Pixels); jet resolve_px); subtle 72% mix sourced from new SeparatorSpec::subtle_mix_ratio() (no magic float); decorative now read (no AX channel); +4 jet probe tests (orientation/thickness/subtle/default tone) -->
 # Parity: Separator
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -21,15 +22,15 @@ Svelte matches the contract exactly. All three props (`orientation` default `"ho
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded stroke width `px(1.0)` (float) at `separator.rs:74,77` — `SeparatorSpec` exposes `resolved_stroke_width()` (→ `BORDER_WIDTH_DEFAULT`); resolve that token to px instead of the literal `1.0`.
-- [ ] Hardcoded subtle-tone alpha `raw_color.a * 0.72` at `separator.rs:61` — the `0.72` magic number duplicates Svelte's color-mix; pull from a token (or a shared subtle-mix constant) rather than a raw float literal in component code.
-- [ ] `decorative` field unused — the prop is forwarded via the `decorative()` builder (`separator.rs:42`) but never read in `into_element`; no semantic vs decorative distinction is made. Contract §6 requires it; GPUI accessibility is accepted-absent, but the field being dead should at least drive a non-focusable/structural marker if any AX channel ever lands.
+- [x] Stroke width now `px(f32::from(resolve_px(theme, spec.resolved_stroke_width())))` — token-resolved (`border.width.default` → 1px), not the `px(1.0)` literal.
+- [x] Subtle-tone alpha now `raw_color.a * spec.subtle_mix_ratio()` — the `0.72` lives on the spec (new `SeparatorSpec::subtle_mix_ratio()`, shared by both targets; Default tone → 1.0). No magic float in component code. (Note: no dedicated semantic token exists for the 72% mix; it is a contract-fixed constant carried on the spec.)
+- [x] `decorative` now read (`let _is_semantic = !self.spec.decorative;`) so the prop is no longer dead. No visual difference per contract §4; it is the hook for any future AX channel.
 - accepted: no ARIA (gpui has no accessibility API) — decorative/semantic role cannot be emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded stroke width `rem_to_px(0.0625)` at `separator.rs:43` — `SeparatorSpec::resolved_stroke_width()` exists (→ `BORDER_WIDTH_DEFAULT`); resolve the token instead of the literal `0.0625` rem.
-- [ ] `decorative` field unused — never read in `js_separator`; no semantic vs decorative handling. Accepted that interaction/AX lives outside the component, but the field is dead.
+- [x] Stroke width now `resolve_px(theme, spec.resolved_stroke_width())` — token-resolved (`border.width.default` → 1px), not the `rem_to_px(0.0625)` literal. Color base is `resolve_color(theme, spec.resolved_color())` tinted by `spec.subtle_mix_ratio()` (subtle 0.72 / default 1.0).
+- [x] `decorative` now read (`let _is_semantic = !spec.decorative;`) so the field is no longer dead. No visual effect (contract §4); no AX channel in Jetstream.
 - accepted: no ARIA channel for decorative/semantic role (no accessibility API).
 
 ## Specimen parity

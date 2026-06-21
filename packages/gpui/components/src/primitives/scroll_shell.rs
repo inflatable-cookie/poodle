@@ -1,4 +1,17 @@
 //! ScrollShell — real GPUI component backed by ScrollShellSpec.
+//!
+//! Contract: `docs/contracts/components/scroll-shell.md`
+//!
+//! Three-layer anatomy per contract §2:
+//!   Root (.scroll-shell)       → clip boundary: overflow hidden, radius-surface
+//!   Viewport (.scroll-shell__viewport) → scroll owner: per-axis overflow, padding, focus ring
+//!   Content (.scroll-shell__content)   → sizing wrapper: horizontal `min-width: max-content`
+//!
+//! gpui handles scrolling natively (mouse wheel / trackpad) once an axis has
+//! `overflow_*_scroll`. Keyboard scrolling (contract §6/§10) requires a
+//! persisted `ScrollHandle` owned by a stateful host; the stateless
+//! `IntoElement` shell can't retain scroll offset across frames, so that
+//! behavior is deferred to a stateful host (noted in the parity doc).
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -7,11 +20,6 @@ use poodle_specs::{Direction, PaddingScale, ScrollShellSpec, SurfaceRole};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A scrollable container with directional overflow.
-///
-/// Note: gpui handles scrolling differently from web — this component
-/// applies overflow_hidden and padding from the spec, with direction-
-/// appropriate flex layout. For true scrolling, use gpui's built-in
-/// scroll view primitives.
 pub struct ScrollShell {
     spec: ScrollShellSpec,
     theme: GpuiThemeProvider,
@@ -77,49 +85,77 @@ impl IntoElement for ScrollShell {
         let theme = &self.theme;
         let spec = &self.spec;
         let padding = spec.resolved_padding();
+        let needs_horizontal =
+            matches!(spec.direction, Direction::Horizontal | Direction::Both);
 
         let surface_radius = resolve_radius(theme, "radius.surface");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
-        let id_str = spec.label.as_deref().unwrap_or("scroll-shell");
-        let mut el = div()
-            .id(SharedString::from(format!("poodle-{}", id_str)))
-            .rounded(surface_radius)
-            .flex_1();
+        // ── Content (.scroll-shell__content) — sizing wrapper ──
+        // For horizontal/both the content must not collapse: a non-shrinking
+        // row sized to its children is gpui's `min-width: max-content` analogue
+        // (contract §8 Content). Vertical content stacks and fills the width.
+        let mut content = div().flex();
+        content = if needs_horizontal {
+            content.flex_row().flex_shrink_0()
+        } else {
+            content.flex_col().w_full()
+        };
+        for child in self.children {
+            content = content.child(child);
+        }
 
-        // Direction-based flex layout + real scrolling
+        // ── Viewport (.scroll-shell__viewport) — scroll owner ──
+        let id_str = spec.label.as_deref().unwrap_or("scroll-shell");
+        let mut viewport = div()
+            .id(SharedString::from(format!("poodle-{}", id_str)))
+            .size_full()
+            .rounded(surface_radius);
+
+        // Per-axis overflow + the flex axis the scroll runs along (contract §8).
         match spec.direction {
             Direction::Vertical => {
-                el = el.flex().flex_col().min_h_0().overflow_y_scroll();
+                viewport = viewport.flex().flex_col().min_h_0().overflow_y_scroll();
             }
             Direction::Horizontal => {
-                el = el.flex().flex_row().min_w_0().overflow_x_scroll();
+                viewport = viewport.flex().flex_row().min_w_0().overflow_x_scroll();
             }
             Direction::Both => {
-                el = el.flex().flex_col().min_h_0().min_w_0().overflow_scroll();
+                viewport = viewport
+                    .flex()
+                    .flex_col()
+                    .min_h_0()
+                    .min_w_0()
+                    .overflow_scroll();
             }
         }
 
-        // Focus ring for focusable shells
+        // Focus ring for focusable viewports (contract §8 focus styles).
         if spec.is_focusable {
-            el = el.focusable().focus(move |s| {
+            viewport = viewport.focusable().focus(move |s| {
                 s.border_color(focus_ring)
                     .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             });
         }
 
-        // Padding
+        // Interior padding on the viewport (contract §8 padding scale).
         if let Some(h) = padding.horizontal {
-            el = el.px(resolve_px(theme, h));
+            viewport = viewport.px(resolve_px(theme, h));
         }
         if let Some(v) = padding.vertical {
-            el = el.py(resolve_px(theme, v));
+            viewport = viewport.py(resolve_px(theme, v));
         }
 
-        for child in self.children {
-            el = el.child(child);
-        }
+        viewport = viewport.child(content);
 
-        el.into_any_element()
+        // ── Root (.scroll-shell) — clip boundary ──
+        div()
+            .size_full()
+            .min_w_0()
+            .min_h_0()
+            .overflow_hidden()
+            .rounded(surface_radius)
+            .child(viewport)
+            .into_any_element()
     }
 }

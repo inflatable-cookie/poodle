@@ -145,9 +145,9 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 0 | 0 | gap |
 | detail-section | fixed | 0 | 0 | gap |
-| detail-section-group | fixed | 4 | 1 | gap |
+| detail-section-group | fixed | 0 | 0 | gap |
 | detail-shell | ok | 0 | 1 | ok |
-| dialog | ok | 2 | 3 | gap |
+| dialog | ok | 0 | 0 | gap |
 | dock-region | ok | 2 | 2 | gap |
 | drawer | ok | 0 | 0 | gap |
 | duration-input | fixed | 2 | 2 | gap |
@@ -209,11 +209,11 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | relation-picker | fixed | 2 | 2 | gap |
 | remediation-banner | gap | 0 | 0 | ok |
 | resize-handle | ok | 1 | 1 | gap |
-| scroll-shell | ok | 3 | 1 | gap |
+| scroll-shell | ok | 1 | 0 | gap |
 | segmented-control | fixed | 0 | 0 | gap |
 | select | ok | 0 | 0 | gap |
 | selection-summary | fixed | 0 | 0 | gap |
-| separator | ok | 3 | 2 | gap |
+| separator | ok | 0 | 0 | gap |
 | sidebar-nav | fixed | 0 | 1 | ok |
 | skeleton | fixed | 0 | 0 | gap |
 | slider | fixed | 1 | 1 | gap |

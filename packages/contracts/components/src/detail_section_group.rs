@@ -55,6 +55,22 @@ impl DetailSectionGroupSpec {
         self
     }
 
+    pub fn with_min_column_width(mut self, min_column_width: impl Into<String>) -> Self {
+        self.min_column_width = min_column_width.into();
+        self
+    }
+
+    pub fn with_item_min_column_width(mut self, item_min_column_width: impl Into<String>) -> Self {
+        self.item_min_column_width = item_min_column_width.into();
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    /// Inter-section gap in rem, driven by density (contract §7).
     pub fn gap_rem(&self) -> f32 {
         match self.density {
             ControlDensity::Compact => 0.75,
@@ -62,4 +78,21 @@ impl DetailSectionGroupSpec {
             ControlDensity::Comfortable => 1.25,
         }
     }
+
+    /// `min_column_width` ("14rem") parsed to rem; falls back to `14.0`.
+    pub fn min_column_width_rem(&self) -> f32 {
+        parse_rem(&self.min_column_width).unwrap_or(14.0)
+    }
+
+    /// `item_min_column_width` ("12rem") parsed to rem; falls back to `12.0`.
+    pub fn item_min_column_width_rem(&self) -> f32 {
+        parse_rem(&self.item_min_column_width).unwrap_or(12.0)
+    }
+}
+
+/// Parse a `"<n>rem"` dimension string to its rem value.
+fn parse_rem(s: &str) -> Option<f32> {
+    s.trim()
+        .strip_suffix("rem")
+        .and_then(|n| n.trim().parse::<f32>().ok())
 }
