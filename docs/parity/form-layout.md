@@ -1,4 +1,10 @@
 <!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 82: Jetstream specimen de-faked — replaced the hand-rolled field() closure
+     (hardcoded text_size(11)/h(2rem)/raw border) with real js_field + js_text_input;
+     actions now real js_button (Cancel secondary / Save primary). Added the two missing
+     groups: "Mixed 2-col and 3-col rows" (columns=3) and "With error and field errors"
+     (with_field_error → accessible field-errors summary, invalid fields). jetstream/preview
+     builds clean. specimen stays gap: GPUI specimen still lacks the fieldErrors group. -->
 <!-- pass 50: both targets. Additive FormLayoutSpec.field_errors (+with_field_error(s)/
      has_field_errors) + layout token methods. Both now compose the real Callout (error/success)
      + FormActions primitives (was inline banner/actions); added accessible field-errors summary
