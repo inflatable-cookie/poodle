@@ -34,9 +34,11 @@ mod page_header;
 mod page_loading;
 mod picker_shell;
 mod relation_picker;
+mod remediation_banner;
 mod selection_summary;
 mod sidebar_nav;
 mod split_view;
+mod state_tile;
 mod toast_host;
 mod tree;
 mod toast_stack;
@@ -80,9 +82,11 @@ pub use page_header::PageHeader;
 pub use page_loading::PageLoading;
 pub use picker_shell::PickerShell;
 pub use relation_picker::{DrillEnterArgs, RelationPicker};
+pub use remediation_banner::RemediationBanner;
 pub use selection_summary::SelectionSummary;
 pub use sidebar_nav::SidebarNav;
 pub use split_view::SplitView;
+pub use state_tile::StateTile;
 pub use toast_host::ToastHost;
 pub use tree::{
     Tree, TreeContextRequest, TreeDragOver, TreeReorderRequest, TreeSelectionUpdate,

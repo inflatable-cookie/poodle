@@ -425,7 +425,7 @@ mod tests {
         MediaPreviewSpec, MediaState, MediaThumbnailSpec, PaginationSummarySpec, ParsedEmbed,
         PickerItemSpec, PickerShellSpec, PickerVariant, RelationPickerSpec, RemediationAction,
         RemediationBannerSpec, SelectionMode, SelectionSummaryItem, SelectionSummarySpec,
-        TableColumnSpec, TableRowSpec, TableSortDirection, ValidationSummaryEntry,
+        StateTileSpec, TableColumnSpec, TableRowSpec, TableSortDirection, ValidationSummaryEntry,
         ValidationSummarySpec,
     };
 
@@ -951,6 +951,59 @@ mod tests {
         assert_eq!(spec.accessibility_role(), Some("status"));
         assert_eq!(spec.border_token(), semantic::COLOR_STATUS_WARNING);
         assert_eq!(spec.background_token(), semantic::COLOR_BACKGROUND_PANEL);
+        // Additive dimension/color token methods (contract §6).
+        assert_eq!(spec.radius_token(), semantic::RADIUS_SURFACE);
+        assert_eq!(spec.border_width_token(), semantic::BORDER_WIDTH_DEFAULT);
+        assert_eq!(spec.icon_color_token(), semantic::COLOR_STATUS_WARNING);
+        assert_eq!(spec.title_color_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(spec.message_color_token(), semantic::COLOR_TEXT_SECONDARY);
+        assert_eq!(spec.tone_icon_name(), "alert-triangle");
+    }
+
+    #[test]
+    fn remediation_banner_tone_icon_map_covers_all_tones() {
+        let cases = [
+            (StatusTone::Neutral, "info"),
+            (StatusTone::Info, "info"),
+            (StatusTone::Success, "check-circle"),
+            (StatusTone::Warning, "alert-triangle"),
+            (StatusTone::Danger, "x-circle"),
+            (StatusTone::Pending, "loader"),
+        ];
+        for (tone, icon) in cases {
+            let spec = RemediationBannerSpec::new("t", "m").with_tone(tone);
+            assert_eq!(spec.tone_icon_name(), icon, "tone {tone:?} icon");
+            assert_eq!(spec.icon_color_token(), tone.color_token(), "tone {tone:?} icon color");
+        }
+    }
+
+    #[test]
+    fn state_tile_resolves_dimension_and_trend_tokens() {
+        // Default: no trend → neutral color + right-arrow glyph.
+        let base = StateTileSpec::new("Active Users", "1,284");
+        assert_eq!(base.fill_token(), semantic::COLOR_BACKGROUND_PANEL);
+        assert_eq!(base.border_token(), semantic::COLOR_BORDER_SUBTLE);
+        assert_eq!(base.radius_token(), semantic::RADIUS_SURFACE);
+        assert_eq!(base.border_width_token(), semantic::BORDER_WIDTH_DEFAULT);
+        assert_eq!(base.label_color_token(), semantic::COLOR_TEXT_SECONDARY);
+        assert_eq!(base.value_color_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(base.value_font_size_token(), semantic::TYPOGRAPHY_HEADING_SIZE);
+        assert_eq!(base.label_font_size_token(), semantic::TYPOGRAPHY_LABEL_SIZE);
+        assert_eq!(base.trend_color_token(), semantic::COLOR_TEXT_SECONDARY);
+        assert_eq!(base.trend_glyph(), "\u{2192}");
+
+        // up / down map to success / danger with directional glyphs.
+        let up = StateTileSpec::new("x", "1").with_trend("up");
+        assert_eq!(up.trend_color_token(), semantic::COLOR_STATUS_SUCCESS);
+        assert_eq!(up.trend_glyph(), "\u{2191}");
+        let down = StateTileSpec::new("x", "1").with_trend("down");
+        assert_eq!(down.trend_color_token(), semantic::COLOR_STATUS_DANGER);
+        assert_eq!(down.trend_glyph(), "\u{2193}");
+
+        // arbitrary string → neutral color + right-arrow glyph.
+        let neutral = StateTileSpec::new("x", "1").with_trend("flat");
+        assert_eq!(neutral.trend_color_token(), semantic::COLOR_TEXT_SECONDARY);
+        assert_eq!(neutral.trend_glyph(), "\u{2192}");
     }
 
     #[test]

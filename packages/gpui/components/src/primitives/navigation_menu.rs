@@ -12,7 +12,7 @@ use poodle_specs::{
 };
 
 use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_height_offset_rem,
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -105,8 +105,6 @@ impl IntoElement for NavigationMenu {
             ControlSize::Lg => 0.8125,
             ControlSize::Xl => 0.875,
         }));
-        let _base_height = resolve_px(theme, "size.control.height");
-        let trigger_height_offset = px(rem_to_px(size_height_offset_rem(effective_size)));
         // Svelte: compact=0.5rem, default=space-control-x (0.75rem), comfortable=0.75rem (same as default)
         let trigger_pad_x = px(rem_to_px(match self.spec.density {
             ControlDensity::Compact => 0.5,
@@ -146,8 +144,10 @@ impl IntoElement for NavigationMenu {
         // Svelte: viewport bg = color-mix(panel 96%, transparent)
         let viewport_bg = Hsla { a: panel.a * 0.96, ..panel };
 
-        // Contract: trigger min-height = control-height + offset - 0.125rem
-        let trigger_height = control_height + trigger_height_offset - px(2.0);
+        // Contract §8: trigger min-height stays flat `size.control.height` for
+        // every size (no per-size offset, no `-0.125rem` inset) — the control
+        // token already scales per size. Matches Svelte `NavigationMenu.svelte:210`.
+        let trigger_height = control_height;
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 

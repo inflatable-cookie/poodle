@@ -184,13 +184,13 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | media-preview | fixed | 1 | 1 | gap |
 | media-thumbnail | ok | 1 | 1 | gap |
 | menu | fixed | 2 | 5 | ok |
-| menubar | fixed | 3 | 6 | gap |
+| menubar | fixed | 2 | 1 | gap |
 | meta-bar | fixed | 3 | 3 | gap |
 | meta-item | fixed | 4 | 2 | gap |
 | meter | fixed | 3 | 6 | gap |
 | metric-tile | ok | 1 | 1 | gap |
 | nav-card | ok | 1 | 2 | gap |
-| navigation-menu | fixed | 5 | 4 | gap |
+| navigation-menu | fixed | 3 | 0 | gap |
 | number-input | gap | 1 | 2 | ok |
 | order-by | fixed | 2 | 2 | ok |
 | page-header | fixed | 1 | 1 | ok |
@@ -207,7 +207,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 5 | gap |
 | relation-picker | fixed | 4 | 4 | gap |
-| remediation-banner | gap | 1 | 8 | gap |
+| remediation-banner | gap | 0 | 0 | ok |
 | resize-handle | ok | 4 | 3 | gap |
 | scroll-shell | ok | 3 | 1 | gap |
 | segmented-control | fixed | 0 | 0 | gap |
@@ -222,7 +222,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | split-button | fixed | 4 | 7 | gap |
 | split-view | fixed | 2 | 2 | ok |
 | stack | fixed | 3 | 3 | gap |
-| state-tile | gap | 1 | 8 | gap |
+| state-tile | gap | 0 | 0 | ok |
 | status-bar | fixed | 0 | 0 | gap |
 | status-indicator | fixed | 4 | 5 | gap |
 | surface | fixed | 1 | 1 | gap |

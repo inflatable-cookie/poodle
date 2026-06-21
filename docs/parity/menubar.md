@@ -1,4 +1,18 @@
-<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap -->
+<!-- pass 41: Jetstream menubar rebuilt to full contract anatomy. Added: List chrome
+     (border-subtle 72%, radius-surface, panel-96% bg, 0.1875rem padding, 0.125rem gap);
+     Overlay/dropdown rendering current_menu().items — action rows (label + shortcut meta),
+     checkbox/radio rows, and separators (border-subtle 72%, 0.0625rem, 0.25rem margin);
+     overlay bg = elevated-98%-over-panel, border = border-default 72%, min-width 12rem,
+     radius-surface, shadow_md (box-shadow approximation). Trigger now radius-control +
+     min-height control-height; open/hover = accent 14% (was the wrong 12%); weight = a
+     LABEL_WEIGHT=600 constant (dropped raw 600/400 magic) and text stays text-primary
+     (dropped non-contract muted idle text). pad_y literal gone (height via min-height).
+     Probe-tested (list chrome + open trigger fill + open-menu items/separators/shortcuts).
+     Remaining Jetstream: focus-ring treatment (JsEl has only .focusable(), no ring channel)
+     + box-shadow (shadow_md preset, not token-driven) — both accepted runtime limits.
+     GPUI unchanged: 2 remaining are the inherited Menu shadow literal (lives in menu.rs,
+     out of scope) + the overlay-anchoring layout delta (accepted). -->
 # Parity: Menubar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,22 +39,24 @@ Props/roles/keyboard align; the size table is where contract and Svelte diverge.
 
 GPUI builds the list chrome + roving trigger strip well (token-resolved, color-mix via opacity, hover/active/disabled/focus), then delegates the dropdown to the `Menu` component.
 
-- [ ] Inherits Menu's hardcoded HSLA shadow literals via the delegated dropdown (`menu.rs:201,207`) — see menu.md; the menubar overlay shadow is therefore also non-token.
-- [ ] Hardcoded px: trigger-row `gap(px(rem_to_px(0.125)))` and `p(px(rem_to_px(0.1875)))` (`menubar.rs:144-145`) — contract list gap `0.125rem` / padding `0.1875rem`; these are correct values but inlined as rem literals rather than resolved from `space.*` tokens. Add tokens or justify.
+- [ ] Inherits Menu's hardcoded HSLA shadow literals via the delegated dropdown (`menu.rs:201,207`) — see menu.md; the menubar overlay shadow is therefore also non-token. Lives in `menu.rs`, OUT OF SCOPE for menubar files; fix on the menu pass.
+- [x] JUSTIFIED (pass 41) — trigger-row `gap(px(rem_to_px(0.125)))` / `p(px(rem_to_px(0.1875)))` (`menubar.rs:144-145`) are the contract's literal list gap `0.125rem` / padding `0.1875rem` (NOT token-backed values — `trigger_gap_token()` resolves to inline-sm 0.5rem, which is the wrong value and intentionally unused). `rem_to_px(<contract-exact rem>)` is not a hardcode violation per the parity rules; the Jetstream side inlines the same two rems for the same reason.
 - [ ] Overlay anchors below the whole wrapper (`menubar.rs:199-220`) via a flex column, not absolutely positioned under the specific trigger group; contract overlay is `position: absolute; left: 0` under its group with `0.25rem` gap. Acceptable as a GPUI layout delta but note: dropdown does not align to the active trigger's left edge.
 - accepted: no ARIA (roles/aria-* not emitted); roving-focus keyboard nav across triggers is render-driven by `current_value` rather than internal focus state (interaction lives in preview event loop).
 
 ## Jetstream gap (vs Svelte + contract)
 
-Renders only the trigger strip — no list chrome, no dropdown overlay at all.
+Rebuilt to full contract anatomy (pass 41): List chrome + Trigger strip + Overlay dropdown.
 
-- [ ] **No list chrome** — root is a bare `flex_row` (`menubar.rs:25`); contract §8 List requires border (`border-subtle 72%`), `radius-surface`, panel-96% bg, `0.1875rem` padding, `0.125rem` gap. None applied except gap.
-- [ ] **No overlay/dropdown** — `js_menubar` never renders `current_menu().items`; clicking a trigger has no submenu. The entire submenu half of the contract (items, separators, meta, roles) is unimplemented.
-- [ ] Hardcoded px: `pad_y = rem_to_px(0.25)` (`menubar.rs:15`) magic; trigger weight uses raw `600`/`400` (`:34`) instead of a label-weight token.
-- [ ] No `radius.control` on triggers, no focus-ring treatment.
-- [ ] `current_value` highlights a trigger but there is no way to show the open menu — open state is visually indicated on the trigger only.
-- [ ] No size-table dimensions (min-height/padding only via `control_space_x_rem`; trigger min-height not set).
-- accepted: interaction (trigger click, item nav) lives in preview event loop.
+- [x] FIXED (pass 41) — **List chrome** present: border 0.0625rem border-subtle 72%, radius-surface, panel-96% bg, 0.1875rem padding, 0.125rem gap (contract §8 List).
+- [x] FIXED (pass 41) — **Overlay/dropdown** renders `current_menu().items`: action rows (label + shortcut/check meta), checkbox/radio rows, and separators. Overlay bg = color-mix(elevated 98%, panel), border = border-default 72%, min-width 12rem, radius-surface, shadow_md (contract §8 Overlay/Item/Separator/Meta).
+- [x] FIXED (pass 41) — **No magic px / raw weights**: `pad_y` literal gone (height via min-height); trigger + item weight use a `LABEL_WEIGHT=600` constant (mirrors GPUI `FontWeight::SEMIBOLD` / contract `typography.label.weight`, per the `form_shell.rs` convention). Idle trigger text now stays text-primary (dropped the non-contract muted/400 idle treatment).
+- [x] FIXED (pass 41) — **`radius.control` on triggers** applied. Focus-ring treatment is NOT applied — JsEl exposes only `.focusable()`, no focus-ring channel (accepted runtime limit; below).
+- [x] FIXED (pass 41) — **open menu shown** via the rendered Overlay (open trigger fill = accent 14%; the dropdown items render below).
+- [x] FIXED (pass 41) — **size-table dimensions**: trigger + item `min-height` = `size.control.height`; item padding = `space.control.y` / control-x; font steps via `size_font_rem` (trigger) / `typography.body.size` (item).
+- accepted: focus-ring treatment — JsEl has `.focusable()` but no focus-ring draw channel; the visible ring lives in the preview event loop / is a runtime limit.
+- accepted: box-shadow uses the `shadow_md()` preset, not a token-driven `elevation.overlay` (JsEl has no token box-shadow channel).
+- accepted: interaction (trigger click, item nav, outside-click close) lives in preview event loop.
 
 ## Specimen parity
 

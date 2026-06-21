@@ -1,4 +1,13 @@
-<!-- parity consv=fixed gpui=5 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=0 specimen=gap -->
+<!-- pass 41: trigger height + hover + min-height pass. GPUI: trigger min-height now
+     flat size.control.height (dropped the bogus `- px(2.0)` inset + per-size offset,
+     matching contract §8 / Svelte); viewport shadow already token-resolved
+     (elevation_overlay_shadow). Jetstream: added trigger min-height (control-height) +
+     hover state (accent 12%) + contract-faithful density padding (comfortable 0.75rem,
+     not the generic 1.0rem ladder); pad_y/gap literals were already gone. Probe-tested.
+     Remaining GPUI: icon field (spec divergence, code-side reconcile, out of scope) +
+     roving tabindex/arrow-keys + click toggle-close (preview-loop, Tier-1). Remaining
+     Jetstream: box-shadow (no JsEl channel, accepted) + roving/outside-close (preview-loop). -->
 <!-- pass 30: viewport panel added — renders on active item with §8 tokens (padding
      space.panel.x/y, border 0.0625rem border-subtle@74%, radius.surface, bg panel@96%);
      content = active item description. Probe-tested. Remaining jetstream: box-shadow
@@ -36,8 +45,8 @@ Divergences between authoritative Svelte and contract §8/§3. Svelte wins unles
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Hardcoded viewport shadow literals** at `navigation_menu.rs:236-246` — two `BoxShadow` with raw `hsla(0,0,0,0.10/0.06)`, `px(4.0)`, `px(16.0)`, `px(1.0)`, `px(4.0)`. Contract §8 viewport `box-shadow` = `var(--poodle-elevation-overlay)`. Resolve from the elevation token, not raw HSLA/px.
-- [ ] **`- px(2.0)` literal** for trigger height at `navigation_menu.rs:150` — the `0.125rem` inset must resolve via `rem_to_px(0.125)` (or a token), not a bare `2.0` px literal.
+- [x] FIXED (pass 41, was already done) — **viewport shadow** now token-resolved via `elevation_overlay_shadow()` (`navigation_menu.rs` viewport branch), reading `poodle_tokens::typed::semantic::ELEVATION_OVERLAY`. No raw HSLA/px literals remain.
+- [x] FIXED (pass 41) — **trigger height literal removed.** `trigger_height` is now flat `size.control.height` (dropped both the per-size `size_height_offset_rem` and the `- px(2.0)` inset), matching contract §8's flat min-height and Svelte `NavigationMenu.svelte:210`. No bare px literal.
 - [ ] **No icon support** — `NavigationMenuEntry` has no `icon` field (only `description`); GPUI trigger never renders an icon. Contract §3 `icon` absent from the Rust spec entirely (`contracts/components/src/types.rs:690-695`).
 - [ ] **No roving tabindex / arrow-key focus movement** — triggers are `.focusable()` (`:169`) but there is no ArrowLeft/Right/Home/End handling and no roving `tabindex` (contract §6, §11 Tier-1). Keyboard nav across triggers is absent.
 - [ ] **Click activates but does not toggle/close** — `on_click` calls the host `on_change` with the value (`:207-209`); there is no Escape/outside-click close and no toggle-off (Svelte `toggleValue` sets null when re-clicking). Active item can never be closed to show "all closed" state.
@@ -46,14 +55,14 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No pill border on trigger** — Svelte trigger has `border 0.0625rem solid border-subtle 72%` + `radius-control` (`NavigationMenu.svelte:212-213`); `js_navigation_menu` (`navigation_menu.rs:31-37`) renders a bare `button` with no border, no radius. Contract §2 anatomy requires the pill border. Add border + `trigger_radius_token()`.
-- [ ] **Wrong trigger background** — Svelte idle bg = `background-surface 88%` (`:214`); Jetstream applies no idle bg (only active gets `tint(accent, 0.12)` at `:20,:40`). Add idle surface-88% fill.
-- [ ] **Wrong active treatment** — Svelte active = `accent 16%` bg + blended border (`accent 42%`/border-default) (`:223-226`); Jetstream active = `tint(accent, 0.12)` (`:20`) which matches *hover* 12%, not active 16%, and has no active border. Use accent-16% + active border token math.
-- [ ] **No hover state** — contract §4 + Svelte `:228-232` give hover `accent 12%`; Jetstream component has no hover branch (interaction may live in preview loop — confirm, else add).
-- [ ] **No viewport** — contract §2/§8 viewport part (border/radius/bg/shadow/panel padding) is entirely absent from `js_navigation_menu`; component renders only the trigger row (`:25-50`). GPUI renders it; Jetstream does not.
-- [ ] **Hardcoded `pad_y = rem_to_px(0.25)`** at `navigation_menu.rs:15` — vertical padding baked to `0.25rem` literal; Svelte trigger has no vertical padding (height comes from `min-height`). Drop or derive from a size token; do not hardcode `0.25`.
-- [ ] **Hardcoded gap `rem_to_px(0.25)`** at `navigation_menu.rs:25` — list gap literal; Svelte uses `--poodle-space-inline-sm`. Resolve from a space token (a `list_gap_token()` is not on the spec — add one).
-- [ ] **No size/min-height handling** — `js_navigation_menu` resolves `size_font_rem` (`:12`) but never sets trigger min-height; Svelte ties height to `control-height`. No per-size dimension applied.
+- [x] FIXED (pass 29) — **pill border on trigger** present (border 0.0625rem + `trigger_radius_token()`).
+- [x] FIXED (pass 29) — **idle trigger background** = surface 88%.
+- [x] FIXED (pass 29) — **active treatment** = accent 16% bg + accent-42%/border-default blended border.
+- [x] FIXED (pass 41) — **hover state** added: `.hover(|s| s.bg(tint(accent, 0.12)))` (accent 12%, contract §8 Hover/Focus). Active triggers keep their accent-16% open fill. Disabled triggers get no hover.
+- [x] FIXED (pass 30) — **viewport** part renders on active item (border/radius/bg/panel padding); box-shadow omitted (no JsEl channel, accepted).
+- [x] FIXED (pass 29, confirmed pass 41) — **no `pad_y` literal**: trigger has no baked vertical padding; height now comes from `min-height` (control-height).
+- [x] FIXED (pass 29) — **list gap** resolves from `space.inline.sm` (`resolve_px(theme, "space.inline.sm")`), not a literal.
+- [x] FIXED (pass 41) — **trigger min-height** now set to `size.control.height` (`resolve_px(theme, "size.control.height")`), matching Svelte's control-height tie. Trigger is `.items_center()` so the label vertically centers within the min-height.
 - accepted: no ARIA channel (no accessibility API in jetstream runtime).
 - accepted: roving-tabindex / arrow-key focus and outside-click close may live in preview `main.rs` event loop — verify there before adding to the component.
 

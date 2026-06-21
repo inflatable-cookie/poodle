@@ -70,4 +70,55 @@ impl RemediationBannerSpec {
     pub fn background_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_PANEL
     }
+
+    /// Icon color (contract §6: Icon = tone → `color.status.*`).
+    pub fn icon_color_token(&self) -> &'static str {
+        self.tone.color_token()
+    }
+
+    /// Root corner radius (contract §6: root `radius` target).
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    /// Root border width (contract §6: root `border` target).
+    pub fn border_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_DEFAULT
+    }
+
+    /// Title color (contract §2 Content: `<strong>` heading).
+    pub fn title_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    /// Message color (contract §2 Content: `<p>` body).
+    pub fn message_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// Disabled-action opacity (contract §3 `RemediationAction.is_disabled`).
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
+
+    /// Tone → leading icon name (contract §2 Icon: tone-based default).
+    /// Shared so GPUI and Jetstream resolve the same glyph per tone.
+    pub fn tone_icon_name(&self) -> &'static str {
+        match self.tone {
+            StatusTone::Neutral | StatusTone::Info => "info",
+            StatusTone::Success => "check-circle",
+            StatusTone::Warning => "alert-triangle",
+            StatusTone::Danger => "x-circle",
+            StatusTone::Pending => "loader",
+        }
+    }
+
+    /// Proportion of the tone color kept when tinting the panel fill — the
+    /// banner surface is `color-mix(tone, panel)` at this ratio (contract §6
+    /// root bg is `color.background.panel`; the tone tint mirrors `Callout`).
+    /// TOKEN GAP: no semantic surface-tint ratio token exists; the 0.08 value
+    /// matches the pending-tone fill ratio used by `Callout`.
+    pub fn fill_tone_ratio(&self) -> f32 {
+        0.08
+    }
 }

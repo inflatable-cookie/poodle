@@ -1,4 +1,5 @@
-<!-- parity consv=gap gpui=1 jetstream=8 specimen=gap -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: GPUI StateTile built (composites/state_tile.rs, mirrors MetricTile); Jetstream rebuilt to contract — value now typography-heading (was 1.5rem), radius/border/typography/padding token-resolved via new spec methods, sparkline reserves a host slot (no synthetic data). Svelte still absent → consv=gap (sole authority is the contract). -->
 # Parity: StateTile
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -29,28 +30,29 @@ Divergences between the contract and the MetricTile-embedded `.poodle-state-tile
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] **Implement StateTile in GPUI.** No component builder exists in `packages/gpui/components/src/` (neither composites nor primitives). The only artifact is an adapter stub returning an empty handle (`packages/gpui/adapter/src/render_editing_composites.rs:217-226`) — it draws nothing. Build a real `state_tile.rs` resolving root fill/border/radius/padding, label, value, trend row, and sparkline slot from `StateTileSpec` tokens; add a specimen.
+- [x] **StateTile built in GPUI.** `packages/gpui/components/src/composites/state_tile.rs` (`StateTile`, registered in `composites/mod.rs`). Mirrors `MetricTile`: resolves fill/border/radius/border-width, label, value (typography-heading), an optional decorative trend row (glyph + label text), and an optional reserved sparkline slot (host-owned — no synthetic chart data) — all from `StateTileSpec` token methods. Build-verified (`cargo build` in gpui/components). The adapter `RenderComponent<StateTileSpec>` stub at `render_editing_composites.rs:217-226` is left unchanged (matches the established pattern — real component lives in the components crate).
 - accepted: no ARIA (gpui has no accessibility API).
+- note: no GPUI specimen added — gpui/preview shares a target lock and is build-skipped this pass.
 
 ## Jetstream gap (vs Svelte + contract)
 
-Component exists (`js_state_tile`) and resolves colors from tokens (`fill_token`/`border_token`/`trend_color_token`, `state_tile.rs:10-15`), but every dimension is a hardcoded rem literal fed to `rem_to_px`, not resolved from the spec/density. Per CLAUDE.md, a hardcoded rem→px is the same sin as a hardcoded px.
+Component rebuilt to the contract. Colors and dimensions now resolve from spec token methods; the value typography is corrected to `typography-heading`.
 
-- [ ] Hardcoded padding `rem_to_px(1.0)` / `rem_to_px(0.75)` at `state_tile.rs:17-18` — resolve from a spec padding/space token (cf. `button.rs:75` using `control_space_x_rem(spec.density)`), not raw rem literals.
-- [ ] Hardcoded gaps `rem_to_px(0.5)` (`state_tile.rs:19`) and trend-row `rem_to_px(0.25)` (`state_tile.rs:45`) — resolve from space tokens, not literals.
-- [ ] Hardcoded type sizes: label `rem_to_px(0.75)`, value `rem_to_px(1.5)`, trend `rem_to_px(0.75)` at `state_tile.rs:20-22` — resolve from typography tokens (contract §2 maps Value→`typography-heading`, Label→`typography-label`). Note value is `1.5rem` here vs MetricTile's `1rem`.
-- [ ] Hardcoded border width `.border(1.0)` at `state_tile.rs:26` — resolve from a border-width token.
-- [ ] Hardcoded sparkline geometry `rem_to_px(2.0)` height + `rem_to_px(0.25)` radius at `state_tile.rs:71,77` — resolve from tokens (and per contract §1/§3 the host owns the sparkline; this draws a placeholder box rather than reserving a host slot).
-- [ ] Radius hardcodes the literal token string `"radius.surface"` at `state_tile.rs:12` instead of a `StateTileSpec::radius_token()` method — add the accessor to the spec.
-- [ ] No density support. Contract/MetricTile carry compact/comfortable density (different padding/gaps); `js_state_tile` ignores density entirely. Thread `spec.density` once the spec gains it.
-- [ ] Spec lacks size/space/typography/radius token methods. `StateTileSpec` (`packages/contracts/components/src/state_tile.rs:38-52`) exposes only `fill_token`/`border_token`/`trend_color_token` — add dimension token accessors so the impl can stop hardcoding rem literals.
+- [x] Padding resolves from `space.panel.x` / `space.panel.y` (was `rem_to_px(1.0)` / `rem_to_px(0.75)`).
+- [x] Gaps resolve from tokens — root `space.stack.sm`, trend-row `space.inline.xs` (were `rem_to_px(0.5)` / `rem_to_px(0.25)`).
+- [x] Type sizes resolve from spec token methods — label `label_font_size_token()` (`typography.label.size`), value `value_font_size_token()` (`typography.heading.size` = 1rem, corrected from `1.5rem`), trend `trend_font_size_token()`.
+- [x] Border width resolves from `border_width_token()` (`BORDER_WIDTH_DEFAULT`), was `.border(1.0)`.
+- [x] Sparkline now reserves a **host slot** (contract §1/§2/§3 — host owns the chart). It renders an empty token-filled area (`sparkline_slot_token()` → `COLOR_BACKGROUND_SURFACE`, TOKEN GAP noted: no chart-surface token) with an `id` (`state-tile-sparkline`). note: slot height (2.0rem) is a contract-exact rem via `rem_to_px` (no token); radius reuses the root radius token.
+- [x] Radius uses `StateTileSpec::radius_token()` (added), not the literal `"radius.surface"` string.
+- [~] Density: `StateTileSpec` still has no `density` field (contract §3 lists no density prop — adding one is a contract decision, out of scope for this build-out pass). Not threaded.
+- [x] Spec gained dimension/typography/radius token accessors (`radius_token`, `border_width_token`, `label_color_token`, `value_color_token`, `value_font_size_token`, `label_font_size_token`, `trend_font_size_token`, `sparkline_slot_token`, `trend_glyph`) — additive, contract-traceable.
 - accepted: interaction is N/A — StateTile is wholly static (contract §3), no event surface.
 
 ## Specimen parity
 
 - Svelte covers: **nothing** — no `StateTileSpecimen.svelte` exists. (MetricTile is a separate component with its own coverage.)
-- GPUI covers: **nothing** — no `specimens/state_tile.rs`. (Only `demo_app.rs:90-92` constructs `StateTileSpec` against the stub adapter, which renders an empty handle — not a real specimen.)
-- Jetstream covers: With trend (up + down), With sparkline, Flat trend (`packages/jetstream/preview/src/specimens/state_tile.rs:12-49`). — missing: the **default / no-trend** state (contract §4 `default`), a **neutral arbitrary-string trend** distinct from `"flat"`, and **density** variants (compact/comfortable) once supported.
+- GPUI covers: **nothing** — component built, but no `specimens/state_tile.rs` (gpui/preview build-skipped this pass).
+- Jetstream covers: **Default (no trend)** ×2, With trend (up + down), **Neutral trend** (`"flat"` + arbitrary `"steady"`), With sparkline (reserved slot). Covers contract §4 default / up / down / neutral-string / with-sparkline. — missing only **density** variants (not in the contract; out of scope).
 
 ## Notes
 

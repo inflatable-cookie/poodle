@@ -19,15 +19,28 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::NavigationMenuSpec;
 
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use poodle_specs::ControlDensity;
+
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{
     color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
 };
 
+/// Trigger horizontal padding in rem per density (contract §8 Density table):
+/// compact 0.5, default `space.control.x` (0.75), comfortable 0.75 — NOT the
+/// generic `control_space_x_rem` ladder (which gives comfortable 1.0). Mirrors
+/// the GPUI navigation_menu density match so both targets agree with the contract.
+fn nav_trigger_pad_x_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.5,
+        ControlDensity::Default | ControlDensity::Comfortable => 0.75,
+    }
+}
+
 pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = rem_to_px(nav_trigger_pad_x_rem(spec.density));
 
     // List gap = --poodle-space-inline-sm (contract §7/§8).
     let list_gap = resolve_px(theme, "space.inline.sm");
@@ -36,12 +49,19 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
     let radius = resolve_radius(theme, spec.trigger_radius_token());
     // Border width = 0.0625rem (contract §8 trigger border), matching peers.
     let border_w = rem_to_px(0.0625);
+    // Trigger min-height = --poodle-size-control-height (contract §8, flat per
+    // size — the control token already scales). Svelte ties height to control-height.
+    let control_height = resolve_px(theme, "size.control.height");
 
     let text_primary = resolve_color(theme, "color.text.primary");
     let accent = resolve_color(theme, "color.accent.base");
     let surface = resolve_color(theme, "color.background.surface");
     let border_subtle = resolve_color(theme, "color.border.subtle");
     let border_default = resolve_color(theme, "color.border.default");
+
+    // Hover/focus trigger (contract §8 "Hover / Focus"):
+    //   background = color-mix(accent 12%, transparent)
+    let hover_bg = tint(accent, 0.12);
 
     // Idle trigger (contract §8 base):
     //   background = color-mix(surface 88%, transparent)
@@ -82,6 +102,8 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
             .text_color(text_primary)
             .text_size(font_size)
             .text_weight(600)
+            .min_h(control_height)
+            .items_center()
             .pl(pad_x)
             .pr(pad_x)
             .rounded(radius)
@@ -93,6 +115,10 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
 
         if entry.is_disabled {
             btn = btn.opacity(disabled_opacity).disabled(true);
+        } else {
+            // Hover (contract §8 Hover/Focus): accent-12% fill. Active triggers
+            // keep their accent-16% open fill on hover (no override needed).
+            btn = btn.hover(move |s| s.bg(hover_bg));
         }
 
         list = list.child(btn);
