@@ -1,11 +1,12 @@
 //! EmbedPreview — preview of embedded content backed by EmbedPreviewSpec.
 
-use crate::primitives::Icon;
+use crate::presentation::rem_to_px;
+use crate::primitives::{Icon, Skeleton, TextLink};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_specs::{IconSpec, SkeletonSpec, TextLinkSpec};
 use poodle_specs::EmbedPreviewSpec;
-use poodle_specs::{IconSize, IconSpec};
 
 pub struct EmbedPreview {
     spec: EmbedPreviewSpec,
@@ -38,228 +39,218 @@ impl IntoElement for EmbedPreview {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let fill = resolve_color(theme, self.spec.fill_token());
-        let border = resolve_color(theme, self.spec.border_token());
+        let spec = &self.spec;
+
+        // Contract §8 tokens.
+        let panel_bg = resolve_color(theme, spec.fill_token()); // background-panel
         let radius = resolve_radius(theme, "radius.surface");
-        let title_color = resolve_color(theme, "color.text.primary");
-        let desc_color = resolve_color(theme, "color.text.secondary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_tertiary = resolve_color(theme, "color.text.tertiary");
         let danger_color = resolve_color(theme, "color.status.danger");
-        let success_color = resolve_color(theme, "color.status.success");
-        let subtle_bg = resolve_color(theme, "color.background.subtle");
-        let gap = resolve_px(theme, "space.inline.sm");
-        let gap_md = resolve_px(theme, "space.inline.md");
-        let gap_lg = resolve_px(theme, "space.inline.lg");
-        let label_size = resolve_px(theme, "typography.label.size");
-        let radius_control = resolve_radius(theme, "radius.control");
 
-        // Surface container with border and radius
-        let mut el = div()
-            .bg(fill)
-            .border_1()
-            .border_color(border)
-            .rounded(radius)
-            .px(gap_lg)
-            .py(gap_md)
-            .flex()
-            .flex_col()
-            .gap(gap)
-            .overflow_hidden();
+        // Contract §7 sizing — loading/error/empty: gap 0.5rem, min-h 8rem,
+        // padding 1.5rem. Text 0.8125rem. Icon 2rem. Fallback padding 0.75rem 1rem.
+        let state_gap = resolve_px(theme, "space.inline.sm"); // 0.5rem
+        let text_size = resolve_px(theme, "typography.label.size"); // 0.8125rem
+        // No named token maps min-h 8rem / padding 1.5rem / icon 2rem / fallback
+        // padding-y 0.75rem(panel.y) padding-x 1rem(panel.x) — exact rem from contract.
+        let state_min_h = px(rem_to_px(8.0));
+        let state_pad = px(rem_to_px(1.5));
+        let icon_2rem = rem_to_px(2.0);
+        let fallback_pad_y = resolve_px(theme, "space.panel.y"); // 0.75rem
+        let fallback_pad_x = resolve_px(theme, "space.panel.x"); // 1rem
 
-        // Loading state: skeleton loading bar
-        if self.spec.is_loading {
-            let skeleton_bar = div()
-                .w_full()
-                .h(px(12.0))
-                .rounded(radius_control)
-                .bg(subtle_bg);
-            let skeleton_bar_short = div()
-                .w(px(160.0))
-                .h(px(12.0))
-                .rounded(radius_control)
-                .bg(subtle_bg);
-            let skeleton_bar_medium = div()
-                .w(px(240.0))
-                .h(px(12.0))
-                .rounded(radius_control)
-                .bg(subtle_bg);
+        // Root: radius-surface + overflow hidden (contract §8). No border/padding —
+        // each state child carries the panel background per the Svelte anatomy.
+        let root = || div().rounded(radius).overflow_hidden();
 
-            el = el.child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(gap_md)
-                    .py(px(4.0))
-                    .child(skeleton_bar)
-                    .child(skeleton_bar_medium)
-                    .child(skeleton_bar_short),
-            );
-            return el.into_any_element();
-        }
-
-        if let Some(ref error) = self.spec.error {
-            el = el.child(
-                div()
-                    .py(gap_lg)
-                    .flex()
-                    .flex_col()
-                    .items_center()
-                    .justify_center()
-                    .gap(gap)
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("alert-circle").with_size(IconSize::Lg),
-                            theme,
-                        )
-                        .with_color(danger_color),
-                    )
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(desc_color)
-                            .child(error.clone()),
-                    ),
-            );
-            return el.into_any_element();
-        }
-
-        if self.spec.parsed.is_none() {
-            el = el.child(
-                div()
-                    .py(gap_lg)
-                    .flex()
-                    .flex_col()
-                    .items_center()
-                    .justify_center()
-                    .gap(gap)
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("monitor-play").with_size(IconSize::Lg),
-                            theme,
-                        )
-                        .with_color(desc_color.opacity(0.7)),
-                    )
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(desc_color)
-                            .child(self.spec.empty_message.clone()),
-                    ),
-            );
-            return el.into_any_element();
-        }
-
-        let parsed = self.spec.parsed.as_ref().unwrap();
-        let embed_url = self.spec.embed_url();
-        let provider_label = parsed.provider.clone();
-
-        if let Some(embed_url) = embed_url {
-            let preview_label = if parsed.provider == "youtube" || parsed.provider == "vimeo" {
-                "Platform preview placeholder"
-            } else {
-                "External embed placeholder"
-            };
-
-            let media_frame = div()
-                .w_full()
-                .min_h(if self.spec.effective_aspect_ratio().is_some() {
-                    px(200.0)
-                } else {
-                    px(160.0)
-                })
-                .rounded(radius)
-                .bg(subtle_bg)
-                .border_1()
-                .border_color(border)
+        // Centered state column (loading / error / empty share this layout).
+        let state_column = || {
+            div()
                 .flex()
                 .flex_col()
                 .items_center()
                 .justify_center()
-                .gap(gap)
-                .px(gap_lg)
-                .py(gap_lg)
-                .child(
-                    Icon::from_spec(IconSpec::new("monitor-play").with_size(IconSize::Lg), theme)
-                        .with_color(success_color),
-                )
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .font_weight(FontWeight::MEDIUM)
-                        .text_color(title_color)
-                        .child(preview_label),
-                )
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(desc_color)
-                        .child(embed_url),
-                );
+                .gap(state_gap)
+                .min_h(state_min_h)
+                .p(state_pad)
+                .bg(panel_bg)
+                .rounded(radius)
+        };
 
-            el = el
+        // ── Render priority: loading > error > empty > iframe > raw > trusted > fallback ──
+
+        // Loading: Skeleton primitive (shape="block") + LoadingText.
+        if spec.is_loading {
+            return root()
                 .child(
-                    div()
-                        .flex()
-                        .items_center()
-                        .gap(gap)
+                    state_column()
+                        .child(Skeleton::from_spec(
+                            SkeletonSpec::new().with_shape("block"),
+                            theme,
+                        ))
                         .child(
-                            Icon::from_spec(IconSpec::new("link").with_size(IconSize::Sm), theme)
-                                .with_color(success_color),
+                            div()
+                                .text_size(text_size)
+                                .text_color(text_secondary)
+                                .child("Loading preview..."),
+                        ),
+                )
+                .into_any_element();
+        }
+
+        // Error: alert-circle icon (text-danger) + error text.
+        if let Some(error) = spec.error.clone() {
+            return root()
+                .child(
+                    state_column()
+                        .child(
+                            Icon::from_spec(IconSpec::new("alert-circle"), theme)
+                                .with_px_size(icon_2rem)
+                                .with_color(danger_color),
                         )
                         .child(
                             div()
-                                .text_size(label_size)
-                                .font_weight(FontWeight::MEDIUM)
-                                .text_color(success_color)
-                                .bg(resolve_color(theme, "color.background.subtle"))
-                                .rounded(radius_control)
-                                .px(gap)
-                                .py(px(2.0))
-                                .child(provider_label),
+                                .text_size(text_size)
+                                .text_color(text_secondary)
+                                .child(error),
                         ),
                 )
-                .child(media_frame);
-            return el.into_any_element();
+                .into_any_element();
         }
 
-        if self.spec.has_raw_embed() {
-            el = el.child(
+        // Empty: play-rectangle icon (text-tertiary) + empty message.
+        if spec.is_empty_state() {
+            return root()
+                .child(
+                    state_column()
+                        .child(
+                            Icon::from_spec(IconSpec::new("monitor-play"), theme)
+                                .with_px_size(icon_2rem)
+                                .with_color(text_tertiary),
+                        )
+                        .child(
+                            div()
+                                .text_size(text_size)
+                                .text_color(text_secondary)
+                                .child(spec.empty_message.clone()),
+                        ),
+                )
+                .into_any_element();
+        }
+
+        // Aspect-ratio container for media states. GPUI renders a contract-sanctioned
+        // placeholder panel (GPUI Notes §iframe) rather than a live web view; the
+        // panel honors the effective aspect ratio via a nominal reference width.
+        let container = |child: AnyElement| {
+            let mut frame = div().w_full().bg(panel_bg).rounded(radius);
+            if let Some(ratio) = spec.effective_aspect_ratio() {
+                // Aspect-ratio layout: derive min-height from the ratio against a
+                // nominal content width (no live width at build time). For "auto"
+                // (audio / ratio None) the panel falls back to the contract's
+                // static 10rem media height.
+                let ref_width = rem_to_px(28.0);
+                frame = frame.min_h(px((ref_width / ratio).max(rem_to_px(8.0))));
+            } else {
+                frame = frame.h(px(rem_to_px(10.0)));
+            }
+            frame.child(child)
+        };
+
+        // Iframe / embed-URL state → placeholder panel with the derived embed URL.
+        if let Some(embed_url) = spec.embed_url() {
+            let provider = spec
+                .parsed
+                .as_ref()
+                .map(|p| p.provider.clone())
+                .unwrap_or_default();
+            return root()
+                .child(container(
+                    div()
+                        .size_full()
+                        .flex()
+                        .flex_col()
+                        .items_center()
+                        .justify_center()
+                        .gap(state_gap)
+                        .p(state_pad)
+                        .child(
+                            Icon::from_spec(IconSpec::new("monitor-play"), theme)
+                                .with_px_size(icon_2rem)
+                                .with_color(text_tertiary),
+                        )
+                        .child(
+                            div()
+                                .text_size(text_size)
+                                .text_color(text_secondary)
+                                .child(format!("{provider} embed")),
+                        )
+                        .child(
+                            div()
+                                .text_size(text_size)
+                                .text_color(text_tertiary)
+                                .child(embed_url),
+                        )
+                        .into_any_element(),
+                ))
+                .into_any_element();
+        }
+
+        // Raw embed (parsed.originalEmbed, no embed URL) → raw HTML in the container.
+        if spec.has_raw_embed() {
+            let raw = spec
+                .parsed
+                .as_ref()
+                .and_then(|p| p.original_embed.clone())
+                .unwrap_or_default();
+            return root()
+                .child(container(
+                    div()
+                        .size_full()
+                        .p(state_pad)
+                        .text_size(text_size)
+                        .text_color(text_secondary)
+                        .child(raw)
+                        .into_any_element(),
+                ))
+                .into_any_element();
+        }
+
+        // Trusted HTML (no parsed iframe/raw output) → caller-sanitized HTML.
+        if spec.has_trusted_html() {
+            let html = spec.trusted_html.clone().unwrap_or_default();
+            return root()
+                .child(container(
+                    div()
+                        .size_full()
+                        .p(state_pad)
+                        .text_size(text_size)
+                        .text_color(text_secondary)
+                        .child(html)
+                        .into_any_element(),
+                ))
+                .into_any_element();
+        }
+
+        // Fallback: TextLink to the original URL.
+        let href = spec
+            .parsed
+            .as_ref()
+            .and_then(|p| p.original_url.clone().or_else(|| Some(p.id.clone())))
+            .unwrap_or_default();
+        root()
+            .child(
                 div()
-                    .w_full()
+                    .bg(panel_bg)
                     .rounded(radius)
-                    .bg(subtle_bg)
-                    .border_1()
-                    .border_color(border)
-                    .px(gap_lg)
-                    .py(gap_md)
-                    .flex()
-                    .flex_col()
-                    .gap(gap)
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .font_weight(FontWeight::MEDIUM)
-                            .text_color(title_color)
-                            .child("Raw embed code"),
-                    )
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(desc_color)
-                            .child(parsed.original_embed.clone().unwrap_or_default()),
-                    ),
-            );
-            return el.into_any_element();
-        }
-
-        el = el.child(
-            div().text_size(label_size).text_color(success_color).child(
-                parsed
-                    .original_url
-                    .clone()
-                    .unwrap_or_else(|| parsed.id.clone()),
-            ),
-        );
-
-        el.into_any_element()
+                    .py(fallback_pad_y)
+                    .px(fallback_pad_x)
+                    .text_size(text_size)
+                    .child(TextLink::from_spec(
+                        TextLinkSpec::new(href.clone()).with_href(href),
+                        theme,
+                    )),
+            )
+            .into_any_element()
     }
 }

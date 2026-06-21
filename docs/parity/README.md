@@ -153,8 +153,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | duration-input | fixed | 2 | 2 | gap |
 | editable-label | ok | 2 | 2 | gap |
 | editable-list | fixed | 4 | 3 | gap |
-| embed-input | fixed | 6 | 7 | gap |
-| embed-preview | fixed | 7 | 5 | gap |
+| embed-input | fixed | 1 | 1 | gap |
+| embed-preview | fixed | 0 | 0 | gap |
 | empty-state | ok | 2 | 5 | ok |
 | error-boundary | ok | 2 | 1 | gap |
 | eyebrow | ok | 5 | 5 | gap |
@@ -188,7 +188,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | meta-bar | fixed | 3 | 3 | gap |
 | meta-item | fixed | 4 | 2 | gap |
 | meter | fixed | 3 | 6 | gap |
-| metric-tile | ok | 8 | 5 | gap |
+| metric-tile | ok | 1 | 1 | gap |
 | nav-card | ok | 1 | 2 | gap |
 | navigation-menu | fixed | 5 | 4 | gap |
 | number-input | gap | 5 | 6 | gap |
@@ -236,7 +236,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-ago | fixed | 4 | 4 | gap |
 | time-input | fixed | 4 | 5 | gap |
 | time-zone-select | fixed | 6 | 6 | gap |
-| toast-host | fixed | 6 | 7 | gap |
+| toast-host | fixed | 3 | 4 | gap |
 | toast-stack | ok | 1 | 3 | gap |
 | toggle-group | fixed | 4 | 6 | gap |
 | token-input | fixed | 2 | 3 | gap |

@@ -1,3 +1,4 @@
+use crate::ControlDensity;
 use poodle_tokens::semantic;
 
 /// Direction of a metric trend relative to the previous period.
@@ -19,7 +20,8 @@ impl MetricTrend {
         match self {
             Self::Up => semantic::COLOR_STATUS_SUCCESS,
             Self::Down => semantic::COLOR_STATUS_DANGER,
-            Self::Flat => semantic::COLOR_TEXT_SECONDARY,
+            // Contract §8 + Svelte: flat trend uses tertiary text color.
+            Self::Flat => semantic::COLOR_TEXT_TERTIARY,
         }
     }
 
@@ -51,6 +53,9 @@ pub struct MetricTileSpec {
     /// the component builds a small line chart. An empty or
     /// single-element vector suppresses the chart.
     pub sparkline_data: Vec<f32>,
+    /// Presentation density — drives tile padding and internal gaps
+    /// only (never typography or sparkline size). Contract §3/§8.
+    pub density: ControlDensity,
 }
 
 impl Eq for MetricTileSpec {}
@@ -64,7 +69,13 @@ impl MetricTileSpec {
             trend: None,
             trend_label: None,
             sparkline_data: Vec::new(),
+            density: ControlDensity::Default,
         }
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
@@ -136,8 +147,16 @@ impl MetricTileSpec {
         semantic::SPACE_PANEL_X
     }
 
+    /// Root gap token. Contract §8 root gap is `space.inline.sm`
+    /// (the default-density root gap); density variants override it via
+    /// [`Self::root_gap_rem`].
     pub fn gap_token(&self) -> &'static str {
-        semantic::SPACE_STACK_SM
+        semantic::SPACE_INLINE_SM
+    }
+
+    /// Sparkline stroke / chart color. Contract §8: `color.text.tertiary`.
+    pub fn sparkline_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
     }
 
     /// Label font: code-family, 0.75rem. Contract §8: `0.75rem`.
@@ -148,5 +167,79 @@ impl MetricTileSpec {
     /// Value font: body size. Contract §8: `1rem`.
     pub fn value_font_size_rem(&self) -> f32 {
         1.0
+    }
+
+    /// Trend row font: 0.75rem. Contract §8 `.state-tile__trend`.
+    pub fn trend_font_size_rem(&self) -> f32 {
+        0.75
+    }
+
+    /// Trend arrow glyph font: 0.875rem. Contract §8 `.state-tile__trend-arrow`.
+    pub fn trend_arrow_font_size_rem(&self) -> f32 {
+        0.875
+    }
+
+    /// Trend row gap: 0.25rem. Contract §8 `.state-tile__trend` gap.
+    pub fn trend_gap_rem(&self) -> f32 {
+        0.25
+    }
+
+    /// Root border width: 0.0625rem (transparent border). Contract §8.
+    pub fn border_width_rem(&self) -> f32 {
+        0.0625
+    }
+
+    /// Sparkline width: 4rem. Contract §7/§8.
+    pub fn sparkline_width_rem(&self) -> f32 {
+        4.0
+    }
+
+    /// Sparkline height: 1.5rem. Contract §7/§8.
+    pub fn sparkline_height_rem(&self) -> f32 {
+        1.5
+    }
+
+    // ── Density-resolved spacing (rem) — contract §8 density table ──
+    //
+    // Density drives root gap, root padding and body gap ONLY; it never
+    // touches typography or sparkline dimensions.
+
+    /// Root gap in rem for the resolved density. Contract §8 density table.
+    pub fn root_gap_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.375,
+            ControlDensity::Default => 0.5, // space.inline.sm (8px)
+            ControlDensity::Comfortable => 0.625,
+        }
+    }
+
+    /// Root vertical padding in rem for the resolved density.
+    /// Contract §8 density table (default = `0.625rem`).
+    pub fn padding_y_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.625,
+            ControlDensity::Comfortable => 0.75,
+        }
+    }
+
+    /// Root horizontal padding in rem for the resolved density.
+    /// Contract §8 density table (default = `space.panel.x`).
+    pub fn padding_x_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.75,
+            ControlDensity::Default => 1.0, // space.panel.x (16px)
+            ControlDensity::Comfortable => 1.25,
+        }
+    }
+
+    /// Body row gap in rem for the resolved density.
+    /// Contract §8 density table (default = `space.inline.md`).
+    pub fn body_gap_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75, // space.inline.md (12px)
+            ControlDensity::Comfortable => 0.875,
+        }
     }
 }

@@ -81,4 +81,41 @@ impl ToastHostSpec {
         self.density = density;
         self
     }
+
+    // ── Host positioning (contract §7/§8) ────────────────────────
+    //
+    // These are layout constants from the contract, exposed as accessors so
+    // impls resolve them instead of hardcoding pixel literals.
+
+    /// Placement inset from the viewport edge, in rem. Contract §8: `1rem`.
+    pub fn inset_rem(&self) -> f32 {
+        1.0
+    }
+
+    /// Host max width, in rem. Contract §7/§8 width is
+    /// `min(28rem, calc(100vw - 2rem))`; this is the `28rem` cap. The
+    /// `calc(100vw - 2rem)` viewport clamp is web-only (no viewport-relative
+    /// unit on the Rust targets) — impls apply the cap and document the clamp.
+    pub fn width_rem(&self) -> f32 {
+        28.0
+    }
+
+    /// Stack order for the host overlay. Contract §7/§8: `z-index: 80`.
+    /// Neither Rust target exposes a z-index style channel, so this is the
+    /// intended stacking value; impls rely on overlay render order instead.
+    pub fn z_index(&self) -> u32 {
+        80
+    }
+
+    /// Narrow-viewport breakpoint, in rem. Contract §8: `max-width: 40rem`.
+    /// Web-only responsive treatment — no media-query channel on the Rust
+    /// targets; exposed for parity/documentation.
+    pub fn narrow_breakpoint_rem(&self) -> f32 {
+        40.0
+    }
+
+    /// Narrow-viewport placement inset, in rem. Contract §8: `0.5rem`.
+    pub fn narrow_inset_rem(&self) -> f32 {
+        0.5
+    }
 }

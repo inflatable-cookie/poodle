@@ -1,12 +1,12 @@
 //! EmbedInput — URL input for embedding external content backed by EmbedInputSpec.
 
-use crate::primitives::Pill;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
-use gpui::prelude::FluentBuilder;
+use crate::presentation::rem_to_px;
+use crate::primitives::{Pill, TextInput};
+use crate::theme_ext::{resolve_color, resolve_px};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EmbedInputSpec;
-use poodle_specs::{PillSize, PillSpec, PillTone};
+use poodle_specs::{PillSize, PillSpec, PillTone, TextInputSpec};
 
 pub struct EmbedInput {
     spec: EmbedInputSpec,
@@ -40,90 +40,80 @@ impl IntoElement for EmbedInput {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let fill = resolve_color(theme, spec.fill_token());
-        let border = resolve_color(theme, spec.border_token());
-        let radius = resolve_radius(theme, "radius.control");
-        let text_color = resolve_color(theme, "color.text.primary");
-        let placeholder_color = resolve_color(theme, "color.text.secondary");
-        let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        let status_color = resolve_color(theme, spec.status_text_color_token());
-        let body_size = resolve_px(theme, "typography.body.size");
-        let label_size = resolve_px(theme, "typography.label.size");
 
-        let display = if spec.value.is_empty() {
-            spec.placeholder
-                .as_deref()
-                .unwrap_or("Paste URL or embed code...")
-        } else {
-            &spec.value
-        };
-        let color = if spec.value.is_empty() {
-            placeholder_color
-        } else {
-            text_color
-        };
+        // Status colors split per contract: error = text-danger, success = text-success.
+        let danger_color = resolve_color(theme, "color.status.danger");
+        let success_color = resolve_color(theme, "color.status.success");
+        let status_size = resolve_px(theme, "typography.label.size");
+
+        // Contract §7 spacing — root gap 0.25rem, status gap 0.375rem,
+        // status min-height 1.25rem. Resolved from named space tokens where the
+        // exact rem aligns (root → space.inline.xs 0.25rem; min-h → space.stack.lg
+        // 1.25rem). Status gap 0.375rem has no exact named token — exact rem.
+        let root_gap = resolve_px(theme, "space.inline.xs");
+        let status_min_h = resolve_px(theme, "space.stack.lg");
+        let status_gap = px(rem_to_px(0.375));
+
         let (parsed, error) = spec.resolved_parse_state();
 
-        // Multi-line text area (min 3 rows ~72px) for URL / embed code
-        let mut textarea = div()
-            .id("poodle-embed-input")
-            .focusable()
-            .bg(fill)
-            .border_1()
-            .border_color(border)
-            .rounded(radius)
-            .min_h(px(72.0))
-            .w_full()
-            .px(px(12.0))
-            .py(px(8.0))
-            .flex()
-            .flex_col()
-            .items_start()
-            .overflow_hidden()
-            .text_size(body_size)
-            .line_height(relative(1.5))
-            .text_color(color)
-            .focus(move |s| s.border_color(focus_ring))
-            .child(display.to_string());
-
-        if spec.is_disabled {
-            textarea = textarea
-                .opacity(resolve_opacity(theme, "state.opacity.disabled"))
-                .cursor_not_allowed();
-        }
+        // Real TextInput primitive (rows=3 multiline) — delegates all input
+        // semantics, sizing, and token resolution. Debounced parse / onValueChange
+        // are preview-loop wiring (the spec pre-resolves parse state here).
+        let placeholder = spec
+            .placeholder
+            .clone()
+            .unwrap_or_else(|| String::from("Paste a URL or embed code..."));
+        let text_input = TextInput::from_spec(
+            TextInputSpec::new()
+                .with_id("embed-input")
+                .with_input_type("multiline")
+                .with_rows(3)
+                .with_value(spec.value.clone())
+                .with_placeholder(placeholder)
+                .with_disabled(spec.is_disabled),
+            theme,
+        );
 
         let mut wrapper = div()
             .flex()
             .flex_col()
-            .gap(px(6.0))
+            .gap(root_gap)
             .w_full()
-            .child(textarea);
+            .child(text_input);
 
         if error.is_some() || parsed.is_some() {
-            let status_area = div()
-                .min_h(px(20.0))
-                .px(px(4.0))
+            let mut status_area = div()
+                .min_h(status_min_h)
                 .flex()
                 .items_center()
-                .gap(px(6.0))
-                .text_size(label_size)
-                .text_color(status_color)
-                .when(parsed.is_some(), |el| {
-                    el.child(Pill::from_spec(
+                .gap(status_gap)
+                .text_size(status_size);
+
+            // Error span — text-danger color (contract Error part).
+            if let Some(err) = error.clone() {
+                status_area = status_area.child(
+                    div().text_color(danger_color).child(err),
+                );
+            } else if let Some(parsed) = parsed.clone() {
+                // Success: ProviderPill (tone="success") + SuccessText.
+                // Contract sizeRole="chrome": at default presentation chrome
+                // resolves one stop down from Md → Sm. PillSpec has no size-role
+                // field, so Sm is the faithful resolved value.
+                status_area = status_area
+                    .child(Pill::from_spec(
                         PillSpec::new()
-                            .with_label(parsed.clone().unwrap().provider)
+                            .with_label(parsed.provider)
                             .with_tone(PillTone::Success)
                             .with_size(PillSize::Sm),
                         theme,
                     ))
-                })
-                .when(error.is_some() || parsed.is_some(), |el| {
-                    el.child(
-                        error
-                            .clone()
-                            .unwrap_or_else(|| String::from("Embed detected")),
-                    )
-                });
+                    .child(
+                        div()
+                            .text_color(success_color)
+                            .child("Embed detected"),
+                    );
+            }
+
             wrapper = wrapper.child(status_area);
         }
 

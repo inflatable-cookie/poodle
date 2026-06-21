@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=8 jetstream=5 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap pass=fixed-pass-41 -->
 # Parity: MetricTile
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,31 +17,33 @@
 
 Contract and Svelte agree on props (label, value, ariaLabel, trend, trendLabel, sparklineData, density), anatomy (Root/Label/Body/Value/Sparkline/Trend/TrendArrow/TrendLabel), trend icon mapping, sparkline algorithm, and accessible name. No public-API divergence → `consv=ok`. Minor spec-drift notes (Rust spec, not Svelte):
 
-- `MetricTileSpec` has **no `density` field** (`metric_tile.rs:38-54`); contract §3 + Svelte expose `density` (compact/default/comfortable) driving padding + gaps. Rust spec gap — neither Rust target can honor density. Document as a known spec gap (not a Svelte fix).
-- `MetricTrend::Flat` color token is `COLOR_TEXT_SECONDARY` (`metric_tile.rs:23`); contract §8 + Svelte flat color is `--poodle-color-text-tertiary`. Spec is slightly off. **Fix: flat → `COLOR_TEXT_TERTIARY`.**
-- `MetricTileSpec::gap_token()` returns `SPACE_STACK_SM` (`metric_tile.rs:139-141`); contract §8 root gap is `space.inline.sm`. Both resolve to 8px today so it's visually equal, but semantically wrong. **Fix: gap_token → `SPACE_INLINE_SM`.**
+- [x] FIXED `MetricTileSpec` now has a `density: ControlDensity` field (additive) plus density-resolved rem accessors (`root_gap_rem`/`padding_x_rem`/`padding_y_rem`/`body_gap_rem`) matching the contract §8 density table. Both Rust targets honor density.
+- [x] FIXED `MetricTrend::Flat` color token → `COLOR_TEXT_TERTIARY` (was `COLOR_TEXT_SECONDARY`), matching contract §8 + Svelte.
+- [x] FIXED `MetricTileSpec::gap_token()` → `SPACE_INLINE_SM` (was `SPACE_STACK_SM`); density variants override via `root_gap_rem`.
+- Additive spec accessors also added: `sparkline_color_token`, `sparkline_width_rem`/`sparkline_height_rem`, `trend_font_size_rem`, `trend_arrow_font_size_rem`, `trend_gap_rem`, `border_width_rem`.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Hardcoded color literal** for the trend background: `Hsla { a: trend_color.a * 0.12, ..trend_color }` at `metric_tile.rs:114-117` — derived inline, not from a token. Also the whole trend-chip background treatment is **not in the contract** (Svelte trend has no background/chip — it's an inline-flex text+icon row). **Remove the chip background or back it with a token.**
-- [ ] **Wrong anatomy placement of trend.** GPUI puts the trend inline in the `value_row` beside the value (`metric_tile.rs:102-147`). Contract §2 + Svelte place `.state-tile__trend` as a **separate row below the body**, not next to the value. Move trend to its own child after the value row.
-- [ ] **Value font size wrong.** Uses `typography.heading.size` (`metric_tile.rs:84, 108`); contract §8 value is `1rem` (body). Use a 1rem token, not heading size.
-- [ ] **Hardcoded px literals throughout:** label `text_size(px(12.0))` + `line_height(relative(1.3))` (`:97-99`); value `line_height(relative(1.2))` (`:108`); value_row `gap(px(8.0))` (`:103`); trend chip `gap(px(4.0))`, `px(6.0))`, `py(px(2.0))`, `rounded(px(10.0))`, `text_size(px(12.0))` (`:122-128`); sparkline `chart_height px(24.0)`, `bar_width px(3.0)`, `bar_gap px(1.0)`, `mt(px(4.0))`, `rounded(px(1.0))` (`:159-185`). All must resolve from tokens (label 0.75rem, trend 0.75rem, body gap space.inline.md, etc.).
-- [ ] **Sparkline is bars, not a line.** Contract §7/§8 + Svelte render an SVG polyline (`buildSparkline`, viewBox 0 0 64 24, stroke 1.5, 4rem×1.5rem); GPUI draws a bar strip (`metric_tile.rs:154-188`). Acceptable as a Tier-3 rendering-internal substitution **only if** dimensions/color match — but width is unbounded (one bar per point) vs fixed 4rem, and color uses trend/value color vs contract `text-tertiary`. Constrain to 4rem×1.5rem and use `color.text.tertiary`.
-- [ ] **Sparkline color wrong.** Bars use trend color or value color (`metric_tile.rs:163-166`); contract §8 sparkline color is `color.text.tertiary`.
-- [ ] No `density` support (spec lacks the field) — padding/gaps fixed.
-- [ ] No light-theme surface-fill override (contract §8 light theme → `treatment-surface-fill`); GPUI uses the same `fill_token()` regardless of theme.
+- [x] FIXED Trend chip background removed — trend is now a plain inline icon+label row in the trend tone color (no chip bg, no hardcoded `Hsla` literal).
+- [x] FIXED Trend moved to its own row below the body (was inline beside the value); matches contract §2 + Svelte.
+- [x] FIXED Value font size now `value_font_size_rem()` (1rem), no longer `typography.heading.size`.
+- [x] FIXED All px literals replaced with `px(rem_to_px(...))` of contract-exact rem (label 0.75rem, value 1rem, trend 0.75rem, trend-arrow 0.875rem, density-resolved root/body gaps + padding, transparent 0.0625rem border).
+- [x] FIXED Sparkline constrained to 4rem×1.5rem and colored `color.text.tertiary`. Still a bar-strip approximation (GPUI has no raw SVG/polyline) — Tier-3 rendering substitution, dims/color now contract-exact. (note)
+- [x] FIXED Sparkline color → `sparkline_color_token()` = `color.text.tertiary`.
+- [x] FIXED `density` now supported via the new spec field + density-resolved rem accessors.
+- [ ] No light-theme surface-fill override (contract §8 light theme → `treatment-surface-fill`). **Token gap:** no `treatment-surface-fill` semantic token exists in the Rust token set, so neither Rust target has a light-theme override path. GPUI uses the same `fill_token()` regardless of theme. (blocked on a new token)
 - accepted: no ARIA (gpui has no accessibility API) — `aria-label`/`aria-hidden` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No sparkline.** `js_metric_tile` renders label + value + optional trend only (`metric_tile.rs:29-85`); there is a `// (+ sparkline placeholder)` comment (`:43`) but no SVG/line is drawn. Contract §2 Body includes the sparkline; the "With sparklines" specimen group requires it. Implement the line (or a documented Tier-3 substitute at 4rem×1.5rem, `text.tertiary`).
-- [ ] **Extra border not in contract.** Adds `border(1.0).border_color(color.border.subtle)` (`metric_tile.rs:31-32`). Contract §8 + Svelte root border is `0.0625rem solid transparent` (invisible). **Fix: transparent border, and the `1.0` width should be `0.0625rem` resolved, not a raw `1.0`.**
-- [ ] **Hardcoded px literals:** `border(1.0)` (`:31`), icon `rem_to_px(0.875)` (`:64`), trend-row `gap(rem_to_px(0.25))` (`:68`). The `rem_to_px(...)` calls at least flow through rem, but `1.0` border width is a raw literal; resolve all three from tokens (border-width token, trend-arrow 0.875rem, trend gap 0.25rem).
-- [ ] **Trend uses `label_font` (0.75rem) for the trend label** (`metric_tile.rs:79-80`) — correct size, but the icon is sized `rem_to_px(0.875)` while the contract trend-arrow font is 0.875rem and trend text is 0.75rem; verify icon vs text sizing matches contract §8 (arrow 0.875rem, trend text 0.75rem). OK as-is but confirm.
-- [ ] No `density` support (spec lacks the field) and no light-theme surface-fill override (contract §8). Padding/gaps fixed; same surface fill in both themes.
+- [x] FIXED Sparkline implemented — body now renders a fixed 4rem×1.5rem `color.text.tertiary` bar-strip approximation beside the value (JsEl has no SVG/polyline path; Tier-3 substitution, dims/color contract-exact). The "With sparklines" specimen group can now exist. (note)
+- [x] FIXED Root border is now `0.0625rem solid transparent` (resolved width via `border_width_rem()`, fully transparent color), replacing the `border(1.0)` + visible subtle border color.
+- [x] FIXED All px values resolve from rem accessors: border-width `border_width_rem()`, trend-arrow `trend_arrow_font_size_rem()` (0.875rem), trend gap `trend_gap_rem()` (0.25rem), density-resolved padding/gaps.
+- [x] CONFIRMED Trend label uses `trend_font_size_rem()` (0.75rem); arrow icon sized `trend_arrow_font_size_rem()` (0.875rem) — matches contract §8.
+- [x] FIXED `density` now supported via the spec field + density-resolved rem accessors.
+- [ ] No light-theme surface-fill override (contract §8). **Token gap:** no `treatment-surface-fill` semantic token in the Rust set; same surface fill in both themes until that token is added. (blocked on a new token)
 - accepted: interaction is n/a (display-only component); no event loop involvement needed.
 
 ## Specimen parity

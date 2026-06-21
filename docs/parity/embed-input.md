@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap --><!-- pass: both targets compose real TextInput(rows=3)+Pill, split danger/success status, token-resolved spacing; only preview-loop callbacks remain -->
 # Parity: EmbedInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,23 +23,26 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] TextInput is a hand-rolled static `div` "textarea" (`embed_input.rs:68-87`), not the real TextInput primitive — no input semantics, no debounced parse, no `onValueChange`.
-- [ ] Error and success share one status text node — `unwrap_or("Embed detected")` at `embed_input.rs:124` conflates the error span and success span; both use a single `status_color` (`:109`). Contract requires `text-danger` for error, `text-success` for success.
-- [ ] ProviderPill uses `PillSize::Sm` (`embed_input.rs:111-119`); contract specifies Pill `sizeRole="chrome"`, not a fixed size.
-- [ ] No `onParse`/`onValueChange` callbacks, no `parseDebounce` (spec pre-resolves parse state; no interaction).
-- [ ] Hardcoded px dimensions: `.min_h(px(72.0))` `:75`, `.px(px(12.0))` `:77`, `.py(px(8.0))` `:78`, root `.gap(px(6.0))` `:98` (contract root gap `0.25rem`=4px), status `.px(px(4.0))` `:105`, status `.gap(px(6.0))` `:108`, `.min_h(px(20.0))` `:104` — resolve from space tokens.
-- accepted: no ARIA (gpui has no accessibility API). Note contract itself requires no aria-live, so only TextInput-delegated semantics are lost.
+- [x] FIXED TextInput now composes the real `TextInput` primitive via `from_spec` (`input_type="multiline"`, `rows=3`, value/placeholder/disabled forwarded) — input semantics, sizing, and disabled-opacity delegate to the primitive. (Multi-row height is a TextInput-primitive limitation, not embed-input's.)
+- [x] FIXED Error and success are separate nodes: error renders an Error span in `text-danger`; success renders the ProviderPill + a SuccessText span in `text-success`. No shared status color.
+- [x] FIXED ProviderPill resolves chrome sizing — `PillSize::Sm` is the faithful resolution of `sizeRole="chrome"` at default presentation (chrome = one stop down from Md). `PillSpec` has no size-role field, so this is the correct mapped value (documented inline).
+- [x] FIXED Spacing token-resolved: root gap → `space.inline.xs` (0.25rem), status min-height → `space.stack.lg` (1.25rem), status font → `typography.label.size`. Status gap 0.375rem has no named token → exact rem (noted).
+- [ ] No `onParse`/`onValueChange` callbacks, no `parseDebounce` — preview-loop: the spec pre-resolves parse state; paste/fetch/debounce wiring lives in the preview event loop.
+- accepted: no ARIA (gpui has no accessibility API). Contract itself requires no aria-live, so only TextInput-delegated semantics route through the primitive.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] TextInput is a hand-rolled static `div` with one `label` child (`embed_input.rs:37-44`), not the real TextInput primitive — no input semantics, no debounce, no callbacks.
-- [ ] ProviderPill is FAKED as a styled `label` (`embed_input.rs:60-66`, bg `color.background.subtle` + padding + rounded) — contract requires the real Pill primitive (tone="success", sizeRole="chrome"). Forbidden hand-styled fake per CLAUDE.md.
-- [ ] Error and success both use single `status_color` (`embed_input.rs:67-75`) — no `text-danger`/`text-success` split.
-- [ ] Hardcoded disabled opacity `.opacity(0.5)` at `embed_input.rs:47` — contract/CLAUDE.md require `disabled_opacity_token()` (GPUI does this correctly).
-- [ ] Status gap `rem_to_px(0.25)` at `embed_input.rs:55` — contract status gap is `0.375rem`; root gap (`:25`) is correct.
-- [ ] No `onParse`/`onValueChange` callbacks, no `parseDebounce`.
-- [ ] Literal rem dimensions via `rem_to_px(0.8125|0.75|0.375|0.125|0.25|4.5)` at `embed_input.rs:17-25` — resolve from named space/typography tokens rather than magic rem constants.
-- accepted: no ARIA / no real input model (Jetstream has no text-input primitive here).
+- [x] FIXED TextInput now composes the real `js_text_input` primitive (`input_type="multiline"`, `rows=3`) — input semantics, sizing, token resolution, and disabled-opacity delegate to the primitive.
+- [x] FIXED ProviderPill is the real `js_pill` (tone=Success, size Sm = chrome resolved) — the hand-styled `label` fake is gone (CLAUDE.md "no fakes" satisfied).
+- [x] FIXED Error and success split: error span resolves `color.status.danger`; success text resolves `color.status.success`. No single `status_color`.
+- [x] FIXED Disabled opacity is delegated to `js_text_input` (which applies `disabled_opacity_token()`) — the hardcoded `.opacity(0.5)` is gone.
+- [x] FIXED Status gap is now `0.375rem` (contract value); root gap → `space.inline.xs`, status min-height → `space.stack.lg`, status/error/success font → `typography.label.size`.
+- [ ] No `onParse`/`onValueChange` callbacks, no `parseDebounce` — preview-loop (paste/fetch/debounce wiring lives in the preview event loop).
+- accepted: no ARIA (Jetstream has no accessibility API).
+
+## Probe tests (Jetstream)
+
+`embed_input::tests` (render_probe, theme DARK): field+placeholder renders a filled panel; success state shows the provider pill + "Embed detected"; error state shows only the error message (no success pill/text); disabled value renders via the composed primitive; empty value emits no status row.
 
 ## Specimen parity
 

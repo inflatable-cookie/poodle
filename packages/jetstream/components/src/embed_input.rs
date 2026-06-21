@@ -1,82 +1,167 @@
 //! EmbedInput — Jetstream URL input with parsed embed preview pills backed by EmbedInputSpec.
+//!
+//! Contract: `docs/contracts/components/embed-input.md`
+//! Reference: Svelte `EmbedInput.svelte` (parity authority); GPUI `composites/embed_input.rs`.
+//!
+//! Composes the real `js_text_input` primitive (multiline, rows=3) and the real
+//! `js_pill` provider chip — no hand-styled fakes. Debounced parse / onValueChange
+//! / onParse are preview-loop concerns (the spec pre-resolves parse state here).
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::EmbedInputSpec;
+use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
 
+use crate::pill::js_pill;
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::text_input::js_text_input;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_embed_input(spec: &EmbedInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let fill = resolve_color(theme, spec.fill_token());
-    let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "radius.control");
-    let text_color = resolve_color(theme, "color.text.primary");
-    let placeholder_color = resolve_color(theme, "color.text.secondary");
-    let status_color = resolve_color(theme, spec.status_text_color_token());
+    // Status colors split per contract: error = text-danger, success = text-success.
+    let danger_color = resolve_color(theme, "color.status.danger");
+    let success_color = resolve_color(theme, "color.status.success");
+    let status_font = resolve_px(theme, "typography.label.size");
 
-    let font_size = rem_to_px(0.8125);
-    let status_font = rem_to_px(0.75);
-    let pad_x = rem_to_px(0.75);
-    let pad_y = rem_to_px(0.5);
-    let min_h = rem_to_px(4.5);
-    let pill_px = rem_to_px(0.375);
-    let pill_py = rem_to_px(0.125);
-    let pill_radius = rem_to_px(0.25);
-    let gap = rem_to_px(0.25);
-
-    let display = if spec.value.is_empty() {
-        spec.placeholder.as_deref().unwrap_or("Paste URL or embed code...")
-    } else {
-        &spec.value
-    };
-    let color = if spec.value.is_empty() { placeholder_color } else { text_color };
+    // Contract §7 spacing. Root gap 0.25rem → space.inline.xs; status min-height
+    // 1.25rem → space.stack.lg. Status gap 0.375rem has no exact named token —
+    // exact rem (status font-size 0.75rem likewise has no token).
+    let root_gap = resolve_px(theme, "space.inline.xs");
+    let status_min_h = resolve_px(theme, "space.stack.lg");
+    let status_gap = rem_to_px(0.375);
 
     let (parsed, error) = spec.resolved_parse_state();
 
-    // Textarea-like input surface
-    let mut textarea = ui_element::div()
-        .bg(fill)
-        .border(1.0).border_color(border)
-        .rounded(radius)
-        .min_h(min_h)
-        .pl(pad_x).pr(pad_x).pt(pad_y).pb(pad_y)
-        .flex_col()
-        .child(ui_element::label(display).text_color(color).text_size(font_size));
+    // Real multiline TextInput primitive (rows=3) — delegates input semantics,
+    // sizing, token resolution, and disabled-opacity to the primitive.
+    let placeholder = spec
+        .placeholder
+        .clone()
+        .unwrap_or_else(|| String::from("Paste a URL or embed code..."));
+    let text_input = js_text_input(
+        &TextInputSpec::new()
+            .with_id("embed-input")
+            .with_input_type("multiline")
+            .with_rows(3)
+            .with_value(spec.value.clone())
+            .with_placeholder(placeholder)
+            .with_disabled(spec.is_disabled),
+        theme,
+    );
 
-    if spec.is_disabled {
-        textarea = textarea.opacity(0.5);
-    }
+    let mut wrapper = ui_element::div().flex_col().gap(root_gap).child(text_input);
 
-    let mut wrapper = ui_element::div().flex_col().gap(gap).child(textarea);
-
-    // Status row with parsed pill or error
     if error.is_some() || parsed.is_some() {
         let mut status_row = ui_element::div()
-            .flex_row().items_center().gap(rem_to_px(0.25))
-            .min_h(rem_to_px(1.25));
-
-        if let Some(ref parsed) = parsed {
-            let pill_bg = resolve_color(theme, "color.background.subtle");
-            status_row = status_row.child(
-                ui_element::label(&parsed.provider)
-                    .text_color(status_color).text_size(status_font)
-                    .bg(pill_bg)
-                    .pl(pill_px).pr(pill_px).pt(pill_py).pb(pill_py)
-                    .rounded(pill_radius)
-            );
-            status_row = status_row.child(
-                ui_element::label("Embed detected").text_color(status_color).text_size(status_font)
-            );
-        }
+            .flex_row()
+            .items_center()
+            .gap(status_gap)
+            .min_h(status_min_h);
 
         if let Some(ref err) = error {
+            // Error span — text-danger.
             status_row = status_row.child(
-                ui_element::label(err).text_color(status_color).text_size(status_font)
+                ui_element::label(err)
+                    .text_color(danger_color)
+                    .text_size(status_font),
             );
+        } else if let Some(ref parsed) = parsed {
+            // Success: real Pill (tone=Success; size Sm = chrome resolved at
+            // default presentation) + SuccessText (text-success).
+            status_row = status_row
+                .child(js_pill(
+                    &PillSpec::new()
+                        .with_label(parsed.provider.clone())
+                        .with_tone(PillTone::Success)
+                        .with_size(PillSize::Sm),
+                    theme,
+                ))
+                .child(
+                    ui_element::label("Embed detected")
+                        .text_color(success_color)
+                        .text_size(status_font),
+                );
         }
 
         wrapper = wrapper.child(status_row);
     }
 
     wrapper
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    #[test]
+    fn renders_text_input_field_with_placeholder() {
+        let th = theme();
+        let spec = EmbedInputSpec::new().with_placeholder("Paste a YouTube URL...");
+        let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
+        // The composed TextInput primitive surfaces the placeholder text.
+        assert!(
+            tree.has_text("Paste a YouTube URL..."),
+            "placeholder missing: {:?}",
+            tree.texts()
+        );
+        // The composed field renders a filled panel (the TextInput body) wrapping
+        // the placeholder label.
+        assert!(
+            tree.nodes.iter().any(|n| n.depth >= 1 && n.bg.is_some()),
+            "no filled field panel: {}",
+            tree.to_json()
+        );
+    }
+
+    #[test]
+    fn success_state_shows_provider_pill_and_success_text() {
+        let th = theme();
+        let spec = EmbedInputSpec::new()
+            .with_value("https://youtu.be/dQw4w9WgXcQ")
+            .with_detected_parse();
+        let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
+        assert!(tree.has_text("youtube"), "provider pill missing: {:?}", tree.texts());
+        assert!(tree.has_text("Embed detected"), "success text missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn error_state_shows_only_error_message() {
+        let th = theme();
+        let spec = EmbedInputSpec::new().with_error("Could not parse embed source");
+        let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
+        assert!(
+            tree.has_text("Could not parse embed source"),
+            "error text missing: {:?}",
+            tree.texts()
+        );
+        // Error and success are mutually exclusive — no success content.
+        assert!(!tree.has_text("Embed detected"), "error state must not show success text");
+        assert!(!tree.has_text("youtube"), "error state must not show a provider pill");
+    }
+
+    #[test]
+    fn disabled_input_delegates_dimming_to_primitive() {
+        let th = theme();
+        let spec = EmbedInputSpec::new().with_value("x").with_disabled(true);
+        let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
+        // The composed TextInput primitive renders the value (it owns disabled
+        // opacity via its own disabled_opacity_token — no hardcoded 0.5 here).
+        assert!(tree.has_text("x"), "input value missing: {}", tree.to_json());
+        assert!(
+            tree.nodes.iter().any(|n| n.depth >= 1 && n.bg.is_some()),
+            "no field panel: {}",
+            tree.to_json()
+        );
+    }
+
+    #[test]
+    fn empty_value_has_no_status_row() {
+        let th = theme();
+        let spec = EmbedInputSpec::new();
+        let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
+        assert!(!tree.has_text("Embed detected"), "empty input must not show success text");
+    }
 }

@@ -14,6 +14,7 @@ use poodle_specs::{
 };
 
 use super::ToastStack;
+use crate::presentation::rem_to_px;
 
 /// A real GPUI toast host component backed by `ToastHostSpec`.
 ///
@@ -118,24 +119,28 @@ impl IntoElement for ToastHost {
             return div().into_any_element();
         }
 
-        let padding = px(16.0); // 1rem
-        let width = px(448.0); // min(28rem, calc(100vw - 2rem))
+        // Contract §7/§8: inset 1rem, width cap 28rem. Resolved from spec
+        // accessors (no raw pixel literals). The `calc(100vw - 2rem)` viewport
+        // clamp and `z-index: 80` are web-only / unavailable on GPUI — the host
+        // is mounted last in the overlay so it stacks above app chrome. (note)
+        let inset = px(rem_to_px(self.spec.inset_rem()));
+        let width = px(rem_to_px(self.spec.width_rem()));
 
         // ── Position the host container at the chosen corner ──────
-        let mut container = div().absolute().w(width);
+        let mut container = div().absolute().w(width).max_w(width);
 
         match self.spec.placement {
             ToastHostPlacement::BottomEnd => {
-                container = container.right(padding).bottom(padding);
+                container = container.right(inset).bottom(inset);
             }
             ToastHostPlacement::BottomStart => {
-                container = container.left(padding).bottom(padding);
+                container = container.left(inset).bottom(inset);
             }
             ToastHostPlacement::TopEnd => {
-                container = container.right(padding).top(padding);
+                container = container.right(inset).top(inset);
             }
             ToastHostPlacement::TopStart => {
-                container = container.left(padding).top(padding);
+                container = container.left(inset).top(inset);
             }
         }
 

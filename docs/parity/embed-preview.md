@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=7 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap --><!-- pass: both targets gain trustedHtml state, real Skeleton(block) loading, ratio-derived placeholder height; unsanctioned pill+heading removed; token-resolved -->
 # Parity: EmbedPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,22 +22,25 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] `trustedHtml` prop entirely absent — no trusted-HTML render state (contract §4 trusted HTML). Tier-1 prop-parity break.
-- [ ] `aspectRatio` only consumed as `effective_aspect_ratio().is_some()` for a binary min-height pick (`embed_preview.rs:165-167`) — no actual aspect-ratio layout; contract fixed-ratio container not honored.
-- [ ] Skeleton is 3 hand-built bars (`embed_preview.rs:69-96`), not the Skeleton primitive (`shape="block"`) the contract anatomy mandates.
-- [ ] Adds contract-undefined anatomy: provider pill (`:155-184`) + "Raw embed code" heading (`:224`) + media placeholder panel. (Placeholder-vs-iframe is sanctioned by GPUI Notes; the pill/heading are not.)
-- [ ] Hardcoded px: skeleton `.h(px(12.0))` `:72,77,82` / `.w(px(160.0))` `:76` / `.w(px(240.0))` `:81` / `.py(px(4.0))` `:91`; media frame `px(200.0)` `:165` / `px(160.0)` `:167`; pill `.py(px(2.0))` `:216` — resolve via `resolve_px`.
-- [ ] No iframe ARIA (`title`/`sandbox`/etc.) — N/A given placeholder render, but the trusted/raw paths also lack semantics.
-- accepted: placeholder panel instead of live iframe (GPUI Notes §sanctioned).
+- [x] FIXED `trustedHtml` render state added — `EmbedPreviewSpec.trusted_html` (additive field) renders caller-sanitized HTML in the aspect-ratio container in the contract priority slot (after raw embed, before fallback). Empty-state trigger now `is_empty_state()` (`!parsed && !trustedHtml`).
+- [x] FIXED `aspectRatio` drives placeholder height — the media container derives min-height from `effective_aspect_ratio()` against a nominal reference width; `"auto"`/None falls back to the contract static 10rem media height. (Live iframe remains the sanctioned placeholder per GPUI Notes.)
+- [x] FIXED Loading uses the real `Skeleton` primitive (`shape="block"`) + LoadingText — hand-built bars gone.
+- [x] FIXED Removed unsanctioned provider pill + "Raw embed code" heading. Root is now radius-surface + overflow-hidden (no extra border/padding); each state child carries the panel bg, matching the Svelte anatomy. Placeholder media frame retained (sanctioned).
+- [x] FIXED Token-resolved: state gap → `space.inline.sm`, text → `typography.label.size`, fallback padding → `space.panel.y`/`space.panel.x`. min-h 8rem / padding 1.5rem / icon 2rem have no named token → exact rem (noted). Icon size set via `with_px_size(2rem)`.
+- accepted: placeholder panel instead of live iframe (GPUI Notes §sanctioned); no iframe ARIA (no live web view).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] `trustedHtml` prop entirely absent — no trusted-HTML render state.
-- [ ] `aspectRatio` only consumed as `.is_some()` for min-height (`embed_preview.rs:98`) — no aspect-ratio layout.
-- [ ] Skeleton is 2 hand-built bars (`embed_preview.rs:34-47`), not the Skeleton primitive.
-- [ ] Adds contract-undefined anatomy: provider pill (always when parsed, `:77-88`) + "Raw embed code" heading (`:117`) + media placeholder panel.
-- [ ] Literal rem dimensions via `rem_to_px(...)` magic numbers throughout (`embed_preview.rs:19-25,99,101,110-113` etc.) — bypass named-token resolution; resolve from space/typography tokens.
+- [x] FIXED `trustedHtml` render state added (shared `EmbedPreviewSpec.trusted_html`) — renders in the aspect-ratio container in the contract priority slot; empty-state uses `is_empty_state()`.
+- [x] FIXED `aspectRatio` drives placeholder min-height (ratio against nominal reference width); `"auto"`/None → static 10rem media height.
+- [x] FIXED Loading uses the real `js_skeleton` primitive (`shape="block"`) — hand-built bars gone.
+- [x] FIXED Removed unsanctioned provider pill + "Raw embed code" heading; root is radius-surface + overflow-hidden with per-state panel bg. Placeholder media frame retained (sanctioned).
+- [x] FIXED Token-resolved where the contract rem maps to a named token (gap → `space.inline.sm`, text → `typography.label.size`, fallback padding → `space.panel.y`/`.x`); contract-exact rems with no token (8rem/1.5rem/2rem/10rem) kept as explicit rem (noted). Fallback now composes the real `js_text_link`.
 - accepted: placeholder panel instead of live iframe; no ARIA (Jetstream has no accessibility API).
+
+## Probe tests (Jetstream)
+
+`embed_preview::tests` (render_probe, theme DARK): loading shows the Skeleton block (6rem) + "Loading preview..."; error shows the alert icon + message (no parsed leak); empty shows the custom message + icon; YouTube parsed shows the provider title + derived `youtube-nocookie.com/embed/...` URL; trustedHtml renders in-container (not empty state); fallback renders the TextLink to the original id/url when no embed URL.
 
 ## Specimen parity
 
