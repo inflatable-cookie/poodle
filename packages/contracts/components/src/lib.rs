@@ -150,7 +150,7 @@ pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
 pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
 pub use button::ButtonSpec;
 pub use calendar::{CalendarMode, CalendarSpec};
-pub use call_out::CallOutSpec;
+pub use call_out::{CallOutSpec, CalloutAnnounceMode};
 pub use card::{CardLayout, CardSpec, CardVariant};
 pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
 pub use checkbox::CheckboxSpec;

@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=7 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 44: both targets — additive CallOutSpec (dismissible, dismiss_label, announce_mode
+     [CalloutAnnounceMode None/Polite/Assertive], aria_label) + tone methods (info→status-info,
+     pending→accent, neutral→text-secondary; is_neutral/pending; fill/border mixes; icon_badge;
+     border_width). GPUI + Jetstream now render the leading icon badge, all tones incl
+     neutral + pending (spinner badge), and a ghost dismiss "x" when dismissible. 5 Jetstream
+     probe tests; specs 61, jet 166, gpui clean. dismiss hover-overlay alpha has no token (flagged);
+     click/dismiss = preview-loop. -->
 # Parity: Callout
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

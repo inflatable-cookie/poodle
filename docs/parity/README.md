@@ -123,8 +123,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 4 | 7 | gap |
 | calendar | fixed | 3 | 3 | gap |
-| callout | fixed | 7 | 9 | gap |
-| card | fixed | 7 | 7 | gap |
+| callout | fixed | 2 | 2 | gap |
+| card | fixed | 2 | 2 | gap |
 | card-radio-group | fixed | 2 | 9 | gap |
 | card-toggle-group | fixed | 9 | 7 | gap |
 | checkbox | ok | 4 | 5 | gap |

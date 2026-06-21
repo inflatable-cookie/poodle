@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=7 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 44: both targets — additive CardSpec density + has_media + density-aware
+     gap/padding/footer token methods. Fixed card-fill (panel 10%, elevated) + hover-fill;
+     density-driven internal padding/gap; token border width; media region (overflow-clipped,
+     inset radius). GPUI elevated shadow rebuilt (light/dark branch) + media slot + with_density.
+     7 Jetstream probe tests (density padding/gap, media clip); specs 61, jet 166, gpui clean.
+     density rems (10/14px) no token (contract-exact); JsEl shadow = shadow_lg preset. -->
 # Parity: Card
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

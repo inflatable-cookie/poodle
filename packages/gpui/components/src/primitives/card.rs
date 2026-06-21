@@ -1,3 +1,4 @@
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -7,6 +8,7 @@ pub struct Card {
     spec: CardSpec,
     theme: GpuiThemeProvider,
     id_prefix: String,
+    media: Option<AnyElement>,
     header: Option<AnyElement>,
     body: Option<AnyElement>,
     footer: Option<AnyElement>,
@@ -25,6 +27,7 @@ impl Card {
             spec: CardSpec::new(),
             theme: theme.clone(),
             id_prefix: "poodle-card".to_string(),
+            media: None,
             header: None,
             body: None,
             footer: None,
@@ -36,6 +39,7 @@ impl Card {
             spec,
             theme: theme.clone(),
             id_prefix: "poodle-card".to_string(),
+            media: None,
             header: None,
             body: None,
             footer: None,
@@ -49,6 +53,10 @@ impl Card {
     }
     pub fn layout(mut self, v: CardLayout) -> Self {
         self.spec.layout = v;
+        self
+    }
+    pub fn with_density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
         self
     }
     pub fn interactive(mut self) -> Self {
@@ -70,6 +78,12 @@ impl Card {
     }
 
     // ── GPUI-specific builders ────────────────────────────────
+    pub fn with_media(mut self, media: impl IntoElement) -> Self {
+        self.media = Some(media.into_any_element());
+        self.spec.has_media = true;
+        self
+    }
+
     pub fn with_header(mut self, header: impl IntoElement) -> Self {
         self.header = Some(header.into_any_element());
         self
@@ -100,29 +114,35 @@ impl IntoElement for Card {
             .map(|t| resolve_color(theme, t));
         let _disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
-        let gap = resolve_px(theme, spec.gap_token());
-        let padding_x = resolve_px(theme, spec.padding_x_token());
-        let padding_y = resolve_px(theme, spec.padding_y_token());
-        let gap_sm = resolve_px(theme, "space.inline.sm");
-        let gap_md = resolve_px(theme, "space.inline.md");
+        let border_width = resolve_px(theme, spec.border_width_token());
 
-        // Contract: compact layout uses smaller padding (0.5rem x 0.625rem)
-        let (effective_px, effective_py) = match spec.layout {
-            CardLayout::Compact => (gap_md, gap_sm),
-            _ => (padding_x, padding_y),
-        };
+        // Density/layout-aware padding, gap, and footer spacing (contract §8
+        // density table). The spec drives the values; default-density maps to
+        // tokens while compact/comfortable use the contract-exact rem fallbacks
+        // (no exact token for 0.625rem / 0.875rem / 1rem).
+        let gap = px(rem_to_px(spec.gap_rem()));
+        let effective_px = px(rem_to_px(spec.padding_x_rem()));
+        let effective_py = px(rem_to_px(spec.padding_y_rem()));
+        let footer_pt = px(rem_to_px(spec.footer_padding_top_rem()));
 
         let border_subtle = resolve_color(theme, "color.border.subtle");
         let border_default = resolve_color(theme, "color.border.default");
         let panel = resolve_color(theme, "color.background.panel");
         let elevated = resolve_color(theme, "color.background.elevated");
+        let canvas = resolve_color(theme, "color.background.canvas");
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+
+        // Light vs dark — runtime-owned detection (contract Known Delta): a
+        // high-lightness canvas background ⇒ light theme. Selects the elevated
+        // shadow recipe.
+        let is_light = canvas.l > 0.5;
 
         // Match Svelte Card.svelte:
-        // Default/Outlined: --poodle-recipe-card-fill = color-mix(panel 98%, elevated)
+        // Default/Outlined: --poodle-recipe-card-fill = color-mix(panel 10%, elevated)
         // Elevated: --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
         let fill = match spec.variant {
             CardVariant::Elevated => color_mix(elevated, panel, 0.98),
-            _ => color_mix(panel, elevated, 0.98),
+            _ => color_mix(panel, elevated, 0.10),
         };
 
         // Border: Default subtle at 18%, Outlined at 76% border-default,
@@ -183,43 +203,102 @@ impl IntoElement for Card {
             el = el.flex().flex_col();
         }
 
-        // Border + shadow
+        // Border + shadow. Border width resolves from the border-width token;
+        // shadow offsets/blurs resolve from the contract-exact rem values.
+        let bw = rem_to_px(0.0625); // contract shadow geometry uses 0.0625rem ring/inset
         if let Some(sel_border) = selected_border_color {
-            // Selected: accent border + shadow ring
+            // Selected: accent border + accent ring + inset accent shadow
+            // (contract §8 Selected state).
             el = el
-                .border_1()
+                .border(border_width)
                 .border_color(sel_border)
-                .shadow(vec![gpui::BoxShadow {
-                    color: sel_border,
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(1.0),
-                }]);
+                .shadow(vec![
+                    gpui::BoxShadow {
+                        color: sel_border,
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(bw),
+                    },
+                    gpui::BoxShadow {
+                        color: Hsla {
+                            a: sel_border.a * 0.12,
+                            ..sel_border
+                        },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(bw),
+                    },
+                ]);
         } else if matches!(spec.variant, CardVariant::Elevated) {
-            // Elevated: border + drop shadow (matches Svelte elevated card)
+            // Elevated: border + multi-layer drop shadow, light/dark-aware
+            // (contract §8 elevated box-shadow tables).
             if let Some(border) = border_color {
-                el = el.border_1().border_color(border);
+                el = el.border(border_width).border_color(border);
             }
-            el = el.shadow(vec![
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.38),
-                    offset: point(px(0.0), px(18.0)),
-                    blur_radius: px(40.0),
-                    spread_radius: px(0.0),
-                },
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.24),
-                    offset: point(px(0.0), px(6.0)),
-                    blur_radius: px(14.0),
-                    spread_radius: px(0.0),
-                },
-            ]);
+            let shadow = if is_light {
+                // rgba(49,66,85,..) ≈ hsl with l~0.26; approximate via rgba()→hsla.
+                let slate = |a: f32| -> Hsla { Rgba { r: 49.0 / 255.0, g: 66.0 / 255.0, b: 85.0 / 255.0, a }.into() };
+                vec![
+                    gpui::BoxShadow {
+                        color: slate(0.1),
+                        offset: point(px(0.0), px(rem_to_px(0.875))),
+                        blur_radius: px(rem_to_px(1.75)),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: slate(0.06),
+                        offset: point(px(0.0), px(rem_to_px(0.25))),
+                        blur_radius: px(rem_to_px(0.625)),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 1.0, 0.72),
+                        offset: point(px(0.0), px(bw)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: Hsla { a: border_default.a * 0.10, ..border_default },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(bw),
+                    },
+                ]
+            } else {
+                vec![
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.38),
+                        offset: point(px(0.0), px(rem_to_px(1.125))),
+                        blur_radius: px(rem_to_px(2.5)),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.24),
+                        offset: point(px(0.0), px(rem_to_px(0.375))),
+                        blur_radius: px(rem_to_px(0.875)),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: Hsla { a: text_inverse.a * 0.10, ..text_inverse },
+                        offset: point(px(0.0), px(bw)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: Hsla { a: border_default.a * 0.12, ..border_default },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(bw),
+                    },
+                ]
+            };
+            el = el.shadow(shadow);
         } else {
             // Default/Outlined: border + treatment inset shadow
             if let Some(border) = border_color {
-                el = el.border_1().border_color(border);
+                el = el.border(border_width).border_color(border);
             }
-            // Svelte treatment-surface-shadow: inset 1px border-subtle at 18%
+            // Svelte treatment-surface-shadow: inset 0.0625rem border-subtle at 18%
             el = el.shadow(vec![gpui::BoxShadow {
                 color: Hsla {
                     a: border_subtle.a * 0.18,
@@ -227,13 +306,26 @@ impl IntoElement for Card {
                 },
                 offset: point(px(0.0), px(0.0)),
                 blur_radius: px(0.0),
-                spread_radius: px(1.0),
+                spread_radius: px(bw),
             }]);
         }
 
         // Interactive hover
         if let Some(hover_fill) = hover_fill {
             el = el.cursor_pointer().hover(|s| s.bg(hover_fill));
+        }
+
+        // Media slot — overflow-clipped region with inset radius
+        // (contract §8 Media: radius = card-radius - 0.1875rem).
+        if let Some(media) = self.media {
+            let media_radius = (radius - px(rem_to_px(spec.media_radius_inset_rem()))).max(px(0.0));
+            el = el.child(
+                div()
+                    .flex_shrink_0()
+                    .overflow_hidden()
+                    .rounded(media_radius)
+                    .child(media),
+            );
         }
 
         // Header slot
@@ -246,14 +338,14 @@ impl IntoElement for Card {
             el = el.child(div().flex_grow().child(body));
         }
 
-        // Footer slot — with top divider per contract
+        // Footer slot — with top divider and density-aware top padding (contract §8)
         if let Some(footer) = self.footer {
             el = el.child(
                 div()
                     .flex_shrink_0()
                     .border_t_1()
                     .border_color(footer_divider)
-                    .pt(gap) // Use gap as top padding for visual separation
+                    .pt(footer_pt)
                     .child(footer),
             );
         }
