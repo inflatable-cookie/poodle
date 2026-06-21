@@ -6,7 +6,10 @@ use poodle_specs::{
     Alignment, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole, ToolbarSpec,
 };
 
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, toolbar_density_gap_rem, toolbar_density_pad_inline_rem,
+    toolbar_gap_rem, toolbar_pad_block_rem, toolbar_pad_inline_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// A real GPUI horizontal toolbar component backed by `ToolbarSpec`.
@@ -83,30 +86,25 @@ impl IntoElement for Toolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let panel = resolve_color(theme, "color.background.panel");
-        let border_subtle = resolve_color(theme, "color.border.subtle");
-        let radius = resolve_radius(theme, "radius.surface");
+        let panel = resolve_color(theme, spec.bg_token());
+        let border_subtle = resolve_color(theme, spec.border_token());
+        let radius = resolve_radius(theme, spec.radius_token());
 
-        // Svelte: background = color-mix(panel 94%, transparent)
+        // Contract §8: background = color-mix(panel 94%, transparent).
         let bg = Hsla { a: panel.a * 0.94, ..panel };
-        // Svelte: border = color-mix(border-subtle 78%, transparent)
+        // Contract §8: border = color-mix(border-subtle 78%, transparent).
         let border = Hsla { a: border_subtle.a * 0.78, ..border_subtle };
 
-        // Svelte: padding and gap vary by size, density overrides inline padding + gap
+        // Contract §8: size scales block/inline padding + gap; density overrides
+        // only inline padding + gap (block padding / height untouched). Resolve
+        // the effective size via the semantic size role, then derive from the
+        // contract rem scales — no inline literal table.
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        use poodle_specs::ControlSize;
-        let (pad_v, pad_h_base, gap_base) = match effective_size {
-            ControlSize::Xs => (0.125_f32, 0.25_f32, 0.25_f32),
-            ControlSize::Sm => (0.1875, 0.3125, 0.3125),
-            ControlSize::Md => (0.25, 0.375, 0.375),
-            ControlSize::Lg => (0.3125, 0.5, 0.5),
-            ControlSize::Xl => (0.375, 0.625, 0.625),
-        };
-        let (pad_h, gap_val) = match spec.density {
-            ControlDensity::Compact => (0.25_f32, 0.25_f32),
-            ControlDensity::Default => (pad_h_base, gap_base),
-            ControlDensity::Comfortable => (0.5, 0.5),
-        };
+        let pad_v = toolbar_pad_block_rem(effective_size);
+        let pad_h = toolbar_density_pad_inline_rem(spec.density)
+            .unwrap_or_else(|| toolbar_pad_inline_rem(effective_size));
+        let gap_val = toolbar_density_gap_rem(spec.density)
+            .unwrap_or_else(|| toolbar_gap_rem(effective_size));
 
         let is_vertical = spec.orientation == Orientation::Vertical;
 

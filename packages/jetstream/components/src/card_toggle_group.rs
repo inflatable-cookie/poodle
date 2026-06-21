@@ -3,40 +3,77 @@
 //! Contract: `docs/contracts/components/card-toggle-group.md`
 //! Reference: GPUI `composites/card_toggle_group.rs`.
 //!
-//! Render-only: toggling lives in the preview event loop. Each option renders an
-//! interactive Card (selected when its value is in `values`) with a title +
-//! optional description. ZERO hardcoded values.
+//! Render-only: toggling lives in the preview event loop. Each option composes
+//! the `Card` primitive (interactive, and selected when its value is in
+//! `values`) so the selected fill/border come from Card's own token-resolved
+//! treatment — never a hand-rolled accent tint. The Card body carries the title
+//! (weight 600, text-primary) and an optional description (text-secondary). The
+//! options reflow in a flex-wrap grid with a density-driven gap; per-item and
+//! group `disabled` dim via the disabled-opacity token. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{CardSpec, CardToggleGroupSpec, TextSpec, TextTone};
+use poodle_specs::{CardSpec, CardToggleGroupSpec};
 
 use crate::card::js_card;
-use crate::presentation::rem_to_px;
-use crate::text::js_text;
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// Build a card-toggle-group from its spec.
 pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let mut root = ui_element::div().flex_col().gap(rem_to_px(0.5));
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+    // Contract §7 size scale — resolved through the spec helpers, not literals.
+    let title_font = rem_to_px(CardToggleGroupSpec::title_font_rem(effective_size));
+    let description_font = rem_to_px(CardToggleGroupSpec::description_font_rem(effective_size));
+
+    // Density-driven grid gap (contract §7 density table) + Card body rhythm.
+    let grid_gap = rem_to_px(control_space_x_rem(spec.density));
+    let body_gap = rem_to_px(0.25);
+
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+
+    let mut root = ui_element::div().flex_row().flex_wrap().gap(grid_gap);
 
     for option in &spec.options {
+        let is_selected = spec.is_selected(&option.value);
+        let is_option_disabled = spec.disabled || option.disabled;
+
+        // Card body: title + optional description, both token-resolved.
+        let mut body = ui_element::div().flex_col().gap(body_gap).child(
+            ui_element::label(option.title.clone())
+                .text_size(title_font)
+                .text_weight(600)
+                .text_color(text_primary),
+        );
+        if let Some(description) = &option.description {
+            body = body.child(
+                ui_element::label(description.clone())
+                    .text_size(description_font)
+                    .text_color(text_secondary),
+            );
+        }
+
+        // Compose the Card primitive — selected state owns the fill/border.
         let mut card_spec = CardSpec::new().interactive();
-        if spec.is_selected(&option.value) {
+        if is_selected {
             card_spec = card_spec.selected();
         }
+        let card = js_card(&card_spec, theme, vec![body]);
 
-        let mut body = ui_element::div()
-            .flex_col()
-            .gap(rem_to_px(0.25))
-            .child(js_text(&TextSpec::new(option.title.clone()), theme));
-        if let Some(description) = &option.description {
-            body = body.child(js_text(
-                &TextSpec::new(description.clone()).with_tone(TextTone::Secondary),
-                theme,
-            ));
+        // Wrap each Card so it can grow within the wrap-grid; dim per-item disabled.
+        let mut option_el = ui_element::div().flex_1().min_w_0().child(card);
+        if is_option_disabled {
+            option_el = option_el.opacity(disabled_opacity);
         }
 
-        root = root.child(js_card(&card_spec, theme, vec![body]));
+        root = root.child(option_el);
+    }
+
+    if spec.disabled {
+        root = root.opacity(disabled_opacity);
     }
 
     root
@@ -56,26 +93,53 @@ mod tests {
         vec![
             CardToggleOption::new("a", "Option A").with_description("First"),
             CardToggleOption::new("b", "Option B"),
+            CardToggleOption::new("c", "Option C"),
         ]
     }
 
     #[test]
     fn renders_each_option_title_and_description() {
         let el = js_card_toggle_group(&CardToggleGroupSpec::new(options()), &theme());
-        let tree = probe(&el, 320.0, 240.0);
-        assert!(tree.has_text("Option A") && tree.has_text("Option B"), "titles missing");
+        let tree = probe(&el, 480.0, 240.0);
+        assert!(
+            tree.has_text("Option A") && tree.has_text("Option B") && tree.has_text("Option C"),
+            "titles missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("First"), "description missing");
     }
 
     #[test]
-    fn renders_all_options_as_cards() {
-        // Two options → at least two card subtrees with their titles present.
-        let el = js_card_toggle_group(
-            &CardToggleGroupSpec::new(options()).with_values(vec!["a".into()]),
-            &theme(),
-        );
-        let tree = probe(&el, 320.0, 240.0);
+    fn multi_select_marks_each_selected_value() {
+        // Multi-select: both "a" and "c" selected at once. The spec reports both,
+        // and all option titles still render as cards.
+        let spec = CardToggleGroupSpec::new(options())
+            .with_values(vec!["a".into(), "c".into()]);
+        assert!(spec.is_selected("a"));
+        assert!(spec.is_selected("c"));
+        assert!(!spec.is_selected("b"));
+
+        let el = js_card_toggle_group(&spec, &theme());
+        let tree = probe(&el, 480.0, 240.0);
         assert!(!tree.is_empty());
-        assert!(tree.has_text("Option A") && tree.has_text("Option B"));
+        assert!(
+            tree.has_text("Option A")
+                && tree.has_text("Option B")
+                && tree.has_text("Option C"),
+            "selected treatment dropped an option: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn renders_all_options_when_group_disabled() {
+        let spec = CardToggleGroupSpec::new(options()).with_disabled(true);
+        let el = js_card_toggle_group(&spec, &theme());
+        let tree = probe(&el, 480.0, 240.0);
+        assert!(
+            tree.has_text("Option A") && tree.has_text("Option B"),
+            "disabled group dropped options: {:?}",
+            tree.texts()
+        );
     }
 }

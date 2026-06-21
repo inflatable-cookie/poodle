@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: both targets size/density + header surface-mix + padding/type tokens + uppercase headers + 1.5 line-height; letter-spacing accepted-approx -->
 # Parity: Table
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,20 +25,20 @@ Contract §8 hardcoded resolved values that Svelte renders differently. Svelte i
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded cell padding `px(rem_to_px(0.5))` / `px(rem_to_px(0.75))` at `table.rs:130-131` — should resolve from a cell-padding token, not raw rem literals.
-- [ ] Hardcoded type sizes: header `px(rem_to_px(0.6875))` (`table.rs:173`), caption `px(rem_to_px(0.8125))` (`table.rs:151`), caption `py(px(rem_to_px(0.625)))` (`table.rs:149`), and `line_height(relative(1.4))` throughout — resolve from tokens (Svelte uses `1.5` for body, so `1.4` is also wrong).
-- [ ] No `size` / `density` support — builder has no size/density methods and `into_element` ignores them; Svelte scales font + padding per size and padding-inline per density.
-- [ ] No `text-transform: uppercase` letter-spacing parity — GPUI uppercases the label string (`table.rs:181`) but never applies `letter-spacing: 0.04em` from contract §8.
+- [x] FIXED Cell padding now resolves from the contract size/density rem scales (`presentation::table_cell_pad_block_rem` / `table_cell_pad_inline_rem`), not raw `0.5`/`0.75` literals.
+- [x] FIXED Type sizes resolve from `table_font_rem` (body) / `table_header_font_rem` (header) per effective size; caption uses the contract caption rule (0.8125rem, weight 500, 0.625/0.75 padding); `line_height` is now `relative(1.5)` everywhere (was `1.4`).
+- [x] FIXED `size` / `density` support — added `size()` / `with_size_role()` / `with_density()` builders; `into_element` resolves the effective size via `resolve_semantic_size` then scales font + padding-block (size) and padding-inline (density).
+- [x] FIXED Header uppercase retained (`to_uppercase()`); header bg now resolves via `header_surface_token()`/`header_mix_text_token()` (surface 91% / text-primary). `letter-spacing: 0.04em` is an accepted approximation — GPUI has no per-run letter-spacing.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored, scope=col/row semantics not emitted (contract §10 GPUI note acknowledges this).
-- accepted: `color-mix` approximated via alpha-blend helper (contract Known Delta).
+- accepted: `color-mix` approximated via alpha-blend / sRGB mix helper (contract Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Wrong cell padding — uses contract's stale `rem_to_px(0.6875)` / `rem_to_px(0.875)` at `table.rs:37-38`; Svelte is `0.5rem` / `0.75rem`. Resolve from a token once contract is fixed.
-- [ ] Header background not mixed — `header_fill = resolve_color(spec.header_fill_token())` raw at `table.rs:24`; Svelte mixes `surface 91% / text-primary`. GPUI does the mix (`color_mix(surface, text_primary, 0.91)`), Jetstream does not. **Add the mix.**
-- [ ] Hardcoded type/size literals: header `rem_to_px(0.6875)` (`table.rs:39`), caption `rem_to_px(0.75)` (`table.rs:40`, Svelte caption is `0.8125rem`), cell/empty `rem_to_px(0.8125)` (`table.rs:98,121`) — resolve from tokens.
-- [ ] No `letter-spacing`/`text-transform` parity — header label not uppercased and `0.04em` spacing absent (`table.rs:71`). Svelte uppercases + spaces headers.
-- [ ] No `size` / `density` support — `js_table` ignores `spec.size`/`spec.density`; no per-size font/padding scaling.
+- [x] FIXED Cell padding now from the contract rem scales — `table_cell_pad_block_rem(size)` (vertical) / `table_cell_pad_inline_rem(density)` (horizontal). Stale `0.6875`/`0.875` literals removed.
+- [x] FIXED Header background mixed — `color_mix(surface, text_primary, 0.91)` via `header_surface_token()`/`header_mix_text_token()`, matching GPUI + Svelte (`theme_ext::color_mix` already existed). Probe test asserts the resolved fill.
+- [x] FIXED Type/size literals — header from `table_header_font_rem`, body/empty from `table_font_rem`; caption is the contract caption rule (0.8125rem, weight 500, 0.625/0.75 padding).
+- [x] FIXED Header `text-transform: uppercase` applied (`col.label.to_uppercase()`). `letter-spacing: 0.04em` is an accepted approximation — JsEl has no per-run letter-spacing.
+- [x] FIXED `size` / `density` support — `js_table` resolves the effective size via `resolve_semantic_size` and scales font + padding-block (size) / padding-inline (density). Shell also gained `min_w_0` (contract §8 `min-width: 0`).
 - accepted: no ARIA channel for scope=col/row (Jetstream has no a11y tree).
 
 ## Specimen parity

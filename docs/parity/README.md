@@ -126,7 +126,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | callout | fixed | 2 | 2 | gap |
 | card | fixed | 2 | 2 | gap |
 | card-radio-group | fixed | 2 | 2 | gap |
-| card-toggle-group | fixed | 2 | 7 | gap |
+| card-toggle-group | fixed | 2 | 2 | gap |
 | checkbox | ok | 4 | 5 | gap |
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 0 | 0 | gap |
@@ -171,7 +171,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | icon | ok | 2 | 1 | gap |
 | icon-button | fixed | 0 | 0 | gap |
 | icon-provider | fixed | 1 | 1 | gap |
-| inline-list-section | fixed | 6 | 1 | gap |
+| inline-list-section | fixed | 0 | 1 | gap |
 | inline-remediation | ok | 1 | 6 | gap |
 | list-card | fixed | 2 | 4 | gap |
 | list-card-counter | fixed | 2 | 2 | ok |
@@ -228,7 +228,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | surface | fixed | 1 | 1 | gap |
 | switch | fixed | 0 | 0 | ok |
 | tab-strip | gap | 0 | 0 | gap |
-| table | fixed | 4 | 5 | gap |
+| table | fixed | 0 | 0 | gap |
 | tabs | fixed | 4 | 4 | gap |
 | text | ok | 4 | 2 | gap |
 | text-input | fixed | 2 | 2 | gap |
@@ -240,7 +240,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | toast-stack | ok | 1 | 3 | gap |
 | toggle-group | fixed | 0 | 0 | gap |
 | token-input | fixed | 2 | 3 | gap |
-| toolbar | fixed | 4 | 5 | gap |
+| toolbar | fixed | 1 | 1 | gap |
 | tooltip | fixed | 0 | 0 | ok |
 | tree | ok | 2 | 4 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |

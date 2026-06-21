@@ -1,5 +1,12 @@
-<!-- parity consv=fixed gpui=6 jetstream=1 specimen=gap -->
-<!-- jetstream impl built (pass 8); the remaining jetstream todo is the specimen -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
+<!-- pass 46: GPUI inline_list_section rebuilt to the contract — compact muted row chrome
+     (color_mix(surface 93%, text-primary), padding 0.5/0.625rem, radius calc(radius.surface −
+     0.1875rem)), full count pill (min-w 1.875rem, h 1.375rem, bg background.elevated, border
+     0.0625rem, label-size/weight), title at typography.label.size + SEMIBOLD uppercase, empty
+     at typography.body.size + italic, items gap space.stack.sm. Zero hardcoded px/hsla — all
+     token or contract-rem. Jetstream impl aligned to the same token values (label/body size,
+     count bg+geometry, row chrome). gpui builds, jet probe tests pass. Remaining jetstream
+     (1): the specimen. -->
 # Parity: InlineListSection
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

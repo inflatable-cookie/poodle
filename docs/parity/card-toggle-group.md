@@ -1,11 +1,13 @@
-<!-- parity consv=fixed gpui=2 jetstream=7 specimen=gap -->
-<!-- pass 45: GPUI rebuilt to the card-radio-group pattern — each option wraps composed
-     Card::from_spec(interactive/selected) in a focusable option container (id, flex_1,
-     cursor, on_toggle), Card owns the selected fill (no invented fill); title + optional
-     description at title_font_rem/description_font_rem; multi-select model kept (values
-     Vec<String>); flex-wrap grid + density gap; per-item/group disabled. Additive
-     CardToggleGroupSpec: with_size/size_role/density + title/description_font_rem. specs 61,
-     gpui clean. count-pill/columns remain (not in shared spec). -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 46: Jetstream js_card_toggle_group rebuilt to match GPUI — each option composes
+     js_card(interactive/selected when in values) with title (weight 600, text-primary at
+     title_font_rem) + optional description (text-secondary at description_font_rem); multi-
+     select model kept (values Vec<String>); flex-wrap grid + density-driven gap
+     (control_space_x_rem); per-item + group disabled via state.opacity.disabled. All token/
+     contract-rem resolved, zero hardcoded hsla/px. Probe tests: titles+description, multi-
+     select (a+c), disabled group. gpui+jet build/test clean. Remaining jet (2): count-pill +
+     columns header (not in shared spec — same omission as GPUI; needs human spec call).
+     Selection/keyboard = preview-loop (accepted). -->
 # Parity: CardToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

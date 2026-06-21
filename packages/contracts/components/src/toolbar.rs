@@ -63,6 +63,11 @@ impl ToolbarSpec {
         semantic::COLOR_BACKGROUND_PANEL
     }
 
+    /// Container border-radius. Contract §8: `radius.surface`.
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
     pub fn padding_token(&self) -> &'static str {
         semantic::SPACE_INLINE_SM
     }
