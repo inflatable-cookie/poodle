@@ -10,6 +10,8 @@ pub struct AudioPlayerSpec {
     pub volume: f64,
     pub is_muted: bool,
     pub show_speed_control: bool,
+    /// Playback rate (e.g. 1.0 = 1x); drives the SpeedSelect display.
+    pub rate: f64,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -25,6 +27,7 @@ impl AudioPlayerSpec {
             volume: 1.0,
             is_muted: false,
             show_speed_control: false,
+            rate: 1.0,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -59,6 +62,20 @@ impl AudioPlayerSpec {
     pub fn with_show_speed_control(mut self, show_speed_control: bool) -> Self {
         self.show_speed_control = show_speed_control;
         self
+    }
+
+    pub fn with_rate(mut self, rate: f64) -> Self {
+        self.rate = rate;
+        self
+    }
+
+    /// Format the playback rate for the SpeedSelect label, e.g. `"1x"`/`"1.5x"`.
+    pub fn rate_label(&self) -> String {
+        if (self.rate.fract()).abs() < f64::EPSILON {
+            format!("{}x", self.rate as i64)
+        } else {
+            format!("{}x", self.rate)
+        }
     }
 
     pub fn progress(&self) -> f64 {

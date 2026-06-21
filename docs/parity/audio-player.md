@@ -1,4 +1,12 @@
-<!-- parity consv=ok gpui=8 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 41: audio-player built out on BOTH targets. Added AudioPlayerSpec.rate (+ with_rate
+     + rate_label). GPUI: button/icon/track now size-driven (were fixed 32px/Sm/4px); split
+     combined "{:.0}s/{:.0}s" → two m:ss CurrentTime/TotalTime labels; added volume slider +
+     speed-select (rate_label); seek/volume relative fills + token track h/r. Jetstream:
+     transport text ("Play"/"Mute") → real icons (play/pause/volume-2/volume-x); seek + volume
+     fills fixed (.w(frac*100) sliver bug → ProgressBar widget); speed shows rate; pill radius.
+     2 probe tests; specs 61. Remaining: monospace time (no font-family resolver), drag/playback
+     = preview-loop. -->
 # Parity: AudioPlayer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

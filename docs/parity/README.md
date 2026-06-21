@@ -115,7 +115,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | action-discovery-panel | fixed | 6 | 9 | gap |
 | alert-dialog | fixed | 2 | 10 | gap |
 | app-header | fixed | 2 | 2 | gap |
-| audio-player | ok | 8 | 7 | gap |
+| audio-player | ok | 2 | 2 | gap |
 | avatar | ok | 4 | 3 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 2 | 3 | gap |
