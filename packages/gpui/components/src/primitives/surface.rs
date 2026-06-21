@@ -5,7 +5,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI surface component backed by `SurfaceSpec`.
 pub struct Surface {
@@ -82,22 +82,28 @@ impl IntoElement for Surface {
         let surface_radius = resolve_radius(theme, spec.radius_token());
         let padding = spec.resolved_padding();
 
-        let is_elevated = spec.is_elevated || spec.tone == SurfaceTone::Elevated;
-
-        // Colors from token system
-        let panel = resolve_color(theme, "color.background.panel");
-        let elevated_bg = resolve_color(theme, "color.background.elevated");
-        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let is_elevated = spec.is_elevated_resolved();
 
         // ── Background ──────────────────────────────────────────
-        // Svelte Surface.svelte:
-        //   non-elevated: color-mix(surface 96%, transparent) (alpha only)
-        //   elevated: color-mix(elevated 96%, panel)
-        let surface_bg = resolve_color(theme, "color.background.surface");
-        let bg = if is_elevated {
-            color_mix(elevated_bg, panel, 0.96)
-        } else {
-            Hsla { a: surface_bg.a * 0.96, ..surface_bg }
+        // Contract §8 (Svelte Surface.svelte):
+        //   panel/base: color-mix(background-surface 96%, transparent) (alpha only)
+        //   canvas:     color-mix(background-canvas 98%, transparent)  (alpha only)
+        //   elevated:   color-mix(background-elevated 96%, background-panel)
+        // Base color, second-color, and ratio all resolve from the spec — the
+        // CSS color-mix percentages live on `SurfaceSpec`, not as inline literals.
+        let base_fill = resolve_color(theme, spec.resolved_background_token());
+        let mix_ratio = spec.fill_mix_ratio();
+        let bg = match spec.fill_mix_over_token() {
+            // Elevated mixes the base color over a second background token.
+            Some(over_token) => {
+                let over = resolve_color(theme, over_token);
+                color_mix(base_fill, over, mix_ratio)
+            }
+            // Non-elevated tones mix toward transparent → alpha-only scaling.
+            None => Hsla {
+                a: base_fill.a * mix_ratio,
+                ..base_fill
+            },
         };
 
         // Brand-raised treatment: gradient fill over the base color
@@ -109,44 +115,33 @@ impl IntoElement for Surface {
         }
 
         // ── Border ──────────────────────────────────────────────
-        // Svelte Surface.svelte: both non-elevated and elevated use
-        //   --poodle-surface-border = color-mix(border-subtle 74%, transparent)
-        //   default: border-default full
-        //   none: transparent
-        if let Some(_border_token) = spec.resolved_border_color() {
+        // Contract §8: subtle → color-mix(border-subtle 74%, transparent);
+        // default → border-default full; none → no border. Width resolves from
+        // the `border.width.default` (0.0625rem) token, not a fixed 1px.
+        if let Some(border_token) = spec.resolved_border_color() {
+            let base_border = resolve_color(theme, border_token);
+            let mix = spec.border_mix_ratio();
             let final_border = match spec.border {
-                SurfaceBorder::Subtle => {
-                    // Svelte: color-mix(border-subtle 74%, transparent)
-                    Hsla {
-                        a: border_subtle.a * 0.74,
-                        ..border_subtle
-                    }
-                }
-                _ => {
-                    let border_default = resolve_color(theme, "color.border.default");
-                    border_default
-                }
+                // color-mix(border-subtle 74%, transparent) → alpha scaling.
+                SurfaceBorder::Subtle => Hsla {
+                    a: base_border.a * mix,
+                    ..base_border
+                },
+                _ => base_border,
             };
-            el = el.border_1().border_color(final_border);
+            let border_width = spec
+                .resolved_border_width()
+                .map(|t| resolve_px(theme, t))
+                .unwrap_or(px(0.0));
+            el = el.border(border_width).border_color(final_border);
         }
 
         // ── Shadow ──────────────────────────────────────────────
-        // Matches Svelte app.css treatment values:
-        //   non-elevated: inset 0 0 0 1px border-subtle at 18%
-        //   elevated: elevation-surface token shadow
+        // Contract §8: base shadow is `none`; elevated resolves the
+        // `elevation.surface` token shadow. The previous undocumented inset ring
+        // (raw 0.18 alpha) is removed — the contract base shadow is none.
         if is_elevated {
             el = el.shadow(crate::theme_ext::elevation_surface_shadow());
-        } else {
-            // Inset shadow ring: 1px border-subtle at 18%
-            el = el.shadow(vec![gpui::BoxShadow {
-                color: Hsla {
-                    a: border_subtle.a * 0.18,
-                    ..border_subtle
-                },
-                offset: point(px(0.0), px(0.0)),
-                blur_radius: px(0.0),
-                spread_radius: px(1.0),
-            }]);
         }
 
         // Padding

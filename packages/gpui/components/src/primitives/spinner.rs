@@ -95,14 +95,17 @@ impl IntoElement for Spinner {
                     .into_any_element()
             }
             SpinnerVariant::Grid => {
-                // Cell and gap sizes from Svelte per-size values (rem origins)
-                let (cell_size, gap) = match spec.size {
-                    SpinnerSize::Xs => (px(rem_to_px(0.125)),    px(rem_to_px(0.0625))),
-                    SpinnerSize::Sm => (px(rem_to_px(0.15625)),  px(rem_to_px(0.078125))),
-                    SpinnerSize::Md => (px(rem_to_px(0.203125)), px(rem_to_px(0.09375))),
-                    SpinnerSize::Lg => (px(rem_to_px(0.28125)),  px(rem_to_px(0.125))),
-                    SpinnerSize::Xl => (px(rem_to_px(0.375)),    px(rem_to_px(0.15625))),
-                };
+                // Cell and gap sizes derive from the spec's per-size rem values
+                // (contract §7 grid sizes + Svelte gap table). The grid wrapper
+                // is 2 cols × 3 rows: cell_w = (width - gap) / 2,
+                // cell_h = (height - 2·gap) / 3 — the cells are square in the
+                // contract, so derive the side from the wrapper width.
+                let gap = px(rem_to_px(spec.grid_gap_rem()));
+                let cell_w = (spec.grid_width_rem() - spec.grid_gap_rem()) / 2.0;
+                let cell_size = px(rem_to_px(cell_w));
+                let cell_radius = px(rem_to_px(spec.cell_radius_rem()));
+                let opacity_floor = spec.opacity_floor();
+                let opacity_span = spec.opacity_peak() - spec.opacity_floor();
 
                 let mut col = div().flex().flex_col().gap(gap);
 
@@ -123,7 +126,7 @@ impl IntoElement for Spinner {
                             div()
                                 .w(cell_size)
                                 .h(cell_size)
-                                .rounded(px(rem_to_px(0.125)))
+                                .rounded(cell_radius)
                                 .bg(color)
                                 .with_animation(
                                     SharedString::from(format!(
@@ -145,7 +148,9 @@ impl IntoElement for Spinner {
                                         let normalized = (nearest / 1.6).min(1.0);
                                         let smooth = 1.0
                                             - (normalized * normalized * (3.0 - 2.0 * normalized));
-                                        let opacity = 0.2 + smooth * 0.56;
+                                        // Ramp within the contract's 0.2 → 0.76
+                                        // opacity band (floor + span from spec).
+                                        let opacity = opacity_floor + smooth * opacity_span;
                                         el.opacity(opacity)
                                     },
                                 ),

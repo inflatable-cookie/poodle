@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap | pass: added SpinnerSpec token methods (ring/cell radius, per-size grid gap, track-opacity, opacity floor/peak); both targets now resolve ring stroke/track + grid cell/gap/radius/opacity from the spec; Jetstream ring renders the two-tone track+arc statically. Remaining open items are animation (preview-loop) + accepted no-ARIA. -->
 # Parity: Spinner
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,22 +28,22 @@ Prop set matches (`variant`/`size`/`sizeRole`/`density`/`tone`/`ariaLabel`, all 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded cell radius literal `rem_to_px(0.125)` at `spinner.rs:126` — Svelte cell radius is `0.125rem` but should resolve from a spec token method (e.g. `SpinnerSpec::cell_radius_token()`), not a raw float; the spec exposes no such method (`packages/contracts/components/src/spinner.rs`). Add token + spec method.
-- [ ] Hardcoded grid cell/gap size table at `spinner.rs:99-105` — five `(cell_size, gap)` rows of raw `rem_to_px(...)` floats. These are derived per-size constants with no spec/token backing; move into `SpinnerSpec` (`grid_cell_px()`/`grid_gap_px()`) so the magic rem origins live in one place.
-- [ ] Grid color is flat `bg(color)` with animated opacity (`spinner.rs:122-152`) — acceptable approximation, but the opacity curve `0.2 + smooth * 0.56` (`spinner.rs:148`) hardcodes the `0.2` floor and `0.56` span; these come from Svelte's `0.2 → 0.76` keyframe range and belong on the spec, not as inline literals.
-- [ ] Ring track + top-color highlight absent — GPUI rotates a single-color `spinner.svg` (`spinner.rs:81-95`); Svelte's ring is a `0.125rem` ring at `currentColor 24%` with a `currentColor` top arc (`Spinner.svelte:125-126`). Verify the SVG asset encodes the 24% track + bright arc, else ring reads as a solid spinning disc, not contract's two-tone ring.
-- [ ] Ring size from `spec.size_px()` (`spinner.rs:80`) returns raw px constants `10/12/16/24/32` (`packages/contracts/components/src/spinner.rs:69-77`) — these are the rem sizes pre-multiplied; acceptable since centralized in spec, but flag that they bypass `rem_to_px` and assume a fixed root font size.
+- [x] FIXED Cell radius resolves `spec.cell_radius_rem()` (0.125rem) via `rem_to_px`; the raw literal is gone.
+- [x] FIXED Grid cell/gap derive from spec: gap = `spec.grid_gap_rem()` (per-size table), cell side = `(spec.grid_width_rem() - gap) / 2`. The five-row raw `(cell, gap)` table in `spinner.rs` is removed.
+- [x] FIXED Opacity band: ramp is now `spec.opacity_floor() + smooth * (spec.opacity_peak() - spec.opacity_floor())` (0.2 → 0.76); the inline `0.2`/`0.56` literals are gone.
+- [ ] Ring track + top-color highlight: GPUI still rotates the single-color `spinner.svg` asset (`spinner.rs` ring branch). The contract two-tone (24% track + bright top arc) lives in the SVG asset, not component code — leaving the asset as the right mechanism. Open: confirm/author the asset encodes the 24% track + bright arc. (Spec now exposes `track_opacity()` if the GPUI ring is ever rebuilt from borders rather than an asset.)
+- [ ] Ring size still uses `spec.size_px()` (pre-multiplied px constants) rather than `spec.ring_size_rem()` × `rem_to_px`. Accepted-style (centralized in spec) but flagged: it assumes a fixed 16px root. `ring_size_rem()` now exists for an exact-parity rebuild.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored on spec but `role="status"`/`aria-live` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No rotation animation — `build_ring` (`spinner.rs:83-101`) renders a static bordered circle; comment at `spinner.rs:96-97` admits rotation is "runtime-level". Spin must be driven by the preview event loop or a runtime animation hook; currently the ring never moves. Wire animation in preview main loop or note as accepted runtime delta.
-- [ ] No grid opacity animation — `build_grid` uses six **static** descending opacities `[1.0, 0.85, 0.7, 0.55, 0.4, 0.25]` (`spinner.rs:126`), not Svelte's animated snake. Cells are frozen. Animate via runtime hook or accept as static delta.
-- [ ] Hardcoded ring border width literal `rem_to_px(0.125)` at `spinner.rs:85` — resolve from a spec token method, not raw `0.125`.
-- [ ] Hardcoded track alpha `tone_color.a * 0.24` at `spinner.rs:88` — the `0.24` is Svelte's `currentColor 24%` mix; move to a spec/token constant, drop the inline magic number.
-- [ ] Ad-hoc grid gap heuristic `(width * 0.1).max(rem_to_px(0.0625))` at `spinner.rs:119` — Svelte has explicit per-size gap values (`0.0625`–`0.15625rem`, `Spinner.svelte:91-119`); replace the `* 0.1` guess + cell math (`spinner.rs:121-122`) with the real per-size table via spec.
-- [ ] Hardcoded cell radius literal `rem_to_px(0.125)` at `spinner.rs:115` and static opacity ramp `spinner.rs:126` — radius needs a token method; the `[1.0..0.25]` ramp hardcodes a non-contract curve (Svelte floor is `0.2`, peak `0.76`).
-- accepted: tone `Current` resolves to `color.text.primary` (`spinner.rs:65`) rather than literal inherited `currentColor` — Jetstream has no CSS inheritance; same approximation GPUI uses.
+- [ ] No rotation animation — `build_ring` renders a static (now two-tone) ring; continuous rotation must be driven by the preview event loop / a runtime animation hook. Accepted runtime delta (noted inline): JsEl has no animation hook here.
+- [ ] No grid opacity animation — `build_grid` renders a static single-frame snapshot of the snake (within the 0.2→0.76 band); continuous pulsing is preview-loop driven. Accepted runtime delta.
+- [x] FIXED Ring border width resolves `spec.ring_border_width_rem()` (0.125rem); the raw literal is gone.
+- [x] FIXED Track alpha resolves `spec.track_opacity()` (0.24); the inline `0.24` is gone. Ring now also draws `border_color_top(tone_color)` for the bright arc — a faithful static two-tone ring.
+- [x] FIXED Grid gap uses `spec.grid_gap_rem()` (the real per-size table 0.0625–0.15625rem); the `width * 0.1` heuristic is removed, cell math derives from it.
+- [x] FIXED Cell radius resolves `spec.cell_radius_rem()` (0.125rem); the static ramp now uses the contract band via `spec.opacity_floor()`/`opacity_peak()` (0.2 floor, 0.76 peak) instead of the old `[1.0..0.25]` curve.
+- accepted: tone `Current` resolves to `color.text.primary` rather than literal inherited `currentColor` — Jetstream has no CSS inheritance; same approximation GPUI uses.
 - accepted: no ARIA channel for `aria_label`.
 
 ## Specimen parity

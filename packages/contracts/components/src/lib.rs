@@ -239,7 +239,9 @@ pub use text_input::TextInputSpec;
 pub use text_link::{TextLinkSpec, TextLinkTone};
 pub use time_ago::TimeAgoSpec;
 pub use time_field::TimeFieldSpec;
-pub use time_zone_select::TimeZoneSelectSpec;
+pub use time_zone_select::{
+    default_time_zone_options, TimeZoneSelectSpec, TIME_ZONE_EMPTY_MESSAGE, TIME_ZONE_PLACEHOLDER,
+};
 pub use token_input::TokenInputSpec;
 pub use toolbar::ToolbarSpec;
 /// Deprecated: Toggle has been superseded by Button with `pressed` prop.
@@ -449,13 +451,15 @@ mod tests {
     }
 
     #[test]
-    fn elevated_surface_uses_elevated_background_and_overlay_shadow() {
+    fn elevated_surface_uses_elevated_background_and_surface_shadow() {
         let spec = SurfaceSpec::new().with_tone(SurfaceTone::Elevated);
         assert_eq!(
             spec.resolved_background_token(),
             semantic::COLOR_BACKGROUND_ELEVATED
         );
-        assert_eq!(spec.resolved_shadow_token(), semantic::ELEVATION_OVERLAY);
+        // Contract §8 elevated targets `--poodle-elevation-surface` (Svelte
+        // `Surface.svelte:86`), not the overlay elevation.
+        assert_eq!(spec.resolved_shadow_token(), semantic::ELEVATION_SURFACE);
     }
 
     #[test]

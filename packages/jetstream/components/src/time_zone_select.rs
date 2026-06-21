@@ -3,78 +3,96 @@
 //! Contract: `docs/contracts/components/time-zone-select.md`
 //! Reference: `packages/svelte/components/src/TimeZoneSelect.svelte`
 //!
-//! Renders a field-chrome shell with a select display and disclosure
-//! chevron indicator.
+//! Thin wrapper over `Select`: the Svelte component delegates rendering and
+//! interaction entirely to `Select` in always-searchable mode. The Jetstream
+//! target mirrors that by mapping the timezone options into a `SelectSpec`
+//! (via `spec.to_select_spec()`) and delegating to `js_select`, so the trigger,
+//! search input, option list, grouping, selected indicator, empty state, and
+//! size/density all come from the shared `Select` implementation for free.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::JsEl;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::TimeZoneSelectSpec;
 
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::select::js_select;
 
 pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = rem_to_px(control_height_rem(effective_size));
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    // Build the searchable `SelectSpec` exactly as the Svelte wrapper does
+    // (searchable always on, timezone empty message, mapped option list,
+    // placeholder + value + size/density forwarded) and delegate.
+    let select_spec = spec.to_select_spec();
+    js_select(&select_spec, theme)
+}
 
-    let fill = resolve_color(theme, "color.background.surface");
-    let border_color = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "radius.control");
-    let text_color = resolve_color(theme, "color.text.primary");
-    let muted = resolve_color(theme, "color.text.secondary");
-    let icon_muted = resolve_color(theme, "color.icon.muted");
-    let focus_ring = resolve_color(theme, "color.accent.focusRing");
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
 
-    // Focus-within: border becomes focusRing color, shadow at 28% opacity
-    let focus_ring_c: Color = focus_ring.into();
-    let _focus_shadow = focus_ring_c.with_alpha(0.28);
-
-    // Determine display
-    let display_text = spec.trigger_text().unwrap_or("Select time zone");
-    let has_value = spec.value.is_some();
-    let display_color = if has_value { text_color } else { muted };
-
-    let mut shell = ui_element::div()
-        .bg(fill)
-        .border(1.0)
-        .border_color(border_color)
-        .rounded(radius)
-        .h(height)
-        .pl(pad_x)
-        .pr(pad_x)
-        .flex_row()
-        .items_center()
-        .gap(rem_to_px(0.375))
-        .focusable()
-        .cursor_pointer();
-
-    // Value display
-    shell = shell.child(
-        ui_element::label(display_text)
-            .text_color(display_color)
-            .text_size(font_size)
-            .grow(),
-    );
-
-    // Indicator chevron (decorative, pointer-events: none in CSS)
-    shell = shell.child(
-        ui_element::icon("chevron-down")
-            .w(rem_to_px(0.75))
-            .h(rem_to_px(0.75))
-            .text_color(icon_muted),
-    );
-
-    // Disabled state
-    if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "state.opacity.disabled");
-        shell = shell.opacity(opacity).disabled(true);
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
-    shell
+    #[test]
+    fn closed_trigger_shows_placeholder() {
+        // Default placeholder is the Svelte "Search time zones..." string.
+        let spec = TimeZoneSelectSpec::new();
+        let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 200.0);
+        assert!(
+            tree.has_text("Search time zones..."),
+            "default placeholder missing: {:?}",
+            tree.texts()
+        );
+        assert!(tree.has_text("chevron-down"), "chevron missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn preselected_zone_shows_value_label() {
+        let spec = TimeZoneSelectSpec::new().with_value("America/New_York");
+        let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 200.0);
+        // Label is `_`→space formatted (matches Svelte formatTimeZoneLabel).
+        assert!(
+            tree.has_text("America/New York"),
+            "selected zone label missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn open_renders_search_and_default_zones() {
+        let spec = TimeZoneSelectSpec::new().with_open(true);
+        let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 400.0);
+        // Searchable always on → search input row present.
+        assert!(tree.has_text("search"), "search row missing: {:?}", tree.texts());
+        // Default option set surfaces (UTC + a formatted zone label).
+        assert!(tree.has_text("UTC"), "UTC option missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("America/New York"),
+            "default zone option missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn open_with_query_filters_zones() {
+        let spec = TimeZoneSelectSpec::new()
+            .with_open(true)
+            .with_search_query("tokyo");
+        let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 400.0);
+        assert!(tree.has_text("Asia/Tokyo"), "matching zone missing: {:?}", tree.texts());
+        assert!(!tree.has_text("UTC"), "non-matching zone not filtered: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn no_match_renders_timezone_empty_message() {
+        let spec = TimeZoneSelectSpec::new()
+            .with_open(true)
+            .with_search_query("zzzz");
+        let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 400.0);
+        assert!(
+            tree.has_text(poodle_specs::TIME_ZONE_EMPTY_MESSAGE),
+            "timezone empty message missing: {:?}",
+            tree.texts()
+        );
+    }
 }

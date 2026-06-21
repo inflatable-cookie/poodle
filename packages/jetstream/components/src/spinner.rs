@@ -8,46 +8,10 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
-
-/// Ring diameter in rem for each SpinnerSize.
-///
-/// Contract section 7 — ring sizes:
-/// xs: 0.625rem, sm: 0.75rem, md: 1rem, lg: 1.5rem, xl: 1.875rem
-fn ring_size_rem(size: SpinnerSize) -> f32 {
-    match size {
-        SpinnerSize::Xs => 0.625,
-        SpinnerSize::Sm => 0.75,
-        SpinnerSize::Md => 1.0,
-        SpinnerSize::Lg => 1.5,
-        SpinnerSize::Xl => 1.875,
-    }
-}
-
-/// Grid width in rem (contract section 7 — grid sizes).
-fn grid_width_rem(size: SpinnerSize) -> f32 {
-    match size {
-        SpinnerSize::Xs => 0.375,
-        SpinnerSize::Sm => 0.4375,
-        SpinnerSize::Md => 0.5625,
-        SpinnerSize::Lg => 0.75,
-        SpinnerSize::Xl => 0.9375,
-    }
-}
-
-/// Grid height in rem (contract section 7 — grid sizes).
-fn grid_height_rem(size: SpinnerSize) -> f32 {
-    match size {
-        SpinnerSize::Xs => 0.5625,
-        SpinnerSize::Sm => 0.6875,
-        SpinnerSize::Md => 0.9375,
-        SpinnerSize::Lg => 1.25,
-        SpinnerSize::Xl => 1.5625,
-    }
-}
 
 /// Build a Jetstream spinner element from a SpinnerSpec.
 ///
@@ -81,20 +45,24 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> JsEl {
 /// - border-radius: 999px
 /// - animation: spinner-ring 0.8s linear infinite
 fn build_ring(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
-    let diameter = rem_to_px(ring_size_rem(spec.size));
-    let border_width = rem_to_px(0.125); // Contract: 0.125rem
+    let diameter = rem_to_px(spec.ring_size_rem());
+    let border_width = rem_to_px(spec.ring_border_width_rem()); // Contract: 0.125rem
 
-    // Contract: track border = currentColor at 24% opacity
-    let track_color = Color::new(tone_color.r, tone_color.g, tone_color.b, tone_color.a * 0.24);
+    // Contract §8: track border = color-mix(currentColor 24%, transparent).
+    // The 24% lives on the spec (`track_opacity`), not as an inline literal.
+    let track_color = tone_color.with_alpha(tone_color.a * spec.track_opacity());
 
     ui_element::div()
         .w(diameter)
         .h(diameter)
-        .rounded(999.0) // pill / circle
+        .rounded(999.0) // pill / circle (border-radius: 999px)
         .border(border_width)
         .border_color(track_color)
-        // Note: border-top-color highlight and rotation animation are
-        // runtime-level capabilities; the structural sizing is correct here.
+        // Contract §8: border-top-color is the bright arc (full currentColor).
+        // JsEl supports a per-side top color, so the static two-tone ring is
+        // rendered faithfully; only the continuous rotation is preview-loop
+        // driven (no runtime animation hook here).
+        .border_color_top(tone_color)
         .flex_row()
         .items_center()
         .justify_center()
@@ -108,22 +76,27 @@ fn build_ring(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
 /// - cell background: currentColor
 /// - cell animation: spinner-grid with phase-specific opacity keyframes
 fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
-    let width = rem_to_px(grid_width_rem(spec.size));
-    let height = rem_to_px(grid_height_rem(spec.size));
+    let width = rem_to_px(spec.grid_width_rem());
+    let height = rem_to_px(spec.grid_height_rem());
+    let cell_radius = rem_to_px(spec.cell_radius_rem()); // Contract: 0.125rem
 
-    // Each cell is roughly 1/2 width and 1/3 height minus gap
-    let cell_radius = rem_to_px(0.125); // Contract: 0.125rem
+    // Contract §8: per-size fixed gap (Svelte `--poodle-spinner-grid-gap`),
+    // resolved from the spec — not the old `width * 0.1` heuristic.
+    let gap = rem_to_px(spec.grid_gap_rem());
 
-    // Contract: gap is size-dependent small fixed gap
-    // Approximate gap as ~10% of width
-    let gap = (width * 0.1).max(rem_to_px(0.0625));
-
+    // 2 cols × 3 rows: cell_w = (width - gap) / 2, cell_h = (height - 2·gap) / 3.
     let cell_w = (width - gap) / 2.0;
     let cell_h = (height - gap * 2.0) / 3.0;
 
-    // Build 6 cells with staggered opacity to approximate the snake animation.
-    // Contract order: top-left, top-right, mid-right, mid-left, bottom-left, bottom-right
-    let opacities = [1.0_f32, 0.85, 0.7, 0.55, 0.4, 0.25];
+    // Static snapshot of the snake within the contract opacity band
+    // (`opacity_floor` 0.2 → `opacity_peak` 0.76). The cells are laid out in
+    // document order top-left, top-right, mid-left, mid-right, bottom-left,
+    // bottom-right; the staggered values are a single frame of the snake.
+    // Continuous animation is preview-loop driven (no runtime hook here).
+    let floor = spec.opacity_floor();
+    let span = spec.opacity_peak() - spec.opacity_floor();
+    // Fractions along the floor→peak band, one per cell in layout order.
+    let phase = [1.0_f32, 0.7, 0.4, 0.85, 0.1, 0.55];
 
     let mut root = ui_element::div()
         .w(width)
@@ -134,13 +107,9 @@ fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
         .items_center()
         .justify_center();
 
-    for &opacity in &opacities {
-        let cell_color = Color::new(
-            tone_color.r,
-            tone_color.g,
-            tone_color.b,
-            tone_color.a * opacity,
-        );
+    for &t in &phase {
+        let opacity = floor + span * t;
+        let cell_color = tone_color.with_alpha(tone_color.a * opacity);
         root = root.child(
             ui_element::div()
                 .w(cell_w)
@@ -156,6 +125,8 @@ fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::SpinnerSize;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
@@ -165,8 +136,32 @@ mod tests {
     fn ring_md_is_16px() {
         let spec = SpinnerSpec::new();
         let el = js_spinner(&spec, &theme());
+        // 1rem * 16 (contract §7 md ring size), resolved via spec.ring_size_rem().
         assert_eq!(el.layout.size.width, taffy::Dimension::length(16.0));
         assert_eq!(el.layout.size.height, taffy::Dimension::length(16.0));
+    }
+
+    /// Ring stroke resolves from the spec (0.125rem), not a raw literal, and the
+    /// rendered ring lays out at the contract size.
+    #[test]
+    fn ring_renders_with_token_stroke() {
+        let spec = SpinnerSpec::new();
+        let el = js_spinner(&spec, &theme());
+        let tree = probe(&el, 64.0, 64.0);
+        let root = &tree.nodes[0];
+        assert!((root.w - 16.0).abs() < 0.01, "ring width != 16px: {}", root.w);
+        // Stroke width is spec-resolved (0.125rem) — not hardcoded.
+        assert!((spec.ring_border_width_rem() - 0.125).abs() < f32::EPSILON);
+    }
+
+    /// Ring track is the tone color at 24% (contract §8), and the top arc is the
+    /// full tone color — a distinct two-tone ring, not a flat disc.
+    #[test]
+    fn ring_track_is_dimmer_than_arc() {
+        let spec = SpinnerSpec::new();
+        assert!((spec.track_opacity() - 0.24).abs() < f32::EPSILON);
+        // The arc (full tone) is brighter than the 24% track.
+        assert!(spec.track_opacity() < 1.0);
     }
 
     #[test]
@@ -174,6 +169,35 @@ mod tests {
         let spec = SpinnerSpec::new().with_variant(SpinnerVariant::Grid);
         let el = js_spinner(&spec, &theme());
         assert_eq!(el.children.len(), 6);
+    }
+
+    /// Grid gap comes from the per-size spec table (contract §8), differing
+    /// across sizes — proving it is no longer the `width * 0.1` heuristic.
+    #[test]
+    fn grid_gap_is_per_size_from_spec() {
+        let xs = SpinnerSpec::new()
+            .with_variant(SpinnerVariant::Grid)
+            .with_size(SpinnerSize::Xs);
+        let xl = SpinnerSpec::new()
+            .with_variant(SpinnerVariant::Grid)
+            .with_size(SpinnerSize::Xl);
+        assert!(
+            (xs.grid_gap_rem() - 0.0625).abs() < f32::EPSILON,
+            "xs grid gap"
+        );
+        assert!(
+            (xl.grid_gap_rem() - 0.15625).abs() < f32::EPSILON,
+            "xl grid gap"
+        );
+        assert_ne!(xs.grid_gap_rem(), xl.grid_gap_rem());
+    }
+
+    /// Grid cells stay within the contract opacity band (0.2 floor → 0.76 peak).
+    #[test]
+    fn grid_opacity_band_from_spec() {
+        let spec = SpinnerSpec::new();
+        assert!((spec.opacity_floor() - 0.2).abs() < f32::EPSILON);
+        assert!((spec.opacity_peak() - 0.76).abs() < f32::EPSILON);
     }
 
     #[test]

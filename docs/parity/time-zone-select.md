@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: TimeZoneSelectSpec grown to Select-parity (options/search_query/aria/name + shared default_time_zone_options() + to_select_spec()); gpui now renders selectable filtered zones + search input + correct placeholder + on_change/on_search channels; jetstream delegates to js_select (full dropdown/search/grouping/indicator); both probe/build-verified -->
 # Parity: TimeZoneSelect
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,29 +27,29 @@ TimeZoneSelect is a thin wrapper: Svelte delegates rendering, interaction, searc
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI hand-rolls a trigger + dropdown instead of delegating to a `Select` primitive, so most of `Select`'s contract surface is reimplemented partially.
+GPUI hand-rolls a trigger + dropdown (Known Delta — no `Select` primitive composition), now backed by the grown spec. All real gaps closed:
 
-- [ ] Hardcoded shadow literals: `hsla(0.0, 0.0, 0.0, 0.10)` / `hsla(0.0, 0.0, 0.0, 0.06)` plus `px(4.0)`/`px(16.0)`/`px(1.0)` offsets and blur at `time_zone_select.rs:214-224` — resolve elevation from a shadow/elevation token, not raw HSLA + px floats.
-- [ ] Timezone list hardcoded inline in the component (`time_zone_select.rs:193-205`, 11 entries) — should pull from a shared `default_time_zone_options()` Rust equivalent (contract §10 requires one); currently no such source exists and the list duplicates the Svelte fallback rather than the full IANA set.
-- [ ] Options are not selectable: dropdown rows only `hover` (`time_zone_select.rs:230-238`); clicking a row does nothing, so there is no `onValueChange` / value-pick path. Svelte/`Select` selects on click. **Toggle-only, not a working select.**
-- [ ] No searchable mode: contract §7 says searchable is always enabled; there is no query input, no filtering, no `emptyMessage`. GPUI renders a static list only.
-- [ ] Placeholder fallback mismatch: `trigger_text().unwrap_or("Select timezone...")` (l.110-112) hardcodes `"Select timezone..."`; Svelte/contract placeholder is `"Search time zones..."`. Use the spec placeholder default, not an ad-hoc string.
-- [ ] No `onQueryChange` / `onOpenChange` channels — only `on_toggle(bool)` exists (l.77, 167-184). Query callback absent entirely.
+- [x] ALREADY OK dropdown shadow uses `crate::theme_ext::elevation_overlay_shadow()` (token-resolved `ELEVATION_OVERLAY`); the prior pass's flagged `hsla`/`px` literals were already gone.
+- [x] FIXED timezone list now sourced from the shared `poodle_specs::default_time_zone_options()` (contract §10) via `spec.select_options()` — no inline duplication. Host options override when provided.
+- [x] FIXED options are selectable — each row has an `on_click` that fires `on_change(value)` then closes; selected row shows a `check` indicator + medium weight.
+- [x] FIXED searchable mode — a real `TextInput` search row renders at the top of the open dropdown; rows filter by `spec.search_query` (case-insensitive substring); `TIME_ZONE_EMPTY_MESSAGE` shown on no match.
+- [x] FIXED placeholder — `trigger_text()` falls back to `spec.effective_placeholder()` (Svelte default "Search time zones..."), no ad-hoc string.
+- [x] FIXED query channel — `on_search_change` wired to the search input; `on_toggle` covers open/close. (`on_change` added for value-pick.)
 - accepted: no ARIA combobox/listbox/option (gpui has no accessibility API).
 - accepted: overlay timing/positioning runtime-owned (contract §11 Tier 3).
+- preview-loop: open/search/select state held by the host via the three channels.
 
 ## Jetstream gap (vs Svelte + contract)
 
-Jetstream renders only the closed trigger chrome. The dropdown, search, listbox, and open state are entirely absent — `is_open` is never read.
+`js_time_zone_select` now **delegates entirely to `js_select`** — exactly as the Svelte wrapper delegates to `Select` — by mapping the spec through `spec.to_select_spec()` (searchable always on, timezone empty message, mapped options, placeholder/value/size/density forwarded). Every gap below is inherited-correct from the now-fixed `Select`:
 
-- [ ] No open/dropdown rendering: `js_time_zone_select` ignores `spec.is_open` (`time_zone_select.rs:20-80`); there is no listbox, option rows, or overlay. Contract §4 requires an `open` state. Not wired in preview `main.rs` either (no tz/search/dropdown handling found).
-- [ ] No searchable mode: no query field, no filtering, no `emptyMessage`. Contract §7 says searchable always enabled.
-- [ ] Dead focus-shadow computation: `focus_ring_c` + `_focus_shadow = focus_ring_c.with_alpha(0.28)` computed then discarded (`time_zone_select.rs:35-36`) — focus ring is never actually applied to the shell. Wire it or drop it.
-- [ ] Hardcoded gap literal `rem_to_px(0.375)` at `time_zone_select.rs:53` — resolve from an inline-space token, not a rem literal.
-- [ ] Hardcoded chevron size `rem_to_px(0.75)` ×2 at `time_zone_select.rs:68-69` — resolve from an icon-size token.
-- [ ] No value-selection / `onValueChange` / `onQueryChange` / `onOpenChange` path — component is display-only chrome.
+- [x] FIXED open/dropdown rendering — `is_open` is forwarded; the open dropdown, listbox, option rows, and overlay come from `js_select`. Contract §4 `open` state satisfied.
+- [x] FIXED searchable mode — always on via `to_select_spec().with_searchable(true)`; query field, filtering, and `TIME_ZONE_EMPTY_MESSAGE` all from `Select`.
+- [x] FIXED dead focus-shadow — the entire hand-rolled shell (including the discarded `_focus_shadow`) is gone; focus treatment now comes from `Select`.
+- [x] FIXED gap/chevron rem literals — gone; spacing and the chevron size resolve through `Select`'s size/density token path.
+- [x] FIXED selection / query / open — handled by `Select`'s `on_change` / `on_search_change` / `on_toggle` channels in the preview loop.
 - accepted: no ARIA (jetstream has no accessibility API).
-- accepted: interaction lives in preview event loop, not the component — but note here it is absent in both.
+- preview-loop: open/search/select state held by the host (same channels as `Select`).
 
 ## Specimen parity
 
@@ -58,7 +59,7 @@ Jetstream renders only the closed trigger chrome. The dropdown, search, listbox,
 
 ## Notes
 
-- `consv=gap` driver is minor: contract's `options` default and the undocumented `emptyMessage` string. Behavior is faithful; the contract text just lags Svelte. Both fixes are doc-side.
-- The shared `TimeZoneSelectSpec` (`contracts/components/src/time_zone_select.rs`) is itself thin: no `options`, no `searchable`, no query/empty-message fields, no `aria_label`/`described_by`. The Rust targets therefore cannot reach `Select` parity without spec growth — this is the structural root of both Rust gaps, not just rendering laziness.
-- Contract §10 asks for a Rust `defaultTimeZoneOptions()` equivalent; none exists. GPUI inlines a partial copy; Jetstream has no list at all. Add a shared Rust default-options source.
+- `consv=fixed` is doc-side only (contract's `options` default + the `emptyMessage` string); behavior is faithful.
+- RESOLVED `TimeZoneSelectSpec` was grown additively to reach `Select` parity: `id`/`name`/`default_value`/`options`/`aria_label`/`described_by`/`search_query` added, plus `current_value()`, `effective_options()`, `effective_placeholder()`, `select_options()`, and `to_select_spec()` (builds a searchable `SelectSpec` exactly like the Svelte wrapper). `trigger_text()` now returns `Option<String>` (label-formatted). All additive — no fields removed; `date_time_zone_picker` consumer unaffected.
+- RESOLVED contract §10's Rust `defaultTimeZoneOptions()` equivalent now exists: `poodle_specs::default_time_zone_options()` (curated 9-entry fallback, `_`→space labels via `formatTimeZoneLabel` rule), shared by both targets. Also exported: `TIME_ZONE_EMPTY_MESSAGE`, `TIME_ZONE_PLACEHOLDER`.
 - Offset display: not implemented or required anywhere (out of scope per contract §1). No offset-computation divergence across targets.

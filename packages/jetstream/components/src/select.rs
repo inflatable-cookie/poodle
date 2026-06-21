@@ -28,7 +28,7 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let item_gap = rem_to_px(0.5);
 
     let fill = resolve_color(theme, "color.background.surface");
-    let border_color = resolve_color(theme, "color.border.default");
+    let base_border = resolve_color(theme, "color.border.default");
     let radius = resolve_radius(theme, "radius.control");
     let surface_radius = resolve_radius(theme, "radius.surface");
     let text_primary = resolve_color(theme, "color.text.primary");
@@ -37,10 +37,27 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let icon_muted = resolve_color(theme, "color.icon.muted");
     let panel_fill = resolve_color(theme, spec.overlay_fill_token());
 
-    // Hover: border shifts toward text
-    let border_c: Color = border_color.into();
+    // Validation-state border colour. Mirrors GPUI / TextInput: when set,
+    // the closed trigger border switches to the matching status colour.
+    use poodle_specs::ValidationState;
+    let validation_border = match spec.validation_state {
+        ValidationState::Invalid => Some(resolve_color(theme, "color.status.danger")),
+        ValidationState::Valid => Some(resolve_color(theme, "color.status.success")),
+        ValidationState::Pending => Some(resolve_color(theme, "color.accent.base")),
+        ValidationState::None => None,
+    };
+    let border_color = validation_border.unwrap_or(base_border);
+
+    // Hover: border shifts toward text (validation border holds when set),
+    // background lifts toward the hover surface.
+    let border_c: Color = base_border.into();
     let text_c: Color = text_primary.into();
-    let hover_border = border_c.mix(text_c, 0.78);
+    let fill_c: Color = fill.into();
+    let elevated_c: Color = panel_fill.into();
+    let hover_border = validation_border
+        .map(Into::into)
+        .unwrap_or_else(|| border_c.mix(text_c, 0.78));
+    let hover_fill = fill_c.mix(elevated_c, 0.5);
 
     // Trigger display text and colour
     let (display_text, display_color) = match spec.trigger_text() {
@@ -51,12 +68,16 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
         ),
     };
 
+    // Clear button visible when clearable + value selected + enabled.
+    let show_clear = spec.clearable && spec.current_value().is_some() && !spec.is_disabled;
+
     // ── Trigger ─────────────────────────────────────────────────
 
     let trigger = build_trigger(
         display_text,
         display_color,
         icon_muted,
+        text_secondary,
         font_size,
         icon_size,
         pad_x,
@@ -66,6 +87,8 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
         border_color,
         radius,
         hover_border,
+        hover_fill,
+        show_clear,
         spec.is_disabled,
         theme,
     );
@@ -77,8 +100,9 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // ── Open state — wrapper + overlay panel ────────────────────
 
-    // Compute panel vertical offset: trigger height + 2px gap
-    let panel_top = height + 2.0;
+    // Panel vertical offset: trigger height + stack spacing token
+    // (GPUI uses space.stack.sm; matches across targets).
+    let panel_top = height + crate::theme_ext::resolve_px(theme, "space.stack.sm");
 
     let panel = build_panel(
         spec,
@@ -114,6 +138,7 @@ fn build_trigger(
     display_text: &str,
     display_color: glam::Vec4,
     icon_muted: glam::Vec4,
+    text_secondary: glam::Vec4,
     font_size: f32,
     icon_size: f32,
     pad_x: f32,
@@ -123,9 +148,13 @@ fn build_trigger(
     border_color: glam::Vec4,
     radius: f32,
     hover_border: Color,
+    hover_fill: Color,
+    show_clear: bool,
     is_disabled: bool,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
+    // Hover shifts both border (toward text) and background (toward elevated),
+    // matching the contract focus-within treatment direction.
     let mut el = ui_element::div()
         .bg(fill)
         .border(1.0)
@@ -139,7 +168,7 @@ fn build_trigger(
         .gap(item_gap)
         .focusable()
         .cursor_pointer()
-        .hover(|s| s.border_color(hover_border));
+        .hover(move |s| s.border_color(hover_border).bg(hover_fill));
 
     el = el.child(
         ui_element::label(display_text)
@@ -148,6 +177,27 @@ fn build_trigger(
             .grow()
             .text_ellipsis(),
     );
+
+    // Clear button — contract anatomy Clear Button (aria-label "Clear
+    // selection"). Rendered as a pill-backed "x" icon before the chevron.
+    if show_clear {
+        let radius_pill = resolve_radius(theme, "radius.pill");
+        let clear_pill: Color = Color::from(text_secondary).with_alpha(0.18);
+        el = el.child(
+            ui_element::div()
+                .bg(clear_pill)
+                .rounded(radius_pill)
+                .flex_row()
+                .items_center()
+                .justify_center()
+                .cursor_pointer()
+                .child(
+                    ui_element::icon("x")
+                        .size(icon_size)
+                        .text_color(text_secondary),
+                ),
+        );
+    }
 
     el = el.child(
         ui_element::icon("chevron-down")
@@ -185,8 +235,16 @@ fn build_panel(
     icon_muted: glam::Vec4,
 ) -> JsEl {
     let panel_py = rem_to_px(0.25);
-    let min_width = rem_to_px(10.0);
-    let max_height = rem_to_px(15.0);
+    // Panel dimensions resolve from tokens (GPUI parity). `menu_min_width`
+    // prop, when set, overrides the default select min-width.
+    let token_min_width = crate::theme_ext::resolve_px(theme, "size.select.minWidth");
+    let min_width = spec
+        .menu_min_width
+        .as_deref()
+        .map(parse_css_length_to_px)
+        .filter(|w| *w > 0.0)
+        .unwrap_or(token_min_width);
+    let max_height = crate::theme_ext::resolve_px(theme, "size.menu.maxHeight");
 
     let mut panel = ui_element::div()
         .absolute()
@@ -314,17 +372,43 @@ fn build_panel(
                     .gap(item_gap)
                     .pl(pad_x)
                     .pr(pad_x)
-                    .h(row_height)
                     .cursor_pointer()
                     .focusable();
 
-                row = row.child(
-                    ui_element::label(opt.label.as_str())
-                        .text_color(label_color)
-                        .text_size(font_size)
-                        .grow()
-                        .text_ellipsis(),
-                );
+                // Rows with a description are taller (label + secondary line);
+                // plain rows keep the fixed control row height.
+                if opt.description.is_none() {
+                    row = row.h(row_height);
+                }
+
+                // Contract anatomy: Option Label + optional Option Description
+                // (Svelte: description color text-secondary, font-size 0.6875rem).
+                if let Some(ref description) = opt.description {
+                    row = row.child(
+                        ui_element::div()
+                            .flex_col()
+                            .grow()
+                            .child(
+                                ui_element::label(opt.label.as_str())
+                                    .text_color(label_color)
+                                    .text_size(font_size)
+                                    .text_ellipsis(),
+                            )
+                            .child(
+                                ui_element::label(description.as_str())
+                                    .text_color(text_secondary)
+                                    .text_size(rem_to_px(0.6875)),
+                            ),
+                    );
+                } else {
+                    row = row.child(
+                        ui_element::label(opt.label.as_str())
+                            .text_color(label_color)
+                            .text_size(font_size)
+                            .grow()
+                            .text_ellipsis(),
+                    );
+                }
 
                 if is_selected {
                     row = row.child(
@@ -345,4 +429,140 @@ fn build_panel(
     }
 
     panel
+}
+
+/// Parse a CSS length string (e.g. "12rem", "200px") to logical pixels.
+/// Returns 0.0 on parse failure. Uses 16px as the rem base (matches `rem_to_px`).
+fn parse_css_length_to_px(value: &str) -> f32 {
+    let trimmed = value.trim();
+    if let Some(num) = trimmed.strip_suffix("rem") {
+        num.trim().parse::<f32>().map(rem_to_px).unwrap_or(0.0)
+    } else if let Some(num) = trimmed.strip_suffix("px") {
+        num.trim().parse::<f32>().unwrap_or(0.0)
+    } else {
+        trimmed.parse::<f32>().unwrap_or(0.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::{ChoiceOption, ValidationState};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn fruit_options() -> Vec<ChoiceOption> {
+        vec![
+            ChoiceOption::new("apple", "Apple"),
+            ChoiceOption::new("banana", "Banana"),
+            ChoiceOption::new("cherry", "Cherry"),
+        ]
+    }
+
+    #[test]
+    fn closed_trigger_shows_placeholder_and_chevron() {
+        let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 200.0);
+        assert!(tree.has_text("Choose a fruit"), "placeholder missing: {:?}", tree.texts());
+        assert!(tree.has_text("chevron-down"), "chevron missing: {:?}", tree.texts());
+        // Closed: no option rows rendered.
+        assert!(!tree.has_text("Apple"), "options leaked when closed: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn open_renders_all_options() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_placeholder("Choose a fruit")
+            .with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("Apple") && tree.has_text("Banana") && tree.has_text("Cherry"),
+            "open options missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn selected_option_renders_check_indicator() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_value("banana")
+            .with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("check"), "selected checkmark missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn searchable_open_renders_search_row() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("search"), "search icon missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn searchable_query_filters_options() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ban")
+            .with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("Banana"), "matching option missing: {:?}", tree.texts());
+        assert!(!tree.has_text("Apple"), "non-matching option not filtered: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn empty_query_renders_empty_message() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("zzz")
+            .with_empty_message("No matches")
+            .with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("No matches"), "empty message missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn grouped_options_render_headers() {
+        let opts = vec![
+            ChoiceOption::new("apple", "Apple").with_group("Fruits"),
+            ChoiceOption::new("carrot", "Carrot").with_group("Vegetables"),
+        ];
+        let spec = SelectSpec::new(opts).with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("Fruits") && tree.has_text("Vegetables"),
+            "group headers missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn option_description_renders() {
+        let opts = vec![ChoiceOption::new("apple", "Apple").with_description("A red fruit")];
+        let spec = SelectSpec::new(opts).with_open(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
+        assert!(tree.has_text("A red fruit"), "option description missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn clearable_with_value_renders_clear_button() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_value("apple")
+            .with_clearable(true);
+        let tree = probe(&js_select(&spec, &theme()), 320.0, 200.0);
+        // An "x" icon appears in the trigger as the clear affordance.
+        assert!(tree.has_text("x"), "clear button icon missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn invalid_validation_recolors_trigger_border() {
+        let theme = theme();
+        let base = SelectSpec::new(fruit_options()).with_placeholder("Choose");
+        let invalid = base.clone().with_validation_state(ValidationState::Invalid);
+        // The first node is the trigger; its border color should differ when invalid.
+        let el_none = js_select(&base, &theme);
+        let el_invalid = js_select(&invalid, &theme);
+        assert_ne!(
+            el_none.style.border_color, el_invalid.style.border_color,
+            "validation state did not recolor the trigger border"
+        );
+    }
 }

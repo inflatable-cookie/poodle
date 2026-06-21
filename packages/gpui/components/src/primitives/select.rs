@@ -271,16 +271,11 @@ impl IntoElement for Select {
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else if !is_ghost {
-            trigger = trigger.cursor_pointer().hover(move |s| {
-                s.bg(hover_bg)
-                    .border_color(hover_border)
-                    .shadow(vec![gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 1.0, 0.10),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(0.0),
-                        spread_radius: px(0.0),
-                    }])
-            });
+            // Svelte Select has no `:hover` box-shadow on the trigger — only a
+            // subtle background/border shift. (focus-within owns the shadow.)
+            trigger = trigger
+                .cursor_pointer()
+                .hover(move |s| s.bg(hover_bg).border_color(hover_border));
         } else {
             trigger = trigger.cursor_pointer();
         }
@@ -299,6 +294,45 @@ impl IntoElement for Select {
                 .child(trigger_text.to_string()),
         );
 
+        // Wrap callbacks in Rc for sharing across trigger + option closures
+        let on_toggle_rc: Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App)>> =
+            self.on_toggle.map(|h| std::rc::Rc::from(h));
+        let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+
+        // Clear button — contract anatomy Clear Button (aria-label
+        // "Clear selection"); shown when clearable, a value is selected, and
+        // not disabled. Resets to default_value (Svelte `clearValue`).
+        let show_clear = spec.clearable && spec.current_value().is_some() && !is_disabled;
+        if show_clear && !is_ghost {
+            let clear_change = on_change_rc.clone();
+            let clear_value = spec.default_value.clone().unwrap_or_default();
+            let clear_pill = Hsla {
+                a: text_secondary.a * 0.18,
+                ..text_secondary
+            };
+            let mut clear_btn = div()
+                .id(SharedString::from("poodle-select-clear"))
+                .flex()
+                .items_center()
+                .justify_center()
+                .rounded(resolve_radius(theme, "radius.pill"))
+                .bg(clear_pill)
+                .cursor_pointer()
+                .child(
+                    // Svelte uses size="xs"; IconSize has no Xs variant, so
+                    // Sm is the nearest available size token.
+                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                        .with_color(text_secondary),
+                );
+            if let Some(handler) = clear_change {
+                clear_btn = clear_btn.on_click(move |_event, window, cx| {
+                    handler(&clear_value, window, cx);
+                });
+            }
+            trigger = trigger.child(clear_btn);
+        }
+
         // Ghost variant hides the chevron indicator
         if !is_ghost {
             trigger = trigger.child(
@@ -314,12 +348,6 @@ impl IntoElement for Select {
                 .with_color(icon_muted),
             );
         }
-
-        // Wrap callbacks in Rc for sharing across trigger + option closures
-        let on_toggle_rc: Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App)>> =
-            self.on_toggle.map(|h| std::rc::Rc::from(h));
-        let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
-            self.on_change.map(|h| std::rc::Rc::from(h));
         let on_search_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_search_change.map(|h| std::rc::Rc::from(h));
 
@@ -560,7 +588,19 @@ impl IntoElement for Select {
                     }
                 }
 
-                item = item.child(option.label.clone());
+                // Contract anatomy: Option Label + optional Option Description.
+                // Description is a secondary text line below the label
+                // (Svelte: color text-secondary, font-size 0.6875rem).
+                if let Some(ref description) = option.description {
+                    item = item.flex().flex_col().child(option.label.clone()).child(
+                        div()
+                            .text_size(px(rem_to_px(0.6875)))
+                            .text_color(text_secondary)
+                            .child(description.clone()),
+                    );
+                } else {
+                    item = item.child(option.label.clone());
+                }
                 list = list.child(item);
             }
 

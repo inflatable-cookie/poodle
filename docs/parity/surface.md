@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap | pass: GPUI+Jetstream fill/border/shadow now token-resolved (SurfaceSpec mix-ratio methods added); only the accepted no-ARIA limit remains per target -->
 # Parity: Surface
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,24 +26,23 @@ Svelte adds treatment-override layers the contract §8 token tables do not docum
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Elevated shadow is fully hardcoded: `hsla(0.0,0.0,0.0,0.08)` + `offset point(px(0.0),px(2.0))` + `blur px(8.0)` at `surface.rs:139-144`, and `hsla(0.0,0.0,0.0,0.04)` + `offset px(0.0),px(1.0)` + `blur px(2.0)` at `surface.rs:145-150`. Contract §8 elevated targets `--poodle-elevation-surface`; resolve `spec.resolved_shadow_token()`, do not invent a two-layer drop shadow.
-- [ ] Non-elevated inset shadow ring is hardcoded: `border_subtle.a * 0.18` magic alpha + `spread_radius px(1.0)` at `surface.rs:154-162`. The contract base shadow is `none` — this inset ring is an undocumented GPUI invention with a raw `0.18` literal. Resolve from a token or remove.
-- [ ] Background mix ratios hardcoded: `color_mix(elevated_bg, panel, 0.96)` at `surface.rs:98` and `surface_bg.a * 0.96` at `surface.rs:100`. The `0.96` color-mix percentage is a raw literal; per surface-elevation contract the mix ratio is "tokenised constant". Resolve the ratio from a token.
-- [ ] Border subtle alpha hardcoded: `border_subtle.a * 0.74` at `surface.rs:121-123`. The `0.74` color-mix percentage (Svelte line 59) is a raw literal — tokenise it.
-- [ ] Border width hardcoded to `border_1()` at `surface.rs:130`; contract border is `0.0625rem` via `spec.resolved_border_width()` (`BORDER_WIDTH_DEFAULT`). Resolve the width token, do not assume 1px.
-- [ ] No `canvas` tone branch — `is_elevated` is the only tone test (`surface.rs:85,97`); `SurfaceTone::Canvas` falls into the non-elevated path and renders identical to panel. Contract §8 canvas fill (`color-mix(canvas 98%, transparent)`) is never applied.
-- accepted: no ARIA — `spec.role`/`spec.label` builders exist (`surface.rs:59-66`) but `asRole`/`aria-label` are never emitted (gpui has no accessibility API). Contract §10 requires platform-a11y mapping; tracked as accepted runtime limit.
+- [x] FIXED Elevated shadow now resolves `elevation.surface` via `elevation_surface_shadow()` (the token-resolved drop shadow), and the base shadow is omitted (contract base = `none`). The old hardcoded `hsla(…)` two-layer shadow and the undocumented non-elevated inset ring (raw `0.18` alpha + `spread px(1.0)`) are both removed.
+- [x] FIXED Background mix ratios are spec-resolved: fill base color (`spec.resolved_background_token()`), second color (`spec.fill_mix_over_token()`), and ratio (`spec.fill_mix_ratio()` → 0.98 canvas / 0.96 panel+elevated) all come from `SurfaceSpec`. No raw `0.96` literal in `surface.rs`. (The percentages are CSS color-mix percents centralized on the spec — see Notes; not a `--poodle-*` token.)
+- [x] FIXED Border subtle alpha is spec-resolved via `spec.border_mix_ratio()` (0.74 subtle, 1.0 default). No raw `0.74` literal in `surface.rs`.
+- [x] FIXED Border width resolves `spec.resolved_border_width()` (`BORDER_WIDTH_DEFAULT` → 0.0625rem) through `resolve_px`; the `border_1()` 1px assumption is gone.
+- [x] FIXED Canvas tone now has a real fill: `resolved_background_token()` returns `color.background.canvas` for canvas (and `color.background.surface` for panel/base, `color.background.elevated` for elevated) with the per-tone ratio, so canvas no longer renders identical to panel.
+- accepted: no ARIA — `spec.role`/`spec.label` builders exist but `asRole`/`aria-label` are never emitted (gpui has no accessibility API). Contract §10 requires platform-a11y mapping; tracked as accepted runtime limit.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No elevation shadow at all — `js_surface` never reads `spec.resolved_shadow_token()` and emits no shadow (`surface.rs:9-36`). Contract §8 elevated requires `box-shadow: var(--poodle-elevation-surface)`; elevated and panel render identically. (grep: no `shadow` in `surface.rs`.)
-- [ ] No color-mix transparency blending — fill is raw `resolve_color(theme, spec.resolved_background_token())` at `surface.rs:10`. Contract §8 every tone uses `color-mix(... %, transparent)`; canvas (98%), panel/surface (96%), elevated (96% over panel) are all flattened to opaque token colors. Apply the mix ratios.
-- [ ] Background token mismatch: spec `resolved_background_token()` returns `COLOR_BACKGROUND_SURFACE`-free path — panel maps to `COLOR_BACKGROUND_PANEL` (`types.rs:364`), but contract base fill mixes `--poodle-color-background-surface` (Svelte line 54). Panel tone uses the wrong base color token. Reconcile spec to surface vs panel per contract.
-- [ ] Border width hardcoded to `border(1.0)` literal at `surface.rs:18`; resolve `spec.resolved_border_width()` (`BORDER_WIDTH_DEFAULT` → `0.0625rem`) instead of the raw `1.0`.
+- [x] FIXED Elevation shadow: elevated surfaces now emit `.shadow_sm()`. JsEl exposes only preset box-shadows (no custom-color / multi-layer), so the token `elevation.surface` (the low tier) is APPROXIMATED with the small preset — elevated and panel no longer render identically. (Approximation noted inline.)
+- [x] FIXED color-mix transparency blending: fill uses `base_fill.mix(over, ratio)` for elevated (over panel) and `with_alpha(a * ratio)` for canvas (98%) / panel (96%) — all ratios from `SurfaceSpec`. No flat opaque fills.
+- [x] FIXED Background token: `resolved_background_token()` now returns `color.background.surface` for panel/base (was `color.background.panel`), `color.background.canvas` for canvas, `color.background.elevated` for elevated — matching contract §8 / Svelte. The `lib.rs` contracts test that asserted the old overlay-shadow path was updated to `ELEVATION_SURFACE`.
+- [x] FIXED Border width resolves `spec.resolved_border_width()` via `resolve_px`; the raw `border(1.0)` literal is gone.
 - [ ] No `asRole`/`label` channel — `spec.role`/`spec.label` unused; no region/group semantics. (Accepted-style for native, but contract §10 + surface-elevation §5 require contrast/semantic intent preserved.)
 - accepted: no ARIA channel (native renderer, documented pattern across components).
 
-Note: `surface.rs` itself is clean of `.h([0-9]`, `.w([0-9]`, `text_size([0-9]`, `hsla(`, `rgb(` literals — the violations are *missing* token resolution (shadow, color-mix, border width), not stray pixel constants.
+Note: `surface.rs` is clean of pixel/`hsla`/`rgb` literals; the closed gaps were *missing* token resolution (shadow, color-mix, border width), now resolved from `SurfaceSpec`. The one remaining open item is the `asRole`/`label` semantic channel (no native a11y surface).
 
 ## Specimen parity
 

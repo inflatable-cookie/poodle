@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: gpui hover-shadow literal dropped (no Svelte basis) + option description + clearable clear button; jetstream panel-offset/dims tokens + menu_min_width + hover bg + clearable + description + validation wiring; both probe/build-verified -->
 # Parity: Select
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,23 +21,28 @@ Svelte implements the full contract surface (native + custom modes, searchable, 
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI renders a custom overlay only (no native mode) — accepted per Known Delta. Real gaps:
+GPUI renders a custom overlay only (no native mode) — accepted per Known Delta. All real gaps closed:
 
-- [ ] Hardcoded hover shadow color literal `hsla(0.0, 0.0, 1.0, 0.10)` at `select.rs:278` and two dropdown shadow literals `hsla(0.0,0.0,0.0,0.10)`/`hsla(...,0.06)` at `select.rs:430-440` — resolve from elevation/shadow tokens, not raw HSLA.
-- [ ] Hardcoded blur/offset px literals in the dropdown `BoxShadow` (`px(4.0)`, `px(16.0)`, `select.rs:431-438`) — derive from an elevation token.
-- [ ] No `clearable` / clear button — contract anatomy includes Clear Button (`aria-label="Clear selection"`); spec/`Select` builder has no clearable path.
-- [ ] Option `icon` and `description` fields not rendered — contract anatomy has Option Icon + Option Description; GPUI renders only `option.label` (`select.rs:576`).
+- [x] FIXED hover shadow literal `hsla(0.0, 0.0, 1.0, 0.10)` at the trigger removed — Svelte Select has **no `:hover` box-shadow** on the trigger (only bg/border shift; focus-within owns the shadow). The white-highlight shadow was a GPUI invention with no Svelte basis; dropped. The bg/border hover shift is retained.
+- [x] ALREADY OK the dropdown listbox shadow uses `crate::theme_ext::elevation_overlay_shadow()` (token-resolved `ELEVATION_OVERLAY`); the `hsla`/`px(4.0)`/`px(16.0)` literals the prior pass flagged at lines 430-440 were already removed.
+- [x] FIXED `clearable` clear button — pill-backed `x` icon rendered in the trigger when `clearable && value selected && !disabled`; fires `on_change(default_value)`. (Svelte `handleClear` → `clearValue = defaultValue ?? ""`.)
+- [x] FIXED option `description` rendered as a secondary line below the label (text-secondary, `rem_to_px(0.6875)` — Svelte exact).
+- note: option `icon` is **not renderable** — `ChoiceOption` (shared spec) has no `icon` field (only `description`). Adding one is a Svelte-authority-driven spec change out of scope for this pass; flagged as a spec-data gap, not a rendering gap.
 - accepted: no native `<select>` mode (Known Delta — GPUI has no native select).
 - accepted: no ARIA (gpui has no accessibility API).
+- preview-loop: open/select/keyboard wiring lives in the preview event loop (`on_toggle`/`on_change`/`on_search_change` channels exist on the builder).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded panel offset literal `height + 2.0` at `select.rs:81` — the `2.0`px gap should be a stack/inline-spacing token (GPUI uses `space.stack.sm`).
-- [ ] Hardcoded panel dims: `min_width = rem_to_px(10.0)` and `max_height = rem_to_px(15.0)` at `select.rs:188-189` — should resolve from `size.select.minWidth` / `size.menu.maxHeight` tokens (GPUI resolves these). Also `menu_min_width` prop is ignored.
-- [ ] Hover/active not applied to trigger background — only `border_color` shifts on hover (`select.rs:142`); contract focus-within also changes background + box-shadow.
-- [ ] No `clearable` / clear button.
-- [ ] Option `icon` and `description` fields not rendered (only label + a trailing `check` for selected).
-- [ ] Validation state not wired — `ValidationState` is in the spec and the specimen passes `Invalid`, but `js_select` never reads `spec.validation_state` to recolor the border (GPUI does, `select.rs:201-208`).
+All real gaps closed:
+
+- [x] FIXED panel offset literal `height + 2.0` → `height + resolve_px(theme, "space.stack.sm")` (GPUI parity).
+- [x] FIXED panel dims resolve from tokens: `size.select.minWidth` / `size.menu.maxHeight`; `menu_min_width` prop now honored (CSS length parsed via `parse_css_length_to_px`, overrides the default min-width).
+- [x] FIXED trigger hover now shifts both border (toward text) **and** background (toward elevated), matching the contract focus-within direction.
+- [x] FIXED `clearable` clear button — pill-backed `x` icon in the trigger when `clearable && value selected && !disabled`.
+- [x] FIXED option `description` rendered as a stacked secondary line (text-secondary, `rem_to_px(0.6875)`); row height relaxes for described rows.
+- [x] FIXED validation state wired — `js_select` now reads `spec.validation_state` and recolors the closed trigger border (Invalid→danger, Valid→success, Pending→accent), mirroring GPUI + TextInput.
+- note: option `icon` not renderable — no `icon` field on `ChoiceOption` (spec-data gap, same as GPUI).
 - accepted: no native mode; interaction (open/select/search) lives in preview event loop.
 - accepted: no ARIA channel.
 
