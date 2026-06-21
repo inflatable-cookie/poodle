@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
 # Parity: MediaPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -48,8 +48,8 @@ Skeletal — surface box + title label only (`media_preview.rs:15-22`). Almost n
 ## Specimen parity
 
 - Svelte covers: Image preview (eyebrow, 3 meta chips, mediaContent placeholder), Video preview (video ratio, 2 meta), Error state (document, `state="error"`, stateTitle/stateMessage), plus size/density demonstration instances (`MediaPreviewSpecimen.svelte`).
-- GPUI covers: Image preview, Video preview, Error state (`media_preview_specimen.rs`). — missing: eyebrow rendering (impl drops it), pill-styled meta, size/density variants.
-- Jetstream covers: Image preview, Audio-with-description (`media_preview.rs:13-19`). — missing: media frame, eyebrow, meta, error state. Demonstrates only the skeletal box+title.
+- GPUI covers (2026-06-21, `specimen=ok`): Image preview (eyebrow/description/meta/Surface media slot), Video preview (video ratio, badge, duration meta), Document preview (caption + thumbnail meta chip), States (loading/error/empty), Variants (default/elevated/outlined), Sizes (xs–xl), Densities (compact/default/comfortable) (`media_preview_specimen.rs`). All `MediaPreview::from_spec` + real `Surface` slot content. `cargo build` clean.
+- Jetstream covers (2026-06-21, `specimen=ok`): same eight groups via `js_media_preview(&spec)` (`media_preview.rs`). All token-resolved; retry-loop build clean.
 
 ## Notes
 

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
 # Parity: MediaThumbnail
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -52,8 +52,8 @@ Skeletal — a fixed box with optional title only (`media_thumbnail.rs:15-26`). 
 ## Specimen parity
 
 - Svelte covers: Image thumbnails (square, badge, meta, video kind), Compact presentation (document + audio), Loading state, Contained image (`fit="contain"`, `aspectRatio="auto"`) (`MediaThumbnailSpecimen.svelte`).
-- GPUI covers: Image thumbnails, Compact presentation, Loading state (`media_thumbnail_specimen.rs`). — missing: Contained-image (`fit`) group; compact group renders but impl ignores presentation so visually identical to default.
-- Jetstream covers: Image thumbnail, Video thumbnail (`media_thumbnail.rs:13-19`). — missing: badge, compact, loading, contained, all state postures. Demonstrates only the skeletal box.
+- GPUI covers (2026-06-21, `specimen=ok`): Kinds (image/video/audio/document/embed fallback icons), Badge + meta + play indicator, Aspect ratios (square/landscape/portrait/video), Compact presentation, States (loading/error/empty), Fit: contain (`media_thumbnail_specimen.rs`). All `MediaThumbnail::from_spec`, real fallback icons resolved by the component. `cargo build` clean.
+- Jetstream covers (2026-06-21, `specimen=ok`): same six groups via `js_media_thumbnail(&spec)` (`media_thumbnail.rs`). All token-resolved; retry-loop build clean.
 
 ## Notes
 

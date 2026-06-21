@@ -181,8 +181,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | markdown-editor | fixed | 2 | 1 | ok |
 | media-browse-panel | ok | 0 | 0 | gap |
 | media-picker | fixed | 0 | 0 | ok |
-| media-preview | fixed | 1 | 1 | gap |
-| media-thumbnail | ok | 1 | 1 | gap |
+| media-preview | fixed | 1 | 1 | ok |
+| media-thumbnail | ok | 1 | 1 | ok |
 | menu | fixed | 0 | 0 | ok |
 | menubar | fixed | 2 | 1 | gap |
 | meta-bar | fixed | 0 | 0 | ok |
@@ -215,10 +215,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | selection-summary | fixed | 0 | 0 | gap |
 | separator | ok | 0 | 0 | gap |
 | sidebar-nav | fixed | 0 | 1 | ok |
-| skeleton | fixed | 0 | 0 | gap |
+| skeleton | fixed | 0 | 0 | ok |
 | slider | fixed | 1 | 1 | gap |
 | spacer | ok | 2 | 2 | gap |
-| spinner | fixed | 2 | 2 | gap |
+| spinner | fixed | 2 | 2 | ok |
 | split-button | fixed | 0 | 0 | gap |
 | split-view | fixed | 2 | 2 | ok |
 | stack | fixed | 2 | 2 | ok |

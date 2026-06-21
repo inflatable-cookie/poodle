@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap | pass: added SpinnerSpec token methods (ring/cell radius, per-size grid gap, track-opacity, opacity floor/peak); both targets now resolve ring stroke/track + grid cell/gap/radius/opacity from the spec; Jetstream ring renders the two-tone track+arc statically. Remaining open items are animation (preview-loop) + accepted no-ARIA. -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok | pass: added SpinnerSpec token methods (ring/cell radius, per-size grid gap, track-opacity, opacity floor/peak); both targets now resolve ring stroke/track + grid cell/gap/radius/opacity from the spec; Jetstream ring renders the two-tone track+arc statically. Jetstream specimen expanded to grid across all 5 sizes + mixed-tone grid row + Context-tone host chips (current/accent/muted). Remaining open items are animation (preview-loop) + accepted no-ARIA. -->
 # Parity: Spinner
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -50,7 +50,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Ring (5 sizes), CLI grid (5 sizes with mixed muted/accent/current tones), Context tones (current on inverse chip, accent chip, muted grid chip) (`SpinnerSpecimen.svelte`).
 - GPUI covers: Ring (5 sizes), CLI grid (5 sizes, tones muted/current/accent/current/current), Context tones (inverse/accent/muted chips). — matches Svelte closely; the only gap is the unused `sizes`/`densities` snippets Svelte defines but does not render, so effectively at parity.
-- Jetstream covers: Variants (ring + grid, md only), Sizes (5, ring only), Tones (3, ring only). — missing: **grid variant at multiple sizes**, **mixed-tone grid row**, and the **Context tones inverse-chip / accent-chip / muted-grid-chip** grouping. Grid is shown once at md; Svelte exercises grid across all 5 sizes and 3 tones.
+- [x] FIXED (Jetstream specimen): now covers Ring (5 sizes), CLI grid (5 sizes), CLI grid mixed tones (xs=muted, md=accent, rest=current), Tones (current/accent/muted, ring), and Context tones (current/accent/muted spinners hosted in bordered surface chips). All via the real `js_spinner`; chips are plain host containers. Delta vs Svelte: the inverse chip is dropped — Jetstream `tone="current"` always resolves to `color.text.primary` (no CSS inheritance, accepted delta), so a colour-inverting chip can't be rendered honestly. The Context group shows current/accent/muted on a real surface bg instead.
 
 ## Notes
 
