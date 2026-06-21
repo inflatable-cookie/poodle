@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=8 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=3 specimen=gap -->
 # Parity: ToastStack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,28 +25,28 @@ Props, anatomy, tone set, ARIA, size/density tables all match Svelte. Minor note
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] Info tone uses wrong token — FIXED: `ToastTone::Info` now maps to `COLOR_STATUS_INFO` (new `color.status.info` token), not `COLOR_ACCENT_BASE`. (The accent *fallback* read at toast_stack.rs:100 is a separate concern only hit for unknown tones.)
-- [ ] No accent-bar tone-mix — contract §8 accent is `color-mix(toast-tone 82%, white 6%)`; GPUI fills the bar with the raw tone color (toast_stack.rs:198). Border (34% mix) and gradient background (12% tint) mixes are also dropped — toast uses flat `fill`/`border_color` (toast_stack.rs:191-194).
-- [ ] No dismiss `aria-label` and dismiss is a raw `×` glyph div, not an Icon(name="x") (toast_stack.rs:170-176); contract §2 requires the Icon primitive + `aria-label="Dismiss {title}"`.
-- [ ] Action affordance is a bare text div, not a `Button variant="secondary"` (toast_stack.rs:149-156); contract §2 anatomy + Svelte (line 55) require the Button primitive.
-- [ ] Message font size wrong — contract §8 message is `0.8125rem` (smaller than title); GPUI sets message `text_size(body_size)` = same as title (toast_stack.rs:138). Per-size message scale ladder (§8 size table) not applied.
-- [ ] Hardcoded `text_size(px(12.0))` + `mt(px(4.0))` on the action element (toast_stack.rs:152,155) — resolve from tokens.
-- [ ] Hardcoded `pl(px(8.0))` on dismiss (toast_stack.rs:175) and `w(px(360.0))` container width (toast_stack.rs:103) — raw literals, not token/rem-derived.
-- [ ] No size ladder for dismiss button dimensions — contract §8 sizes dismiss 1rem→1.75rem and inset across xs/sm/lg/xl; GPUI has no per-size dismiss sizing.
-- [ ] No density padding ladder — contract §8 density scales toast padding ×0.75 / ×1.25; GPUI applies flat `padding` both axes (toast_stack.rs:207-208), density unused for spacing.
+- [x] DONE (pass 41): accent-bar + tone mixes — accent bar `color_mix(tone, white, 0.94)` (≈82%/white-6% intent), border `color_mix(tone 34%, border-default)`, background `color_mix(tone 12%, elevated)` flat tint. Bar is now absolute, full-height.
+- [x] DONE: dismiss is the `Icon` primitive (`name="x"`) with `aria_label("Dismiss {title}")`, absolute top-right, sized square.
+- [x] DONE: action affordance is the real `Button` primitive (variant Secondary, size/density forwarded), wired to `on_action`.
+- [x] DONE: per-size title + message font ladder (§8 size table); message is the smaller body scale, title the heading scale.
+- [x] DONE: action/dismiss/container literals removed — action sits in the Button; dismiss/inset/container width are rem-derived (`22.5rem` container, per-size dismiss dims + inset).
+- [x] DONE: per-size dismiss dimension + top/right inset ladder (1rem→1.75rem; 0.25→0.5rem).
+- [x] DONE: density padding ladder — toast padding scaled ×0.75 / ×1.25 (contract-justified uniform scale, matches Svelte `padding` shorthand). Elevation shadow now applied (`elevation_overlay_shadow()`); radius = surface − 0.125rem; `overflow_hidden`.
 - accepted: no ARIA / live-region (gpui has no accessibility API) — danger `aria-live="assertive"` escalation cannot be expressed.
 
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] DONE: built out the toast body — leading tone **accent bar** (`tone_color`, so Info now shows the status-info blue), required **title** (was message-only — message-only toasts rendered blank before), optional message, optional **action** label, and a **dismiss** `×` affordance. Probe-tested (title/message/action/dismiss present).
-- [ ] No `onDismiss`/`onAction` callbacks — function signature takes only `(spec, theme)` (toast_stack.rs:11); interaction would live in preview `main.rs` but no wiring exists.
-- [ ] No tone-based border/background/accent mixes — flat `fill`/`border` only (toast_stack.rs:28-29); contract §8 gradient + 34% border mix + accent mix dropped.
-- [ ] No box-shadow/elevation — contract §8 `box-shadow: var(--poodle-elevation-overlay)`; `shadow_token()` exists on spec (toast_stack.rs:109) but is never applied.
-- [ ] Hardcoded `item_gap = rem_to_px(0.5)` at toast_stack.rs:17 — contract toast internal gap is `space-stack-sm` (a token); resolve it, drop the `0.5` literal.
-- [ ] Vertical padding hack `panel_space_y_rem(spec.density) - 0.25` at toast_stack.rs:15 subtracts a magic `0.25` rem — not contract-derived; density also wrongly drives vertical padding here (density must not affect vertical padding per repo rules).
-- [ ] No size ladder (dismiss dims, message font) and no overflow:hidden / radius-minus-0.125rem treatment.
-- [ ] No `role="list"`/`listitem` semantic mapping note — accepted no ARIA, but transient-notification meaning per contract §6 GPUI-native note is unaddressed.
+- [x] DONE (pass 41): tone-based mixes — accent bar `color_mix(tone, white, 0.94)`, border `color_mix(tone 34%, border-default)`, background `color_mix(tone 12%, elevated)` flat tint plus a 90° `bg_gradient_linear` (tone-tint → elevated at 18%). Probe-tested (info accent uses `status.info`; danger bg tint applied).
+- [x] DONE: box-shadow — `shadow_md()` applied. Note: JsEl has no token-driven box-shadow, so `elevation.overlay` is approximated by the runtime medium-shadow preset (offset 0,4 / blur 8). (note)
+- [x] DONE: `item_gap` resolves `spec.gap_token()` (`space-stack-sm`) — `0.5` literal dropped; stack gap uses the same token.
+- [x] DONE: vertical-padding hack removed — toast padding is `space-panel-x × density-scale` on all sides (the magic `-0.25` and `panel_space_y_rem` are gone). Density-scaled padding is the contract-justified case (Svelte `padding` shorthand).
+- [x] DONE: size ladder (per-size dismiss square + title/message font), `overflow_hidden`, and radius = surface − 0.125rem all applied.
+- [ ] No `onDismiss`/`onAction` callbacks — `js_toast_stack(spec, theme)` still has no handler slot; dismiss/action clicks live in the preview loop (**preview-loop**), un-plumbed.
+- [ ] Action affordance approximates a secondary button as a bordered tone-neutral chip label — the real `Button` primitive isn't composed (no nested-component slot in the immediate JsEl pass). (note)
+- [ ] `role="list"`/`listitem` transient-notification semantics unaddressed — accepted: no ARIA channel.
 - accepted: no ARIA channel (documented across jetstream impls).
-- accepted: interaction (dismiss/action clicks) lives in preview event loop — but no handlers are plumbed through the component signature, so it can't be wired yet.
+- accepted: interaction (dismiss/action clicks) lives in preview event loop — no handlers plumbed through the component signature yet.
 
 ## Specimen parity
 

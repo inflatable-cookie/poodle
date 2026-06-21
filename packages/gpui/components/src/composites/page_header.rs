@@ -2,13 +2,39 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, PillAppearance, PillSize, PillSpec, PillTone,
+    SemanticControlSizeRole,
+};
 use poodle_specs::{PageHeaderAlign, PageHeaderSpec};
 
 use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::primitives::{Icon, Pill};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px};
+
+/// Map the resolved control size to the supporting-visual `PillSize` the count
+/// badge renders at (matches Svelte `resolveSupportingVisualSize`).
+fn count_pill_size(size: ControlSize) -> PillSize {
+    match resolve_supporting_visual_size(size) {
+        ControlSize::Xs => PillSize::Xs,
+        ControlSize::Sm => PillSize::Sm,
+        ControlSize::Md => PillSize::Md,
+        ControlSize::Lg => PillSize::Lg,
+        ControlSize::Xl => PillSize::Xl,
+    }
+}
+
+/// Per-level heading scale over the base heading-size token (level 2 = base,
+/// level 1 larger, levels 3–6 compact). Mirrors the Svelte title-size ladder.
+fn level_scale(level: u8) -> f32 {
+    match level {
+        1 => 1.143,
+        2 => 1.0,
+        _ => 0.714,
+    }
+}
 
 /// A real GPUI page header component backed by `PageHeaderSpec`.
 ///
@@ -151,143 +177,83 @@ impl IntoElement for PageHeader {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let font_size = rem_to_px(size_font_rem(effective_size));
-        let _panel_px = rem_to_px(panel_space_x_rem(spec.density));
-        let _panel_py = rem_to_px(panel_space_y_rem(spec.density));
 
         let gap = resolve_px(theme, spec.gap_token());
         let body_size = px(font_size);
-        // Heading hierarchy: level 1 uses the primary heading token,
-        // levels 2-6 scale down proportionally. GPUI doesn't have a
-        // dedicated h1/h2/h3 token stack, so we derive from the base
-        // heading size using a simple multiplier per level. This
-        // preserves the visual hierarchy the contract doc requires
-        // (level prop on page-header.md L82) without inventing new
-        // tokens.
-        let heading_base = resolve_px(theme, "typography.heading.size");
-        let level_scale: f32 = match spec.level {
-            1 => 1.0,
-            2 => 0.85,
-            3 => 0.72,
-            4 => 0.62,
-            5 => 0.55,
-            _ => 0.50,
-        };
-        let heading_size = heading_base * level_scale;
+        // Title size: scale the heading-size token per level (level 2 = base).
+        let heading_base = resolve_px(theme, spec.heading_size_token());
+        let heading_size = heading_base * level_scale(spec.level);
         let header_gap = resolve_px(theme, spec.header_gap_token());
+        let title_block_gap = resolve_px(theme, spec.title_block_gap_token());
+        let title_gap = resolve_px(theme, spec.title_gap_token());
+        let actions_gap = resolve_px(theme, spec.actions_gap_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
+        let banner_radius = resolve_px(theme, spec.banner_radius_token());
 
         let title_color = resolve_color(theme, spec.title_color_token());
         let subtitle_color = resolve_color(theme, spec.subtitle_color_token());
         let eyebrow_color = resolve_color(theme, spec.eyebrow_color_token());
+        let section_color = resolve_color(theme, spec.section_color_token());
         let back_color = resolve_color(theme, spec.back_color_token());
-        let count_color = resolve_color(theme, spec.count_color_token());
+        let context_dot = resolve_color(theme, spec.context_dot_color_token());
         let banner_color = resolve_color(theme, spec.banner_color_token());
-        let panel_radius = resolve_px(theme, "radius.control");
+        let surface = resolve_color(theme, "color.background.surface");
 
-        let mut wrapper = div().w_full().flex().flex_col().py(padding_y);
+        let primary_title = spec.primary_title();
+        let resolved_subtitle = spec.resolved_subtitle();
 
-        // Back-navigation link (above everything else).
-        if spec.has_back_link() {
-            let label = spec.back_label.clone().unwrap_or_default();
-            let href = spec.back_href.clone().unwrap_or_default();
-            let back_text_size = if spec.back_is_contextual {
-                resolve_px(theme, "typography.caption.size")
-            } else {
-                body_size
-            };
-            // Svelte: back link gap = 0.35rem (hardcoded, not a token)
-            let back_gap = px(rem_to_px(0.35));
-            let mut back_row = div()
-                .id("poodle-page-header-back")
-                .w_full()
-                .mb(gap)
-                .flex()
-                .items_center()
-                .gap(back_gap)
-                .text_size(back_text_size)
-                .text_color(back_color)
-                .cursor_pointer()
-                .child(div().child("\u{2190}"))
-                .child(div().child(format!("Back to {label}")));
+        let mut wrapper = div().w_full().flex().flex_col().gap(gap).py(padding_y);
 
-            if let Some(handler) = self.on_back {
-                back_row = back_row.on_click(move |_event, window, cx| {
-                    handler(&href, window, cx);
-                });
-            }
-
-            wrapper = wrapper.child(back_row);
-        }
-
-        // Optional breadcrumbs above
-        if let Some(breadcrumbs) = self.breadcrumbs_slot {
-            wrapper = wrapper.child(div().w_full().mb(gap).child(breadcrumbs));
-        }
-
-        // Section label (rendered above the main row, distinct from eyebrow)
-        if let Some(ref section) = spec.section {
-            wrapper = wrapper.child(
-                div()
-                    .w_full()
-                    .mb(gap)
-                    // Svelte: section label = 0.75rem
-                    .text_size(px(rem_to_px(0.75)))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(eyebrow_color)
-                    .child(section.to_uppercase()),
-            );
-        }
-
-        // Main row: title block + actions
-        let justify = match spec.align {
-            PageHeaderAlign::Between => true,
-            PageHeaderAlign::Start => false,
-        };
-
-        let mut main_row = div().w_full().flex().items_center().gap(header_gap);
-
-        if justify {
-            main_row = main_row.justify_between();
-        }
-
-        // Title block: eyebrow, title row (+count), subtitle stacked
-        // Svelte: title-block gap = space.inline.sm (8px)
-        let title_block_gap = resolve_px(theme, "space.inline.sm");
+        // ── Title block: eyebrow, section, title (+count Pill), subtitle ──────
         let mut title_block = div().flex().flex_col().gap(title_block_gap);
 
         if let Some(ref eyebrow) = spec.eyebrow {
             title_block = title_block.child(
                 div()
-                    // Svelte: eyebrow = 0.6875rem (11px)
                     .text_size(px(rem_to_px(0.6875)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(eyebrow_color)
-                    .child(eyebrow.clone()),
+                    .child(eyebrow.to_uppercase()),
             );
         }
 
-        // Title row: title + optional count badge
-        let mut title_row = div().flex().items_center().gap(px(8.0));
+        // Section row — distinct from eyebrow (only in default posture w/ split).
+        if spec.has_section_title_split() && !spec.is_entity_detail_posture() {
+            if let Some(ref section) = spec.section {
+                title_block = title_block.child(
+                    div()
+                        .text_size(px(rem_to_px(0.75)))
+                        .font_weight(FontWeight::BOLD)
+                        .text_color(section_color)
+                        .child(section.to_uppercase()),
+                );
+            }
+        }
+
+        // Title row: heading + optional count Pill.
+        let mut title_row = div().flex().items_center().gap(title_gap);
         title_row = title_row.child(
             div()
                 .text_size(heading_size)
                 .font_weight(FontWeight::BOLD)
                 .text_color(title_color)
-                .child(spec.title.clone()),
+                .child(primary_title),
         );
-
         if let Some(count) = spec.count {
             title_row = title_row.child(
-                div()
-                    .text_size(body_size)
-                    .text_color(count_color)
-                    .child(format!("{count}")),
+                Pill::from_spec(
+                    PillSpec::new()
+                        .with_label(format!("{count}"))
+                        .with_tone(PillTone::Neutral)
+                        .with_appearance(PillAppearance::Subtle)
+                        .with_size(count_pill_size(effective_size)),
+                    theme,
+                ),
             );
         }
-
         title_block = title_block.child(title_row);
 
-        if let Some(ref subtitle) = spec.subtitle {
+        if let Some(ref subtitle) = resolved_subtitle {
             title_block = title_block.child(
                 div()
                     .text_size(body_size)
@@ -296,46 +262,103 @@ impl IntoElement for PageHeader {
             );
         }
 
-        main_row = main_row.child(title_block);
+        // ── Actions row: back link (left) + actions cluster (right) ──────────
+        let has_actions_row = spec.has_back_link() || self.actions_slot.is_some();
+        let actions_row = if has_actions_row {
+            let mut row = div()
+                .flex()
+                .items_center()
+                .flex_shrink_0()
+                .gap(header_gap);
 
-        if let Some(actions) = self.actions_slot {
-            main_row = main_row.child(
-                div()
+            if spec.has_back_link() {
+                let href = spec.back_href.clone().unwrap_or_default();
+                let display = spec.back_display_label();
+                // Back link: arrow-left icon + stripped display label + dot.
+                let mut back_row = div()
+                    .id("poodle-page-header-back")
                     .flex()
                     .items_center()
-                    .flex_shrink_0()
-                    .gap(px(6.0))
-                    .child(actions),
-            );
+                    .gap(px(rem_to_px(0.35)))
+                    .text_size(px(rem_to_px(0.8125)))
+                    .text_color(back_color)
+                    .cursor_pointer()
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new("arrow-left").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(back_color),
+                    )
+                    .child(div().child(display));
+
+                if spec.back_is_contextual {
+                    back_row = back_row.child(
+                        div()
+                            .w(px(rem_to_px(0.375)))
+                            .h(px(rem_to_px(0.375)))
+                            .rounded(px(rem_to_px(0.1875)))
+                            .flex_shrink_0()
+                            .bg(context_dot),
+                    );
+                }
+
+                if let Some(handler) = self.on_back {
+                    back_row = back_row.on_click(move |_event, window, cx| {
+                        handler(&href, window, cx);
+                    });
+                }
+                row = row.child(back_row);
+            }
+
+            if let Some(actions) = self.actions_slot {
+                row = row.child(
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .items_center()
+                        .gap(actions_gap)
+                        .child(actions),
+                );
+            }
+            Some(row)
+        } else {
+            None
+        };
+
+        // ── Top row: title block + actions row ───────────────────────────────
+        let mut top_row = div().w_full().flex().items_start().gap(header_gap);
+        if matches!(spec.align, PageHeaderAlign::Between) {
+            top_row = top_row.justify_between();
         }
+        top_row = top_row.child(title_block);
+        if let Some(actions_row) = actions_row {
+            top_row = top_row.child(actions_row);
+        }
+        wrapper = wrapper.child(top_row);
 
-        wrapper = wrapper.child(main_row);
-
-        // Metadata row (MetaBar or similar) below the main header row.
+        // ── Secondary content: breadcrumbs / meta ────────────────────────────
+        if let Some(breadcrumbs) = self.breadcrumbs_slot {
+            wrapper = wrapper.child(div().w_full().child(breadcrumbs));
+        }
         if let Some(meta) = self.meta_slot {
-            wrapper = wrapper.child(div().w_full().mt(gap).child(meta));
+            wrapper = wrapper.child(div().w_full().child(meta));
         }
 
-        // Banner row
+        // ── Banner row ───────────────────────────────────────────────────────
         if let Some(ref message) = spec.banner_message {
-            let banner_bg = Hsla {
-                a: banner_color.a * 0.12,
-                ..banner_color
-            };
-            let banner_border = Hsla {
-                a: banner_color.a * 0.38,
-                ..banner_color
-            };
+            // Tinted fill / border derived from the tone color mixed into surface.
+            let banner_bg = color_mix(banner_color, surface, 0.12);
+            let banner_border = color_mix(banner_color, surface, 0.38);
             wrapper = wrapper.child(
                 div()
                     .w_full()
-                    .mt(gap)
-                    .px(px(12.0))
-                    .py(px(8.0))
+                    .px(px(rem_to_px(0.75)))
+                    .py(px(rem_to_px(0.5)))
                     .bg(banner_bg)
-                    .border_1()
+                    .border_l_2()
                     .border_color(banner_border)
-                    .rounded(panel_radius)
+                    .rounded(banner_radius)
                     .text_size(body_size)
                     .text_color(banner_color)
                     .child(message.clone()),

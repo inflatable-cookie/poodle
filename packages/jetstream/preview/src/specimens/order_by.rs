@@ -4,42 +4,105 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::order_by::js_order_by;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{OrderByField, OrderBySpec, SortDirection, SortField};
+use poodle_specs::{
+    ControlDensity, ControlSize, OrderByField, OrderBySpec, SortDirection, SortField,
+};
+
+fn fields() -> Vec<SortField> {
+    vec![
+        SortField::new("title", "Title"),
+        SortField::new("kind", "Kind"),
+        SortField::new("updated", "Updated").with_default_direction(SortDirection::Desc),
+        SortField::new("created", "Created").with_default_direction(SortDirection::Desc),
+        SortField::new("visibility", "Visibility").with_disabled(true),
+    ]
+}
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    let fields = vec![
-        SortField::new("name", "Name"),
-        SortField::new("date", "Date"),
-        SortField::new("status", "Status"),
-    ];
+    // Single-value sort used for the size / density rows.
+    let single = vec![OrderByField::new("title", SortDirection::Asc)];
 
     div()
         .flex_col()
         .gap(24.0)
         .child(group(
-            "No active sort",
+            "Multi-field sort builder (compact, open)",
             secondary,
             js_order_by(
                 &OrderBySpec::new()
-                    .with_fields(fields.clone())
+                    .with_fields(fields())
+                    .with_value(vec![
+                        OrderByField::new("updated", SortDirection::Desc),
+                        OrderByField::new("title", SortDirection::Asc),
+                    ])
+                    .with_compact(true)
                     .with_open(true),
                 theme,
             ),
         ))
         .child(group(
-            "Multi-field sort",
+            "Empty (open)",
+            secondary,
+            js_order_by(
+                &OrderBySpec::new().with_fields(fields()).with_open(true),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Disabled",
             secondary,
             js_order_by(
                 &OrderBySpec::new()
-                    .with_fields(fields.clone())
-                    .with_value(vec![
-                        OrderByField::new("name", SortDirection::Asc),
-                        OrderByField::new("date", SortDirection::Desc),
-                    ])
-                    .with_open(true),
+                    .with_fields(fields())
+                    .with_value(single.clone())
+                    .with_disabled(true),
                 theme,
+            ),
+        ))
+        .child(group(
+            "Sizes (xs–xl)",
+            secondary,
+            div().flex_col().gap(8.0).children(
+                [
+                    ControlSize::Xs,
+                    ControlSize::Sm,
+                    ControlSize::Md,
+                    ControlSize::Lg,
+                    ControlSize::Xl,
+                ]
+                .into_iter()
+                .map(|size| {
+                    js_order_by(
+                        &OrderBySpec::new()
+                            .with_fields(fields())
+                            .with_value(single.clone())
+                            .with_size(size),
+                        theme,
+                    )
+                }),
+            ),
+        ))
+        .child(group(
+            "Densities (compact/default/comfortable)",
+            secondary,
+            div().flex_col().gap(8.0).children(
+                [
+                    ControlDensity::Compact,
+                    ControlDensity::Default,
+                    ControlDensity::Comfortable,
+                ]
+                .into_iter()
+                .map(|density| {
+                    js_order_by(
+                        &OrderBySpec::new()
+                            .with_fields(fields())
+                            .with_value(single.clone())
+                            .with_density(density),
+                        theme,
+                    )
+                }),
             ),
         ))
 }

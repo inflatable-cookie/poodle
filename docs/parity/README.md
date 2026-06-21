@@ -192,8 +192,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | nav-card | ok | 1 | 2 | gap |
 | navigation-menu | fixed | 5 | 4 | gap |
 | number-input | gap | 5 | 6 | gap |
-| order-by | fixed | 10 | 11 | gap |
-| page-header | fixed | 8 | 8 | gap |
+| order-by | fixed | 2 | 2 | ok |
+| page-header | fixed | 1 | 1 | ok |
 | page-loading | ok | 5 | 7 | gap |
 | pagination | fixed | 0 | 1 | gap |
 | pagination-summary | fixed | 2 | 2 | gap |
@@ -204,7 +204,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | progress | fixed | 3 | 4 | gap |
 | radio-group | ok | 4 | 4 | gap |
 | range-slider | gap | 6 | 8 | gap |
-| rating | ok | 8 | 7 | gap |
+| rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 5 | gap |
 | relation-picker | fixed | 9 | 10 | gap |
 | remediation-banner | gap | 1 | 8 | gap |
@@ -237,7 +237,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-input | fixed | 4 | 5 | gap |
 | time-zone-select | fixed | 6 | 6 | gap |
 | toast-host | fixed | 6 | 7 | gap |
-| toast-stack | ok | 8 | 7 | gap |
+| toast-stack | ok | 1 | 3 | gap |
 | toggle-group | fixed | 4 | 6 | gap |
 | token-input | fixed | 9 | 6 | gap |
 | toolbar | fixed | 4 | 5 | gap |

@@ -244,6 +244,23 @@ impl OrderBySpec {
         semantic::COLOR_TEXT_SECONDARY
     }
 
+    /// Muted color for the summary placeholder text (empty state) and the
+    /// drag handle glyph. Maps to Svelte `--poodle-color-text-muted`; the
+    /// Rust token set exposes the equivalent placeholder color.
+    pub fn muted_color_token(&self) -> &'static str {
+        "color.text.placeholder"
+    }
+
+    /// Border color for an active sort item row (`border-subtle`).
+    pub fn item_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    /// Surface radius for the dropdown surface.
+    pub fn surface_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
     pub fn field_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
     }

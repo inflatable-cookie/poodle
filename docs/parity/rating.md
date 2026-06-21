@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=8 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=gap -->
 # Parity: Rating
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -18,29 +18,29 @@
 Svelte faithfully implements the contract: whole/fractional modes, roving focus, slider keyboard, `allowClear`, clamped-display-but-step-quantized-input, per-star clipped overlay fill, five sizes, density gap overrides, full ARIA. No material divergence.
 
 - Minor: contract §7 says "glyph renders at 1rem font-size" but Svelte sizes the SVG at `1.125em` (line 363) relative to the per-size glyph font-size. This is an em-relative scale of the size table, not a contradiction. **No action** (documentation nuance only).
-- The `RatingSpec` (Rust) is a reduced model vs the Svelte/contract surface: it has `precision` (single field) instead of `step`, lacks `allow_clear`, `aria_label`, `default_value`, `hover`/`focus` state, and `value` is a plain `f64` (no null/empty). This is a spec gap that blocks both Rust targets — flagged under each target below rather than as a contract↔Svelte issue.
+- The `RatingSpec` (Rust) was a reduced model vs the Svelte/contract surface. **Pass 41 (additive):** added `step`, `allow_clear`, `default_value`, plus helpers `effective_step()`, `is_fractional()`, `fill_ratio(index)`, `inactive_color_alpha()`, `hover_glow_token()`, `focus_ring_token()`; fixed `inactive_color_token()` to resolve `color.text.secondary` (renderers apply 48% alpha) instead of `color.border.subtle`. `value` is still a plain `f64` (no null/empty) and `aria_label` is unmodeled — minor residual spec deltas, not blocking.
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] No partial/fractional fill — fill is binary via `spec.filled_count()` (`rating.rs:95,108`); contract §2/§4 require a clipped accent overlay sized by per-star ratio. Implement the Base + Fill + FillInner layers.
-- [ ] No fractional (slider) mode — `step < 1` path absent; root is always a flex row, never `slider` role with stepped keyboard. Contract §6.
-- [ ] `RatingSpec` lacks `step`/`allow_clear`/`default_value` (`rating.rs` spec) — GPUI cannot express half-star or clearable specimens; add fields then wire builders.
-- [ ] No `allowClear` deselection on repeat click (`selectIndex` clear branch in Svelte:131 has no GPUI equivalent).
-- [ ] No roving tabindex / focus-ring — `.focusable()` is set per star (`rating.rs:124`) but no `tabindex 0/-1` roving and no focus-visible outline (`accent.focusRing`). Contract §6 Tier 1.
-- [ ] Inactive color hardcodes the 48% mix inline (`rating.rs:94`) instead of resolving `spec.inactive_color_token()` — and the spec token itself returns `COLOR_BORDER_SUBTLE` (`rating.rs:76` spec), not the contract's `text-secondary 48%`. Reconcile: make the token resolve the contract value, then consume it.
-- [ ] Hover uses `active_color` text recolor (`rating.rs:132`); contract hover is an accent `drop-shadow` glow on the hovered item, not a recolor. Match the glow.
-- [ ] Home/End keyboard missing — only Left/Right/Up/Down handled (`rating.rs:146-155`); contract §6 requires Home/End and Enter/Space select.
+- [x] DONE (pass 41): partial/fractional fill — clipped accent overlay (`relative` glyph + `absolute` fill layer, `overflow_hidden`, `w(relative(fill_ratio))`) sized by `spec.fill_ratio(index)`. Base + Fill layers present.
+- [x] DONE: `step`/`allow_clear`/`default_value` added to `RatingSpec`; GPUI builders `.step()`/`.allow_clear()` wired.
+- [x] DONE: `allowClear` deselection — Enter/Space/keyboard floor honors `allow_clear` (Home → 0 when clearable). Click selects i+1 (repeat-click clear lives in the preview loop — see note).
+- [x] DONE: focus-ring — per-star `.focus(|s| s.border_2().border_color(focusRing))` resolving `color.accent.focusRing`.
+- [x] DONE: inactive color — resolves `spec.inactive_color_token()` (= `color.text.secondary`) × `inactive_color_alpha()` (0.48); no inline hardcode, no `border.subtle`.
+- [x] DONE: hover glow — accent `drop-shadow` (BoxShadow blur 0.375rem, accent@52%) on the hovered item, not a recolor.
+- [x] DONE: Home/End/Enter/Space — full key set handled per star (`home`/`end`/`enter`/`space` plus arrows).
+- [x] DONE: per-size glyph font (§8 table, ×1.125em) + density-driven inter-item gap.
+- [ ] Fractional sub-star pointer precision (selecting 3.5 by clicking the left half of star 4) and true slider-role stepped keyboard — **preview-loop**: requires pointer-x within the star and persisted hover/value state, which a stateless render can't resolve. Whole-star click + keyboard floor/clear are wired.
 - accepted: no ARIA (gpui has no accessibility API) — radiogroup/radio/slider roles not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No partial/fractional fill — `is_filled = (i as f64) < spec.value` (`rating.rs:22`) is binary; no clipped overlay. Contract §2/§4.
-- [ ] No fractional (slider) mode — `step`/`precision<1` path absent.
-- [ ] `inactive_color_token()` resolves `COLOR_BORDER_SUBTLE` (`spec rating.rs:76`); contract inactive is `text-secondary` at 48% alpha. Fix the spec token (or blend in the component) to match Svelte (`Rating.svelte:328`).
-- [ ] No touch-target wrapper — stars are bare icons (`rating.rs:24`); contract §7 requires each item be a 2rem (size-scaled) square hit target. GPUI sizes it via `star_touch_size`; Jetstream omits.
-- [ ] No size application to item box — only icon glyph is sized (`size_font_rem`); item width/height per size table (§8.Size adjustments) not applied.
-- [ ] `RatingSpec` lacks `step`/`allow_clear` — cannot render half-star or clearable specimens.
-- [ ] No `allowClear`, no keyboard, no roving focus (interaction lives in preview event loop, but no handlers wired at all here).
+- [x] DONE (pass 41): partial/fractional fill — `relative` glyph wrapper + `absolute`/`overflow_hidden` fill overlay clipped to `glyph_px * fill_ratio(index)`. Probe-tested (filled-vs-empty icon-layer counts).
+- [x] DONE: inactive color — `tint(resolve_color(inactive_color_token), 0.48)` = `text-secondary 48%`; spec token fixed to `color.text.secondary`.
+- [x] DONE: touch-target wrapper — each item is a fixed `control_height_rem(size)`-square hit area wrapping the glyph.
+- [x] DONE: per-size item box + glyph (§8 size table) and density-driven gap applied.
+- [x] DONE: `step`/`allow_clear` available on the spec for clearable/half-star specimens.
+- [ ] `allowClear`, keyboard, roving focus, and fractional pointer selection — **preview-loop**: interaction (click/keyboard/hover-preview) lives in preview `main.rs`; no handlers are plumbed through the `(spec, theme)` signature yet.
 - accepted: no ARIA channel; interaction (click/keyboard) would live in preview `main.rs` event loop.
 
 ## Specimen parity

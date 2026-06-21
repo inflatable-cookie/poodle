@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=10 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
 # Parity: OrderBy
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -33,41 +33,44 @@ Contract and Svelte diverge heavily. Svelte is authoritative — the contract is
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. GPUI mirrors the (stale) contract, so it also carries contract↔Svelte drift. Mark accepted runtime limits.
 
-- [ ] Item background hardcoded via raw `Hsla{ a: surface.a*0.88 + elevated.a*0.12, ..surface }` alpha-math at `order_by.rs:107-110` — resolve a real fill token, not a hand-rolled HSLA mix.
-- [ ] Renders move-up + move-down IconButtons (`order_by.rs:209-224`) that Svelte does not have; missing the draggable drag-handle button + Alt-arrow keyboard reorder. Align to Svelte: 2 action buttons + interactive handle.
-- [ ] Item laid out as stacked `flex_col` with a separate "Ascending"/"Descending" direction text line (`order_by.rs:246-269`) — Svelte item is a single inline row with no direction text. Restructure.
-- [ ] Empty text `"No sort fields selected"` (`order_by.rs:185`) — Svelte says `"No sort fields"`.
-- [ ] Renders a footer "Clear all" `Button` at `active_count >= 2` (`order_by.rs:300-310`) — Svelte has no footer/Clear-all.
-- [ ] Reset is a bespoke `1.75rem` square `div` with literal `×` (`order_by.rs:156-166`) — Svelte uses an `IconButton icon="x"` ghost. Drag-handle `⠿` is a plain `div`, not interactive (`order_by.rs:256`).
-- [ ] Direction-toggle/remove IconButtons use `ControlSize::Sm` (`order_by.rs:206,229`) — Svelte uses `xs`; aria/tooltip strings are generic ("Toggle direction", "Remove field") not the per-field Svelte strings.
-- [ ] Sizes hardcoded xs `1.625`/sm `1.75`/lg `2.25`/xl `2.5` (`order_by.rs:80-86`) — Svelte is xs `1.5`/lg `2.75`/xl `3.25`. (Driven by contract; fix once contract corrected.)
-- [ ] Spec exposes `gap_token()`, `active_fill/border/text_token()`, `reset_color_token()` — all unused; item radius uses literal `"radius.surface"` string (`order_by.rs:242,314`) and gaps/paddings are raw `rem_to_px` literals where spec token methods exist. Resolve via spec methods.
-- [ ] No interactivity beyond `on_reset`: add/remove/toggle/move/drag/clear callbacks absent — render-only.
+- [x] FIXED — Item background now resolves `color_mix(surface 90%, elevated)` via `theme_ext::color_mix`, not raw HSLA alpha-math.
+- [x] FIXED — move-up/move-down IconButtons removed. Item now has the drag-handle glyph + 2 action buttons (direction toggle + remove); Alt-arrow keyboard reorder is preview-loop (note).
+- [x] FIXED — Item restructured to a single inline flex row (drag handle + flex-1 ellipsis label + direction-toggle + remove); the stacked `flex_col` + "Ascending/Descending" direction line is gone.
+- [x] FIXED — Empty text now `"No sort fields"`.
+- [x] FIXED — footer "Clear all" Button removed (clearing is the reset `×` IconButton only).
+- [x] FIXED — Reset is now an `IconButton icon="x" variant=Ghost` (aria "Clear sort") at the resolved size. Drag handle is a muted glyph; the focusable-`<button>` drag affordance is approximated (note: drag/keyboard reorder is preview-loop).
+- [x] FIXED — Direction-toggle/remove IconButtons now `ControlSize::Xs`, ghost, with per-field aria (`"{field}: ascending. Click to toggle."`, `"Remove {field}"`) + tooltips `Asc`/`Desc`/`Remove`; remove no longer sets danger tone.
+- [x] FIXED — Sizes corrected to the contract table (xs `1.5`/sm `1.75`/md control-height/lg `2.75`/xl `3.25`), with per-size label/summary fonts and xs/lg/xl trigger padding.
+- [x] FIXED — Item radius now `radius.control` via `spec.radius_token()`; surface radius via `spec.surface_radius_token()`; item border via `spec.item_border_token()`; muted summary/handle via `spec.muted_color_token()`. The add-field box is now a real `Select` (placeholder "+ Add field", aria "Add sort field").
+- [ ] Menu open + add-field selection, drag reorder, and Alt+Arrow keyboard reorder are not wired in the component — preview event-loop work, render-only build-verified posture.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_expanded`/roles not emitted.
 - accepted: anchored-dropdown positioning is platform-owned; panel rendered inline below trigger.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Item background via `tint(elevated, 0.88)` heuristic (`order_by.rs:172`) — resolve a real fill token, not an ad-hoc tint factor.
-- [ ] Renders move-up + move-down IconButtons (`order_by.rs:134-149`) absent from Svelte; missing the draggable handle + Alt-arrow keyboard reorder.
-- [ ] Item is stacked `flex_col` with a separate "Ascending"/"Descending" direction line (`order_by.rs:174-199`) — Svelte item is a single inline row, no direction text. Restructure.
-- [ ] Empty text `"No sort fields selected"` (`order_by.rs:108`) — Svelte says `"No sort fields"`.
-- [ ] Footer "Clear all" `js_button` at `active_count >= 2` (`order_by.rs:232-240`) — Svelte has no footer/Clear-all.
-- [ ] Reset is a plain `button("×")` square (`order_by.rs:91-98`) — Svelte uses `IconButton icon="x"` ghost. Drag handle `⠿` is a non-interactive `label` (`order_by.rs:183-186`).
-- [ ] Direction-toggle/remove IconButtons use `ControlSize::Sm` (`order_by.rs:131,154`) — Svelte uses `xs`; generic aria/tooltip strings, not per-field Svelte strings; remove sets `tone=Danger` which Svelte does not.
-- [ ] Sizes hardcoded xs `1.625`/sm `1.75`/lg `2.25`/xl `2.5` (`order_by.rs:23-29`) — Svelte is xs `1.5`/lg `2.75`/xl `3.25`. (Contract-driven.)
-- [ ] Spec `gap_token()`, `active_*_token()`, `reset_color_token()` unused; chevron sized with literal `0.875` rem (`order_by.rs:80-81`); item radius via literal `"radius.surface"` (`order_by.rs:169,244`). Resolve via spec token methods.
-- [ ] Trigger gap/pad and panel/list/item gaps are raw `rem_to_px` literals where `gap_token()` and size/density methods should drive them (`order_by.rs:30-43`).
-- [ ] No interactivity in component (no callbacks at all) — render-only.
+- [x] FIXED — Item background now `color_mix(surface 90%, elevated)`, not a `tint()` heuristic.
+- [x] FIXED — move-up/move-down IconButtons removed; item now has the drag-handle glyph (a focusable `button`) + direction toggle + remove.
+- [x] FIXED — Item restructured to a single inline flex row (handle + flex-1 ellipsis label + 2 IconButtons); the stacked `flex_col` + "Ascending/Descending" line is gone.
+- [x] FIXED — Empty text now `"No sort fields"`.
+- [x] FIXED — footer "Clear all" `js_button` removed.
+- [x] FIXED — Reset is a ghost `js_icon_button` (icon "x", aria "Clear sort"). Drag handle is now a focusable `button("⠿")` (drag/Alt-arrow reorder is preview-loop).
+- [x] FIXED — Direction-toggle/remove IconButtons now `ControlSize::Xs`, ghost, with per-field aria + `Asc`/`Desc`/`Remove` tooltips; remove no longer sets `tone=Danger`.
+- [x] FIXED — Sizes corrected to the contract table (xs `1.5`/sm `1.75`/md control-height/lg `2.75`/xl `3.25`) with per-size fonts/padding.
+- [x] FIXED — chevron sized from the summary font; item radius via `spec.radius_token()`, surface radius via `spec.surface_radius_token()`, item border via `spec.item_border_token()`, muted via `spec.muted_color_token()`. Add-field is now a real `js_select` (placeholder "+ Add field", aria via `SelectSpec.aria_label`).
+- [ ] Menu open + add-field selection, drag reorder, and Alt+Arrow keyboard reorder are not wired in the component — preview event-loop work, render-only build/probe-verified.
 - accepted: no ARIA channel (documented pattern); interaction would live in preview event loop, but no add/remove/toggle/drag wiring exists there either.
+
+Probe tests (`order_by.rs` `#[cfg(test)] mod tests`): empty-open shows "No sort fields" + hidden reset; populated item shows label + `arrow-up`/`arrow-down` direction icon + `⠿` handle, no "Ascending"/"Descending" text, no "Clear all"; summary reads `"Title ↑"`.
 
 ## Specimen parity
 
 - Svelte covers: Multi-field sort builder (compact, with live JSON), Disabled, Sizes snippet (xs–xl), Densities snippet (compact/default/comfortable). (`OrderBySpecimen.svelte`)
 - GPUI covers: Sort controls (open, 2 active fields), Disabled (open), Sizes, Densities — broad. — missing: a `compact` example; uses different field set ("Name/Date/Size/Type") than Svelte's ("Title/Kind/Updated/Created/Visibility"), so compact-summary `+N` truncation is never shown.
-- Jetstream covers: "No active sort" (empty/open), "Multi-field sort" (2 active/open). — missing: **Disabled**, **Sizes**, **Densities**, **compact** — only two static groups, no size/density coverage at all.
+- Jetstream covers: Multi-field sort builder (compact, open, Svelte field set Title/Kind/Updated/Created/Visibility), Empty (open), Disabled, Sizes (xs–xl), Densities (compact/default/comfortable) — now broad, parity with the Svelte/GPUI specimen set.
 
 ## Notes
+
+- **Fix pass (both Rust targets reconverged to corrected contract):** both impls rewritten to the single-row item model — drag-handle glyph + flex-1 ellipsis label + xs ghost direction-toggle + xs ghost remove; ghost `×` reset IconButton; "No sort fields" empty text; `color_mix(surface 90%, elevated)` item bg; `radius.control` item radius + `radius.surface` surface; corrected size table; real `Select` (GPUI `Select`, Jetstream `js_select`) for add-field. Removed move-up/move-down buttons and the footer "Clear all". Additive `OrderBySpec` token methods: `muted_color_token()` (→ `color.text.placeholder`), `item_border_token()` (→ `border.subtle`), `surface_radius_token()` (→ `radius.surface`). Jetstream `#[cfg(test)] mod tests` added (render_probe). Token gap noted: there is no `color.text.muted` constant in the Rust token set, so the Svelte `--poodle-color-text-muted` (summary placeholder + drag handle) maps to `color.text.placeholder`. Preview-loop (not closed): menu open, add-field selection, drag reorder, Alt+Arrow keyboard reorder.
 
 - `consv=fixed`: the contract was badly out of date vs authoritative Svelte and is now fully reconciled — move-up/move-down buttons, footer Clear-all, stacked item with direction text, bespoke square reset, and wrong size heights all removed/corrected to match `OrderBy.svelte`. The popover wrapper, dialog surface, drag-handle button, Alt-arrow keyboard reorder, `showClearButton` prop, xs-size IconButtons, and corrected item/drop-target tokens are now documented. Both Rust impls still replicate the OLD contract (move buttons, footer, stacked item, bespoke reset, wrong sizes) — they now need to re-converge against the corrected contract; that is code work, tracked in the GPUI/Jetstream sections, out of scope for this contract reconciliation.
 - `rem_to_px(<contract-rem-value>)` is the sanctioned resolution path and is **not** flagged as a token violation. Flags above are genuine: raw `Hsla{}` alpha-math (GPUI), `tint()` factor (Jetstream), unused spec token methods, and literal `"radius.surface"` strings bypassing `spec.radius_token()`-style accessors.
