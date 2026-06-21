@@ -1,4 +1,11 @@
-<!-- parity consv=ok gpui=7 jetstream=10 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 49: built out both targets. Additive DockRegionSpec: DockSizing (Flexible/Static),
+     DockCollapsedPosture (IconStrip/Hidden), DockEmphasis (Standard/Quiet/Strong), can_accept_panel
+     (render-only proxy for Svelte's canAcceptPanel callback). Both render collapsedPosture,
+     emphasis (quiet transparent / strong accent-32% border), canAcceptPanel drop overlay, static
+     mode, compact/icon-only tabs. GPUI dropped px(4/36/32) — strip dims from density tokens.
+     Jetstream tab_gap/border/active-tint → tokens. 6 probe tests; specs 61, jet 184, gpui clean.
+     Tab activation/collapse/DnD = preview-loop; JsEl no dashed-border (solid+8% approx). -->
 # Parity: DockRegion
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

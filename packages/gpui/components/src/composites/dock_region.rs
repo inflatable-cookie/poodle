@@ -3,15 +3,22 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
-use poodle_specs::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
+use poodle_specs::{
+    DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing, DockTabsPlacement,
+    PanelTabItem,
+};
 
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dock region backed by `DockRegionSpec`.
 ///
 /// Renders a dockable panel region with tabs along the specified edge or top.
-/// Supports collapsed state with a narrow gutter.
+/// Supports flexible (tabbed/collapsible) and static (stacked) sizing, collapsed
+/// icon-strip / hidden postures, emphasis variants, compact tabs, and a
+/// cross-region drop-target affordance.
 pub struct DockRegion {
     spec: DockRegionSpec,
     theme: GpuiThemeProvider,
@@ -57,8 +64,28 @@ impl DockRegion {
         self.spec.edge = v;
         self
     }
+    pub fn sizing(mut self, v: DockSizing) -> Self {
+        self.spec.sizing = v;
+        self
+    }
     pub fn collapsed(mut self, v: bool) -> Self {
         self.spec.is_collapsed = v;
+        self
+    }
+    pub fn collapsible(mut self, v: bool) -> Self {
+        self.spec.is_collapsible = v;
+        self
+    }
+    pub fn collapsed_posture(mut self, v: DockCollapsedPosture) -> Self {
+        self.spec.collapsed_posture = v;
+        self
+    }
+    pub fn emphasis(mut self, v: DockEmphasis) -> Self {
+        self.spec.emphasis = v;
+        self
+    }
+    pub fn can_accept_panel(mut self, v: bool) -> Self {
+        self.spec.can_accept_panel = v;
         self
     }
     pub fn tabs_placement(mut self, v: DockTabsPlacement) -> Self {
@@ -124,131 +151,293 @@ impl IntoElement for DockRegion {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let _font_size = rem_to_px(size_font_rem(effective_size));
-        let tab_gap = rem_to_px(control_space_x_rem(spec.density));
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        // Density → spacing (contract: density controls horizontal padding / gaps).
+        let space_x = rem_to_px(control_space_x_rem(spec.density));
+        let space_y = rem_to_px(panel_space_y_rem(spec.density));
         let label_size = resolve_px(theme, "typography.label.size");
         let radius_control = resolve_radius(theme, "radius.control");
+        let radius_surface = resolve_radius(theme, "radius.surface");
 
         let strip_fill = resolve_color(theme, spec.strip_fill_token());
-        let border = resolve_color(theme, "color.border.default");
-        let _text_primary = resolve_color(theme, "color.text.primary");
+        let panel_fill = resolve_color(theme, "color.background.panel");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, "color.accent.base");
         let hover_bg = resolve_color(theme, "color.background.elevated");
 
         let current_value = spec.current_value().map(|s| s.to_string());
-        let is_horizontal_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);
+        let is_side_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);
 
-        // Collapsed gutter
-        if spec.is_collapsed {
-            let mut gutter = div().bg(strip_fill);
+        // ── Root region treatment (emphasis + edge border) ─────────
+        // Standard: panel fill, subtle border on the inner edge.
+        // Quiet: transparent border + background.
+        // Strong: accent mixed 32% into the subtle border.
+        let (root_bg, root_border): (Hsla, Hsla) = match spec.emphasis {
+            DockEmphasis::Standard => (panel_fill, border_subtle),
+            DockEmphasis::Quiet => (
+                gpui::transparent_black(),
+                gpui::transparent_black(),
+            ),
+            DockEmphasis::Strong => (panel_fill, color_mix(accent, border_subtle, 0.32)),
+        };
 
-            if is_horizontal_edge {
-                gutter = gutter.w(px(4.0)).h_full();
-            } else {
-                gutter = gutter.h(px(4.0)).w_full();
-            }
-
-            // Border on the inner edge
+        let apply_edge_border = |el: Div, color: Hsla| -> Div {
             match spec.edge {
-                DockEdge::Left => gutter = gutter.border_r_1().border_color(border),
-                DockEdge::Right => gutter = gutter.border_l_1().border_color(border),
-                DockEdge::Top => gutter = gutter.border_b_1().border_color(border),
-                DockEdge::Bottom => gutter = gutter.border_t_1().border_color(border),
+                DockEdge::Left => el.border_r_1().border_color(color),
+                DockEdge::Right => el.border_l_1().border_color(color),
+                DockEdge::Top => el.border_b_1().border_color(color),
+                DockEdge::Bottom => el.border_t_1().border_color(color),
             }
+        };
 
-            return gutter.into_any_element();
-        }
-
-        // Tabs strip
-        let is_tabs_on_edge = spec.tabs_placement == DockTabsPlacement::Edge && is_horizontal_edge;
-
-        let mut tabs_strip = div().bg(strip_fill);
-
-        if is_tabs_on_edge {
-            // Vertical tab strip along the edge
-            tabs_strip = tabs_strip
-                .flex()
-                .flex_col()
-                .gap(px(tab_gap * 0.25))
-                .py(px(tab_gap * 0.5))
-                .w(px(36.0));
-        } else {
-            // Horizontal tab strip on top
-            tabs_strip = tabs_strip
-                .flex()
-                .items_center()
-                .gap(px(tab_gap * 0.25))
-                .px(px(tab_gap * 0.5))
-                .h(px(32.0))
-                .border_b_1()
-                .border_color(border);
-        }
-
-        for item in &spec.items {
-            let is_active = current_value.as_deref() == Some(item.value.as_str());
+        // Helper to render a single horizontal/edge tab.
+        let render_tab = |item: &PanelTabItem, is_active: bool, on_edge: bool, compact: bool| -> Stateful<Div> {
             let tab_id = SharedString::from(format!("{}-tab-{}", self.id_prefix, item.value));
-
             let mut tab = div()
                 .id(tab_id)
                 .flex()
                 .items_center()
                 .justify_center()
+                .gap(px(space_x * 0.5))
                 .cursor_pointer()
-                .rounded(radius_control);
+                .rounded(radius_control)
+                .text_size(label_size);
 
-            if is_tabs_on_edge {
-                tab = tab
-                    .w_full()
-                    .py(px(tab_gap * 0.75))
-                    .text_size(label_size);
+            if on_edge {
+                tab = tab.w_full().py(px(space_y * 0.5)).px(px(space_x));
+            } else if compact {
+                // Compact: icon-only, square-ish, no horizontal label padding.
+                tab = tab.px(px(space_x * 0.5)).py(px(space_y * 0.5));
             } else {
-                tab = tab
-                    .px(px(tab_gap))
-                    .py(px(tab_gap * 0.5))
-                    .text_size(label_size);
+                tab = tab.px(px(space_x)).py(px(space_y * 0.5));
             }
 
             if is_active {
                 tab = tab.bg(accent.opacity(0.10)).text_color(accent);
             } else {
-                tab = tab.text_color(text_secondary).hover(|s| s.bg(hover_bg));
+                tab = tab.text_color(text_secondary).hover(move |s| s.bg(hover_bg));
             }
 
-            tab = tab.child(item.label.clone());
-            tabs_strip = tabs_strip.child(tab);
+            // Icon (when present). Compact / icon-strip render icon-only.
+            if let Some(icon) = &item.icon {
+                tab = tab.child(div().text_color(if is_active { accent } else { text_secondary }).child(icon.clone()));
+            }
+            if !compact {
+                tab = tab.child(item.label.clone());
+            }
+            tab
+        };
+
+        // Collapse-toggle affordance (only when collapsible). Token-resolved
+        // chevron glyph sized to the strip control height.
+        let collapse_toggle = |vertical: bool| -> Stateful<Div> {
+            let glyph = match spec.edge {
+                DockEdge::Left => "‹",
+                DockEdge::Right => "›",
+                DockEdge::Top => "‹",
+                DockEdge::Bottom => "›",
+            };
+            let mut t = div()
+                .id(SharedString::from(format!("{}-collapse", self.id_prefix)))
+                .flex()
+                .items_center()
+                .justify_center()
+                .cursor_pointer()
+                .text_color(text_secondary)
+                .text_size(px(font_size))
+                .rounded(radius_control)
+                .hover(move |s| s.bg(hover_bg))
+                .child(glyph);
+            if vertical {
+                t = t.w_full().py(px(space_y * 0.5));
+            } else {
+                t = t.px(px(space_x * 0.5)).py(px(space_y * 0.5));
+            }
+            t
+        };
+
+        // ── Static mode: stacked panels, no tabs / collapse ────────
+        if spec.sizing == DockSizing::Static {
+            // Left/right edge → row direction; top/bottom → column.
+            let mut stack = div().flex().w_full().h_full();
+            stack = if is_side_edge { stack.flex_row() } else { stack.flex_col() };
+
+            for item in &spec.items {
+                let mut cell = div()
+                    .flex_1()
+                    .min_w_0()
+                    .overflow_hidden()
+                    .id(SharedString::from(format!("{}-stack-{}", self.id_prefix, item.value)));
+                // Drop-target affordance: accent inset ring when region accepts panels.
+                if spec.can_accept_panel {
+                    cell = cell.border_1().border_color(accent.opacity(0.0)).rounded(radius_control);
+                }
+                cell = cell.child(item.label.clone());
+                stack = stack.child(cell);
+            }
+
+            let mut region = apply_edge_border(div().relative().w_full().h_full().bg(root_bg), root_border);
+            region = region.child(stack);
+            if let Some(content) = self.content {
+                region = region.child(div().absolute().child(content));
+            }
+            // Drop-zone overlay affordance.
+            if spec.can_accept_panel {
+                region = region.child(
+                    div()
+                        .absolute()
+                        .inset_0()
+                        .border_2()
+                        .border_color(accent.opacity(0.6))
+                        .rounded(radius_surface)
+                        .bg(accent.opacity(0.08)),
+                );
+            }
+            return region.into_any_element();
         }
 
-        // Assemble dock region
-        let mut region = div();
+        // ── Collapsed: hidden posture (only the collapse toggle) ───
+        if spec.is_collapsed && spec.collapsed_posture == DockCollapsedPosture::Hidden {
+            let mut region = div()
+                .relative()
+                .flex()
+                .items_center()
+                .justify_center()
+                .bg(gpui::transparent_black());
+            region = if is_side_edge { region.h_full() } else { region.w_full() };
+            if spec.is_collapsible {
+                region = region.child(collapse_toggle(false).px(px(space_x)).py(px(space_y)));
+            }
+            return region.into_any_element();
+        }
 
-        if is_horizontal_edge {
+        // ── Collapsed: icon-strip posture ──────────────────────────
+        if spec.is_collapsed && spec.collapsed_posture == DockCollapsedPosture::IconStrip {
+            if is_side_edge {
+                // Vertical icon strip: toggle on top, icon-only tabs below.
+                let mut strip = div()
+                    .flex()
+                    .flex_col()
+                    .items_start()
+                    .gap(px(space_y * 0.5))
+                    .py(px(space_y))
+                    .bg(strip_fill);
+                if spec.is_collapsible {
+                    strip = strip.child(collapse_toggle(true));
+                }
+                for item in &spec.items {
+                    let is_active = current_value.as_deref() == Some(item.value.as_str());
+                    strip = strip.child(render_tab(item, is_active, true, true));
+                }
+                let region = apply_edge_border(
+                    div().relative().h_full().bg(root_bg),
+                    root_border,
+                )
+                .child(strip);
+                return region.into_any_element();
+            } else {
+                // Horizontal compact icon strip: icon-only tabs + toggle.
+                let mut strip = div()
+                    .flex()
+                    .items_center()
+                    .gap(px(space_x * 0.5))
+                    .px(px(space_x))
+                    .h(px(rem_to_px(size_font_rem(effective_size)) + space_y * 2.0))
+                    .bg(strip_fill);
+                for item in &spec.items {
+                    let is_active = current_value.as_deref() == Some(item.value.as_str());
+                    strip = strip.child(render_tab(item, is_active, false, true));
+                }
+                if spec.is_collapsible {
+                    strip = strip.child(collapse_toggle(false));
+                }
+                let region = apply_edge_border(
+                    div().relative().w_full().bg(root_bg),
+                    root_border,
+                )
+                .child(strip);
+                return region.into_any_element();
+            }
+        }
+
+        // ── Expanded flexible mode: strip (tabs + toggle) + body ───
+        let is_tabs_on_edge = spec.tabs_placement == DockTabsPlacement::Edge && is_side_edge;
+
+        let mut strip = div().bg(strip_fill);
+        if is_tabs_on_edge {
+            strip = strip
+                .flex()
+                .flex_col()
+                .items_start()
+                .gap(px(space_y * 0.5))
+                .py(px(space_y));
+        } else {
+            strip = strip
+                .flex()
+                .items_center()
+                .gap(px(space_x * 0.5))
+                .px(px(space_x))
+                .py(px(space_y * 0.5))
+                .border_b_1()
+                .border_color(border_subtle);
+        }
+
+        // Tab list grows; toggle is fixed at the end.
+        let mut tab_list = div().flex_1().min_w_0().flex();
+        tab_list = if is_tabs_on_edge {
+            tab_list.flex_col().items_start().gap(px(space_y * 0.5))
+        } else {
+            tab_list.items_center().gap(px(space_x * 0.5))
+        };
+        for item in &spec.items {
+            let is_active = current_value.as_deref() == Some(item.value.as_str());
+            tab_list = tab_list.child(render_tab(item, is_active, is_tabs_on_edge, false));
+        }
+        strip = strip.child(tab_list);
+        if spec.is_collapsible {
+            strip = strip.child(collapse_toggle(is_tabs_on_edge));
+        }
+
+        // Assemble dock region root.
+        let mut region = div().relative().bg(root_bg);
+        if is_side_edge {
             region = region.flex().h_full();
         } else {
             region = region.flex().flex_col().w_full();
         }
+        region = apply_edge_border(region, root_border);
 
-        // Border on outer edge
-        match spec.edge {
-            DockEdge::Left => region = region.border_r_1().border_color(border),
-            DockEdge::Right => region = region.border_l_1().border_color(border),
-            DockEdge::Top => region = region.border_b_1().border_color(border),
-            DockEdge::Bottom => region = region.border_t_1().border_color(border),
+        // Place strip and body in edge-aware order.
+        if is_tabs_on_edge && spec.edge == DockEdge::Right {
+            if let Some(content) = self.content {
+                region = region.child(div().flex_1().overflow_hidden().child(content));
+            }
+            region = region.child(strip);
+        } else {
+            region = region.child(strip);
+            if let Some(content) = self.content {
+                region = region.child(
+                    div()
+                        .flex_1()
+                        .min_h(px(0.0))
+                        .overflow_hidden()
+                        .child(content),
+                );
+            }
         }
 
-        // Place tabs strip and content
-        if is_tabs_on_edge && spec.edge == DockEdge::Right {
-            // Content first, then tabs on the right
-            if let Some(content) = self.content {
-                region = region.child(div().flex_1().overflow_hidden().child(content));
-            }
-            region = region.child(tabs_strip);
-        } else {
-            // Tabs first, then content
-            region = region.child(tabs_strip);
-            if let Some(content) = self.content {
-                region = region.child(div().flex_1().overflow_hidden().child(content));
-            }
+        // Cross-region drop-zone overlay affordance.
+        if spec.can_accept_panel {
+            region = region.child(
+                div()
+                    .absolute()
+                    .inset_0()
+                    .border_2()
+                    .border_color(accent.opacity(0.6))
+                    .rounded(radius_surface)
+                    .bg(accent.opacity(0.08)),
+            );
         }
 
         region.into_any_element()

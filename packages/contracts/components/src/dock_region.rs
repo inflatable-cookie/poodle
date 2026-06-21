@@ -9,13 +9,45 @@ pub enum DockTabsPlacement {
     Top,
 }
 
+/// Sizing mode — `Flexible` for tabbed/collapsible docks, `Static` for fixed
+/// stacked panels. Mirrors Svelte `sizing` prop.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DockSizing {
+    Flexible,
+    Static,
+}
+
+/// Collapsed-state chrome posture. `IconStrip` renders narrow icon-only tabs;
+/// `Hidden` renders only the CollapseToggle. Mirrors Svelte `collapsedPosture`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DockCollapsedPosture {
+    IconStrip,
+    Hidden,
+}
+
+/// Region visual emphasis. Mirrors Svelte `emphasis` prop and the
+/// `data-emphasis` attribute (`standard` / `quiet` / `strong`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DockEmphasis {
+    Standard,
+    Quiet,
+    Strong,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DockRegionSpec {
     pub edge: DockEdge,
+    pub sizing: DockSizing,
     pub is_collapsed: bool,
     /// When true, renders the CollapseToggle; when false, no collapse affordance.
     pub is_collapsible: bool,
+    pub collapsed_posture: DockCollapsedPosture,
+    pub emphasis: DockEmphasis,
     pub tabs_placement: DockTabsPlacement,
+    /// When true the region advertises a cross-region drop target (drag-over
+    /// affordance). Render-only proxy for Svelte's `canAcceptPanel` callback,
+    /// whose validation logic lives in the host event loop.
+    pub can_accept_panel: bool,
     pub items: Vec<PanelTabItem>,
     pub value: Option<String>,
     pub aria_label: Option<String>,
@@ -28,9 +60,13 @@ impl DockRegionSpec {
     pub fn new(edge: DockEdge, items: Vec<PanelTabItem>) -> Self {
         Self {
             edge,
+            sizing: DockSizing::Flexible,
             is_collapsed: false,
             is_collapsible: false,
+            collapsed_posture: DockCollapsedPosture::IconStrip,
+            emphasis: DockEmphasis::Standard,
             tabs_placement: DockTabsPlacement::Edge,
+            can_accept_panel: false,
             items,
             value: None,
             aria_label: None,
@@ -38,6 +74,26 @@ impl DockRegionSpec {
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
         }
+    }
+
+    pub fn with_sizing(mut self, sizing: DockSizing) -> Self {
+        self.sizing = sizing;
+        self
+    }
+
+    pub fn with_collapsed_posture(mut self, collapsed_posture: DockCollapsedPosture) -> Self {
+        self.collapsed_posture = collapsed_posture;
+        self
+    }
+
+    pub fn with_emphasis(mut self, emphasis: DockEmphasis) -> Self {
+        self.emphasis = emphasis;
+        self
+    }
+
+    pub fn with_can_accept_panel(mut self, can_accept_panel: bool) -> Self {
+        self.can_accept_panel = can_accept_panel;
+        self
     }
 
     pub fn with_collapsed(mut self, is_collapsed: bool) -> Self {

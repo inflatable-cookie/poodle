@@ -148,7 +148,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | detail-section-group | fixed | 4 | 1 | gap |
 | detail-shell | ok | 4 | 6 | gap |
 | dialog | ok | 2 | 3 | gap |
-| dock-region | ok | 7 | 10 | gap |
+| dock-region | ok | 2 | 2 | gap |
 | drawer | ok | 6 | 6 | gap |
 | duration-input | fixed | 2 | 2 | gap |
 | editable-label | ok | 2 | 2 | gap |

@@ -277,7 +277,9 @@ pub use debug_dialog::DebugDialogSpec;
 pub use detail_section::DetailSectionSpec;
 pub use detail_section_group::{DetailSectionGroupLayout, DetailSectionGroupSpec};
 pub use detail_shell::{DetailShellSpec, DetailState};
-pub use dock_region::{DockRegionSpec, DockTabsPlacement};
+pub use dock_region::{
+    DockCollapsedPosture, DockEmphasis, DockRegionSpec, DockSizing, DockTabsPlacement,
+};
 pub use editable_list::EditableListSpec;
 pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
