@@ -28,6 +28,7 @@ jetstream-text = { path = "../../../../jetstream/crates/jetstream-text" }
 
 glam = "0.29"
 wgpu = "29"
+pollster = "0.4"
 bytemuck = "1"
 image = { version = "0.25", default-features = false, features = ["png"] }
 env_logger = "0.11"
