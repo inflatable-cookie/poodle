@@ -208,4 +208,54 @@ fn main() {
         .child(field())  // focused → should show focus ring
         .child(field()); // unfocused → plain border
     snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true);
+
+    // Gradient test: linear (white→transparent over red) + radial (cyan center → transparent).
+    use glam::Vec4;
+    let white = Vec4::new(1.0, 1.0, 1.0, 1.0);
+    let white_t = Vec4::new(1.0, 1.0, 1.0, 0.0);
+    let red = Vec4::new(0.90, 0.22, 0.22, 1.0);
+    let cyan = Vec4::new(0.20, 0.80, 0.92, 1.0);
+    let cyan_t = Vec4::new(0.20, 0.80, 0.92, 0.0);
+    let dark = Vec4::new(0.10, 0.11, 0.13, 1.0);
+    // Layered like the color-picker saturation square: hue bg on parent, white→transparent
+    // gradient on a child overlay (no bg) that composites over it.
+    let lin_overlay = ui_element::div()
+        .absolute().inset_0()
+        .bg_gradient_linear(90.0, vec![(white.into(), 0.0), (white_t.into(), 1.0)]);
+    let lin = ui_element::div()
+        .w(240.0).h(140.0).rounded(10.0)
+        .relative().overflow_hidden()
+        .bg(red)
+        .child(lin_overlay); // expect: left=white → right=red
+    let rad = ui_element::div()
+        .w(240.0).h(140.0).rounded(10.0)
+        .bg(dark)
+        .bg_gradient_radial([0.3, 0.3], 0.75, vec![(cyan.into(), 0.0), (cyan_t.into(), 1.0)]); // cyan blob top-left
+    let grad_scene = ui_element::div()
+        .w(580.0).h(200.0)
+        .flex_row().items_center().gap(40.0).pl(30.0)
+        .child(lin)
+        .child(rad);
+    snapshot(&grad_scene, 580, 200, "/tmp/poodle-snap-gradient.png");
+
+    // Real component: color picker (open) — its saturation square (hue bg + white→
+    // transparent + transparent→black overlays) and rainbow hue strip exercise gradients.
+    let panel = resolve_color(&theme, "color.background.panel");
+    let cp = poodle_jetstream_components::color_picker::js_color_picker(
+        &poodle_specs::ColorPickerSpec::new().with_value("#6366f1").with_open(true),
+        &theme,
+    );
+    let cp_scene = ui_element::div()
+        .w(560.0).h(360.0).p(24.0).bg(panel).flex_row()
+        .child(cp);
+    snapshot(&cp_scene, 560, 360, "/tmp/poodle-snap-colorpicker.png");
+
+    // Progress (determinate + indeterminate) — gradient fill bars (no bg → were invisible
+    // before the gate fix).
+    let mk_prog = |spec| poodle_jetstream_components::progress::js_progress(spec, &theme);
+    let prog_scene = ui_element::div()
+        .w(420.0).h(120.0).p(24.0).bg(panel).flex_col().gap(20.0)
+        .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new().with_value(0.6))))
+        .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new())));
+    snapshot(&prog_scene, 420, 120, "/tmp/poodle-snap-progress.png");
 }

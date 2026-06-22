@@ -62,12 +62,15 @@ Several older parity notes claim gaps that no longer exist — impls can use the
 engine work:
 
 - **Gradients** — `bg_gradient_linear` (angle: 0=top→bottom, 90=left→right; stops 0..1) and
-  `bg_gradient_radial` (center + radius as **fractions of the rect**) exist and are used today
-  (color_picker hue strip, toast tone-tint, progress). **Caveat (engine):** the radial path in
-  `render_bridge.rs` packs only the *last* stop's color over the element's base bg — `stops[0]`
-  is ignored, so a multi-stop radial (e.g. the media-thumbnail accent-at-top-left frame wash)
-  can't render faithfully yet. That frame upgrade is deferred pending an engine fix + visual
-  verification, NOT a missing-primitive gap.
+  `bg_gradient_radial` (center + radius as **fractions of the rect**) exist and work
+  (color_picker saturation overlays + hue strip, toast tone-tint, progress fill). **Fixed
+  2026-06-22** (offscreen-verified): `stops[0]` was ignored (gradient started from the element
+  bg, radial discarded it); the radial blend was distorted (shader aliased center-Y as stop0);
+  and gradient-only elements (no solid bg) rendered nothing. All three resolved — `color_a =
+  stops[0]`, radial uses `t = clamp(dist/radius)`, and the fill quad emits whenever a gradient is
+  present. The media-thumbnail accent-wash radial is now renderable. **Residual:** >2-stop
+  gradients still collapse to first+last (the 7-stop rainbow hue strip renders as 2-stop) — needs
+  more GPU instance slots; separate change.
 - **Per-side borders + colors** — `border_t_/b_/l_/r_` + `border_color_{top,bottom,left,right}`.
   (table row borders, accordion, field-set legend, status-bar chrome — no need for all-sides hacks.)
 - **Custom `BoxShadow`** — a `BoxShadow` type and `style.shadow` field exist (slider/tooltip set
