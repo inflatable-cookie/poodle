@@ -40,8 +40,13 @@ honor checks**, not new subsystems:
   `elevation_surface/overlay/dialog`), matching GPUI's mapping (single layer, spread 0) — the
   one-size `shadow_md/sm/lg` presets are gone from all elevated surfaces (popovers/menus/dropdowns →
   overlay, modals/drawers → dialog, raised cards/surfaces → surface). **Residual:** the contract's
-  multi-layer stacks (inset highlight + stacked drops on popover/card) and inset selection rings still
-  collapse to the single token layer — needs `inset` + `.shadow_layers(vec![..])` on the builder.
+  **multi-layer + inset DONE 2026-06-22** (offscreen-verified): `JsEl::shadow_layers(Vec<BoxShadow>)`
+  emits a quad per layer (outset stacks — popover/card depth); `BoxShadow.inset` draws inside the
+  element (render_bridge emits inset quads after the element at its own rect; the shader paints
+  inward from the edge — blur 0 = a hard inner ring of width `spread`, blur > 0 = a soft inner
+  shadow). The runtime channels are complete. **Residual is component wiring only** (swap the
+  selection-ring border stand-ins → inset rings, and single-layer elevation → contract multi-layer
+  stacks where the contract CSS specifies them).
 - **P2-6 animation** → `transitions`/`AnimatableProperty`/`tick_transitions` are live; expose a
   `.transition(…)` builder. (Builder only — the engine already ticks it.)
 - **P3-9 rotate / P3-11 z-index** → honored by `UiStyle`+draw; add builders. (Builder only.)
@@ -109,7 +114,7 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 | # | Capability | Status | Unblocks (≈ docs) | Current workaround | Suggested API |
 |---|---|---|---|---|---|
 | 1 | **focus-visible style state** | **DONE** (outset `box-shadow` ring, spread = 2px focus width, in `theme.focus_color`; visually confirmed) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34**) | renders the contract outset ring on focus; 56/56 components mark `.focusable()` | done — host sets focus via its event loop (already wired for interactive specimens) |
-| 2 | **token-driven / custom / inset / multi-layer box-shadow** | **single-layer LANDED** (`JsEl::shadow(offset_x,offset_y,blur,spread,color)` exists; Poodle resolves `ELEVATION_*` ShadowValue tokens via `theme_ext::elevation_*`); still missing **inset** + **stacked layers** | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | overlays/modals/raised surfaces now draw the **token-accurate single-layer** `elevation.surface/overlay/dialog` (preset→token swap done, matches GPUI); multi-layer stacks + inset rings still collapse to one layer (inset rings drawn as a 1px border) | `.shadow(BoxShadow{…,inset})` + `.shadow_layers(vec![..])` for the multi-layer/inset residual; the structured-token `.elevation(token)` equivalent is now wired in Poodle's `theme_ext` |
+| 2 | **token-driven / custom / inset / multi-layer box-shadow** | **DONE** — custom `JsEl::shadow()`, token elevation (`theme_ext::elevation_*`), `shadow_layers()` (multi-layer stacks), and `BoxShadow.inset` (inner rings/shadows) all landed + offscreen-verified | elevation on surface/card/popover/menu/dialog/drawer/overlays; inset rings on segmented-control/tabs/tri-state/list-card (**55**) | all shadow channels render (outset single + stacked, inset hard ring + soft) | runtime complete; residual is component wiring (selection-ring borders → inset rings; single elevation → contract multi-layer where specified) |
 | 3 | **font-family channel** | **DONE 2026-06-22** (offscreen-verified) | code, code-input, kbd chips (menu/context-menu/menubar/command-palette/action-discovery), audio/video time labels, duration-input, markdown-editor, slug text-input, metric-tile, color-picker hex (**~15 wired**) | — | `JsEl::font_family(FontFamily::{Sans,Mono})` landed (sans default; cosmic-text Family). 15 components now request Mono where the contract specifies code-family; sans already resolved to a system sans. Residual: a *specific* embedded sans (Inter) for exact parity vs the system fallback — not blocking. |
 | 4 | **letter-spacing / tracking** | **DONE 2026-06-22** (offscreen-verified) | eyebrow (0.12/0.04em), badge, table header, field-set legend, meta-item, order-by, nav-card, sidebar-nav (0.18em), code lang, page-header, button (0.01em), calendar, pill, … (**~20 wired**) | — | `JsEl::letter_spacing_em(f32)` landed (em, scales with font size); contract-exact values applied per component; eyebrow pulls `spec.letter_spacing_em()`. |
 | 5 | **dashed / dotted border-style** | **DONE 2026-06-22** (offscreen-verified) | region, file-upload + dock-region drop-zones, list-card not-live, empty-state (**5 wired**) | — | `JsEl::border_style(BorderStyle::{Solid,Dashed,Dotted})` landed; shader dash-masks the border by perimeter position (packed into the unused `border_params.y` lane). Dotted *underlines* (time-ago/text-link) skipped — no underline element to attach a bottom-border to (text-decoration, not a border). |
@@ -137,8 +142,9 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 
 1. ~~P1-1 focus-visible~~ and ~~P1-2 box-shadow builder/elevation~~ — **both largely DONE.**
    Focus rings render the contract outset ring (P1-1 DONE); custom shadow + token elevation
-   landed (P1-2). The two biggest "looks unfinished" deltas are closed. Residual: multi-layer/
-   inset shadow — niche, deferrable.
+   landed (P1-2, incl. multi-layer + inset). The two biggest "looks unfinished" deltas are closed.
+   All shadow channels render; residual is component wiring only (selection-ring borders → inset
+   rings where contracts specify them).
 2. **P1-3/4/5** (font-family, letter-spacing, dashed/dotted border) — **all DONE**. The full P1
    set is closed.
 3. **P2-6 animation** — large but high perceived value.
