@@ -66,6 +66,7 @@ pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> JsEl {
         blur: rem_to_px(1.25),
         spread: 0.0,
         color: glam::Vec4::new(0.0, 0.0, 0.0, 0.30),
+        inset: false,
     };
 
     // Tooltip bubble: overlay surface positioned by the runtime/preview loop.

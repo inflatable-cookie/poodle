@@ -134,6 +134,7 @@ pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -
         blur: rem_to_px(0.5),
         spread: 0.0,
         color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+        inset: false,
     };
 
     // Thumbs absolutely positioned at the segment junctions.

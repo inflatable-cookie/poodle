@@ -476,4 +476,37 @@ fn main() {
         .w(420.0).h(200.0).p(24.0).bg(panel).flex_col()
         .child(es);
     snapshot(&es_scene, 420, 200, "/tmp/poodle-snap-emptystate.png");
+
+    // Multi-layer shadow: single token layer vs a 3-layer contract stack.
+    use jetstream_runtime::ui_element::BoxShadow;
+    let blk = |a: f32| Vec4::new(0.0, 0.0, 0.0, a);
+    let single = ui_element::div().w(180.0).h(110.0).rounded(12.0).bg(panel)
+        .shadow(0.0, 8.0, 16.0, -2.0, blk(0.18));
+    let stacked = ui_element::div().w(180.0).h(110.0).rounded(12.0).bg(panel)
+        .shadow_layers(vec![
+            BoxShadow { offset_x: 0.0, offset_y: 1.0, blur: 2.0, spread: 0.0, color: blk(0.20) , inset: false },
+            BoxShadow { offset_x: 0.0, offset_y: 6.0, blur: 14.0, spread: -2.0, color: blk(0.16) , inset: false },
+            BoxShadow { offset_x: 0.0, offset_y: 18.0, blur: 36.0, spread: -6.0, color: blk(0.18) , inset: false },
+        ]);
+    let ml_scene = ui_element::div()
+        .w(520.0).h(220.0).flex_row().items_center().justify_center().gap(60.0)
+        .bg(Vec4::new(0.92, 0.93, 0.95, 1.0))
+        .child(single)
+        .child(stacked);
+    snapshot(&ml_scene, 520, 220, "/tmp/poodle-snap-multilayer.png");
+
+    // Inset shadows: hard inner ring (selection ring) + soft inner shadow.
+    let ring = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: 2.5, color: accent, inset: true,
+        }]);
+    let inner = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0, offset_y: 0.0, blur: 14.0, spread: 0.0, color: blk(0.55), inset: true,
+        }]);
+    let inset_scene = ui_element::div()
+        .w(460.0).h(150.0).p(24.0).bg(panel).flex_row().items_center().gap(40.0)
+        .child(ring)
+        .child(inner);
+    snapshot(&inset_scene, 460, 150, "/tmp/poodle-snap-inset.png");
 }

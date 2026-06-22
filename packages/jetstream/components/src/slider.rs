@@ -101,6 +101,7 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
         blur: rem_to_px(0.5),
         spread: 0.0,
         color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+        inset: false,
     };
 
     // Thumb: absolutely positioned at the fill/remainder junction.
