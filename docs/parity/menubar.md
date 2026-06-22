@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap | GPUI specimen done; Jetstream pending engine recovery. GPUI specimen now full: File/Edit/View triggers, open overlay with shortcuts+separators, checkbox + radio rows (View menu), disabled item (Edit), disabled trigger (Window), sizes + densities. -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=ok | GPUI specimen done; Jetstream specimen done. Jetstream now full: File/Edit/View triggers, open overlay (with_value) with shortcuts+separators, checkbox + radio rows (View menu, checkmarks), disabled item (Edit Paste Special), disabled trigger (Window), Size + Density ladders — all via js_menubar. jetstream/preview + gpui/preview build clean. specimen=gap → ok. -->
 <!-- pass 41: Jetstream menubar rebuilt to full contract anatomy. Added: List chrome
      (border-subtle 72%, radius-surface, panel-96% bg, 0.1875rem padding, 0.125rem gap);
      Overlay/dropdown rendering current_menu().items — action rows (label + shortcut meta),

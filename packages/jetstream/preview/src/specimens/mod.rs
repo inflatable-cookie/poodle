@@ -30,6 +30,7 @@ pub mod command_palette;
 pub mod confirm_action;
 pub mod context_menu;
 pub mod data_table;
+pub mod debug_dialog;
 pub mod date_picker;
 pub mod date_range_picker;
 pub mod date_time_picker;
@@ -47,6 +48,7 @@ pub mod editable_list;
 pub mod embed_input;
 pub mod embed_preview;
 pub mod empty_state;
+pub mod error_boundary;
 pub mod eyebrow;
 pub mod field;
 pub mod field_set;
@@ -274,6 +276,7 @@ fn render_specimen(
         "confirm-action" => Some(confirm_action::render(theme)),
         "context-menu" => Some(context_menu::render(theme)),
         "data-table" => Some(data_table::render(theme)),
+        "debug-dialog" => Some(debug_dialog::render(theme)),
         "date-picker" => Some(date_picker::render(theme)),
         "date-range-picker" => Some(date_range_picker::render(theme)),
         "date-time-picker" => Some(date_time_picker::render(theme)),
@@ -291,6 +294,7 @@ fn render_specimen(
         "embed-input" => Some(embed_input::render(theme)),
         "embed-preview" => Some(embed_preview::render(theme)),
         "empty-state" => Some(empty_state::render(theme)),
+        "error-boundary" => Some(error_boundary::render(theme)),
         "eyebrow" => Some(eyebrow::render(theme)),
         "field" => Some(field::render(theme)),
         "field-set" => Some(field_set::render(theme)),

@@ -1,7 +1,7 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
-<!-- specimen: GPUI specimen done (added static "Open (calendar + time)" group composing the
-     real Calendar + TimeInput; full contract state coverage, no fake grid); Jetstream pending
-     engine recovery — specimen=gap kept until Jetstream Sizes/Densities/open land. -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen: BOTH targets done. GPUI + Jetstream specimens each cover Default, With default
+     value, static "Open (calendar + time)" (composes the real Calendar + TimeInput — no fake
+     grid), Disabled, Sizes, Densities; both previews build clean (pass 42). -->
 <!-- pass 41: GPUI indicator glyph aligned to chevron-down (contract §2/§8 disclosure
      chevron, matches sibling pickers) — last GPUI todo closed. Jetstream built out: the
      overlay now composes the REAL Calendar + a Time Section (contract Time Label + composed

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap --><!-- pass: both targets compose real TextInput(rows=3)+Pill, split danger/success status, token-resolved spacing; only preview-loop callbacks remain --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok --><!-- pass: both targets compose real TextInput(rows=3)+Pill, split danger/success status, token-resolved spacing; only preview-loop callbacks remain --><!-- pass: GPUI specimen done; Jetstream pending engine recovery --><!-- pass: Jetstream specimen now mirrors GPUI (providers table, detection matrix, Field wrapper, restricted, states, presets) via real js_embed_input; both previews build clean -->
 # Parity: EmbedInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

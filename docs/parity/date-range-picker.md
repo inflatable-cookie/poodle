@@ -1,7 +1,7 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
-<!-- specimen: GPUI specimen done (added static "Open (range calendar)" group composing the
-     real range Calendar; full contract state coverage, no fake grid); Jetstream pending
-     engine recovery — specimen=gap kept until Jetstream Sizes/Densities/open land. -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen: BOTH targets done. GPUI + Jetstream specimens each cover Default, With
+     default range, static "Open (range calendar)" (composes the real range Calendar — no
+     fake grid), Disabled, Sizes, Densities; both previews build clean (pass 42). -->
 <!-- pass 41: both Rust targets closed. GPUI — indicator `calendar` Icon → `chevron-down`
      (text-secondary, per-size `date_picker_indicator_font_rem`); partial-range `"<start> – …"`
      → `"<start> – End date"` (Svelte parity, start-only ⇒ placeholder); shadow already

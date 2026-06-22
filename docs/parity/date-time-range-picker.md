@@ -1,8 +1,8 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
-<!-- specimen: GPUI specimen done (added static "Open (range calendar + start/end time)" group
-     composing the real range Calendar + paired START/END TimeInput; full contract state coverage,
-     no fake grid); Jetstream pending engine recovery — specimen=gap kept until Jetstream
-     Sizes/Densities/open land. -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- specimen: BOTH targets done. GPUI + Jetstream specimens each cover Default, With default
+     range, static "Open (range calendar + start/end time)" (composes the real range Calendar +
+     paired START/END TimeInput — no fake grid), Disabled, Sizes, Densities; both previews build
+     clean (pass 42). -->
 <!-- pass 41: Jetstream overlay built — composes real Calendar(range) + paired
      START/END TimeField sections (mirrors GPUI + date_time_picker.rs). Indicator
      now size-scaled (date_picker_indicator_font_rem); min-width/gaps are

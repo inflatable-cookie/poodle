@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap --><!-- pass: both targets gain trustedHtml state, real Skeleton(block) loading, ratio-derived placeholder height; unsanctioned pill+heading removed; token-resolved --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok --><!-- pass: both targets gain trustedHtml state, real Skeleton(block) loading, ratio-derived placeholder height; unsanctioned pill+heading removed; token-resolved --><!-- pass: GPUI specimen done; Jetstream pending engine recovery --><!-- pass: Jetstream specimen now mirrors GPUI 7 cases (YouTube/Vimeo/generic iframe/trusted raw/loading/error/empty) via real js_embed_preview; both previews build clean -->
 # Parity: EmbedPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

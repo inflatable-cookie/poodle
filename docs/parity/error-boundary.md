@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=1 specimen=gap --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
+<!-- parity consv=ok gpui=2 jetstream=0 specimen=ok --><!-- pass: GPUI specimen done; Jetstream pending engine recovery --><!-- pass: Jetstream specimen created+registered (error-boundary slug) mirroring GPUI groups (normal children via real js_surface+js_text/caught render error/default fallback) via real js_error_boundary→js_empty_state; both previews build clean -->
 # Parity: ErrorBoundary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,7 +26,7 @@ Svelte implements the full contract — props `children` (required Snippet), `ti
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] DONE: `js_error_boundary(spec, theme, child)` created (`error_boundary.rs`), composing `js_empty_state` (title + message + retry action) on error, else the child. Registered in lib.rs, probe-tested.
-- [ ] Add the Jetstream specimen (error + non-error states).
+- [x] DONE: Added the Jetstream specimen `packages/jetstream/preview/src/specimens/error_boundary.rs` (created + registered: pub mod + dispatch arm + `error-boundary` registry entry) covering normal children (real `js_surface`+`js_text` passthrough), caught render error, and default fallback via real `js_error_boundary`.
 
 ## Specimen parity
 

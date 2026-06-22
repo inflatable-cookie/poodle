@@ -1,25 +1,149 @@
 //! AppHeader specimen — application header bar.
+//!
+//! Mirrors the GPUI specimen groups (`gpui/preview/src/specimens/app_header.rs`)
+//! and the contract §10 specimen: a full app-window header (title + ghost-button
+//! nav + utility IconButtons), title + actions + utility, title-only, a custom
+//! identity slot, plus density and size ladders. The three-region shell is
+//! composed via `js_app_header_with_slots`; action / utility clusters are real
+//! `js_button` / `js_icon_button` rows. Zero hand-rolled boxes.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::app_header::js_app_header;
+use poodle_jetstream_components::app_header::{js_app_header, js_app_header_with_slots};
+use poodle_jetstream_components::button::js_button;
+use poodle_jetstream_components::icon_button::js_icon_button;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::AppHeaderSpec;
+use poodle_specs::{
+    AppHeaderSpec, ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec,
+};
+
+/// A ghost text-button cluster — the global-actions region (contract §2 actions).
+fn ghost_actions(theme: &JetstreamThemeProvider, labels: &[&str], size: ControlSize) -> JsEl {
+    let mut row = div().flex_row().items_center().gap(4.0);
+    for lbl in labels {
+        row = row.child(js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label(*lbl)
+                .with_size(size),
+            theme,
+        ));
+    }
+    row
+}
+
+/// A trailing utility cluster of icon buttons (contract §2 utility region).
+fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSize) -> JsEl {
+    let mut row = div().flex_row().items_center().gap(4.0);
+    for ic in icons {
+        row = row.child(js_icon_button(
+            &IconButtonSpec::new().with_icon(*ic).with_size(size),
+            theme,
+        ));
+    }
+    row
+}
+
+/// The shared demo header used by both ladders: a "My Application" title with
+/// New/Open ghost actions and a settings utility icon (mirrors GPUI `demo_header`).
+fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let size = spec.effective_size();
+    js_app_header_with_slots(
+        &spec,
+        theme,
+        None,
+        Some(ghost_actions(theme, &["New", "Open"], size)),
+        Some(utility_icons(theme, &["settings"], size)),
+    )
+}
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
-        .child(group("With title", secondary,
-            js_app_header(&AppHeaderSpec::new().with_title("My Application"), theme)
+        // Full app-window header: title + ghost-button menu nav + 3 utility icons.
+        .child(group("Full app window header (title + menubar + utility)", secondary,
+            js_app_header_with_slots(
+                &AppHeaderSpec::new()
+                    .with_title("Poodle Studio")
+                    .with_drag_region(true)
+                    .with_aria_label("Application header"),
+                theme,
+                None,
+                Some(ghost_actions(theme, &["File", "Edit", "View", "Help"], ControlSize::Sm)),
+                Some(utility_icons(theme, &["search", "bell", "settings"], ControlSize::Sm)),
+            )
         ))
-        .child(group("Without title", secondary,
-            js_app_header(&AppHeaderSpec::new(), theme)
+        // Title + actions + utility.
+        .child(group("With title, actions, and utility", secondary,
+            js_app_header_with_slots(
+                &AppHeaderSpec::new().with_title("My Application"),
+                theme,
+                None,
+                Some(ghost_actions(theme, &["New", "Open"], ControlSize::Sm)),
+                Some(utility_icons(theme, &["settings"], ControlSize::Sm)),
+            )
+        ))
+        // Title only — default identity region, no slots.
+        .child(group("Title only", secondary,
+            js_app_header(&AppHeaderSpec::new().with_title("Poodle Workstation"), theme)
+        ))
+        // Custom identity slot: swatch + label replaces the default title group.
+        .child(group("Custom identity slot", secondary,
+            js_app_header_with_slots(
+                &AppHeaderSpec::new().with_aria_label("Custom identity header"),
+                theme,
+                Some(
+                    div().flex_row().items_center().gap(8.0)
+                        .child(div().w(20.0).h(20.0).rounded(4.0).bg(accent))
+                        .child(
+                            label("Poodle Studio")
+                                .text_color(text_primary)
+                                .text_size(13.0)
+                                .text_weight(600),
+                        ),
+                ),
+                None,
+                Some(utility_icons(theme, &["bell", "user"], ControlSize::Sm)),
+            )
+        ))
+        // Density ladder — region gaps tighten/loosen, height unchanged.
+        .child(group("Density ladder", secondary,
+            div().flex_col().gap(16.0)
+                .child(ladder("COMPACT", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Compact), theme)))
+                .child(ladder("DEFAULT", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Default), theme)))
+                .child(ladder("COMFORTABLE", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Comfortable), theme)))
+        ))
+        // Size ladder — shell height + title font scale xs..xl.
+        .child(group("Size ladder", secondary,
+            div().flex_col().gap(16.0)
+                .child(ladder("XS", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Xs), theme)))
+                .child(ladder("SM", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Sm), theme)))
+                .child(ladder("MD", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Md), theme)))
+                .child(ladder("LG", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Lg), theme)))
+                .child(ladder("XL", secondary,
+                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Xl), theme)))
         ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
+        .child(content)
+}
+
+/// A ladder entry: a bold muted label above a single header instance.
+fn ladder(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+    div().flex_col().gap(8.0)
+        .child(label(title).text_color(text_secondary).text_size(11.0).text_weight(700))
         .child(content)
 }

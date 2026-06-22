@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- jetstream-specimen pass: Jetstream specimen rebuilt to GPUI parity — full-window-header / title+actions+utility / title-only / custom-identity-slot groups via js_app_header_with_slots (real js_button + js_icon_button clusters), plus Density and Size ladders (with_density/with_size, demo_header). jetstream/preview + gpui/preview build clean. specimen=gap → ok. -->
 <!-- gpui-specimen pass: GPUI specimen complete — added Density ladder (compact/default/comfortable)
      and Size ladder (xs–xl) groups using real AppHeader + Button/IconButton (with_density/with_size),
      joining the existing full-window-header / title+actions+utility / title-only / custom-identity

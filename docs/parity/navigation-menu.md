@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=0 specimen=gap | GPUI specimen done; Jetstream pending engine recovery. GPUI specimen now full: top-level triggers with leading icons, active/disabled states, disclosed viewport panel (per-item description), interactive on_change, sizes + densities. -->
+<!-- parity consv=fixed gpui=2 jetstream=0 specimen=ok | GPUI specimen done; Jetstream specimen done. Jetstream now full: top-level triggers with leading icons (contract §3), active fill + disabled (Changelog), disclosed viewport panel rendering active item description (active=Components, active=Tokens), Size + Density ladders — all via js_navigation_menu. No chevron group: neither Jetstream nor GPUI component renders a disclosure chevron (would be a fake). jetstream/preview + gpui/preview build clean. specimen=gap → ok. -->
 <!-- finalize pass (2026-06-21): GPUI icon gap CLOSED — `NavigationMenuEntry` gains
      additive `icon: Option<String>` (contract §3); BOTH Rust targets now render the
      leading icon (real Icon primitive / ui_element::icon) ahead of the label, sized

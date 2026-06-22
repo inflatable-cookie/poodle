@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- jetstream-specimen pass: Jetstream specimen rebuilt to GPUI parity — count+total+select-all, four-tone action set (default/danger/warning, icons), single-item subset, disabled bar, loading+per-action-disabled, plus Size and Density ladders via real js_bulk_action_bar (with_size/with_density). jetstream/preview + gpui/preview build clean. specimen=gap → ok. -->
 <!-- gpui-specimen pass: GPUI specimen complete — added Size ladder (xs–xl) and Density ladder
      (compact/default/comfortable) groups via real BulkActionBar (with_size/with_density), joining
      existing selection-count+select-all / single-item / disabled / loading+disabled groups. Count

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap --><!-- pass: GPUI specimen done; Jetstream pending engine recovery -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok --><!-- pass: GPUI specimen done; Jetstream pending engine recovery --><!-- pass: Jetstream specimen created+registered (debug-dialog slug) mirroring GPUI groups (with value/custom trigger/hidden-when-null) via real js_debug_dialog→js_button+js_code; both previews build clean -->
 <!-- pass: GPUI rebuilt to compose Dialog primitive (title/close/lg-width) wrapping a Code block; gap tokenized (space.stack.md); value-as-String reclassified accepted (Rust has no `unknown`). max_height wired into both targets' Code blocks via new DebugDialogSpec::max_height_px(). -->
 # Parity: DebugDialog
 
@@ -44,7 +44,7 @@ Now composes the Dialog primitive: trigger Button + Dialog (title / close button
 ## Jetstream gap (vs Svelte + contract)
 
 - [x] DONE: `js_debug_dialog(spec, theme)` created — trigger Button (`triggerVariant`/`triggerSize`) + JSON Code block of `value`; renders nothing without a value. Registered in lib.rs, probe-tested. (Open/close dialog behavior lives in the preview event loop, like other Jetstream interactions.)
-- [ ] Add the Jetstream specimen `packages/jetstream/preview/src/specimens/debug_dialog.rs` covering the Svelte states (with value, custom trigger, hidden when null).
+- [x] DONE: Added the Jetstream specimen `packages/jetstream/preview/src/specimens/debug_dialog.rs` (created + registered: pub mod + dispatch arm + `debug-dialog` registry entry) covering the Svelte/GPUI states (with value, custom trigger, hidden when null) via real `js_debug_dialog`.
 
 ## Specimen parity
 

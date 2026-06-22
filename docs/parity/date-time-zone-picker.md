@@ -1,7 +1,8 @@
-<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap -->
-<!-- specimen: GPUI specimen done (added static "Open (calendar + time + zone)" group composing
-     the real Calendar + TimeInput + TimeZoneSelect; full contract state coverage, no fake grid);
-     Jetstream pending engine recovery — specimen=gap kept until Jetstream Sizes/Densities/open land. -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=ok -->
+<!-- specimen: BOTH targets done. GPUI + Jetstream specimens each cover With value/Default,
+     Placeholder, static "Open (calendar + time + zone)" (composes the real Calendar + TimeInput +
+     TimeZoneSelect — no fake grid), Disabled, Sizes, Densities; both previews build clean
+     (pass 42). -->
 <!-- pass 41: Jetstream overlay built — composes real Calendar + TimeField +
      TimeZoneSelect (the recently-built js_time_zone_select), each in a labelled
      Field (mirrors GPUI + date_time_picker.rs). Indicator now size-scaled
