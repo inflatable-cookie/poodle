@@ -1,4 +1,8 @@
-//! Spacer specimen — flexible space filler.
+//! Spacer specimen — flexible space filler in flex contexts.
+//!
+//! Mirrors the GPUI specimen (push-apart + between-three-items) and keeps the
+//! min-size / no-grow coverage the Jetstream target already had. Every spacer
+//! is a real `js_spacer`; the surrounding boxes resolve tokens.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -11,8 +15,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let accent = resolve_color(theme, "color.accent.base");
     let border = resolve_color(theme, "color.border.default");
 
-    // A helper that renders a labelled box so the spacer's effect is visible
-    let labeled_box = |text: &str| -> JsEl {
+    let boxed = |text: &str| -> JsEl {
         div()
             .px(12.0).py(6.0)
             .border_1().border_color(border)
@@ -21,29 +24,43 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     };
 
     div().flex_col().gap(24.0)
-        .child(group("Flex-row with growing spacer", secondary,
+        // --- Push items apart (logo / sign-in) ---
+        .child(group("Push items apart", secondary,
             div().flex_row().items_center().gap(8.0)
                 .w(400.0)
                 .border_1().border_color(border).rounded(4.0).p(8.0)
-                .child(labeled_box("Left"))
+                .child(boxed("Logo"))
                 .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
-                .child(labeled_box("Right"))
+                .child(boxed("Sign in"))
         ))
+        // --- Between three items (left / center / right) ---
+        .child(group("Between three items", secondary,
+            div().flex_row().items_center().gap(8.0)
+                .w(400.0)
+                .border_1().border_color(border).rounded(4.0).p(8.0)
+                .child(boxed("Left"))
+                .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
+                .child(boxed("Center"))
+                .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
+                .child(boxed("Right"))
+        ))
+        // --- Spacer with min-size (grow 0, reserved width) ---
         .child(group("Spacer with min-size", secondary,
             div().flex_row().items_center()
                 .border_1().border_color(border).rounded(4.0).p(8.0)
-                .child(labeled_box("A"))
+                .child(boxed("A"))
                 .child(js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(64.0))
                     .bg(tint(accent, 0.12)).rounded(2.0))
-                .child(labeled_box("B"))
+                .child(boxed("B"))
         ))
-        .child(group("No-grow fixed spacer (min-size only)", secondary,
+        // --- No-grow fixed spacer (min-size only) ---
+        .child(group("No-grow fixed spacer", secondary,
             div().flex_row().items_center()
                 .border_1().border_color(border).rounded(4.0).p(8.0)
-                .child(labeled_box("X"))
+                .child(boxed("X"))
                 .child(js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(32.0))
                     .bg(tint(accent, 0.08)).rounded(2.0))
-                .child(labeled_box("Y"))
+                .child(boxed("Y"))
         ))
 }
 

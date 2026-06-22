@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
+<!-- specimen=ok: Jetstream specimen rebuilt to mirror GPUI — End/Start/Between, Responsive danger (real js_form_actions_full inline danger + dangerItems ellipsis overflow), Submitting (loading primary + disabled cancel), Density ladder (compact/default/comfortable), Footer-embedded (showTopSeparation=false), Bordered separation (showTopBorder=true); all real js_form_actions + js_button. Both previews build clean. -->
 <!-- gpui-specimen pass: GPUI specimen done; Jetstream pending engine recovery. form_actions.rs now covers End/Start/Between, danger-overflow (real with_danger_action + dangerItems → ghost ellipsis), Submitting (loading primary + disabled cancel), Density ladder (compact/default/comfortable), Footer-embedded (showTopSeparation=false), Bordered separation (showTopBorder=true). Replaced the old fake "responsive danger" group (three plain stacked buttons) with the real danger inline-group + overflow trigger path. specimen stays gap — Jetstream specimen unverifiable while the engine is build-blocked. -->
 <!-- pass 42: danger model landed (additive). `FormActionDangerItem` struct added
      to poodle-specs (label/value?/disabled, value-fallback `index:label`) +

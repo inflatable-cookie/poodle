@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- jetstream-specimen pass: Jetstream list_card specimen expanded to mirror GPUI's renderable groups — interactive/disabled, rounded-square leading, solid-fill accent colors, not-live, sash, selectable, reorder handle, link roots (href), highlighted, selection-indicator checkbox, layout default/compact/stacked, leading-size-offset, static. All real `js_list_card(&ListCardSpec)`; no fakes. GPUI groups needing a leading/trailing/footer snippet channel (With badges, Footer counters, With context menu) stay omitted — `js_list_card` has no slot params, so they are component-API gaps, not fakeable. Both previews build 0 errors. -->
 <!-- pass 41: leadingSizeOffset modeled — additive `leading_size_offset: i32` on
      ListCardSpec, consumed by `leading_size_rem()` (±2 steps × 0.25rem, clamped,
      box ≥ 1rem); both targets inherit it through the spec helper. Jetstream gains

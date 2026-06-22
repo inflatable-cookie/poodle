@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- jetstream-specimen pass: Jetstream list_grid specimen now mirrors GPUI — Default (wrap, min 14em), With header actions (real `js_button` Export + `js_icon_button` refresh), Compact single-column, With ListCards (grid of real `js_list_card` tiles, min 16em), Empty (header + token-resolved empty `js_text`, no items). All real components; no hand-rolled boxes. Both previews build 0 errors. -->
 # Parity: ListGrid
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

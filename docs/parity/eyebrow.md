@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=1 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=ok | jet-specimen: real js_eyebrow groups — section-label, category, sizes (xs/sm/md), spacing (none/bottom); mirrors gpui; both previews build clean -->
 <!-- pass 48: EyebrowSpec extended (size xs/sm/md, spacing none/bottom, element
      span/p/h2/h3/h4, ariaLabel + font_family/font_weight/line_height/
      letter_spacing_em/margin_bottom_rem methods). GPUI: size-based font-size,

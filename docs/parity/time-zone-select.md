@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | jet-specimen: real js_time_zone_select groups — default, pre-selected, open (searchable+query+selected), disabled, sizes (sm/md/lg); mirrors gpui; both previews build clean -->
 <!-- pass: TimeZoneSelectSpec grown to Select-parity (options/search_query/aria/name + shared default_time_zone_options() + to_select_spec()); gpui now renders selectable filtered zones + search input + correct placeholder + on_change/on_search channels; jetstream delegates to js_select (full dropdown/search/grouping/indicator); both probe/build-verified. GPUI specimen done; Jetstream pending engine recovery — specimen flag stays gap until Jetstream preview builds clean. -->
 # Parity: TimeZoneSelect
 

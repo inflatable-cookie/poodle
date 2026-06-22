@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=ok -->
+<!-- jetstream-specimen pass: created `packages/jetstream/preview/src/specimens/inline_list_section.rs` (registered in mod.rs) mirroring GPUI — Framed (count pill + `js_icon_button` add action + 3 status rows), Header actions (no count, ghost icon button), Empty state (italic empty message), Unframed (count + rows, no card). Rows compose real `js_text` + `js_pill`; section is real `js_inline_list_section`. No fakes. Both previews build 0 errors. -->
 <!-- pass 46: GPUI inline_list_section rebuilt to the contract — compact muted row chrome
      (color_mix(surface 93%, text-primary), padding 0.5/0.625rem, radius calc(radius.surface −
      0.1875rem)), full count pill (min-w 1.875rem, h 1.375rem, bg background.elevated, border

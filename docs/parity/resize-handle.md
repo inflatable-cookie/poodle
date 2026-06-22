@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok | jet-specimen: real js_resize_handle in token-styled panes — horizontal split, vertical split, disabled of each (mirrors gpui's 4 groups); both previews build clean -->
 <!-- pass: GPUI hover now recolors the LINE to accent-base via group_hover (not a translucent container fill); GPUI focus ring retained. Jetstream gained line hover/active→accent-base, col/row-resize cursor affordance, default cursor when disabled, and a pill line radius; orientation confirmed consistent with GPUI/contract (horizontal→vertical line). Probe tests cover orientation, idle 82% line, and disabled opacity. Keyboard/drag callbacks remain preview-loop on both. -->
 # Parity: ResizeHandle
 

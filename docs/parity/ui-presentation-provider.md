@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | jet-specimen: NEW file + registry entry; non-visual provider (no context cascade / no js builder) — demo resolves each region's size via UiPresentationProviderSpec::resolve_size and applies it to real js_button/js_text_input; compact/sm + comfortable/lg + nested override (mirrors gpui §12); both previews build clean -->
 <!-- pass: propagation gaps reclassified accepted/architectural — neither Rust target has a runtime context channel; resolver math (resolve_size) is exact and the wrapper is already display:contents-faithful in GPUI. No representable spec/visual gap remains. -->
 # Parity: UiPresentationProvider
 

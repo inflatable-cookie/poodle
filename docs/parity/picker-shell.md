@@ -1,4 +1,5 @@
-<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=ok -->
+<!-- jetstream-specimen pass: Jetstream picker_shell specimen expanded to mirror GPUI — inline ready (real `js_text_input` search + `js_text` result rows + resultCount/description), loading, no-results (custom state title/message), multiple-selection (real `js_selection_summary`), popover variant + modal variant (search + body + real `js_form_actions` footer with `js_button` Cancel/Add), error, empty. Replaced the old hand-rolled bordered search box with real `js_text_input` and the hand-rolled justify-end footer row with real `js_form_actions`. Both previews build 0 errors. -->
 <!-- gpui-specimen pass: GPUI specimen complete — added Popover variant and Modal variant groups
      (each: header title+description, search TextInput, body option rows, FormActions footer with
      Cancel/Add), plus Error and Empty state groups, joining existing inline-ready / loading /

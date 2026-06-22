@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen=ok: Jetstream specimen rebuilt to mirror GPUI + contract §8 (real js_context_menu) — editing menu (shortcuts/separators/disabled), danger + checkbox/radio surface, size matrix xs–xl, density matrix. Open/close + anchor positioning preview-loop bound. Both previews build clean. -->
 <!-- pass 41: Jetstream rebuilt to match Menu item surface. min-width 10→14rem,
      item padding 0.75→0.5rem (size-table driven), per-size item metrics
      (min-height/padding/font xs–xl), density-aware item gap, shortcut (meta)

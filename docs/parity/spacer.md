@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=ok | jet-specimen: real js_spacer groups — push-apart, between-three-items (mirrors gpui) + min-size + no-grow fixed; both previews build clean -->
 # Parity: Spacer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

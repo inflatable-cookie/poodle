@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=1 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=2 specimen=ok -->
+<!-- specimen=ok: Jetstream specimen rebuilt to mirror GPUI (real js_block_editor via consumer block path) — Default blocks (heading/paragraph/quote/code), Consumer-driven block types (+ list), Single posture (TypeSelect inset), Disabled. Dropped the with_block_count placeholder blocks; real typed content + TypeSelect/AddSelect toolbar, token-resolved. Both previews build clean. -->
 <!-- pass 36: Jetstream block-editor rebuilt to match GPUI — placeholder "Block N" content +
      static type label + unicode glyphs removed; composed js_select TypeSelect (block_type +
      block_types options) + AddSelect (value-less + plus tool button); move/remove tool buttons

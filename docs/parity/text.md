@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap | pass: TextSpec gained `spacing` (compact stack-sm gap); both targets render it; gpui specimen detoned (stack-sm gap token, +muted/warning/sm/weights/inline/clamp); clamp+element stay accepted runtime limits; jet probe tests cover size/tone/weight/spacing -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=ok | pass: TextSpec gained `spacing` (compact stack-sm gap); both targets render it; gpui specimen detoned (stack-sm gap token, +muted/warning/sm/weights/inline/clamp); clamp+element stay accepted runtime limits; jet probe tests cover size/tone/weight/spacing | jet-specimen: NEW file + registry entry; real js_text groups — tones (6), sizes (xs/sm/md), weights+relaxed, inline/compact/clamp; mirrors gpui; both previews build clean -->
 # Parity: Text
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

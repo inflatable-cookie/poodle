@@ -1,27 +1,67 @@
-//! ScrollShell specimen — scrollable container with child content.
+//! ScrollShell specimen — scrollable container (viewport → content → children).
+//!
+//! Mirrors the GPUI specimen: a vertical scroll with enough rows to overflow,
+//! and a horizontal scroll with a wide column row. Both render the real
+//! three-layer `js_scroll_shell` (viewport owns overflow, content wraps,
+//! children slot in) with direction + label from `ScrollShellSpec`.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::scroll_shell::js_scroll_shell;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, ScrollShellSpec};
+use poodle_specs::{ControlSize, Direction, ScrollShellSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let border = resolve_color(theme, "color.border.default");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
-    let text_primary = resolve_color(theme, "color.text.primary");
 
-    let children = vec![
-        label("Scrollable content line 1").text_color(text_primary).text_size(body_font),
-        label("Scrollable content line 2").text_color(text_primary).text_size(body_font),
-        label("Scrollable content line 3").text_color(text_primary).text_size(body_font),
-    ];
+    // Token-styled scroll rows for the vertical example.
+    let row = move |text: String| -> JsEl {
+        div().h(24.0).px(8.0).rounded(3.0)
+            .border_1().border_color(border)
+            .flex_row().items_center()
+            .child(label(text).text_color(secondary).text_size(body_font))
+    };
+    // Non-shrinking column items for the horizontal example.
+    let column = move |text: String| -> JsEl {
+        div().h(28.0).px(12.0).rounded(3.0)
+            .border_1().border_color(border)
+            .flex_row().items_center().flex_shrink_0()
+            .child(label(text).text_color(secondary).text_size(body_font).whitespace_nowrap())
+    };
+
+    let vertical_rows: Vec<JsEl> = (1..=12).map(|i| row(format!("Item {i}"))).collect();
+
+    // Horizontal content is a single wide row of columns (the content layer
+    // sizes to its children so the viewport scrolls on the x axis).
+    let column_row = {
+        let mut r = div().flex_row().gap(4.0);
+        for i in 1..=10 {
+            r = r.child(column(format!("Column {i}")));
+        }
+        r
+    };
 
     div().flex_col().gap(24.0)
-        .child(group("Default", secondary,
-            div().h(120.0)
-                .child(js_scroll_shell(&ScrollShellSpec::new(), theme, children))
+        .child(group("Vertical scroll", secondary,
+            div().h(160.0).child(js_scroll_shell(
+                &ScrollShellSpec::new()
+                    .with_direction(Direction::Vertical)
+                    .with_label("Scrollable content"),
+                theme,
+                vertical_rows,
+            ))
+        ))
+        .child(group("Horizontal scroll", secondary,
+            div().h(48.0).child(js_scroll_shell(
+                &ScrollShellSpec::new()
+                    .with_direction(Direction::Horizontal)
+                    .with_label("Horizontal items"),
+                theme,
+                vec![column_row],
+            ))
         ))
 }
 

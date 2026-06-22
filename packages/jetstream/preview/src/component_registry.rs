@@ -63,6 +63,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "hover-card", display_name: "HoverCard", description: "Rich preview on hover.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "icon", display_name: "Icon", description: "SVG icon from registry.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "icon-button", display_name: "IconButton", description: "Icon-only button.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "icon-provider", display_name: "IconProvider", description: "Icon-registry boundary (non-visual).", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "inline", display_name: "Inline", description: "Horizontal flex layout.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "list-card", display_name: "ListCard", description: "Structured list item card.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "list-card-counter", display_name: "ListCardCounter", description: "Icon + count for list card footers.", tier: Tier::Primitive, has_specimen: true },
@@ -101,6 +102,8 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "switch", display_name: "Switch", description: "Toggle switch.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "table", display_name: "Table", description: "Static data table.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tabs", display_name: "Tabs", description: "Tabbed interface.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "text", display_name: "Text", description: "Typographic text primitive.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "tab-strip", display_name: "TabStrip", description: "Standalone tablist primitive.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "text-input", display_name: "TextInput", description: "Single or multi-line text input.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "text-link", display_name: "TextLink", description: "Inline text action or navigation link.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "time-ago", display_name: "TimeAgo", description: "Relative timestamp.", tier: Tier::Primitive, has_specimen: true },
@@ -111,6 +114,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "ui-presentation-provider", display_name: "UiPresentationProvider", description: "Size/density propagation boundary.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "date-time-zone-picker", display_name: "DateTimeZonePicker", description: "Date-time with timezone.", tier: Tier::Primitive, has_specimen: true },
 ];
 
@@ -140,6 +144,7 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "form-layout", display_name: "FormLayout", description: "Responsive form grid with error/success messaging.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "form-shell", display_name: "FormShell", description: "Form container with sections.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "inline-editable-field", display_name: "InlineEditableField", description: "Click-to-edit text field.", tier: Tier::Composite, has_specimen: true },
+    ComponentEntry { slug: "inline-list-section", display_name: "InlineListSection", description: "Compact card-contained related-list section.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "inline-remediation", display_name: "InlineRemediation", description: "Inline fix suggestion.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "list-container", display_name: "ListContainer", description: "Paginated list with state handling.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "log-list", display_name: "LogList", description: "Timestamped log viewer.", tier: Tier::Composite, has_specimen: true },

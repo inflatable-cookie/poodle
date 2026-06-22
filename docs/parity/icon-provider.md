@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok | jet-specimen: NEW file + registry entry; non-visual boundary (shared icon registry, no js_icon_provider builder) — real js_icons in a labeled scope + honest note, matches gpui's no-visual framing; both previews build clean -->
 # Parity: IconProvider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=1 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=0 specimen=ok | jet-specimen: real 3-layer js_scroll_shell — vertical (12 overflowing rows) + horizontal (10 columns); mirrors gpui's 2 groups; both previews build clean -->
 <!-- pass: both targets rebuilt to the 3-layer Root→Viewport→Content anatomy (contract §2). Content wrapper added; horizontal/both gets a non-shrinking row (max-content analogue). GPUI: Root clips (overflow_hidden + radius), Viewport scrolls per-axis + padding + focus ring. Jetstream same minus focus. Keyboard scroll remains open (needs stateful ScrollHandle host). gpui build + jetstream probe (4) green. -->
 # Parity: ScrollShell
 

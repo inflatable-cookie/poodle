@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=1 specimen=ok | jet-specimen: real js_icon groups — sizes (sm/md/lg), color inheritance (6 tones), accessibility (aria vs decorative), 48-icon gallery; mirrors gpui; both previews build clean -->
 # Parity: Icon
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

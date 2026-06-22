@@ -63,6 +63,8 @@ pub mod grid;
 pub mod hover_card;
 pub mod icon;
 pub mod icon_button;
+pub mod icon_provider;
+pub mod inline_list_section;
 pub mod inline_remediation;
 pub mod list_card;
 pub mod list_card_counter;
@@ -124,6 +126,7 @@ pub mod switch;
 pub mod tab_strip;
 pub mod table;
 pub mod tabs;
+pub mod text;
 pub mod text_input;
 pub mod text_link;
 pub mod time_ago;
@@ -137,6 +140,7 @@ pub mod toolbar;
 pub mod tooltip;
 pub mod tree;
 pub mod tri_state_switch;
+pub mod ui_presentation_provider;
 pub mod validation_summary;
 pub mod video_player;
 pub mod date_time_zone_picker;
@@ -309,6 +313,8 @@ fn render_specimen(
         "hover-card" => Some(hover_card::render(theme)),
         "icon" => Some(icon::render(theme)),
         "icon-button" => Some(icon_button::render(theme)),
+        "icon-provider" => Some(icon_provider::render(theme)),
+        "inline-list-section" => Some(inline_list_section::render(theme)),
         "inline-remediation" => Some(inline_remediation::render(theme)),
         "list-card" => Some(list_card::render(theme)),
         "list-card-counter" => Some(list_card_counter::render(theme)),
@@ -369,6 +375,7 @@ fn render_specimen(
         "tab-strip" => Some(tab_strip::render(theme)),
         "table" => Some(table::render(theme)),
         "tabs" => Some(tabs::render(theme)),
+        "text" => Some(text::render(theme)),
         "text-input" => Some(text_input::render(theme)),
         "text-link" => Some(text_link::render(theme)),
         "time-ago" => Some(time_ago::render(theme)),
@@ -382,6 +389,7 @@ fn render_specimen(
         "tooltip" => Some(tooltip::render(theme)),
         "tree" => Some(tree::render(state, theme)),
         "tri-state-switch" => Some(tri_state_switch::render(theme)),
+        "ui-presentation-provider" => Some(ui_presentation_provider::render(theme)),
         "validation-summary" => Some(validation_summary::render(theme)),
         "video-player" => Some(video_player::render(theme)),
         "date-time-zone-picker" => Some(date_time_zone_picker::render(theme)),
