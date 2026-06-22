@@ -46,11 +46,19 @@ fn headless_device() -> (wgpu::Device, wgpu::Queue) {
 
 /// Render a JsEl scene to a PNG at the given logical size.
 fn snapshot(el: &JsEl, w: u32, h: u32, path: &str) {
-    snapshot_opts(el, w, h, path, false);
+    snapshot_opts(el, w, h, path, false, None);
 }
 
-/// As [`snapshot`], optionally focusing the first focusable node (to show focus rings).
-fn snapshot_opts(el: &JsEl, w: u32, h: u32, path: &str, focus_first: bool) {
+/// As [`snapshot`], optionally focusing the first focusable node (focus rings) and/or
+/// applying hover/active overrides at a pointer position `(x, y, pressed)`.
+fn snapshot_opts(
+    el: &JsEl,
+    w: u32,
+    h: u32,
+    path: &str,
+    focus_first: bool,
+    hover: Option<(f32, f32, bool)>,
+) {
     let (device, queue) = headless_device();
     let format = wgpu::TextureFormat::Rgba8UnormSrgb;
 
@@ -60,6 +68,9 @@ fn snapshot_opts(el: &JsEl, w: u32, h: u32, path: &str, focus_first: bool) {
     ui.render_immediate(el);
     if focus_first {
         ui.focus.navigate(&ui.tree, NavDirection::Next);
+    }
+    if let Some((hx, hy, pressed)) = hover {
+        ui.set_pointer_state(hx, hy, pressed);
     }
     let cmds = collect_draw_commands(&ui.tree, &ui.focus, &Theme::default());
     let quads = convert_draw_commands_scaled(&cmds, 1.0);
@@ -303,7 +314,7 @@ fn main() {
         .pl(30.0)
         .child(field())  // focused → should show focus ring
         .child(field()); // unfocused → plain border
-    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true);
+    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true, None);
 
     // Gradient test: linear (white→transparent over red) + radial (cyan center → transparent).
     use glam::Vec4;
@@ -408,4 +419,19 @@ fn main() {
         .w(460.0).h(90.0).p(24.0).bg(panel).flex_col()
         .child(eb);
     snapshot(&eb_scene, 460, 90, "/tmp/poodle-snap-eyebrow.png");
+
+    // Hover/active: two rows with a .hover() bg override; pointer over the first.
+    let accent = resolve_color(&theme, "color.accent.base");
+    let surface = resolve_color(&theme, "color.background.surface");
+    let row_hov = || {
+        ui_element::div()
+            .w(400.0).h(48.0).rounded(8.0).bg(surface)
+            .hover(move |s| s.bg(accent))
+    };
+    let hov_scene = ui_element::div()
+        .w(460.0).h(160.0).p(24.0).bg(panel).flex_col().gap(16.0)
+        .child(row_hov())  // y≈24..72 — pointer here → hover bg
+        .child(row_hov()); // y≈88..136 — untouched
+    // Pointer at (230, 48): over the first row.
+    snapshot_opts(&hov_scene, 460, 160, "/tmp/poodle-snap-hover.png", false, Some((230.0, 48.0, false)));
 }

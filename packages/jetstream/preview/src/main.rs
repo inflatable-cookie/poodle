@@ -563,6 +563,11 @@ impl PreviewState {
             self.mouse_y,
         );
 
+        // Record the pointer so `.hover()` / `.active()` style overrides render this
+        // frame (collect_draw_commands reads the hovered/pressed node off the tree).
+        self.game_ui
+            .set_pointer_state(self.mouse_x, self.mouse_y, self.mouse_left_down);
+
         for event in &ui_events {
             if let UiEvent::Activated(node_id) = event {
                 self.handle_activation(*node_id);
