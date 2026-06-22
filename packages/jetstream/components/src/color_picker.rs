@@ -334,13 +334,26 @@ fn build_hue_strip(theme: &JetstreamThemeProvider, hue: f32) -> JsEl {
         (Color::from_u8(255, 0, 0, 255), 1.0),
     ];
 
-    let track = ui_element::div()
+    // A gradient packs only its first + last stop, so render the multi-stop rainbow
+    // as one 2-stop segment per adjacent pair, each flex-grown to its stop spacing.
+    // Visually identical to a single 7-stop gradient; overflow_hidden + rounded clip
+    // the row to the track shape.
+    let mut track = ui_element::div()
         .id("color-picker-hue")
         .w_full()
         .h(track_h)
         .rounded(track_h / 2.0)
         .overflow_hidden()
-        .bg_gradient_linear(90.0, stops);
+        .flex_row();
+    for pair in stops.windows(2) {
+        let (c0, p0) = pair[0];
+        let (c1, p1) = pair[1];
+        let mut seg = ui_element::div()
+            .h(track_h)
+            .bg_gradient_linear(90.0, vec![(c0, 0.0), (c1, 1.0)]);
+        seg.layout.flex_grow = (p1 - p0).max(0.0001);
+        track = track.child(seg);
+    }
 
     slider_wrap(track, thumb_d, track_h, (hue / 360.0).clamp(0.0, 1.0), elevated, border)
 }

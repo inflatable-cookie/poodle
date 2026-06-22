@@ -68,9 +68,12 @@ engine work:
   bg, radial discarded it); the radial blend was distorted (shader aliased center-Y as stop0);
   and gradient-only elements (no solid bg) rendered nothing. All three resolved — `color_a =
   stops[0]`, radial uses `t = clamp(dist/radius)`, and the fill quad emits whenever a gradient is
-  present. The media-thumbnail accent-wash radial is now renderable. **Residual:** >2-stop
-  gradients still collapse to first+last (the 7-stop rainbow hue strip renders as 2-stop) — needs
-  more GPU instance slots; separate change.
+  present. The media-thumbnail accent-wash radial is now renderable. **>2-stop gradients** — the
+  GPU layer still packs only first+last; handled at the **component level by tessellation** (render
+  an N-stop gradient as N-1 adjacent 2-stop segments, flex-grown to the stop spacing, clipped by
+  the parent `overflow_hidden`). The color-picker rainbow hue strip uses this — offscreen-verified
+  full red→…→red rainbow (was rendering solid red). A native N-stop GPU path is unnecessary for
+  current usage; revisit only if a non-axis-aligned multi-stop case appears.
 - **Per-side borders + colors** — `border_t_/b_/l_/r_` + `border_color_{top,bottom,left,right}`.
   (table row borders, accordion, field-set legend, status-bar chrome — no need for all-sides hacks.)
 - **Custom `BoxShadow`** — a `BoxShadow` type and `style.shadow` field exist (slider/tooltip set
