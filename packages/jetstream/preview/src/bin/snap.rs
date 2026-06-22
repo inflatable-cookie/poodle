@@ -520,4 +520,12 @@ fn main() {
         .child(lc(true))   // highlighted → inset accent ring
         .child(lc(false)); // resting
     snapshot(&lc_scene, 460, 200, "/tmp/poodle-snap-listcard.png");
+
+    // Grayscale filter: same accent box in color vs fully desaturated.
+    let gbox = |g: f32| ui_element::div().w(150.0).h(90.0).rounded(10.0).bg(accent).grayscale(g);
+    let gray_scene = ui_element::div()
+        .w(420.0).h(140.0).p(24.0).bg(panel).flex_row().items_center().gap(40.0)
+        .child(gbox(0.0))
+        .child(gbox(1.0));
+    snapshot(&gray_scene, 420, 140, "/tmp/poodle-snap-grayscale.png");
 }

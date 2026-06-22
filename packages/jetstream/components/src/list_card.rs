@@ -379,14 +379,15 @@ pub fn js_list_card_with_slots(
         el = el.relative().overflow_hidden().child(sash);
     }
 
-    // Not-live: dashed 0.1875rem border at border-default @ 72%, reduced opacity
-    // (0.72). NOTE: JsEl has no grayscale filter, so the greyscale treatment is
-    // omitted; border style + width + color + opacity are applied (contract §8).
+    // Not-live: dashed 0.1875rem border at border-default @ 72%, grayscale(1), and
+    // reduced opacity (0.72) (contract §8). Grayscale/opacity restore on hover is a
+    // hover-state refinement (JsStyleOverride has no grayscale lane) — base state applied.
     if spec.is_not_live {
         el = el
             .border(rem_to_px(0.1875))
             .border_style(BorderStyle::Dashed)
             .border_color(tint(border_default, 0.72))
+            .grayscale(1.0)
             .opacity(spec.not_live_opacity());
     }
 
