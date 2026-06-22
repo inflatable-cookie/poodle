@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=fixed | pass: gpui `parse_dimension_px` now resolves `rem` (×16) so `12rem` works; jet `js_box` applies width/height/min_w/min_h (rem/px/100%) + maps all 4 overflow modes (hidden/clip→clip, auto/scroll→scroll-list); BoxSpec gained `aria_label`; both a11y emissions stay accepted runtime limits; jet box specimen rebuilt spec-driven (default/padding/fixed-12x6rem/overflow-hidden); 5 probe tests added -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok | pass: gpui `parse_dimension_px` now resolves `rem` (×16) so `12rem` works; jet `js_box` applies width/height/min_w/min_h (rem/px/100%) + maps all 4 overflow modes (hidden/clip→clip, auto/scroll→scroll-list); BoxSpec gained `aria_label`; both a11y emissions stay accepted runtime limits; jet box specimen rebuilt spec-driven (default/padding/fixed-12x6rem/overflow-hidden); 5 probe tests added -->
 # Parity: Box
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

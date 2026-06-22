@@ -118,7 +118,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | audio-player | ok | 2 | 2 | ok |
 | avatar | ok | 0 | 0 | ok |
 | block-editor | fixed | 1 | 2 | ok |
-| box | ok | 0 | 0 | fixed |
+| box | ok | 0 | 0 | ok |
 | breadcrumbs | fixed | 0 | 0 | ok |
 | bulk-action-bar | fixed | 2 | 2 | ok |
 | button | fixed | 2 | 2 | ok |
