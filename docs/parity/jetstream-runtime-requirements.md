@@ -85,13 +85,15 @@ engine work:
   `on_scroll`, `focusable` exist; widgets `text_input`, `slider`, `progress`, `rich_text`, `image`.
 - **Focus rings** — render automatically (see P1-1): focused `.focusable()` node draws the
   `theme.focus_color` ring. No engine work to get a focus indicator.
-- **`.hover()` / `.active()` ARE dead for generic elements** (the *real* stub, distinct from focus):
-  `JsStyleOverride` is stored on `JsEl` but **read nowhere** in materialize/draw — only
-  `Widget::Button` has a built-in theme hover/pressed bg. So a `.hover()`/`.active()` on a plain
-  `div` (row/card highlight) has no effect. Wiring it needs (a) an override-merge in draw-gen +
-  (b) per-node hovered/pressed state from the host loop — i.e. the interaction-loop bucket, not a
-  quick builder. (Focus works *because* `FocusState` tracks the focused node generically; hover has
-  no equivalent generic state.)
+- **`.hover()` / `.active()` — DONE 2026-06-22** (was the real stub; offscreen-verified).
+  The `JsStyleOverride` now lives on `NodeStyle`; `UiTree` carries hovered/pressed node indices
+  (`GameUi::set_pointer_state(x,y,down)` hit-tests + stores them, non-destructively); and
+  `collect_draw_commands` merges each node's override into its draw command's effective
+  bg/border/text-color/opacity, propagating to the hovered/pressed node **and its ancestors**
+  (CSS `:hover`/`:active`). Host wiring is one call per frame before collect (the preview does
+  this after `process_input`). **29 components already called `.hover()`/`.active()` (40 + 6 calls,
+  previously no-ops) and now render** — menu/sidebar/list/card/select/button/etc. The retained
+  tree is never mutated, so the effect clears the instant the pointer leaves; no rebuild needed.
 
 ### Pixel verification is now available (new)
 
