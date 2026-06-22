@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok | pass: Jetstream specimen brought to full contract coverage — grouped 7-item palette + shortcuts, active-item highlight, compact (sm+compact), all five §6 open-states (ready/loading/error/empty/no-results), Sizes + Densities sweeps; all real js_command_palette, each open palette in a relative/min_h container; both previews build clean. -->
 <!-- pass 41: GPUI specimen completed to full contract coverage — Open-states group (ready/
      loading/error/empty/no-results), Sizes sweep (xs–xl via with_size), Densities sweep
      (compact/default/comfortable). All real CommandPalette::from_spec, no fakes; gpui/preview

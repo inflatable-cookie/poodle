@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
 <!-- pass 18: GPUI rebuilt — composed real MediaThumbnail (square, compact) + Callout
      (danger error) + Button (load-more) instead of fakes; grid min-columns corrected
      (lg 12.5→12, xl 14→13); dropped ad-hoc alpha math (item bg now color-mix(panel 92%));
@@ -17,6 +17,10 @@
      already present; real MediaBrowsePanel only, no fakes; gpui/preview builds 0 errors);
      Jetstream pending engine recovery. specimen=gap held — Jetstream half unverifiable while
      engine is build-blocked. -->
+<!-- specimen flip: engine now builds. Jetstream specimen aligned to GPUI coverage — browse grid
+     + load-more, loading/error/empty states, loading-more, semantic compact+prominent; real
+     js_media_browse_panel (composes real js_media_thumbnail/js_callout/js_button), no fakes.
+     Both previews build 0 errors. specimen=gap → ok. -->
 # Parity: MediaBrowsePanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

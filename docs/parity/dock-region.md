@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=ok -->
 <!-- pass 49: built out both targets. Additive DockRegionSpec: DockSizing (Flexible/Static),
      DockCollapsedPosture (IconStrip/Hidden), DockEmphasis (Standard/Quiet/Strong), can_accept_panel
      (render-only proxy for Svelte's canAcceptPanel callback). Both render collapsedPosture,
@@ -11,6 +11,11 @@
      cross-region two-dock DnD groups; real DockRegion only, no fakes; gpui/preview builds 0 errors.
      Jetstream pending engine recovery. specimen=gap held — Jetstream half unverifiable while
      engine is build-blocked. -->
+<!-- specimen flip: engine now builds. Jetstream specimen brought to GPUI DockRegion coverage —
+     static top + static left, flexible expanded, active-tab, right/bottom edges, collapsed
+     icon-strip, collapsed hidden posture, compact top-edge icon-strip, emphasis quiet/standard/
+     strong, canAcceptPanel drop affordance; real js_dock_region only, no fakes. (SplitView is a
+     separate component, out of scope.) Both previews build 0 errors. specimen=gap → ok. -->
 # Parity: DockRegion
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

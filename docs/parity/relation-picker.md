@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap | pass: additive RelationPickerSpec fields (searchPlaceholder, filters+filterValues, footerNote, showFooter, showSelectionSummary) now rendered on both targets — toolbar filter Selects, footer note, footer/summary gating; remaining open = keyboard-nav + hover/focus (preview-loop/accepted) -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok | pass: Jetstream specimen brought to full contract coverage — Multiple/Single/Loading/Drill-down/Semantic-presentation, Filters+footer-note+selection-summary, Empty, Sizes + Densities sweeps; all real js_relation_picker over the shared PickerShell/SelectionSummary/Select composites; both previews build clean. (Prior pass: additive RelationPickerSpec fields now rendered on both targets; remaining open = keyboard-nav + hover/focus, preview-loop/accepted.) -->
 <!-- pass 41: GPUI specimen completed to full contract coverage — added Filters+footer+summary
      group (two PickerFilterConfig Selects + seeded filter_value + footer note + summary), Empty
      state, Sizes sweep (xs–xl via with_size), Densities sweep (compact/default/comfortable). All

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
 <!-- pass 46: built out on BOTH targets. Additive ActionDiscoveryPanelSpec.active_id
      (+with_active_id). GPUI: active-item state (accent bg + ring), per-size badge/kbd chips,
      EmptyState for error/empty/no-results, 5 skeleton rows; dropped px(14)/opacity(0.72)/px(1)
@@ -9,6 +9,10 @@
 <!-- specimen note: GPUI specimen done (active/loading/error/empty/no-results groups added,
      real ActionDiscoveryPanel, gpui/preview builds 0 errors); Jetstream pending engine recovery.
      specimen=gap held — Jetstream half unverifiable while engine is build-blocked. -->
+<!-- specimen flip: engine now builds. Jetstream specimen brought to full GPUI coverage —
+     grouped/described (label+shortcut+badge+description), active-item, loading skeleton,
+     empty/error/no-results, semantic compact+prominent; real js_action_discovery_panel in a
+     token-colored frame, no fakes. Both previews build 0 errors. specimen=gap → ok. -->
 # Parity: ActionDiscoveryPanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

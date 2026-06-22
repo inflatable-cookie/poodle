@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=2 specimen=ok | pass: Jetstream specimen brought to full contract coverage — open surface across Basic/Swatches/Alpha/RGB-mode/Preview-only, plus closed-trigger No-color, Disabled, Sizes + Densities sweeps; all real js_color_picker exercising the gradient pad / hue+alpha sliders / mode SegmentedControl / channel NumberInputs / preset swatch grid; both previews build clean. -->
 <!-- pass 41: GPUI specimen verified already at full contract coverage (Basic/Swatches/Alpha/
      RGB-open/Preview-only/Disabled + sizes + densities) over the real surface build-out — no
      fakes, no change needed. gpui/preview builds clean. GPUI specimen done; Jetstream pending

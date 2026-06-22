@@ -112,7 +112,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | component | consv | gpui | jet | spec |
 |---|---|---|---|---|
 | accordion | fixed | 2 | 2 | ok |
-| action-discovery-panel | fixed | 2 | 2 | gap |
+| action-discovery-panel | fixed | 2 | 2 | ok |
 | alert-dialog | fixed | 2 | 2 | ok |
 | app-header | fixed | 2 | 2 | gap |
 | audio-player | ok | 2 | 2 | ok |
@@ -132,8 +132,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | code-input | fixed | 0 | 0 | ok |
 | collapse-toggle | fixed | 0 | 1 | ok |
 | collapsible | fixed | 2 | 2 | ok |
-| color-picker | fixed | 0 | 2 | gap |
-| command-palette | fixed | 2 | 2 | gap |
+| color-picker | fixed | 0 | 2 | ok |
+| command-palette | fixed | 2 | 2 | ok |
 | confirm-action | ok | 0 | 0 | ok |
 | context-menu | ok | 0 | 0 | gap |
 | data-table | fixed | 1 | 0 | ok |
@@ -148,7 +148,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | detail-section-group | fixed | 0 | 0 | ok |
 | detail-shell | ok | 0 | 1 | ok |
 | dialog | ok | 0 | 0 | ok |
-| dock-region | ok | 2 | 2 | gap |
+| dock-region | ok | 2 | 2 | ok |
 | drawer | ok | 0 | 0 | ok |
 | duration-input | fixed | 2 | 2 | ok |
 | editable-label | ok | 2 | 2 | ok |
@@ -165,21 +165,21 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | form-actions | ok | 1 | 1 | gap |
 | form-dialog | ok | 0 | 0 | ok |
 | form-layout | fixed | 2 | 2 | ok |
-| form-shell | gap | 0 | 0 | gap |
+| form-shell | gap | 0 | 0 | ok |
 | grid | fixed | 0 | 0 | ok |
 | hover-card | ok | 1 | 0 | ok |
 | icon | ok | 2 | 1 | gap |
 | icon-button | fixed | 0 | 0 | ok |
 | icon-provider | fixed | 1 | 1 | gap |
 | inline-list-section | fixed | 0 | 1 | gap |
-| inline-remediation | ok | 1 | 0 | gap |
+| inline-remediation | ok | 1 | 0 | ok |
 | list-card | fixed | 1 | 1 | gap |
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 0 | 0 | ok |
 | list-grid | fixed | 1 | 1 | gap |
 | log-list | ok | 1 | 2 | ok |
 | markdown-editor | fixed | 2 | 1 | ok |
-| media-browse-panel | ok | 0 | 0 | gap |
+| media-browse-panel | ok | 0 | 0 | ok |
 | media-picker | fixed | 0 | 0 | ok |
 | media-preview | fixed | 1 | 1 | ok |
 | media-thumbnail | ok | 1 | 1 | ok |
@@ -206,7 +206,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | range-slider | fixed | 1 | 1 | ok |
 | rating | ok | 1 | 2 | ok |
 | region | ok | 1 | 0 | ok |
-| relation-picker | fixed | 2 | 2 | gap |
+| relation-picker | fixed | 2 | 2 | ok |
 | remediation-banner | gap | 0 | 0 | ok |
 | resize-handle | ok | 1 | 1 | gap |
 | scroll-shell | ok | 1 | 0 | gap |
@@ -245,7 +245,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tree | ok | 0 | 0 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 0 | 0 | gap |
-| validation-summary | gap | 0 | 0 | gap |
+| validation-summary | gap | 0 | 0 | ok |
 | video-player | fixed | 0 | 0 | ok |
 <!-- END MATRIX -->
 

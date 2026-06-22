@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=0 specimen=gap pass=jetstream-rebuilt-to-contract -->
+<!-- parity consv=ok gpui=1 jetstream=0 specimen=ok pass=jetstream-rebuilt-to-contract -->
+<!-- jetstream-specimen pass: engine recovered; Jetstream specimen now mirrors GPUI coverage. Rebuilt packages/jetstream/preview/src/specimens/inline_remediation.rs driving the real js_inline_remediation across tones (info/warning/danger), actionless, with-action (real js_button), referenced-fields (with count hint), and disabled-action. Tone-colored left border via border_token(); action delegates to the real Button primitive via RemediationAction. No fakes. Both previews build clean (gpui + jetstream → 0 errors). specimen flipped gap→ok. -->
 # Parity: InlineRemediation
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
