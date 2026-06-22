@@ -1,23 +1,25 @@
 //! ListCard specimen — card items for list views.
 //!
-//! Mirrors `packages/gpui/preview/src/specimens/list_card.rs` to the extent the
-//! Jetstream `js_list_card` API allows. Every card is a real
-//! `js_list_card(&ListCardSpec, theme)` resolving all visuals from tokens — no
-//! hand-rolled boxes.
-//!
-//! API gaps vs GPUI: the Jetstream `js_list_card` has no leading-snippet,
-//! trailing-snippet, or footer-snippet parameters (the leading box is derived
-//! from the title's first letter). So the GPUI groups that compose a custom
-//! leading icon, a trailing `Pill`, or footer `ListCardCounter`s — "With badges",
-//! "Footer counters", "With context menu" — cannot be rendered through the real
-//! component and are intentionally omitted rather than faked. Every other
-//! contract group is covered through the spec builders.
+//! Mirrors `packages/gpui/preview/src/specimens/list_card.rs`. Every card is a
+//! real `js_list_card` / `js_list_card_with_slots(&ListCardSpec, theme, …)`
+//! resolving all visuals from tokens — no hand-rolled boxes. Slot content is
+//! composed from real components (`js_pill`, `js_list_card_counter`, `js_button`,
+//! `js_icon`), matching the GPUI specimen's `with_leading` / `with_trailing` /
+//! `with_footer` compositions.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::list_card::js_list_card;
+use poodle_jetstream_components::button::js_button;
+use poodle_jetstream_components::icon::js_icon;
+use poodle_jetstream_components::list_card::{js_list_card, js_list_card_with_slots};
+use poodle_jetstream_components::list_card_counter::js_list_card_counter;
+use poodle_jetstream_components::pill::js_pill;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, IconSize, IconSpec, LeadingFill, LeadingShape,
+    ListCardCounterSpec, ListCardLayout, ListCardSpec, PillAppearance, PillSize, PillSpec, PillTone,
+    SelectionIndicator,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -71,6 +73,189 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                         .with_leading_shape(LeadingShape::RoundedSquare)
                         .with_interactive(true),
                     theme,
+                )),
+        ))
+        // -- With badges (header-accessories slot) --
+        .child(group("With badges", secondary,
+            div().flex_col().gap(6.0)
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("API integration guide")
+                        .with_subtitle("Authentication and webhooks")
+                        .with_meta("Draft")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    vec![js_pill(
+                        &PillSpec::new()
+                            .with_label("New")
+                            .with_tone(PillTone::Info)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    )],
+                    None,
+                    None,
+                    None,
+                ))
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Q4 planning deck")
+                        .with_subtitle("Revenue targets and roadmap")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    vec![
+                        js_pill(
+                            &PillSpec::new()
+                                .with_label("3")
+                                .with_appearance(PillAppearance::Badge)
+                                .with_tone(PillTone::Neutral)
+                                .with_size(PillSize::Sm),
+                            theme,
+                        ),
+                        js_pill(
+                            &PillSpec::new()
+                                .with_label("Review")
+                                .with_tone(PillTone::Warning)
+                                .with_size(PillSize::Sm),
+                            theme,
+                        ),
+                    ],
+                    None,
+                    None,
+                    None,
+                )),
+        ))
+        // -- With footer counters (footer slot) --
+        .child(group("With footer counters", secondary,
+            div().flex_col().gap(6.0)
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Design system")
+                        .with_subtitle("Components and tokens")
+                        .with_leading_shape(LeadingShape::RoundedSquare)
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    vec![js_pill(
+                        &PillSpec::new()
+                            .with_label("Active")
+                            .with_tone(PillTone::Success)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    )],
+                    Some(
+                        div().flex_row().items_center().gap(12.0)
+                            .child(js_list_card_counter(&ListCardCounterSpec::new("file-text", 24), theme))
+                            .child(js_list_card_counter(&ListCardCounterSpec::new("image", 8), theme))
+                            .child(js_list_card_counter(&ListCardCounterSpec::new("folder", 3), theme)),
+                    ),
+                    None,
+                    None,
+                ))
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Brand guidelines")
+                        .with_subtitle("Logos, color, and voice")
+                        .with_leading_shape(LeadingShape::RoundedSquare)
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    Some(
+                        div().flex_row().items_center().gap(12.0)
+                            .child(js_list_card_counter(&ListCardCounterSpec::new("file-text", 6), theme))
+                            .child(js_list_card_counter(&ListCardCounterSpec::new("image", 42), theme)),
+                    ),
+                    None,
+                    None,
+                )),
+        ))
+        // -- With trailing (exclusive trailing lane; replaces meta + actions) --
+        .child(group("With trailing (exclusive lane)", secondary,
+            div().flex_col().gap(6.0)
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("API Server")
+                        .with_subtitle("Running on port 8080")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    None,
+                    None,
+                    Some(js_pill(
+                        &PillSpec::new()
+                            .with_label("Active")
+                            .with_tone(PillTone::Success)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    )),
+                ))
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Background Worker")
+                        .with_subtitle("High queue depth")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    None,
+                    None,
+                    Some(js_pill(
+                        &PillSpec::new()
+                            .with_label("Degraded")
+                            .with_tone(PillTone::Warning)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    )),
+                )),
+        ))
+        // -- With actions (action-trigger lane, composed with meta) --
+        .child(group("With actions", secondary,
+            div().flex_col().gap(6.0)
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("invoice-2024-q4.pdf")
+                        .with_subtitle("Generated yesterday")
+                        .with_meta("182 KB")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    None,
+                    Some(
+                        js_button(
+                            &ButtonSpec::new()
+                                .with_label("Download")
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_size(ControlSize::Sm),
+                            theme,
+                        ),
+                    ),
+                    None,
+                ))
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("contract-final.docx")
+                        .with_subtitle("Awaiting signature")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    None,
+                    Some(
+                        div().flex_row().items_center().gap(4.0)
+                            .child(js_icon(&IconSpec::new("download").with_size(IconSize::Sm), theme))
+                            .child(js_button(
+                                &ButtonSpec::new()
+                                    .with_label("Sign")
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_size(ControlSize::Sm),
+                                theme,
+                            )),
+                    ),
+                    None,
                 )),
         ))
         // -- Solid fill with accent colors --

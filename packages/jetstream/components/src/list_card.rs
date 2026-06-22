@@ -2,11 +2,18 @@
 //!
 //! Contract: `docs/contracts/components/list-card.md`
 //! Reference: `packages/svelte/components/src/ListCard.svelte`
+//! Mirrors the GPUI build-out (`packages/gpui/components/src/primitives/list_card.rs`).
 //!
-//! Anatomy (contract §2): `[sash?] [selection?] [leading?] [body(header/subtitle)] [meta?] [handle?]`.
+//! Anatomy (contract §2):
+//! `[sash?] [selection?] [leading?] [body(header(title + accessories/badges) / subtitle / footer?)] [meta?] [actions?] [trailing?] [handle?]`.
 //! Every dimension resolves from a token or a contract-exact rem via the spec
 //! helpers — zero hardcoded hsla; rem literals are contract values resolved by
 //! `rem_to_px`. Interaction (click/keyboard) lives in the preview event loop.
+//!
+//! Host-snippet slots (contract §2 / §3) — `leading`, `badges`, `footer`,
+//! `actions`, `trailing` — are content the host composes (`JsEl`), not spec
+//! fields, so they arrive through [`js_list_card_with_slots`]; [`js_list_card`]
+//! delegates with empty slots for back-compat.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
@@ -15,7 +22,36 @@ use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, Sele
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
+/// Render a list card with no host slots (derived leading glyph, no
+/// badges/footer/actions/trailing). Back-compat entry — existing callers are
+/// unchanged.
 pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    js_list_card_with_slots(spec, theme, None, Vec::new(), None, None, None)
+}
+
+/// Render a list card with the contract's optional host-snippet slots.
+///
+/// - `leading` — avatar/icon/thumbnail content; rendered inside the styled
+///   leading box and **overriding** the derived first-letter glyph (contract §2
+///   Leading; mirrors GPUI `with_leading`).
+/// - `badges` — pills/badges rendered in the header-accessories cluster inline
+///   next to the title (contract §2 Badges / §8 Header Accessories).
+/// - `footer` — counter row rendered in the body column below the subtitle with
+///   the contract `margin-top 0.125rem` (contract §2 Footer / §8 Footer).
+/// - `actions` — explicit action triggers in the right-edge lane after meta
+///   (contract §2 Actions).
+/// - `trailing` — exclusive right-edge lane; when present it **replaces** both
+///   meta and actions so the card has a single trailing lane (contract §3
+///   `trailing` / §7 right-edge composition).
+pub fn js_list_card_with_slots(
+    spec: &ListCardSpec,
+    theme: &JetstreamThemeProvider,
+    leading: Option<JsEl>,
+    badges: Vec<JsEl>,
+    footer: Option<JsEl>,
+    actions: Option<JsEl>,
+    trailing: Option<JsEl>,
+) -> JsEl {
     let surface = resolve_color(theme, spec.fill_token());
     let text_primary = resolve_color(theme, spec.title_color_token());
     let border_subtle = resolve_color(theme, spec.border_token());
@@ -61,6 +97,23 @@ pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl
         LeadingFill::Solid => on_accent,
     };
 
+    // The styled leading box always paints the shape/tint/solid fill. Its child
+    // is the host `leading` slot when supplied (contract §2 Leading — avatar /
+    // icon / thumbnail), otherwise the derived first-letter glyph. The slot
+    // overrides the derived avatar, mirroring GPUI `with_leading`.
+    let leading_inner = leading.unwrap_or_else(|| {
+        ui_element::label(
+            &spec
+                .title
+                .chars()
+                .next()
+                .map_or(String::new(), |c| c.to_uppercase().to_string()),
+        )
+        .text_color(leading_icon_color)
+        .text_size(leading_font)
+        .text_weight(600)
+    });
+
     let leading_el = ui_element::div()
         .size(leading_size)
         .flex_none()
@@ -68,33 +121,48 @@ pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl
         .bg(leading_bg)
         .items_center()
         .justify_center()
-        .child(
-            ui_element::label(
-                &spec
-                    .title
-                    .chars()
-                    .next()
-                    .map_or(String::new(), |c| c.to_uppercase().to_string()),
-            )
-            .text_color(leading_icon_color)
-            .text_size(leading_font)
-            .text_weight(600),
-        );
+        .overflow_hidden()
+        .text_color(leading_icon_color)
+        .child(leading_inner);
 
-    // ── Body: header (title) + optional subtitle ───────────────────────
+    // ── Body: header (title + badges) + optional subtitle + optional footer ──
     let mut body = ui_element::div()
         .flex_col()
         .gap(rem_to_px(spec.body_gap_rem()))
         .flex_grow()
         .min_w_0();
 
-    body = body.child(
-        ui_element::label(&spec.title)
-            .text_color(text_primary)
-            .text_size(title_font)
-            .text_weight(500)
-            .text_ellipsis(),
-    );
+    // Header row — contract §8 Header: gap 0.375rem. Title truncates (flex 1,
+    // min-width 0); the badges cluster is shrink-proof beside it.
+    let title_el = ui_element::label(&spec.title)
+        .text_color(text_primary)
+        .text_size(title_font)
+        .text_weight(500)
+        .text_ellipsis()
+        .flex_grow()
+        .min_w_0();
+
+    if badges.is_empty() {
+        body = body.child(title_el);
+    } else {
+        // Header-accessories cluster (contract §8): shrink-proof, wraps, gap
+        // space.inline.sm; the badges group itself uses gap space.inline.xs.
+        let accessories = ui_element::div()
+            .flex_row()
+            .flex_none()
+            .items_center()
+            .flex_wrap()
+            .gap(resolve_px(theme, "space.inline.xs"))
+            .children(badges);
+        body = body.child(
+            ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(rem_to_px(spec.header_gap_rem()))
+                .child(title_el)
+                .child(accessories),
+        );
+    }
 
     if let Some(ref subtitle) = spec.subtitle {
         body = body.child(
@@ -105,13 +173,49 @@ pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl
         );
     }
 
-    // ── Meta (right-aligned). NOTE: tabular-nums has no JsEl API. ───────
-    let meta_el = spec.meta.as_ref().map(|m| {
-        ui_element::label(m)
-            .text_color(text_secondary)
-            .text_size(small_font)
+    // Footer — contract §8 Footer: gap 0.5rem, margin-top 0.125rem. The footer
+    // slot is host-composed (e.g. ListCardCounters); the row wrapper supplies
+    // the contract spacing.
+    if let Some(footer) = footer {
+        body = body.child(
+            ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(rem_to_px(spec.footer_gap_rem()))
+                .mt(rem_to_px(0.125))
+                .child(footer),
+        );
+    }
+
+    // ── Right-edge lanes (contract §7) ──────────────────────────────────
+    // `trailing` is exclusive: when present it replaces both meta and actions
+    // so the card has a single trailing lane. Otherwise meta + actions compose.
+    let has_trailing = trailing.is_some();
+
+    // Meta (right-aligned). NOTE: tabular-nums has no JsEl API.
+    let meta_el = (!has_trailing)
+        .then(|| spec.meta.as_ref())
+        .flatten()
+        .map(|m| {
+            ui_element::label(m)
+                .text_color(text_secondary)
+                .text_size(small_font)
+                .flex_none()
+        });
+
+    // Actions lane (contract §2 Actions) — explicit action triggers, shrink-proof,
+    // suppressed when `trailing` claims the right edge.
+    let actions_el = actions.filter(|_| !has_trailing).map(|a| {
+        ui_element::div()
+            .flex_row()
             .flex_none()
+            .items_center()
+            .gap(resolve_px(theme, "space.inline.xs"))
+            .child(a)
     });
+
+    // Trailing lane (contract §8 Trailing) — exclusive, shrink-proof.
+    let trailing_el = trailing.map(|t| ui_element::div().flex_row().flex_none().items_center().child(t));
 
     // ── Selection indicator (checkbox box) — contract §3/§8 ─────────────
     let selection_el = (spec.is_selectable
@@ -212,8 +316,15 @@ pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl
     }
     el = el.child(leading_el).child(body);
 
+    // Right edge: meta + actions, OR the exclusive trailing lane (contract §7).
     if let Some(m) = meta_el {
         el = el.child(m);
+    }
+    if let Some(a) = actions_el {
+        el = el.child(a);
+    }
+    if let Some(t) = trailing_el {
+        el = el.child(t);
     }
 
     if let Some(handle) = handle_el {
@@ -404,5 +515,123 @@ mod tests {
         assert!(tree.has_text("Read-only item"), "title missing: {:?}", tree.texts());
         // No meta text like a size string leaks in.
         assert!(!tree.has_text("14.2 MB"), "unexpected meta on bare card");
+    }
+
+    #[test]
+    fn default_no_slots_still_renders_title_subtitle() {
+        // Back-compat: js_list_card (no slots) still renders title + subtitle.
+        let th = theme();
+        let tree = probe(&js_list_card(&spec(), &th), 360.0, 96.0);
+        assert!(tree.has_text("design-system-v2.figma"), "title missing: {:?}", tree.texts());
+        assert!(tree.has_text("Edited 2 hours ago"), "subtitle missing: {:?}", tree.texts());
+        // Derived first-letter glyph present when no leading slot is supplied.
+        assert!(tree.has_text("D"), "derived leading glyph missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn leading_slot_overrides_derived_avatar() {
+        let th = theme();
+        // A leading slot replaces the derived first-letter glyph (contract §2).
+        let leading = ui_element::label("LEAD");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(),
+                &th,
+                Some(leading),
+                Vec::new(),
+                None,
+                None,
+                None,
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("LEAD"), "leading slot content missing: {:?}", tree.texts());
+        // The derived first-letter glyph ("D") must be gone — the slot overrides it.
+        assert!(
+            !tree.has_text("D"),
+            "derived avatar glyph should be overridden by the leading slot: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn footer_slot_renders() {
+        let th = theme();
+        let footer = ui_element::label("24 docs");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(),
+                &th,
+                None,
+                Vec::new(),
+                Some(footer),
+                None,
+                None,
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("24 docs"), "footer slot content missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn badges_slot_renders_in_header() {
+        let th = theme();
+        let badges = vec![ui_element::label("New"), ui_element::label("Review")];
+        let tree = probe(
+            &js_list_card_with_slots(&spec(), &th, None, badges, None, None, None),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("New"), "first badge missing: {:?}", tree.texts());
+        assert!(tree.has_text("Review"), "second badge missing: {:?}", tree.texts());
+        // Title still present alongside the badges.
+        assert!(tree.has_text("design-system-v2.figma"), "title missing with badges");
+    }
+
+    #[test]
+    fn trailing_slot_renders() {
+        let th = theme();
+        let trailing = ui_element::label("Open");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(),
+                &th,
+                None,
+                Vec::new(),
+                None,
+                None,
+                Some(trailing),
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("Open"), "trailing slot content missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn trailing_is_exclusive_and_replaces_meta_and_actions() {
+        // Contract §7: trailing replaces meta + actions. The card still has meta
+        // text in its spec, but the trailing lane suppresses it.
+        let th = theme();
+        let trailing = ui_element::label("Trailing");
+        let actions = ui_element::label("Action");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(), // spec carries meta "14.2 MB"
+                &th,
+                None,
+                Vec::new(),
+                None,
+                Some(actions),
+                Some(trailing),
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("Trailing"), "trailing missing: {:?}", tree.texts());
+        assert!(!tree.has_text("14.2 MB"), "meta should be suppressed by trailing");
+        assert!(!tree.has_text("Action"), "actions should be suppressed by trailing");
     }
 }
