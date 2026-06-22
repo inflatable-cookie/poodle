@@ -17,8 +17,13 @@ are "# of `docs/parity/*.md` files referencing the gap".
 Several older parity notes claim gaps that no longer exist — impls can use these **today**, no
 engine work:
 
-- **Gradients** — `bg_gradient_linear`, `bg_gradient_radial` exist. (progress fill, media-frame
-  radial, toast tone-gradient can use these instead of flat approximations.)
+- **Gradients** — `bg_gradient_linear` (angle: 0=top→bottom, 90=left→right; stops 0..1) and
+  `bg_gradient_radial` (center + radius as **fractions of the rect**) exist and are used today
+  (color_picker hue strip, toast tone-tint, progress). **Caveat (engine):** the radial path in
+  `render_bridge.rs` packs only the *last* stop's color over the element's base bg — `stops[0]`
+  is ignored, so a multi-stop radial (e.g. the media-thumbnail accent-at-top-left frame wash)
+  can't render faithfully yet. That frame upgrade is deferred pending an engine fix + visual
+  verification, NOT a missing-primitive gap.
 - **Per-side borders + colors** — `border_t_/b_/l_/r_` + `border_color_{top,bottom,left,right}`.
   (table row borders, accordion, field-set legend, status-bar chrome — no need for all-sides hacks.)
 - **Custom `BoxShadow`** — a `BoxShadow` type and `style.shadow` field exist (slider/tooltip set
