@@ -504,11 +504,18 @@ fn main() {
         .shadow_layers(vec![BoxShadow {
             offset_x: 0.0, offset_y: 0.0, blur: 14.0, spread: 0.0, color: blk(0.55), inset: true,
         }]);
+    // Offset highlight: inset 0 1px 0 white@45% (top inner highlight, à la button).
+    let hilite = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0, offset_y: 3.0, blur: 0.0, spread: 0.0,
+            color: Vec4::new(1.0, 1.0, 1.0, 0.6), inset: true,
+        }]);
     let inset_scene = ui_element::div()
-        .w(460.0).h(150.0).p(24.0).bg(panel).flex_row().items_center().gap(40.0)
+        .w(640.0).h(150.0).p(24.0).bg(panel).flex_row().items_center().gap(36.0)
         .child(ring)
-        .child(inner);
-    snapshot(&inset_scene, 460, 150, "/tmp/poodle-snap-inset.png");
+        .child(inner)
+        .child(hilite);
+    snapshot(&inset_scene, 640, 150, "/tmp/poodle-snap-inset.png");
 
     // Real component spot-check: list-card highlighted → inset accent ring.
     let lc = |hl: bool| poodle_jetstream_components::list_card::js_list_card(
@@ -546,4 +553,16 @@ fn main() {
         .w(460.0).h(110.0).p(24.0).bg(panel).flex_col()
         .child(tabs);
     snapshot(&tabs_scene, 460, 110, "/tmp/poodle-snap-tabsdrop.png");
+
+    // Button treatment shadows: primary (inset highlight + drop) / secondary (highlight) / ghost.
+    use poodle_specs::ButtonVariant;
+    let mkbtn = |v: ButtonVariant| poodle_jetstream_components::button::js_button(
+        &poodle_specs::ButtonSpec::new().with_label("Save").with_variant(v), &theme);
+    let btn_scene = ui_element::div()
+        .w(460.0).h(110.0).p(24.0).flex_row().items_center().gap(20.0)
+        .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
+        .child(mkbtn(ButtonVariant::Primary))
+        .child(mkbtn(ButtonVariant::Secondary))
+        .child(mkbtn(ButtonVariant::Ghost));
+    snapshot(&btn_scene, 460, 110, "/tmp/poodle-snap-btnshadow.png");
 }

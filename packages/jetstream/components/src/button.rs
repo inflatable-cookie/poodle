@@ -16,6 +16,8 @@ use poodle_specs::ButtonSpec;
 use poodle_specs::ButtonTone;
 use poodle_specs::ButtonVariant;
 
+use jetstream_runtime::ui_element::BoxShadow;
+
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
     size_font_rem, size_min_width_rem, size_padding_x_offset_rem,
@@ -133,6 +135,32 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // Border — 1px for non-ghost, 1px transparent for ghost (maintains layout)
     el = el.border(1.0).border_color(border_color);
+
+    // Contract §8 shadow treatment: an inset top highlight on solid buttons, plus an
+    // outset drop on primary. Ghost has no shadow.
+    if !matches!(spec.variant, ButtonVariant::Ghost) {
+        let is_primary = matches!(spec.variant, ButtonVariant::Primary);
+        let highlight_alpha = if is_primary { 0.14 } else { 0.08 };
+        let mut layers = vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: glam::Vec4::new(1.0, 1.0, 1.0, highlight_alpha),
+            inset: true,
+        }];
+        if is_primary {
+            layers.push(BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.375),
+                blur: rem_to_px(1.125),
+                spread: 0.0,
+                color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+                inset: false,
+            });
+        }
+        el = el.shadow_layers(layers);
+    }
 
     // Hover/active state overrides (contract color-mix formulas)
     if !is_disabled {
