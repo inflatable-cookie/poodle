@@ -434,4 +434,21 @@ fn main() {
         .child(row_hov()); // y≈88..136 — untouched
     // Pointer at (230, 48): over the first row.
     snapshot_opts(&hov_scene, 460, 160, "/tmp/poodle-snap-hover.png", false, Some((230.0, 48.0, false)));
+
+    // Real component spot-check: menu (items call .hover(|s| s.bg(hover))); pointer over
+    // the 2nd item should show the hover fill.
+    use poodle_specs::MenuEntry;
+    let menu = poodle_jetstream_components::menu::js_menu(
+        &poodle_specs::MenuSpec::new(vec![
+            MenuEntry::new("new", "New file"),
+            MenuEntry::new("open", "Open…"),
+            MenuEntry::new("save", "Save"),
+        ]),
+        &theme,
+    );
+    let menu_scene = ui_element::div()
+        .w(320.0).h(180.0).p(20.0).bg(panel).flex_col().items_start()
+        .child(menu);
+    // Pointer over the 2nd item ("Open…") — items start ~y20, ~32px each → ~y 68.
+    snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)));
 }
