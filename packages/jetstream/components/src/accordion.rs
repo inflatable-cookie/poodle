@@ -5,7 +5,7 @@
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_specs::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity};
@@ -142,6 +142,11 @@ fn render_item(
         .child(summary)
         .child(indicator);
 
+    // Contract §8 Item box-shadow: `inset 0 0.0625rem 0 color-mix(text-inverse
+    // 8%, transparent)` — a top highlight in the inverse text color at 8% alpha.
+    let text_inverse = resolve_color(theme, "color.text.inverse");
+    let highlight = glam::Vec4::new(text_inverse.x, text_inverse.y, text_inverse.z, 0.08);
+
     // Contract §8 Item: section with border, radius, background, internal gap.
     let mut el = ui_element::div()
         .flex_col()
@@ -153,6 +158,14 @@ fn render_item(
         .bg(item_bg)
         .border_1()
         .border_color(item_border)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: highlight,
+            inset: true,
+        }])
         .child(trigger);
 
     // Contract §8 Panel: role="region", conditional render, carries the children

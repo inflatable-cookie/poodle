@@ -6,7 +6,7 @@
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, SwitchSpec};
 
@@ -126,13 +126,23 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     };
 
     // ── Thumb ──
+    // Contract §8 Thumb box-shadow: `0 0.125rem 0.5rem black@18%` outset drop.
     let thumb = ui_element::div()
         .w(thumb_size)
         .h(thumb_size)
         .rounded(thumb_size / 2.0) // circle — 999px pill equivalent
-        .bg(thumb_color);
+        .bg(thumb_color)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.125),
+            blur: rem_to_px(0.5),
+            spread: 0.0,
+            color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+            inset: false,
+        }]);
 
     // ── Track ──
+    // Contract §8 Track box-shadow: `inset 0 0.0625rem 0 white@8%` top highlight.
     let track = ui_element::div()
         .w(track_width)
         .h(track_height)
@@ -141,6 +151,14 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border(border_width).border_color(track_border)
         .items_center()
         .pl(thumb_offset)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: glam::Vec4::new(1.0, 1.0, 1.0, 0.08),
+            inset: true,
+        }])
         .child(thumb);
 
     // ── Root: dual labels flank the track, or a single trailing label ──

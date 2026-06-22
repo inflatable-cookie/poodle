@@ -565,4 +565,13 @@ fn main() {
         .child(mkbtn(ButtonVariant::Secondary))
         .child(mkbtn(ButtonVariant::Ghost));
     snapshot(&btn_scene, 460, 110, "/tmp/poodle-snap-btnshadow.png");
+
+    // Treatment spot-check: switch (track inset highlight + thumb outset drop), on light bg.
+    let sw = poodle_jetstream_components::switch::js_switch(
+        &poodle_specs::SwitchSpec::new().with_checked(true), &theme);
+    let sw_scene = ui_element::div()
+        .w(300.0).h(100.0).p(28.0).flex_row().items_center()
+        .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
+        .child(sw);
+    snapshot(&sw_scene, 300, 100, "/tmp/poodle-snap-switch.png");
 }

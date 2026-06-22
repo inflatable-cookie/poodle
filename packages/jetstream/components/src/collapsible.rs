@@ -10,7 +10,7 @@
 //! indicator. JsEl has no rotation, so the chevron swaps icon name (Tier-3,
 //! matching the other Jetstream disclosure components).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 
@@ -67,6 +67,13 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
         ControlDensity::Comfortable => 1.0,
     });
 
+    // Contract §8 Root box-shadow: `inset 0 0.0625rem 0 color-mix(text-inverse
+    // 8%, transparent)` — a top highlight in the inverse text color at 8% alpha.
+    // (The highlighted-state `0 0 0 0.125rem accent@12%` halo is a focus ring,
+    // carried by the accent border above, not a treatment shadow.)
+    let text_inverse = resolve_color(theme, "color.text.inverse");
+    let root_highlight = glam::Vec4::new(text_inverse.x, text_inverse.y, text_inverse.z, 0.08);
+
     let mut outer = ui_element::div()
         .flex_col()
         .gap(root_gap)
@@ -81,7 +88,15 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
         } else {
             root_border
         })
-        .rounded(radius);
+        .rounded(radius)
+        .shadow_layers(vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: root_highlight,
+            inset: true,
+        }]);
 
     // ── Trigger: 1fr heading block + auto chevron (emulated grid) ──
     let mut heading = ui_element::div()

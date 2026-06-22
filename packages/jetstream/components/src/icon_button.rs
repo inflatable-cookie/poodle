@@ -16,7 +16,7 @@
 //! - **Click/keyboard activation** lives in the preview `main.rs` event loop.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec};
 
@@ -136,6 +136,20 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
         .items_center()
         .justify_center()
         .focusable();
+
+    // Contract §8 shadow treatment: `none` for ghost (and any pressed state —
+    // contract §6 pressed: "no shadow"); `inset 0 0.0625rem 0 white@8%` top
+    // highlight for primary/secondary at rest.
+    if !matches!(spec.variant, ButtonVariant::Ghost) && !is_pressed {
+        el = el.shadow_layers(vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: glam::Vec4::new(1.0, 1.0, 1.0, 0.08),
+            inset: true,
+        }]);
+    }
 
     // ── Glyph or spinner (mutually exclusive; contract §2) ──
     if spec.is_loading {

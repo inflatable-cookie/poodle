@@ -6,7 +6,7 @@
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
@@ -164,12 +164,28 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
             .justify_center()
             .focusable();
 
-        // Selection drop shadow on the active segment (contract §8 selection
-        // box-shadow: black 18% drop). JsEl exposes only preset shadows;
-        // `shadow_md` (0 4 8) is the closest approximation to the contract's
-        // `0 0.125rem 0.5rem black@18%`. No inset highlight in this runtime.
+        // Selection box-shadow on the active segment (contract §8): an
+        // `inset 0 0.0625rem 0 white@8%` top highlight plus a
+        // `0 0.125rem 0.5rem black@18%` outset drop.
         if is_active {
-            segment = segment.shadow_md();
+            segment = segment.shadow_layers(vec![
+                BoxShadow {
+                    offset_x: 0.0,
+                    offset_y: rem_to_px(0.0625),
+                    blur: 0.0,
+                    spread: 0.0,
+                    color: glam::Vec4::new(1.0, 1.0, 1.0, 0.08),
+                    inset: true,
+                },
+                BoxShadow {
+                    offset_x: 0.0,
+                    offset_y: rem_to_px(0.125),
+                    blur: rem_to_px(0.5),
+                    spread: 0.0,
+                    color: glam::Vec4::new(0.0, 0.0, 0.0, 0.18),
+                    inset: false,
+                },
+            ]);
         }
 
         root = root.child(segment);

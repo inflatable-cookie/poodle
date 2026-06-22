@@ -9,7 +9,7 @@
 //! has no DOM/overlay-positioning engine in the component layer). `overlay()`
 //! lifts the surface above normal content.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::PopoverSpec;
 
@@ -38,9 +38,10 @@ pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: O
     let min_w = rem_to_px(spec.effective_surface_min_width_rem());
     let max_w = rem_to_px(spec.effective_surface_max_width_rem());
 
-    // Contract `elevation-overlay` resolved token-accurately from the typed
-    // semantic token via the runtime shadow builder (single layer, spread 0;
-    // matches GPUI's mapping). The contract's multi-layer stack is the residual.
+    // Contract §8 box-shadow is a 3-layer stack: an inset top highlight over two
+    // drop shadows. `elevation_overlay` supplies the token-accurate primary drop;
+    // the contract's `inset 0 0.0625rem 0 rgba(255,255,255,0.08)` top highlight is
+    // layered on top via `shadow_layers` (rendered alongside the primary shadow).
     let mut el = elevation_overlay(
         ui_element::div()
             .bg(fill)
@@ -52,7 +53,15 @@ pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: O
             .pt(pad_y)
             .pb(pad_y)
             .min_w(min_w)
-            .max_w(max_w),
+            .max_w(max_w)
+            .shadow_layers(vec![BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.0625),
+                blur: 0.0,
+                spread: 0.0,
+                color: glam::Vec4::new(1.0, 1.0, 1.0, 0.08),
+                inset: true,
+            }]),
     )
     .overlay(); // Render above normal content.
 

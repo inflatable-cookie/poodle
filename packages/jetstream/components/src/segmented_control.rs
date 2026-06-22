@@ -1,6 +1,6 @@
 //! SegmentedControl — Jetstream segmented control backed by SegmentedControlSpec.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SegmentedControlSpec;
 
@@ -69,10 +69,16 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
             .focusable();
 
         if is_selected {
-            // Contract §8 selected: accent fill + inverse text. The contract's
-            // `box-shadow: inset 0 0.0625rem 0 color-mix(white 12%)` highlight is
-            // not representable on JsEl (no shadow/inset support) — flat fill only.
-            seg = seg.bg(selected_fill);
+            // Contract §8 selected: accent fill + inverse text + an
+            // `inset 0 0.0625rem 0 white@12%` top-highlight box-shadow.
+            seg = seg.bg(selected_fill).shadow_layers(vec![BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.0625),
+                blur: 0.0,
+                spread: 0.0,
+                color: glam::Vec4::new(1.0, 1.0, 1.0, 0.12),
+                inset: true,
+            }]);
         }
 
         if spec.equal_width {
