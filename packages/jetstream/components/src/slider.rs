@@ -141,6 +141,10 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         el = el.opacity(opacity).disabled(true);
+    } else {
+        // Keyboard-operable per contract — mark focusable so it can hold focus and
+        // render the focus ring (the runtime draws theme.focus_color when focused).
+        el = el.focusable();
     }
 
     el

@@ -39,12 +39,20 @@ fn headless_device() -> (wgpu::Device, wgpu::Queue) {
 
 /// Render a JsEl scene to a PNG at the given logical size.
 fn snapshot(el: &JsEl, w: u32, h: u32, path: &str) {
+    snapshot_opts(el, w, h, path, false);
+}
+
+/// As [`snapshot`], optionally focusing the first focusable node (to show focus rings).
+fn snapshot_opts(el: &JsEl, w: u32, h: u32, path: &str, focus_first: bool) {
     let (device, queue) = headless_device();
     let format = wgpu::TextureFormat::Rgba8UnormSrgb;
 
     // Layout the scene (real GameUi materialize + Taffy layout).
     let mut ui = GameUi::new(w as f32, h as f32);
     ui.render_immediate(el);
+    if focus_first {
+        ui.focus.navigate(&ui.tree, NavDirection::Next);
+    }
     let cmds = collect_draw_commands(&ui.tree, &ui.focus, &Theme::default());
     let quads = convert_draw_commands_scaled(&cmds, 1.0);
 
@@ -181,4 +189,23 @@ fn main() {
         .justify_center()
         .child(card(1));
     snapshot(&solo, 420, 300, "/tmp/poodle-snap-solo.png");
+
+    // Focus-ring test: two input-like focusable boxes; focus the first.
+    let input_color = resolve_color(&theme, "color.background.input");
+    let field = || ui_element::div()
+        .w(220.0).h(40.0)
+        .bg(input_color)
+        .rounded(8.0)
+        .border(1.0)
+        .border_color(border)
+        .focusable();
+    let focus_scene = ui_element::div()
+        .w(540.0).h(120.0)
+        .flex_row()
+        .items_center()
+        .gap(40.0)
+        .pl(30.0)
+        .child(field())  // focused → should show focus ring
+        .child(field()); // unfocused → plain border
+    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true);
 }

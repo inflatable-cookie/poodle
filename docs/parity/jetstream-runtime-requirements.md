@@ -26,8 +26,15 @@ The friction was the thin `JsEl` builder (`ui_element.rs`) **under-exposing a ca
 `tick_transitions(dt)` runs every frame. So most P1/P2 items below are **builder wire-ups + draw-
 honor checks**, not new subsystems:
 
-- **P1-1 focus-visible** → add `.focus(\|s\|…)` override mirroring `.hover`/`.active`; `FocusState`
-  + a focus-ring draw path already exist. (Small.)
+- **P1-1 focus-visible** → **ALREADY WORKS (corrected 2026-06-22 by offscreen render).** `draw.rs`
+  swaps `border_color → theme.focus_color` (the `border_focus` token) at ≥2px whenever a `.focusable()`
+  node holds `FocusState` focus, and rasterizes it. **Visually confirmed** via the new offscreen snap
+  harness (focused field shows the blue ring, unfocused doesn't). 55/56 interactive `js_*` already
+  mark `.focusable()` (slider was the lone miss — now fixed). **Residual is fidelity + state, not
+  absence:** the ring is a 2px border-recolor, not the contract's outset `box-shadow 0 0 0 3px focus.ring`
+  with offset; and it only appears once something sets focus (Jetstream's host/preview event loop —
+  the accepted interaction-loop bucket). An exact outset ring would need a focus-state style merge
+  (`focus_style.shadow`) — a nicety, since a token-colored ring already renders.
 - **P1-2 custom/inset/multi-layer shadow + elevation** → **LANDED (single-layer):** the runtime now
   has `JsEl::shadow(offset_x, offset_y, blur, spread, color)` feeding the same `style.shadow` the draw
   bridge rasterizes (render path proven). Poodle's Jetstream overlays now resolve **token-accurate
@@ -70,6 +77,23 @@ engine work:
   `flex_basis(f32)` builders take **px**, so percent *width on a div* is still not reachable (P3-6).
 - **Interaction events** — `on_click`, `on_drag`, `on_mouse_down`, `on_pointer_enter/leave`,
   `on_scroll`, `focusable` exist; widgets `text_input`, `slider`, `progress`, `rich_text`, `image`.
+- **Focus rings** — render automatically (see P1-1): focused `.focusable()` node draws the
+  `theme.focus_color` ring. No engine work to get a focus indicator.
+- **`.hover()` / `.active()` ARE dead for generic elements** (the *real* stub, distinct from focus):
+  `JsStyleOverride` is stored on `JsEl` but **read nowhere** in materialize/draw — only
+  `Widget::Button` has a built-in theme hover/pressed bg. So a `.hover()`/`.active()` on a plain
+  `div` (row/card highlight) has no effect. Wiring it needs (a) an override-merge in draw-gen +
+  (b) per-node hovered/pressed state from the host loop — i.e. the interaction-loop bucket, not a
+  quick builder. (Focus works *because* `FocusState` tracks the focused node generically; hover has
+  no equivalent generic state.)
+
+### Pixel verification is now available (new)
+
+`packages/jetstream/preview/src/bin/snap.rs` renders a `JsEl` scene to a PNG on a **headless wgpu
+device** (no window), reusing the preview's `capture_screenshot` path. Quads-only (bg / border /
+**shadow** / focus ring; no glyph pass). Visual deltas in the runtime can now be confirmed by
+inspecting a PNG — this already corrected two wrong entries in this doc (focus rings "not drawn",
+and the shadow render path). **Verify visually before claiming a render gap.**
 
 **Action item (Poodle-side, no engine work):** audit impls still flat-approximating gradients /
 multi-side borders and upgrade them. Tracked separately from the engine asks below.
@@ -78,7 +102,7 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 
 | # | Capability | Status | Unblocks (≈ docs) | Current workaround | Suggested API |
 |---|---|---|---|---|---|
-| 1 | **focus-visible style state** | missing (`.focusable()` sets tabindex but there is no `.focus(\|s\|…)` style state; only `.hover`/`.active`) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34**) | none — focus ring simply not drawn | `.focus(\|s\| s.border_color(..).shadow(..))` mirroring `hover`/`active`; engine paints it when the element holds keyboard focus (`FocusState` already exists in the runtime) |
+| 1 | **focus-visible style state** | **PRESENT — corrected** (the engine already draws a `theme.focus_color` ring at ≥2px for the focused `.focusable()` node; visually confirmed) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34** — but most are NOT a gap; the ring renders) | ring renders on focus; 55/56 components mark `.focusable()` (slider fixed) | **residual only:** outset `box-shadow 0 0 0 3px` fidelity (vs the 2px border-recolor) via a `focus_style.shadow` merge; + host focus-state mgmt (interaction-loop bucket). Not a missing primitive. |
 | 2 | **token-driven / custom / inset / multi-layer box-shadow** | **single-layer LANDED** (`JsEl::shadow(offset_x,offset_y,blur,spread,color)` exists; Poodle resolves `ELEVATION_*` ShadowValue tokens via `theme_ext::elevation_*`); still missing **inset** + **stacked layers** | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | overlays/modals/raised surfaces now draw the **token-accurate single-layer** `elevation.surface/overlay/dialog` (preset→token swap done, matches GPUI); multi-layer stacks + inset rings still collapse to one layer (inset rings drawn as a 1px border) | `.shadow(BoxShadow{…,inset})` + `.shadow_layers(vec![..])` for the multi-layer/inset residual; the structured-token `.elevation(token)` equivalent is now wired in Poodle's `theme_ext` |
 | 3 | **font-family channel** | missing (`font_family` 0 refs) | code, code-input (monospace cells), kbd chips (menu / command-palette / text-input shortcut / data-table), audio/video time labels (tabular/mono) (**12**) | default sans for everything; mono lost | `.font_family(family)` accepting the `typography.{label,body,code}.family` token (or a `FontFamily` enum Sans/Mono) |
 | 4 | **letter-spacing / tracking** | missing | eyebrow (0.12em), badges (0.04/0.03em), table headers, section titles, kbd (resets tracking) (**19**) | dropped (visual-only, no functional loss) | `.letter_spacing(em: f32)` |
@@ -105,10 +129,10 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 
 ## Suggested order
 
-1. **P1-1 focus-visible** and **P1-2 box-shadow builder/elevation** — the two highest-impact
-   visual gaps (34 + 55 docs), both concrete `JsEl` builder + render additions with existing
-   substrate (`FocusState`, `BoxShadow`). These alone close the bulk of the "looks unfinished"
-   deltas.
+1. ~~P1-1 focus-visible~~ and ~~P1-2 box-shadow builder/elevation~~ — **both largely DONE.**
+   Focus rings already render (P1-1 corrected); custom shadow + token elevation landed (P1-2).
+   The two biggest "looks unfinished" deltas are mostly closed. Residual: outset focus-ring
+   fidelity + multi-layer/inset shadow — both niceties, deferrable.
 2. **P1-3/4/5** (font-family, letter-spacing, dashed) — small, independent, typography/border
    fidelity.
 3. **P2-6 animation** — large but high perceived value.
