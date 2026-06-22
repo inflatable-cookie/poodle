@@ -374,7 +374,7 @@ fn render_specimen(
         "switch" => Some(switch::render(theme)),
         "tab-strip" => Some(tab_strip::render(theme)),
         "table" => Some(table::render(theme)),
-        "tabs" => Some(tabs::render(theme)),
+        "tabs" => Some(tabs::render(state, theme)),
         "text" => Some(text::render(theme)),
         "text-input" => Some(text_input::render(theme)),
         "text-link" => Some(text_link::render(theme)),

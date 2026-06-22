@@ -482,6 +482,16 @@ impl PreviewState {
                     // Winit 0.30 CursorMoved reports physical pixels.
                     self.mouse_x = *x as f32 / scale;
                     self.mouse_y = *y as f32 / scale;
+                    // During a tabs drag, follow the cursor with the drop-target
+                    // ring (only while a tab is being dragged, so the tree drag
+                    // path is untouched).
+                    if self.app.tabs.drag_source.is_some() {
+                        let target = self.tab_at(self.mouse_x, self.mouse_y);
+                        if target != self.app.tabs.drop_target {
+                            self.app.tabs.drop_target = target;
+                            self.app.dirty = true;
+                        }
+                    }
                 }
                 PlatformEvent::MouseButton { button, pressed } => {
                     if matches!(button, PlatMouseButton::Left) {
@@ -492,7 +502,18 @@ impl PreviewState {
                             // Mouse-down: remember a potential drag source row.
                             self.app.tree.drag_source =
                                 self.tree_node_at(self.mouse_x, self.mouse_y);
+                            // Tabs specimen: remember the tab grabbed at mouse-down.
+                            self.app.tabs.drag_source =
+                                self.tab_at(self.mouse_x, self.mouse_y);
                         } else if was_down && !pressed {
+                            // Tabs drag-reorder takes priority when a tab was grabbed.
+                            if let Some(from) = self.app.tabs.drag_source.take() {
+                                if let Some(to) = self.tab_at(self.mouse_x, self.mouse_y) {
+                                    self.app.tabs_reorder(&from, &to);
+                                }
+                                self.app.tabs.drop_target = None;
+                                self.app.dirty = true;
+                            }
                             let source = self.app.tree.drag_source.take();
                             let target = self.tree_node_at(self.mouse_x, self.mouse_y);
                             match (source, target) {
@@ -724,6 +745,17 @@ impl PreviewState {
             .get(hit)
             .and_then(|n| n.style.token_key.clone())?;
         token.strip_prefix("tree:").map(|s| s.to_string())
+    }
+
+    /// The tab value under the cursor (parsed from its `tabs:` token).
+    fn tab_at(&self, x: f32, y: f32) -> Option<String> {
+        let hit = self.game_ui.tree.hit_test(x, y)?;
+        let token = self
+            .game_ui
+            .tree
+            .get(hit)
+            .and_then(|n| n.style.token_key.clone())?;
+        token.strip_prefix("tabs:").map(|s| s.to_string())
     }
 
     fn handle_activation(&mut self, node_id: UiNodeId) {

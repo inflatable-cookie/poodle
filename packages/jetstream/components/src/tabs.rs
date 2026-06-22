@@ -145,6 +145,9 @@ fn apply_drag_state(
     spec: &TabsSpec,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
+    // Hit-test id so the preview host can identify which tab is under the
+    // cursor during a drag (matches the tree's `tree:<value>` convention).
+    tab_el = tab_el.id(format!("tabs:{tab_value}"));
     if spec.is_drag_value(tab_value) {
         tab_el = tab_el.opacity(0.4);
     }

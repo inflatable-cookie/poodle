@@ -3,7 +3,7 @@
 //! Mirrors the GPUI preview app's state structure: section navigation,
 //! theme preset, density, control size, and per-specimen interaction state.
 
-use poodle_specs::{reorder_nodes, DropPosition, TreeNode, TreeSpec};
+use poodle_specs::{reorder_nodes, DropPosition, TabDefinition, TreeNode, TreeSpec};
 
 fn set_label(nodes: &mut [TreeNode], value: &str, label: &str) {
     for n in nodes.iter_mut() {
@@ -290,6 +290,55 @@ impl TreePreviewState {
     }
 }
 
+/// Interactive state for the Tabs specimen (one reorderable instance).
+///
+/// Mirrors the Tree specimen's drag-reorder model: `drag_source` holds the tab
+/// grabbed at mouse-down, `drop_target` follows the cursor during the drag so
+/// the drop-target ring renders live, and `reorder` moves the dragged tab to
+/// the target's position in the flat ordered list.
+pub struct TabsPreviewState {
+    /// Ordered list of tabs (drag-reorder mutates the order).
+    pub tabs: Vec<TabDefinition>,
+    /// Currently active tab value.
+    pub active: String,
+    /// Tab grabbed at mouse-down, for drag-reorder on release.
+    pub drag_source: Option<String>,
+    /// Tab under the cursor during a drag (drop-target ring).
+    pub drop_target: Option<String>,
+}
+
+impl TabsPreviewState {
+    pub fn new() -> Self {
+        Self {
+            tabs: vec![
+                TabDefinition::new("overview", "Overview"),
+                TabDefinition::new("details", "Details"),
+                TabDefinition::new("settings", "Settings"),
+                TabDefinition::new("activity", "Activity"),
+            ],
+            active: "overview".to_string(),
+            drag_source: None,
+            drop_target: None,
+        }
+    }
+
+    /// Move tab `from` to `to`'s position in the flat list. No-op if either
+    /// value is missing or they are the same.
+    pub fn reorder(&mut self, from: &str, to: &str) {
+        if from == to {
+            return;
+        }
+        let Some(from_idx) = self.tabs.iter().position(|t| t.value == from) else {
+            return;
+        };
+        let Some(to_idx) = self.tabs.iter().position(|t| t.value == to) else {
+            return;
+        };
+        let item = self.tabs.remove(from_idx);
+        self.tabs.insert(to_idx, item);
+    }
+}
+
 /// Global application state.
 pub struct AppState {
     pub section: Section,
@@ -310,6 +359,8 @@ pub struct AppState {
     pub reset_content_scroll: bool,
     /// Interactive state for the Tree specimen.
     pub tree: TreePreviewState,
+    /// Interactive state for the Tabs specimen (reorderable instance).
+    pub tabs: TabsPreviewState,
 }
 
 impl AppState {
@@ -329,6 +380,7 @@ impl AppState {
             reset_sidebar_scroll: true,
             reset_content_scroll: true,
             tree: TreePreviewState::new(),
+            tabs: TabsPreviewState::new(),
         }
     }
 
@@ -427,6 +479,21 @@ impl AppState {
     pub fn tree_reorder(&mut self, from: &str, to: &str, position: DropPosition) {
         self.tree.reorder(from, to, position);
         self.dirty = true;
+    }
+
+    /// Move the dragged tab `from` to `to`'s position in the reorderable list.
+    pub fn tabs_reorder(&mut self, from: &str, to: &str) {
+        self.tabs.reorder(from, to);
+        self.dirty = true;
+    }
+
+    /// Build the reorderable Tabs spec from the current interactive state.
+    pub fn tabs_spec(&self) -> poodle_specs::TabsSpec {
+        poodle_specs::TabsSpec::new(self.tabs.tabs.clone())
+            .with_value(&self.tabs.active)
+            .with_reorderable(true)
+            .with_drag_value(self.tabs.drag_source.clone())
+            .with_drop_target_value(self.tabs.drop_target.clone())
     }
 
     /// Drop position for a drag onto `to`: into branches, after leaves.

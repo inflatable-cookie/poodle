@@ -8,7 +8,9 @@ use poodle_specs::{
     ControlDensity, ControlSize, Orientation, TabDefinition, TabVariant, TabsSpec,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+use crate::app_state::AppState;
+
+pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Basic tabs — used for most variant groups.
@@ -180,18 +182,15 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 
         // ── Drag reorder states (drag-source + drop-target) ──────────────
         // Contract §4: drag-source = opacity 0.4; drop-target = inset
-        // accent-base ring. Host-set transient state; here it is set on the
-        // spec directly so the visual is renderable for offscreen review.
-        .child(group("Reorder — dragging 'details', over 'settings' (Underline)", secondary,
-            js_tabs(
-                &TabsSpec::new(items.clone())
-                    .with_value("overview")
-                    .with_reorderable(true)
-                    .with_drag_value(Some("details".into()))
-                    .with_drop_target_value(Some("settings".into())),
-                theme,
-            )
+        // accent-base ring. This group is LIVE — it renders from AppState and
+        // responds to a real pointer drag (see the MouseButton/MouseMoved
+        // handlers in main.rs). Drag a tab to reorder; the dragged tab dims to
+        // 0.4 and the tab under the cursor shows the accent ring.
+        .child(group("Reorder — drag a tab to reorder (live)", secondary,
+            js_tabs(&state.tabs_spec(), theme)
         ))
+        // The remaining reorder group is a static snapshot of the states for
+        // offscreen review (spec-set drag/drop values).
         .child(group("Reorder — dragging 'details', over 'settings' (Card)", secondary,
             js_tabs(
                 &TabsSpec::new(items.clone())
