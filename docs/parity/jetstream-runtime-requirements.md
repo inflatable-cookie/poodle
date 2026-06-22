@@ -26,15 +26,13 @@ The friction was the thin `JsEl` builder (`ui_element.rs`) **under-exposing a ca
 `tick_transitions(dt)` runs every frame. So most P1/P2 items below are **builder wire-ups + draw-
 honor checks**, not new subsystems:
 
-- **P1-1 focus-visible** → **ALREADY WORKS (corrected 2026-06-22 by offscreen render).** `draw.rs`
-  swaps `border_color → theme.focus_color` (the `border_focus` token) at ≥2px whenever a `.focusable()`
-  node holds `FocusState` focus, and rasterizes it. **Visually confirmed** via the new offscreen snap
-  harness (focused field shows the blue ring, unfocused doesn't). 55/56 interactive `js_*` already
-  mark `.focusable()` (slider was the lone miss — now fixed). **Residual is fidelity + state, not
-  absence:** the ring is a 2px border-recolor, not the contract's outset `box-shadow 0 0 0 3px focus.ring`
-  with offset; and it only appears once something sets focus (Jetstream's host/preview event loop —
-  the accepted interaction-loop bucket). An exact outset ring would need a focus-state style merge
-  (`focus_style.shadow`) — a nicety, since a token-colored ring already renders.
+- **P1-1 focus-visible** → **DONE 2026-06-22.** A focused `.focusable()` node now renders the
+  contract's outset focus ring — `draw.rs` emits a `box-shadow` (offset 0, blur 0, spread = 2px
+  focus width) in `theme.focus_color`, sitting outside the element without disturbing its border
+  (was a border-recolor). **Offscreen-verified** (focused field shows a blue ring outside its
+  border, unfocused none). 56/56 interactive `js_*` mark `.focusable()` (slider fixed). The host
+  sets focus via its event loop (preview keyboard/click); that's the only remaining wiring and it
+  already exists for the interactive specimens.
 - **P1-2 custom/inset/multi-layer shadow + elevation** → **LANDED (single-layer):** the runtime now
   has `JsEl::shadow(offset_x, offset_y, blur, spread, color)` feeding the same `style.shadow` the draw
   bridge rasterizes (render path proven). Poodle's Jetstream overlays now resolve **token-accurate
@@ -110,7 +108,7 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 
 | # | Capability | Status | Unblocks (≈ docs) | Current workaround | Suggested API |
 |---|---|---|---|---|---|
-| 1 | **focus-visible style state** | **PRESENT — corrected** (the engine already draws a `theme.focus_color` ring at ≥2px for the focused `.focusable()` node; visually confirmed) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34** — but most are NOT a gap; the ring renders) | ring renders on focus; 55/56 components mark `.focusable()` (slider fixed) | **residual only:** outset `box-shadow 0 0 0 3px` fidelity (vs the 2px border-recolor) via a `focus_style.shadow` merge; + host focus-state mgmt (interaction-loop bucket). Not a missing primitive. |
+| 1 | **focus-visible style state** | **DONE** (outset `box-shadow` ring, spread = 2px focus width, in `theme.focus_color`; visually confirmed) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34**) | renders the contract outset ring on focus; 56/56 components mark `.focusable()` | done — host sets focus via its event loop (already wired for interactive specimens) |
 | 2 | **token-driven / custom / inset / multi-layer box-shadow** | **single-layer LANDED** (`JsEl::shadow(offset_x,offset_y,blur,spread,color)` exists; Poodle resolves `ELEVATION_*` ShadowValue tokens via `theme_ext::elevation_*`); still missing **inset** + **stacked layers** | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | overlays/modals/raised surfaces now draw the **token-accurate single-layer** `elevation.surface/overlay/dialog` (preset→token swap done, matches GPUI); multi-layer stacks + inset rings still collapse to one layer (inset rings drawn as a 1px border) | `.shadow(BoxShadow{…,inset})` + `.shadow_layers(vec![..])` for the multi-layer/inset residual; the structured-token `.elevation(token)` equivalent is now wired in Poodle's `theme_ext` |
 | 3 | **font-family channel** | **DONE 2026-06-22** (offscreen-verified) | code, code-input, kbd chips (menu/context-menu/menubar/command-palette/action-discovery), audio/video time labels, duration-input, markdown-editor, slug text-input, metric-tile, color-picker hex (**~15 wired**) | — | `JsEl::font_family(FontFamily::{Sans,Mono})` landed (sans default; cosmic-text Family). 15 components now request Mono where the contract specifies code-family; sans already resolved to a system sans. Residual: a *specific* embedded sans (Inter) for exact parity vs the system fallback — not blocking. |
 | 4 | **letter-spacing / tracking** | **DONE 2026-06-22** (offscreen-verified) | eyebrow (0.12/0.04em), badge, table header, field-set legend, meta-item, order-by, nav-card, sidebar-nav (0.18em), code lang, page-header, button (0.01em), calendar, pill, … (**~20 wired**) | — | `JsEl::letter_spacing_em(f32)` landed (em, scales with font size); contract-exact values applied per component; eyebrow pulls `spec.letter_spacing_em()`. |
@@ -138,11 +136,11 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 ## Suggested order
 
 1. ~~P1-1 focus-visible~~ and ~~P1-2 box-shadow builder/elevation~~ — **both largely DONE.**
-   Focus rings already render (P1-1 corrected); custom shadow + token elevation landed (P1-2).
-   The two biggest "looks unfinished" deltas are mostly closed. Residual: outset focus-ring
-   fidelity + multi-layer/inset shadow — both niceties, deferrable.
-2. **P1-3/4/5** (font-family, letter-spacing, dashed) — small, independent, typography/border
-   fidelity.
+   Focus rings render the contract outset ring (P1-1 DONE); custom shadow + token elevation
+   landed (P1-2). The two biggest "looks unfinished" deltas are closed. Residual: multi-layer/
+   inset shadow — niche, deferrable.
+2. **P1-3/4** (font-family, letter-spacing) — DONE. **P1-5 dashed/dotted border** — remaining
+   (shader work in `ui_quad.wgsl`); niche (drop-zones, dotted underlines).
 3. **P2-6 animation** — large but high perceived value.
 4. **P3-8 accessibility** — its own epic, coordinate platform-wide.
 5. The rest (P3-9..14) are niche/accepted; do opportunistically.
