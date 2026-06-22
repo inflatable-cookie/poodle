@@ -123,6 +123,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .text_color(text_color)
         .text_size(label_size)
         .text_weight(500) // contract: font-weight: var(--poodle-typography-label-weight) = 500
+        .letter_spacing_em(0.01) // contract §8: letter-spacing 0.01em
         .flex_row()
         .items_center()
         .justify_center()
@@ -175,6 +176,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 ui_element::label(&label_text)
                     .text_size(label_size)
                     .text_color(text_color)
+                    .letter_spacing_em(0.01) // contract §8: letter-spacing 0.01em
             );
         }
 

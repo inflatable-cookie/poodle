@@ -28,9 +28,9 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
     let label_weight = spec.label_font_weight(); // typography.label.weight (500)
     let gap = rem_to_px(spec.gap_rem());
 
-    // Jetstream's current text API does not expose font-family, letter-spacing,
-    // or line-height controls, so those typography details remain documented
-    // runtime deltas for now (contract §10 Known Delta).
+    // Jetstream's current text API does not expose font-family or line-height
+    // controls, so those typography details remain documented runtime deltas for
+    // now (contract §10 Known Delta). Label letter-spacing 0.08em is applied.
     let mut row = ui_element::div()
         .flex_row()
         .flex_wrap()
@@ -44,6 +44,7 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
                 .text_color(label_color)
                 .text_size(label_size)
                 .text_weight(label_weight)
+                .letter_spacing_em(0.08) // contract §8: letter-spacing 0.08em
         );
     }
 

@@ -179,6 +179,7 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
                 .text_size(font_size)
                 .text_weight(500)
                 .text_color(colors.text)
+                .letter_spacing_em(0.01) // contract §8: letter-spacing 0.01em
                 .whitespace_nowrap(),
         );
     }

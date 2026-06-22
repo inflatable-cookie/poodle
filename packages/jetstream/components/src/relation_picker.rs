@@ -267,7 +267,8 @@ fn build_search(
                     ui_element::label(&level.label.to_uppercase())
                         .text_color(text_secondary)
                         .text_size(label_size)
-                        .text_weight(600),
+                        .text_weight(600)
+                        .letter_spacing_em(0.08), // contract drill-level-label: 0.08em
                 );
             }
         }

@@ -194,7 +194,8 @@ pub fn js_media_thumbnail(spec: &MediaThumbnailSpec, theme: &JetstreamThemeProvi
                     ui_element::label(&badge_label.to_uppercase())
                         .text_color(badge_color)
                         .text_size(badge_text_size)
-                        .text_weight(600),
+                        .text_weight(600)
+                        .letter_spacing_em(0.04), // contract badge: letter-spacing 0.04em
                 ),
         );
     }

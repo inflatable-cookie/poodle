@@ -306,6 +306,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
             .id(id)
             .text_size(month_label_font_px)
             .text_weight(600)
+            .letter_spacing_em(0.02) // contract __month: letter-spacing 0.02em
             .text_color(text_primary)
             .border_b_1()
             .border_color(trigger_underline);
@@ -354,6 +355,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
                 .justify_center()
                 .text_size(weekday_font_px)
                 .text_weight(600)
+                .letter_spacing_em(0.04) // contract __weekday: letter-spacing 0.04em
                 .text_color(text_secondary)
                 .text_align_center(),
         );

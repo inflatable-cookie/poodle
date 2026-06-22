@@ -124,11 +124,13 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
     let build_segment = |unit_label: &str, value_text: &str| -> JsEl {
         // Root sets code-family (contract §8); JsEl has no inheritance so each
         // text leaf carries FontFamily::Mono explicitly.
-        // Label: per-size font, secondary, line-height 1.
+        // Label: per-size font, secondary, line-height 1, tracking 0.05em
+        // (contract §8 Label letter-spacing).
         let label = ui_element::label(unit_label)
             .text_size(label_font)
             .line_height(label_font)
             .text_color(text_secondary)
+            .letter_spacing_em(0.05)
             .font_family(FontFamily::Mono);
 
         // Field: per-size width, digit font, centered, line-height 1.

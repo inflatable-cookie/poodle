@@ -53,6 +53,7 @@ pub fn js_inline_list_section(
             ui_element::label(spec.title.to_uppercase())
                 .text_size(label_size)
                 .text_weight(600)
+                .letter_spacing_em(0.05) // contract Title: letter-spacing 0.05em
                 .text_color(text_secondary),
         );
     if let Some(count) = &spec.count {

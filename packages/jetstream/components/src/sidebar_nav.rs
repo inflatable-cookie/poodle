@@ -90,6 +90,7 @@ pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> 
                 .text_color(group_title_color)
                 .text_size(title_font)
                 .text_weight(700)
+                .letter_spacing_em(0.18) // contract §8 title tracking: 0.18em
                 .pl(item_px)
                 .pr(item_px)
                 .mb(title_gap);

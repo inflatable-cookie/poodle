@@ -108,9 +108,9 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.size, spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
     // `font="mono"` now resolves through the JsEl font-family channel to
-    // `--poodle-pill-mono` → code-family (contract §8 `.pill[data-font="mono"]`).
-    // The badge `letter-spacing: 0.04em` is still a documented runtime delta (no
-    // tracking channel). The pill renders as a single Label, so the
+    // `--poodle-pill-mono` → code-family (contract §8 `.pill[data-font="mono"]`,
+    // which also sets letter-spacing 0.02em). Badge appearance sets 0.04em
+    // (contract §8 badge). The pill renders as a single Label, so the
     // `--poodle-pill-gap` content gap has no inline child to separate yet; PillSpec
     // models no icon prop (Svelte composes the optional icon via a slot), so the
     // label-only render is faithful until an icon prop lands.
@@ -135,8 +135,13 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .pl(rem_to_px(pad_x)).pr(rem_to_px(pad_x))
         .pt(rem_to_px(pad_y)).pb(rem_to_px(pad_y));
 
+    // Letter-spacing: mono variant (0.02em) is the most specific tracking rule
+    // for the text run; otherwise badge appearance carries 0.04em. Base pills
+    // have no letter-spacing rule (0 = default).
     if spec.font == PillFont::Mono {
-        el = el.font_family(FontFamily::Mono);
+        el = el.font_family(FontFamily::Mono).letter_spacing_em(0.02);
+    } else if spec.appearance == PillAppearance::Badge {
+        el = el.letter_spacing_em(0.04);
     }
 
     if spec.is_muted {

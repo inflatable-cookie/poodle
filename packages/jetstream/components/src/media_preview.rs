@@ -57,7 +57,8 @@ pub fn js_media_preview(spec: &MediaPreviewSpec, theme: &JetstreamThemeProvider)
             ui_element::label(&eyebrow.to_uppercase())
                 .text_color(text_secondary)
                 .text_size(eyebrow_size)
-                .text_weight(600),
+                .text_weight(600)
+                .letter_spacing_em(0.12), // contract Eyebrow: letter-spacing 0.12em
         );
     }
     heading = heading.child(

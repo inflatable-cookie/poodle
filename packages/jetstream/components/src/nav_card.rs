@@ -92,6 +92,7 @@ pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 .text_color(badge_color)
                 .text_size(badge_font)
                 .text_weight(600)
+                .letter_spacing_em(0.05) // contract §8 Badge: letter-spacing 0.05em
                 .bg(tint(badge_bg, 0.16))
                 .rounded(badge_radius)
                 .px(rem_to_px(0.375))

@@ -112,14 +112,16 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .border_b_1()
             .border_color(border);
 
-        // Language label: 0.6875rem, label-weight (500 = medium), uppercase.
-        // Programmatic uppercase (JsEl has no text-transform).
+        // Language label: 0.6875rem, label-weight (500 = medium), uppercase,
+        // letter-spacing 0.05em (contract §8). Programmatic uppercase (JsEl has
+        // no text-transform).
         if let Some(ref lang) = spec.language {
             toolbar = toolbar.child(
                 ui_element::label(lang.to_uppercase())
                     .text_size(rem_to_px(0.6875))
                     .text_color(text_secondary)
-                    .text_weight(500),
+                    .text_weight(500)
+                    .letter_spacing_em(0.05),
             );
         } else {
             // Spacer keeps the actions group right-aligned (margin-left: auto).

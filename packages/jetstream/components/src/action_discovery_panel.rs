@@ -259,7 +259,8 @@ pub fn js_action_discovery_panel(
                                 ui_element::label(badge.to_uppercase())
                                     .text_color(accent)
                                     .text_size(rem_to_px(chip_font))
-                                    .text_weight(600),
+                                    .text_weight(600)
+                                    .letter_spacing_em(0.03), // contract §9 chip: 0.03em
                             ),
                     );
                 }

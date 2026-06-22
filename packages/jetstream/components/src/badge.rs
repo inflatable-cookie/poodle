@@ -62,12 +62,12 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .bg(bg)
         .text_color(text_color)
         .text_size(rem_to_px(0.6875))
+        .letter_spacing_em(0.04) // contract: letter-spacing 0.04em
         .items_center()
         .justify_center()
-    // Note: text-transform: uppercase and letter-spacing: 0.04em are CSS-only
-    // properties not yet expressible in the JsEl API. The runtime text renderer
-    // would need to support these. For now, content should be pre-uppercased.
-    // font-weight: 700 also requires runtime text support.
+    // Note: text-transform: uppercase is a CSS-only property not yet expressible
+    // in the JsEl API; content should be pre-uppercased. font-weight: 700 also
+    // requires runtime text support.
 }
 
 #[cfg(test)]

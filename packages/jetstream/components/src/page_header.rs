@@ -117,7 +117,8 @@ pub fn js_page_header_with_slots(
             ui_element::label(&eyebrow.to_uppercase())
                 .text_color(eyebrow_color)
                 .text_size(eyebrow_size)
-                .text_weight(600),
+                .text_weight(600)
+                .letter_spacing_em(0.12), // contract __eyebrow: letter-spacing 0.12em
         );
     }
 
@@ -128,7 +129,8 @@ pub fn js_page_header_with_slots(
                 ui_element::label(&section.to_uppercase())
                     .text_color(section_color)
                     .text_size(section_size)
-                    .text_weight(700),
+                    .text_weight(700)
+                    .letter_spacing_em(0.08), // contract __section: letter-spacing 0.08em
             );
         }
     }

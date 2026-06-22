@@ -391,4 +391,21 @@ fn main() {
         .child(ui_element::label("Source (expect monospace):").text_size(13.0).text_color(muted))
         .child(code);
     snapshot(&code_scene, 460, 160, "/tmp/poodle-snap-code.png");
+
+    // Letter-spacing: same eyebrow label normal vs 0.12em tracked (contract eyebrow value).
+    let ls_scene = ui_element::div()
+        .w(460.0).h(120.0).p(24.0).bg(panel).flex_col().gap(18.0)
+        .child(ui_element::label("SECTION TITLE").text_size(13.0).text_weight(600).text_color(muted))
+        .child(ui_element::label("SECTION TITLE").text_size(13.0).text_weight(600).text_color(muted).letter_spacing_em(0.12));
+    snapshot(&ls_scene, 460, 120, "/tmp/poodle-snap-letterspacing.png");
+
+    // Real component spot-check: eyebrow (uppercased + 0.12em tracked from its spec).
+    let eb = poodle_jetstream_components::eyebrow::js_eyebrow(
+        &poodle_specs::EyebrowSpec::new().with_content("overview"),
+        &theme,
+    );
+    let eb_scene = ui_element::div()
+        .w(460.0).h(90.0).p(24.0).bg(panel).flex_col()
+        .child(eb);
+    snapshot(&eb_scene, 460, 90, "/tmp/poodle-snap-eyebrow.png");
 }

@@ -106,7 +106,8 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
             ui_element::label("SORT BY")
                 .text_color(text_secondary)
                 .text_size(label_font)
-                .text_weight(500),
+                .text_weight(500)
+                .letter_spacing_em(0.05), // contract §8 label: letter-spacing 0.05em
         );
     }
 

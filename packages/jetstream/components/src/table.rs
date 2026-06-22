@@ -84,13 +84,12 @@ pub fn js_table(spec: &TableSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border_color(header_border);
 
     for col in &spec.columns {
-        // Contract §8: header text-transform uppercase. `letter-spacing: 0.04em`
-        // is also specified; JsEl has no per-run letter-spacing, so spacing is
-        // an accepted approximation (uppercase applied).
+        // Contract §8: header text-transform uppercase + letter-spacing 0.04em.
         let mut header_cell = ui_element::label(col.label.to_uppercase())
             .text_color(header_text)
             .text_size(header_font)
             .text_weight(600)
+            .letter_spacing_em(0.04)
             .pl(cell_px)
             .pr(cell_px)
             .pt(cell_py)

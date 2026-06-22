@@ -39,14 +39,15 @@ pub fn js_field_set(
     // Root stacks legend → description → fields grid.
     let mut root = ui_element::div().flex_col();
 
-    // Legend (optional). letter-spacing 0.12em and line-height 1.5 have no JsEl
-    // API — accepted rendering delta; casing applied via to_uppercase().
+    // Legend (optional). Contract §6 letter-spacing 0.12em; line-height 1.5 has
+    // no JsEl API (accepted rendering delta); casing applied via to_uppercase().
     if let Some(ref legend) = spec.legend {
         root = root.child(
             ui_element::label(legend.to_uppercase())
                 .text_color(legend_color)
                 .text_size(legend_size)
                 .text_weight(600)
+                .letter_spacing_em(0.12)
                 .mb(resolve_px(theme, spec.legend_margin_bottom_token())),
         );
     }

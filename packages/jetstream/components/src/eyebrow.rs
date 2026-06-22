@@ -17,11 +17,13 @@ pub fn js_eyebrow(spec: &EyebrowSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let text = spec.content.as_deref().unwrap_or("").to_uppercase();
 
     // Contract §8: weight 600 (literal — heavier than the 500 label-weight token).
-    // line-height/letter-spacing/font-family have no JsEl channel (runtime gap).
+    // Contract §8 letter-spacing: 0.12em (xs/sm) / 0.04em (md) via the spec.
+    // line-height/font-family have no JsEl channel (runtime gap).
     let mut el = ui_element::label(text)
         .text_color(text_color)
         .text_size(font_size)
-        .text_weight(spec.font_weight());
+        .text_weight(spec.font_weight())
+        .letter_spacing_em(spec.letter_spacing_em());
 
     // Contract §8 spacing="bottom": bottom margin (0.5rem, 0.35rem for xs).
     let mb = spec.margin_bottom_rem();
