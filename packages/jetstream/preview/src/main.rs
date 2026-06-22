@@ -620,6 +620,7 @@ impl PreviewState {
                 let _clear = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("clear_pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        depth_slice: None,
                         view: surface_view,
                         resolve_target: None,
                         ops: wgpu::Operations {
@@ -630,6 +631,7 @@ impl PreviewState {
                     depth_stencil_attachment: None,
                     timestamp_writes: None,
                     occlusion_query_set: None,
+                    multiview_mask: None,
                 });
             }
 
@@ -918,6 +920,7 @@ impl PreviewState {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("text_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        depth_slice: None,
                     view: surface_view,
                     resolve_target: None,
                     ops: wgpu::Operations {
@@ -928,6 +931,7 @@ impl PreviewState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                    multiview_mask: None,
             });
 
             if let Some([sx, sy, sw, sh]) = scissor {
@@ -1094,6 +1098,7 @@ impl PreviewState {
             let _clear = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("screenshot_clear"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        depth_slice: None,
                     view: &readback_view,
                     resolve_target: None,
                     ops: wgpu::Operations {
@@ -1104,6 +1109,7 @@ impl PreviewState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                    multiview_mask: None,
             });
         }
 
@@ -1175,7 +1181,7 @@ impl PreviewState {
         slice.map_async(wgpu::MapMode::Read, move |result| {
             let _ = sender.send(result);
         });
-        gpu.device.poll(wgpu::Maintain::Wait);
+        let _ = gpu.device.poll(wgpu::PollType::wait_indefinitely());
 
         match receiver.recv() {
             Ok(Ok(())) => {

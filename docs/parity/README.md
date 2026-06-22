@@ -239,8 +239,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | toast-host | fixed | 0 | 0 | ok |
 | toast-stack | ok | 0 | 3 | ok |
 | toggle-group | fixed | 0 | 0 | ok |
-| token-input | fixed | 2 | 3 | gap |
-| toolbar | fixed | 1 | 1 | gap |
+| token-input | fixed | 2 | 3 | ok |
+| toolbar | fixed | 1 | 1 | ok |
 | tooltip | fixed | 0 | 0 | ok |
 | tree | ok | 0 | 0 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |
