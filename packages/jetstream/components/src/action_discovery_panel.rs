@@ -8,7 +8,7 @@
 //! Keyboard navigation / item activation are parent (event-loop) driven and
 //! are not wired here — the component renders at the current resolved state
 //! (`spec.active_id`, `spec.state`). No ARIA channel exists in Jetstream.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
@@ -277,10 +277,12 @@ pub fn js_action_discovery_panel(
                             .bg(tint(surface, 0.76))
                             .whitespace_nowrap()
                             .child(
+                                // Contract §9 kbd override: code-family (monospace).
                                 ui_element::label(shortcut)
                                     .text_color(text_secondary)
                                     .text_size(rem_to_px(chip_font))
-                                    .text_weight(600),
+                                    .text_weight(600)
+                                    .font_family(FontFamily::Mono),
                             ),
                     );
                 }

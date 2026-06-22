@@ -24,7 +24,7 @@
 //! limit. Interaction (trigger click, item nav, outside-click close) lives in the
 //! preview event loop.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenubarSpec};
 
@@ -203,8 +203,8 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
                         // Meta `.menubar__meta`: shortcut label (or check glyph
                         // for checked items) in text-secondary, 0.6875rem
-                        // (contract §8 Meta). Code-family is approximated — JsEl
-                        // has no font-family channel.
+                        // (contract §8 Meta). The shortcut hint is code-family
+                        // (monospace); the check glyph is an indicator, not meta text.
                         if item.is_checked {
                             row = row.child(
                                 ui_element::label("✓")
@@ -215,7 +215,8 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
                             row = row.child(
                                 ui_element::label(shortcut)
                                     .text_color(text_secondary)
-                                    .text_size(meta_font),
+                                    .text_size(meta_font)
+                                    .font_family(FontFamily::Mono),
                             );
                         }
 

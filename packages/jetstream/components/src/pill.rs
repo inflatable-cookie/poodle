@@ -1,9 +1,9 @@
 //! Pill — Jetstream pill/chip component backed by PillSpec.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{InlineTypographyMode, PillAppearance, PillSize, PillSpec, PillTone};
+use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
@@ -107,9 +107,10 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
 pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.size, spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
-    // Jetstream's current text API does not expose font-family or letter-spacing,
-    // so `font="mono"` and the badge `letter-spacing: 0.04em` remain documented
-    // runtime deltas for now. The pill renders as a single Label, so the
+    // `font="mono"` now resolves through the JsEl font-family channel to
+    // `--poodle-pill-mono` → code-family (contract §8 `.pill[data-font="mono"]`).
+    // The badge `letter-spacing: 0.04em` is still a documented runtime delta (no
+    // tracking channel). The pill renders as a single Label, so the
     // `--poodle-pill-gap` content gap has no inline child to separate yet; PillSpec
     // models no icon prop (Svelte composes the optional icon via a slot), so the
     // label-only render is faithful until an icon prop lands.
@@ -133,6 +134,10 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border_color(border)
         .pl(rem_to_px(pad_x)).pr(rem_to_px(pad_x))
         .pt(rem_to_px(pad_y)).pb(rem_to_px(pad_y));
+
+    if spec.font == PillFont::Mono {
+        el = el.font_family(FontFamily::Mono);
+    }
 
     if spec.is_muted {
         el = el.opacity(0.72);

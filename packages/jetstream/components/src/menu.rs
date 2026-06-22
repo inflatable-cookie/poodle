@@ -3,11 +3,11 @@
 //! Contract: `docs/contracts/components/menu.md`
 //! Reference: `packages/svelte/components/src/Menu.svelte` (+ `MenuSurface.svelte`)
 //!
-//! All geometry resolves from tokens or contract-exact rems. Two JsEl gaps are
-//! noted inline: the runtime has no font-family setter (contract meta wants
-//! `typography.code.family`), and `shadow_md()` approximates `elevation-overlay`.
+//! All geometry resolves from tokens or contract-exact rems. The shortcut meta
+//! column uses `FontFamily::Mono` per contract §8 (`typography.code.family`);
+//! `shadow_md()` approximates `elevation-overlay`.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenuSpec};
 
@@ -125,12 +125,11 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 // Trailing shortcut hint (contract meta column).
                 if let Some(ref shortcut) = entry.shortcut_label {
                     item = item.child(
-                        // NOTE: contract meta wants typography.code.family; the
-                        // runtime has no font-family setter, so the default font
-                        // is used at the contract meta size/color.
+                        // Contract §8 Meta: code-family (monospace shortcut hint).
                         ui_element::label(shortcut)
                             .text_color(muted_color)
-                            .text_size(meta_font_size),
+                            .text_size(meta_font_size)
+                            .font_family(FontFamily::Mono),
                     );
                 }
 
@@ -176,11 +175,11 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                     );
                 } else if let Some(ref shortcut) = entry.shortcut_label {
                     item = item.child(
-                        // NOTE: contract meta wants typography.code.family; runtime
-                        // has no font-family setter — default font, contract size.
+                        // Contract §8 Meta: code-family (monospace shortcut hint).
                         ui_element::label(shortcut)
                             .text_color(muted_color)
-                            .text_size(meta_font_size),
+                            .text_size(meta_font_size)
+                            .font_family(FontFamily::Mono),
                     );
                 }
 

@@ -15,7 +15,7 @@
 //! - No ARIA channel (Jetstream has no a11y tree); aria-labels are carried as the
 //!   transport buttons' fallback text alongside the icon glyph.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::VideoPlayerSpec;
 
@@ -178,10 +178,12 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
         format_time(spec.current_time),
         format_time(spec.duration)
     );
+    // Time display — monospace (contract §8 `.video-player__time`).
     bar = bar.child(
         ui_element::label(&time_text)
             .text_color(white_80)
-            .text_size(time_font),
+            .text_size(time_font)
+            .font_family(FontFamily::Mono),
     );
 
     // Spacer pushes fullscreen to the right edge.

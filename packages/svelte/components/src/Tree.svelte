@@ -267,6 +267,7 @@
     return rows;
   });
 
+  let focusedValue = $state<string | null>(null);
   // Roving tabindex: exactly one visible row is tabbable.
   const effectiveFocus = $derived(
     focusedValue && visibleRows.some((r) => r.node.value === focusedValue)
@@ -275,7 +276,6 @@
         visibleRows[0]?.node.value ??
         null,
   );
-  let focusedValue = $state<string | null>(null);
 
   // Anchor for shift-range selection.
   let anchorValue: string | null = null;

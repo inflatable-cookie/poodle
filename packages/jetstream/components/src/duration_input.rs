@@ -14,7 +14,7 @@
 //! preview event loop). ALL dimensions resolve from tokens.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, DurationInputSpec};
 
@@ -122,11 +122,14 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
     // (Focus tracking is preview-loop; the highlight styling is rendered on a
     // dedicated bg so it round-trips through layout/probe.)
     let build_segment = |unit_label: &str, value_text: &str| -> JsEl {
+        // Root sets code-family (contract §8); JsEl has no inheritance so each
+        // text leaf carries FontFamily::Mono explicitly.
         // Label: per-size font, secondary, line-height 1.
         let label = ui_element::label(unit_label)
             .text_size(label_font)
             .line_height(label_font)
-            .text_color(text_secondary);
+            .text_color(text_secondary)
+            .font_family(FontFamily::Mono);
 
         // Field: per-size width, digit font, centered, line-height 1.
         let field = ui_element::label(value_text)
@@ -134,6 +137,7 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
             .text_size(field_font)
             .line_height(field_font)
             .text_color(text_primary)
+            .font_family(FontFamily::Mono)
             .text_align_center();
 
         ui_element::div()
@@ -160,7 +164,7 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
             .line_height(field_font)
             .text_color(text_secondary)
             .text_weight(600)
-            .child(ui_element::label(":"));
+            .child(ui_element::label(":").font_family(FontFamily::Mono));
         ui_element::div()
             .flex_col()
             .items_center()

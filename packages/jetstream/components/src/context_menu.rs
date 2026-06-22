@@ -8,7 +8,7 @@
 //! `js_menu`. Open/close, anchor positioning, viewport clamping, and focus
 //! restoration live in the preview event loop (not modeled here).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, ContextMenuSpec, MenuItemKind};
 
@@ -128,9 +128,11 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
 
                 if let Some(ref shortcut) = entry.shortcut_label {
                     item = item.child(
+                        // Contract §8 Meta: code-family (monospace shortcut hint).
                         ui_element::label(shortcut)
                             .text_color(muted_color)
-                            .text_size(meta_font),
+                            .text_size(meta_font)
+                            .font_family(FontFamily::Mono),
                     );
                 }
 
@@ -175,9 +177,11 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
                     );
                 } else if let Some(ref shortcut) = entry.shortcut_label {
                     item = item.child(
+                        // Contract §8 Meta: code-family (monospace shortcut hint).
                         ui_element::label(shortcut)
                             .text_color(muted_color)
-                            .text_size(meta_font),
+                            .text_size(meta_font)
+                            .font_family(FontFamily::Mono),
                     );
                 }
 

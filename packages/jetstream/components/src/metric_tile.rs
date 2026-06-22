@@ -5,7 +5,7 @@
 //!
 //! Anatomy: Root → Label | Body[Value + Sparkline] | Trend
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MetricTileSpec, MetricTrend};
 
@@ -45,12 +45,12 @@ pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> 
         .flex_col()
         .gap(root_gap);
 
-    // Label (code-style metadata key). Code font-family is not expressible in
-    // JsEl — size + color resolved from tokens. (note: code-family unsupported)
+    // Label (code-style metadata key) — code-family (contract §8 `.state-tile__label`).
     el = el.child(
         ui_element::label(&spec.label)
             .text_color(label_color)
-            .text_size(label_font),
+            .text_size(label_font)
+            .font_family(FontFamily::Mono),
     );
 
     // Body: value + optional inline sparkline.
@@ -135,10 +135,12 @@ pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> 
         );
 
         if let Some(ref trend_label) = spec.trend_label {
+            // Trend text — code-family (contract §8 `.state-tile__trend`).
             trend_row = trend_row.child(
                 ui_element::label(trend_label)
                     .text_color(trend_color)
-                    .text_size(trend_font),
+                    .text_size(trend_font)
+                    .font_family(FontFamily::Mono),
             );
         }
 

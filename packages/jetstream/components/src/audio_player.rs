@@ -1,5 +1,5 @@
 //! AudioPlayer — Jetstream audio player backed by AudioPlayerSpec.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AudioPlayerSpec;
 
@@ -104,11 +104,12 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
     // Play / pause (icon, not text).
     el = el.child(icon_btn(if spec.is_playing { "pause" } else { "play" }));
 
-    // Current time (m:ss).
+    // Current time (m:ss) — monospace (contract CurrentTime).
     el = el.child(
         ui_element::label(format_time(spec.current_time))
             .text_color(text_secondary)
             .text_size(font_size)
+            .font_family(FontFamily::Mono)
             .min_w(time_width),
     );
 
@@ -124,11 +125,12 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
             .min_w(rem_to_px(4.0)),
     );
 
-    // Total time (m:ss).
+    // Total time (m:ss) — monospace (contract TotalTime).
     el = el.child(
         ui_element::label(format_time(spec.duration))
             .text_color(text_secondary)
             .text_size(font_size)
+            .font_family(FontFamily::Mono)
             .min_w(time_width),
     );
 

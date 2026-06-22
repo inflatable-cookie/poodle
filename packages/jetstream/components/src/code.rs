@@ -14,7 +14,7 @@
 //! but inert here).
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
 
@@ -47,9 +47,11 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         };
         let inline_font = rem_to_px(base_em * ratio);
 
+        // Inline `<code>` uses `--poodle-typography-code-family` (contract §8).
         let mut el = ui_element::label(&spec.content)
             .text_size(inline_font)
             .text_color(text_color)
+            .font_family(FontFamily::Mono)
             .whitespace_nowrap();
 
         // `Default` carries inline chrome; `Plain` drops padding/radius/bg
@@ -202,21 +204,30 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
             if spec.show_line_numbers {
                 // Gutter: 2.5rem wide, right-aligned, padding-right 1rem,
                 // text-secondary (tabular-nums has no JsEl channel — note).
+                // Gutter lives inside `.code__source` (code-family); JsEl has no
+                // inheritance so set Mono explicitly.
                 row = row.child(
                     ui_element::label(line_no.to_string())
                         .w(rem_to_px(2.5))
                         .pr(rem_to_px(1.0))
                         .text_color(text_secondary)
+                        .font_family(FontFamily::Mono)
                         .text_right(),
                 );
             }
 
-            row = row.child(ui_element::label(line.to_string()).whitespace_nowrap());
+            // `.code__source` font-family is code-family (contract §8).
+            row = row.child(
+                ui_element::label(line.to_string())
+                    .font_family(FontFamily::Mono)
+                    .whitespace_nowrap(),
+            );
             scroll = scroll.child(row);
         }
     } else {
         // No per-line chrome: render the source as a single block.
-        scroll = scroll.child(ui_element::label(&spec.content));
+        // `.code__source` font-family is code-family (contract §8).
+        scroll = scroll.child(ui_element::label(&spec.content).font_family(FontFamily::Mono));
     }
 
     root = root.child(scroll);

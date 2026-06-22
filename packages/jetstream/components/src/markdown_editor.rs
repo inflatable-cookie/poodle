@@ -7,7 +7,7 @@
 //! colors resolve from semantic tokens. Real text editing + toolbar markdown
 //! insertion live in the preview event loop (Tier-3), so the edit pane is a
 //! `text_input` (placeholder + current value) and the preview shows source text.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 
@@ -143,9 +143,11 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
             .pt(pane_pad)
             .pb(pane_pad)
             .child(
+                // Textarea is monospace (contract §8 `.md-editor__textarea`).
                 ui_element::text_input(spec.value.clone(), placeholder)
                     .w_full()
                     .text_size(textarea_font)
+                    .font_family(FontFamily::Mono)
                     .text_color(if spec.value.is_empty() {
                         placeholder_color
                     } else {

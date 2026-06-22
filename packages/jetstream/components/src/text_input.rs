@@ -7,7 +7,7 @@
 //! indicators, multiline mode, char count display, and search clear button.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState,
@@ -47,6 +47,9 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
     let text_primary: Color = resolve_color(theme, "color.text.primary").into();
     let hover_border = border_c.mix(text_primary, 0.78);
 
+    // Slug mode: the editable value and the prefix affix use code-family so the
+    // full slug reads as one code-like unit (contract §5 "Slug Mode").
+    let is_slug = spec.input_type == "slug";
     let current_value = spec.current_value();
     let is_placeholder = current_value.is_empty() || spec.value.is_none();
     let show_text = if is_placeholder {
@@ -90,13 +93,13 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
             .w(border_width)
             .self_stretch()
             .bg(affix_sep_color);
-        input_row = input_row
-            .child(
-                ui_element::label(prefix.as_str())
-                    .text_color(affix_color)
-                    .text_size(font_size),
-            )
-            .child(divider);
+        let mut prefix_label = ui_element::label(prefix.as_str())
+            .text_color(affix_color)
+            .text_size(font_size);
+        if is_slug {
+            prefix_label = prefix_label.font_family(FontFamily::Mono);
+        }
+        input_row = input_row.child(prefix_label).child(divider);
     }
 
     // Leading icon
@@ -108,13 +111,15 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
         );
     }
 
-    // Text content (grows)
-    input_row = input_row.child(
-        ui_element::label(show_text)
-            .text_color(show_color)
-            .text_size(font_size)
-            .grow(),
-    );
+    // Text content (grows). Slug mode renders the value in code-family.
+    let mut value_label = ui_element::label(show_text)
+        .text_color(show_color)
+        .text_size(font_size)
+        .grow();
+    if is_slug {
+        value_label = value_label.font_family(FontFamily::Mono);
+    }
+    input_row = input_row.child(value_label);
 
     // Trailing icon or validation icon (trailing_icon takes precedence)
     if let Some(icon_name) = &spec.trailing_icon {

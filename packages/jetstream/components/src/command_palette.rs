@@ -22,7 +22,7 @@
 //!   `shadow_lg()` (the closest available preset). Noted as a token gap.
 
 use glam::Vec4;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CommandActionItem, CommandPaletteSpec, DiscoveryState, TextInputSpec};
 
@@ -143,9 +143,11 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
                 .rounded(radius_control)
                 .bg(hint_bg)
                 .child(
+                    // Contract §9 `.command-palette__hint`: code-family (kbd-styled).
                     ui_element::label(hint.clone())
                         .text_size(label_size)
-                        .text_color(text_secondary),
+                        .text_color(text_secondary)
+                        .font_family(FontFamily::Mono),
                 ),
         );
     }

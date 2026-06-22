@@ -368,4 +368,27 @@ fn main() {
         .child(row("Medium 14 / 500", 14.0, 500, ink))
         .child(row("Caption 11 / 400 muted", 11.0, 400, muted));
     snapshot(&text_scene, 460, 200, "/tmp/poodle-snap-text.png");
+
+    // Font-family: same string sans vs mono. In mono "iiii MMMM 0000" the columns line up.
+    use jetstream_text::layout::FontFamily;
+    let s = "iiii MMMM 0000 — code()";
+    let fam_scene = ui_element::div()
+        .w(460.0).h(120.0).p(24.0).bg(panel).flex_col().gap(16.0)
+        .child(ui_element::label(s).text_size(18.0).text_color(ink)) // sans (default)
+        .child(ui_element::label(s).text_size(18.0).text_color(ink).font_family(FontFamily::Mono));
+    snapshot(&fam_scene, 460, 120, "/tmp/poodle-snap-fontfamily.png");
+
+    // Real component spot-check: code block should render its source in mono.
+    let code = poodle_jetstream_components::code::js_code(
+        &poodle_specs::CodeSpec::new()
+            .with_content("fn main() {\n    let xs = [1, 2, 3];\n}")
+            .with_language("rust")
+            .with_show_line_numbers(true),
+        &theme,
+    );
+    let code_scene = ui_element::div()
+        .w(460.0).h(160.0).p(24.0).bg(panel).flex_col().gap(10.0)
+        .child(ui_element::label("Source (expect monospace):").text_size(13.0).text_color(muted))
+        .child(code);
+    snapshot(&code_scene, 460, 160, "/tmp/poodle-snap-code.png");
 }

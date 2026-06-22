@@ -15,7 +15,7 @@
 //! the distributed value, the active-slot highlight, and the error label.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInputSpec, ValidationState};
 
@@ -108,10 +108,12 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
             .items_center()
             .justify_center()
             .child(
+                // Slot value uses `--poodle-typography-code-family` (contract §7).
                 ui_element::label(&display_text)
                     .text_size(font_size)
                     .text_color(slot_text_color)
                     .text_weight(600)
+                    .font_family(FontFamily::Mono)
                     .text_align_center(),
             );
 

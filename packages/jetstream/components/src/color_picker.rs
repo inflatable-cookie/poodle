@@ -33,7 +33,7 @@
 
 use glam::Vec4;
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,
@@ -136,9 +136,11 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
                 .flex_row()
                 .items_center()
                 .child(
+                    // Contract §8 `.color-picker__input`: code-family hex value.
                     ui_element::label(input_display)
                         .text_color(input_color)
-                        .text_size(font_size),
+                        .text_size(font_size)
+                        .font_family(FontFamily::Mono),
                 ),
         );
     }
@@ -468,9 +470,11 @@ fn build_channel_inputs(
                 .flex_row()
                 .items_center()
                 .child(
+                    // Contract §8 `.color-picker__text-input`: code-family hex value.
                     ui_element::label(current.to_string())
                         .text_size(rem_to_px(0.75))
-                        .text_color(text_primary),
+                        .text_color(text_primary)
+                        .font_family(FontFamily::Mono),
                 );
             row = row.child(labelled(hex_field, "Hex"));
             if spec.show_alpha {
