@@ -14,7 +14,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::PopoverSpec;
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{elevation_overlay, resolve_color, resolve_px, resolve_radius, tint};
 
 pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
     // Contract §8 surface: background = background-elevated, border =
@@ -38,22 +38,23 @@ pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: O
     let min_w = rem_to_px(spec.effective_surface_min_width_rem());
     let max_w = rem_to_px(spec.effective_surface_max_width_rem());
 
-    let mut el = ui_element::div()
-        .bg(fill)
-        .border(border_width)
-        .border_color(border)
-        .rounded(radius)
-        .pl(pad_x)
-        .pr(pad_x)
-        .pt(pad_y)
-        .pb(pad_y)
-        .min_w(min_w)
-        .max_w(max_w)
-        // JsEl has no token-resolved box-shadow primitive; the contract
-        // `elevation-overlay` 3-layer stack is approximated by shadow_md()
-        // (accepted JsEl delta — note).
-        .shadow_md()
-        .overlay(); // Render above normal content.
+    // Contract `elevation-overlay` resolved token-accurately from the typed
+    // semantic token via the runtime shadow builder (single layer, spread 0;
+    // matches GPUI's mapping). The contract's multi-layer stack is the residual.
+    let mut el = elevation_overlay(
+        ui_element::div()
+            .bg(fill)
+            .border(border_width)
+            .border_color(border)
+            .rounded(radius)
+            .pl(pad_x)
+            .pr(pad_x)
+            .pt(pad_y)
+            .pb(pad_y)
+            .min_w(min_w)
+            .max_w(max_w),
+    )
+    .overlay(); // Render above normal content.
 
     if let Some(content_el) = content {
         el = el.child(content_el);

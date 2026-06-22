@@ -30,7 +30,9 @@ use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::text_input::js_text_input;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{
+    color_mix, elevation_dialog, resolve_color, resolve_opacity, resolve_px, resolve_radius,
+};
 
 pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Closed: render nothing. Consumers that never touched `is_open` still
@@ -89,22 +91,24 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
     // gap = space.stack.md (contract §9). Contract width is
     // min(45rem, calc(100vw − 2rem)) and max-height min(78vh, 52.5rem);
     // JsEl has no min()/vw, so pin the rem caps and let the backdrop center.
-    let mut modal = ui_element::div()
-        .flex_col()
-        .gap(stack_md)
-        .w(rem_to_px(45.0))
-        .max_w(rem_to_px(45.0))
-        .max_h(rem_to_px(52.5))
-        .px(panel_px)
-        .py(panel_py)
-        .rounded(dialog_radius)
-        .bg(surface_bg)
-        .border_1()
-        .border_color(dialog_border)
-        // JsEl has no box-shadow primitive matching elevation.dialog;
-        // shadow_lg() is the closest available preset. See note above.
-        .shadow_lg()
-        .overflow_hidden();
+    // Token-accurate `elevation-dialog` (contract §8: var(--poodle-elevation-dialog))
+    // resolved from the typed semantic token via the runtime shadow builder
+    // (single layer, spread 0; matches GPUI's mapping).
+    let mut modal = elevation_dialog(
+        ui_element::div()
+            .flex_col()
+            .gap(stack_md)
+            .w(rem_to_px(45.0))
+            .max_w(rem_to_px(45.0))
+            .max_h(rem_to_px(52.5))
+            .px(panel_px)
+            .py(panel_py)
+            .rounded(dialog_radius)
+            .bg(surface_bg)
+            .border_1()
+            .border_color(dialog_border),
+    )
+    .overflow_hidden();
 
     // ── Header: title-group + meta (hint pill + close) ────────────────
     let mut title_group = ui_element::div().flex_col().gap(rem_to_px(0.125)).grow().min_w_0();

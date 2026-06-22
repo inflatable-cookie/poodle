@@ -17,7 +17,7 @@ use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px,
     resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -246,22 +246,26 @@ fn build_panel(
         .unwrap_or(token_min_width);
     let max_height = crate::theme_ext::resolve_px(theme, "size.menu.maxHeight");
 
-    let mut panel = ui_element::div()
-        .absolute()
-        .top(panel_top)
-        .left(0.0)
-        .bg(panel_fill)
-        .border(1.0)
-        .border_color(border_color)
-        .rounded(surface_radius)
-        .shadow_md()
-        .min_w(min_width)
-        .max_h(max_height)
-        .overflow_hidden()
-        .flex_col()
-        .pt(panel_py)
-        .pb(panel_py)
-        .overlay();
+    // Token-accurate `elevation-overlay` (Svelte: var(--poodle-elevation-overlay))
+    // resolved from the typed semantic token via the runtime shadow builder
+    // (single layer, spread 0; matches GPUI's mapping).
+    let mut panel = elevation_overlay(
+        ui_element::div()
+            .absolute()
+            .top(panel_top)
+            .left(0.0)
+            .bg(panel_fill)
+            .border(1.0)
+            .border_color(border_color)
+            .rounded(surface_radius),
+    )
+    .min_w(min_width)
+    .max_h(max_height)
+    .overflow_hidden()
+    .flex_col()
+    .pt(panel_py)
+    .pb(panel_py)
+    .overlay();
 
     // Search input row (when searchable)
     if spec.shows_search_input() {

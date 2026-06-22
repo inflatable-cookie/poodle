@@ -12,7 +12,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SurfaceSpec;
 
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{elevation_surface, resolve_color, resolve_px, resolve_radius};
 
 pub fn js_surface(spec: &SurfaceSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let padding = spec.resolved_padding();
@@ -52,11 +52,11 @@ pub fn js_surface(spec: &SurfaceSpec, theme: &JetstreamThemeProvider, children: 
     }
 
     // ── Elevation shadow (contract §8) ──────────────────────────
-    // Elevated surfaces resolve `elevation.surface`. JsEl exposes only preset
-    // box-shadows (no custom-color / multi-layer), so the token shadow is
-    // APPROXIMATED with the small preset (`elevation.surface` is the low tier).
+    // Elevated surfaces resolve `elevation.surface` — token-accurate, from the
+    // typed semantic token via the runtime shadow builder (single layer,
+    // spread 0; matches GPUI's mapping).
     if spec.is_elevated_resolved() {
-        el = el.shadow_sm();
+        el = elevation_surface(el);
     }
 
     if let Some(h) = padding.horizontal {

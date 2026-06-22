@@ -6,7 +6,7 @@ use poodle_specs::{BrowseState, PickerShellSpec};
 
 use crate::presentation::rem_to_px;
 use crate::spinner::js_spinner;
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, elevation_dialog, elevation_overlay, resolve_color, resolve_px, resolve_radius};
 
 pub fn js_picker_shell(
     spec: &PickerShellSpec,
@@ -56,17 +56,16 @@ pub fn js_picker_shell(
         .pt(panel_y)
         .pb(panel_y);
 
-    // Variant elevation + width. The JsEl runtime exposes only preset shadows
-    // (shadow_sm/md/lg), not token-resolved elevation — so this approximates
-    // the contract §8 elevation tokens (overlay→md, dialog→lg). DELTA: shadow
-    // offset/blur/color are runtime presets, not the resolved elevation tokens.
+    // Variant elevation + width. Token-accurate per contract §8 (popover →
+    // `elevation-overlay`, modal → `elevation-dialog`), resolved from the typed
+    // semantic tokens via the runtime shadow builder (single layer, spread 0;
+    // matches GPUI's mapping).
     if spec.is_popover() {
-        shell = shell
-            .shadow_md()
+        shell = elevation_overlay(shell)
             .w_full()
             .max_w(rem_to_px(spec.popover_max_width_rem()));
     } else if spec.is_modal() {
-        shell = shell.shadow_lg();
+        shell = elevation_dialog(shell);
     }
 
     let mut title_block = ui_element::div()

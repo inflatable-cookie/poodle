@@ -14,7 +14,7 @@ use poodle_specs::{MenuItemKind, MenuSpec};
 use crate::presentation::{
     control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -57,19 +57,20 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Contract §7: overlay min-width 14rem (== size.menu.minWidth, 224px). The
     // Jetstream adapter has no mapping for that token, so the contract-exact rem
     // is used directly.
-    let mut el = ui_element::div()
-        .bg(fill)
-        .border(1.0)
-        .border_color(border)
-        .rounded(radius)
-        .flex_col()
-        .pt(menu_py)
-        .pb(menu_py)
-        .min_w(rem_to_px(14.0))
-        // NOTE: shadow_md() approximates elevation-overlay; runtime has no
-        // token-driven box-shadow setter.
-        .shadow_md()
-        .overlay();
+    // Token-accurate `elevation-overlay` from the typed semantic token via the
+    // runtime shadow builder (single layer, spread 0; matches GPUI's mapping).
+    let mut el = elevation_overlay(
+        ui_element::div()
+            .bg(fill)
+            .border(1.0)
+            .border_color(border)
+            .rounded(radius)
+            .flex_col()
+            .pt(menu_py)
+            .pb(menu_py)
+            .min_w(rem_to_px(14.0)),
+    )
+    .overlay();
 
     for entry in &spec.items {
         match entry.kind {

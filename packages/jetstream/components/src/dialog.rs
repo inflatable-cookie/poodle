@@ -12,7 +12,7 @@ use crate::presentation::{
     control_height_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{elevation_dialog, resolve_color, resolve_px, resolve_radius};
 use poodle_specs::SemanticControlSizeRole;
 
 pub fn js_dialog(
@@ -54,18 +54,22 @@ pub fn js_dialog(
     // ── Panel ────────────────────────────────────────────────────────────────
     // No flat panel gap — per-section spacing comes from header margin-bottom /
     // actions margin-top (contract §8), not a uniform 1rem.
-    let mut panel = ui_element::div()
-        .bg(fill)
-        .border(1.0)
-        .border_color(border)
-        .rounded(radius)
-        .flex_col()
-        // Contract §7: surface max-height min(80vh, 42rem). The 80vh term is
-        // viewport-relative (the centering parent already constrains it); cap
-        // at the 42rem rem-term here so tall content scrolls within the surface.
-        .max_h(rem_to_px(42.0))
-        .overflow_y_hidden()
-        .shadow_lg();
+    // Token-accurate `elevation-dialog` (modal tier) resolved from the typed
+    // semantic token via the runtime shadow builder (single layer, spread 0;
+    // matches GPUI's mapping).
+    let mut panel = elevation_dialog(
+        ui_element::div()
+            .bg(fill)
+            .border(1.0)
+            .border_color(border)
+            .rounded(radius)
+            .flex_col()
+            // Contract §7: surface max-height min(80vh, 42rem). The 80vh term is
+            // viewport-relative (the centering parent already constrains it); cap
+            // at the 42rem rem-term here so tall content scrolls within the surface.
+            .max_h(rem_to_px(42.0))
+            .overflow_y_hidden(),
+    );
 
     if width_rem.is_finite() {
         panel = panel.w(rem_to_px(width_rem));

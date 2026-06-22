@@ -10,7 +10,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::HoverCardSpec;
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{color_mix, elevation_overlay, resolve_color, resolve_px, resolve_radius, tint};
 
 pub fn js_hover_card(
     spec: &HoverCardSpec,
@@ -37,22 +37,23 @@ pub fn js_hover_card(
     let min_w = resolve_px(theme, "size.menu.minWidth");
     let max_w = resolve_px(theme, "size.hoverCard.maxWidth");
 
-    let mut el = ui_element::div()
-        .bg(fill)
-        .border(1.0)
-        .border_color(border)
-        .rounded(radius)
-        .pl(pad_x)
-        .pr(pad_x)
-        .pt(pad_y)
-        .pb(pad_y)
-        .min_w(min_w)
-        .max_w(max_w)
-        // JsEl approximation of contract §8 box-shadow: var(--poodle-elevation-overlay).
-        // JsEl has no per-token shadow channel; shadow_md() is the nearest elevated
-        // preset. spec.shadow_token() carries the intended elevation-overlay token.
-        .shadow_md()
-        .overlay();
+    // Token-accurate `elevation-overlay` (spec.shadow_token()) resolved from the
+    // typed semantic token via the runtime shadow builder (single layer, spread
+    // 0; matches GPUI's mapping).
+    let mut el = elevation_overlay(
+        ui_element::div()
+            .bg(fill)
+            .border(1.0)
+            .border_color(border)
+            .rounded(radius)
+            .pl(pad_x)
+            .pr(pad_x)
+            .pt(pad_y)
+            .pb(pad_y)
+            .min_w(min_w)
+            .max_w(max_w),
+    )
+    .overlay();
 
     if let Some(c) = content {
         el = el.child(c);

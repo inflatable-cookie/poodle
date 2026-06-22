@@ -13,7 +13,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, ContextMenuSpec, MenuItemKind};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, tint};
+use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius, tint};
 
 /// Per-size item metrics (min-height, padding-y, padding-x, font-size) in rem.
 /// Contract §8 size table.
@@ -65,19 +65,22 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
     // Separator bg: border-subtle @ 72% (contract §8 Separator).
     let separator_bg = tint(separator_color, 0.72);
 
-    let mut el = ui_element::div()
-        .bg(fill)
-        .border(1.0)
-        .border_color(border)
-        .rounded(radius)
-        .flex_col()
-        .pt(overlay_pad)
-        .pb(overlay_pad)
-        .pl(overlay_pad)
-        .pr(overlay_pad)
-        .min_w(min_width)
-        .shadow_md()
-        .overlay();
+    // Token-accurate `elevation-overlay` from the typed semantic token via the
+    // runtime shadow builder (single layer, spread 0; matches GPUI's mapping).
+    let mut el = elevation_overlay(
+        ui_element::div()
+            .bg(fill)
+            .border(1.0)
+            .border_color(border)
+            .rounded(radius)
+            .flex_col()
+            .pt(overlay_pad)
+            .pb(overlay_pad)
+            .pl(overlay_pad)
+            .pr(overlay_pad)
+            .min_w(min_width),
+    )
+    .overlay();
 
     for entry in &spec.menu.items {
         match entry.kind {

@@ -140,8 +140,11 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
 
         // Toast box: tinted gradient bg, tone border, elevation shadow, clipped.
         // Contract §8 background is a linear gradient (90deg) of the tone tint
-        // fading into elevated; shadow = elevation-overlay (approximated by the
-        // runtime's medium shadow preset — no token-driven box-shadow on JsEl).
+        // fading into elevated; shadow = `elevation-overlay`, resolved token-
+        // accurately from the typed semantic token (single layer, spread 0;
+        // matches GPUI). Inline `.shadow()` keeps the long child-bearing chain
+        // readable; the contract's multi-layer stack is the residual.
+        let ov = &poodle_tokens::typed::semantic::ELEVATION_OVERLAY;
         let toast_el = ui_element::div()
             .relative()
             .bg(bg_tinted)
@@ -156,7 +159,13 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
             .border_color(toast_border)
             .rounded(radius)
             .overflow_hidden()
-            .shadow_md()
+            .shadow(
+                ov.offset_x,
+                ov.offset_y,
+                ov.blur,
+                0.0,
+                glam::Vec4::new(ov.color.0, ov.color.1, ov.color.2, ov.color.3),
+            )
             .pl(pad)
             .pr(pad + rem_to_px(1.5))
             .pt(pad)

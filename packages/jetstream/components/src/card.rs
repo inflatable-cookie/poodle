@@ -13,7 +13,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{elevation_surface, resolve_color, resolve_px, resolve_radius};
 
 pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let radius = resolve_radius(theme, spec.radius_token());
@@ -70,10 +70,11 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
         el = el.border(border_width).border_color(border_color);
     }
 
-    // Elevated drop shadow — approximated with the large preset (JsEl shadow is
-    // a single preset, no multi-layer / custom-color box-shadow).
+    // Elevated drop shadow — token-accurate `elevation.surface` (raised card
+    // tier), resolved from the typed semantic token via the runtime shadow
+    // builder (single layer, spread 0; matches GPUI's mapping).
     if matches!(spec.variant, CardVariant::Elevated) {
-        el = el.shadow_lg();
+        el = elevation_surface(el);
     }
 
     // Interactive cards get a hover fill + pointer cursor.

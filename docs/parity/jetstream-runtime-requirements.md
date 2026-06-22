@@ -28,8 +28,15 @@ honor checks**, not new subsystems:
 
 - **P1-1 focus-visible** → add `.focus(\|s\|…)` override mirroring `.hover`/`.active`; `FocusState`
   + a focus-ring draw path already exist. (Small.)
-- **P1-2 custom/inset/multi-layer shadow + elevation** → `UiStyle.shadow: Option<BoxShadow>` +
-  draw support exist; expose `.shadow(BoxShadow)` / `.elevation(token)`. (Builder only.)
+- **P1-2 custom/inset/multi-layer shadow + elevation** → **LANDED (single-layer):** the runtime now
+  has `JsEl::shadow(offset_x, offset_y, blur, spread, color)` feeding the same `style.shadow` the draw
+  bridge rasterizes (render path proven). Poodle's Jetstream overlays now resolve **token-accurate
+  elevation** from the structured `ELEVATION_*` ShadowValue tokens (`theme_ext::with_elevation` +
+  `elevation_surface/overlay/dialog`), matching GPUI's mapping (single layer, spread 0) — the
+  one-size `shadow_md/sm/lg` presets are gone from all elevated surfaces (popovers/menus/dropdowns →
+  overlay, modals/drawers → dialog, raised cards/surfaces → surface). **Residual:** the contract's
+  multi-layer stacks (inset highlight + stacked drops on popover/card) and inset selection rings still
+  collapse to the single token layer — needs `inset` + `.shadow_layers(vec![..])` on the builder.
 - **P2-6 animation** → `transitions`/`AnimatableProperty`/`tick_transitions` are live; expose a
   `.transition(…)` builder. (Builder only — the engine already ticks it.)
 - **P3-9 rotate / P3-11 z-index** → honored by `UiStyle`+draw; add builders. (Builder only.)
@@ -72,7 +79,7 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 | # | Capability | Status | Unblocks (≈ docs) | Current workaround | Suggested API |
 |---|---|---|---|---|---|
 | 1 | **focus-visible style state** | missing (`.focusable()` sets tabindex but there is no `.focus(\|s\|…)` style state; only `.hover`/`.active`) | focus rings on text-input, button, icon-button, checkbox, radio-group, switch, select, slider, segmented-control, tabs, fields, popover/menu triggers, resize-handle, scroll-shell, link, … (**34**) | none — focus ring simply not drawn | `.focus(\|s\| s.border_color(..).shadow(..))` mirroring `hover`/`active`; engine paints it when the element holds keyboard focus (`FocusState` already exists in the runtime) |
-| 2 | **token-driven / custom / inset / multi-layer box-shadow** | partial (`BoxShadow` + `style.shadow` exist; public builder is only `shadow_sm/md/lg` presets — no inset, no per-token offsets, no stacked layers) | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | `shadow_md()` preset stands in for `elevation.overlay/dialog`; inset rings drawn as a 1px border | `.shadow(BoxShadow{offset,blur,spread,color,inset})` + `.shadow_layers(vec![..])`; ideally a `.elevation(token)` that resolves the structured `ELEVATION_*` ShadowValue (GPUI already does this) |
+| 2 | **token-driven / custom / inset / multi-layer box-shadow** | **single-layer LANDED** (`JsEl::shadow(offset_x,offset_y,blur,spread,color)` exists; Poodle resolves `ELEVATION_*` ShadowValue tokens via `theme_ext::elevation_*`); still missing **inset** + **stacked layers** | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | overlays/modals/raised surfaces now draw the **token-accurate single-layer** `elevation.surface/overlay/dialog` (preset→token swap done, matches GPUI); multi-layer stacks + inset rings still collapse to one layer (inset rings drawn as a 1px border) | `.shadow(BoxShadow{…,inset})` + `.shadow_layers(vec![..])` for the multi-layer/inset residual; the structured-token `.elevation(token)` equivalent is now wired in Poodle's `theme_ext` |
 | 3 | **font-family channel** | missing (`font_family` 0 refs) | code, code-input (monospace cells), kbd chips (menu / command-palette / text-input shortcut / data-table), audio/video time labels (tabular/mono) (**12**) | default sans for everything; mono lost | `.font_family(family)` accepting the `typography.{label,body,code}.family` token (or a `FontFamily` enum Sans/Mono) |
 | 4 | **letter-spacing / tracking** | missing | eyebrow (0.12em), badges (0.04/0.03em), table headers, section titles, kbd (resets tracking) (**19**) | dropped (visual-only, no functional loss) | `.letter_spacing(em: f32)` |
 | 5 | **dashed / dotted border-style** | missing (`dashed`/`BorderStyle` 0 refs — border builders set width only) | region (dashed frame), file-upload + dock-region drop-zones, list-card not-live, empty-state, time-ago + text-link dotted underline (**6**) | rendered as solid border (right width/color, wrong style) | `.border_style(BorderStyle::{Solid,Dashed,Dotted})` |

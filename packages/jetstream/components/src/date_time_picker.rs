@@ -30,7 +30,7 @@ use crate::presentation::{
     control_height_rem, control_space_x_rem, date_picker_indicator_font_rem, panel_space_x_rem,
     panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 use crate::time_field::js_time_field;
 
 pub fn js_date_time_picker(spec: &DateTimePickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
@@ -150,17 +150,18 @@ pub fn js_date_time_picker(spec: &DateTimePickerSpec, theme: &JetstreamThemeProv
         };
         let surface_bg = color_mix(elevated.into(), panel_bg.into(), 0.98);
 
-        let surface = ui_element::div()
-            .rounded(surface_radius)
-            .bg(surface_bg)
-            .border(1.0)
-            .border_color(surface_border)
-            // JsEl gap: no token→box-shadow resolution exists in the runtime;
-            // `shadow_md()` is the closest preset for `elevation-overlay`.
-            .shadow_md()
-            .py(rem_to_px(panel_space_y_rem(spec.density)))
-            .px(rem_to_px(panel_space_x_rem(spec.density)))
-            .child(body);
+        // Token-accurate `elevation-overlay` from the typed semantic token via
+        // the runtime shadow builder (single layer, spread 0; matches GPUI).
+        let surface = elevation_overlay(
+            ui_element::div()
+                .rounded(surface_radius)
+                .bg(surface_bg)
+                .border(1.0)
+                .border_color(surface_border),
+        )
+        .py(rem_to_px(panel_space_y_rem(spec.density)))
+        .px(rem_to_px(panel_space_x_rem(spec.density)))
+        .child(body);
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
         // platform delta; rendered as a flow column with the contract gap).

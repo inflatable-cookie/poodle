@@ -3,6 +3,7 @@
 //! Mirrors `packages/gpui/components/src/theme_ext.rs` for API parity.
 
 use glam::Vec4;
+use jetstream_runtime::ui_element::JsEl;
 use poodle_jetstream::JetstreamThemeProvider;
 
 /// Resolve a semantic color token to a linear-space Vec4.
@@ -23,6 +24,42 @@ pub fn resolve_radius(theme: &JetstreamThemeProvider, token: &str) -> f32 {
 /// Resolve an opacity token to a float (0.0–1.0).
 pub fn resolve_opacity(theme: &JetstreamThemeProvider, token: &str) -> f32 {
     theme.resolve_opacity_value(token)
+}
+
+// ── Elevation shadows ─────────────────────────────────────────────
+//
+// Token-resolved drop shadows for elevated surfaces. The offset/blur/color
+// come from the typed semantic token table
+// (`poodle_tokens::typed::semantic`), so component code never hardcodes a
+// shadow value. Mirrors GPUI's `elevation_*_shadow()` mapping exactly:
+// single layer, spread 0, color taken straight from the token's RGBA. The
+// `JsEl::shadow()` builder feeds the render bridge's `style.shadow`.
+
+/// Apply a typed `ShadowValue` to a `JsEl` as a single token-accurate shadow
+/// (spread 0, matching GPUI's mapping).
+pub fn with_elevation(el: JsEl, sv: &poodle_tokens::typed::ShadowValue) -> JsEl {
+    el.shadow(
+        sv.offset_x,
+        sv.offset_y,
+        sv.blur,
+        0.0,
+        Vec4::new(sv.color.0, sv.color.1, sv.color.2, sv.color.3),
+    )
+}
+
+/// Token-resolved `elevation.surface` shadow — low-elevation raised cards/surfaces.
+pub fn elevation_surface(el: JsEl) -> JsEl {
+    with_elevation(el, &poodle_tokens::typed::semantic::ELEVATION_SURFACE)
+}
+
+/// Token-resolved `elevation.overlay` shadow — popovers, menus, dropdowns.
+pub fn elevation_overlay(el: JsEl) -> JsEl {
+    with_elevation(el, &poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+}
+
+/// Token-resolved `elevation.dialog` shadow — modal dialogs and drawers.
+pub fn elevation_dialog(el: JsEl) -> JsEl {
+    with_elevation(el, &poodle_tokens::typed::semantic::ELEVATION_DIALOG)
 }
 
 /// Mix a color with transparency (emulates CSS `color-mix`).

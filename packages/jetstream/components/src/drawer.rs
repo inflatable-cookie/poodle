@@ -23,7 +23,7 @@ use crate::presentation::{
     drawer_title_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{elevation_dialog, resolve_color, resolve_px};
 
 /// Render a Drawer surface anchored to the spec's edge.
 ///
@@ -69,15 +69,19 @@ pub fn js_drawer_with_actions(
 
     // Panel — direction-specific sizing and border edge.
     let panel = {
-        let mut p = ui_element::div()
-            .bg(fill)
-            .flex_col()
-            .gap(panel_gap)
-            .pl(space_x)
-            .pr(space_x)
-            .pt(space_y)
-            .pb(space_y)
-            .shadow_lg();
+        // Token-accurate `elevation-dialog` (modal tier) resolved from the typed
+        // semantic token via the runtime shadow builder (single layer, spread 0;
+        // matches GPUI's mapping).
+        let mut p = elevation_dialog(
+            ui_element::div()
+                .bg(fill)
+                .flex_col()
+                .gap(panel_gap)
+                .pl(space_x)
+                .pr(space_x)
+                .pt(space_y)
+                .pb(space_y),
+        );
 
         p = match spec.edge {
             DrawerEdge::Right => p.h_full().w(side_width).border_l_1().border_color(border),

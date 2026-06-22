@@ -31,7 +31,9 @@ use poodle_specs::{MenuItemKind, MenubarSpec};
 use crate::presentation::{
     control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// Trigger / item label weight. Font weight is a typography constant (no px
 /// dimension); mirrors the GPUI `FontWeight::SEMIBOLD` and the contract's
@@ -145,20 +147,24 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // conditional / §4 "menu open"). Renders the submenu items.
     if let Some(menu) = spec.current_menu() {
         if !menu.items.is_empty() {
-            let mut overlay = ui_element::div()
-                .flex_col()
-                .min_w(overlay_min_w)
-                .pt(overlay_pad)
-                .pb(overlay_pad)
-                .pl(overlay_pad)
-                .pr(overlay_pad)
-                .rounded(list_radius)
-                .border(border_w)
-                .border_color(overlay_border)
-                .bg(overlay_bg)
-                .shadow_md()
-                .mt(overlay_pad) // ~0.25rem gap below the trigger row (contract overlay top offset)
-                .overlay();
+            // Token-accurate `elevation-overlay` from the typed semantic token
+            // via the runtime shadow builder (single layer, spread 0; matches
+            // GPUI's mapping).
+            let mut overlay = elevation_overlay(
+                ui_element::div()
+                    .flex_col()
+                    .min_w(overlay_min_w)
+                    .pt(overlay_pad)
+                    .pb(overlay_pad)
+                    .pl(overlay_pad)
+                    .pr(overlay_pad)
+                    .rounded(list_radius)
+                    .border(border_w)
+                    .border_color(overlay_border)
+                    .bg(overlay_bg),
+            )
+            .mt(overlay_pad) // ~0.25rem gap below the trigger row (contract overlay top offset)
+            .overlay();
 
             for item in &menu.items {
                 match item.kind {
