@@ -2,7 +2,7 @@
 //!
 //! Contract: `docs/contracts/components/empty-state.md`
 //! Reference: `packages/svelte/components/src/EmptyState.svelte`
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EmptyStateSpec, EmptyStateVariant,
@@ -77,7 +77,7 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
         .flex_col().items_center().justify_center().gap(gap)
         .pt(vertical_padding).pb(vertical_padding)
         .pl(horiz_padding).pr(horiz_padding)
-        .border(1.0).border_color(border_default)
+        .border(1.0).border_style(BorderStyle::Dashed).border_color(border_default)
         .rounded(root_radius)
         .bg(root_bg);
 

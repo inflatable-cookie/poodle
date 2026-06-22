@@ -11,7 +11,7 @@
 //! (preview surface vs file icon) renders.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 
@@ -170,6 +170,7 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
         .rounded(radius)
         .bg(Color::TRANSPARENT) // contract: transparent default
         .border(border_width)
+        .border_style(BorderStyle::Dashed) // contract: 0.125rem dashed
         .border_color(border_color)
         .flex_row()
         .items_center()

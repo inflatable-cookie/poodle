@@ -5,7 +5,7 @@
 //! uppercase label. Per contract §3 it does NOT accept child content — it
 //! renders only the label.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::RegionSpec;
 
@@ -28,9 +28,7 @@ pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider) -> JsEl {
         None => resolve_color(theme, spec.label_color_token()),
     };
 
-    // Contract §2/Svelte: dashed border at 0.125rem (2px). JsEl has no dashed
-    // border-style channel — approximated as a solid 0.125rem border at the
-    // contract-exact width (NOTE: dash pattern not yet expressible in JsEl).
+    // Contract §2/Svelte: dashed border at 0.125rem (2px).
     let mut el = ui_element::div()
         .flex_col()
         .items_center()
@@ -38,6 +36,7 @@ pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .min_h(spec.min_height_px)
         .rounded(radius)
         .border(rem_to_px(0.125))
+        .border_style(BorderStyle::Dashed)
         .border_color(border_color)
         .pl(padding)
         .pr(padding)

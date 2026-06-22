@@ -15,7 +15,7 @@
 //! spec fields, so they arrive through [`js_list_card_with_slots`];
 //! [`js_list_card`] delegates with empty slots for back-compat.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 
@@ -368,10 +368,15 @@ pub fn js_list_card_with_slots(
         el = el.relative().overflow_hidden().child(sash);
     }
 
-    // Not-live: reduced opacity (0.72). NOTE: JsEl has no dashed-border or
-    // grayscale filter, so only the opacity treatment is applied here.
+    // Not-live: dashed 0.1875rem border at border-default @ 72%, reduced opacity
+    // (0.72). NOTE: JsEl has no grayscale filter, so the greyscale treatment is
+    // omitted; border style + width + color + opacity are applied (contract §8).
     if spec.is_not_live {
-        el = el.opacity(spec.not_live_opacity());
+        el = el
+            .border(rem_to_px(0.1875))
+            .border_style(BorderStyle::Dashed)
+            .border_color(tint(border_default, 0.72))
+            .opacity(spec.not_live_opacity());
     }
 
     // Disabled: token opacity.
@@ -379,12 +384,15 @@ pub fn js_list_card_with_slots(
         el = el.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
     }
 
-    // Interactive: hover background + border, pointer + focusable.
+    // Interactive: hover background + border, pointer + focusable. Not-live
+    // cards stay interactive (contract §8) but restore their dashed border to
+    // full border-default on hover instead of the generic 52% tint.
     if (spec.is_interactive || spec.href.is_some()) && !spec.is_disabled {
+        let hover_border = if spec.is_not_live { border_default } else { hover_border };
         el = el
             .cursor_pointer()
             .focusable()
-            .hover(|s| s.bg(hover_fill).border_color(hover_border));
+            .hover(move |s| s.bg(hover_fill).border_color(hover_border));
         let _ = focus_ring; // surfaced for the preview focus layer; see NOTE.
     }
 

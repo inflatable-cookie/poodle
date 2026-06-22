@@ -112,7 +112,7 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
 | 2 | **token-driven / custom / inset / multi-layer box-shadow** | **single-layer LANDED** (`JsEl::shadow(offset_x,offset_y,blur,spread,color)` exists; Poodle resolves `ELEVATION_*` ShadowValue tokens via `theme_ext::elevation_*`); still missing **inset** + **stacked layers** | elevation fidelity on surface, card, popover, menu, dialog, drawer, toast-stack/host, all dropdown overlays; **inset** selection rings on segmented-control, tabs, tri-state-switch, list-card sash (**55**) | overlays/modals/raised surfaces now draw the **token-accurate single-layer** `elevation.surface/overlay/dialog` (preset→token swap done, matches GPUI); multi-layer stacks + inset rings still collapse to one layer (inset rings drawn as a 1px border) | `.shadow(BoxShadow{…,inset})` + `.shadow_layers(vec![..])` for the multi-layer/inset residual; the structured-token `.elevation(token)` equivalent is now wired in Poodle's `theme_ext` |
 | 3 | **font-family channel** | **DONE 2026-06-22** (offscreen-verified) | code, code-input, kbd chips (menu/context-menu/menubar/command-palette/action-discovery), audio/video time labels, duration-input, markdown-editor, slug text-input, metric-tile, color-picker hex (**~15 wired**) | — | `JsEl::font_family(FontFamily::{Sans,Mono})` landed (sans default; cosmic-text Family). 15 components now request Mono where the contract specifies code-family; sans already resolved to a system sans. Residual: a *specific* embedded sans (Inter) for exact parity vs the system fallback — not blocking. |
 | 4 | **letter-spacing / tracking** | **DONE 2026-06-22** (offscreen-verified) | eyebrow (0.12/0.04em), badge, table header, field-set legend, meta-item, order-by, nav-card, sidebar-nav (0.18em), code lang, page-header, button (0.01em), calendar, pill, … (**~20 wired**) | — | `JsEl::letter_spacing_em(f32)` landed (em, scales with font size); contract-exact values applied per component; eyebrow pulls `spec.letter_spacing_em()`. |
-| 5 | **dashed / dotted border-style** | missing (`dashed`/`BorderStyle` 0 refs — border builders set width only) | region (dashed frame), file-upload + dock-region drop-zones, list-card not-live, empty-state, time-ago + text-link dotted underline (**6**) | rendered as solid border (right width/color, wrong style) | `.border_style(BorderStyle::{Solid,Dashed,Dotted})` |
+| 5 | **dashed / dotted border-style** | **DONE 2026-06-22** (offscreen-verified) | region, file-upload + dock-region drop-zones, list-card not-live, empty-state (**5 wired**) | — | `JsEl::border_style(BorderStyle::{Solid,Dashed,Dotted})` landed; shader dash-masks the border by perimeter position (packed into the unused `border_params.y` lane). Dotted *underlines* (time-ago/text-link) skipped — no underline element to attach a bottom-border to (text-decoration, not a border). |
 
 ## P2 — interaction & motion (larger / architectural)
 
@@ -139,8 +139,8 @@ multi-side borders and upgrade them. Tracked separately from the engine asks bel
    Focus rings render the contract outset ring (P1-1 DONE); custom shadow + token elevation
    landed (P1-2). The two biggest "looks unfinished" deltas are closed. Residual: multi-layer/
    inset shadow — niche, deferrable.
-2. **P1-3/4** (font-family, letter-spacing) — DONE. **P1-5 dashed/dotted border** — remaining
-   (shader work in `ui_quad.wgsl`); niche (drop-zones, dotted underlines).
+2. **P1-3/4/5** (font-family, letter-spacing, dashed/dotted border) — **all DONE**. The full P1
+   set is closed.
 3. **P2-6 animation** — large but high perceived value.
 4. **P3-8 accessibility** — its own epic, coordinate platform-wide.
 5. The rest (P3-9..14) are niche/accepted; do opportunistically.

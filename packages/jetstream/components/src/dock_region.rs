@@ -1,5 +1,5 @@
 //! DockRegion — Jetstream dock region backed by DockRegionSpec.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing};
 
@@ -111,12 +111,13 @@ pub fn js_dock_region(
         t
     };
 
-    // Drop-zone overlay affordance — solid accent border + tinted fill.
-    // (JsEl has no dashed-border primitive; approximated with a solid border.)
+    // Drop-zone overlay affordance — dashed accent border + tinted fill
+    // (contract .dock-region__drop-zone: 0.125rem dashed accent).
     let drop_zone = || -> JsEl {
         ui_element::div()
             .grow()
             .border(border_w * 2.0)
+            .border_style(BorderStyle::Dashed)
             .border_color(accent)
             .bg(tint(accent, 0.08))
     };

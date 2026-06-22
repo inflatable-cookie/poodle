@@ -451,4 +451,29 @@ fn main() {
         .child(menu);
     // Pointer over the 2nd item ("Open…") — items start ~y20, ~32px each → ~y 68.
     snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)));
+
+    // Border styles: solid / dashed / dotted (contract drop-zone / underline frames).
+    use jetstream_runtime::ui_element::BorderStyle;
+    let bbox = |style| {
+        ui_element::div()
+            .w(130.0).h(80.0).rounded(10.0)
+            .bg(surface)
+            .border(2.0).border_color(accent).border_style(style)
+    };
+    let border_scene = ui_element::div()
+        .w(520.0).h(140.0).p(24.0).bg(panel).flex_row().items_center().gap(24.0)
+        .child(bbox(BorderStyle::Solid))
+        .child(bbox(BorderStyle::Dashed))
+        .child(bbox(BorderStyle::Dotted));
+    snapshot(&border_scene, 520, 140, "/tmp/poodle-snap-border.png");
+
+    // Real component spot-check: empty-state renders a dashed container border.
+    let es = poodle_jetstream_components::empty_state::js_empty_state(
+        &poodle_specs::EmptyStateSpec::new("No items yet"),
+        &theme,
+    );
+    let es_scene = ui_element::div()
+        .w(420.0).h(200.0).p(24.0).bg(panel).flex_col()
+        .child(es);
+    snapshot(&es_scene, 420, 200, "/tmp/poodle-snap-emptystate.png");
 }
