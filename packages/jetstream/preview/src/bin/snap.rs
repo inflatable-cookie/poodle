@@ -11,6 +11,13 @@
 use jetstream_runtime::game_ui::*;
 use jetstream_runtime::ui_element::{self, JsEl};
 use jetstream_renderer::ui_pass::UiPass;
+use jetstream_renderer::camera::CameraGpu;
+use jetstream_renderer::pipeline::create_sprite_pipeline;
+use jetstream_renderer::shader::create_sprite_shader;
+use jetstream_renderer::sprite::{QUAD_INDICES, QUAD_VERTICES};
+use jetstream_renderer::texture::GpuTexture;
+use glam::Mat4;
+use wgpu::util::DeviceExt;
 
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::{elevation_overlay, elevation_dialog, resolve_color};
@@ -47,8 +54,9 @@ fn snapshot_opts(el: &JsEl, w: u32, h: u32, path: &str, focus_first: bool) {
     let (device, queue) = headless_device();
     let format = wgpu::TextureFormat::Rgba8UnormSrgb;
 
-    // Layout the scene (real GameUi materialize + Taffy layout).
-    let mut ui = GameUi::new(w as f32, h as f32);
+    // Layout the scene (real GameUi materialize + Taffy layout). with_text enables the
+    // glyph atlases so the text pass below can render labels.
+    let mut ui = GameUi::with_text(w as f32, h as f32);
     ui.render_immediate(el);
     if focus_first {
         ui.focus.navigate(&ui.tree, NavDirection::Next);
@@ -96,6 +104,94 @@ fn snapshot_opts(el: &JsEl, w: u32, h: u32, path: &str, focus_first: bool) {
     }
     ui_pass.encode(&device, &queue, &mut encoder, &view, &quads, w as f32, h as f32);
     queue.submit(std::iter::once(encoder.finish()));
+
+    // ── Text pass (glyphs) — mirrors the preview's render_all_text at 1× scale ──
+    // Same path the live app uses: per font size, rasterize into the atlas via
+    // convert_text_commands, upload the atlas as a texture, draw the sprite instances.
+    if ui.text_atlases.is_some() {
+        let ortho = Mat4::orthographic_rh(0.0, w as f32, h as f32, 0.0, -1.0, 1.0);
+        let camera = CameraGpu::from_matrix(&device, ortho);
+        let shader = create_sprite_shader(&device);
+        let tex_bgl = GpuTexture::bind_group_layout(&device);
+        let pipeline =
+            create_sprite_pipeline(&device, &shader, format, &camera.bind_group_layout, &tex_bgl);
+        let vbo = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("snap_text_vbo"),
+            contents: bytemuck::cast_slice(QUAD_VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+        let ibo = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("snap_text_ibo"),
+            contents: bytemuck::cast_slice(QUAD_INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
+        // Unique font sizes among text commands (1× scale).
+        let mut sizes: Vec<f32> = Vec::new();
+        for c in &cmds {
+            if c.text.is_some() {
+                let s = c.text_size.round().max(1.0);
+                if !sizes.iter().any(|x| (x - s).abs() < 0.5) {
+                    sizes.push(s);
+                }
+            }
+        }
+
+        for size in sizes {
+            let filtered: Vec<_> = cmds
+                .iter()
+                .filter(|c| c.text.is_some() && (c.text_size.round().max(1.0) - size).abs() < 0.5)
+                .cloned()
+                .collect();
+            if filtered.is_empty() {
+                continue;
+            }
+            let atlases = ui.text_atlases.as_mut().unwrap();
+            let instances = convert_text_commands(&filtered, atlases, 1.0);
+            if instances.is_empty() {
+                continue;
+            }
+            let Some(atlas) = atlases.get_mut(size) else { continue };
+            let atlas_tex = GpuTexture::from_rgba8(
+                &device, &queue, &atlas.pixels, atlas.width, atlas.height, "snap_atlas", &tex_bgl,
+            );
+            atlas.mark_clean();
+            let ibuf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("snap_text_instances"),
+                contents: bytemuck::cast_slice(&instances),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+            let mut enc = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("snap_text_enc"),
+            });
+            {
+                let mut pass = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: Some("snap_text_pass"),
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        depth_slice: None,
+                        view: &view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Load,
+                            store: wgpu::StoreOp::Store,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
+                    multiview_mask: None,
+                });
+                pass.set_pipeline(&pipeline);
+                pass.set_bind_group(0, &camera.bind_group, &[]);
+                pass.set_bind_group(1, &atlas_tex.bind_group, &[]);
+                pass.set_vertex_buffer(0, vbo.slice(..));
+                pass.set_vertex_buffer(1, ibuf.slice(..));
+                pass.set_index_buffer(ibo.slice(..), wgpu::IndexFormat::Uint16);
+                pass.draw_indexed(0..QUAD_INDICES.len() as u32, 0, 0..instances.len() as u32);
+            }
+            queue.submit(std::iter::once(enc.finish()));
+        }
+    }
 
     // Readback.
     let bpp = 4u32;
@@ -258,4 +354,18 @@ fn main() {
         .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new().with_value(0.6))))
         .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new())));
     snapshot(&prog_scene, 420, 120, "/tmp/poodle-snap-progress.png");
+
+    // Text scene — sizes + weights + color, the canonical text-pass verification target.
+    let ink = resolve_color(&theme, "color.text.primary");
+    let muted = resolve_color(&theme, "color.text.tertiary");
+    let row = |s: &str, size: f32, weight: u16, c: glam::Vec4| {
+        ui_element::label(s).text_size(size).text_weight(weight).text_color(c)
+    };
+    let text_scene = ui_element::div()
+        .w(460.0).h(200.0).p(24.0).bg(panel).flex_col().gap(12.0)
+        .child(row("Heading 24 / 700", 24.0, 700, ink))
+        .child(row("Body 16 / 400 — the quick brown fox", 16.0, 400, ink))
+        .child(row("Medium 14 / 500", 14.0, 500, ink))
+        .child(row("Caption 11 / 400 muted", 11.0, 400, muted));
+    snapshot(&text_scene, 460, 200, "/tmp/poodle-snap-text.png");
 }
