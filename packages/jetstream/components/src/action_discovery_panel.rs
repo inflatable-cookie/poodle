@@ -228,9 +228,17 @@ pub fn js_action_discovery_panel(
                 .rounded(radius_control)
                 .child(text_block.flex_grow());
 
-            // Active item: accent-tinted bg + accent ring (border approximation).
+            // Active item (contract §9): accent-tinted bg + an inset accent ring (no
+            // longer a border approximation — doesn't shift layout vs other rows).
             if is_active {
-                row = row.bg(active_bg).border(1.0).border_color(active_ring);
+                row = row.bg(active_bg).shadow_layers(vec![jetstream_runtime::ui_element::BoxShadow {
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                    blur: 0.0,
+                    spread: rem_to_px(0.0625),
+                    color: active_ring,
+                    inset: true,
+                }]);
             }
 
             // Trailing snippet — badge chip + kbd chip.

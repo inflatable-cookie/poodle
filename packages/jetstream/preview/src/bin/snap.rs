@@ -574,4 +574,17 @@ fn main() {
         .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
         .child(sw);
     snapshot(&sw_scene, 300, 100, "/tmp/poodle-snap-switch.png");
+
+    // Card elevated 4-layer shadow stack, on a light bg.
+    use poodle_specs::CardVariant;
+    let card = poodle_jetstream_components::card::js_card(
+        &poodle_specs::CardSpec::new().with_variant(CardVariant::Elevated),
+        &theme,
+        vec![ui_element::div().w(180.0).h(70.0)],
+    );
+    let card_scene = ui_element::div()
+        .w(320.0).h(180.0).p(36.0).flex_row().items_center().justify_center()
+        .bg(Vec4::new(0.91, 0.92, 0.94, 1.0))
+        .child(card);
+    snapshot(&card_scene, 320, 180, "/tmp/poodle-snap-card.png");
 }

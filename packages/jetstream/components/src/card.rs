@@ -8,12 +8,12 @@
 //! media region with inset radius.
 
 use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{elevation_surface, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let radius = resolve_radius(theme, spec.radius_token());
@@ -59,8 +59,7 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
     }
 
     // Border. Outlined/default carry a subtle/default border; elevated gets a
-    // border too. Selected overrides with the accent ring (thicker accent border
-    // approximates the inset+outset box-shadow — JsEl shadow is preset-only).
+    // border too. Selected uses the accent border color.
     if let Some(selected_token) = spec.selected_border_token() {
         let selected_color = resolve_color(theme, selected_token);
         let sel_border_w = resolve_px(theme, "border.width.focus");
@@ -70,12 +69,31 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
         el = el.border(border_width).border_color(border_color);
     }
 
-    // Elevated drop shadow — token-accurate `elevation.surface` (raised card
-    // tier), resolved from the typed semantic token via the runtime shadow
-    // builder (single layer, spread 0; matches GPUI's mapping).
-    if matches!(spec.variant, CardVariant::Elevated) {
-        el = elevation_surface(el);
+    // Variant box-shadow treatment (contract §8/§10, dark mode) via shadow_layers:
+    //   elevated → two stacked outset drops + an inset top highlight + a 1px outset
+    //              perimeter ring (the contract 4-layer stack);
+    //   default/outlined → a subtle inset 1px perimeter ring;
+    //   selected → adds an accent inset ring on top of the variant base.
+    let with_a = |c: glam::Vec4, a: f32| glam::Vec4::new(c.x, c.y, c.z, a);
+    let black = |a: f32| glam::Vec4::new(0.0, 0.0, 0.0, a);
+    let mut shadows: Vec<BoxShadow> = if matches!(spec.variant, CardVariant::Elevated) {
+        let inv = resolve_color(theme, "color.text.inverse");
+        let bd = resolve_color(theme, "color.border.default");
+        vec![
+            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(1.125), blur: rem_to_px(2.5), spread: 0.0, color: black(0.38), inset: false },
+            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(0.375), blur: rem_to_px(0.875), spread: 0.0, color: black(0.24), inset: false },
+            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(0.0625), blur: 0.0, spread: 0.0, color: with_a(inv, 0.10), inset: true },
+            BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(bd, 0.12), inset: false },
+        ]
+    } else {
+        let bs = resolve_color(theme, "color.border.subtle");
+        vec![BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(bs, 0.18), inset: true }]
+    };
+    if spec.selected_border_token().is_some() {
+        let accent = resolve_color(theme, "color.accent.base");
+        shadows.push(BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(accent, 0.5), inset: true });
     }
+    el = el.shadow_layers(shadows);
 
     // Interactive cards get a hover fill + pointer cursor.
     if spec.is_interactive {
