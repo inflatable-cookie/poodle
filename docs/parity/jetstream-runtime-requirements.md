@@ -12,6 +12,36 @@ This doc enumerates the runtime capabilities needed to close those deltas, groun
 engine work itself lives in the sibling repo and is out of scope here. Component impact counts
 are "# of `docs/parity/*.md` files referencing the gap".
 
+## Architecture verdict (2026-06-22): sound — most asks are wire-ups, not new capability
+
+Audited the runtime pipeline (`render_immediate` → `materialize` → Taffy `layout` → draw
+commands; `UiStyle`, `FocusState`, `animation`/`tick_transitions`, `draw.rs`). **The model is
+correct for Poodle and richer than the parity notes implied.** Pure render-from-spec (host owns
+semantic state; runtime retains transient state — hover/pressed/focus/scroll/transitions) matches
+the stateless-component contract. **No architectural rework needed.**
+
+The friction was the thin `JsEl` builder (`ui_element.rs`) **under-exposing a capable model**:
+`UiStyle` already has `shadow`, `z_index`, `transform`+`transform_origin`, `transitions`,
+`background_gradient`, `position`+insets; `draw.rs` honors shadow/transform/focused/hovered/pressed;
+`tick_transitions(dt)` runs every frame. So most P1/P2 items below are **builder wire-ups + draw-
+honor checks**, not new subsystems:
+
+- **P1-1 focus-visible** → add `.focus(\|s\|…)` override mirroring `.hover`/`.active`; `FocusState`
+  + a focus-ring draw path already exist. (Small.)
+- **P1-2 custom/inset/multi-layer shadow + elevation** → `UiStyle.shadow: Option<BoxShadow>` +
+  draw support exist; expose `.shadow(BoxShadow)` / `.elevation(token)`. (Builder only.)
+- **P2-6 animation** → `transitions`/`AnimatableProperty`/`tick_transitions` are live; expose a
+  `.transition(…)` builder. (Builder only — the engine already ticks it.)
+- **P3-9 rotate / P3-11 z-index** → honored by `UiStyle`+draw; add builders. (Builder only.)
+
+**Genuinely missing from the model (real additions):** font-family (P1-3), letter-spacing (P1-4),
+border-style dashed/dotted (P1-5) — no `UiStyle` field. Plus the radial-gradient render bug below.
+
+**One real (non-blocking) cost:** `render_immediate` does `tree.clear()` + full `materialize` +
+full `layout()` each call in a continuous frame loop — no dirty-tracking / diff / layout memo.
+Correct, but wasteful for static app screens at 60fps. An optimization (skip re-materialize/relayout
+when the tree is unchanged) for later **if** profiling warrants — not a rework, not blocking.
+
 ## What the runtime already has (corrects stale parity notes)
 
 Several older parity notes claim gaps that no longer exist — impls can use these **today**, no
