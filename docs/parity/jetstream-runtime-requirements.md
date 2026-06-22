@@ -44,9 +44,14 @@ honor checks**, not new subsystems:
   emits a quad per layer (outset stacks — popover/card depth); `BoxShadow.inset` draws inside the
   element (render_bridge emits inset quads after the element at its own rect; the shader paints
   inward from the edge — blur 0 = a hard inner ring of width `spread`, blur > 0 = a soft inner
-  shadow). The runtime channels are complete. **Residual is component wiring only** (swap the
-  selection-ring border stand-ins → inset rings, and single-layer elevation → contract multi-layer
-  stacks where the contract CSS specifies them).
+  shadow). The runtime channels are complete. **Component wiring (2026-06-22):** `list-card`
+  highlighted draws its contract inset accent ring (`inset 0 0 0 1px accent@12%`) via `shadow_layers`
+  — offscreen-verified. Contract re-check: the other "ring" candidates aren't spread-based offset-0
+  inset rings — `tabs`' `inset 0 0 0 2px` is the drag **drop-target** state (needs a `TabsSpec` field,
+  not wired); `tri-state-switch`'s is an offset highlight + a real accent border; `segmented-control`'s
+  is an offset highlight. So list-card is the only true spread inset ring. **Residual:** single-layer
+  elevation → contract multi-layer stacks where the contract CSS specifies them (needs per-layer
+  values / multi-layer tokens).
 - **P2-6 animation** → `transitions`/`AnimatableProperty`/`tick_transitions` are live; expose a
   `.transition(…)` builder. (Builder only — the engine already ticks it.)
 - **P3-9 rotate / P3-11 z-index** → honored by `UiStyle`+draw; add builders. (Builder only.)

@@ -509,4 +509,15 @@ fn main() {
         .child(ring)
         .child(inner);
     snapshot(&inset_scene, 460, 150, "/tmp/poodle-snap-inset.png");
+
+    // Real component spot-check: list-card highlighted → inset accent ring.
+    let lc = |hl: bool| poodle_jetstream_components::list_card::js_list_card(
+        &poodle_specs::ListCardSpec::new().with_title("Project Alpha").with_highlighted(hl),
+        &theme,
+    );
+    let lc_scene = ui_element::div()
+        .w(460.0).h(200.0).p(24.0).bg(panel).flex_col().gap(16.0)
+        .child(lc(true))   // highlighted → inset accent ring
+        .child(lc(false)); // resting
+    snapshot(&lc_scene, 460, 200, "/tmp/poodle-snap-listcard.png");
 }

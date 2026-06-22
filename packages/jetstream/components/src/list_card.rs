@@ -15,7 +15,7 @@
 //! spec fields, so they arrive through [`js_list_card_with_slots`];
 //! [`js_list_card`] delegates with empty slots for back-compat.
 
-use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
+use jetstream_runtime::ui_element::{self, BorderStyle, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 
@@ -332,16 +332,27 @@ pub fn js_list_card_with_slots(
         el.flex_row().items_center()
     };
 
-    // Highlighted: accent-tinted border + inset accent ring approximation
-    // (contract §8 Root highlighted). NOTE: JsEl can't paint a gradient overlay
-    // over an existing fill, so the accent gradient is approximated by an
-    // accent-tinted fill blended toward surface.
+    // Highlighted: accent-tinted border + inset accent ring (contract §8 Root
+    // highlighted, independent of selection). The accent-to-transparent gradient
+    // is approximated by compositing the accent at 10% over the base fill (JsEl
+    // can't paint a gradient overlay); the ring is now a real spread-based inset
+    // box-shadow rather than a border stand-in, so it hugs the rounded edge
+    // without affecting layout.
     if spec.is_highlighted {
-        // Approximate the accent-to-transparent gradient by compositing the
-        // accent at 10% over the base fill (a single flat color).
+        // Contract: box-shadow inset 0 0 0 0.0625rem color-mix(accent 12%, transparent).
+        let ring_spread = rem_to_px(0.0625);
+        let ring_color = tint(accent, 0.12);
         el = el
             .border_color(tint(accent, 0.34))
-            .bg(color_mix(accent, fill, 0.10));
+            .bg(color_mix(accent, fill, 0.10))
+            .shadow_layers(vec![BoxShadow {
+                offset_x: 0.0,
+                offset_y: 0.0,
+                blur: 0.0,
+                spread: ring_spread,
+                color: ring_color,
+                inset: true,
+            }]);
     }
 
     if let Some(sel) = selection_el {
