@@ -105,6 +105,15 @@ Updated: 2026-04-01
 | drag-source | dragging this tab | `opacity: 0.4` |
 | drop-target | dragging over this tab | `box-shadow: inset 0 0 0 0.125rem accent-base`, `border-radius: radius-control` |
 
+The drag-source / drop-target visuals are driven by transient host-set drag
+state. In Svelte these come from the component's own internal `dragSourceIndex`
+/ `dropTargetIndex` during a drag gesture (`[data-drag-source]` /
+`[data-drop-target]`). In the spec-driven targets (GPUI, Jetstream) the host
+sets `dragValue` / `dropTargetValue` (the tab values being dragged / hovered)
+on the spec; both default unset. GPUI box-shadow has no `inset` mode, so its
+drop-target ring renders as a `border-width-focus` accent-base border (closest
+native equivalent).
+
 ### Component States
 
 - Selected-tab state: controlled or uncontrolled value tracking

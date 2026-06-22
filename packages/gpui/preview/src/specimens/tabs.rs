@@ -431,6 +431,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
     }
 
+    // 11. REORDER DRAG STATES (drag-source + drop-target)
+    // Contract §4: drag-source = opacity 0.4; drop-target = inset accent ring
+    // (GPUI fallback: 2px accent border). Host-set transient state, here pinned
+    // on the spec so the visual renders without an active drag gesture.
+    let drag_tabs = || {
+        vec![
+            TabDefinition::new("overview", "Overview"),
+            TabDefinition::new("features", "Features"),
+            TabDefinition::new("pricing", "Pricing"),
+        ]
+    };
+    let drag_underline = Tabs::from_spec(
+        TabsSpec::new(drag_tabs())
+            .with_variant(TabVariant::Underline)
+            .with_value("overview")
+            .with_drag_value(Some("features".to_string()))
+            .with_drop_target_value(Some("pricing".to_string())),
+        theme,
+    )
+    .with_id("specimen-drag-underline");
+    let drag_card = Tabs::from_spec(
+        TabsSpec::new(drag_tabs())
+            .with_variant(TabVariant::Card)
+            .with_value("overview")
+            .with_drag_value(Some("features".to_string()))
+            .with_drop_target_value(Some("pricing".to_string())),
+        theme,
+    )
+    .with_id("specimen-drag-card");
+
     // ASSEMBLE
     div()
         .flex()
@@ -707,5 +737,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(density_row),
+        )
+        // 11. Reorder drag states (drag-source dimmed, drop-target ringed)
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Reorder drag states — 'Features' dragged (dimmed), 'Pricing' drop-target (ring)",
+                    ),
+                    theme,
+                ))
+                .child(drag_underline)
+                .child(drag_card),
         )
 }

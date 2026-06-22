@@ -528,4 +528,22 @@ fn main() {
         .child(gbox(0.0))
         .child(gbox(1.0));
     snapshot(&gray_scene, 420, 140, "/tmp/poodle-snap-grayscale.png");
+
+    // Real component spot-check: tabs with a drop-target tab (inset accent ring) +
+    // a drag-source tab (opacity 0.4).
+    use poodle_specs::TabDefinition;
+    let tabs = poodle_jetstream_components::tabs::js_tabs(
+        &poodle_specs::TabsSpec::new(vec![
+            TabDefinition::new("over", "Overview"),
+            TabDefinition::new("det", "Details"),
+            TabDefinition::new("set", "Settings"),
+        ])
+        .with_drag_value(Some("over".into()))
+        .with_drop_target_value(Some("set".into())),
+        &theme,
+    );
+    let tabs_scene = ui_element::div()
+        .w(460.0).h(110.0).p(24.0).bg(panel).flex_col()
+        .child(tabs);
+    snapshot(&tabs_scene, 460, 110, "/tmp/poodle-snap-tabsdrop.png");
 }

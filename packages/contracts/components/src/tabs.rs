@@ -33,6 +33,14 @@ pub struct TabsSpec {
     /// key so the render surface can expose a stable id for tests /
     /// state.
     pub history_key: Option<String>,
+    /// The tab currently being dragged, if any. Transient host-set state
+    /// during a reorder drag. Drives the drag-source visual (opacity 0.4).
+    /// Mirrors the tree's `drag_value` convention.
+    pub drag_value: Option<String>,
+    /// The tab currently under the drag (the drop target), if any. Transient
+    /// host-set state during a reorder drag. Drives the drop-target visual
+    /// (inset accent ring). Mirrors the tree's `drop_target_value` convention.
+    pub drop_target_value: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -52,6 +60,8 @@ impl Default for TabsSpec {
             is_bordered: true,
             is_full_width: false,
             history_key: None,
+            drag_value: None,
+            drop_target_value: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -85,6 +95,28 @@ impl TabsSpec {
     pub fn with_full_width(mut self, is_full_width: bool) -> Self {
         self.is_full_width = is_full_width;
         self
+    }
+
+    /// Set the tab currently being dragged (drag-source). `None` clears it.
+    pub fn with_drag_value(mut self, drag_value: Option<String>) -> Self {
+        self.drag_value = drag_value;
+        self
+    }
+
+    /// Set the tab currently under the drag (drop-target). `None` clears it.
+    pub fn with_drop_target_value(mut self, drop_target_value: Option<String>) -> Self {
+        self.drop_target_value = drop_target_value;
+        self
+    }
+
+    /// True when `value` is the tab currently being dragged (drag-source).
+    pub fn is_drag_value(&self, value: &str) -> bool {
+        self.drag_value.as_deref() == Some(value)
+    }
+
+    /// True when `value` is the tab currently under the drag (drop-target).
+    pub fn is_drop_target(&self, value: &str) -> bool {
+        self.drop_target_value.as_deref() == Some(value)
     }
 
     /// True when the full-width flex layout applies: `fullWidth` set and the
@@ -221,5 +253,46 @@ impl TabsSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn drag_state_defaults_none() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
+        assert!(spec.drag_value.is_none());
+        assert!(spec.drop_target_value.is_none());
+        assert!(!spec.is_drag_value("a"));
+        assert!(!spec.is_drop_target("a"));
+    }
+
+    #[test]
+    fn drag_builders_set_drag_and_drop_target() {
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+            TabDefinition::new("c", "C"),
+        ])
+        .with_drag_value(Some("a".into()))
+        .with_drop_target_value(Some("c".into()));
+
+        assert!(spec.is_drag_value("a"));
+        assert!(!spec.is_drag_value("c"));
+        assert!(spec.is_drop_target("c"));
+        assert!(!spec.is_drop_target("a"));
+    }
+
+    #[test]
+    fn drag_builders_clear_with_none() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")])
+            .with_drag_value(Some("a".into()))
+            .with_drag_value(None)
+            .with_drop_target_value(Some("a".into()))
+            .with_drop_target_value(None);
+        assert!(spec.drag_value.is_none());
+        assert!(spec.drop_target_value.is_none());
     }
 }

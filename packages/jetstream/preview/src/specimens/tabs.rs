@@ -178,6 +178,32 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             )
         ))
 
+        // ── Drag reorder states (drag-source + drop-target) ──────────────
+        // Contract §4: drag-source = opacity 0.4; drop-target = inset
+        // accent-base ring. Host-set transient state; here it is set on the
+        // spec directly so the visual is renderable for offscreen review.
+        .child(group("Reorder — dragging 'details', over 'settings' (Underline)", secondary,
+            js_tabs(
+                &TabsSpec::new(items.clone())
+                    .with_value("overview")
+                    .with_reorderable(true)
+                    .with_drag_value(Some("details".into()))
+                    .with_drop_target_value(Some("settings".into())),
+                theme,
+            )
+        ))
+        .child(group("Reorder — dragging 'details', over 'settings' (Card)", secondary,
+            js_tabs(
+                &TabsSpec::new(items.clone())
+                    .with_variant(TabVariant::Card)
+                    .with_value("overview")
+                    .with_reorderable(true)
+                    .with_drag_value(Some("details".into()))
+                    .with_drop_target_value(Some("settings".into())),
+                theme,
+            )
+        ))
+
         // ── Full-width ───────────────────────────────────────────────────
         .child(group("Full-width (tabs flex to fill the row)", secondary,
             div().w(360.0).child(js_tabs(

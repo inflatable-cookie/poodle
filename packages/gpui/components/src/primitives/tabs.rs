@@ -169,6 +169,16 @@ impl Tabs {
         self.spec.density = v;
         self
     }
+    /// Set the transient drag-source tab value (the tab being dragged).
+    pub fn drag_value(mut self, v: Option<String>) -> Self {
+        self.spec.drag_value = v;
+        self
+    }
+    /// Set the transient drop-target tab value (the tab under the drag).
+    pub fn drop_target_value(mut self, v: Option<String>) -> Self {
+        self.spec.drop_target_value = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -318,6 +328,16 @@ impl Tabs {
                         }
                     });
                 }
+            }
+
+            // Contract §4 reorder drag states. drag-source: opacity 0.4.
+            // drop-target: inset accent-base ring — GPUI box-shadow has no inset,
+            // so the closest native equivalent is a 2px accent border.
+            if self.spec.is_drag_value(&tab_def.value) {
+                tab = tab.opacity(0.4);
+            }
+            if self.spec.is_drop_target(&tab_def.value) {
+                tab = tab.border_2().border_color(accent).rounded(radius);
             }
 
             let label_color = if is_active {
@@ -475,6 +495,17 @@ impl Tabs {
                         }
                     });
                 }
+            }
+
+            // Contract §4 reorder drag states. drag-source: opacity 0.4.
+            // drop-target: inset accent ring — GPUI box-shadow has no inset, so a
+            // 2px accent border is the closest native equivalent (card already
+            // carries radius-control).
+            if self.spec.is_drag_value(&tab_def.value) {
+                tab = tab.opacity(0.4);
+            }
+            if self.spec.is_drop_target(&tab_def.value) {
+                tab = tab.border_2().border_color(accent);
             }
 
             let label_color = if is_active {
@@ -666,6 +697,19 @@ impl Tabs {
                 }
             }
 
+            // Contract §4 reorder drag states. drag-source: opacity 0.4.
+            // drop-target: inset accent ring + radius-control — GPUI box-shadow
+            // has no inset, so a 2px accent border is the closest native fallback.
+            if self.spec.is_drag_value(&tab_def.value) {
+                tab = tab.opacity(0.4);
+            }
+            if self.spec.is_drop_target(&tab_def.value) {
+                tab = tab
+                    .border_2()
+                    .border_color(accent)
+                    .rounded(resolve_radius(theme, "radius.control"));
+            }
+
             let label_color = if is_active {
                 text_primary
             } else {
@@ -790,6 +834,17 @@ impl Tabs {
                         }
                     });
                 }
+            }
+
+            // Contract §4 reorder drag states. drag-source: opacity 0.4.
+            // drop-target: inset accent ring — GPUI box-shadow has no inset, so a
+            // 2px accent border is the closest native fallback (pill keeps its
+            // pill radius so the ring hugs the rounded tab).
+            if self.spec.is_drag_value(&tab_def.value) {
+                tab = tab.opacity(0.4);
+            }
+            if self.spec.is_drop_target(&tab_def.value) {
+                tab = tab.border_2().border_color(accent);
             }
 
             let label_color = if is_active {

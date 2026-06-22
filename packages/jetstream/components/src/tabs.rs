@@ -9,7 +9,7 @@
 //! - Pill: rounded pill container with tinted active state
 //! - Block: full-width tabs with vertical separators, accent-tinted selected fill
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{TabVariant, TabsSpec};
 
@@ -130,6 +130,40 @@ fn build_close_button(theme: &JetstreamThemeProvider, font_size: f32) -> JsEl {
         )
 }
 
+/// Apply the transient reorder-drag visuals to a built tab element.
+///
+/// Contract §4 States:
+/// - drag-source (the tab being dragged): `opacity: 0.4`.
+/// - drop-target (the tab being dragged over): `box-shadow: inset 0 0 0
+///   0.125rem accent-base` with `border-radius: radius-control`.
+///
+/// Both can apply at once when the same tab is somehow both (normally they are
+/// different tabs), so the two states are layered independently.
+fn apply_drag_state(
+    mut tab_el: JsEl,
+    tab_value: &str,
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+) -> JsEl {
+    if spec.is_drag_value(tab_value) {
+        tab_el = tab_el.opacity(0.4);
+    }
+    if spec.is_drop_target(tab_value) {
+        let accent = resolve_color(theme, "color.accent.base");
+        tab_el = tab_el
+            .rounded(resolve_radius(theme, "radius.control"))
+            .shadow_layers(vec![BoxShadow {
+                offset_x: 0.0,
+                offset_y: 0.0,
+                blur: 0.0,
+                spread: rem_to_px(0.125),
+                color: accent,
+                inset: true,
+            }]);
+    }
+    tab_el
+}
+
 // ── Underline variant ───────────────────────────────────────────────────────
 
 fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
@@ -208,6 +242,8 @@ fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
         if is_disabled {
             tab_el = tab_el.opacity(disabled_opacity);
         }
+
+        tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
 
         tab_bar = tab_bar.child(tab_el);
     }
@@ -305,6 +341,8 @@ fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             tab_el = tab_el.opacity(disabled_opacity);
         }
 
+        tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
+
         tab_bar = tab_bar.child(tab_el);
     }
 
@@ -371,6 +409,8 @@ fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
         if is_disabled {
             tab_el = tab_el.opacity(disabled_opacity);
         }
+
+        tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
 
         container = container.child(tab_el);
     }
@@ -461,6 +501,8 @@ fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
         if is_disabled {
             tab_el = tab_el.opacity(disabled_opacity);
         }
+
+        tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
 
         tab_bar = tab_bar.child(tab_el);
     }
@@ -703,6 +745,25 @@ mod tests {
             "vertical tab should hide label; texts: {:?}",
             tree.texts()
         );
+    }
+
+    /// Contract §4 drag states: setting drag-source + drop-target still renders
+    /// all tab labels (opacity/inset-ring are applied but not surfaced by the
+    /// probe; structure is the assertable signal that the states are wired).
+    #[test]
+    fn drag_states_still_render_all_tabs() {
+        let th = theme();
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Card)
+            .with_value("a")
+            .with_reorderable(true)
+            .with_drag_value(Some("b".into()))
+            .with_drop_target_value(Some("c".into()));
+        let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
+
+        assert!(tree.has_text("Overview"));
+        assert!(tree.has_text("Features"));
+        assert!(tree.has_text("Pricing"));
     }
 
     /// Contract §8 vertical: a vertical block tablist stacks tabs in a column,
