@@ -19,7 +19,6 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::presentation::rem_to_px;
 use crate::spinner::js_spinner;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
