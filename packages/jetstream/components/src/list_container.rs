@@ -24,12 +24,37 @@ use crate::pagination_comp::js_pagination;
 use crate::pagination_summary::js_pagination_summary;
 use crate::theme_ext::resolve_px;
 
+/// Render a list container with no header host slots (no breadcrumbs / actions).
+/// Back-compat entry — existing 5-arg callers are unchanged; delegates to
+/// [`js_list_container_with_slots`] with empty header slots.
 pub fn js_list_container(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
     content: Option<JsEl>,
     filters: Option<JsEl>,
     batch: Option<JsEl>,
+) -> JsEl {
+    js_list_container_with_slots(spec, theme, content, filters, batch, None, None)
+}
+
+/// Render a list container with the contract's optional header host slots.
+///
+/// - `breadcrumbs` — page breadcrumbs forwarded into the composed PageHeader
+///   (contract §2 PageHeader → Breadcrumbs; mirrors GPUI `with_breadcrumbs`).
+/// - `actions` — page-level actions forwarded into the composed PageHeader
+///   (contract §2 PageHeader → Actions; mirrors GPUI `with_actions`).
+///
+/// Both slots are host-composed `JsEl` content (not spec fields), so they
+/// arrive through this entry and flow into `js_page_header_with_slots`, which is
+/// where the contract anatomy places the header region.
+pub fn js_list_container_with_slots(
+    spec: &ListContainerSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+    filters: Option<JsEl>,
+    batch: Option<JsEl>,
+    breadcrumbs: Option<JsEl>,
+    actions: Option<JsEl>,
 ) -> JsEl {
     // Contract §8: root gap = space.stack.lg (between major regions);
     // region gap = space.stack.md (inside filters/batch/content/state).
@@ -46,7 +71,15 @@ pub fn js_list_container(
     if let Some(ref eyebrow) = spec.eyebrow {
         header_spec = header_spec.with_eyebrow(eyebrow.clone());
     }
-    container = container.child(js_page_header_with_slots(&header_spec, theme, None, None, None));
+    // Forward host-owned breadcrumbs + actions into the PageHeader (contract §2
+    // places both in the header region).
+    container = container.child(js_page_header_with_slots(
+        &header_spec,
+        theme,
+        breadcrumbs,
+        actions,
+        None,
+    ));
 
     // ── State-dependent body ──────────────────────────────────────────────────
     match spec.state {
@@ -233,6 +266,37 @@ mod tests {
 
         assert!(tree.has_text("Filter bar"), "filters slot missing: {:?}", tree.texts());
         assert!(tree.has_text("3 selected"), "batch slot missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn list_container_breadcrumbs_and_actions_slots_render() {
+        // Contract §2: breadcrumbs + actions forward into the composed PageHeader.
+        let th = theme();
+        let breadcrumbs = ui_element::label("Home / Settings / Team");
+        let actions = ui_element::label("New member");
+        let el = js_list_container_with_slots(
+            &ready_spec(),
+            &th,
+            Some(ui_element::label("Body")),
+            None,
+            None,
+            Some(breadcrumbs),
+            Some(actions),
+        );
+        let tree = probe(&el, 640.0, 480.0);
+
+        assert!(
+            tree.has_text("Home / Settings / Team"),
+            "breadcrumbs slot missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("New member"),
+            "actions slot missing: {:?}",
+            tree.texts()
+        );
+        // Header title still renders alongside the forwarded slots.
+        assert!(tree.has_text("Projects"), "title missing: {:?}", tree.texts());
     }
 
     #[test]

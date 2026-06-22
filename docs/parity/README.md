@@ -173,7 +173,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | icon-provider | fixed | 1 | 1 | ok |
 | inline-list-section | fixed | 0 | 1 | ok |
 | inline-remediation | ok | 1 | 0 | ok |
-| list-card | fixed | 1 | 0 | ok |
+| list-card | fixed | 0 | 0 | ok |
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 0 | 0 | ok |
 | list-grid | fixed | 1 | 1 | ok |

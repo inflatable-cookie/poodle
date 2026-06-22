@@ -2,10 +2,13 @@
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::list_container::js_list_container;
+use poodle_jetstream_components::button::js_button;
+use poodle_jetstream_components::list_container::{js_list_container, js_list_container_with_slots};
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, ListContainerSpec, ListContainerState};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, ListContainerSpec, ListContainerState,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -44,6 +47,29 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 Some(rows()),
                 Some(label("Filter toolbar").text_color(secondary).text_size(body_font)),
                 Some(label("3 selected").text_color(secondary).text_size(body_font)),
+            )
+        ))
+        // Ready with breadcrumbs + actions header slots (forwarded to PageHeader).
+        .child(group("Breadcrumbs and actions", secondary,
+            js_list_container_with_slots(
+                &ListContainerSpec::new("Team members")
+                    .with_eyebrow("Settings"),
+                theme,
+                Some(rows()),
+                None,
+                None,
+                // Breadcrumbs: host-composed trail forwarded into the PageHeader.
+                Some(label("Workspace / Settings / Team")
+                    .text_color(secondary)
+                    .text_size(body_font)),
+                // Actions: a real primary Button in the header actions cluster.
+                Some(js_button(
+                    &ButtonSpec::new()
+                        .with_label("New member")
+                        .with_variant(ButtonVariant::Primary)
+                        .with_size(ControlSize::Sm),
+                    theme,
+                )),
             )
         ))
         .child(group("Empty", secondary,

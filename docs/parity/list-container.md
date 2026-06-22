@@ -1,5 +1,6 @@
 <!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
 <!-- pass 41: both Rust targets now compose real PageHeader/Callout/EmptyState/Pagination/PaginationSummary; filters+batch slots added; root gap → stack.lg; Jetstream typography resolves from tokens; specimens cover ready+filters/batch+loading+error+empty; Jetstream probe tests added. -->
+<!-- header-slots pass: Jetstream gained `js_list_container_with_slots(..., breadcrumbs, actions)` forwarding both into the composed PageHeader; `js_list_container(spec, theme, content, filters, batch)` delegates with empty header slots (5-arg callers unchanged). GPUI already had `with_breadcrumbs`/`with_actions`. Both header host slots now match the contract §2 anatomy across targets. Jetstream specimen gains a "Breadcrumbs and actions" group (real breadcrumb trail + primary js_button); 1 new render_probe test. -->
 
 # Parity: ListContainer
 
@@ -25,7 +26,7 @@ One real divergence, plus a class-name namespacing note.
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI now composes the real PageHeader / Callout / EmptyState / Pagination / PaginationSummary components. Slot builders cover filters/batch/breadcrumbs/actions; page-change is wired.
+GPUI now composes the real PageHeader / Callout / EmptyState / Pagination / PaginationSummary components. Slot builders cover filters/batch/breadcrumbs/actions (the latter two forwarded into the composed PageHeader); page-change is wired.
 
 - [x] FIXED No Filters / Batch regions — added `with_filters` / `with_batch` builders rendering `stack.md` regions between header and content (Ready state only). No spec field needed — slots are component-level `AnyElement`.
 - [x] FIXED No real Pagination control — now composes `Pagination::from_spec` (current/total/sibling/aria) + `PaginationSummary::from_spec`; pagination region justifies controls to the end (contract §8 `justify-self: end`).
@@ -44,6 +45,7 @@ Jetstream now mirrors GPUI: composes the real PageHeader / Callout / EmptyState 
 - [x] FIXED No Filters / Batch regions — `js_list_container` gained `filters` / `batch` params rendering `stack.md` regions (Ready state).
 - [x] FIXED No real Pagination — now `js_pagination` (current/total/sibling/aria) + `js_pagination_summary` ("Showing N – M of T") when totals known; gated by `show_pagination && total_pages > 1`.
 - [x] FIXED Header hand-built — delegated to `js_page_header_with_slots`.
+- [x] FIXED No breadcrumbs / actions header slots — `js_list_container_with_slots(..., breadcrumbs, actions)` now forwards both into the composed PageHeader (contract §2). `js_list_container` delegates with empty header slots (5-arg back-compat). Mirrors GPUI's `with_breadcrumbs`/`with_actions`.
 - [x] FIXED Loading/error/empty hand-built — now `js_callout(pending)` / `js_callout(danger, Assertive)` / `js_empty_state`; the raw `pt/pb 2.0rem` empty literals are gone.
 - preview-loop: page-change interaction lives in the preview event loop; `js_pagination` renders controls but emits no callback here.
 
@@ -51,9 +53,9 @@ Jetstream now mirrors GPUI: composes the real PageHeader / Callout / EmptyState 
 
 - Svelte covers: Ready (full shell: header, batch slot, list cards, summary + pagination), plus interactive state toggle (loading/error/empty) on a second instance.
 - GPUI covers: Ready-with-content + built-in pagination (real Pagination + summary), Loading, Error, Empty (`list_container_specimen.rs`). Slot builders (filters/batch/breadcrumbs/actions) available; specimen can add them without impl changes.
-- Jetstream covers: Ready-with-pagination, Filters+batch, Empty, Loading, Error (`split`-equivalent five groups, `list_container.rs` specimen). Pagination summary + controls render via composed primitives.
+- Jetstream covers: Ready-with-pagination, Filters+batch, Breadcrumbs+actions (real breadcrumb trail + primary `js_button` forwarded into the PageHeader), Empty, Loading, Error (`list_container.rs` specimen). Pagination summary + controls render via composed primitives.
 
 ## Notes
 
-- `consv=fixed`: the only Contract↔Svelte divergence was the pagination `justify-self` value (now `end` to match Svelte). The remaining work is Rust-side spec/composition (filters/batch/pagination wiring), tracked below.
-- Root structural gap across both Rust targets: `ListContainerSpec` (`list_container.rs:21-`) has no filter/batch/breadcrumbs/actions slot surface and no pagination wiring, so neither Rust target can reach contract parity without spec expansion. This is the dominant work item — flag spec-level before component-level.
+- `consv=fixed`: the only Contract↔Svelte divergence was the pagination `justify-self` value (now `end` to match Svelte). The Rust-side composition work (filters/batch/breadcrumbs/actions slots + pagination wiring) is complete on both targets.
+- Slot surfaces are intentionally NOT `ListContainerSpec` fields — filters/batch/breadcrumbs/actions/content are host-composed element content (`JsEl` / `AnyElement`) passed through `js_list_container_with_slots` (Jetstream) / `with_filters`/`with_batch`/`with_breadcrumbs`/`with_actions` (GPUI). Both targets now expose every contract §2 slot region; no spec expansion was needed. Remaining residual is `onPageChange` interaction in Jetstream (preview event loop) — a runtime-loop limit, not a slot gap.

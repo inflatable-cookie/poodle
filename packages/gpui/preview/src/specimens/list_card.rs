@@ -242,6 +242,68 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }),
                 ),
         )
+        // -- With corner (header-corner slot, tertiary color) --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With corner (header-corner slot)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Pipeline config")
+                                    .with_subtitle("Build and deploy steps")
+                                    .with_leading_shape(LeadingShape::RoundedSquare)
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            // Corner: supplementary header-corner content (icon + label),
+                            // tertiary-colored, top-right in the header row.
+                            .with_corner(
+                                div()
+                                    .flex()
+                                    .flex_row()
+                                    .items_center()
+                                    .gap(px(4.0))
+                                    .child(Icon::from_spec(
+                                        IconSpec::new("git-branch").with_size(IconSize::Sm),
+                                        theme,
+                                    ))
+                                    .child("v2.1"),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Release candidate")
+                                    .with_subtitle("Header corner shows recency")
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_corner(
+                                div()
+                                    .flex()
+                                    .flex_row()
+                                    .items_center()
+                                    .gap(px(4.0))
+                                    .child(Icon::from_spec(
+                                        IconSpec::new("clock").with_size(IconSize::Sm),
+                                        theme,
+                                    ))
+                                    .child("2d"),
+                            ),
+                        ),
+                ),
+        )
         // -- Footer counters with inherited typography --
         .child(
             div()

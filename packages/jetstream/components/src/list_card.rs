@@ -10,10 +10,10 @@
 //! helpers — zero hardcoded hsla; rem literals are contract values resolved by
 //! `rem_to_px`. Interaction (click/keyboard) lives in the preview event loop.
 //!
-//! Host-snippet slots (contract §2 / §3) — `leading`, `badges`, `footer`,
-//! `actions`, `trailing` — are content the host composes (`JsEl`), not spec
-//! fields, so they arrive through [`js_list_card_with_slots`]; [`js_list_card`]
-//! delegates with empty slots for back-compat.
+//! Host-snippet slots (contract §2 / §3) — `leading`, `badges`, `corner`,
+//! `footer`, `actions`, `trailing` — are content the host composes (`JsEl`), not
+//! spec fields, so they arrive through [`js_list_card_with_slots`];
+//! [`js_list_card`] delegates with empty slots for back-compat.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
@@ -26,7 +26,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, re
 /// badges/footer/actions/trailing). Back-compat entry — existing callers are
 /// unchanged.
 pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    js_list_card_with_slots(spec, theme, None, Vec::new(), None, None, None)
+    js_list_card_with_slots(spec, theme, None, Vec::new(), None, None, None, None)
 }
 
 /// Render a list card with the contract's optional host-snippet slots.
@@ -36,6 +36,9 @@ pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl
 ///   Leading; mirrors GPUI `with_leading`).
 /// - `badges` — pills/badges rendered in the header-accessories cluster inline
 ///   next to the title (contract §2 Badges / §8 Header Accessories).
+/// - `corner` — supplementary header-corner content rendered alongside badges in
+///   the header-accessories cluster, painted at the tertiary text color
+///   (contract §2 Corner / §8 Badges-and-Corner).
 /// - `footer` — counter row rendered in the body column below the subtitle with
 ///   the contract `margin-top 0.125rem` (contract §2 Footer / §8 Footer).
 /// - `actions` — explicit action triggers in the right-edge lane after meta
@@ -51,6 +54,7 @@ pub fn js_list_card_with_slots(
     footer: Option<JsEl>,
     actions: Option<JsEl>,
     trailing: Option<JsEl>,
+    corner: Option<JsEl>,
 ) -> JsEl {
     let surface = resolve_color(theme, spec.fill_token());
     let text_primary = resolve_color(theme, spec.title_color_token());
@@ -142,18 +146,47 @@ pub fn js_list_card_with_slots(
         .flex_grow()
         .min_w_0();
 
-    if badges.is_empty() {
+    // Header-accessories cluster holds badges and/or corner content beside the
+    // title (contract §2 HeaderAccessories). It renders only when at least one
+    // of those slots is supplied.
+    if badges.is_empty() && corner.is_none() {
         body = body.child(title_el);
     } else {
         // Header-accessories cluster (contract §8): shrink-proof, wraps, gap
-        // space.inline.sm; the badges group itself uses gap space.inline.xs.
-        let accessories = ui_element::div()
+        // space.inline.sm; the badges/corner groups each use gap space.inline.xs.
+        let mut accessories = ui_element::div()
             .flex_row()
             .flex_none()
             .items_center()
             .flex_wrap()
-            .gap(resolve_px(theme, "space.inline.xs"))
-            .children(badges);
+            .gap(resolve_px(theme, "space.inline.sm"));
+
+        if !badges.is_empty() {
+            // Badges group — gap space.inline.xs (contract §8 Badges-and-Corner).
+            accessories = accessories.child(
+                ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .gap(resolve_px(theme, "space.inline.xs"))
+                    .children(badges),
+            );
+        }
+
+        if let Some(corner) = corner {
+            // Corner group — gap space.inline.xs, tertiary text color
+            // (contract §8 Badges-and-Corner: "Corner additionally sets color:
+            // var(--poodle-color-text-tertiary)").
+            let text_tertiary = resolve_color(theme, "color.text.tertiary");
+            accessories = accessories.child(
+                ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .gap(resolve_px(theme, "space.inline.xs"))
+                    .text_color(text_tertiary)
+                    .child(corner),
+            );
+        }
+
         body = body.child(
             ui_element::div()
                 .flex_row()
@@ -542,6 +575,7 @@ mod tests {
                 None,
                 None,
                 None,
+                None,
             ),
             360.0,
             96.0,
@@ -568,6 +602,7 @@ mod tests {
                 Some(footer),
                 None,
                 None,
+                None,
             ),
             360.0,
             96.0,
@@ -580,7 +615,7 @@ mod tests {
         let th = theme();
         let badges = vec![ui_element::label("New"), ui_element::label("Review")];
         let tree = probe(
-            &js_list_card_with_slots(&spec(), &th, None, badges, None, None, None),
+            &js_list_card_with_slots(&spec(), &th, None, badges, None, None, None, None),
             360.0,
             96.0,
         );
@@ -603,6 +638,7 @@ mod tests {
                 None,
                 None,
                 Some(trailing),
+                None,
             ),
             360.0,
             96.0,
@@ -626,6 +662,7 @@ mod tests {
                 None,
                 Some(actions),
                 Some(trailing),
+                None,
             ),
             360.0,
             96.0,
@@ -633,5 +670,58 @@ mod tests {
         assert!(tree.has_text("Trailing"), "trailing missing: {:?}", tree.texts());
         assert!(!tree.has_text("14.2 MB"), "meta should be suppressed by trailing");
         assert!(!tree.has_text("Action"), "actions should be suppressed by trailing");
+    }
+
+    #[test]
+    fn corner_slot_renders_in_header() {
+        // Contract §2 Corner: supplementary header-corner content renders in the
+        // header-accessories cluster beside the title (alongside any badges).
+        let th = theme();
+        let corner = ui_element::label("v2.1");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(),
+                &th,
+                None,
+                Vec::new(),
+                None,
+                None,
+                None,
+                Some(corner),
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("v2.1"), "corner slot content missing: {:?}", tree.texts());
+        // Title still present alongside the corner content.
+        assert!(
+            tree.has_text("design-system-v2.figma"),
+            "title missing with corner: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn corner_and_badges_render_together_in_header() {
+        // Both badges and corner share the header-accessories cluster (contract §2).
+        let th = theme();
+        let badges = vec![ui_element::label("New")];
+        let corner = ui_element::label("v2.1");
+        let tree = probe(
+            &js_list_card_with_slots(
+                &spec(),
+                &th,
+                None,
+                badges,
+                None,
+                None,
+                None,
+                Some(corner),
+            ),
+            360.0,
+            96.0,
+        );
+        assert!(tree.has_text("New"), "badge missing: {:?}", tree.texts());
+        assert!(tree.has_text("v2.1"), "corner missing: {:?}", tree.texts());
     }
 }

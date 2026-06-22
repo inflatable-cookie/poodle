@@ -14,6 +14,7 @@ pub struct ListCard {
     spec: ListCardSpec,
     theme: GpuiThemeProvider,
     leading: Option<AnyElement>,
+    corner: Option<AnyElement>,
     footer: Option<AnyElement>,
     trailing: Option<AnyElement>,
     _icon_color: Hsla,
@@ -34,6 +35,7 @@ impl ListCard {
             spec,
             theme: theme.clone(),
             leading: None,
+            corner: None,
             footer: None,
             trailing: None,
             _icon_color: gpui::white(),
@@ -46,6 +48,7 @@ impl ListCard {
             spec,
             theme: theme.clone(),
             leading: None,
+            corner: None,
             footer: None,
             trailing: None,
             _icon_color: gpui::white(),
@@ -90,6 +93,14 @@ impl ListCard {
 
     pub fn with_leading(mut self, element: impl IntoElement) -> Self {
         self.leading = Some(element.into_any_element());
+        self
+    }
+
+    /// Supplementary header-corner content (contract §2 Corner) — rendered
+    /// top-right in the header row, alongside the title, at the tertiary text
+    /// color. Mirrors the `corner` snippet in the header-accessories cluster.
+    pub fn with_corner(mut self, element: impl IntoElement) -> Self {
+        self.corner = Some(element.into_any_element());
         self
     }
 
@@ -205,16 +216,45 @@ impl IntoElement for ListCard {
                 .flex_grow()
                 .min_w_0();
 
-            col = col.child(
-                div()
-                    .text_size(label_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(title_color)
-                    .overflow_x_hidden()
-                    .text_ellipsis()
-                    .whitespace_nowrap()
-                    .child(spec.title.clone()),
-            );
+            let title_el = div()
+                .flex_grow()
+                .min_w_0()
+                .text_size(label_size)
+                .font_weight(FontWeight::MEDIUM)
+                .text_color(title_color)
+                .overflow_x_hidden()
+                .text_ellipsis()
+                .whitespace_nowrap()
+                .child(spec.title.clone());
+
+            // Header row — contract §2 Header: title + optional header-accessories
+            // (corner). When a corner slot is present, the title and corner share
+            // the header row; the corner cluster is shrink-proof and tertiary-colored
+            // (contract §8 Header / Badges-and-Corner).
+            if let Some(corner) = self.corner {
+                let corner_color = resolve_color(theme, "color.text.tertiary");
+                col = col.child(
+                    div()
+                        .flex()
+                        .flex_row()
+                        .items_center()
+                        .gap(px(rem_to_px(0.375)))
+                        .child(title_el)
+                        .child(
+                            // Header-accessories / corner cluster (contract §8):
+                            // shrink-proof, inline-flex, gap inline-xs, tertiary color.
+                            div()
+                                .flex()
+                                .flex_shrink_0()
+                                .items_center()
+                                .gap(resolve_px(theme, "space.inline.xs"))
+                                .text_color(corner_color)
+                                .child(corner),
+                        ),
+                );
+            } else {
+                col = col.child(title_el);
+            }
 
             if let Some(ref subtitle) = spec.subtitle {
                 col = col.child(

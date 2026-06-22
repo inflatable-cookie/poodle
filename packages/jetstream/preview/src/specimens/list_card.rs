@@ -96,6 +96,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     None,
                     None,
                     None,
+                    None,
                 ))
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
@@ -121,6 +122,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                             theme,
                         ),
                     ],
+                    None,
                     None,
                     None,
                     None,
@@ -152,6 +154,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     ),
                     None,
                     None,
+                    None,
                 ))
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
@@ -167,6 +170,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                             .child(js_list_card_counter(&ListCardCounterSpec::new("file-text", 6), theme))
                             .child(js_list_card_counter(&ListCardCounterSpec::new("image", 42), theme)),
                     ),
+                    None,
                     None,
                     None,
                 )),
@@ -191,6 +195,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                             .with_size(PillSize::Sm),
                         theme,
                     )),
+                    None,
                 ))
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
@@ -209,6 +214,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                             .with_size(PillSize::Sm),
                         theme,
                     )),
+                    None,
                 )),
         ))
         // -- With actions (action-trigger lane, composed with meta) --
@@ -234,6 +240,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                         ),
                     ),
                     None,
+                    None,
                 ))
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
@@ -256,6 +263,50 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                             )),
                     ),
                     None,
+                    None,
+                )),
+        ))
+        // -- With corner (header-accessories corner slot, tertiary color) --
+        .child(group("With corner (header-corner slot)", secondary,
+            div().flex_col().gap(6.0)
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Pipeline config")
+                        .with_subtitle("Build and deploy steps")
+                        .with_leading_shape(LeadingShape::RoundedSquare)
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    Vec::new(),
+                    None,
+                    None,
+                    None,
+                    // Corner: supplementary header-corner content (tertiary color).
+                    Some(div().flex_row().items_center().gap(4.0)
+                        .child(js_icon(&IconSpec::new("git-branch").with_size(IconSize::Sm), theme))
+                        .child(label("v2.1"))),
+                ))
+                .child(js_list_card_with_slots(
+                    &ListCardSpec::new()
+                        .with_title("Release candidate")
+                        .with_subtitle("Badges and corner share the cluster")
+                        .with_interactive(true),
+                    theme,
+                    None,
+                    // Badges and corner render side by side in the accessories cluster.
+                    vec![js_pill(
+                        &PillSpec::new()
+                            .with_label("RC")
+                            .with_tone(PillTone::Info)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    )],
+                    None,
+                    None,
+                    None,
+                    Some(div().flex_row().items_center().gap(4.0)
+                        .child(js_icon(&IconSpec::new("clock").with_size(IconSize::Sm), theme))
+                        .child(label("2d"))),
                 )),
         ))
         // -- Solid fill with accent colors --
