@@ -14,7 +14,6 @@
   import { resolveOverlayPosition } from "./overlay-position";
   import type {
     ButtonTone,
-    ButtonVariant,
     ControlDensity,
     ControlSize,
     IconProp,
@@ -22,8 +21,10 @@
     SemanticControlSizeRole,
   } from "./types";
 
+  type IconButtonVariant = "normal" | "primary" | "secondary" | "ghost";
+
   interface Props {
-    variant?: ButtonVariant;
+    variant?: IconButtonVariant;
     tone?: ButtonTone;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
@@ -46,7 +47,7 @@
   }
 
   let {
-    variant = "ghost",
+    variant = "normal",
     tone = "default",
     size = null,
     sizeRole = "control",
@@ -303,6 +304,7 @@
     );
   }
 
+  .poodle-icon-button[data-variant="normal"],
   .poodle-icon-button[data-variant="secondary"] {
     --poodle-icon-button-fill: var(
       --poodle-treatment-interactive-fill,
