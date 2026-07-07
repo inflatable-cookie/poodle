@@ -60,6 +60,7 @@ export { default as Pagination } from "./Pagination.svelte";
 export { default as PaginationSummary } from "./PaginationSummary.svelte";
 export { default as PasswordRequirements } from "./PasswordRequirements.svelte";
 export { default as Progress } from "./Progress.svelte";
+export { default as Radio } from "./Radio.svelte";
 export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as Rating } from "./Rating.svelte";
 export { default as Region } from "./Region.svelte";
