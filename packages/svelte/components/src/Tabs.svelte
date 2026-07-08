@@ -542,6 +542,7 @@
             type="button"
             class="poodle-tabs__tab"
             disabled={item.disabled === true}
+            draggable={reorderable && !item.disabled}
             id={`poodle-tab-${tabsId}-${item.value}`}
             role="tab"
             tabindex={focusIndex === index ? 0 : -1}
@@ -893,6 +894,10 @@
 
   /* Drag-and-drop states */
   .poodle-tabs__item[draggable="true"] {
+    cursor: grab;
+  }
+
+  .poodle-tabs__tab[draggable="true"] {
     cursor: grab;
   }
 

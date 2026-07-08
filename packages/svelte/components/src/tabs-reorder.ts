@@ -1,5 +1,7 @@
 import type { TabItem } from "./types";
 
+const TAB_REORDER_TYPE = "application/x-poodle-tab-reorder";
+
 export interface ReorderState {
   dragSourceIndex: number | null;
   dropTargetIndex: number | null;
@@ -40,6 +42,7 @@ export function handleDragStart(
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", String(index));
+    event.dataTransfer.setData(TAB_REORDER_TYPE, String(index));
   }
 
   return { dragSourceIndex: index, dataTransferSet: true };
@@ -50,7 +53,10 @@ export function handleDragOver(
   index: number,
   dragSourceIndex: number | null
 ): { dropTargetIndex: number | null; prevented: boolean } {
-  if (dragSourceIndex === null) {
+  const hasTransferredSource =
+    event.dataTransfer?.types.includes(TAB_REORDER_TYPE) ||
+    event.dataTransfer?.types.includes("text/plain");
+  if (dragSourceIndex === null && !hasTransferredSource) {
     return { dropTargetIndex: null, prevented: false };
   }
 
@@ -71,6 +77,16 @@ export function handleDrop(
 
   if (dragSourceIndex !== null) {
     return { fromIndex: dragSourceIndex, toIndex: index };
+  }
+
+  const transferredIndex =
+    event.dataTransfer?.getData(TAB_REORDER_TYPE) ||
+    event.dataTransfer?.getData("text/plain");
+  if (transferredIndex) {
+    const parsed = Number.parseInt(transferredIndex, 10);
+    if (Number.isInteger(parsed) && parsed >= 0) {
+      return { fromIndex: parsed, toIndex: index };
+    }
   }
 
   return { fromIndex: null, toIndex: null };
