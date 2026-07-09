@@ -98,6 +98,15 @@
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let dragSourceIndex = $state<number | null>(null);
   let dropTargetIndex = $state<number | null>(null);
+  let pointerReorder = $state<{
+    pointerId: number;
+    sourceIndex: number;
+    targetIndex: number;
+    startX: number;
+    startY: number;
+    active: boolean;
+  } | null>(null);
+  let suppressNextClick = false;
   let collapsedByOverflow = $state(false);
   let historyReady = $state(false);
 
@@ -371,6 +380,100 @@
     dropTargetIndex = null;
   }
 
+  function pointerTargetIndex(event: PointerEvent): number | null {
+    const axis = isVertical ? event.clientY : event.clientX;
+    for (let index = 0; index < tabElements.length; index += 1) {
+      const element = tabElements[index];
+      if (!element || renderedItems[index]?.disabled) continue;
+      const rect = element.getBoundingClientRect();
+      const midpoint = isVertical
+        ? rect.top + rect.height / 2
+        : rect.left + rect.width / 2;
+      if (axis < midpoint) {
+        return index;
+      }
+    }
+    const enabledIndexes = renderedItems
+      .map((item, index) => (item.disabled ? -1 : index))
+      .filter((index) => index >= 0);
+    return enabledIndexes[enabledIndexes.length - 1] ?? null;
+  }
+
+  function beginPointerReorder(event: PointerEvent, index: number): void {
+    if (
+      !reorderable ||
+      renderedItems.length < 2 ||
+      renderedItems[index]?.disabled ||
+      event.button !== 0
+    ) {
+      return;
+    }
+
+    pointerReorder = {
+      pointerId: event.pointerId,
+      sourceIndex: index,
+      targetIndex: index,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+    };
+    (event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent): void {
+    if (!pointerReorder || event.pointerId !== pointerReorder.pointerId) {
+      return;
+    }
+
+    const distance = Math.hypot(
+      event.clientX - pointerReorder.startX,
+      event.clientY - pointerReorder.startY,
+    );
+    if (!pointerReorder.active && distance < 4) {
+      return;
+    }
+
+    event.preventDefault();
+    const targetIndex = pointerTargetIndex(event) ?? pointerReorder.targetIndex;
+    pointerReorder = {
+      ...pointerReorder,
+      targetIndex,
+      active: true,
+    };
+    dragSourceIndex = pointerReorder.sourceIndex;
+    dropTargetIndex = targetIndex;
+  }
+
+  function finishPointerReorder(event: PointerEvent): void {
+    if (!pointerReorder || event.pointerId !== pointerReorder.pointerId) {
+      return;
+    }
+
+    (event.currentTarget as HTMLElement | null)?.releasePointerCapture?.(event.pointerId);
+    const { sourceIndex, targetIndex, active } = pointerReorder;
+    pointerReorder = null;
+    dragSourceIndex = null;
+    dropTargetIndex = null;
+
+    if (active) {
+      event.preventDefault();
+      suppressNextClick = true;
+      if (sourceIndex !== targetIndex) {
+        applyReorder(sourceIndex, targetIndex);
+      }
+    }
+  }
+
+  function cancelPointerReorder(event: PointerEvent): void {
+    if (!pointerReorder || event.pointerId !== pointerReorder.pointerId) {
+      return;
+    }
+    (event.currentTarget as HTMLElement | null)?.releasePointerCapture?.(event.pointerId);
+    pointerReorder = null;
+    dragSourceIndex = null;
+    dropTargetIndex = null;
+  }
+
   function handleKeydown(event: KeyboardEvent, index: number): void {
     const horizontal = orientation === "horizontal";
 
@@ -551,6 +654,7 @@
             onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
             onblur={() => hasTooltips && dismissTooltip()}
             onpointerdown={(event) => {
+              beginPointerReorder(event, index);
               if (
                 reorderable &&
                 event.button === 0 &&
@@ -560,7 +664,17 @@
                 setValue(item.value);
               }
             }}
-            onclick={() => setValue(item.value)}
+            onpointermove={handlePointerMove}
+            onpointerup={finishPointerReorder}
+            onpointercancel={cancelPointerReorder}
+            onclick={(event) => {
+              if (suppressNextClick) {
+                suppressNextClick = false;
+                event.preventDefault();
+                return;
+              }
+              setValue(item.value);
+            }}
             onkeydown={(event) => {
               if (event.key === "Escape" && hasTooltips) dismissTooltip();
               handleKeydown(event, index);
