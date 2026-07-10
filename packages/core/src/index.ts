@@ -15,6 +15,11 @@ export {
 
 export {
   menuTransition,
+  menuNavigableItems,
+  menuListNavigate,
+  menuListCanActivate,
+  type MenuListItem,
+  type MenuListMove,
   type MenuState,
   type MenuContext,
   type MenuEvent,

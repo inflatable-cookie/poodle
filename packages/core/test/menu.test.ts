@@ -2,6 +2,43 @@ import { describe, expect, test } from "bun:test";
 
 import { menuTransition } from "../src/menu";
 
+import { menuListCanActivate, menuListNavigate, menuNavigableItems } from "../src/menu";
+
+describe("menu list machinery", () => {
+  const items = [
+    { value: "a" },
+    { value: "b", disabled: true },
+    { value: "c" },
+    { value: "d" },
+  ];
+
+  test("next/prev wrap and skip disabled", () => {
+    expect(menuListNavigate(items, 0, "next")).toBe(2);
+    expect(menuListNavigate(items, 3, "next")).toBe(0);
+    expect(menuListNavigate(items, 2, "prev")).toBe(0);
+    expect(menuListNavigate(items, 0, "prev")).toBe(3);
+  });
+
+  test("first/last land on enabled boundaries", () => {
+    expect(menuListNavigate(items, 2, "first")).toBe(0);
+    expect(menuListNavigate(items, 0, "last")).toBe(3);
+    expect(menuListNavigate([{ value: "x", disabled: true }, { value: "y" }], 1, "first")).toBe(1);
+  });
+
+  test("all-disabled and empty lists stay put", () => {
+    expect(menuListNavigate([{ value: "x", disabled: true }], 0, "next")).toBe(0);
+    expect(menuListNavigate([], 0, "next")).toBe(0);
+  });
+
+  test("navigable items exclude separators; activation guards", () => {
+    const mixed = [{ value: "a" }, { value: "s", kind: "separator" }, { value: "b" }];
+    expect(menuNavigableItems(mixed).map((item) => item.value)).toEqual(["a", "b"]);
+    expect(menuListCanActivate({ kind: "separator" })).toBe(false);
+    expect(menuListCanActivate({ disabled: true })).toBe(false);
+    expect(menuListCanActivate({ kind: "checkbox" })).toBe(true);
+  });
+});
+
 describe("menuTransition", () => {
   test("TOGGLE opens with focus-first-item intent", () => {
     const result = menuTransition("closed", {}, { type: "TOGGLE" });

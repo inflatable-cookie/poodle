@@ -91,9 +91,12 @@ index are required.
 Behavior classification: machine-backed (`menuTransition` in
 `@poodle/headless`)
 
-Menu overlay machine shared by Menu and ContextMenu. Item navigation
-(roving focus, typeahead) currently lives in the MenuSurface adapter and
-joins the machine in a later batch (recorded sweep debt).
+Menu overlay machine shared by Menu and ContextMenu. Item navigation is
+core machinery (`menuListNavigate`, `menuNavigableItems`,
+`menuListCanActivate`): wrapping disabled-skip next/prev, enabled-boundary
+first/last, separator exclusion, activation guards. The MenuSurface adapter
+owns focus calls and rendering. Typeahead is not part of the current
+behavior (the Svelte implementation is the parity authority).
 
 - States: `closed` | `open`; open state controllable
 - Events: `TOGGLE` (trigger click), `OPEN` (Enter/Space/ArrowDown on

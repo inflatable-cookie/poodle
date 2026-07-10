@@ -94,6 +94,4 @@ export function overflowValue(mode: OverflowMode): string {
 // so existing internal imports keep working.
 export { findNextEnabledIndex, firstEnabledIndex, getFocusableElements } from "@poodle/headless";
 
-export function menuNavigableItems(items: MenuItem[]): MenuItem[] {
-  return items.filter((item) => item.kind !== "separator");
-}
+export { menuNavigableItems } from "@poodle/headless";

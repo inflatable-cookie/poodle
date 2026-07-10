@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { menuNavigableItems } from "./internal";
+  import { menuListCanActivate, menuListNavigate, menuNavigableItems } from "@poodle/headless";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
@@ -38,29 +38,9 @@
     }
 
     if (highlightIndex >= count || actionableItems[highlightIndex]?.disabled) {
-      highlightIndex = firstEnabledIndex();
+      highlightIndex = menuListNavigate(actionableItems, 0, "first");
     }
   });
-
-  function firstEnabledIndex(): number {
-    for (let index = 0; index < actionableItems.length; index += 1) {
-      if (!actionableItems[index]?.disabled) {
-        return index;
-      }
-    }
-
-    return 0;
-  }
-
-  function lastEnabledIndex(): number {
-    for (let index = actionableItems.length - 1; index >= 0; index -= 1) {
-      if (!actionableItems[index]?.disabled) {
-        return index;
-      }
-    }
-
-    return 0;
-  }
 
   function focusIndex(index: number): void {
     highlightIndex = index;
@@ -72,26 +52,15 @@
       return;
     }
 
-    focusIndex(firstEnabledIndex());
+    focusIndex(menuListNavigate(actionableItems, highlightIndex, "first"));
   }
 
   export function moveHighlight(direction: 1 | -1): void {
-    const count = actionableItems.length;
-
-    if (count === 0) {
+    if (actionableItems.length === 0) {
       return;
     }
 
-    let nextIndex = highlightIndex;
-
-    for (let step = 0; step < count; step += 1) {
-      nextIndex = (nextIndex + direction + count) % count;
-
-      if (!actionableItems[nextIndex]?.disabled) {
-        focusIndex(nextIndex);
-        return;
-      }
-    }
+    focusIndex(menuListNavigate(actionableItems, highlightIndex, direction === 1 ? "next" : "prev"));
   }
 
   export function moveToBoundary(boundary: "start" | "end"): void {
@@ -99,11 +68,11 @@
       return;
     }
 
-    focusIndex(boundary === "start" ? firstEnabledIndex() : lastEnabledIndex());
+    focusIndex(menuListNavigate(actionableItems, highlightIndex, boundary === "start" ? "first" : "last"));
   }
 
   function activateItem(item: MenuItem): void {
-    if (item.disabled || item.kind === "separator") {
+    if (!menuListCanActivate(item)) {
       return;
     }
 

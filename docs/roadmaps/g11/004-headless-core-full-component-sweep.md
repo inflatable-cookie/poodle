@@ -100,12 +100,19 @@ Menu batch complete (2026-07-10): `Menu` and `ContextMenu` share
 stack. Runtime-verified: trigger open with focus-first-item, item action
 closing and firing, escape and outside dismiss, contextmenu open at pointer.
 Recorded deltas in context-menu.md (overlay-only containment; re-invoke
-repositions without re-emitting open). Item navigation and typeahead stay
-in MenuSurface — recorded sweep debt for a later batch. 73 core tests green.
+repositions without re-emitting open).
 
-Remaining wave 2: MenuSurface item navigation + typeahead machinery,
-`Toast` (queue/timeout), plus the Floating UI anchor-positioning swap for
-Popover/Tooltip/HoverCard/Menu.
+MenuSurface batch complete (2026-07-10): item navigation moved to core
+machinery (`menuListNavigate` / `menuNavigableItems` /
+`menuListCanActivate`); `internal.ts` re-exports `menuNavigableItems` so
+ListCard/Menubar/SplitButton pick up the core version unchanged.
+Runtime-verified: focus-first on open, arrow navigation with disabled skip
+and wrap, Home/End enabled boundaries, Enter activate-and-close. Typeahead
+is not present in the Svelte implementation and therefore not modeled
+(parity authority). 77 core tests green.
+
+Remaining wave 2: `Toast` (queue/timeout), plus the Floating UI
+anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
 
 ## Exit Criteria
 
