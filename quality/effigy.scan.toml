@@ -13,6 +13,9 @@ exclude = [
   "**/*.json", "**/preview/**", "**/scripts/**",
   # Intentionally large complex components with substantial markup and accessibility requirements
   "**/ColorPicker.svelte", "**/Tabs.svelte", "**/RelationPicker.svelte", "**/BlockEditor.svelte", "**/DockRegion.svelte",
+  # Cohesive single-expression render bodies (logic already extracted to poodle-specs/headless;
+  # decomposing further would require parameter-bag structs that reduce clarity).
+  "**/data_table/render.rs",
   # Contract files that define comprehensive type systems
   "**/contracts/**/types.rs", "**/contracts/**/lib.rs",
 ]
