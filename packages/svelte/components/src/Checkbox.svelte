@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { checkboxParts, checkboxTransition, type CheckboxContext } from "@poodle/headless";
+
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -61,38 +63,53 @@
     }
   });
 
+  const machineContext = $derived<CheckboxContext>({
+    checked: currentChecked,
+    mixed,
+    disabled,
+    readOnly,
+  });
+
+  const parts = $derived(
+    checkboxParts(machineContext, {
+      id,
+      ariaLabel,
+      describedBy,
+      hasVisibleLabel: label !== null && label !== "",
+    }),
+  );
+
   function handleChange(event: Event): void {
-    const nextChecked = (event.currentTarget as HTMLInputElement).checked;
+    const control = event.currentTarget as HTMLInputElement;
+    const result = checkboxTransition(machineContext, {
+      type: "TOGGLE",
+      nextChecked: control.checked,
+    });
 
-    if (readOnly) {
-      (event.currentTarget as HTMLInputElement).checked = currentChecked;
-      return;
+    for (const effect of result.effects) {
+      if (effect.type === "revertNativeChecked") {
+        control.checked = currentChecked;
+      } else if (effect.type === "emitCheckedChange") {
+        if (checked === undefined) {
+          uncontrolledChecked = effect.checked;
+        } else {
+          checked = effect.checked;
+        }
+
+        onCheckedChange?.(effect.checked);
+      }
     }
-
-    if (checked === undefined) {
-      uncontrolledChecked = nextChecked;
-    } else {
-      checked = nextChecked;
-    }
-
-    onCheckedChange?.(nextChecked);
   }
 </script>
 
-<label class="poodle-checkbox" data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
+<label {...parts.root} class="poodle-checkbox" data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
   <input
     bind:this={input}
-    {id}
+    {...parts.control}
     class="poodle-checkbox__control"
-    type="checkbox"
-    checked={currentChecked}
-    disabled={disabled}
-    aria-label={label ? undefined : ariaLabel ?? undefined}
-    aria-describedby={describedBy ?? undefined}
-    aria-readonly={readOnly ? "true" : undefined}
     onchange={handleChange}
   />
-  <span class="poodle-checkbox__indicator" aria-hidden="true">
+  <span {...parts.indicator} class="poodle-checkbox__indicator">
     {#if mixed}
       <span class="poodle-checkbox__mark"><Icon name="minus" /></span>
     {:else if currentChecked}
@@ -100,7 +117,7 @@
     {/if}
   </span>
   {#if label}
-    <span class="poodle-checkbox__label">{label}</span>
+    <span {...parts.label} class="poodle-checkbox__label">{label}</span>
   {/if}
 </label>
 

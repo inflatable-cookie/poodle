@@ -90,45 +90,9 @@ export function overflowValue(mode: OverflowMode): string {
   return mode;
 }
 
-export function getFocusableElements(root: HTMLElement | null): HTMLElement[] {
-  if (!root) {
-    return [];
-  }
-
-  return Array.from(
-    root.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )
-  ).filter((element) => !element.hasAttribute("hidden") && element.offsetParent !== null);
-}
-
-export function findNextEnabledIndex<T extends { disabled?: boolean; isDisabled?: boolean }>(
-  items: T[],
-  startIndex: number,
-  direction: 1 | -1
-): number {
-  const count = items.length;
-
-  if (count === 0) {
-    return -1;
-  }
-
-  let index = startIndex;
-
-  for (let step = 0; step < count; step += 1) {
-    index = (index + direction + count) % count;
-
-    if (!items[index]?.disabled && !items[index]?.isDisabled) {
-      return index;
-    }
-  }
-
-  return startIndex;
-}
-
-export function firstEnabledIndex<T extends { disabled?: boolean; isDisabled?: boolean }>(items: T[]): number {
-  return items.findIndex((item) => !item.disabled && !item.isDisabled);
-}
+// Focus and index-navigation helpers moved to the headless core; re-exported
+// so existing internal imports keep working.
+export { findNextEnabledIndex, firstEnabledIndex, getFocusableElements } from "@poodle/headless";
 
 export function menuNavigableItems(items: MenuItem[]): MenuItem[] {
   return items.filter((item) => item.kind !== "separator");

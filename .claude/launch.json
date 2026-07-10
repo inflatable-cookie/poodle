@@ -5,7 +5,8 @@
       "name": "preview",
       "runtimeExecutable": "/opt/homebrew/bin/bun",
       "runtimeArgs": ["run", "--cwd", "packages/svelte/preview", "dev"],
-      "port": 4173
+      "port": 4173,
+      "autoPort": true
     }
   ]
 }

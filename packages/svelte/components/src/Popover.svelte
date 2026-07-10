@@ -1,11 +1,14 @@
-<script module lang="ts">
-  let nextPopoverId = 0;
-</script>
-
 <script lang="ts">
-  import { onMount, tick, type Snippet } from "svelte";
-
-  import { getFocusableElements } from "./internal";
+  import {
+    createInstanceId,
+    getFocusableElements,
+    popoverParts,
+    popoverTransition,
+    registerDismissLayer,
+    type PopoverContext,
+    type PopoverEvent,
+  } from "@poodle/headless";
+  import { tick, type Snippet } from "svelte";
 
   import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
@@ -45,7 +48,7 @@
     children,
   }: Props = $props();
 
-  const popoverId = `poodle-popover-${++nextPopoverId}`;
+  const popoverId = createInstanceId("popover");
   let rootElement = $state<HTMLDivElement | null>(null);
   let triggerElement = $state<HTMLDivElement | null>(null);
   let surfaceElement = $state<HTMLDivElement | null>(null);
@@ -87,64 +90,69 @@
     previousOpen = isOpen;
   });
 
-  function setOpen(nextOpen: boolean): void {
-    if (disabled) {
-      return;
-    }
+  const machineContext = $derived<PopoverContext>({
+    disabled,
+    dismissOnOutsideInteract,
+    initialFocus,
+  });
 
-    if (isControlled) {
-      open = nextOpen;
-    } else {
-      uncontrolledOpen = nextOpen;
-    }
+  const parts = $derived(
+    popoverParts(isOpen ? "open" : "closed", machineContext, {
+      surfaceId: popoverId,
+      ariaLabel,
+      block,
+      placement,
+      surfaceWidth,
+    }),
+  );
 
-    onOpenChange?.(nextOpen);
+  function send(event: PopoverEvent): void {
+    const result = popoverTransition(isOpen ? "open" : "closed", machineContext, event);
 
-    if (!nextOpen) {
-      triggerElement?.focus();
+    for (const effect of result.effects) {
+      switch (effect.type) {
+        case "emitOpenChange": {
+          if (isControlled) {
+            open = effect.open;
+          } else {
+            uncontrolledOpen = effect.open;
+          }
+
+          onOpenChange?.(effect.open);
+          break;
+        }
+        case "restoreTriggerFocus": {
+          triggerElement?.focus();
+          break;
+        }
+        case "focusOnOpen": {
+          // Executed by the isOpen $effect above, which waits for the surface
+          // to render before applying the initialFocus strategy.
+          break;
+        }
+      }
     }
   }
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!dismissOnOutsideInteract || !isOpen || !rootElement) {
-        return;
-      }
-
-      if (!rootElement.contains(event.target as Node)) {
-        setOpen(false);
-      }
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
-        event.preventDefault();
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract,
+      onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
+    });
   });
 </script>
 
-<div class="poodle-popover" data-block={block} bind:this={rootElement}>
+<div {...parts.root} class="poodle-popover" bind:this={rootElement}>
   <div
     bind:this={triggerElement}
+    {...parts.trigger}
     class="poodle-popover__trigger"
-    data-block={block}
-    data-disabled={disabled}
-    role="button"
-    tabindex={disabled ? -1 : 0}
-    aria-disabled={disabled ? "true" : undefined}
-    aria-expanded={isOpen ? "true" : "false"}
-    aria-controls={isOpen ? popoverId : undefined}
-    onclick={() => setOpen(!isOpen)}
+    onclick={() => send({ type: "TOGGLE" })}
     onkeydown={(event) => {
       if (disabled) {
         return;
@@ -152,7 +160,7 @@
 
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        setOpen(!isOpen);
+        send({ type: "TOGGLE" });
       }
     }}
   >
@@ -162,18 +170,13 @@
   {#if isOpen}
     <div
       bind:this={surfaceElement}
-      id={popoverId}
+      {...parts.surface}
       class="poodle-popover__surface"
-      data-placement={placement}
-      data-surface-width={surfaceWidth}
       style={[
         `--poodle-popover-offset: ${offset}px`,
         surfaceMinWidth ? `--poodle-popover-surface-min-width: ${surfaceMinWidth}` : "",
         surfaceMaxWidth ? `--poodle-popover-surface-max-width: ${surfaceMaxWidth}` : "",
       ].filter(Boolean).join("; ")}
-      tabindex={initialFocus === "content" ? 0 : -1}
-      role="dialog"
-      aria-label={ariaLabel ?? undefined}
     >
       {@render children?.()}
     </div>

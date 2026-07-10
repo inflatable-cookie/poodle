@@ -5,13 +5,19 @@
 <script lang="ts">
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
+  import {
+    tabsKeydownEvent,
+    tabsTransition,
+    type TabsContext as HeadlessTabsContext,
+    type TabsEvent as HeadlessTabsEvent,
+  } from "@poodle/headless";
+
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
-  import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
+  import { firstEnabledIndex } from "./internal";
   import {
-    applyReorder as applyReorderItems,
     handleDragStart as startDrag,
     handleDragOver as overDrag,
     handleDrop as dropDrag,
@@ -207,6 +213,9 @@
 
   onDestroy(() => clearTooltip());
 
+  // Environment paths (URL history restore) apply values directly and keep
+  // the old unknown-value semantics; user interactions go through the machine
+  // via send().
   function setValue(nextValue: string): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
@@ -215,6 +224,54 @@
     }
 
     onValueChange?.(nextValue);
+  }
+
+  const machineContext = $derived<HeadlessTabsContext<TabItem>>({
+    items: renderedItems,
+    value: currentValue,
+    focusIndex,
+    activationMode,
+    reorderable,
+  });
+
+  function send(event: HeadlessTabsEvent): void {
+    const result = tabsTransition(machineContext, event);
+
+    if (result.context.items !== machineContext.items) {
+      renderedItems = result.context.items;
+    }
+
+    if (result.context.focusIndex !== focusIndex) {
+      focusIndex = result.context.focusIndex;
+    }
+
+    for (const effect of result.effects) {
+      switch (effect.type) {
+        case "emitValueChange": {
+          if (!isControlled) {
+            uncontrolledValue = effect.value;
+          } else {
+            value = effect.value;
+          }
+
+          onValueChange?.(effect.value);
+          break;
+        }
+        case "focusTab": {
+          const index = effect.index;
+          tick().then(() => tabElements[index]?.focus());
+          break;
+        }
+        case "emitReorder": {
+          onReorder?.(effect.order);
+          break;
+        }
+        case "emitClose": {
+          onClose?.(effect.value);
+          break;
+        }
+      }
+    }
   }
 
   function replaceUrlTabParam(nextValue: string): void {
@@ -309,35 +366,7 @@
     void evaluateCollapsedOverflow();
   });
 
-  function moveFocus(nextIndex: number): void {
-    focusIndex = nextIndex;
-    tabElements[nextIndex]?.focus();
-
-    if (activationMode === "automatic") {
-      const nextValue = renderedItems[nextIndex]?.value;
-
-      if (nextValue) {
-        setValue(nextValue);
-      }
-    }
-  }
-
-  // ── Reorder (keyboard + drag-and-drop) ──
-
-  function applyReorder(fromIndex: number, toIndex: number): void {
-    const result = applyReorderItems(renderedItems, fromIndex, toIndex);
-    renderedItems = result.items;
-    focusIndex = result.focusIndex;
-    tick().then(() => tabElements[result.focusIndex]?.focus());
-    onReorder?.(result.items.map((item) => item.value));
-  }
-
-  function requestReorder(index: number, direction: -1 | 1): void {
-    if (!reorderable) return;
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= renderedItems.length) return;
-    applyReorder(index, nextIndex);
-  }
+  // ── Reorder (drag-and-drop DOM plumbing; final reorder routes through the machine) ──
 
   function handleDragStart(event: DragEvent, index: number): void {
     const result = startDrag(event, index, reorderable);
@@ -360,7 +389,7 @@
   function handleDrop(event: DragEvent, index: number): void {
     const result = dropDrag(event, index, dragSourceIndex);
     if (result.fromIndex !== null && result.toIndex !== null) {
-      applyReorder(result.fromIndex, result.toIndex);
+      send({ type: "REORDER", fromIndex: result.fromIndex, toIndex: result.toIndex });
     }
     dragSourceIndex = null;
     dropTargetIndex = null;
@@ -372,64 +401,25 @@
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
-    const horizontal = orientation === "horizontal";
+    const item = renderedItems[index];
 
-    if (
-      (horizontal && event.key === "ArrowRight") ||
-      (!horizontal && event.key === "ArrowDown")
-    ) {
-      if (reorderable && event.altKey) {
-        event.preventDefault();
-        requestReorder(index, 1);
-      } else {
-        event.preventDefault();
-        moveFocus(findNextEnabledIndex(renderedItems, index, 1));
-      }
-      return;
-    }
-
-    if (
-      (horizontal && event.key === "ArrowLeft") ||
-      (!horizontal && event.key === "ArrowUp")
-    ) {
-      if (reorderable && event.altKey) {
-        event.preventDefault();
-        requestReorder(index, -1);
-      } else {
-        event.preventDefault();
-        moveFocus(findNextEnabledIndex(renderedItems, index, -1));
-      }
-      return;
-    }
-
-    if (event.key === "Home") {
+    if (event.key === "Delete" && item?.closable) {
       event.preventDefault();
-      moveFocus(firstEnabledIndex(renderedItems));
+      send({ type: "CLOSE", value: item.value });
       return;
     }
 
-    if (event.key === "End") {
-      event.preventDefault();
-      moveFocus(findNextEnabledIndex(renderedItems, 0, -1));
-      return;
-    }
+    const machineEvent = tabsKeydownEvent(
+      event.key,
+      event.altKey,
+      orientation,
+      { reorderable, activationMode },
+      index,
+    );
 
-    if (
-      activationMode === "manual" &&
-      (event.key === "Enter" || event.key === " ")
-    ) {
+    if (machineEvent) {
       event.preventDefault();
-      const nextValue = renderedItems[index]?.value;
-
-      if (nextValue) {
-        setValue(nextValue);
-      }
-      return;
-    }
-
-    if (event.key === "Delete" && renderedItems[index]?.closable) {
-      event.preventDefault();
-      onClose?.(renderedItems[index].value);
+      send(machineEvent);
     }
   }
 </script>
@@ -491,7 +481,7 @@
         triggerAriaLabel={ariaLabel ?? "Sections"}
         size={resolvedSize}
         density={resolvedDensity}
-        onAction={(value) => setValue(value)}
+        onAction={(value) => send({ type: "SELECT", value })}
       >
         {#snippet trigger()}
           <Button
@@ -557,10 +547,10 @@
                 item.disabled !== true &&
                 currentValue !== item.value
               ) {
-                setValue(item.value);
+                send({ type: "SELECT", value: item.value });
               }
             }}
-            onclick={() => setValue(item.value)}
+            onclick={() => send({ type: "SELECT", value: item.value })}
             onkeydown={(event) => {
               if (event.key === "Escape" && hasTooltips) dismissTooltip();
               handleKeydown(event, index);
@@ -591,7 +581,7 @@
               aria-label={`Close ${item.label}`}
               onclick={(event) => {
                 event.stopPropagation();
-                onClose?.(item.value);
+                send({ type: "CLOSE", value: item.value });
               }}
             >
               <Icon name="x" size={resolvedIconSize} />
