@@ -1,7 +1,7 @@
 # Pagination
 
 Status: detailed contract
-Updated: 2026-05-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -179,6 +179,19 @@ inserted. For example, with `siblingCount=1` and `currentPage=5` of 20 pages:
 ```
 1  ...  4  5  6  ...  20
 ```
+
+### Behavior Machine
+
+Behavior classification: machine-backed (pagination machinery in
+`@poodle/headless`)
+
+- `buildVisiblePages(page, count, siblings)`: first/last always visible,
+  sibling window around the current page, ellipsis for gaps greater than
+  one page
+- `canRequestPage(next, current, total)`: in-bounds integer and an actual
+  navigation; guards every page request
+- Controller integration, scroll-into-view, and callbacks stay adapter-side
+- Machinery dependencies: none.
 
 ## 5. Callbacks
 

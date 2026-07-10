@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+  import { buildVisiblePages, canRequestPage } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -111,35 +113,6 @@
   const showInfoSummary = $derived(showInfo && (effectiveTotal ?? 0) > 0);
   const rootClassName = $derived(`poodle-pagination${className ? ` ${className}` : ""}`);
 
-  function buildVisiblePages(
-    pageValue: number,
-    count: number,
-    siblings: number,
-  ): Array<number | "ellipsis"> {
-    const pages = new Set<number>([1, count]);
-
-    for (let candidate = pageValue - siblings; candidate <= pageValue + siblings; candidate += 1) {
-      if (candidate >= 1 && candidate <= count) {
-        pages.add(candidate);
-      }
-    }
-
-    const sorted = Array.from(pages).sort((left, right) => left - right);
-    const result: Array<number | "ellipsis"> = [];
-
-    for (let index = 0; index < sorted.length; index += 1) {
-      const current = sorted[index];
-      const previous = sorted[index - 1];
-
-      if (previous && current - previous > 1) {
-        result.push("ellipsis");
-      }
-
-      result.push(current);
-    }
-
-    return result;
-  }
 
   function getScrollParent(element: HTMLElement): HTMLElement | null {
     let parent = element.parentElement;
@@ -190,7 +163,7 @@
   }
 
   async function handlePageRequest(nextPage: number): Promise<void> {
-    if (nextPage < 1 || nextPage > safeTotalPages || nextPage === safeCurrentPage) {
+    if (!canRequestPage(nextPage, safeCurrentPage, safeTotalPages)) {
       return;
     }
 

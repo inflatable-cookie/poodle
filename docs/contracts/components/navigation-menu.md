@@ -1,7 +1,7 @@
 # NavigationMenu
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -93,6 +93,15 @@ Updated: 2026-03-30
 - Active item value (which navigation item is open): controlled or uncontrolled
 - `focusIndex`: roving tabindex position across triggers
 - Viewport visibility: shown when value is non-null, hidden otherwise
+
+### Behavior Machine
+
+Behavior classification: machine-backed via shared machinery
+
+Trigger roving uses `findNextEnabledIndex`/`firstEnabledIndex`; panel
+open/close is single-select-with-deactivation over controllable state;
+dismissal (escape + outside) registers on the dismissable-layer stack while
+a panel is open.
 
 ## 5. Callbacks
 

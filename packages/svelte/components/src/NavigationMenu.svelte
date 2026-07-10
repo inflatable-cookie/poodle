@@ -3,7 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { onMount, type Snippet } from "svelte";
+  import { registerDismissLayer } from "@poodle/headless";
+  import type { Snippet } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -125,31 +126,16 @@
     }
   }
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!currentValue || !rootElement) {
-        return;
-      }
-
-      if (!rootElement.contains(event.target as Node)) {
-        setValue(null);
-      }
+  $effect(() => {
+    if (!currentValue) {
+      return;
     }
 
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && currentValue) {
-        event.preventDefault();
-        setValue(null);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setValue(null),
+    });
   });
 </script>
 

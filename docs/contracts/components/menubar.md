@@ -1,7 +1,7 @@
 # Menubar
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -105,6 +105,18 @@ MenuItem: {
 - `highlightIndex`: which item within overlay has keyboard focus
 - `lastOpenValue`: tracks last opened menu for hover-to-switch behavior
 - Outside click: document mousedown listener closes open menu
+
+### Behavior Machine
+
+Behavior classification: machine-backed via shared machinery
+
+Menubar composes core machinery rather than owning a bespoke machine:
+trigger roving uses `findNextEnabledIndex`/`firstEnabledIndex`, open-menu
+item navigation uses `menuListNavigate`/`menuNavigableItems`/
+`menuListCanActivate`, and dismissal (escape + outside) registers on the
+dismissable-layer stack while a menu is open. Open-menu value is plain
+controllable state; activation emits `onAction` then closes and restores
+trigger focus.
 
 ## 5. Callbacks
 

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { disclosureTransition } from "@poodle/headless";
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
@@ -66,12 +67,18 @@
     seededDefaultOpen = true;
   });
 
-  function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
-      uncontrolledOpen = nextOpen;
-    }
+  function toggle(): void {
+    const result = disclosureTransition({ open: isOpen, disabled }, { type: "TOGGLE" });
 
-    onOpenChange?.(nextOpen);
+    for (const effect of result.effects) {
+      if (effect.type === "emitOpenChange") {
+        if (!isControlled) {
+          uncontrolledOpen = effect.open;
+        }
+
+        onOpenChange?.(effect.open);
+      }
+    }
   }
 </script>
 
@@ -91,7 +98,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={`poodle-collapsible-content-${collapsibleId}`}
     aria-label={title ? undefined : ariaLabel ?? undefined}
-    onclick={() => setOpen(!isOpen)}
+    onclick={toggle}
   >
     <span class="poodle-collapsible__heading">
       {#if trigger}

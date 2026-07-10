@@ -5,6 +5,20 @@ export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
 
 export {
+  disclosureTransition,
+  type DisclosureContext,
+  type DisclosureEvent,
+  type DisclosureEffect,
+  type DisclosureResult,
+} from "./disclosure";
+
+export {
+  buildVisiblePages,
+  canRequestPage,
+  type VisiblePage,
+} from "./pagination";
+
+export {
   hoverTransition,
   type HoverState,
   type HoverContext,

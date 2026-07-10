@@ -3,7 +3,7 @@
 > **Surface elevation**: Accordion is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -97,6 +97,19 @@ Updated: 2026-03-30
 
 - `data-open`: `"true"` or `"false"` on each `.accordion__item`
 - Items rendered via `{#each items as item (item.value)}` with keyed identity
+
+### Behavior Machine
+
+Behavior classification: machine-backed (shared `toggleGroupTransition` in
+`@poodle/headless`)
+
+Accordion reuses the ToggleGroup machine: open values are a selection over
+items. `selectionMode` maps directly; `collapsible` maps to
+`allowDeactivation` (single mode reselect closes the panel only when
+collapsible). Disabled items are inert. Every accepted toggle emits
+`emitValueChange(nextValue)`.
+
+- Machinery dependencies: none (native buttons provide keyboard/focus).
 
 ## 5. Callbacks
 

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { toggleGroupTransition } from "@poodle/headless";
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
@@ -61,26 +62,28 @@
       : []);
 
   function toggle(itemValue: string): void {
-    const currentlyOpen = openValues.includes(itemValue);
-    let nextValue: string | string[] | null;
+    const result = toggleGroupTransition(
+      {
+        value: selectionMode === "multiple" ? openValues : (typeof currentValue === "string" ? currentValue : null),
+        options: items.map((item) => ({ value: item.value, disabled: item.disabled === true })),
+        selectionMode,
+        allowDeactivation: collapsible,
+        disabled: false,
+      },
+      { type: "TOGGLE", value: itemValue },
+    );
 
-    if (selectionMode === "multiple") {
-      nextValue = currentlyOpen
-        ? openValues.filter((valueItem) => valueItem !== itemValue)
-        : [...openValues, itemValue];
-    } else if (currentlyOpen) {
-      nextValue = collapsible ? null : itemValue;
-    } else {
-      nextValue = itemValue;
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        if (!isControlled) {
+          uncontrolledValue = effect.value;
+        } else {
+          value = effect.value;
+        }
+
+        onValueChange?.(effect.value);
+      }
     }
-
-    if (!isControlled) {
-      uncontrolledValue = nextValue;
-    } else {
-      value = nextValue;
-    }
-
-    onValueChange?.(nextValue);
   }
 </script>
 

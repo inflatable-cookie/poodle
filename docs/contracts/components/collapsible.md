@@ -3,7 +3,7 @@
 > **Surface elevation**: Collapsible is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -85,6 +85,17 @@ Updated: 2026-03-30
 - `data-open`: `"true"` or `"false"` on root `.collapsible`
 - `data-disabled`: `"true"` or `"false"` on root `.collapsible`
 - `data-highlighted`: `"true"` or `"false"` on root `.collapsible`
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`disclosureTransition` in
+`@poodle/headless`)
+
+- Context: `open` (controllable), `disabled`
+- Events: `TOGGLE` (trigger click), `SET_OPEN` (programmatic, silent)
+- Transitions: `TOGGLE` flips `open` and emits `emitOpenChange(open)`;
+  disabled is inert
+- Machinery dependencies: none (native button provides keyboard/focus).
 
 ## 5. Callbacks
 

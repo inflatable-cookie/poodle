@@ -3,7 +3,12 @@
 </script>
 
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import {
+    menuListCanActivate,
+    menuListNavigate,
+    registerDismissLayer,
+  } from "@poodle/headless";
+  import { tick } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -108,27 +113,17 @@
   }
 
   function moveMenuHighlight(direction: 1 | -1): void {
-    const count = actionableItems.length;
-
-    if (count === 0) {
+    if (actionableItems.length === 0) {
       return;
     }
 
-    let nextIndex = highlightIndex;
-
-    for (let step = 0; step < count; step += 1) {
-      nextIndex = (nextIndex + direction + count) % count;
-
-      if (!actionableItems[nextIndex]?.disabled) {
-        highlightIndex = nextIndex;
-        menuItemElements[nextIndex]?.focus();
-        return;
-      }
-    }
+    const nextIndex = menuListNavigate(actionableItems, highlightIndex, direction === 1 ? "next" : "prev");
+    highlightIndex = nextIndex;
+    menuItemElements[nextIndex]?.focus();
   }
 
   function activateItem(item: MenuItem): void {
-    if (item.disabled || item.kind === "separator") {
+    if (!menuListCanActivate(item)) {
       return;
     }
 
@@ -137,31 +132,16 @@
     triggerElements[focusIndex]?.focus();
   }
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!currentValue || !rootElement) {
-        return;
-      }
-
-      if (!rootElement.contains(event.target as Node)) {
-        setValue(null);
-      }
+  $effect(() => {
+    if (!currentValue) {
+      return;
     }
 
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && currentValue) {
-        event.preventDefault();
-        setValue(null);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setValue(null),
+    });
   });
 </script>
 

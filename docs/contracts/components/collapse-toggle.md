@@ -1,7 +1,7 @@
 # CollapseToggle
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -70,6 +70,14 @@ type CollapseDirection = "left" | "right" | "up" | "down";
 | hover | pointer over button | background changes to surface-hover, color changes to text-default |
 | disabled | `disabled=true` | opacity 0.4, cursor default, non-interactive |
 | focus-visible | keyboard focus | focus ring outline |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+CollapseToggle owns no state: `collapsed` is a plain prop and the click
+handler emits `onToggle(!collapsed)` with a disabled guard. The parent owns
+the disclosure state (typically via `disclosureTransition`).
 
 ## 5. Callbacks
 

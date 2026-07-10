@@ -132,9 +132,26 @@ the old code read the same values), so pixel placement could not be
 runtime-verified there; confidence rests on the line-identical port plus
 core unit tests with real viewport sizes.
 
-Wave 2 is complete. Next: wave 3 (disclosure and navigation — Collapsible,
-Accordion, NavigationMenu, Menubar, Pagination), then wave 4 (text entry
-and pickers), then the long-tail classification sweep.
+Wave 2 is complete.
+
+## Wave 3 Status (complete, 2026-07-10)
+
+- `Collapsible` on new `disclosureTransition`; `CollapseToggle` classified
+  styled-only (stateless callback button)
+- `Accordion` reuses `toggleGroupTransition` (`collapsible` maps to
+  `allowDeactivation`)
+- `Pagination` on core machinery: `buildVisiblePages` window math and
+  `canRequestPage` guard; controller/scroll stay adapter-side
+- `Menubar` and `NavigationMenu` composed onto shared machinery: menu-list
+  navigation, roving helpers, dismissable-layer stack replacing their
+  document listeners
+- Runtime-verified: collapsible toggle/restore, accordion open +
+  collapsible-close, pagination ellipsis window + page activation, menubar
+  and navigation-menu escape/outside dismiss. 91 core tests green.
+
+Next: wave 4 (text entry and pickers — TextInput, NumberEntry, Select,
+CommandPalette, date/time cluster, ColorPicker), then the long-tail
+classification sweep.
 
 ## Exit Criteria
 
