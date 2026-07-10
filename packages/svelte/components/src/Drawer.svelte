@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick, type Snippet } from "svelte";
+  import {
+    getFocusableElements,
+    modalTransition,
+    registerDismissLayer,
+    trapFocusKeydown,
+    type ModalEvent,
+  } from "@poodle/headless";
+  import { onDestroy, tick, type Snippet } from "svelte";
   import { fade } from "svelte/transition";
-
-  import { getFocusableElements } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";
@@ -114,64 +119,50 @@
     };
   }
 
-  function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
-      uncontrolledOpen = nextOpen;
-    }
+  function send(event: ModalEvent): void {
+    const result = modalTransition(
+      isOpen ? "open" : "closed",
+      { dismissOnEscape, dismissOnBackdrop },
+      event,
+    );
 
-    onOpenChange?.(nextOpen);
+    for (const effect of result.effects) {
+      if (effect.type === "emitRequestClose") {
+        onRequestClose?.();
+      } else if (effect.type === "emitOpenChange") {
+        if (!isControlled) {
+          uncontrolledOpen = effect.open;
+        }
+
+        onOpenChange?.(effect.open);
+      }
+      // Focus save/restore and scroll-lock intents run in the isOpen edge
+      // effects above, which see the actual open flip.
+    }
   }
 
   function requestClose(): void {
-    onRequestClose?.();
-    setOpen(false);
+    send({ type: "REQUEST_CLOSE" });
   }
 
   function trapFocus(event: KeyboardEvent): void {
-    if (!modal || event.key !== "Tab" || !surfaceElement) {
+    if (!modal) {
       return;
     }
 
-    const focusable = getFocusableElements(surfaceElement);
-
-    if (focusable.length === 0) {
-      event.preventDefault();
-      surfaceElement.focus();
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    }
-
-    if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    trapFocusKeydown(surfaceElement, event);
   }
 
-  onMount(() => {
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen && dismissOnEscape) {
-        event.preventDefault();
-        requestClose();
-      }
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeydown);
-
-      if (bodyOverflow !== null) {
-        document.body.style.overflow = bodyOverflow;
-        bodyOverflow = null;
-      }
-    };
+    return registerDismissLayer({
+      contains: () => true,
+      dismissOnOutsideInteract: false,
+      onDismiss: () => send({ type: "ESCAPE" }),
+    });
   });
 
   onDestroy(() => {
@@ -190,11 +181,7 @@
         class="poodle-drawer__backdrop"
         aria-label="Dismiss drawer backdrop"
         transition:fade={{ duration }}
-        onclick={() => {
-          if (dismissOnBackdrop) {
-            requestClose();
-          }
-        }}
+        onclick={() => send({ type: "BACKDROP_CLICK" })}
       ></button>
     {/if}
 

@@ -2,7 +2,16 @@ export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
-export { getFocusableElements } from "./dom/focus";
+export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
+
+export {
+  modalTransition,
+  type ModalState,
+  type ModalContext,
+  type ModalEvent,
+  type ModalEffect,
+  type ModalResult,
+} from "./modal";
 export { registerDismissLayer, resolveDismiss, type DismissLayer } from "./dom/dismiss";
 export { createInstanceId } from "./dom/id";
 

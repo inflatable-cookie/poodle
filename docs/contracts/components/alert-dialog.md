@@ -1,7 +1,7 @@
 # AlertDialog
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -81,6 +81,38 @@ Updated: 2026-03-26
 | working | confirm activated | dismiss on escape and backdrop disabled, buttons remain visible |
 | danger tone | `tone="danger"` (default) | confirm button uses variant="primary" with tone="danger" |
 | warning tone | `tone="warning"` | confirm button uses variant="primary" with tone="default" (warning maps to default) |
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`modalTransition` in
+`@poodle/headless`)
+
+Modal overlay machine shared by Dialog, AlertDialog (which composes Dialog),
+and Drawer.
+
+- States: `closed` | `open`
+- Context: `dismissOnEscape`, `dismissOnBackdrop`; open state is
+  controllable (controlled mode never writes `open`; the parent owns it and
+  reacts to `emitOpenChange`)
+- Events: `OPEN` / `CLOSE` (programmatic), `REQUEST_CLOSE` (close button or
+  caller), `ESCAPE` (dismissable-layer stack), `BACKDROP_CLICK`
+- Transitions: user-initiated close paths (`REQUEST_CLOSE`, guarded
+  `ESCAPE`, guarded `BACKDROP_CLICK`) emit `emitRequestClose` before
+  `emitOpenChange(false)`, preserving the onRequestClose -> onOpenChange
+  ordering; programmatic `CLOSE` skips `emitRequestClose`
+- Effects on open: `saveFocusAndEnter` (store the previously focused
+  element, focus the first focusable in the surface or the surface itself),
+  `lockBodyScroll`; on close: `unlockBodyScroll`, `restoreFocus`
+- Focus trap: shared `trapFocusKeydown` machinery — Tab wraps last->first
+  and first->last; with no focusable children focus pins to the surface
+- Machinery dependencies: dismissable-layer stack (escape targets the
+  innermost open layer; when `dismissOnEscape` is false the modal still
+  occupies the stack, so escape is swallowed rather than reaching outer
+  layers — modal semantics), focus (`getFocusableElements`,
+  `trapFocusKeydown`).
+
+AlertDialog composes Dialog and inherits its machine; its confirm/cancel
+actions call the shared close paths.
 
 ## 5. Callbacks
 

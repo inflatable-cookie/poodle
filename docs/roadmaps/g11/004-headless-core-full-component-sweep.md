@@ -1,6 +1,6 @@
 # g11.004 Headless Core Full Component Sweep
 
-Status: active — wave 1 complete (2026-07-10)
+Status: active — wave 1 complete; wave 2 dialog-family batch complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.003`
 Updated: 2026-07-10
@@ -73,6 +73,23 @@ Machine-backed and swapped: `Switch`, `TriStateSwitch`, `RadioGroup`,
 `ToggleGroup` single-mode reselect (without `allowDeactivation`) re-emits
 `onValueChange` with the same value — preserved from pre-machine behavior,
 recorded in the contract.
+
+## Wave 2 Status (dialog-family batch complete, 2026-07-10)
+
+Machine-backed and swapped: `Dialog`, `AlertDialog` (composes Dialog),
+`Drawer` — shared `modalTransition` machine plus `trapFocusKeydown` focus
+machinery. Escape now routes through the dismissable-layer stack (innermost
+first; a modal with `dismissOnEscape=false` swallows escape — modal
+semantics, recorded in the contracts). 64 core tests green.
+
+Runtime-verified: dialog open (focus entry, scroll lock), Tab trap wrap,
+escape and backdrop close with scroll unlock, persistent
+(`dismissOnEscape/Backdrop=false`) dialog correctly refusing both; drawer
+scroll-lock cycle across escape and backdrop paths.
+
+Remaining wave 2: `Tooltip`, `HoverCard` (hover-timing machine), `Menu`,
+`ContextMenu` (list navigation + typeahead), `Toast` (queue/timeout), plus
+the Floating UI anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
 
 ## Exit Criteria
 
