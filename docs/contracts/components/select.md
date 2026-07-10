@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-05-14
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -179,6 +179,27 @@ The component automatically determines whether to render a native `<select>` or 
 | value committed (custom) | Enter on highlighted option or click | `value` updates, dropdown closes |
 | dismissed (custom) | Escape or click outside | dropdown closes without changing value |
 | freeform commit (custom) | blur or Enter with no highlight, `freeform=true` | query text becomes the value |
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+Select composes `@poodle/headless` machinery; lazy loading, query state,
+freeform mode, and native-mode delegation stay adapter-side.
+
+- Option lists: `flattenSelectOptions` (grouped or flat),
+  `filterSelectOptions` (enabled + case-insensitive label match),
+  `filterSelectGroups` (per-group filter, empty groups dropped),
+  `isSelectOptionDisabled` (honors `disabled` and `isDisabled`)
+- Open placement: `selectMenuPlacement` — flips above when under 280px
+  remain below the trigger; right-aligns a fixed min-width menu that would
+  overflow the right edge but fits against the trigger's right edge
+- Open highlight: `selectOpenHighlightIndex` — selected option when
+  present, else first
+- Dismissal: escape + outside interaction via the dismissable-layer stack
+  (innermost-first)
+- Keyboard highlight movement is clamp-based (no wrap) and operates on the
+  already-enabled filtered list — adapter-side by current behavior
 
 ## 5. Callbacks
 

@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { onMount, type Snippet } from "svelte";
+  import {
+    filterSelectGroups,
+    flattenSelectOptions,
+    isSelectOptionDisabled,
+    registerDismissLayer,
+    selectMenuPlacement,
+    selectOpenHighlightIndex,
+  } from "@poodle/headless";
+  import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -141,26 +149,16 @@
   // ── Helpers ──────────────────────────────────────────────────
 
   function flattenOptions(source: SelectItems): SelectOption[] {
-    if (source.length === 0) return [];
-    if ("options" in source[0]) {
-      return (source as SelectOptionGroup[]).flatMap((g) => g.options);
-    }
-    return source as SelectOption[];
+    return flattenSelectOptions(source as (SelectOption | SelectOptionGroup)[]) as SelectOption[];
   }
 
   function filterGroups(source: SelectItems, q: string): SelectItems {
     if (!isGrouped) return source;
-    const lq = q.toLowerCase();
-    return (source as SelectOptionGroup[])
-      .map((g) => ({
-        ...g,
-        options: g.options.filter((o) => o.label.toLowerCase().includes(lq)),
-      }))
-      .filter((g) => g.options.length > 0);
+    return filterSelectGroups(source as SelectOptionGroup[], q) as SelectItems;
   }
 
   function isOptionDisabled(o: SelectOption): boolean {
-    return o.disabled === true || o.isDisabled === true;
+    return isSelectOptionDisabled(o);
   }
 
   function parseMinWidth(value: string): number {
@@ -212,26 +210,20 @@
   function setOpen(nextOpen: boolean): void {
     if (nextOpen && rootElement) {
       const rect = rootElement.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      placement = spaceBelow < 280 ? "above" : "below";
+      const menuPlacement = selectMenuPlacement(
+        rect,
+        { width: window.innerWidth, height: window.innerHeight },
+        menuMinWidth ? parseMinWidth(menuMinWidth) : null,
+      );
 
-      // Horizontal: if menuMinWidth is set, check if left-anchored would overflow
-      if (menuMinWidth) {
-        const spaceRight = window.innerWidth - rect.left;
-        const minW = parseMinWidth(menuMinWidth);
-        alignEnd = minW > spaceRight && rect.right > minW;
-      } else {
-        alignEnd = false;
-      }
+      placement = menuPlacement.placement;
+      alignEnd = menuPlacement.alignEnd;
     }
     open = nextOpen;
     onOpenChange?.(nextOpen);
 
     if (nextOpen) {
-      highlightIndex = selectedOption
-        ? filteredOptions.findIndex((entry) => entry.value === selectedOption.value)
-        : 0;
-      if (highlightIndex < 0) highlightIndex = 0;
+      highlightIndex = selectOpenHighlightIndex(filteredOptions, selectedOption?.value ?? null);
     }
   }
 
@@ -347,28 +339,16 @@
     }
   });
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!open || !rootElement) return;
-      if (!rootElement.contains(event.target as Node)) {
-        setOpen(false);
-      }
+  $effect(() => {
+    if (!open) {
+      return;
     }
 
-    function handleDocKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && open) {
-        event.preventDefault();
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleDocKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleDocKeydown);
-    };
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setOpen(false),
+    });
   });
 </script>
 

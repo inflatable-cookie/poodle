@@ -144,6 +144,18 @@ export {
 } from "./position";
 
 export {
+  isSelectOptionDisabled,
+  flattenSelectOptions,
+  filterSelectOptions,
+  filterSelectGroups,
+  selectMenuPlacement,
+  selectOpenHighlightIndex,
+  type SelectOptionLike,
+  type SelectGroupLike,
+  type SelectMenuPlacement,
+} from "./select";
+
+export {
   resolveToastTone,
   normalizeToast,
   isToastSticky,

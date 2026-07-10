@@ -160,10 +160,16 @@ adapter-side by design. Runtime-verified: slug input normalizing
 "Héllo Wörld Test" → "hello-world-test"; number input clamping 999999→100
 and -999999→0 on blur. 97 core tests green.
 
-Remaining wave 4: `Select` (open/dismiss/list-nav onto menu machinery),
-date/time cluster (`Calendar` + pickers — date math extraction),
-`ColorPicker` (color conversion math), `DurationInput` (parse). Then the
-long-tail classification sweep.
+Select batch complete (2026-07-10): option flatten/filter/disabled
+helpers, open placement (`selectMenuPlacement`), and open-highlight
+resolution moved to core; dismissal onto the layer stack. Lazy loading,
+query state, freeform, and native-mode delegation stay adapter-side.
+Runtime-verified: open, escape and outside dismiss, ArrowDown+Enter
+selection committing and closing. 104 core tests green.
+
+Remaining wave 4: date/time cluster (`Calendar` + pickers — date math
+extraction), `ColorPicker` (color conversion math), `DurationInput`
+(parse). Then the long-tail classification sweep.
 
 ## Exit Criteria
 
