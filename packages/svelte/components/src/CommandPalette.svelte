@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { trapFocusKeydown } from "@poodle/headless";
   import { onDestroy, tick } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -130,26 +131,7 @@
   }
 
   function trapFocus(event: KeyboardEvent): void {
-    if (event.key !== "Tab") return;
-
-    const focusableElements = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '.poodle-command-palette button:not([disabled]), .poodle-command-palette input:not([disabled]), .poodle-command-palette [tabindex]:not([tabindex="-1"])',
-      ),
-    ).filter((el) => !el.hasAttribute("disabled"));
-
-    if (focusableElements.length === 0) return;
-
-    const first = focusableElements[0];
-    const last = focusableElements[focusableElements.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    trapFocusKeydown(document.querySelector<HTMLElement>(".poodle-command-palette"), event);
   }
 
   function handleKeydown(event: KeyboardEvent): void {

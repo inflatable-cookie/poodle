@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-04-17
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -197,6 +197,16 @@ Updated: 2026-04-17
 | char-over | character count exceeds maxLength | char count text color switches to `status-danger` |
 
 The built-in trailing indicators (`pending-indicator`, `valid-indicator`, `invalid-indicator`) only render when `showValidationStatus` is `true` **and** the effective validation state is not `none`; when `showValidationStatus` is `false` the validation border-color states still apply but no indicator icon/spinner is shown.
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+Value semantics from `@poodle/headless`: `slugify` / `isValidSlugFormat`
+(slug mode normalization and format validation) and
+`validationStatusToState` (validation status to visual state mapping).
+Debounce, async validation orchestration, and submit/cancel/clear event
+plumbing stay adapter-side.
 
 ## 5. Callbacks
 

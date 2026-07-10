@@ -149,9 +149,21 @@ Wave 2 is complete.
   collapsible-close, pagination ellipsis window + page activation, menubar
   and navigation-menu escape/outside dismiss. 91 core tests green.
 
-Next: wave 4 (text entry and pickers — TextInput, NumberEntry, Select,
-CommandPalette, date/time cluster, ColorPicker), then the long-tail
-classification sweep.
+## Wave 4 Status (in progress)
+
+Batch A complete (2026-07-10): `TextInput` (slugify / slug validation /
+validation-state mapping), `NumberInput` (numeric coercion, step parsing,
+nullable-bounds clamping, validation-state mapping), `CommandPalette`
+(focus trap onto shared `trapFocusKeydown`) — all on core `input.ts` and
+focus machinery. Debounce/async-validation/commit plumbing stays
+adapter-side by design. Runtime-verified: slug input normalizing
+"Héllo Wörld Test" → "hello-world-test"; number input clamping 999999→100
+and -999999→0 on blur. 97 core tests green.
+
+Remaining wave 4: `Select` (open/dismiss/list-nav onto menu machinery),
+date/time cluster (`Calendar` + pickers — date math extraction),
+`ColorPicker` (color conversion math), `DurationInput` (parse). Then the
+long-tail classification sweep.
 
 ## Exit Criteria
 

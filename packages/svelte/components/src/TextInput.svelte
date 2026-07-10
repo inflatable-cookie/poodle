@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { isValidSlugFormat, slugify, validationStatusToState } from "@poodle/headless";
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
@@ -172,15 +173,6 @@
   const charCount = $derived(currentValue.length);
   const charCountText = $derived(maxLength ? `${charCount}/${maxLength}` : `${charCount}`);
 
-  function validationStatusToState(
-    status: InputValidationStatus,
-    fallback: ValidationState,
-  ): ValidationState {
-    if (status === "validating") return "pending";
-    if (status === "valid") return "valid";
-    if (status === "invalid") return "invalid";
-    return fallback;
-  }
   const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -310,22 +302,6 @@
     }
 
     return { value: context, validationKey: key };
-  }
-
-  function slugify(input: string): string {
-    return input
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/[\s_]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-  }
-
-  function isValidSlugFormat(slug: string, limit: number = 100): boolean {
-    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length >= 2 && slug.length <= limit;
   }
 
   function normalizeInputValue(input: string): string {

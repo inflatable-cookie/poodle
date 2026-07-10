@@ -1,7 +1,7 @@
 # NumberInput
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -40,6 +40,16 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 - standard control props:
   `id`, `name`, `placeholder`, `disabled`, `readOnly`, `required`,
   `ariaLabel`, `describedBy`, `size`, `sizeRole`, `density`
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+Value semantics from `@poodle/headless`: `parseNumberish` (numeric
+coercion; empty and non-finite become null), `parseStep` (invalid or
+non-positive steps fall back to 1), `clampNullable` (optional min/max
+bounds), `validationStatusToState`. Increment/decrement, commit-on-blur,
+and async validation orchestration stay adapter-side.
 
 ## Callbacks
 

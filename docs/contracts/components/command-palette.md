@@ -1,7 +1,7 @@
 # CommandPalette
 
 Status: contract
-Updated: 2026-03-26
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -62,6 +62,14 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for header chips, close control, and nested search/results chrome |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for the palette shell and nested result spacing |
+
+### Behavior Machine
+
+Behavior classification: machine-backed via shared machinery
+
+Focus trap uses the core `trapFocusKeydown` machinery (shared with the
+modal family). Active-item navigation delegates to the panel component;
+open/close is controlled state with escape/overlay dismissal.
 
 ## 5. Callbacks
 

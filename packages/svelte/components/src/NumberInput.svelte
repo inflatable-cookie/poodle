@@ -1,4 +1,11 @@
 <script lang="ts">
+  import {
+    clampNullable,
+    parseNumberish,
+    parseStep,
+    validationStatusToState,
+  } from "@poodle/headless";
+
   import { default as Icon } from "./Icon.svelte";
   import { formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -129,40 +136,8 @@
     return "number";
   }
 
-  function validationStatusToState(
-    status: InputValidationStatus,
-    fallback: ValidationState,
-  ): ValidationState {
-    if (status === "validating") return "pending";
-    if (status === "valid") return "valid";
-    if (status === "invalid") return "invalid";
-    return fallback;
-  }
-
-  function parseNumberish(input: number | string | null | undefined): number | null {
-    if (input === null || input === undefined || input === "") return null;
-    const nextValue = Number(input);
-    return Number.isFinite(nextValue) ? nextValue : null;
-  }
-
-  function parseStep(input: number | string | null): number {
-    if (input === null || input === "") return 1;
-    const nextValue = Number(input);
-    return Number.isFinite(nextValue) && nextValue > 0 ? nextValue : 1;
-  }
-
   function clampIfNeeded(nextValue: number): number {
-    let clampedValue = nextValue;
-
-    if (parsedMin !== null) {
-      clampedValue = Math.max(clampedValue, parsedMin);
-    }
-
-    if (parsedMax !== null) {
-      clampedValue = Math.min(clampedValue, parsedMax);
-    }
-
-    return clampedValue;
+    return clampNullable(nextValue, parsedMin, parsedMax);
   }
 
   function emitValidationChange(): void {
