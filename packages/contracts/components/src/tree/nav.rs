@@ -2,7 +2,7 @@
 //! sibling/parent lookup). Split out of `tree/mod.rs` (god-file
 //! decomposition); delegates cascade to poodle-headless. Unchanged.
 
-use crate::{CheckState, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::CheckState;
 use poodle_tokens::semantic;
 
 use super::*;

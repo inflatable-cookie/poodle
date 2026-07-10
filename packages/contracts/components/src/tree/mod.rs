@@ -1,5 +1,4 @@
-use crate::{CheckState, ControlDensity, ControlSize, SemanticControlSizeRole};
-use poodle_tokens::semantic;
+use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// A single node in a [`TreeSpec`]. Nodes are recursive: a node with children
 /// (or an explicit `is_branch` flag) renders as a branch with a twisty.
