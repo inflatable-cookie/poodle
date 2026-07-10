@@ -125,10 +125,32 @@ Domain-math port (complete for the consuming features, 2026-07-10):
   math to share); the positioning resolver has no GPUI consumer (native
   layout); Intl label formatting stays per-runtime.
 
+Jetstream adoption (first pass, 2026-07-10):
+
+- `tree.rs` joins `poodle-headless` — visible-row flattening, tri-state
+  cascade, keyboard intents, range selection, sibling targets, virtual
+  windowing — generic over the host's node type via the `TreeNodeLike`
+  trait. 24 conformance vector cases generated from the TS core; all pass.
+- `poodle-specs` `TreeSpec` delegates its cascade helpers
+  (`checkable_values_under`, `check_state`) to headless; its 119 tests
+  pass unchanged.
+- The Jetstream preview host consumes headless directly: tree keyboard
+  navigation runs through `tree_keydown_intent` (host `TreeKey` mapped
+  onto the shared key model, with host-only no-focus seeding kept
+  adapter-side), checkbox cascade through `tree_toggle_check`, Alt+Up/Down
+  sibling moves through `tree_sibling_reorder_target`, and tab drag-reorder
+  through the tabs machine's `apply_reorder`.
+- Validation: jetstream adapter (172 tests), components, and preview all
+  build; poodle-specs 119, headless 14 suites, TS 194 — all green. Per the
+  build-verified-only posture for Rust previews, behavioral confidence
+  rests on the conformance vectors.
+
 Remaining follow-on debt:
 
-- Jetstream consumption: explicitly deferred per program posture; adopt the
-  same machine-guarded-handler shape when Jetstream work resumes.
+- Jetstream component-level machine adoption (js_* components emit static
+  trees today; interactivity lives in the host — wiring machines into
+  component-level handlers follows the runtime's on_click/JsEl handler API
+  when Jetstream's own interactive surface matures).
 - Remaining GPUI families (selection/value, hover, tabs) adopt the same
   pattern opportunistically as those files are next touched.
 
