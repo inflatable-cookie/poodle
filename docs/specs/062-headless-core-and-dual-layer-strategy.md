@@ -194,8 +194,11 @@ Build list for `g11.003`, from the pilot specs:
   contract (`docs/architecture/007-appearance-recipe-contract.md`), with a
   generated inventory
   (`packages/svelte/preview/artifacts/recipe-inventory.json`).
-- Whether GPUI/Jetstream consume ported machines or only the declarative spec
-  (`g11.006`).
+- ~~GPUI/Jetstream consumption depth~~ **Resolved (g11.006):**
+  machine-guarded handlers — GPUI parents keep state ownership, components
+  call the Rust machines for guard decisions and execute emitted effect
+  intents. Dialog/Drawer/Menu adopted; remaining families adopt as touched.
+  Jetstream deferred per program posture.
 
 ## Honesty Rule
 

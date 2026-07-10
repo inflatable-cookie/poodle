@@ -268,24 +268,22 @@ impl IntoElement for Menu {
                         if let Some(ref close) = key_close {
                             close(window, cx);
                         }
-                    } else if key == "down" || key == "right" {
-                        // Move to next item (wrapping)
+                    } else if key == "down" || key == "right" || key == "up" || key == "left" {
+                        // Wrapping navigation via the shared menu-list
+                        // machinery (poodle-headless); nav_values is already
+                        // filtered to enabled items, so the disabled flags
+                        // are uniformly false.
                         if let Some(idx) = nav_values.iter().position(|v| v == &val) {
-                            let next = (idx + 1) % nav_values.len();
+                            let mv = if key == "down" || key == "right" {
+                                poodle_headless::menu::MenuListMove::Next
+                            } else {
+                                poodle_headless::menu::MenuListMove::Prev
+                            };
+                            let flags = vec![false; nav_values.len()];
+                            let next = poodle_headless::menu::menu_list_navigate(&flags, idx, mv);
+
                             if let Some(ref handler) = nav_select {
                                 handler(&nav_values[next], window, cx);
-                            }
-                        }
-                    } else if key == "up" || key == "left" {
-                        // Move to previous item (wrapping)
-                        if let Some(idx) = nav_values.iter().position(|v| v == &val) {
-                            let prev = if idx == 0 {
-                                nav_values.len() - 1
-                            } else {
-                                idx - 1
-                            };
-                            if let Some(ref handler) = nav_select {
-                                handler(&nav_values[prev], window, cx);
                             }
                         }
                     }

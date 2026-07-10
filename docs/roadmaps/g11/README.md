@@ -76,13 +76,12 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
   classification; machine model promoted to architecture 006
 - `g11.005` complete — appearance-recipe contract (architecture 007),
   recipe-hook namespace, inventory tooling, soundcheck worked example
-- `g11.006` active — `poodle-headless` crate: all 11 machines ported,
-  41 shared conformance vectors green on both runtimes; GPUI adoption and
-  domain-math port remain
+- `g11.006` complete — `poodle-headless` crate (11 machines, 41 shared
+  conformance vectors green on both runtimes); GPUI dialog/drawer/menu run
+  machine-guarded handlers
 - `g11.007` planned — React adapter pilot and Mitosis shell decision
 
 ## Next Task
 
-Open `g11/006-rust-headless-mirror.md` — GPUI overlay-family adoption onto
-`poodle-headless` plus the domain-math port; then
-`g11/007-multi-framework-adapters-and-mitosis-decision.md`.
+Open `g11/007-multi-framework-adapters-and-mitosis-decision.md` — the
+final runway milestone.

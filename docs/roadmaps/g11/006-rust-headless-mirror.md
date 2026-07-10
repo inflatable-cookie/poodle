@@ -1,6 +1,6 @@
 # g11.006 Rust Headless Mirror
 
-Status: active — machine mirror + conformance harness complete (2026-07-10)
+Status: complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.004` (machine shape stabilized through at least waves 1–3)
 Updated: 2026-07-10
@@ -86,17 +86,31 @@ Complete:
 Validation commands: `cargo test` in `packages/contracts/headless`;
 `bun test` in `packages/core`.
 
-Remaining in this milestone (explicit debt):
+GPUI adoption (complete, 2026-07-10):
 
-- GPUI family adoption: drive one overlay family (dialog/menu) from the
-  Rust machines end-to-end.
+- **Consumption depth decided: machine-guarded handlers.** GPUI parents own
+  open state (per the existing spec architecture), so components route
+  dismissal decisions through the machines — escape/backdrop handlers call
+  `modal_transition` and execute the emitted `EmitOpenChange` intents
+  instead of gating inline on spec flags. Handlers attach unconditionally;
+  the machine guards.
+- Adopted: `Dialog` and `Drawer` (modal machine, escape + backdrop paths),
+  `Menu` (wrapping keyboard navigation via `menu_list_navigate`).
+- Validation: `poodle-gpui-components` and `poodle-gpui-preview` build;
+  `poodle-gpui` adapter tests green (143). Per the build-verified-only
+  posture, behavioral confidence comes from the conformance vectors, not
+  runtime preview.
+
+Recorded follow-on debt (not exit criteria):
+
 - Domain-math port (dates/calendar grid, colors, durations, pagination,
-  select options, positioning resolver) — pure functions, mechanical;
-  port alongside GPUI adoption so each lands with a consumer.
-- Consumption-depth decision for Jetstream recorded when GPUI adoption
-  proves the shape.
+  select options, positioning resolver) — pure and mechanical; port each
+  piece alongside the GPUI/Jetstream feature that consumes it.
+- Jetstream consumption: explicitly deferred per program posture; adopt the
+  same machine-guarded-handler shape when Jetstream work resumes.
+- Remaining GPUI families (selection/value, hover, tabs) adopt the same
+  pattern opportunistically as those files are next touched.
 
 ## Next Task
 
-GPUI overlay-family adoption onto `poodle-headless`, then `g11.007`
-multi-framework adapters.
+`g11.007` multi-framework adapters and the Mitosis decision.

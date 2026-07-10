@@ -2,6 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_headless::modal::{modal_transition, ModalContext, ModalEffect, ModalEvent, ModalState};
 use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
 use crate::presentation::{
@@ -237,16 +238,26 @@ impl IntoElement for Drawer {
             drawer_panel = drawer_panel.child(header);
         }
 
-        // Escape key to close
-        if spec.dismiss_on_escape {
-            if let Some(ref handler) = self.on_open_change {
-                let esc_handler = handler.clone();
-                drawer_panel = drawer_panel.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                    if event.keystroke.key == "escape" {
-                        esc_handler(false, window, cx);
+        // Escape key to close — the shared modal machine owns the guard
+        // (poodle-headless, conformance-tested against the TS core).
+        let machine_context = ModalContext {
+            dismiss_on_escape: spec.dismiss_on_escape,
+            dismiss_on_backdrop: spec.dismiss_on_backdrop,
+        };
+
+        if let Some(ref handler) = self.on_open_change {
+            let esc_handler = handler.clone();
+            drawer_panel = drawer_panel.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                if event.keystroke.key == "escape" {
+                    let (_, effects) = modal_transition(ModalState::Open, machine_context, ModalEvent::Escape);
+
+                    for effect in effects {
+                        if let ModalEffect::EmitOpenChange { open } = effect {
+                            esc_handler(open, window, cx);
+                        }
                     }
-                });
-            }
+                }
+            });
         }
 
         // Body content (flex-grows so the actions row pins to the bottom)
@@ -303,14 +314,19 @@ impl IntoElement for Drawer {
                 backdrop = backdrop.flex_col();
             }
 
-            // Backdrop click to dismiss
-            if spec.dismiss_on_backdrop {
-                if let Some(ref handler) = self.on_open_change {
-                    let click_handler = handler.clone();
-                    backdrop = backdrop.on_click(move |_event, window, cx| {
-                        click_handler(false, window, cx);
-                    });
-                }
+            // Backdrop click to dismiss — same machine, BackdropClick event.
+            if let Some(ref handler) = self.on_open_change {
+                let click_handler = handler.clone();
+                backdrop = backdrop.on_click(move |_event, window, cx| {
+                    let (_, effects) =
+                        modal_transition(ModalState::Open, machine_context, ModalEvent::BackdropClick);
+
+                    for effect in effects {
+                        if let ModalEffect::EmitOpenChange { open } = effect {
+                            click_handler(open, window, cx);
+                        }
+                    }
+                });
             }
 
             if is_left {
