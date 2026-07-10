@@ -87,9 +87,17 @@ escape and backdrop close with scroll unlock, persistent
 (`dismissOnEscape/Backdrop=false`) dialog correctly refusing both; drawer
 scroll-lock cycle across escape and backdrop paths.
 
-Remaining wave 2: `Tooltip`, `HoverCard` (hover-timing machine), `Menu`,
-`ContextMenu` (list navigation + typeahead), `Toast` (queue/timeout), plus
-the Floating UI anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
+Hover batch complete (2026-07-10): `Tooltip` and `HoverCard` share
+`hoverTransition` (closed/opening/open/closing with adapter-owned timers).
+Runtime-verified: tooltip hidden through the open delay then shown,
+immediate close on leave; hover-card open delay, close-delay window,
+re-enter cancelling a pending close. Recorded delta: hover-card `LEAVE`
+while closed is now inert instead of firing a redundant close callback.
+69 core tests green.
+
+Remaining wave 2: `Menu`, `ContextMenu` (list navigation + typeahead —
+the last real machinery gap), `Toast` (queue/timeout), plus the Floating UI
+anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
 
 ## Exit Criteria
 

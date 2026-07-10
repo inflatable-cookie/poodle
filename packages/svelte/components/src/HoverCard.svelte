@@ -3,6 +3,11 @@
 </script>
 
 <script lang="ts">
+  import {
+    hoverTransition,
+    type HoverEvent as HoverMachineEvent,
+    type HoverState,
+  } from "@poodle/headless";
   import { onDestroy, tick, type Snippet } from "svelte";
 
   import type { OverlayPlacement } from "./types";
@@ -48,6 +53,8 @@
   const isControlled = $derived(open !== null);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
+  let machineState: HoverState = "closed";
+
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
@@ -59,6 +66,22 @@
     }
 
     onOpenChange?.(nextOpen);
+  }
+
+  function send(event: HoverMachineEvent): void {
+    const result = hoverTransition(machineState, { openDelayMs, closeDelayMs }, event);
+    machineState = result.state;
+
+    for (const effect of result.effects) {
+      if (effect.type === "clearTimer") {
+        clearTimers();
+      } else if (effect.type === "startTimer") {
+        clearTimers();
+        openTimer = setTimeout(() => send({ type: "TIMER_FIRE" }), effect.ms);
+      } else if (effect.type === "emitOpenChange") {
+        setOpen(effect.open);
+      }
+    }
   }
 
   function positionSurface(): void {
@@ -138,13 +161,11 @@
   }
 
   function scheduleOpen(): void {
-    clearTimers();
-    openTimer = setTimeout(() => setOpen(true), openDelayMs);
+    send({ type: "ENTER" });
   }
 
   function scheduleClose(): void {
-    clearTimers();
-    closeTimer = setTimeout(() => setOpen(false), closeDelayMs);
+    send({ type: "LEAVE" });
   }
 
   onDestroy(() => clearTimers());

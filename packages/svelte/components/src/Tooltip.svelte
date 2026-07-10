@@ -3,6 +3,11 @@
 </script>
 
 <script lang="ts">
+  import {
+    hoverTransition,
+    type HoverEvent as HoverMachineEvent,
+    type HoverState,
+  } from "@poodle/headless";
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import { resolveOverlayPosition } from "./overlay-position";
@@ -55,21 +60,34 @@
     }
   });
 
-  function setOpen(nextOpen: boolean): void {
-    if (!nextOpen && triggerElement) {
-      triggerElement.removeAttribute("aria-describedby");
-    }
+  let machineState: HoverState = "closed";
 
-    if (!isControlled) {
-      uncontrolledOpen = nextOpen;
-    }
+  function send(event: HoverMachineEvent): void {
+    const result = hoverTransition(machineState, { openDelayMs: delayMs, closeDelayMs: 0 }, event);
+    machineState = result.state;
 
-    onOpenChange?.(nextOpen);
+    for (const effect of result.effects) {
+      if (effect.type === "clearTimer") {
+        clearTimer();
+      } else if (effect.type === "startTimer") {
+        clearTimer();
+        timer = setTimeout(() => send({ type: "TIMER_FIRE" }), effect.ms);
+      } else if (effect.type === "emitOpenChange") {
+        if (!effect.open && triggerElement) {
+          triggerElement.removeAttribute("aria-describedby");
+        }
+
+        if (!isControlled) {
+          uncontrolledOpen = effect.open;
+        }
+
+        onOpenChange?.(effect.open);
+      }
+    }
   }
 
   function scheduleOpen(): void {
-    clearTimer();
-    timer = setTimeout(() => setOpen(true), delayMs);
+    send({ type: "ENTER" });
   }
 
   function clearTimer(): void {
@@ -80,8 +98,7 @@
   }
 
   function dismiss(): void {
-    clearTimer();
-    setOpen(false);
+    send({ type: "DISMISS" });
   }
 
   function getDefaultAnchor(): HTMLElement | null {

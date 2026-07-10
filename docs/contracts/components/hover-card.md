@@ -1,7 +1,7 @@
 # HoverCard
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -87,6 +87,34 @@ OverlayPlacement:
 - Delay timers: `openTimer` and `closeTimer` — entering trigger starts open timer, leaving trigger starts close timer
 - Surface hover: mouseenter on surface cancels close timer, mouseleave schedules close
 - Hover entering the surface must cancel the close timer to maintain continuity
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`hoverTransition` in
+`@poodle/headless`)
+
+Hover-intent machine shared by Tooltip and HoverCard.
+
+- States: `closed` | `opening` (open delay pending) | `open` | `closing`
+  (close delay pending)
+- Context: `openDelayMs`, `closeDelayMs`; open state controllable
+- Events: `ENTER` (pointer enter / focus in), `LEAVE` (pointer leave /
+  focus out), `TIMER_FIRE`, `DISMISS` (Escape), `SET_OPEN` (programmatic)
+- Transitions: `ENTER` from closed/opening starts the open timer; from
+  open/closing it cancels a pending close and stays open. `LEAVE` with a
+  zero close delay closes immediately; otherwise enters `closing` with the
+  close timer. `TIMER_FIRE` resolves the pending state; stale fires are
+  inert. `DISMISS` closes immediately from any non-closed state.
+- Effects: `startTimer(ms)` / `clearTimer` (adapter owns the timer handle),
+  `emitOpenChange(open)`. Immediate closes emit `emitOpenChange(false)` even
+  if the surface never became visible, matching pre-machine behavior.
+- Machinery dependencies: none beyond the adapter timer; positioning stays
+  adapter-side (anchor-positioning service arrives with the Floating UI
+  swap).
+
+HoverCard uses both delays (defaults 180/120ms). Delta from pre-machine
+behavior: `LEAVE` while fully closed is now inert instead of scheduling a
+redundant close callback.
 
 ## 5. Callbacks
 

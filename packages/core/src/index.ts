@@ -5,6 +5,15 @@ export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
 
 export {
+  hoverTransition,
+  type HoverState,
+  type HoverContext,
+  type HoverEvent,
+  type HoverEffect,
+  type HoverResult,
+} from "./hover";
+
+export {
   modalTransition,
   type ModalState,
   type ModalContext,

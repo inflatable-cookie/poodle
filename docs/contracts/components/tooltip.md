@@ -1,7 +1,7 @@
 # Tooltip
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -82,6 +82,32 @@ OverlayPlacement:
 ### Component States
 
 Closed, pending-open, and open states are required.
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`hoverTransition` in
+`@poodle/headless`)
+
+Hover-intent machine shared by Tooltip and HoverCard.
+
+- States: `closed` | `opening` (open delay pending) | `open` | `closing`
+  (close delay pending)
+- Context: `openDelayMs`, `closeDelayMs`; open state controllable
+- Events: `ENTER` (pointer enter / focus in), `LEAVE` (pointer leave /
+  focus out), `TIMER_FIRE`, `DISMISS` (Escape), `SET_OPEN` (programmatic)
+- Transitions: `ENTER` from closed/opening starts the open timer; from
+  open/closing it cancels a pending close and stays open. `LEAVE` with a
+  zero close delay closes immediately; otherwise enters `closing` with the
+  close timer. `TIMER_FIRE` resolves the pending state; stale fires are
+  inert. `DISMISS` closes immediately from any non-closed state.
+- Effects: `startTimer(ms)` / `clearTimer` (adapter owns the timer handle),
+  `emitOpenChange(open)`. Immediate closes emit `emitOpenChange(false)` even
+  if the surface never became visible, matching pre-machine behavior.
+- Machinery dependencies: none beyond the adapter timer; positioning stays
+  adapter-side (anchor-positioning service arrives with the Floating UI
+  swap).
+
+Tooltip uses `closeDelayMs = 0` (immediate close on leave/blur/Escape).
 
 ## 5. Callbacks
 
