@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@poodle/headless";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Icon } from "./Icon.svelte";
@@ -111,11 +112,7 @@
       return;
     }
 
-    const merged = dedupe
-      ? Array.from(new Set([...current, ...nextTokens]))
-      : [...current, ...nextTokens];
-
-    applyValues(merged);
+    applyValues(mergeTokens(current, nextTokens, dedupe));
   }
 
   function commitInput(): void {
@@ -135,23 +132,15 @@
   }
 
   function handleInput(nextValue: string): void {
-    if (!splitPattern) {
+    const split = splitTokenInput(nextValue, splitPattern, separatorChars);
+
+    if (!split) {
       inputValue = nextValue;
       return;
     }
 
-    const rawParts = nextValue.split(splitPattern);
-    const endsWithSeparator = separatorChars.length > 0
-      && separatorChars.split("").some((separator) => nextValue.endsWith(separator));
-
-    if (rawParts.length <= 1 && !endsWithSeparator) {
-      inputValue = nextValue;
-      return;
-    }
-
-    const committed = endsWithSeparator ? rawParts : rawParts.slice(0, -1);
-    addTokens(committed);
-    inputValue = endsWithSeparator ? "" : rawParts.at(-1) ?? "";
+    addTokens(split.committed);
+    inputValue = split.remainder;
   }
 
   function handleKeyDown(event: KeyboardEvent): void {
@@ -165,7 +154,7 @@
       return;
     }
 
-    if (event.key === "Backspace" && inputValue.length === 0 && values.length > 0) {
+    if (event.key === "Backspace" && tokenBackspaceRemoves(inputValue, values.length)) {
       event.preventDefault();
       applyValues(values.slice(0, -1));
     }

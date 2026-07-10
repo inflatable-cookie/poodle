@@ -104,9 +104,14 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Chip entry with keyboard editing; the pointer listener is local focus routing (not overlay dismissal). Extraction debt: chip-editing machine.
+Machine-backed via core machinery (g11 extraction sweep): token merging
+with dedupe (`mergeTokens`), separator-driven splitting with remainder
+(`splitTokenInput`), and the backspace-removes-last-chip guard
+(`tokenBackspaceRemoves`) live in `@poodle/headless`. Token
+resolution/rejection hooks stay adapter-side (app-defined); the pointer
+listener is local focus routing.
 
 ## 5. States
 

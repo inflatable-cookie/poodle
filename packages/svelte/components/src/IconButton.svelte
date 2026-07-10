@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@poodle/headless";
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -106,14 +107,30 @@
     }
   });
 
+  let hoverMachineState: HoverState = "closed";
+
+  function sendHover(event: HoverMachineEvent): void {
+    const result = hoverTransition(hoverMachineState, { openDelayMs: 300, closeDelayMs: 0 }, event);
+    hoverMachineState = result.state;
+
+    for (const effect of result.effects) {
+      if (effect.type === "clearTimer") {
+        clearTimer();
+      } else if (effect.type === "startTimer") {
+        clearTimer();
+        timer = setTimeout(() => sendHover({ type: "TIMER_FIRE" }), effect.ms);
+      } else if (effect.type === "emitOpenChange") {
+        tooltipOpen = effect.open;
+      }
+    }
+  }
+
   function scheduleOpen(): void {
-    clearTimer();
-    timer = setTimeout(() => (tooltipOpen = true), 300);
+    sendHover({ type: "ENTER" });
   }
 
   function dismiss(): void {
-    clearTimer();
-    tooltipOpen = false;
+    sendHover({ type: "DISMISS" });
   }
 
   function clearTimer(): void {

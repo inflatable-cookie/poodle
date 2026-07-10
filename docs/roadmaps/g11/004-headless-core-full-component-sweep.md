@@ -213,10 +213,21 @@ open. 121 core tests green.
     `minSelectableValue`, now recorded), `ListCard` (context-menu dismissal
     onto the layer stack), `ConfirmAction` (reclassified — composes the
     machine-backed Dialog; no separate machine warranted).
-  - **Remaining:** `EditableLabel`/`EditableList` (edit-mode machine),
-    `CodeInput` (segment navigation), `IconButton` tooltip (compose hover
-    machine), `TokenInput` chip editing. Recorded in each contract; none
-    blocks anything.
+  - **Cleared (third pass — register empty, 2026-07-10):**
+    `EditableLabel` (edit-label machine in core `edit.ts`; commit/cancel now
+    state-guarded so blur-after-escape cannot double-emit),
+    `EditableList` (grab-and-move keyboard intents via
+    `listReorderKeyIntent` + shared `applyReorder`),
+    `CodeInput` (sanitize/caret/slot-selection/insert-replacement math in
+    core `code-input.ts`), `TokenInput` (merge/split/backspace machinery in
+    core `token.ts`), `IconButton` tooltip (composes `hoverTransition`).
+    194 core tests. Browser runtime verification for the three
+    debt-burn-down passes remains deferred (preview extension unavailable
+    those sessions) — behavior encoded in unit vectors; flag for the next
+    preview session.
+
+  **The extraction-debt register is empty.** Every behavioral component in
+  `@poodle/svelte` now runs on `@poodle/headless` machines or machinery.
 - Promotion complete: machine model, machinery inventory, classification
   rule, and cross-runtime contract promoted to
   `docs/architecture/006-headless-core-and-machine-model.md`.

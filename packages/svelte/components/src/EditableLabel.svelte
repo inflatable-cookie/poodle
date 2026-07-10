@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { editLabelTransition, type EditLabelEvent } from "@poodle/headless";
   import { tick } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -60,31 +61,55 @@
     }
   });
 
-  async function startEditing(): Promise<void> {
-    if (disabled || activationMode === "programmatic") return;
+  async function send(event: EditLabelEvent): Promise<void> {
+    const result = editLabelTransition(
+      isEditing ? "editing" : "view",
+      {
+        value,
+        draft: draftValue,
+        disabled,
+        canStartEdit: activationMode !== "programmatic",
+      },
+      event,
+    );
 
-    draftValue = value;
-    isEditing = true;
-    onEditStart?.();
-    await tick();
+    isEditing = result.state === "editing";
+    draftValue = result.context.draft;
 
-    if (inputElement) {
-      inputElement.focus();
-      if (selectOnFocus) inputElement.select();
+    for (const effect of result.effects) {
+      switch (effect.type) {
+        case "emitEditStart":
+          onEditStart?.();
+          break;
+        case "focusInput": {
+          await tick();
+
+          if (inputElement) {
+            inputElement.focus();
+            if (selectOnFocus) inputElement.select();
+          }
+          break;
+        }
+        case "emitCommit":
+          onCommit?.({ value: effect.value, previousValue: effect.previousValue });
+          break;
+        case "emitCancel":
+          onCancel?.();
+          break;
+      }
     }
   }
 
+  function startEditing(): void {
+    void send({ type: "START_EDIT" });
+  }
+
   function commit(): void {
-    const trimmed = draftValue.trim();
-    const previousValue = value;
-    isEditing = false;
-    onCommit?.({ value: trimmed, previousValue });
+    void send({ type: "COMMIT" });
   }
 
   function cancel(): void {
-    isEditing = false;
-    draftValue = value;
-    onCancel?.();
+    void send({ type: "CANCEL" });
   }
 </script>
 

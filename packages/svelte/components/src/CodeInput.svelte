@@ -1,4 +1,11 @@
 <script lang="ts">
+  import {
+    clampCodePosition,
+    codeInsertReplacement,
+    codeSelectionRange,
+    codeSlotSelection,
+    sanitizeCodeValue,
+  } from "@poodle/headless";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Field } from "./Field.svelte";
@@ -90,8 +97,7 @@
   });
 
   function sanitizeValue(input: string): string {
-    const normalized = numbersOnly ? input.replace(/\D/g, "") : input;
-    return normalized.slice(0, length);
+    return sanitizeCodeValue(input, length, numbersOnly);
   }
 
   function updateValue(nextRawValue: string): void {
@@ -126,13 +132,10 @@
   function setActivePosition(index: number, selectFilled: boolean): void {
     if (!inputRef) return;
 
-    const maxPosition = Math.max(Math.min(currentValue.length, length - 1), 0);
-    const nextPosition = Math.min(Math.max(index, 0), maxPosition);
-    const selectionEnd = selectFilled && nextPosition < currentValue.length
-      ? nextPosition + 1
-      : nextPosition;
+    const nextPosition = clampCodePosition(index, currentValue.length, length);
+    const range = codeSelectionRange(nextPosition, currentValue.length, selectFilled);
 
-    inputRef.setSelectionRange(nextPosition, selectionEnd);
+    inputRef.setSelectionRange(range.start, range.end);
     caretIndex = nextPosition;
   }
 
@@ -176,9 +179,7 @@
 
     if (!inputRef) return;
 
-    const nextPosition = Math.min(index, currentValue.length);
-    const selectionEnd = index < currentValue.length ? index + 1 : nextPosition;
-    pendingSelection = { start: nextPosition, end: selectionEnd };
+    pendingSelection = codeSlotSelection(index, currentValue.length);
     requestAnimationFrame(() => {
       applyPendingSelection();
     });
@@ -202,24 +203,26 @@
       return;
     }
 
-    const nextData = numbersOnly ? (event.data ?? "").replace(/\D/g, "") : (event.data ?? "");
+    const selectionStart = inputRef.selectionStart ?? currentValue.length;
+    const selectionEnd = inputRef.selectionEnd ?? selectionStart;
+    const replacement = codeInsertReplacement(
+      currentValue,
+      event.data ?? "",
+      selectionStart,
+      selectionEnd,
+      length,
+      numbersOnly,
+    );
 
-    if (nextData.length === 0) {
-      event.preventDefault();
+    event.preventDefault();
+
+    if (!replacement) {
       return;
     }
 
-    const selectionStart = inputRef.selectionStart ?? currentValue.length;
-    const selectionEnd = inputRef.selectionEnd ?? selectionStart;
-    const replacementEnd = Math.max(selectionEnd, Math.min(selectionStart + nextData.length, currentValue.length));
-    const nextValue =
-      `${currentValue.slice(0, selectionStart)}${nextData}${currentValue.slice(replacementEnd)}`.slice(0, length);
-    const nextCaretPosition = Math.min(selectionStart + nextData.length, length - 1);
-
-    event.preventDefault();
-    updateValue(nextValue);
+    updateValue(replacement.value);
     requestAnimationFrame(() => {
-      setActivePosition(nextCaretPosition, true);
+      setActivePosition(replacement.caret, true);
     });
   }
 

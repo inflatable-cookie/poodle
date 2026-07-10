@@ -112,9 +112,11 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Tooltip timing and pressed state. Extraction debt: compose the shared hover machine for its tooltip path.
+Machine-backed via shared machinery (g11 extraction sweep): the tooltip
+path composes `hoverTransition` (300ms open delay, immediate close — the
+same machine Tooltip runs). Pressed state is plain controllable state.
 
 ## 5. Callbacks
 

@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
+  import { applyReorder, listReorderKeyIntent } from "@poodle/headless";
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";
@@ -157,9 +158,8 @@
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     if (fromIndex >= items.length || toIndex >= items.length) return;
 
-    const updated = [...items];
-    const [moved] = updated.splice(fromIndex, 1);
-    updated.splice(toIndex, 0, moved);
+    const { items: updated } = applyReorder(items, fromIndex, toIndex);
+    const moved = updated[toIndex];
     items = updated;
     onReorder?.(updated);
     onChange?.(updated);
@@ -201,47 +201,43 @@
   function handleKeydown(event: KeyboardEvent, index: number): void {
     if (isUnavailable) return;
 
-    const key = event.key;
-    if (key === " " || key === "Enter") {
-      event.preventDefault();
-      if (grabbedIndex === index) {
-        grabbedIndex = null;
-        announce("Dropped item.");
-      } else {
+    const intent = listReorderKeyIntent(event.key, index, grabbedIndex, items.length);
+
+    if (!intent) return;
+
+    event.preventDefault();
+
+    switch (intent.type) {
+      case "grab":
         grabbedIndex = index;
         announce(
           `Grabbed ${items[index]?.label ?? items[index]?.id ?? "item"}. Use arrow keys to move, Escape to cancel.`,
         );
+        break;
+      case "drop":
+        grabbedIndex = null;
+        announce("Dropped item.");
+        break;
+      case "cancelGrab":
+        grabbedIndex = null;
+        announce("Cancelled keyboard move.");
+        break;
+      case "boundary":
+        announce("Reached list boundary.");
+        break;
+      case "move": {
+        moveItem(intent.from, intent.to);
+        if (grabbedIndex !== null) {
+          grabbedIndex = intent.to;
+        }
+
+        requestAnimationFrame(() => {
+          const element = document.querySelector<HTMLElement>(`[data-reorder-index="${intent.to}"]`);
+          element?.focus();
+        });
+        break;
       }
-      return;
     }
-
-    if (key === "Escape" && grabbedIndex !== null) {
-      event.preventDefault();
-      grabbedIndex = null;
-      announce("Cancelled keyboard move.");
-      return;
-    }
-
-    if (key !== "ArrowUp" && key !== "ArrowDown") return;
-
-    event.preventDefault();
-    const activeIndex = grabbedIndex ?? index;
-    const targetIndex = key === "ArrowUp" ? activeIndex - 1 : activeIndex + 1;
-    if (targetIndex < 0 || targetIndex >= items.length) {
-      announce("Reached list boundary.");
-      return;
-    }
-
-    moveItem(activeIndex, targetIndex);
-    if (grabbedIndex !== null) {
-      grabbedIndex = targetIndex;
-    }
-
-    requestAnimationFrame(() => {
-      const element = document.querySelector<HTMLElement>(`[data-reorder-index="${targetIndex}"]`);
-      element?.focus();
-    });
   }
 
   function addItem(): void {

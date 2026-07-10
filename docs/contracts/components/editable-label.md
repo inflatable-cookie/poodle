@@ -92,9 +92,14 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-View/edit mode toggle with commit/cancel keys. Extraction debt: edit-mode machine (shared with EditableList).
+Machine-backed (g11 extraction sweep): runs `editLabelTransition` in
+`@poodle/headless` — view/editing states, start-edit guards (disabled,
+programmatic activation), commit trims the draft and reports
+`{ value, previousValue }`, cancel restores. Focus/select-on-focus are
+effect intents the adapter executes. Bonus hardening: commit/cancel are
+now state-guarded, so a blur after Escape cannot double-emit.
 
 ## 5. Callbacks
 

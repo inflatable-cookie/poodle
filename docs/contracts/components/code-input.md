@@ -62,9 +62,13 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Segmented code entry: per-digit keyboard movement and paste distribution. Extraction debt: segment-navigation machine.
+Machine-backed via core machinery (g11 extraction sweep): sanitization,
+caret-position clamping into the filled prefix, slot-click selection, and
+insert-replacement math (overwrite + caret advance, length-capped) live in
+`@poodle/headless` `code-input.ts`. Selection-range DOM calls and
+requestAnimationFrame timing stay adapter-side.
 
 ## 5. Behavior
 

@@ -154,9 +154,13 @@ view uses `windowStart` offset for correct global indexing.
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Item edit/reorder with keyboard. Extraction debt: edit-mode machine + reorder via core `applyReorder`.
+Machine-backed via core machinery (g11 extraction sweep): keyboard
+grab-and-move resolves through `listReorderKeyIntent` (Space/Enter grab
+and drop, Escape cancel, arrow moves with boundary reporting) and item
+moves use the shared `applyReorder`. Announcements, focus, and drag DOM
+plumbing stay adapter-side.
 
 ## 5. Callbacks
 
