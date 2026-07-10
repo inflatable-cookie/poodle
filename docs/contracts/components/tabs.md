@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-04-01
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -119,6 +119,118 @@ native equivalent).
 - Selected-tab state: controlled or uncontrolled value tracking
 - Roving focus: `focusIndex` tracks which tab has `tabindex="0"`, all others get `tabindex="-1"`
 - Drag state: `dragSourceIndex` and `dropTargetIndex` for reorder
+
+### Behavior Machine
+
+Behavior classification: machine-backed
+
+Moderate-case pilot: selection + roving tabindex, plus three auxiliary
+behaviors (drag reorder, tooltip timing, overflow collapse) modeled as
+sub-machines so the main chart stays readable. URL-history sync and overflow
+measurement are environment effects, not machine states.
+
+#### Context
+
+| Field | Type | Initial | Controllable | Meaning |
+|-------|------|---------|--------------|---------|
+| `value` | `string \| null` | `defaultValue`, else first enabled item | yes | selected tab value |
+| `focusIndex` | `number` | selected index | no | roving-tabindex position; follows selection when selection changes |
+| `items` | `TabItem[]` | prop | input | ordered tab descriptors (value, label, disabled, closable, ...) |
+| `activationMode` | `"automatic" \| "manual"` | `"automatic"` | input | whether focus movement commits selection |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | input | maps arrow keys |
+| `reorderable` | `boolean` | `false` | input | enables Alt+Arrow and drag reorder |
+| `collapsedByOverflow` | `boolean` | `false` | no | presentational: list replaced by menu when it cannot fit |
+
+#### States
+
+Main chart:
+
+| State | Description |
+|-------|-------------|
+| `idle` | tablist interactive |
+
+Reorder sub-machine: `idle` → `dragging { sourceIndex, dropTargetIndex }` →
+`idle` (drop applies reorder; leave/end cancels). Keyboard reorder
+(Alt+Arrow) is a single-event action, not a `dragging` entry.
+
+Tooltip sub-machine (active when vertical or `showTooltips`): `hidden` →
+`pending { index }` (pointer enter, 300ms timer) → `visible { index }`;
+pointer leave from any state → `hidden`, cancelling the timer.
+
+#### Events
+
+| Event | Payload | Source |
+|-------|---------|--------|
+| `SELECT` | `value` | tab click, collapsed-menu selection, programmatic |
+| `FOCUS_MOVE` | `direction: next \| prev \| first \| last`, `fromIndex?` | Arrow keys (orientation-mapped), Home, End |
+| `ACTIVATE` | `index?` | Enter/Space on focused tab (manual mode only) |
+| `CLOSE` | `value` | close-button click or Delete on closable tab |
+| `REORDER_STEP` | `direction: -1 \| 1`, `fromIndex?` | Alt+Arrow when `reorderable` |
+
+Keyboard events carry the index of the tab that received the key
+(`fromIndex`/`index`); the machine prefers it over tracked `focusIndex` when
+the two diverge, matching the pre-machine behavior where handlers used their
+own tab index.
+| `DRAG_START` / `DRAG_OVER` / `DRAG_LEAVE` / `DROP` / `DRAG_END` | indices | pointer drag when `reorderable` |
+| `URL_POP` | `value \| null` | environment: `popstate` when `historyKey` set |
+| `OVERFLOW_CHANGE` | `collapsed: boolean` | environment: measurement effect |
+
+#### Transitions
+
+| State | Event | Guard | Target | Actions / Effects |
+|-------|-------|-------|--------|-------------------|
+| `idle` | `SELECT` | item exists | `idle` | set `value`, sync `focusIndex` to selection, `onValueChange(value)`; effect `syncHistory` |
+| `idle` | `FOCUS_MOVE` | — | `idle` | move `focusIndex` to next enabled item, wrapping and skipping disabled; effect `focusTab`; when `activationMode="automatic"`, also commit selection as `SELECT` |
+| `idle` | `ACTIVATE` | `activationMode="manual"` | `idle` | commit selection as `SELECT` |
+| `idle` | `CLOSE` | item `closable` | `idle` | `onClose(value)` only — parent owns item removal |
+| `idle` | `REORDER_STEP` | `reorderable`, target in bounds | `idle` | reorder items, keep focus on moved tab (effect `focusTab`), `onReorder(order)` |
+| `idle` | `DRAG_START` | `reorderable`, item enabled | `dragging` | record `sourceIndex` |
+| `dragging` | `DRAG_OVER` / `DRAG_LEAVE` | — | `dragging` | update/clear `dropTargetIndex` |
+| `dragging` | `DROP` | valid target | `idle` | apply reorder as in `REORDER_STEP` |
+| `dragging` | `DRAG_END` | — | `idle` | clear drag context, no reorder |
+| `idle` | `URL_POP` | `historyKey` set | `idle` | set `value` from URL, falling back to first enabled item |
+| `idle` | `OVERFLOW_CHANGE` | `collapseWhenOverflow`, horizontal | `idle` | set `collapsedByOverflow`; collapsed rendering delegates selection to a Menu, which re-enters via `SELECT` |
+
+Disabled items: never selectable, never focus targets (`FOCUS_MOVE` skips
+them, wrapping modulo item count), not draggable.
+
+#### Effects
+
+| Effect | What It Does | Cleanup |
+|--------|--------------|---------|
+| `focusTab` | focuses the tab element at `focusIndex` after render | none |
+| `syncHistory` | when `historyKey` set: mirror `value` into `?{historyKey}=` via `history.replaceState` (deleting the param when at the default tab); subscribe to `popstate` and emit `URL_POP` | unsubscribe `popstate` on unmount |
+| `measureOverflow` | when `collapseWhenOverflow`: compare natural list width (hidden measurement copy) against available width via ResizeObserver + window resize; emit `OVERFLOW_CHANGE` | disconnect observer, remove listener on unmount |
+| `tooltipTimer` | 300ms delay between `pending` and `visible` in the tooltip sub-machine | clear timer on leave/unmount |
+
+#### Part Attribute Output
+
+| Part | Attribute | Value |
+|------|-----------|-------|
+| root | `data-scope` / `data-part` | `tabs` / `root` |
+| root | `data-orientation` / `data-variant` / `data-bordered` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
+| list | `data-part` / `role` | `list` / `"tablist"` |
+| list | `aria-label` / `aria-orientation` | `ariaLabel` / `orientation` |
+| tab | `data-part` / `role` / `id` | `trigger` / `"tab"` / `poodle-tab-{instance}-{value}` |
+| tab | `aria-selected` | `"true"` on the selected tab, else `"false"` |
+| tab | `aria-controls` | panel id, only when a panel snippet exists |
+| tab | `tabindex` | `0` at `focusIndex`, else `-1` (roving) |
+| tab | `disabled` | item `disabled` |
+| tab | `data-state` | `active` \| `inactive` |
+| item wrapper | `role` / `data-selected` / `data-drag-source` / `data-drop-target` | `"presentation"` / selection and drag flags |
+| panel | `data-part` / `role` / `id` | `panel` / `"tabpanel"` / `poodle-tabpanel-{instance}-{value}` |
+| panel | `aria-labelledby` / `tabindex` | selected tab id / `0` |
+| close | `aria-label` | `Close {label}` |
+
+Note: `data-scope`/`data-part`/`data-state` are added during the core swap
+(additive); the remaining attributes match the current implementation.
+
+#### Machinery Dependencies
+
+Roving tabindex (wrapping, disabled-skipping index navigation), id wiring
+(tab/panel pairs). Collapsed mode composes the Menu component rather than core
+machinery. History sync and overflow measurement are Tabs-specific effects,
+not shared services.
 
 ## 5. Callbacks
 

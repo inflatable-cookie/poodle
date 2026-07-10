@@ -1,7 +1,7 @@
 # Checkbox
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -82,6 +82,78 @@ Updated: 2026-03-24
 
 - internal checked state (uncontrolled mode)
 - indeterminate property set via JS on native input
+
+### Behavior Machine
+
+Behavior classification: machine-backed
+
+Trivial-case pilot: one state, one event. The value lives in context, not in
+the state chart — checked/mixed are context-derived, so "unchecked → checked"
+is a context change, not a state transition.
+
+#### Context
+
+| Field | Type | Initial | Controllable | Meaning |
+|-------|------|---------|--------------|---------|
+| `checked` | `boolean` | `defaultChecked` | yes | current checked value |
+| `mixed` | `boolean` | `false` | controlled-only | indeterminate presentation and `aria-checked="mixed"`; not toggled by the machine |
+| `disabled` | `boolean` | `false` | input | blocks interaction entirely |
+| `readOnly` | `boolean` | `false` | input | focusable and readable; change attempts revert |
+
+#### States
+
+| State | Description |
+|-------|-------------|
+| `idle` | only state; checkbox behavior is stateless beyond context |
+
+#### Events
+
+| Event | Payload | Source |
+|-------|---------|--------|
+| `TOGGLE` | `nextChecked: boolean` | user interaction (native change: click, Space, label click) |
+| `SET_CHECKED` | `checked: boolean` | programmatic (controlled writes) |
+
+#### Transitions
+
+| State | Event | Guard | Target | Actions / Effects |
+|-------|-------|-------|--------|-------------------|
+| `idle` | `TOGGLE` | `disabled` | `idle` | none (event never reaches the machine; native disabled) |
+| `idle` | `TOGGLE` | `readOnly` | `idle` | effect `revertNativeChecked`; no context change, no callback |
+| `idle` | `TOGGLE` | otherwise | `idle` | set `checked = nextChecked`; when `mixed`, first toggle resolves to `checked = true`; invoke `onCheckedChange(checked)` |
+| `idle` | `SET_CHECKED` | — | `idle` | set `checked`; no callback |
+
+#### Effects
+
+| Effect | What It Does | Cleanup |
+|--------|--------------|---------|
+| `syncIndeterminate` | sets the `indeterminate` DOM property on the control to match `mixed` (property, not attribute) | re-runs on `mixed` change; nothing to dispose |
+| `revertNativeChecked` | resets the native input's checked property to context `checked` after a readOnly change attempt | none |
+
+#### Part Attribute Output
+
+| Part | Attribute | Value |
+|------|-----------|-------|
+| root | `data-scope` / `data-part` | `checkbox` / `root` |
+| root | `data-state` | `checked` \| `unchecked` \| `mixed` |
+| root | `data-disabled` | `disabled` |
+| control | `data-part` | `control` |
+| control | `checked` | context `checked` |
+| control | `disabled` | `disabled` |
+| control | `aria-label` | `ariaLabel` when no visible label |
+| control | `aria-describedby` | `describedBy` |
+| control | `aria-readonly` | `"true"` when `readOnly` |
+| control | `indeterminate` (DOM property) | `mixed` (yields `aria-checked="mixed"`) |
+| indicator | `data-part`, `aria-hidden` | `indicator`, `"true"` |
+| label | `data-part` | `label` |
+
+Note: the Svelte implementation currently emits `data-disabled`/`data-size`/
+`data-density` but not `data-state`/`data-scope`/`data-part`; those are added
+during the core swap (additive, non-breaking).
+
+#### Machinery Dependencies
+
+None. Id wiring only if the visually-hidden-native-input pattern is replaced;
+current implementation gets association free from the wrapping `<label>`.
 
 ## 5. Callbacks
 

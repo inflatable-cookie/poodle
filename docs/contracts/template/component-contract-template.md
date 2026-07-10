@@ -1,7 +1,7 @@
 # Component Contract Template
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-07-10
 
 Use this template for every new Poodle component before implementation begins.
 
@@ -97,6 +97,73 @@ Use a state machine diagram when:
 - the component has more than one transient interaction mode
 - async loading/open/closing behavior exists
 - keyboard, pointer, and focus can drive different transitions
+
+### Behavior Machine
+
+Required for every behavioral component; styled-only components state
+`Behavior classification: styled-only (no machine)` here instead. This section
+is the source of truth for the headless core (`@poodle/headless` TS machines
+and the Rust mirror). Rules: transitions are pure; side effects appear only in
+the Effects table as named intents; every ARIA/data attribute the machine owns
+appears in the Part Attribute Output table as a function of machine state and
+context. See `docs/specs/062-headless-core-and-dual-layer-strategy.md`.
+
+Behavior classification: `machine-backed | styled-only`
+
+#### Context
+
+Externally ownable or long-lived values the machine reads and writes. Mark
+which are controllable (controlled/uncontrolled seam).
+
+| Field | Type | Initial | Controllable | Meaning |
+|-------|------|---------|--------------|---------|
+| | | | yes/no | |
+
+#### States
+
+| State | Description |
+|-------|-------------|
+| | |
+
+#### Events
+
+| Event | Payload | Source |
+|-------|---------|--------|
+| | | user interaction / keyboard / pointer / programmatic / timer / environment |
+
+#### Transitions
+
+One row per (state, event). Guards are pure predicates over context + payload.
+Actions mutate context; effects reference the Effects table by name.
+
+| State | Event | Guard | Target | Actions / Effects |
+|-------|-------|-------|--------|-------------------|
+| | | | | |
+
+#### Effects
+
+Named side-effect intents the machine emits as data; the adapter executes
+them. Every effect must state its cleanup rule.
+
+| Effect | What It Does | Cleanup |
+|--------|--------------|---------|
+| | | |
+
+#### Part Attribute Output
+
+Attribute/handler output per anatomy part, as a function of state and context.
+`data-scope` is the component name on every part; `data-part` is the part
+name. Renderers without DOM attributes (GPUI, Jetstream) map each row to the
+equivalent native accessibility and state exposure.
+
+| Part | Attribute | Value |
+|------|-----------|-------|
+| | | |
+
+#### Machinery Dependencies
+
+Shared core services this machine consumes (focus trap, roving tabindex,
+dismissable layer, anchor positioning, presence, typeahead, id wiring).
 
 ## 5. Events
 

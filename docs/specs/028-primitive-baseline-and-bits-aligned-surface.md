@@ -1,7 +1,7 @@
 # 028 Primitive Baseline And Bits-Aligned Surface
 
-Status: active
-Updated: 2026-03-12
+Status: active; Ownership Rule superseded in part by `062-headless-core-and-dual-layer-strategy.md` (Bits is no longer a dependency of `@poodle/svelte`; the primitive baseline and coverage rules below still stand)
+Updated: 2026-07-10
 Depends on: `005-product-composite-composition-and-information-architecture-rules.md`, `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose

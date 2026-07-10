@@ -4,11 +4,13 @@
 
 - `g11`
   - Status: active
-  - Range: `001` on disk
-  - Notes: systematic Svelte component modernization and downstream consumer
-    rollout. Sequence every public Svelte component through a modern API or
-    internals pass, then update Underlay, the six Underlay-root consumer app
-    families, and direct desktop adopters one component wave at a time.
+  - Range: `001` to `007` on disk
+  - Notes: `g11.001` (systematic Svelte modernization and audited consumer
+    rollout) is complete. The generation continues with the headless-core
+    dual-layer program — framework-free state-machine core, interface-stable
+    Svelte adapter layer, appearance-recipe overrides, Rust machine mirror,
+    and multi-framework adapter pilot. Master spec:
+    `docs/specs/062-headless-core-and-dual-layer-strategy.md`.
 
 - `g10`
   - Status: completed
@@ -97,5 +99,8 @@ closeout there first.
 
 ## Next Task
 
-Open `g11/README.md`. Active seam: `g11.001` consumer-by-consumer Svelte
-modernization rollout planning and execution.
+Open `g11/README.md`. `g11.001` is complete. Active seam: the headless-core
+dual-layer program — master spec
+`docs/specs/062-headless-core-and-dual-layer-strategy.md`, runway `g11.002`
+through `g11.007`, starting with `g11.002` machine-spec format and pilot
+contracts.

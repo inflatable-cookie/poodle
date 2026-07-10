@@ -26,9 +26,9 @@ Roadmaps hold executable milestone work for Poodle.
 - current executable generation plan: `g11`
 - `g09` is complete
 - `g10` is complete
-- `g11` is active; it owns the systematic Svelte component modernization and
-  downstream consumer rollout program across Underlay, the six Underlay-root
-  app families, and direct desktop consumers
+- `g11` is active; `g11.001` (systematic Svelte modernization and consumer
+  rollout) is complete, and the generation continues with the headless-core
+  dual-layer program (`g11.002`–`g11.007`, master spec `docs/specs/062`)
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.

@@ -1,7 +1,7 @@
 # Popover
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -86,6 +86,89 @@ OverlayPlacement:
 ### Component States
 
 Open/closed state and placement state are required.
+
+### Behavior Machine
+
+Behavior classification: machine-backed
+
+Hard-case pilot: exercises the dismissable-layer, focus, and (future) anchor
+positioning machinery.
+
+#### Context
+
+| Field | Type | Initial | Controllable | Meaning |
+|-------|------|---------|--------------|---------|
+| `open` | `boolean` | `defaultOpen` | yes | overlay visibility |
+| `disabled` | `boolean` | `false` | input | trigger inert; open blocked in all directions |
+| `dismissOnOutsideInteract` | `boolean` | `true` | input | guard for outside dismissal |
+| `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | input | focus strategy on open |
+
+#### States
+
+| State | Description |
+|-------|-------------|
+| `closed` | surface unmounted |
+| `open` | surface mounted, anchored to trigger, registered on the dismissable layer |
+
+#### Events
+
+| Event | Payload | Source |
+|-------|---------|--------|
+| `TOGGLE` | — | trigger click, or Enter/Space on trigger |
+| `OPEN` / `CLOSE` | — | programmatic |
+| `ESCAPE` | — | keyboard, document-level while open |
+| `OUTSIDE_INTERACT` | target | pointerdown outside root while open |
+
+#### Transitions
+
+| State | Event | Guard | Target | Actions / Effects |
+|-------|-------|-------|--------|-------------------|
+| `closed` | `TOGGLE` / `OPEN` | `!disabled` | `open` | `onOpenChange(true)`; effects `focusOnOpen`, `registerDismissLayer` |
+| `open` | `TOGGLE` / `CLOSE` | `!disabled` | `closed` | `onOpenChange(false)`; effect `restoreTriggerFocus` |
+| `open` | `ESCAPE` | — | `closed` | as close above (preventDefault on the key) |
+| `open` | `OUTSIDE_INTERACT` | `dismissOnOutsideInteract` | `closed` | as close above |
+| any | any open-direction event | `disabled` | unchanged | none |
+
+Current-implementation notes the machine must preserve: focus returns to the
+trigger on every close path (explicit, escape, and outside dismiss); escape
+and outside listeners are document-level and active only while open.
+
+#### Effects
+
+| Effect | What It Does | Cleanup |
+|--------|--------------|---------|
+| `focusOnOpen` | after render: `first-focusable` focuses first focusable element in surface; `content` focuses the surface itself; `none` does nothing | none |
+| `restoreTriggerFocus` | focuses the trigger element on close | none |
+| `registerDismissLayer` | attaches document `mousedown` + `keydown(Escape)` handlers; in core this becomes registration on the shared dismissable-layer stack so nested overlays dismiss innermost-first | detach/unregister on close and on unmount |
+| `positionSurface` | anchors the surface per `placement`/`offset`. Current implementation is CSS-only (absolute positioning off the relative root, no collision handling); core replaces this with the shared anchor-positioning service (Floating UI). Documented delta until then | dispose positioning subscription on close |
+
+#### Part Attribute Output
+
+| Part | Attribute | Value |
+|------|-----------|-------|
+| root | `data-scope` / `data-part` | `popover` / `root` |
+| root | `data-state` | `open` \| `closed` |
+| root | `data-block` | `block` |
+| trigger | `data-part` | `trigger` |
+| trigger | `role` / `tabindex` | `"button"` / `0` (`-1` when `disabled`) |
+| trigger | `aria-expanded` | `"true"` \| `"false"` |
+| trigger | `aria-controls` | surface id while open |
+| trigger | `aria-disabled` / `data-disabled` | `"true"` when `disabled` |
+| trigger | `data-state` | `open` \| `closed` |
+| surface | `data-part` / `id` | `surface` / generated instance id |
+| surface | `role` | `"dialog"` |
+| surface | `aria-label` | `ariaLabel` |
+| surface | `tabindex` | `0` when `initialFocus="content"`, else `-1` |
+| surface | `data-state` / `data-placement` / `data-surface-width` | `open` / resolved placement / resolved width strategy |
+
+Note: `data-scope`/`data-part`/`data-state` are added during the core swap
+(additive); existing attributes above match the current implementation.
+
+#### Machinery Dependencies
+
+Dismissable-layer stack, focus (focusable-element query + restore), anchor
+positioning (future — CSS anchoring is the current documented delta), id
+wiring, presence (if open/close animation is added later).
 
 ## 5. Callbacks
 
