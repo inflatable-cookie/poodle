@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { onMount, tick, type Snippet } from "svelte";
+  import { tick, type Snippet } from "svelte";
+
+  import { registerDismissLayer } from "@poodle/headless";
 
   import { menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -256,29 +258,18 @@
     });
   });
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!contextMenuOpen) return;
-      if (leadingElement?.contains(event.target as Node)) return;
-      if (!overlayElement || !overlayElement.contains(event.target as Node)) {
-        closeContextMenu();
-      }
+  $effect(() => {
+    if (!contextMenuOpen) {
+      return;
     }
 
-    function handleDocumentKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && contextMenuOpen) {
-        event.preventDefault();
-        closeContextMenu();
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleDocumentKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleDocumentKeydown);
-    };
+    return registerDismissLayer({
+      // The overlay and the leading trigger area count as inside.
+      contains: (target) =>
+        (overlayElement?.contains(target) ?? false) || (leadingElement?.contains(target) ?? false),
+      dismissOnOutsideInteract: true,
+      onDismiss: () => closeContextMenu(),
+    });
   });
 </script>
 

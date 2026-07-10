@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@poodle/headless";
   import type { SplitOrientation } from "./types";
 
   let {
@@ -33,17 +34,16 @@
     if (disabled) return;
     event.preventDefault();
     isDragging = true;
-    lastPosition = orientation === "horizontal" ? event.clientX : event.clientY;
+    lastPosition = resizeAxisPosition(orientation, event.clientX, event.clientY);
     onResizeStart?.(lastPosition);
     startListening();
   }
 
   function handlePointerMove(event: MouseEvent): void {
     if (!isDragging) return;
-    const pos = orientation === "horizontal" ? event.clientX : event.clientY;
-    const delta = pos - lastPosition;
-    lastPosition = pos;
-    onResizeMove?.(delta);
+    const move = resizeDragDelta(lastPosition, resizeAxisPosition(orientation, event.clientX, event.clientY));
+    lastPosition = move.position;
+    onResizeMove?.(move.delta);
   }
 
   function handlePointerUp(): void {
@@ -69,23 +69,13 @@
 
   function handleKeydown(event: KeyboardEvent): void {
     if (disabled) return;
-    const step = 8;
-    const prevKey = orientation === "horizontal" ? "ArrowLeft" : "ArrowUp";
-    const nextKey = orientation === "horizontal" ? "ArrowRight" : "ArrowDown";
 
-    if (event.key === prevKey) {
-      event.preventDefault();
-      onResizeStep?.(-step);
-    } else if (event.key === nextKey) {
-      event.preventDefault();
-      onResizeStep?.(step);
-    } else if (event.key === "Home") {
-      event.preventDefault();
-      onResizeStep?.(-9999);
-    } else if (event.key === "End") {
-      event.preventDefault();
-      onResizeStep?.(9999);
-    }
+    const step = resizeKeydownStep(event.key, orientation);
+
+    if (step === null) return;
+
+    event.preventDefault();
+    onResizeStep?.(step);
   }
 
   $effect(() => {

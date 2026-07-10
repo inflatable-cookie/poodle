@@ -68,9 +68,13 @@ type SplitOrientation = "horizontal" | "vertical";
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Pointer drag + keyboard step resize with document move/up listeners (drag-gesture listeners are legitimate adapter effects). Extraction debt: pure step/clamp math.
+Machine-backed via core machinery (g11 extraction sweep): axis position,
+drag-delta tracking, and keyboard step resolution (`resizeAxisPosition`,
+`resizeDragDelta`, `resizeKeydownStep` — ±8px arrows along the axis,
+saturating Home/End) live in `@poodle/headless`. Window move/up listeners
+stay adapter-side (drag-gesture effects).
 
 ## 5. Callbacks
 

@@ -91,9 +91,12 @@ type AlertDialogTone = "danger" | "warning";
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Two-step confirm flow with escape/timeout reset. Extraction debt: small confirm machine.
+Reclassified (g11 extraction sweep): ConfirmAction composes Dialog, which
+runs the shared modal machine — escape/backdrop dismissal is machine-backed
+via composition. The confirm/cancel flow itself is plain open state with no
+component-owned behavioral logic; no separate machine is warranted.
 
 ## 5. Callbacks
 

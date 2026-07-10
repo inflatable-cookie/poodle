@@ -95,9 +95,14 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Keyboard/pointer rating selection with hover preview. Extraction debt: small value machine.
+Machine-backed via core machinery (g11 extraction sweep): step resolution
+(capped at 1), snap/clamp normalization, clear-on-reselect, pointer-ratio
+value resolution (snap-up within an item, minimum one step), fill ratios,
+fraction display trimming, and keyboard stepping (both directions floor at
+`minSelectableValue`) live in `@poodle/headless` `rating.ts`. Hover state
+and DOM geometry reads stay adapter-side.
 
 ## 5. Callbacks
 

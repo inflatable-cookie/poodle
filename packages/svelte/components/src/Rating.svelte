@@ -1,4 +1,14 @@
 <script lang="ts">
+  import {
+    normalizeRatingValue,
+    ratingFillRatio,
+    ratingKeyboardStep,
+    ratingPointerValue,
+    ratingSelectValue,
+    resolveRatingStep,
+    clampRatingDisplayValue,
+    trimRatingFraction,
+  } from "@poodle/headless";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -68,50 +78,11 @@
     }
   });
 
-  function resolveStep(nextStep: number): number {
-    if (!Number.isFinite(nextStep) || nextStep <= 0) {
-      return 1;
-    }
-
-    return Math.min(1, nextStep);
-  }
-
-  function roundToStep(nextValue: number, nextStep: number): number {
-    const rounded = Math.round(nextValue / nextStep) * nextStep;
-    return Number(rounded.toFixed(4));
-  }
-
-  function clampDisplayValue(
-    nextValue: number | null | undefined,
-    nextMax: number,
-  ): number | null {
-    if (nextValue === null || nextValue === undefined) {
-      return null;
-    }
-
-    return Number(Math.max(0, Math.min(nextMax, nextValue)).toFixed(4));
-  }
-
-  function normalizeInteractiveValue(
-    nextValue: number | null | undefined,
-    nextMax: number,
-    nextStep: number,
-  ): number | null {
-    const clamped = clampDisplayValue(nextValue, nextMax);
-    if (clamped === null) {
-      return null;
-    }
-
-    return roundToStep(clamped, nextStep);
-  }
-
-  function trimFraction(nextValue: number): string {
-    return nextValue % 1 === 0 ? `${nextValue}` : nextValue.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
-  }
-
-  function getFillRatio(index: number, nextValue: number): number {
-    return Math.max(0, Math.min(1, nextValue - index));
-  }
+  const resolveStep = resolveRatingStep;
+  const clampDisplayValue = clampRatingDisplayValue;
+  const normalizeInteractiveValue = normalizeRatingValue;
+  const trimFraction = trimRatingFraction;
+  const getFillRatio = ratingFillRatio;
 
   function setValue(nextValue: number | null): void {
     const normalized = normalizeInteractiveValue(nextValue, itemCount, effectiveStep);
@@ -126,26 +97,15 @@
   }
 
   function selectIndex(index: number): void {
-    const nextValue = index + 1;
-
-    if (allowClear && currentValue === nextValue) {
-      setValue(null);
-      return;
-    }
-
-    setValue(nextValue);
+    setValue(ratingSelectValue(index + 1, currentValue, allowClear));
   }
 
   function getPointerValue(event: MouseEvent, index: number): number {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const relativeX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
     const rawWithinStar = rect.width === 0 ? 1 : relativeX / rect.width;
-    const snappedWithinStar = Math.max(
-      effectiveStep,
-      Math.ceil(rawWithinStar / effectiveStep) * effectiveStep,
-    );
 
-    return Math.min(itemCount, index + Math.min(1, snappedWithinStar));
+    return ratingPointerValue(rawWithinStar, index, effectiveStep, itemCount);
   }
 
   function handleFractionalHover(event: MouseEvent, index: number): void {
@@ -157,13 +117,7 @@
   function handleFractionalSelect(event: MouseEvent, index: number): void {
     if (disabled) return;
 
-    const nextValue = getPointerValue(event, index);
-    if (allowClear && currentValue === nextValue) {
-      setValue(null);
-      return;
-    }
-
-    setValue(nextValue);
+    setValue(ratingSelectValue(getPointerValue(event, index), currentValue, allowClear));
   }
 
   function moveFocus(nextIndex: number): void {
@@ -178,12 +132,12 @@
 
     if (event.key === "ArrowRight" || event.key === "ArrowUp") {
       event.preventDefault();
-      setValue(Math.min(itemCount, Math.max(minSelectableValue, currentNumericValue + effectiveStep)));
+      setValue(ratingKeyboardStep(currentNumericValue, 1, effectiveStep, itemCount, minSelectableValue));
     }
 
     if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
       event.preventDefault();
-      setValue(Math.max(minSelectableValue, currentNumericValue - effectiveStep));
+      setValue(ratingKeyboardStep(currentNumericValue, -1, effectiveStep, itemCount, minSelectableValue));
     }
 
     if (event.key === "Home") {

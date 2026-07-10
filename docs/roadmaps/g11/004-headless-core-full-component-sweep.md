@@ -207,11 +207,16 @@ open. 121 core tests green.
     `toggleGroupTransition` single mode (the radio variant with
     `allowDeactivation: false`, preserving its reselect re-emit) plus
     `menuListNavigate` keyboard wrap.
-  - **Remaining:** `ResizeHandle` (step/clamp math),
-    `EditableLabel`/`EditableList` (edit-mode machine), `CodeInput`
-    (segment navigation), `Rating`, `ConfirmAction`, `IconButton` tooltip
-    (compose hover machine), `ListCard` overlay dismissal, `TokenInput`
-    chip editing. Recorded in each contract; none blocks anything.
+  - **Cleared (second pass):** `ResizeHandle` (axis/delta/keyboard-step
+    math in core `resize.ts`), `Rating` (full value math in core
+    `rating.ts` — test-writing surfaced that keyboard down-steps floor at
+    `minSelectableValue`, now recorded), `ListCard` (context-menu dismissal
+    onto the layer stack), `ConfirmAction` (reclassified — composes the
+    machine-backed Dialog; no separate machine warranted).
+  - **Remaining:** `EditableLabel`/`EditableList` (edit-mode machine),
+    `CodeInput` (segment navigation), `IconButton` tooltip (compose hover
+    machine), `TokenInput` chip editing. Recorded in each contract; none
+    blocks anything.
 - Promotion complete: machine model, machinery inventory, classification
   rule, and cross-runtime contract promoted to
   `docs/architecture/006-headless-core-and-machine-model.md`.

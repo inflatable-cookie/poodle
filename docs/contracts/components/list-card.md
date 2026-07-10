@@ -137,9 +137,13 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Context-menu integration and selection callbacks; overlay dismissal should route through the layer stack. Extraction debt.
+Machine-backed via shared machinery (g11 extraction sweep): the context
+menu's escape/outside dismissal registers on the dismissable-layer stack
+(overlay and leading trigger area count as inside), and item navigation
+already uses the shared menu-list machinery. Selection callbacks are plain
+props.
 
 ## 5. Callbacks
 
