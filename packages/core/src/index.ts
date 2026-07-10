@@ -143,6 +143,8 @@ export {
   type OverlayPosition,
 } from "./position";
 
+export * from "./date";
+
 export {
   isSelectOptionDisabled,
   flattenSelectOptions,

@@ -1,7 +1,7 @@
 # Date Picker
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -100,6 +100,23 @@ CalendarWeekStart: "sunday" | "monday"
 |-------|---------|-----------------|
 | closed | initial, Escape, outside click, date selected | surface hidden, trigger shows value or placeholder |
 | open | trigger click, Enter, Space | surface visible with Calendar, `onOpenChange` runs |
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+All date and time math lives in `@poodle/headless` (`date.ts`), promoted
+wholesale from the Svelte date module: ISO parse/format, day/month
+arithmetic (`addMonths` anchors to the 1st — month paging semantics),
+comparison, range normalization (endpoints ordered), calendar-grid
+construction (`buildCalendarWeeks`, full 7-day rows, `startOfWeek`,
+Home/End boundary deltas), date-time and zoned value normalization, and
+Intl-based labels/time-zone validation. The value types
+(`DateRangeValue`, `DateTimeValue`, `DateTimeRangeValue`,
+`ZonedDateTimeValue`, `CalendarWeekStart`, `TimeZoneOption`) are defined in
+core so the Rust mirror shares the same shapes. Component state (month
+cursor, draft editing, focus movement) stays adapter-side and calls into
+this machinery.
 
 ## 5. Callbacks
 

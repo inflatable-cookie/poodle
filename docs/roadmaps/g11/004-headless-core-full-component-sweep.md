@@ -167,8 +167,17 @@ query state, freeform, and native-mode delegation stay adapter-side.
 Runtime-verified: open, escape and outside dismiss, ArrowDown+Enter
 selection committing and closing. 104 core tests green.
 
-Remaining wave 4: date/time cluster (`Calendar` + pickers — date math
-extraction), `ColorPicker` (color conversion math), `DurationInput`
+Date/time batch complete (2026-07-10): the Svelte `date.ts` module (452
+lines of pure ISO/date-time/zone math and calendar-grid construction) was
+promoted wholesale into core, with the six value types now defined in core
+for the Rust mirror; the Svelte module re-exports, so Calendar and all
+five pickers plus TimeZoneSelect are unchanged. Test-writing surfaced two
+intentional semantics worth recording: `addMonths` anchors to the 1st
+(month paging), and `dayDeltaForWeekBoundary` takes an ISO string.
+Runtime-verified: calendar renders full-week grids and click selection.
+114 core tests green.
+
+Remaining wave 4: `ColorPicker` (color conversion math), `DurationInput`
 (parse). Then the long-tail classification sweep.
 
 ## Exit Criteria
