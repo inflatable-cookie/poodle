@@ -14,6 +14,15 @@ export {
 } from "./hover";
 
 export {
+  menuTransition,
+  type MenuState,
+  type MenuContext,
+  type MenuEvent,
+  type MenuEffect,
+  type MenuResult,
+} from "./menu";
+
+export {
   modalTransition,
   type ModalState,
   type ModalContext,

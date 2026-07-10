@@ -95,9 +95,17 @@ re-enter cancelling a pending close. Recorded delta: hover-card `LEAVE`
 while closed is now inert instead of firing a redundant close callback.
 69 core tests green.
 
-Remaining wave 2: `Menu`, `ContextMenu` (list navigation + typeahead —
-the last real machinery gap), `Toast` (queue/timeout), plus the Floating UI
-anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
+Menu batch complete (2026-07-10): `Menu` and `ContextMenu` share
+`menuTransition` (open/close + action-then-close), dismissal via the layer
+stack. Runtime-verified: trigger open with focus-first-item, item action
+closing and firing, escape and outside dismiss, contextmenu open at pointer.
+Recorded deltas in context-menu.md (overlay-only containment; re-invoke
+repositions without re-emitting open). Item navigation and typeahead stay
+in MenuSurface — recorded sweep debt for a later batch. 73 core tests green.
+
+Remaining wave 2: MenuSurface item navigation + typeahead machinery,
+`Toast` (queue/timeout), plus the Floating UI anchor-positioning swap for
+Popover/Tooltip/HoverCard/Menu.
 
 ## Exit Criteria
 

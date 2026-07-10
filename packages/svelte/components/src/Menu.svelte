@@ -1,4 +1,9 @@
 <script lang="ts">
+  import {
+    menuTransition,
+    registerDismissLayer,
+    type MenuEvent as MenuMachineEvent,
+  } from "@poodle/headless";
   import { onMount, tick, type Snippet } from "svelte";
 
   import { resolveOverlayPosition } from "./overlay-position";
@@ -79,25 +84,35 @@
     });
   });
 
-  function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
-      uncontrolledOpen = nextOpen;
-    }
+  function send(event: MenuMachineEvent): void {
+    const result = menuTransition(isOpen ? "open" : "closed", {}, event);
 
-    onOpenChange?.(nextOpen);
+    for (const effect of result.effects) {
+      if (effect.type === "emitOpenChange") {
+        if (!isControlled) {
+          uncontrolledOpen = effect.open;
+        }
+
+        onOpenChange?.(effect.open);
+      } else if (effect.type === "emitAction") {
+        onAction?.(effect.value);
+      }
+      // focusFirstItem intent runs in the isOpen $effect above, after the
+      // surface has rendered and been positioned.
+    }
   }
 
   function handleTriggerClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    setOpen(!isOpen);
+    send({ type: "TOGGLE" });
   }
 
   function handleTriggerKeydown(event: KeyboardEvent): void {
     if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
       event.preventDefault();
       event.stopPropagation();
-      setOpen(true);
+      send({ type: "OPEN" });
     }
   }
 
@@ -122,38 +137,29 @@
     overlayStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
   }
 
+  $effect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
+    });
+  });
+
   onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) {
-        return;
-      }
-
-      if (!rootElement.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
-        event.preventDefault();
-        setOpen(false);
-      }
-    }
-
     function handleViewportChange(): void {
       if (isOpen) {
         void updateOverlayPosition();
       }
     }
 
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
     window.addEventListener("resize", handleViewportChange);
     window.addEventListener("scroll", handleViewportChange, true);
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
       window.removeEventListener("resize", handleViewportChange);
       window.removeEventListener("scroll", handleViewportChange, true);
     };
@@ -184,10 +190,7 @@
       density={resolvedDensity}
       placement={resolvedPlacement}
       overlayStyle={overlayStyle}
-      onAction={(value) => {
-        onAction?.(value);
-        setOpen(false);
-      }}
+      onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}
 </div>

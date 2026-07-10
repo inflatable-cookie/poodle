@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { onMount, tick, type Snippet } from "svelte";
+  import {
+    menuTransition,
+    registerDismissLayer,
+    type MenuEvent as MenuMachineEvent,
+  } from "@poodle/headless";
+  import { tick, type Snippet } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import MenuSurface from "./MenuSurface.svelte";
@@ -95,18 +100,27 @@
     });
   });
 
-  function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
-      uncontrolledOpen = nextOpen;
-    }
+  function send(event: MenuMachineEvent): void {
+    const result = menuTransition(isOpen ? "open" : "closed", {}, event);
 
-    onOpenChange?.(nextOpen);
+    for (const effect of result.effects) {
+      if (effect.type === "emitOpenChange") {
+        if (!isControlled) {
+          uncontrolledOpen = effect.open;
+        }
+
+        onOpenChange?.(effect.open);
+      } else if (effect.type === "emitAction") {
+        onAction?.(effect.value);
+      }
+      // focusFirstItem intent runs in the isOpen $effect above.
+    }
   }
 
   function handleContextMenu(event: MouseEvent): void {
     event.preventDefault();
     uncontrolledAnchorPoint = { x: event.clientX, y: event.clientY };
-    setOpen(true);
+    send({ type: "OPEN" });
   }
 
   function handleTriggerKeydown(event: KeyboardEvent): void {
@@ -122,34 +136,21 @@
 
     const rect = target.getBoundingClientRect();
     uncontrolledAnchorPoint = { x: rect.left + 16, y: rect.top + 16 };
-    setOpen(true);
+    send({ type: "OPEN" });
   }
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) {
-        return;
-      }
-
-      if (!overlayElement || !overlayElement.contains(event.target as Node)) {
-        setOpen(false);
-      }
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
-        event.preventDefault();
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+    return registerDismissLayer({
+      // Only the overlay itself counts as inside; clicking the trigger area
+      // closes, matching the previous document-listener behavior.
+      contains: (target) => overlayElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
+    });
   });
 </script>
 
@@ -175,10 +176,7 @@
       size={resolvedSize}
       density={resolvedDensity}
       overlayStyle={overlayStyle}
-      onAction={(value) => {
-        onAction?.(value);
-        setOpen(false);
-      }}
+      onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}
 </div>

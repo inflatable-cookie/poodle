@@ -1,7 +1,7 @@
 # Menu
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -95,6 +95,29 @@ OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
 ### Component States
 
 Open/closed state and current highlighted item index are required.
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`menuTransition` in
+`@poodle/headless`)
+
+Menu overlay machine shared by Menu and ContextMenu. Item navigation
+(roving focus, typeahead) currently lives in the MenuSurface adapter and
+joins the machine in a later batch (recorded sweep debt).
+
+- States: `closed` | `open`; open state controllable
+- Events: `TOGGLE` (trigger click), `OPEN` (Enter/Space/ArrowDown on
+  trigger; contextmenu / Shift+F10 for ContextMenu), `CLOSE`, `ESCAPE` and
+  `OUTSIDE_INTERACT` (dismissable-layer stack), `ACTION { value }` (item
+  activation)
+- Transitions: `ACTION` emits `emitAction(value)` then closes with
+  `emitOpenChange(false)`; escape/outside close via the layer stack
+  (innermost-first). Closing does not restore trigger focus (matches
+  pre-machine behavior).
+- Effects: `emitOpenChange`, `emitAction`, `focusFirstItem` (executed after
+  the surface renders and is positioned)
+- Machinery dependencies: dismissable-layer stack; anchor positioning stays
+  adapter-side until the Floating UI swap.
 
 ## 5. Callbacks
 

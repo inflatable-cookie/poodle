@@ -1,7 +1,7 @@
 # ContextMenu
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -85,6 +85,34 @@ MenuItem: {
 
 Open/closed state, invocation anchor position, and current highlighted item
 index are required.
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`menuTransition` in
+`@poodle/headless`)
+
+Menu overlay machine shared by Menu and ContextMenu. Item navigation
+(roving focus, typeahead) currently lives in the MenuSurface adapter and
+joins the machine in a later batch (recorded sweep debt).
+
+- States: `closed` | `open`; open state controllable
+- Events: `TOGGLE` (trigger click), `OPEN` (Enter/Space/ArrowDown on
+  trigger; contextmenu / Shift+F10 for ContextMenu), `CLOSE`, `ESCAPE` and
+  `OUTSIDE_INTERACT` (dismissable-layer stack), `ACTION { value }` (item
+  activation)
+- Transitions: `ACTION` emits `emitAction(value)` then closes with
+  `emitOpenChange(false)`; escape/outside close via the layer stack
+  (innermost-first). Closing does not restore trigger focus (matches
+  pre-machine behavior).
+- Effects: `emitOpenChange`, `emitAction`, `focusFirstItem` (executed after
+  the surface renders and is positioned)
+- Machinery dependencies: dismissable-layer stack; anchor positioning stays
+  adapter-side until the Floating UI swap.
+
+ContextMenu deltas: outside containment tests only the overlay (clicking
+the trigger zone closes). Re-invoking contextmenu while already open
+repositions the anchor without re-emitting `onOpenChange(true)` (the
+pre-machine component re-fired the callback; recorded delta).
 
 ## 5. Callbacks
 
