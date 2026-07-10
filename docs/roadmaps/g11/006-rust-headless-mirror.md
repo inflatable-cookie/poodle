@@ -101,11 +101,32 @@ GPUI adoption (complete, 2026-07-10):
   posture, behavioral confidence comes from the conformance vectors, not
   runtime preview.
 
-Recorded follow-on debt (not exit criteria):
+Domain-math port (complete for the consuming features, 2026-07-10):
 
-- Domain-math port (dates/calendar grid, colors, durations, pagination,
-  select options, positioning resolver) — pure and mechanical; port each
-  piece alongside the GPUI/Jetstream feature that consumes it.
+- `date.rs`: ISO parse/format (real-date validation), Hinnant epoch-days,
+  weekday, add-days/add-months (anchor-1st), month anchor, compare, range
+  normalize/membership, week start + boundary deltas, and
+  `build_calendar_weeks` (six full weeks; unlike the TS builder it takes
+  `today_iso` explicitly — the Rust core has no clock). GPUI `calendar.rs`
+  dropped its private Sakamoto/leap-year/epoch math and delegates.
+- `color.rs`: full hex/RGB/HSV/HSL codec mirroring the TS rounding exactly
+  (JS `Math.round` semantics). GPUI `theme_ext` hex parsing/formatting
+  delegates; its **continuous** f32 HSV math stays GPUI-specific by design
+  (gradient-pad coordinates need unrounded values — display/serialization
+  semantics live in core, interaction geometry in the adapter).
+- `pagination.rs`: `build_visible_pages` window math;
+  `poodle-specs` `visible_pages()` now delegates (its 119 tests pass
+  unchanged, proving the previous hand-rolled window was equivalent).
+- **97 domain conformance vector cases generated FROM the TS core**
+  (`vectors/domain.json` — the generation snippet executes the TS functions
+  so expectations are exact by construction); Rust reproduces every case.
+  Calendar grids compare iso/label/inMonth (isToday is clock-dependent).
+- Not ported, with reasons: GPUI DurationInput is display-only (no segment
+  math to share); the positioning resolver has no GPUI consumer (native
+  layout); Intl label formatting stays per-runtime.
+
+Remaining follow-on debt:
+
 - Jetstream consumption: explicitly deferred per program posture; adopt the
   same machine-guarded-handler shape when Jetstream work resumes.
 - Remaining GPUI families (selection/value, hover, tabs) adopt the same
