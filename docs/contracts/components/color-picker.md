@@ -1,7 +1,7 @@
 # ColorPicker
 
 Status: detailed contract
-Updated: 2026-03-16
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -110,6 +110,17 @@ Updated: 2026-03-16
 | `alpha` | `number` (0-1) | derived from `value` or 1 |
 | `inputMode` | `ColorInputMode` | `defaultMode` |
 | `isOpen` | `boolean` | `open ?? uncontrolledOpen` |
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+All color conversion math lives in `@poodle/headless` (`color.ts`,
+promoted wholesale from the Svelte color-utils module): hex validation and
+normalization, hex/RGB/HSL/HSV conversions in both directions. Internal
+model uses HSV for the gradient pad; HSL/RGB/hex for display and I/O.
+Pointer/keyboard gradient interaction, mode switching, and overlay state
+stay adapter-side.
 
 ## 5. Callbacks
 

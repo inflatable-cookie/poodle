@@ -1,7 +1,7 @@
 # DurationInput
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -77,6 +77,17 @@ Updated: 2026-03-15
 | segment-focus | individual field focused | segment background highlight (covers label + field) |
 | disabled | `disabled=true` | reduced opacity, fields not editable |
 | invalid | total out of min/max bounds | danger border color |
+
+### Behavior Machine
+
+Behavior classification: machine-backed via core machinery
+
+Segment semantics live in `@poodle/headless` (`duration.ts`):
+`adjustDurationSegment` (±step with carry/borrow seconds → minutes →
+hours; hours clamp to `[0, maxHours]`, carries at the bound are
+swallowed), `setDurationSegment` (direct entry clamped per segment),
+`durationTotalSeconds`, `padDurationSegment`. Min/max total-seconds
+validation display and focus behavior stay adapter-side.
 
 ## 5. Callbacks
 

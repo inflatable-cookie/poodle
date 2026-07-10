@@ -177,8 +177,18 @@ intentional semantics worth recording: `addMonths` anchors to the 1st
 Runtime-verified: calendar renders full-week grids and click selection.
 114 core tests green.
 
-Remaining wave 4: `ColorPicker` (color conversion math), `DurationInput`
-(parse). Then the long-tail classification sweep.
+ColorPicker + DurationInput batch complete (2026-07-10): the color-utils
+module promoted wholesale into core (`color.ts`, Svelte re-exports —
+zero component changes); DurationInput segment semantics (carry/borrow
+adjustment, clamped direct entry, total seconds, padding) moved to
+`duration.ts` and the component swapped onto them. Runtime-verified:
+duration seconds-carry (01:30:59 → 01:31:00 on ArrowUp) and color picker
+open. 121 core tests green.
+
+**Wave 4 is complete.** Remaining for this milestone: the long-tail
+classification sweep — walk `src/index.ts`, mark every remaining export
+machine-backed or styled-only in its contract, and extract anything that
+still owns interaction logic.
 
 ## Exit Criteria
 

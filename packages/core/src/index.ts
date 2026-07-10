@@ -145,6 +145,17 @@ export {
 
 export * from "./date";
 
+export * from "./color";
+
+export {
+  durationTotalSeconds,
+  adjustDurationSegment,
+  setDurationSegment,
+  padDurationSegment,
+  type DurationValue,
+  type DurationSegment,
+} from "./duration";
+
 export {
   isSelectOptionDisabled,
   flattenSelectOptions,

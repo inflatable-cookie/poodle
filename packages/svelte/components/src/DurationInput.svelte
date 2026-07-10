@@ -1,4 +1,12 @@
 <script lang="ts">
+  import {
+    adjustDurationSegment,
+    durationTotalSeconds,
+    padDurationSegment,
+    setDurationSegment,
+    type DurationSegment,
+  } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -46,13 +54,9 @@
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const totalSeconds = $derived(hours * 3600 + minutes * 60 + seconds);
+  const totalSeconds = $derived(durationTotalSeconds({ hours, minutes, seconds }));
   const isUnderMin = $derived(totalSeconds < minTotalSeconds);
   const isOverMax = $derived(maxTotalSeconds !== null && totalSeconds > maxTotalSeconds);
-
-  function clamp(val: number, min: number, max: number): number {
-    return Math.min(Math.max(val, min), max);
-  }
 
   function emitChange(h: number, m: number, s: number): void {
     hours = h;
@@ -62,73 +66,38 @@
       hours: h,
       minutes: m,
       seconds: s,
-      totalSeconds: h * 3600 + m * 60 + s,
+      totalSeconds: durationTotalSeconds({ hours: h, minutes: m, seconds: s }),
     });
   }
 
-  function adjustHours(delta: number): void {
-    emitChange(clamp(hours + delta, 0, maxHours), minutes, seconds);
+  function applyValue(next: { hours: number; minutes: number; seconds: number }): void {
+    emitChange(next.hours, next.minutes, next.seconds);
   }
 
-  function adjustMinutes(delta: number): void {
-    let m = minutes + delta;
-    let h = hours;
-    if (m >= 60) { m = 0; h = clamp(h + 1, 0, maxHours); }
-    if (m < 0) { m = 59; h = clamp(h - 1, 0, maxHours); }
-    emitChange(h, m, seconds);
-  }
-
-  function adjustSeconds(delta: number): void {
-    let s = seconds + delta;
-    let m = minutes;
-    let h = hours;
-    if (s >= 60) { s = 0; m += 1; }
-    if (s < 0) { s = 59; m -= 1; }
-    if (m >= 60) { m = 0; h = clamp(h + 1, 0, maxHours); }
-    if (m < 0) { m = 59; h = clamp(h - 1, 0, maxHours); }
-    emitChange(h, clamp(m, 0, 59), clamp(s, 0, 59));
-  }
-
-  function handleSegmentKeydown(
-    event: KeyboardEvent,
-    segment: "hours" | "minutes" | "seconds"
-  ): void {
+  function handleSegmentKeydown(event: KeyboardEvent, segment: DurationSegment): void {
     if (disabled) return;
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      if (segment === "hours") adjustHours(1);
-      else if (segment === "minutes") adjustMinutes(1);
-      else adjustSeconds(1);
+      applyValue(adjustDurationSegment({ hours, minutes, seconds }, segment, 1, maxHours));
     }
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      if (segment === "hours") adjustHours(-1);
-      else if (segment === "minutes") adjustMinutes(-1);
-      else adjustSeconds(-1);
+      applyValue(adjustDurationSegment({ hours, minutes, seconds }, segment, -1, maxHours));
     }
   }
 
-  function handleSegmentInput(
-    event: Event,
-    segment: "hours" | "minutes" | "seconds"
-  ): void {
+  function handleSegmentInput(event: Event, segment: DurationSegment): void {
     const raw = (event.currentTarget as HTMLInputElement).value;
     const val = parseInt(raw, 10);
     if (Number.isNaN(val)) return;
 
-    if (segment === "hours") {
-      emitChange(clamp(val, 0, maxHours), minutes, seconds);
-    } else if (segment === "minutes") {
-      emitChange(hours, clamp(val, 0, 59), seconds);
-    } else {
-      emitChange(hours, minutes, clamp(val, 0, 59));
-    }
+    applyValue(setDurationSegment({ hours, minutes, seconds }, segment, val, maxHours));
   }
 
   function pad(n: number): string {
-    return n.toString().padStart(2, "0");
+    return padDurationSegment(n);
   }
 
   function selectInputText(event: FocusEvent): void {
