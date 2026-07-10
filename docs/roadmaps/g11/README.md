@@ -83,5 +83,6 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
 
 ## Next Task
 
-Read `docs/specs/062-headless-core-and-dual-layer-strategy.md`, then open
-`g11/002-headless-machine-spec-format-and-pilot-contracts.md`.
+Open `g11/006-rust-headless-mirror.md` — GPUI overlay-family adoption onto
+`poodle-headless` plus the domain-math port; then
+`g11/007-multi-framework-adapters-and-mitosis-decision.md`.
