@@ -278,8 +278,8 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent);
+    background: var(--poodle-recipe-rating-item-fill, transparent);
+    color: var(--poodle-recipe-rating-item-text, color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent));
     cursor: pointer;
     font: inherit;
     transition: color 120ms ease, filter 120ms ease;
@@ -326,7 +326,7 @@
     position: absolute;
     inset: 0 auto 0 0;
     overflow: hidden;
-    color: var(--poodle-color-accent-base);
+    color: var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-color-accent-base));
     pointer-events: none;
   }
 

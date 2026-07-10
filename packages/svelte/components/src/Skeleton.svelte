@@ -84,13 +84,12 @@
     width: var(--poodle-skeleton-width, 100%);
     height: var(--poodle-skeleton-height, 0.875rem);
     border-radius: var(--poodle-radius-control);
-    background:
-      linear-gradient(
+    background: var(--poodle-recipe-skeleton-fill, linear-gradient(
         90deg,
         color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 0%,
         color-mix(in srgb, var(--poodle-color-background-surface) 92%, white) 48%,
         color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 100%
-      );
+      ));
     background-size: 220% 100%;
   }
 

@@ -320,8 +320,8 @@
     padding: 0;
     border: 0.0625rem solid var(--code-slot-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-code-input-slot-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-code-input-slot-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: 1rem;
     font-weight: 600;
@@ -333,8 +333,8 @@
   }
 
   .poodle-code-input__slot--active {
-    border-color: var(--code-slot-focus, var(--poodle-color-accent-border));
-    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
+    border-color: var(--poodle-recipe-code-input-slot--active-border, var(--code-slot-focus, var(--poodle-color-accent-border)));
+    box-shadow: var(--poodle-recipe-code-input-slot--active-shadow, 0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)));
   }
 
   .poodle-code-input__slot--split-after {

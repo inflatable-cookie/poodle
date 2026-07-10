@@ -6,7 +6,7 @@
     overflow: auto;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-panel);
+    background: var(--poodle-recipe-data-table-fill, var(--poodle-color-background-panel));
   }
 
   .poodle-data-table__toolbar {
@@ -16,7 +16,7 @@
     gap: var(--poodle-space-inline-md);
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-data-table-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-data-table__toolbar-btn {
@@ -26,8 +26,8 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-data-table-toolbar-btn-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-data-table-toolbar-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font: inherit;
     font-size: var(--poodle-typography-label-size);
@@ -36,7 +36,7 @@
   }
 
   .poodle-data-table__toolbar-btn:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
+    background: var(--poodle-recipe-data-table-hover-toolbar-btn-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
   }
 
   .poodle-data-table__toolbar-btn:focus-visible {
@@ -62,11 +62,11 @@
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     cursor: pointer;
     font-size: var(--poodle-typography-label-size);
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-data-table-col-menu-item-text, var(--poodle-color-text-primary));
   }
 
   .poodle-data-table__col-menu-item:hover {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    background: var(--poodle-recipe-data-table-hover-col-menu-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   table {
@@ -96,12 +96,12 @@
   }
 
   thead th {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-th-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-data-table-th-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-data-table--sticky-header thead th {
@@ -113,7 +113,7 @@
   .poodle-data-table__filters-row td {
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-data-table-filters-row-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-data-table__filters-row .poodle-select,
@@ -123,11 +123,11 @@
   }
 
   tbody tr.poodle-selected {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
+    background: var(--poodle-recipe-data-table-selected-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent));
   }
 
   tbody tr:hover {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent);
+    background: var(--poodle-recipe-data-table-hover-tr-fill, color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent));
   }
 
   .poodle-data-table__selection {
@@ -144,7 +144,7 @@
     min-height: var(--poodle-size-control-height);
     padding: 0;
     border: 0;
-    background: transparent;
+    background: var(--poodle-recipe-data-table-actions-trigger-fill, transparent);
     color: inherit;
     cursor: pointer;
     font: inherit;
@@ -166,7 +166,7 @@
   }
 
   .poodle-data-table__cell small {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-cell-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -198,12 +198,12 @@
 
   .poodle-data-table__row-action-btn--danger,
   .poodle-data-table__action-link.poodle-data-table__row-action-btn--danger {
-    color: var(--poodle-color-feedback-danger-text);
+    color: var(--poodle-recipe-data-table-row-action-btn--danger-text, var(--poodle-color-feedback-danger-text));
   }
 
   .poodle-data-table__expanded-row td {
     padding: 0;
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
+    background: var(--poodle-recipe-data-table-expanded-row-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent));
   }
 
   .poodle-data-table__expanded-panel {
@@ -211,7 +211,7 @@
   }
 
   .poodle-data-table__empty {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-empty-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -224,12 +224,12 @@
     gap: var(--poodle-space-stack-md);
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-data-table-footer-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-data-table__pagination-summary {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-pagination-summary-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
   }
 
@@ -245,7 +245,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-limit-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
   }
 
@@ -262,7 +262,7 @@
   }
 
   .poodle-data-table__pagination-page {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-data-table-pagination-page-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
     white-space: nowrap;
   }
@@ -272,12 +272,12 @@
     width: 100%;
     height: 0.875rem;
     border-radius: var(--poodle-radius-control);
-    background: linear-gradient(
+    background: var(--poodle-recipe-data-table-loading-block-fill, linear-gradient(
       90deg,
       color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent) 0%,
       color-mix(in srgb, var(--poodle-color-background-panel) 88%, transparent) 50%,
       color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent) 100%
-    );
+    ));
   }
 
   .poodle-data-table__loading-block--checkbox {
@@ -304,11 +304,11 @@
   }
 
   .poodle-data-table--striped tbody tr:nth-child(even) {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent);
+    background: var(--poodle-recipe-data-table-even-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent));
   }
 
   .poodle-data-table--striped tbody tr.poodle-selected:nth-child(even) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    background: var(--poodle-recipe-data-table-selected-even-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 
   .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn {

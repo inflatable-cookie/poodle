@@ -66,18 +66,18 @@
     overflow: hidden;
     min-height: var(--poodle-meter-track-thickness);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-meter-track-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)));
   }
 
   .poodle-meter__fill {
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(
+    background: var(--poodle-recipe-meter-fill-fill, linear-gradient(
       90deg,
       color-mix(in srgb, var(--poodle-color-status-success) 82%, white),
       var(--poodle-color-status-success)
-    );
+    ));
   }
 
   .poodle-meter[data-size="xs"] {

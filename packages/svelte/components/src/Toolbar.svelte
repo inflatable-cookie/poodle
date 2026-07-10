@@ -87,7 +87,7 @@
     padding: 0.25rem 0.375rem;
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    background: var(--poodle-recipe-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
   }
 
   /* Size variants */

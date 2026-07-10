@@ -138,7 +138,7 @@
     height: 0.375rem;
     transform: translateY(-50%);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
+    background: var(--poodle-recipe-range-slider-track-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
   }
 
   .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__track {
@@ -154,7 +154,7 @@
     width: calc(var(--poodle-range-end) - var(--poodle-range-start));
     height: 100%;
     border-radius: inherit;
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-range-slider-fill-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill {
@@ -172,7 +172,7 @@
     transform: translateY(-50%);
     width: 100%;
     margin: 0;
-    background: transparent;
+    background: var(--poodle-recipe-range-slider-control-fill, transparent);
     appearance: none;
     pointer-events: none;
   }
@@ -186,12 +186,12 @@
 
   .poodle-range-slider__control::-webkit-slider-runnable-track {
     height: 0.375rem;
-    background: transparent;
+    background: var(--poodle-recipe-range-slider-control-track-fill, transparent);
   }
 
   .poodle-range-slider__control::-moz-range-track {
     height: 0.375rem;
-    background: transparent;
+    background: var(--poodle-recipe-range-slider-control-track-fill, transparent);
   }
 
   .poodle-range-slider__control::-webkit-slider-thumb {
@@ -200,8 +200,8 @@
     margin-top: -0.3125rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--poodle-color-background-elevated);
-    box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    background: var(--poodle-recipe-range-slider-control-thumb-fill, var(--poodle-color-background-elevated));
+    box-shadow: var(--poodle-recipe-range-slider-control-thumb-shadow, 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
     appearance: none;
     cursor: pointer;
     pointer-events: auto;
@@ -212,8 +212,8 @@
     height: 1rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--poodle-color-background-elevated);
-    box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    background: var(--poodle-recipe-range-slider-control-thumb-fill, var(--poodle-color-background-elevated));
+    box-shadow: var(--poodle-recipe-range-slider-control-thumb-shadow, 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
     cursor: pointer;
     pointer-events: auto;
   }
@@ -223,15 +223,13 @@
   }
 
   .poodle-range-slider__control:focus-visible::-webkit-slider-thumb {
-    box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
-      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    box-shadow: var(--poodle-recipe-range-slider-focus-control-thumb-shadow, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
+      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
   }
 
   .poodle-range-slider__control:focus-visible::-moz-range-thumb {
-    box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
-      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    box-shadow: var(--poodle-recipe-range-slider-focus-control-thumb-shadow, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
+      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
   }
 
   /* Size variants */

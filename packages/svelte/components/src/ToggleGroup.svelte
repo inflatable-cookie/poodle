@@ -161,12 +161,12 @@
       color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)
     );
     border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
-    background: var(
+    background: var(--poodle-recipe-toggle-group-item-fill, var(
       --poodle-treatment-interactive-fill,
       color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-    );
-    box-shadow: var(--poodle-treatment-interactive-shadow, none);
-    color: var(--poodle-color-text-primary);
+    ));
+    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, var(--poodle-treatment-interactive-shadow, none));
+    color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -180,19 +180,18 @@
   }
 
   .poodle-toggle-group__item.poodle-selected {
-    background:
-      linear-gradient(
+    background: var(--poodle-recipe-toggle-group-selected-item-fill, linear-gradient(
         color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
         color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
       ),
       var(
         --poodle-treatment-interactive-fill,
         color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-      );
-    border-color: var(
+      ));
+    border-color: var(--poodle-recipe-toggle-group-item-border, var(
       --poodle-treatment-interactive-border-active,
       color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))
-    );
+    ));
   }
 
   .poodle-toggle-group__item:focus-visible {

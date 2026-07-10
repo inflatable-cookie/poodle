@@ -133,7 +133,7 @@
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-radio-group-option-text, var(--poodle-color-text-primary));
     cursor: pointer;
   }
 
@@ -162,7 +162,7 @@
     height: calc(var(--poodle-size-icon-md) + 0.125rem);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-recipe-radio-group-indicator-fill, var(--poodle-color-background-surface));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -172,16 +172,16 @@
     width: calc(var(--poodle-size-icon-md) * 0.5);
     height: calc(var(--poodle-size-icon-md) * 0.5);
     border-radius: 999px;
-    background: transparent;
+    background: var(--poodle-recipe-radio-group-dot-fill, transparent);
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-radio-group__control:checked + .poodle-radio-group__indicator {
-    border-color: var(--poodle-radio-selected-color);
+    border-color: var(--poodle-recipe-radio-group-indicator-border, var(--poodle-radio-selected-color));
   }
 
   .poodle-radio-group__control:checked + .poodle-radio-group__indicator .poodle-radio-group__dot {
-    background: var(--poodle-radio-selected-color);
+    background: var(--poodle-recipe-radio-group-checked-dot-fill, var(--poodle-radio-selected-color));
   }
 
   .poodle-radio-group__control:focus-visible + .poodle-radio-group__indicator {

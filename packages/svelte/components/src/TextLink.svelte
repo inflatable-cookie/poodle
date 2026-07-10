@@ -67,8 +67,8 @@
     display: inline;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-text-link-fill, transparent);
+    color: var(--poodle-recipe-text-link-text, var(--poodle-color-accent-base));
     cursor: pointer;
     font: inherit;
     line-height: inherit;
@@ -84,7 +84,7 @@
   }
 
   .poodle-text-link[data-tone="secondary"] {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-text-link-secondary-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-text-link:hover:not(:disabled),

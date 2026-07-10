@@ -227,7 +227,7 @@
     padding: var(--poodle-audio-player-pad-y) var(--poodle-audio-player-pad-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-recipe-audio-player-fill, var(--poodle-color-background-surface));
   }
 
   .poodle-audio-player[data-size="xs"] {
@@ -281,8 +281,8 @@
     padding: 0;
     border: 0;
     border-radius: 999rem;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-audio-player-mute-fill, transparent);
+    color: var(--poodle-recipe-audio-player-mute-text, var(--poodle-color-text-primary));
     cursor: pointer;
     flex-shrink: 0;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -290,7 +290,7 @@
 
   .poodle-audio-player__play:hover,
   .poodle-audio-player__mute:hover {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    background: var(--poodle-recipe-audio-player-hover-mute-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   .poodle-audio-player__play:focus-visible,
@@ -308,7 +308,7 @@
   .poodle-audio-player__time {
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-typography-label-size);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-audio-player-time-text, var(--poodle-color-text-secondary));
     flex-shrink: 0;
     min-width: var(--poodle-audio-player-time-width);
     text-align: center;
@@ -318,7 +318,7 @@
   .poodle-audio-player__volume {
     -webkit-appearance: none;
     appearance: none;
-    background: transparent;
+    background: var(--poodle-recipe-audio-player-volume-fill, transparent);
     cursor: pointer;
     height: 1rem;
   }
@@ -337,26 +337,26 @@
   .poodle-audio-player__seek::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-audio-player-seek-track-fill, var(--poodle-color-text-primary));
   }
 
   .poodle-audio-player__seek::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-audio-player-seek-track-fill, var(--poodle-color-text-primary));
   }
 
   /* Volume track */
   .poodle-audio-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-audio-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-color-accent-base));
   }
 
   /* Thumb */
@@ -367,7 +367,7 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-audio-player-volume-thumb-fill, var(--poodle-color-text-primary));
     margin-top: -0.1875rem;
   }
 
@@ -377,7 +377,7 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-audio-player-volume-thumb-fill, var(--poodle-color-text-primary));
   }
 
   .poodle-audio-player__speed {
@@ -385,8 +385,8 @@
     padding: var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-audio-player-speed-fill, transparent);
+    color: var(--poodle-recipe-audio-player-speed-text, var(--poodle-color-text-secondary));
     font: inherit;
     font-size: var(--poodle-typography-label-size);
     font-family: var(--poodle-typography-code-family);

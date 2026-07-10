@@ -75,14 +75,13 @@
     padding-right: calc(var(--poodle-space-panel-x) + 1.5rem);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default));
     border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
-    background:
-      linear-gradient(
+    background: var(--poodle-recipe-toast-stack-fill, linear-gradient(
         90deg,
         color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent),
         color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%
       ),
-      color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
-    box-shadow: var(--poodle-elevation-overlay);
+      color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent));
+    box-shadow: var(--poodle-recipe-toast-stack-shadow, var(--poodle-elevation-overlay));
     position: relative;
     overflow: hidden;
   }
@@ -92,7 +91,7 @@
     position: absolute;
     inset: 0 auto 0 0;
     width: 0.1875rem;
-    background: color-mix(in srgb, var(--poodle-toast-tone) 82%, white 6%);
+    background: var(--poodle-recipe-toast-stack-before-fill, color-mix(in srgb, var(--poodle-toast-tone) 82%, white 6%));
   }
 
   .poodle-toast[data-tone="info"] {
@@ -123,14 +122,14 @@
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-toast-stack-dismiss-fill, transparent);
+    color: var(--poodle-recipe-toast-stack-dismiss-text, var(--poodle-color-text-secondary));
     cursor: pointer;
   }
 
   .poodle-toast__dismiss:hover {
-    color: var(--poodle-color-text-primary);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
+    color: var(--poodle-recipe-toast-stack-hover-dismiss-text, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-toast-stack-hover-dismiss-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
   }
 
   .poodle-toast__copy {
@@ -144,7 +143,7 @@
   }
 
   .poodle-toast__copy p {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-toast-stack-copy-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.5;
   }

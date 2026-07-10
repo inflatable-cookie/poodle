@@ -109,10 +109,10 @@
   }
 
   .poodle-embed-input__error {
-    color: var(--poodle-color-text-danger, #ef4444);
+    color: var(--poodle-recipe-embed-input-error-text, var(--poodle-color-text-danger, #ef4444));
   }
 
   .poodle-embed-input__success {
-    color: var(--poodle-color-text-success, #22c55e);
+    color: var(--poodle-recipe-embed-input-success-text, var(--poodle-color-text-success, #22c55e));
   }
 </style>

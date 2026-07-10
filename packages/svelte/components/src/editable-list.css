@@ -38,14 +38,14 @@
 
   .poodle-editable-list-session__error {
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-status-danger) 8%, var(--poodle-color-background-surface));
-    color: var(--poodle-color-status-danger);
+    background: var(--poodle-recipe-editable-list-error-fill, color-mix(in srgb, var(--poodle-color-status-danger) 8%, var(--poodle-color-background-surface)));
+    color: var(--poodle-recipe-editable-list-error-text, var(--poodle-color-status-danger));
   }
 
   .poodle-editable-list-session__info {
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 6%, var(--poodle-color-background-surface));
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-editable-list-info-fill, color-mix(in srgb, var(--poodle-color-accent-base) 6%, var(--poodle-color-background-surface)));
+    color: var(--poodle-recipe-editable-list-info-text, var(--poodle-color-text-primary));
   }
 
   .poodle-editable-list-session__window-nav {
@@ -59,7 +59,7 @@
     min-width: 13rem;
     text-align: center;
     font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-editable-list-window-label-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-editable-list {
@@ -137,9 +137,9 @@
     padding: var(--poodle-editable-list-item-y) var(--poodle-editable-list-item-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
+    background: var(--poodle-recipe-editable-list-item-fill, transparent);
     font-size: var(--poodle-editable-list-font-size);
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-editable-list-item-text, var(--poodle-color-text-primary));
     outline: none;
     transition:
       background-color 120ms ease,
@@ -149,12 +149,12 @@
   }
 
   .poodle-editable-list__item:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent);
+    background: var(--poodle-recipe-editable-list-hover-item-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent));
   }
 
   .poodle-editable-list__item:focus-visible {
-    border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing);
+    border-color: var(--poodle-recipe-editable-list-focus-item-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-editable-list-focus-item-shadow, 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing));
   }
 
   .poodle-editable-list__item--dragging {
@@ -164,8 +164,8 @@
   .poodle-editable-list__item--drop-target,
   .poodle-editable-list__item--grabbed,
   .poodle-editable-list__item--last-moved {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    border-color: var(--poodle-recipe-editable-list-item--last-moved-border, color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent));
+    background: var(--poodle-recipe-editable-list-item--last-moved-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 
   .poodle-editable-list__item--embedded-handle {
@@ -178,7 +178,7 @@
     justify-content: center;
     width: var(--poodle-editable-list-handle-size);
     height: var(--poodle-editable-list-handle-size);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-editable-list-handle-text, var(--poodle-color-text-secondary));
     flex-shrink: 0;
     cursor: grab;
   }
@@ -198,14 +198,14 @@
   }
 
   .poodle-editable-list__remove--danger-on-hover .poodle-icon-button {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-editable-list-remove--danger-on-hover-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-editable-list__remove--danger-on-hover .poodle-icon-button:hover:not(:disabled),
   .poodle-editable-list__remove--danger-on-hover .poodle-icon-button:focus-visible:not(:disabled) {
-    color: var(--poodle-color-status-danger);
-    border-color: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
-    background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
+    color: var(--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-text, var(--poodle-color-status-danger));
+    border-color: var(--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-border, color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default)));
+    background: var(--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-fill, color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent));
   }
 
   .poodle-editable-list__add {
@@ -225,6 +225,6 @@
 
   .poodle-editable-list__count {
     align-self: flex-end;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-editable-list-count-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
   }

@@ -73,7 +73,7 @@
 
   .poodle-form-layout__description {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-form-layout-description-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-body-size, 0.875rem);
     line-height: var(--poodle-typography-body-lineHeight, 1.5);
   }
@@ -81,7 +81,7 @@
   .poodle-form-layout__field-errors {
     padding: var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem);
     border-radius: var(--poodle-radius-surface, 0.5rem);
-    background: color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent);
+    background: var(--poodle-recipe-form-layout-field-errors-fill, color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent));
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent);
     font-size: var(--poodle-typography-label-size, 0.75rem);
   }

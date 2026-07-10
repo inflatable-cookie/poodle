@@ -329,7 +329,7 @@
   .poodle-pagination--chrome {
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-pagination-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-pagination--compact {
@@ -343,7 +343,7 @@
   }
 
   .poodle-pagination__info {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-pagination-info-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -360,7 +360,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-pagination-limit-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
   }
@@ -370,8 +370,8 @@
     font: inherit;
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-pagination-limit-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-pagination-limit-select-text, var(--poodle-color-text-primary));
   }
 
   .poodle-pagination__limit select:focus-visible {
@@ -401,8 +401,8 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-pagination-button-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-pagination-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
@@ -411,13 +411,13 @@
   }
 
   .poodle-pagination__button[data-current="true"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+    background: var(--poodle-recipe-pagination-current-button-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
+    border-color: var(--poodle-recipe-pagination-current-button-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
   }
 
   .poodle-pagination__button:hover:not(:disabled),
   .poodle-pagination__button:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    background: var(--poodle-recipe-pagination-hover-focus-button-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
     outline: none;
   }
 
@@ -426,14 +426,14 @@
     align-items: center;
     justify-content: center;
     min-width: 1.5rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-pagination-ellipsis-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
   }
 
   .poodle-pagination__summary {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-pagination-summary-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);

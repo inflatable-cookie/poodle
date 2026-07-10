@@ -36,7 +36,7 @@
 
   .poodle-pagination-summary__copy {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-pagination-summary-copy-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-label-size, 0.75rem);
     line-height: var(--poodle-typography-label-lineHeight, 1.4);

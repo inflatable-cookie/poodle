@@ -150,11 +150,11 @@
 <style>
   .poodle-alert-dialog__item-detail {
     margin: 0 0 0.75rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-alert-dialog-item-detail-text, var(--poodle-color-text-secondary));
     line-height: 1.5;
   }
 
   .poodle-alert-dialog__item-detail strong {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-alert-dialog-item-detail-strong-text, var(--poodle-color-text-primary));
   }
 </style>

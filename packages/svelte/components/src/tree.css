@@ -72,8 +72,8 @@
     padding-inline: var(--poodle-tree-row-pad-inline);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-tree-row-fill, transparent);
+    color: var(--poodle-recipe-tree-row-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-tree-row-font);
     font-weight: 500;
@@ -103,7 +103,7 @@
     justify-content: center;
     width: var(--poodle-tree-twisty-size);
     font-size: var(--poodle-tree-chevron-size);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-tree-twisty-text, var(--poodle-color-text-secondary));
     transition: transform var(--poodle-motion-duration-interaction)
       var(--poodle-motion-easing-standard);
   }
@@ -115,7 +115,7 @@
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-tree-icon-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-tree__checkbox {
@@ -130,11 +130,11 @@
     align-items: center;
     justify-content: center;
     width: var(--poodle-tree-twisty-size);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-tree-spinner-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-tree__label--muted {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-tree-label--muted-text, var(--poodle-color-text-secondary));
     font-style: italic;
   }
 
@@ -145,16 +145,16 @@
     padding: 0 0.25rem;
     border: 0.0625rem solid var(--poodle-color-accent-base);
     border-radius: 0.1875rem;
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-tree-rename-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-tree-rename-text, var(--poodle-color-text-primary));
     font-family: inherit;
     font-size: inherit;
     line-height: 1.3;
     outline: none;
   }
   .poodle-tree__rename:focus-visible {
-    box-shadow: 0 0 0 0.125rem
-      color-mix(in srgb, var(--poodle-color-accent-focusRing) 50%, transparent);
+    box-shadow: var(--poodle-recipe-tree-focus-rename-shadow, 0 0 0 0.125rem
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 50%, transparent));
   }
 
   .poodle-tree[data-virtualized="true"] {
@@ -179,16 +179,16 @@
   }
 
   .poodle-tree__row:hover {
-    color: var(--poodle-color-text-primary);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent);
+    color: var(--poodle-recipe-tree-hover-row-text, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-tree-hover-row-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent));
   }
 
   .poodle-tree__item[data-selected="true"] > .poodle-tree__row {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-tree-selected-row-text, var(--poodle-color-text-primary));
     font-weight: 600;
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
-    box-shadow: inset 0 0 0 0.0625rem
-      color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent);
+    background: var(--poodle-recipe-tree-selected-row-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
+    box-shadow: var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem
+      color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent));
   }
 
   .poodle-tree__item:focus-visible > .poodle-tree__row {
@@ -212,7 +212,7 @@
     left: 0;
     right: 0;
     height: 0.125rem;
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-tree-before-after-row-after-fill, var(--poodle-color-accent-base));
     pointer-events: none;
   }
   .poodle-tree__item[data-drop="before"] > .poodle-tree__row::before {
@@ -222,6 +222,6 @@
     bottom: -0.0625rem;
   }
   .poodle-tree__item[data-drop="inside"] > .poodle-tree__row {
-    box-shadow: inset 0 0 0 0.0625rem var(--poodle-color-accent-base);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    box-shadow: var(--poodle-recipe-tree-row-shadow, inset 0 0 0 0.0625rem var(--poodle-color-accent-base));
+    background: var(--poodle-recipe-tree-inside-row-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }

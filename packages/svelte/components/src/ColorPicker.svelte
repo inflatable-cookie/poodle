@@ -679,7 +679,7 @@
     padding: 0;
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 62%, transparent);
     border-radius: var(--poodle-radius-control);
-    background: transparent;
+    background: var(--poodle-recipe-color-picker-trigger-fill, transparent);
     cursor: pointer;
     overflow: hidden;
     transition:
@@ -707,8 +707,8 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-color-picker-input-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-color-picker-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
     outline: none;
@@ -718,9 +718,9 @@
   }
 
   .poodle-color-picker__input:focus {
-    border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus)
-      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-recipe-color-picker-focus-input-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-color-picker-focus-input-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
   /* ── Surface (popover) ───────────────────────────────────── */
@@ -738,8 +738,8 @@
     padding: 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-elevated);
-    box-shadow: var(--poodle-shadow-lg);
+    background: var(--poodle-recipe-color-picker-surface-fill, var(--poodle-color-background-elevated));
+    box-shadow: var(--poodle-recipe-color-picker-surface-shadow, var(--poodle-shadow-lg));
   }
 
   .poodle-color-picker__surface--above {
@@ -782,14 +782,14 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, #fff, transparent);
+    background: var(--poodle-recipe-color-picker-gradient-fill, linear-gradient(to right, #fff, transparent));
   }
 
   .poodle-color-picker__gradient::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent, #000);
+    background: var(--poodle-recipe-color-picker-gradient-after-fill, linear-gradient(to bottom, transparent, #000));
   }
 
   .poodle-color-picker__gradient:focus-visible {
@@ -807,7 +807,7 @@
     margin-top: -0.4375rem;
     border: 0.125rem solid #fff;
     border-radius: 50%;
-    box-shadow: 0 0 0 0.0625rem rgba(0, 0, 0, 0.3), inset 0 0 0 0.0625rem rgba(0, 0, 0, 0.1);
+    box-shadow: var(--poodle-recipe-color-picker-gradient-thumb-shadow, 0 0 0 0.0625rem rgba(0, 0, 0, 0.3), inset 0 0 0 0.0625rem rgba(0, 0, 0, 0.1));
     pointer-events: none;
   }
 
@@ -818,7 +818,7 @@
   }
 
   .poodle-color-picker__hue-wrap :global(.poodle-slider__track) {
-    background: linear-gradient(
+    background: var(--poodle-recipe-color-picker-track-fill, linear-gradient(
       to right,
       #f00 0%,
       #ff0 17%,
@@ -827,7 +827,7 @@
       #00f 67%,
       #f0f 83%,
       #f00 100%
-    ) !important;
+    ) !important);
   }
 
   .poodle-color-picker__hue-wrap :global(.poodle-slider__fill) {
@@ -842,8 +842,7 @@
   }
 
   .poodle-color-picker__alpha-wrap :global(.poodle-slider__track) {
-    background:
-      linear-gradient(
+    background: var(--poodle-recipe-color-picker-track-fill, linear-gradient(
         to right,
         transparent,
         var(--poodle-cp-alpha-color, #000)
@@ -851,7 +850,7 @@
       repeating-conic-gradient(
         #d0d0d0 0% 25%,
         #fff 0% 50%
-      ) 0 0 / 0.5rem 0.5rem !important;
+      ) 0 0 / 0.5rem 0.5rem !important);
   }
 
   .poodle-color-picker__alpha-wrap :global(.poodle-slider__fill) {
@@ -911,8 +910,8 @@
     padding: 0 0.375rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-color-picker-text-input-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-color-picker-text-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     outline: none;
@@ -922,9 +921,9 @@
   }
 
   .poodle-color-picker__text-input:focus {
-    border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus)
-      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-recipe-color-picker-focus-text-input-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-color-picker-focus-text-input-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
   .poodle-color-picker__input-label {
@@ -932,7 +931,7 @@
     font-family: var(--poodle-typography-label-family);
     font-size: 0.625rem;
     font-weight: var(--poodle-typography-label-weight);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-color-picker-input-label-text, var(--poodle-color-text-secondary));
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -972,8 +971,8 @@
   }
 
   .poodle-color-picker__swatch--active {
-    border-color: var(--poodle-color-text-primary);
-    box-shadow: 0 0 0 0.0625rem var(--poodle-color-background-surface);
+    border-color: var(--poodle-recipe-color-picker-swatch--active-border, var(--poodle-color-text-primary));
+    box-shadow: var(--poodle-recipe-color-picker-swatch--active-shadow, 0 0 0 0.0625rem var(--poodle-color-background-surface));
   }
 
   /* Size variants */

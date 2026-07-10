@@ -201,7 +201,7 @@
       );
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-recipe-duration-input-fill, var(--poodle-color-background-surface));
     font-family: var(--poodle-typography-code-family);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -209,8 +209,8 @@
   }
 
   .poodle-duration-input:focus-within {
-    border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-recipe-duration-input-focus-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-duration-input-focus-shadow, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
   .poodle-duration-input[data-disabled="true"] {
@@ -218,7 +218,7 @@
   }
 
   .poodle-duration-input[data-invalid="true"] {
-    border-color: var(--poodle-color-status-danger);
+    border-color: var(--poodle-recipe-duration-input-invalid-border, var(--poodle-color-status-danger));
   }
 
   .poodle-duration-input__segment {
@@ -231,12 +231,12 @@
   }
 
   .poodle-duration-input__segment:has(.poodle-duration-input__field:focus) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    background: var(--poodle-recipe-duration-input-focus-field-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   .poodle-duration-input__label {
     font-size: var(--poodle-duration-input-label-size);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-duration-input-label-text, var(--poodle-color-text-secondary));
     text-transform: uppercase;
     letter-spacing: 0.05em;
     line-height: 1;
@@ -248,8 +248,8 @@
     min-height: 0;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-duration-input-field-fill, transparent);
+    color: var(--poodle-recipe-duration-input-field-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-duration-input-digit-size);
     font-variant-numeric: tabular-nums;
@@ -262,7 +262,7 @@
     display: grid;
     grid-template-rows: var(--poodle-duration-input-label-size) 1fr;
     align-items: stretch;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-duration-input-separator-text, var(--poodle-color-text-secondary));
     user-select: none;
   }
 

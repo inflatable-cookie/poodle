@@ -87,7 +87,7 @@
     min-height: var(--poodle-app-header-min-height);
     padding: var(--poodle-app-header-padding-block) var(--poodle-app-header-padding-inline);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    background: var(--poodle-recipe-app-header-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
     overflow: visible;
   }
 
@@ -114,7 +114,7 @@
   }
 
   .poodle-app-header__subtitle {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-app-header-subtitle-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-app-header-subtitle-size);
     line-height: 1.2;
     white-space: nowrap;

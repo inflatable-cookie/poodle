@@ -52,7 +52,7 @@
   }
 
   .poodle-fieldset__legend {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-field-set-legend-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
@@ -65,7 +65,7 @@
 
   .poodle-fieldset__description {
     margin: calc(var(--poodle-space-stack-sm) * -0.5) 0 var(--poodle-space-stack-md);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-field-set-description-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-body-size, 0.875rem);
     line-height: var(--poodle-typography-body-lineHeight, 1.5);
   }

@@ -196,7 +196,7 @@
   }
 
   .poodle-field__label {
-    color: color-mix(in srgb, var(--poodle-color-text-primary) 45%, var(--poodle-color-text-secondary));
+    color: var(--poodle-recipe-field-label-text, color-mix(in srgb, var(--poodle-color-text-primary) 45%, var(--poodle-color-text-secondary)));
     font-family: var(--poodle-typography-label-family);
     font-size: inherit;
     font-weight: var(--poodle-typography-label-weight);
@@ -204,11 +204,11 @@
   }
 
   .poodle-field__required {
-    color: var(--poodle-color-status-danger);
+    color: var(--poodle-recipe-field-required-text, var(--poodle-color-status-danger));
   }
 
   .poodle-field__optional {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-field-optional-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
     font-size: 0.75rem;
     line-height: var(--poodle-typography-body-lineHeight);
@@ -221,11 +221,11 @@
   }
 
   .poodle-field__message--pending {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-field-message--pending-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-field__message--error {
-    color: var(--poodle-color-status-danger);
+    color: var(--poodle-recipe-field-message--error-text, var(--poodle-color-status-danger));
   }
 
   .poodle-field[data-size="xs"] .poodle-field__label-row { font-size: 0.6875rem; }
@@ -280,8 +280,8 @@
     cursor: pointer;
     flex-shrink: 0;
     border-radius: var(--poodle-radius-pill);
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-field-info-icon-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent));
+    color: var(--poodle-recipe-field-info-icon-text, var(--poodle-color-text-secondary));
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
@@ -291,13 +291,13 @@
   }
 
   .poodle-field__info-trigger-wrap:hover .poodle-field__info-icon {
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-field-hover-info-icon-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent));
+    color: var(--poodle-recipe-field-hover-info-icon-text, var(--poodle-color-text-primary));
   }
 
   .poodle-field__info-content {
     margin: 0;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-field-info-content-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: 0.75rem;
     line-height: 1.5;

@@ -59,7 +59,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-status-gap);
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-status-indicator-text, var(--poodle-color-text-primary));
     min-width: 0;
   }
 
@@ -88,8 +88,8 @@
     width: var(--poodle-status-dot-size);
     height: var(--poodle-status-dot-size);
     border-radius: 999px;
-    background: var(--poodle-status-color);
-    box-shadow: 0 0 0 var(--poodle-status-dot-ring) color-mix(in srgb, var(--poodle-status-color) 18%, transparent);
+    background: var(--poodle-recipe-status-indicator-dot-fill, var(--poodle-status-color));
+    box-shadow: var(--poodle-recipe-status-indicator-dot-shadow, 0 0 0 var(--poodle-status-dot-ring) color-mix(in srgb, var(--poodle-status-color) 18%, transparent));
   }
 
   .poodle-status-indicator[data-status="pending"] .poodle-status-indicator__dot {

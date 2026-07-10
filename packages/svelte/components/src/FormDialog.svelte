@@ -183,7 +183,7 @@
   }
 
   .poodle-form-dialog__subtitle {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-form-dialog-subtitle-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-body-size, 0.875rem);
     line-height: var(--poodle-typography-body-lineHeight, 1.5);
   }

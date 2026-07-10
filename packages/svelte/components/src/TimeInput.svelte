@@ -88,8 +88,8 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-time-input-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-time-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);

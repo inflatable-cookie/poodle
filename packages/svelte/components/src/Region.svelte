@@ -34,7 +34,7 @@
   }
 
   .poodle-region__label {
-    color: var(--region-color, var(--poodle-color-text-tertiary, #888));
+    color: var(--poodle-recipe-region-label-text, var(--region-color, var(--poodle-color-text-tertiary, #888)));
     font-family: var(--poodle-typography-label-family, sans-serif);
     font-size: var(--poodle-typography-label-size, 0.75rem);
     font-weight: 600;

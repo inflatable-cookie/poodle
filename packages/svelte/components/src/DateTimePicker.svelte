@@ -226,8 +226,8 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-date-time-picker-trigger-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-date-time-picker-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
@@ -240,11 +240,11 @@
   }
 
   .poodle-date-time-picker__value[data-placeholder="true"] {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-date-time-picker-value-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-date-time-picker__indicator {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-date-time-picker-indicator-text, var(--poodle-color-text-secondary));
     font-size: 0.75rem;
   }
 
@@ -256,12 +256,12 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(
+    background: var(--poodle-recipe-date-time-picker-surface-fill, color-mix(
       in srgb,
       var(--poodle-color-background-elevated) 98%,
       var(--poodle-color-background-panel)
-    );
-    box-shadow: var(--poodle-elevation-overlay);
+    ));
+    box-shadow: var(--poodle-recipe-date-time-picker-surface-shadow, var(--poodle-elevation-overlay));
   }
 
   .poodle-date-time-picker__body {
@@ -275,7 +275,7 @@
   }
 
   .poodle-date-time-picker__time-label {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-date-time-picker-time-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
@@ -284,11 +284,11 @@
   }
 
   .poodle-date-time-picker__trigger:hover:not(:disabled) {
-    background: color-mix(
+    background: var(--poodle-recipe-date-time-picker-hover-trigger-fill, color-mix(
       in srgb,
       var(--poodle-color-background-surface) 86%,
       var(--poodle-color-background-elevated)
-    );
+    ));
   }
 
   .poodle-date-time-picker__trigger:focus-visible {

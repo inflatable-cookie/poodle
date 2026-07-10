@@ -48,11 +48,13 @@ Two classes, machine-classified by
 
 - **Recipe hooks** (`--poodle-recipe-*`, public): the supported override
   surface. Stable: renaming or removing one is a breaking change handled
-  via the g11.001 wave process. Current adopters: Card, PageHeader,
-  ListCard, BulkActionBar (from the g03.005 seed), Button and Pill
-  (g11.005). The inventory's `candidates` list tracks appearance variables
-  that do not yet expose a hook — hooks are added there on demonstrated
-  need.
+  via the g11.001 wave process. Coverage is **library-wide** as of g11.008:
+  every appearance property in every component resolves through a hook
+  (973 hooks across 116 scanned components, `candidates` empty). Two
+  mechanical shapes: components with local appearance variables wrap the
+  variable definition; components without them hook inline at the property.
+  Slot names come from the component's anatomy class parts; qualifiers from
+  data-attributes and pseudo-state in the defining selector.
 - **Metric variables** (internal): sizing, padding, gaps, font sizes. These
   belong to the size/density system and are NOT part of the recipe
   contract. Overriding them is unsupported (density must never change

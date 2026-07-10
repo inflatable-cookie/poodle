@@ -84,7 +84,7 @@
     --poodle-password-requirements-hint-gap: 0.5rem;
     padding: 1rem;
     border-radius: var(--poodle-radius-panel, 0.75rem);
-    background: var(--poodle-color-background-subtle, color-mix(in srgb, var(--poodle-color-background-surface) 92%, var(--poodle-color-surface-muted) 8%));
+    background: var(--poodle-recipe-password-requirements-fill, var(--poodle-color-background-subtle, color-mix(in srgb, var(--poodle-color-background-surface) 92%, var(--poodle-color-surface-muted) 8%)));
     border: 0.0625rem solid var(--poodle-color-border-subtle, color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent));
     padding: var(--poodle-password-requirements-padding);
   }
@@ -92,7 +92,7 @@
   .poodle-password-requirements__title {
     margin: 0 0 0.5rem;
     font-weight: 600;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-password-requirements-title-text, var(--poodle-color-text-primary));
     font-size: var(--poodle-password-requirements-title-size);
     line-height: 1.4;
   }
@@ -104,11 +104,11 @@
     margin: 0;
     font-size: var(--poodle-password-requirements-body-size);
     line-height: 1.5;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-password-requirements-error-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-password-requirements__error {
-    color: var(--poodle-color-status-danger);
+    color: var(--poodle-recipe-password-requirements-error-text, var(--poodle-color-status-danger));
   }
 
   .poodle-password-requirements__description {
@@ -127,14 +127,14 @@
   }
 
   .poodle-password-requirements__list li {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-password-requirements-list-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-password-requirements-body-size);
     line-height: var(--poodle-password-requirements-list-line-height);
     transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-password-requirements__list li.poodle-password-requirements__item--met {
-    color: var(--poodle-color-status-success);
+    color: var(--poodle-recipe-password-requirements-item--met-text, var(--poodle-color-status-success));
   }
 
   .poodle-password-requirements[data-size="xs"] {

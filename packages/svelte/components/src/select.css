@@ -31,8 +31,8 @@
       var(--poodle-color-border-default)
     );
     border-radius: var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control));
-    background: var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface));
-    box-shadow: var(--poodle-treatment-interactive-subtle-shadow, none);
+    background: var(--poodle-recipe-select-fill, var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface)));
+    box-shadow: var(--poodle-recipe-select-shadow, var(--poodle-treatment-interactive-subtle-shadow, none));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -48,28 +48,28 @@
   }
 
   .poodle-select[data-validation-state="invalid"] {
-    border-color: var(--poodle-color-status-danger);
+    border-color: var(--poodle-recipe-select-border, var(--poodle-color-status-danger));
   }
 
   .poodle-select[data-validation-state="valid"] {
-    border-color: var(--poodle-color-status-success);
+    border-color: var(--poodle-recipe-select-valid-border, var(--poodle-color-status-success));
   }
 
   .poodle-select[data-validation-state="pending"] {
-    border-color: var(--poodle-color-accent-base);
+    border-color: var(--poodle-recipe-select-pending-border, var(--poodle-color-accent-base));
   }
 
   .poodle-select:focus-within {
-    border-color: var(--poodle-color-accent-focusRing);
-    background: var(
+    border-color: var(--poodle-recipe-select-focus-border, var(--poodle-color-accent-focusRing));
+    background: var(--poodle-recipe-select-focus-fill, var(
       --poodle-treatment-interactive-subtle-fill-focus,
       var(--poodle-color-background-surface)
-    );
-    box-shadow: var(
+    ));
+    box-shadow: var(--poodle-recipe-select-focus-shadow, var(
       --poodle-treatment-interactive-subtle-shadow-focus,
       0 0 0 var(--poodle-border-width-focus)
         color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)
-    );
+    ));
   }
 
   .poodle-select__indicator {
@@ -77,7 +77,7 @@
     right: var(--poodle-select-inline-padding);
     top: 50%;
     transform: translateY(-50%);
-    color: var(--poodle-color-icon-muted);
+    color: var(--poodle-recipe-select-indicator-text, var(--poodle-color-icon-muted));
     font-size: 0.75rem;
     line-height: 1;
     pointer-events: none;
@@ -96,8 +96,8 @@
     padding: 0;
     padding-right: 1.5rem;
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-select-control-fill, transparent);
+    color: var(--poodle-recipe-select-control-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -107,11 +107,11 @@
   }
 
   .poodle-select[data-placeholder="true"] .poodle-select__control {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-placeholder-control-text, var(--poodle-color-text-secondary));
   }
 
-  .poodle-select__control optgroup { font-weight: 600; color: var(--poodle-color-text-secondary); }
-  .poodle-select__control option { font-weight: normal; color: var(--poodle-color-text-primary); }
+  .poodle-select__control optgroup { font-weight: 600; color: var(--poodle-recipe-select-group-control-text, var(--poodle-color-text-secondary)); }
+  .poodle-select__control option { font-weight: normal; color: var(--poodle-recipe-select-control-text, var(--poodle-color-text-primary)); }
 
   /* ═══ CUSTOM MODE ═══ */
 
@@ -144,8 +144,8 @@
       + var(--poodle-select-end-gap)
     );
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-select-input-fill, transparent);
+    color: var(--poodle-recipe-select-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -153,7 +153,7 @@
   }
 
   .poodle-select__input::placeholder {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-placeholder-input-text, var(--poodle-color-text-secondary));
   }
 
   /* Trigger button (non-searchable custom) */
@@ -171,8 +171,8 @@
       + var(--poodle-select-end-gap)
     );
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-select-trigger-fill, transparent);
+    color: var(--poodle-recipe-select-trigger-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -200,7 +200,7 @@
   }
 
   .poodle-select__value[data-placeholder="true"] {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-value-text, var(--poodle-color-text-secondary));
   }
 
   /* Clear button */
@@ -215,8 +215,8 @@
     height: var(--poodle-select-indicator-width);
     padding: 0;
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-icon-muted);
+    background: var(--poodle-recipe-select-indicator-button-fill, transparent);
+    color: var(--poodle-recipe-select-indicator-button-text, var(--poodle-color-icon-muted));
     transform: translateY(-50%);
     cursor: pointer;
   }
@@ -242,15 +242,15 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-pill);
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 18%, transparent);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-select-clear-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 18%, transparent));
+    color: var(--poodle-recipe-select-clear-text, var(--poodle-color-text-secondary));
     transform: translateY(-50%);
     cursor: pointer;
   }
 
   .poodle-select__clear:hover {
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 28%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-select-hover-clear-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 28%, transparent));
+    color: var(--poodle-recipe-select-hover-clear-text, var(--poodle-color-text-primary));
   }
 
   /* Listbox dropdown */
@@ -267,8 +267,8 @@
     padding: 0.25rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-elevated);
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-select-listbox-fill, var(--poodle-color-background-elevated));
+    box-shadow: var(--poodle-recipe-select-listbox-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
   }
 
   .poodle-select__listbox--above {
@@ -279,7 +279,7 @@
   /* Group */
   .poodle-select__group-label {
     padding: 0.375rem 0.5rem 0.1875rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-group-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
@@ -300,8 +300,8 @@
     padding: 0.375rem 0.5rem;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-select-option-fill, transparent);
+    color: var(--poodle-recipe-select-option-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
     font-size: var(--poodle-typography-body-size);
@@ -310,7 +310,7 @@
 
   .poodle-select__option[data-highlighted="true"],
   .poodle-select__option:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+    background: var(--poodle-recipe-select-highlighted-hover-option-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
   }
 
   .poodle-select__option[aria-selected="true"] {
@@ -348,13 +348,13 @@
 
   .poodle-select__option-description {
     display: block;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-option-description-text, var(--poodle-color-text-secondary));
     font-size: 0.6875rem;
   }
 
   .poodle-select__empty {
     padding: 0.5rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-select-empty-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
   }
 
@@ -365,14 +365,14 @@
     padding: 0;
     border: 0;
     border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    background: var(--poodle-recipe-select-ghost-fill, transparent);
+    box-shadow: var(--poodle-recipe-select-ghost-shadow, none);
   }
 
   .poodle-select[data-variant="ghost"]:focus-within {
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
+    border-color: var(--poodle-recipe-select-ghost-focus-border, transparent);
+    background: var(--poodle-recipe-select-ghost-focus-fill, transparent);
+    box-shadow: var(--poodle-recipe-select-ghost-focus-shadow, none);
   }
 
   .poodle-select[data-variant="ghost"] .poodle-select__trigger-area {

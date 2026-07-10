@@ -61,14 +61,14 @@
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
     padding: 0.375rem 0.75rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-status-bar-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .poodle-status-bar--chrome {
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    background: var(--poodle-recipe-status-bar-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
   }
 
   .poodle-status-bar__leading,

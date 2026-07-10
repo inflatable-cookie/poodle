@@ -751,18 +751,18 @@
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-relation-picker-back-fill, transparent);
+    color: var(--poodle-recipe-relation-picker-back-text, var(--poodle-color-text-secondary));
     cursor: pointer;
   }
 
   .poodle-drill-breadcrumbs__back:hover {
-    background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-relation-picker-hover-back-fill, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12)));
+    color: var(--poodle-recipe-relation-picker-hover-back-text, var(--poodle-color-text-primary));
   }
 
   .poodle-drill-breadcrumbs__sep {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-sep-text, var(--poodle-color-text-secondary));
     font-size: 0.6875rem;
     opacity: 0.6;
   }
@@ -772,8 +772,8 @@
     padding: 0.125rem var(--poodle-relation-picker-breadcrumb-x);
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: transparent;
-    color: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-relation-picker-item-fill, transparent);
+    color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-accent-base));
     font-size: var(--poodle-typography-label-size);
     font-weight: 500;
     cursor: pointer;
@@ -784,7 +784,7 @@
   }
 
   .poodle-drill-breadcrumbs__item:hover {
-    background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
+    background: var(--poodle-recipe-relation-picker-hover-item-fill, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12)));
   }
 
   .poodle-drill-level-label {
@@ -792,7 +792,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-text, var(--poodle-color-text-secondary));
     padding-bottom: 0.25rem;
   }
 
@@ -818,8 +818,8 @@
     padding: var(--poodle-relation-picker-list-y) var(--poodle-relation-picker-list-x);
     border: none;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-relation-picker-button-fill, transparent);
+    color: var(--poodle-recipe-relation-picker-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -827,7 +827,7 @@
   }
 
   .poodle-drill-list__button:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
+    background: var(--poodle-recipe-relation-picker-hover-button-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
   }
 
   .poodle-drill-list__button:focus-visible {
@@ -849,7 +849,7 @@
   }
 
   .poodle-drill-list__copy small {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-copy-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -861,7 +861,7 @@
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-meta-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-drill-list__count {
@@ -872,7 +872,7 @@
   .poodle-drill-list__empty {
     padding: calc(var(--poodle-relation-picker-list-y) * 2.5);
     text-align: center;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-empty-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
   }
 
@@ -893,8 +893,8 @@
     padding: var(--poodle-relation-picker-item-y) var(--poodle-relation-picker-item-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-relation-picker-item-fill, color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent));
+    color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-text-primary));
   }
 
   .poodle-relation-picker__item[data-selection-mode="single"] {
@@ -902,8 +902,8 @@
   }
 
   .poodle-relation-picker__item[data-selected="true"] {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    border-color: var(--poodle-recipe-relation-picker-selected-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent));
+    background: var(--poodle-recipe-relation-picker-selected-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 
   .poodle-relation-picker__item[data-disabled="true"] {
@@ -918,7 +918,7 @@
     min-width: 0;
     padding: 0;
     border: 0;
-    background: transparent;
+    background: var(--poodle-recipe-relation-picker-item-button-fill, transparent);
     color: inherit;
     cursor: pointer;
     text-align: left;
@@ -942,7 +942,7 @@
 
   .poodle-relation-picker__item-copy small {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-item-copy-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-relation-picker-desc-size);
     line-height: 1.4;
   }
@@ -951,7 +951,7 @@
     flex: 1 1 18rem;
     min-width: 0;
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-relation-picker-footer-note-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-relation-picker-desc-size);
     line-height: 1.5;
   }

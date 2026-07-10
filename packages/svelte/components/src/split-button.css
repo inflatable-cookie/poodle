@@ -91,9 +91,9 @@
     justify-content: center;
     height: var(--poodle-split-button-height);
     border: 0.0625rem solid var(--poodle-split-border);
-    background: var(--poodle-split-fill);
-    box-shadow: var(--poodle-split-shadow);
-    color: var(--poodle-split-text);
+    background: var(--poodle-recipe-split-button-toggle-fill, var(--poodle-split-fill));
+    box-shadow: var(--poodle-recipe-split-button-toggle-shadow, var(--poodle-split-shadow));
+    color: var(--poodle-recipe-split-button-toggle-text, var(--poodle-split-text));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-split-button-font-size);
@@ -155,7 +155,7 @@
   }
 
   .poodle-split-button__primary:hover:not(:disabled) {
-    background: var(--poodle-split-fill-hover);
+    background: var(--poodle-recipe-split-button-hover-primary-fill, var(--poodle-split-fill-hover));
   }
 
   .poodle-split-button__primary:focus-visible {
@@ -177,7 +177,7 @@
   }
 
   .poodle-split-button__toggle:hover:not(:disabled) {
-    background: var(--poodle-split-fill-hover);
+    background: var(--poodle-recipe-split-button-hover-toggle-fill, var(--poodle-split-fill-hover));
   }
 
   .poodle-split-button__toggle:focus-visible {
@@ -193,7 +193,7 @@
 
   .poodle-split-button__divider {
     width: 0.0625rem;
-    background: color-mix(in srgb, var(--poodle-split-text) 22%, transparent);
+    background: var(--poodle-recipe-split-button-divider-fill, color-mix(in srgb, var(--poodle-split-text) 22%, transparent));
     align-self: center;
     height: 60%;
   }
@@ -226,11 +226,11 @@
       color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(
+    background: var(--poodle-recipe-split-button-menu-fill, var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    );
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+    ));
+    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
     overflow-y: auto;
   }
 
@@ -247,8 +247,8 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-split-button-item-fill, transparent);
+    color: var(--poodle-recipe-split-button-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
     font-size: var(--poodle-typography-label-size);
@@ -257,7 +257,7 @@
 
   .poodle-split-button__item:hover:not(:disabled),
   .poodle-split-button__item:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    background: var(--poodle-recipe-split-button-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
     outline: none;
   }
 
@@ -270,7 +270,7 @@
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
-    background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    background: var(--poodle-recipe-split-button-separator-fill, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
   /* Density variants — horizontal padding */

@@ -110,7 +110,7 @@
   .poodle-embed-preview__container {
     position: relative;
     width: 100%;
-    background: var(--poodle-color-background-panel, #1a1a1a);
+    background: var(--poodle-recipe-embed-preview-container-fill, var(--poodle-color-background-panel, #1a1a1a));
   }
 
   .poodle-embed-preview__iframe {
@@ -152,7 +152,7 @@
     gap: 0.5rem;
     min-height: 8rem;
     padding: 1.5rem;
-    background: var(--poodle-color-background-panel, #1a1a1a);
+    background: var(--poodle-recipe-embed-preview-empty-fill, var(--poodle-color-background-panel, #1a1a1a));
     border-radius: var(--poodle-radius-surface, 0.5rem);
   }
 
@@ -160,27 +160,27 @@
   .poodle-embed-preview__empty svg {
     width: 2rem;
     height: 2rem;
-    color: var(--poodle-color-text-tertiary, #666);
+    color: var(--poodle-recipe-embed-preview-empty-text, var(--poodle-color-text-tertiary, #666));
   }
 
   .poodle-embed-preview__loading-text {
     font-size: 0.8125rem;
-    color: var(--poodle-color-text-secondary, #999);
+    color: var(--poodle-recipe-embed-preview-loading-text-text, var(--poodle-color-text-secondary, #999));
   }
 
   .poodle-embed-preview__error span,
   .poodle-embed-preview__empty span {
     font-size: 0.8125rem;
-    color: var(--poodle-color-text-secondary, #999);
+    color: var(--poodle-recipe-embed-preview-empty-span-text, var(--poodle-color-text-secondary, #999));
   }
 
   .poodle-embed-preview__error svg {
-    color: var(--poodle-color-text-danger, #ef4444);
+    color: var(--poodle-recipe-embed-preview-error-text, var(--poodle-color-text-danger, #ef4444));
   }
 
   .poodle-embed-preview__fallback {
     padding: 0.75rem 1rem;
-    background: var(--poodle-color-background-panel, #1a1a1a);
+    background: var(--poodle-recipe-embed-preview-fallback-fill, var(--poodle-color-background-panel, #1a1a1a));
     border-radius: var(--poodle-radius-surface, 0.5rem);
   }
 

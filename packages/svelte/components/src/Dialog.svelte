@@ -273,7 +273,7 @@
     inset: 0;
     padding: 0;
     border: 0;
-    background: var(--poodle-color-background-overlay);
+    background: var(--poodle-recipe-dialog-backdrop-fill, var(--poodle-color-background-overlay));
     cursor: default;
   }
 
@@ -289,15 +289,15 @@
       color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(
+    background: var(--poodle-recipe-dialog-surface-fill, var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    );
+    ));
     --poodle-surface: var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
+    box-shadow: var(--poodle-recipe-dialog-surface-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog)));
   }
 
   .poodle-dialog__surface--bare {
@@ -347,7 +347,7 @@
   .poodle-dialog__header p {
     margin: 0;
     padding-top: 0.375rem;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-dialog-header-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.5;
   }

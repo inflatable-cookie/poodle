@@ -151,7 +151,7 @@
 
 <style>
   .poodle-time-ago {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-time-ago-text, var(--poodle-color-text-primary));
     --poodle-time-ago-underline: color-mix(in srgb, currentColor 32%, transparent);
     --poodle-time-ago-underline-hover: color-mix(in srgb, currentColor 48%, transparent);
     font-family: var(--poodle-typography-body-family);
@@ -173,7 +173,7 @@
 
   .poodle-time-ago:hover,
   .poodle-time-ago:focus-visible {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-time-ago-hover-focus-text, var(--poodle-color-text-primary));
     text-decoration-color: var(--poodle-time-ago-underline-hover);
   }
 </style>

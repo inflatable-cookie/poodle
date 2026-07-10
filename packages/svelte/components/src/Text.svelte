@@ -41,7 +41,7 @@
 <style>
   .poodle-text {
     margin: 0;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-text-text, var(--poodle-color-text-primary));
     font-size: 0.875rem;
     line-height: 1.5;
   }
@@ -100,18 +100,18 @@
 
   .poodle-text[data-tone="secondary"],
   .poodle-text[data-tone="muted"] {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-text-secondary-muted-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-text[data-tone="success"] {
-    color: var(--poodle-color-status-success);
+    color: var(--poodle-recipe-text-success-text, var(--poodle-color-status-success));
   }
 
   .poodle-text[data-tone="danger"] {
-    color: var(--poodle-color-status-danger);
+    color: var(--poodle-recipe-text-danger-text, var(--poodle-color-status-danger));
   }
 
   .poodle-text[data-tone="warning"] {
-    color: var(--poodle-color-status-warning);
+    color: var(--poodle-recipe-text-warning-text, var(--poodle-color-status-warning));
   }
 </style>

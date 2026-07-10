@@ -191,35 +191,35 @@
     flex-shrink: 0;
     border: 0.125rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: transparent;
+    background: var(--poodle-recipe-card-radio-group-indicator-fill, transparent);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-card-radio-group__indicator[data-checked="true"] {
-    border-color: var(--poodle-color-accent-base);
-    background: var(--poodle-color-accent-base);
+    border-color: var(--poodle-recipe-card-radio-group-checked-indicator-border, var(--poodle-color-accent-base));
+    background: var(--poodle-recipe-card-radio-group-checked-indicator-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-card-radio-group__dot {
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 999px;
-    background: var(--poodle-color-text-inverse);
+    background: var(--poodle-recipe-card-radio-group-dot-fill, var(--poodle-color-text-inverse));
   }
 
   .poodle-card-radio-group__title {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-card-radio-group-title-text, var(--poodle-color-text-primary));
   }
 
   .poodle-card-radio-group__description {
     margin: 0;
     font-size: 0.8125rem;
     line-height: 1.5;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-card-radio-group-description-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-card-radio-group[data-size="xs"] .poodle-card-radio-group__indicator {

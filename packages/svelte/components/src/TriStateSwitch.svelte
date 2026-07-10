@@ -129,8 +129,8 @@
     padding: var(--poodle-tri-state-track-inset);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-color-background-canvas) 75%, black);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-tri-state-switch-fill, color-mix(in srgb, var(--poodle-color-background-canvas) 75%, black));
+    color: var(--poodle-recipe-tri-state-switch-text, var(--poodle-color-text-primary));
     isolation: isolate;
   }
 
@@ -186,9 +186,8 @@
     width: calc((100% - (var(--poodle-tri-state-track-inset) * 2)) / 3);
     border: 0.0625rem solid transparent;
     border-radius: 999px;
-    box-shadow:
-      inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent),
-      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    box-shadow: var(--poodle-recipe-tri-state-switch-selection-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent),
+      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
     transform: translateX(calc(var(--poodle-tri-state-active-index, 1) * 100%));
     transition:
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -199,18 +198,18 @@
   }
 
   .poodle-tri-state-switch[data-state="excluded"] .poodle-tri-state-switch__selection {
-    background: var(--poodle-tri-state-excluded-track);
-    border-color: color-mix(in srgb, var(--poodle-tri-state-excluded-color) 58%, var(--poodle-color-border-default));
+    background: var(--poodle-recipe-tri-state-switch-excluded-selection-fill, var(--poodle-tri-state-excluded-track));
+    border-color: var(--poodle-recipe-tri-state-switch-excluded-selection-border, color-mix(in srgb, var(--poodle-tri-state-excluded-color) 58%, var(--poodle-color-border-default)));
   }
 
   .poodle-tri-state-switch[data-state="default"] .poodle-tri-state-switch__selection {
-    background: var(--poodle-tri-state-default-track);
-    border-color: var(--poodle-color-border-default);
+    background: var(--poodle-recipe-tri-state-switch-default-selection-fill, var(--poodle-tri-state-default-track));
+    border-color: var(--poodle-recipe-tri-state-switch-default-selection-border, var(--poodle-color-border-default));
   }
 
   .poodle-tri-state-switch[data-state="included"] .poodle-tri-state-switch__selection {
-    background: var(--poodle-tri-state-included-track);
-    border-color: color-mix(in srgb, var(--poodle-tri-state-included-color) 58%, var(--poodle-color-border-default));
+    background: var(--poodle-recipe-tri-state-switch-included-selection-fill, var(--poodle-tri-state-included-track));
+    border-color: var(--poodle-recipe-tri-state-switch-included-selection-border, color-mix(in srgb, var(--poodle-tri-state-included-color) 58%, var(--poodle-color-border-default)));
   }
 
   .poodle-tri-state-switch__option {
@@ -243,7 +242,7 @@
     min-width: calc(var(--poodle-tri-state-min-content-width) + (var(--poodle-tri-state-x) * 2));
     padding: 0 var(--poodle-tri-state-x);
     border-radius: 999px;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-tri-state-switch-segment-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
@@ -254,19 +253,19 @@
   }
 
   .poodle-tri-state-switch__option[data-selected="true"] .poodle-tri-state-switch__segment {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-tri-state-switch-selected-segment-text, var(--poodle-color-text-primary));
   }
 
   .poodle-tri-state-switch__option[data-state="excluded"][data-selected="true"] .poodle-tri-state-switch__segment {
-    color: var(--poodle-tri-state-excluded-color);
+    color: var(--poodle-recipe-tri-state-switch-excluded-selected-segment-text, var(--poodle-tri-state-excluded-color));
   }
 
   .poodle-tri-state-switch__option[data-state="default"][data-selected="true"] .poodle-tri-state-switch__segment {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-tri-state-switch-default-selected-segment-text, var(--poodle-color-text-primary));
   }
 
   .poodle-tri-state-switch__option[data-state="included"][data-selected="true"] .poodle-tri-state-switch__segment {
-    color: var(--poodle-tri-state-included-color);
+    color: var(--poodle-recipe-tri-state-switch-included-selected-segment-text, var(--poodle-tri-state-included-color));
   }
 
   .poodle-tri-state-switch__control:focus-visible + .poodle-tri-state-switch__segment {

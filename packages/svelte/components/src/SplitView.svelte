@@ -388,12 +388,12 @@
     gap: 0.125rem;
     padding: 0.125rem;
     border-radius: var(--poodle-radius-pill);
-    background: color-mix(
+    background: var(--poodle-recipe-split-view-toggles-fill, color-mix(
       in srgb,
       var(--poodle-color-background-panel) 92%,
       var(--poodle-color-background-elevated)
-    );
-    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent);
+    ));
+    box-shadow: var(--poodle-recipe-split-view-toggles-shadow, 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent));
   }
 
   .poodle-split-view__divider[data-orientation="horizontal"] .poodle-split-view__toggles {

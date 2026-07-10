@@ -116,40 +116,37 @@
   }
 
   .poodle-card[data-variant="outlined"] {
-    border-color: color-mix(in srgb, var(--poodle-color-border-default) 76%, transparent);
+    border-color: var(--poodle-recipe-card-outlined-border, color-mix(in srgb, var(--poodle-color-border-default) 76%, transparent));
   }
 
   .poodle-card[data-variant="elevated"] {
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-recipe-card-radius));
-    border-color: color-mix(
+    border-color: var(--poodle-recipe-card-elevated-border, color-mix(
       in srgb,
       var(--poodle-treatment-surface-elevated-border, var(--poodle-color-border-default)) 82%,
       var(--poodle-color-border-default)
-    );
-    background: var(
+    ));
+    background: var(--poodle-recipe-card-elevated-fill, var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    );
-    box-shadow:
-      0 1.125rem 2.5rem color-mix(in srgb, black 38%, transparent),
+    ));
+    box-shadow: var(--poodle-recipe-card-elevated-shadow, 0 1.125rem 2.5rem color-mix(in srgb, black 38%, transparent),
       0 0.375rem 0.875rem color-mix(in srgb, black 24%, transparent),
       inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 10%, transparent),
-      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 12%, transparent);
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 12%, transparent));
   }
 
   :global([data-theme="light"]) .poodle-card[data-variant="elevated"] {
-    box-shadow:
-      0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
+    box-shadow: var(--poodle-recipe-card-theme-light-elevated-shadow, 0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
       0 0.25rem 0.625rem rgba(49, 66, 85, 0.06),
       inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72),
-      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 10%, transparent);
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 10%, transparent));
   }
 
   .poodle-card[data-selected="true"] {
-    border-color: var(--poodle-color-accent-base);
-    box-shadow:
-      0 0 0 0.0625rem var(--poodle-color-accent-base),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    border-color: var(--poodle-recipe-card-selected-border, var(--poodle-color-accent-base));
+    box-shadow: var(--poodle-recipe-card-selected-shadow, 0 0 0 0.0625rem var(--poodle-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   .poodle-card[data-interactive="true"] {
@@ -163,10 +160,9 @@
   }
 
   .poodle-card[data-interactive="true"][data-selected="true"]:hover {
-    border-color: var(--poodle-color-accent-base);
-    box-shadow:
-      0 0 0 0.0625rem var(--poodle-color-accent-base),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    border-color: var(--poodle-recipe-card-selected-hover-border, var(--poodle-color-accent-base));
+    box-shadow: var(--poodle-recipe-card-selected-hover-shadow, 0 0 0 0.0625rem var(--poodle-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   .poodle-card[data-layout="horizontal"] {

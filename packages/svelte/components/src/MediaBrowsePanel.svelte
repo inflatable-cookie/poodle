@@ -154,7 +154,7 @@
     padding: var(--poodle-media-browse-item-pad);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent);
+    background: var(--poodle-recipe-media-browse-panel-item-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent));
     color: inherit;
     text-align: left;
     cursor: pointer;
@@ -162,8 +162,8 @@
 
   .poodle-media-browse-panel__item:hover,
   .poodle-media-browse-panel__item:focus-visible {
-    border-color: var(--poodle-color-border-focus);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent);
+    border-color: var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus));
+    background: var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent));
     outline: none;
   }
 
@@ -185,7 +185,7 @@
   .poodle-media-browse-panel__meta,
   .poodle-media-browse-panel__state p {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-media-browse-panel-state-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.45;
   }

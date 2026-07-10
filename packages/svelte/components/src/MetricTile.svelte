@@ -91,11 +91,11 @@
     padding: var(--poodle-state-tile-padding-y) var(--poodle-state-tile-padding-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
+    background: var(--poodle-recipe-metric-tile-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
   }
 
   .poodle-state-tile__label {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-metric-tile-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
   }
@@ -113,7 +113,7 @@
   .poodle-state-tile__sparkline {
     width: 4rem;
     height: 1.5rem;
-    color: var(--poodle-color-text-tertiary);
+    color: var(--poodle-recipe-metric-tile-sparkline-text, var(--poodle-color-text-tertiary));
     flex-shrink: 0;
   }
 
@@ -123,19 +123,19 @@
     gap: 0.25rem;
     font-size: 0.75rem;
     font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-metric-tile-trend-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-state-tile__trend[data-trend="up"] {
-    color: var(--poodle-color-status-success, #22c55e);
+    color: var(--poodle-recipe-metric-tile-up-trend-text, var(--poodle-color-status-success, #22c55e));
   }
 
   .poodle-state-tile__trend[data-trend="down"] {
-    color: var(--poodle-color-status-danger, #ef4444);
+    color: var(--poodle-recipe-metric-tile-down-trend-text, var(--poodle-color-status-danger, #ef4444));
   }
 
   .poodle-state-tile__trend[data-trend="flat"] {
-    color: var(--poodle-color-text-tertiary);
+    color: var(--poodle-recipe-metric-tile-flat-trend-text, var(--poodle-color-text-tertiary));
   }
 
   .poodle-state-tile__trend-arrow {
@@ -158,6 +158,6 @@
   }
 
   :global([data-theme="light"]) .poodle-state-tile {
-    background: var(--poodle-treatment-surface-fill);
+    background: var(--poodle-recipe-metric-tile-theme-light-fill, var(--poodle-treatment-surface-fill));
   }
 </style>

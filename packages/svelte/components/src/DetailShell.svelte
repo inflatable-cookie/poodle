@@ -79,7 +79,7 @@
     padding: calc(var(--poodle-space-panel-y) * 2) calc(var(--poodle-space-panel-x) * 1.5);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated));
+    background: var(--poodle-recipe-detail-shell-state-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated)));
   }
 
   .poodle-detail-shell__spinner {
@@ -94,7 +94,7 @@
   }
 
   .poodle-detail-shell__state p {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-detail-shell-state-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }

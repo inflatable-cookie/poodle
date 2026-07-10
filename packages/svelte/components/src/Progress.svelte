@@ -57,7 +57,7 @@
     width: 100%;
     min-height: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-progress-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)));
   }
 
   .poodle-progress[data-size="xs"],
@@ -75,11 +75,11 @@
     inset: 0;
     transform-origin: left center;
     border-radius: inherit;
-    background: linear-gradient(
+    background: var(--poodle-recipe-progress-indicator-fill, linear-gradient(
       90deg,
       color-mix(in srgb, var(--poodle-color-accent-base) 88%, white),
       var(--poodle-color-accent-base)
-    );
+    ));
     transition: transform var(--poodle-motion-duration-standard) var(--poodle-motion-easing-standard);
   }
 

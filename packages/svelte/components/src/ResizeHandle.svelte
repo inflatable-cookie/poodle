@@ -134,7 +134,7 @@
   .poodle-resize-handle__line {
     position: absolute;
     border-radius: 999rem;
-    background: color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent);
+    background: var(--poodle-recipe-resize-handle-line-fill, color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent));
     transition: background 120ms ease;
   }
 
@@ -150,7 +150,7 @@
 
   .poodle-resize-handle:not([data-disabled]):hover .poodle-resize-handle__line,
   .poodle-resize-handle[data-dragging] .poodle-resize-handle__line {
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-resize-handle-dragging-hover-line-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-resize-handle:focus-visible {

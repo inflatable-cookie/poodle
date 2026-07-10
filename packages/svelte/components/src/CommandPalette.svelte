@@ -256,7 +256,7 @@
   .poodle-command-palette__overlay {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, black 44%, transparent);
+    background: var(--poodle-recipe-command-palette-overlay-fill, color-mix(in srgb, black 44%, transparent));
     backdrop-filter: blur(0.5rem);
     z-index: 40;
   }
@@ -277,8 +277,8 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent);
     border-radius: calc(var(--poodle-radius-surface) + 0.125rem);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent);
-    box-shadow: var(--poodle-elevation-dialog);
+    background: var(--poodle-recipe-command-palette-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent));
+    box-shadow: var(--poodle-recipe-command-palette-shadow, var(--poodle-elevation-dialog));
     overflow: hidden;
     overscroll-behavior: contain;
     transform: translate(-50%, -50%);
@@ -326,7 +326,7 @@
   }
 
   .poodle-command-palette__header p {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-command-palette-header-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.5;
   }
@@ -344,8 +344,8 @@
     min-height: var(--poodle-command-palette-hint-height);
     padding: 0 var(--poodle-command-palette-hint-x);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-command-palette-hint-fill, color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent));
+    color: var(--poodle-recipe-command-palette-hint-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-typography-label-size);
   }
@@ -359,8 +359,8 @@
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-command-palette-close-fill, transparent);
+    color: var(--poodle-recipe-command-palette-close-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     padding: 0;
     font: inherit;
@@ -377,7 +377,7 @@
 
   .poodle-command-palette__status {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-command-palette-status-text, var(--poodle-color-text-secondary));
     font-size: 0.75rem;
     line-height: 1.4;
   }

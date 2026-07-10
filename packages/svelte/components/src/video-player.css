@@ -6,7 +6,7 @@
     position: relative;
     overflow: hidden;
     border-radius: var(--poodle-radius-surface);
-    background: #000;
+    background: var(--poodle-recipe-video-player-fill, #000);
     cursor: pointer;
   }
 
@@ -26,8 +26,8 @@
     height: 4rem;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.9);
+    background: var(--poodle-recipe-video-player-big-play-fill, transparent);
+    color: var(--poodle-recipe-video-player-big-play-text, rgba(255, 255, 255, 0.9));
     cursor: pointer;
     transition: transform 0.2s ease;
   }
@@ -46,7 +46,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    background: var(--poodle-recipe-video-player-controls-fill, linear-gradient(transparent, rgba(0, 0, 0, 0.7)));
     padding: 1.5rem 0.5rem 0.375rem;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -61,14 +61,14 @@
     position: relative;
     height: 0.25rem;
     margin-bottom: 0.375rem;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--poodle-recipe-video-player-progress-bar-fill, rgba(255, 255, 255, 0.2));
     border-radius: 999rem;
     overflow: hidden;
   }
 
   .poodle-video-player__progress-fill {
     height: 100%;
-    background: var(--poodle-color-accent-base, #6366f1);
+    background: var(--poodle-recipe-video-player-progress-fill-fill, var(--poodle-color-accent-base, #6366f1));
     border-radius: 999rem;
     transition: width 0.1s linear;
   }
@@ -106,14 +106,14 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.9);
+    background: var(--poodle-recipe-video-player-btn-fill, transparent);
+    color: var(--poodle-recipe-video-player-btn-text, rgba(255, 255, 255, 0.9));
     cursor: pointer;
     transition: background 0.15s ease;
   }
 
   .poodle-video-player__btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--poodle-recipe-video-player-hover-btn-fill, rgba(255, 255, 255, 0.15));
   }
 
   .poodle-video-player__btn svg {
@@ -126,7 +126,7 @@
     appearance: none;
     width: 3.5rem;
     height: 1rem;
-    background: transparent;
+    background: var(--poodle-recipe-video-player-volume-fill, transparent);
     cursor: pointer;
     flex-shrink: 0;
   }
@@ -134,13 +134,13 @@
   .poodle-video-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--poodle-recipe-video-player-volume-track-fill, rgba(255, 255, 255, 0.5));
   }
 
   .poodle-video-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--poodle-recipe-video-player-volume-track-fill, rgba(255, 255, 255, 0.5));
   }
 
   .poodle-video-player__volume::-webkit-slider-thumb {
@@ -149,7 +149,7 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: white;
+    background: var(--poodle-recipe-video-player-volume-thumb-fill, white);
     margin-top: -0.1875rem;
   }
 
@@ -158,13 +158,13 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: white;
+    background: var(--poodle-recipe-video-player-volume-thumb-fill, white);
   }
 
   .poodle-video-player__time {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--poodle-recipe-video-player-time-text, rgba(255, 255, 255, 0.8));
     white-space: nowrap;
   }
 

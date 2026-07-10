@@ -45,7 +45,7 @@
   }
 
   .poodle-meta-item__label {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-meta-item-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-meta-item-label-font-size);
     font-weight: var(--poodle-typography-label-weight);
@@ -60,7 +60,7 @@
     align-items: center;
     gap: var(--poodle-meta-item-gap);
     min-width: 0;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-meta-item-value-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-meta-item-value-font-size);
     line-height: 1.4;

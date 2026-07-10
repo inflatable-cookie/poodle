@@ -114,7 +114,7 @@
     font-weight: var(--poodle-typography-label-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-inline-list-section-title-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-inline-list-section__count {
@@ -126,8 +126,8 @@
     padding: 0 0.5rem;
     border-radius: 999rem;
     border: 1px solid var(--poodle-color-border);
-    background: var(--poodle-surface-elevated);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-inline-list-section-count-fill, var(--poodle-surface-elevated));
+    color: var(--poodle-recipe-inline-list-section-count-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: 1;
@@ -155,14 +155,14 @@
     min-width: 0;
     padding: 0.5rem 0.625rem;
     border-radius: calc(var(--poodle-radius-surface) - 0.1875rem);
-    background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-inline-list-section-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
   }
 
   .poodle-inline-list-section__empty {
     margin: 0;
     font-size: var(--poodle-typography-body-size);
     font-style: italic;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-inline-list-section-empty-text, var(--poodle-color-text-secondary));
   }
 
   @media (max-width: 45rem) {

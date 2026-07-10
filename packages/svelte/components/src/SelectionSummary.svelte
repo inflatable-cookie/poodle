@@ -92,19 +92,19 @@
   .poodle-selection-summary__chip {
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: color-mix(
+    background: var(--poodle-recipe-selection-summary-chip-fill, color-mix(
       in srgb,
       var(--poodle-surface, var(--poodle-color-background-surface)) 60%,
       var(--poodle-color-background-elevated)
-    );
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 70%, transparent);
-    color: var(--poodle-color-text-primary);
+    ));
+    box-shadow: var(--poodle-recipe-selection-summary-chip-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 70%, transparent));
+    color: var(--poodle-recipe-selection-summary-chip-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
   }
 
   .poodle-selection-summary__empty {
-    color: var(--poodle-color-text-tertiary);
+    color: var(--poodle-recipe-selection-summary-empty-text, var(--poodle-color-text-tertiary));
     font-style: italic;
   }
 
@@ -128,17 +128,17 @@
   }
 
   .poodle-selection-summary__overflow {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-selection-summary-overflow-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-selection-summary-overflow-font-size);
     line-height: var(--poodle-selection-summary-overflow-line-height);
     padding: 0 var(--poodle-selection-summary-overflow-padding-x);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(
+    background: var(--poodle-recipe-selection-summary-overflow-fill, color-mix(
       in srgb,
       var(--poodle-surface, var(--poodle-color-background-surface)) 68%,
       var(--poodle-color-background-elevated)
-    );
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
+    ));
+    box-shadow: var(--poodle-recipe-selection-summary-overflow-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent));
   }
 
   .poodle-selection-summary[data-density="compact"] {

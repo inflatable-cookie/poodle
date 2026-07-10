@@ -70,15 +70,15 @@
     padding: 0.125rem;
     border: 0;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: transparent;
-    color: var(--poodle-color-text-muted);
+    background: var(--poodle-recipe-collapse-toggle-fill, transparent);
+    color: var(--poodle-recipe-collapse-toggle-text, var(--poodle-color-text-muted));
     cursor: pointer;
     line-height: 1;
   }
 
   .poodle-collapse-toggle:hover {
-    background: var(--poodle-color-surface-hover);
-    color: var(--poodle-color-text-default);
+    background: var(--poodle-recipe-collapse-toggle-hover-fill, var(--poodle-color-surface-hover));
+    color: var(--poodle-recipe-collapse-toggle-hover-text, var(--poodle-color-text-default));
   }
 
   .poodle-collapse-toggle:disabled {

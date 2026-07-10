@@ -55,7 +55,7 @@
     width: 0.25rem;
     height: 0.25rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
+    background: var(--poodle-recipe-meta-bar-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent));
     transform: translateY(-50%);
   }
 

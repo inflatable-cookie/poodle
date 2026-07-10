@@ -222,7 +222,7 @@
     padding: var(--poodle-media-picker-item-pad);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control, 0.375rem);
-    background: transparent;
+    background: var(--poodle-recipe-media-picker-item-fill, transparent);
     color: inherit;
     cursor: pointer;
     transition: border-color 0.1s, background 0.1s;
@@ -230,8 +230,8 @@
 
   .poodle-media-picker__item:hover,
   .poodle-media-picker__item:focus-visible {
-    border-color: var(--poodle-color-border-focus, #888);
-    background: var(--poodle-color-background-panel, #1a1a1a);
+    border-color: var(--poodle-recipe-media-picker-hover-focus-item-border, var(--poodle-color-border-focus, #888));
+    background: var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-color-background-panel, #1a1a1a));
     outline: none;
   }
 
@@ -246,18 +246,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--poodle-color-background-panel, #1a1a1a);
+    background: var(--poodle-recipe-media-picker-thumb--placeholder-fill, var(--poodle-color-background-panel, #1a1a1a));
   }
 
   .poodle-media-picker__thumb--placeholder svg {
     width: 1.5rem;
     height: 1.5rem;
-    color: var(--poodle-color-text-tertiary, #666);
+    color: var(--poodle-recipe-media-picker-thumb--placeholder-text, var(--poodle-color-text-tertiary, #666));
   }
 
   .poodle-media-picker__label {
     font-size: var(--poodle-typography-label-size);
-    color: var(--poodle-color-text-secondary, #999);
+    color: var(--poodle-recipe-media-picker-label-text, var(--poodle-color-text-secondary, #999));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -273,7 +273,7 @@
 
   .poodle-media-picker__empty p {
     margin: 0;
-    color: var(--poodle-color-text-secondary, #999);
+    color: var(--poodle-recipe-media-picker-empty-text, var(--poodle-color-text-secondary, #999));
     font-size: 0.875rem;
   }
 

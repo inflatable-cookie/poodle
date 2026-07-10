@@ -43,7 +43,7 @@
 <style>
   .poodle-eyebrow {
     margin: 0;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-eyebrow-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;

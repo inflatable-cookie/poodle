@@ -416,16 +416,16 @@
     min-height: 0;
     height: 100%;
     border: 0;
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    background: var(--poodle-recipe-dock-region-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
   }
 
   .poodle-dock-region[data-emphasis="quiet"] {
-    border-color: transparent;
-    background: transparent;
+    border-color: var(--poodle-recipe-dock-region-border, transparent);
+    background: var(--poodle-recipe-dock-region-quiet-fill, transparent);
   }
 
   .poodle-dock-region[data-emphasis="strong"] {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+    border-color: var(--poodle-recipe-dock-region-strong-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
   }
 
   .poodle-dock-region[data-sizing="static"] {
@@ -458,7 +458,7 @@
   }
 
   .poodle-dock-region__stack-item[data-drop-target] {
-    box-shadow: inset 0 0 0 0.125rem var(--poodle-color-accent-base);
+    box-shadow: var(--poodle-recipe-dock-region-drop-target-stack-item-shadow, inset 0 0 0 0.125rem var(--poodle-color-accent-base));
     border-radius: var(--poodle-radius-control);
   }
 
@@ -614,6 +614,6 @@
     pointer-events: none;
     border: 0.125rem dashed color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
+    background: var(--poodle-recipe-dock-region-drop-zone-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent));
   }
 </style>

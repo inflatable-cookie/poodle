@@ -226,12 +226,11 @@
       color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(--poodle-color-background-elevated);
+    background: var(--poodle-recipe-popover-surface-fill, var(--poodle-color-background-elevated));
     --poodle-surface: var(--poodle-color-background-elevated);
-    box-shadow:
-      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
+    box-shadow: var(--poodle-recipe-popover-surface-shadow, inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
       0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
-      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
+      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15));
   }
 
   .poodle-popover__surface[data-surface-width="trigger"] {

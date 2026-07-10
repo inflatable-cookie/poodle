@@ -72,7 +72,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-breadcrumbs-list-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
@@ -87,7 +87,7 @@
   .poodle-breadcrumbs button {
     border: 0;
     padding: 0;
-    background: transparent;
+    background: var(--poodle-recipe-breadcrumbs-fill, transparent);
     color: inherit;
     cursor: pointer;
     font: inherit;
@@ -100,7 +100,7 @@
   }
 
   .poodle-breadcrumbs [aria-current="page"] {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-breadcrumbs-text, var(--poodle-color-text-primary));
   }
 
   /* Size variants */

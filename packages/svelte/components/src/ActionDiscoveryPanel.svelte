@@ -252,9 +252,9 @@
   }
 
   .poodle-action-discovery-panel__list li[aria-selected="true"] :global(.poodle-list-card) {
-    border-color: transparent;
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated));
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+    border-color: var(--poodle-recipe-action-discovery-panel-list-border, transparent);
+    background: var(--poodle-recipe-action-discovery-panel-list-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated)));
+    box-shadow: var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent));
   }
 
   .poodle-action-discovery-panel__trailing {
@@ -272,8 +272,8 @@
     min-height: var(--poodle-action-discovery-chip-height);
     padding: 0 var(--poodle-action-discovery-chip-x);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-action-discovery-panel-kbd-fill, color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent));
+    color: var(--poodle-recipe-action-discovery-panel-kbd-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-action-discovery-chip-font-size);
     font-weight: 600;
@@ -283,8 +283,8 @@
   }
 
   .poodle-action-discovery-panel__badge {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
-    color: var(--poodle-color-accent-base);
+    background: var(--poodle-recipe-action-discovery-panel-badge-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    color: var(--poodle-recipe-action-discovery-panel-badge-text, var(--poodle-color-accent-base));
   }
 
   .poodle-action-discovery-panel__kbd {

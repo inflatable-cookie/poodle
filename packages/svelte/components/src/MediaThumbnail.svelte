@@ -169,9 +169,8 @@
     overflow: hidden;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
-    background:
-      radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%),
-      color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    background: var(--poodle-recipe-media-thumbnail-frame-fill, radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%),
+      color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
   }
 
   .poodle-media-thumbnail__frame :global(img),
@@ -233,9 +232,8 @@
     justify-items: start;
     padding: 0.5rem var(--poodle-space-panel-x);
     text-align: left;
-    background:
-      linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)),
-      color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
+    background: var(--poodle-recipe-media-thumbnail-state-fill, linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)),
+      color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent));
   }
 
   .poodle-media-thumbnail__spinner {
@@ -263,7 +261,7 @@
 
   .poodle-media-thumbnail__state p,
   .poodle-media-thumbnail__caption span {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-media-thumbnail-caption-text, var(--poodle-color-text-secondary));
     font-size: 0.8125rem;
     line-height: 1.5;
   }
@@ -293,8 +291,8 @@
     right: 0.625rem;
     min-height: 1.5rem;
     padding: 0 0.625rem;
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-media-thumbnail-badge-fill, color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent));
+    color: var(--poodle-recipe-media-thumbnail-badge-text, var(--poodle-color-text-primary));
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -311,8 +309,8 @@
     bottom: 0.625rem;
     width: 2rem;
     height: 2rem;
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-media-thumbnail-play-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent));
+    color: var(--poodle-recipe-media-thumbnail-play-text, var(--poodle-color-text-primary));
     font-size: 0.9375rem;
   }
 </style>

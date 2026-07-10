@@ -323,8 +323,8 @@
     padding: 0 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    color: var(--poodle-color-text-muted);
-    background: var(--poodle-color-background-surface);
+    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-color-text-muted));
+    background: var(--poodle-recipe-number-input-suffix-fill, var(--poodle-color-background-surface));
     white-space: nowrap;
   }
 
@@ -337,34 +337,33 @@
     height: var(--poodle-number-input-control-height);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-color-background-surface));
     overflow: hidden;
   }
 
   .poodle-number-input__field[data-validation-state="invalid"] {
-    border-color: var(--poodle-color-status-danger);
+    border-color: var(--poodle-recipe-number-input-field-border, var(--poodle-color-status-danger));
   }
 
   .poodle-number-input__field[data-validation-state="valid"] {
-    border-color: var(--poodle-color-status-success);
+    border-color: var(--poodle-recipe-number-input-valid-field-border, var(--poodle-color-status-success));
   }
 
   .poodle-number-input__field[data-validation-state="pending"] {
-    border-color: var(--poodle-color-accent-base);
+    border-color: var(--poodle-recipe-number-input-pending-field-border, var(--poodle-color-accent-base));
   }
 
   .poodle-number-input__field:focus-within {
-    box-shadow:
-      0 0 0 var(--poodle-border-width-focus)
-      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+    box-shadow: var(--poodle-recipe-number-input-focus-field-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
   .poodle-number-input__control {
     min-width: 0;
     padding: 0 var(--poodle-space-control-x);
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-number-input-control-fill, transparent);
+    color: var(--poodle-recipe-number-input-control-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
@@ -386,8 +385,8 @@
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-number-input-steppers-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent));
+    color: var(--poodle-recipe-number-input-steppers-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-size: 0;
     padding: 0;

@@ -1,6 +1,6 @@
 # g11.008 Recipe Hook Full Coverage
 
-Status: in progress (2026-07-10)
+Status: complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.005` (recipe contract promoted, architecture 007), god-files
 batch 5 (component styles extracted to co-located `.css` files, which makes
@@ -58,20 +58,20 @@ stay internal — the size/density system is not part of the recipe surface.
 
 - [x] 0. Infra: inventory script scans extracted `.css` files (was
   `.svelte`-only — broken silently by the god-files extraction)
-- [ ] 1. Candidate components (15, listed above) — wrap existing vars
-- [ ] 2. Bare: form/input family (DurationInput, Field, FileUpload,
+- [x] 1. Candidate components (15, listed above) — wrap existing vars
+- [x] 2. Bare: form/input family (DurationInput, Field, FileUpload,
   NumberInput*, SearchInput*, Slider, TextArea*, DatePicker family,
   CodeInput*, RelationPicker, Select, OrderBy, TokenInput remainder)
-- [ ] 3. Bare: overlay/disclosure/navigation (Accordion, Collapsible
+- [x] 3. Bare: overlay/disclosure/navigation (Accordion, Collapsible
   remainder, CommandPalette, Dialog family, Drawer, Menu, Popover, Tooltip,
   Tabs, SegmentedControl, Toast, SplitButton, DockRegion)
-- [ ] 4. Bare: data/display (DataTable, Tree, ListCard remainder, LogList,
+- [x] 4. Bare: data/display (DataTable, Tree, ListCard remainder, LogList,
   EditableList, DetailItem/Section, Skeleton, EmptyState, StatCard,
   Calendar, Pagination, Rating, MediaCard, VideoPlayer, AudioPlayer,
   BlockEditor)
-- [ ] 5. Bare: chrome/shell (AppHeader, PageHeader remainder, Sidebar,
+- [x] 5. Bare: chrome/shell (AppHeader, PageHeader remainder, Sidebar,
   StatusBar, Workspace pieces, FormLayout/Dialog, remaining stragglers)
-- [ ] 6. Regenerate inventory; update architecture 007 adopter list;
+- [x] 6. Regenerate inventory; update architecture 007 adopter list;
   Playwright verification (see below); consumer typechecks
 
 Components marked * may live inside another component's css file — the
@@ -99,7 +99,41 @@ additive check is the gate).
   inventory is the source of truth (g11.005 precedent).
 - Metric/size/density overrides — explicitly unsupported.
 
+## Completion Notes (2026-07-10)
+
+Final inventory: **116 components, 973 recipe hooks, 0 candidates** (from
+6 components / 34 hooks / 46 candidates). The component count grew because
+the fixed scanner now sees every style-bearing file, including components
+with no custom properties at all.
+
+What the sweep surfaced:
+
+- **Inventory scanner** was silently broken by the god-files CSS extraction
+  (`.svelte`-only glob) and classified by variable presence rather than
+  unhooked definitions; both fixed. Prop-channel definitions (template
+  literals, `style:--x` directives) are excluded from candidates.
+- **Switch defect**: the default primary tone emitted an inline
+  `--poodle-switch-on-color` unconditionally, shadowing any app-scope
+  recipe override. Fixed — the stylesheet default already resolves accent
+  through the recipe chain; explicit onColor/offColor props still win.
+- Naming came out per architecture 007: slots from anatomy class parts
+  (`surface`, `trigger`, `item`, `th`…), qualifiers from data-attributes
+  (`primary`, `danger`, `not-current-month`, `theme-light`) and pseudo
+  states (`hover`, `focus`, `checked`). `:not(...)` is stripped before
+  qualifier extraction.
+- A handful of properties stayed unhooked by design: values already routed
+  through local resolution vars/treatment roles (hooked at the var), data-URI
+  composites, and `currentColor` derivations.
+
+Verification: Playwright additive checks across every family — override
+applies from the document root, removal restores the pixel-identical token
+default (button, icon-button, avatar, switch, text-input, callout, surface,
+separator, spinner, accordion, tabs, select, file-upload, dialog surface,
+calendar day, data-table header, tree row, pagination, skeleton,
+sidebar-nav). docs:lint green; underlay/acme-admin/dairy typechecks green.
+
 ## Next Task
 
-Execute batches 1–6 in order; per-batch commit + Playwright additive check.
-Completion notes land here when batch 6 closes.
+g11 runway complete (002–008). Rust-side hook correspondence stays
+on-demand per architecture 007; hook renames go through the g11.001 wave
+process.

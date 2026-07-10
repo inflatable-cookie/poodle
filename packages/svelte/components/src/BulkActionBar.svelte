@@ -149,9 +149,8 @@
     --poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary));
     background: var(--poodle-recipe-bulk-fill);
     --poodle-surface: var(--poodle-recipe-bulk-fill);
-    box-shadow:
-      0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
-      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent);
+    box-shadow: var(--poodle-recipe-bulk-action-bar-shadow, 0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent));
   }
 
   .poodle-bulk-action-bar__summary {
@@ -159,14 +158,14 @@
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
     align-items: baseline;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-bulk-action-bar-summary-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .poodle-bulk-action-bar__summary span {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-bulk-action-bar-summary-span-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-bulk-action-bar__actions {
@@ -181,12 +180,12 @@
   }
 
   .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button) {
-    color: var(--poodle-color-status-warning);
+    color: var(--poodle-recipe-bulk-action-bar-warning-icon-action-text, var(--poodle-color-status-warning));
   }
 
   .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button:hover),
   .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button:focus-visible) {
-    color: color-mix(in srgb, var(--poodle-color-status-warning) 82%, var(--poodle-color-text-primary));
+    color: var(--poodle-recipe-bulk-action-bar-warning-hover-focus-icon-action-text, color-mix(in srgb, var(--poodle-color-status-warning) 82%, var(--poodle-color-text-primary)));
   }
 
   /* Size variants — controls and text only, not container padding */

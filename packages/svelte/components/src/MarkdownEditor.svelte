@@ -250,7 +250,7 @@
     --poodle-md-editor-pane-y: 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-recipe-markdown-editor-fill, var(--poodle-color-background-surface));
     overflow: hidden;
   }
 
@@ -307,7 +307,7 @@
     gap: 0.5rem;
     padding: var(--poodle-md-editor-toolbar-y) var(--poodle-md-editor-toolbar-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
+    background: var(--poodle-recipe-markdown-editor-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
     flex-wrap: wrap;
   }
 
@@ -325,8 +325,8 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, transparent);
+    color: var(--poodle-recipe-markdown-editor-tool-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
@@ -336,8 +336,8 @@
   }
 
   .poodle-md-editor__tool-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-markdown-editor-hover-tool-btn-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    color: var(--poodle-recipe-markdown-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
   }
 
   .poodle-md-editor__tool-btn:focus-visible {
@@ -378,8 +378,8 @@
     width: 100%;
     padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
     border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-markdown-editor-textarea-fill, transparent);
+    color: var(--poodle-recipe-markdown-editor-textarea-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
     line-height: 1.6;
@@ -388,7 +388,7 @@
   }
 
   .poodle-md-editor__textarea::placeholder {
-    color: var(--poodle-color-text-tertiary);
+    color: var(--poodle-recipe-markdown-editor-placeholder-textarea-text, var(--poodle-color-text-tertiary));
   }
 
   .poodle-md-editor__preview {
@@ -397,7 +397,7 @@
     font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-primary));
     overflow-y: auto;
   }
 
@@ -430,7 +430,7 @@
   .poodle-md-editor__preview :global(code) {
     padding: 0.125rem 0.25rem;
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
+    background: var(--poodle-recipe-markdown-editor-preview-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
   }
@@ -439,7 +439,7 @@
     margin: 0 0 0.5rem;
     padding: 0.375rem 0.75rem;
     border-left: 0.1875rem solid var(--poodle-color-border-default);
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-md-editor__preview :global(ul),
@@ -459,12 +459,12 @@
   }
 
   .poodle-md-editor__preview :global(a) {
-    color: var(--poodle-color-accent-base);
+    color: var(--poodle-recipe-markdown-editor-preview-link-text, var(--poodle-color-accent-base));
     text-decoration: underline;
   }
 
   .poodle-md-editor__preview-empty {
-    color: var(--poodle-color-text-tertiary);
+    color: var(--poodle-recipe-markdown-editor-preview-empty-text, var(--poodle-color-text-tertiary));
     font-style: italic;
     margin: 0;
   }

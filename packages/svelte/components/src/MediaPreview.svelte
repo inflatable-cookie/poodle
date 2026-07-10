@@ -136,7 +136,7 @@
   }
 
   .poodle-media-preview__eyebrow {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-media-preview-eyebrow-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-media-preview-eyebrow-size);
     font-weight: 600;
     letter-spacing: 0.12em;
@@ -156,7 +156,7 @@
   .poodle-media-preview__description,
   .poodle-media-preview__caption,
   .poodle-media-preview__meta {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-media-preview-meta-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-media-preview-body-size);
     line-height: 1.5;
   }
@@ -173,7 +173,7 @@
   .poodle-media-preview__meta li {
     padding: var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent);
+    background: var(--poodle-recipe-media-preview-meta-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent));
   }
 
   .poodle-media-preview[data-size="xs"] {
@@ -227,6 +227,6 @@
   }
 
   :global([data-theme="light"]) .poodle-media-preview__meta li {
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent);
+    box-shadow: var(--poodle-recipe-media-preview-meta-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent));
   }
 </style>

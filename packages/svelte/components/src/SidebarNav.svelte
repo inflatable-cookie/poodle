@@ -172,7 +172,7 @@
   .poodle-sidebar-nav__group-title {
     margin: 0;
     padding: 0 var(--poodle-sidebar-nav-item-padding-inline) var(--poodle-sidebar-nav-title-gap);
-    color: var(--poodle-color-accent-base);
+    color: var(--poodle-recipe-sidebar-nav-group-title-text, var(--poodle-color-accent-base));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-sidebar-nav-title-font-size);
     font-weight: 700;
@@ -200,8 +200,8 @@
     border: 0;
     border-left: 0.1875rem solid transparent;
     border-radius: 0.1875rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.1875rem;
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
+    background: var(--poodle-recipe-sidebar-nav-item-fill, transparent);
+    color: var(--poodle-recipe-sidebar-nav-item-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-sidebar-nav-item-font-size);
     font-weight: 500;
@@ -217,15 +217,15 @@
 
 
   .poodle-sidebar-nav__item:hover:not(:disabled) {
-    color: var(--poodle-color-text-primary);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent);
+    color: var(--poodle-recipe-sidebar-nav-hover-item-text, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-sidebar-nav-hover-item-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent));
   }
 
   .poodle-sidebar-nav__item--active {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-sidebar-nav-item--active-text, var(--poodle-color-text-primary));
     font-weight: 600;
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent);
+    background: var(--poodle-recipe-sidebar-nav-item--active-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
+    box-shadow: var(--poodle-recipe-sidebar-nav-item--active-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent));
   }
 
   .poodle-sidebar-nav__item--active {

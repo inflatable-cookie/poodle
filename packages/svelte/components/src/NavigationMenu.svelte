@@ -197,8 +197,8 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+    color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
@@ -207,13 +207,13 @@
   }
 
   .poodle-navigation-menu__trigger[data-open="true"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+    background: var(--poodle-recipe-navigation-menu-open-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    border-color: var(--poodle-recipe-navigation-menu-open-trigger-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
   }
 
   .poodle-navigation-menu__trigger:hover:not(:disabled),
   .poodle-navigation-menu__trigger:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
     outline: none;
   }
 
@@ -227,8 +227,8 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
-    box-shadow: var(--poodle-elevation-overlay);
+    background: var(--poodle-recipe-navigation-menu-viewport-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
+    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-elevation-overlay));
   }
 
   /* Size variants */

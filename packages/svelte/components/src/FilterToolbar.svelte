@@ -169,11 +169,11 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+    background: var(--poodle-recipe-filter-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
   }
 
   .poodle-filter-toolbar[data-sticky="true"] {
-    box-shadow: var(--poodle-elevation-surface);
+    box-shadow: var(--poodle-recipe-filter-toolbar-shadow, var(--poodle-elevation-surface));
   }
 
   .poodle-filter-toolbar__header {
@@ -190,7 +190,7 @@
     width: 100%;
     padding: 0;
     border: 0;
-    background: transparent;
+    background: var(--poodle-recipe-filter-toolbar-header--button-fill, transparent);
     color: inherit;
     text-align: left;
     cursor: pointer;
@@ -204,7 +204,7 @@
   .poodle-filter-toolbar__summary {
     margin: 0;
     flex: 1;
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-filter-toolbar-summary-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-typography-label-size, 0.75rem);
     line-height: var(--poodle-typography-label-lineHeight, 1.4);
   }

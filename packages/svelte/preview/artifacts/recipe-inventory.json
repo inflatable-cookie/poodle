@@ -1,21 +1,53 @@
 {
   "summary": {
-    "components": 65,
-    "recipeHooks": 173,
+    "components": 116,
+    "recipeHooks": 973,
     "hookCandidates": 0,
     "metricVariables": 290
   },
   "inventory": {
     "accordion": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-accordion-description-text",
+        "--poodle-recipe-accordion-indicator-text",
+        "--poodle-recipe-accordion-item-fill",
+        "--poodle-recipe-accordion-item-shadow",
+        "--poodle-recipe-accordion-panel-text",
+        "--poodle-recipe-accordion-trigger-fill",
+        "--poodle-recipe-accordion-trigger-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-accordion-item-gap",
         "--poodle-accordion-panel-font-size"
       ]
     },
+    "action-discovery-panel": {
+      "recipe": [
+        "--poodle-recipe-action-discovery-panel-badge-fill",
+        "--poodle-recipe-action-discovery-panel-badge-text",
+        "--poodle-recipe-action-discovery-panel-kbd-fill",
+        "--poodle-recipe-action-discovery-panel-kbd-text",
+        "--poodle-recipe-action-discovery-panel-list-border",
+        "--poodle-recipe-action-discovery-panel-list-fill",
+        "--poodle-recipe-action-discovery-panel-list-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "alert-dialog": {
+      "recipe": [
+        "--poodle-recipe-alert-dialog-item-detail-strong-text",
+        "--poodle-recipe-alert-dialog-item-detail-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "app-header": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-app-header-fill",
+        "--poodle-recipe-app-header-subtitle-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-app-header-gap",
@@ -28,7 +60,19 @@
       ]
     },
     "audio-player": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-audio-player-fill",
+        "--poodle-recipe-audio-player-hover-mute-fill",
+        "--poodle-recipe-audio-player-mute-fill",
+        "--poodle-recipe-audio-player-mute-text",
+        "--poodle-recipe-audio-player-seek-track-fill",
+        "--poodle-recipe-audio-player-speed-fill",
+        "--poodle-recipe-audio-player-speed-text",
+        "--poodle-recipe-audio-player-time-text",
+        "--poodle-recipe-audio-player-volume-fill",
+        "--poodle-recipe-audio-player-volume-thumb-fill",
+        "--poodle-recipe-audio-player-volume-track-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-audio-player-button-size",
@@ -56,7 +100,26 @@
       ]
     },
     "block-editor": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-block-editor-active-block-fill",
+        "--poodle-recipe-block-editor-block-fill",
+        "--poodle-recipe-block-editor-block-shadow",
+        "--poodle-recipe-block-editor-drag-grip-text",
+        "--poodle-recipe-block-editor-fill",
+        "--poodle-recipe-block-editor-hover-disabled-tool-btn-fill",
+        "--poodle-recipe-block-editor-hover-disabled-tool-btn-text",
+        "--poodle-recipe-block-editor-hover-drag-grip-fill",
+        "--poodle-recipe-block-editor-hover-drag-grip-text",
+        "--poodle-recipe-block-editor-hover-remove-btn-fill",
+        "--poodle-recipe-block-editor-hover-remove-btn-text",
+        "--poodle-recipe-block-editor-hover-tool-btn-fill",
+        "--poodle-recipe-block-editor-hover-tool-btn-text",
+        "--poodle-recipe-block-editor-input-fill",
+        "--poodle-recipe-block-editor-input-text",
+        "--poodle-recipe-block-editor-tool-btn-fill",
+        "--poodle-recipe-block-editor-tool-btn-text",
+        "--poodle-recipe-block-editor-toolbar-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-block-editor-content-x",
@@ -73,8 +136,22 @@
         "--poodle-block-editor-type-picker-inset"
       ]
     },
+    "breadcrumbs": {
+      "recipe": [
+        "--poodle-recipe-breadcrumbs-fill",
+        "--poodle-recipe-breadcrumbs-list-text",
+        "--poodle-recipe-breadcrumbs-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "bulk-action-bar": {
       "recipe": [
+        "--poodle-recipe-bulk-action-bar-shadow",
+        "--poodle-recipe-bulk-action-bar-summary-span-text",
+        "--poodle-recipe-bulk-action-bar-summary-text",
+        "--poodle-recipe-bulk-action-bar-warning-hover-focus-icon-action-text",
+        "--poodle-recipe-bulk-action-bar-warning-icon-action-text",
         "--poodle-recipe-bulk-fill"
       ],
       "candidates": [],
@@ -147,6 +224,33 @@
       "candidates": [],
       "metric": []
     },
+    "calendar": {
+      "recipe": [
+        "--poodle-recipe-calendar-day-border",
+        "--poodle-recipe-calendar-day-fill",
+        "--poodle-recipe-calendar-day-text",
+        "--poodle-recipe-calendar-hover-focus-day-border",
+        "--poodle-recipe-calendar-hover-focus-day-fill",
+        "--poodle-recipe-calendar-hover-nav-fill",
+        "--poodle-recipe-calendar-hover-year-button-text",
+        "--poodle-recipe-calendar-in-range-day-fill",
+        "--poodle-recipe-calendar-nav-fill",
+        "--poodle-recipe-calendar-nav-text",
+        "--poodle-recipe-calendar-not-current-month-day-text",
+        "--poodle-recipe-calendar-range-start-range-end-day-fill",
+        "--poodle-recipe-calendar-range-start-range-end-day-text",
+        "--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill",
+        "--poodle-recipe-calendar-selected-day-fill",
+        "--poodle-recipe-calendar-selected-day-text",
+        "--poodle-recipe-calendar-selected-hover-focus-day-fill",
+        "--poodle-recipe-calendar-weekday-text",
+        "--poodle-recipe-calendar-year-button-fill",
+        "--poodle-recipe-calendar-year-input-fill",
+        "--poodle-recipe-calendar-year-input-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "callout": {
       "recipe": [
         "--poodle-recipe-callout-border",
@@ -169,12 +273,21 @@
       "recipe": [
         "--poodle-recipe-card-border",
         "--poodle-recipe-card-divider",
+        "--poodle-recipe-card-elevated-border",
+        "--poodle-recipe-card-elevated-fill",
+        "--poodle-recipe-card-elevated-shadow",
         "--poodle-recipe-card-fill",
         "--poodle-recipe-card-hover-border",
         "--poodle-recipe-card-hover-fill",
         "--poodle-recipe-card-hover-shadow",
+        "--poodle-recipe-card-outlined-border",
         "--poodle-recipe-card-radius",
-        "--poodle-recipe-card-shadow"
+        "--poodle-recipe-card-selected-border",
+        "--poodle-recipe-card-selected-hover-border",
+        "--poodle-recipe-card-selected-hover-shadow",
+        "--poodle-recipe-card-selected-shadow",
+        "--poodle-recipe-card-shadow",
+        "--poodle-recipe-card-theme-light-elevated-shadow"
       ],
       "candidates": [],
       "metric": [
@@ -184,8 +297,24 @@
         "--poodle-card-padding-inline"
       ]
     },
+    "card-radio-group": {
+      "recipe": [
+        "--poodle-recipe-card-radio-group-checked-indicator-border",
+        "--poodle-recipe-card-radio-group-checked-indicator-fill",
+        "--poodle-recipe-card-radio-group-description-text",
+        "--poodle-recipe-card-radio-group-dot-fill",
+        "--poodle-recipe-card-radio-group-indicator-fill",
+        "--poodle-recipe-card-radio-group-title-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "card-toggle-group": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-card-toggle-group-count-text",
+        "--poodle-recipe-card-toggle-group-description-text",
+        "--poodle-recipe-card-toggle-group-title-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-card-toggle-group-count-font-size",
@@ -202,6 +331,44 @@
       "candidates": [],
       "metric": []
     },
+    "code": {
+      "recipe": [
+        "--poodle-recipe-code-copy-fill",
+        "--poodle-recipe-code-copy-text",
+        "--poodle-recipe-code-fill",
+        "--poodle-recipe-code-hover-copy-text",
+        "--poodle-recipe-code-language-text",
+        "--poodle-recipe-code-line--highlighted-fill",
+        "--poodle-recipe-code-line-number-text",
+        "--poodle-recipe-code-plain-fill",
+        "--poodle-recipe-code-pre-fill",
+        "--poodle-recipe-code-source-text",
+        "--poodle-recipe-code-text",
+        "--poodle-recipe-code-toolbar-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "code-input": {
+      "recipe": [
+        "--poodle-recipe-code-input-slot--active-border",
+        "--poodle-recipe-code-input-slot--active-shadow",
+        "--poodle-recipe-code-input-slot-fill",
+        "--poodle-recipe-code-input-slot-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "collapse-toggle": {
+      "recipe": [
+        "--poodle-recipe-collapse-toggle-fill",
+        "--poodle-recipe-collapse-toggle-hover-fill",
+        "--poodle-recipe-collapse-toggle-hover-text",
+        "--poodle-recipe-collapse-toggle-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "collapsible": {
       "recipe": [
         "--poodle-recipe-collapsible-fill"
@@ -209,8 +376,42 @@
       "candidates": [],
       "metric": []
     },
+    "color-picker": {
+      "recipe": [
+        "--poodle-recipe-color-picker-focus-input-border",
+        "--poodle-recipe-color-picker-focus-input-shadow",
+        "--poodle-recipe-color-picker-focus-text-input-border",
+        "--poodle-recipe-color-picker-focus-text-input-shadow",
+        "--poodle-recipe-color-picker-gradient-after-fill",
+        "--poodle-recipe-color-picker-gradient-fill",
+        "--poodle-recipe-color-picker-gradient-thumb-shadow",
+        "--poodle-recipe-color-picker-input-fill",
+        "--poodle-recipe-color-picker-input-label-text",
+        "--poodle-recipe-color-picker-input-text",
+        "--poodle-recipe-color-picker-surface-fill",
+        "--poodle-recipe-color-picker-surface-shadow",
+        "--poodle-recipe-color-picker-swatch--active-border",
+        "--poodle-recipe-color-picker-swatch--active-shadow",
+        "--poodle-recipe-color-picker-text-input-fill",
+        "--poodle-recipe-color-picker-text-input-text",
+        "--poodle-recipe-color-picker-track-fill",
+        "--poodle-recipe-color-picker-trigger-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "command-palette": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-command-palette-close-fill",
+        "--poodle-recipe-command-palette-close-text",
+        "--poodle-recipe-command-palette-fill",
+        "--poodle-recipe-command-palette-header-text",
+        "--poodle-recipe-command-palette-hint-fill",
+        "--poodle-recipe-command-palette-hint-text",
+        "--poodle-recipe-command-palette-overlay-fill",
+        "--poodle-recipe-command-palette-shadow",
+        "--poodle-recipe-command-palette-status-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-command-palette-close-size",
@@ -218,43 +419,126 @@
         "--poodle-command-palette-hint-x"
       ]
     },
+    "data-table": {
+      "recipe": [
+        "--poodle-recipe-data-table-actions-trigger-fill",
+        "--poodle-recipe-data-table-cell-text",
+        "--poodle-recipe-data-table-col-menu-item-text",
+        "--poodle-recipe-data-table-empty-text",
+        "--poodle-recipe-data-table-even-fill",
+        "--poodle-recipe-data-table-expanded-row-fill",
+        "--poodle-recipe-data-table-fill",
+        "--poodle-recipe-data-table-filters-row-fill",
+        "--poodle-recipe-data-table-footer-fill",
+        "--poodle-recipe-data-table-hover-col-menu-item-fill",
+        "--poodle-recipe-data-table-hover-toolbar-btn-fill",
+        "--poodle-recipe-data-table-hover-tr-fill",
+        "--poodle-recipe-data-table-limit-text",
+        "--poodle-recipe-data-table-loading-block-fill",
+        "--poodle-recipe-data-table-pagination-page-text",
+        "--poodle-recipe-data-table-pagination-summary-text",
+        "--poodle-recipe-data-table-row-action-btn--danger-text",
+        "--poodle-recipe-data-table-selected-even-fill",
+        "--poodle-recipe-data-table-selected-fill",
+        "--poodle-recipe-data-table-th-fill",
+        "--poodle-recipe-data-table-th-text",
+        "--poodle-recipe-data-table-toolbar-btn-fill",
+        "--poodle-recipe-data-table-toolbar-btn-text",
+        "--poodle-recipe-data-table-toolbar-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "date-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-date-picker-hover-trigger-fill",
+        "--poodle-recipe-date-picker-indicator-text",
+        "--poodle-recipe-date-picker-surface-fill",
+        "--poodle-recipe-date-picker-surface-shadow",
+        "--poodle-recipe-date-picker-trigger-fill",
+        "--poodle-recipe-date-picker-trigger-text",
+        "--poodle-recipe-date-picker-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-date-picker-trigger-height"
       ]
     },
     "date-range-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-date-range-picker-hover-trigger-fill",
+        "--poodle-recipe-date-range-picker-indicator-text",
+        "--poodle-recipe-date-range-picker-surface-fill",
+        "--poodle-recipe-date-range-picker-surface-shadow",
+        "--poodle-recipe-date-range-picker-trigger-fill",
+        "--poodle-recipe-date-range-picker-trigger-text",
+        "--poodle-recipe-date-range-picker-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-date-range-picker-trigger-height"
       ]
     },
     "date-time-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-date-time-picker-hover-trigger-fill",
+        "--poodle-recipe-date-time-picker-indicator-text",
+        "--poodle-recipe-date-time-picker-surface-fill",
+        "--poodle-recipe-date-time-picker-surface-shadow",
+        "--poodle-recipe-date-time-picker-time-label-text",
+        "--poodle-recipe-date-time-picker-trigger-fill",
+        "--poodle-recipe-date-time-picker-trigger-text",
+        "--poodle-recipe-date-time-picker-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-date-time-picker-trigger-height"
       ]
     },
     "date-time-range-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-date-time-range-picker-hover-trigger-fill",
+        "--poodle-recipe-date-time-range-picker-indicator-text",
+        "--poodle-recipe-date-time-range-picker-surface-fill",
+        "--poodle-recipe-date-time-range-picker-surface-shadow",
+        "--poodle-recipe-date-time-range-picker-time-label-text",
+        "--poodle-recipe-date-time-range-picker-trigger-fill",
+        "--poodle-recipe-date-time-range-picker-trigger-text",
+        "--poodle-recipe-date-time-range-picker-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-date-time-range-picker-trigger-height"
       ]
     },
     "date-time-zone-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-date-time-zone-picker-hover-trigger-fill",
+        "--poodle-recipe-date-time-zone-picker-indicator-text",
+        "--poodle-recipe-date-time-zone-picker-label-text",
+        "--poodle-recipe-date-time-zone-picker-surface-fill",
+        "--poodle-recipe-date-time-zone-picker-surface-shadow",
+        "--poodle-recipe-date-time-zone-picker-trigger-fill",
+        "--poodle-recipe-date-time-zone-picker-trigger-text",
+        "--poodle-recipe-date-time-zone-picker-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-date-time-zone-picker-trigger-height"
       ]
     },
     "detail-item": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-detail-item-fill",
+        "--poodle-recipe-detail-item-hover-info-icon-fill",
+        "--poodle-recipe-detail-item-hover-info-icon-text",
+        "--poodle-recipe-detail-item-info-content-text",
+        "--poodle-recipe-detail-item-info-icon-fill",
+        "--poodle-recipe-detail-item-info-icon-text",
+        "--poodle-recipe-detail-item-label-text",
+        "--poodle-recipe-detail-item-surface-stacked-label-text",
+        "--poodle-recipe-detail-item-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-detail-item-inline-column-gap",
@@ -268,7 +552,11 @@
       ]
     },
     "detail-section": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-detail-section-description-text",
+        "--poodle-recipe-detail-section-fill",
+        "--poodle-recipe-detail-section-title-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-detail-section-body-column-gap",
@@ -294,8 +582,58 @@
         "--poodle-detail-section-group-min"
       ]
     },
+    "detail-shell": {
+      "recipe": [
+        "--poodle-recipe-detail-shell-state-fill",
+        "--poodle-recipe-detail-shell-state-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "dialog": {
+      "recipe": [
+        "--poodle-recipe-dialog-backdrop-fill",
+        "--poodle-recipe-dialog-header-text",
+        "--poodle-recipe-dialog-surface-fill",
+        "--poodle-recipe-dialog-surface-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "dock-region": {
+      "recipe": [
+        "--poodle-recipe-dock-region-border",
+        "--poodle-recipe-dock-region-drop-target-stack-item-shadow",
+        "--poodle-recipe-dock-region-drop-zone-fill",
+        "--poodle-recipe-dock-region-fill",
+        "--poodle-recipe-dock-region-quiet-fill",
+        "--poodle-recipe-dock-region-strong-border"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "drawer": {
+      "recipe": [
+        "--poodle-recipe-drawer-backdrop-fill",
+        "--poodle-recipe-drawer-header-text",
+        "--poodle-recipe-drawer-surface-fill",
+        "--poodle-recipe-drawer-surface-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "duration-input": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-duration-input-field-fill",
+        "--poodle-recipe-duration-input-field-text",
+        "--poodle-recipe-duration-input-fill",
+        "--poodle-recipe-duration-input-focus-border",
+        "--poodle-recipe-duration-input-focus-field-fill",
+        "--poodle-recipe-duration-input-focus-shadow",
+        "--poodle-recipe-duration-input-invalid-border",
+        "--poodle-recipe-duration-input-label-text",
+        "--poodle-recipe-duration-input-separator-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-duration-input-digit-size",
@@ -309,8 +647,44 @@
         "--poodle-duration-input-padding-inline-size-adjust"
       ]
     },
+    "editable-label": {
+      "recipe": [
+        "--poodle-recipe-editable-label-flush-hover-focus-display-fill",
+        "--poodle-recipe-editable-label-flush-input-fill",
+        "--poodle-recipe-editable-label-flush-input-shadow",
+        "--poodle-recipe-editable-label-hover-focus-display-border",
+        "--poodle-recipe-editable-label-hover-focus-display-fill",
+        "--poodle-recipe-editable-label-icon-text",
+        "--poodle-recipe-editable-label-input-border",
+        "--poodle-recipe-editable-label-input-fill",
+        "--poodle-recipe-editable-label-input-shadow",
+        "--poodle-recipe-editable-label-input-text",
+        "--poodle-recipe-editable-label-text-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "editable-list": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-editable-list-count-text",
+        "--poodle-recipe-editable-list-error-fill",
+        "--poodle-recipe-editable-list-error-text",
+        "--poodle-recipe-editable-list-focus-item-border",
+        "--poodle-recipe-editable-list-focus-item-shadow",
+        "--poodle-recipe-editable-list-handle-text",
+        "--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-border",
+        "--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-fill",
+        "--poodle-recipe-editable-list-hover-focus-remove--danger-on-hover-text",
+        "--poodle-recipe-editable-list-hover-item-fill",
+        "--poodle-recipe-editable-list-info-fill",
+        "--poodle-recipe-editable-list-info-text",
+        "--poodle-recipe-editable-list-item--last-moved-border",
+        "--poodle-recipe-editable-list-item--last-moved-fill",
+        "--poodle-recipe-editable-list-item-fill",
+        "--poodle-recipe-editable-list-item-text",
+        "--poodle-recipe-editable-list-remove--danger-on-hover-text",
+        "--poodle-recipe-editable-list-window-label-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-editable-list-font-size",
@@ -321,8 +695,59 @@
         "--poodle-editable-list-item-y"
       ]
     },
+    "embed-input": {
+      "recipe": [
+        "--poodle-recipe-embed-input-error-text",
+        "--poodle-recipe-embed-input-success-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "embed-preview": {
+      "recipe": [
+        "--poodle-recipe-embed-preview-container-fill",
+        "--poodle-recipe-embed-preview-empty-fill",
+        "--poodle-recipe-embed-preview-empty-span-text",
+        "--poodle-recipe-embed-preview-empty-text",
+        "--poodle-recipe-embed-preview-error-text",
+        "--poodle-recipe-embed-preview-fallback-fill",
+        "--poodle-recipe-embed-preview-loading-text-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "empty-state": {
+      "recipe": [
+        "--poodle-recipe-empty-state-copy-text",
+        "--poodle-recipe-empty-state-fill",
+        "--poodle-recipe-empty-state-firstrun-fill",
+        "--poodle-recipe-empty-state-search-fill",
+        "--poodle-recipe-empty-state-visual-fill",
+        "--poodle-recipe-empty-state-visual-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "eyebrow": {
+      "recipe": [
+        "--poodle-recipe-eyebrow-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "field": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-field-hover-info-icon-fill",
+        "--poodle-recipe-field-hover-info-icon-text",
+        "--poodle-recipe-field-info-content-text",
+        "--poodle-recipe-field-info-icon-fill",
+        "--poodle-recipe-field-info-icon-text",
+        "--poodle-recipe-field-label-text",
+        "--poodle-recipe-field-message--error-text",
+        "--poodle-recipe-field-message--pending-text",
+        "--poodle-recipe-field-optional-text",
+        "--poodle-recipe-field-required-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-field-gap",
@@ -330,8 +755,38 @@
         "--poodle-field-label-gap"
       ]
     },
+    "field-set": {
+      "recipe": [
+        "--poodle-recipe-field-set-description-text",
+        "--poodle-recipe-field-set-legend-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "file-upload": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-file-upload-browse-text",
+        "--poodle-recipe-file-upload-dropzone--active-border",
+        "--poodle-recipe-file-upload-dropzone--active-fill",
+        "--poodle-recipe-file-upload-dropzone-fill",
+        "--poodle-recipe-file-upload-error-text-text",
+        "--poodle-recipe-file-upload-file-icon-fill",
+        "--poodle-recipe-file-upload-file-icon-text",
+        "--poodle-recipe-file-upload-hover-focus-dropzone-border",
+        "--poodle-recipe-file-upload-hover-focus-dropzone-fill",
+        "--poodle-recipe-file-upload-hover-focus-remove-fill",
+        "--poodle-recipe-file-upload-hover-focus-remove-text",
+        "--poodle-recipe-file-upload-icon-text",
+        "--poodle-recipe-file-upload-item--error-fill",
+        "--poodle-recipe-file-upload-item-fill",
+        "--poodle-recipe-file-upload-label-text",
+        "--poodle-recipe-file-upload-name-text",
+        "--poodle-recipe-file-upload-progress-bar-fill",
+        "--poodle-recipe-file-upload-progress-fill",
+        "--poodle-recipe-file-upload-remove-fill",
+        "--poodle-recipe-file-upload-remove-text",
+        "--poodle-recipe-file-upload-size-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-file-upload-content-gap",
@@ -342,6 +797,16 @@
         "--poodle-file-upload-item-padding",
         "--poodle-file-upload-label-size"
       ]
+    },
+    "filter-toolbar": {
+      "recipe": [
+        "--poodle-recipe-filter-toolbar-fill",
+        "--poodle-recipe-filter-toolbar-header--button-fill",
+        "--poodle-recipe-filter-toolbar-shadow",
+        "--poodle-recipe-filter-toolbar-summary-text"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "form-actions": {
       "recipe": [
@@ -356,19 +821,32 @@
       ]
     },
     "form-dialog": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-form-dialog-subtitle-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-form-dialog-width"
       ]
     },
     "form-layout": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-form-layout-description-text",
+        "--poodle-recipe-form-layout-field-errors-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-form-layout-column-gap",
         "--poodle-form-layout-row-gap"
       ]
+    },
+    "hover-card": {
+      "recipe": [
+        "--poodle-recipe-hover-card-surface-fill",
+        "--poodle-recipe-hover-card-surface-shadow"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "icon-button": {
       "recipe": [
@@ -380,11 +858,11 @@
         "--poodle-recipe-icon-button-fill-hover",
         "--poodle-recipe-icon-button-ghost-danger-border",
         "--poodle-recipe-icon-button-ghost-danger-fill",
-        "--poodle-recipe-icon-button-ghost-danger-hover-disabled-border",
+        "--poodle-recipe-icon-button-ghost-danger-hover-border",
         "--poodle-recipe-icon-button-ghost-danger-text",
         "--poodle-recipe-icon-button-ghost-success-border",
         "--poodle-recipe-icon-button-ghost-success-fill",
-        "--poodle-recipe-icon-button-ghost-success-hover-disabled-border",
+        "--poodle-recipe-icon-button-ghost-success-hover-border",
         "--poodle-recipe-icon-button-ghost-success-text",
         "--poodle-recipe-icon-button-primary-border",
         "--poodle-recipe-icon-button-primary-danger-border",
@@ -408,10 +886,56 @@
       "candidates": [],
       "metric": []
     },
+    "inline-list-section": {
+      "recipe": [
+        "--poodle-recipe-inline-list-section-count-fill",
+        "--poodle-recipe-inline-list-section-count-text",
+        "--poodle-recipe-inline-list-section-empty-text",
+        "--poodle-recipe-inline-list-section-item-fill",
+        "--poodle-recipe-inline-list-section-title-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "list-card": {
       "recipe": [
+        "--poodle-recipe-list-card-active-leading-fill",
+        "--poodle-recipe-list-card-context-item-fill",
+        "--poodle-recipe-list-card-context-item-text",
+        "--poodle-recipe-list-card-context-menu-fill",
+        "--poodle-recipe-list-card-context-menu-shadow",
+        "--poodle-recipe-list-card-context-meta-text",
+        "--poodle-recipe-list-card-context-separator-fill",
+        "--poodle-recipe-list-card-corner-text",
+        "--poodle-recipe-list-card-danger-context-item-text",
+        "--poodle-recipe-list-card-danger-hover-focus-context-item-fill",
         "--poodle-recipe-list-card-fill",
-        "--poodle-recipe-list-card-hover-fill"
+        "--poodle-recipe-list-card-handle-text",
+        "--poodle-recipe-list-card-highlighted-border",
+        "--poodle-recipe-list-card-highlighted-shadow",
+        "--poodle-recipe-list-card-hover-border",
+        "--poodle-recipe-list-card-hover-fill",
+        "--poodle-recipe-list-card-hover-focus-context-item-fill",
+        "--poodle-recipe-list-card-hover-leading-fill",
+        "--poodle-recipe-list-card-hover-leading-shadow",
+        "--poodle-recipe-list-card-leading-fill",
+        "--poodle-recipe-list-card-leading-text",
+        "--poodle-recipe-list-card-meta-text",
+        "--poodle-recipe-list-card-not-live-hover-border",
+        "--poodle-recipe-list-card-sash-fill",
+        "--poodle-recipe-list-card-sash-text",
+        "--poodle-recipe-list-card-selected-border",
+        "--poodle-recipe-list-card-selected-hover-border",
+        "--poodle-recipe-list-card-selected-selection-box-border",
+        "--poodle-recipe-list-card-selected-selection-box-fill",
+        "--poodle-recipe-list-card-selected-shadow",
+        "--poodle-recipe-list-card-selection-box-fill",
+        "--poodle-recipe-list-card-selection-box-text",
+        "--poodle-recipe-list-card-solid-interactive-hover-leading-fill",
+        "--poodle-recipe-list-card-solid-leading-fill",
+        "--poodle-recipe-list-card-solid-leading-text",
+        "--poodle-recipe-list-card-subtitle-text",
+        "--poodle-recipe-list-card-title-text"
       ],
       "candidates": [],
       "metric": [
@@ -446,8 +970,88 @@
         "--poodle-list-grid-gap"
       ]
     },
+    "log-list": {
+      "recipe": [
+        "--poodle-recipe-log-list-active-filter-btn-border",
+        "--poodle-recipe-log-list-active-filter-btn-fill",
+        "--poodle-recipe-log-list-active-filter-btn-text",
+        "--poodle-recipe-log-list-audit-actor-text",
+        "--poodle-recipe-log-list-audit-details-text",
+        "--poodle-recipe-log-list-audit-icon-fill",
+        "--poodle-recipe-log-list-audit-icon-text",
+        "--poodle-recipe-log-list-audit-resource-label-text",
+        "--poodle-recipe-log-list-audit-resource-text",
+        "--poodle-recipe-log-list-audit-time-text",
+        "--poodle-recipe-log-list-create-restore-audit-icon-fill",
+        "--poodle-recipe-log-list-create-restore-audit-icon-text",
+        "--poodle-recipe-log-list-delete-audit-icon-fill",
+        "--poodle-recipe-log-list-delete-audit-icon-text",
+        "--poodle-recipe-log-list-empty-text",
+        "--poodle-recipe-log-list-error-entry-text",
+        "--poodle-recipe-log-list-fill",
+        "--poodle-recipe-log-list-filter-btn-fill",
+        "--poodle-recipe-log-list-filter-btn-text",
+        "--poodle-recipe-log-list-focus-search-border",
+        "--poodle-recipe-log-list-info-entry-text",
+        "--poodle-recipe-log-list-level-text",
+        "--poodle-recipe-log-list-pagination-page-text",
+        "--poodle-recipe-log-list-scroll-btn-fill",
+        "--poodle-recipe-log-list-scroll-btn-shadow",
+        "--poodle-recipe-log-list-scroll-btn-text",
+        "--poodle-recipe-log-list-scroll-fill",
+        "--poodle-recipe-log-list-search-fill",
+        "--poodle-recipe-log-list-search-text",
+        "--poodle-recipe-log-list-security-audit-icon-fill",
+        "--poodle-recipe-log-list-security-audit-icon-text",
+        "--poodle-recipe-log-list-status--error-text",
+        "--poodle-recipe-log-list-status-text",
+        "--poodle-recipe-log-list-toolbar-fill",
+        "--poodle-recipe-log-list-update-upload-audit-icon-fill",
+        "--poodle-recipe-log-list-update-upload-audit-icon-text",
+        "--poodle-recipe-log-list-warn-entry-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "markdown-editor": {
+      "recipe": [
+        "--poodle-recipe-markdown-editor-fill",
+        "--poodle-recipe-markdown-editor-hover-tool-btn-fill",
+        "--poodle-recipe-markdown-editor-hover-tool-btn-text",
+        "--poodle-recipe-markdown-editor-placeholder-textarea-text",
+        "--poodle-recipe-markdown-editor-preview-empty-text",
+        "--poodle-recipe-markdown-editor-preview-fill",
+        "--poodle-recipe-markdown-editor-preview-link-text",
+        "--poodle-recipe-markdown-editor-preview-text",
+        "--poodle-recipe-markdown-editor-textarea-fill",
+        "--poodle-recipe-markdown-editor-textarea-text",
+        "--poodle-recipe-markdown-editor-tool-btn-fill",
+        "--poodle-recipe-markdown-editor-tool-btn-text",
+        "--poodle-recipe-markdown-editor-toolbar-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "media-browse-panel": {
+      "recipe": [
+        "--poodle-recipe-media-browse-panel-hover-focus-item-border",
+        "--poodle-recipe-media-browse-panel-hover-focus-item-fill",
+        "--poodle-recipe-media-browse-panel-item-fill",
+        "--poodle-recipe-media-browse-panel-state-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "media-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-media-picker-empty-text",
+        "--poodle-recipe-media-picker-hover-focus-item-border",
+        "--poodle-recipe-media-picker-hover-focus-item-fill",
+        "--poodle-recipe-media-picker-item-fill",
+        "--poodle-recipe-media-picker-label-text",
+        "--poodle-recipe-media-picker-thumb--placeholder-fill",
+        "--poodle-recipe-media-picker-thumb--placeholder-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-media-picker-grid-gap",
@@ -459,7 +1063,12 @@
       ]
     },
     "media-preview": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-media-preview-eyebrow-text",
+        "--poodle-recipe-media-preview-meta-fill",
+        "--poodle-recipe-media-preview-meta-shadow",
+        "--poodle-recipe-media-preview-meta-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-media-preview-body-size",
@@ -473,14 +1082,64 @@
       ]
     },
     "media-thumbnail": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-media-thumbnail-badge-fill",
+        "--poodle-recipe-media-thumbnail-badge-text",
+        "--poodle-recipe-media-thumbnail-caption-text",
+        "--poodle-recipe-media-thumbnail-frame-fill",
+        "--poodle-recipe-media-thumbnail-play-fill",
+        "--poodle-recipe-media-thumbnail-play-text",
+        "--poodle-recipe-media-thumbnail-state-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-media-thumbnail-object-fit"
       ]
     },
+    "menu-surface": {
+      "recipe": [
+        "--poodle-recipe-menu-surface-danger-hover-focus-item-fill",
+        "--poodle-recipe-menu-surface-danger-item-text",
+        "--poodle-recipe-menu-surface-fill",
+        "--poodle-recipe-menu-surface-hover-focus-item-fill",
+        "--poodle-recipe-menu-surface-item-fill",
+        "--poodle-recipe-menu-surface-item-text",
+        "--poodle-recipe-menu-surface-meta-text",
+        "--poodle-recipe-menu-surface-separator-fill",
+        "--poodle-recipe-menu-surface-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "menubar": {
+      "recipe": [
+        "--poodle-recipe-menubar-hover-focus-item-fill",
+        "--poodle-recipe-menubar-item-fill",
+        "--poodle-recipe-menubar-item-text",
+        "--poodle-recipe-menubar-list-fill",
+        "--poodle-recipe-menubar-meta-text",
+        "--poodle-recipe-menubar-open-hover-focus-trigger-fill",
+        "--poodle-recipe-menubar-overlay-fill",
+        "--poodle-recipe-menubar-overlay-shadow",
+        "--poodle-recipe-menubar-separator-fill",
+        "--poodle-recipe-menubar-trigger-fill",
+        "--poodle-recipe-menubar-trigger-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "meta-bar": {
+      "recipe": [
+        "--poodle-recipe-meta-bar-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "meta-item": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-meta-item-label-text",
+        "--poodle-recipe-meta-item-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-meta-item-gap",
@@ -489,14 +1148,42 @@
       ]
     },
     "meter": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-meter-fill-fill",
+        "--poodle-recipe-meter-track-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-meter-track-thickness"
       ]
     },
+    "metric-tile": {
+      "recipe": [
+        "--poodle-recipe-metric-tile-down-trend-text",
+        "--poodle-recipe-metric-tile-fill",
+        "--poodle-recipe-metric-tile-flat-trend-text",
+        "--poodle-recipe-metric-tile-label-text",
+        "--poodle-recipe-metric-tile-sparkline-text",
+        "--poodle-recipe-metric-tile-theme-light-fill",
+        "--poodle-recipe-metric-tile-trend-text",
+        "--poodle-recipe-metric-tile-up-trend-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "nav-card": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-nav-card-arrow-text",
+        "--poodle-recipe-nav-card-badge-fill",
+        "--poodle-recipe-nav-card-badge-text",
+        "--poodle-recipe-nav-card-description-text",
+        "--poodle-recipe-nav-card-fill",
+        "--poodle-recipe-nav-card-hover-border",
+        "--poodle-recipe-nav-card-hover-fill",
+        "--poodle-recipe-nav-card-icon-fill",
+        "--poodle-recipe-nav-card-icon-text",
+        "--poodle-recipe-nav-card-title-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-nav-card-content-gap",
@@ -507,15 +1194,57 @@
         "--poodle-nav-card-title-gap"
       ]
     },
+    "navigation-menu": {
+      "recipe": [
+        "--poodle-recipe-navigation-menu-hover-focus-trigger-fill",
+        "--poodle-recipe-navigation-menu-open-trigger-border",
+        "--poodle-recipe-navigation-menu-open-trigger-fill",
+        "--poodle-recipe-navigation-menu-trigger-fill",
+        "--poodle-recipe-navigation-menu-trigger-text",
+        "--poodle-recipe-navigation-menu-viewport-fill",
+        "--poodle-recipe-navigation-menu-viewport-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "number-input": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-number-input-control-fill",
+        "--poodle-recipe-number-input-control-text",
+        "--poodle-recipe-number-input-field-border",
+        "--poodle-recipe-number-input-field-fill",
+        "--poodle-recipe-number-input-focus-field-shadow",
+        "--poodle-recipe-number-input-pending-field-border",
+        "--poodle-recipe-number-input-steppers-fill",
+        "--poodle-recipe-number-input-steppers-text",
+        "--poodle-recipe-number-input-suffix-fill",
+        "--poodle-recipe-number-input-suffix-text",
+        "--poodle-recipe-number-input-valid-field-border"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-number-input-control-height"
       ]
     },
     "order-by": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-order-by-chevron-text",
+        "--poodle-recipe-order-by-drag-handle-fill",
+        "--poodle-recipe-order-by-drag-handle-text",
+        "--poodle-recipe-order-by-empty-text",
+        "--poodle-recipe-order-by-hover-item-border",
+        "--poodle-recipe-order-by-hover-trigger-fill",
+        "--poodle-recipe-order-by-item--drop-target-fill",
+        "--poodle-recipe-order-by-item--drop-target-shadow",
+        "--poodle-recipe-order-by-item-fill",
+        "--poodle-recipe-order-by-item-label-text",
+        "--poodle-recipe-order-by-label-text",
+        "--poodle-recipe-order-by-summary-text",
+        "--poodle-recipe-order-by-surface-fill",
+        "--poodle-recipe-order-by-surface-shadow",
+        "--poodle-recipe-order-by-trigger-fill",
+        "--poodle-recipe-order-by-trigger-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-order-by-control-height",
@@ -524,13 +1253,27 @@
     },
     "page-header": {
       "recipe": [
+        "--poodle-recipe-page-header-back--icon-fill",
+        "--poodle-recipe-page-header-back--icon-shadow",
+        "--poodle-recipe-page-header-back-text",
+        "--poodle-recipe-page-header-body-text",
         "--poodle-recipe-page-header-border",
+        "--poodle-recipe-page-header-context-dot--overlay-shadow",
+        "--poodle-recipe-page-header-context-dot-fill",
+        "--poodle-recipe-page-header-eyebrow-text",
         "--poodle-recipe-page-header-fill",
+        "--poodle-recipe-page-header-hover-back--icon-border",
+        "--poodle-recipe-page-header-hover-back--icon-fill",
+        "--poodle-recipe-page-header-hover-back--icon-shadow",
+        "--poodle-recipe-page-header-hover-back-text",
+        "--poodle-recipe-page-header-not-has-title-subtitle-text",
         "--poodle-recipe-page-header-padding-block-end",
         "--poodle-recipe-page-header-padding-block-start",
         "--poodle-recipe-page-header-padding-inline",
         "--poodle-recipe-page-header-radius",
-        "--poodle-recipe-page-header-shadow"
+        "--poodle-recipe-page-header-section-text",
+        "--poodle-recipe-page-header-shadow",
+        "--poodle-recipe-page-header-subtitle-text"
       ],
       "candidates": [],
       "metric": [
@@ -552,8 +1295,54 @@
         "--poodle-page-header-title-size"
       ]
     },
+    "page-loading": {
+      "recipe": [
+        "--poodle-recipe-page-loading-backdrop-fill",
+        "--poodle-recipe-page-loading-cancel-fill",
+        "--poodle-recipe-page-loading-cancel-text",
+        "--poodle-recipe-page-loading-card-fill",
+        "--poodle-recipe-page-loading-card-shadow",
+        "--poodle-recipe-page-loading-hover-cancel-fill",
+        "--poodle-recipe-page-loading-inline-card-fill",
+        "--poodle-recipe-page-loading-inline-card-shadow",
+        "--poodle-recipe-page-loading-message-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "pagination": {
+      "recipe": [
+        "--poodle-recipe-pagination-button-fill",
+        "--poodle-recipe-pagination-button-text",
+        "--poodle-recipe-pagination-current-button-border",
+        "--poodle-recipe-pagination-current-button-fill",
+        "--poodle-recipe-pagination-ellipsis-text",
+        "--poodle-recipe-pagination-fill",
+        "--poodle-recipe-pagination-hover-focus-button-fill",
+        "--poodle-recipe-pagination-info-text",
+        "--poodle-recipe-pagination-limit-fill",
+        "--poodle-recipe-pagination-limit-select-text",
+        "--poodle-recipe-pagination-limit-text",
+        "--poodle-recipe-pagination-summary-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "pagination-summary": {
+      "recipe": [
+        "--poodle-recipe-pagination-summary-copy-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "password-requirements": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-password-requirements-error-text",
+        "--poodle-recipe-password-requirements-fill",
+        "--poodle-recipe-password-requirements-item--met-text",
+        "--poodle-recipe-password-requirements-list-text",
+        "--poodle-recipe-password-requirements-title-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-password-requirements-body-size",
@@ -564,6 +1353,18 @@
         "--poodle-password-requirements-padding",
         "--poodle-password-requirements-title-size"
       ]
+    },
+    "picker-shell": {
+      "recipe": [
+        "--poodle-recipe-picker-shell-fill",
+        "--poodle-recipe-picker-shell-modal-fill",
+        "--poodle-recipe-picker-shell-modal-shadow",
+        "--poodle-recipe-picker-shell-popover-shadow",
+        "--poodle-recipe-picker-shell-state-fill",
+        "--poodle-recipe-picker-shell-status-text"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "pill": {
       "recipe": [
@@ -599,13 +1400,24 @@
       ]
     },
     "popover": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-popover-surface-fill",
+        "--poodle-recipe-popover-surface-shadow"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-popover-offset",
         "--poodle-popover-surface-max-width",
         "--poodle-popover-surface-min-width"
       ]
+    },
+    "progress": {
+      "recipe": [
+        "--poodle-recipe-progress-fill",
+        "--poodle-recipe-progress-indicator-fill"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "radio": {
       "recipe": [
@@ -614,8 +1426,69 @@
       "candidates": [],
       "metric": []
     },
+    "radio-group": {
+      "recipe": [
+        "--poodle-recipe-radio-group-checked-dot-fill",
+        "--poodle-recipe-radio-group-dot-fill",
+        "--poodle-recipe-radio-group-indicator-border",
+        "--poodle-recipe-radio-group-indicator-fill",
+        "--poodle-recipe-radio-group-option-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "range-slider": {
+      "recipe": [
+        "--poodle-recipe-range-slider-control-fill",
+        "--poodle-recipe-range-slider-control-thumb-fill",
+        "--poodle-recipe-range-slider-control-thumb-shadow",
+        "--poodle-recipe-range-slider-control-track-fill",
+        "--poodle-recipe-range-slider-fill-fill",
+        "--poodle-recipe-range-slider-focus-control-thumb-shadow",
+        "--poodle-recipe-range-slider-track-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "rating": {
+      "recipe": [
+        "--poodle-recipe-rating-glyph-fill-text",
+        "--poodle-recipe-rating-item-fill",
+        "--poodle-recipe-rating-item-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "region": {
+      "recipe": [
+        "--poodle-recipe-region-label-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "relation-picker": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-relation-picker-back-fill",
+        "--poodle-recipe-relation-picker-back-text",
+        "--poodle-recipe-relation-picker-button-fill",
+        "--poodle-recipe-relation-picker-button-text",
+        "--poodle-recipe-relation-picker-copy-text",
+        "--poodle-recipe-relation-picker-empty-text",
+        "--poodle-recipe-relation-picker-footer-note-text",
+        "--poodle-recipe-relation-picker-hover-back-fill",
+        "--poodle-recipe-relation-picker-hover-back-text",
+        "--poodle-recipe-relation-picker-hover-button-fill",
+        "--poodle-recipe-relation-picker-hover-item-fill",
+        "--poodle-recipe-relation-picker-item-button-fill",
+        "--poodle-recipe-relation-picker-item-copy-text",
+        "--poodle-recipe-relation-picker-item-fill",
+        "--poodle-recipe-relation-picker-item-text",
+        "--poodle-recipe-relation-picker-meta-text",
+        "--poodle-recipe-relation-picker-selected-item-border",
+        "--poodle-recipe-relation-picker-selected-item-fill",
+        "--poodle-recipe-relation-picker-sep-text",
+        "--poodle-recipe-relation-picker-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-relation-picker-breadcrumb-control",
@@ -630,8 +1503,23 @@
         "--poodle-relation-picker-title-size"
       ]
     },
+    "resize-handle": {
+      "recipe": [
+        "--poodle-recipe-resize-handle-dragging-hover-line-fill",
+        "--poodle-recipe-resize-handle-line-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "segmented-control": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-segmented-control-fill",
+        "--poodle-recipe-segmented-control-label-text",
+        "--poodle-recipe-segmented-control-selected-label-fill",
+        "--poodle-recipe-segmented-control-selected-label-shadow",
+        "--poodle-recipe-segmented-control-selected-label-text",
+        "--poodle-recipe-segmented-control-shadow"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-segmented-control-height",
@@ -639,7 +1527,46 @@
       ]
     },
     "select": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-select-border",
+        "--poodle-recipe-select-clear-fill",
+        "--poodle-recipe-select-clear-text",
+        "--poodle-recipe-select-control-fill",
+        "--poodle-recipe-select-control-text",
+        "--poodle-recipe-select-empty-text",
+        "--poodle-recipe-select-fill",
+        "--poodle-recipe-select-focus-border",
+        "--poodle-recipe-select-focus-fill",
+        "--poodle-recipe-select-focus-shadow",
+        "--poodle-recipe-select-ghost-fill",
+        "--poodle-recipe-select-ghost-focus-border",
+        "--poodle-recipe-select-ghost-focus-fill",
+        "--poodle-recipe-select-ghost-focus-shadow",
+        "--poodle-recipe-select-ghost-shadow",
+        "--poodle-recipe-select-group-control-text",
+        "--poodle-recipe-select-group-label-text",
+        "--poodle-recipe-select-highlighted-hover-option-fill",
+        "--poodle-recipe-select-hover-clear-fill",
+        "--poodle-recipe-select-hover-clear-text",
+        "--poodle-recipe-select-indicator-button-fill",
+        "--poodle-recipe-select-indicator-button-text",
+        "--poodle-recipe-select-indicator-text",
+        "--poodle-recipe-select-input-fill",
+        "--poodle-recipe-select-input-text",
+        "--poodle-recipe-select-listbox-fill",
+        "--poodle-recipe-select-listbox-shadow",
+        "--poodle-recipe-select-option-description-text",
+        "--poodle-recipe-select-option-fill",
+        "--poodle-recipe-select-option-text",
+        "--poodle-recipe-select-pending-border",
+        "--poodle-recipe-select-placeholder-control-text",
+        "--poodle-recipe-select-placeholder-input-text",
+        "--poodle-recipe-select-shadow",
+        "--poodle-recipe-select-trigger-fill",
+        "--poodle-recipe-select-trigger-text",
+        "--poodle-recipe-select-valid-border",
+        "--poodle-recipe-select-value-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-select-clear-width",
@@ -654,7 +1581,15 @@
       ]
     },
     "selection-summary": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-selection-summary-chip-fill",
+        "--poodle-recipe-selection-summary-chip-shadow",
+        "--poodle-recipe-selection-summary-chip-text",
+        "--poodle-recipe-selection-summary-empty-text",
+        "--poodle-recipe-selection-summary-overflow-fill",
+        "--poodle-recipe-selection-summary-overflow-shadow",
+        "--poodle-recipe-selection-summary-overflow-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-selection-summary-chip-font-size",
@@ -680,7 +1615,16 @@
       "metric": []
     },
     "sidebar-nav": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-sidebar-nav-group-title-text",
+        "--poodle-recipe-sidebar-nav-hover-item-fill",
+        "--poodle-recipe-sidebar-nav-hover-item-text",
+        "--poodle-recipe-sidebar-nav-item--active-fill",
+        "--poodle-recipe-sidebar-nav-item--active-shadow",
+        "--poodle-recipe-sidebar-nav-item--active-text",
+        "--poodle-recipe-sidebar-nav-item-fill",
+        "--poodle-recipe-sidebar-nav-item-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-sidebar-nav-group-gap",
@@ -694,7 +1638,9 @@
       ]
     },
     "skeleton": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-skeleton-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-skeleton-height",
@@ -702,7 +1648,14 @@
       ]
     },
     "slider": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-slider-control-fill",
+        "--poodle-recipe-slider-control-shadow",
+        "--poodle-recipe-slider-control-thumb-fill",
+        "--poodle-recipe-slider-fill-fill",
+        "--poodle-recipe-slider-focus-control-shadow",
+        "--poodle-recipe-slider-track-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-slider-percent"
@@ -724,7 +1677,20 @@
       ]
     },
     "split-button": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-split-button-divider-fill",
+        "--poodle-recipe-split-button-hover-focus-item-fill",
+        "--poodle-recipe-split-button-hover-primary-fill",
+        "--poodle-recipe-split-button-hover-toggle-fill",
+        "--poodle-recipe-split-button-item-fill",
+        "--poodle-recipe-split-button-item-text",
+        "--poodle-recipe-split-button-menu-fill",
+        "--poodle-recipe-split-button-menu-shadow",
+        "--poodle-recipe-split-button-separator-fill",
+        "--poodle-recipe-split-button-toggle-fill",
+        "--poodle-recipe-split-button-toggle-shadow",
+        "--poodle-recipe-split-button-toggle-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-split-button-chevron-size",
@@ -737,6 +1703,31 @@
         "--poodle-split-button-toggle-width-base",
         "--poodle-split-button-toggle-width-density-adjust"
       ]
+    },
+    "split-view": {
+      "recipe": [
+        "--poodle-recipe-split-view-toggles-fill",
+        "--poodle-recipe-split-view-toggles-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "status-bar": {
+      "recipe": [
+        "--poodle-recipe-status-bar-fill",
+        "--poodle-recipe-status-bar-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "status-indicator": {
+      "recipe": [
+        "--poodle-recipe-status-indicator-dot-fill",
+        "--poodle-recipe-status-indicator-dot-shadow",
+        "--poodle-recipe-status-indicator-text"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "surface": {
       "recipe": [
@@ -755,6 +1746,7 @@
     },
     "switch": {
       "recipe": [
+        "--poodle-recipe-switch-",
         "--poodle-recipe-switch-off-border",
         "--poodle-recipe-switch-off-color",
         "--poodle-recipe-switch-on-border",
@@ -768,8 +1760,51 @@
         "--poodle-switch-on-track"
       ]
     },
+    "table": {
+      "recipe": [
+        "--poodle-recipe-table-caption-text",
+        "--poodle-recipe-table-empty-text",
+        "--poodle-recipe-table-fill",
+        "--poodle-recipe-table-header-fill",
+        "--poodle-recipe-table-header-text",
+        "--poodle-recipe-table-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "tabs": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-tabs-block-hover-item-fill",
+        "--poodle-recipe-tabs-block-list-fill",
+        "--poodle-recipe-tabs-block-selected-hover-item-fill",
+        "--poodle-recipe-tabs-block-selected-item-fill",
+        "--poodle-recipe-tabs-block-selected-tab-text",
+        "--poodle-recipe-tabs-card-item-fill",
+        "--poodle-recipe-tabs-card-item-shadow",
+        "--poodle-recipe-tabs-card-selected-item-border",
+        "--poodle-recipe-tabs-card-selected-item-fill",
+        "--poodle-recipe-tabs-card-tab-text",
+        "--poodle-recipe-tabs-close-fill",
+        "--poodle-recipe-tabs-close-text",
+        "--poodle-recipe-tabs-drop-target-item-shadow",
+        "--poodle-recipe-tabs-hover-close-fill",
+        "--poodle-recipe-tabs-hover-close-text",
+        "--poodle-recipe-tabs-panel-fill",
+        "--poodle-recipe-tabs-pill-selected-tab-fill",
+        "--poodle-recipe-tabs-pill-selected-tab-text",
+        "--poodle-recipe-tabs-separator-fill",
+        "--poodle-recipe-tabs-strip-hover-item-fill",
+        "--poodle-recipe-tabs-strip-list-fill",
+        "--poodle-recipe-tabs-strip-selected-tab-text",
+        "--poodle-recipe-tabs-tab-fill",
+        "--poodle-recipe-tabs-tab-text",
+        "--poodle-recipe-tabs-text-panel-fill",
+        "--poodle-recipe-tabs-text-selected-tab-fill",
+        "--poodle-recipe-tabs-text-selected-tab-text",
+        "--poodle-recipe-tabs-tooltip-fill",
+        "--poodle-recipe-tabs-tooltip-shadow",
+        "--poodle-recipe-tabs-tooltip-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-tabs-content-gap",
@@ -782,6 +1817,17 @@
         "--poodle-tabs-strip-inline-padding",
         "--poodle-tabs-strip-tab-x"
       ]
+    },
+    "text": {
+      "recipe": [
+        "--poodle-recipe-text-danger-text",
+        "--poodle-recipe-text-secondary-muted-text",
+        "--poodle-recipe-text-success-text",
+        "--poodle-recipe-text-text",
+        "--poodle-recipe-text-warning-text"
+      ],
+      "candidates": [],
+      "metric": []
     },
     "text-input": {
       "recipe": [
@@ -808,8 +1854,20 @@
         "--poodle-text-input-radius"
       ]
     },
+    "text-link": {
+      "recipe": [
+        "--poodle-recipe-text-link-fill",
+        "--poodle-recipe-text-link-secondary-text",
+        "--poodle-recipe-text-link-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "time-ago": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-time-ago-hover-focus-text",
+        "--poodle-recipe-time-ago-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-time-ago-underline",
@@ -817,14 +1875,37 @@
       ]
     },
     "time-input": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-time-input-fill",
+        "--poodle-recipe-time-input-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-time-input-control-height"
       ]
     },
+    "toast-stack": {
+      "recipe": [
+        "--poodle-recipe-toast-stack-before-fill",
+        "--poodle-recipe-toast-stack-copy-text",
+        "--poodle-recipe-toast-stack-dismiss-fill",
+        "--poodle-recipe-toast-stack-dismiss-text",
+        "--poodle-recipe-toast-stack-fill",
+        "--poodle-recipe-toast-stack-hover-dismiss-fill",
+        "--poodle-recipe-toast-stack-hover-dismiss-text",
+        "--poodle-recipe-toast-stack-shadow"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "toggle-group": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-toggle-group-item-border",
+        "--poodle-recipe-toggle-group-item-fill",
+        "--poodle-recipe-toggle-group-item-shadow",
+        "--poodle-recipe-toggle-group-item-text",
+        "--poodle-recipe-toggle-group-selected-item-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-toggle-group-gap",
@@ -852,14 +1933,43 @@
       ]
     },
     "toolbar": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-toolbar-fill"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-toolbar-control-height"
       ]
     },
+    "tooltip": {
+      "recipe": [
+        "--poodle-recipe-tooltip-bubble-fill",
+        "--poodle-recipe-tooltip-bubble-shadow",
+        "--poodle-recipe-tooltip-bubble-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "tree": {
-      "recipe": [],
+      "recipe": [
+        "--poodle-recipe-tree-before-after-row-after-fill",
+        "--poodle-recipe-tree-focus-rename-shadow",
+        "--poodle-recipe-tree-hover-row-fill",
+        "--poodle-recipe-tree-hover-row-text",
+        "--poodle-recipe-tree-icon-text",
+        "--poodle-recipe-tree-inside-row-fill",
+        "--poodle-recipe-tree-label--muted-text",
+        "--poodle-recipe-tree-rename-fill",
+        "--poodle-recipe-tree-rename-text",
+        "--poodle-recipe-tree-row-fill",
+        "--poodle-recipe-tree-row-shadow",
+        "--poodle-recipe-tree-row-text",
+        "--poodle-recipe-tree-selected-row-fill",
+        "--poodle-recipe-tree-selected-row-shadow",
+        "--poodle-recipe-tree-selected-row-text",
+        "--poodle-recipe-tree-spinner-text",
+        "--poodle-recipe-tree-twisty-text"
+      ],
       "candidates": [],
       "metric": [
         "--poodle-tree-chevron-size",
@@ -870,6 +1980,45 @@
         "--poodle-tree-row-pad-inline",
         "--poodle-tree-twisty-size"
       ]
+    },
+    "tri-state-switch": {
+      "recipe": [
+        "--poodle-recipe-tri-state-switch-default-selected-segment-text",
+        "--poodle-recipe-tri-state-switch-default-selection-border",
+        "--poodle-recipe-tri-state-switch-default-selection-fill",
+        "--poodle-recipe-tri-state-switch-excluded-selected-segment-text",
+        "--poodle-recipe-tri-state-switch-excluded-selection-border",
+        "--poodle-recipe-tri-state-switch-excluded-selection-fill",
+        "--poodle-recipe-tri-state-switch-fill",
+        "--poodle-recipe-tri-state-switch-included-selected-segment-text",
+        "--poodle-recipe-tri-state-switch-included-selection-border",
+        "--poodle-recipe-tri-state-switch-included-selection-fill",
+        "--poodle-recipe-tri-state-switch-segment-text",
+        "--poodle-recipe-tri-state-switch-selected-segment-text",
+        "--poodle-recipe-tri-state-switch-selection-shadow",
+        "--poodle-recipe-tri-state-switch-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "video-player": {
+      "recipe": [
+        "--poodle-recipe-video-player-big-play-fill",
+        "--poodle-recipe-video-player-big-play-text",
+        "--poodle-recipe-video-player-btn-fill",
+        "--poodle-recipe-video-player-btn-text",
+        "--poodle-recipe-video-player-controls-fill",
+        "--poodle-recipe-video-player-fill",
+        "--poodle-recipe-video-player-hover-btn-fill",
+        "--poodle-recipe-video-player-progress-bar-fill",
+        "--poodle-recipe-video-player-progress-fill-fill",
+        "--poodle-recipe-video-player-time-text",
+        "--poodle-recipe-video-player-volume-fill",
+        "--poodle-recipe-video-player-volume-thumb-fill",
+        "--poodle-recipe-video-player-volume-track-fill"
+      ],
+      "candidates": [],
+      "metric": []
     }
   }
 }

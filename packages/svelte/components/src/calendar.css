@@ -42,7 +42,7 @@
     padding: 0;
     border: 0;
     border-bottom: 0.0625rem dashed color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
-    background: transparent;
+    background: var(--poodle-recipe-calendar-year-button-fill, transparent);
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
@@ -55,7 +55,7 @@
 
   .poodle-calendar__month-button:hover:not(:disabled),
   .poodle-calendar__year-button:hover:not(:disabled) {
-    color: var(--poodle-color-text-primary);
+    color: var(--poodle-recipe-calendar-hover-year-button-text, var(--poodle-color-text-primary));
     border-bottom-color: color-mix(in srgb, var(--poodle-color-accent-base) 72%, transparent);
   }
 
@@ -67,14 +67,14 @@
     padding: 0.125rem 0.25rem;
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
     border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated));
+    background: var(--poodle-recipe-calendar-year-input-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated)));
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
     line-height: 1.4;
     text-align: center;
     outline: 0;
-    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 18%, transparent);
+    box-shadow: var(--poodle-recipe-calendar-year-input-shadow, 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 18%, transparent));
   }
 
   .poodle-calendar__month-select {
@@ -104,14 +104,14 @@
     height: 2rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-calendar-nav-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-calendar-nav-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
   }
 
   .poodle-calendar__nav:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated));
+    background: var(--poodle-recipe-calendar-hover-nav-fill, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated)));
   }
 
   .poodle-calendar__weekdays {
@@ -119,7 +119,7 @@
   }
 
   .poodle-calendar__weekday {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-calendar-weekday-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
@@ -149,8 +149,8 @@
     padding: 0.25rem;
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-recipe-calendar-day-fill, transparent);
+    color: var(--poodle-recipe-calendar-day-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
@@ -158,46 +158,46 @@
   }
 
   .poodle-calendar__day[data-current-month="false"] {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-recipe-calendar-not-current-month-day-text, var(--poodle-color-text-secondary));
     opacity: 0.72;
   }
 
   .poodle-calendar__day[data-today="true"] {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default));
+    border-color: var(--poodle-recipe-calendar-day-border, color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default)));
   }
 
   .poodle-calendar__day[data-selected="true"] {
-    background: var(--poodle-color-accent-base);
-    color: var(--poodle-color-text-inverse);
+    background: var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-color-accent-base));
+    color: var(--poodle-recipe-calendar-selected-day-text, var(--poodle-color-text-inverse));
   }
 
   .poodle-calendar__day[data-in-range="true"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    background: var(--poodle-recipe-calendar-in-range-day-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
   }
 
   .poodle-calendar__day[data-range-start="true"],
   .poodle-calendar__day[data-range-end="true"] {
-    background: var(--poodle-color-accent-base);
-    color: var(--poodle-color-text-inverse);
+    background: var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-color-accent-base));
+    color: var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-color-text-inverse));
   }
 
   .poodle-calendar__day:hover:not(:disabled),
   .poodle-calendar__day:focus-visible {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 46%, var(--poodle-color-border-default));
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+    border-color: var(--poodle-recipe-calendar-hover-focus-day-border, color-mix(in srgb, var(--poodle-color-accent-base) 46%, var(--poodle-color-border-default)));
+    background: var(--poodle-recipe-calendar-hover-focus-day-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
     outline: none;
   }
 
   .poodle-calendar__day[data-selected="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-selected="true"]:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
+    background: var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%));
   }
 
   .poodle-calendar__day[data-range-start="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-range-start="true"]:focus-visible,
   .poodle-calendar__day[data-range-end="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-range-end="true"]:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
+    background: var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%));
   }
 
   .poodle-calendar__nav:focus-visible {
