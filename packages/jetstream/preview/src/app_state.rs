@@ -323,19 +323,27 @@ impl TabsPreviewState {
     }
 
     /// Move tab `from` to `to`'s position in the flat list. No-op if either
-    /// value is missing or they are the same.
+    /// value is missing or they are the same. Reorder math comes from the
+    /// shared tabs machinery in poodle-headless.
     pub fn reorder(&mut self, from: &str, to: &str) {
-        if from == to {
-            return;
-        }
         let Some(from_idx) = self.tabs.iter().position(|t| t.value == from) else {
             return;
         };
         let Some(to_idx) = self.tabs.iter().position(|t| t.value == to) else {
             return;
         };
-        let item = self.tabs.remove(from_idx);
-        self.tabs.insert(to_idx, item);
+        let items: Vec<poodle_headless::tabs::TabsItem> = self
+            .tabs
+            .iter()
+            .map(|t| poodle_headless::tabs::TabsItem {
+                value: t.value.clone(),
+                disabled: false,
+                closable: false,
+            })
+            .collect();
+        let (reordered, _) = poodle_headless::tabs::apply_reorder(&items, from_idx, to_idx);
+        let order: Vec<String> = reordered.into_iter().map(|item| item.value).collect();
+        self.tabs.sort_by_key(|t| order.iter().position(|v| *v == t.value).unwrap_or(usize::MAX));
     }
 }
 
@@ -512,16 +520,12 @@ impl AppState {
         let Some(focused) = self.tree.focused.clone() else {
             return;
         };
-        let spec = self.tree_spec();
-        let sibs = spec.siblings_of(&focused);
-        let Some(i) = sibs.iter().position(|v| v == &focused) else {
+        let sibs = self.tree_spec().siblings_of(&focused);
+        let Some(step) = poodle_headless::tree::tree_sibling_reorder_target(&sibs, &focused, up) else {
             return;
         };
-        if up && i > 0 {
-            self.tree_reorder(&focused, &sibs[i - 1], DropPosition::Before);
-        } else if !up && i + 1 < sibs.len() {
-            self.tree_reorder(&focused, &sibs[i + 1], DropPosition::After);
-        }
+        let position = if step.before { DropPosition::Before } else { DropPosition::After };
+        self.tree_reorder(&focused, &step.target, position);
     }
 
     /// Cascade-toggle the checkbox for `value`: when all checkable descendants are
@@ -531,85 +535,76 @@ impl AppState {
         let Some(node) = find_node(&nodes, value) else {
             return;
         };
-        let leaves = self.tree_spec().checkable_values_under(node);
-        let all_on = leaves.iter().all(|v| self.tree.checked.contains(v));
-        if all_on {
-            self.tree.checked.retain(|v| !leaves.contains(v));
-        } else {
-            for v in leaves {
-                if !self.tree.checked.contains(&v) {
-                    self.tree.checked.push(v);
-                }
-            }
-        }
+        self.tree.checked = poodle_headless::tree::tree_toggle_check(node, &self.tree.checked);
         self.dirty = true;
     }
 
     /// Apply a keyboard action to the Tree specimen, mirroring the Svelte/GPUI
     /// keyboard model via the shared spec navigation helpers.
     pub fn tree_key(&mut self, key: TreeKey) {
+        use poodle_headless::tree::{tree_keydown_intent, TreeKeyIntent, TreeKeyModifiers};
+
         let spec = self.tree_spec();
         let rows = spec.visible_rows();
         let order: Vec<String> = rows.iter().map(|r| r.value.clone()).collect();
-        let focused = self.tree.focused.clone();
-        match key {
-            TreeKey::Down => {
-                let next = match focused.as_deref() {
-                    Some(f) => spec.next_visible(f),
-                    None => order.first().cloned(),
-                };
-                if let Some(n) = next {
-                    self.tree.focused = Some(n);
-                }
+
+        // Without focus, Down/Up seed focus at the boundary (host behavior
+        // that precedes the shared keyboard model).
+        let Some(focused) = self.tree.focused.clone() else {
+            match key {
+                TreeKey::Down | TreeKey::Home => self.tree.focused = order.first().cloned(),
+                TreeKey::Up | TreeKey::End => self.tree.focused = order.last().cloned(),
+                _ => {}
             }
-            TreeKey::Up => {
-                let prev = match focused.as_deref() {
-                    Some(f) => spec.prev_visible(f),
-                    None => order.last().cloned(),
-                };
-                if let Some(p) = prev {
-                    self.tree.focused = Some(p);
-                }
+            self.dirty = true;
+            return;
+        };
+
+        // Map the host key onto the shared model, then run the same
+        // poodle-headless intent resolver the Svelte layer uses.
+        let key_name = match key {
+            TreeKey::Down => "ArrowDown",
+            TreeKey::Up => "ArrowUp",
+            TreeKey::Left => "ArrowLeft",
+            TreeKey::Right => "ArrowRight",
+            TreeKey::Home => "Home",
+            TreeKey::End => "End",
+            TreeKey::Enter => "Enter",
+        };
+
+        let headless_rows: Vec<poodle_headless::tree::TreeRow> = rows
+            .iter()
+            .map(|r| poodle_headless::tree::TreeRow {
+                value: r.value.clone(),
+                depth: r.depth,
+                parent: r.parent.clone(),
+                disabled: false,
+                branch: r.is_branch,
+                expanded: r.is_expanded,
+            })
+            .collect();
+
+        let expanded = self.tree.expanded.clone();
+        let intent = tree_keydown_intent(
+            &headless_rows,
+            &focused,
+            key_name,
+            TreeKeyModifiers { alt: false, shift: false },
+            false,
+            &expanded,
+        );
+
+        match intent {
+            Some(TreeKeyIntent::Focus { value: Some(next), .. }) => {
+                self.tree.focused = Some(next);
             }
-            TreeKey::Right => {
-                if let Some(f) = focused.as_deref() {
-                    if let Some(r) = rows.iter().find(|r| r.value == f) {
-                        if r.is_branch && !r.is_expanded {
-                            self.tree.toggle_expanded(f);
-                        } else if r.is_branch {
-                            if let Some(n) = spec.next_visible(f) {
-                                self.tree.focused = Some(n);
-                            }
-                        }
-                    }
-                }
+            Some(TreeKeyIntent::Expand { value }) => self.tree.toggle_expanded(&value),
+            Some(TreeKeyIntent::Collapse { value }) => self.tree.toggle_expanded(&value),
+            Some(TreeKeyIntent::FocusParent { parent: Some(parent) }) => {
+                self.tree.focused = Some(parent);
             }
-            TreeKey::Left => {
-                if let Some(f) = focused.as_deref() {
-                    if let Some(r) = rows.iter().find(|r| r.value == f) {
-                        if r.is_branch && r.is_expanded {
-                            self.tree.toggle_expanded(f);
-                        } else if let Some(p) = spec.parent_of(f) {
-                            self.tree.focused = Some(p);
-                        }
-                    }
-                }
-            }
-            TreeKey::Home => {
-                if let Some(first) = order.first() {
-                    self.tree.focused = Some(first.clone());
-                }
-            }
-            TreeKey::End => {
-                if let Some(last) = order.last() {
-                    self.tree.focused = Some(last.clone());
-                }
-            }
-            TreeKey::Enter => {
-                if let Some(f) = focused.as_deref() {
-                    self.tree.select_only(f);
-                }
-            }
+            Some(TreeKeyIntent::Activate) => self.tree.select_only(&focused),
+            _ => {}
         }
         self.dirty = true;
     }

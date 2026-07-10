@@ -22,3 +22,4 @@ pub mod slider;
 pub mod switch;
 pub mod tabs;
 pub mod toggle_group;
+pub mod tree;

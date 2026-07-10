@@ -1451,5 +1451,409 @@
       "total": 5,
       "expect": true
     }
+  ],
+  "treeNodes": [
+    {
+      "value": "src",
+      "children": [
+        {
+          "value": "src/a.ts"
+        },
+        {
+          "value": "src/b.ts",
+          "isDisabled": true
+        },
+        {
+          "value": "src/lib",
+          "children": [
+            {
+              "value": "src/lib/c.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "docs",
+      "isBranch": true
+    },
+    {
+      "value": "README.md"
+    }
+  ],
+  "tree": [
+    {
+      "op": "flatten",
+      "expanded": [],
+      "expect": [
+        {
+          "value": "src",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "docs",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "README.md",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "op": "flatten",
+      "expanded": [
+        "src"
+      ],
+      "expect": [
+        {
+          "value": "src",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "src/a.ts",
+          "depth": 1,
+          "parent": "src",
+          "disabled": false
+        },
+        {
+          "value": "src/b.ts",
+          "depth": 1,
+          "parent": "src",
+          "disabled": true
+        },
+        {
+          "value": "src/lib",
+          "depth": 1,
+          "parent": "src",
+          "disabled": false
+        },
+        {
+          "value": "docs",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "README.md",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "op": "flatten",
+      "expanded": [
+        "src",
+        "src/lib"
+      ],
+      "expect": [
+        {
+          "value": "src",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "src/a.ts",
+          "depth": 1,
+          "parent": "src",
+          "disabled": false
+        },
+        {
+          "value": "src/b.ts",
+          "depth": 1,
+          "parent": "src",
+          "disabled": true
+        },
+        {
+          "value": "src/lib",
+          "depth": 1,
+          "parent": "src",
+          "disabled": false
+        },
+        {
+          "value": "src/lib/c.ts",
+          "depth": 2,
+          "parent": "src/lib",
+          "disabled": false
+        },
+        {
+          "value": "docs",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        },
+        {
+          "value": "README.md",
+          "depth": 0,
+          "parent": null,
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "op": "checkState",
+      "value": "src",
+      "checked": [],
+      "expect": "unchecked"
+    },
+    {
+      "op": "checkState",
+      "value": "src",
+      "checked": [
+        "src/a.ts"
+      ],
+      "expect": "mixed"
+    },
+    {
+      "op": "checkState",
+      "value": "src",
+      "checked": [
+        "src/a.ts",
+        "src/b.ts",
+        "src/lib/c.ts"
+      ],
+      "expect": "checked"
+    },
+    {
+      "op": "toggleCheck",
+      "value": "src",
+      "checked": [],
+      "expect": [
+        "src/a.ts",
+        "src/b.ts",
+        "src/lib/c.ts"
+      ]
+    },
+    {
+      "op": "toggleCheck",
+      "value": "src",
+      "checked": [
+        "src/a.ts",
+        "src/b.ts",
+        "src/lib/c.ts"
+      ],
+      "expect": []
+    },
+    {
+      "op": "range",
+      "expanded": [
+        "src"
+      ],
+      "anchor": "src",
+      "to": "src/lib",
+      "expect": [
+        "src",
+        "src/a.ts",
+        "src/lib"
+      ]
+    },
+    {
+      "op": "range",
+      "expanded": [
+        "src"
+      ],
+      "anchor": "src/lib",
+      "to": "src",
+      "expect": [
+        "src",
+        "src/a.ts",
+        "src/lib"
+      ]
+    },
+    {
+      "op": "siblingTarget",
+      "siblings": [
+        "a",
+        "b",
+        "c"
+      ],
+      "value": "a",
+      "up": false,
+      "expect": {
+        "target": "b",
+        "position": "after"
+      }
+    },
+    {
+      "op": "siblingTarget",
+      "siblings": [
+        "a",
+        "b",
+        "c"
+      ],
+      "value": "c",
+      "up": true,
+      "expect": {
+        "target": "b",
+        "position": "before"
+      }
+    },
+    {
+      "op": "siblingTarget",
+      "siblings": [
+        "a",
+        "b",
+        "c"
+      ],
+      "value": "a",
+      "up": true,
+      "expect": null
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src",
+      "key": "ArrowDown",
+      "shift": false,
+      "expect": {
+        "type": "focus",
+        "value": "src/a.ts",
+        "extendSelection": false
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src/a.ts",
+      "key": "ArrowDown",
+      "shift": true,
+      "expect": {
+        "type": "focus",
+        "value": "src/b.ts",
+        "extendSelection": false
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src/lib",
+      "key": "ArrowRight",
+      "shift": false,
+      "expect": {
+        "type": "expand",
+        "value": "src/lib"
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src",
+      "key": "ArrowRight",
+      "shift": false,
+      "expect": {
+        "type": "focus",
+        "value": "src/a.ts",
+        "extendSelection": false
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src",
+      "key": "ArrowLeft",
+      "shift": false,
+      "expect": {
+        "type": "collapse",
+        "value": "src"
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src/a.ts",
+      "key": "ArrowLeft",
+      "shift": false,
+      "expect": {
+        "type": "focusParent",
+        "parent": "src"
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src",
+      "key": "Home",
+      "shift": false,
+      "expect": {
+        "type": "focus",
+        "value": "src",
+        "extendSelection": false
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src",
+      "key": "End",
+      "shift": false,
+      "expect": {
+        "type": "focus",
+        "value": "README.md",
+        "extendSelection": false
+      }
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src/b.ts",
+      "key": "Enter",
+      "shift": false,
+      "expect": null
+    },
+    {
+      "op": "keydown",
+      "expanded": [
+        "src"
+      ],
+      "value": "src/a.ts",
+      "key": " ",
+      "shift": false,
+      "expect": {
+        "type": "toggleSelection"
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 1000,
+      "rowHeight": 28,
+      "scrollTop": 280,
+      "viewport": 300,
+      "overscan": 6,
+      "expect": {
+        "startIndex": 4,
+        "endIndex": 27,
+        "offsetY": 112,
+        "totalHeight": 28000
+      }
+    }
   ]
 }

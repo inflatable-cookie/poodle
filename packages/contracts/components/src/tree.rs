@@ -68,6 +68,21 @@ impl TreeNode {
     }
 }
 
+impl poodle_headless::tree::TreeNodeLike for TreeNode {
+    fn value(&self) -> &str {
+        &self.value
+    }
+    fn children(&self) -> &[Self] {
+        &self.children
+    }
+    fn is_branch_flag(&self) -> bool {
+        self.is_branch
+    }
+    fn is_disabled(&self) -> bool {
+        self.is_disabled
+    }
+}
+
 /// A flattened, currently-visible tree row. Produced by
 /// [`TreeSpec::visible_rows`] for keyboard navigation and reordering.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -491,31 +506,19 @@ impl TreeSpec {
     /// (leaf or empty/lazy branch), otherwise every leaf descendant. Used to
     /// cascade a branch check and to derive a branch's check state.
     pub fn checkable_values_under(&self, node: &TreeNode) -> Vec<String> {
-        if node.children.is_empty() {
-            vec![node.value.clone()]
-        } else {
-            let mut out = Vec::new();
-            for child in &node.children {
-                out.extend(self.checkable_values_under(child));
-            }
-            out
-        }
+        poodle_headless::tree::tree_checkable_under(node)
     }
 
     /// Tri-state check state for a node, derived from its checkable descendants:
     /// `Checked` when all are checked, `Unchecked` when none, else `Mixed`.
     pub fn check_state(&self, node: &TreeNode) -> CheckState {
-        let leaves = self.checkable_values_under(node);
-        if leaves.is_empty() {
-            return CheckState::Unchecked;
-        }
-        let checked = leaves.iter().filter(|v| self.is_checked(v)).count();
-        if checked == 0 {
-            CheckState::Unchecked
-        } else if checked == leaves.len() {
-            CheckState::Checked
-        } else {
-            CheckState::Mixed
+        // Delegates to the poodle-headless cascade (conformance-tested
+        // against the TS core). Leafless nodes cannot occur (a childless
+        // node is its own checkable atom).
+        match poodle_headless::tree::tree_check_state(node, &self.checked_values) {
+            poodle_headless::tree::TreeCheckState::Checked => CheckState::Checked,
+            poodle_headless::tree::TreeCheckState::Unchecked => CheckState::Unchecked,
+            poodle_headless::tree::TreeCheckState::Mixed => CheckState::Mixed,
         }
     }
 

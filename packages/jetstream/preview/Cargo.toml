@@ -14,6 +14,7 @@ poodle-jetstream = { path = "../adapter" }
 poodle-jetstream-components = { path = "../components" }
 poodle-adapter = { path = "../../contracts/adapter" }
 poodle-specs = { path = "../../contracts/components" }
+poodle-headless = { path = "../../contracts/headless" }
 poodle-workstation = { path = "../../contracts/workstation" }
 poodle-layout = { path = "../../contracts/layout" }
 poodle-style = { path = "../../contracts/style" }

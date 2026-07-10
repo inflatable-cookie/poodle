@@ -7,6 +7,15 @@ use serde_json::{json, Value};
 use poodle_headless::color::*;
 use poodle_headless::date::*;
 
+fn canonicalize(value: &Value) -> Value {
+    match value {
+        Value::Number(number) => json!(number.as_f64().unwrap_or(0.0)),
+        Value::Array(entries) => Value::Array(entries.iter().map(canonicalize).collect()),
+        Value::Object(map) => Value::Object(map.iter().map(|(key, entry)| (key.clone(), canonicalize(entry))).collect()),
+        other => other.clone(),
+    }
+}
+
 fn vectors() -> Value {
     serde_json::from_str(include_str!("../vectors/domain.json")).expect("vectors parse")
 }
@@ -194,6 +203,151 @@ fn pagination_conformance() {
                 assert_eq!(result, expect.as_bool().unwrap(), "canRequestPage {case}");
             }
             other => panic!("unknown pagination op {other}"),
+        }
+    }
+}
+
+// ── Tree ──
+
+struct VecNode {
+    value: String,
+    children: Vec<VecNode>,
+    is_branch: bool,
+    is_disabled: bool,
+}
+
+impl poodle_headless::tree::TreeNodeLike for VecNode {
+    fn value(&self) -> &str {
+        &self.value
+    }
+    fn children(&self) -> &[Self] {
+        &self.children
+    }
+    fn is_branch_flag(&self) -> bool {
+        self.is_branch
+    }
+    fn is_disabled(&self) -> bool {
+        self.is_disabled
+    }
+}
+
+fn nodes_from(value: &Value) -> Vec<VecNode> {
+    value
+        .as_array()
+        .map(|entries| {
+            entries
+                .iter()
+                .map(|entry| VecNode {
+                    value: s(entry, "value").to_string(),
+                    children: nodes_from(&entry["children"]),
+                    is_branch: entry["isBranch"].as_bool().unwrap_or(false),
+                    is_disabled: entry["isDisabled"].as_bool().unwrap_or(false),
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn strings_from(value: &Value) -> Vec<String> {
+    value
+        .as_array()
+        .map(|entries| entries.iter().filter_map(Value::as_str).map(str::to_string).collect())
+        .unwrap_or_default()
+}
+
+#[test]
+fn tree_conformance() {
+    use poodle_headless::tree::*;
+
+    let doc = vectors();
+    let nodes = nodes_from(&doc["treeNodes"]);
+
+    for case in doc["tree"].as_array().unwrap() {
+        let op = s(case, "op");
+        let expect = &case["expect"];
+
+        match op {
+            "flatten" => {
+                let rows = flatten_visible_tree_rows(&nodes, &strings_from(&case["expanded"]));
+                let actual: Vec<Value> = rows
+                    .iter()
+                    .map(|row| json!({ "value": row.value, "depth": row.depth, "parent": row.parent, "disabled": row.disabled }))
+                    .collect();
+                assert_eq!(json!(actual), *expect, "flatten {case}");
+            }
+            "checkState" => {
+                let node = find_tree_node(&nodes, s(case, "value")).unwrap();
+                let state = tree_check_state(node, &strings_from(&case["checked"]));
+                let name = match state {
+                    TreeCheckState::Checked => "checked",
+                    TreeCheckState::Unchecked => "unchecked",
+                    TreeCheckState::Mixed => "mixed",
+                };
+                assert_eq!(name, expect.as_str().unwrap(), "checkState {case}");
+            }
+            "toggleCheck" => {
+                let node = find_tree_node(&nodes, s(case, "value")).unwrap();
+                let mut next = tree_toggle_check(node, &strings_from(&case["checked"]));
+                next.sort();
+                assert_eq!(json!(next), *expect, "toggleCheck {case}");
+            }
+            "range" => {
+                let rows = flatten_visible_tree_rows(&nodes, &strings_from(&case["expanded"]));
+                let range = tree_range_selection(&rows, Some(s(case, "anchor")), s(case, "to"));
+                assert_eq!(json!(range), *expect, "range {case}");
+            }
+            "siblingTarget" => {
+                let siblings = strings_from(&case["siblings"]);
+                let up = case["up"].as_bool().unwrap();
+                let target = tree_sibling_reorder_target(&siblings, s(case, "value"), up);
+                let actual = target.map(|step| {
+                    json!({ "target": step.target, "position": if step.before { "before" } else { "after" } })
+                });
+                assert_eq!(json!(actual), *expect, "siblingTarget {case}");
+            }
+            "keydown" => {
+                let expanded = strings_from(&case["expanded"]);
+                let rows = flatten_visible_tree_rows(&nodes, &expanded);
+                let shift = case["shift"].as_bool().unwrap_or(false);
+                let intent = tree_keydown_intent(
+                    &rows,
+                    s(case, "value"),
+                    s(case, "key"),
+                    TreeKeyModifiers { alt: false, shift },
+                    false,
+                    &expanded,
+                );
+                let actual = intent.map(|intent| match intent {
+                    TreeKeyIntent::Focus { value, extend_selection } => {
+                        json!({ "type": "focus", "value": value, "extendSelection": extend_selection })
+                    }
+                    TreeKeyIntent::Expand { value } => json!({ "type": "expand", "value": value }),
+                    TreeKeyIntent::Collapse { value } => json!({ "type": "collapse", "value": value }),
+                    TreeKeyIntent::FocusParent { parent } => json!({ "type": "focusParent", "parent": parent }),
+                    TreeKeyIntent::MoveSibling { up } => json!({ "type": "moveSibling", "direction": if up { -1 } else { 1 } }),
+                    TreeKeyIntent::Activate => json!({ "type": "activate" }),
+                    TreeKeyIntent::ToggleSelection => json!({ "type": "toggleSelection" }),
+                    TreeKeyIntent::StartRename => json!({ "type": "startRename" }),
+                });
+                assert_eq!(json!(actual), *expect, "keydown {case}");
+            }
+            "virtualWindow" => {
+                let window = tree_virtual_window(
+                    case["rowCount"].as_u64().unwrap() as usize,
+                    case["rowHeight"].as_f64().unwrap(),
+                    case["scrollTop"].as_f64().unwrap(),
+                    case["viewport"].as_f64().unwrap(),
+                    case["overscan"].as_u64().unwrap() as usize,
+                );
+                let actual = json!({
+                    "startIndex": window.start_index,
+                    "endIndex": window.end_index,
+                    "offsetY": window.offset_y,
+                    "totalHeight": window.total_height,
+                });
+                assert_eq!(canonicalize(&actual), canonicalize(expect), "virtualWindow {case}");
+            }
+            other => panic!("unknown tree op {other}"),
         }
     }
 }
