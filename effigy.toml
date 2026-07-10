@@ -9,11 +9,6 @@ include = [
   "demos/effigy.demos.toml",
 ]
 
-[isolation]
-paths = [
-  "node_modules",
-]
-
 [bootstrap]
 setup = ["bootstrap:deps"]
 start = "preview:dev"

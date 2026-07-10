@@ -8,11 +8,14 @@
 //! See docs/architecture/006-headless-core-and-machine-model.md.
 
 pub mod checkbox;
+pub mod color;
+pub mod date;
 pub mod disclosure;
 pub mod hover;
 pub mod menu;
 pub mod modal;
 pub mod nav;
+pub mod pagination;
 pub mod popover;
 pub mod single_select;
 pub mod slider;

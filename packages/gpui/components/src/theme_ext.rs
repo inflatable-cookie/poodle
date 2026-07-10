@@ -318,31 +318,21 @@ pub struct Hsl {
 }
 
 /// Parse a hex string (#rgb / #rrggbb / #rrggbbaa) into RGB + alpha.
-/// Returns `None` for malformed input.
+/// Returns `None` for malformed input. Delegates to the poodle-headless hex
+/// codec (conformance-tested against the TS core).
 pub fn hex_to_rgb255(hex: &str) -> Option<Rgb255> {
-    let hex = hex.strip_prefix('#').unwrap_or(hex);
-    let (r, g, b, a) = match hex.len() {
-        3 => {
-            let r = u8::from_str_radix(&hex[0..1], 16).ok()?;
-            let g = u8::from_str_radix(&hex[1..2], 16).ok()?;
-            let b = u8::from_str_radix(&hex[2..3], 16).ok()?;
-            (r * 17, g * 17, b * 17, 1.0)
-        }
-        6 => (
-            u8::from_str_radix(&hex[0..2], 16).ok()?,
-            u8::from_str_radix(&hex[2..4], 16).ok()?,
-            u8::from_str_radix(&hex[4..6], 16).ok()?,
-            1.0,
-        ),
-        8 => (
-            u8::from_str_radix(&hex[0..2], 16).ok()?,
-            u8::from_str_radix(&hex[2..4], 16).ok()?,
-            u8::from_str_radix(&hex[4..6], 16).ok()?,
-            u8::from_str_radix(&hex[6..8], 16).ok()? as f32 / 255.0,
-        ),
-        _ => return None,
-    };
-    Some(Rgb255 { r, g, b, a })
+    if !poodle_headless::color::is_valid_hex(hex) && !poodle_headless::color::is_valid_hex(&format!("#{hex}")) {
+        return None;
+    }
+
+    let (rgb, alpha) = poodle_headless::color::hex_to_rgb(hex)?;
+
+    Some(Rgb255 {
+        r: rgb.r,
+        g: rgb.g,
+        b: rgb.b,
+        a: alpha.unwrap_or(1.0) as f32,
+    })
 }
 
 /// Convert RGB (0–255) to HSV.
@@ -438,10 +428,10 @@ pub fn pure_hue_hsla(h: f32) -> Hsla {
 /// Format RGB (0–255) + alpha into a normalized hex string.
 /// 6-digit when alpha is 1.0, 8-digit otherwise.
 pub fn rgb255_to_hex(rgb: Rgb255) -> String {
-    if (rgb.a - 1.0).abs() < f32::EPSILON {
-        format!("#{:02x}{:02x}{:02x}", rgb.r, rgb.g, rgb.b)
-    } else {
-        let a = (rgb.a * 255.0).round().clamp(0.0, 255.0) as u8;
-        format!("#{:02x}{:02x}{:02x}{:02x}", rgb.r, rgb.g, rgb.b, a)
-    }
+    let alpha = if (rgb.a - 1.0).abs() < f32::EPSILON { None } else { Some(f64::from(rgb.a)) };
+
+    poodle_headless::color::rgb_to_hex(
+        poodle_headless::color::Rgb { r: rgb.r, g: rgb.g, b: rgb.b },
+        alpha,
+    )
 }

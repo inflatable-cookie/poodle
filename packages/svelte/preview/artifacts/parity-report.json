@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-21T11:46:47.714Z",
+  "generatedAt": "2026-07-10T19:19:07.842Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 153,
-        "componentCount": 124,
+        "exportCount": 160,
+        "componentCount": 131,
         "helperCount": 29,
-        "previewedCount": 153,
+        "previewedCount": 160,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 153,
-        "componentCount": 124,
+        "exportCount": 160,
+        "componentCount": 131,
         "helperCount": 29,
-        "previewedCount": 153,
+        "previewedCount": 160,
         "contractOnlyCount": 0
       }
     ],
@@ -252,6 +252,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Avatar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -699,6 +712,19 @@
         ],
         "sectionTitles": [
           "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DetailSectionGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Responsive peer-detail grouping is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -1589,6 +1615,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "Radio",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "RadioGroup",
         "kind": "component",
         "status": "previewed",
@@ -1996,6 +2035,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "Text",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",
@@ -2005,6 +2057,19 @@
         ],
         "sectionTitles": [
           "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "TextLink",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -2087,6 +2152,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "TokenInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Toolbar",
         "kind": "component",
         "status": "previewed",
@@ -2104,6 +2182,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Tree",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
         "sectionIds": [
           "catalog-hub"
         ],

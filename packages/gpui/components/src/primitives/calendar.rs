@@ -1,6 +1,7 @@
 //! Calendar — real GPUI component backed by CalendarSpec.
 
 use gpui::*;
+use poodle_headless::date as headless_date;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue,
@@ -165,55 +166,26 @@ impl Calendar {
         }
     }
 
-    /// Parse "YYYY-MM-DD" and return the day number.
+    /// Parse "YYYY-MM-DD" and return the day number (poodle-headless,
+    /// conformance-tested against the TS core).
     fn parse_day(s: &str) -> Option<u32> {
-        let parts: Vec<&str> = s.split('-').collect();
-        if parts.len() == 3 {
-            parts[2].parse::<u32>().ok()
-        } else {
-            None
-        }
+        headless_date::parse_iso_date(s).map(|date| date.day)
     }
 
     /// Number of days in a given month (handles leap years).
     fn days_in_month(year: i32, month: u32) -> u32 {
-        match month {
-            1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-            4 | 6 | 9 | 11 => 30,
-            2 => {
-                if (year % 4 == 0 && year % 100 != 0) || year % 400 == 0 {
-                    29
-                } else {
-                    28
-                }
-            }
-            _ => 30,
-        }
+        headless_date::days_in_month(year, month)
     }
 
     /// Day-of-week for the 1st of a given month (0 = Sunday).
     fn first_day_of_week(year: i32, month: u32) -> u32 {
-        // Tomohiko Sakamoto's algorithm
-        let t = [0i32, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
-        let y = if month < 3 { year - 1 } else { year };
-        let m = month as usize;
-        ((y + y / 4 - y / 100 + y / 400 + t[m - 1] + 1) % 7) as u32
+        headless_date::weekday(headless_date::IsoDate { year, month, day: 1 })
     }
 
     /// Convert days since Unix epoch to (year, month, day).
     fn days_to_ymd(days: i64) -> (i32, u32, u32) {
-        // Algorithm from https://howardhinnant.github.io/date_algorithms.html
-        let z = days + 719468;
-        let era = (if z >= 0 { z } else { z - 146096 }) / 146097;
-        let doe = (z - era * 146097) as u32;
-        let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
-        let y = yoe as i64 + era * 400;
-        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
-        let mp = (5 * doy + 2) / 153;
-        let d = doy - (153 * mp + 2) / 5 + 1;
-        let m = if mp < 10 { mp + 3 } else { mp - 9 };
-        let y = if m <= 2 { y + 1 } else { y };
-        (y as i32, m, d)
+        let date = headless_date::from_epoch_days(days);
+        (date.year, date.month, date.day)
     }
 }
 

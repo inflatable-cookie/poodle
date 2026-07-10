@@ -276,50 +276,22 @@ impl PaginationSpec {
     }
 
     /// Compute the visible page items: first, last, siblings around current,
-    /// and ellipsis markers for gaps.
+    /// and ellipsis markers for gaps. Delegates to the poodle-headless
+    /// window math (conformance-tested against the TS core).
     pub fn visible_pages(&self) -> Vec<PageItem> {
         if self.total_pages <= 1 {
             return vec![PageItem::Page(1)];
         }
 
         let current = self.current_page.clamp(1, self.total_pages);
-        let siblings = self.sibling_count;
 
-        let sibling_start = if current > siblings + 1 {
-            current - siblings
-        } else {
-            1
-        };
-        let sibling_end = (current + siblings).min(self.total_pages);
-
-        let mut items = Vec::new();
-
-        // Always include page 1
-        items.push(PageItem::Page(1));
-
-        // Left ellipsis if sibling range doesn't touch page 2
-        if sibling_start > 2 {
-            items.push(PageItem::Ellipsis);
-        }
-
-        // Sibling range (skip 1 and total_pages, they're always added)
-        for page in sibling_start..=sibling_end {
-            if page != 1 && page != self.total_pages {
-                items.push(PageItem::Page(page));
-            }
-        }
-
-        // Right ellipsis if sibling range doesn't touch second-to-last
-        if sibling_end < self.total_pages - 1 {
-            items.push(PageItem::Ellipsis);
-        }
-
-        // Always include last page (if different from first)
-        if self.total_pages > 1 {
-            items.push(PageItem::Page(self.total_pages));
-        }
-
-        items
+        poodle_headless::pagination::build_visible_pages(current, self.total_pages, self.sibling_count)
+            .into_iter()
+            .map(|item| match item {
+                poodle_headless::pagination::VisiblePage::Page(page) => PageItem::Page(page),
+                poodle_headless::pagination::VisiblePage::Ellipsis => PageItem::Ellipsis,
+            })
+            .collect()
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

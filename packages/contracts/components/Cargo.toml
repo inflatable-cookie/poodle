@@ -9,6 +9,7 @@ path = "src/lib.rs"
 
 [dependencies]
 poodle-tokens = { path = "../tokens" }
+poodle-headless = { path = "../headless" }
 
 [package.metadata.poodle]
 public-intent = true
