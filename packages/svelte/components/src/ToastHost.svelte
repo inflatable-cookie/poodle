@@ -47,7 +47,11 @@
   }
 
   function reconcileTimers(next: ToastHostStoreItem[]) {
-    const plan = reconcileToastTimers([...timers.keys()], next, { autoDismissMs, stickyTones });
+    const plan = reconcileToastTimers([...timers.keys()], next, {
+      autoDismissMs,
+      // ToastItem["tone"] is optional; undefined entries can never match a tone
+      stickyTones: stickyTones.filter((tone): tone is NonNullable<typeof tone> => tone != null),
+    });
 
     for (const id of plan.clear) {
       clearTimer(id);

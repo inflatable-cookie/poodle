@@ -1,0 +1,784 @@
+{
+  "summary": {
+    "components": 65,
+    "recipeHooks": 34,
+    "hookCandidates": 46,
+    "metricVariables": 290
+  },
+  "inventory": {
+    "accordion": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-accordion-item-gap",
+        "--poodle-accordion-panel-font-size"
+      ]
+    },
+    "app-header": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-app-header-gap",
+        "--poodle-app-header-min-height",
+        "--poodle-app-header-padding-block",
+        "--poodle-app-header-padding-inline",
+        "--poodle-app-header-region-gap",
+        "--poodle-app-header-subtitle-size",
+        "--poodle-app-header-title-size"
+      ]
+    },
+    "audio-player": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-audio-player-button-size",
+        "--poodle-audio-player-gap",
+        "--poodle-audio-player-icon-size",
+        "--poodle-audio-player-pad-x",
+        "--poodle-audio-player-pad-y",
+        "--poodle-audio-player-speed-x",
+        "--poodle-audio-player-speed-y",
+        "--poodle-audio-player-time-width",
+        "--poodle-audio-player-volume-width"
+      ]
+    },
+    "avatar": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-avatar-background",
+        "--poodle-avatar-color"
+      ],
+      "metric": [
+        "--poodle-avatar-font-size",
+        "--poodle-avatar-size"
+      ]
+    },
+    "block-editor": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-block-editor-content-x",
+        "--poodle-block-editor-content-y",
+        "--poodle-block-editor-control-size",
+        "--poodle-block-editor-input-x",
+        "--poodle-block-editor-input-y",
+        "--poodle-block-editor-shell-x",
+        "--poodle-block-editor-shell-y",
+        "--poodle-block-editor-stack-gap",
+        "--poodle-block-editor-toolbar-gap",
+        "--poodle-block-editor-toolbar-x",
+        "--poodle-block-editor-toolbar-y",
+        "--poodle-block-editor-type-picker-inset"
+      ]
+    },
+    "bulk-action-bar": {
+      "recipe": [
+        "--poodle-recipe-bulk-fill"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-bulk-action-bar-bottom",
+        "--poodle-bulk-action-bar-left",
+        "--poodle-bulk-action-bar-max-width",
+        "--poodle-bulk-action-bar-right"
+      ]
+    },
+    "button": {
+      "recipe": [
+        "--poodle-recipe-button-border",
+        "--poodle-recipe-button-border-hover",
+        "--poodle-recipe-button-fill",
+        "--poodle-recipe-button-fill-active",
+        "--poodle-recipe-button-fill-hover",
+        "--poodle-recipe-button-primary-border",
+        "--poodle-recipe-button-primary-fill",
+        "--poodle-recipe-button-primary-fill-active",
+        "--poodle-recipe-button-primary-fill-hover",
+        "--poodle-recipe-button-primary-shadow",
+        "--poodle-recipe-button-primary-text",
+        "--poodle-recipe-button-shadow",
+        "--poodle-recipe-button-text"
+      ],
+      "candidates": [
+        "--poodle-button-border",
+        "--poodle-button-border-hover",
+        "--poodle-button-fill",
+        "--poodle-button-fill-active",
+        "--poodle-button-fill-hover",
+        "--poodle-button-shadow",
+        "--poodle-button-text"
+      ],
+      "metric": []
+    },
+    "callout": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-callout-border",
+        "--poodle-callout-fill"
+      ],
+      "metric": []
+    },
+    "card": {
+      "recipe": [
+        "--poodle-recipe-card-border",
+        "--poodle-recipe-card-divider",
+        "--poodle-recipe-card-fill",
+        "--poodle-recipe-card-hover-border",
+        "--poodle-recipe-card-hover-fill",
+        "--poodle-recipe-card-hover-shadow",
+        "--poodle-recipe-card-radius",
+        "--poodle-recipe-card-shadow"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-card-footer-padding-top",
+        "--poodle-card-gap",
+        "--poodle-card-padding-block",
+        "--poodle-card-padding-inline"
+      ]
+    },
+    "card-toggle-group": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-card-toggle-group-count-font-size",
+        "--poodle-card-toggle-group-count-padding-block",
+        "--poodle-card-toggle-group-count-padding-inline",
+        "--poodle-card-toggle-group-gap",
+        "--poodle-card-toggle-group-min-width"
+      ]
+    },
+    "checkbox": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-checkbox-selected-color"
+      ],
+      "metric": []
+    },
+    "collapsible": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-collapsible-fill"
+      ],
+      "metric": []
+    },
+    "command-palette": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-command-palette-close-size",
+        "--poodle-command-palette-hint-height",
+        "--poodle-command-palette-hint-x"
+      ]
+    },
+    "date-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-date-picker-trigger-height"
+      ]
+    },
+    "date-range-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-date-range-picker-trigger-height"
+      ]
+    },
+    "date-time-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-date-time-picker-trigger-height"
+      ]
+    },
+    "date-time-range-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-date-time-range-picker-trigger-height"
+      ]
+    },
+    "date-time-zone-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-date-time-zone-picker-trigger-height"
+      ]
+    },
+    "detail-item": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-detail-item-inline-column-gap",
+        "--poodle-detail-item-inline-label-column",
+        "--poodle-detail-item-label-block-gap",
+        "--poodle-detail-item-row-gap",
+        "--poodle-detail-item-surface-gap",
+        "--poodle-detail-item-surface-padding-x",
+        "--poodle-detail-item-surface-padding-y",
+        "--poodle-detail-item-surface-stacked-gap"
+      ]
+    },
+    "detail-section": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-detail-section-body-column-gap",
+        "--poodle-detail-section-body-gap",
+        "--poodle-detail-section-body-row-gap",
+        "--poodle-detail-section-header-gap",
+        "--poodle-detail-section-item-min",
+        "--poodle-detail-section-root-gap",
+        "--poodle-detail-section-separated-gap",
+        "--poodle-detail-section-separated-inset",
+        "--poodle-detail-section-title-gap",
+        "--poodle-detail-section-title-line-height",
+        "--poodle-detail-section-title-size",
+        "--poodle-detail-section-title-weight"
+      ]
+    },
+    "detail-section-group": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-detail-section-group-gap",
+        "--poodle-detail-section-group-item-min",
+        "--poodle-detail-section-group-min"
+      ]
+    },
+    "duration-input": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-duration-input-digit-size",
+        "--poodle-duration-input-field-width",
+        "--poodle-duration-input-gap-base",
+        "--poodle-duration-input-gap-density-adjust",
+        "--poodle-duration-input-label-gap",
+        "--poodle-duration-input-label-size",
+        "--poodle-duration-input-padding-block-base",
+        "--poodle-duration-input-padding-inline-density-adjust",
+        "--poodle-duration-input-padding-inline-size-adjust"
+      ]
+    },
+    "editable-list": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-editable-list-font-size",
+        "--poodle-editable-list-gap",
+        "--poodle-editable-list-handle-size",
+        "--poodle-editable-list-item-gap",
+        "--poodle-editable-list-item-x",
+        "--poodle-editable-list-item-y"
+      ]
+    },
+    "field": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-field-gap",
+        "--poodle-field-header-gap",
+        "--poodle-field-label-gap"
+      ]
+    },
+    "file-upload": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-file-upload-content-gap",
+        "--poodle-file-upload-dropzone-min-height",
+        "--poodle-file-upload-dropzone-padding-x",
+        "--poodle-file-upload-dropzone-padding-y",
+        "--poodle-file-upload-hint-size",
+        "--poodle-file-upload-item-padding",
+        "--poodle-file-upload-label-size"
+      ]
+    },
+    "form-actions": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-form-actions-border-color"
+      ],
+      "metric": [
+        "--poodle-form-actions-border-gap",
+        "--poodle-form-actions-gap",
+        "--poodle-form-actions-padding-top"
+      ]
+    },
+    "form-dialog": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-form-dialog-width"
+      ]
+    },
+    "form-layout": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-form-layout-column-gap",
+        "--poodle-form-layout-row-gap"
+      ]
+    },
+    "icon-button": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-icon-button-border",
+        "--poodle-icon-button-fill",
+        "--poodle-icon-button-fill-active",
+        "--poodle-icon-button-fill-hover",
+        "--poodle-icon-button-shadow",
+        "--poodle-icon-button-text"
+      ],
+      "metric": []
+    },
+    "list-card": {
+      "recipe": [
+        "--poodle-recipe-list-card-fill",
+        "--poodle-recipe-list-card-hover-fill"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-list-card-compact-gap",
+        "--poodle-list-card-compact-padding-block",
+        "--poodle-list-card-compact-padding-inline",
+        "--poodle-list-card-density-gap-adjust",
+        "--poodle-list-card-density-padding-block-adjust",
+        "--poodle-list-card-density-padding-inline-adjust",
+        "--poodle-list-card-gap",
+        "--poodle-list-card-leading-box-size",
+        "--poodle-list-card-leading-font-size",
+        "--poodle-list-card-leading-icon-size",
+        "--poodle-list-card-padding-block",
+        "--poodle-list-card-padding-inline",
+        "--poodle-list-card-selection-indicator-size"
+      ]
+    },
+    "list-card-counter": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-list-card-counter-font-size",
+        "--poodle-list-card-counter-gap",
+        "--poodle-list-card-counter-icon-size"
+      ]
+    },
+    "list-grid": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-list-grid-gap"
+      ]
+    },
+    "media-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-media-picker-grid-gap",
+        "--poodle-media-picker-grid-min",
+        "--poodle-media-picker-item-pad",
+        "--poodle-media-picker-search-offset",
+        "--poodle-media-picker-stack-gap",
+        "--poodle-media-picker-thumb-size"
+      ]
+    },
+    "media-preview": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-media-preview-body-size",
+        "--poodle-media-preview-eyebrow-size",
+        "--poodle-media-preview-header-gap",
+        "--poodle-media-preview-meta-padding-x",
+        "--poodle-media-preview-meta-padding-y",
+        "--poodle-media-preview-section-gap",
+        "--poodle-media-preview-title-line-height",
+        "--poodle-media-preview-title-size"
+      ]
+    },
+    "media-thumbnail": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-media-thumbnail-object-fit"
+      ]
+    },
+    "meta-item": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-meta-item-gap",
+        "--poodle-meta-item-label-font-size",
+        "--poodle-meta-item-value-font-size"
+      ]
+    },
+    "meter": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-meter-track-thickness"
+      ]
+    },
+    "nav-card": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-nav-card-content-gap",
+        "--poodle-nav-card-gap",
+        "--poodle-nav-card-icon-size",
+        "--poodle-nav-card-padding-x",
+        "--poodle-nav-card-padding-y",
+        "--poodle-nav-card-title-gap"
+      ]
+    },
+    "number-input": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-number-input-control-height"
+      ]
+    },
+    "order-by": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-order-by-control-height",
+        "--poodle-order-by-trigger-height"
+      ]
+    },
+    "page-header": {
+      "recipe": [
+        "--poodle-recipe-page-header-border",
+        "--poodle-recipe-page-header-fill",
+        "--poodle-recipe-page-header-padding-block-end",
+        "--poodle-recipe-page-header-padding-block-start",
+        "--poodle-recipe-page-header-padding-inline",
+        "--poodle-recipe-page-header-radius",
+        "--poodle-recipe-page-header-shadow"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-page-header-actions-gap",
+        "--poodle-page-header-actions-row-gap",
+        "--poodle-page-header-back-size",
+        "--poodle-page-header-banner-margin-top",
+        "--poodle-page-header-body-size",
+        "--poodle-page-header-content-gap",
+        "--poodle-page-header-eyebrow-size",
+        "--poodle-page-header-gap",
+        "--poodle-page-header-section-size",
+        "--poodle-page-header-section-title-compact-size",
+        "--poodle-page-header-section-title-size",
+        "--poodle-page-header-subtitle-compact-size",
+        "--poodle-page-header-subtitle-size",
+        "--poodle-page-header-title-compact-size",
+        "--poodle-page-header-title-gap",
+        "--poodle-page-header-title-size"
+      ]
+    },
+    "password-requirements": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-password-requirements-body-size",
+        "--poodle-password-requirements-description-gap",
+        "--poodle-password-requirements-hint-gap",
+        "--poodle-password-requirements-list-indent",
+        "--poodle-password-requirements-list-line-height",
+        "--poodle-password-requirements-padding",
+        "--poodle-password-requirements-title-size"
+      ]
+    },
+    "pill": {
+      "recipe": [
+        "--poodle-recipe-pill-border",
+        "--poodle-recipe-pill-fill",
+        "--poodle-recipe-pill-text"
+      ],
+      "candidates": [
+        "--poodle-pill-accent",
+        "--poodle-pill-border",
+        "--poodle-pill-fill",
+        "--poodle-pill-text"
+      ],
+      "metric": [
+        "--poodle-pill-font-size",
+        "--poodle-pill-gap",
+        "--poodle-pill-min-height",
+        "--poodle-pill-min-width-adjust",
+        "--poodle-pill-min-width-base",
+        "--poodle-pill-padding-x-adjust",
+        "--poodle-pill-padding-x-base",
+        "--poodle-pill-padding-y-adjust",
+        "--poodle-pill-padding-y-base"
+      ]
+    },
+    "popover": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-popover-offset",
+        "--poodle-popover-surface-max-width",
+        "--poodle-popover-surface-min-width"
+      ]
+    },
+    "radio": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-radio-selected-color"
+      ],
+      "metric": []
+    },
+    "relation-picker": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-relation-picker-breadcrumb-control",
+        "--poodle-relation-picker-breadcrumb-x",
+        "--poodle-relation-picker-desc-size",
+        "--poodle-relation-picker-item-gap",
+        "--poodle-relation-picker-item-x",
+        "--poodle-relation-picker-item-y",
+        "--poodle-relation-picker-list-gap",
+        "--poodle-relation-picker-list-x",
+        "--poodle-relation-picker-list-y",
+        "--poodle-relation-picker-title-size"
+      ]
+    },
+    "segmented-control": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-segmented-control-height",
+        "--poodle-segmented-control-x"
+      ]
+    },
+    "select": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-select-clear-width",
+        "--poodle-select-control-height",
+        "--poodle-select-end-decoration-width",
+        "--poodle-select-end-gap",
+        "--poodle-select-indicator-width",
+        "--poodle-select-inline-padding",
+        "--poodle-select-inline-padding-density-adjust",
+        "--poodle-select-inline-padding-size-adjust",
+        "--poodle-select-interior-height"
+      ]
+    },
+    "selection-summary": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-selection-summary-chip-font-size",
+        "--poodle-selection-summary-chip-min-height",
+        "--poodle-selection-summary-chip-padding-x",
+        "--poodle-selection-summary-chips-min-height",
+        "--poodle-selection-summary-clear-font-size",
+        "--poodle-selection-summary-font-size",
+        "--poodle-selection-summary-gap",
+        "--poodle-selection-summary-icon-size",
+        "--poodle-selection-summary-overflow-font-size",
+        "--poodle-selection-summary-overflow-line-height",
+        "--poodle-selection-summary-overflow-padding-x",
+        "--poodle-selection-summary-padding-bottom"
+      ]
+    },
+    "separator": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-separator-color"
+      ],
+      "metric": []
+    },
+    "sidebar-nav": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-sidebar-nav-group-gap",
+        "--poodle-sidebar-nav-item-font-size",
+        "--poodle-sidebar-nav-item-height",
+        "--poodle-sidebar-nav-item-padding-block",
+        "--poodle-sidebar-nav-item-padding-inline",
+        "--poodle-sidebar-nav-title-font-size",
+        "--poodle-sidebar-nav-title-gap",
+        "--poodle-sidebar-nav-title-letter-spacing"
+      ]
+    },
+    "skeleton": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-skeleton-height",
+        "--poodle-skeleton-width"
+      ]
+    },
+    "slider": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-slider-percent"
+      ]
+    },
+    "spinner": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-spinner-color"
+      ],
+      "metric": [
+        "--poodle-spinner-grid-gap",
+        "--poodle-spinner-grid-height",
+        "--poodle-spinner-grid-width",
+        "--poodle-spinner-ring-size"
+      ]
+    },
+    "split-button": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-split-button-chevron-size",
+        "--poodle-split-button-font-size",
+        "--poodle-split-button-height",
+        "--poodle-split-button-primary-padding-inline",
+        "--poodle-split-button-primary-padding-inline-base",
+        "--poodle-split-button-primary-padding-inline-density-adjust",
+        "--poodle-split-button-toggle-width",
+        "--poodle-split-button-toggle-width-base",
+        "--poodle-split-button-toggle-width-density-adjust"
+      ]
+    },
+    "surface": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-surface-border",
+        "--poodle-surface-fill",
+        "--poodle-surface-shadow"
+      ],
+      "metric": [
+        "--poodle-surface"
+      ]
+    },
+    "switch": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-switch-off-border",
+        "--poodle-switch-off-color",
+        "--poodle-switch-on-border",
+        "--poodle-switch-on-color"
+      ],
+      "metric": [
+        "--poodle-switch-off-thumb",
+        "--poodle-switch-off-track",
+        "--poodle-switch-on-thumb",
+        "--poodle-switch-on-track"
+      ]
+    },
+    "tabs": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-tabs-content-gap",
+        "--poodle-tabs-control-height",
+        "--poodle-tabs-control-x",
+        "--poodle-tabs-label-size",
+        "--poodle-tabs-list-gap",
+        "--poodle-tabs-separator-margin",
+        "--poodle-tabs-strip-close-margin-end",
+        "--poodle-tabs-strip-inline-padding",
+        "--poodle-tabs-strip-tab-x"
+      ]
+    },
+    "text-input": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-text-input-border",
+        "--poodle-text-input-border-focus",
+        "--poodle-text-input-fill",
+        "--poodle-text-input-fill-focus",
+        "--poodle-text-input-shadow",
+        "--poodle-text-input-shadow-focus"
+      ],
+      "metric": [
+        "--poodle-text-input-adornment-gap",
+        "--poodle-text-input-control-height",
+        "--poodle-text-input-control-padding-end",
+        "--poodle-text-input-control-padding-start",
+        "--poodle-text-input-density-block-adjust",
+        "--poodle-text-input-density-inline-adjust",
+        "--poodle-text-input-font-size",
+        "--poodle-text-input-line-height",
+        "--poodle-text-input-multiline-padding-end",
+        "--poodle-text-input-padding-block",
+        "--poodle-text-input-padding-inline",
+        "--poodle-text-input-radius"
+      ]
+    },
+    "time-ago": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-time-ago-underline",
+        "--poodle-time-ago-underline-hover"
+      ]
+    },
+    "time-input": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-time-input-control-height"
+      ]
+    },
+    "toggle-group": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-toggle-group-gap",
+        "--poodle-toggle-group-height",
+        "--poodle-toggle-group-x"
+      ]
+    },
+    "token-input": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-token-input-border",
+        "--poodle-token-input-border-focus",
+        "--poodle-token-input-fill",
+        "--poodle-token-input-fill-focus",
+        "--poodle-token-input-shadow",
+        "--poodle-token-input-shadow-focus"
+      ],
+      "metric": [
+        "--poodle-token-input-font-size",
+        "--poodle-token-input-gap",
+        "--poodle-token-input-line-height",
+        "--poodle-token-input-padding-block",
+        "--poodle-token-input-padding-inline",
+        "--poodle-token-input-radius"
+      ]
+    },
+    "toolbar": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-toolbar-control-height"
+      ]
+    },
+    "tree": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-tree-chevron-size",
+        "--poodle-tree-indent",
+        "--poodle-tree-row-font",
+        "--poodle-tree-row-gap",
+        "--poodle-tree-row-height",
+        "--poodle-tree-row-pad-inline",
+        "--poodle-tree-twisty-size"
+      ]
+    }
+  }
+}

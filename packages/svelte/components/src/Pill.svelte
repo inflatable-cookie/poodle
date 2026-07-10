@@ -63,9 +63,9 @@
 
 <style>
   .poodle-pill {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent);
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
-    --poodle-pill-text: var(--poodle-color-text-secondary);
+    --poodle-pill-fill: var(--poodle-recipe-pill-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent));
+    --poodle-pill-text: var(--poodle-recipe-pill-text, var(--poodle-color-text-secondary));
     --poodle-pill-min-height: 1.25rem;
     --poodle-pill-min-width-base: 0rem;
     --poodle-pill-min-width-adjust: 0rem;

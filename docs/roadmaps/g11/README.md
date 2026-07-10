@@ -74,8 +74,8 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
   pilot swap (Tabs/Popover/Checkbox) runtime-verified, consumer matrix clean
 - `g11.004` complete — full component sweep onto core: 4 waves + long-tail
   classification; machine model promoted to architecture 006
-- `g11.005` planned — appearance-recipe productization and per-app overrides
-  (can start after `g11.004` wave 2)
+- `g11.005` complete — appearance-recipe contract (architecture 007),
+  recipe-hook namespace, inventory tooling, soundcheck worked example
 - `g11.006` planned — Rust headless mirror with shared conformance vectors
 - `g11.007` planned — React adapter pilot and Mitosis shell decision
 

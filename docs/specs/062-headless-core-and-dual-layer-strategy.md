@@ -184,8 +184,16 @@ Build list for `g11.003`, from the pilot specs:
   event-site facts into events instead of relying on mirrored state.
 
 ## Open Questions (resolve in the runway, record answers here)
-- Recipe override delivery mechanism on the web: CSS custom properties per
-  part/state vs style-object maps vs both (`g11.005`).
+- ~~Recipe override delivery mechanism~~ **Resolved (g11.005):** CSS
+  custom-property contracts in a dedicated read-only namespace
+  (`--poodle-recipe-<component>[-<variant>]-<slot>[-<state>]`), no JS API.
+  Components resolve recipe hook -> treatment role -> token. Key finding:
+  component-local variables cannot be the public surface (components define
+  them, so app overrides lose the cascade) — the seed's `--poodle-recipe-*`
+  namespace from g03.005 was the correct pattern and is now the documented
+  contract (`docs/architecture/007-appearance-recipe-contract.md`), with a
+  generated inventory
+  (`packages/svelte/preview/artifacts/recipe-inventory.json`).
 - Whether GPUI/Jetstream consume ported machines or only the declarative spec
   (`g11.006`).
 

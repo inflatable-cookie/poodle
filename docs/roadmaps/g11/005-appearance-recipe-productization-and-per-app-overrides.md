@@ -1,6 +1,6 @@
 # g11.005 Appearance Recipe Productization And Per-App Overrides
 
-Status: planned
+Status: complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.003` (needs `data-part`/`data-state` attributes on at least
 the pilot + overlay waves), `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md`
@@ -58,6 +58,38 @@ check on the preview demo screens.
 - consumer typecheck matrix
 - `effigy docs:lint`, `effigy svelte:surface-audit`
 
+## Completion Notes (2026-07-10)
+
+- **Decision:** recipes are CSS custom-property contracts in a dedicated
+  read-only namespace — `--poodle-recipe-<component>[-<variant>]-<slot>
+  [-<state>]` — no JS API. Resolution chain per component variable:
+  recipe hook → treatment role → semantic token. Recorded in
+  `docs/architecture/007-appearance-recipe-contract.md` and spec 062.
+- **Design correction caught live:** component-local
+  `--poodle-<component>-*` variables cannot be the public surface —
+  components define them, so app-scoped overrides lose the cascade.
+  Verified in the preview; the g03.005 seed's `--poodle-recipe-*` pattern
+  (already adopted by Card/PageHeader/ListCard/BulkActionBar) was correct
+  and is now the documented contract. Button (secondary + primary-variant
+  hooks) and Pill adopted in this milestone.
+- **Inventory tooling:**
+  `packages/svelte/preview/scripts/build-recipe-inventory.ts` generates
+  `artifacts/recipe-inventory.json` — 34 recipe hooks, 46 hook candidates
+  (appearance vars pending hooks, added on demonstrated need), 290 metric
+  vars (explicitly out of contract, size/density owns them).
+- **Worked example:** `soundcheck` restyles Button (violet fill + hard
+  shadow), Pill (amber tint), and text-input focus chrome via a scoped
+  recipe block in its `app.css`; soundcheck `bun run build`
+  (svelte-check + vite) passes.
+- **Runtime-verified:** app-scoped `--poodle-recipe-button-fill` and
+  `--poodle-recipe-button-primary-fill` override secondary and primary
+  buttons independently and restore exactly on removal. Verification
+  gotcha recorded: buttons transition `background-color`, so computed
+  reads must wait out the transition.
+- Bonus fix: soundcheck's stricter svelte-check exposed a `stickyTones`
+  typing defect in ToastHost (optional tone entries vs core `ToastTone[]`)
+  — fixed.
+
 ## Next Task
 
-`g11.006` Rust mirror, or continue `g11.004` waves in parallel.
+`g11.006` Rust mirror.

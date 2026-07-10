@@ -219,32 +219,34 @@
 
 <style>
   .poodle-button {
-    --poodle-button-fill: var(
+    /* Recipe hooks (--poodle-recipe-*) are read-only from the app's scope:
+       recipe → treatment role → token. See architecture 007. */
+    --poodle-button-fill: var(--poodle-recipe-button-fill, var(
       --poodle-treatment-interactive-fill,
       color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))
-    );
-    --poodle-button-fill-hover: var(
+    ));
+    --poodle-button-fill-hover: var(--poodle-recipe-button-fill-hover, var(
       --poodle-treatment-interactive-fill-active,
       color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 80%, var(--poodle-color-text-primary))
-    );
-    --poodle-button-fill-active: color-mix(
+    ));
+    --poodle-button-fill-active: var(--poodle-recipe-button-fill-active, color-mix(
       in srgb,
       var(--poodle-surface, var(--poodle-color-background-surface)) 84%,
       var(--poodle-color-text-primary)
-    );
-    --poodle-button-border: var(
+    ));
+    --poodle-button-border: var(--poodle-recipe-button-border, var(
       --poodle-treatment-interactive-border,
       var(--poodle-color-border-default)
-    );
-    --poodle-button-border-hover: var(
+    ));
+    --poodle-button-border-hover: var(--poodle-recipe-button-border-hover, var(
       --poodle-treatment-interactive-border-active,
       color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary))
-    );
-    --poodle-button-text: var(--poodle-color-text-primary);
-    --poodle-button-shadow: var(
+    ));
+    --poodle-button-text: var(--poodle-recipe-button-text, var(--poodle-color-text-primary));
+    --poodle-button-shadow: var(--poodle-recipe-button-shadow, var(
       --poodle-treatment-interactive-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
-    );
+    ));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -388,28 +390,28 @@
   }
 
   .poodle-button[data-variant="primary"] {
-    --poodle-button-fill: var(
+    --poodle-button-fill: var(--poodle-recipe-button-primary-fill, var(
       --poodle-treatment-interactive-primary-fill,
       var(--poodle-color-accent-base)
-    );
-    --poodle-button-fill-hover: var(
+    ));
+    --poodle-button-fill-hover: var(--poodle-recipe-button-primary-fill-hover, var(
       --poodle-treatment-interactive-primary-fill-hover,
       color-mix(in srgb, white 12%, var(--poodle-color-accent-base))
-    );
-    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 88%, black);
-    --poodle-button-border: var(
+    ));
+    --poodle-button-fill-active: var(--poodle-recipe-button-primary-fill-active, color-mix(in srgb, var(--poodle-color-accent-base) 88%, black));
+    --poodle-button-border: var(--poodle-recipe-button-primary-border, var(
       --poodle-treatment-interactive-primary-border,
       color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
-    );
-    --poodle-button-text: var(
+    ));
+    --poodle-button-text: var(--poodle-recipe-button-primary-text, var(
       --poodle-treatment-interactive-primary-text,
       var(--poodle-color-text-inverse)
-    );
-    --poodle-button-shadow: var(
+    ));
+    --poodle-button-shadow: var(--poodle-recipe-button-primary-shadow, var(
       --poodle-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
-    );
+    ));
   }
 
   .poodle-button[data-variant="ghost"] {
