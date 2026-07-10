@@ -109,8 +109,9 @@ behavior (the Svelte implementation is the parity authority).
   pre-machine behavior).
 - Effects: `emitOpenChange`, `emitAction`, `focusFirstItem` (executed after
   the surface renders and is positioned)
-- Machinery dependencies: dismissable-layer stack; anchor positioning stays
-  adapter-side until the Floating UI swap.
+- Machinery dependencies: dismissable-layer stack; pointer-anchored
+  placement stays adapter-side (virtual-anchor adoption of the core
+  resolver is possible later).
 
 ContextMenu deltas: outside containment tests only the overlay (clicking
 the trigger zone closes). Re-invoking contextmenu while already open

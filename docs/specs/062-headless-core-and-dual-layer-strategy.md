@@ -164,9 +164,17 @@ Build list for `g11.003`, from the pilot specs:
   **Do not use `file:../../core` for the internal dep** — bun snapshots
   `file:` deps into its store, which shadowed live core source during
   development (stale-copy bug, caught in g11.003).
-- Floating UI: **deferred to the overlay wave (g11.004 wave 2).** Popover
-  keeps CSS anchoring as its documented delta; keeps the pilot swap visually
-  invariant with zero new runtime deps.
+- Floating UI: **rejected (g11.004 wave 2).** The in-house
+  `resolveOverlayPosition` (collision-aware flip candidates scored by
+  viewport overflow then anchor overlap, viewport clamp) was promoted into
+  core as `position.ts`, parameterized by viewport so it is pure and
+  Rust-portable. Rationale: zero new dependencies, pixel-identical for the
+  components already using it, and the Rust runtimes can mirror it directly
+  — Floating UI would have been web-only. Tooltip/Menu/IconButton use it via
+  a window-bound wrapper; HoverCard swapped its bespoke math onto it (flip
+  near edges is a recorded improvement delta); Popover deliberately keeps
+  CSS anchoring as a documented delta; ContextMenu's pointer anchoring stays
+  adapter-side.
 - Tests: `bun test` in `packages/core` (`bun:test`, no new dev deps beyond
   `@types/bun`). Machine tests double as the seed conformance vectors for
   `g11.006`.

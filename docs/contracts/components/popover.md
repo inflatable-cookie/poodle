@@ -167,7 +167,9 @@ Note: `data-scope`/`data-part`/`data-state` are added during the core swap
 #### Machinery Dependencies
 
 Dismissable-layer stack, focus (focusable-element query + restore), anchor
-positioning (future — CSS anchoring is the current documented delta), id
+positioning (core `resolveOverlayPosition` exists; Popover deliberately
+keeps CSS anchoring as a documented delta — converting to JS positioning
+is a behavior change deferred), id
 wiring, presence (if open/close animation is added later).
 
 ## 5. Callbacks

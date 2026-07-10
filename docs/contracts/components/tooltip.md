@@ -103,9 +103,9 @@ Hover-intent machine shared by Tooltip and HoverCard.
 - Effects: `startTimer(ms)` / `clearTimer` (adapter owns the timer handle),
   `emitOpenChange(open)`. Immediate closes emit `emitOpenChange(false)` even
   if the surface never became visible, matching pre-machine behavior.
-- Machinery dependencies: none beyond the adapter timer; positioning stays
-  adapter-side (anchor-positioning service arrives with the Floating UI
-  swap).
+- Machinery dependencies: adapter timer; anchor positioning via the core
+  `resolveOverlayPosition` machinery (collision-aware flip + viewport
+  clamp).
 
 Tooltip uses `closeDelayMs = 0` (immediate close on leave/blur/Escape).
 

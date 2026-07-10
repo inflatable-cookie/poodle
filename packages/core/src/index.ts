@@ -110,6 +110,15 @@ export {
 } from "./slider";
 
 export {
+  resolveOverlayPosition,
+  type OverlaySide,
+  type OverlayPlacement,
+  type RectLike,
+  type ViewportSize,
+  type OverlayPosition,
+} from "./position";
+
+export {
   resolveToastTone,
   normalizeToast,
   isToastSticky,

@@ -10,6 +10,7 @@
   } from "@poodle/headless";
   import { onDestroy, tick, type Snippet } from "svelte";
 
+  import { resolveOverlayPosition } from "./overlay-position";
   import type { OverlayPlacement } from "./types";
 
   interface Props {
@@ -89,63 +90,14 @@
       return;
     }
 
-    const trigger = triggerElement.getBoundingClientRect();
-    const surface = surfaceElement.getBoundingClientRect();
-    const pad = 8;
-    const gap = 8;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const position = resolveOverlayPosition(
+      triggerElement.getBoundingClientRect(),
+      surfaceElement.getBoundingClientRect(),
+      placement,
+      8,
+    );
 
-    let x: number;
-    let y: number;
-
-    const isVertical = placement.startsWith("top") || placement.startsWith("bottom");
-    const isHorizontal = placement.startsWith("left") || placement.startsWith("right");
-
-    if (isVertical) {
-      if (placement.endsWith("start")) {
-        x = trigger.left;
-      } else if (placement.endsWith("end")) {
-        x = trigger.right - surface.width;
-      } else {
-        x = trigger.left + trigger.width / 2 - surface.width / 2;
-      }
-
-      if (placement.startsWith("top")) {
-        y = trigger.top - surface.height - gap;
-      } else {
-        y = trigger.bottom + gap;
-      }
-    } else if (isHorizontal) {
-      if (placement.startsWith("left")) {
-        x = trigger.left - surface.width - gap;
-      } else {
-        x = trigger.right + gap;
-      }
-
-      y = trigger.top + trigger.height / 2 - surface.height / 2;
-    } else {
-      x = trigger.left + trigger.width / 2 - surface.width / 2;
-      y = trigger.top - surface.height - gap;
-    }
-
-    if (x + surface.width > vw - pad) {
-      x = vw - pad - surface.width;
-    }
-
-    if (x < pad) {
-      x = pad;
-    }
-
-    if (y + surface.height > vh - pad) {
-      y = vh - pad - surface.height;
-    }
-
-    if (y < pad) {
-      y = pad;
-    }
-
-    surfaceStyle = `left: ${x}px; top: ${y}px;`;
+    surfaceStyle = `left: ${position.left}px; top: ${position.top}px;`;
   }
 
   function clearTimers(): void {

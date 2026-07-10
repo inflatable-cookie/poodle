@@ -119,8 +119,22 @@ styled-only. Runtime-verified: toast render and manual dismiss; timer
 semantics covered by core unit tests (browser wait for the 6s auto-dismiss
 not exercised). 82 core tests green.
 
-Remaining wave 2: the Floating UI anchor-positioning swap for
-Popover/Tooltip/HoverCard/Menu.
+Positioning batch complete (2026-07-10) — **Floating UI rejected** (see
+spec 062): the in-house collision-aware resolver was promoted into core as
+`position.ts` (pure, viewport-parameterized, Rust-portable).
+Tooltip/Menu/IconButton unchanged via the window-bound wrapper; HoverCard
+swapped its bespoke math onto the shared resolver (edge-flip improvement
+delta recorded); Popover keeps CSS anchoring by deliberate contract delta;
+ContextMenu pointer anchoring stays adapter-side. 87 core tests green,
+including flip/clamp/scoring vectors. Verification note: the preview
+browser pane reports a 0×0 JS viewport (harness artifact, pre-existing —
+the old code read the same values), so pixel placement could not be
+runtime-verified there; confidence rests on the line-identical port plus
+core unit tests with real viewport sizes.
+
+Wave 2 is complete. Next: wave 3 (disclosure and navigation — Collapsible,
+Accordion, NavigationMenu, Menubar, Pagination), then wave 4 (text entry
+and pickers), then the long-tail classification sweep.
 
 ## Exit Criteria
 
