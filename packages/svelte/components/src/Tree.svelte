@@ -1,4 +1,15 @@
 <script lang="ts">
+  import {
+    findTreeNode,
+    flattenVisibleTreeRows,
+    isTreeBranch,
+    treeCheckState,
+    treeKeydownIntent,
+    treeRangeSelection,
+    treeSiblingReorderTarget,
+    treeToggleCheck,
+    treeVirtualWindow,
+  } from "@poodle/headless";
   import { untrack } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
@@ -87,7 +98,7 @@
     return selectedValues.includes(value);
   }
   function isBranch(node: TreeNode): boolean {
-    return Boolean(node.isBranch) || (node.children?.length ?? 0) > 0;
+    return isTreeBranch(node);
   }
   function isChecked(value: string): boolean {
     return checkedValues.includes(value);
@@ -96,40 +107,23 @@
     return loadingValues.includes(value);
   }
 
-  function findNode(value: string, list: TreeNode[] = nodes): TreeNode | null {
-    for (const node of list) {
-      if (node.value === value) return node;
-      const found = node.children ? findNode(value, node.children) : null;
-      if (found) return found;
-    }
-    return null;
+  function findNode(value: string): TreeNode | null {
+    return findTreeNode(nodes, value);
   }
 
   // ── Checkbox cascade ───────────────────────────────────────────
   // Checkable atoms under a node: itself when it has no children (leaf or
   // empty/lazy branch), otherwise every leaf descendant.
-  function checkableUnder(node: TreeNode): string[] {
-    if (!node.children?.length) return [node.value];
-    return node.children.flatMap(checkableUnder);
-  }
   type Tri = "checked" | "unchecked" | "mixed";
   function checkState(node: TreeNode): Tri {
-    const leaves = checkableUnder(node);
-    const n = leaves.filter(isChecked).length;
-    return n === 0 ? "unchecked" : n === leaves.length ? "checked" : "mixed";
+    return treeCheckState(node, checkedValues);
   }
   function setChecked(next: string[]): void {
     checkedValues = next;
     onCheckedChange?.(next);
   }
   function toggleCheck(node: TreeNode): void {
-    const leaves = checkableUnder(node);
-    const allOn = leaves.every(isChecked);
-    setChecked(
-      allOn
-        ? checkedValues.filter((v) => !leaves.includes(v))
-        : [...new Set([...checkedValues, ...leaves])],
-    );
+    setChecked(treeToggleCheck(node, checkedValues));
   }
 
   // Row height in px per size, for virtual-scroll windowing.
@@ -246,26 +240,13 @@
   function moveSibling(node: TreeNode, dir: 1 | -1): void {
     const sibs = siblingListOf(node.value);
     if (!sibs) return;
-    const i = sibs.findIndex((n) => n.value === node.value);
-    const j = i + dir;
-    if (j < 0 || j >= sibs.length) return;
-    onReorder?.(node.value, sibs[j].value, dir < 0 ? "before" : "after");
+    const move = treeSiblingReorderTarget(sibs, node.value, dir);
+    if (!move) return;
+    onReorder?.(node.value, move.target, move.position);
   }
 
   // Flattened visible rows drive keyboard navigation and range selection.
-  const visibleRows = $derived.by(() => {
-    const rows: Row[] = [];
-    const walk = (list: TreeNode[], depth: number, parent: string | null): void => {
-      for (const node of list) {
-        rows.push({ node, depth, parent });
-        if (isBranch(node) && isExpanded(node.value) && node.children?.length) {
-          walk(node.children, depth + 1, node.value);
-        }
-      }
-    };
-    walk(nodes, 0, null);
-    return rows;
-  });
+  const visibleRows = $derived(flattenVisibleTreeRows(nodes, expanded) as Row[]);
 
   let focusedValue = $state<string | null>(null);
   // Roving tabindex: exactly one visible row is tabbable.
@@ -282,14 +263,10 @@
 
   // ── Virtual scroll windowing (opt-in, flat render) ─────────────
   let scrollTop = $state(0);
-  const overscan = 6;
-  const totalHeight = $derived(visibleRows.length * rowHeightPx);
-  const startIdx = $derived(Math.max(0, Math.floor(scrollTop / rowHeightPx) - overscan));
-  const endIdx = $derived(
-    Math.min(visibleRows.length, Math.ceil((scrollTop + virtualHeight) / rowHeightPx) + overscan),
-  );
-  const windowRows = $derived(visibleRows.slice(startIdx, endIdx));
-  const offsetY = $derived(startIdx * rowHeightPx);
+  const virtualWindow = $derived(treeVirtualWindow(visibleRows.length, rowHeightPx, scrollTop, virtualHeight));
+  const totalHeight = $derived(virtualWindow.totalHeight);
+  const windowRows = $derived(visibleRows.slice(virtualWindow.startIndex, virtualWindow.endIndex));
+  const offsetY = $derived(virtualWindow.offsetY);
   function handleScroll(event: Event): void {
     scrollTop = (event.currentTarget as HTMLElement).scrollTop;
   }
@@ -336,18 +313,11 @@
     );
   }
   function selectRange(toValue: string): void {
-    const order = visibleRows.map((r) => r.node.value);
-    const a = order.indexOf(anchorValue ?? toValue);
-    const b = order.indexOf(toValue);
-    if (a === -1 || b === -1) {
+    const range = treeRangeSelection(visibleRows, anchorValue, toValue);
+    if (range === null) {
       selectOnly(toValue);
       return;
     }
-    const [lo, hi] = a <= b ? [a, b] : [b, a];
-    const range = order.slice(lo, hi + 1).filter((v) => {
-      const row = visibleRows.find((r) => r.node.value === v);
-      return row !== undefined && !row.node.isDisabled;
-    });
     setSelection(range);
   }
   function extendSelection(toValue: string): void {
@@ -389,74 +359,49 @@
   function handleKeydown(row: Row, event: KeyboardEvent): void {
     // Keydown targets the focused treeitem; stop it reaching ancestors.
     event.stopPropagation();
-    const order = visibleRows;
-    const idx = order.findIndex((r) => r.node.value === row.node.value);
-    const node = row.node;
-    switch (event.key) {
-      case "ArrowDown": {
-        event.preventDefault();
-        if (event.altKey && reorderable) {
-          moveSibling(node, 1);
-          break;
-        }
-        const next = order[idx + 1]?.node.value ?? null;
-        if (event.shiftKey && next && !order[idx + 1].node.isDisabled) extendSelection(next);
-        focusRow(next);
+
+    const intent = treeKeydownIntent(
+      visibleRows,
+      row.node.value,
+      event.key,
+      { altKey: event.altKey, shiftKey: event.shiftKey },
+      { reorderable, expandedValues: expanded },
+    );
+
+    if (!intent) {
+      return;
+    }
+
+    event.preventDefault();
+
+    switch (intent.type) {
+      case "focus": {
+        if (intent.extendSelection && intent.value) extendSelection(intent.value);
+        focusRow(intent.value);
         break;
       }
-      case "ArrowUp": {
-        event.preventDefault();
-        if (event.altKey && reorderable) {
-          moveSibling(node, -1);
-          break;
-        }
-        const prev = order[idx - 1]?.node.value ?? null;
-        if (event.shiftKey && prev && !order[idx - 1].node.isDisabled) extendSelection(prev);
-        focusRow(prev);
+      case "expand":
+        expand(intent.value);
         break;
-      }
-      case "ArrowRight": {
-        event.preventDefault();
-        if (isBranch(node)) {
-          if (!isExpanded(node.value)) expand(node.value);
-          else focusRow(order[idx + 1]?.node.value ?? null);
-        }
+      case "collapse":
+        collapse(intent.value);
         break;
-      }
-      case "ArrowLeft": {
-        event.preventDefault();
-        if (isBranch(node) && isExpanded(node.value)) collapse(node.value);
-        else focusRow(row.parent);
+      case "focusParent":
+        focusRow(intent.parent);
         break;
-      }
-      case "Home": {
-        event.preventDefault();
-        focusRow(order[0]?.node.value ?? null);
+      case "moveSibling":
+        moveSibling(row.node, intent.direction);
         break;
-      }
-      case "End": {
-        event.preventDefault();
-        focusRow(order[order.length - 1]?.node.value ?? null);
+      case "activate":
+        selectOnly(row.node.value);
+        onActivate?.(row.node.value);
         break;
-      }
-      case "Enter": {
-        event.preventDefault();
-        if (!node.isDisabled) {
-          selectOnly(node.value);
-          onActivate?.(node.value);
-        }
+      case "toggleSelection":
+        toggleSelection(row.node.value);
         break;
-      }
-      case " ": {
-        event.preventDefault();
-        if (!node.isDisabled) toggleSelection(node.value);
+      case "startRename":
+        startRename(row.node);
         break;
-      }
-      case "F2": {
-        event.preventDefault();
-        startRename(node);
-        break;
-      }
     }
   }
 </script>

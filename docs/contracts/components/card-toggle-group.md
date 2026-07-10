@@ -75,9 +75,12 @@ type CardToggleItem = {
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Toggle-group semantics over cards. Extraction debt: swap onto `toggleGroupTransition`.
+Machine-backed (g11 extraction sweep): runs the shared
+`toggleGroupTransition` in single mode with the component's
+`allowDeactivation` prop mapped directly. Keyboard wrap navigation uses
+`menuListNavigate` over the enabled item list.
 
 ## 5. Accessibility
 

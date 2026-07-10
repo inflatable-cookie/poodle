@@ -104,9 +104,13 @@ type CardRadioItem = {
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: machine-backed via shared machinery
 
-Single-select over cards; same semantics as the shared single-select machine. Extraction debt: swap onto `singleSelectTransition`.
+Machine-backed (g11 extraction sweep): runs the shared
+`toggleGroupTransition` in single mode with `allowDeactivation: false` —
+card buttons re-emit on reselect, which is toggle-group semantics, not
+native-radio semantics. Keyboard wrap navigation uses `menuListNavigate`
+over the enabled item list.
 
 ## 5. Callbacks
 

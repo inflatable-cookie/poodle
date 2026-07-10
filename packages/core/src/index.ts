@@ -107,6 +107,24 @@ export {
 } from "./single-select";
 
 export {
+  flattenVisibleTreeRows,
+  findTreeNode,
+  isTreeBranch,
+  treeCheckableUnder,
+  treeCheckState,
+  treeToggleCheck,
+  treeRangeSelection,
+  treeSiblingReorderTarget,
+  treeKeydownIntent,
+  treeVirtualWindow,
+  type TreeNodeLike,
+  type TreeRow,
+  type TreeCheckState,
+  type TreeKeyIntent,
+  type TreeVirtualWindow,
+} from "./tree";
+
+export {
   toggleGroupTransition,
   toggleGroupIsSelected,
   type ToggleGroupValue,

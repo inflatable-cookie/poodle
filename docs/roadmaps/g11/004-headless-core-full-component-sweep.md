@@ -197,14 +197,21 @@ open. 121 core tests green.
   listeners onto the dismissable-layer stack (runtime-verified escape and
   outside dismiss). TokenInput's pointer listener confirmed as local focus
   routing, not overlay dismissal.
-- Extraction-debt register (highest value first): `Tree` (tree-navigation
-  machine — largest gap), `ResizeHandle` (step/clamp math),
-  `CardRadioGroup`/`CardToggleGroup` (swap onto shared select machines),
-  `EditableLabel`/`EditableList` (edit-mode machine), `CodeInput`
-  (segment navigation), `Rating`, `ConfirmAction`, `IconButton` tooltip
-  (compose hover machine), `ListCard` overlay dismissal, `TokenInput`
-  chip editing. These are recorded in each contract; none blocks g11.005
-  or g11.006.
+- Extraction-debt register (updated 2026-07-10, post-runway burn-down):
+  - **Cleared:** `Tree` — full machinery in core `tree.ts` (visible-row
+    flattening, tri-state cascade, keyboard intents, shift-range selection,
+    sibling-reorder targets, virtual windowing; 12 tests encoding the exact
+    pre-swap keyboard semantics; browser runtime check deferred — preview
+    tooling was unavailable that session, flagged for the next preview
+    pass). `CardRadioGroup`/`CardToggleGroup` — both run
+    `toggleGroupTransition` single mode (the radio variant with
+    `allowDeactivation: false`, preserving its reselect re-emit) plus
+    `menuListNavigate` keyboard wrap.
+  - **Remaining:** `ResizeHandle` (step/clamp math),
+    `EditableLabel`/`EditableList` (edit-mode machine), `CodeInput`
+    (segment navigation), `Rating`, `ConfirmAction`, `IconButton` tooltip
+    (compose hover machine), `ListCard` overlay dismissal, `TokenInput`
+    chip editing. Recorded in each contract; none blocks anything.
 - Promotion complete: machine model, machinery inventory, classification
   rule, and cross-runtime contract promoted to
   `docs/architecture/006-headless-core-and-machine-model.md`.

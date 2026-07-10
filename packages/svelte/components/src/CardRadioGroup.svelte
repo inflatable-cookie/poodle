@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { menuListNavigate, toggleGroupTransition } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";
@@ -48,22 +49,30 @@
   const currentValue = $derived(isControlled ? value ?? null : uncontrolledValue);
 
   function select(itemValue: string): void {
-    if (disabled) {
-      return;
-    }
+    const result = toggleGroupTransition(
+      {
+        value: currentValue,
+        options: items.map((item) => ({ value: item.value, disabled: item.disabled === true })),
+        selectionMode: "single",
+        allowDeactivation: false,
+        disabled,
+      },
+      { type: "TOGGLE", value: itemValue },
+    );
 
-    const item = items.find((candidate) => candidate.value === itemValue);
-    if (item?.disabled) {
-      return;
-    }
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        const nextValue = effect.value as string | null;
 
-    if (isControlled) {
-      value = itemValue;
-    } else {
-      uncontrolledValue = itemValue;
-    }
+        if (isControlled) {
+          value = nextValue;
+        } else {
+          uncontrolledValue = nextValue;
+        }
 
-    onValueChange?.(itemValue);
+        onValueChange?.(nextValue);
+      }
+    }
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
@@ -72,12 +81,14 @@
 
     let nextItem: CardRadioItem | undefined;
 
+    const flags = enabledItems.map(() => false);
+
     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      nextItem = enabledItems[(currentEnabledIndex + 1) % enabledItems.length];
+      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "next")];
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      nextItem = enabledItems[(currentEnabledIndex - 1 + enabledItems.length) % enabledItems.length];
+      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "prev")];
     }
 
     if (!nextItem) {

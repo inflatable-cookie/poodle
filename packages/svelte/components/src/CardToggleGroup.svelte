@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { menuListNavigate, toggleGroupTransition } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";
@@ -64,24 +65,30 @@
   const firstEnabledIndex = $derived(items.findIndex((item) => !item.disabled));
 
   function select(itemValue: string): void {
-    if (disabled) {
-      return;
+    const result = toggleGroupTransition(
+      {
+        value: currentValue,
+        options: items.map((item) => ({ value: item.value, disabled: item.disabled === true })),
+        selectionMode: "single",
+        allowDeactivation: allowDeactivation,
+        disabled,
+      },
+      { type: "TOGGLE", value: itemValue },
+    );
+
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        const nextValue = effect.value as string | null;
+
+        if (isControlled) {
+          value = nextValue;
+        } else {
+          uncontrolledValue = nextValue;
+        }
+
+        onValueChange?.(nextValue);
+      }
     }
-
-    const item = items.find((candidate) => candidate.value === itemValue);
-    if (item?.disabled) {
-      return;
-    }
-
-    const nextValue = allowDeactivation && currentValue === itemValue ? null : itemValue;
-
-    if (isControlled) {
-      value = nextValue;
-    } else {
-      uncontrolledValue = nextValue;
-    }
-
-    onValueChange?.(nextValue);
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
@@ -90,12 +97,14 @@
 
     let nextItem: CardToggleItem | undefined;
 
+    const flags = enabledItems.map(() => false);
+
     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      nextItem = enabledItems[(currentEnabledIndex + 1) % enabledItems.length];
+      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "next")];
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      nextItem = enabledItems[(currentEnabledIndex - 1 + enabledItems.length) % enabledItems.length];
+      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "prev")];
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
       select(items[index].value);
