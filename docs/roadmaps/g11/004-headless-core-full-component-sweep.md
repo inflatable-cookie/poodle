@@ -221,13 +221,41 @@ open. 121 core tests green.
     `CodeInput` (sanitize/caret/slot-selection/insert-replacement math in
     core `code-input.ts`), `TokenInput` (merge/split/backspace machinery in
     core `token.ts`), `IconButton` tooltip (composes `hoverTransition`).
-    194 core tests. Browser runtime verification for the three
-    debt-burn-down passes remains deferred (preview extension unavailable
-    those sessions) — behavior encoded in unit vectors; flag for the next
-    preview session.
+    194 core tests.
 
   **The extraction-debt register is empty.** Every behavioral component in
   `@poodle/svelte` now runs on `@poodle/headless` machines or machinery.
+
+  **Runtime verification (2026-07-10, headless Playwright against the vite
+  dev server — the browser-pane outage does not block runtime checks):**
+
+  - tree: ArrowRight expand (4→9 rows), Shift+ArrowDown range-select over
+    enabled children (2 selected), ArrowLeft collapse — PASS
+  - card-radio-group: click selection reflected — PASS
+  - card-toggle-group: click sets `aria-pressed` via the shared machine —
+    PASS
+  - resize-handle: pointer drag moved the SplitView primary 538→618px;
+    arrow keys stepped it back to 602px — PASS
+  - rating: pointer select on whole-star mode; fractional slider keyboard
+    step 3.5→4 — PASS
+  - editable-label: dblclick edit, Enter emits
+    `Committed: "..." (was: "...")`, Escape emits cancel (value ownership
+    stays with the parent, matching pre-swap semantics) — PASS
+  - editable-list: Space grab + ArrowDown swapped rows 1/2 — PASS
+  - code-input: typed 123456, ArrowLeft×2 + type 9 overwrote to 123956 —
+    PASS
+  - token-input: Enter added a chip (3→4), Backspace on empty input removed
+    it — PASS
+  - icon-button: tooltip absent at 100ms, present after the 300ms delay,
+    closed on leave — PASS
+  - radio (bonus, new component): native group exclusivity + machine-driven
+    selection — PASS
+  - list-card: SKIP — the specimen exposes no context-menu affordance;
+    dismissal is covered by the dismiss-layer unit tests
+
+  Method note: headless Playwright (scratchpad harness) drives the real
+  preview at `#components/<slug>` — a repeatable pattern whenever the
+  interactive browser pane is unavailable.
 - Promotion complete: machine model, machinery inventory, classification
   rule, and cross-runtime contract promoted to
   `docs/architecture/006-headless-core-and-machine-model.md`.
