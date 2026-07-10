@@ -77,6 +77,7 @@ import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
 import PopoverSpecimen from "./PopoverSpecimen.svelte";
 import ProgressSpecimen from "./ProgressSpecimen.svelte";
 import RadioGroupSpecimen from "./RadioGroupSpecimen.svelte";
+import RadioSpecimen from "./RadioSpecimen.svelte";
 import RangeSliderSpecimen from "./RangeSliderSpecimen.svelte";
 import RatingSpecimen from "./RatingSpecimen.svelte";
 import RegionSpecimen from "./RegionSpecimen.svelte";
@@ -214,6 +215,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "code-input": CodeInputSpecimen,
   popover: PopoverSpecimen,
   progress: ProgressSpecimen,
+  "radio": RadioSpecimen,
   "radio-group": RadioGroupSpecimen,
   "range-slider": RangeSliderSpecimen,
   rating: RatingSpecimen,

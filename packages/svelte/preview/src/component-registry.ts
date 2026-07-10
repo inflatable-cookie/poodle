@@ -50,6 +50,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Checkbox", "control", "Boolean toggle with label, supporting indeterminate state.", true),
   entry("Switch", "control", "Toggle switch for on/off states.", true),
   entry("TriStateSwitch", "control", "Three-position switch for on/off/indeterminate.", true),
+  entry("Radio", "control", "Single radio option with native name-based group exclusivity.", true),
   entry("RadioGroup", "control", "Single-selection option group.", true),
   entry("SegmentedControl", "control", "Inline toggle between mutually exclusive options.", true),
   entry("ToggleGroup", "control", "Group of mutually exclusive toggle buttons.", true),

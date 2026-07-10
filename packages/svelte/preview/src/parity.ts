@@ -431,6 +431,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Dialog",
       "Field",
       "FormActions",
+      "Radio",
       "RadioGroup",
       "Switch",
       "TokenInput",

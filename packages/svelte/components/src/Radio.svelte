@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { switchTransition } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -66,20 +68,25 @@
   });
 
   function handleChange(event: Event): void {
-    const nextChecked = (event.currentTarget as HTMLInputElement).checked;
+    const control = event.currentTarget as HTMLInputElement;
+    const result = switchTransition(
+      { checked: currentChecked, disabled, readOnly },
+      { type: "TOGGLE", nextChecked: control.checked },
+    );
 
-    if (readOnly) {
-      (event.currentTarget as HTMLInputElement).checked = currentChecked;
-      return;
+    for (const effect of result.effects) {
+      if (effect.type === "revertNativeChecked") {
+        control.checked = currentChecked;
+      } else if (effect.type === "emitCheckedChange") {
+        if (checked === undefined) {
+          uncontrolledChecked = effect.checked;
+        } else {
+          checked = effect.checked;
+        }
+
+        onCheckedChange?.(effect.checked);
+      }
     }
-
-    if (checked === undefined) {
-      uncontrolledChecked = nextChecked;
-    } else {
-      checked = nextChecked;
-    }
-
-    onCheckedChange?.(nextChecked);
   }
 </script>
 

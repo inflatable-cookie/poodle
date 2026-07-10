@@ -101,6 +101,7 @@ primitives and layout surfaces through higher-order application components.
 - `pill.md`
 - `popover.md`
 - `progress.md`
+- `radio.md`
 - `radio-group.md`
 - `range-slider.md`
 - `rating.md`
@@ -145,6 +146,7 @@ primitives and layout surfaces through higher-order application components.
 - `token-input.md`
 - `tooltip.md`
 - `treatment-tokens.md`
+- `tree.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
 - `validation-summary.md`

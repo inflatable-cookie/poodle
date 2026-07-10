@@ -127,6 +127,7 @@ above it in downstream repos such as Loophole.
 - `components/pill.md`
 - `components/popover.md`
 - `components/progress.md`
+- `components/radio.md`
 - `components/radio-group.md`
 - `components/range-slider.md`
 - `components/rating.md`
@@ -170,6 +171,7 @@ above it in downstream repos such as Loophole.
 - `components/toolbar.md`
 - `components/tooltip.md`
 - `components/treatment-tokens.md`
+- `components/tree.md`
 - `components/tri-state-switch.md`
 - `components/ui-presentation-provider.md`
 - `components/validation-summary.md`
