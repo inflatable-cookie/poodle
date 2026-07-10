@@ -1,0 +1,16 @@
+[package]
+name = "poodle-headless"
+version = "0.0.0"
+edition = "2021"
+description = "Poodle headless behavior core, Rust mirror: pure component state machines and shared interaction logic, conformance-tested against the TypeScript core."
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+serde_json = "1"
+
+[package.metadata.poodle]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

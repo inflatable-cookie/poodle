@@ -1,6 +1,6 @@
 # g11.006 Rust Headless Mirror
 
-Status: planned
+Status: active — machine mirror + conformance harness complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.004` (machine shape stabilized through at least waves 1–3)
 Updated: 2026-07-10
@@ -62,6 +62,41 @@ runtime preview claims.
 - `cargo test` on the new crate, `effigy gpui:build`, `effigy gpui:test`
 - conformance vector suite green on both runtimes
 
+## Progress (2026-07-10)
+
+Complete:
+
+- **Port strategy decided: hand-port** (per the spec-062 lean — the
+  interesting content is guards and effects, which codegen cannot
+  generate). Crate: `packages/contracts/headless` → `poodle-headless`,
+  zero runtime dependencies, `serde_json` dev-only.
+- All 11 behavior machines ported: checkbox, switch, single-select,
+  toggle-group, disclosure, slider + range-slider, popover, modal, menu
+  (+ menu-list navigation), hover, tabs (main chart; tooltip sub-machine
+  and drag plumbing stay adapter-side, as in TS). Plus `nav` roving
+  helpers.
+- **Conformance harness built**: 41 shared JSON vectors in
+  `packages/contracts/headless/vectors/machines.json`, executed by both
+  runtimes — `packages/core/test/conformance.test.ts` (bun) and
+  `tests/conformance.rs` (cargo). Effects compare order-sensitively;
+  numbers canonicalized to f64 to neutralize serializer differences.
+  Both sides green: TS 162 total tests, Rust 10 suites / 41 cases.
+- `poodle-gpui` still builds (crate is additive, unreferenced so far).
+
+Validation commands: `cargo test` in `packages/contracts/headless`;
+`bun test` in `packages/core`.
+
+Remaining in this milestone (explicit debt):
+
+- GPUI family adoption: drive one overlay family (dialog/menu) from the
+  Rust machines end-to-end.
+- Domain-math port (dates/calendar grid, colors, durations, pagination,
+  select options, positioning resolver) — pure functions, mechanical;
+  port alongside GPUI adoption so each lands with a consumer.
+- Consumption-depth decision for Jetstream recorded when GPUI adoption
+  proves the shape.
+
 ## Next Task
 
-`g11.007` multi-framework adapters.
+GPUI overlay-family adoption onto `poodle-headless`, then `g11.007`
+multi-framework adapters.

@@ -1,0 +1,287 @@
+{
+  "description": "Shared conformance vectors for the Poodle headless machines. Executed by both the TypeScript core (packages/core/test/conformance.test.ts) and the Rust mirror (packages/contracts/headless/tests/conformance.rs). Effects are order-significant.",
+  "checkbox": [
+    {
+      "name": "toggle emits checked change",
+      "context": { "checked": false, "mixed": false, "disabled": false, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": true },
+      "expect": { "context": { "checked": true }, "effects": [{ "type": "emitCheckedChange", "checked": true }] }
+    },
+    {
+      "name": "disabled is inert",
+      "context": { "checked": false, "mixed": false, "disabled": true, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": true },
+      "expect": { "context": { "checked": false }, "effects": [] }
+    },
+    {
+      "name": "readOnly reverts without callback",
+      "context": { "checked": true, "mixed": false, "disabled": false, "readOnly": true },
+      "event": { "type": "TOGGLE", "nextChecked": false },
+      "expect": { "context": { "checked": true }, "effects": [{ "type": "revertNativeChecked" }] }
+    },
+    {
+      "name": "mixed resolves to checked",
+      "context": { "checked": false, "mixed": true, "disabled": false, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": false },
+      "expect": { "context": { "checked": true }, "effects": [{ "type": "emitCheckedChange", "checked": true }] }
+    },
+    {
+      "name": "SET_CHECKED is silent",
+      "context": { "checked": false, "mixed": false, "disabled": false, "readOnly": false },
+      "event": { "type": "SET_CHECKED", "checked": true },
+      "expect": { "context": { "checked": true }, "effects": [] }
+    }
+  ],
+  "popover": [
+    {
+      "name": "toggle opens with open-change then focus intent",
+      "state": "closed",
+      "context": { "disabled": false, "dismissOnOutsideInteract": true, "initialFocus": "first-focusable" },
+      "event": { "type": "TOGGLE" },
+      "expect": { "state": "open", "effects": [{ "type": "emitOpenChange", "open": true }, { "type": "focusOnOpen", "strategy": "first-focusable" }] }
+    },
+    {
+      "name": "escape closes with focus restore",
+      "state": "open",
+      "context": { "disabled": false, "dismissOnOutsideInteract": true, "initialFocus": "first-focusable" },
+      "event": { "type": "ESCAPE" },
+      "expect": { "state": "closed", "effects": [{ "type": "emitOpenChange", "open": false }, { "type": "restoreTriggerFocus" }] }
+    },
+    {
+      "name": "outside guard holds",
+      "state": "open",
+      "context": { "disabled": false, "dismissOnOutsideInteract": false, "initialFocus": "content" },
+      "event": { "type": "OUTSIDE_INTERACT" },
+      "expect": { "state": "open", "effects": [] }
+    },
+    {
+      "name": "disabled blocks open",
+      "state": "closed",
+      "context": { "disabled": true, "dismissOnOutsideInteract": true, "initialFocus": "none" },
+      "event": { "type": "OPEN" },
+      "expect": { "state": "closed", "effects": [] }
+    }
+  ],
+  "modal": [
+    {
+      "name": "open emits change, focus entry, scroll lock in order",
+      "state": "closed",
+      "context": { "dismissOnEscape": true, "dismissOnBackdrop": true },
+      "event": { "type": "OPEN" },
+      "expect": { "state": "open", "effects": [{ "type": "emitOpenChange", "open": true }, { "type": "saveFocusAndEnter" }, { "type": "lockBodyScroll" }] }
+    },
+    {
+      "name": "escape emits request-close before open-change",
+      "state": "open",
+      "context": { "dismissOnEscape": true, "dismissOnBackdrop": true },
+      "event": { "type": "ESCAPE" },
+      "expect": { "state": "closed", "effects": [{ "type": "emitRequestClose" }, { "type": "emitOpenChange", "open": false }, { "type": "unlockBodyScroll" }, { "type": "restoreFocus" }] }
+    },
+    {
+      "name": "programmatic close skips request-close",
+      "state": "open",
+      "context": { "dismissOnEscape": true, "dismissOnBackdrop": true },
+      "event": { "type": "CLOSE" },
+      "expect": { "state": "closed", "effects": [{ "type": "emitOpenChange", "open": false }, { "type": "unlockBodyScroll" }, { "type": "restoreFocus" }] }
+    },
+    {
+      "name": "escape guard holds",
+      "state": "open",
+      "context": { "dismissOnEscape": false, "dismissOnBackdrop": true },
+      "event": { "type": "ESCAPE" },
+      "expect": { "state": "open", "effects": [] }
+    },
+    {
+      "name": "backdrop guard holds",
+      "state": "open",
+      "context": { "dismissOnEscape": true, "dismissOnBackdrop": false },
+      "event": { "type": "BACKDROP_CLICK" },
+      "expect": { "state": "open", "effects": [] }
+    }
+  ],
+  "hover": [
+    {
+      "name": "enter schedules open timer",
+      "state": "closed",
+      "context": { "openDelayMs": 300, "closeDelayMs": 0 },
+      "event": { "type": "ENTER" },
+      "expect": { "state": "opening", "effects": [{ "type": "clearTimer" }, { "type": "startTimer", "ms": 300 }] }
+    },
+    {
+      "name": "timer fire opens",
+      "state": "opening",
+      "context": { "openDelayMs": 300, "closeDelayMs": 0 },
+      "event": { "type": "TIMER_FIRE" },
+      "expect": { "state": "open", "effects": [{ "type": "emitOpenChange", "open": true }] }
+    },
+    {
+      "name": "zero close delay closes immediately from opening",
+      "state": "opening",
+      "context": { "openDelayMs": 300, "closeDelayMs": 0 },
+      "event": { "type": "LEAVE" },
+      "expect": { "state": "closed", "effects": [{ "type": "clearTimer" }, { "type": "emitOpenChange", "open": false }] }
+    },
+    {
+      "name": "leave with close delay enters closing",
+      "state": "open",
+      "context": { "openDelayMs": 180, "closeDelayMs": 120 },
+      "event": { "type": "LEAVE" },
+      "expect": { "state": "closing", "effects": [{ "type": "clearTimer" }, { "type": "startTimer", "ms": 120 }] }
+    },
+    {
+      "name": "re-enter cancels pending close",
+      "state": "closing",
+      "context": { "openDelayMs": 180, "closeDelayMs": 120 },
+      "event": { "type": "ENTER" },
+      "expect": { "state": "open", "effects": [{ "type": "clearTimer" }] }
+    },
+    {
+      "name": "stale timer fire is inert",
+      "state": "open",
+      "context": { "openDelayMs": 180, "closeDelayMs": 120 },
+      "event": { "type": "TIMER_FIRE" },
+      "expect": { "state": "open", "effects": [] }
+    }
+  ],
+  "singleSelect": [
+    {
+      "name": "select enabled option emits",
+      "context": { "value": "a", "options": [{ "value": "a" }, { "value": "b", "disabled": true }, { "value": "c" }], "disabled": false },
+      "event": { "type": "SELECT", "value": "c" },
+      "expect": { "context": { "value": "c" }, "effects": [{ "type": "emitValueChange", "value": "c" }] }
+    },
+    {
+      "name": "disabled option is inert",
+      "context": { "value": "a", "options": [{ "value": "a" }, { "value": "b", "disabled": true }], "disabled": false },
+      "event": { "type": "SELECT", "value": "b" },
+      "expect": { "context": { "value": "a" }, "effects": [] }
+    },
+    {
+      "name": "same value is inert",
+      "context": { "value": "a", "options": [{ "value": "a" }], "disabled": false },
+      "event": { "type": "SELECT", "value": "a" },
+      "expect": { "context": { "value": "a" }, "effects": [] }
+    },
+    {
+      "name": "unknown value is inert",
+      "context": { "value": "a", "options": [{ "value": "a" }], "disabled": false },
+      "event": { "type": "SELECT", "value": "zz" },
+      "expect": { "context": { "value": "a" }, "effects": [] }
+    }
+  ],
+  "slider": [
+    {
+      "name": "input snaps and clamps, emits change",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "raw": 44 },
+      "expect": { "context": { "value": 40 }, "effects": [{ "type": "emitValueChange", "value": 40 }] }
+    },
+    {
+      "name": "commit clamps to max, emits commit",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "COMMIT", "raw": 999 },
+      "expect": { "context": { "value": 100 }, "effects": [{ "type": "emitValueCommit", "value": 100 }] }
+    },
+    {
+      "name": "degenerate range widens to min+1",
+      "context": { "value": 5, "min": 10, "max": 10, "step": 1, "disabled": false },
+      "event": { "type": "INPUT", "raw": 50 },
+      "expect": { "context": { "value": 11 }, "effects": [{ "type": "emitValueChange", "value": 11 }] }
+    }
+  ],
+  "menu": [
+    {
+      "name": "toggle opens with focus-first intent",
+      "state": "closed",
+      "context": {},
+      "event": { "type": "TOGGLE" },
+      "expect": { "state": "open", "effects": [{ "type": "emitOpenChange", "open": true }, { "type": "focusFirstItem" }] }
+    },
+    {
+      "name": "action emits before closing",
+      "state": "open",
+      "context": {},
+      "event": { "type": "ACTION", "value": "rename" },
+      "expect": { "state": "closed", "effects": [{ "type": "emitAction", "value": "rename" }, { "type": "emitOpenChange", "open": false }] }
+    },
+    {
+      "name": "action while closed is inert",
+      "state": "closed",
+      "context": {},
+      "event": { "type": "ACTION", "value": "x" },
+      "expect": { "state": "closed", "effects": [] }
+    }
+  ],
+  "disclosure": [
+    {
+      "name": "toggle opens and emits",
+      "context": { "open": false, "disabled": false },
+      "event": { "type": "TOGGLE" },
+      "expect": { "context": { "open": true }, "effects": [{ "type": "emitOpenChange", "open": true }] }
+    },
+    {
+      "name": "disabled is inert",
+      "context": { "open": false, "disabled": true },
+      "event": { "type": "TOGGLE" },
+      "expect": { "context": { "open": false }, "effects": [] }
+    }
+  ],
+  "toggleGroup": [
+    {
+      "name": "multiple mode adds membership",
+      "context": { "value": ["x"], "options": [{ "value": "x" }, { "value": "y" }], "selectionMode": "multiple", "allowDeactivation": false, "disabled": false },
+      "event": { "type": "TOGGLE", "value": "y" },
+      "expect": { "context": { "value": ["x", "y"] }, "effects": [{ "type": "emitValueChange", "value": ["x", "y"] }] }
+    },
+    {
+      "name": "multiple mode removes membership",
+      "context": { "value": ["x", "y"], "options": [{ "value": "x" }, { "value": "y" }], "selectionMode": "multiple", "allowDeactivation": false, "disabled": false },
+      "event": { "type": "TOGGLE", "value": "x" },
+      "expect": { "context": { "value": ["y"] }, "effects": [{ "type": "emitValueChange", "value": ["y"] }] }
+    },
+    {
+      "name": "single deactivation clears",
+      "context": { "value": "x", "options": [{ "value": "x" }], "selectionMode": "single", "allowDeactivation": true, "disabled": false },
+      "event": { "type": "TOGGLE", "value": "x" },
+      "expect": { "context": { "value": null }, "effects": [{ "type": "emitValueChange", "value": null }] }
+    },
+    {
+      "name": "single reselect without deactivation re-emits same value",
+      "context": { "value": "x", "options": [{ "value": "x" }], "selectionMode": "single", "allowDeactivation": false, "disabled": false },
+      "event": { "type": "TOGGLE", "value": "x" },
+      "expect": { "context": { "value": "x" }, "effects": [{ "type": "emitValueChange", "value": "x" }] }
+    }
+  ],
+  "tabs": [
+    {
+      "name": "select syncs focus and emits",
+      "context": { "items": [{ "value": "a" }, { "value": "b", "disabled": true }, { "value": "c" }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": false },
+      "event": { "type": "SELECT", "value": "c" },
+      "expect": { "context": { "value": "c", "focusIndex": 2 }, "effects": [{ "type": "emitValueChange", "value": "c" }] }
+    },
+    {
+      "name": "focus next skips disabled and commits in automatic mode",
+      "context": { "items": [{ "value": "a" }, { "value": "b", "disabled": true }, { "value": "c" }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": false },
+      "event": { "type": "FOCUS_MOVE", "direction": "next" },
+      "expect": { "context": { "value": "c", "focusIndex": 2 }, "effects": [{ "type": "focusTab", "index": 2 }, { "type": "emitValueChange", "value": "c" }] }
+    },
+    {
+      "name": "manual mode moves focus without committing",
+      "context": { "items": [{ "value": "a" }, { "value": "c" }], "value": "a", "focusIndex": 0, "activationMode": "manual", "reorderable": false },
+      "event": { "type": "FOCUS_MOVE", "direction": "next" },
+      "expect": { "context": { "value": "a", "focusIndex": 1 }, "effects": [{ "type": "focusTab", "index": 1 }] }
+    },
+    {
+      "name": "keyboard reorder prefers the originating index",
+      "context": { "items": [{ "value": "a" }, { "value": "b" }, { "value": "c" }, { "value": "d" }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": true },
+      "event": { "type": "REORDER_STEP", "direction": -1, "fromIndex": 3 },
+      "expect": { "context": { "focusIndex": 2 }, "order": ["a", "b", "d", "c"], "effects": [{ "type": "focusTab", "index": 2 }, { "type": "emitReorder", "order": ["a", "b", "d", "c"] }] }
+    },
+    {
+      "name": "close emits request only for closable items",
+      "context": { "items": [{ "value": "a", "closable": true }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": false },
+      "event": { "type": "CLOSE", "value": "a" },
+      "expect": { "context": { "value": "a" }, "effects": [{ "type": "emitClose", "value": "a" }] }
+    }
+  ]
+}
