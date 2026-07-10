@@ -110,6 +110,17 @@ export {
 } from "./slider";
 
 export {
+  resolveToastTone,
+  normalizeToast,
+  isToastSticky,
+  reconcileToastTimers,
+  type ToastTone,
+  type ToastHostInput,
+  type NormalizedToast,
+  type ToastTimerPlan,
+} from "./toast";
+
+export {
   tabsTransition,
   tabsKeydownEvent,
   tabsTooltipTransition,

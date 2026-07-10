@@ -111,8 +111,16 @@ and wrap, Home/End enabled boundaries, Enter activate-and-close. Typeahead
 is not present in the Svelte implementation and therefore not modeled
 (parity authority). 77 core tests green.
 
-Remaining wave 2: `Toast` (queue/timeout), plus the Floating UI
-anchor-positioning swap for Popover/Tooltip/HoverCard/Menu.
+Toast batch complete (2026-07-10): `ToastHost` runs on core machinery —
+tone resolution, normalization, stickiness, and the auto-dismiss timer
+reconciliation plan (`reconcileToastTimers` returns clear/start ids; the
+adapter owns real timers and the store). `ToastStack` classified
+styled-only. Runtime-verified: toast render and manual dismiss; timer
+semantics covered by core unit tests (browser wait for the 6s auto-dismiss
+not exercised). 82 core tests green.
+
+Remaining wave 2: the Floating UI anchor-positioning swap for
+Popover/Tooltip/HoverCard/Menu.
 
 ## Exit Criteria
 

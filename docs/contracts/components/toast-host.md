@@ -1,7 +1,7 @@
 # ToastHost
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -100,6 +100,27 @@ internally but can be configured via `autoDismissMs` and `stickyTones`.
 
 - `items: ToastItem[]` -- normalized toast items derived from store subscription
 - `timers: Map<string, ReturnType<typeof setTimeout>>` -- active auto-dismiss timers
+
+### Behavior Machine
+
+Behavior classification: machine-backed (toast machinery in
+`@poodle/headless`)
+
+Pure host machinery; the adapter owns real timers and the store
+subscription.
+
+- `resolveToastTone`: explicit `tone` wins; `variant` maps
+  error->danger, warning->warning, success->success; default `info`
+- `normalizeToast`: title falls back to message then "Notification";
+  message is kept only alongside a real title
+- `isToastSticky`: explicit `sticky` flag, or tone listed in `stickyTones`
+- `reconcileToastTimers(runningIds, next, { autoDismissMs, stickyTones })`
+  returns a plan `{ clear, start }`: clear timers whose toasts left the
+  store, start timers for new non-sticky toasts. Existing timers are
+  preserved (a toast's clock never restarts on unrelated store changes);
+  non-positive `autoDismissMs` starts nothing
+- Machinery dependencies: none; ToastStack remains a presentational list
+  (styled-only).
 
 ## 5. Callbacks
 

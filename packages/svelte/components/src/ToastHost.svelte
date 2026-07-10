@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { normalizeToast, reconcileToastTimers } from "@poodle/headless";
   import type { Readable } from "svelte/store";
 
   import { default as ToastStack } from "./ToastStack.svelte";
@@ -38,32 +39,6 @@
 
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
-  function resolveTone(toast: ToastHostStoreItem): ToastItem["tone"] {
-    if (toast.tone) return toast.tone;
-    if (toast.variant === "error") return "danger";
-    if (toast.variant === "warning") return "warning";
-    if (toast.variant === "success") return "success";
-    return "info";
-  }
-
-  function normalizeToast(toast: ToastHostStoreItem): ToastItem {
-    const title = toast.title?.trim() || toast.message || "Notification";
-    const message = toast.title?.trim() ? toast.message ?? null : null;
-
-    return {
-      id: toast.id,
-      title,
-      message,
-      tone: resolveTone(toast),
-      actionLabel: toast.actionLabel ?? null,
-    };
-  }
-
-  function isSticky(toast: ToastHostStoreItem): boolean {
-    if (toast.sticky === true) return true;
-    return stickyTones.includes(resolveTone(toast));
-  }
-
   function clearTimer(id: string) {
     const timer = timers.get(id);
     if (!timer) return;
@@ -72,23 +47,19 @@
   }
 
   function reconcileTimers(next: ToastHostStoreItem[]) {
-    const ids = new Set(next.map((toast) => toast.id));
+    const plan = reconcileToastTimers([...timers.keys()], next, { autoDismissMs, stickyTones });
 
-    for (const id of timers.keys()) {
-      if (!ids.has(id)) clearTimer(id);
+    for (const id of plan.clear) {
+      clearTimer(id);
     }
 
-    for (const toast of next) {
-      if (isSticky(toast)) continue;
-      if (autoDismissMs <= 0) continue;
-      if (timers.has(toast.id)) continue;
-
+    for (const id of plan.start) {
       const timer = setTimeout(() => {
-        store.dismiss(toast.id);
-        timers.delete(toast.id);
+        store.dismiss(id);
+        timers.delete(id);
       }, autoDismissMs);
 
-      timers.set(toast.id, timer);
+      timers.set(id, timer);
     }
   }
 
