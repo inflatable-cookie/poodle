@@ -1,0 +1,255 @@
+/* Styles for OrderBy. Extracted from the Svelte component (god-file
+   decomposition). Selectors use unique poodle-* class names, so the
+   previously-scoped block is safe as global CSS. */
+
+  .poodle-order-by-popover {
+    --poodle-order-by-control-height: var(--poodle-size-control-height);
+    --poodle-order-by-trigger-height: var(--poodle-order-by-control-height);
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-order-by {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-order-by__trigger-wrap {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .poodle-order-by[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-order-by__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--poodle-order-by-trigger-height);
+    padding: 0 var(--poodle-space-control-x);
+    box-sizing: border-box;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-order-by__trigger:hover {
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
+  }
+
+  .poodle-order-by__trigger:focus-visible,
+  .poodle-order-by__reset:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-order-by__label {
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.75rem;
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .poodle-order-by__summary {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .poodle-order-by__summary[data-placeholder="true"] {
+    color: var(--poodle-color-text-muted);
+  }
+
+  .poodle-order-by__chevron {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-order-by__reset {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .poodle-order-by__surface {
+    position: absolute;
+    z-index: var(--poodle-overlay-z-menu);
+    top: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 14rem;
+    max-width: min(24rem, 90vw);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(
+      --poodle-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
+    );
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
+    background: var(--poodle-color-background-elevated);
+    --poodle-surface: var(--poodle-color-background-elevated);
+    box-shadow:
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
+      0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
+      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
+  }
+
+  .poodle-order-by[data-compact="true"] .poodle-order-by__label {
+    display: none;
+  }
+
+  .poodle-order-by__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin: calc(-0.5 * var(--poodle-space-panel-y)) calc(-0.5 * var(--poodle-space-panel-x));
+    padding: 0.375rem;
+  }
+
+  .poodle-order-by__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .poodle-order-by__item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated));
+  }
+
+  .poodle-order-by__item:hover {
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent);
+  }
+
+  .poodle-order-by__item:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: -0.0625rem;
+  }
+
+  .poodle-order-by__item--dragging {
+    opacity: 0.65;
+  }
+
+  .poodle-order-by__item--drop-target {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
+    box-shadow: inset 0.125rem 0 0 var(--poodle-color-accent-base);
+  }
+
+  .poodle-order-by__item-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-order-by__drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-muted);
+    cursor: grab;
+    user-select: none;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .poodle-order-by__drag-handle:disabled {
+    cursor: not-allowed;
+  }
+
+  .poodle-order-by__empty {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    margin: 0;
+    padding: 0.25rem 0;
+  }
+
+  .poodle-order-by__add {
+    display: flex;
+    align-items: center;
+  }
+
+  .poodle-order-by[data-size="xs"] {
+    --poodle-order-by-control-height: 1.5rem;
+    --poodle-order-by-trigger-height: 1.5rem;
+  }
+
+  .poodle-order-by[data-size="xs"] .poodle-order-by__trigger { padding: 0 0.5rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__label { font-size: 0.5625rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__summary { font-size: 0.6875rem; }
+
+  .poodle-order-by[data-size="sm"] {
+    --poodle-order-by-control-height: 1.75rem;
+    --poodle-order-by-trigger-height: 1.75rem;
+  }
+
+  .poodle-order-by[data-size="sm"] .poodle-order-by__label { font-size: 0.625rem; }
+  .poodle-order-by[data-size="sm"] .poodle-order-by__summary { font-size: 0.8125rem; }
+
+  .poodle-order-by[data-size="md"] {
+    --poodle-order-by-control-height: var(
+      --poodle-size-control-height-md,
+      var(--poodle-size-control-height)
+    );
+    --poodle-order-by-trigger-height: var(--poodle-order-by-control-height);
+  }
+
+  .poodle-order-by[data-size="lg"] {
+    --poodle-order-by-control-height: 2.75rem;
+    --poodle-order-by-trigger-height: 2.75rem;
+  }
+
+  .poodle-order-by[data-size="lg"] .poodle-order-by__trigger { padding: 0 1rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__label { font-size: 0.8125rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__summary { font-size: 0.9375rem; }
+
+  .poodle-order-by[data-size="xl"] {
+    --poodle-order-by-control-height: 3.25rem;
+    --poodle-order-by-trigger-height: 3.25rem;
+  }
+
+  .poodle-order-by[data-size="xl"] .poodle-order-by__trigger { padding: 0 1.125rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__label { font-size: 0.875rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__summary { font-size: 1rem; }
+
+  .poodle-order-by[data-density="compact"] .poodle-order-by__trigger {
+    gap: 0.375rem;
+  }
+
+  .poodle-order-by[data-density="comfortable"] .poodle-order-by__trigger {
+    gap: 0.625rem;
+  }
