@@ -42,11 +42,13 @@ function componentKey(variable: string): string | null {
 }
 
 for (const file of readdirSync(SRC)) {
-  if (!file.endsWith(".svelte")) continue;
+  // Components keep styles either inline (<style>) or in an extracted,
+  // co-located .css file (god-file decomposition); scan both.
+  if (!file.endsWith(".svelte") && !file.endsWith(".css")) continue;
 
   const source = readFileSync(join(SRC, file), "utf8");
   const kebab = file
-    .replace(/\.svelte$/, "")
+    .replace(/\.(svelte|css)$/, "")
     .replace(/([a-z])([A-Z])/g, "$1-$2")
     .toLowerCase();
 
@@ -55,6 +57,27 @@ for (const file of readdirSync(SRC)) {
 
   for (const match of source.matchAll(/--poodle-recipe-[a-z0-9-]+/g)) {
     entry.recipe.add(match[0]);
+  }
+
+  // Appearance vars whose every definition resolves through a recipe hook
+  // are internal resolution variables (architecture 007), not candidates.
+  const hookedDefinitions = new Set<string>();
+  for (const match of source.matchAll(/(--poodle-[a-z0-9-]+)\s*:\s*var\(--poodle-recipe-/g)) {
+    hookedDefinitions.add(match[1]);
+  }
+  const bareDefinitions = new Set<string>();
+  const propChannel = new Set<string>();
+  for (const match of source.matchAll(/style:(--poodle-[a-z0-9-]+)=/g)) {
+    propChannel.add(match[1]);
+  }
+  for (const match of source.matchAll(/(--poodle-[a-z0-9-]+)\s*:(?!\s*var\(--poodle-recipe-)\s*([^;\n]*)/g)) {
+    // Template-literal definitions (`--x: ${prop}`) are the per-instance
+    // prop channel, not a missing hook.
+    if (match[2]?.includes("${")) {
+      propChannel.add(match[1]);
+      continue;
+    }
+    bareDefinitions.add(match[1]);
   }
 
   for (const match of source.matchAll(/--poodle-[a-z0-9-]+/g)) {
@@ -66,7 +89,14 @@ for (const file of readdirSync(SRC)) {
 
     if (!body || !body.startsWith(kebab)) continue;
 
-    (APPEARANCE_PATTERN.test(variable) ? entry.candidates : entry.metric).add(variable);
+    if (!APPEARANCE_PATTERN.test(variable)) {
+      entry.metric.add(variable);
+    } else if (
+      bareDefinitions.has(variable) ||
+      (!hookedDefinitions.has(variable) && !propChannel.has(variable))
+    ) {
+      entry.candidates.add(variable);
+    }
   }
 
   if (entry.recipe.size > 0 || entry.candidates.size > 0 || entry.metric.size > 0) {

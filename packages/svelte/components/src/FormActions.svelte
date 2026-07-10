@@ -77,12 +77,12 @@
   .poodle-form-actions {
     --poodle-form-actions-gap: var(--poodle-space-inline-md);
     --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
-    --poodle-form-actions-border-gap: 0.5rem;
-    --poodle-form-actions-border-color: color-mix(
+    --poodle-form-actions-border-gap: var(--poodle-recipe-form-actions-border-gap, 0.5rem);
+    --poodle-form-actions-border-color: var(--poodle-recipe-form-actions-border-color, color-mix(
       in srgb,
       var(--poodle-color-border-subtle) 72%,
       transparent
-    );
+    ));
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-form-actions-gap);
@@ -130,19 +130,19 @@
   .poodle-form-actions[data-density="compact"] {
     --poodle-form-actions-gap: 0.5rem;
     --poodle-form-actions-padding-top: 0.375rem;
-    --poodle-form-actions-border-gap: 0.25rem;
+    --poodle-form-actions-border-gap: var(--poodle-recipe-form-actions-border-gap, 0.25rem);
   }
 
   .poodle-form-actions[data-density="default"] {
     --poodle-form-actions-gap: var(--poodle-space-inline-md);
     --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
-    --poodle-form-actions-border-gap: 0.5rem;
+    --poodle-form-actions-border-gap: var(--poodle-recipe-form-actions-border-gap, 0.5rem);
   }
 
   .poodle-form-actions[data-density="comfortable"] {
     --poodle-form-actions-gap: 0.875rem;
     --poodle-form-actions-padding-top: 0.75rem;
-    --poodle-form-actions-border-gap: 0.625rem;
+    --poodle-form-actions-border-gap: var(--poodle-recipe-form-actions-border-gap, 0.625rem);
   }
 
   .poodle-form-actions__danger-menu[data-visible="always"] {

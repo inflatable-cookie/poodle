@@ -245,27 +245,27 @@
 <style>
   .poodle-token-input {
     --poodle-token-input-radius: var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control));
-    --poodle-token-input-fill: var(
+    --poodle-token-input-fill: var(--poodle-recipe-token-input-fill, var(
       --poodle-treatment-interactive-subtle-fill,
       color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)
-    );
-    --poodle-token-input-fill-focus: var(
+    ));
+    --poodle-token-input-fill-focus: var(--poodle-recipe-token-input-fill-focus, var(
       --poodle-treatment-interactive-subtle-fill-hover,
       var(--poodle-token-input-fill)
-    );
-    --poodle-token-input-border: var(
+    ));
+    --poodle-token-input-border: var(--poodle-recipe-token-input-border, var(
       --poodle-treatment-interactive-subtle-border,
       color-mix(in srgb, var(--poodle-color-border-subtle) 76%, transparent)
-    );
-    --poodle-token-input-border-focus: var(
+    ));
+    --poodle-token-input-border-focus: var(--poodle-recipe-token-input-border-focus, var(
       --poodle-treatment-interactive-subtle-border-focus,
       color-mix(in srgb, var(--poodle-color-accent-base) 58%, var(--poodle-color-border-subtle))
-    );
-    --poodle-token-input-shadow: var(--poodle-treatment-interactive-subtle-shadow, none);
-    --poodle-token-input-shadow-focus: var(
+    ));
+    --poodle-token-input-shadow: var(--poodle-recipe-token-input-shadow, var(--poodle-treatment-interactive-subtle-shadow, none));
+    --poodle-token-input-shadow-focus: var(--poodle-recipe-token-input-shadow-focus, var(
       --poodle-treatment-interactive-subtle-shadow-focus,
       0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)
-    );
+    ));
     --poodle-token-input-padding-inline: var(--poodle-space-control-x);
     --poodle-token-input-padding-block: var(--poodle-space-control-y);
     --poodle-token-input-gap: 0.375rem;

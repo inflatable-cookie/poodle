@@ -267,20 +267,20 @@
   }
 
   .poodle-icon-button {
-    --poodle-icon-button-fill: transparent;
-    --poodle-icon-button-fill-hover: color-mix(
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-fill, transparent);
+    --poodle-icon-button-fill-hover: var(--poodle-recipe-icon-button-fill-hover, color-mix(
       in srgb,
       var(--poodle-icon-button-fill) 76%,
       var(--poodle-color-background-elevated)
-    );
-    --poodle-icon-button-fill-active: color-mix(
+    ));
+    --poodle-icon-button-fill-active: var(--poodle-recipe-icon-button-fill-active, color-mix(
       in srgb,
       var(--poodle-icon-button-fill) 64%,
       var(--poodle-color-background-elevated)
-    );
-    --poodle-icon-button-border: transparent;
-    --poodle-icon-button-shadow: none;
-    --poodle-icon-button-text: var(--poodle-color-text-primary);
+    ));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-border, transparent);
+    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-shadow, none);
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-text, var(--poodle-color-text-primary));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -302,89 +302,89 @@
 
 
   .poodle-icon-button[data-variant="primary"] {
-    --poodle-icon-button-fill: var(
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-fill, var(
       --poodle-treatment-interactive-primary-fill,
       var(--poodle-color-accent-base)
-    );
-    --poodle-icon-button-border: var(
+    ));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-border, var(
       --poodle-treatment-interactive-primary-border,
       color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
-    );
-    --poodle-icon-button-text: var(
+    ));
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-text, var(
       --poodle-treatment-interactive-primary-text,
       var(--poodle-color-text-inverse)
-    );
-    --poodle-icon-button-shadow: var(
+    ));
+    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-primary-shadow, var(
       --poodle-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
-    );
+    ));
   }
 
   .poodle-icon-button[data-variant="secondary"] {
-    --poodle-icon-button-fill: var(
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-secondary-fill, var(
       --poodle-treatment-interactive-fill,
       var(--poodle-color-background-surface)
-    );
-    --poodle-icon-button-border: var(
+    ));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-secondary-border, var(
       --poodle-treatment-interactive-border,
       var(--poodle-color-border-default)
-    );
-    --poodle-icon-button-shadow: var(
+    ));
+    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-secondary-shadow, var(
       --poodle-treatment-interactive-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
-    );
+    ));
   }
 
   .poodle-icon-button[data-tone="danger"] {
-    --poodle-icon-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface)));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default)));
   }
 
   .poodle-icon-button[data-tone="success"] {
-    --poodle-icon-button-fill: color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-color-background-surface));
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default));
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-color-background-surface)));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-success-border, color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default)));
   }
 
   .poodle-icon-button[data-variant="primary"][data-tone="danger"] {
-    --poodle-icon-button-fill: var(--poodle-color-status-danger);
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
-    --poodle-icon-button-text: var(--poodle-color-text-inverse);
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-danger-fill, var(--poodle-color-status-danger));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 84%, black));
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-danger-text, var(--poodle-color-text-inverse));
   }
 
   .poodle-icon-button[data-variant="primary"][data-tone="success"] {
-    --poodle-icon-button-fill: var(--poodle-color-status-success);
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 84%, black);
-    --poodle-icon-button-text: var(--poodle-color-text-inverse);
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-success-fill, var(--poodle-color-status-success));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-success-border, color-mix(in srgb, var(--poodle-color-status-success) 84%, black));
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-success-text, var(--poodle-color-text-inverse));
   }
 
   .poodle-icon-button[data-variant="ghost"][data-tone="danger"] {
-    --poodle-icon-button-fill: transparent;
-    --poodle-icon-button-border: transparent;
-    --poodle-icon-button-text: var(--poodle-color-status-danger);
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-ghost-danger-fill, transparent);
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-danger-border, transparent);
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-ghost-danger-text, var(--poodle-color-status-danger));
   }
 
   .poodle-icon-button[data-variant="ghost"][data-tone="success"] {
-    --poodle-icon-button-fill: transparent;
-    --poodle-icon-button-border: transparent;
-    --poodle-icon-button-text: var(--poodle-color-status-success);
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-ghost-success-fill, transparent);
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-success-border, transparent);
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-ghost-success-text, var(--poodle-color-status-success));
   }
 
   .poodle-icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-danger-hover-border, color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default)));
     background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
   }
 
   .poodle-icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled) {
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-success-hover-border, color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default)));
     background: color-mix(in srgb, var(--poodle-color-status-success) 10%, transparent);
   }
 
   .poodle-icon-button[data-pressed="true"]:not([data-variant="primary"]) {
-    --poodle-icon-button-fill: var(--poodle-color-accent-base);
-    --poodle-icon-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-accent-base));
-    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
-    --poodle-icon-button-text: var(--poodle-color-text-inverse);
-    --poodle-icon-button-shadow: none;
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-fill, var(--poodle-color-accent-base));
+    --poodle-icon-button-fill-hover: var(--poodle-recipe-icon-button-primary-fill-hover, color-mix(in srgb, white 12%, var(--poodle-color-accent-base)));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-border, color-mix(in srgb, var(--poodle-color-accent-base) 85%, black));
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-text, var(--poodle-color-text-inverse));
+    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-primary-shadow, none);
   }
 
   .poodle-icon-button:hover:not(:disabled) {

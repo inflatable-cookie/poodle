@@ -120,8 +120,8 @@
 
 <style>
   .poodle-callout {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent);
+    --poodle-callout-fill: var(--poodle-recipe-callout-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
+    --poodle-callout-border: var(--poodle-recipe-callout-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent));
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
@@ -135,28 +135,28 @@
   }
 
   .poodle-callout[data-tone="info"] {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel));
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default));
+    --poodle-callout-fill: var(--poodle-recipe-callout-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-info-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="success"] {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel));
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default));
+    --poodle-callout-fill: var(--poodle-recipe-callout-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-success-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="warning"] {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel));
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default));
+    --poodle-callout-fill: var(--poodle-recipe-callout-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="danger"] {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel));
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default));
+    --poodle-callout-fill: var(--poodle-recipe-callout-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="pending"] {
-    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel));
-    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default));
+    --poodle-callout-fill: var(--poodle-recipe-callout-pending-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-pending-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout__body {

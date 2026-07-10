@@ -69,7 +69,7 @@
 
 <style>
   .poodle-spinner {
-    --poodle-spinner-color: currentColor;
+    --poodle-spinner-color: var(--poodle-recipe-spinner-color, currentColor);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -77,43 +77,43 @@
   }
 
   .poodle-spinner[data-tone="accent"] {
-    --poodle-spinner-color: var(--poodle-color-accent-base);
+    --poodle-spinner-color: var(--poodle-recipe-spinner-accent-color, var(--poodle-color-accent-base));
   }
 
   .poodle-spinner[data-tone="muted"] {
-    --poodle-spinner-color: var(--poodle-color-text-secondary);
+    --poodle-spinner-color: var(--poodle-recipe-spinner-muted-color, var(--poodle-color-text-secondary));
   }
 
   .poodle-spinner[data-size="sm"] {
-    --poodle-spinner-ring-size: 0.75rem;
+    --poodle-spinner-ring-size: var(--poodle-recipe-spinner-ring-size, 0.75rem);
     --poodle-spinner-grid-width: 0.4375rem;
     --poodle-spinner-grid-height: 0.6875rem;
     --poodle-spinner-grid-gap: 0.078125rem;
   }
 
   .poodle-spinner[data-size="xs"] {
-    --poodle-spinner-ring-size: 0.625rem;
+    --poodle-spinner-ring-size: var(--poodle-recipe-spinner-ring-size, 0.625rem);
     --poodle-spinner-grid-width: 0.375rem;
     --poodle-spinner-grid-height: 0.5625rem;
     --poodle-spinner-grid-gap: 0.0625rem;
   }
 
   .poodle-spinner[data-size="md"] {
-    --poodle-spinner-ring-size: 1rem;
+    --poodle-spinner-ring-size: var(--poodle-recipe-spinner-ring-size, 1rem);
     --poodle-spinner-grid-width: 0.5625rem;
     --poodle-spinner-grid-height: 0.9375rem;
     --poodle-spinner-grid-gap: 0.09375rem;
   }
 
   .poodle-spinner[data-size="lg"] {
-    --poodle-spinner-ring-size: 1.5rem;
+    --poodle-spinner-ring-size: var(--poodle-recipe-spinner-ring-size, 1.5rem);
     --poodle-spinner-grid-width: 0.75rem;
     --poodle-spinner-grid-height: 1.25rem;
     --poodle-spinner-grid-gap: 0.125rem;
   }
 
   .poodle-spinner[data-size="xl"] {
-    --poodle-spinner-ring-size: 1.875rem;
+    --poodle-spinner-ring-size: var(--poodle-recipe-spinner-ring-size, 1.875rem);
     --poodle-spinner-grid-width: 0.9375rem;
     --poodle-spinner-grid-height: 1.5625rem;
     --poodle-spinner-grid-gap: 0.15625rem;

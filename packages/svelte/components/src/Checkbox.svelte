@@ -123,7 +123,7 @@
 
 <style>
   .poodle-checkbox {
-    --poodle-checkbox-selected-color: var(--poodle-color-accent-base);
+    --poodle-checkbox-selected-color: var(--poodle-recipe-checkbox-selected-color, var(--poodle-color-accent-base));
     position: relative;
     display: inline-flex;
     align-items: center;

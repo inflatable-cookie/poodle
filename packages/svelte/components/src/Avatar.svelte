@@ -67,13 +67,13 @@
   }
 
   .poodle-avatar[data-tone="neutral"] {
-    --poodle-avatar-background: color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-text-primary));
-    --poodle-avatar-color: var(--poodle-color-text-secondary);
+    --poodle-avatar-background: var(--poodle-recipe-avatar-neutral-background, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-text-primary)));
+    --poodle-avatar-color: var(--poodle-recipe-avatar-neutral-color, var(--poodle-color-text-secondary));
   }
 
   .poodle-avatar[data-tone="accent"] {
-    --poodle-avatar-background: color-mix(in srgb, var(--poodle-color-accent-base) 76%, var(--poodle-color-background-surface));
-    --poodle-avatar-color: var(--poodle-color-text-primary);
+    --poodle-avatar-background: var(--poodle-recipe-avatar-accent-background, color-mix(in srgb, var(--poodle-color-accent-base) 76%, var(--poodle-color-background-surface)));
+    --poodle-avatar-color: var(--poodle-recipe-avatar-accent-color, var(--poodle-color-text-primary));
   }
 
   .poodle-avatar[data-size="xs"] {

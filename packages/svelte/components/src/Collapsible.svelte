@@ -131,7 +131,7 @@
 
 <style>
   .poodle-collapsible {
-    --poodle-collapsible-fill: color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel));
+    --poodle-collapsible-fill: var(--poodle-recipe-collapsible-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel)));
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;

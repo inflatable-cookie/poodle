@@ -85,7 +85,11 @@
   function toneToColor(tone: SwitchTone): string | null {
     switch (tone) {
       case "primary":
-        return "var(--poodle-color-accent-base)";
+        // Stylesheet default for the on side is already the accent token via
+        // the recipe chain; returning null keeps the inline prop channel
+        // quiet so app-scope --poodle-recipe-switch-* overrides can reach
+        // the component. Explicit onColor/offColor props still win.
+        return null;
       case "success":
         return "var(--poodle-color-status-success)";
       case "warning":
@@ -158,14 +162,14 @@
 <style>
   .poodle-switch {
     --switch-unit: var(--poodle-size-icon-md);
-    --poodle-switch-off-color: var(--poodle-color-text-primary);
-    --poodle-switch-on-color: var(--poodle-color-accent-base);
+    --poodle-switch-off-color: var(--poodle-recipe-switch-off-color, var(--poodle-color-text-primary));
+    --poodle-switch-on-color: var(--poodle-recipe-switch-on-color, var(--poodle-color-accent-base));
     --poodle-switch-off-track: color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface));
     --poodle-switch-on-track: color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface));
     --poodle-switch-off-thumb: var(--poodle-switch-off-color);
     --poodle-switch-on-thumb: var(--poodle-switch-on-color);
-    --poodle-switch-off-border: var(--poodle-color-border-default);
-    --poodle-switch-on-border: color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default));
+    --poodle-switch-off-border: var(--poodle-recipe-switch-off-border, var(--poodle-color-border-default));
+    --poodle-switch-on-border: var(--poodle-recipe-switch-on-border, color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default)));
     position: relative;
     display: inline-flex;
     align-items: center;

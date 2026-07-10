@@ -1,8 +1,8 @@
 {
   "summary": {
     "components": 65,
-    "recipeHooks": 34,
-    "hookCandidates": 46,
+    "recipeHooks": 173,
+    "hookCandidates": 0,
     "metricVariables": 290
   },
   "inventory": {
@@ -43,11 +43,13 @@
       ]
     },
     "avatar": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-avatar-background",
-        "--poodle-avatar-color"
+      "recipe": [
+        "--poodle-recipe-avatar-accent-background",
+        "--poodle-recipe-avatar-accent-color",
+        "--poodle-recipe-avatar-neutral-background",
+        "--poodle-recipe-avatar-neutral-color"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-avatar-font-size",
         "--poodle-avatar-size"
@@ -87,35 +89,80 @@
       "recipe": [
         "--poodle-recipe-button-border",
         "--poodle-recipe-button-border-hover",
+        "--poodle-recipe-button-danger-border",
+        "--poodle-recipe-button-danger-border-hover",
+        "--poodle-recipe-button-danger-fill",
+        "--poodle-recipe-button-danger-fill-active",
+        "--poodle-recipe-button-danger-fill-hover",
+        "--poodle-recipe-button-danger-text",
         "--poodle-recipe-button-fill",
         "--poodle-recipe-button-fill-active",
         "--poodle-recipe-button-fill-hover",
+        "--poodle-recipe-button-ghost-border",
+        "--poodle-recipe-button-ghost-danger-border",
+        "--poodle-recipe-button-ghost-danger-border-hover",
+        "--poodle-recipe-button-ghost-danger-fill",
+        "--poodle-recipe-button-ghost-danger-fill-active",
+        "--poodle-recipe-button-ghost-danger-fill-hover",
+        "--poodle-recipe-button-ghost-danger-shadow",
+        "--poodle-recipe-button-ghost-danger-text",
+        "--poodle-recipe-button-ghost-fill",
+        "--poodle-recipe-button-ghost-shadow",
+        "--poodle-recipe-button-ghost-warning-border",
+        "--poodle-recipe-button-ghost-warning-border-hover",
+        "--poodle-recipe-button-ghost-warning-fill",
+        "--poodle-recipe-button-ghost-warning-fill-active",
+        "--poodle-recipe-button-ghost-warning-fill-hover",
+        "--poodle-recipe-button-ghost-warning-shadow",
+        "--poodle-recipe-button-ghost-warning-text",
         "--poodle-recipe-button-primary-border",
+        "--poodle-recipe-button-primary-danger-border",
+        "--poodle-recipe-button-primary-danger-border-hover",
+        "--poodle-recipe-button-primary-danger-fill",
+        "--poodle-recipe-button-primary-danger-fill-active",
+        "--poodle-recipe-button-primary-danger-fill-hover",
+        "--poodle-recipe-button-primary-danger-shadow",
+        "--poodle-recipe-button-primary-danger-text",
         "--poodle-recipe-button-primary-fill",
         "--poodle-recipe-button-primary-fill-active",
         "--poodle-recipe-button-primary-fill-hover",
         "--poodle-recipe-button-primary-shadow",
         "--poodle-recipe-button-primary-text",
+        "--poodle-recipe-button-primary-warning-border",
+        "--poodle-recipe-button-primary-warning-border-hover",
+        "--poodle-recipe-button-primary-warning-fill",
+        "--poodle-recipe-button-primary-warning-fill-active",
+        "--poodle-recipe-button-primary-warning-fill-hover",
+        "--poodle-recipe-button-primary-warning-shadow",
+        "--poodle-recipe-button-primary-warning-text",
         "--poodle-recipe-button-shadow",
-        "--poodle-recipe-button-text"
+        "--poodle-recipe-button-text",
+        "--poodle-recipe-button-warning-border",
+        "--poodle-recipe-button-warning-border-hover",
+        "--poodle-recipe-button-warning-fill",
+        "--poodle-recipe-button-warning-fill-active",
+        "--poodle-recipe-button-warning-fill-hover",
+        "--poodle-recipe-button-warning-text"
       ],
-      "candidates": [
-        "--poodle-button-border",
-        "--poodle-button-border-hover",
-        "--poodle-button-fill",
-        "--poodle-button-fill-active",
-        "--poodle-button-fill-hover",
-        "--poodle-button-shadow",
-        "--poodle-button-text"
-      ],
+      "candidates": [],
       "metric": []
     },
     "callout": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-callout-border",
-        "--poodle-callout-fill"
+      "recipe": [
+        "--poodle-recipe-callout-border",
+        "--poodle-recipe-callout-danger-border",
+        "--poodle-recipe-callout-danger-fill",
+        "--poodle-recipe-callout-fill",
+        "--poodle-recipe-callout-info-border",
+        "--poodle-recipe-callout-info-fill",
+        "--poodle-recipe-callout-pending-border",
+        "--poodle-recipe-callout-pending-fill",
+        "--poodle-recipe-callout-success-border",
+        "--poodle-recipe-callout-success-fill",
+        "--poodle-recipe-callout-warning-border",
+        "--poodle-recipe-callout-warning-fill"
       ],
+      "candidates": [],
       "metric": []
     },
     "card": {
@@ -149,17 +196,17 @@
       ]
     },
     "checkbox": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-checkbox-selected-color"
+      "recipe": [
+        "--poodle-recipe-checkbox-selected-color"
       ],
+      "candidates": [],
       "metric": []
     },
     "collapsible": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-collapsible-fill"
+      "recipe": [
+        "--poodle-recipe-collapsible-fill"
       ],
+      "candidates": [],
       "metric": []
     },
     "command-palette": {
@@ -297,10 +344,11 @@
       ]
     },
     "form-actions": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-form-actions-border-color"
+      "recipe": [
+        "--poodle-recipe-form-actions-border-color",
+        "--poodle-recipe-form-actions-border-gap"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-form-actions-border-gap",
         "--poodle-form-actions-gap",
@@ -323,15 +371,41 @@
       ]
     },
     "icon-button": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-icon-button-border",
-        "--poodle-icon-button-fill",
-        "--poodle-icon-button-fill-active",
-        "--poodle-icon-button-fill-hover",
-        "--poodle-icon-button-shadow",
-        "--poodle-icon-button-text"
+      "recipe": [
+        "--poodle-recipe-icon-button-border",
+        "--poodle-recipe-icon-button-danger-border",
+        "--poodle-recipe-icon-button-danger-fill",
+        "--poodle-recipe-icon-button-fill",
+        "--poodle-recipe-icon-button-fill-active",
+        "--poodle-recipe-icon-button-fill-hover",
+        "--poodle-recipe-icon-button-ghost-danger-border",
+        "--poodle-recipe-icon-button-ghost-danger-fill",
+        "--poodle-recipe-icon-button-ghost-danger-hover-disabled-border",
+        "--poodle-recipe-icon-button-ghost-danger-text",
+        "--poodle-recipe-icon-button-ghost-success-border",
+        "--poodle-recipe-icon-button-ghost-success-fill",
+        "--poodle-recipe-icon-button-ghost-success-hover-disabled-border",
+        "--poodle-recipe-icon-button-ghost-success-text",
+        "--poodle-recipe-icon-button-primary-border",
+        "--poodle-recipe-icon-button-primary-danger-border",
+        "--poodle-recipe-icon-button-primary-danger-fill",
+        "--poodle-recipe-icon-button-primary-danger-text",
+        "--poodle-recipe-icon-button-primary-fill",
+        "--poodle-recipe-icon-button-primary-fill-hover",
+        "--poodle-recipe-icon-button-primary-shadow",
+        "--poodle-recipe-icon-button-primary-success-border",
+        "--poodle-recipe-icon-button-primary-success-fill",
+        "--poodle-recipe-icon-button-primary-success-text",
+        "--poodle-recipe-icon-button-primary-text",
+        "--poodle-recipe-icon-button-secondary-border",
+        "--poodle-recipe-icon-button-secondary-fill",
+        "--poodle-recipe-icon-button-secondary-shadow",
+        "--poodle-recipe-icon-button-shadow",
+        "--poodle-recipe-icon-button-success-border",
+        "--poodle-recipe-icon-button-success-fill",
+        "--poodle-recipe-icon-button-text"
       ],
+      "candidates": [],
       "metric": []
     },
     "list-card": {
@@ -494,15 +568,24 @@
     "pill": {
       "recipe": [
         "--poodle-recipe-pill-border",
+        "--poodle-recipe-pill-danger-border",
+        "--poodle-recipe-pill-danger-fill",
+        "--poodle-recipe-pill-danger-text",
         "--poodle-recipe-pill-fill",
-        "--poodle-recipe-pill-text"
+        "--poodle-recipe-pill-info-border",
+        "--poodle-recipe-pill-info-fill",
+        "--poodle-recipe-pill-info-text",
+        "--poodle-recipe-pill-neutral-fill",
+        "--poodle-recipe-pill-neutral-text",
+        "--poodle-recipe-pill-success-border",
+        "--poodle-recipe-pill-success-fill",
+        "--poodle-recipe-pill-success-text",
+        "--poodle-recipe-pill-text",
+        "--poodle-recipe-pill-warning-border",
+        "--poodle-recipe-pill-warning-fill",
+        "--poodle-recipe-pill-warning-text"
       ],
-      "candidates": [
-        "--poodle-pill-accent",
-        "--poodle-pill-border",
-        "--poodle-pill-fill",
-        "--poodle-pill-text"
-      ],
+      "candidates": [],
       "metric": [
         "--poodle-pill-font-size",
         "--poodle-pill-gap",
@@ -525,10 +608,10 @@
       ]
     },
     "radio": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-radio-selected-color"
+      "recipe": [
+        "--poodle-recipe-radio-selected-color"
       ],
+      "candidates": [],
       "metric": []
     },
     "relation-picker": {
@@ -589,10 +672,11 @@
       ]
     },
     "separator": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-separator-color"
+      "recipe": [
+        "--poodle-recipe-separator-color",
+        "--poodle-recipe-separator-default-color"
       ],
+      "candidates": [],
       "metric": []
     },
     "sidebar-nav": {
@@ -625,10 +709,13 @@
       ]
     },
     "spinner": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-spinner-color"
+      "recipe": [
+        "--poodle-recipe-spinner-accent-color",
+        "--poodle-recipe-spinner-color",
+        "--poodle-recipe-spinner-muted-color",
+        "--poodle-recipe-spinner-ring-size"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-spinner-grid-gap",
         "--poodle-spinner-grid-height",
@@ -652,24 +739,28 @@
       ]
     },
     "surface": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-surface-border",
-        "--poodle-surface-fill",
-        "--poodle-surface-shadow"
+      "recipe": [
+        "--poodle-recipe-surface-border",
+        "--poodle-recipe-surface-canvas-fill",
+        "--poodle-recipe-surface-elevated-border",
+        "--poodle-recipe-surface-elevated-fill",
+        "--poodle-recipe-surface-elevated-shadow",
+        "--poodle-recipe-surface-fill",
+        "--poodle-recipe-surface-shadow"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-surface"
       ]
     },
     "switch": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-switch-off-border",
-        "--poodle-switch-off-color",
-        "--poodle-switch-on-border",
-        "--poodle-switch-on-color"
+      "recipe": [
+        "--poodle-recipe-switch-off-border",
+        "--poodle-recipe-switch-off-color",
+        "--poodle-recipe-switch-on-border",
+        "--poodle-recipe-switch-on-color"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-switch-off-thumb",
         "--poodle-switch-off-track",
@@ -693,15 +784,15 @@
       ]
     },
     "text-input": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-text-input-border",
-        "--poodle-text-input-border-focus",
-        "--poodle-text-input-fill",
-        "--poodle-text-input-fill-focus",
-        "--poodle-text-input-shadow",
-        "--poodle-text-input-shadow-focus"
+      "recipe": [
+        "--poodle-recipe-text-input-border",
+        "--poodle-recipe-text-input-border-focus",
+        "--poodle-recipe-text-input-fill",
+        "--poodle-recipe-text-input-fill-focus",
+        "--poodle-recipe-text-input-shadow",
+        "--poodle-recipe-text-input-shadow-focus"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-text-input-adornment-gap",
         "--poodle-text-input-control-height",
@@ -742,15 +833,15 @@
       ]
     },
     "token-input": {
-      "recipe": [],
-      "candidates": [
-        "--poodle-token-input-border",
-        "--poodle-token-input-border-focus",
-        "--poodle-token-input-fill",
-        "--poodle-token-input-fill-focus",
-        "--poodle-token-input-shadow",
-        "--poodle-token-input-shadow-focus"
+      "recipe": [
+        "--poodle-recipe-token-input-border",
+        "--poodle-recipe-token-input-border-focus",
+        "--poodle-recipe-token-input-fill",
+        "--poodle-recipe-token-input-fill-focus",
+        "--poodle-recipe-token-input-shadow",
+        "--poodle-recipe-token-input-shadow-focus"
       ],
+      "candidates": [],
       "metric": [
         "--poodle-token-input-font-size",
         "--poodle-token-input-gap",

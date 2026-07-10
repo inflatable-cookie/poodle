@@ -49,16 +49,16 @@
 
 <style>
   .poodle-surface {
-    --poodle-surface-fill: var(
+    --poodle-surface-fill: var(--poodle-recipe-surface-fill, var(
       --poodle-treatment-surface-fill,
       color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)
-    );
+    ));
     --poodle-surface: var(--poodle-surface-fill);
-    --poodle-surface-border: var(
+    --poodle-surface-border: var(--poodle-recipe-surface-border, var(
       --poodle-treatment-surface-border,
       color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
-    );
-    --poodle-surface-shadow: var(--poodle-treatment-surface-shadow, none);
+    ));
+    --poodle-surface-shadow: var(--poodle-recipe-surface-shadow, var(--poodle-treatment-surface-shadow, none));
     min-width: 0;
     min-height: 0;
     border: 0.0625rem solid var(--poodle-surface-border);
@@ -68,23 +68,23 @@
   }
 
   .poodle-surface[data-tone="canvas"] {
-    --poodle-surface-fill: color-mix(in srgb, var(--poodle-color-background-canvas) 98%, transparent);
+    --poodle-surface-fill: var(--poodle-recipe-surface-canvas-fill, color-mix(in srgb, var(--poodle-color-background-canvas) 98%, transparent));
   }
 
   .poodle-surface[data-tone="elevated"],
   .poodle-surface[data-elevated="true"] {
-    --poodle-surface-fill: var(
+    --poodle-surface-fill: var(--poodle-recipe-surface-elevated-fill, var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))
-    );
-    --poodle-surface-border: var(
+    ));
+    --poodle-surface-border: var(--poodle-recipe-surface-elevated-border, var(
       --poodle-treatment-surface-elevated-border,
       color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
-    );
-    --poodle-surface-shadow: var(
+    ));
+    --poodle-surface-shadow: var(--poodle-recipe-surface-elevated-shadow, var(
       --poodle-treatment-surface-elevated-shadow,
       var(--poodle-elevation-surface)
-    );
+    ));
   }
 
   .poodle-surface[data-border="none"] {
@@ -92,6 +92,6 @@
   }
 
   .poodle-surface[data-border="default"] {
-    --poodle-surface-border: var(--poodle-color-border-default);
+    --poodle-surface-border: var(--poodle-recipe-surface-border, var(--poodle-color-border-default));
   }
 </style>
