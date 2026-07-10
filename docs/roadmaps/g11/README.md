@@ -79,9 +79,13 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
 - `g11.006` complete — `poodle-headless` crate (11 machines, 41 shared
   conformance vectors green on both runtimes); GPUI dialog/drawer/menu run
   machine-guarded handlers
-- `g11.007` planned — React adapter pilot and Mitosis shell decision
+- `g11.007` complete — React pilot (`@poodle/react`, 268 LOC of shells,
+  browser-verified on shared machines); Mitosis rejected for shells too
+  (Svelte-4 output, dropped types — evidence in the roadmap file)
 
 ## Next Task
 
-Open `g11/007-multi-framework-adapters-and-mitosis-decision.md` — the
-final runway milestone.
+The headless-core runway (g11.002–007) is complete. Spec 062 is promoted;
+remaining recorded debt lives in g11.004 (extraction register) and g11.006
+(domain-math port, Jetstream adoption). Generation rollover is an explicit
+maintainer decision.

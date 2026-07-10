@@ -4,8 +4,25 @@
     {
       "name": "preview",
       "runtimeExecutable": "/opt/homebrew/bin/bun",
-      "runtimeArgs": ["run", "--cwd", "packages/svelte/preview", "dev"],
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/svelte/preview",
+        "dev"
+      ],
       "port": 4173,
+      "autoPort": true
+    },
+    {
+      "name": "react-preview",
+      "runtimeExecutable": "/opt/homebrew/bin/bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/react/preview",
+        "dev"
+      ],
+      "port": 4180,
       "autoPort": true
     }
   ]

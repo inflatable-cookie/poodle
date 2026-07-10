@@ -9,7 +9,9 @@
         "packages/svelte/components",
         "packages/bridges/underlay",
         "packages/svelte/icons-lucide",
-        "packages/svelte/preview"
+        "packages/svelte/preview",
+        "packages/react/components",
+        "packages/react/preview"
     ],
     "devDependencies": {
         "@types/node": "^25.5.2"

@@ -1,0 +1,25 @@
+{
+  "name": "@poodle/react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Poodle React component pilot: styled shells over @poodle/headless machines, sharing tokens and recipes with the Svelte layer.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": ["src", "README.md"],
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@poodle/headless": "workspace:*"
+  },
+  "poodleRelease": {
+    "publicIntent": true,
+    "channel": "preview",
+    "stability": "experimental"
+  }
+}
