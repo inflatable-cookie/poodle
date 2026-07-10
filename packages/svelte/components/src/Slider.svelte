@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { clamp, joinStyles, snapToStep } from "./internal";
+  import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@poodle/headless";
+
+  import { joinStyles } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
@@ -40,21 +42,25 @@
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const safeMax = $derived(max <= min ? min + 1 : max);
-  const displayValue = $derived(clamp(snapToStep(value, min, step), min, safeMax));
+  const machineContext = $derived<SliderContext>({ value, min, max, step, disabled });
+  const safeMax = $derived(safeSliderMax(min, max));
+  const displayValue = $derived(normalizeSliderValue(machineContext, value));
   const percentage = $derived(((displayValue - min) / (safeMax - min)) * 100);
   const sliderStyle = $derived(joinStyles([`--poodle-slider-percent: ${percentage}%`]));
 
-  function handleInput(event: Event): void {
-    const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
-    value = next;
-    onValueChange?.(next);
-  }
+  function send(type: "INPUT" | "COMMIT", event: Event): void {
+    const raw = Number((event.currentTarget as HTMLInputElement).value);
+    const result = sliderTransition(machineContext, { type, raw });
 
-  function handleChange(event: Event): void {
-    const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
-    value = next;
-    onValueCommit?.(next);
+    for (const effect of result.effects) {
+      value = effect.value;
+
+      if (effect.type === "emitValueChange") {
+        onValueChange?.(effect.value);
+      } else if (effect.type === "emitValueCommit") {
+        onValueCommit?.(effect.value);
+      }
+    }
   }
 </script>
 
@@ -72,8 +78,8 @@
     disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-valuetext={valueText ?? undefined}
-    oninput={handleInput}
-    onchange={handleChange}
+    oninput={(event) => send("INPUT", event)}
+    onchange={(event) => send("COMMIT", event)}
   />
 </div>
 

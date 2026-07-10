@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { clamp, joinStyles, snapToStep } from "./internal";
+  import {
+    normalizeRangeValue,
+    rangeSliderTransition,
+    safeSliderMax,
+    type RangeSliderContext,
+  } from "@poodle/headless";
+
+  import { joinStyles } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
@@ -42,9 +49,11 @@
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const safeMax = $derived(max <= min ? min + 1 : max);
-  const displayLower = $derived(clamp(Math.min(value[0], value[1]), min, safeMax));
-  const displayUpper = $derived(clamp(Math.max(value[0], value[1]), min, safeMax));
+  const machineContext = $derived<RangeSliderContext>({ value, min, max, step, disabled });
+  const safeMax = $derived(safeSliderMax(min, max));
+  const displayRange = $derived(normalizeRangeValue(machineContext));
+  const displayLower = $derived(displayRange[0]);
+  const displayUpper = $derived(displayRange[1]);
   const lowerPercent = $derived(((displayLower - min) / (safeMax - min)) * 100);
   const upperPercent = $derived(((displayUpper - min) / (safeMax - min)) * 100);
   const rangeStyle = $derived(joinStyles([
@@ -52,32 +61,19 @@
     `--poodle-range-end: ${upperPercent}%`,
   ]));
 
-  function handleLowerInput(event: Event): void {
+  function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
-    const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
-    value = [snapped, displayUpper];
-    onValueChange?.([snapped, displayUpper]);
-  }
+    const result = rangeSliderTransition(machineContext, { type, thumb, raw });
 
-  function handleLowerChange(event: Event): void {
-    const raw = Number((event.currentTarget as HTMLInputElement).value);
-    const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
-    value = [snapped, displayUpper];
-    onValueCommit?.([snapped, displayUpper]);
-  }
+    for (const effect of result.effects) {
+      value = effect.value;
 
-  function handleUpperInput(event: Event): void {
-    const raw = Number((event.currentTarget as HTMLInputElement).value);
-    const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
-    value = [displayLower, snapped];
-    onValueChange?.([displayLower, snapped]);
-  }
-
-  function handleUpperChange(event: Event): void {
-    const raw = Number((event.currentTarget as HTMLInputElement).value);
-    const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
-    value = [displayLower, snapped];
-    onValueCommit?.([displayLower, snapped]);
+      if (effect.type === "emitValueChange") {
+        onValueChange?.(effect.value);
+      } else if (effect.type === "emitValueCommit") {
+        onValueCommit?.(effect.value);
+      }
+    }
   }
 </script>
 
@@ -96,8 +92,8 @@
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
     aria-valuetext={lowerValueText ?? undefined}
-    oninput={handleLowerInput}
-    onchange={handleLowerChange}
+    oninput={(event) => send("INPUT", "lower", event)}
+    onchange={(event) => send("COMMIT", "lower", event)}
   />
 
   <input
@@ -110,8 +106,8 @@
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
     aria-valuetext={upperValueText ?? undefined}
-    oninput={handleUpperInput}
-    onchange={handleUpperChange}
+    oninput={(event) => send("INPUT", "upper", event)}
+    onchange={(event) => send("COMMIT", "upper", event)}
   />
 </div>
 

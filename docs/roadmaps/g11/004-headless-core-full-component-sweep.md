@@ -1,6 +1,6 @@
 # g11.004 Headless Core Full Component Sweep
 
-Status: planned
+Status: active — wave 1 complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.003`
 Updated: 2026-07-10
@@ -47,6 +47,32 @@ is a seed, not an inventory.
 4. run the consumer validation matrix; record results in this file
 5. if a surface must change: g11.001 wave process, Underlay first, consumers
    in the same wave
+
+## Wave 1 Status (complete, 2026-07-10)
+
+Machine-backed and swapped: `Switch`, `TriStateSwitch`, `RadioGroup`,
+`SegmentedControl`, `ToggleGroup`, `Slider`, `RangeSlider`
+(+ `Checkbox` from the g11.003 pilot).
+
+- Core modules: `switch.ts`, `single-select.ts` (shared by RadioGroup /
+  SegmentedControl / TriStateSwitch), `toggle-group.ts`, `slider.ts`
+  (single + range). 59 core tests green.
+- Machine specs written into all seven contracts (compact form referencing
+  the shared machines; the full-table pilot form remains the template).
+- Public surfaces unchanged. These components lean on native inputs for
+  keyboard/focus, so machines own value semantics, guards, and the
+  change/commit callback split only — recorded per contract under
+  Machinery Dependencies.
+- Runtime-verified in the preview: switch toggle + readOnly revert, radio
+  and segmented selection, tri-state cycle, toggle-group single/multiple
+  membership, slider snap + percent var, range-slider thumb-crossing clamp.
+- Consumer typecheck matrix clean: underlay, acme-admin, compli-me/admin,
+  cp-admin, composer-admin (greenhouse still blocked by pre-existing
+  songsprout/stem errors unrelated to Poodle).
+
+`ToggleGroup` single-mode reselect (without `allowDeactivation`) re-emits
+`onValueChange` with the same value — preserved from pre-machine behavior,
+recorded in the contract.
 
 ## Exit Criteria
 

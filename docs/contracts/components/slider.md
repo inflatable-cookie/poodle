@@ -1,7 +1,7 @@
 # Slider
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -78,6 +78,25 @@ Updated: 2026-03-15
 
 - current value state
 - active drag/keyboard-adjustment state (native input handles this)
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`sliderTransition` in
+`@poodle/headless`)
+
+Keyboard and pointer interaction come from the native range input; the
+machine owns value normalization and the change/commit split.
+
+- Context: `value` (controllable), `min`, `max`, `step`, `disabled`
+- Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
+  `SET_VALUE` (programmatic)
+- Normalization: snap to step from `min`, clamp into `[min, safeMax]` where
+  a degenerate range (`max <= min`) widens to `min + 1`; non-positive step
+  passes values through unsnapped
+- Transitions: `INPUT` sets normalized value, effect
+  `emitValueChange(value)`; `COMMIT` sets normalized value, effect
+  `emitValueCommit(value)`
+- Machinery dependencies: none.
 
 ## 5. Callbacks
 

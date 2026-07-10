@@ -1,7 +1,7 @@
 # Radio Group
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -90,6 +90,21 @@ Updated: 2026-03-24
 
 - internal selected value (uncontrolled mode)
 - roving focus tracked via native radio group behavior
+
+### Behavior Machine
+
+Behavior classification: machine-backed (shared `singleSelectTransition` in
+`@poodle/headless`)
+
+- Context: `value` (controllable), `options` (per-option `disabled`, group
+  `disabled` folds in), `disabled`
+- Events: `SELECT { value }` (native radio change), `SET_VALUE` (programmatic)
+- Transitions: `SELECT` — disabled group/option, unknown value, or same
+  value: inert; otherwise set `value`, effect `emitValueChange(value)`.
+  Same-value guard is behavior-invariant: native radios cannot re-fire an
+  unchanged selection.
+- Machinery dependencies: none (native radio group provides roving keyboard
+  behavior and focus).
 
 ## 5. Callbacks
 

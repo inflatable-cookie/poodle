@@ -32,6 +32,52 @@ export {
 } from "./popover";
 
 export {
+  switchTransition,
+  switchState,
+  type SwitchContext,
+  type SwitchEvent,
+  type SwitchEffect,
+  type SwitchResult,
+} from "./switch";
+
+export {
+  singleSelectTransition,
+  type SelectOption,
+  type SingleSelectContext,
+  type SingleSelectEvent,
+  type SingleSelectEffect,
+  type SingleSelectResult,
+} from "./single-select";
+
+export {
+  toggleGroupTransition,
+  toggleGroupIsSelected,
+  type ToggleGroupValue,
+  type ToggleGroupContext,
+  type ToggleGroupEvent,
+  type ToggleGroupEffect,
+  type ToggleGroupResult,
+} from "./toggle-group";
+
+export {
+  sliderTransition,
+  rangeSliderTransition,
+  normalizeSliderValue,
+  normalizeRangeValue,
+  safeSliderMax,
+  clampValue,
+  snapToStep,
+  type SliderContext,
+  type SliderEvent,
+  type SliderEffect,
+  type SliderResult,
+  type RangeSliderContext,
+  type RangeSliderEvent,
+  type RangeSliderEffect,
+  type RangeSliderResult,
+} from "./slider";
+
+export {
   tabsTransition,
   tabsKeydownEvent,
   tabsTooltipTransition,

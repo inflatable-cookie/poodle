@@ -1,7 +1,7 @@
 # Tri-State Switch
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -84,6 +84,20 @@ type TriStateValue = "excluded" | "default" | "included"
 
 Native radio-group keyboard behavior and single-selected-option state are
 required. Exactly one of three states is always selected.
+
+### Behavior Machine
+
+Behavior classification: machine-backed (shared `singleSelectTransition` in
+`@poodle/headless`)
+
+Single-select machine over the fixed option order
+`excluded / default / included`.
+
+- Context: `value` (controllable), `options` (all enabled), `disabled`
+- Events: `SELECT { value }` (radio change), `SET_VALUE` (programmatic)
+- Transitions: `SELECT` — disabled group, unknown value, or same value:
+  inert; otherwise set `value`, effect `emitValueChange(value)`
+- Machinery dependencies: none (native radio group provides keyboard/focus).
 
 ## 5. Callbacks
 

@@ -3,7 +3,7 @@
 > **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -81,6 +81,24 @@ Updated: 2026-03-15
 
 - Selected items tracked as `string` (single mode) or `string[]` (multiple mode)
 - `data-selected` attribute on selected items for styling hooks
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`toggleGroupTransition` in
+`@poodle/headless`)
+
+- Context: `value: string | string[] | null` (controllable), `options`,
+  `selectionMode: single | multiple`, `allowDeactivation`, `disabled`
+- Events: `TOGGLE { value }` (item click), `SET_VALUE` (programmatic)
+- Transitions: `TOGGLE` — disabled group/option or unknown value: inert.
+  Multiple mode: toggle membership in the value array. Single mode: select;
+  reselect clears to `null` only when `allowDeactivation`. Every accepted
+  toggle emits `emitValueChange(nextValue)` (including reselect in single
+  mode without deactivation, matching pre-machine behavior).
+- Selection predicate `toggleGroupIsSelected` is shared so rendering and
+  machine agree on membership semantics.
+- Machinery dependencies: none (buttons provide focus; no roving tabindex in
+  the current contract).
 
 ## 5. Callbacks
 

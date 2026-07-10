@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -85,6 +85,16 @@ Updated: 2026-03-30
 
 Roving-focus via native radio group behavior and single-selected-option state
 are required.
+
+### Behavior Machine
+
+Behavior classification: machine-backed (shared `singleSelectTransition` in
+`@poodle/headless`)
+
+Same machine as RadioGroup: single-select over options with per-option and
+group disabled guards; `SELECT` sets `value` and emits
+`emitValueChange(value)`; same-value and disabled selections are inert.
+Native radio inputs provide keyboard and focus behavior.
 
 ## 5. Callbacks
 

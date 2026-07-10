@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+  import { singleSelectTransition } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -60,12 +62,17 @@
   ].filter(Boolean).join("; ") || undefined);
 
   function handleSelect(nextValue: TriStateValue): void {
-    if (disabled || value === nextValue) {
-      return;
-    }
+    const result = singleSelectTransition(
+      { value, options: orderedValues.map((candidate) => ({ value: candidate })), disabled },
+      { type: "SELECT", value: nextValue },
+    );
 
-    value = nextValue;
-    onValueChange?.(nextValue);
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        value = effect.value as TriStateValue;
+        onValueChange?.(effect.value as TriStateValue);
+      }
+    }
   }
 </script>
 

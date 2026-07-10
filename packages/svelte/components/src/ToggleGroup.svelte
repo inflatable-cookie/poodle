@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -52,35 +54,32 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
-  function isSelected(optionValue: string): boolean {
-    if (selectionMode === "multiple") {
-      return Array.isArray(currentValue) && currentValue.includes(optionValue);
-    }
+  const machineContext = $derived<ToggleGroupContext>({
+    value: currentValue ?? null,
+    options: options.map((option) => ({ value: option.value, disabled: disabled || option.disabled === true })),
+    selectionMode,
+    allowDeactivation,
+    disabled,
+  });
 
-    return currentValue === optionValue;
+  function isSelected(optionValue: string): boolean {
+    return toggleGroupIsSelected(machineContext, optionValue);
   }
 
   function toggle(optionValue: string): void {
-    let nextValue: string | string[] | null;
+    const result = toggleGroupTransition(machineContext, { type: "TOGGLE", value: optionValue });
 
-    if (selectionMode === "multiple") {
-      const current = Array.isArray(currentValue) ? currentValue : [];
-      nextValue = current.includes(optionValue)
-        ? current.filter((item) => item !== optionValue)
-        : [...current, optionValue];
-    } else if (allowDeactivation && currentValue === optionValue) {
-      nextValue = null;
-    } else {
-      nextValue = optionValue;
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        if (!controlled) {
+          uncontrolledValue = effect.value;
+        } else {
+          value = effect.value;
+        }
+
+        onValueChange?.(effect.value);
+      }
     }
-
-    if (!controlled) {
-      uncontrolledValue = nextValue;
-    } else {
-      value = nextValue;
-    }
-
-    onValueChange?.(nextValue);
   }
 </script>
 

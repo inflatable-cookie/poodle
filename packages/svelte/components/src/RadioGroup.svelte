@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+  import { singleSelectTransition } from "@poodle/headless";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
 
@@ -57,13 +59,26 @@
   const radioGroupStyles = $derived(selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined);
 
   function handleChange(nextValue: string): void {
-    if (!isControlled) {
-      uncontrolledValue = nextValue;
-    } else {
-      value = nextValue;
-    }
+    const result = singleSelectTransition(
+      {
+        value: currentValue ?? null,
+        options: options.map((option) => ({ value: option.value, disabled: disabled || option.disabled === true })),
+        disabled,
+      },
+      { type: "SELECT", value: nextValue },
+    );
 
-    onValueChange?.(nextValue);
+    for (const effect of result.effects) {
+      if (effect.type === "emitValueChange") {
+        if (!isControlled) {
+          uncontrolledValue = effect.value;
+        } else {
+          value = effect.value;
+        }
+
+        onValueChange?.(effect.value);
+      }
+    }
   }
 </script>
 

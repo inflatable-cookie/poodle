@@ -1,7 +1,7 @@
 # Range Slider
 
 Status: detailed contract
-Updated: 2026-06-21
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -82,6 +82,25 @@ Updated: 2026-06-21
 
 - lower value and upper value
 - active thumb identity (which thumb is being adjusted)
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`rangeSliderTransition` in
+`@poodle/headless`)
+
+Two-thumb variant of the Slider machine; native range inputs provide
+interaction.
+
+- Context: `value: [lower, upper]` (controllable), `min`, `max`, `step`,
+  `disabled`
+- Events: `INPUT { thumb, raw }`, `COMMIT { thumb, raw }`, `SET_VALUE`
+- Normalization: `normalizeRangeValue` orders the pair and clamps both ends
+  into `[min, safeMax]`; per-event, the raw value snaps to step and a thumb
+  cannot cross its sibling (lower clamps to `[min, upper]`, upper to
+  `[lower, max]`)
+- Transitions: `INPUT` sets the pair, effect `emitValueChange(pair)`;
+  `COMMIT` sets the pair, effect `emitValueCommit(pair)`
+- Machinery dependencies: none.
 
 ## 5. Callbacks
 

@@ -1,7 +1,7 @@
 # Switch
 
 Status: detailed contract
-Updated: 2026-04-01
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -85,6 +85,21 @@ Updated: 2026-04-01
 ### Component States
 
 - internal checked state (uncontrolled mode)
+
+### Behavior Machine
+
+Behavior classification: machine-backed (`switchTransition` in
+`@poodle/headless`)
+
+Checkbox semantics without the mixed state: single implicit state, value in
+context.
+
+- Context: `checked` (controllable), `disabled`, `readOnly`
+- Events: `TOGGLE { nextChecked }` (native change), `SET_CHECKED` (programmatic)
+- Transitions: `TOGGLE` — disabled: inert; readOnly: effect
+  `revertNativeChecked`, no callback; otherwise set `checked`, effect
+  `emitCheckedChange(checked)`. `SET_CHECKED` updates without callback.
+- Machinery dependencies: none (native input provides keyboard/focus).
 
 ## 5. Callbacks
 
