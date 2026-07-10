@@ -1,7 +1,7 @@
 # FilterToolbar
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -87,6 +87,14 @@ Updated: 2026-05-18
 ### Component States
 
 State table is sufficient.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

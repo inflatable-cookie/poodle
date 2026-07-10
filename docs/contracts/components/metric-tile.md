@@ -1,7 +1,7 @@
 # MetricTile
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -80,6 +80,14 @@ Display composite only; all values are externally driven. No internal state.
 
 - `sparklinePath` (derived): SVG path string built from `sparklineData` via
   `buildSparkline()` pure function; `null` when data has fewer than 2 values
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

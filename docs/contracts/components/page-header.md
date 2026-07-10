@@ -3,7 +3,7 @@
 > **Audit note**: the Svelte component uses Svelte 5 `interface Props {}` syntax rather than `export let` declarations. All props listed in this contract are present and accurate — `grep "export let"` scans will find nothing and should not be treated as evidence of drift.
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -132,6 +132,14 @@ Updated: 2026-03-30
 | `primaryTitle` (derived) | `isEntityDetailPosture ? (section ?? title ?? "") : (title ?? section ?? "")` |
 | `resolvedSubtitle` (derived) | `isEntityDetailPosture ? (title ?? subtitle ?? null) : subtitle` |
 | `headingTag` (derived) | `h${level}` |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

@@ -1,7 +1,7 @@
 # ActionDiscoveryPanel
 
 Status: contract
-Updated: 2026-03-26
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -79,6 +79,14 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for group, list, and skeleton spacing |
 | `onItemSelect` | `((id: string) => void) \| null` | `null` | no | called when an action item is selected |
 | `onActiveChange` | `((id: string \| null) => void) \| null` | `null` | no | called when the active item changes |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-04-13
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -105,6 +105,14 @@ Updated: 2026-04-13
 | loading | `loading=true` | spinner visible, button disabled |
 | icon-only | no children content | square button, no min-width |
 | pressed | `pressed=true` or uncontrolled toggle active | non-primary variants get accent fill, accent border, inverse text; `aria-pressed="true"` |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

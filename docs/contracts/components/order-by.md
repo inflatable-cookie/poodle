@@ -1,7 +1,7 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -164,6 +164,12 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 - Empty: `"Sort by..."`
 - Non-empty: field labels joined with `, `, each suffixed with `↑` (asc) or `↓` (desc)
 - Compact mode with 3+ fields: first two items shown, then ` +N` where N is the remaining count
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Dropdown open/dismiss (now on the dismissable-layer stack) plus direction toggling; option logic is plain state.
 
 ## 5. Callbacks
 

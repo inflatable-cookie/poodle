@@ -3,7 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { registerDismissLayer } from "@poodle/headless";
+  import { tick } from "svelte";
 
   import { default as Button } from "./Button.svelte";
   import { default as IconButton } from "./IconButton.svelte";
@@ -247,31 +248,18 @@
     handleDrop(index);
   }
 
-  onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!open || !rootElement) {
-        return;
-      }
-
-      if (!rootElement.contains(event.target as Node)) {
-        open = false;
-      }
+  $effect(() => {
+    if (!open) {
+      return;
     }
 
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && open) {
-        event.preventDefault();
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: () => {
         open = false;
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+      },
+    });
   });
 </script>
 

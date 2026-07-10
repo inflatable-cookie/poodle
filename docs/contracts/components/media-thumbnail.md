@@ -1,7 +1,7 @@
 # MediaThumbnail
 
 Status: contract
-Updated: 2026-05-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -80,6 +80,14 @@ type AspectRatio = "auto" | "square" | "landscape" | "portrait" | "video";
 | `frameWidth` | `"fill" \| "xl" \| number \| string \| null` | `"fill"` | no | explicit frame width; `"fill"` stretches to parent width, `"xl"` applies a preset wide size, number sets px width, string sets arbitrary CSS value, null removes inline width |
 | `frameMinHeight` | `number \| string \| null` | `null` | no | optional minimum frame height; numbers are treated as px |
 | `frameMaxHeight` | `number \| string \| null` | `null` | no | optional maximum frame height; numbers are treated as px |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Snippets
 

@@ -3,7 +3,7 @@
 > **Surface elevation**: EditableLabel is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-21
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -89,6 +89,12 @@ Updated: 2026-03-21
 | view -> editing | activation gesture or programmatic start | input opens with current value, optionally selected |
 | editing -> view (commit) | `Enter` or blur | `commit` fires with trimmed value and previousValue |
 | editing -> view (cancel) | `Escape` | edit discarded, `cancel` fires, original value restored |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+View/edit mode toggle with commit/cancel keys. Extraction debt: edit-mode machine (shared with EditableList).
 
 ## 5. Callbacks
 

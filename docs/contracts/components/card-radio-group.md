@@ -1,7 +1,7 @@
 # CardRadioGroup
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -101,6 +101,12 @@ type CardRadioItem = {
 | `value` | Tracks which item is currently selected |
 | `isChecked` (derived) | `value === item.value` per item |
 | `isItemDisabled` (derived) | `disabled || item.disabled === true` per item |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Single-select over cards; same semantics as the shared single-select machine. Extraction debt: swap onto `singleSelectTransition`.
 
 ## 5. Callbacks
 

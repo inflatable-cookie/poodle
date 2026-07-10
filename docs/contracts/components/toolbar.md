@@ -1,7 +1,7 @@
 # Toolbar
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -62,6 +62,12 @@ Updated: 2026-03-30
 |-------|---------|-----------------|
 | horizontal | `orientation="horizontal"` | items flow left-to-right, ArrowLeft/Right navigate |
 | vertical | `orientation="vertical"` | items flow top-to-bottom, ArrowUp/Down navigate |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Keyboard handling delegated to focused children; no owned machine state.
 
 ## 5. Events
 

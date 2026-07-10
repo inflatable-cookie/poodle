@@ -1,7 +1,7 @@
 # ListGrid
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -45,6 +45,14 @@ Updated: 2026-04-09
   - With a `maxColumns` cap (default `3`), the track floor becomes
     `min(100%, max(minItemWidth, calc((100% - (maxColumns - 1) * gap) / maxColumns)))`, so the grid never exceeds `maxColumns` columns even on wide viewports while still collapsing on narrow ones.
 - Compact variant: single column (`1fr`); `maxColumns` does not apply.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 2. Accessibility
 

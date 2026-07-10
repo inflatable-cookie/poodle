@@ -1,7 +1,7 @@
 # ErrorBoundary
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -35,6 +35,14 @@ Updated: 2026-04-09
 - Composes: `EmptyState` from composites, `Button` from `@poodle/svelte`
 - Uses `svelte:boundary` with `onerror` handler to catch child errors
 - Retry button resets the error state and re-renders children
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 2. Accessibility
 

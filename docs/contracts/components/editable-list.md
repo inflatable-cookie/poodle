@@ -1,7 +1,7 @@
 # EditableList
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -151,6 +151,12 @@ view uses `windowStart` offset for correct global indexing.
 | windowed | `windowSize` active; list shows a page slice with navigation controls |
 | `newItemText` (internal) | Current input value |
 | `canAdd` (derived) | `editable && !disabled && (maxItems === null || items.length < maxItems)` |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Item edit/reorder with keyboard. Extraction debt: edit-mode machine + reorder via core `applyReorder`.
 
 ## 5. Callbacks
 

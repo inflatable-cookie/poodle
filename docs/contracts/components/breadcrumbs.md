@@ -1,7 +1,7 @@
 # Breadcrumbs
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -85,6 +85,14 @@ When `maxVisibleItems` is set and `items.length > maxVisibleItems`:
 | current | `current=true`, or last visible item when `forceLastItemCurrent` is true (default) | non-link `<span>` with `aria-current="page"`, primary text color |
 | truncated | `items.length > maxVisibleItems` | first item, ellipsis, then last N-1 items shown |
 | hover (link/button) | pointer over interactive item | browser default link/button hover |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

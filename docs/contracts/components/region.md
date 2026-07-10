@@ -1,7 +1,7 @@
 # Region
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-07-10
 
 - Component name: `Region`
 - Layer: `foundation`
@@ -37,6 +37,14 @@ inside the placeholder block.
 | `label` | `string` | `""` | no | Placeholder copy shown in the centre of the region |
 | `color` | `string \| null` | `null` | no | Optional custom border and label color via `--region-color` |
 | `minHeight` | `string` | `"4rem"` | no | Minimum height for the placeholder region |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. States
 

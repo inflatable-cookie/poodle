@@ -1,7 +1,7 @@
 # CodeInput
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 > **Note:** This component replaces both `PinInput` and `TotpInput`. Use
 > `mask: true` for PIN-style masked entry. Use `mask: false` (default) for
@@ -59,6 +59,12 @@ Updated: 2026-03-30
 |------|---------|------|
 | `onValueChange` | `string` | whenever the sanitized code changes |
 | `onComplete` | `string` | when the code reaches `length` digits |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Segmented code entry: per-digit keyboard movement and paste distribution. Extraction debt: segment-navigation machine.
 
 ## 5. Behavior
 

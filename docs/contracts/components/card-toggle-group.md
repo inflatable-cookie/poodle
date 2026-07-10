@@ -1,7 +1,7 @@
 # CardToggleGroup
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -72,6 +72,12 @@ type CardToggleItem = {
   `null`.
 - Disabled items cannot be selected or deactivated.
 - Group-level `disabled` disables every item.
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Toggle-group semantics over cards. Extraction debt: swap onto `toggleGroupTransition`.
 
 ## 5. Accessibility
 

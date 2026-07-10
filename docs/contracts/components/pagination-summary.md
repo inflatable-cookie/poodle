@@ -1,7 +1,7 @@
 # PaginationSummary
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -52,6 +52,14 @@ Updated: 2026-03-15
 | default | `totalItems > 0` | summary shows current item range |
 | empty | `totalItems=0` | summary shows `0-0 of 0` |
 | single page | `totalPages=1` | ARIA label still includes total page count |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

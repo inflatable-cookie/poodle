@@ -1,6 +1,6 @@
 # g11.004 Headless Core Full Component Sweep
 
-Status: active — wave 1 complete; wave 2 dialog-family batch complete (2026-07-10)
+Status: complete (2026-07-10)
 Owner: Poodle core
 Depends on: `g11.003`
 Updated: 2026-07-10
@@ -185,10 +185,32 @@ adjustment, clamped direct entry, total seconds, padding) moved to
 duration seconds-carry (01:30:59 → 01:31:00 on ArrowUp) and color picker
 open. 121 core tests green.
 
-**Wave 4 is complete.** Remaining for this milestone: the long-tail
-classification sweep — walk `src/index.ts`, mark every remaining export
-machine-backed or styled-only in its contract, and extract anything that
-still owns interaction logic.
+**Wave 4 is complete.**
+
+## Long-Tail Classification Sweep (complete, 2026-07-10)
+
+- All 141 component contracts now carry a Behavior Machine classification:
+  36 machine-backed from the waves, 74 styled-only, 20 adapter-owned
+  interaction with per-component extraction-debt notes, plus
+  pattern/utility contracts (no component implementation) left unchanged.
+- Final dismissal cleanup: `OrderBy` and `SplitButton` moved off document
+  listeners onto the dismissable-layer stack (runtime-verified escape and
+  outside dismiss). TokenInput's pointer listener confirmed as local focus
+  routing, not overlay dismissal.
+- Extraction-debt register (highest value first): `Tree` (tree-navigation
+  machine — largest gap), `ResizeHandle` (step/clamp math),
+  `CardRadioGroup`/`CardToggleGroup` (swap onto shared select machines),
+  `EditableLabel`/`EditableList` (edit-mode machine), `CodeInput`
+  (segment navigation), `Rating`, `ConfirmAction`, `IconButton` tooltip
+  (compose hover machine), `ListCard` overlay dismissal, `TokenInput`
+  chip editing. These are recorded in each contract; none blocks g11.005
+  or g11.006.
+- Promotion complete: machine model, machinery inventory, classification
+  rule, and cross-runtime contract promoted to
+  `docs/architecture/006-headless-core-and-machine-model.md`.
+
+**This milestone is closed.** 121 core tests; every batch consumer-verified
+against the g11.001 matrix roots.
 
 ## Exit Criteria
 

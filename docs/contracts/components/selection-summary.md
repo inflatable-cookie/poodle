@@ -1,7 +1,7 @@
 # SelectionSummary
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -74,6 +74,14 @@ Display composite. Items list is externally driven. No internal state.
 The component always renders (not conditionally hidden when empty). The chips container maintains `min-height` for reserved vertical space regardless of selection state.
 
 No internal component state.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

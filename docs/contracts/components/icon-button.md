@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -109,6 +109,12 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 - Variant-driven CSS custom properties set on the root element
 - `isUnavailable` combines disabled and loading for interaction gating
 - Loading and disabled both suppress click events
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Tooltip timing and pressed state. Extraction debt: compose the shared hover machine for its tooltip path.
 
 ## 5. Callbacks
 

@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -102,6 +102,14 @@ inside the component are not emitted through a callback.
 | edit | Only textarea visible; all tools enabled (unless disabled) |
 | preview | Only preview pane visible; toolbar tools disabled |
 | split | Both textarea and preview visible side by side |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

@@ -1,7 +1,7 @@
 # EmbedInput
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -139,6 +139,12 @@ None.
 - `parseTimer` (internal): setTimeout handle for debounced parsing
 - `parsed`: result of last successful parse
 - `error`: current error message
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Debounced parse of pasted embeds; parse stays adapter-side (async). No machine required beyond debounce.
 
 ## 5. Callbacks
 

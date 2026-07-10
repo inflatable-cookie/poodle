@@ -1,7 +1,7 @@
 # Status Indicator
 
 Status: detailed contract
-Updated: 2026-04-01
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -65,6 +65,14 @@ Updated: 2026-04-01
 ### Component States
 
 No internal state. Status is fully parent-controlled.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

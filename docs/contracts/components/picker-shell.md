@@ -1,7 +1,7 @@
 # PickerShell
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -104,6 +104,14 @@ controls which region is visible (body vs state area).
 | no-results | `state="no-results"` | State area shown with fallback title `"No results"` and fallback message `"No results found."` when explicit copy is absent |
 
 No internal component state. PickerShell is a layout container.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

@@ -1,7 +1,7 @@
 # BlockEditor
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -134,6 +134,14 @@ When the `block` snippet is not provided, the only fallback is a minimal `<texta
 | `activeBlockId` | ID of the currently focused block |
 | `dragSourceIndex` | Index of the block being dragged |
 | `dragOverIndex` | Index of the current drop target |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

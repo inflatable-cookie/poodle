@@ -1,7 +1,7 @@
 # ResizeHandle
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -65,6 +65,12 @@ type SplitOrientation = "horizontal" | "vertical";
 | active/dragging | mouse drag in progress | line changes to accent-base color; `data-dragging` attribute present |
 | disabled | `disabled=true` | opacity 0.4, default cursor, no interaction, `tabindex=-1` |
 | focus-visible | keyboard focus | focus ring outline around the handle |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Pointer drag + keyboard step resize with document move/up listeners (drag-gesture listeners are legitimate adapter effects). Extraction debt: pure step/clamp math.
 
 ## 5. Callbacks
 

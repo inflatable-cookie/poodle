@@ -1,7 +1,7 @@
 # BulkActionBar
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -89,6 +89,14 @@ type BulkAction = {
 | select all | `showSelectAll=true` and `allSelected=false` | summary shows a select-all ghost IconButton (`icon="check-check"`) after the count/total |
 | loading | `loading=true` | all action controls disabled |
 | disabled | `disabled=true` | all action controls disabled |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

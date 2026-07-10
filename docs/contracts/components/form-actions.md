@@ -1,7 +1,7 @@
 # Form Actions
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -68,6 +68,14 @@ Updated: 2026-05-18
 | wrapped | narrow container | actions wrap to multiple lines maintaining gap |
 | danger-inline | `danger` snippet present | danger content is rendered inline |
 | danger-collapsed | `danger` snippet and `dangerItems` present in a narrow container | danger content is hidden and overflow trigger is shown |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

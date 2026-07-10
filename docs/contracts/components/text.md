@@ -1,7 +1,7 @@
 # Text
 
 Status: contract
-Updated: 2026-06-12
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -50,6 +50,14 @@ Updated: 2026-06-12
 - `Text` does not add ARIA roles.
 - Use `as="p"` for paragraphs, `as="span"` for inline phrases, and `as="div"`
   when wrapping multiple text nodes.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Specimen
 

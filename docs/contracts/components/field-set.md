@@ -1,7 +1,7 @@
 # Field Set
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-07-10
 
 - Component name: `FieldSet`
 - Layer: `foundation`
@@ -54,6 +54,14 @@ fieldset (root)
 | legendless | `legend=null` | No legend is rendered |
 | described | `description!=null` | A `<p>` description renders between legend and fields |
 | spanned | `span!=null` | Root sets `grid-column: span <n>` (or `1 / -1` when `span="full"`) within a parent grid |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Accessibility
 

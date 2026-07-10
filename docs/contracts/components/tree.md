@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-06-19
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -163,6 +163,12 @@ None.
 
 State table suffices — selection and expansion are independent flat sets; there
 is no transient async or open/close machine.
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Keyboard tree navigation (expand/collapse, roving). Extraction debt: tree-navigation machine (largest remaining gap).
 
 ## 5. Events
 

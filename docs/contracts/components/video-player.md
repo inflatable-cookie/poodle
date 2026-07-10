@@ -1,7 +1,7 @@
 # VideoPlayer
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -110,6 +110,12 @@ configuration only.
 | `isMuted` | `boolean` | Whether audio is muted |
 | `isFullscreen` | `boolean` | Whether fullscreen is active |
 | `showControls` | `boolean` | Whether controls overlay is visible |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Media-element control surface; listeners are media events (adapter effects by nature). Math-free.
 
 ## 5. Events
 

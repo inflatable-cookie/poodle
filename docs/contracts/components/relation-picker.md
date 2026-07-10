@@ -1,7 +1,7 @@
 # RelationPicker
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -197,6 +197,12 @@ type SelectionMode = "single" | "multiple";
 ### Component States
 
 Internal drill-down state includes: `drillDepth`, `drillSelections` (map of level key to selected item), `drillSearchQuery`, `drillItems`, `drillLoading`, `finalItemsLoaded`, `finalItemsLoading`.
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Composite over PickerShell; owns query/selection plumbing. Behavior belongs to composed primitives; classify with them.
 
 ## 5. Callbacks
 

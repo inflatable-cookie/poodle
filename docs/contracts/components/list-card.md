@@ -3,7 +3,7 @@
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-27
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -134,6 +134,12 @@ Updated: 2026-03-27
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
 | stacked | `layout="stacked"` | vertical layout with top leading area, body column, and bottom utility rail |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Context-menu integration and selection callbacks; overlay dismissal should route through the layer stack. Extraction debt.
 
 ## 5. Callbacks
 

@@ -1,7 +1,7 @@
 # DetailItem
 
 Status: detailed contract
-Updated: 2026-05-17
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -95,6 +95,14 @@ At container widths at or below `26rem`, the inline layout collapses to a single
 - Any `data-span` value collapses to `1 / -1`
 
 At container widths at or below `21rem`, spacing tightens further (inline/surface column gap `0.5rem`, surface padding-x `0.75rem`) and label/value font-size step down (label `0.75rem`/lh `1.35`, value `0.9375rem`/lh `1.4`).
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. States
 

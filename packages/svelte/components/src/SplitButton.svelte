@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { registerDismissLayer } from "@poodle/headless";
   import { onMount, tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
@@ -151,36 +152,35 @@
     closeMenu();
   }
 
+  $effect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    return registerDismissLayer({
+      contains: (target) => rootElement?.contains(target) ?? false,
+      dismissOnOutsideInteract: true,
+      onDismiss: (reason) => {
+        closeMenu();
+
+        if (reason === "escape") {
+          toggleElement?.focus();
+        }
+      },
+    });
+  });
+
   onMount(() => {
-    function handlePointerDown(event: MouseEvent): void {
-      if (!menuOpen || !rootElement) return;
-      if (!rootElement.contains(event.target as Node)) {
-        closeMenu();
-      }
-    }
-
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && menuOpen) {
-        event.preventDefault();
-        closeMenu();
-        toggleElement?.focus();
-      }
-    }
-
     function handleBoundaryChange(): void {
       if (menuOpen) {
         syncMenuLayout();
       }
     }
 
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
     window.addEventListener("resize", handleBoundaryChange);
     document.addEventListener("scroll", handleBoundaryChange, true);
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
       window.removeEventListener("resize", handleBoundaryChange);
       document.removeEventListener("scroll", handleBoundaryChange, true);
     };

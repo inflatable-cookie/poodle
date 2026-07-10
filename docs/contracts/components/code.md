@@ -1,7 +1,7 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -100,6 +100,12 @@ Updated: 2026-03-15
 ### Component States
 
 - `copied`: internal boolean, set to `true` on copy, reset after 2000ms
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Copy-feedback timer only; otherwise presentational. Timer stays adapter-side.
 
 ## 5. Events
 

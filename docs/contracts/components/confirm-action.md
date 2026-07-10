@@ -1,7 +1,7 @@
 # ConfirmAction
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -88,6 +88,12 @@ type AlertDialogTone = "danger" | "warning";
 - `open` (internal boolean): controls AlertDialog visibility directly
 - Derived: `triggerTone` — maps `tone === "danger"` to `"danger"` Button tone,
   all others to `"default"`
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Two-step confirm flow with escape/timeout reset. Extraction debt: small confirm machine.
 
 ## 5. Callbacks
 

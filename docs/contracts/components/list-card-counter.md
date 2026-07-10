@@ -1,7 +1,7 @@
 # ListCardCounter
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -60,6 +60,14 @@ Fully uncontrolled display component. No internal state.
 | hover (linked) | Mouse over linked counter | Text color transitions to the stronger `color-mix(currentColor 58%, transparent)` tint |
 
 No internal component state. All visual states are derived from props.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

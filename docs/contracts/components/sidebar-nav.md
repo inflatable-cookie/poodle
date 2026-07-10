@@ -1,7 +1,7 @@
 # SidebarNav
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -91,6 +91,14 @@ controlled.
 | hover | Mouse over non-disabled item | Text color primary, elevated background |
 | disabled | Item `disabled: true` | Reduced opacity, `cursor: not-allowed`, no activation |
 | focus-visible | Keyboard focus on item | Focus ring via `--poodle-border-width-focus` and `--poodle-color-accent-focusRing` |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Callbacks
 

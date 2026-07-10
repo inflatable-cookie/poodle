@@ -3,7 +3,7 @@
 > **Surface elevation**: Meter is a surface consumer (80% subtle contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-05-18
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -72,6 +72,14 @@ Updated: 2026-05-18
 No internal state. The `low`, `high`, and `optimum` props are passed to the
 native `<meter>` element for browser semantics but do not change the visual
 fill color in the current implementation.
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

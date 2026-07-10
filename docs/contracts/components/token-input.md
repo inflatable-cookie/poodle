@@ -1,7 +1,7 @@
 # Token Input
 
 Status: detailed contract
-Updated: 2026-06-11
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -101,6 +101,12 @@ Updated: 2026-06-11
 - the live draft text is never submitted unless it has been committed first
 - consumers should use `formData.getAll(name)` rather than `formData.get(name)`
   when reading the component payload
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Chip entry with keyboard editing; the pointer listener is local focus routing (not overlay dismissal). Extraction debt: chip-editing machine.
 
 ## 5. States
 

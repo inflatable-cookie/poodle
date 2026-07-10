@@ -72,7 +72,8 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
   (template extension + tabs/popover/checkbox machine specs)
 - `g11.003` complete — `@poodle/headless` core package, shared machinery,
   pilot swap (Tabs/Popover/Checkbox) runtime-verified, consumer matrix clean
-- `g11.004` planned — full behavioral-component sweep onto core, in waves
+- `g11.004` complete — full component sweep onto core: 4 waves + long-tail
+  classification; machine model promoted to architecture 006
 - `g11.005` planned — appearance-recipe productization and per-app overrides
   (can start after `g11.004` wave 2)
 - `g11.006` planned — Rust headless mirror with shared conformance vectors

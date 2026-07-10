@@ -1,7 +1,7 @@
 # StatusBar
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -67,6 +67,14 @@ Updated: 2026-03-30
 | with leading snippet | `leading()` provided | snippet content replaces summary text in leading region |
 | with trailing snippet | `trailing()` provided | trailing region appears with right-aligned metadata |
 | full | both snippets + summary | leading snippet content shown (summary ignored for display), trailing snippet shown |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 

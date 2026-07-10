@@ -1,7 +1,7 @@
 # DetailShell
 
 Status: contract
-Updated: 2026-03-25
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -55,6 +55,14 @@ type DetailShellState = "ready" | "empty" | "loading" | "error";
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the section |
 | `stateTitle` | `string \| null` | `null` | no | heading text for state region; falls back to "Detail state" |
 | `stateMessage` | `string \| null` | `null` | no | body text for state region |
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Snippets
 

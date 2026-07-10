@@ -1,7 +1,7 @@
 # Rating
 
 Status: detailed contract
-Updated: 2026-05-17
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -92,6 +92,12 @@ Updated: 2026-05-17
 | `selectedValue` | `number \| null` | currently selected rating value |
 | `focusIndex` | `number` | index of the currently focusable item (roving focus) |
 | `hoverValue` | `number \| null` | fractional hover preview value in fractional mode |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Keyboard/pointer rating selection with hover preview. Extraction debt: small value machine.
 
 ## 5. Callbacks
 

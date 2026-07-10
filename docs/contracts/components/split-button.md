@@ -1,7 +1,7 @@
 # SplitButton
 
 Status: detailed contract
-Updated: 2026-04-01
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -98,6 +98,12 @@ type MenuItem = {
 | menu open | toggle clicked or keyboard opens | menu panel visible below root by default, or above when lower space is constrained |
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | loading | `loading=true` | spinner in primary half, control disabled |
+
+### Behavior Machine
+
+Behavior classification: adapter-owned interaction (g11.004 sweep)
+
+Menu open/dismiss (now on the dismissable-layer stack); item activation via shared menu-list machinery.
 
 ## 5. Callbacks
 

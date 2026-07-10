@@ -1,7 +1,7 @@
 # MetaItem
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -35,6 +35,14 @@ Updated: 2026-03-30
 - allows caller-owned rich value content such as `Code inline` and `Pill`
 - `typography="inherit"` uses proportional-inherit scaling so the compact label,
   value text, and inline gap stay proportional inside larger parent copy
+
+### Behavior Machine
+
+Behavior classification: styled-only (no machine)
+
+Rendering and composition only, or interaction fully delegated to composed
+Poodle primitives / native elements; no component-owned behavioral state
+beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Boundary
 
