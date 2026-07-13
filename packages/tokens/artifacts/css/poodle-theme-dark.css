@@ -2,17 +2,17 @@
 [data-theme="dark"] {
   /* Contrast axis anchor: oklch lightness of this theme's canvas. */
   --poodle-contrast-anchor-l: 0.170750;
-  --poodle-color-background-canvas: oklch(from #0e1012 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 1)) c h);
-  --poodle-color-background-surface: oklch(from #15181b calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 1)) c h);
-  --poodle-color-background-panel: oklch(from #1b1f23 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 1)) c h);
-  --poodle-color-background-elevated: oklch(from #20252a calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 1)) c h);
+  --poodle-color-background-canvas: oklch(from #0e1012 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-surface: oklch(from #15181b calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-panel: oklch(from #1b1f23 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-elevated: oklch(from #20252a calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
   --poodle-color-background-overlay: rgba(8, 10, 13, 0.78);
   --poodle-color-text-primary: #eef2f6;
   --poodle-color-text-secondary: #99a4b0;
   --poodle-color-text-inverse: #161a1f;
-  --poodle-color-border-subtle: rgba(227, 232, 238, calc(0.12 * max(0.4, var(--poodle-contrast, 1))));
-  --poodle-color-border-default: rgba(227, 232, 238, calc(0.22 * max(0.4, var(--poodle-contrast, 1))));
-  --poodle-color-border-strong: rgba(227, 232, 238, calc(0.42 * max(0.4, var(--poodle-contrast, 1))));
+  --poodle-color-border-subtle: rgba(227, 232, 238, calc(0.12 * max(0.4, var(--poodle-contrast, 0.5))));
+  --poodle-color-border-default: rgba(227, 232, 238, calc(0.22 * max(0.4, var(--poodle-contrast, 0.5))));
+  --poodle-color-border-strong: rgba(227, 232, 238, calc(0.42 * max(0.4, var(--poodle-contrast, 0.5))));
   --poodle-color-accent-base: #f0b24d;
   --poodle-color-accent-hover: #ffca73;
   --poodle-color-accent-focusRing: #ffca73;

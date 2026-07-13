@@ -252,7 +252,10 @@ function syncSvelteTokenArtifacts(): void {
 // Neutral backgrounds and borders are emitted as contrast-scalable CSS so an
 // app can compress or accentuate the grey ramp with a single knob:
 //
-//   --poodle-contrast: 1;   /* 0.4 = flat … 1 = theme default … 1.6 = punchy */
+//   --poodle-contrast: 0.5; /* 0.4 = flat … 1 = full theme ramp … 1.6 = punchy */
+//
+// The library default is 0.5 (softened ramp); the raw theme literals
+// correspond to --poodle-contrast: 1.
 //
 // Opaque neutrals scale their oklch lightness distance from the theme's
 // canvas (relative color syntax); translucent neutrals (dark-theme borders)
@@ -262,7 +265,7 @@ function syncSvelteTokenArtifacts(): void {
 // default contrast until they grow their own knob).
 
 const CONTRAST_SCALED = /^color\.(background\.(canvas|surface|panel|elevated)|border\.[a-z]+)$/;
-const CONTRAST_VAR = "var(--poodle-contrast, 1)";
+const CONTRAST_VAR = "var(--poodle-contrast, 0.5)";
 const BORDER_ALPHA_FLOOR = 0.4;
 
 function parseColorLiteral(value: string): { r: number; g: number; b: number; a: number } | null {

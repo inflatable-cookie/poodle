@@ -40,7 +40,7 @@
   let theme: ThemeName = "dark";
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "sm";
-  let contrast = 1;
+  let contrast = 0.5;
   let componentSearch = "";
   let route: Route = { section: "components" };
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = {};
@@ -132,7 +132,7 @@
 />
 
 <UiPresentationProvider density={density} sizeScale={controlSize}>
-  <div class="poodle-app-shell" style:--poodle-contrast={contrast === 1 ? undefined : contrast} bind:this={appShell}>
+  <div class="poodle-app-shell" style:--poodle-contrast={contrast === 0.5 ? undefined : contrast} bind:this={appShell}>
     <header class="poodle-app-top-bar">
       <div class="poodle-app-top-bar__title">
         <strong>Poodle</strong>

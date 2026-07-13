@@ -259,8 +259,11 @@ tokens as contrast-scalable values controlled by one inherited custom
 property:
 
 ```css
---poodle-contrast: 1;   /* 0.4 = flat … 1 = theme default … 1.6 = accentuated */
+--poodle-contrast: 0.5; /* 0.4 = flat … 0.5 = library default … 1 = full theme ramp … 1.6 = accentuated */
 ```
+
+The library default is **0.5** (softened ramp) — the raw theme literals
+correspond to `--poodle-contrast: 1`.
 
 - **Opaque neutrals** (`color.background.canvas|surface|panel|elevated`,
   opaque borders): emitted via relative color syntax, scaling oklch
@@ -273,8 +276,8 @@ property:
   by `max(0.4, k)` — the floor keeps borders from vanishing at low k.
 - **Untouched**: accent, status, text, and overlay tokens.
 
-Unset, everything computes pixel-identical to the literal theme values
-(k = 1 identity, Playwright-verified). The knob is a plain inherited custom
+At k = 1 everything computes pixel-identical to the literal theme values
+(Playwright-verified); unset, the 0.5 default applies. The knob is a plain inherited custom
 property: set it app-wide, per-view, or animate it. Only the CSS artifacts
 carry the axis — the Rust/TS artifacts keep literal values, so GPUI and
 Jetstream render at default contrast until they grow a matching knob.
