@@ -252,6 +252,33 @@ pub struct BackgroundColors {
 }
 ```
 
+## Contrast Axis (Neutral Ramp Knob)
+
+Added 2026-07-13. The CSS artifacts emit neutral background and border
+tokens as contrast-scalable values controlled by one inherited custom
+property:
+
+```css
+--poodle-contrast: 1;   /* 0.4 = flat … 1 = theme default … 1.6 = accentuated */
+```
+
+- **Opaque neutrals** (`color.background.canvas|surface|panel|elevated`,
+  opaque borders): emitted via relative color syntax, scaling oklch
+  lightness distance from the theme's canvas anchor —
+  `oklch(from <literal> calc(anchor + (l - anchor) * k) c h)`. Each theme
+  block emits `--poodle-contrast-anchor-l` (build-time oklch L of its
+  canvas), so the canvas stays fixed and the elevation ramp compresses or
+  expands around it. Overriding the anchor variable switches the pivot.
+- **Translucent neutrals** (dark/loophole border whites): alpha multiplies
+  by `max(0.4, k)` — the floor keeps borders from vanishing at low k.
+- **Untouched**: accent, status, text, and overlay tokens.
+
+Unset, everything computes pixel-identical to the literal theme values
+(k = 1 identity, Playwright-verified). The knob is a plain inherited custom
+property: set it app-wide, per-view, or animate it. Only the CSS artifacts
+carry the axis — the Rust/TS artifacts keep literal values, so GPUI and
+Jetstream render at default contrast until they grow a matching knob.
+
 ## Svelte Consumption Layout
 
 The Svelte side should not define parallel token meaning. It should import

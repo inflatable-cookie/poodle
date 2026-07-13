@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     Eyebrow,
+    Slider,
     TextInput,
     ToggleGroup,
     type ToggleGroupOption,
@@ -19,6 +20,8 @@
   export let onDensityChange: (value: string) => void = () => {};
   export let onControlSizeChange: (value: string) => void = () => {};
   export let onSearchChange: (value: string) => void = () => {};
+  export let contrast: number = 1;
+  export let onContrastChange: (value: number) => void = () => {};
 
   type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
@@ -68,6 +71,19 @@
       options={controlSizeOptions}
       ariaLabel="Control size"
       onValueChange={(value) => onControlSizeChange(value as string)}
+    />
+  </div>
+
+  <div class="poodle-display-controls__group">
+    <Eyebrow>Contrast</Eyebrow>
+    <Slider
+      value={contrast}
+      min={0.4}
+      max={1.6}
+      step={0.05}
+      ariaLabel="Neutral contrast"
+      valueText={`${contrast.toFixed(2)}x`}
+      onValueChange={(value) => onContrastChange(value)}
     />
   </div>
 

@@ -247,10 +247,86 @@ function syncSvelteTokenArtifacts(): void {
   copyDir(path.join(artifactDir, "css"), path.join(svelteTokensGeneratedDir, "css"));
 }
 
+// ── Contrast axis ─────────────────────────────────────────────────────
+//
+// Neutral backgrounds and borders are emitted as contrast-scalable CSS so an
+// app can compress or accentuate the grey ramp with a single knob:
+//
+//   --poodle-contrast: 1;   /* 0.4 = flat … 1 = theme default … 1.6 = punchy */
+//
+// Opaque neutrals scale their oklch lightness distance from the theme's
+// canvas (relative color syntax); translucent neutrals (dark-theme borders)
+// scale their alpha, floored so borders never fully vanish. Accent, status,
+// text, and overlay tokens are untouched. Only the CSS artifacts carry this
+// — the Rust/TS artifacts keep literal values (Rust runtimes render at the
+// default contrast until they grow their own knob).
+
+const CONTRAST_SCALED = /^color\.(background\.(canvas|surface|panel|elevated)|border\.[a-z]+)$/;
+const CONTRAST_VAR = "var(--poodle-contrast, 1)";
+const BORDER_ALPHA_FLOOR = 0.4;
+
+function parseColorLiteral(value: string): { r: number; g: number; b: number; a: number } | null {
+  const hex = value.trim().match(/^#([0-9a-fA-F]{6})$/);
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
+  }
+  const rgba = value
+    .trim()
+    .match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([0-9.]+)\s*)?\)$/);
+  if (rgba) {
+    return {
+      r: Number(rgba[1]),
+      g: Number(rgba[2]),
+      b: Number(rgba[3]),
+      a: rgba[4] === undefined ? 1 : Number(rgba[4]),
+    };
+  }
+  return null;
+}
+
+/** OKLab/OKLCH lightness of an sRGB color (0–1). */
+function oklchLightness(rgb: { r: number; g: number; b: number }): number {
+  const lin = (c: number) => {
+    const s = c / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const r = lin(rgb.r);
+  const g = lin(rgb.g);
+  const b = lin(rgb.b);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.0900799505 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+}
+
+function contrastScaledCssValue(value: string): string | null {
+  const rgb = parseColorLiteral(value);
+  if (!rgb) return null;
+  if (rgb.a < 1) {
+    // Translucent neutral: alpha carries the contrast against the backdrop.
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, calc(${rgb.a} * max(${BORDER_ALPHA_FLOOR}, ${CONTRAST_VAR})))`;
+  }
+  // Opaque neutral: scale lightness spread around the theme's canvas anchor.
+  return `oklch(from ${value} calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * ${CONTRAST_VAR}) c h)`;
+}
+
 function buildCssBlock(selector: string, entries: ResolvedTokenEntry[]): string {
-  const lines = entries.map(
-    (entry) => `  ${cssVarName(entry.path)}: ${String(entry.resolvedValue)};`,
-  );
+  const lines: string[] = [];
+  const canvas = entries.find((entry) => entry.path === "color.background.canvas");
+  const canvasRgb = canvas ? parseColorLiteral(String(canvas.resolvedValue)) : null;
+  if (canvasRgb) {
+    lines.push(
+      "  /* Contrast axis anchor: oklch lightness of this theme's canvas. */",
+      `  --poodle-contrast-anchor-l: ${oklchLightness(canvasRgb).toFixed(6)};`,
+    );
+  }
+  for (const entry of entries) {
+    const value = String(entry.resolvedValue);
+    const scaled =
+      canvasRgb && CONTRAST_SCALED.test(entry.path) ? contrastScaledCssValue(value) : null;
+    lines.push(`  ${cssVarName(entry.path)}: ${scaled ?? value};`);
+  }
   return `${selector} {\n${lines.join("\n")}\n}\n`;
 }
 
