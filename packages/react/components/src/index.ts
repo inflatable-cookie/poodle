@@ -1,3 +1,7 @@
+export { Accordion, type AccordionProps } from "./Accordion";
+export { Collapsible, type CollapsibleProps } from "./Collapsible";
+export { Menu, type MenuProps } from "./Menu";
+export { MenuSurface, type MenuSurfaceProps, type MenuSurfaceHandle } from "./MenuSurface";
 export { Avatar, type AvatarProps } from "./Avatar";
 export { Box, type BoxProps } from "./Box";
 export { Button, type ButtonProps } from "./Button";

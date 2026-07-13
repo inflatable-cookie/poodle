@@ -169,3 +169,20 @@ export type ActiveSort = {
   field: string;
   direction: SortDirection;
 };
+
+export interface AccordionItem {
+  value: string;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+}
+
+export interface MenuItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  checked?: boolean;
+  shortcutLabel?: string;
+  tone?: "default" | "danger";
+  kind?: "action" | "checkbox" | "radio" | "separator";
+}
