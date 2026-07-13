@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@poodle/headless": "workspace:*",
-    "@poodle/styles": "workspace:*"
+    "@poodle/styles": "workspace:*",
+    "@poodle/icons-lucide": "workspace:*"
   },
   "poodleRelease": {
     "publicIntent": true,

@@ -23,6 +23,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@poodle/headless": "workspace:*",
+        "@poodle/icons-lucide": "workspace:*",
         "@poodle/styles": "workspace:*",
       },
       "devDependencies": {

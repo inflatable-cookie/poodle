@@ -9,6 +9,8 @@ import { specimens, useHashRoute } from "./harness";
 import "./specimens/button";
 import "./specimens/checkbox";
 import "./specimens/tabs";
+import "./specimens/display";
+import "./specimens/layout";
 
 function App() {
   const slug = useHashRoute();
