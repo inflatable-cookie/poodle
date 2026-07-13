@@ -10,7 +10,10 @@
       "default": "./src/index.ts"
     }
   },
-  "files": ["src", "README.md"],
+  "files": [
+    "src",
+    "README.md"
+  ],
   "peerDependencies": {
     "react": ">=18"
   },
@@ -22,5 +25,8 @@
     "publicIntent": true,
     "channel": "preview",
     "stability": "experimental"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0"
   }
 }

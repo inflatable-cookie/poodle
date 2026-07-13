@@ -25,6 +25,9 @@
         "@poodle/headless": "workspace:*",
         "@poodle/styles": "workspace:*",
       },
+      "devDependencies": {
+        "@types/react": "^19.1.0",
+      },
       "peerDependencies": {
         "react": ">=18",
       },
