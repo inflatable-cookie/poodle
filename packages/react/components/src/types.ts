@@ -186,3 +186,5 @@ export interface MenuItem {
   tone?: "default" | "danger";
   kind?: "action" | "checkbox" | "radio" | "separator";
 }
+
+export type DrawerEdge = "left" | "right" | "top" | "bottom";

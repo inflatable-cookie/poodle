@@ -19,6 +19,8 @@ import "./specimens/forms";
 import "./specimens/forms2";
 import "./specimens/order-by";
 import "./specimens/overlays";
+import "./specimens/overlays2";
+import "./specimens/misc";
 
 function App() {
   const slug = useHashRoute();

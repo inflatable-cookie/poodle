@@ -15,7 +15,8 @@
     "README.md"
   ],
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "dependencies": {
     "@poodle/headless": "workspace:*",
@@ -28,6 +29,8 @@
     "stability": "experimental"
   },
   "devDependencies": {
-    "@types/react": "^19.1.0"
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
