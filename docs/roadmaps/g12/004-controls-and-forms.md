@@ -17,8 +17,10 @@ Depends on: `g12.003`
   whole-star radiogroup mode). Verified: selection machines, keyboard
   stepping on both sliders, rating keyboard step + whole-star roving
   focus/click — 8/8 probes.
-- [ ] Wave 3: TextInput, NumberInput, TimeInput, DurationInput, CodeInput,
-  TokenInput, EditableLabel
+- [x] Wave 3a: EditableLabel (edit-label machine: commit/cancel/focus
+  effects), TimeInput. Verified: dblclick edit + Enter commit + Escape
+  cancel through editLabelTransition; time value change.
+- [ ] Wave 3b: TextInput, NumberInput, DurationInput, CodeInput, TokenInput
 - [ ] Wave 4: Select, OrderBy, Field, FieldSet, FormActions,
   PasswordRequirements
 

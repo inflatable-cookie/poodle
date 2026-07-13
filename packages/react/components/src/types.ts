@@ -82,3 +82,5 @@ export interface ToggleGroupOption {
 }
 
 export type TriStateValue = "excluded" | "default" | "included";
+
+export type EditableLabelActivationMode = "doubleClick" | "enterOrSpace" | "programmatic";
