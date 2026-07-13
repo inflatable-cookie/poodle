@@ -43,3 +43,25 @@ export type SpaceScale = "none" | "sm" | "md" | "lg";
 export type LayoutAlign = "start" | "center" | "end" | "stretch";
 export type LayoutJustify = "start" | "center" | "end" | "between";
 export type OverflowMode = "visible" | "hidden" | "clip";
+
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonTone = "default" | "danger" | "success" | "warning";
+export type OverlayPlacement =
+  | "top"
+  | "top-start"
+  | "top-end"
+  | "right"
+  | "right-start"
+  | "right-end"
+  | "bottom"
+  | "bottom-start"
+  | "bottom-end"
+  | "left"
+  | "left-start"
+  | "left-end";
+
+export interface RadioGroupOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}

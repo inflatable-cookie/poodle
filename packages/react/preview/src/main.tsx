@@ -11,6 +11,7 @@ import "./specimens/checkbox";
 import "./specimens/tabs";
 import "./specimens/display";
 import "./specimens/layout";
+import "./specimens/controls";
 
 function App() {
   const slug = useHashRoute();
