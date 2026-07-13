@@ -3,48 +3,27 @@
    previously-scoped block is safe as global CSS. */
 
   .poodle-split-button {
-    --poodle-split-fill: var(
-      --poodle-treatment-interactive-fill,
-      var(--poodle-color-background-surface)
-    );
+    --poodle-split-fill: var(--poodle-color-background-surface);
     --poodle-split-fill-hover: color-mix(
       in srgb,
       var(--poodle-split-fill) 84%,
       var(--poodle-color-background-elevated)
     );
-    --poodle-split-border: var(
-      --poodle-treatment-interactive-border,
-      var(--poodle-color-border-default)
-    );
-    --poodle-split-shadow: var(
-      --poodle-treatment-interactive-shadow,
-      none
-    );
+    --poodle-split-border: var(--poodle-color-border-default);
+    --poodle-split-shadow: none;
     --poodle-split-text: var(--poodle-color-text-primary);
     position: relative;
     display: inline-flex;
     align-items: stretch;
     width: fit-content;
-    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
+    border-radius: var(--poodle-radius-control);
   }
 
   .poodle-split-button[data-variant="primary"] {
-    --poodle-split-fill: var(
-      --poodle-treatment-interactive-primary-fill,
-      var(--poodle-color-accent-base)
-    );
-    --poodle-split-border: var(
-      --poodle-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
-    );
-    --poodle-split-shadow: var(
-      --poodle-treatment-interactive-primary-shadow,
-      none
-    );
-    --poodle-split-text: var(
-      --poodle-treatment-interactive-primary-text,
-      var(--poodle-color-text-inverse)
-    );
+    --poodle-split-fill: var(--poodle-color-accent-base);
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-accent-base) 84%, black);
+    --poodle-split-shadow: none;
+    --poodle-split-text: var(--poodle-color-text-inverse);
   }
 
   .poodle-split-button[data-variant="ghost"] {
@@ -151,7 +130,7 @@
     min-width: 4rem;
     padding: 0 var(--poodle-split-button-primary-padding-inline);
     border-right: 0;
-    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
+    border-radius: var(--poodle-radius-control) 0 0 var(--poodle-radius-control);
   }
 
   .poodle-split-button__primary:hover:not(:disabled) {
@@ -173,7 +152,7 @@
     width: var(--poodle-split-button-toggle-width);
     padding: 0;
     border-left: 0;
-    border-radius: 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0;
+    border-radius: 0 var(--poodle-radius-control) var(--poodle-radius-control) 0;
   }
 
   .poodle-split-button__toggle:hover:not(:disabled) {
@@ -221,16 +200,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
-    );
-    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(--poodle-recipe-split-button-menu-fill, var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    ));
-    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-split-button-menu-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-elevation-overlay));
     overflow-y: auto;
   }
 

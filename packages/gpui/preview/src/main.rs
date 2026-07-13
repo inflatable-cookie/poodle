@@ -58,7 +58,7 @@ impl AssetSource for PreviewAssets {
 }
 
 use app_state::{
-    AppState, AppearanceTreatment, ControlSize, Density, Section, ThemePreset, TokenPanel,
+    AppState, ControlSize, Density, Section, ThemePreset, TokenPanel,
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::load_contract_usage_docs;
@@ -304,22 +304,6 @@ impl PreviewRoot {
                     .collect();
                 self.render_toggle_group("Size", text_secondary, &opts, accent, border, "size", cx)
             })
-            // Treatment group
-            .child({
-                let opts: Vec<(&str, bool)> = AppearanceTreatment::ALL
-                    .iter()
-                    .map(|t| (t.label(), self.state.appearance_treatment == *t))
-                    .collect();
-                self.render_toggle_group(
-                    "Treatment",
-                    text_secondary,
-                    &opts,
-                    accent,
-                    border,
-                    "treatment",
-                    cx,
-                )
-            })
             .child(
                 div()
                     .flex()
@@ -410,10 +394,6 @@ impl PreviewRoot {
                     }
                     "size" => {
                         this.state.control_size = ControlSize::ALL[i];
-                        this.state.rebuild_theme();
-                    }
-                    "treatment" => {
-                        this.state.appearance_treatment = AppearanceTreatment::ALL[i];
                         this.state.rebuild_theme();
                     }
                     _ => {}
@@ -1283,7 +1263,6 @@ struct CliArgs {
     theme: Option<ThemePreset>,
     density: Option<Density>,
     control_size: Option<ControlSize>,
-    treatment: Option<AppearanceTreatment>,
     screenshot: Option<String>,
 }
 
@@ -1297,7 +1276,6 @@ fn parse_cli_args() -> CliArgs {
     let mut theme = None;
     let mut density = None;
     let mut control_size = None;
-    let mut treatment = None;
     let mut screenshot = None;
 
     let mut i = 1;
@@ -1380,16 +1358,6 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
-            "--treatment" => {
-                if let Some(val) = args.get(i + 1) {
-                    treatment = match val.as_str() {
-                        "system" => Some(AppearanceTreatment::System),
-                        "brand-raised" => Some(AppearanceTreatment::BrandRaised),
-                        _ => None,
-                    };
-                    i += 1;
-                }
-            }
             "--screenshot" => {
                 if let Some(val) = args.get(i + 1) {
                     screenshot = Some(val.clone());
@@ -1410,7 +1378,6 @@ fn parse_cli_args() -> CliArgs {
         theme,
         density,
         control_size,
-        treatment,
         screenshot,
     }
 }
@@ -1475,9 +1442,6 @@ fn main() {
                     }
                     if let Some(s) = cli.control_size {
                         root.state.control_size = s;
-                    }
-                    if let Some(t) = cli.treatment {
-                        root.state.appearance_treatment = t;
                     }
                     // Rebuild theme with all overrides applied together
                     root.state.rebuild_theme();

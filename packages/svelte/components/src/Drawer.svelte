@@ -252,20 +252,11 @@
     height: 100dvh;
     overflow: auto;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0 solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)
-    );
+    border: 0 solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
     border-radius: 0;
-    background: var(--poodle-recipe-drawer-surface-fill, var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    ));
-    --poodle-surface: var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    );
-    box-shadow: var(--poodle-recipe-drawer-surface-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog)));
+    background: var(--poodle-recipe-drawer-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    --poodle-surface: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
+    box-shadow: var(--poodle-recipe-drawer-surface-shadow, var(--poodle-elevation-dialog));
   }
 
   .poodle-drawer[data-edge="left"] .poodle-drawer__surface {

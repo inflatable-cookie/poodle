@@ -1,11 +1,11 @@
-export type SectionId = "components" | "tokens" | "treatments";
+export type SectionId = "components" | "tokens";
 
 export type Route = {
   section: SectionId;
   component?: string;
 };
 
-const validSections: SectionId[] = ["components", "tokens", "treatments"];
+const validSections: SectionId[] = ["components", "tokens"];
 
 /** Legacy section aliases that redirect to the unified components section. */
 const sectionAliases: Record<string, SectionId> = {

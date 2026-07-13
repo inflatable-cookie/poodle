@@ -174,27 +174,6 @@ impl ControlSize {
     }
 }
 
-/// Appearance treatment.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AppearanceTreatment {
-    System,
-    BrandRaised,
-}
-
-impl AppearanceTreatment {
-    pub const ALL: &[AppearanceTreatment] = &[
-        AppearanceTreatment::System,
-        AppearanceTreatment::BrandRaised,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            AppearanceTreatment::System => "system",
-            AppearanceTreatment::BrandRaised => "brand-raised",
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenPanel {
     Summary,
@@ -393,7 +372,6 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
-    pub appearance_treatment: AppearanceTreatment,
     pub component_search: String,
     pub active_component_slug: Option<String>,
     pub active_token_panel: TokenPanel,
@@ -409,7 +387,6 @@ impl AppState {
         let preset = ThemePreset::Dark;
         let density = Density::Compact;
         let control_size = ControlSize::Sm;
-        let appearance_treatment = AppearanceTreatment::System;
 
         // Build theme with density + control-size layered on top
         let theme = preset
@@ -423,7 +400,6 @@ impl AppState {
             theme_preset: preset,
             density,
             control_size,
-            appearance_treatment,
             component_search: String::new(),
             active_component_slug: None,
             active_token_panel: TokenPanel::Summary,
@@ -447,7 +423,6 @@ impl AppState {
         let mut theme = self.theme_preset.build_theme();
         theme = theme.with_density(self.density.token_definition());
         theme = theme.with_control_size(self.control_size.token_definition());
-        theme.brand_raised = self.appearance_treatment == AppearanceTreatment::BrandRaised;
         self.theme = theme;
     }
 }

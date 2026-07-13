@@ -827,7 +827,7 @@
       #00f 67%,
       #f0f 83%,
       #f00 100%
-    ) !important);
+    )) !important;
   }
 
   .poodle-color-picker__hue-wrap :global(.poodle-slider__fill) {
@@ -850,7 +850,7 @@
       repeating-conic-gradient(
         #d0d0d0 0% 25%,
         #fff 0% 50%
-      ) 0 0 / 0.5rem 0.5rem !important);
+      ) 0 0 / 0.5rem 0.5rem) !important;
   }
 
   .poodle-color-picker__alpha-wrap :global(.poodle-slider__fill) {

@@ -109,13 +109,7 @@ impl Tabs {
             }
 
             if is_active {
-                let active_fill = if theme.brand_raised && !is_disabled {
-                    // Reuse the selected_bg; brand-raised treatment is additive.
-                    tab = tab.bg(crate::theme_ext::brand_raised_interactive_fill(selected_bg));
-                    None
-                } else {
-                    Some(selected_bg)
-                };
+                let active_fill = Some(selected_bg);
                 if let Some(bg) = active_fill {
                     tab = tab.bg(bg);
                 }

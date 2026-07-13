@@ -221,11 +221,8 @@
     min-width: var(--poodle-popover-surface-min-width, 14rem);
     max-width: var(--poodle-popover-surface-max-width, min(24rem, 90vw));
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
-    );
-    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
+    border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-popover-surface-fill, var(--poodle-color-background-elevated));
     --poodle-surface: var(--poodle-color-background-elevated);
     box-shadow: var(--poodle-recipe-popover-surface-shadow, inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),

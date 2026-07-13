@@ -139,7 +139,7 @@ impl IntoElement for Card {
 
         // Match Svelte Card.svelte:
         // Default/Outlined: --poodle-recipe-card-fill = color-mix(panel 10%, elevated)
-        // Elevated: --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        // Elevated: the retired treatment role = color-mix(elevated 98%, panel)
         let fill = match spec.variant {
             CardVariant::Elevated => color_mix(elevated, panel, 0.98),
             _ => color_mix(panel, elevated, 0.10),

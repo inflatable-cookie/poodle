@@ -196,11 +196,7 @@ impl IntoElement for Drawer {
         }
 
         // Brand-raised treatment: gradient fill for elevated surface
-        if theme.brand_raised {
-            drawer_panel = drawer_panel.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
-        } else {
-            drawer_panel = drawer_panel.bg(surface_bg);
-        }
+        drawer_panel = drawer_panel.bg(surface_bg);
 
         drawer_panel = drawer_panel
             .px(density_pad_x)

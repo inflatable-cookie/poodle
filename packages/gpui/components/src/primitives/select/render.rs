@@ -113,11 +113,7 @@ impl Select {
                 .px(inline_padding)
                 .rounded(control_radius);
 
-            if theme.brand_raised {
-                trigger = trigger.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg));
-            } else {
-                trigger = trigger.bg(surface_bg);
-            }
+            trigger = trigger.bg(surface_bg);
 
             trigger = trigger
                 .border_1()
@@ -310,11 +306,7 @@ impl Select {
             }
 
             // Brand-raised treatment: gradient fill for elevated surface
-            if theme.brand_raised {
-                list = list.bg(crate::theme_ext::brand_raised_surface_fill(elevated_bg));
-            } else {
-                list = list.bg(elevated_bg);
-            }
+            list = list.bg(elevated_bg);
 
             list = list
                 .border_1()

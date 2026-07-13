@@ -124,7 +124,7 @@ impl IntoElement for Tooltip {
         let tooltip_radius =
             resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
-        // Svelte --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        // Svelte default = color-mix(elevated 98%, panel)
         let panel_bg = resolve_color(theme, "color.background.panel");
         let fill = color_mix(elevated_bg, panel_bg, 0.98);
         // Svelte: color-mix(border-default 72%, transparent)
@@ -182,12 +182,7 @@ impl IntoElement for Tooltip {
                     .max_w(tooltip_max_w)
                     .child(content.clone());
 
-                // Brand-raised treatment: gradient fill for elevated surface
-                if theme.brand_raised {
-                    bubble = bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
-                } else {
-                    bubble = bubble.bg(fill);
-                }
+                bubble = bubble.bg(fill);
 
                 bubble.into_any_element()
             })

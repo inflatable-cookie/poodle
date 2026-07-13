@@ -108,11 +108,7 @@ impl IntoElement for Surface {
 
         // Brand-raised treatment: gradient fill over the base color
         let mut el = div().rounded(surface_radius);
-        if theme.brand_raised {
-            el = el.bg(crate::theme_ext::brand_raised_surface_fill(bg));
-        } else {
-            el = el.bg(bg);
-        }
+        el = el.bg(bg);
 
         // ── Border ──────────────────────────────────────────────
         // Contract §8: subtle → color-mix(border-subtle 74%, transparent);

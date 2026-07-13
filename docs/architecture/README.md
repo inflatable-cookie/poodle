@@ -11,7 +11,7 @@ Architecture defines how Poodle is structured, where package ownership lives, an
 - `002-token-system-and-package-layout.md`
 - `003-component-docs-ia-and-implementation-substrates.md`
 - `004-underlay-bridge-and-adapter-ownership.md`
-- `005-treatment-system-and-recipe-variables.md`
+- `005-treatment-system-and-recipe-variables.md` *(retired — superseded by 007)*
 
 ## Working Rule
 

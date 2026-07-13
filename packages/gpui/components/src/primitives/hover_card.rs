@@ -102,7 +102,7 @@ impl IntoElement for HoverCard {
         let border_default = resolve_color(theme, "color.border.default");
         let radius = resolve_radius(theme, "radius.surface");
 
-        // Svelte: --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        // Svelte: the retired treatment role = color-mix(elevated 98%, panel)
         let panel_bg = resolve_color(theme, "color.background.panel");
         let fill = color_mix(elevated_bg, panel_bg, 0.98);
         // Svelte: color-mix(border-default 72%, transparent)
@@ -157,11 +157,7 @@ impl IntoElement for HoverCard {
                 .rounded(radius);
 
             // Brand-raised treatment: gradient fill for elevated surface
-            if theme.brand_raised {
-                surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(fill));
-            } else {
-                surface = surface.bg(fill);
-            }
+            surface = surface.bg(fill);
 
             surface = surface
                 .border_1()

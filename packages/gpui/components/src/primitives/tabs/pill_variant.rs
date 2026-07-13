@@ -72,13 +72,7 @@ impl Tabs {
             if is_active {
                 let active_bg = accent.opacity(self.spec.pill_active_bg_opacity());
                 // Brand-raised treatment: gradient fill for active pill tab
-                if theme.brand_raised && !is_disabled {
-                    tab = tab
-                        .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
-                        .text_color(text_primary);
-                } else {
-                    tab = tab.bg(active_bg).text_color(text_primary);
-                }
+                tab = tab.bg(active_bg).text_color(text_primary);
             } else {
                 tab = tab.text_color(text_secondary);
             }

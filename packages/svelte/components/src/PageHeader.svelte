@@ -29,6 +29,8 @@
     sizeRole?: SemanticControlSizeRole | null;
     density?: ControlDensity | null;
     children?: Snippet;
+    titleContent?: Snippet;
+    subtitleContent?: Snippet;
     breadcrumbs?: Snippet;
     meta?: Snippet;
     actions?: Snippet;
@@ -55,6 +57,8 @@
     sizeRole = null,
     density = null,
     children,
+    titleContent,
+    subtitleContent,
     breadcrumbs,
     meta,
     actions,
@@ -69,10 +73,10 @@
   const resolvedSubtitle = $derived(
     isEntityDetailPosture ? title ?? subtitle ?? null : subtitle
   );
-  const hasPrimaryHeading = $derived(Boolean(primaryTitle || count !== null));
+  const hasPrimaryHeading = $derived(Boolean(primaryTitle || titleContent || count !== null));
   const showTopBreadcrumbs = $derived(Boolean(breadcrumbs && !isEntityDetailPosture));
   const showSubtitleText = $derived(
-    Boolean(resolvedSubtitle) &&
+    Boolean(resolvedSubtitle || subtitleContent) &&
       (!isEntityDetailPosture || !breadcrumbs || showSubtitleWithBreadcrumbs)
   );
   const hasSecondaryContent = $derived(
@@ -131,7 +135,9 @@
         {/if}
         {#if hasPrimaryHeading}
           <svelte:element this={headingTag} class="poodle-page-header__title">
-            {#if primaryTitle}
+            {#if titleContent}
+              {@render titleContent()}
+            {:else if primaryTitle}
               <span>{primaryTitle}</span>
             {/if}
             {#if count !== null}
@@ -180,7 +186,9 @@
     {#if hasSecondaryContent}
       <div class="poodle-page-header__content poodle-page-header__content--secondary">
         {#if showSubtitleText}
-          <p class="poodle-page-header__subtitle">{resolvedSubtitle}</p>
+          <div class="poodle-page-header__subtitle">
+            {#if subtitleContent}{@render subtitleContent()}{:else}{resolvedSubtitle}{/if}
+          </div>
         {/if}
         {#if showTopBreadcrumbs && breadcrumbs}
           <div class="poodle-page-header__breadcrumbs poodle-page-header__breadcrumbs--stacked">
@@ -216,4 +224,3 @@
     {/if}
   </header>
 </UiPresentationProvider>
-

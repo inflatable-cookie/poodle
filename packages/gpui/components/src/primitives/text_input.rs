@@ -417,16 +417,7 @@ impl IntoElement for TextInput {
             .px(inline_padding)
             .rounded(control_radius);
 
-        // Brand-raised treatment: gradient fill + token-resolved subtle shadow.
-        // Uses the shared `brand_raised_interactive_shadow` helper instead of an
-        // inline hsla literal (parity: text_input.rs:424).
-        if theme.brand_raised {
-            el = el
-                .bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg))
-                .shadow(crate::theme_ext::brand_raised_interactive_shadow());
-        } else {
-            el = el.bg(surface_bg);
-        }
+        el = el.bg(surface_bg);
 
         el = el
             .border_1()

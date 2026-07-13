@@ -186,19 +186,10 @@
     min-width: 14rem;
     max-width: min(22rem, 90vw);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
-    );
-    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(--poodle-recipe-hover-card-surface-fill, var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    ));
-    --poodle-surface: var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    );
-    box-shadow: var(--poodle-recipe-hover-card-surface-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-hover-card-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    --poodle-surface: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
+    box-shadow: var(--poodle-recipe-hover-card-surface-shadow, var(--poodle-elevation-overlay));
   }
 </style>

@@ -3,7 +3,7 @@
     "components": 116,
     "recipeHooks": 973,
     "hookCandidates": 0,
-    "metricVariables": 290
+    "metricVariables": 296
   },
   "inventory": {
     "accordion": {
@@ -291,10 +291,12 @@
       ],
       "candidates": [],
       "metric": [
+        "--poodle-card-divider",
         "--poodle-card-footer-padding-top",
         "--poodle-card-gap",
         "--poodle-card-padding-block",
-        "--poodle-card-padding-inline"
+        "--poodle-card-padding-inline",
+        "--poodle-card-radius"
       ]
     },
     "card-radio-group": {
@@ -1285,6 +1287,10 @@
         "--poodle-page-header-content-gap",
         "--poodle-page-header-eyebrow-size",
         "--poodle-page-header-gap",
+        "--poodle-page-header-padding-block-end",
+        "--poodle-page-header-padding-block-start",
+        "--poodle-page-header-padding-inline",
+        "--poodle-page-header-radius",
         "--poodle-page-header-section-size",
         "--poodle-page-header-section-title-compact-size",
         "--poodle-page-header-section-title-size",

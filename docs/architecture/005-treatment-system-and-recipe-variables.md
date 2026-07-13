@@ -1,6 +1,16 @@
 # 005 Treatment System And Recipe Variables
 
-Status: active
+Status: retired (2026-07-13)
+
+> **Retired.** The treatment-role layer is removed. Recipes
+> (`007-appearance-recipe-contract.md`) are the single app-facing override
+> surface — g11.008 gave every appearance property a recipe hook, which
+> covers everything treatments were for with finer grain. The role layer's
+> defaults only ever lived in the preview's stylesheet, so the preview
+> rendered differently from every real consumer; the two live consumer
+> usages (underlay EntityList, soundcheck focus chrome) were migrated to
+> recipe hooks. Family-level branding is now an app-side concern: define
+> one app variable and point several recipe hooks at it. Kept for history.
 Updated: 2026-03-22
 Depends on: `002-token-system-and-package-layout.md`
 Reference: `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md`

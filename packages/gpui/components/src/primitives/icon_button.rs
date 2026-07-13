@@ -203,8 +203,6 @@ impl IntoElement for IconButton {
             format!("poodle-icon-btn-{}", icon_name)
         };
 
-        let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
-
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
@@ -213,26 +211,7 @@ impl IntoElement for IconButton {
             .rounded(radius);
 
         // Brand-raised treatment: gradient fills and elevated shadows
-        if theme.brand_raised && !is_ghost && !is_unavailable && !pressed_active {
-            use crate::theme_ext::{
-                brand_raised_interactive_fill, brand_raised_interactive_shadow,
-                brand_raised_primary_fill, brand_raised_primary_shadow,
-            };
-            match spec.variant {
-                ButtonVariant::Primary => {
-                    el = el
-                        .bg(brand_raised_primary_fill(current_fill))
-                        .shadow(brand_raised_primary_shadow());
-                }
-                _ => {
-                    el = el
-                        .bg(brand_raised_interactive_fill(current_fill))
-                        .shadow(brand_raised_interactive_shadow());
-                }
-            }
-        } else {
-            el = el.bg(current_fill);
-        }
+        el = el.bg(current_fill);
 
         el = el
             .text_color(text_color)

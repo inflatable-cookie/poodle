@@ -378,26 +378,7 @@ impl IntoElement for Button {
             .rounded(radius);
 
         // Brand-raised treatment: use gradient fills and elevated shadows
-        if theme.brand_raised && !is_ghost && !is_disabled {
-            use crate::theme_ext::{
-                brand_raised_interactive_fill, brand_raised_interactive_shadow,
-                brand_raised_primary_fill, brand_raised_primary_shadow,
-            };
-            match spec.variant {
-                ButtonVariant::Primary => {
-                    el = el
-                        .bg(brand_raised_primary_fill(fill))
-                        .shadow(brand_raised_primary_shadow());
-                }
-                _ => {
-                    el = el
-                        .bg(brand_raised_interactive_fill(fill))
-                        .shadow(brand_raised_interactive_shadow());
-                }
-            }
-        } else {
-            el = el.bg(fill);
-        }
+        el = el.bg(fill);
 
         el = el
             .border_1()
@@ -438,7 +419,7 @@ impl IntoElement for Button {
                 .cursor_pointer()
                 .hover(move |s| {
                     // Contract §8 Hover box-shadow:
-                    // var(--poodle-treatment-interactive-shadow-active,
+                    // var(the retired treatment role,
                     //     var(--poodle-button-shadow)) — token-derived, no raw hsla.
                     s.bg(hover_fill)
                         .border_color(hover_border)

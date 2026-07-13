@@ -156,16 +156,10 @@
   .poodle-toggle-group__item {
     min-height: calc(var(--poodle-toggle-group-height) - 0.25rem);
     padding: 0 var(--poodle-toggle-group-x);
-    border: 0.0625rem solid var(
-      --poodle-treatment-interactive-border,
-      color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)
-    );
-    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
-    background: var(--poodle-recipe-toggle-group-item-fill, var(
-      --poodle-treatment-interactive-fill,
-      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-    ));
-    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, var(--poodle-treatment-interactive-shadow, none));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
+    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, none);
     color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -184,14 +178,8 @@
         color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
         color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
       ),
-      var(
-        --poodle-treatment-interactive-fill,
-        color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-      ));
-    border-color: var(--poodle-recipe-toggle-group-item-border, var(
-      --poodle-treatment-interactive-border-active,
-      color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))
-    ));
+      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
+    border-color: var(--poodle-recipe-toggle-group-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
   }
 
   .poodle-toggle-group__item:focus-visible {

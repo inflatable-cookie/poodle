@@ -14,12 +14,10 @@
   export let theme: string;
   export let density: string;
   export let controlSize: string;
-  export let appearanceTreatment: string = "system";
   export let search: string = "";
   export let onThemeChange: (value: string) => void = () => {};
   export let onDensityChange: (value: string) => void = () => {};
   export let onControlSizeChange: (value: string) => void = () => {};
-  export let onAppearanceTreatmentChange: (value: string) => void = () => {};
   export let onSearchChange: (value: string) => void = () => {};
 
   type ThemeName = keyof typeof themes;
@@ -40,10 +38,6 @@
   const controlSizeOptions: ToggleGroupOption[] = controlSizeOrder
     .filter((name) => controlSizeEntries.some(([entryName]) => entryName === name))
     .map((name) => ({ value: name, label: name }));
-  const appearanceTreatmentOptions: ToggleGroupOption[] = [
-    { value: "system", label: "system" },
-    { value: "brand-raised", label: "brand-raised" },
-  ];
 </script>
 
 <div class="poodle-display-controls">
@@ -74,16 +68,6 @@
       options={controlSizeOptions}
       ariaLabel="Control size"
       onValueChange={(value) => onControlSizeChange(value as string)}
-    />
-  </div>
-
-  <div class="poodle-display-controls__group">
-    <Eyebrow>Treatment</Eyebrow>
-    <ToggleGroup
-      value={appearanceTreatment}
-      options={appearanceTreatmentOptions}
-      ariaLabel="Appearance treatment"
-      onValueChange={(value) => onAppearanceTreatmentChange(value as string)}
     />
   </div>
 

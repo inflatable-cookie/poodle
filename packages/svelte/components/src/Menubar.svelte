@@ -334,16 +334,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
-    );
-    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(--poodle-recipe-menubar-overlay-fill, var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    ));
-    box-shadow: var(--poodle-recipe-menubar-overlay-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-menubar-overlay-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    box-shadow: var(--poodle-recipe-menubar-overlay-shadow, var(--poodle-elevation-overlay));
   }
 
   .poodle-menubar__item {

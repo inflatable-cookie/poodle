@@ -841,16 +841,10 @@
   /* Card variant: bordered card items */
   .poodle-tabs[data-variant="card"] .poodle-tabs__item {
     gap: 0;
-    border: 0.0625rem solid var(
-      --poodle-treatment-interactive-border,
-      color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent)
-    );
-    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
-    background: var(--poodle-recipe-tabs-card-item-fill, var(
-      --poodle-treatment-interactive-fill,
-      color-mix(in srgb, var(--poodle-color-background-surface) 92%, transparent)
-    ));
-    box-shadow: var(--poodle-recipe-tabs-card-item-shadow, var(--poodle-treatment-interactive-shadow, none));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-tabs-card-item-fill, color-mix(in srgb, var(--poodle-color-background-surface) 92%, transparent));
+    box-shadow: var(--poodle-recipe-tabs-card-item-shadow, none);
   }
 
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {

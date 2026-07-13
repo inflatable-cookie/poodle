@@ -287,11 +287,7 @@ impl IntoElement for Accordion {
                 }]);
 
             // Brand-raised treatment: gradient fill for accordion item card
-            if theme.brand_raised {
-                item_card = item_card.bg(crate::theme_ext::brand_raised_surface_fill(item_bg));
-            } else {
-                item_card = item_card.bg(item_bg);
-            }
+            item_card = item_card.bg(item_bg);
 
             item_card = item_card.child(trigger);
 

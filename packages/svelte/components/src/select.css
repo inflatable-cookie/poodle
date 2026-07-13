@@ -26,13 +26,10 @@
     align-items: center;
     min-height: var(--poodle-select-control-height);
     padding: 0 var(--poodle-select-inline-padding);
-    border: 0.0625rem solid var(
-      --poodle-treatment-interactive-subtle-border,
-      var(--poodle-color-border-default)
-    );
-    border-radius: var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control));
-    background: var(--poodle-recipe-select-fill, var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface)));
-    box-shadow: var(--poodle-recipe-select-shadow, var(--poodle-treatment-interactive-subtle-shadow, none));
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-select-fill, var(--poodle-color-background-surface));
+    box-shadow: var(--poodle-recipe-select-shadow, none);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -61,15 +58,9 @@
 
   .poodle-select:focus-within {
     border-color: var(--poodle-recipe-select-focus-border, var(--poodle-color-accent-focusRing));
-    background: var(--poodle-recipe-select-focus-fill, var(
-      --poodle-treatment-interactive-subtle-fill-focus,
-      var(--poodle-color-background-surface)
-    ));
-    box-shadow: var(--poodle-recipe-select-focus-shadow, var(
-      --poodle-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--poodle-border-width-focus)
-        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)
-    ));
+    background: var(--poodle-recipe-select-focus-fill, var(--poodle-color-background-surface));
+    box-shadow: var(--poodle-recipe-select-focus-shadow, 0 0 0 var(--poodle-border-width-focus)
+        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
   .poodle-select__indicator {
@@ -268,7 +259,7 @@
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-select-listbox-fill, var(--poodle-color-background-elevated));
-    box-shadow: var(--poodle-recipe-select-listbox-shadow, var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay)));
+    box-shadow: var(--poodle-recipe-select-listbox-shadow, var(--poodle-elevation-overlay));
   }
 
   .poodle-select__listbox--above {

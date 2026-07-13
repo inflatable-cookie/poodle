@@ -20,19 +20,16 @@
   import DisplayControls from "./components/DisplayControls.svelte";
   import ComponentsSection from "./sections/ComponentsSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
-  import TreatmentsSection from "./sections/TreatmentsSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
 
   type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
-  type AppearanceTreatmentName = "system" | "brand-raised";
   type SemanticTokenPath = keyof typeof cssVars;
 
   const topTabs: TabItem[] = [
     { value: "components", label: "Components" },
     { value: "tokens", label: "Tokens" },
-    { value: "treatments", label: "Treatments" },
   ];
 
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
@@ -43,7 +40,6 @@
   let theme: ThemeName = "dark";
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "sm";
-  let appearanceTreatment: AppearanceTreatmentName = "system";
   let componentSearch = "";
   let route: Route = { section: "components" };
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = {};
@@ -135,7 +131,7 @@
 />
 
 <UiPresentationProvider density={density} sizeScale={controlSize}>
-  <div class="poodle-app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
+  <div class="poodle-app-shell" bind:this={appShell}>
     <header class="poodle-app-top-bar">
       <div class="poodle-app-top-bar__title">
         <strong>Poodle</strong>
@@ -158,12 +154,10 @@
       {theme}
       {density}
       {controlSize}
-      {appearanceTreatment}
       search={componentSearch}
       onThemeChange={(value) => (theme = value as ThemeName)}
       onDensityChange={(value) => (density = value as DensityName)}
       onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
-      onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
       onSearchChange={(value) => {
         componentSearch = value;
         if (activeSection !== "components") {
@@ -179,8 +173,6 @@
             <ComponentsSection activeComponent={route.component} search={componentSearch} />
           {:else if activeSection === "tokens"}
             <TokensSection {liveTokenValues} />
-          {:else if activeSection === "treatments"}
-            <TreatmentsSection />
           {/if}
         </IconProvider>
       {/key}

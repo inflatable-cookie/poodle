@@ -117,16 +117,10 @@
     grid-auto-columns: minmax(0, 1fr);
     gap: 0.125rem;
     padding: 0.125rem;
-    border: 0.0625rem solid var(
-      --poodle-treatment-interactive-border,
-      color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)
-    );
-    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
-    background: var(--poodle-recipe-segmented-control-fill, var(
-      --poodle-treatment-interactive-fill,
-      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-    ));
-    box-shadow: var(--poodle-recipe-segmented-control-shadow, var(--poodle-treatment-interactive-shadow, none));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-segmented-control-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
+    box-shadow: var(--poodle-recipe-segmented-control-shadow, none);
   }
 
   .poodle-segmented-control[data-equal-width="false"] {
@@ -191,7 +185,7 @@
     min-width: 0;
     min-height: calc(var(--poodle-segmented-control-height) - 0.25rem);
     padding: 0 var(--poodle-segmented-control-x);
-    border-radius: calc(var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) - 0.125rem);
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     color: var(--poodle-recipe-segmented-control-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;

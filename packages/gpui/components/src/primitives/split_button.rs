@@ -184,8 +184,6 @@ impl IntoElement for SplitButton {
         // ── Primary half ──────────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();
 
-        let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
-
         // Contract §7 Primary half: `min-width: 4rem` flat (not the per-size
         // Button min-width scale).
         let mut primary = div()
@@ -196,26 +194,7 @@ impl IntoElement for SplitButton {
             .px(pad_x);
 
         // Brand-raised treatment for primary half
-        if theme.brand_raised && !is_ghost && !is_unavailable {
-            use crate::theme_ext::{
-                brand_raised_interactive_fill, brand_raised_interactive_shadow,
-                brand_raised_primary_fill, brand_raised_primary_shadow,
-            };
-            match spec.variant {
-                ButtonVariant::Primary => {
-                    primary = primary
-                        .bg(brand_raised_primary_fill(fill))
-                        .shadow(brand_raised_primary_shadow());
-                }
-                _ => {
-                    primary = primary
-                        .bg(brand_raised_interactive_fill(fill))
-                        .shadow(brand_raised_interactive_shadow());
-                }
-            }
-        } else {
-            primary = primary.bg(fill);
-        }
+        primary = primary.bg(fill);
 
         let primary_gap = resolve_px(theme, "space.inline.sm");
         primary = primary
@@ -277,26 +256,7 @@ impl IntoElement for SplitButton {
             .w(px(rem_to_px(split_button_toggle_width_rem(effective_size))));
 
         // Brand-raised treatment for toggle half
-        if theme.brand_raised && !is_ghost && !is_unavailable {
-            use crate::theme_ext::{
-                brand_raised_interactive_fill, brand_raised_interactive_shadow,
-                brand_raised_primary_fill, brand_raised_primary_shadow,
-            };
-            match spec.variant {
-                ButtonVariant::Primary => {
-                    toggle = toggle
-                        .bg(brand_raised_primary_fill(fill))
-                        .shadow(brand_raised_primary_shadow());
-                }
-                _ => {
-                    toggle = toggle
-                        .bg(brand_raised_interactive_fill(fill))
-                        .shadow(brand_raised_interactive_shadow());
-                }
-            }
-        } else {
-            toggle = toggle.bg(fill);
-        }
+        toggle = toggle.bg(fill);
 
         toggle = toggle
             .border_1()

@@ -90,14 +90,7 @@ impl Tabs {
                     ..accent
                 };
                 // Brand-raised treatment: gradient fill for active underline tab
-                if theme.brand_raised && !is_disabled {
-                    tab = tab
-                        .text_color(text_primary)
-                        .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
-                        .rounded(radius);
-                } else {
-                    tab = tab.text_color(text_primary).bg(active_bg).rounded(radius);
-                }
+                tab = tab.text_color(text_primary).bg(active_bg).rounded(radius);
             } else {
                 tab = tab.text_color(text_secondary);
             }

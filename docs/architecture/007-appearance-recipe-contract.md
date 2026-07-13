@@ -2,15 +2,16 @@
 
 Status: active
 Updated: 2026-07-10
-Depends on: `005-treatment-system-and-recipe-variables.md`, `006-headless-core-and-machine-model.md`
+Depends on: `006-headless-core-and-machine-model.md`
+Supersedes: `005-treatment-system-and-recipe-variables.md` (treatment roles retired 2026-07-13; recipes are the single override surface)
 Promoted from: `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md` (g11.005)
 
 ## What A Recipe Is
 
 A recipe is the set of **component-scoped CSS custom properties** a component
 resolves its appearance from. Recipes are the third override depth in the
-sanctioned ladder (tokens → treatment roles → per-component recipe
-variables), and the mechanism apps use to restyle individual components
+sanctioned ladder (tokens → per-component recipe variables), and the
+mechanism apps use to restyle individual components
 without forking them or redefining shared meaning.
 
 Decision (g11.005): recipes are **CSS custom-property contracts, not a
@@ -31,7 +32,7 @@ spec field / token override on the GPUI/Jetstream side).
   ancestor overrides cannot reach them. This distinction was verified live
   in g11.005.)
 - Components resolve each internal appearance variable with the chain:
-  **recipe hook → treatment role variable → semantic token.** With no
+  **recipe hook → semantic token.** With no
   override active, rendering is identical to the token default — recipes
   are strictly additive.
 - Variant-specific rules get variant-scoped hooks (e.g.
@@ -71,12 +72,10 @@ registration.
 ```css
 /* app-owned stylesheet */
 .checkout-flow {
-  /* family-level: treatment role */
-  --poodle-treatment-interactive-primary-fill: linear-gradient(#7c5cff, #5533ff);
-
-  /* component-level: recipe variables */
-  --poodle-button-shadow: 0 2px 0 rgb(0 0 0 / 0.35);
-  --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+  /* component-level: recipe hooks. For family-level branding, define an
+     app variable once and point several recipe hooks at it. */
+  --poodle-recipe-button-shadow: 0 2px 0 rgb(0 0 0 / 0.35);
+  --poodle-recipe-pill-fill: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
 }
 ```
 

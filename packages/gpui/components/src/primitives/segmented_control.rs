@@ -210,26 +210,16 @@ impl IntoElement for SegmentedControl {
             if is_selected {
                 // Contract §8 selected Label: accent bg, inverse text, inset highlight.
                 // Brand-raised treatment: gradient fill for selected segment.
-                if theme.brand_raised && !is_disabled && !is_opt_disabled {
-                    use crate::theme_ext::{
-                        brand_raised_primary_fill, brand_raised_primary_shadow,
-                    };
-                    seg = seg
-                        .bg(brand_raised_primary_fill(accent))
-                        .text_color(text_inverse)
-                        .shadow(brand_raised_primary_shadow());
-                } else {
-                    // Contract: box-shadow inset 0 0.0625rem 0 color-mix(white 12%).
-                    seg = seg
-                        .bg(accent)
-                        .text_color(text_inverse)
-                        .shadow(vec![gpui::BoxShadow {
-                            color: selected_inset_highlight,
-                            offset: point(px(0.0), px(rem_to_px(0.0625))),
-                            blur_radius: px(0.0),
-                            spread_radius: px(0.0),
-                        }]);
-                }
+                // Contract: box-shadow inset 0 0.0625rem 0 color-mix(white 12%).
+                seg = seg
+                    .bg(accent)
+                    .text_color(text_inverse)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: selected_inset_highlight,
+                        offset: point(px(0.0), px(rem_to_px(0.0625))),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    }]);
             } else {
                 // Contract: unselected text = text-secondary
                 seg = seg.text_color(text_secondary);

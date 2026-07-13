@@ -62,7 +62,8 @@
 
     for (const effect of result.effects) {
       if (effect.type === "emitValueChange") {
-        const nextValue = effect.value as string | null;
+        if (effect.value === null) continue;
+        const nextValue = effect.value as string;
 
         if (isControlled) {
           value = nextValue;
@@ -81,14 +82,12 @@
 
     let nextItem: CardRadioItem | undefined;
 
-    const flags = enabledItems.map(() => false);
-
     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "next")];
+      nextItem = enabledItems[menuListNavigate(enabledItems, currentEnabledIndex, "next")];
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      nextItem = enabledItems[menuListNavigate(flags, currentEnabledIndex, "prev")];
+      nextItem = enabledItems[menuListNavigate(enabledItems, currentEnabledIndex, "prev")];
     }
 
     if (!nextItem) {

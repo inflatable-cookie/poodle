@@ -158,6 +158,9 @@
   }
 
   :global([data-theme="light"]) .poodle-state-tile {
-    background: var(--poodle-recipe-metric-tile-theme-light-fill, var(--poodle-treatment-surface-fill));
+    background: var(
+      --poodle-recipe-metric-tile-theme-light-fill,
+      color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated))
+    );
   }
 </style>

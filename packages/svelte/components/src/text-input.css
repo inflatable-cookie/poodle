@@ -3,29 +3,14 @@
    previously-scoped block is safe as global CSS. */
 
   .poodle-text-input {
-    --poodle-text-input-radius: var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control));
-    --poodle-text-input-fill: var(--poodle-recipe-text-input-fill, var(
-      --poodle-treatment-interactive-subtle-fill,
-      var(--poodle-color-background-surface)
-    ));
-    --poodle-text-input-fill-focus: var(--poodle-recipe-text-input-fill-focus, var(
-      --poodle-treatment-interactive-subtle-fill-focus,
-      var(--poodle-text-input-fill)
-    ));
-    --poodle-text-input-border: var(--poodle-recipe-text-input-border, var(
-      --poodle-treatment-interactive-subtle-border,
-      var(--poodle-color-border-default)
-    ));
-    --poodle-text-input-border-focus: var(--poodle-recipe-text-input-border-focus, var(
-      --poodle-treatment-interactive-subtle-border-focus,
-      var(--poodle-color-accent-focusRing)
-    ));
-    --poodle-text-input-shadow: var(--poodle-recipe-text-input-shadow, var(--poodle-treatment-interactive-subtle-shadow, none));
-    --poodle-text-input-shadow-focus: var(--poodle-recipe-text-input-shadow-focus, var(
-      --poodle-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--poodle-border-width-focus)
-        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)
-    ));
+    --poodle-text-input-radius: var(--poodle-radius-control);
+    --poodle-text-input-fill: var(--poodle-recipe-text-input-fill, var(--poodle-color-background-surface));
+    --poodle-text-input-fill-focus: var(--poodle-recipe-text-input-fill-focus, var(--poodle-text-input-fill));
+    --poodle-text-input-border: var(--poodle-recipe-text-input-border, var(--poodle-color-border-default));
+    --poodle-text-input-border-focus: var(--poodle-recipe-text-input-border-focus, var(--poodle-color-accent-focusRing));
+    --poodle-text-input-shadow: var(--poodle-recipe-text-input-shadow, none);
+    --poodle-text-input-shadow-focus: var(--poodle-recipe-text-input-shadow-focus, 0 0 0 var(--poodle-border-width-focus)
+        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
     --poodle-text-input-padding-inline: var(--poodle-space-control-x);
     --poodle-text-input-padding-block: var(--poodle-space-control-y);
     --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);

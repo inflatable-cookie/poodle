@@ -232,11 +232,7 @@ impl IntoElement for Popover {
                 }
 
                 // Brand-raised treatment: gradient fill for elevated surface
-                if theme.brand_raised {
-                    surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
-                } else {
-                    surface = surface.bg(surface_bg);
-                }
+                surface = surface.bg(surface_bg);
 
                 // Escape key to close
                 if let Some(ref handler) = self.on_open_change {

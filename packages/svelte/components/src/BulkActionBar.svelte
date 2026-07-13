@@ -146,9 +146,9 @@
     padding: 0.5rem var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
-    --poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary));
-    background: var(--poodle-recipe-bulk-fill);
-    --poodle-surface: var(--poodle-recipe-bulk-fill);
+    --poodle-bulk-fill: var(--poodle-recipe-bulk-fill, color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary)));
+    background: var(--poodle-bulk-fill);
+    --poodle-surface: var(--poodle-bulk-fill);
     box-shadow: var(--poodle-recipe-bulk-action-bar-shadow, 0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
       0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent));
   }

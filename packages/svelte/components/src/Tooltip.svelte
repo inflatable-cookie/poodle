@@ -265,18 +265,9 @@
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid var(
-      --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
-    );
-    border-radius: var(
-      --poodle-treatment-surface-elevated-radius,
-      calc(var(--poodle-radius-control) - 0.125rem)
-    );
-    background: var(--poodle-recipe-tooltip-bubble-fill, var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
-    ));
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: var(--poodle-recipe-tooltip-bubble-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
     box-shadow: var(--poodle-recipe-tooltip-bubble-shadow, 0 0.5rem 1.25rem rgba(0, 0, 0, 0.3),
       0 0.125rem 0.375rem rgba(0, 0, 0, 0.2));
     color: var(--poodle-recipe-tooltip-bubble-text, var(--poodle-color-text-primary));

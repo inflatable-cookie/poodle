@@ -235,11 +235,7 @@ impl IntoElement for Dialog {
         }
 
         // Brand-raised treatment: gradient fill for elevated surface
-        if theme.brand_raised {
-            dialog = dialog.bg(crate::theme_ext::brand_raised_surface_fill(bg));
-        } else {
-            dialog = dialog.bg(bg);
-        }
+        dialog = dialog.bg(bg);
 
         dialog = dialog
             .border_1()

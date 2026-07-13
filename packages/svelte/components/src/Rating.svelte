@@ -51,6 +51,12 @@
   let hoverIndex = $state(-1);
   let hoverValue = $state<number | null>(null);
 
+  const resolveStep = resolveRatingStep;
+  const clampDisplayValue = clampRatingDisplayValue;
+  const normalizeInteractiveValue = normalizeRatingValue;
+  const trimFraction = trimRatingFraction;
+  const getFillRatio = ratingFillRatio;
+
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const itemCount = $derived(Math.max(1, Math.floor(max)));
@@ -77,12 +83,6 @@
       focusIndex = Math.max(0, Math.min(itemCount - 1, Math.ceil(currentValue) - 1));
     }
   });
-
-  const resolveStep = resolveRatingStep;
-  const clampDisplayValue = clampRatingDisplayValue;
-  const normalizeInteractiveValue = normalizeRatingValue;
-  const trimFraction = trimRatingFraction;
-  const getFillRatio = ratingFillRatio;
 
   function setValue(nextValue: number | null): void {
     const normalized = normalizeInteractiveValue(nextValue, itemCount, effectiveStep);
