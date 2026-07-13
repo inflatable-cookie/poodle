@@ -20,7 +20,15 @@ Depends on: `g12.003`
 - [x] Wave 3a: EditableLabel (edit-label machine: commit/cancel/focus
   effects), TimeInput. Verified: dblclick edit + Enter commit + Escape
   cancel through editLabelTransition; time value change.
-- [ ] Wave 3b: TextInput, NumberInput, DurationInput, CodeInput, TokenInput
+- [x] Wave 3b: TextInput (full pipeline: debounced change, async validator
+  with key-guarded races, validation-context re-runs, slug mode with source
+  auto-generation, multiline, char count, clear, affordances), NumberInput
+  (draft/commit editing, arrow stepping with snap+clamp, steppers, async
+  validation), DurationInput (segment machinery), TokenInput (split/merge/
+  backspace token machinery). Verified: typing, slug autogen from source,
+  invalid->valid validation message lifecycle, arrow step + max clamp,
+  duration segment arrows, comma-commit + backspace-remove — 8/8.
+- [ ] Wave 3c: CodeInput
 - [ ] Wave 4: Select, OrderBy, Field, FieldSet, FormActions,
   PasswordRequirements
 

@@ -14,6 +14,7 @@ import "./specimens/layout";
 import "./specimens/controls";
 import "./specimens/controls2";
 import "./specimens/text-entry";
+import "./specimens/text-entry2";
 
 function App() {
   const slug = useHashRoute();

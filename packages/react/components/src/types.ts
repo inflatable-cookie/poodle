@@ -84,3 +84,17 @@ export interface ToggleGroupOption {
 export type TriStateValue = "excluded" | "default" | "included";
 
 export type EditableLabelActivationMode = "doubleClick" | "enterOrSpace" | "programmatic";
+
+export type ValidationState = "none" | "invalid" | "valid" | "pending";
+export type InputValidationStatus = "idle" | "validating" | "valid" | "invalid";
+export type TextInputValidationChange = {
+  status: InputValidationStatus;
+  valid: boolean;
+  message: string;
+};
+export type ValidationResult = {
+  valid: boolean;
+  message?: string;
+  suggestion?: string;
+};
+export type InputValidator = (value: string, context?: unknown) => ValidationResult | Promise<ValidationResult>;

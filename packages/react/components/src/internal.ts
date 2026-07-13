@@ -44,3 +44,21 @@ export function justifyContentValue(justify: LayoutJustify): string {
 export function overflowValue(mode: OverflowMode): string {
   return mode;
 }
+
+export function snapToStep(value: number, min: number, step: number): number {
+  if (step <= 0) {
+    return value;
+  }
+  const steps = Math.round((value - min) / step);
+  return min + steps * step;
+}
+
+export function formatNumber(value: number | null, precision: number | null = null): string {
+  if (value === null || Number.isNaN(value)) {
+    return "";
+  }
+  if (precision === null) {
+    return String(value);
+  }
+  return value.toFixed(precision);
+}
