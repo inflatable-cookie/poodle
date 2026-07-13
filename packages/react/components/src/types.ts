@@ -100,3 +100,48 @@ export type ValidationResult = {
 export type InputValidator = (value: string, context?: unknown) => ValidationResult | Promise<ValidationResult>;
 
 export type PopoverInitialFocus = "first-focusable" | "content" | "none";
+
+export interface PasswordRequirementsPolicy {
+  minLength: number;
+  requireMixedCase: boolean;
+  requireDigit: boolean;
+  requireSpecial: boolean;
+  minStrengthScore?: number;
+  description?: string | null;
+}
+
+export interface SelectOption {
+  value: string;
+  label: string;
+  description?: string;
+  icon?: IconProp;
+  disabled?: boolean;
+  /** @deprecated Use `disabled` instead */
+  isDisabled?: boolean;
+  group?: string;
+}
+export interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+export type SelectItems = SelectOption[] | SelectOptionGroup[];
+export interface SelectTriggerRenderState {
+  selectedOption: SelectOption | null;
+  open: boolean;
+  placeholder: string | null;
+}
+export interface SelectOptionRenderState {
+  option: SelectOption;
+  highlighted: boolean;
+  selected: boolean;
+  index: number;
+}
+export interface SelectEmptyRenderState {
+  query: string;
+}
+export interface SelectLoadContext {
+  query?: string;
+  value?: string | null;
+  loadKey?: string | null;
+}
+export type SelectLoadOptions = (context?: SelectLoadContext) => Promise<SelectItems>;

@@ -36,8 +36,16 @@ Depends on: `g12.003`
   with beforeinput interception). Verified: popover toggle + initial focus
   + Escape and outside dismiss through the shared dismiss-layer stack,
   field error message, 6-digit entry with onComplete + filled slots.
-- [ ] Wave 4: Select, OrderBy, FieldSet, FormActions,
-  PasswordRequirements
+- [x] Wave 4a: Select (custom + searchable + native modes, grouped options,
+  lazy loadOptions with request-id races, dismiss layer, menu placement via
+  selectMenuPlacement, trigger/option/empty render props), FieldSet,
+  PasswordRequirements. Caught in verification: dropped Svelte's isGrouped
+  guard around filterSelectGroups — crashed on flat searchable options;
+  restored. Verified 7/7: click select, keyboard open/Escape, disabled
+  options filtered from flat lists (Svelte parity), search filter + Enter,
+  native <select> mode, password rule transitions, fieldset grid.
+- [ ] Wave 4b: OrderBy (needs Select — now available), FormActions (needs
+  Menu — overlay batch)
 
 ## Notes
 
