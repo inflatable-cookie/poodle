@@ -33,5 +33,6 @@ Depends on: `g12.004` (Popover proved machine + dismiss-layer + reactifyPart)
   contract). Button upgraded from the pilot stub to full Svelte parity
   (tone/density/icons/toggle-pressed/loading/fit/truncate) — surfaced by
   AlertDialog needing density. Verified 4/4 + button regression.
-- [ ] Wave 4: Menubar, CommandPalette
+- [ ] Wave 4: Menubar, CommandPalette (+ ActionDiscoveryPanel dependency)
+  — slot with the composites batch
 
