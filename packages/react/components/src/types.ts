@@ -98,3 +98,5 @@ export type ValidationResult = {
   suggestion?: string;
 };
 export type InputValidator = (value: string, context?: unknown) => ValidationResult | Promise<ValidationResult>;
+
+export type PopoverInitialFocus = "first-focusable" | "content" | "none";

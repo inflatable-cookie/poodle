@@ -28,8 +28,15 @@ Depends on: `g12.003`
   backspace token machinery). Verified: typing, slug autogen from source,
   invalid->valid validation message lifecycle, arrow step + max clamp,
   duration segment arrows, comma-commit + backspace-remove — 8/8.
-- [ ] Wave 3c: CodeInput
-- [ ] Wave 4: Select, OrderBy, Field, FieldSet, FormActions,
+- [x] Wave 3c: Popover (popover machine + registerDismissLayer + initial
+  focus via getFocusableElements; parts records adapted through a
+  reactifyPart helper for tabindex/class), Field (control render prop,
+  described-by wiring, info popover, nested UiPresentationProvider),
+  CodeInput (code machinery: sanitize/insert-replacement/slot-selection
+  with beforeinput interception). Verified: popover toggle + initial focus
+  + Escape and outside dismiss through the shared dismiss-layer stack,
+  field error message, 6-digit entry with onComplete + filled slots.
+- [ ] Wave 4: Select, OrderBy, FieldSet, FormActions,
   PasswordRequirements
 
 ## Notes
