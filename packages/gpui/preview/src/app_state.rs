@@ -174,6 +174,42 @@ impl ControlSize {
     }
 }
 
+/// Neutral-contrast stops for the preview toggle (mirrors the web slider).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ContrastStop {
+    Flat,
+    Default,
+    Mid,
+    Full,
+}
+
+impl ContrastStop {
+    pub const ALL: &[ContrastStop] = &[
+        ContrastStop::Flat,
+        ContrastStop::Default,
+        ContrastStop::Mid,
+        ContrastStop::Full,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            ContrastStop::Flat => "0.4",
+            ContrastStop::Default => "0.5",
+            ContrastStop::Mid => "0.75",
+            ContrastStop::Full => "1",
+        }
+    }
+
+    pub fn value(self) -> f32 {
+        match self {
+            ContrastStop::Flat => 0.4,
+            ContrastStop::Default => 0.5,
+            ContrastStop::Mid => 0.75,
+            ContrastStop::Full => 1.0,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenPanel {
     Summary,
@@ -372,6 +408,7 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
+    pub contrast: ContrastStop,
     pub component_search: String,
     pub active_component_slug: Option<String>,
     pub active_token_panel: TokenPanel,
@@ -400,6 +437,7 @@ impl AppState {
             theme_preset: preset,
             density,
             control_size,
+            contrast: ContrastStop::Default,
             component_search: String::new(),
             active_component_slug: None,
             active_token_panel: TokenPanel::Summary,
@@ -423,6 +461,7 @@ impl AppState {
         let mut theme = self.theme_preset.build_theme();
         theme = theme.with_density(self.density.token_definition());
         theme = theme.with_control_size(self.control_size.token_definition());
+        theme = theme.with_contrast(self.contrast.value());
         self.theme = theme;
     }
 }

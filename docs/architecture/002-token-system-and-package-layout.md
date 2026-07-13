@@ -278,9 +278,12 @@ correspond to `--poodle-contrast: 1`.
 
 At k = 1 everything computes pixel-identical to the literal theme values
 (Playwright-verified); unset, the 0.5 default applies. The knob is a plain inherited custom
-property: set it app-wide, per-view, or animate it. Only the CSS artifacts
-carry the axis — the Rust/TS artifacts keep literal values, so GPUI and
-Jetstream render at default contrast until they grow a matching knob.
+property: set it app-wide, per-view, or animate it. The Rust/TS artifacts
+keep literal values; the GPUI and Jetstream theme providers apply the same
+math numerically (`poodle_headless::color::apply_neutral_contrast`, OKLab
+constants matching browser relative-color rendering, conformance-tested
+against browser-computed values) with a `contrast` field defaulting to 0.5
+and a `with_contrast` builder. The GPUI preview exposes a Contrast toggle.
 
 ## Svelte Consumption Layout
 

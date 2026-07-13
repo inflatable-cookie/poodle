@@ -28,6 +28,11 @@ pub struct JetstreamThemeProvider {
     /// Keys are semantic token paths (e.g. "space.panel.x"),
     /// values are raw CSS strings (e.g. "0.75rem") parsed at resolve time.
     space_overrides: HashMap<String, String>,
+    /// Neutral-contrast knob (mirrors the CSS `--poodle-contrast` axis).
+    /// 0.4 = flat … 0.5 = library default … 1 = full theme ramp.
+    pub contrast: f32,
+    /// OKLab lightness of the active theme's canvas (contrast pivot).
+    contrast_anchor_l: f64,
 }
 
 impl Default for JetstreamThemeProvider {
@@ -51,11 +56,42 @@ impl JetstreamThemeProvider {
                 }
             }
         }
-        Self {
+        let mut provider = Self {
             scale_factor: 1.0,
             color_overrides,
             space_overrides: HashMap::new(),
+            contrast: 0.5,
+            contrast_anchor_l: 0.0,
+        };
+        let canvas = provider.resolve_color_raw("color.background.canvas");
+        provider.contrast_anchor_l = poodle_headless::color::oklab_lightness(
+            canvas.0 as f64,
+            canvas.1 as f64,
+            canvas.2 as f64,
+        );
+        provider
+    }
+
+    /// Set the neutral-contrast knob (see the `contrast` field).
+    pub fn with_contrast(mut self, contrast: f32) -> Self {
+        self.contrast = contrast;
+        self
+    }
+
+    fn resolve_color_raw(&self, token: &str) -> ColorValue {
+        if let Some(hex) = token.strip_prefix('#') {
+            return parse_hex_color(hex);
         }
+        if let Some(inner) = token.strip_prefix("rgba(").and_then(|s| s.strip_suffix(')')) {
+            return parse_rgba(inner);
+        }
+        if let Some(color) = self.match_override(token) {
+            return color;
+        }
+        if let Some(color) = match_semantic_color(token) {
+            return color;
+        }
+        ColorValue(0.0, 0.0, 0.0, 1.0)
     }
 
     pub fn with_scale_factor(mut self, factor: f32) -> Self {
@@ -111,28 +147,21 @@ impl JetstreamThemeProvider {
 
 impl ThemeProvider for JetstreamThemeProvider {
     fn resolve_color(&self, token: &str) -> ColorValue {
-        // Strategy 1: Parse hex color strings directly
-        if let Some(hex) = token.strip_prefix('#') {
-            return parse_hex_color(hex);
+        let raw = self.resolve_color_raw(token);
+        if (self.contrast - 1.0).abs() < f32::EPSILON
+            || !poodle_headless::color::is_contrast_scaled_token(token)
+        {
+            return raw;
         }
-
-        // Strategy 2: Parse rgba() function strings
-        if let Some(inner) = token.strip_prefix("rgba(").and_then(|s| s.strip_suffix(')')) {
-            return parse_rgba(inner);
-        }
-
-        // Strategy 3: Check theme overrides (dark/light/loophole-studio)
-        if let Some(color) = self.match_override(token) {
-            return color;
-        }
-
-        // Strategy 4: Match against known typed semantic constants (light defaults)
-        if let Some(color) = match_semantic_color(token) {
-            return color;
-        }
-
-        // Fallback: opaque black
-        ColorValue(0.0, 0.0, 0.0, 1.0)
+        let (r, g, b, a) = poodle_headless::color::apply_neutral_contrast(
+            raw.0 as f64,
+            raw.1 as f64,
+            raw.2 as f64,
+            raw.3 as f64,
+            self.contrast_anchor_l,
+            self.contrast as f64,
+        );
+        ColorValue(r as f32, g as f32, b as f32, a as f32)
     }
 
     fn resolve_space(&self, token: &str) -> f32 {
@@ -482,5 +511,26 @@ mod tests {
         assert!((super::srgb_to_linear(1.0) - 1.0).abs() < 0.001);
         // Mid-range: 0.5 sRGB ≈ 0.214 linear
         assert!((super::srgb_to_linear(0.5) - 0.214).abs() < 0.01);
+    }
+}
+
+#[cfg(test)]
+mod contrast_tests {
+    use super::*;
+    use poodle_adapter::ThemeProvider;
+
+    #[test]
+    fn neutral_contrast_matches_gpui_reference() {
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let surface = theme.resolve_color("color.background.surface");
+        assert!((surface.0 - 17.073 / 255.0).abs() < 0.002, "surface r {}", surface.0);
+        let border = theme.resolve_color("color.border.default");
+        assert!((border.3 - 0.11).abs() < 0.001, "border alpha {}", border.3);
+        let full = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK).with_contrast(1.0);
+        let literal = full.resolve_color("color.background.surface");
+        assert!((literal.0 - 21.0 / 255.0).abs() < 0.002, "k=1 literal");
+        let accent = theme.resolve_color("color.accent.base");
+        let accent_full = full.resolve_color("color.accent.base");
+        assert_eq!(accent.0, accent_full.0, "accent untouched");
     }
 }

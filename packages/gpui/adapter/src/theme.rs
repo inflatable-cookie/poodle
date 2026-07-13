@@ -24,15 +24,24 @@ pub struct GpuiThemeProvider {
     overrides: Vec<(&'static str, &'static str)>,
     /// Active theme name.
     pub theme_name: String,
+    /// Neutral-contrast knob (mirrors the CSS `--poodle-contrast` axis).
+    /// 0.4 = flat … 0.5 = library default … 1 = full theme ramp.
+    pub contrast: f32,
+    /// OKLab lightness of the active theme's canvas (contrast pivot).
+    contrast_anchor_l: f64,
 }
 
 impl Default for GpuiThemeProvider {
     fn default() -> Self {
-        Self {
+        let mut provider = Self {
             scale_factor: 1.0,
             overrides: Vec::new(),
             theme_name: "default".to_string(),
-        }
+            contrast: 0.5,
+            contrast_anchor_l: 0.0,
+        };
+        provider.recompute_contrast_anchor();
+        provider
     }
 }
 
@@ -50,7 +59,21 @@ impl GpuiThemeProvider {
     pub fn with_theme(mut self, theme: &poodle_tokens::themes::ThemeDefinition) -> Self {
         self.overrides = theme.overrides.to_vec();
         self.theme_name = theme.name.to_string();
+        self.recompute_contrast_anchor();
         self
+    }
+
+    /// Set the neutral-contrast knob (see the `contrast` field).
+    pub fn with_contrast(mut self, contrast: f32) -> Self {
+        self.contrast = contrast;
+        self
+    }
+
+    /// Recompute the contrast pivot from the active theme's canvas color.
+    fn recompute_contrast_anchor(&mut self) {
+        let canvas = self.resolve_color_value_raw("color.background.canvas");
+        self.contrast_anchor_l =
+            poodle_headless::color::oklab_lightness(canvas.0 as f64, canvas.1 as f64, canvas.2 as f64);
     }
 
     /// Apply density overrides on top of the current theme.
@@ -131,6 +154,24 @@ impl GpuiThemeProvider {
     /// 3. Direct hex/rgba parsing (for inline values)
     /// 4. Black fallback
     pub fn resolve_color_value(&self, token: &str) -> ColorValue {
+        let raw = self.resolve_color_value_raw(token);
+        if (self.contrast - 1.0).abs() < f32::EPSILON
+            || !poodle_headless::color::is_contrast_scaled_token(token)
+        {
+            return raw;
+        }
+        let (r, g, b, a) = poodle_headless::color::apply_neutral_contrast(
+            raw.0 as f64,
+            raw.1 as f64,
+            raw.2 as f64,
+            raw.3 as f64,
+            self.contrast_anchor_l,
+            self.contrast as f64,
+        );
+        ColorValue(r as f32, g as f32, b as f32, a as f32)
+    }
+
+    fn resolve_color_value_raw(&self, token: &str) -> ColorValue {
         // 1. Check theme overrides (token is a semantic path like "color.accent.base")
         for &(path, value) in &self.overrides {
             if path == token {
@@ -386,5 +427,43 @@ mod tests {
         let light_accent = light.resolve_color(semantic::COLOR_ACCENT_BASE);
         // Dark gold vs light blue — they must differ
         assert!((dark_accent.0 - light_accent.0).abs() > 0.1);
+    }
+}
+
+#[cfg(test)]
+mod contrast_tests {
+    use super::*;
+
+    #[test]
+    fn neutral_contrast_scales_dark_surface() {
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        // default contrast 0.5 — surface sits halfway (in oklab L) to canvas
+        let surface = theme.resolve_color_value("color.background.surface");
+        let full = theme.clone().with_contrast(1.0);
+        let literal = full.resolve_color_value("color.background.surface");
+        assert!((literal.0 - 21.0 / 255.0).abs() < 0.002, "k=1 is the literal");
+        assert!(surface.0 < literal.0, "toned-down surface is darker");
+        // reference value from the shared conformance math
+        assert!((surface.0 - 17.073 / 255.0).abs() < 0.002, "surface r {}", surface.0);
+        assert!((surface.2 - 22.943 / 255.0).abs() < 0.002, "surface b {}", surface.2);
+    }
+
+    #[test]
+    fn accent_and_text_are_untouched() {
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let full = theme.clone().with_contrast(1.0);
+        for token in ["color.accent.base", "color.text.primary", "color.background.overlay"] {
+            let a = theme.resolve_color_value(token);
+            let b = full.resolve_color_value(token);
+            assert_eq!(a.0, b.0, "{token}");
+            assert_eq!(a.3, b.3, "{token} alpha");
+        }
+    }
+
+    #[test]
+    fn translucent_borders_scale_alpha() {
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let border = theme.resolve_color_value("color.border.default");
+        assert!((border.3 - 0.11).abs() < 0.001, "alpha {}", border.3);
     }
 }

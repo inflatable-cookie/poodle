@@ -6,6 +6,7 @@ description = "Jetstream rendering adapter for Poodle — maps shared contract s
 
 [dependencies]
 poodle-adapter = { path = "../../contracts/adapter" }
+poodle-headless = { path = "../../contracts/headless" }
 poodle-events = { path = "../../contracts/events" }
 poodle-layout = { path = "../../contracts/layout" }
 poodle-specs = { path = "../../contracts/components" }

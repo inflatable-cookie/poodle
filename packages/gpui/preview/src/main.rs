@@ -58,7 +58,7 @@ impl AssetSource for PreviewAssets {
 }
 
 use app_state::{
-    AppState, ControlSize, Density, Section, ThemePreset, TokenPanel,
+    AppState, ContrastStop, ControlSize, Density, Section, ThemePreset, TokenPanel,
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::load_contract_usage_docs;
@@ -304,6 +304,22 @@ impl PreviewRoot {
                     .collect();
                 self.render_toggle_group("Size", text_secondary, &opts, accent, border, "size", cx)
             })
+            // Contrast group (neutral-ramp knob, mirrors the web slider)
+            .child({
+                let opts: Vec<(&str, bool)> = ContrastStop::ALL
+                    .iter()
+                    .map(|c| (c.label(), self.state.contrast == *c))
+                    .collect();
+                self.render_toggle_group(
+                    "Contrast",
+                    text_secondary,
+                    &opts,
+                    accent,
+                    border,
+                    "contrast",
+                    cx,
+                )
+            })
             .child(
                 div()
                     .flex()
@@ -394,6 +410,10 @@ impl PreviewRoot {
                     }
                     "size" => {
                         this.state.control_size = ControlSize::ALL[i];
+                        this.state.rebuild_theme();
+                    }
+                    "contrast" => {
+                        this.state.contrast = ContrastStop::ALL[i];
                         this.state.rebuild_theme();
                     }
                     _ => {}
