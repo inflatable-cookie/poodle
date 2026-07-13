@@ -65,3 +65,20 @@ export interface RadioGroupOption {
   label: string;
   disabled?: boolean;
 }
+
+export interface SegmentedControlOption {
+  value: string;
+  label: string;
+  ariaLabel?: string;
+  title?: string;
+  disabled?: boolean;
+}
+
+export interface ToggleGroupOption {
+  value: string;
+  label: string;
+  ariaLabel?: string;
+  disabled?: boolean;
+}
+
+export type TriStateValue = "excluded" | "default" | "included";

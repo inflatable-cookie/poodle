@@ -12,6 +12,7 @@ import "./specimens/tabs";
 import "./specimens/display";
 import "./specimens/layout";
 import "./specimens/controls";
+import "./specimens/controls2";
 
 function App() {
   const slug = useHashRoute();

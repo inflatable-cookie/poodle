@@ -12,8 +12,11 @@ Depends on: `g12.003`
   resolver). Verified: switch toggle + read-only revert, radio-group select
   + disabled-option inertness, tooltip open/close through `hoverTransition`
   (300ms delay), styling probes.
-- [ ] Wave 2: SegmentedControl, ToggleGroup, TriStateSwitch, Slider,
-  RangeSlider, Rating
+- [x] Wave 2: SegmentedControl, ToggleGroup (multi + allowDeactivation),
+  TriStateSwitch, Slider, RangeSlider, Rating (fractional slider mode +
+  whole-star radiogroup mode). Verified: selection machines, keyboard
+  stepping on both sliders, rating keyboard step + whole-star roving
+  focus/click — 8/8 probes.
 - [ ] Wave 3: TextInput, NumberInput, TimeInput, DurationInput, CodeInput,
   TokenInput, EditableLabel
 - [ ] Wave 4: Select, OrderBy, Field, FieldSet, FormActions,
