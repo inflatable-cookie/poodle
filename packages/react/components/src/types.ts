@@ -188,3 +188,37 @@ export interface MenuItem {
 }
 
 export type DrawerEdge = "left" | "right" | "top" | "bottom";
+
+export type AlertDialogTone = "danger" | "warning";
+
+export type FormActionAlign = "start" | "end" | "between";
+export type FormActionDangerItem = {
+  label: string;
+  onSelect: () => void;
+  value?: string;
+  disabled?: boolean;
+};
+
+export type ToastTone = "info" | "success" | "warning" | "danger";
+export type ToastItem = {
+  id: string;
+  title: string;
+  message?: string | null;
+  tone?: ToastTone;
+  actionLabel?: string | null;
+};
+export type ToastHostPlacement = "bottom-end" | "bottom-start" | "top-end" | "top-start";
+export type ToastHostStoreItem = {
+  id: string;
+  title?: string;
+  message: string;
+  tone?: ToastTone;
+  variant?: "info" | "success" | "warning" | "error" | "danger";
+  actionLabel?: string | null;
+  sticky?: boolean;
+};
+/** Svelte-store-shaped contract: framework-neutral subscribe + dismiss. */
+export type ToastHostStore = {
+  toasts: { subscribe: (run: (items: ToastHostStoreItem[]) => void) => () => void };
+  dismiss: (id: string) => void;
+};

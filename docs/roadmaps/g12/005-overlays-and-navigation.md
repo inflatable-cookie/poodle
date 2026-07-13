@@ -26,6 +26,12 @@ Depends on: `g12.004` (Popover proved machine + dismiss-layer + reactifyPart)
   child. Verified 8/8: dialog open/focus/trap/Escape+restore/backdrop,
   drawer open+edge+Escape, tooltip open+describedby+leave-close, time-ago
   relative text + tooltip, counter link mode.
-- [ ] Wave 2b: HoverCard, AlertDialog
-- [ ] Wave 3: ToastStack/ToastHost, Menubar, CommandPalette
-- [ ] Wave 4: FormActions (Menu available now)
+- [x] Wave 3: HoverCard (hover machine with open+close delays), AlertDialog
+  (Dialog composition, working-state guards), FormActions (danger slot +
+  responsive danger menu), ToastStack + ToastHost (reconcileToastTimers:
+  auto-dismiss, sticky tones; framework-neutral svelte-store-shaped store
+  contract). Button upgraded from the pilot stub to full Svelte parity
+  (tone/density/icons/toggle-pressed/loading/fit/truncate) — surfaced by
+  AlertDialog needing density. Verified 4/4 + button regression.
+- [ ] Wave 4: Menubar, CommandPalette
+
