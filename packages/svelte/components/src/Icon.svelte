@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/icon.css";
   import { fromStore } from "svelte/store";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
@@ -74,32 +75,3 @@
   {/each}
 </svg>
 
-<style>
-  .poodle-icon {
-    display: inline-block;
-    width: var(--poodle-size-icon-md);
-    height: var(--poodle-size-icon-md);
-    vertical-align: middle;
-    flex-shrink: 0;
-  }
-
-  .poodle-icon[data-size="xs"] {
-    width: var(--poodle-size-icon-xs);
-    height: var(--poodle-size-icon-xs);
-  }
-
-  .poodle-icon[data-size="sm"] {
-    width: var(--poodle-size-icon-sm);
-    height: var(--poodle-size-icon-sm);
-  }
-
-  .poodle-icon[data-size="lg"] {
-    width: var(--poodle-size-icon-lg);
-    height: var(--poodle-size-icon-lg);
-  }
-
-  .poodle-icon[data-size="xl"] {
-    width: var(--poodle-size-icon-xl);
-    height: var(--poodle-size-icon-xl);
-  }
-</style>

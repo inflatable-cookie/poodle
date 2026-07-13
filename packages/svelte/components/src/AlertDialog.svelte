@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/alert-dialog.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";
@@ -147,14 +148,3 @@
   </Dialog>
 </div>
 
-<style>
-  .poodle-alert-dialog__item-detail {
-    margin: 0 0 0.75rem;
-    color: var(--poodle-recipe-alert-dialog-item-detail-text, var(--poodle-color-text-secondary));
-    line-height: 1.5;
-  }
-
-  .poodle-alert-dialog__item-detail strong {
-    color: var(--poodle-recipe-alert-dialog-item-detail-strong-text, var(--poodle-color-text-primary));
-  }
-</style>

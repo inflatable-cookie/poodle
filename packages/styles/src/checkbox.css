@@ -1,8 +1,8 @@
-/* Extracted from the Svelte Checkbox shell — shared visual contract.
-   Token/recipe variables resolve identically in both frameworks. */
+/* Styles for Checkbox. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-checkbox {
-    --poodle-checkbox-selected-color: var(--poodle-color-accent-base);
+    --poodle-checkbox-selected-color: var(--poodle-recipe-checkbox-selected-color, var(--poodle-color-accent-base));
     position: relative;
     display: inline-flex;
     align-items: center;

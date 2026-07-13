@@ -1,0 +1,37 @@
+/* Styles for DetailShell. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-detail-shell {
+    display: grid;
+    gap: var(--poodle-space-stack-lg);
+  }
+
+  .poodle-detail-shell__body,
+  .poodle-detail-shell__state {
+    display: grid;
+    gap: var(--poodle-space-stack-lg);
+  }
+
+  .poodle-detail-shell__state {
+    padding: calc(var(--poodle-space-panel-y) * 2) calc(var(--poodle-space-panel-x) * 1.5);
+    border: 0.0625rem solid transparent;
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-detail-shell-state-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated)));
+  }
+
+  .poodle-detail-shell__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .poodle-detail-shell__state strong,
+  .poodle-detail-shell__state p {
+    margin: 0;
+  }
+
+  .poodle-detail-shell__state p {
+    color: var(--poodle-recipe-detail-shell-state-text, var(--poodle-color-text-secondary));
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+  }

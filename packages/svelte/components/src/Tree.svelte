@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./tree.css";
+  import "@poodle/styles/tree.css";
   import {
     findTreeNode,
     flattenVisibleTreeRows,

@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@poodle/headless": "workspace:*",
+    "@poodle/styles": "workspace:*",
     "marked": "^18.0.0"
   }
 }

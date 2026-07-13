@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import "@poodle/styles/tooltip.css";
   import {
     hoverTransition,
     type HoverEvent as HoverMachineEvent,
@@ -255,24 +256,3 @@
   {/if}
 </span>
 
-<style>
-  .poodle-tooltip {
-    display: contents;
-  }
-
-  .poodle-tooltip__bubble {
-    position: fixed;
-    z-index: var(--poodle-overlay-z-menu);
-    max-width: 16rem;
-    padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
-    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-tooltip-bubble-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    box-shadow: var(--poodle-recipe-tooltip-bubble-shadow, 0 0.5rem 1.25rem rgba(0, 0, 0, 0.3),
-      0 0.125rem 0.375rem rgba(0, 0, 0, 0.2));
-    color: var(--poodle-recipe-tooltip-bubble-text, var(--poodle-color-text-primary));
-    font-size: 0.6875rem;
-    line-height: 1.35;
-    white-space: nowrap;
-  }
-</style>

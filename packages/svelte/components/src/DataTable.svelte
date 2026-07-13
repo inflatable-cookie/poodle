@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./data-table.css";
+  import "@poodle/styles/data-table.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";

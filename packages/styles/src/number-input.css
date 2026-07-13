@@ -1,0 +1,125 @@
+/* Styles for NumberInput. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-number-input {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .poodle-number-input__prefix,
+  .poodle-number-input__suffix {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-color-text-muted));
+    background: var(--poodle-recipe-number-input-suffix-fill, var(--poodle-color-background-surface));
+    white-space: nowrap;
+  }
+
+  .poodle-number-input__field {
+    --poodle-number-input-control-height: var(--poodle-size-control-height);
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    height: var(--poodle-number-input-control-height);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-color-background-surface));
+    overflow: hidden;
+  }
+
+  .poodle-number-input__field[data-validation-state="invalid"] {
+    border-color: var(--poodle-recipe-number-input-field-border, var(--poodle-color-status-danger));
+  }
+
+  .poodle-number-input__field[data-validation-state="valid"] {
+    border-color: var(--poodle-recipe-number-input-valid-field-border, var(--poodle-color-status-success));
+  }
+
+  .poodle-number-input__field[data-validation-state="pending"] {
+    border-color: var(--poodle-recipe-number-input-pending-field-border, var(--poodle-color-accent-base));
+  }
+
+  .poodle-number-input__field:focus-within {
+    box-shadow: var(--poodle-recipe-number-input-focus-field-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
+  }
+
+  .poodle-number-input__control {
+    min-width: 0;
+    padding: 0 var(--poodle-space-control-x);
+    border: 0;
+    background: var(--poodle-recipe-number-input-control-fill, transparent);
+    color: var(--poodle-recipe-number-input-control-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+    outline: 0;
+  }
+
+  .poodle-number-input__steppers {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+    padding: 0.0625rem;
+  }
+
+  .poodle-number-input__steppers button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--poodle-size-icon-md) + 0.5rem);
+    min-height: 0;
+    border: 0;
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: var(--poodle-recipe-number-input-steppers-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent));
+    color: var(--poodle-recipe-number-input-steppers-text, var(--poodle-color-text-primary));
+    cursor: pointer;
+    font-size: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .poodle-number-input__field[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .poodle-number-input__field[data-disabled="true"] .poodle-number-input__control {
+    cursor: not-allowed;
+  }
+
+  .poodle-number-input__steppers button:disabled {
+    cursor: not-allowed;
+  }
+
+  .poodle-number-input__field[data-density="compact"] .poodle-number-input__control {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .poodle-number-input__field[data-density="comfortable"] .poodle-number-input__control {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  .poodle-number-input__field[data-size="xs"] { --poodle-number-input-control-height: 1.5rem; }
+  .poodle-number-input__field[data-size="xs"] .poodle-number-input__control { font-size: 0.75rem; }
+
+  .poodle-number-input__field[data-size="sm"] { --poodle-number-input-control-height: 1.75rem; }
+  .poodle-number-input__field[data-size="sm"] .poodle-number-input__control { font-size: 0.8125rem; }
+
+  .poodle-number-input__field[data-size="md"] {
+    --poodle-number-input-control-height: var(
+      --poodle-size-control-height-md,
+      var(--poodle-size-control-height)
+    );
+  }
+
+  .poodle-number-input__field[data-size="lg"] { --poodle-number-input-control-height: 2.75rem; }
+  .poodle-number-input__field[data-size="lg"] .poodle-number-input__control { font-size: 0.9375rem; }
+
+  .poodle-number-input__field[data-size="xl"] { --poodle-number-input-control-height: 3.25rem; }
+  .poodle-number-input__field[data-size="xl"] .poodle-number-input__control { font-size: 1rem; }

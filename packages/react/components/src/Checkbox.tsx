@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { checkboxParts, checkboxTransition, type CheckboxContext } from "@poodle/headless";
 
-import "./checkbox.css";
+import "@poodle/styles/checkbox.css";
 
 export interface CheckboxProps {
   checked?: boolean;

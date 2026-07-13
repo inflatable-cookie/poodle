@@ -1,0 +1,201 @@
+/* Styles for Switch. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-switch {
+    --switch-unit: var(--poodle-size-icon-md);
+    --poodle-switch-off-color: var(--poodle-recipe-switch-off-color, var(--poodle-color-text-primary));
+    --poodle-switch-on-color: var(--poodle-recipe-switch-on-color, var(--poodle-color-accent-base));
+    --poodle-switch-off-track: color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface));
+    --poodle-switch-on-track: color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface));
+    --poodle-switch-off-thumb: var(--poodle-switch-off-color);
+    --poodle-switch-on-thumb: var(--poodle-switch-on-color);
+    --poodle-switch-off-border: var(--poodle-recipe-switch-off-border, var(--poodle-color-border-default));
+    --poodle-switch-on-border: var(--poodle-recipe-switch-on-border, color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default)));
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--poodle-space-inline-sm);
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+  }
+
+  .poodle-switch[data-disabled="true"] {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-switch[data-read-only="true"] {
+    cursor: default;
+  }
+
+  .poodle-switch__control {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .poodle-switch__track {
+    display: inline-flex;
+    align-items: center;
+    width: calc(var(--switch-unit) * 2 + 0.125rem);
+    height: calc(var(--switch-unit) + 0.25rem);
+    padding: 0.125rem;
+    border: 0.0625rem solid var(--poodle-switch-off-border);
+    border-radius: 999px;
+    background: var(--poodle-switch-off-track);
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-switch__thumb {
+    width: calc(var(--switch-unit) - 0.125rem);
+    height: calc(var(--switch-unit) - 0.125rem);
+    border-radius: 999px;
+    background: var(--poodle-switch-off-thumb);
+    box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    transform: translateX(0);
+    transition:
+      transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-switch__control:checked ~ .poodle-switch__track {
+    border-color: var(--poodle-switch-on-border);
+    background: var(--poodle-switch-on-track);
+  }
+
+  .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    background: var(--poodle-switch-on-thumb);
+    transform: translateX(calc(var(--switch-unit) - 0.125rem));
+  }
+
+  .poodle-switch__control:focus-visible + .poodle-switch__track {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .poodle-switch__label {
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
+    line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  .poodle-switch__label--left,
+  .poodle-switch__label--right {
+    color: var(--poodle-color-text-muted);
+    transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-switch:not([data-dual-label]) .poodle-switch__label {
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-switch__control:not(:checked) ~ .poodle-switch__label--left {
+    color: var(--poodle-switch-off-color);
+  }
+
+  .poodle-switch__control:checked ~ .poodle-switch__label--right {
+    color: var(--poodle-switch-on-color);
+  }
+
+  /* Density variants */
+  .poodle-switch[data-density="compact"] {
+    gap: 0.25rem;
+  }
+
+  .poodle-switch[data-density="comfortable"] {
+    gap: var(--poodle-space-inline-md);
+  }
+
+  /* Size variants */
+  .poodle-switch[data-size="xs"] .poodle-switch__track {
+    width: 1.75rem;
+    height: 1rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="xs"] .poodle-switch__thumb {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .poodle-switch[data-size="xs"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(0.75rem);
+  }
+
+  .poodle-switch[data-size="sm"] .poodle-switch__track {
+    width: 2rem;
+    height: 1.125rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="sm"] .poodle-switch__thumb {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .poodle-switch[data-size="sm"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(0.875rem);
+  }
+
+  .poodle-switch[data-size="md"] .poodle-switch__track {
+    width: 2.25rem;
+    height: 1.375rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="md"] .poodle-switch__thumb {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .poodle-switch[data-size="md"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(0.875rem);
+  }
+
+  .poodle-switch[data-size="lg"] .poodle-switch__track {
+    width: 2.75rem;
+    height: 1.625rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="lg"] .poodle-switch__thumb {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .poodle-switch[data-size="lg"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(1.125rem);
+  }
+
+  .poodle-switch[data-size="xl"] .poodle-switch__track {
+    width: 3rem;
+    height: 1.75rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="xl"] .poodle-switch__thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .poodle-switch[data-size="xl"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(1.25rem);
+  }
+
+  /* Label size variants */
+  .poodle-switch[data-size="xs"] .poodle-switch__label { font-size: 0.75rem; }
+  .poodle-switch[data-size="sm"] .poodle-switch__label { font-size: 0.75rem; }
+  .poodle-switch[data-size="md"] .poodle-switch__label { font-size: 0.8125rem; }
+  .poodle-switch[data-size="lg"] .poodle-switch__label { font-size: 0.875rem; }
+  .poodle-switch[data-size="xl"] .poodle-switch__label { font-size: 0.875rem; }

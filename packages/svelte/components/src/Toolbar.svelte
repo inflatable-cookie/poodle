@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/toolbar.css";
   import type { Snippet } from "svelte";
   import { getFocusableElements } from "./internal";
   import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -79,29 +80,3 @@
   {@render children?.()}
 </div>
 
-<style>
-  .poodle-toolbar {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.375rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent);
-    border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
-  }
-
-  /* Size variants */
-  .poodle-toolbar[data-size="xs"] { padding: 0.125rem 0.25rem; gap: 0.25rem; }
-  .poodle-toolbar[data-size="sm"] { padding: 0.1875rem 0.3125rem; gap: 0.3125rem; }
-  .poodle-toolbar[data-size="lg"] { padding: 0.3125rem 0.5rem; gap: 0.5rem; }
-  .poodle-toolbar[data-size="xl"] { padding: 0.375rem 0.625rem; gap: 0.625rem; }
-
-  /* Density variants */
-  .poodle-toolbar[data-density="compact"] { padding-inline: 0.25rem; gap: 0.25rem; }
-  .poodle-toolbar[data-density="comfortable"] { padding-inline: 0.5rem; gap: 0.5rem; }
-
-  .poodle-toolbar[data-orientation="vertical"] {
-    flex-direction: column;
-    align-items: stretch;
-  }
-</style>

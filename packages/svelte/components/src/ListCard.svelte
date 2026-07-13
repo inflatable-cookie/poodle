@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./list-card.css";
+  import "@poodle/styles/list-card.css";
   import { tick, type Snippet } from "svelte";
 
   import { registerDismissLayer } from "@poodle/headless";

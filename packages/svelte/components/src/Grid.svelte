@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/grid.css";
   import type { Snippet } from "svelte";
 
   import { joinStyles, scaleToSpace } from "./internal";
@@ -35,10 +36,3 @@
   {@render children?.()}
 </div>
 
-<style>
-  .poodle-grid {
-    display: grid;
-    min-width: 0;
-    min-height: 0;
-  }
-</style>

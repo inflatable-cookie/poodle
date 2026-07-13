@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/stack.css";
   import type { Snippet } from "svelte";
 
   import {
@@ -65,11 +66,3 @@
   {@render children?.()}
 </div>
 
-<style>
-  .poodle-stack {
-    box-sizing: border-box;
-    display: flex;
-    min-width: 0;
-    min-height: 0;
-  }
-</style>

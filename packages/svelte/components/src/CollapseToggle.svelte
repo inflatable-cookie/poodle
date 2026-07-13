@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/collapse-toggle.css";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -62,49 +63,3 @@
   <Icon name={iconName} size={resolvedSize} />
 </button>
 
-<style>
-  .poodle-collapse-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.125rem;
-    border: 0;
-    border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-collapse-toggle-fill, transparent);
-    color: var(--poodle-recipe-collapse-toggle-text, var(--poodle-color-text-muted));
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  .poodle-collapse-toggle:hover {
-    background: var(--poodle-recipe-collapse-toggle-hover-fill, var(--poodle-color-surface-hover));
-    color: var(--poodle-recipe-collapse-toggle-hover-text, var(--poodle-color-text-default));
-  }
-
-  .poodle-collapse-toggle:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .poodle-collapse-toggle:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.0625rem;
-  }
-
-  /* Size variants */
-  .poodle-collapse-toggle[data-size="xs"] {
-    padding: 0.0625rem;
-  }
-
-  .poodle-collapse-toggle[data-size="lg"] {
-    padding: 0.1875rem;
-  }
-
-  .poodle-collapse-toggle[data-size="xl"] {
-    padding: 0.25rem;
-  }
-
-  /* Density variants */
-  .poodle-collapse-toggle[data-density="compact"] { padding-inline: 0.125rem; }
-  .poodle-collapse-toggle[data-density="comfortable"] { padding-inline: 0.375rem; }
-</style>

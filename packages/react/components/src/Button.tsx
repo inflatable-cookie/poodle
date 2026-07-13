@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import "./button.css";
+import "@poodle/styles/button.css";
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
   variant?: "primary" | "secondary" | "ghost";

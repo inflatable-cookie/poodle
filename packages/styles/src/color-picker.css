@@ -1,0 +1,371 @@
+/* Styles for ColorPicker. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-color-picker {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+  }
+
+  .poodle-color-picker[data-disabled] {
+    opacity: var(--poodle-state-opacity-disabled);
+    pointer-events: none;
+  }
+
+  .poodle-color-picker__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Trigger button ──────────────────────────────────────── */
+
+  .poodle-color-picker__trigger {
+    position: relative;
+    width: 2.25rem;
+    height: 2.25rem;
+    min-height: 0;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 62%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-color-picker-trigger-fill, transparent);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-color-picker__trigger:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-color-picker__preview {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  /* ── Inline hex input ────────────────────────────────────── */
+
+  .poodle-color-picker__input {
+    width: 6.5rem;
+    height: 2.25rem;
+    min-height: 0;
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-color-picker-input-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-color-picker-input-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.8125rem;
+    outline: none;
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-color-picker__input:focus {
+    border-color: var(--poodle-recipe-color-picker-focus-input-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-color-picker-focus-input-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
+  }
+
+  /* ── Surface (popover) ───────────────────────────────────── */
+
+  .poodle-color-picker__surface {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    width: 24rem;
+    margin-top: 0.25rem;
+    padding: 0.75rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-color-picker-surface-fill, var(--poodle-color-background-elevated));
+    box-shadow: var(--poodle-recipe-color-picker-surface-shadow, var(--poodle-shadow-lg));
+  }
+
+  .poodle-color-picker__surface--above {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  /* ── Picker area (gradient + controls side by side) ────── */
+
+  .poodle-color-picker__picker-area {
+    display: flex;
+    gap: 0.625rem;
+    align-items: stretch;
+  }
+
+  .poodle-color-picker__controls-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  /* ── Gradient pad ────────────────────────────────────────── */
+
+  .poodle-color-picker__gradient {
+    position: relative;
+    width: 10rem;
+    flex-shrink: 0;
+    aspect-ratio: 1;
+    border-radius: 0.25rem;
+    cursor: crosshair;
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .poodle-color-picker__gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--poodle-recipe-color-picker-gradient-fill, linear-gradient(to right, #fff, transparent));
+  }
+
+  .poodle-color-picker__gradient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--poodle-recipe-color-picker-gradient-after-fill, linear-gradient(to bottom, transparent, #000));
+  }
+
+  .poodle-color-picker__gradient:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-color-picker__gradient-thumb {
+    position: absolute;
+    z-index: 1;
+    width: 0.875rem;
+    height: 0.875rem;
+    min-height: 0;
+    margin-left: -0.4375rem;
+    margin-top: -0.4375rem;
+    border: 0.125rem solid #fff;
+    border-radius: 50%;
+    box-shadow: var(--poodle-recipe-color-picker-gradient-thumb-shadow, 0 0 0 0.0625rem rgba(0, 0, 0, 0.3), inset 0 0 0 0.0625rem rgba(0, 0, 0, 0.1));
+    pointer-events: none;
+  }
+
+  /* ── Hue slider ──────────────────────────────────────────── */
+
+  .poodle-color-picker__hue-wrap {
+    min-height: 0;
+  }
+
+  .poodle-color-picker__hue-wrap .poodle-slider__track {
+    background: var(--poodle-recipe-color-picker-track-fill, linear-gradient(
+      to right,
+      #f00 0%,
+      #ff0 17%,
+      #0f0 33%,
+      #0ff 50%,
+      #00f 67%,
+      #f0f 83%,
+      #f00 100%
+    )) !important;
+  }
+
+  .poodle-color-picker__hue-wrap .poodle-slider__fill {
+    display: none;
+  }
+
+  /* ── Alpha slider ────────────────────────────────────────── */
+
+  .poodle-color-picker__alpha-wrap {
+    position: relative;
+    min-height: 0;
+  }
+
+  .poodle-color-picker__alpha-wrap .poodle-slider__track {
+    background: var(--poodle-recipe-color-picker-track-fill, linear-gradient(
+        to right,
+        transparent,
+        var(--poodle-cp-alpha-color, #000)
+      ),
+      repeating-conic-gradient(
+        #d0d0d0 0% 25%,
+        #fff 0% 50%
+      ) 0 0 / 0.5rem 0.5rem) !important;
+  }
+
+  .poodle-color-picker__alpha-wrap .poodle-slider__fill {
+    display: none;
+  }
+
+  /* ── Mode section ────────────────────────────────────────── */
+
+  .poodle-color-picker__mode-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .poodle-color-picker__mode-toggle {
+    min-height: 0;
+  }
+
+  .poodle-color-picker__inputs {
+    display: flex;
+    gap: 0.375rem;
+    align-items: flex-start;
+  }
+
+  .poodle-color-picker__hex-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .poodle-color-picker__channel-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .poodle-color-picker__channel-field .poodle-number-input__field {
+    height: 2rem;
+    min-height: 0;
+  }
+
+  .poodle-color-picker__channel-field input {
+    min-height: 0;
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .poodle-color-picker__text-input {
+    width: 100%;
+    height: 2rem;
+    min-height: 0;
+    padding: 0 0.375rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-color-picker-text-input-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-color-picker-text-input-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    outline: none;
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-color-picker__text-input:focus {
+    border-color: var(--poodle-recipe-color-picker-focus-text-input-border, var(--poodle-color-accent-focusRing));
+    box-shadow: var(--poodle-recipe-color-picker-focus-text-input-shadow, 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
+  }
+
+  .poodle-color-picker__input-label {
+    display: block;
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.625rem;
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-recipe-color-picker-input-label-text, var(--poodle-color-text-secondary));
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    user-select: none;
+  }
+
+  /* ── Swatches ────────────────────────────────────────────── */
+
+  .poodle-color-picker__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding-top: 0.25rem;
+    border-top: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+  }
+
+  .poodle-color-picker__swatch {
+    width: 1.25rem;
+    height: 1.25rem;
+    min-height: 0;
+    padding: 0;
+    border: 0.125rem solid transparent;
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-color-picker__swatch:hover {
+    transform: scale(1.15);
+  }
+
+  .poodle-color-picker__swatch:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-color-picker__swatch--active {
+    border-color: var(--poodle-recipe-color-picker-swatch--active-border, var(--poodle-color-text-primary));
+    box-shadow: var(--poodle-recipe-color-picker-swatch--active-shadow, 0 0 0 0.0625rem var(--poodle-color-background-surface));
+  }
+
+  /* Size variants */
+  .poodle-color-picker[data-size="xs"] .poodle-color-picker__trigger {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .poodle-color-picker[data-size="xs"] .poodle-color-picker__input {
+    height: 1.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .poodle-color-picker[data-size="sm"] .poodle-color-picker__trigger {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .poodle-color-picker[data-size="sm"] .poodle-color-picker__input {
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .poodle-color-picker[data-size="lg"] .poodle-color-picker__trigger {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .poodle-color-picker[data-size="lg"] .poodle-color-picker__input {
+    height: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .poodle-color-picker[data-size="xl"] .poodle-color-picker__trigger {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .poodle-color-picker[data-size="xl"] .poodle-color-picker__input {
+    height: 2.75rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Density variants */
+  .poodle-color-picker[data-density="compact"] .poodle-color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-color-picker[data-density="comfortable"] .poodle-color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }

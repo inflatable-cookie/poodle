@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/form-dialog.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";
@@ -173,27 +174,3 @@
   {/snippet}
 </Dialog>
 
-<style>
-  :global(.poodle-form-dialog__surface) {
-    width: min(var(--poodle-form-dialog-width, 34rem), 100%);
-  }
-
-  .poodle-form-dialog__header {
-    margin-bottom: var(--poodle-space-stack-md);
-  }
-
-  .poodle-form-dialog__subtitle {
-    color: var(--poodle-recipe-form-dialog-subtitle-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-body-size, 0.875rem);
-    line-height: var(--poodle-typography-body-lineHeight, 1.5);
-  }
-
-  .poodle-form-dialog__custom-actions {
-    width: 100%;
-  }
-
-  .poodle-form-dialog__custom-actions :global(.poodle-form-actions) {
-    width: 100%;
-    padding-top: 0;
-  }
-</style>

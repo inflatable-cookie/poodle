@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
+  import "@poodle/styles/editable-list.css";
   import { applyReorder, listReorderKeyIntent } from "@poodle/headless";
   import { onDestroy, type Snippet } from "svelte";
 

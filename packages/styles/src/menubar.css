@@ -1,0 +1,146 @@
+/* Styles for Menubar. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-menubar {
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  .poodle-menubar__list {
+    display: inline-flex;
+    gap: 0.125rem;
+    padding: 0.1875rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-menubar-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
+  }
+
+  .poodle-menubar__group {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .poodle-menubar__trigger {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0;
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-menubar-trigger-fill, transparent);
+    color: var(--poodle-recipe-menubar-trigger-text, var(--poodle-color-text-primary));
+    cursor: pointer;
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
+    line-height: 1;
+  }
+
+  .poodle-menubar__trigger[data-open="true"],
+  .poodle-menubar__trigger:hover:not(:disabled),
+  .poodle-menubar__trigger:focus-visible {
+    background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
+    outline: none;
+  }
+
+  .poodle-menubar__overlay {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    z-index: var(--poodle-overlay-z-menu);
+    min-width: 12rem;
+    padding: 0.25rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-menubar-overlay-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    box-shadow: var(--poodle-recipe-menubar-overlay-shadow, var(--poodle-elevation-overlay));
+  }
+
+  .poodle-menubar__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    width: 100%;
+    min-height: var(--poodle-size-control-height);
+    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
+    border: 0;
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: var(--poodle-recipe-menubar-item-fill, transparent);
+    color: var(--poodle-recipe-menubar-item-text, var(--poodle-color-text-primary));
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--poodle-typography-body-size);
+    text-align: left;
+  }
+
+  .poodle-menubar__item:hover:not(:disabled),
+  .poodle-menubar__item:focus-visible {
+    background: var(--poodle-recipe-menubar-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    outline: none;
+  }
+
+  .poodle-menubar__meta {
+    color: var(--poodle-recipe-menubar-meta-text, var(--poodle-color-text-secondary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.6875rem;
+  }
+
+  .poodle-menubar__separator {
+    width: 100%;
+    height: 0.0625rem;
+    margin: 0.25rem 0;
+    background: var(--poodle-recipe-menubar-separator-fill, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
+  }
+
+  .poodle-menubar__trigger:disabled,
+  .poodle-menubar__item:disabled {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* Size variants */
+  .poodle-menubar[data-size="xs"] .poodle-menubar__trigger {
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    font-size: 0.6875rem;
+  }
+
+  .poodle-menubar[data-size="xs"] .poodle-menubar__item {
+    min-height: var(--poodle-size-control-height);
+    font-size: 0.75rem;
+  }
+
+  .poodle-menubar[data-size="sm"] .poodle-menubar__trigger {
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+  }
+
+  .poodle-menubar[data-size="sm"] .poodle-menubar__item {
+    min-height: var(--poodle-size-control-height);
+  }
+
+  .poodle-menubar[data-size="lg"] .poodle-menubar__trigger {
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    font-size: 0.875rem;
+  }
+
+  .poodle-menubar[data-size="lg"] .poodle-menubar__item {
+    min-height: var(--poodle-size-control-height);
+    font-size: 0.9375rem;
+  }
+
+  .poodle-menubar[data-size="xl"] .poodle-menubar__trigger {
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    font-size: 0.9375rem;
+  }
+
+  .poodle-menubar[data-size="xl"] .poodle-menubar__item {
+    min-height: var(--poodle-size-control-height);
+    font-size: 1rem;
+  }
+
+  /* Density variants */
+  .poodle-menubar[data-density="compact"] .poodle-menubar__item { padding-inline: 0.5rem; }
+  .poodle-menubar[data-density="comfortable"] .poodle-menubar__item { padding-inline: 0.75rem; }

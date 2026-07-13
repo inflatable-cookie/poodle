@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/split-view.css";
   import type { Snippet } from "svelte";
 
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
@@ -344,73 +345,3 @@
   </div>
 </div>
 
-<style>
-  .poodle-split-view {
-    display: flex;
-    min-height: 0;
-    min-width: 0;
-    height: 100%;
-    width: 100%;
-  }
-
-  .poodle-split-view[data-orientation="vertical"] {
-    flex-direction: column;
-  }
-
-  .poodle-split-view__pane {
-    min-width: 0;
-    min-height: 0;
-  }
-
-  .poodle-split-view__divider {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .poodle-split-view__divider[data-orientation="horizontal"] {
-    width: 0.5rem;
-    height: 100%;
-  }
-
-  .poodle-split-view__divider[data-orientation="vertical"] {
-    width: 100%;
-    height: 0.5rem;
-  }
-
-  .poodle-split-view__toggles {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.125rem;
-    padding: 0.125rem;
-    border-radius: var(--poodle-radius-pill);
-    background: var(--poodle-recipe-split-view-toggles-fill, color-mix(
-      in srgb,
-      var(--poodle-color-background-panel) 92%,
-      var(--poodle-color-background-elevated)
-    ));
-    box-shadow: var(--poodle-recipe-split-view-toggles-shadow, 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent));
-  }
-
-  .poodle-split-view__divider[data-orientation="horizontal"] .poodle-split-view__toggles {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    flex-direction: column;
-  }
-
-  .poodle-split-view__divider[data-orientation="vertical"] .poodle-split-view__toggles {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    flex-direction: row;
-  }
-
-  .poodle-split-view__divider[data-disabled] .poodle-split-view__toggles {
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-</style>

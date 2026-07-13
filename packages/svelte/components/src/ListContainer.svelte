@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/list-container.css";
   import type { Snippet } from "svelte";
 
   import { default as Callout } from "./Callout.svelte";
@@ -185,30 +186,3 @@
   {/if}
 </section>
 
-<style>
-  .poodle-list-container {
-    display: grid;
-    gap: var(--poodle-space-stack-lg);
-  }
-
-  .poodle-list-container__filters,
-  .poodle-list-container__batch,
-  .poodle-list-container__content,
-  .poodle-list-container__state {
-    display: grid;
-    gap: var(--poodle-space-stack-md);
-  }
-
-  .poodle-list-container__pagination {
-    display: grid;
-    gap: var(--poodle-space-stack-md);
-  }
-
-  .poodle-list-container__pagination :global(.poodle-pagination-summary) {
-    width: 100%;
-  }
-
-  .poodle-list-container__pagination :global(.poodle-pagination) {
-    justify-self: end;
-  }
-</style>

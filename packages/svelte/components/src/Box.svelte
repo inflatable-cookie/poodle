@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/box.css";
   import type { Snippet } from "svelte";
 
   import { joinStyles, overflowValue, scaleToSpace } from "./internal";
@@ -41,10 +42,3 @@
   {@render children?.()}
 </div>
 
-<style>
-  .poodle-box {
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: 0;
-  }
-</style>

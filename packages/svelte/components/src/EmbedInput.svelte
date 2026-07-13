@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/embed-input.css";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as Pill } from "./Pill.svelte";
 
@@ -93,26 +94,3 @@
   </div>
 </div>
 
-<style>
-  .poodle-embed-input {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .poodle-embed-input__status {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    min-height: 1.25rem;
-    font-size: 0.75rem;
-  }
-
-  .poodle-embed-input__error {
-    color: var(--poodle-recipe-embed-input-error-text, var(--poodle-color-text-danger, #ef4444));
-  }
-
-  .poodle-embed-input__success {
-    color: var(--poodle-recipe-embed-input-success-text, var(--poodle-color-text-success, #22c55e));
-  }
-</style>

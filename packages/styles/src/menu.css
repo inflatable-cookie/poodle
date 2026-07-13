@@ -1,0 +1,16 @@
+/* Styles for Menu. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-menu {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .poodle-menu__trigger {
+    display: inline-flex;
+  }
+
+  .poodle-menu__trigger:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }

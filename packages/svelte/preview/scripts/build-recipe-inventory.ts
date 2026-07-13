@@ -14,6 +14,8 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const SRC = join(import.meta.dir, "..", "..", "components", "src");
+// Component stylesheets live in the shared framework-neutral package (g12.001).
+const STYLES_SRC = join(import.meta.dir, "..", "..", "..", "styles", "src");
 const OUT_DIR = join(import.meta.dir, "..", "artifacts");
 const OUT = join(OUT_DIR, "recipe-inventory.json");
 
@@ -41,43 +43,54 @@ function componentKey(variable: string): string | null {
   return body;
 }
 
-for (const file of readdirSync(SRC)) {
+const scanFiles = [
+  ...readdirSync(SRC).map((file) => ({ dir: SRC, file })),
+  ...readdirSync(STYLES_SRC).map((file) => ({ dir: STYLES_SRC, file })),
+];
+for (const { dir, file } of scanFiles) {
   // Components keep styles either inline (<style>) or in an extracted,
   // co-located .css file (god-file decomposition); scan both.
   if (!file.endsWith(".svelte") && !file.endsWith(".css")) continue;
 
-  const source = readFileSync(join(SRC, file), "utf8");
+  const source = readFileSync(join(dir, file), "utf8");
   const kebab = file
     .replace(/\.(svelte|css)$/, "")
     .replace(/([a-z])([A-Z])/g, "$1-$2")
     .toLowerCase();
 
   const entry =
-    perComponent.get(kebab) ?? { recipe: new Set<string>(), candidates: new Set<string>(), metric: new Set<string>() };
+    perComponent.get(kebab) ??
+    {
+      recipe: new Set<string>(),
+      candidates: new Set<string>(),
+      metric: new Set<string>(),
+      appearance: new Set<string>(),
+      hookedDefinitions: new Set<string>(),
+      bareDefinitions: new Set<string>(),
+      propChannel: new Set<string>(),
+    };
 
   for (const match of source.matchAll(/--poodle-recipe-[a-z0-9-]+/g)) {
     entry.recipe.add(match[0]);
   }
 
-  // Appearance vars whose every definition resolves through a recipe hook
-  // are internal resolution variables (architecture 007), not candidates.
-  const hookedDefinitions = new Set<string>();
+  // Definition-shape facts accumulate per COMPONENT across its files (a
+  // component's markup and stylesheet live in separate files since g12.001);
+  // candidates are classified in a post-pass once every file is scanned.
   for (const match of source.matchAll(/(--poodle-[a-z0-9-]+)\s*:\s*var\(--poodle-recipe-/g)) {
-    hookedDefinitions.add(match[1]);
+    entry.hookedDefinitions.add(match[1]);
   }
-  const bareDefinitions = new Set<string>();
-  const propChannel = new Set<string>();
   for (const match of source.matchAll(/style:(--poodle-[a-z0-9-]+)=/g)) {
-    propChannel.add(match[1]);
+    entry.propChannel.add(match[1]);
   }
   for (const match of source.matchAll(/(--poodle-[a-z0-9-]+)\s*:(?!\s*var\(--poodle-recipe-)\s*([^;\n]*)/g)) {
     // Template-literal definitions (`--x: ${prop}`) are the per-instance
     // prop channel, not a missing hook.
     if (match[2]?.includes("${")) {
-      propChannel.add(match[1]);
+      entry.propChannel.add(match[1]);
       continue;
     }
-    bareDefinitions.add(match[1]);
+    entry.bareDefinitions.add(match[1]);
   }
 
   for (const match of source.matchAll(/--poodle-[a-z0-9-]+/g)) {
@@ -89,18 +102,29 @@ for (const file of readdirSync(SRC)) {
 
     if (!body || !body.startsWith(kebab)) continue;
 
-    if (!APPEARANCE_PATTERN.test(variable)) {
-      entry.metric.add(variable);
-    } else if (
-      bareDefinitions.has(variable) ||
-      (!hookedDefinitions.has(variable) && !propChannel.has(variable))
+    (APPEARANCE_PATTERN.test(variable) ? entry.appearance : entry.metric).add(variable);
+  }
+
+  if (
+    entry.recipe.size > 0 ||
+    entry.appearance.size > 0 ||
+    entry.metric.size > 0
+  ) {
+    perComponent.set(kebab, entry);
+  }
+}
+
+// Post-pass: appearance vars whose every definition resolves through a
+// recipe hook are internal resolution variables (architecture 007), not
+// candidates; prop-channel-only vars are the per-instance channel.
+for (const entry of perComponent.values()) {
+  for (const variable of entry.appearance) {
+    if (
+      entry.bareDefinitions.has(variable) ||
+      (!entry.hookedDefinitions.has(variable) && !entry.propChannel.has(variable))
     ) {
       entry.candidates.add(variable);
     }
-  }
-
-  if (entry.recipe.size > 0 || entry.candidates.size > 0 || entry.metric.size > 0) {
-    perComponent.set(kebab, entry);
   }
 }
 

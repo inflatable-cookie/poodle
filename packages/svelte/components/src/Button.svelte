@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./button.css";
+  import "@poodle/styles/button.css";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";

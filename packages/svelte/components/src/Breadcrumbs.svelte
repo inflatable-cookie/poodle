@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/breadcrumbs.css";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -64,73 +65,3 @@
   </ol>
 </nav>
 
-<style>
-  .poodle-breadcrumbs__list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--poodle-space-inline-sm);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    color: var(--poodle-recipe-breadcrumbs-list-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-body-size);
-    line-height: var(--poodle-typography-body-lineHeight);
-  }
-
-  .poodle-breadcrumbs__item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--poodle-space-inline-sm);
-  }
-
-  .poodle-breadcrumbs a,
-  .poodle-breadcrumbs button {
-    border: 0;
-    padding: 0;
-    background: var(--poodle-recipe-breadcrumbs-fill, transparent);
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
-    text-decoration: none;
-  }
-
-  .poodle-breadcrumbs__separator {
-    display: inline-flex;
-    opacity: 0.4;
-  }
-
-  .poodle-breadcrumbs [aria-current="page"] {
-    color: var(--poodle-recipe-breadcrumbs-text, var(--poodle-color-text-primary));
-  }
-
-  /* Size variants */
-  .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__list {
-    gap: 0.25rem;
-    font-size: 0.6875rem;
-  }
-  .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__item { gap: 0.25rem; }
-
-  .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__list {
-    gap: 0.375rem;
-    font-size: 0.78125rem;
-  }
-  .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__item { gap: 0.375rem; }
-
-  .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__list {
-    gap: 0.625rem;
-    font-size: 1rem;
-  }
-  .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__item { gap: 0.625rem; }
-
-  .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__list {
-    gap: 0.75rem;
-    font-size: 1.125rem;
-  }
-  .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__item { gap: 0.75rem; }
-
-  /* Density variants */
-  .poodle-breadcrumbs[data-density="compact"] .poodle-breadcrumbs__list { gap: 0.25rem; }
-  .poodle-breadcrumbs[data-density="compact"] .poodle-breadcrumbs__item { gap: 0.25rem; }
-  .poodle-breadcrumbs[data-density="comfortable"] .poodle-breadcrumbs__list { gap: 0.75rem; }
-  .poodle-breadcrumbs[data-density="comfortable"] .poodle-breadcrumbs__item { gap: 0.75rem; }
-</style>

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import "@poodle/styles/navigation-menu.css";
   import { registerDismissLayer } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
@@ -175,87 +176,3 @@
   {/if}
 </div>
 
-<style>
-  .poodle-navigation-menu {
-    display: grid;
-    gap: var(--poodle-space-stack-md);
-    min-width: 0;
-  }
-
-  .poodle-navigation-menu__list {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--poodle-space-inline-sm);
-    align-items: center;
-  }
-
-  .poodle-navigation-menu__trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--poodle-space-inline-sm);
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
-    color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
-    cursor: pointer;
-    font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
-  }
-
-  .poodle-navigation-menu__trigger[data-open="true"] {
-    background: var(--poodle-recipe-navigation-menu-open-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
-    border-color: var(--poodle-recipe-navigation-menu-open-trigger-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
-  }
-
-  .poodle-navigation-menu__trigger:hover:not(:disabled),
-  .poodle-navigation-menu__trigger:focus-visible {
-    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
-    outline: none;
-  }
-
-  .poodle-navigation-menu__trigger:disabled {
-    cursor: not-allowed;
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-
-  .poodle-navigation-menu__viewport {
-    min-width: 0;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
-    border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-navigation-menu-viewport-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
-    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-elevation-overlay));
-  }
-
-  /* Size variants */
-  .poodle-navigation-menu[data-size="xs"] .poodle-navigation-menu__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 0.6875rem;
-  }
-
-  .poodle-navigation-menu[data-size="sm"] .poodle-navigation-menu__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-  }
-
-  .poodle-navigation-menu[data-size="lg"] .poodle-navigation-menu__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 0.8125rem;
-  }
-
-  .poodle-navigation-menu[data-size="xl"] .poodle-navigation-menu__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 0.875rem;
-  }
-
-  /* Density variants */
-  .poodle-navigation-menu[data-density="compact"] .poodle-navigation-menu__trigger { padding-inline: 0.5rem; }
-  .poodle-navigation-menu[data-density="comfortable"] .poodle-navigation-menu__trigger { padding-inline: 0.75rem; }
-</style>

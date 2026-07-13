@@ -23,6 +23,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@poodle/headless": "workspace:*",
+        "@poodle/styles": "workspace:*",
       },
       "peerDependencies": {
         "react": ">=18",
@@ -45,11 +46,16 @@
         "vite": "^7.0.0",
       },
     },
+    "packages/styles": {
+      "name": "@poodle/styles",
+      "version": "0.0.0",
+    },
     "packages/svelte/components": {
       "name": "@poodle/svelte",
       "version": "0.0.0",
       "dependencies": {
         "@poodle/headless": "workspace:*",
+        "@poodle/styles": "workspace:*",
         "marked": "^18.0.0",
       },
       "peerDependencies": {
@@ -204,6 +210,8 @@
     "@poodle/react": ["@poodle/react@workspace:packages/react/components"],
 
     "@poodle/react-preview": ["@poodle/react-preview@workspace:packages/react/preview"],
+
+    "@poodle/styles": ["@poodle/styles@workspace:packages/styles"],
 
     "@poodle/svelte": ["@poodle/svelte@workspace:packages/svelte/components"],
 

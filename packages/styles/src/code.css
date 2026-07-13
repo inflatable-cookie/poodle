@@ -1,0 +1,177 @@
+/* Styles for Code. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-code--inline-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .poodle-code--inline {
+    display: inline;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: var(--poodle-recipe-code-fill, color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated)));
+    color: var(--poodle-recipe-code-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
+    line-height: 1.5;
+  }
+
+  .poodle-code--inline[data-inline-variant="plain"] {
+    padding: 0;
+    border-radius: 0;
+    background: var(--poodle-recipe-code-plain-fill, transparent);
+  }
+
+  .poodle-code--inline[data-typography="inline"] {
+    font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
+    line-height: inherit;
+  }
+
+  .poodle-code--block {
+    display: flex;
+    flex-direction: column;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    overflow: hidden;
+  }
+
+  .poodle-code__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.625rem;
+    background: var(--poodle-recipe-code-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, var(--poodle-color-background-panel)));
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-code__language {
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-recipe-code-language-text, var(--poodle-color-text-secondary));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .poodle-code__toolbar-actions {
+    display: flex;
+    margin-left: auto;
+    gap: 0.25rem;
+  }
+
+  .poodle-code__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+    background: var(--poodle-recipe-code-copy-fill, transparent);
+    color: var(--poodle-recipe-code-copy-text, var(--poodle-color-text-secondary));
+    cursor: pointer;
+    transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-code__copy:hover {
+    color: var(--poodle-recipe-code-hover-copy-text, var(--poodle-color-text-primary));
+  }
+
+  .poodle-code__copy:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  }
+
+  .poodle-code__copy svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .poodle-code__copy--inline {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .poodle-code__copy--inline svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .poodle-code__scroll {
+    overflow-x: auto;
+  }
+
+  .poodle-code__pre {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    background: var(--poodle-recipe-code-pre-fill, color-mix(in srgb, var(--poodle-color-background-canvas) 92%, black));
+  }
+
+  .poodle-code__source {
+    display: block;
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--poodle-recipe-code-source-text, var(--poodle-color-text-primary));
+    tab-size: 2;
+    white-space: pre;
+  }
+
+  .poodle-code__line {
+    display: block;
+  }
+
+  .poodle-code__line--highlighted {
+    background: var(--poodle-recipe-code-line--highlighted-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .poodle-code__line-number {
+    display: inline-block;
+    width: 2.5rem;
+    padding-right: 1rem;
+    color: var(--poodle-recipe-code-line-number-text, var(--poodle-color-text-secondary));
+    text-align: right;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Size variants */
+  .poodle-code[data-size="xs"] .poodle-code__source {
+    font-size: 0.6875rem;
+  }
+
+  .poodle-code--inline[data-size="xs"] {
+    font-size: calc(0.6875em * var(--poodle-typography-code-adjustmentRatio));
+  }
+
+  .poodle-code[data-size="sm"] .poodle-code__source {
+    font-size: 0.75rem;
+  }
+
+  .poodle-code--inline[data-size="sm"] {
+    font-size: calc(0.75em * var(--poodle-typography-code-adjustmentRatio));
+  }
+
+  .poodle-code[data-size="lg"] .poodle-code__source {
+    font-size: 0.875rem;
+  }
+
+  .poodle-code--inline[data-size="lg"] {
+    font-size: calc(0.875em * var(--poodle-typography-code-adjustmentRatio));
+  }
+
+  .poodle-code[data-size="xl"] .poodle-code__source {
+    font-size: 0.9375rem;
+  }
+
+  .poodle-code--inline[data-size="xl"] {
+    font-size: calc(0.9375em * var(--poodle-typography-code-adjustmentRatio));
+  }
+
+  /* Density variants */
+  .poodle-code[data-density="compact"] .poodle-code__pre { padding: 0.5rem 0.75rem; }
+  .poodle-code[data-density="comfortable"] .poodle-code__pre { padding: 1rem 1.25rem; }

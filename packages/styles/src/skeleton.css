@@ -1,0 +1,162 @@
+/* Styles for Skeleton. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-skeleton {
+    display: block;
+    width: var(--poodle-skeleton-width, 100%);
+    height: var(--poodle-skeleton-height, 0.875rem);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-skeleton-fill, linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 0%,
+        color-mix(in srgb, var(--poodle-color-background-surface) 92%, white) 48%,
+        color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 100%
+      ));
+    background-size: 220% 100%;
+  }
+
+  .poodle-skeleton[data-shape="circle"] {
+    border-radius: 999rem;
+  }
+
+  .poodle-skeleton[data-shape="block"] {
+    border-radius: calc(var(--poodle-radius-surface) - 0.25rem);
+  }
+
+  .poodle-skeleton[data-animated="true"],
+  .poodle-skeleton-preset[data-animated="true"] .poodle-skeleton {
+    animation: skeleton-shimmer 1.6s linear infinite;
+  }
+
+  @keyframes skeleton-shimmer {
+    from {
+      background-position: 200% 0;
+    }
+
+    to {
+      background-position: -20% 0;
+    }
+  }
+
+  /* ── Preset shared ───────────────────────────────────────── */
+
+  .poodle-skeleton-preset {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── table-row ───────────────────────────────────────────── */
+
+  .poodle-skeleton-preset--table-row {
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+  }
+
+  .poodle-skeleton--cell {
+    height: 0.875rem;
+    flex: 1;
+  }
+
+  /* ── card ─────────────────────────────────────────────────── */
+
+  .poodle-skeleton-preset--card {
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent);
+    border-radius: var(--poodle-radius-surface);
+  }
+
+  .poodle-skeleton--block-header {
+    height: 6rem;
+    border-radius: calc(var(--poodle-radius-surface) - 0.375rem);
+  }
+
+  .poodle-skeleton-preset__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .poodle-skeleton-preset__card-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+  }
+
+  .poodle-skeleton--pill {
+    width: 3.5rem;
+    height: 1.25rem;
+    border-radius: 999rem;
+  }
+
+  /* ── list-item ───────────────────────────────────────────── */
+
+  .poodle-skeleton-preset--list-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .poodle-skeleton--avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    border-radius: 999rem;
+  }
+
+  .poodle-skeleton-preset__list-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .poodle-skeleton--line {
+    height: 0.875rem;
+  }
+
+  .poodle-skeleton--line-sm {
+    height: 0.6875rem;
+  }
+
+  /* ── detail-section ──────────────────────────────────────── */
+
+  .poodle-skeleton-preset--detail {
+    gap: 0.625rem;
+  }
+
+  .poodle-skeleton--heading {
+    width: 8rem;
+    height: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .poodle-skeleton-preset__detail-item {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .poodle-skeleton--label {
+    width: 6rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .poodle-skeleton--value {
+    height: 0.75rem;
+    flex: 1;
+    max-width: 14rem;
+  }
+
+  /* ── avatar-line ─────────────────────────────────────────── */
+
+  .poodle-skeleton-preset--avatar-line {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }

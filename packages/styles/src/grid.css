@@ -1,0 +1,8 @@
+/* Styles for Grid. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-grid {
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+  }

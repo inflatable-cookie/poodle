@@ -1,0 +1,34 @@
+/* Styles for FieldSet. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .poodle-fieldset__legend {
+    color: var(--poodle-recipe-field-set-legend-text, var(--poodle-color-text-secondary));
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    padding: 0;
+    margin-bottom: var(--poodle-space-stack-sm);
+  }
+
+  .poodle-fieldset__description {
+    margin: calc(var(--poodle-space-stack-sm) * -0.5) 0 var(--poodle-space-stack-md);
+    color: var(--poodle-recipe-field-set-description-text, var(--poodle-color-text-secondary));
+    font-size: var(--poodle-typography-body-size, 0.875rem);
+    line-height: var(--poodle-typography-body-lineHeight, 1.5);
+  }
+
+  .poodle-fieldset__fields {
+    display: grid;
+    align-items: start;
+    min-width: 0;
+  }

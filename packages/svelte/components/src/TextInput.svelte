@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./text-input.css";
+  import "@poodle/styles/text-input.css";
   import { isValidSlugFormat, slugify, validationStatusToState } from "@poodle/headless";
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";

@@ -1,0 +1,232 @@
+/* Styles for MarkdownEditor. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-md-editor {
+    --poodle-md-editor-toolbar-y: 0.375rem;
+    --poodle-md-editor-toolbar-x: 0.5rem;
+    --poodle-md-editor-tool-gap: 0.125rem;
+    --poodle-md-editor-tool-size: 1.75rem;
+    --poodle-md-editor-mode-y: 0.1875rem;
+    --poodle-md-editor-mode-x: 0.5rem;
+    --poodle-md-editor-pane-x: 0.75rem;
+    --poodle-md-editor-pane-y: 0.75rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-markdown-editor-fill, var(--poodle-color-background-surface));
+    overflow: hidden;
+  }
+
+  .poodle-md-editor[data-size="xs"] {
+    --poodle-md-editor-tool-size: 1.5rem;
+    --poodle-md-editor-mode-x: 0.375rem;
+  }
+
+  .poodle-md-editor[data-size="sm"] {
+    --poodle-md-editor-tool-size: 1.75rem;
+  }
+
+  .poodle-md-editor[data-size="md"] {
+    --poodle-md-editor-tool-size: 2rem;
+  }
+
+  .poodle-md-editor[data-size="lg"] {
+    --poodle-md-editor-tool-size: 2.25rem;
+    --poodle-md-editor-mode-x: 0.625rem;
+  }
+
+  .poodle-md-editor[data-size="xl"] {
+    --poodle-md-editor-tool-size: 2.5rem;
+    --poodle-md-editor-mode-x: 0.75rem;
+  }
+
+  .poodle-md-editor[data-density="compact"] {
+    --poodle-md-editor-toolbar-y: 0.25rem;
+    --poodle-md-editor-toolbar-x: 0.375rem;
+    --poodle-md-editor-tool-gap: 0.0625rem;
+    --poodle-md-editor-mode-y: 0.125rem;
+    --poodle-md-editor-pane-x: 0.625rem;
+    --poodle-md-editor-pane-y: 0.625rem;
+  }
+
+  .poodle-md-editor[data-density="comfortable"] {
+    --poodle-md-editor-toolbar-y: 0.5rem;
+    --poodle-md-editor-toolbar-x: 0.625rem;
+    --poodle-md-editor-tool-gap: 0.1875rem;
+    --poodle-md-editor-mode-y: 0.25rem;
+    --poodle-md-editor-pane-x: 0.875rem;
+    --poodle-md-editor-pane-y: 0.875rem;
+  }
+
+  .poodle-md-editor--disabled {
+    opacity: var(--poodle-state-opacity-disabled);
+    pointer-events: none;
+  }
+
+  .poodle-md-editor__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: var(--poodle-md-editor-toolbar-y) var(--poodle-md-editor-toolbar-x);
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: var(--poodle-recipe-markdown-editor-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
+    flex-wrap: wrap;
+  }
+
+  .poodle-md-editor__tools {
+    display: flex;
+    gap: var(--poodle-md-editor-tool-gap);
+  }
+
+  .poodle-md-editor__tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--poodle-md-editor-tool-size);
+    height: var(--poodle-md-editor-tool-size);
+    padding: 0;
+    border: 0;
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, transparent);
+    color: var(--poodle-recipe-markdown-editor-tool-btn-text, var(--poodle-color-text-secondary));
+    cursor: pointer;
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-md-editor__tool-btn:hover:not(:disabled) {
+    background: var(--poodle-recipe-markdown-editor-hover-tool-btn-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    color: var(--poodle-recipe-markdown-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
+  }
+
+  .poodle-md-editor__tool-btn:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-md-editor__tool-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .poodle-md-editor__modes {
+    display: flex;
+    gap: var(--poodle-md-editor-tool-gap);
+    padding: 0;
+  }
+
+  .poodle-md-editor__body {
+    display: flex;
+  }
+
+  .poodle-md-editor__body[data-mode="split"] {
+    gap: 0;
+  }
+
+  .poodle-md-editor__body[data-mode="split"] .poodle-md-editor__textarea {
+    flex: 1;
+    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-md-editor__body[data-mode="split"] .poodle-md-editor__preview {
+    flex: 1;
+  }
+
+  .poodle-md-editor__textarea {
+    flex: 1;
+    width: 100%;
+    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
+    border: 0;
+    background: var(--poodle-recipe-markdown-editor-textarea-fill, transparent);
+    color: var(--poodle-recipe-markdown-editor-textarea-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+  }
+
+  .poodle-md-editor__textarea::placeholder {
+    color: var(--poodle-recipe-markdown-editor-placeholder-textarea-text, var(--poodle-color-text-tertiary));
+  }
+
+  .poodle-md-editor__preview {
+    flex: 1;
+    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
+    font-family: var(--poodle-typography-body-family);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-primary));
+    overflow-y: auto;
+  }
+
+  .poodle-md-editor__preview h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+  }
+
+  .poodle-md-editor__preview h2 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin: 0 0 0.375rem;
+  }
+
+  .poodle-md-editor__preview h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+  }
+
+  .poodle-md-editor__preview p {
+    margin: 0 0 0.5rem;
+  }
+
+  .poodle-md-editor__preview strong {
+    font-weight: 700;
+  }
+
+  .poodle-md-editor__preview code {
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-markdown-editor-preview-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.8125rem;
+  }
+
+  .poodle-md-editor__preview blockquote {
+    margin: 0 0 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-left: 0.1875rem solid var(--poodle-color-border-default);
+    color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-secondary));
+  }
+
+  .poodle-md-editor__preview ul,
+  .poodle-md-editor__preview ol {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .poodle-md-editor__preview li {
+    margin: 0 0 0.125rem;
+  }
+
+  .poodle-md-editor__preview hr {
+    border: 0;
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+    margin: 0.75rem 0;
+  }
+
+  .poodle-md-editor__preview a {
+    color: var(--poodle-recipe-markdown-editor-preview-link-text, var(--poodle-color-accent-base));
+    text-decoration: underline;
+  }
+
+  .poodle-md-editor__preview-empty {
+    color: var(--poodle-recipe-markdown-editor-preview-empty-text, var(--poodle-color-text-tertiary));
+    font-style: italic;
+    margin: 0;
+  }

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import "@poodle/styles/hover-card.css";
   import {
     hoverTransition,
     type HoverEvent as HoverMachineEvent,
@@ -165,31 +166,3 @@
   {/if}
 </span>
 
-<style>
-  .poodle-hover-card {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .poodle-hover-card__trigger {
-    display: inline-flex;
-  }
-
-  .poodle-hover-card__trigger:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-
-  .poodle-hover-card__surface {
-    position: fixed;
-    z-index: var(--poodle-overlay-z-menu);
-    min-width: 14rem;
-    max-width: min(22rem, 90vw);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
-    border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-hover-card-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    --poodle-surface: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
-    box-shadow: var(--poodle-recipe-hover-card-surface-shadow, var(--poodle-elevation-overlay));
-  }
-</style>

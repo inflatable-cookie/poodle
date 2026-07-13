@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/time-ago.css";
   import { default as Tooltip } from "./Tooltip.svelte";
 
   let {
@@ -149,31 +150,3 @@
   </time>
 </Tooltip>
 
-<style>
-  .poodle-time-ago {
-    color: var(--poodle-recipe-time-ago-text, var(--poodle-color-text-primary));
-    --poodle-time-ago-underline: color-mix(in srgb, currentColor 32%, transparent);
-    --poodle-time-ago-underline-hover: color-mix(in srgb, currentColor 48%, transparent);
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
-    font-variant-numeric: tabular-nums;
-    text-decoration-line: underline;
-    text-decoration-style: dotted;
-    text-decoration-color: var(--poodle-time-ago-underline);
-    text-underline-offset: 0.14em;
-    cursor: help;
-    transition:
-      color 120ms ease,
-      text-decoration-color 120ms ease;
-  }
-
-  .poodle-time-ago[data-typography="inherit"] {
-    font: inherit;
-  }
-
-  .poodle-time-ago:hover,
-  .poodle-time-ago:focus-visible {
-    color: var(--poodle-recipe-time-ago-hover-focus-text, var(--poodle-color-text-primary));
-    text-decoration-color: var(--poodle-time-ago-underline-hover);
-  }
-</style>

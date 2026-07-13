@@ -1,0 +1,146 @@
+/* Styles for CommandPalette. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-command-palette__overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--poodle-recipe-command-palette-overlay-fill, color-mix(in srgb, black 44%, transparent));
+    backdrop-filter: blur(0.5rem);
+    z-index: 40;
+  }
+
+  .poodle-command-palette {
+    --poodle-command-palette-hint-height: 1.5rem;
+    --poodle-command-palette-hint-x: 0.5rem;
+    --poodle-command-palette-close-size: 1.75rem;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    gap: var(--poodle-space-stack-md);
+    width: min(45rem, calc(100vw - 2rem));
+    max-height: min(78vh, 52.5rem);
+    min-height: 0;
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent);
+    border-radius: calc(var(--poodle-radius-surface) + 0.125rem);
+    background: var(--poodle-recipe-command-palette-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent));
+    box-shadow: var(--poodle-recipe-command-palette-shadow, var(--poodle-elevation-dialog));
+    overflow: hidden;
+    overscroll-behavior: contain;
+    transform: translate(-50%, -50%);
+    z-index: 41;
+  }
+
+  .poodle-command-palette[data-size="xs"] {
+    --poodle-command-palette-hint-height: 1.25rem;
+    --poodle-command-palette-hint-x: 0.375rem;
+    --poodle-command-palette-close-size: 1.5rem;
+  }
+
+  .poodle-command-palette[data-size="sm"] {
+    --poodle-command-palette-hint-height: 1.5rem;
+    --poodle-command-palette-close-size: 1.75rem;
+  }
+
+  .poodle-command-palette[data-size="lg"] {
+    --poodle-command-palette-hint-height: 1.75rem;
+    --poodle-command-palette-hint-x: 0.625rem;
+    --poodle-command-palette-close-size: 2rem;
+  }
+
+  .poodle-command-palette[data-size="xl"] {
+    --poodle-command-palette-hint-height: 2rem;
+    --poodle-command-palette-hint-x: 0.75rem;
+    --poodle-command-palette-close-size: 2.25rem;
+  }
+
+  .poodle-command-palette__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--poodle-space-inline-md);
+    align-items: start;
+  }
+
+  .poodle-command-palette__header h3,
+  .poodle-command-palette__header p {
+    margin: 0;
+  }
+
+  .poodle-command-palette__header h3 {
+    font-size: 1.375rem;
+    line-height: 1.2;
+  }
+
+  .poodle-command-palette__header p {
+    color: var(--poodle-recipe-command-palette-header-text, var(--poodle-color-text-secondary));
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .poodle-command-palette__meta {
+    display: flex;
+    gap: var(--poodle-space-inline-sm);
+    align-items: center;
+  }
+
+  .poodle-command-palette__hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--poodle-command-palette-hint-height);
+    padding: 0 var(--poodle-command-palette-hint-x);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-command-palette-hint-fill, color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent));
+    color: var(--poodle-recipe-command-palette-hint-text, var(--poodle-color-text-secondary));
+    font-family: var(--poodle-typography-code-family);
+    font-size: var(--poodle-typography-label-size);
+  }
+
+  .poodle-command-palette__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--poodle-command-palette-close-size);
+    height: var(--poodle-command-palette-close-size);
+    min-height: 0;
+    border: 0;
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+    background: var(--poodle-recipe-command-palette-close-fill, transparent);
+    color: var(--poodle-recipe-command-palette-close-text, var(--poodle-color-text-secondary));
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+  }
+
+  .poodle-command-palette__close:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .poodle-command-palette__query {
+    min-width: 0;
+  }
+
+  .poodle-command-palette__status {
+    margin: 0;
+    color: var(--poodle-recipe-command-palette-status-text, var(--poodle-color-text-secondary));
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 45rem) {
+    .poodle-command-palette {
+      width: calc(100vw - 1rem);
+      padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x-sm, 0.75rem);
+    }
+
+    .poodle-command-palette__header {
+      grid-template-columns: 1fr;
+    }
+
+    .poodle-command-palette__meta {
+      justify-content: space-between;
+    }
+  }

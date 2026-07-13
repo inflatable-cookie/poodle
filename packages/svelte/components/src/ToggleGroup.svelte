@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/toggle-group.css";
   import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@poodle/headless";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -108,87 +109,3 @@
   {/each}
 </div>
 
-<style>
-  .poodle-toggle-group {
-    --poodle-toggle-group-height: var(--poodle-size-control-height);
-    --poodle-toggle-group-x: var(--poodle-space-control-x);
-    --poodle-toggle-group-gap: 0.25rem;
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--poodle-toggle-group-gap);
-  }
-
-  .poodle-toggle-group[data-size="xs"] {
-    --poodle-toggle-group-height: 1.5rem;
-  }
-
-  .poodle-toggle-group[data-size="sm"] {
-    --poodle-toggle-group-height: 1.75rem;
-  }
-
-  .poodle-toggle-group[data-size="md"] {
-    --poodle-toggle-group-height: 2.25rem;
-  }
-
-  .poodle-toggle-group[data-size="lg"] {
-    --poodle-toggle-group-height: 2.75rem;
-  }
-
-  .poodle-toggle-group[data-size="xl"] {
-    --poodle-toggle-group-height: 3.25rem;
-  }
-
-  .poodle-toggle-group[data-density="compact"] {
-    --poodle-toggle-group-x: 0.5rem;
-    --poodle-toggle-group-gap: 0.1875rem;
-  }
-
-  .poodle-toggle-group[data-density="default"] {
-    --poodle-toggle-group-x: 0.75rem;
-    --poodle-toggle-group-gap: 0.25rem;
-  }
-
-  .poodle-toggle-group[data-density="comfortable"] {
-    --poodle-toggle-group-x: 1rem;
-    --poodle-toggle-group-gap: 0.375rem;
-  }
-
-  .poodle-toggle-group__item {
-    min-height: calc(var(--poodle-toggle-group-height) - 0.25rem);
-    padding: 0 var(--poodle-toggle-group-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
-    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, none);
-    color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary));
-    cursor: pointer;
-    font-family: var(--poodle-typography-label-family);
-    font-size: var(--poodle-typography-label-size);
-    font-weight: 600;
-    line-height: 1;
-    transition:
-      border-color 180ms ease,
-      background 180ms ease,
-      box-shadow 180ms ease,
-      color 180ms ease;
-  }
-
-  .poodle-toggle-group__item.poodle-selected {
-    background: var(--poodle-recipe-toggle-group-selected-item-fill, linear-gradient(
-        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
-        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
-      ),
-      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
-    border-color: var(--poodle-recipe-toggle-group-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
-  }
-
-  .poodle-toggle-group__item:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-
-  .poodle-toggle-group__item:disabled {
-    cursor: not-allowed;
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-</style>

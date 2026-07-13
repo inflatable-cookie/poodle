@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/menu.css";
   import {
     menuTransition,
     registerDismissLayer,
@@ -195,18 +196,3 @@
   {/if}
 </div>
 
-<style>
-  .poodle-menu {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .poodle-menu__trigger {
-    display: inline-flex;
-  }
-
-  .poodle-menu__trigger:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-</style>

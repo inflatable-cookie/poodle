@@ -1,0 +1,15 @@
+{
+  "name": "@poodle/styles",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Framework-neutral component stylesheets: unique poodle-* classes, data-attribute states, recipe hooks. Consumed by @poodle/svelte and @poodle/react.",
+  "exports": {
+    "./*": "./src/*"
+  },
+  "files": ["src", "README.md"],
+  "poodleRelease": {
+    "publicIntent": true,
+    "channel": "preview",
+    "stability": "pre-release"
+  }
+}

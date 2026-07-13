@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import "./order-by.css";
+  import "@poodle/styles/order-by.css";
   import { registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 

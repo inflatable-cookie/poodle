@@ -1,0 +1,149 @@
+/* Styles for Dialog. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: var(--poodle-overlay-z-dialog);
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+  }
+
+  .poodle-dialog__backdrop {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background: var(--poodle-recipe-dialog-backdrop-fill, var(--poodle-color-background-overlay));
+    cursor: default;
+  }
+
+  .poodle-dialog__surface {
+    position: relative;
+    z-index: 1;
+    width: min(34rem, 100%);
+    max-height: min(80vh, 42rem);
+    overflow: auto;
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-recipe-dialog-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
+    --poodle-surface: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
+    box-shadow: var(--poodle-recipe-dialog-surface-shadow, var(--poodle-elevation-dialog));
+  }
+
+  .poodle-dialog__surface--bare {
+    padding: 0;
+  }
+
+  /* Width presets */
+  .poodle-dialog[data-width="sm"] .poodle-dialog__surface { width: min(24rem, 100%); }
+  .poodle-dialog[data-width="lg"] .poodle-dialog__surface { width: min(48rem, 100%); }
+  .poodle-dialog[data-width="xl"] .poodle-dialog__surface { width: min(64rem, 100%); }
+  .poodle-dialog[data-width="full"] .poodle-dialog__surface { width: 100%; }
+
+  .poodle-dialog__header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--poodle-space-inline-md);
+    margin-bottom: 1.25rem;
+  }
+
+  .poodle-dialog__close {
+    position: static;
+    flex-shrink: 0;
+    margin-right: -0.375rem;
+  }
+
+  .poodle-dialog__close--overlay {
+    position: absolute;
+    top: var(--poodle-space-panel-y);
+    right: var(--poodle-space-panel-x);
+    z-index: 1;
+  }
+
+  .poodle-dialog__header {
+    display: grid;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .poodle-dialog__title {
+    font-family: var(--poodle-typography-heading-family);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .poodle-dialog__header p {
+    margin: 0;
+    padding-top: 0.375rem;
+    color: var(--poodle-recipe-dialog-header-text, var(--poodle-color-text-secondary));
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .poodle-dialog__body {
+    min-width: 0;
+  }
+
+  .poodle-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--poodle-space-inline-sm);
+    justify-content: flex-end;
+    margin-top: var(--poodle-space-stack-lg);
+  }
+
+  .poodle-dialog__footer {
+    margin-top: var(--poodle-space-stack-lg);
+  }
+
+  /* Size variants */
+  .poodle-dialog[data-size="xs"] .poodle-dialog__header strong {
+    font-size: 0.8125rem;
+  }
+
+  .poodle-dialog[data-size="xs"] .poodle-dialog__header p {
+    font-size: 0.6875rem;
+  }
+
+  .poodle-dialog[data-size="sm"] .poodle-dialog__header strong {
+    font-size: 0.875rem;
+  }
+
+  .poodle-dialog[data-size="sm"] .poodle-dialog__header p {
+    font-size: 0.75rem;
+  }
+
+  .poodle-dialog[data-size="lg"] .poodle-dialog__header strong {
+    font-size: 1.0625rem;
+  }
+
+  .poodle-dialog[data-size="lg"] .poodle-dialog__header p {
+    font-size: 0.875rem;
+  }
+
+  .poodle-dialog[data-size="xl"] .poodle-dialog__header strong {
+    font-size: 1.125rem;
+  }
+
+  .poodle-dialog[data-size="xl"] .poodle-dialog__header p {
+    font-size: 0.9375rem;
+  }
+
+  /* Density variants */
+  .poodle-dialog[data-density="compact"] .poodle-dialog__surface { padding: 0.5rem 0.75rem; }
+  .poodle-dialog[data-density="compact"] .poodle-dialog__surface--bare { padding: 0; }
+  .poodle-dialog[data-density="compact"] .poodle-dialog__close--overlay {
+    top: 0.5rem;
+    right: 0.75rem;
+  }
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__surface { padding: 1rem 1.25rem; }
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__surface--bare { padding: 0; }
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__close--overlay {
+    top: 1rem;
+    right: 1.25rem;
+  }

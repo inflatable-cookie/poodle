@@ -1,0 +1,6 @@
+/* Styles for UiPresentationProvider. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-ui-presentation-provider {
+    display: contents;
+  }

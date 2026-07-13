@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/ui-presentation-provider.css";
   import type { Snippet } from "svelte";
   import {
     controlHeightRem,
@@ -45,8 +46,3 @@
   {@render children?.()}
 </div>
 
-<style>
-  .poodle-ui-presentation-provider {
-    display: contents;
-  }
-</style>

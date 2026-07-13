@@ -6,7 +6,7 @@ import {
   type TabsEvent,
 } from "@poodle/headless";
 
-import "./tabs.css";
+import "@poodle/styles/tabs.css";
 
 export interface TabsItem {
   value: string;

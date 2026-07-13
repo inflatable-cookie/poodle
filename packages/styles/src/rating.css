@@ -1,0 +1,101 @@
+/* Styles for Rating. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .poodle-rating[data-mode="fractional"]:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+    border-radius: var(--poodle-radius-control);
+  }
+
+  .poodle-rating__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--poodle-size-icon-md) + 0.75rem);
+    height: calc(var(--poodle-size-icon-md) + 0.75rem);
+    padding: 0;
+    border: 0;
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-rating-item-fill, transparent);
+    color: var(--poodle-recipe-rating-item-text, color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent));
+    cursor: pointer;
+    font: inherit;
+    transition: color 120ms ease, filter 120ms ease;
+  }
+
+  .poodle-rating__item[data-hovered="true"] {
+    filter: drop-shadow(0 0 0.375rem color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent));
+  }
+
+  .poodle-rating__item:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-rating[data-mode="fractional"] .poodle-rating__item:focus-visible {
+    outline: none;
+  }
+
+  .poodle-rating__glyph {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .poodle-rating__glyph-base,
+  .poodle-rating__glyph-fill-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .poodle-rating__glyph-base svg,
+  .poodle-rating__glyph-fill-inner svg {
+    width: 1.125em;
+    height: 1.125em;
+  }
+
+  .poodle-rating__glyph-base svg {
+    stroke-width: 2;
+  }
+
+  .poodle-rating__glyph-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+    color: var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-color-accent-base));
+    pointer-events: none;
+  }
+
+  .poodle-rating__glyph-fill-inner {
+    width: max-content;
+  }
+
+  .poodle-rating__glyph-fill-inner svg {
+    fill: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .poodle-rating__item:disabled {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-rating[data-size="xs"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xs) + 0.75rem); height: calc(var(--poodle-size-icon-xs) + 0.75rem); }
+  .poodle-rating[data-size="xs"] .poodle-rating__glyph { font-size: 0.75rem; }
+  .poodle-rating[data-size="sm"] .poodle-rating__item { width: calc(var(--poodle-size-icon-sm) + 0.75rem); height: calc(var(--poodle-size-icon-sm) + 0.75rem); }
+  .poodle-rating[data-size="sm"] .poodle-rating__glyph { font-size: 0.875rem; }
+  .poodle-rating[data-size="lg"] .poodle-rating__item { width: calc(var(--poodle-size-icon-lg) + 0.75rem); height: calc(var(--poodle-size-icon-lg) + 0.75rem); }
+  .poodle-rating[data-size="lg"] .poodle-rating__glyph { font-size: 1.125rem; }
+  .poodle-rating[data-size="xl"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xl) + 0.75rem); height: calc(var(--poodle-size-icon-xl) + 0.75rem); }
+  .poodle-rating[data-size="xl"] .poodle-rating__glyph { font-size: 1.25rem; }
+
+  .poodle-rating[data-density="compact"] { gap: 0.0625rem; }
+  .poodle-rating[data-density="comfortable"] { gap: 0.25rem; }

@@ -1,0 +1,15 @@
+/* Styles for ListGrid. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-list-grid__header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: var(--poodle-list-grid-gap);
+  }
+
+  .poodle-list-grid__content {
+    display: grid;
+    align-items: stretch;
+  }

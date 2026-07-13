@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./select.css";
+  import "@poodle/styles/select.css";
   import {
     filterSelectGroups,
     flattenSelectOptions,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./page-header.css";
+  import "@poodle/styles/page-header.css";
   import type { Snippet } from "svelte";
 
   import { default as Callout } from "./Callout.svelte";

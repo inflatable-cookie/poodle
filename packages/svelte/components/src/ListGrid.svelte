@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/list-grid.css";
   import type { Snippet } from "svelte";
 
   type ListGridVariant = "default" | "compact";
@@ -56,17 +57,3 @@
   </div>
 </div>
 
-<style>
-  .poodle-list-grid__header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: var(--poodle-list-grid-gap);
-  }
-
-  .poodle-list-grid__content {
-    display: grid;
-    align-items: stretch;
-  }
-</style>

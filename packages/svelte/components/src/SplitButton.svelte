@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "./split-button.css";
+  import "@poodle/styles/split-button.css";
   import { registerDismissLayer } from "@poodle/headless";
   import { onMount, tick, type Snippet } from "svelte";
 

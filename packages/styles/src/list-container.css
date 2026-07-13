@@ -1,0 +1,28 @@
+/* Styles for ListContainer. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-list-container {
+    display: grid;
+    gap: var(--poodle-space-stack-lg);
+  }
+
+  .poodle-list-container__filters,
+  .poodle-list-container__batch,
+  .poodle-list-container__content,
+  .poodle-list-container__state {
+    display: grid;
+    gap: var(--poodle-space-stack-md);
+  }
+
+  .poodle-list-container__pagination {
+    display: grid;
+    gap: var(--poodle-space-stack-md);
+  }
+
+  .poodle-list-container__pagination .poodle-pagination-summary {
+    width: 100%;
+  }
+
+  .poodle-list-container__pagination .poodle-pagination {
+    justify-self: end;
+  }

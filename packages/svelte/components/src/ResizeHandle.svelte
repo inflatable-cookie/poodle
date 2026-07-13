@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/resize-handle.css";
   import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@poodle/headless";
   import type { SplitOrientation } from "./types";
 
@@ -105,56 +106,3 @@
   <span class="poodle-resize-handle__line" aria-hidden="true"></span>
 </div>
 
-<style>
-  .poodle-resize-handle {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .poodle-resize-handle[data-orientation="horizontal"] {
-    width: 0.5rem;
-    height: 100%;
-    cursor: col-resize;
-  }
-
-  .poodle-resize-handle[data-orientation="vertical"] {
-    width: 100%;
-    height: 0.5rem;
-    cursor: row-resize;
-  }
-
-  .poodle-resize-handle[data-disabled] {
-    cursor: default;
-    opacity: 0.4;
-  }
-
-  .poodle-resize-handle__line {
-    position: absolute;
-    border-radius: 999rem;
-    background: var(--poodle-recipe-resize-handle-line-fill, color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent));
-    transition: background 120ms ease;
-  }
-
-  .poodle-resize-handle[data-orientation="horizontal"] .poodle-resize-handle__line {
-    width: 0.125rem;
-    height: 100%;
-  }
-
-  .poodle-resize-handle[data-orientation="vertical"] .poodle-resize-handle__line {
-    width: 100%;
-    height: 0.125rem;
-  }
-
-  .poodle-resize-handle:not([data-disabled]):hover .poodle-resize-handle__line,
-  .poodle-resize-handle[data-dragging] .poodle-resize-handle__line {
-    background: var(--poodle-recipe-resize-handle-dragging-hover-line-fill, var(--poodle-color-accent-base));
-  }
-
-  .poodle-resize-handle:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.0625rem;
-  }
-</style>

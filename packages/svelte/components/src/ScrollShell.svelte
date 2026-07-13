@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/scroll-shell.css";
   import type { Snippet } from "svelte";
   import { joinStyles, overflowForDirection, scaleToSpace } from "./internal";
 
@@ -51,29 +52,3 @@
   </div>
 </div>
 
-<style>
-  .poodle-scroll-shell {
-    min-width: 0;
-    min-height: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius: var(--poodle-radius-surface);
-  }
-
-  .poodle-scroll-shell__viewport {
-    width: 100%;
-    height: 100%;
-    overscroll-behavior: contain;
-    border-radius: inherit;
-  }
-
-  .poodle-scroll-shell__content--h {
-    min-width: max-content;
-  }
-
-  .poodle-scroll-shell__viewport:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-</style>

@@ -15,7 +15,8 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@poodle/headless": "workspace:*"
+    "@poodle/headless": "workspace:*",
+    "@poodle/styles": "workspace:*"
   },
   "poodleRelease": {
     "publicIntent": true,

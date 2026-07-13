@@ -1,0 +1,7 @@
+/* Styles for Spacer. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+  .poodle-spacer {
+    min-width: 0;
+    min-height: 0;
+  }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@poodle/styles/empty-state.css";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -63,90 +64,3 @@
   {/if}
 </section>
 
-<style>
-  .poodle-empty-state {
-    display: grid;
-    justify-items: center;
-    text-align: center;
-    gap: var(--poodle-space-stack-md);
-    padding: calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x);
-    border: 0.0625rem dashed var(--poodle-color-border-default);
-    border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
-    background: var(--poodle-recipe-empty-state-fill, color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent));
-  }
-
-  .poodle-empty-state[data-variant="search"] {
-    background: var(--poodle-recipe-empty-state-search-fill, color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent));
-  }
-
-  .poodle-empty-state[data-variant="firstRun"] {
-    background: var(--poodle-recipe-empty-state-firstrun-fill, color-mix(in srgb, var(--poodle-color-status-success) 7%, transparent));
-  }
-
-  .poodle-empty-state__visual {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 999rem;
-    background: var(--poodle-recipe-empty-state-visual-fill, color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent));
-    color: var(--poodle-recipe-empty-state-visual-text, var(--poodle-color-text-secondary));
-    font-size: 1.125rem;
-    font-weight: 600;
-  }
-
-  .poodle-empty-state[data-size="compact"] .poodle-empty-state__visual {
-    width: 1.75rem;
-    height: 1.75rem;
-    font-size: 0.9375rem;
-  }
-
-  .poodle-empty-state__copy {
-    display: grid;
-    gap: var(--poodle-space-inline-sm);
-    max-width: 24rem;
-  }
-
-  .poodle-empty-state__copy h3,
-  .poodle-empty-state__copy p {
-    margin: 0;
-  }
-
-  .poodle-empty-state__copy h3 {
-    font-size: 1.125rem;
-    line-height: 1.2;
-  }
-
-  .poodle-empty-state[data-size="compact"] .poodle-empty-state__copy h3 {
-    font-size: 0.9375rem;
-  }
-
-  .poodle-empty-state__copy p {
-    color: var(--poodle-recipe-empty-state-copy-text, var(--poodle-color-text-secondary));
-    font-size: 0.8125rem;
-    line-height: 1.5;
-  }
-
-  .poodle-empty-state[data-size="compact"] .poodle-empty-state__copy p {
-    font-size: 0.75rem;
-  }
-
-  .poodle-empty-state__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--poodle-space-inline-sm);
-  }
-
-  /* ── Density variants ─────────────────────────────────────── */
-
-  .poodle-empty-state[data-density="compact"] {
-    gap: var(--poodle-space-stack-sm);
-    padding: var(--poodle-space-stack-lg) var(--poodle-space-panel-x);
-  }
-
-  .poodle-empty-state[data-density="comfortable"] {
-    gap: var(--poodle-space-stack-lg);
-    padding: calc(var(--poodle-space-panel-y) * 2) var(--poodle-space-panel-x);
-  }
-</style>
