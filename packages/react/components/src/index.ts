@@ -29,6 +29,7 @@ export { Slider, type SliderProps } from "./Slider";
 export { ToggleGroup, type ToggleGroupProps } from "./ToggleGroup";
 export { TriStateSwitch, type TriStateSwitchProps } from "./TriStateSwitch";
 export { Meter, type MeterProps } from "./Meter";
+export { OrderBy, type OrderByProps } from "./OrderBy";
 export { MetaItem, type MetaItemProps } from "./MetaItem";
 export { Pill, type PillProps } from "./Pill";
 export { PillContext, usePillContext, type PillContextValue } from "./pill-context";

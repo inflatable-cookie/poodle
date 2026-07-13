@@ -17,6 +17,7 @@ import "./specimens/text-entry";
 import "./specimens/text-entry2";
 import "./specimens/forms";
 import "./specimens/forms2";
+import "./specimens/order-by";
 
 function App() {
   const slug = useHashRoute();

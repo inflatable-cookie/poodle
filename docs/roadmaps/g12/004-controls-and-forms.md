@@ -44,8 +44,12 @@ Depends on: `g12.003`
   restored. Verified 7/7: click select, keyboard open/Escape, disabled
   options filtered from flat lists (Svelte parity), search filter + Enter,
   native <select> mode, password rule transitions, fieldset grid.
-- [ ] Wave 4b: OrderBy (needs Select — now available), FormActions (needs
-  Menu — overlay batch)
+- [x] Wave 4b: OrderBy — first React composite: Select + IconButtons inside
+  a dismiss-layer panel; dual value/activeSort API, drag + Alt-arrow
+  reorder, add/remove/toggle-direction. 6/6 probes (open, direction
+  toggle, add via nested Select, Alt+ArrowUp reorder, remove, outside
+  dismiss with correctly stacked dismiss layers).
+- [ ] Wave 4c: FormActions (needs Menu — overlay batch)
 
 ## Notes
 

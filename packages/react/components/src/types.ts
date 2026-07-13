@@ -145,3 +145,27 @@ export interface SelectLoadContext {
   loadKey?: string | null;
 }
 export type SelectLoadOptions = (context?: SelectLoadContext) => Promise<SelectItems>;
+
+export type SortDirection = "asc" | "desc";
+export type SortField = {
+  label: string;
+  value?: string;
+  key?: string;
+  disabled?: boolean;
+  defaultDirection?: SortDirection;
+};
+export type OrderByField = {
+  key: string;
+  direction: SortDirection;
+};
+export type OrderByValue = OrderByField[];
+export type OrderByFieldDefinition = {
+  key: string;
+  label: string;
+  disabled?: boolean;
+  defaultDirection?: SortDirection;
+};
+export type ActiveSort = {
+  field: string;
+  direction: SortDirection;
+};
