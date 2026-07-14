@@ -42,6 +42,12 @@ export { PickerShell, type PickerShellProps } from "./PickerShell";
 export { ResizeHandle, type ResizeHandleProps } from "./ResizeHandle";
 export { resolveEmbedParseState, detectParsedEmbed, type EmbedParseState } from "./embed-input";
 export { ColorPicker, type ColorPickerProps } from "./ColorPicker";
+export { AudioPlayer, type AudioPlayerProps } from "./AudioPlayer";
+export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
+export { MediaBrowsePanel, type MediaBrowsePanelProps } from "./MediaBrowsePanel";
+export { MediaPicker, type MediaPickerProps } from "./MediaPicker";
+export { MediaPreview, type MediaPreviewProps } from "./MediaPreview";
+export { MediaThumbnail, type MediaThumbnailProps } from "./MediaThumbnail";
 export { FileUpload, type FileUploadProps, type FileUploadHandle } from "./FileUpload";
 export { RelationPicker, type RelationPickerProps } from "./RelationPicker";
 export {

@@ -518,3 +518,16 @@ export type DrillDownConfig = {
   levels: DrillDownLevel[];
   finalItems?: DrillDownItemsFn;
 };
+
+export type MediaState = "ready" | "loading" | "error" | "empty";
+export type MediaKind = "image" | "audio" | "video" | "document" | "embed" | "pdf" | "other";
+export type AspectRatio = "auto" | "square" | "landscape" | "portrait" | "video";
+
+export type MediaPickerItem = {
+  id: string;
+  label: string;
+  thumbnailUrl?: string | null;
+  mimeType?: string | null;
+  kind?: MediaKind;
+  meta?: string | null;
+};

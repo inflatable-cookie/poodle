@@ -60,8 +60,14 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   levels with async item loaders, breadcrumbs, final-items handoff,
   candidate roving arrows, filter Selects, footer FormActions).
   Verified 28/28. 109/132.
-- [ ] Wave 6: media — AudioPlayer, VideoPlayer, MediaPicker,
-  MediaPreview, MediaThumbnail, MediaBrowsePanel
+- [x] Wave 6: media — AudioPlayer (rAF time loop, seek/volume ranges,
+  mute, speed select), VideoPlayer (wrapper-as-button play toggle,
+  auto-hiding controls with 3s timer, fullscreen API, progress fill),
+  MediaThumbnail (kind/state/aspect data attrs, frame sizing props,
+  play overlay, caption), MediaPreview (Card media composition),
+  MediaBrowsePanel (grid over compact thumbnails, load-more, error
+  Callout), MediaPicker (Dialog + Tabs browse/upload with search filter
+  and FileUpload). Verified 30/30. 115/132.
 - [ ] Wave 7: editors — MarkdownEditor, BlockEditor
 - [ ] Wave 8: workstation + detail — DockRegion, SplitView, ScrollShell,
   DetailItem, DetailSection, DetailSectionGroup, DetailShell, PageHeader
