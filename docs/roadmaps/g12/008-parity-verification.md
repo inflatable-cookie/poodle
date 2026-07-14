@@ -51,5 +51,18 @@ they drive the same hash-routed specimens as the Svelte preview.
 - [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
   role on the anchor variant), replicated in React for pixel parity.
   Fix both together if confirmed (noted in 006).
+- [x] **Gallery closeout (deferred items done)**:
+  - Removed the detached probe harness (`harness.tsx` + 34 batch
+    specimens) now that the per-component gallery supersedes it.
+  - Tokens section ported (top-nav Components/Tokens tabs, live
+    semantic-token value cards, searchable inspector).
+  - Per-component usage docs (props/slots/events tables) on every
+    component page, from `component-docs.ts` copied verbatim.
+  - Report generators: `docs:export` (React's own component-docs.json),
+    `parity:report` + `accessibility:report` — React-pathed artifacts
+    that reuse the canonical cross-runtime contract-parity data
+    (imported from the Svelte preview, no fork) with a
+    `frameworks: [@poodle/react, @poodle/svelte]` field. `bun run
+    reports` runs all three.
 - [ ] Docs closeout: README/consumer notes for `@poodle/react`,
   update g12 README runway.
