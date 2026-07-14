@@ -392,3 +392,23 @@ export type SidebarNavGroup = {
   label?: string | null;
   items: SidebarNavItem[];
 };
+
+export type CardVariant = "default" | "outlined" | "elevated";
+
+export type CardRadioItem = {
+  value: string;
+  label: string;
+  description?: string | null;
+  disabled?: boolean;
+};
+
+export type CardToggleItem = {
+  value: string;
+  label: string;
+  description?: string | null;
+  count?: string | number | null;
+  disabled?: boolean;
+};
+
+export type SurfaceTone = "canvas" | "panel" | "elevated";
+export type SurfaceBorder = "none" | "subtle" | "default";

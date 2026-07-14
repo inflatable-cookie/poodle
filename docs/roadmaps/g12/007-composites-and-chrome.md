@@ -20,8 +20,14 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   tabindex triggers, arrow/Home/End nav skipping disabled, panel render
   prop `(value, item) => ReactNode`, dismiss layer). Verified 22/22.
   84/132.
-- [ ] Wave 3: cards + tiles — Card, Surface, NavCard, MetricTile,
-  CardRadioGroup, CardToggleGroup, StatusBar
+- [x] Wave 3: cards + tiles — Card (media/header/body/footer parts,
+  variant/layout/selected data attrs), Surface (tone/border/padding,
+  optional region role), NavCard (anchor-or-button dual root, badge,
+  arrow), MetricTile (sparkline path built from data, trend arrow +
+  label), CardRadioGroup + CardToggleGroup (both drive
+  toggleGroupTransition from @poodle/headless; roving tabindex, arrow
+  nav skipping disabled, toggle group supports allowDeactivation),
+  StatusBar. Verified 28/28. 91/132.
 - [ ] Wave 4: toolbars + bars — Toolbar, FilterToolbar, MetaBar,
   BulkActionBar, SelectionSummary, CollapseToggle, PageLoading
 - [ ] Wave 5: pickers + inputs — ColorPicker, FileUpload, EmbedInput,
