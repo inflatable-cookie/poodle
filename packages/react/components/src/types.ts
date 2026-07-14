@@ -71,6 +71,8 @@ export interface RadioGroupOption {
 export interface SegmentedControlOption {
   value: string;
   label: string;
+  icon?: IconProp;
+  iconOnly?: boolean;
   ariaLabel?: string;
   title?: string;
   disabled?: boolean;
@@ -559,3 +561,33 @@ export type EditorBlock = {
 };
 
 export type ScrollDirection = "vertical" | "horizontal" | "both";
+
+export interface TabItem {
+  value: string;
+  label: string;
+  icon?: IconProp;
+  disabled?: boolean;
+  closable?: boolean;
+  count?: number;
+  separator?: boolean;
+}
+
+export type TabVariant = "text" | "card" | "pill" | "strip" | "block" | "underline";
+export type TabActivationMode = "automatic" | "manual";
+
+export type DockEdge = "left" | "right" | "top" | "bottom";
+export type DockEmphasis = "standard" | "quiet" | "strong";
+export type DockCollapsedPosture = "hidden" | "icon-strip";
+export type DockSizing = "static" | "flexible";
+
+export type PanelDragData = {
+  panelId: string;
+  sourceEdge: DockEdge;
+};
+
+export type PanelTabItem = {
+  value: string;
+  label: string;
+  icon?: IconProp | null;
+  closable?: boolean;
+};

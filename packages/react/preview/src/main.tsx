@@ -39,6 +39,7 @@ import "./specimens/media";
 import "./specimens/editors";
 import "./specimens/workstation";
 import "./specimens/sweep";
+import "./specimens/dock-region";
 
 function App() {
   const slug = useHashRoute();

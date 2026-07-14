@@ -30,11 +30,10 @@ they drive the same hash-routed specimens as the Svelte preview.
 
 ## Open items to 132/132 + closeout
 
-- [ ] **DockRegion** — last component. Blocked on the in-progress
-  Svelte edit (tabVariant prop, uncommitted). Port once landed.
-- [ ] **SegmentedControl option icons** — in-progress Svelte edit adds
-  `icon`/`iconOnly` to `SegmentedControlOption`. Mirror in the React
-  type + component when it lands (interface-invariance sync).
+- [x] **DockRegion** — ported (with the full Tabs upgrade it required).
+  30/30 probes + Tabs-consumer regression. **132/132.**
+- [x] **SegmentedControl option icons** — icon/iconOnly mirrored in the
+  React type + component; verified in the dock-region suite.
 - [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
   role on the anchor variant), replicated in React for pixel parity.
   Fix both together if confirmed (noted in 006).

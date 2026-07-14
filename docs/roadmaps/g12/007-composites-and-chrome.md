@@ -92,6 +92,12 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   FormLayout, IconProvider (IconSetContext; Icon now resolves the
   context set before lucide fallback), SplitButton (scroll-container
   aware flip + max-height, roving menu focus). Verified 28/28. 131/132.
-- [ ] DockRegion — sole holdout; port after Tom's in-progress
-  tabVariant edit to DockRegion.svelte lands. Then g12.008 parity
-  verification sweep.
+- [x] DockRegion — ported after the tabVariant edit landed. Required
+  upgrading Tabs from its pilot stub to the full 624L implementation
+  (machine-backed selection/reorder/close via tabsTransition +
+  tabsKeydownEvent, drag reorder through the shared tabs-reorder module,
+  icon/count/separator/closable items, vertical orientation with delayed
+  tooltips, collapse-when-overflow via measure list + Menu fallback,
+  historyKey URL sync). SegmentedControl synced with the new
+  icon/iconOnly options in the same pass. Verified 30/30 + Tabs-consumer
+  regression (media 30/30, harness 3/3). **132/132 — g12.007 COMPLETE.**

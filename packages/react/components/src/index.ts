@@ -65,6 +65,7 @@ export { FormDialog, type FormDialogProps } from "./FormDialog";
 export { FormLayout, type FormLayoutProps } from "./FormLayout";
 export { IconProvider, type IconProviderProps } from "./IconProvider";
 export { SplitButton, type SplitButtonProps } from "./SplitButton";
+export { DockRegion, type DockRegionProps } from "./DockRegion";
 export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
 export { MediaBrowsePanel, type MediaBrowsePanelProps } from "./MediaBrowsePanel";
 export { MediaPicker, type MediaPickerProps } from "./MediaPicker";
