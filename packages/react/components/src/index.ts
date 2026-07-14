@@ -24,6 +24,7 @@ export { FieldSet, type FieldSetProps } from "./FieldSet";
 export { PasswordRequirements, type PasswordRequirementsProps } from "./PasswordRequirements";
 export { Select, type SelectProps } from "./Select";
 export { Popover, type PopoverProps } from "./Popover";
+export { DataTable, type DataTableProps } from "./DataTable";
 export { DatePicker, type DatePickerProps } from "./DatePicker";
 export { DateTimePicker, type DateTimePickerProps } from "./DateTimePicker";
 export { DateTimeRangePicker, type DateTimeRangePickerProps } from "./DateTimeRangePicker";

@@ -324,3 +324,21 @@ export type TreeNode = {
   isDisabled?: boolean;
 };
 export type TreeDropPosition = "before" | "after" | "inside";
+
+export type TableSortDirection = "asc" | "desc";
+export type TableFilters = Record<string, string>;
+export type TablePagination = {
+  page: number;
+  limit: number;
+  total: number;
+};
+export type TableRowAction = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  kind?: "action" | "separator";
+  href?: string | null;
+  shortcutLabel?: string;
+  tone?: "default" | "danger";
+  hidden?: boolean;
+};
