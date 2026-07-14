@@ -10,6 +10,11 @@ export { MenuSurface, type MenuSurfaceProps, type MenuSurfaceHandle } from "./Me
 export { Avatar, type AvatarProps } from "./Avatar";
 export { Box, type BoxProps } from "./Box";
 export { Button, type ButtonProps } from "./Button";
+export { Calendar, type CalendarProps } from "./Calendar";
+export { ListGrid, type ListGridProps } from "./ListGrid";
+export { Pagination, type PaginationProps, type PaginationControllerLike } from "./Pagination";
+export { PaginationSummary, type PaginationSummaryProps } from "./PaginationSummary";
+export { Table, type TableProps } from "./Table";
 export { Checkbox, type CheckboxProps } from "./Checkbox";
 export { Code, type CodeProps } from "./Code";
 export { CodeInput, type CodeInputProps } from "./CodeInput";

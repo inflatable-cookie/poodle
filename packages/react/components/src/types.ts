@@ -222,3 +222,32 @@ export type ToastHostStore = {
   toasts: { subscribe: (run: (items: ToastHostStoreItem[]) => void) => () => void };
   dismiss: (id: string) => void;
 };
+
+export type TableFilterType = "text" | "select" | "date";
+export type TableCellValue = string | number | null;
+export type TableColumn = {
+  id: string;
+  label: string;
+  align?: "start" | "center" | "end";
+  sortable?: boolean;
+  hideable?: boolean;
+  width?: string;
+  minWidth?: string;
+  hideOnMobile?: boolean;
+  isRowHeader?: boolean;
+  filterable?: boolean;
+  filterType?: TableFilterType;
+  filterOptions?: Array<{ value: string; label: string } | string>;
+};
+export type TableRow<TData = unknown> = {
+  id: string;
+  cells: Record<string, TableCellValue>;
+  summary?: string | null;
+  data?: TData;
+};
+
+export type CalendarWeekStart = "sunday" | "monday";
+export interface DateRangeValue {
+  start: string | null;
+  end: string | null;
+}

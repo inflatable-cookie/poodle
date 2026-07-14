@@ -22,6 +22,7 @@ import "./specimens/overlays";
 import "./specimens/overlays2";
 import "./specimens/misc";
 import "./specimens/overlays3";
+import "./specimens/data";
 
 function App() {
   const slug = useHashRoute();
