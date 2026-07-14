@@ -1,0 +1,36 @@
+# g12.007 React Batch: Composites And Chrome
+
+Status: in progress (2026-07-14)
+Owner: Poodle core
+Depends on: `g12.006`
+
+Final conversion tier: everything left after primitives, forms, overlays,
+and data/date — app chrome, navigation, media, editors, workstation
+pieces, and detail shells. Same playbook as prior batches (roadmap 002).
+
+## Progress
+
+- [x] Wave 1: command chrome — Menubar, CommandPalette,
+  ActionDiscoveryPanel, EmptyState (landed against the 005 wave-4 entry;
+  see that doc for the deferred-focus-restore React trap). 20/20 probes.
+- [x] Wave 2: nav chrome — AppHeader (identity/actions/utility lanes,
+  presentation re-provide), SidebarNav (grouped nav, anchor-or-button
+  items, controlled/uncontrolled value), Breadcrumbs (maxVisibleItems
+  ellipsis collapse, forceLastItemCurrent), NavigationMenu (roving
+  tabindex triggers, arrow/Home/End nav skipping disabled, panel render
+  prop `(value, item) => ReactNode`, dismiss layer). Verified 22/22.
+  84/132.
+- [ ] Wave 3: cards + tiles — Card, Surface, NavCard, MetricTile,
+  CardRadioGroup, CardToggleGroup, StatusBar
+- [ ] Wave 4: toolbars + bars — Toolbar, FilterToolbar, MetaBar,
+  BulkActionBar, SelectionSummary, CollapseToggle, PageLoading
+- [ ] Wave 5: pickers + inputs — ColorPicker, FileUpload, EmbedInput,
+  EmbedPreview, PickerShell, RelationPicker, InlineListSection,
+  ListContainer, ResizeHandle
+- [ ] Wave 6: media — AudioPlayer, VideoPlayer, MediaPicker,
+  MediaPreview, MediaThumbnail, MediaBrowsePanel
+- [ ] Wave 7: editors — MarkdownEditor, BlockEditor
+- [ ] Wave 8: workstation + detail — DockRegion, SplitView, ScrollShell,
+  DetailItem, DetailSection, DetailSectionGroup, DetailShell, PageHeader
+- [ ] Sweep: remaining stragglers to 132/132, then g12.008 parity
+  verification

@@ -365,3 +365,30 @@ export interface MenubarItem {
   disabled?: boolean;
   items: MenuItem[];
 }
+
+export interface NavigationMenuItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  description?: string;
+}
+
+export type BreadcrumbItem = {
+  value: string;
+  label: string;
+  href?: string;
+  current?: boolean;
+};
+
+export type SidebarNavItem = {
+  value: string;
+  label: string;
+  href?: string | null;
+  disabled?: boolean;
+};
+
+export type SidebarNavGroup = {
+  id: string;
+  label?: string | null;
+  items: SidebarNavItem[];
+};

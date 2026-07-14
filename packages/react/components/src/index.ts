@@ -14,6 +14,10 @@ export {
   type ActionDiscoveryPanelHandle,
 } from "./ActionDiscoveryPanel";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
+export { AppHeader, type AppHeaderProps } from "./AppHeader";
+export { Breadcrumbs, type BreadcrumbsProps } from "./Breadcrumbs";
+export { NavigationMenu, type NavigationMenuProps } from "./NavigationMenu";
+export { SidebarNav, type SidebarNavProps } from "./SidebarNav";
 export { MenuSurface, type MenuSurfaceProps, type MenuSurfaceHandle } from "./MenuSurface";
 export { Avatar, type AvatarProps } from "./Avatar";
 export { Box, type BoxProps } from "./Box";
