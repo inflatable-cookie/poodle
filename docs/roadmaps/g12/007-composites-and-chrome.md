@@ -49,8 +49,17 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   pagination), ResizeHandle (resizeAxisPosition/resizeDragDelta/
   resizeKeydownStep from @poodle/headless; window listener pair attached
   per drag). Verified 30/30. 106/132.
-- [ ] Wave 5b: heavy pickers — ColorPicker (653L), FileUpload (330L),
-  RelationPicker (664L)
+- [x] Wave 5b: heavy pickers — ColorPicker (HSV state + pinned-hex model
+  over the headless color converters; gradient pad with pointer capture
+  and shift-stepped arrows, hue/alpha Sliders, hex/RGB/HSL mode inputs,
+  swatch listbox, outside/Escape dismiss, above/below placement),
+  FileUpload (drag-drop + browse, validateUploadFile/compressImage from
+  the ported file-upload module, preview object-URLs with revoke,
+  imperative updateProgress/setError/clear handle), RelationPicker
+  (flat + drill-down modes over PickerShell/SelectionSummary; drill
+  levels with async item loaders, breadcrumbs, final-items handoff,
+  candidate roving arrows, filter Selects, footer FormActions).
+  Verified 28/28. 109/132.
 - [ ] Wave 6: media — AudioPlayer, VideoPlayer, MediaPicker,
   MediaPreview, MediaThumbnail, MediaBrowsePanel
 - [ ] Wave 7: editors — MarkdownEditor, BlockEditor

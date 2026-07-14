@@ -41,6 +41,18 @@ export { PageHeader, type PageHeaderProps } from "./PageHeader";
 export { PickerShell, type PickerShellProps } from "./PickerShell";
 export { ResizeHandle, type ResizeHandleProps } from "./ResizeHandle";
 export { resolveEmbedParseState, detectParsedEmbed, type EmbedParseState } from "./embed-input";
+export { ColorPicker, type ColorPickerProps } from "./ColorPicker";
+export { FileUpload, type FileUploadProps, type FileUploadHandle } from "./FileUpload";
+export { RelationPicker, type RelationPickerProps } from "./RelationPicker";
+export {
+  DEFAULT_COMPRESSION,
+  compressImage,
+  formatFileSize,
+  generateFileUploadId,
+  validateUploadFile,
+  type FileUploadValidationError,
+  type ImageCompressionOptions,
+} from "./file-upload";
 export { MenuSurface, type MenuSurfaceProps, type MenuSurfaceHandle } from "./MenuSurface";
 export { Avatar, type AvatarProps } from "./Avatar";
 export { Box, type BoxProps } from "./Box";
