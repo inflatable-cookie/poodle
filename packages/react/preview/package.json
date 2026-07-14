@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "docs:export": "bun scripts/export-component-docs.ts",
+    "parity:report": "bun scripts/build-parity-report.ts",
+    "accessibility:report": "bun scripts/build-accessibility-report.ts",
+    "reports": "bun scripts/export-component-docs.ts && bun scripts/build-parity-report.ts && bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
     "@poodle/react": "workspace:*",
