@@ -39,9 +39,18 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   when determinate, cancel). Verified 35/35. 98/132. controlHeightRem
   added to React presentation.ts. Specimen note: BulkActionBar is
   position:fixed bottom — one instance per page or they stack.
-- [ ] Wave 5: pickers + inputs — ColorPicker, FileUpload, EmbedInput,
-  EmbedPreview, PickerShell, RelationPicker, InlineListSection,
-  ListContainer, ResizeHandle
+- [x] Wave 5a: shells + embeds — Callout, PageHeader (entity-detail
+  posture, back links, count pill, banner), EmbedInput (debounced parse
+  through the ported framework-free embed-input module, provider pill,
+  error lane), EmbedPreview (provider iframe URLs, trusted-HTML branch
+  via dangerouslySetInnerHTML), PickerShell (browse-state switch, SR
+  status region), InlineListSection (generic render-prop list, framed
+  Card wrap), ListContainer (PageHeader + state switch + built-in
+  pagination), ResizeHandle (resizeAxisPosition/resizeDragDelta/
+  resizeKeydownStep from @poodle/headless; window listener pair attached
+  per drag). Verified 30/30. 106/132.
+- [ ] Wave 5b: heavy pickers — ColorPicker (653L), FileUpload (330L),
+  RelationPicker (664L)
 - [ ] Wave 6: media — AudioPlayer, VideoPlayer, MediaPicker,
   MediaPreview, MediaThumbnail, MediaBrowsePanel
 - [ ] Wave 7: editors — MarkdownEditor, BlockEditor

@@ -425,3 +425,32 @@ export type BulkAction = {
   tone?: "default" | "danger" | "warning";
   disabled?: boolean;
 };
+
+export type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
+export type PickerVariant = "inline" | "popover" | "modal";
+export type SplitOrientation = "horizontal" | "vertical";
+export type CalloutAnnounceMode = "none" | "polite" | "assertive";
+
+export type ParsedEmbed = {
+  provider: string;
+  id: string;
+  originalUrl?: string;
+  originalEmbed?: string;
+  width?: number;
+  height?: number;
+  embedType?: "video" | "audio" | "playlist" | "generic";
+};
+
+export type EmbedParseResult = {
+  success: boolean;
+  parsed: ParsedEmbed | null;
+  error?: string;
+};
+
+export type EmbedMeta = {
+  title?: string;
+  description?: string;
+  duration?: number;
+  thumbnailUrl?: string;
+  authorName?: string;
+};

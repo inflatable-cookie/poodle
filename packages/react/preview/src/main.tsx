@@ -33,6 +33,7 @@ import "./specimens/command-chrome";
 import "./specimens/nav-chrome";
 import "./specimens/cards-tiles";
 import "./specimens/toolbars-bars";
+import "./specimens/pickers-shells";
 
 function App() {
   const slug = useHashRoute();
