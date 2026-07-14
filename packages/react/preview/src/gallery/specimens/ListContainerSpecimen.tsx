@@ -1,0 +1,161 @@
+import { useState, type CSSProperties } from "react";
+import { Button, FilterToolbar, IconButton, ListContainer, Pill, Select, TextInput } from "@poodle/react";
+import { SpecimenGroup } from "../SpecimenGroup";
+
+type QueueItem = {
+  id: string;
+  name: string;
+  status: "healthy" | "warning" | "error";
+  summary: string;
+};
+
+const items: QueueItem[] = [
+  {
+    id: "q-001",
+    name: "Media ingest",
+    status: "healthy",
+    summary: "Thumbnail generation and metadata extraction are within expected latency.",
+  },
+  {
+    id: "q-002",
+    name: "Search index",
+    status: "warning",
+    summary: "The queue is recovering after three transient upstream timeouts.",
+  },
+  {
+    id: "q-003",
+    name: "Email capture",
+    status: "error",
+    summary: "SMTP relay is failing health checks and needs manual attention.",
+  },
+];
+
+function toneFor(status: QueueItem["status"]): "success" | "neutral" | "danger" {
+  if (status === "healthy") return "success";
+  if (status === "error") return "danger";
+  return "neutral";
+}
+
+const batchStyle: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.75rem" };
+const listStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "0.75rem" };
+const cardStyle: CSSProperties = {
+  display: "grid",
+  gap: "0.5rem",
+  padding: "var(--poodle-space-panel-y) var(--poodle-space-panel-x)",
+  border: "0.0625rem solid var(--poodle-color-border-default)",
+  borderRadius: "var(--poodle-radius-surface)",
+  background: "color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)",
+};
+const cardHeaderStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "0.75rem",
+};
+const cardTextStyle: CSSProperties = { margin: 0, color: "var(--poodle-color-text-secondary)" };
+const stateButtonsStyle: CSSProperties = { display: "flex", flexWrap: "wrap", gap: "0.5rem" };
+
+export function ListContainerSpecimen() {
+  const [page, setPage] = useState(2);
+  const [state, setState] = useState<"ready" | "loading" | "empty" | "error">("ready");
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+
+  const visibleFrom = items.length === 0 ? 0 : (page - 1) * 3 + 1;
+  const visibleTo = Math.min(page * 3, 24);
+  const filterSummaryText = `Showing ${visibleFrom}-${visibleTo} of 24`;
+
+  return (
+    <div className="poodle-specimen">
+      <SpecimenGroup label="Ready with slots and built-in pagination" bare>
+        <ListContainer
+          title="Operational queues"
+          subtitle="Monitor health, triage issues, and navigate paged result sets."
+          eyebrow="Systems"
+          currentPage={page}
+          totalPages={8}
+          totalItems={24}
+          pageSize={3}
+          showPaginationSummary={false}
+          onPageChange={(nextPage) => setPage(nextPage)}
+          actions={
+            <IconButton icon="plus" variant="primary" sizeRole="chrome" ariaLabel="Create incident" tooltip="Create incident" />
+          }
+          filters={
+            <FilterToolbar
+              ariaLabel="Operational queue filters"
+              columns={2}
+              collapsible
+              collapsed={filtersCollapsed}
+              onCollapsedChange={setFiltersCollapsed}
+              summaryText={filterSummaryText}
+              actions={
+                <IconButton
+                  icon="refresh-cw"
+                  variant="ghost"
+                  sizeRole="chrome"
+                  ariaLabel="Refresh queues"
+                  tooltip="Refresh queues"
+                />
+              }
+            >
+              <TextInput id="list-container-search-input" type="search" placeholder="Search queues" ariaLabel="Search queues" />
+              <Select
+                id="list-container-status-select"
+                value=""
+                ariaLabel="Status"
+                options={[
+                  { value: "", label: "All statuses" },
+                  { value: "healthy", label: "Healthy" },
+                  { value: "warning", label: "Warning" },
+                  { value: "error", label: "Error" },
+                ]}
+              />
+            </FilterToolbar>
+          }
+          batch={
+            <div style={batchStyle}>
+              <Pill tone="neutral" appearance="badge">3 selected</Pill>
+              <Button variant="ghost" sizeRole="chrome">Archive</Button>
+              <Button variant="ghost" sizeRole="chrome">Mute alerts</Button>
+            </div>
+          }
+        >
+          <div style={listStyle}>
+            {items.map((item) => (
+              <article key={item.id} style={cardStyle}>
+                <div style={cardHeaderStyle}>
+                  <strong>{item.name}</strong>
+                  <Pill tone={toneFor(item.status)} appearance="badge">{item.status}</Pill>
+                </div>
+                <p style={cardTextStyle}>{item.summary}</p>
+              </article>
+            ))}
+          </div>
+        </ListContainer>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="State handling" bare>
+        <div style={stateButtonsStyle}>
+          <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => setState("ready")}>Ready</Button>
+          <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => setState("loading")}>Loading</Button>
+          <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => setState("empty")}>Empty</Button>
+          <Button variant={state === "error" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => setState("error")}>Error</Button>
+        </div>
+
+        <ListContainer
+          title="Workflow incidents"
+          subtitle="Review how the built-in state surfaces read inside the list shell."
+          state={state}
+          loadingMessage="Loading workflow incidents..."
+          errorMessage="The list failed to load after the latest refresh."
+          emptyTitle="No incidents found"
+          emptyMessage="Try widening the filters or create a new workflow incident."
+        >
+          <div style={cardStyle}>
+            This content is only shown in the ready state.
+          </div>
+        </ListContainer>
+      </SpecimenGroup>
+    </div>
+  );
+}

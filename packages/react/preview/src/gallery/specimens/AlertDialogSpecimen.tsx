@@ -1,0 +1,104 @@
+import { useState, type CSSProperties } from "react";
+import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/react";
+
+const rowStyle: CSSProperties = { display: "flex", alignItems: "center", gap: "0.75rem" };
+const hintStyle: CSSProperties = { margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" };
+const cardStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.125rem",
+  padding: "0.5rem 0.75rem",
+  borderRadius: "0.375rem",
+  background: "var(--poodle-color-background-panel)",
+};
+const cardSpanStyle: CSSProperties = { color: "var(--poodle-color-text-secondary)", fontSize: "0.8125rem" };
+
+export function AlertDialogSpecimen() {
+  const [dangerOpen, setDangerOpen] = useState(false);
+  const [warningOpen, setWarningOpen] = useState(false);
+  const [asyncOpen, setAsyncOpen] = useState(false);
+  const [lastAction, setLastAction] = useState("");
+
+  async function simulateAsync(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setLastAction("Async confirm completed");
+  }
+
+  return (
+    <Surface tone="panel" border="subtle" padding="md">
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div style={rowStyle}>
+          <Eyebrow>Danger tone</Eyebrow>
+          <Button tone="danger" onClick={() => setDangerOpen(true)}>
+            Delete item
+          </Button>
+          <AlertDialog
+            open={dangerOpen}
+            title="Delete this item?"
+            description="This action cannot be undone. The item and all associated data will be permanently removed."
+            confirmLabel="Delete"
+            cancelLabel="Keep it"
+            onConfirm={() => {
+              setLastAction("Item deleted");
+              setDangerOpen(false);
+            }}
+            onCancel={() => setDangerOpen(false)}
+            onOpenChange={(open) => setDangerOpen(open)}
+          />
+        </div>
+
+        <div style={rowStyle}>
+          <Eyebrow>Warning tone</Eyebrow>
+          <Button variant="secondary" onClick={() => setWarningOpen(true)}>
+            Reset settings
+          </Button>
+          <AlertDialog
+            open={warningOpen}
+            title="Reset all settings?"
+            description="Your customized settings will be restored to their default values."
+            tone="warning"
+            confirmLabel="Reset"
+            cancelLabel="Cancel"
+            onConfirm={() => {
+              setLastAction("Settings reset");
+              setWarningOpen(false);
+            }}
+            onCancel={() => setWarningOpen(false)}
+            onOpenChange={(open) => setWarningOpen(open)}
+          />
+        </div>
+
+        <div style={rowStyle}>
+          <Eyebrow>Async confirm</Eyebrow>
+          <Button tone="danger" onClick={() => setAsyncOpen(true)}>
+            Archive project
+          </Button>
+          <AlertDialog
+            open={asyncOpen}
+            title="Archive this project?"
+            description="The project will be hidden from active lists but can still be restored later."
+            confirmLabel="Archive"
+            workingLabel="Archiving…"
+            onConfirm={async () => {
+              await simulateAsync();
+              setAsyncOpen(false);
+            }}
+            onCancel={() => setAsyncOpen(false)}
+            onOpenChange={(open) => setAsyncOpen(open)}
+          >
+            <div style={cardStyle}>
+              <strong>Roadmap Cleanup</strong>
+              <span style={cardSpanStyle}>14 linked tasks will move to the archived view.</span>
+            </div>
+          </AlertDialog>
+        </div>
+
+        {lastAction ? (
+          <p style={hintStyle}>
+            Last action: <strong>{lastAction}</strong>
+          </p>
+        ) : null}
+      </div>
+    </Surface>
+  );
+}

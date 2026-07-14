@@ -335,3 +335,17 @@ input {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* AppHeader specimen: strip the menubar's container chrome when inline in the header. */
+.poodle-specimen__menubar-inline .poodle-menubar__list {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  gap: 0;
+}
+
+/* SplitView specimen: let Regions fill their pane. */
+.poodle-specimen__fill .poodle-region {
+  height: 100%;
+  min-height: 0;
+}

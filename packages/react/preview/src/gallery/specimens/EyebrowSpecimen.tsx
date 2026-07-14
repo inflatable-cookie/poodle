@@ -1,0 +1,58 @@
+import type { CSSProperties } from "react";
+import { Eyebrow, Surface } from "@poodle/react";
+
+const container: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.5rem",
+};
+
+const example: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.25rem",
+};
+
+const heading: CSSProperties = {
+  margin: 0,
+  fontSize: "1.25rem",
+  color: "var(--poodle-color-text-primary)",
+};
+
+const paragraph: CSSProperties = {
+  margin: 0,
+  color: "var(--poodle-color-text-secondary)",
+  fontSize: "0.875rem",
+  lineHeight: 1.5,
+};
+
+export function EyebrowSpecimen() {
+  return (
+    <Surface tone="panel" border="subtle" padding="md">
+      <div style={container}>
+        <div style={example}>
+          <Eyebrow>Section label</Eyebrow>
+          <h3 style={heading}>Page Title</h3>
+          <p style={paragraph}>Eyebrow renders small uppercase text used for categorizing content above headings.</p>
+        </div>
+
+        <div style={example}>
+          <Eyebrow>Primitive</Eyebrow>
+          <h3 style={heading}>Button</h3>
+          <p style={paragraph}>Primary interactive control for triggering actions.</p>
+        </div>
+
+        <div style={example}>
+          <Eyebrow>Status</Eyebrow>
+          <h3 style={heading}>Active deployment</h3>
+          <p style={paragraph}>Last deployed 3 minutes ago.</p>
+        </div>
+
+        <div style={example}>
+          <Eyebrow as="h3" size="md" spacing="bottom">Semantic section heading</Eyebrow>
+          <p style={paragraph}>Eyebrow can render as a heading when it labels a real subsection.</p>
+        </div>
+      </div>
+    </Surface>
+  );
+}

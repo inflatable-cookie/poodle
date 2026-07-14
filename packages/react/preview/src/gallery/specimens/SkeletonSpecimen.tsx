@@ -1,0 +1,47 @@
+import { Skeleton } from "@poodle/react";
+import { SpecimenGroup } from "../SpecimenGroup";
+
+export function SkeletonSpecimen() {
+  return (
+    <div className="poodle-specimen">
+      <SpecimenGroup label="Basic shapes">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
+          <Skeleton shape="line" width="12rem" />
+          <Skeleton shape="circle" width="2.5rem" height="2.5rem" />
+          <Skeleton shape="block" width="8rem" height="3rem" />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Preset: avatar-line">
+        <Skeleton preset="avatar-line" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Preset: list-item (×3)">
+        <Skeleton preset="list-item" />
+        <Skeleton preset="list-item" />
+        <Skeleton preset="list-item" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Preset: table-row (×3)">
+        <Skeleton preset="table-row" />
+        <Skeleton preset="table-row" />
+        <Skeleton preset="table-row" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Preset: card">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
+          <Skeleton preset="card" />
+          <Skeleton preset="card" />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Preset: detail-section">
+        <Skeleton preset="detail-section" lines={4} />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Static (no animation)">
+        <Skeleton shape="line" width="10rem" animated={false} />
+      </SpecimenGroup>
+    </div>
+  );
+}
