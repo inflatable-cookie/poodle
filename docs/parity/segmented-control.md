@@ -53,7 +53,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Specimen parity
 
-- **Svelte covers** (`SegmentedControlSpecimen.svelte`): Default (controlled, live `onValueChange` + readout), With disabled option, **Content Fit** (`equalWidth={false}` + `size="xs"` + `title` tooltips), Fully disabled, plus `sizes` and `densities` snippet matrices.
+- **Svelte covers** (`SegmentedControlSpecimen.svelte`): Default (controlled, live `onValueChange` + readout), With disabled option, **Content Fit** (`equalWidth={false}` + `size="xs"` + `title` tooltips), **Icon-only options** (`icon` + `iconOnly=true` with accessible label fallback), Fully disabled, plus `sizes` and `densities` snippet matrices.
 - **GPUI covers** (`segmented_control.rs`): Default (controlled, live `on_change` + "Selected:" readout), With disabled option, Fully disabled, Equal-width, **Content fit (`equalWidth=false`, xs, per-option `aria_label`)**, plus size + density matrices. — no remaining gaps; `title` tooltip not representable (shared `ChoiceOption` spec has no `title` field — `aria_label` used as the closest accessible-name channel).
 - **Jetstream covers** (`segmented_control.rs`): Default (Grid selected, render-only seeded), With disabled option (Draft), Fully disabled, Equal-width, **Content fit (`equalWidth=false`)**, **full xs–xl Sizes ladder**, **Compact/Default/Comfortable Densities**. — no remaining gaps; live `on_change` readout omitted (render-only per Jetstream architecture); `title` tooltip not representable (no spec field).
 

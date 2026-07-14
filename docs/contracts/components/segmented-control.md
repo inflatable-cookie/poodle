@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-14
 
 ## 1. Purpose
 
@@ -23,6 +23,8 @@ Updated: 2026-07-10
   └── [Segment .segmented-control__segment...]  <label>
         ├── [Control .segmented-control__control]  <input type="radio">
         └── [Label .segmented-control__label]  <span>
+              ├── [Icon .poodle-icon]  optional
+              └── [Label Text .segmented-control__label-text]  optional when icon-only
 ```
 
 | Part | Required | Description | Token Targets |
@@ -30,7 +32,9 @@ Updated: 2026-07-10
 | Root | yes | radiogroup host track | border, radius, background, padding |
 | Segment | yes | one selectable option wrapper | cursor |
 | Control | yes | hidden native radio input | visually hidden, receives focus |
-| Label | yes | visible segment text | typography, background, color, border-radius, focus ring |
+| Label | yes | visible segment content and selected-state surface | typography, background, color, border-radius, focus ring |
+| Icon | no | decorative option icon | current color, supporting visual size |
+| Label Text | conditional | visible option text; omitted only when an icon-only option has an icon | typography, truncation |
 
 ## 3. Props And Inputs
 
@@ -54,7 +58,9 @@ Updated: 2026-07-10
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
 | `value` | `string` | yes | option value |
-| `label` | `string` | yes | visible label text |
+| `label` | `string` | yes | visible label text, or accessible-name and tooltip fallback for an icon-only option |
+| `icon` | `IconProp` | no | optional icon rendered before the label |
+| `iconOnly` | `boolean` | no | hides visible label text when `icon` exists; retains `label` as the accessible-name and tooltip fallback |
 | `disabled` | `boolean` | no | disables individual segment |
 | `ariaLabel` | `string` | no | accessible name override for abbreviated labels |
 | `title` | `string` | no | tooltip/title attribute for the segment wrapper |
@@ -110,6 +116,8 @@ Native radio inputs provide keyboard and focus behavior.
 - Each segment uses a hidden `<input type="radio">` for native radio semantics
 - `aria-label` on root from prop
 - Per-segment `aria-label` from option when visible labels are abbreviated
+- Icon-only segments use `ariaLabel` when supplied, otherwise their required
+  `label`, so the icon is never the sole accessible name
 - Hidden inputs: `position: absolute; opacity: 0; pointer-events: none`
 
 ### Keyboard
@@ -137,6 +145,8 @@ Native radio inputs provide keyboard and focus behavior.
 - Root uses CSS grid with equal-width columns for all segments by default
 - When `equalWidth=false`, segments size to content and the group left-aligns
 - Segment labels truncate with ellipsis when content overflows
+- Labelled icons sit before text; icon-only segments become square when
+  `equalWidth=false`
 - Control height derived from shared control-height token minus internal padding
 
 ### Composition
@@ -182,7 +192,11 @@ Native radio inputs provide keyboard and focus behavior.
 
 | Property | Value |
 |----------|-------|
-| `display` | `block` |
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `gap` | `0.375rem` |
+| `box-sizing` | `border-box` |
 | `min-width` | `0` |
 | `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
 | `padding` | `0 0.75rem` |
@@ -197,6 +211,13 @@ Native radio inputs provide keyboard and focus behavior.
 | `text-overflow` | `ellipsis` |
 | `white-space` | `nowrap` |
 | `transition` | `background, color, box-shadow` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+
+### Label — icon-only (`[data-icon-only="true"]`)
+
+| Property | Value |
+|----------|-------|
+| `width` | `calc(var(--poodle-segmented-control-height) - 0.25rem)` |
+| `padding-inline` | `0` |
 
 ### Label — selected state (`:checked + .segmented-control__label`)
 
@@ -227,6 +248,9 @@ Native radio inputs provide keyboard and focus behavior.
   built-in radiogroup keyboard behavior
 - Module-level `let nextSegmentedControlId = 0` generates unique group names
 - `data-selected` attribute on segment for styling hooks
+- `data-icon-only="true"` on options that supply both `iconOnly=true` and an icon
+- Option icons use Poodle `Icon` at the supporting-visual size resolved from the
+  control size
 - Label styling is driven by adjacent sibling selectors (`:checked +`,
   `:focus-visible +`, `:disabled +`)
 - Treatment token: uses `--poodle-radius-control` directly
@@ -273,6 +297,7 @@ Native radio inputs provide keyboard and focus behavior.
 | Hidden radio inputs vs GPUI native controls | web uses native radio for a11y; GPUI exposes semantics directly | allowed | keep selection semantics strict |
 | ID generation strategy | module-level counter vs Rust ID approach | allowed | both must produce unique group names |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
+| Icon and icon-only options | currently implemented by the authoritative Svelte component; native option specs do not yet carry icon references | provisional | add equivalent native icon references before claiming strict visual parity for this presentation |
 
 ## 13. Specimen Definitions
 
@@ -293,6 +318,12 @@ Native radio inputs provide keyboard and focus behavior.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Fully disabled | `disabled=true`, `defaultValue="list"`, `ariaLabel="Disabled control"`, options: Grid, List, Table | All three segments at reduced opacity, not-allowed cursor; List shows selected styling but entire control is non-interactive |
+
+### Icon-Only Options
+
+| Label | Props / Config | Expected Visual |
+|-------|----------------|-----------------|
+| Icon-only options | `defaultValue="effects"`, `equalWidth=false`, `ariaLabel="Plugin kind"`, options: Effects and Instruments with `icon` and `iconOnly=true` | Two compact square segments showing icons; Effects is selected; each native radio is announced by its option label and each wrapper exposes the label as a tooltip |
 
 ## 14. Approval And Adoption Notes
 

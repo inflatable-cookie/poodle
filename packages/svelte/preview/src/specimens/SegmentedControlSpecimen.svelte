@@ -48,6 +48,19 @@
     />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Icon-only options">
+    <SegmentedControl
+      options={[
+        { value: "effects", label: "Effects", icon: "audio-waveform", iconOnly: true },
+        { value: "instruments", label: "Instruments", icon: "piano", iconOnly: true }
+      ]}
+      defaultValue="effects"
+      ariaLabel="Plugin kind"
+      size="sm"
+      equalWidth={false}
+    />
+  </SpecimenGroup>
+
   <SpecimenGroup label="Fully disabled">
     <SegmentedControl options={viewOptions} defaultValue="list" ariaLabel="Disabled control" disabled />
   </SpecimenGroup>

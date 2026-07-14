@@ -15,6 +15,7 @@
     PanelTabItem,
     SemanticControlSizeRole,
     TabItem,
+    TabVariant,
   } from "./types";
 
   interface Props {
@@ -27,6 +28,7 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    tabVariant?: TabVariant;
     items?: PanelTabItem[];
     value?: string | null;
     ariaLabel?: string | null;
@@ -50,6 +52,7 @@
     size = null,
     sizeRole = "chrome",
     density = null,
+    tabVariant = "strip",
     items = [],
     value = null,
     ariaLabel = null,
@@ -320,7 +323,7 @@
         />
       {/if}
       <Tabs
-        variant="strip"
+        variant={tabVariant}
         orientation="vertical"
         {size}
         {sizeRole}
@@ -344,7 +347,7 @@
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
-          variant="strip"
+          variant={tabVariant}
           orientation="horizontal"
           {size}
           {sizeRole}
@@ -378,7 +381,7 @@
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
-          variant="strip"
+          variant={tabVariant}
           orientation="horizontal"
           {size}
           {sizeRole}
@@ -408,4 +411,3 @@
     </div>
   {/if}
 </section>
-

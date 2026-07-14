@@ -6,7 +6,12 @@
   import "@poodle/styles/segmented-control.css";
   import { singleSelectTransition } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import Icon from "./Icon.svelte";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
 
   import type {
     ControlDensity,
@@ -58,6 +63,7 @@
   const isControlled = $derived(value !== undefined);
   const currentValue = $derived(isControlled ? value : uncontrolledValue);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function handleChange(nextValue: string): void {
@@ -93,7 +99,12 @@
   aria-label={ariaLabel ?? undefined}
 >
   {#each options as option (option.value)}
-    <label class="poodle-segmented-control__segment" data-selected={currentValue === option.value} title={option.title ?? undefined}>
+    <label
+      class="poodle-segmented-control__segment"
+      data-selected={currentValue === option.value}
+      data-icon-only={option.iconOnly === true && option.icon ? "true" : undefined}
+      title={option.title ?? (option.iconOnly && option.icon ? option.label : undefined)}
+    >
       <input
         class="poodle-segmented-control__control"
         type="radio"
@@ -101,11 +112,17 @@
         value={option.value}
         checked={currentValue === option.value}
         disabled={disabled || option.disabled === true}
-        aria-label={option.ariaLabel ?? undefined}
+        aria-label={option.ariaLabel ?? (option.iconOnly && option.icon ? option.label : undefined)}
         onchange={() => handleChange(option.value)}
       />
-      <span class="poodle-segmented-control__label">{option.label}</span>
+      <span class="poodle-segmented-control__label">
+        {#if option.icon}
+          <Icon icon={option.icon} size={resolvedIconSize} />
+        {/if}
+        {#if !option.iconOnly || !option.icon}
+          <span class="poodle-segmented-control__label-text">{option.label}</span>
+        {/if}
+      </span>
     </label>
   {/each}
 </div>
-

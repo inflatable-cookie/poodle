@@ -2880,7 +2880,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable selected value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
-      { name: "options", type: "SegmentedControlOption[]", default: "[]", description: "Array of segment option definitions." },
+      { name: "options", type: "SegmentedControlOption[]", default: "[]", description: "Array of segment options. Options may include an icon and use iconOnly for a compact accessible icon segment." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the segmented control." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },

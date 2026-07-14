@@ -105,6 +105,8 @@ export interface AccordionItem {
 export interface SegmentedControlOption {
   value: string;
   label: string;
+  icon?: IconProp;
+  iconOnly?: boolean;
   ariaLabel?: string;
   title?: string;
   disabled?: boolean;

@@ -17,6 +17,8 @@
     orientation?: SplitOrientation;
     ratio?: number | undefined;
     defaultRatio?: number;
+    minRatio?: number;
+    maxRatio?: number;
     minPrimarySize?: number | null;
     minSecondarySize?: number | null;
     primarySize?: number | null;
@@ -45,6 +47,8 @@
     orientation = "horizontal",
     ratio = $bindable<number | undefined>(undefined),
     defaultRatio = 0.5,
+    minRatio = 0.05,
+    maxRatio = 0.95,
     minPrimarySize = null,
     minSecondarySize = null,
     primarySize = null,
@@ -90,8 +94,18 @@
   const hasControlledRatio = $derived(ratio !== undefined);
   const hasControlledPrimaryCollapsed = $derived(primaryCollapsed !== undefined);
   const hasControlledSecondaryCollapsed = $derived(secondaryCollapsed !== undefined);
+  const resolvedMinRatio = $derived(Math.min(0.95, Math.max(0.05, minRatio)));
+  const resolvedMaxRatio = $derived(
+    Math.max(resolvedMinRatio, Math.min(0.95, maxRatio)),
+  );
   const currentRatio = $derived(
-    Math.min(0.95, Math.max(0.05, hasControlledRatio ? (ratio ?? defaultRatio) : uncontrolledRatio)),
+    Math.min(
+      resolvedMaxRatio,
+      Math.max(
+        resolvedMinRatio,
+        hasControlledRatio ? (ratio ?? defaultRatio) : uncontrolledRatio,
+      ),
+    ),
   );
   const isPrimaryCollapsed = $derived(
     hasControlledPrimaryCollapsed ? primaryCollapsed === true : uncontrolledPrimaryCollapsed,
@@ -138,7 +152,10 @@
   const afterDirection = $derived((orientation === "horizontal" ? "right" : "down") as CollapseDirection);
 
   function setRatio(nextRatio: number): void {
-    const clamped = Math.min(0.95, Math.max(0.05, nextRatio));
+    const clamped = Math.min(
+      resolvedMaxRatio,
+      Math.max(resolvedMinRatio, nextRatio),
+    );
     if (hasControlledRatio) {
       ratio = clamped;
     } else {
@@ -344,4 +361,3 @@
     {/if}
   </div>
 </div>
-
