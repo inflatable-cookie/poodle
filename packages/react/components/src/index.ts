@@ -35,6 +35,7 @@ export { Dialog, type DialogProps } from "./Dialog";
 export { Drawer, type DrawerProps } from "./Drawer";
 export { ThemePortal } from "./portal";
 export { Tooltip, type TooltipProps } from "./Tooltip";
+export { ListCard, type ListCardProps } from "./ListCard";
 export { ListCardCounter, type ListCardCounterProps } from "./ListCardCounter";
 export { TimeAgo, type TimeAgoProps } from "./TimeAgo";
 export { DurationInput, type DurationInputProps, type DurationInputChange } from "./DurationInput";

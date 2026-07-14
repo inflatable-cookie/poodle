@@ -28,6 +28,7 @@ import "./specimens/editable-list";
 import "./specimens/log-list";
 import "./specimens/tree";
 import "./specimens/data-table";
+import "./specimens/list-card";
 
 function App() {
   const slug = useHashRoute();
