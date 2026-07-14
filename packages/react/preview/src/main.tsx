@@ -25,6 +25,7 @@ import "./specimens/overlays3";
 import "./specimens/data";
 import "./specimens/date-pickers";
 import "./specimens/editable-list";
+import "./specimens/log-list";
 
 function App() {
   const slug = useHashRoute();

@@ -272,3 +272,44 @@ export interface ZonedDateTimeValue {
   time: string | null;
   timeZone: string | null;
 }
+
+export type LogLevel = "info" | "warn" | "error";
+export type LogActionType =
+  | "create"
+  | "update"
+  | "delete"
+  | "restore"
+  | "upload"
+  | "login"
+  | "logout"
+  | "security"
+  | "other";
+export type LogActor = {
+  id: string;
+  email?: string;
+  name?: string;
+};
+export type StreamLogEntry = {
+  id?: string;
+  timestamp: Date | string | number;
+  level: LogLevel;
+  message: string;
+};
+export type AuditLogEntry = {
+  id: string;
+  occurredAt: string;
+  actor?: LogActor | null;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  resourceLabel?: string;
+  details?: Record<string, unknown>;
+};
+export type LogEntry = StreamLogEntry | AuditLogEntry;
+export type LogFilter = {
+  field: string;
+  label: string;
+  type: "select" | "date";
+  options?: { value: string; label: string }[];
+  placeholder?: string;
+};

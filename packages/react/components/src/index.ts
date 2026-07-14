@@ -12,6 +12,7 @@ export { Box, type BoxProps } from "./Box";
 export { Button, type ButtonProps } from "./Button";
 export { Calendar, type CalendarProps } from "./Calendar";
 export { ListGrid, type ListGridProps } from "./ListGrid";
+export { LogList, type LogListProps } from "./LogList";
 export { Pagination, type PaginationProps, type PaginationControllerLike } from "./Pagination";
 export { PaginationSummary, type PaginationSummaryProps } from "./PaginationSummary";
 export { Table, type TableProps } from "./Table";
