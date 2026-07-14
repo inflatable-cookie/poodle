@@ -18,10 +18,13 @@
     "./theme-dark.css": "./src/generated/css/poodle-theme-dark.css",
     "./theme-loophole-studio.css": "./src/generated/css/poodle-theme-loophole-studio.css",
     "./density-compact.css": "./src/generated/css/poodle-density-compact.css",
+    "./density-default.css": "./src/generated/css/poodle-density-default.css",
     "./density-comfortable.css": "./src/generated/css/poodle-density-comfortable.css",
+    "./control-size-xs.css": "./src/generated/css/poodle-control-size-xs.css",
     "./control-size-sm.css": "./src/generated/css/poodle-control-size-sm.css",
     "./control-size-md.css": "./src/generated/css/poodle-control-size-md.css",
     "./control-size-lg.css": "./src/generated/css/poodle-control-size-lg.css",
+    "./control-size-xl.css": "./src/generated/css/poodle-control-size-xl.css",
     "./themes": "./src/themes.ts",
     "./metadata": "./src/metadata.ts",
     "./units": "./src/units.ts"

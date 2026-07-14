@@ -1,5 +1,13 @@
 # g12 — React Full Parity
 
+**Status: COMPLETE.** All 132 components ported to `@poodle/react` and
+Playwright-verified against the Svelte preview. The React preview is a full
+per-component gallery matching the Svelte preview (shell, controls, Tokens
+inspector, usage docs, 131/131 specimen slugs) plus docs / parity /
+accessibility report generators. `@poodle/react` has a consumer README
+(`packages/react/components/README.md`). Docs and parity data are authored
+canonically in the Svelte preview and re-exported live into React — no fork.
+
 Goal: `@poodle/react` grows from the 3-component pilot (g11.007) to full
 library parity (132 components), as a strategic second web target — no
 consuming app yet, so the acceptance bar is the React preview plus
