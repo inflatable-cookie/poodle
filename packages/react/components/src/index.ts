@@ -40,6 +40,7 @@ export { NumberInput, type NumberInputProps, type NumberInputValidationChange } 
 export { TextInput, type TextInputProps } from "./TextInput";
 export { TokenInput, type TokenInputProps } from "./TokenInput";
 export { EditableLabel, type EditableLabelProps } from "./EditableLabel";
+export { EditableList, type EditableListProps, type EditableListItemLike } from "./EditableList";
 export { Eyebrow, type EyebrowProps } from "./Eyebrow";
 export { TimeInput, type TimeInputProps } from "./TimeInput";
 export { Grid, type GridProps } from "./Grid";
