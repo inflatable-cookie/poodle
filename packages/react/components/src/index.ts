@@ -23,6 +23,8 @@ export { FieldSet, type FieldSetProps } from "./FieldSet";
 export { PasswordRequirements, type PasswordRequirementsProps } from "./PasswordRequirements";
 export { Select, type SelectProps } from "./Select";
 export { Popover, type PopoverProps } from "./Popover";
+export { DatePicker, type DatePickerProps } from "./DatePicker";
+export { DateRangePicker, type DateRangePickerProps } from "./DateRangePicker";
 export { Dialog, type DialogProps } from "./Dialog";
 export { Drawer, type DrawerProps } from "./Drawer";
 export { ThemePortal } from "./portal";

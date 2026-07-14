@@ -15,6 +15,10 @@ Depends on: `g12.005`
   Verified 7/7: page click + prev + ellipsis + summary window, table
   structure, grid display, day select, arrow+Enter keyboard select, month
   nav, range start..end.
-- [ ] Wave 2: DatePicker, DateRangePicker (+ remaining date-time pickers)
+- [x] Wave 2: DatePicker, DateRangePicker (Calendar composition: trigger
+  label formatting, month follow, outside/Escape dismissal, close on
+  complete selection). Verified 3/3. Remaining date-time pickers
+  (DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, TimeInput
+  composition) -> wave 2b.
 - [ ] Wave 3: EditableList, LogList, Tree
 - [ ] Wave 4: DataTable, ListCard
