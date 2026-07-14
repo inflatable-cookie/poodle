@@ -23,5 +23,14 @@ Depends on: `g12.005`
   TimeZoneSelect: searchable Select over defaultTimeZoneOptions) done —
   the whole date-picker family is ported. Verified: range completion with
   end time, zoned pick via timezone search.
-- [ ] Wave 3: EditableList, LogList, Tree
+- [x] Wave 3: EditableList (applyReorder + listReorderKeyIntent keyboard
+  grab/move/drop, drag, windowing), LogList (stream + audit variants),
+  Tree (full WAI-ARIA pattern over the tree machinery: treeKeydownIntent
+  nav, expand/collapse with lazy loadChildren, checkbox cascade via
+  treeCheckState/treeToggleCheck with native indeterminate, shift-range
+  via treeRangeSelection, F2 inline rename, Alt-arrow sibling reorder,
+  drag-drop before/after/inside, opt-in virtual windowing via
+  treeVirtualWindow). Checkbox upgraded from pilot stub to full parity
+  (id/size/density/selectedColor/mixed-indeterminate/parts records).
+  Verified 7/7 tree probes + 3/3 editable-list + 2/2 log-list.
 - [ ] Wave 4: DataTable, ListCard

@@ -55,6 +55,7 @@ export { Rating, type RatingProps } from "./Rating";
 export { SegmentedControl, type SegmentedControlProps } from "./SegmentedControl";
 export { Slider, type SliderProps } from "./Slider";
 export { ToggleGroup, type ToggleGroupProps } from "./ToggleGroup";
+export { Tree, type TreeProps } from "./Tree";
 export { TriStateSwitch, type TriStateSwitchProps } from "./TriStateSwitch";
 export { Meter, type MeterProps } from "./Meter";
 export { OrderBy, type OrderByProps } from "./OrderBy";

@@ -313,3 +313,14 @@ export type LogFilter = {
   options?: { value: string; label: string }[];
   placeholder?: string;
 };
+
+export type TreeNode = {
+  value: string;
+  label: string;
+  icon?: string | null;
+  children?: TreeNode[];
+  /** Force branch posture even when `children` is empty (empty / lazy folder). */
+  isBranch?: boolean;
+  isDisabled?: boolean;
+};
+export type TreeDropPosition = "before" | "after" | "inside";
