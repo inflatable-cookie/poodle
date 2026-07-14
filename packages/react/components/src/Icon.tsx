@@ -2,7 +2,7 @@ import { createElement } from "react";
 
 import "@poodle/styles/icon.css";
 
-import { resolveIconNodes } from "./icon-registry";
+import { resolveIconNodes, useIconSet } from "./icon-registry";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, IconNodes, SemanticControlSizeRole } from "./types";
 
@@ -26,10 +26,11 @@ export function Icon({
   ariaLabel = null,
 }: IconProps) {
   const uiPresentation = useUiPresentation();
+  const iconSet = useIconSet();
   const resolvedIcon = icon ?? name;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
-  const nodes = resolveIconNodes(resolvedIcon);
+  const nodes = resolveIconNodes(resolvedIcon, iconSet);
 
   return (
     <svg

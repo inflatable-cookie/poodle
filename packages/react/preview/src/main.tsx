@@ -38,6 +38,7 @@ import "./specimens/heavy-pickers";
 import "./specimens/media";
 import "./specimens/editors";
 import "./specimens/workstation";
+import "./specimens/sweep";
 
 function App() {
   const slug = useHashRoute();

@@ -1,6 +1,15 @@
+import { createContext, useContext } from "react";
+
 import * as lucideIcons from "@poodle/icons-lucide";
 
 import type { IconNodeElement, IconNodes, IconSet } from "./types";
+
+/** Icon-set context set by `IconProvider`; string lookups resolve here first. */
+export const IconSetContext = createContext<IconSet>({});
+
+export function useIconSet(): IconSet {
+  return useContext(IconSetContext);
+}
 
 /**
  * Icon resolution for `@poodle/react`. Mirrors the Svelte package's

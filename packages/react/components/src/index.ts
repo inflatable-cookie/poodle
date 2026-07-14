@@ -57,6 +57,14 @@ export { DetailSectionGroup, type DetailSectionGroupProps } from "./DetailSectio
 export { DetailShell, type DetailShellProps } from "./DetailShell";
 export { ScrollShell, type ScrollShellProps } from "./ScrollShell";
 export { SplitView, type SplitViewProps } from "./SplitView";
+export { ConfirmAction, type ConfirmActionProps } from "./ConfirmAction";
+export { ContextMenu, type ContextMenuProps } from "./ContextMenu";
+export { DebugDialog, type DebugDialogProps } from "./DebugDialog";
+export { ErrorBoundary, type ErrorBoundaryProps } from "./ErrorBoundary";
+export { FormDialog, type FormDialogProps } from "./FormDialog";
+export { FormLayout, type FormLayoutProps } from "./FormLayout";
+export { IconProvider, type IconProviderProps } from "./IconProvider";
+export { SplitButton, type SplitButtonProps } from "./SplitButton";
 export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
 export { MediaBrowsePanel, type MediaBrowsePanelProps } from "./MediaBrowsePanel";
 export { MediaPicker, type MediaPickerProps } from "./MediaPicker";

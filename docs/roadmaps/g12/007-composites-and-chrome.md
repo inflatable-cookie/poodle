@@ -84,5 +84,14 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   Verified 27/27. 123/132. DockRegion DEFERRED: Tom has in-progress
   uncommitted edits to DockRegion.svelte (tabVariant prop) — port after
   that lands.
-- [ ] Sweep: remaining stragglers to 132/132, then g12.008 parity
-  verification
+- [x] Sweep: ConfirmAction (AlertDialog composition), ContextMenu
+  (menuTransition machine + MenuSurface handle, measure-then-reveal
+  viewport clamp), DebugDialog, ErrorBoundary (the package's one React
+  class component — getDerivedStateFromError mirrors svelte:boundary),
+  FormDialog (Dialog + FormLayout, submitting locks dismissal),
+  FormLayout, IconProvider (IconSetContext; Icon now resolves the
+  context set before lucide fallback), SplitButton (scroll-container
+  aware flip + max-height, roving menu focus). Verified 28/28. 131/132.
+- [ ] DockRegion — sole holdout; port after Tom's in-progress
+  tabVariant edit to DockRegion.svelte lands. Then g12.008 parity
+  verification sweep.
