@@ -251,3 +251,8 @@ export interface DateRangeValue {
   start: string | null;
   end: string | null;
 }
+
+export interface DateTimeValue {
+  date: string | null;
+  time: string | null;
+}

@@ -17,8 +17,8 @@ Depends on: `g12.005`
   nav, range start..end.
 - [x] Wave 2: DatePicker, DateRangePicker (Calendar composition: trigger
   label formatting, month follow, outside/Escape dismissal, close on
-  complete selection). Verified 3/3. Remaining date-time pickers
-  (DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, TimeInput
-  composition) -> wave 2b.
+  complete selection). Verified 3/3. DateTimePicker done (Calendar +
+  TimeInput composition, verified). DateTimeRangePicker + DateTimeZonePicker
+  -> wave 2c.
 - [ ] Wave 3: EditableList, LogList, Tree
 - [ ] Wave 4: DataTable, ListCard

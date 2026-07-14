@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatePicker, DateRangePicker, type DateRangeValue } from "@poodle/react";
+import { DatePicker, DateRangePicker, DateTimePicker, type DateRangeValue, type DateTimeValue } from "@poodle/react";
 import { registerSpecimen, Row, SpecimenSection } from "../harness";
 
 function DatePickerSpecimen() {
@@ -29,3 +29,18 @@ function DateRangePickerSpecimen() {
   );
 }
 registerSpecimen({ slug: "date-range-picker", title: "DateRangePicker", render: () => <DateRangePickerSpecimen /> });
+
+function DateTimePickerSpecimen() {
+  const [v, setV] = useState<DateTimeValue>({ date: "2026-07-14", time: null });
+  return (
+    <SpecimenSection title="DateTimePicker">
+      <Row>
+        <DateTimePicker value={v} onValueChange={setV} />
+      </Row>
+      <span data-testid="dtp-value">
+        {v.date ?? "-"} {v.time ?? "-"}
+      </span>
+    </SpecimenSection>
+  );
+}
+registerSpecimen({ slug: "date-time-picker", title: "DateTimePicker", render: () => <DateTimePickerSpecimen /> });

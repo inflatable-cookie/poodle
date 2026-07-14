@@ -24,6 +24,7 @@ export { PasswordRequirements, type PasswordRequirementsProps } from "./Password
 export { Select, type SelectProps } from "./Select";
 export { Popover, type PopoverProps } from "./Popover";
 export { DatePicker, type DatePickerProps } from "./DatePicker";
+export { DateTimePicker, type DateTimePickerProps } from "./DateTimePicker";
 export { DateRangePicker, type DateRangePickerProps } from "./DateRangePicker";
 export { Dialog, type DialogProps } from "./Dialog";
 export { Drawer, type DrawerProps } from "./Drawer";
