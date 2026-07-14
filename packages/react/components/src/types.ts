@@ -342,3 +342,26 @@ export type TableRowAction = {
   tone?: "default" | "danger";
   hidden?: boolean;
 };
+
+export type EmptyStateVariant = "neutral" | "search" | "firstRun";
+export type EmptyStateSize = "default" | "compact";
+
+export type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
+
+export type CommandActionItem = {
+  id: string;
+  title: string;
+  description?: string | null;
+  group?: string | null;
+  shortcut?: string | null;
+  keywords?: string[];
+  badge?: string | null;
+  disabled?: boolean;
+};
+
+export interface MenubarItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  items: MenuItem[];
+}

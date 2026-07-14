@@ -6,6 +6,14 @@ export { ToastStack, type ToastStackProps } from "./ToastStack";
 export { Accordion, type AccordionProps } from "./Accordion";
 export { Collapsible, type CollapsibleProps } from "./Collapsible";
 export { Menu, type MenuProps } from "./Menu";
+export { Menubar, type MenubarProps } from "./Menubar";
+export { CommandPalette, type CommandPaletteProps } from "./CommandPalette";
+export {
+  ActionDiscoveryPanel,
+  type ActionDiscoveryPanelProps,
+  type ActionDiscoveryPanelHandle,
+} from "./ActionDiscoveryPanel";
+export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { MenuSurface, type MenuSurfaceProps, type MenuSurfaceHandle } from "./MenuSurface";
 export { Avatar, type AvatarProps } from "./Avatar";
 export { Box, type BoxProps } from "./Box";

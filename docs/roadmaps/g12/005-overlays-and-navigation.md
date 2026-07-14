@@ -33,6 +33,20 @@ Depends on: `g12.004` (Popover proved machine + dismiss-layer + reactifyPart)
   contract). Button upgraded from the pilot stub to full Svelte parity
   (tone/density/icons/toggle-pressed/loading/fit/truncate) — surfaced by
   AlertDialog needing density. Verified 4/4 + button regression.
-- [ ] Wave 4: Menubar, CommandPalette (+ ActionDiscoveryPanel dependency)
+- [x] Wave 4 (2026-07-14, landed with g12.007 start): Menubar (roving
+  trigger focus, arrow/Home/End nav, cross-menu ArrowLeft/Right from
+  inside an open menu, checkbox/radio roles, dismiss layer),
+  CommandPalette (scroll lock, focus capture/restore, window-level
+  keyboard routing into ActionDiscoveryPanel via imperative handle,
+  live status region), ActionDiscoveryPanel (grouped listbox over
+  ListCard, loading skeletons + EmptyState branches), EmptyState.
+  Verified 20/20 headless probes.
+
+  React trap (documented for reuse): restoring focus to the trigger
+  synchronously while closing from an Enter keydown lets the browser's
+  default Enter action "click" the newly focused trigger and reopen the
+  overlay — React flushes the unmount inside the keydown dispatch
+  (Svelte's async effects dodge this by timing). Defer the focus restore
+  with setTimeout(0). CommandPalette carries the reference fix.
   — slot with the composites batch
 
