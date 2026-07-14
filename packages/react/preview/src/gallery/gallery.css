@@ -1,0 +1,337 @@
+:root {
+  font-family: var(--poodle-typography-body-family);
+  background: var(--poodle-color-background-canvas, #0f1720);
+  color: var(--poodle-color-text-primary, #e8eef5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--poodle-color-background-canvas, #0f1720);
+  color: var(--poodle-color-text-primary, #e8eef5);
+}
+
+button,
+input,
+fieldset,
+table {
+  font: inherit;
+}
+
+button,
+input {
+  min-height: 0;
+}
+
+/* ── App shell ──────────────────────────────────────────────────────── */
+
+.poodle-app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell[data-theme="light"] {
+  color-scheme: light;
+}
+.app-shell[data-theme="dark"],
+.app-shell[data-theme="loophole-studio"] {
+  color-scheme: dark;
+}
+
+.poodle-app-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-color-background-elevated);
+  flex-shrink: 0;
+}
+
+.poodle-app-top-bar__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.poodle-app-top-bar__title strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--poodle-color-text-primary);
+  white-space: nowrap;
+}
+
+.poodle-app-top-bar__framework {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-app-top-bar__pills {
+  display: flex;
+  gap: 0.375rem;
+  margin-left: auto;
+}
+
+.poodle-app-main {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Display controls ───────────────────────────────────────────────── */
+
+.poodle-display-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem 2rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-color-background-panel);
+}
+
+.poodle-display-controls__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.poodle-display-controls__group--search {
+  flex: 1;
+  min-width: 10rem;
+}
+
+/* ── Catalogue layout ───────────────────────────────────────────────── */
+
+.poodle-catalogue-layout {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+}
+
+.poodle-catalogue-sidebar {
+  width: 14rem;
+  flex-shrink: 0;
+  border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
+  overflow-y: auto;
+}
+
+.poodle-catalogue-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ── Catalogue landing ──────────────────────────────────────────────── */
+
+.poodle-catalogue-landing {
+  padding: 1.5rem;
+}
+.poodle-catalogue-landing__header {
+  margin-bottom: 2rem;
+}
+.poodle-catalogue-landing__header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--poodle-color-text-primary);
+}
+.poodle-catalogue-landing__header p {
+  color: var(--poodle-color-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.poodle-catalogue-landing__count {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.poodle-catalogue-landing__section {
+  margin-bottom: 1.5rem;
+}
+.poodle-catalogue-landing__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.poodle-component-card {
+  display: block;
+  padding: 0.75rem 1rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.poodle-component-card:hover {
+  border-color: var(--poodle-color-border-default);
+  background: var(--poodle-color-background-elevated);
+}
+.poodle-component-card__name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--poodle-color-text-primary);
+  margin-bottom: 0.25rem;
+}
+.poodle-component-card__description {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--poodle-color-text-secondary);
+  margin: 0;
+}
+
+/* ── Component page ─────────────────────────────────────────────────── */
+
+.poodle-component-page {
+  padding: 1.5rem 2rem;
+}
+.poodle-component-page__hero {
+  margin-bottom: 1.5rem;
+}
+.poodle-component-page__hero-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.poodle-component-page__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--poodle-color-text-primary);
+  margin: 0.25rem 0 0.75rem;
+}
+.poodle-component-page__description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--poodle-color-text-secondary);
+  margin: 0;
+}
+.poodle-component-page__section {
+  padding: 1.5rem 0;
+}
+.poodle-component-page__section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--poodle-color-text-primary);
+  margin: 0 0 1rem;
+}
+.poodle-component-page__placeholder {
+  padding: 2rem;
+  text-align: center;
+  color: var(--poodle-color-text-secondary);
+  border: 0.0625rem dashed color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
+  border-radius: var(--poodle-radius-surface);
+}
+.poodle-component-page__placeholder p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+.poodle-component-page__code {
+  padding: 0.75rem 1rem;
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, transparent);
+  border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.8125rem;
+  color: var(--poodle-color-text-primary);
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* ── Specimen layout + groups ───────────────────────────────────────── */
+
+.poodle-specimen-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.poodle-specimen-layout__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.poodle-specimen-layout__variants {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.poodle-specimen-layout__variants[data-direction="row"] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.poodle-specimen-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.poodle-specimen-group__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Shared specimen helpers (mirror common Svelte specimen styles) ──── */
+
+.poodle-specimen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.poodle-specimen__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.poodle-specimen__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.poodle-specimen__log {
+  font-size: 0.8125rem;
+  color: var(--poodle-color-text-secondary);
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
+  border-radius: var(--poodle-radius-control);
+}
+.poodle-specimen__inline-copy {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--poodle-color-text-primary);
+}
+.poodle-specimen__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
