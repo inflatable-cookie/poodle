@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
-import { Pill } from "@poodle/react";
+import { Pill, Separator } from "@poodle/react";
 import type { ComponentEntry } from "./registry";
+import { componentDocsMap } from "./component-docs";
+import { UsageDocs } from "./UsageDocs";
 
 export interface ComponentPageProps {
   entry: ComponentEntry;
@@ -8,6 +10,8 @@ export interface ComponentPageProps {
 }
 
 export function ComponentPage({ entry, specimenComponent: Specimen = null }: ComponentPageProps) {
+  const docs = componentDocsMap[entry.slug] ?? null;
+
   return (
     <article className="poodle-component-page">
       <header className="poodle-component-page__hero">
@@ -37,6 +41,13 @@ export function ComponentPage({ entry, specimenComponent: Specimen = null }: Com
           <code>{`import { ${entry.displayName} } from "${entry.packageName}";`}</code>
         </pre>
       </section>
+
+      {docs ? (
+        <>
+          <Separator />
+          <UsageDocs docs={docs} />
+        </>
+      ) : null}
     </article>
   );
 }

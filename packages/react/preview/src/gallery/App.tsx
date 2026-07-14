@@ -1,23 +1,33 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Pill, IconProvider, UiPresentationProvider, type IconSet } from "@poodle/react";
-import { applyThemeAttributes, themes, densityModes, controlSizes } from "@poodle/svelte-tokens";
+import { Pill, Tabs, IconProvider, UiPresentationProvider, type IconSet, type TabItem } from "@poodle/react";
+import { applyThemeAttributes, cssVars, themes, densityModes, controlSizes } from "@poodle/svelte-tokens";
 import iconNodes from "lucide-static/icon-nodes.json";
 
 import { DisplayControls } from "./DisplayControls";
 import { ComponentsSection } from "./ComponentsSection";
+import { TokensSection } from "./TokensSection";
 
 type ThemeName = keyof typeof themes;
 type DensityName = keyof typeof densityModes;
 type ControlSizeName = keyof typeof controlSizes;
+type SectionId = "components" | "tokens";
 
 interface Route {
-  section: "components";
+  section: SectionId;
   component?: string;
 }
 
+const topTabs: TabItem[] = [
+  { value: "components", label: "Components" },
+  { value: "tokens", label: "Tokens" },
+];
+
+const semanticPaths = Object.keys(cssVars) as Array<keyof typeof cssVars>;
+
 function parseRoute(hash: string): Route {
-  const match = hash.match(/^#components\/([a-z0-9-]+)$/);
-  if (match) return { section: "components", component: match[1] };
+  const component = hash.match(/^#components\/([a-z0-9-]+)$/);
+  if (component) return { section: "components", component: component[1] };
+  if (hash.startsWith("#tokens")) return { section: "tokens" };
   return { section: "components" };
 }
 
@@ -31,6 +41,7 @@ export function App() {
   const [search, setSearch] = useState("");
   const [route, setRoute] = useState<Route>({ section: "components" });
   const [mounted, setMounted] = useState(false);
+  const [liveTokenValues, setLiveTokenValues] = useState<Partial<Record<string, string>>>({});
 
   // ── Routing + initial query state ────────────────────────────────────
   useEffect(() => {
@@ -54,15 +65,22 @@ export function App() {
     };
   }, []);
 
-  // ── Theme application ────────────────────────────────────────────────
+  // ── Theme application + live token readout ───────────────────────────
   useEffect(() => {
     if (typeof document !== "undefined") {
       applyThemeAttributes(document.documentElement, { theme, density, controlSize });
     }
-    if (shellRef.current) {
-      applyThemeAttributes(shellRef.current, { theme, density, controlSize });
+    const shell = shellRef.current;
+    if (shell) {
+      applyThemeAttributes(shell, { theme, density, controlSize });
+      const styles = getComputedStyle(shell);
+      const next: Partial<Record<string, string>> = {};
+      for (const path of semanticPaths) {
+        next[path] = styles.getPropertyValue(cssVars[path]).trim();
+      }
+      setLiveTokenValues(next);
     }
-  }, [theme, density, controlSize]);
+  }, [theme, density, controlSize, contrast]);
 
   // ── Persist preview mode to the URL ──────────────────────────────────
   useEffect(() => {
@@ -76,6 +94,10 @@ export function App() {
     }
   }, [mounted, theme, density, controlSize, route]);
 
+  function navigateToSection(section: SectionId): void {
+    window.location.hash = section;
+  }
+
   const shellStyle: CSSProperties | undefined =
     contrast === 0.5 ? undefined : ({ "--poodle-contrast": contrast } as CSSProperties);
 
@@ -87,6 +109,13 @@ export function App() {
             <strong>Poodle</strong>
             <span className="poodle-app-top-bar__framework">React</span>
           </div>
+          <Tabs
+            value={route.section}
+            items={topTabs}
+            variant="pill"
+            ariaLabel="Main navigation"
+            onValueChange={(value) => navigateToSection(value as SectionId)}
+          />
           <div className="poodle-app-top-bar__pills">
             <Pill>{theme}</Pill>
             <Pill>{density}</Pill>
@@ -104,12 +133,19 @@ export function App() {
           onDensityChange={(value) => setDensity(value as DensityName)}
           onControlSizeChange={(value) => setControlSize(value as ControlSizeName)}
           onContrastChange={(value) => setContrast(Math.round(value * 100) / 100)}
-          onSearchChange={setSearch}
+          onSearchChange={(value) => {
+            setSearch(value);
+            if (route.section !== "components") navigateToSection("components");
+          }}
         />
 
         <main className="poodle-app-main">
           <IconProvider icons={iconNodes as unknown as IconSet}>
-            <ComponentsSection activeComponent={route.component} search={search} />
+            {route.section === "tokens" ? (
+              <TokensSection liveTokenValues={liveTokenValues} />
+            ) : (
+              <ComponentsSection activeComponent={route.component} search={search} />
+            )}
           </IconProvider>
         </main>
       </div>

@@ -349,3 +349,152 @@ input {
   height: 100%;
   min-height: 0;
 }
+
+/* ── Tokens page ────────────────────────────────────────────────────── */
+
+.poodle-tokens-page {
+  padding: 1.5rem 2rem;
+  max-width: 64rem;
+  overflow-y: auto;
+}
+.poodle-heading {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+.poodle-hint {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999rem;
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  color: var(--poodle-color-text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  align-self: flex-start;
+}
+.poodle-path {
+  color: var(--poodle-color-text-secondary);
+  font-family: var(--poodle-typography-code-family);
+  font-size: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.poodle-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.poodle-swatch {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent);
+  border-radius: var(--poodle-radius-control);
+}
+.poodle-value {
+  font-family: var(--poodle-typography-code-family);
+  font-size: 0.8125rem;
+}
+.poodle-search-input {
+  min-width: min(17.5rem, 100%);
+  max-width: 26rem;
+}
+.poodle-inspector-count {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ── Usage docs ─────────────────────────────────────────────────────── */
+
+.poodle-usage-docs {
+  display: flex;
+  flex-direction: column;
+  padding: 0 2rem 1.5rem;
+}
+.poodle-usage-docs__section {
+  padding: 1.5rem 0;
+}
+.poodle-usage-docs__heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--poodle-color-text-primary);
+  margin: 0 0 1rem;
+}
+.poodle-usage-docs__code {
+  padding: 0.75rem 1rem;
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, transparent);
+  border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--poodle-color-text-primary);
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+.poodle-usage-docs__table-wrap {
+  overflow-x: auto;
+}
+.poodle-usage-docs__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.poodle-usage-docs__table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--poodle-color-text-secondary);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.poodle-usage-docs__table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 40%, transparent);
+  color: var(--poodle-color-text-primary);
+  vertical-align: top;
+}
+.poodle-usage-docs__table td.poodle-usage-docs__type {
+  white-space: nowrap;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.poodle-usage-docs__table td.poodle-usage-docs__default {
+  white-space: nowrap;
+}
+.poodle-usage-docs__table td.poodle-usage-docs__description {
+  min-width: 12rem;
+  word-break: break-word;
+  color: var(--poodle-color-text-secondary);
+}
+.poodle-usage-docs__table tbody tr:last-child td {
+  border-bottom: none;
+}
+.poodle-usage-docs__prop-name {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--poodle-color-text-primary);
+}
+.poodle-usage-docs__required {
+  color: var(--poodle-color-text-danger, #ef4444);
+  margin-left: 0.125rem;
+}
+.poodle-usage-docs__type code,
+.poodle-usage-docs__default code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.75rem;
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.1875rem;
+  background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
+  color: var(--poodle-color-text-secondary);
+  white-space: nowrap;
+}
