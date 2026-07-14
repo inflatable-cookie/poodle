@@ -37,5 +37,19 @@ they drive the same hash-routed specimens as the Svelte preview.
 - [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
   role on the anchor variant), replicated in React for pixel parity.
   Fix both together if confirmed (noted in 006).
+- [x] **React preview gallery** — full per-component gallery matching
+  the Svelte preview: app shell (theme/density/size/contrast controls +
+  URL sync), tag-grouped SidebarNav, catalogue landing, per-component
+  page (hero + specimen + import), SpecimenLayout Examples/Sizes/
+  Densities tabs. All 129 specimen files ported (131/131 slugs) so both
+  apps route identically at `#components/<slug>` for side-by-side visual
+  diffing. Bulk port via an 18-agent orchestration pass; typecheck
+  clean; 128/131 render with zero console errors (the 3 others emit only
+  benign warnings — see the gallery commit). Deferred vs the Svelte
+  preview: Tokens section, component-docs/UsageDocs, and the
+  accessibility.ts/parity.ts report generators.
+- [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
+  role on the anchor variant), replicated in React for pixel parity.
+  Fix both together if confirmed (noted in 006).
 - [ ] Docs closeout: README/consumer notes for `@poodle/react`,
   update g12 README runway.
