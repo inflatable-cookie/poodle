@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatePicker, DateRangePicker, DateTimePicker, type DateRangeValue, type DateTimeValue } from "@poodle/react";
+import { DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, type DateRangeValue, type DateTimeRangeValue, type DateTimeValue, type ZonedDateTimeValue } from "@poodle/react";
 import { registerSpecimen, Row, SpecimenSection } from "../harness";
 
 function DatePickerSpecimen() {
@@ -44,3 +44,36 @@ function DateTimePickerSpecimen() {
   );
 }
 registerSpecimen({ slug: "date-time-picker", title: "DateTimePicker", render: () => <DateTimePickerSpecimen /> });
+
+function DateTimeRangePickerSpecimen() {
+  const [v, setV] = useState<DateTimeRangeValue>({
+    start: { date: "2026-07-06", time: "09:00" },
+    end: { date: null, time: null },
+  });
+  return (
+    <SpecimenSection title="DateTimeRangePicker">
+      <Row>
+        <DateTimeRangePicker value={v} onValueChange={setV} />
+      </Row>
+      <span data-testid="dtrp-value">
+        {v.start.date ?? "-"} {v.start.time ?? "-"} .. {v.end.date ?? "-"} {v.end.time ?? "-"}
+      </span>
+    </SpecimenSection>
+  );
+}
+registerSpecimen({ slug: "date-time-range-picker", title: "DateTimeRangePicker", render: () => <DateTimeRangePickerSpecimen /> });
+
+function DateTimeZonePickerSpecimen() {
+  const [v, setV] = useState<ZonedDateTimeValue>({ date: "2026-07-14", time: null, timeZone: null });
+  return (
+    <SpecimenSection title="DateTimeZonePicker">
+      <Row>
+        <DateTimeZonePicker value={v} onValueChange={setV} />
+      </Row>
+      <span data-testid="dtzp-value">
+        {v.date ?? "-"} {v.time ?? "-"} {v.timeZone ?? "-"}
+      </span>
+    </SpecimenSection>
+  );
+}
+registerSpecimen({ slug: "date-time-zone-picker", title: "DateTimeZonePicker", render: () => <DateTimeZonePickerSpecimen /> });

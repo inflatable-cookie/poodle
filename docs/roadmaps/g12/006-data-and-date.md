@@ -18,7 +18,10 @@ Depends on: `g12.005`
 - [x] Wave 2: DatePicker, DateRangePicker (Calendar composition: trigger
   label formatting, month follow, outside/Escape dismissal, close on
   complete selection). Verified 3/3. DateTimePicker done (Calendar +
-  TimeInput composition, verified). DateTimeRangePicker + DateTimeZonePicker
-  -> wave 2c.
+  TimeInput composition, verified). DateTimeRangePicker
+  (range calendar + per-end TimeInputs) and DateTimeZonePicker (+
+  TimeZoneSelect: searchable Select over defaultTimeZoneOptions) done —
+  the whole date-picker family is ported. Verified: range completion with
+  end time, zoned pick via timezone search.
 - [ ] Wave 3: EditableList, LogList, Tree
 - [ ] Wave 4: DataTable, ListCard

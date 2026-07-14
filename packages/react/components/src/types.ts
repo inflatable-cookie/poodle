@@ -256,3 +256,19 @@ export interface DateTimeValue {
   date: string | null;
   time: string | null;
 }
+
+export interface DateTimeRangeValue {
+  start: DateTimeValue;
+  end: DateTimeValue;
+}
+
+export interface TimeZoneOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+export interface ZonedDateTimeValue {
+  date: string | null;
+  time: string | null;
+  timeZone: string | null;
+}
