@@ -531,3 +531,29 @@ export type MediaPickerItem = {
   kind?: MediaKind;
   meta?: string | null;
 };
+
+export type BlockType = string;
+export type BlockEditorMode = "single" | "multi";
+
+export type BlockTypeDefinition = {
+  type: BlockType;
+  label: string;
+  icon: IconProp;
+};
+
+export type BlockTypeGroup = {
+  label: string;
+  options: BlockTypeDefinition[];
+};
+
+export type BlockTypeItems = BlockTypeDefinition[] | BlockTypeGroup[];
+
+export type EditorBlock = {
+  id: string;
+  type: BlockType;
+  version?: string | number;
+  hash?: string | null;
+  data?: unknown;
+  content?: string;
+  [key: string]: unknown;
+};

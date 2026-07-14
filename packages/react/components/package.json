@@ -20,8 +20,9 @@
   },
   "dependencies": {
     "@poodle/headless": "workspace:*",
+    "@poodle/icons-lucide": "workspace:*",
     "@poodle/styles": "workspace:*",
-    "@poodle/icons-lucide": "workspace:*"
+    "marked": "^18.0.0"
   },
   "poodleRelease": {
     "publicIntent": true,

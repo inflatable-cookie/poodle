@@ -25,6 +25,7 @@
         "@poodle/headless": "workspace:*",
         "@poodle/icons-lucide": "workspace:*",
         "@poodle/styles": "workspace:*",
+        "marked": "^18.0.0",
       },
       "devDependencies": {
         "@types/react": "^19.1.0",

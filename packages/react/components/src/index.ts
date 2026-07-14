@@ -43,6 +43,14 @@ export { ResizeHandle, type ResizeHandleProps } from "./ResizeHandle";
 export { resolveEmbedParseState, detectParsedEmbed, type EmbedParseState } from "./embed-input";
 export { ColorPicker, type ColorPickerProps } from "./ColorPicker";
 export { AudioPlayer, type AudioPlayerProps } from "./AudioPlayer";
+export {
+  BlockEditor,
+  type BlockEditorProps,
+  type BlockEditorTypePickerProps,
+  type BlockEditorAddPickerProps,
+  type BlockEditorBlockProps,
+} from "./BlockEditor";
+export { MarkdownEditor, type MarkdownEditorProps } from "./MarkdownEditor";
 export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
 export { MediaBrowsePanel, type MediaBrowsePanelProps } from "./MediaBrowsePanel";
 export { MediaPicker, type MediaPickerProps } from "./MediaPicker";

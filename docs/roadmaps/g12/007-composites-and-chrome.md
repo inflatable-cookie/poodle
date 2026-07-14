@@ -68,7 +68,13 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   MediaBrowsePanel (grid over compact thumbnails, load-more, error
   Callout), MediaPicker (Dialog + Tabs browse/upload with search filter
   and FileUpload). Verified 30/30. 115/132.
-- [ ] Wave 7: editors — MarkdownEditor, BlockEditor
+- [x] Wave 7: editors — MarkdownEditor (marked-rendered preview in
+  edit/split/preview modes, toolbar wrap/line insertions through
+  execCommand with setRangeText fallback, post-render selection restore
+  via pending ref), BlockEditor (block CRUD, move up/down, HTML5 drag
+  reorder, type-change + add-after Selects with custom trigger,
+  typePicker/addPicker/block render props). marked@^18 added to
+  @poodle/react deps. Verified 18/18. 117/132.
 - [ ] Wave 8: workstation + detail — DockRegion, SplitView, ScrollShell,
   DetailItem, DetailSection, DetailSectionGroup, DetailShell, PageHeader
 - [ ] Sweep: remaining stragglers to 132/132, then g12.008 parity
