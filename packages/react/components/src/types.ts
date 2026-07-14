@@ -557,3 +557,5 @@ export type EditorBlock = {
   content?: string;
   [key: string]: unknown;
 };
+
+export type ScrollDirection = "vertical" | "horizontal" | "both";

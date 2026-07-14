@@ -37,6 +37,7 @@ import "./specimens/pickers-shells";
 import "./specimens/heavy-pickers";
 import "./specimens/media";
 import "./specimens/editors";
+import "./specimens/workstation";
 
 function App() {
   const slug = useHashRoute();

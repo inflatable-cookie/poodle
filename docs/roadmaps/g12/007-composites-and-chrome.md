@@ -75,7 +75,14 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   reorder, type-change + add-after Selects with custom trigger,
   typePicker/addPicker/block render props). marked@^18 added to
   @poodle/react deps. Verified 18/18. 117/132.
-- [ ] Wave 8: workstation + detail — DockRegion, SplitView, ScrollShell,
-  DetailItem, DetailSection, DetailSectionGroup, DetailShell, PageHeader
+- [x] Wave 8 (partial): workstation + detail — SplitView (controlled/
+  uncontrolled ratio + collapse pairs, rail-collapse with hysteresis,
+  edge auto-collapse, ResizeHandle + CollapseToggle composition; drag
+  handlers read a stateRef mirror since they run outside the render
+  cycle), ScrollShell, DetailItem (Popover info trigger), DetailSection,
+  DetailSectionGroup, DetailShell. PageHeader landed in wave 5a.
+  Verified 27/27. 123/132. DockRegion DEFERRED: Tom has in-progress
+  uncommitted edits to DockRegion.svelte (tabVariant prop) — port after
+  that lands.
 - [ ] Sweep: remaining stragglers to 132/132, then g12.008 parity
   verification

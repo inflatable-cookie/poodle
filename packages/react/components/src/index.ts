@@ -51,6 +51,12 @@ export {
   type BlockEditorBlockProps,
 } from "./BlockEditor";
 export { MarkdownEditor, type MarkdownEditorProps } from "./MarkdownEditor";
+export { DetailItem, type DetailItemProps } from "./DetailItem";
+export { DetailSection, type DetailSectionProps } from "./DetailSection";
+export { DetailSectionGroup, type DetailSectionGroupProps } from "./DetailSectionGroup";
+export { DetailShell, type DetailShellProps } from "./DetailShell";
+export { ScrollShell, type ScrollShellProps } from "./ScrollShell";
+export { SplitView, type SplitViewProps } from "./SplitView";
 export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
 export { MediaBrowsePanel, type MediaBrowsePanelProps } from "./MediaBrowsePanel";
 export { MediaPicker, type MediaPickerProps } from "./MediaPicker";
