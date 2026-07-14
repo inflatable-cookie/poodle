@@ -4,6 +4,8 @@
  * `Snippet` becomes `ReactNode`. Grows per conversion batch.
  */
 
+import type { ReactNode } from "react";
+
 export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
 export type SemanticControlSizeRole = "control" | "chrome" | "prominent";
@@ -412,3 +414,14 @@ export type CardToggleItem = {
 
 export type SurfaceTone = "canvas" | "panel" | "elevated";
 export type SurfaceBorder = "none" | "subtle" | "default";
+
+export type Orientation = "vertical" | "horizontal";
+export type CollapseDirection = "left" | "right" | "up" | "down";
+
+export type BulkAction = {
+  id: string;
+  label: string;
+  icon?: IconProp | ReactNode;
+  tone?: "default" | "danger" | "warning";
+  disabled?: boolean;
+};

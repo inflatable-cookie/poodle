@@ -32,6 +32,7 @@ import "./specimens/list-card";
 import "./specimens/command-chrome";
 import "./specimens/nav-chrome";
 import "./specimens/cards-tiles";
+import "./specimens/toolbars-bars";
 
 function App() {
   const slug = useHashRoute();

@@ -28,8 +28,17 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   toggleGroupTransition from @poodle/headless; roving tabindex, arrow
   nav skipping disabled, toggle group supports allowDeactivation),
   StatusBar. Verified 28/28. 91/132.
-- [ ] Wave 4: toolbars + bars — Toolbar, FilterToolbar, MetaBar,
-  BulkActionBar, SelectionSummary, CollapseToggle, PageLoading
+- [x] Wave 4: toolbars + bars — Toolbar (getFocusableElements arrow
+  cycling, orientation-aware), FilterToolbar (collapsible header button
+  with CollapseToggle, controlled/uncontrolled collapsed pair,
+  columns/minItemWidth CSS vars, presentation re-provide), MetaBar (pill
+  context provider), BulkActionBar (select-all, tone'd icon actions,
+  zero-selection disable; custom icon = isValidElement branch replacing
+  Svelte's Component check), SelectionSummary (chip remove, overflow
+  count, clear), CollapseToggle, PageLoading (overlay/inline, progress
+  when determinate, cancel). Verified 35/35. 98/132. controlHeightRem
+  added to React presentation.ts. Specimen note: BulkActionBar is
+  position:fixed bottom — one instance per page or they stack.
 - [ ] Wave 5: pickers + inputs — ColorPicker, FileUpload, EmbedInput,
   EmbedPreview, PickerShell, RelationPicker, InlineListSection,
   ListContainer, ResizeHandle

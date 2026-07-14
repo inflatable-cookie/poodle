@@ -66,6 +66,14 @@ export function resolveSemanticControlSize(
   return "xl";
 }
 
+export function controlHeightRem(size: ControlSize): number {
+  if (size === "xs") return 1.5;
+  if (size === "sm") return 1.75;
+  if (size === "lg") return 2.75;
+  if (size === "xl") return 3.25;
+  return 2.25;
+}
+
 export function resolveSupportingVisualSize(size: ControlSize): ControlSize {
   if (size === "xl") return "lg";
   if (size === "lg") return "md";
