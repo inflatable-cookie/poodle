@@ -1,7 +1,7 @@
 # SelectionSummary
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-15
 
 ## 1. Purpose
 
@@ -20,12 +20,21 @@ Updated: 2026-07-10
 [Root <section>]  aria-label="Current selection"
   └── [Chips .selection-summary__chips]
         ├── [Empty .selection-summary__empty]  <span> (when items.length === 0)
-        ├── [Chip <button>...]                 (when items.length > 0)
+        ├── [Chip <button>...]                 (remove-only mode: onActivate is null)
         │     ├── [ChipLabel]
         │     └── [RemoveIcon]  Icon "x", aria-hidden
+        ├── [Chip .selection-summary__chip--split <span>]  (split mode: onActivate set)
+        │     ├── [Activate .selection-summary__chip-activate]  <button> containing label
+        │     └── [Remove]  IconButton (icon "x", size xs, ghost)
         ├── [Overflow <span>]                  (when items.length > maxVisibleItems)
         └── [ClearLink .selection-summary__clear]  TextLink (when items.length > 0, pushed right via margin-left: auto)
 ```
+
+The chip renders in one of two modes. Default (remove-only) keeps the whole chip
+as a single remove button. When `onActivate` is provided the chip splits into two
+independent sibling controls — an activation button (the label) and a remove
+IconButton — so consumers like `FilterBuilder` can edit and remove a pill
+separately. The two modes never nest interactive elements.
 
 ### Parts
 
@@ -50,6 +59,7 @@ Updated: 2026-07-10
 | `size` | `ControlSize \| null` | `null` | no | Explicit absolute size override |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic size intent for presentation context resolution |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
+| `onActivate` | `((id: string) => void) \| null` | `null` | no | When set, each chip splits into a separate activation button (the label) and a remove button (no nested buttons). When `null`, the whole chip is the remove button (default) |
 | `onRemove` | `((id: string) => void) \| null` | `null` | no | called when an item is removed from the selection |
 | `onClear` | `(() => void) \| null` | `null` | no | called when all items are cleared |
 
@@ -87,17 +97,21 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Callback | When It Runs | Payload | Notes |
 |----------|--------------|---------|-------|
+| `onActivate` | chip activation button clicked (split mode) | `string` | host activates/edits the item |
 | `onRemove` | chip remove button clicked | `string` | host removes the item from selection |
 | `onClear` | clear link clicked | none | host clears all selections |
 
 ## 6. Accessibility
 
 - Root is `<section>` with `aria-label="Current selection"`
-- Each chip button has `aria-label="Remove {item.label}"`
-- Remove icon (x) is `aria-hidden="true"`
-- `Tab` navigates between chip buttons and the inline clear link
-- `Enter` / `Space` activates focused button (clear or remove)
-- Focus entry: first chip or clear link
+- Remove-only mode: each chip button has `aria-label="Remove {item.label}"`;
+  remove icon (x) is `aria-hidden="true"`
+- Split mode (`onActivate` set): the activation button has
+  `aria-label="Edit {item.label}"` and the separate remove IconButton has
+  `aria-label="Remove {item.label}"` — two independent, non-nested controls
+- `Tab` navigates between chip controls and the inline clear link
+- `Enter` / `Space` activates the focused button (activate, remove, or clear)
+- Focus entry: first chip control or clear link
 
 ## 7. Layout
 

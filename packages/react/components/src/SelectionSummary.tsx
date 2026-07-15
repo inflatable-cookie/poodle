@@ -1,6 +1,7 @@
 import "@poodle/styles/selection-summary.css";
 
 import { Icon } from "./Icon";
+import { IconButton } from "./IconButton";
 import { TextLink } from "./TextLink";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -16,6 +17,10 @@ export interface SelectionSummaryProps {
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
+  /** When set, each chip splits into a separate activation button (the label)
+   * and a remove button — no nested buttons. When null, the whole chip removes
+   * the item (backward-compatible default). */
+  onActivate?: ((id: string) => void) | null;
   onRemove?: ((id: string) => void) | null;
   onClear?: (() => void) | null;
 }
@@ -26,6 +31,7 @@ export function SelectionSummary({
   size = null,
   sizeRole = "control",
   density = null,
+  onActivate = null,
   onRemove = null,
   onClear = null,
 }: SelectionSummaryProps) {
@@ -48,20 +54,43 @@ export function SelectionSummary({
           <span className="poodle-selection-summary__empty">No selection</span>
         ) : (
           <>
-            {visibleItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="poodle-selection-summary__chip"
-                onClick={() => onRemove?.(item.id)}
-                aria-label={`Remove ${item.label}`}
-              >
-                {item.label}
-                <span aria-hidden="true">
-                  <Icon name="x" />
+            {visibleItems.map((item) =>
+              onActivate ? (
+                <span
+                  key={item.id}
+                  className="poodle-selection-summary__chip poodle-selection-summary__chip--split"
+                >
+                  <button
+                    type="button"
+                    className="poodle-selection-summary__chip-activate"
+                    onClick={() => onActivate?.(item.id)}
+                    aria-label={`Edit ${item.label}`}
+                  >
+                    {item.label}
+                  </button>
+                  <IconButton
+                    icon="x"
+                    size="xs"
+                    variant="ghost"
+                    ariaLabel={`Remove ${item.label}`}
+                    onClick={() => onRemove?.(item.id)}
+                  />
                 </span>
-              </button>
-            ))}
+              ) : (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="poodle-selection-summary__chip"
+                  onClick={() => onRemove?.(item.id)}
+                  aria-label={`Remove ${item.label}`}
+                >
+                  {item.label}
+                  <span aria-hidden="true">
+                    <Icon name="x" />
+                  </span>
+                </button>
+              ),
+            )}
             {overflowCount > 0 ? (
               <span className="poodle-selection-summary__overflow">+{overflowCount} more</span>
             ) : null}

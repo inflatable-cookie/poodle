@@ -59,6 +59,31 @@
     font-size: var(--poodle-selection-summary-chip-font-size);
   }
 
+  /* Split chip: separate activation + remove controls (no nested buttons). The
+     wrapper keeps the chip chrome; the remove IconButton supplies trailing space. */
+  .poodle-selection-summary__chip--split {
+    gap: 0.125rem;
+    padding-right: 0.1875rem;
+    cursor: default;
+  }
+
+  .poodle-selection-summary__chip-activate {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .poodle-selection-summary__chip-activate:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+  }
+
   .poodle-selection-summary__chip .poodle-icon {
     width: var(--poodle-selection-summary-icon-size);
     height: var(--poodle-selection-summary-icon-size);
