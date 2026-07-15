@@ -41,7 +41,7 @@ evaluation and serialization.
   │       └── [Reset .filter-builder__reset] <span> (when showClearButton)
   │           └── IconButton (icon="x", variant="ghost", ariaLabel="Clear filters")
   └── [Surface .filter-builder__surface > .filter-builder__panel] <div role="dialog"> (rendered inline when open)
-      ├── [Combinator .filter-builder__combinator] SegmentedControl (conditional: showCombinator && clauses.length >= 2)
+      ├── [Combinator .filter-builder__combinator] SegmentedControl (conditional: showCombinator && clauses.length >= 2 && not editing a chip)
       │       └── "Match all" / "Match any"
       ├── [Draft .filter-builder__draft] <div>  (add or edit a clause)
       │   ├── [Field Select] Select (placeholder "+ Add filter"; disabled while editing)
@@ -66,7 +66,7 @@ evaluation and serialization.
 | Count | no | small badge with the active-clause count; the single count indicator, shown when `showPills` (the opener summary text is suppressed to avoid duplicating it) | `--poodle-color-accent-base`, `--poodle-color-text-inverse` |
 | Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear filters"`), the single clear-all, shown when `showClearButton` and at least one clause is active | (IconButton primitive) |
 | Surface | yes | anchored `role="dialog"` popover surface (`tabindex="-1"`) containing the combinator + draft editor | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` |
-| Combinator | no | `SegmentedControl` choosing `and` / `or`; shown only when `showCombinator` is true and 2+ clauses exist | (SegmentedControl contract) |
+| Combinator | no | `SegmentedControl` choosing `and` / `or`; the mode *switch* shows only when `showCombinator` is true, 2+ clauses exist, **and** the popover was opened from the trigger (the All/Any label) — it is hidden while editing an individual chip, since the combinator combines the whole stack, not one clause. The opener label still reflects the mode in every state | (SegmentedControl contract) |
 | Draft | no | the add/edit row: field select, operator select, operand editor, actions | — |
 | Operand Editor | no | value editor whose shape depends on the operator's operand kind (§4.4) | (composed primitives) |
 | Empty | no | placeholder text ("No filters") when no clauses and no active draft | `--poodle-color-text-secondary` |
@@ -175,7 +175,7 @@ relabel the set via `operators`. Defaults:
 | popover open | user clicks trigger or a pill | anchored dialog surface appears below the trigger |
 | adding | a field is chosen in the draft, no clause being edited | operator + operand editor + "Add"/"Cancel" shown; "Add" disabled until draft valid |
 | editing | a pill is activated | draft pre-filled from that clause; field select disabled; "Update"/"Cancel" shown |
-| combinator shown | `showCombinator` && `clauses.length >= 2` | `Match all` / `Match any` SegmentedControl appears above the draft (default off) |
+| combinator shown | `showCombinator` && `clauses.length >= 2` && `editingId === null` | `Match all` / `Match any` SegmentedControl appears (default off; hidden while editing a chip — the opener label still shows the mode) |
 | maxClauses reached | active count equals `maxClauses` and not editing | the add row (field select) is hidden |
 
 ### 4.2 Summary Text Logic

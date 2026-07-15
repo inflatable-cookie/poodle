@@ -110,14 +110,18 @@ export function FilterBuilder({
     .filter((field) => !field.disabled)
     .filter((field) => field.allowMultiple || !clauses.some((clause) => clause.key === field.key));
   const addSelectItems = availableFields.map((field) => ({ value: field.key, label: field.label }));
-  const combinatorVisible = showCombinator && clauses.length >= 2;
-  const openerLabel = combinatorVisible ? (combinator === "and" ? "All" : "Any") : "Filter";
+  // Mode is "active" whenever opted in with 2+ clauses (label reflects it in
+  // every state); the switch only renders when the popover was opened from the
+  // trigger, not when editing an individual chip.
+  const combinatorActive = showCombinator && clauses.length >= 2;
+  const combinatorVisible = combinatorActive && editingId === null;
+  const openerLabel = combinatorActive ? (combinator === "and" ? "All" : "Any") : "Filter";
   const isDrafting = draftKey !== "";
   const showAddRow = !isDrafting && canAddMore && availableFields.length > 0;
   const summaryText =
     activeCount === 0 ? "Filter" : activeCount === 1 ? "1 filter" : `${activeCount} filters`;
   const triggerAriaLabel = `${ariaLabel}${
-    combinatorVisible ? (combinator === "and" ? ", match all" : ", match any") : ""
+    combinatorActive ? (combinator === "and" ? ", match all" : ", match any") : ""
   }${activeCount > 0 ? `, ${activeCount} active` : ""}`;
 
   useEffect(() => {
@@ -297,7 +301,7 @@ export function FilterBuilder({
           {!compact ? (
             <span
               className="poodle-filter-builder__label"
-              data-combinator={combinatorVisible ? "true" : "false"}
+              data-combinator={combinatorActive ? "true" : "false"}
             >
               {openerLabel}
             </span>

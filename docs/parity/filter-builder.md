@@ -52,6 +52,14 @@ React is interface-invariant with Svelte (same props/types/behavior, own local t
 
 ## Notes
 
+- **Combinator switch scoped to the overview, not chip edits (2026-07-15).** The
+  `Match all` / `Match any` switch now renders only when the popover is opened from
+  the trigger (the All/Any label) — it is hidden while editing an individual chip
+  (`editingId !== null`), since the combinator combines the whole clause stack, not
+  one clause. The opener label still reflects the live mode in every state. Web-only
+  gating (native has no interactive edit mode, so `combinator_visible()` is
+  unchanged and always renders the overview). Verified headless: trigger-open shows
+  the switch; clicking a pill to edit hides it while the label stays "ALL"/"ANY".
 - **`showCombinator` opt-in + mode-reflecting label (2026-07-15).** The `Match all`
   / `Match any` root combinator is now off by default and shown only when a host
   opts in via `showCombinator` (and 2+ clauses exist). Most filter sets are AND-only,

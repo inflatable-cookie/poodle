@@ -121,11 +121,15 @@
       .filter((field) => field.allowMultiple || !clauses.some((clause) => clause.key === field.key)),
   );
   const addSelectItems = $derived(availableFields.map((field) => ({ value: field.key, label: field.label })));
-  const combinatorVisible = $derived(showCombinator && clauses.length >= 2);
-  // When the combinator is live, the opener label reflects the match mode so it
-  // is visible without opening the popover.
+  // The combinator mode is "active" whenever opted in with 2+ clauses — the
+  // opener label reflects it in every state. The mode *switch* only renders in
+  // the popover when it was opened from the trigger (the All/Any label), not when
+  // editing an individual chip — the combinator combines the whole stack, so it
+  // is noise in a single-chip edit.
+  const combinatorActive = $derived(showCombinator && clauses.length >= 2);
+  const combinatorVisible = $derived(combinatorActive && editingId === null);
   const openerLabel = $derived(
-    combinatorVisible ? (combinator === "and" ? "All" : "Any") : "Filter",
+    combinatorActive ? (combinator === "and" ? "All" : "Any") : "Filter",
   );
   const isDrafting = $derived(draftKey !== "");
   const showAddRow = $derived(!isDrafting && canAddMore && availableFields.length > 0);
@@ -133,7 +137,7 @@
     activeCount === 0 ? "Filter" : activeCount === 1 ? "1 filter" : `${activeCount} filters`,
   );
   const triggerAriaLabel = $derived(
-    `${ariaLabel}${combinatorVisible ? (combinator === "and" ? ", match all" : ", match any") : ""}${activeCount > 0 ? `, ${activeCount} active` : ""}`,
+    `${ariaLabel}${combinatorActive ? (combinator === "and" ? ", match all" : ", match any") : ""}${activeCount > 0 ? `, ${activeCount} active` : ""}`,
   );
 
   $effect(() => {
@@ -328,7 +332,7 @@
       onclick={toggleOpen}
     >
       {#if !compact}
-        <span class="poodle-filter-builder__label" data-combinator={combinatorVisible ? "true" : "false"}>{openerLabel}</span>
+        <span class="poodle-filter-builder__label" data-combinator={combinatorActive ? "true" : "false"}>{openerLabel}</span>
       {/if}
       {#if !(showPills && activeCount > 0)}
         <span class="poodle-filter-builder__summary" data-placeholder={activeCount === 0}>
