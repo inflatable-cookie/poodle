@@ -294,6 +294,44 @@ impl Default for FilterExpression {
     }
 }
 
+/// In-progress draft in the open popover: adding a new clause (`editing_id`
+/// none) or editing an existing one (`editing_id` set). Mirrors the web's local
+/// draft state so the render is a faithful function of the full component state.
+#[derive(Clone, Debug, PartialEq)]
+pub struct FilterDraft {
+    pub key: String,
+    pub operator: String,
+    pub operand: FilterOperand,
+    pub editing_id: Option<String>,
+}
+
+impl FilterDraft {
+    /// Seed a draft for a field at its default operator with a blank operand.
+    pub fn adding(field: &FilterFieldDefinition) -> Self {
+        let operator = field.resolved_default_operator();
+        let operand_kind = field
+            .find_operator(&operator)
+            .map(|op| op.operand_kind)
+            .unwrap_or(FilterOperandKind::None);
+        Self {
+            key: field.key.clone(),
+            operator,
+            operand: FilterOperand::empty(operand_kind),
+            editing_id: None,
+        }
+    }
+
+    /// Load an existing clause into a draft for editing.
+    pub fn editing(clause: &FilterClause) -> Self {
+        Self {
+            key: clause.key.clone(),
+            operator: clause.operator.clone(),
+            operand: clause.operand.clone(),
+            editing_id: Some(clause.id.clone()),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct FilterBuilderSpec {
     pub fields: Vec<FilterFieldDefinition>,
@@ -309,6 +347,8 @@ pub struct FilterBuilderSpec {
     pub show_pills: bool,
     pub show_combinator: bool,
     pub is_open: bool,
+    /// Active draft in the open popover, if any.
+    pub draft: Option<FilterDraft>,
 }
 
 impl FilterBuilderSpec {
@@ -327,6 +367,7 @@ impl FilterBuilderSpec {
             show_pills: true,
             show_combinator: false,
             is_open: false,
+            draft: None,
         }
     }
 
@@ -390,6 +431,39 @@ impl FilterBuilderSpec {
         self
     }
 
+    pub fn with_draft(mut self, draft: FilterDraft) -> Self {
+        self.draft = Some(draft);
+        self
+    }
+
+    /// Whether a draft (add or edit) is active in the open popover.
+    pub fn is_drafting(&self) -> bool {
+        self.draft.is_some()
+    }
+
+    /// Whether the active draft is editing an existing clause (vs adding).
+    pub fn is_editing(&self) -> bool {
+        self.draft.as_ref().is_some_and(|d| d.editing_id.is_some())
+    }
+
+    /// The field definition backing the active draft, if any.
+    pub fn draft_field(&self) -> Option<&FilterFieldDefinition> {
+        self.draft.as_ref().and_then(|d| self.field(&d.key))
+    }
+
+    /// Whether the active draft is complete enough to commit.
+    pub fn is_draft_valid(&self) -> bool {
+        match &self.draft {
+            Some(draft) => self.is_clause_complete(&draft.key, &draft.operator, &draft.operand),
+            None => false,
+        }
+    }
+
+    /// Whether the add-field row shows (not drafting, room for more, fields left).
+    pub fn show_add_row(&self) -> bool {
+        !self.is_drafting() && self.can_add_more() && !self.available_fields().is_empty()
+    }
+
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
         self
@@ -430,7 +504,9 @@ impl FilterBuilderSpec {
     }
 
     pub fn combinator_visible(&self) -> bool {
-        self.show_combinator && self.value.clauses.len() >= 2
+        // Hidden while editing a chip — the combinator combines the whole stack,
+        // not one clause (matches the Svelte/React `editingId === null` gate).
+        self.show_combinator && self.value.clauses.len() >= 2 && !self.is_editing()
     }
 
     /// Whether a draft clause is complete: valid operator whose operand kind
@@ -700,6 +776,36 @@ mod tests {
         assert!(spec.combinator_visible());
         spec.value.clauses.pop();
         assert!(!spec.combinator_visible());
+    }
+
+    #[test]
+    fn draft_state_and_edit_scoped_combinator() {
+        let mut spec = sample_spec().with_show_combinator(true);
+        spec.value.clauses.push(FilterClause::new("f1", "format", "any_of", FilterOperand::Options(vec!["clap".into()])));
+        spec.value.clauses.push(FilterClause::new("h1", "hidden", "is", FilterOperand::Boolean(false)));
+
+        // Overview: 2 clauses + opted in → combinator visible.
+        assert!(!spec.is_drafting());
+        assert!(spec.combinator_visible());
+        assert!(spec.show_add_row());
+
+        // Adding a new clause → drafting, not editing; combinator stays.
+        let format = spec.field("format").unwrap().clone();
+        spec.draft = Some(FilterDraft::adding(&format));
+        assert!(spec.is_drafting() && !spec.is_editing());
+        assert!(spec.combinator_visible());
+        assert!(!spec.show_add_row());
+        // Fresh multi-enum draft has no selected options → not valid yet.
+        assert!(!spec.is_draft_valid());
+
+        // Editing an existing clause → combinator hidden.
+        let clause = spec.value.clauses[1].clone();
+        spec.draft = Some(FilterDraft::editing(&clause));
+        assert!(spec.is_editing());
+        assert!(!spec.combinator_visible());
+        assert_eq!(spec.draft_field().map(|f| f.key.as_str()), Some("hidden"));
+        // Boolean operand is always valid.
+        assert!(spec.is_draft_valid());
     }
 
     #[test]

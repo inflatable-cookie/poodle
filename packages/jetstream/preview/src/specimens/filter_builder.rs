@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::filter_builder::js_filter_builder;
 use poodle_jetstream_components::theme_ext::*;
 use poodle_specs::{
-    ControlDensity, ControlSize, FilterBuilderSpec, FilterClause, FilterCombinator,
+    ControlDensity, ControlSize, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
     FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOption,
 };
 
@@ -60,6 +60,32 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     .with_value(value())
                     .with_show_combinator(true)
                     .with_open(true),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Adding a filter (draft editor)",
+            secondary,
+            js_filter_builder(
+                &FilterBuilderSpec::new()
+                    .with_fields(fields())
+                    .with_value(value())
+                    .with_show_combinator(true)
+                    .with_open(true)
+                    .with_draft(FilterDraft::adding(&fields()[3])),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Editing a clause (combinator hidden)",
+            secondary,
+            js_filter_builder(
+                &FilterBuilderSpec::new()
+                    .with_fields(fields())
+                    .with_value(value())
+                    .with_show_combinator(true)
+                    .with_open(true)
+                    .with_draft(FilterDraft::editing(&value().clauses[0])),
                 theme,
             ),
         ))

@@ -361,9 +361,14 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 
 - expected crate/module surface: `poodle_gpui::primitives::filter_builder`
 - theme access via `GpuiThemeProvider`; all dimensions/colors resolved from tokens
-- render-only build-verified posture accepted for v1: trigger + summary + pills +
-  surface render from `FilterBuilderSpec`; interactive draft editing and anchored
-  positioning are platform-owned and tracked as open parity items
+- the render is a faithful function of the **full** spec state: `FilterBuilderSpec`
+  carries `draft: Option<FilterDraft>` (adding vs editing), so GPUI + Jetstream
+  render the complete draft editor (operator select + operand editor per kind +
+  Add/Update/Cancel) and gate the combinator on `!is_editing()`, matching
+  Svelte/React for equivalent states. The one native limitation (shared by all
+  components) is that the preview does not itself drive clicks — live open / select
+  / add / edit / remove is host-event-loop work; anchored positioning is
+  platform-owned (surface renders inline)
 - no ARIA API — accessible-name intent documented as an accepted delta
 
 ## 11. Parity Checklist
@@ -403,7 +408,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream interactive draft editing not wired | native preview event-loop limitation; render-only build-verified posture (same as OrderBy) | accepted | wire when native preview interaction lands |
+| GPUI/Jetstream preview doesn't drive live clicks | native render is a faithful function of the full spec state (draft editor + edit-scoping rendered), but the preview event loop doesn't dispatch open/select/add/edit/remove — shared render-only posture across all components | accepted | host wires interaction; nothing FilterBuilder-specific left |
 | No nested Boolean groups | v1 scope; single commutative combinator only | accepted (by design) | forward-compatible expression shape retained for a future grouped-node model |
 | Clause `id` generated per-instance counter | opaque UI identity only; host may replace ids on round-trip | accepted | documented risk; host owns durable identity |
 

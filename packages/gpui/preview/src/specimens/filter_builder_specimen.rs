@@ -7,7 +7,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, FilterBuilder};
 use poodle_specs::{
-    EyebrowSpec, FilterBuilderSpec, FilterClause, FilterCombinator, FilterExpression,
+    EyebrowSpec, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft, FilterExpression,
     FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOption,
 };
 
@@ -77,6 +77,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .child("3 active clauses, Match all"),
                         ),
                 ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Adding a filter (draft editor)"),
+                    theme,
+                ))
+                .child(FilterBuilder::from_spec(
+                    FilterBuilderSpec::new()
+                        .with_fields(demo_fields())
+                        .with_value(demo_value())
+                        .with_show_combinator(true)
+                        .with_open(true)
+                        .with_draft(FilterDraft::adding(&demo_fields()[3])),
+                    theme,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Editing a clause (combinator hidden)"),
+                    theme,
+                ))
+                .child(FilterBuilder::from_spec(
+                    FilterBuilderSpec::new()
+                        .with_fields(demo_fields())
+                        .with_value(demo_value())
+                        .with_show_combinator(true)
+                        .with_open(true)
+                        .with_draft(FilterDraft::editing(&demo_value().clauses[0])),
+                    theme,
+                )),
         )
         .child(
             div()

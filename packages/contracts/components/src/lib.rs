@@ -296,8 +296,8 @@ pub use embed_preview::EmbedPreviewSpec;
 pub use empty_state::EmptyStateSpec;
 pub use error_boundary::ErrorBoundarySpec;
 pub use filter_builder::{
-    default_operators_for_kind, FilterBuilderSpec, FilterClause, FilterCombinator, FilterExpression,
-    FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOperandKind,
+    default_operators_for_kind, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
+    FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOperandKind,
     FilterOperatorDefinition, FilterOption,
 };
 pub use filter_toolbar::FilterToolbarSpec;

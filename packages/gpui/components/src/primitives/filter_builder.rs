@@ -1,13 +1,126 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonVariant, ChoiceOption, ControlDensity, ControlSize, FilterBuilderSpec, FilterCombinator,
-    IconButtonSpec, IconSize, IconSpec, SelectSpec, SemanticControlSizeRole,
+    ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
+    FilterBuilderSpec, FilterCombinator, FilterFieldDefinition, FilterFieldKind, FilterOperand,
+    FilterOperandKind, IconButtonSpec, IconSize, IconSpec, NumberInputSpec, SegmentedControlSpec,
+    SelectSpec, SemanticControlSizeRole, TextInputSpec,
 };
 
-use super::{Icon, IconButton, Select};
+use super::{Button, Checkbox, Icon, IconButton, NumberInput, SegmentedControl, Select, TextInput};
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+
+/// Operand editor for a draft clause, chosen by the operator's operand kind —
+/// mirrors the Svelte/React `FilterOperandEditor`. Render-only.
+#[allow(clippy::too_many_arguments)]
+fn operand_editor(
+    theme: &GpuiThemeProvider,
+    field: &FilterFieldDefinition,
+    operand_kind: FilterOperandKind,
+    operand: &FilterOperand,
+    size: ControlSize,
+    density: ControlDensity,
+    disabled: bool,
+) -> AnyElement {
+    match operand_kind {
+        FilterOperandKind::Boolean => {
+            let on = matches!(operand, FilterOperand::Boolean(true));
+            SegmentedControl::from_spec(
+                SegmentedControlSpec::new(vec![
+                    ChoiceOption::new("true", "True"),
+                    ChoiceOption::new("false", "False"),
+                ]),
+                theme,
+            )
+            .value(if on { "true" } else { "false" })
+            .size(size)
+            .density(density)
+            .disabled(disabled)
+            .into_any_element()
+        }
+        FilterOperandKind::Text => {
+            let value = match operand {
+                FilterOperand::Text(t) => t.clone(),
+                _ => String::new(),
+            };
+            TextInput::from_spec(TextInputSpec::new().with_value(value), theme)
+                .size(size)
+                .density(density)
+                .disabled(disabled)
+                .into_any_element()
+        }
+        FilterOperandKind::Number => {
+            let value = match operand {
+                FilterOperand::Number(n) if n.is_finite() => *n,
+                _ => 0.0,
+            };
+            NumberInput::from_spec(NumberInputSpec::new(value), theme)
+                .size(size)
+                .density(density)
+                .disabled(disabled)
+                .into_any_element()
+        }
+        FilterOperandKind::Options => {
+            let selected: Vec<String> = match operand {
+                FilterOperand::Options(v) => v.clone(),
+                _ => Vec::new(),
+            };
+            if field.kind == FilterFieldKind::Enum {
+                let options: Vec<ChoiceOption> = field
+                    .options
+                    .iter()
+                    .map(|o| ChoiceOption::new(o.value.clone(), o.label.clone()))
+                    .collect();
+                Select::from_spec(SelectSpec::new(options), theme)
+                    .value(selected.first().cloned().unwrap_or_default())
+                    .placeholder("Select…")
+                    .size(size)
+                    .density(density)
+                    .disabled(disabled)
+                    .into_any_element()
+            } else {
+                let mut list = div().flex().flex_col().gap(px(rem_to_px(0.25)));
+                for option in field.options.iter() {
+                    list = list.child(
+                        Checkbox::from_spec(CheckboxSpec::new(), theme)
+                            .label(option.label.clone())
+                            .checked(selected.contains(&option.value))
+                            .size(size)
+                            .disabled(disabled || option.is_disabled),
+                    );
+                }
+                list.into_any_element()
+            }
+        }
+        FilterOperandKind::Range => {
+            let (min, max) = match operand {
+                FilterOperand::Range { min, max } => (*min, *max),
+                _ => (None, None),
+            };
+            let sep = resolve_color(theme, "color.text.secondary");
+            div()
+                .flex()
+                .items_center()
+                .gap(px(rem_to_px(0.375)))
+                .child(
+                    NumberInput::from_spec(NumberInputSpec::new(min.unwrap_or(0.0)), theme)
+                        .size(size)
+                        .density(density)
+                        .disabled(disabled),
+                )
+                .child(div().text_color(sep).child("–"))
+                .child(
+                    NumberInput::from_spec(NumberInputSpec::new(max.unwrap_or(0.0)), theme)
+                        .size(size)
+                        .density(density)
+                        .disabled(disabled),
+                )
+                .into_any_element()
+        }
+        FilterOperandKind::None => div().into_any_element(),
+    }
+}
 
 /// FilterBuilder — anchored filter-clause builder backed by `FilterBuilderSpec`.
 ///
@@ -283,10 +396,79 @@ impl IntoElement for FilterBuilder {
                 );
             }
 
-            // Add-field Select (fields still available).
-            let available = spec.available_fields();
-            if spec.can_add_more() && !available.is_empty() {
-                let options: Vec<ChoiceOption> = available
+            // Draft editor (adding or editing a clause).
+            if let (Some(draft), Some(field)) = (spec.draft.as_ref(), spec.draft_field()) {
+                let operators = field.resolved_operators();
+                let mut editor = div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(rem_to_px(0.5)))
+                    .p(px(rem_to_px(0.5)))
+                    .rounded(radius)
+                    .border_1()
+                    .border_color(item_border)
+                    .bg(item_bg)
+                    .child(
+                        div()
+                            .text_size(px(rem_to_px(0.8125)))
+                            .text_color(text_primary)
+                            .child(field.label.clone()),
+                    );
+
+                if operators.len() > 1 {
+                    let options: Vec<ChoiceOption> = operators
+                        .iter()
+                        .map(|op| ChoiceOption::new(op.key.clone(), op.label.clone()))
+                        .collect();
+                    editor = editor.child(
+                        Select::from_spec(SelectSpec::new(options), theme)
+                            .value(draft.operator.clone())
+                            .size(effective_size)
+                            .density(spec.density)
+                            .disabled(spec.is_disabled),
+                    );
+                }
+
+                if let Some(op) = field.find_operator(&draft.operator) {
+                    editor = editor.child(operand_editor(
+                        theme,
+                        field,
+                        op.operand_kind,
+                        &draft.operand,
+                        effective_size,
+                        spec.density,
+                        spec.is_disabled,
+                    ));
+                }
+
+                let commit_label = if draft.editing_id.is_some() { "Update" } else { "Add" };
+                editor = editor.child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(rem_to_px(0.375)))
+                        .child(
+                            Button::from_spec(ButtonSpec::new(), theme)
+                                .variant(ButtonVariant::Primary)
+                                .label(commit_label)
+                                .size(effective_size)
+                                .disabled(spec.is_disabled || !spec.is_draft_valid()),
+                        )
+                        .child(
+                            Button::from_spec(ButtonSpec::new(), theme)
+                                .variant(ButtonVariant::Ghost)
+                                .label("Cancel")
+                                .size(effective_size)
+                                .disabled(spec.is_disabled),
+                        ),
+                );
+                panel = panel.child(editor);
+            }
+
+            // Add-field Select (only when not drafting, room remains).
+            if spec.show_add_row() {
+                let options: Vec<ChoiceOption> = spec
+                    .available_fields()
                     .into_iter()
                     .map(|field| ChoiceOption::new(field.key.clone(), field.label.clone()))
                     .collect();
@@ -299,7 +481,7 @@ impl IntoElement for FilterBuilder {
                 panel = panel.child(div().flex().items_center().child(select));
             }
 
-            if !spec.has_value() {
+            if !spec.has_value() && !spec.is_drafting() {
                 panel = panel.child(
                     div()
                         .text_size(px(rem_to_px(0.75)))

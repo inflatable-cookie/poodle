@@ -30,15 +30,17 @@ React is interface-invariant with Svelte (same props/types/behavior, own local t
 
 ## GPUI gap (vs Svelte + contract)
 
-- [x] Trigger (FILTER label + summary + count badge + chevron), ghost `×` reset, clause pills (label + xs ghost remove IconButton), anchored surface (combinator two-option indicator + add-field `Select` + "No filters"), sizes/densities from the spec token methods and size table — all resolve from `FilterBuilderSpec` tokens (`count_fill_token`, `muted_color_token`, `surface_radius_token`, …). Build-verified (`cargo check`).
-- [ ] Interactive draft editing (field → operator → operand editor → Add), pill edit-on-activate, and anchored-popover positioning are not wired in the component — preview event-loop work, render-only build-verified posture (same as OrderBy). The combinator renders as a static selected/unselected two-option indicator rather than an interactive SegmentedControl (no GPUI SegmentedControl primitive).
+- [x] Trigger (FILTER/All/Any label + summary + count badge + chevron), ghost `×` reset, clause pills, anchored surface, sizes/densities — all from `FilterBuilderSpec` tokens/methods. Build-verified (`cargo check`).
+- [x] **Full draft editor rendered from spec state** (`FilterBuilderSpec::draft`): field label + operator `Select` + operand editor by kind (boolean→`SegmentedControl`, text→`TextInput`, number→`NumberInput`, enum→`Select`, multi-enum→`Checkbox` list, range→two `NumberInput`s) + Add/Update + Cancel `Button`s (Add disabled from `is_draft_valid()`). Mirrors the Svelte `FilterOperandEditor`.
+- [x] **Edit-scoped combinator**: `combinator_visible()` gates on `!is_editing()`, so the combinator switch is hidden while editing a chip (`FilterDraft::editing`) and shown in the add/overview state — matching Svelte/React. The opener label still reflects the mode.
+- [ ] Live event-loop wiring only: the native *preview* renders any given state faithfully but does not itself drive clicks (open/select/add/edit/remove). This is the render-only posture shared by all components — the render is a faithful function of the spec; a host wires the interaction.
 - accepted: no ARIA (GPUI has no accessibility API) — accessible-name intent documented only.
-- accepted: anchored-dropdown positioning is platform-owned; surface renders inline below the trigger.
+- accepted: anchored-dropdown positioning is platform-owned; surface renders inline below the trigger. Combinator is a static selected/unselected two-option indicator (no live SegmentedControl interaction).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] Same anatomy as GPUI built from `JsEl` (`js_filter_builder`): trigger + count badge + reset + pills + surface (combinator + `js_select` add-field + "No filters"), size/density tables, all colors/radii from spec token methods. Build-verified (`cargo check`).
-- [ ] Interactive draft editing / pill activate / anchored positioning not wired — preview event-loop work, render-only build/probe-verified posture. Combinator is a static two-option indicator.
+- [x] Same anatomy + **full draft editor** as GPUI, built from `JsEl` (`js_filter_builder` + `operand_editor` via `js_segmented_control` / `js_text_input` / `js_number_input` / `js_select` / `js_checkbox` / `js_button`). Edit-scoped combinator via `combinator_visible()`. Build-verified (`cargo check`).
+- [ ] Live event-loop wiring only (render is a faithful function of spec state; host drives clicks) — the shared render-only posture.
 - accepted: no ARIA channel; interaction would live in the preview event loop.
 
 `#[cfg(test)] mod tests` render_probe assertions are authored in `filter_builder.rs` (empty → "No filters" + "FILTER" + "Filter" placeholder; populated → "Format is any of CLAP, VST3" / "Hidden is false" pill labels + "2 filters" count; combinator visible only with 2+ clauses). **Note:** these probe tests cannot currently execute in this workspace — the `poodle-jetstream-components` *test* target fails to compile from pre-existing, unrelated breakage in `src/presentation/metrics_c.rs` (and the sibling `jetstream-runtime` test build), independent of FilterBuilder. The render code itself is `cargo check`-clean.
@@ -52,6 +54,18 @@ React is interface-invariant with Svelte (same props/types/behavior, own local t
 
 ## Notes
 
+- **Native draft-editor + edit-scoping parity (2026-07-15).** `FilterBuilderSpec`
+  gained a `draft: Option<FilterDraft>` (adding vs editing an existing clause), so
+  the Rust render is now a faithful function of the *full* interactive state, not
+  just the overview snapshot. GPUI + Jetstream render the complete draft editor
+  (operator select + operand editor per kind + Add/Update/Cancel) and gate the
+  combinator on `!is_editing()`, matching Svelte/React exactly for equivalent
+  states. All operand editors use existing native primitives
+  (SegmentedControl/TextInput/NumberInput/Select/Checkbox/Button). Native
+  specimens added: "Adding a filter (draft editor)" and "Editing a clause
+  (combinator hidden)". Remaining native limitation is unchanged and shared by all
+  components: the preview doesn't drive live clicks (host event loop owns that).
+  9 `poodle-specs` unit tests (incl. `draft_state_and_edit_scoped_combinator`).
 - **Combinator switch scoped to the overview, not chip edits (2026-07-15).** The
   `Match all` / `Match any` switch now renders only when the popover is opened from
   the trigger (the All/Any label) — it is hidden while editing an individual chip
