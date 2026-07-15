@@ -52,6 +52,34 @@ React is interface-invariant with Svelte (same props/types/behavior, own local t
 
 ## Notes
 
+- **`showCombinator` opt-in + mode-reflecting label (2026-07-15).** The `Match all`
+  / `Match any` root combinator is now off by default and shown only when a host
+  opts in via `showCombinator` (and 2+ clauses exist). Most filter sets are AND-only,
+  so the toggle was irrelevant noise. The expression still carries a `combinator`
+  field (defaults `"and"`); the flag gates only the UI switch. Wired through all
+  targets (`FilterBuilderSpec::show_combinator` gates `combinator_visible()`, which
+  GPUI + Jetstream already consume). **To make the mode legible** (users, incl. the
+  author, misread the popover-only toggle), the always-visible opener label now
+  reads the live mode — "All" / "Any" — instead of "Filter" when the combinator is
+  in effect (`FilterBuilderSpec::opener_label()`), rendered a touch more prominent
+  (`data-combinator`, text-primary). Verified headless: opt-in specimen label reads
+  "ALL", flips to "ANY" on toggle; default specimen reads "FILTER" and shows no
+  toggle. Note: web uppercases the label via CSS; native renders the semantic
+  title-case ("All"/"Any"/"Filter") — accepted build-verified delta.
+- **Single-block layout refinement (2026-07-15).** Trigger + clause pills now live
+  in one bordered field (pills flow inline, filling the row, wrapping only when
+  needed) instead of a trigger row with pills stacked beneath. De-duplicated the
+  count: the count badge is kept as the single indicator, right-aligned in a
+  trailing group with the reset, and the opener "N filters" summary text is
+  suppressed while pills show. De-duplicated the clear: dropped the SelectionSummary
+  "Clear" link; one trailing reset × remains. Pills render inline reusing
+  SelectionSummary's split-chip classes (single CSS source); because the classes
+  are used outside their usual `.poodle-selection-summary` root, the field supplies
+  the chip CSS variables (font/padding/min-height per size + density) so pill
+  sizing scales correctly. Mirrored across Svelte + React (both re-verified
+  headless: pills inline at correct chip font, count badge present, no summary dup,
+  single clear, zero console errors) and GPUI + Jetstream (build-verified; Jetstream
+  probe tests updated to assert inline pills + suppressed count text).
 - **New component (2026-07-15).** Companion to OrderBy. The pure model (`default_operators_for_kind`, `isClauseComplete`, `clauseLabel`, `cloneOperand`, …) is authored once in TS (`filter-builder-model.ts`), mirrored verbatim in React, and re-implemented as `FilterBuilderSpec` methods in Rust; `poodle-specs` carries 6 unit tests for it.
 - **SelectionSummary extension:** additive `onActivate` splits each chip into a separate activation button + remove IconButton (no nested buttons). Web-only for now; Rust SelectionSummary is unchanged (FilterBuilder's Rust targets render their own pills). See `docs/parity/selection-summary.md`.
 - **Bug found + fixed during Svelte verification:** `editClause` used `structuredClone` on a reactive `$state` operand, which throws; replaced with a `cloneOperand` helper in the shared model.

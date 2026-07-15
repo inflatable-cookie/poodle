@@ -86,14 +86,18 @@ export function FilterBuilderSpecimen() {
         <FilterBuilder fields={fields} density={density} value={densityValue} onChange={setDensityValue} />
       )}
     >
-      <SpecimenGroup label="Filter builder (controlled, live value)">
-        <FilterBuilder fields={fields} value={value} onChange={setValue} />
+      <SpecimenGroup label="Filter builder (controlled, live value, combinator on)">
+        <FilterBuilder fields={fields} value={value} onChange={setValue} showCombinator />
         <pre style={{ margin: 0, fontSize: "0.75rem", maxHeight: "12rem", overflow: "auto" }}>
           {JSON.stringify(value, null, 2)}
         </pre>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Match any">
+      <SpecimenGroup label="Match any (showCombinator)">
+        <FilterBuilder fields={fields} value={anyValue} onChange={setAnyValue} showCombinator />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="AND-only (combinator toggle hidden — default)">
         <FilterBuilder fields={fields} value={anyValue} onChange={setAnyValue} />
       </SpecimenGroup>
 

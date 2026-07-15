@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@poodle/styles/selection-summary.css";
   import { default as Icon } from "./Icon.svelte";
-  import { default as IconButton } from "./IconButton.svelte";
   import { default as TextLink } from "./TextLink.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -60,13 +59,14 @@
             >
               {item.label}
             </button>
-            <IconButton
-              icon="x"
-              size="xs"
-              variant="ghost"
-              ariaLabel={`Remove ${item.label}`}
-              onClick={() => onRemove?.(item.id)}
-            />
+            <button
+              type="button"
+              class="poodle-selection-summary__chip-remove"
+              onclick={() => onRemove?.(item.id)}
+              aria-label={`Remove ${item.label}`}
+            >
+              <Icon name="x" size="xs" />
+            </button>
           </span>
         {:else}
           <button

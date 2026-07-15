@@ -66,6 +66,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             FilterBuilderSpec::new()
                                 .with_fields(demo_fields())
                                 .with_value(demo_value())
+                                .with_show_combinator(true)
                                 .with_open(true),
                             theme,
                         ))

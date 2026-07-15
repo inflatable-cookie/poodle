@@ -77,106 +77,68 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
     let surface_radius = resolve_radius(theme, spec.surface_radius_token());
     let item_bg = color_mix(surface, elevated, 0.90);
 
-    // ── Trigger ───────────────────────────────────────────────────────────────
-    let mut trigger = ui_element::div()
+    // ── Single bordered field: opener + inline pills + reset ──────────────────
+    let mut field = ui_element::div()
         .flex_row()
+        .flex_wrap()
         .items_center()
-        .gap(trigger_gap)
-        .grow()
+        .gap(root_gap)
         .min_w(0.0)
         .min_h(trigger_h)
         .pl(trigger_pad_x)
         .pr(trigger_pad_x)
+        .pt(rem_to_px(0.25))
+        .pb(rem_to_px(0.25))
         .rounded(radius)
         .border_1()
         .border_color(border)
         .bg(surface);
 
+    // Opener (borderless): label + optional summary + chevron. Summary text
+    // shows only when pills are not conveying the clauses.
+    let mut opener = ui_element::div().flex_row().items_center().gap(trigger_gap);
     if !spec.is_compact {
-        trigger = trigger.child(
-            ui_element::label("FILTER")
-                .text_color(text_secondary)
+        opener = opener.child(
+            ui_element::label(spec.opener_label())
+                .text_color(if spec.combinator_visible() {
+                    text_primary
+                } else {
+                    text_secondary
+                })
                 .text_size(label_font)
                 .text_weight(500)
                 .letter_spacing_em(0.05),
         );
     }
-
-    let is_placeholder = !spec.has_value();
-    trigger = trigger.child(
-        ui_element::label(&spec.summary_text())
-            .text_color(if is_placeholder { muted } else { text_primary })
-            .text_size(summary_font)
-            .grow()
-            .min_w(0.0)
-            .text_ellipsis()
-            .whitespace_nowrap(),
-    );
-
-    if spec.active_count() > 0 {
-        trigger = trigger.child(
-            ui_element::label(&format!("{}", spec.active_count()))
-                .min_w(rem_to_px(1.125))
-                .min_h(rem_to_px(1.125))
-                .pl(rem_to_px(0.3125))
-                .pr(rem_to_px(0.3125))
-                .flex_none()
-                .items_center()
-                .justify_center()
-                .rounded(rem_to_px(0.5625))
-                .bg(accent)
-                .text_color(accent_text)
-                .text_size(rem_to_px(0.6875))
-                .text_weight(600),
+    if !(spec.show_pills && spec.has_value()) {
+        let is_placeholder = !spec.has_value();
+        opener = opener.child(
+            ui_element::label(&spec.summary_text())
+                .text_color(if is_placeholder { muted } else { text_primary })
+                .text_size(summary_font)
+                .text_ellipsis()
+                .whitespace_nowrap(),
         );
     }
-
-    trigger = trigger.child(
+    opener = opener.child(
         ui_element::icon("chevron-down")
             .w(summary_font)
             .h(summary_font)
             .text_color(text_secondary),
     );
+    field = field.child(opener);
 
-    // ── Root row: trigger + optional ghost reset ──────────────────────────────
-    let mut trigger_row = ui_element::div()
-        .flex_row()
-        .items_center()
-        .gap(root_gap)
-        .min_w(0.0)
-        .child(trigger);
-
-    if spec.show_clear_button && spec.has_value() {
-        trigger_row = trigger_row.child(js_icon_button(
-            &IconButtonSpec::new()
-                .with_icon("x")
-                .with_aria_label("Clear filters")
-                .with_variant(ButtonVariant::Ghost)
-                .with_size(effective_size)
-                .with_disabled(spec.is_disabled),
-            theme,
-        ));
-    }
-
-    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0);
-    root = root.child(trigger_row);
-
-    // ── Clause pills ──────────────────────────────────────────────────────────
+    // Inline clause pills.
     if spec.show_pills && spec.has_value() {
-        let mut pills = ui_element::div()
-            .flex_row()
-            .flex_wrap()
-            .items_center()
-            .gap(rem_to_px(0.375));
         for clause in spec.value.clauses.iter() {
             let label = spec.clause_label(clause);
-            pills = pills.child(
+            field = field.child(
                 ui_element::div()
                     .flex_row()
                     .items_center()
-                    .gap(rem_to_px(0.25))
+                    .gap(rem_to_px(0.375))
                     .pl(rem_to_px(0.5))
-                    .pr(rem_to_px(0.1875))
+                    .pr(rem_to_px(0.375))
                     .min_h(rem_to_px(1.5))
                     .rounded(radius)
                     .border_1()
@@ -187,19 +149,60 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
                             .text_color(text_primary)
                             .text_size(rem_to_px(0.75)),
                     )
-                    .child(js_icon_button(
-                        &IconButtonSpec::new()
-                            .with_icon("x")
-                            .with_aria_label(format!("Remove {label}"))
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_size(ControlSize::Xs)
-                            .with_disabled(spec.is_disabled),
-                        theme,
-                    )),
+                    // Compact remove glyph (not a full 1.5rem IconButton).
+                    .child(
+                        ui_element::icon("x")
+                            .w(rem_to_px(0.75))
+                            .h(rem_to_px(0.75))
+                            .text_color(muted),
+                    ),
             );
         }
-        root = root.child(pills);
     }
+
+    // Trailing controls (count badge + single clear-all).
+    if spec.has_value() && (spec.show_pills || spec.show_clear_button) {
+        let mut trailing = ui_element::div()
+            .grow()
+            .flex_row()
+            .items_center()
+            .justify_end()
+            .gap(rem_to_px(0.375));
+
+        if spec.show_pills {
+            trailing = trailing.child(
+                ui_element::label(&format!("{}", spec.active_count()))
+                    .min_w(rem_to_px(1.125))
+                    .min_h(rem_to_px(1.125))
+                    .pl(rem_to_px(0.3125))
+                    .pr(rem_to_px(0.3125))
+                    .flex_none()
+                    .items_center()
+                    .justify_center()
+                    .rounded(rem_to_px(0.5625))
+                    .bg(accent)
+                    .text_color(accent_text)
+                    .text_size(rem_to_px(0.6875))
+                    .text_weight(600),
+            );
+        }
+
+        if spec.show_clear_button {
+            trailing = trailing.child(js_icon_button(
+                &IconButtonSpec::new()
+                    .with_icon("x")
+                    .with_aria_label("Clear filters")
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_size(effective_size)
+                    .with_disabled(spec.is_disabled),
+                theme,
+            ));
+        }
+
+        field = field.child(trailing);
+    }
+
+    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0).child(field);
 
     // ── Dialog surface (rendered inline when open) ────────────────────────────
     if spec.is_open {
@@ -307,6 +310,7 @@ mod tests {
         FilterBuilderSpec::new()
             .with_fields(fields())
             .with_open(true)
+            .with_show_combinator(true)
             .with_value(FilterExpression {
                 combinator: FilterCombinator::And,
                 clauses: vec![
@@ -329,12 +333,12 @@ mod tests {
         );
         let tree = crate::render_probe::probe(&el, 320.0, 240.0);
         assert!(tree.has_text("No filters"), "empty text wrong: {:?}", tree.texts());
-        assert!(tree.has_text("FILTER"));
-        assert!(tree.has_text("Filter"), "placeholder summary missing: {:?}", tree.texts());
+        // Empty + combinator off → opener label and placeholder summary both "Filter".
+        assert!(tree.has_text("Filter"), "opener/placeholder missing: {:?}", tree.texts());
     }
 
     #[test]
-    fn populated_shows_pill_labels_and_count() {
+    fn populated_shows_inline_pill_labels() {
         let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
         assert!(
             tree.has_text("Format is any of CLAP, VST3"),
@@ -342,7 +346,11 @@ mod tests {
             tree.texts()
         );
         assert!(tree.has_text("Hidden is false"), "boolean pill wrong: {:?}", tree.texts());
-        assert!(tree.has_text("2 filters"), "summary count wrong: {:?}", tree.texts());
+        // Summary count text is suppressed while pills convey the clauses (no
+        // duplicate count). `populated()` opts into the combinator with 2 clauses,
+        // so the opener label reflects the match mode ("All").
+        assert!(tree.has_text("All"), "opener mode label missing: {:?}", tree.texts());
+        assert!(!tree.has_text("2 filters"), "count must not duplicate the pills: {:?}", tree.texts());
     }
 
     #[test]
@@ -351,8 +359,8 @@ mod tests {
         let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
         assert!(tree.has_text("Match all") && tree.has_text("Match any"));
 
-        // One clause → combinator hidden.
-        let one = FilterBuilderSpec::new().with_fields(fields()).with_open(true).with_value(
+        // One clause → combinator hidden (even with the toggle enabled).
+        let one = FilterBuilderSpec::new().with_fields(fields()).with_open(true).with_show_combinator(true).with_value(
             FilterExpression {
                 combinator: FilterCombinator::And,
                 clauses: vec![FilterClause::new(
@@ -365,6 +373,6 @@ mod tests {
         );
         let tree = crate::render_probe::probe(&js_filter_builder(&one, &theme()), 360.0, 240.0);
         assert!(!tree.has_text("Match all"), "combinator must hide with <2 clauses: {:?}", tree.texts());
-        assert!(tree.has_text("1 filter"));
+        assert!(tree.has_text("Hidden is true"), "single clause pill missing: {:?}", tree.texts());
     }
 }

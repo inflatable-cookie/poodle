@@ -126,108 +126,60 @@ impl IntoElement for FilterBuilder {
         let surface_radius = resolve_radius(theme, spec.surface_radius_token());
         let item_bg = color_mix(surface, elevated, 0.90);
 
-        // ── Trigger ───────────────────────────────────────────────────────────
-        let mut trigger = div()
-            .min_w(px(0.0))
-            .max_w(px(rem_to_px(28.0)))
-            .h(trigger_height)
+        // ── Single bordered field: opener + inline pills + reset ──────────────
+        let mut field = div()
+            .id("filter-builder")
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .gap(px(rem_to_px(0.375)))
+            .min_h(trigger_height)
             .px(trigger_pad_x)
+            .py(px(rem_to_px(0.25)))
             .rounded(radius)
             .border_1()
             .border_color(border)
             .bg(surface)
-            .flex()
-            .items_center()
-            .gap(trigger_gap)
             .text_color(text_primary);
 
+        // Opener (borderless): label + optional summary + chevron. The summary
+        // text shows only when pills are not conveying the clauses.
+        let mut opener = div().flex().items_center().gap(trigger_gap);
         if !spec.is_compact {
-            trigger = trigger.child(
+            opener = opener.child(
                 div()
                     .text_size(label_size)
-                    .text_color(text_secondary)
-                    .child("FILTER"),
+                    .text_color(if spec.combinator_visible() {
+                        text_primary
+                    } else {
+                        text_secondary
+                    })
+                    .child(spec.opener_label()),
             );
         }
-
-        let is_placeholder = !spec.has_value();
-        trigger = trigger.child(
-            div()
-                .flex_grow()
-                .min_w(px(0.0))
-                .text_size(summary_size)
-                .text_color(if is_placeholder { muted } else { text_primary })
-                .child(spec.summary_text()),
-        );
-
-        if spec.active_count() > 0 {
-            trigger = trigger.child(
+        if !(spec.show_pills && spec.has_value()) {
+            let is_placeholder = !spec.has_value();
+            opener = opener.child(
                 div()
-                    .flex_shrink_0()
-                    .min_w(px(rem_to_px(1.125)))
-                    .h(px(rem_to_px(1.125)))
-                    .px(px(rem_to_px(0.3125)))
-                    .rounded(px(999.0))
-                    .bg(accent)
-                    .text_color(accent_text)
-                    .text_size(px(rem_to_px(0.6875)))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(format!("{}", spec.active_count())),
+                    .text_size(summary_size)
+                    .text_color(if is_placeholder { muted } else { text_primary })
+                    .child(spec.summary_text()),
             );
         }
-
-        trigger = trigger.child(
+        opener = opener.child(
             Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
                 .with_color(text_secondary),
         );
+        field = field.child(opener);
 
-        let mut root = div()
-            .id("filter-builder")
-            .flex()
-            .flex_col()
-            .gap(px(rem_to_px(0.375)));
-
-        let mut trigger_row = div()
-            .flex()
-            .items_center()
-            .gap(px(rem_to_px(0.375)))
-            .child(trigger);
-
-        if spec.show_clear_button && spec.has_value() {
-            let mut reset = IconButton::from_spec(
-                IconButtonSpec::new()
-                    .with_icon("x")
-                    .with_aria_label("Clear filters")
-                    .with_variant(ButtonVariant::Ghost)
-                    .with_size(effective_size)
-                    .with_disabled(spec.is_disabled),
-                theme,
-            )
-            .with_id("filter-builder-reset");
-
-            if let Some(handler) = self.on_reset {
-                reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
-            }
-            trigger_row = trigger_row.child(reset);
-        }
-
-        root = root.child(trigger_row);
-
-        // ── Clause pills (editable/removable; interaction host-owned) ──────────
+        // Inline clause pills (editable/removable; interaction host-owned).
         if spec.show_pills && spec.has_value() {
-            let mut pills = div()
-                .flex()
-                .flex_wrap()
-                .items_center()
-                .gap(px(rem_to_px(0.375)));
             for clause in spec.value.clauses.iter() {
-                pills = pills.child(
+                field = field.child(
                     div()
                         .flex()
                         .items_center()
-                        .gap(px(rem_to_px(0.25)))
+                        .gap(px(rem_to_px(0.375)))
                         .px(px(rem_to_px(0.5)))
                         .h(px(rem_to_px(1.5)))
                         .rounded(radius)
@@ -237,19 +189,67 @@ impl IntoElement for FilterBuilder {
                         .text_size(px(rem_to_px(0.75)))
                         .text_color(text_primary)
                         .child(spec.clause_label(clause))
-                        .child(IconButton::from_spec(
-                            IconButtonSpec::new()
-                                .with_icon("x")
-                                .with_aria_label(format!("Remove {}", spec.clause_label(clause)))
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_size(ControlSize::Xs)
-                                .with_disabled(spec.is_disabled),
-                            theme,
-                        )),
+                        // Compact remove glyph (not a full 1.5rem IconButton).
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("x").with_size(IconSize::Sm),
+                                theme,
+                            )
+                            .with_color(muted),
+                        ),
                 );
             }
-            root = root.child(pills);
         }
+
+        // Trailing controls (count badge + single clear-all), pushed to the end.
+        if spec.has_value() && (spec.show_pills || spec.show_clear_button) {
+            let mut trailing = div()
+                .flex_grow()
+                .flex()
+                .items_center()
+                .justify_end()
+                .gap(px(rem_to_px(0.375)));
+
+            if spec.show_pills {
+                trailing = trailing.child(
+                    div()
+                        .flex_shrink_0()
+                        .min_w(px(rem_to_px(1.125)))
+                        .h(px(rem_to_px(1.125)))
+                        .px(px(rem_to_px(0.3125)))
+                        .rounded(px(999.0))
+                        .bg(accent)
+                        .text_color(accent_text)
+                        .text_size(px(rem_to_px(0.6875)))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(format!("{}", spec.active_count())),
+                );
+            }
+
+            if spec.show_clear_button {
+                let mut reset = IconButton::from_spec(
+                    IconButtonSpec::new()
+                        .with_icon("x")
+                        .with_aria_label("Clear filters")
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(effective_size)
+                        .with_disabled(spec.is_disabled),
+                    theme,
+                )
+                .with_id("filter-builder-reset");
+
+                if let Some(handler) = self.on_reset {
+                    reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
+                }
+                trailing = trailing.child(reset);
+            }
+
+            field = field.child(trailing);
+        }
+
+        let mut root = div().flex().flex_col().gap(px(rem_to_px(0.375))).child(field);
 
         // ── Anchored surface (rendered inline when open) ──────────────────────
         if spec.is_open {

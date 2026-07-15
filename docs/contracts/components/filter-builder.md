@@ -28,19 +28,20 @@ evaluation and serialization.
 
 ```text
 [Popover .filter-builder-popover] <div>  (position: relative wrapper, carries data-size/data-density)
-  ├── [Root .filter-builder] <div role="group">
-  │   ├── [Trigger Wrap .filter-builder__trigger-wrap] <div>
-  │   │   └── [Trigger .filter-builder__trigger] <button aria-expanded aria-controls aria-haspopup="dialog">
-  │   │       ├── [Label .filter-builder__label] <span>  (hidden when compact)
-  │   │       ├── [Summary .filter-builder__summary] <span>  ("Filter" / "N filters")
-  │   │       ├── [Count .filter-builder__count] <span aria-hidden>  (badge, when clauses > 0)
-  │   │       └── [Chevron .filter-builder__chevron] <span aria-hidden="true">
-  │   └── [Reset .filter-builder__reset] <span> (conditional: showClearButton && clauses non-empty)
-  │       └── IconButton (icon="x", variant="ghost", ariaLabel="Clear filters")
-  ├── [Pills .filter-builder__pills] SelectionSummary (conditional: clauses non-empty)
-  │       └── one activatable + removable chip per clause
+  ├── [Field .filter-builder] <div role="group">  (single bordered block, flex-wrap: opener + inline pills + reset)
+  │   ├── [Trigger .filter-builder__trigger] <button aria-expanded aria-controls aria-haspopup="dialog">
+  │   │   ├── [Label .filter-builder__label] <span>  (hidden when compact; "Filter", or the live match mode "All"/"Any" — see Label part)
+  │   │   ├── [Summary .filter-builder__summary] <span>  ("Filter" / "N filters"; shown only when pills are NOT shown)
+  │   │   └── [Chevron .filter-builder__chevron] <span aria-hidden="true">
+  │   ├── [Pill .filter-builder__pill .selection-summary__chip--split] <span> (repeated inline; conditional: showPills && clauses non-empty)
+  │   │   ├── [Activate .selection-summary__chip-activate] <button>  (edit clause; aria-label "Edit {clauseLabel}")
+  │   │   └── [Remove] IconButton (icon="x", size="xs", ghost; aria-label "Remove {clauseLabel}")
+  │   └── [Trailing .filter-builder__trailing] <span> (conditional: clauses non-empty; margin-left:auto, right-aligned)
+  │       ├── [Count .filter-builder__count] <span aria-hidden> (badge; when showPills — the single count indicator)
+  │       └── [Reset .filter-builder__reset] <span> (when showClearButton)
+  │           └── IconButton (icon="x", variant="ghost", ariaLabel="Clear filters")
   └── [Surface .filter-builder__surface > .filter-builder__panel] <div role="dialog"> (rendered inline when open)
-      ├── [Combinator .filter-builder__combinator] SegmentedControl (conditional: clauses.length >= 2)
+      ├── [Combinator .filter-builder__combinator] SegmentedControl (conditional: showCombinator && clauses.length >= 2)
       │       └── "Match all" / "Match any"
       ├── [Draft .filter-builder__draft] <div>  (add or edit a clause)
       │   ├── [Field Select] Select (placeholder "+ Add filter"; disabled while editing)
@@ -55,17 +56,17 @@ evaluation and serialization.
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Popover | yes | `position: relative` wrapper anchoring the surface; carries `data-size`, `data-density` | — |
-| Root | yes | flex container wrapping trigger and reset; `role="group"`, carries `data-disabled`, `data-compact` | — |
-| Trigger Wrap | yes | flex-1 wrapper around the trigger button | — |
-| Trigger | yes | button that opens the popover; shows label, summary, count badge, chevron; `aria-expanded` / `aria-controls` / `aria-haspopup="dialog"` | `--poodle-size-control-height`, `--poodle-radius-control`, `--poodle-color-background-surface`, `--poodle-color-border-default` |
-| Label | yes | static "Filter" uppercase text inside the trigger; hidden when `compact` | `--poodle-color-text-secondary` |
-| Summary | yes | dynamic text summarizing active clause count | `--poodle-color-text-primary` / `--poodle-color-text-muted` (empty) |
-| Count | no | small badge showing active clause count when > 0 | `--poodle-color-accent-base`, `--poodle-color-text-inverse` |
+| Field | yes | single bordered `flex-wrap` block holding the opener, inline clause pills, and reset; `role="group"`, carries `data-disabled`, `data-compact`, `data-open` | `--poodle-size-control-height`, `--poodle-radius-control`, `--poodle-color-background-surface`, `--poodle-color-border-default` |
+| Trigger | yes | borderless opener button inside the field; shows label + (conditional) summary + chevron; `aria-expanded` / `aria-controls` / `aria-haspopup="dialog"` | — |
+| Label | yes | uppercase text, hidden when `compact`. Reads "Filter" normally; when the combinator is live (`showCombinator` + 2+ clauses) it instead reflects the match mode — "All" (`combinator="and"`) or "Any" (`combinator="or"`) — so the mode is visible without opening the popover. Carries `data-combinator`; the mode form is rendered in `text-primary` (vs `text-secondary`) to read as a live value | `--poodle-color-text-secondary` / `--poodle-color-text-primary` (mode) |
+| Summary | no | "Filter" placeholder / "N filter(s)" — shown only when pills are NOT displayed (empty, or `showPills=false`); avoids duplicating the count the pills already convey | `--poodle-color-text-primary` / `--poodle-color-text-muted` (empty) |
 | Chevron | yes | popover indicator arrow (`▾`) | `--poodle-color-text-secondary` |
-| Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear filters"`), shown when `showClearButton` and at least one clause is active | (IconButton primitive) |
-| Pills | no | `SelectionSummary` rendering one chip per clause; each chip activates (edit) and removes independently | (SelectionSummary contract) |
+| Pill | no | inline clause chip reusing SelectionSummary's split-chip treatment: a separate activation button (the clause label) + a remove IconButton (no nested buttons); flows inline within the field. The field supplies the SelectionSummary chip CSS variables (font/padding/min-height per size/density) since the chip classes are used outside their usual root | (SelectionSummary chip classes) |
+| Trailing | no | right-aligned (`margin-left:auto`) group holding the count badge + reset; shown when clauses non-empty | — |
+| Count | no | small badge with the active-clause count; the single count indicator, shown when `showPills` (the opener summary text is suppressed to avoid duplicating it) | `--poodle-color-accent-base`, `--poodle-color-text-inverse` |
+| Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear filters"`), the single clear-all, shown when `showClearButton` and at least one clause is active | (IconButton primitive) |
 | Surface | yes | anchored `role="dialog"` popover surface (`tabindex="-1"`) containing the combinator + draft editor | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` |
-| Combinator | no | `SegmentedControl` choosing `and` / `or`; shown only when 2+ clauses exist | (SegmentedControl contract) |
+| Combinator | no | `SegmentedControl` choosing `and` / `or`; shown only when `showCombinator` is true and 2+ clauses exist | (SegmentedControl contract) |
 | Draft | no | the add/edit row: field select, operator select, operand editor, actions | — |
 | Operand Editor | no | value editor whose shape depends on the operator's operand kind (§4.4) | (composed primitives) |
 | Empty | no | placeholder text ("No filters") when no clauses and no active draft | `--poodle-color-text-secondary` |
@@ -87,6 +88,7 @@ evaluation and serialization.
 | `compact` | `boolean` | `false` | no | when true, hides the static "Filter" label in the trigger |
 | `showClearButton` | `boolean` | `true` | no | when false the reset `×` IconButton is never rendered |
 | `showPills` | `boolean` | `true` | no | when false, active clauses are not rendered as external pills (trigger count only) |
+| `showCombinator` | `boolean` | `false` | no | when true, the `Match all` / `Match any` root-combinator toggle appears (only ever with 2+ clauses). Off by default — most filter sets are AND-only, so the toggle is irrelevant noise. The expression still carries a `combinator` (defaults `"and"`); this only gates the UI switch, not the data model |
 | `onChange` | `((value: FilterExpression) => void) \| null` | `null` | no | fired on every committed mutation (add, update, remove, clear, combinator change) |
 
 ### Naming Rules
@@ -166,14 +168,14 @@ relabel the set via `operators`. Defaults:
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty | no active clauses | trigger summary shows "Filter" placeholder (muted); no count badge; no pills; reset hidden; panel shows "No filters" and the add row |
-| populated | one or more clauses | trigger summary shows "N filter(s)" with count badge; pills rendered below; reset visible (when `showClearButton`) |
+| empty | no active clauses | opener shows "FILTER" + "Filter" placeholder (muted); no pills; reset hidden; panel shows "No filters" and the add row |
+| populated | one or more clauses | pills render inline in the field; opener summary text suppressed; a count badge + reset sit right-aligned at the field's trailing edge (single count, single clear) |
 | compact | `compact=true` | the static "Filter" label is hidden |
 | disabled | `disabled=true` | root reduced to disabled opacity; all controls disabled; pills non-interactive |
 | popover open | user clicks trigger or a pill | anchored dialog surface appears below the trigger |
 | adding | a field is chosen in the draft, no clause being edited | operator + operand editor + "Add"/"Cancel" shown; "Add" disabled until draft valid |
 | editing | a pill is activated | draft pre-filled from that clause; field select disabled; "Update"/"Cancel" shown |
-| combinator shown | `clauses.length >= 2` | `Match all` / `Match any` SegmentedControl appears above the draft |
+| combinator shown | `showCombinator` && `clauses.length >= 2` | `Match all` / `Match any` SegmentedControl appears above the draft (default off) |
 | maxClauses reached | active count equals `maxClauses` and not editing | the add row (field select) is hidden |
 
 ### 4.2 Summary Text Logic
@@ -259,7 +261,7 @@ roving tabindex.
 | Operand editor | `ariaLabel` | `"Value for {fieldLabel}"` (range: "Minimum/Maximum for {fieldLabel}") |
 | Add/Update button | text | `"Add"` / `"Update"`; disabled until draft valid |
 | Reset IconButton | `ariaLabel` | `"Clear filters"` |
-| Pills (SelectionSummary) | per chip | activation control `aria-label="Edit {clauseLabel}"`; remove control `aria-label="Remove {clauseLabel}"` |
+| Pills (inline split chips) | per chip | activation control `aria-label="Edit {clauseLabel}"`; remove control `aria-label="Remove {clauseLabel}"` |
 
 ### Keyboard
 
@@ -293,14 +295,16 @@ roving tabindex.
   `var(--poodle-size-control-height)` (size-stepped), ellipsis summary overflow
 - Surface: anchored `position: absolute`, `min-width: 16rem`,
   `max-width: min(24rem, 90vw)`, `top: calc(100% + 0.5rem)`
-- Pills: full width below the trigger row; wrap to multiple rows; long/numerous
-  clauses use `SelectionSummary` overflow ("+N more") rather than expanding
+- Pills: flow inline inside the single field block, filling the row beside the
+  opener and wrapping to further rows only when needed; long labels ellipsis at a
+  max width. The field grows vertically as pills wrap
 
 ### Composition
 
 - parent expectations: toolbar areas, list headers, filter panels, data-table
   toolbars — composes cleanly beside `OrderBy` and does not extend `FilterToolbar`
-- child expectations: `SelectionSummary` (pills), `SegmentedControl` (combinator +
+- child expectations: SelectionSummary chip treatment for pills (reused inline,
+  not the section component), `SegmentedControl` (combinator +
   boolean operand), `Select`, `Input`, `NumberInput`, `Button`, `IconButton`
 - the popover surface is owned locally by `FilterBuilder`, not by `Popover`
 
@@ -319,7 +323,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 | Trigger focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus` | focus ring |
 | Label | `--poodle-color-text-secondary` | uppercase label |
 | Summary placeholder | `--poodle-color-text-muted` | empty state |
-| Count badge | `--poodle-color-accent-base` / `--poodle-color-text-inverse` | active-count badge |
+| Pill | (SelectionSummary chip classes) | inline clause chip treatment |
 | Chevron | `--poodle-color-text-secondary` | indicator |
 | Surface | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` | anchored panel |
 | Draft actions | (Button primitive) | Add/Update/Cancel |
@@ -334,6 +338,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 | `data-disabled` | Root | `"true"` / `"false"` |
 | `data-compact` | Root | `"true"` / `"false"` |
 | `data-placeholder` | Summary | `"true"` when empty |
+| `data-combinator` | Label | `"true"` when the label shows the live match mode (All/Any) |
 | `data-open` | Root | `"true"` when the popover is open |
 
 ## 9. Svelte Notes
@@ -346,7 +351,10 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
   (controlled) or local state (uncontrolled) then calls `onChange`
 - draft is local `$state`; committed only through `isClauseComplete`
 - pure logic imported from `./filter-builder-model`
-- pills rendered via the extended `SelectionSummary` (`onActivate` + `onRemove`)
+- clause pills rendered inline in the field, reusing SelectionSummary's
+  split-chip classes (`poodle-selection-summary__chip--split` + `__chip-activate`)
+  for a single CSS source — not the SelectionSummary section component, so the
+  pills flow inline in the single-block field
 - clause ids generated from a module counter: `${fieldKey}-${++n}`
 
 ## 10. GPUI Notes
@@ -366,12 +374,12 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 - [ ] `value` controlled; external replacement re-renders
 - [ ] draft never emits an incomplete clause
 - [ ] add / update / remove / clear mutate the expression and fire `onChange`
-- [ ] `Match all` / `Match any` combinator; shown only with 2+ clauses
+- [ ] `Match all` / `Match any` combinator; opt-in via `showCombinator` (default off), and only with 2+ clauses
 - [ ] multi-enum any/all/none semantics preserved via operator keys
 - [ ] `allowMultiple` governs duplicate-field clauses (default single)
 - [ ] `maxClauses` hides the add row when reached
 - [ ] pills activate (edit) and remove independently, no nested buttons
-- [ ] summary text: "Filter" / "N filter(s)"; count badge when > 0
+- [ ] single-block field: pills inline (chip vars supplied by the field); one count badge + one clear, right-aligned; summary text only when pills hidden (no duplicate count)
 - [ ] disabled suppresses all interaction
 - [ ] no domain vocabulary; no expression evaluation
 

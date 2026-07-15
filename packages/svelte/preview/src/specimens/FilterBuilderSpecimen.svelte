@@ -83,13 +83,17 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Filter builder (controlled, live value)">
-    <FilterBuilder {fields} bind:value />
+  <SpecimenGroup label="Filter builder (controlled, live value, combinator on)">
+    <FilterBuilder {fields} bind:value showCombinator />
     <pre>{JSON.stringify(value, null, 2)}</pre>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Match any">
-    <FilterBuilder {fields} bind:value={anyValue} />
+  <SpecimenGroup label="Match any (showCombinator)">
+    <FilterBuilder {fields} bind:value={anyValue} showCombinator />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="AND-only (combinator toggle hidden — default)">
+    <FilterBuilder {fields} value={anyValue} />
   </SpecimenGroup>
 
   <SpecimenGroup label="Empty">

@@ -1431,6 +1431,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "compact", type: "boolean", default: "false", description: "Hides the static \"Filter\" label in the trigger." },
       { name: "showClearButton", type: "boolean", default: "true", description: "Whether the reset (clear-all) button is rendered." },
       { name: "showPills", type: "boolean", default: "true", description: "Whether active clauses render as external editable/removable pills." },
+      { name: "showCombinator", type: "boolean", default: "false", description: "Show the Match all / Match any root-combinator toggle (only with 2+ clauses). Off by default — most filter sets are AND-only." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },

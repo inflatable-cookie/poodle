@@ -1,7 +1,6 @@
 import "@poodle/styles/selection-summary.css";
 
 import { Icon } from "./Icon";
-import { IconButton } from "./IconButton";
 import { TextLink } from "./TextLink";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -68,13 +67,14 @@ export function SelectionSummary({
                   >
                     {item.label}
                   </button>
-                  <IconButton
-                    icon="x"
-                    size="xs"
-                    variant="ghost"
-                    ariaLabel={`Remove ${item.label}`}
+                  <button
+                    type="button"
+                    className="poodle-selection-summary__chip-remove"
                     onClick={() => onRemove?.(item.id)}
-                  />
+                    aria-label={`Remove ${item.label}`}
+                  >
+                    <Icon name="x" size="xs" />
+                  </button>
                 </span>
               ) : (
                 <button

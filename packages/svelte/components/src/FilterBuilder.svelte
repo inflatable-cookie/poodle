@@ -5,16 +5,20 @@
 
 <script lang="ts">
   import "@poodle/styles/filter-builder.css";
+  // Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
+  // clause pills — single CSS source, no visual fork. The pills render inline in
+  // the trigger block rather than via the SelectionSummary section component.
+  import "@poodle/styles/selection-summary.css";
   import { registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
   import { default as Button } from "./Button.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as NumberInput } from "./NumberInput.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as Select } from "./Select.svelte";
-  import { default as SelectionSummary } from "./SelectionSummary.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import {
@@ -49,6 +53,11 @@
     compact?: boolean;
     showClearButton?: boolean;
     showPills?: boolean;
+    /** Show the `Match all` / `Match any` root-combinator toggle (only ever
+     * appears with 2+ clauses). Off by default — most filter sets are AND-only,
+     * so the toggle is irrelevant noise there. The expression still carries a
+     * combinator (defaults `"and"`); this only gates the UI switch. */
+    showCombinator?: boolean;
     onChange?: ((value: FilterExpression) => void) | null;
   }
 
@@ -64,6 +73,7 @@
     compact = false,
     showClearButton = true,
     showPills = true,
+    showCombinator = false,
     onChange = null,
   }: Props = $props();
 
@@ -111,17 +121,19 @@
       .filter((field) => field.allowMultiple || !clauses.some((clause) => clause.key === field.key)),
   );
   const addSelectItems = $derived(availableFields.map((field) => ({ value: field.key, label: field.label })));
-  const combinatorVisible = $derived(clauses.length >= 2);
+  const combinatorVisible = $derived(showCombinator && clauses.length >= 2);
+  // When the combinator is live, the opener label reflects the match mode so it
+  // is visible without opening the popover.
+  const openerLabel = $derived(
+    combinatorVisible ? (combinator === "and" ? "All" : "Any") : "Filter",
+  );
   const isDrafting = $derived(draftKey !== "");
   const showAddRow = $derived(!isDrafting && canAddMore && availableFields.length > 0);
-  const pillItems = $derived(
-    clauses.map((clause) => ({ id: clause.id, label: clauseLabel(fieldMap.get(clause.key), clause) })),
-  );
   const summaryText = $derived(
     activeCount === 0 ? "Filter" : activeCount === 1 ? "1 filter" : `${activeCount} filters`,
   );
   const triggerAriaLabel = $derived(
-    activeCount > 0 ? `${ariaLabel}, ${activeCount} active` : ariaLabel,
+    `${ariaLabel}${combinatorVisible ? (combinator === "and" ? ", match all" : ", match any") : ""}${activeCount > 0 ? `, ${activeCount} active` : ""}`,
   );
 
   $effect(() => {
@@ -305,54 +317,73 @@
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
-    <div class="poodle-filter-builder__trigger-wrap">
-      <button
-        type="button"
-        class="poodle-filter-builder__trigger"
-        disabled={disabled}
-        aria-label={triggerAriaLabel}
-        aria-haspopup="dialog"
-        aria-expanded={open ? "true" : "false"}
-        aria-controls={open ? panelId : undefined}
-        onclick={toggleOpen}
-      >
-        <span class="poodle-filter-builder__label">Filter</span>
+    <button
+      type="button"
+      class="poodle-filter-builder__trigger"
+      disabled={disabled}
+      aria-label={triggerAriaLabel}
+      aria-haspopup="dialog"
+      aria-expanded={open ? "true" : "false"}
+      aria-controls={open ? panelId : undefined}
+      onclick={toggleOpen}
+    >
+      {#if !compact}
+        <span class="poodle-filter-builder__label" data-combinator={combinatorVisible ? "true" : "false"}>{openerLabel}</span>
+      {/if}
+      {#if !(showPills && activeCount > 0)}
         <span class="poodle-filter-builder__summary" data-placeholder={activeCount === 0}>
           {summaryText}
         </span>
-        {#if activeCount > 0}
+      {/if}
+      <span class="poodle-filter-builder__chevron" aria-hidden="true">▾</span>
+    </button>
+
+    {#if showPills && activeCount > 0}
+      {#each clauses as clause (clause.id)}
+        {@const pillText = clauseLabel(fieldMap.get(clause.key), clause)}
+        <span class="poodle-selection-summary__chip poodle-selection-summary__chip--split poodle-filter-builder__pill">
+          <button
+            type="button"
+            class="poodle-selection-summary__chip-activate"
+            disabled={disabled}
+            onclick={() => editClause(clause.id)}
+            aria-label={`Edit ${pillText}`}
+          >
+            {pillText}
+          </button>
+          <button
+            type="button"
+            class="poodle-selection-summary__chip-remove"
+            disabled={disabled}
+            onclick={() => removeClause(clause.id)}
+            aria-label={`Remove ${pillText}`}
+          >
+            <Icon name="x" size="xs" />
+          </button>
+        </span>
+      {/each}
+    {/if}
+
+    {#if activeCount > 0 && (showPills || showClearButton)}
+      <span class="poodle-filter-builder__trailing">
+        {#if showPills}
           <span class="poodle-filter-builder__count" aria-hidden="true">{activeCount}</span>
         {/if}
-        <span class="poodle-filter-builder__chevron" aria-hidden="true">▾</span>
-      </button>
-    </div>
-
-    {#if showClearButton && activeCount > 0}
-      <span class="poodle-filter-builder__reset">
-        <IconButton
-          icon="x"
-          ariaLabel="Clear filters"
-          variant="ghost"
-          size={resolvedSize}
-          disabled={disabled}
-          onClick={handleResetClick}
-        />
+        {#if showClearButton}
+          <span class="poodle-filter-builder__reset">
+            <IconButton
+              icon="x"
+              ariaLabel="Clear filters"
+              variant="ghost"
+              size={resolvedSize}
+              disabled={disabled}
+              onClick={handleResetClick}
+            />
+          </span>
+        {/if}
       </span>
     {/if}
   </div>
-
-  {#if showPills && activeCount > 0}
-    <div class="poodle-filter-builder__pills">
-      <SelectionSummary
-        items={pillItems}
-        size={resolvedSize}
-        density={resolvedDensity}
-        onActivate={editClause}
-        onRemove={removeClause}
-        onClear={clearAll}
-      />
-    </div>
-  {/if}
 
   {#if open}
     <div

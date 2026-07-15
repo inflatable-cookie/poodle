@@ -2,14 +2,18 @@ import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { registerDismissLayer } from "@poodle/headless";
 
 import "@poodle/styles/filter-builder.css";
+// Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
+// clause pills — single CSS source, no visual fork. Pills render inline in the
+// trigger block rather than via the SelectionSummary section component.
+import "@poodle/styles/selection-summary.css";
 
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
+import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
 import { NumberInput } from "./NumberInput";
 import { SegmentedControl } from "./SegmentedControl";
 import { Select } from "./Select";
-import { SelectionSummary } from "./SelectionSummary";
 import { TextInput } from "./TextInput";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import {
@@ -46,6 +50,10 @@ export interface FilterBuilderProps {
   compact?: boolean;
   showClearButton?: boolean;
   showPills?: boolean;
+  /** Show the `Match all` / `Match any` root-combinator toggle (only ever appears
+   * with 2+ clauses). Off by default — most filter sets are AND-only. The
+   * expression still carries a combinator (defaults `"and"`); this gates the UI. */
+  showCombinator?: boolean;
   onChange?: ((value: FilterExpression) => void) | null;
 }
 
@@ -61,6 +69,7 @@ export function FilterBuilder({
   compact = false,
   showClearButton = true,
   showPills = true,
+  showCombinator = false,
   onChange = null,
 }: FilterBuilderProps) {
   const uiPresentation = useUiPresentation();
@@ -101,16 +110,15 @@ export function FilterBuilder({
     .filter((field) => !field.disabled)
     .filter((field) => field.allowMultiple || !clauses.some((clause) => clause.key === field.key));
   const addSelectItems = availableFields.map((field) => ({ value: field.key, label: field.label }));
-  const combinatorVisible = clauses.length >= 2;
+  const combinatorVisible = showCombinator && clauses.length >= 2;
+  const openerLabel = combinatorVisible ? (combinator === "and" ? "All" : "Any") : "Filter";
   const isDrafting = draftKey !== "";
   const showAddRow = !isDrafting && canAddMore && availableFields.length > 0;
-  const pillItems = clauses.map((clause) => ({
-    id: clause.id,
-    label: clauseLabel(fieldMap.get(clause.key), clause),
-  }));
   const summaryText =
     activeCount === 0 ? "Filter" : activeCount === 1 ? "1 filter" : `${activeCount} filters`;
-  const triggerAriaLabel = activeCount > 0 ? `${ariaLabel}, ${activeCount} active` : ariaLabel;
+  const triggerAriaLabel = `${ariaLabel}${
+    combinatorVisible ? (combinator === "and" ? ", match all" : ", match any") : ""
+  }${activeCount > 0 ? `, ${activeCount} active` : ""}`;
 
   useEffect(() => {
     if (!open) return;
@@ -270,64 +278,93 @@ export function FilterBuilder({
         data-size={resolvedSize}
         data-density={resolvedDensity}
       >
-        <div className="poodle-filter-builder__trigger-wrap">
-          <button
-            type="button"
-            className="poodle-filter-builder__trigger"
-            disabled={disabled}
-            aria-label={triggerAriaLabel}
-            aria-haspopup="dialog"
-            aria-expanded={open}
-            aria-controls={open ? panelId : undefined}
-            onClick={() => {
-              if (disabled) return;
-              setOpen((o) => {
-                if (o) resetDraft();
-                return !o;
-              });
-            }}
-          >
-            <span className="poodle-filter-builder__label">Filter</span>
+        <button
+          type="button"
+          className="poodle-filter-builder__trigger"
+          disabled={disabled}
+          aria-label={triggerAriaLabel}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={() => {
+            if (disabled) return;
+            setOpen((o) => {
+              if (o) resetDraft();
+              return !o;
+            });
+          }}
+        >
+          {!compact ? (
+            <span
+              className="poodle-filter-builder__label"
+              data-combinator={combinatorVisible ? "true" : "false"}
+            >
+              {openerLabel}
+            </span>
+          ) : null}
+          {!(showPills && activeCount > 0) ? (
             <span className="poodle-filter-builder__summary" data-placeholder={activeCount === 0}>
               {summaryText}
             </span>
-            {activeCount > 0 ? (
+          ) : null}
+          <span className="poodle-filter-builder__chevron" aria-hidden="true">
+            ▾
+          </span>
+        </button>
+
+        {showPills && activeCount > 0
+          ? clauses.map((clause) => {
+              const pillText = clauseLabel(fieldMap.get(clause.key), clause);
+              return (
+                <span
+                  key={clause.id}
+                  className="poodle-selection-summary__chip poodle-selection-summary__chip--split poodle-filter-builder__pill"
+                >
+                  <button
+                    type="button"
+                    className="poodle-selection-summary__chip-activate"
+                    disabled={disabled}
+                    onClick={() => editClause(clause.id)}
+                    aria-label={`Edit ${pillText}`}
+                  >
+                    {pillText}
+                  </button>
+                  <button
+                    type="button"
+                    className="poodle-selection-summary__chip-remove"
+                    disabled={disabled}
+                    onClick={() => removeClause(clause.id)}
+                    aria-label={`Remove ${pillText}`}
+                  >
+                    <Icon name="x" size="xs" />
+                  </button>
+                </span>
+              );
+            })
+          : null}
+
+        {activeCount > 0 && (showPills || showClearButton) ? (
+          <span className="poodle-filter-builder__trailing">
+            {showPills ? (
               <span className="poodle-filter-builder__count" aria-hidden="true">
                 {activeCount}
               </span>
             ) : null}
-            <span className="poodle-filter-builder__chevron" aria-hidden="true">
-              ▾
-            </span>
-          </button>
-        </div>
-
-        {showClearButton && activeCount > 0 ? (
-          <span className="poodle-filter-builder__reset">
-            <IconButton
-              icon="x"
-              ariaLabel="Clear filters"
-              variant="ghost"
-              size={resolvedSize}
-              disabled={disabled}
-              onClick={handleResetClick}
-            />
+            {showClearButton ? (
+              <span className="poodle-filter-builder__reset">
+                <IconButton
+                  icon="x"
+                  ariaLabel="Clear filters"
+                  variant="ghost"
+                  size={resolvedSize}
+                  disabled={disabled}
+                  onClick={handleResetClick}
+                />
+              </span>
+            ) : null}
           </span>
         ) : null}
       </div>
-
-      {showPills && activeCount > 0 ? (
-        <div className="poodle-filter-builder__pills">
-          <SelectionSummary
-            items={pillItems}
-            size={resolvedSize}
-            density={resolvedDensity}
-            onActivate={editClause}
-            onRemove={removeClause}
-            onClear={clearAll}
-          />
-        </div>
-      ) : null}
 
       {open ? (
         <div

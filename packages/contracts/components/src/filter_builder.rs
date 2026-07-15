@@ -307,6 +307,7 @@ pub struct FilterBuilderSpec {
     pub is_compact: bool,
     pub show_clear_button: bool,
     pub show_pills: bool,
+    pub show_combinator: bool,
     pub is_open: bool,
 }
 
@@ -324,6 +325,7 @@ impl FilterBuilderSpec {
             is_compact: false,
             show_clear_button: true,
             show_pills: true,
+            show_combinator: false,
             is_open: false,
         }
     }
@@ -383,6 +385,11 @@ impl FilterBuilderSpec {
         self
     }
 
+    pub fn with_show_combinator(mut self, show: bool) -> Self {
+        self.show_combinator = show;
+        self
+    }
+
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
         self
@@ -423,7 +430,7 @@ impl FilterBuilderSpec {
     }
 
     pub fn combinator_visible(&self) -> bool {
-        self.value.clauses.len() >= 2
+        self.show_combinator && self.value.clauses.len() >= 2
     }
 
     /// Whether a draft clause is complete: valid operator whose operand kind
@@ -490,6 +497,20 @@ impl FilterBuilderSpec {
             0 => "Filter".to_string(),
             1 => "1 filter".to_string(),
             n => format!("{n} filters"),
+        }
+    }
+
+    /// Opener label. When the combinator is live (opted in + 2+ clauses) this
+    /// reflects the match mode — "All" / "Any" — so the mode is visible in the
+    /// always-shown trigger; otherwise the static "Filter".
+    pub fn opener_label(&self) -> &'static str {
+        if self.combinator_visible() {
+            match self.value.combinator {
+                FilterCombinator::And => "All",
+                FilterCombinator::Or => "Any",
+            }
+        } else {
+            "Filter"
         }
     }
 
@@ -651,6 +672,7 @@ mod tests {
 
     #[test]
     fn summary_and_combinator_visibility() {
+        // show_combinator gates the toggle; with it off it never shows.
         let mut spec = sample_spec();
         assert_eq!(spec.summary_text(), "Filter");
         assert!(!spec.combinator_visible());
@@ -662,7 +684,6 @@ mod tests {
             FilterOperand::Boolean(false),
         ));
         assert_eq!(spec.summary_text(), "1 filter");
-        assert!(!spec.combinator_visible());
 
         spec.value.clauses.push(FilterClause::new(
             "tag-count-1",
@@ -671,7 +692,31 @@ mod tests {
             FilterOperand::Number(3.0),
         ));
         assert_eq!(spec.summary_text(), "2 filters");
+        // 2 clauses but show_combinator defaults off → hidden.
+        assert!(!spec.combinator_visible());
+
+        // Opt in → visible at 2+, still hidden at <2.
+        spec.show_combinator = true;
         assert!(spec.combinator_visible());
+        spec.value.clauses.pop();
+        assert!(!spec.combinator_visible());
+    }
+
+    #[test]
+    fn opener_label_reflects_live_combinator() {
+        let mut spec = sample_spec();
+        // No combinator in effect → "Filter".
+        assert_eq!(spec.opener_label(), "Filter");
+        spec.show_combinator = true;
+        spec.value.clauses.push(FilterClause::new("a", "hidden", "is", FilterOperand::Boolean(true)));
+        spec.value.clauses.push(FilterClause::new("b", "tag-count", "gte", FilterOperand::Number(1.0)));
+        // Opted in + 2 clauses → mode label.
+        assert_eq!(spec.opener_label(), "All");
+        spec.value.combinator = FilterCombinator::Or;
+        assert_eq!(spec.opener_label(), "Any");
+        // Toggle off → back to "Filter" even with 2 clauses.
+        spec.show_combinator = false;
+        assert_eq!(spec.opener_label(), "Filter");
     }
 
     #[test]

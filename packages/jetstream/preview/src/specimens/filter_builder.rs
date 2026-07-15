@@ -58,6 +58,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 &FilterBuilderSpec::new()
                     .with_fields(fields())
                     .with_value(value())
+                    .with_show_combinator(true)
                     .with_open(true),
                 theme,
             ),
