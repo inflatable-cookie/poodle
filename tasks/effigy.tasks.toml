@@ -13,6 +13,12 @@
 "svelte:preview" = [{ task = "svelte:run"}]
 "svelte:surface-audit" = "bun packages/svelte/components/scripts/surface-audit.ts"
 
+# React preview (component gallery, mirrors the Svelte preview)
+"react:build" = "bun run --cwd packages/react/preview build"
+"react:run" = "bun run --cwd packages/react/preview dev"
+"react:preview" = [{ task = "react:run" }]
+"react:reports" = "bun run --cwd packages/react/preview reports"
+
 # GPUI native preview (macOS)
 "gpui:build" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
 "gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
