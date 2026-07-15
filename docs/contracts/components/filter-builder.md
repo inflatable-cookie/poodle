@@ -374,7 +374,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 - [ ] `value` controlled; external replacement re-renders
 - [ ] draft never emits an incomplete clause
 - [ ] add / update / remove / clear mutate the expression and fire `onChange`
-- [ ] `Match all` / `Match any` combinator; opt-in via `showCombinator` (default off), and only with 2+ clauses
+- [ ] `Match all` / `Match any` combinator; opt-in via `showCombinator` (default off), only with 2+ clauses, and switch hidden while editing a chip (opener label still reflects the mode). Native renders the overview state only (no interactive edit mode)
 - [ ] multi-enum any/all/none semantics preserved via operator keys
 - [ ] `allowMultiple` governs duplicate-field clauses (default single)
 - [ ] `maxClauses` hides the add row when reached
