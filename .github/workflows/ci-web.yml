@@ -1,0 +1,72 @@
+# Web gate — mirrors `effigy ci:web`. Node/bun only, ubuntu (1x minutes).
+# Path-scoped: a Rust-only or docs-only change never triggers this.
+name: ci-web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/core/**"
+      - "packages/styles/**"
+      - "packages/tokens/**"
+      - "packages/svelte/**"
+      - "packages/react/**"
+      - "packages/bridges/**"
+      - "docs/contracts/**"
+      - "packages/*.json"
+      - "bun.lock"
+      - "package.json"
+      - ".github/workflows/ci-web.yml"
+  pull_request:
+    paths:
+      - "packages/core/**"
+      - "packages/styles/**"
+      - "packages/tokens/**"
+      - "packages/svelte/**"
+      - "packages/react/**"
+      - "packages/bridges/**"
+      - "docs/contracts/**"
+      - "packages/*.json"
+      - "bun.lock"
+      - "package.json"
+      - ".github/workflows/ci-web.yml"
+
+# Cancel superseded runs on the same ref — the single biggest minutes saver.
+concurrency:
+  group: ci-web-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      # Cache the bun install store, keyed on the lockfile.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - run: bun install --frozen-lockfile
+
+      # ── effigy ci:web ──────────────────────────────────────────────
+      - name: core state-machine tests
+        run: bun run --cwd packages/core test
+      - name: contract / manifest lint
+        run: bun run --cwd packages/svelte/preview docs:lint
+      - name: parity report (tokens:build + data-layer smoke)
+        run: |
+          bun packages/tokens/scripts/build-tokens.ts
+          bun run --cwd packages/svelte/preview parity:report
+      - name: accessibility report (data-layer smoke)
+        run: bun run --cwd packages/svelte/preview accessibility:report

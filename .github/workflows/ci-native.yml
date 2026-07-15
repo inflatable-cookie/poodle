@@ -1,0 +1,81 @@
+# Native compile-rot check — mirrors `effigy ci:native` (gpui half).
+# macOS only: gpui 0.2.2 pulls metal. Runs NIGHTLY, but the expensive macOS job
+# only fires when the default branch changed in the last 24h — a cheap ubuntu
+# guard early-exits on idle nights so no macOS runner (10x minutes) is spent.
+# The native component crates have no unit tests yet; `cargo check` catches build
+# rot from contract/spec changes.
+#
+# jetstream/components is NOT built here: it depends on the sibling jetstream-runtime
+# repo (../../../../jetstream), which isn't part of this checkout. Verify it locally
+# with `effigy check:jetstream`.
+name: ci-native
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC daily — guarded below
+  workflow_dispatch: {} # manual runs always proceed (guard bypassed)
+
+concurrency:
+  group: ci-native-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Cheap ubuntu gate: did the default branch change in the last 24h?
+  # Skips the macOS job on idle nights. Manual dispatch always proceeds.
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch — proceeding."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last=$(git log -1 --format=%ct)   # committer date of HEAD (unix)
+          age=$(( $(date +%s) - last ))
+          if [ "$age" -lt 86400 ]; then
+            echo "HEAD is ${age}s old (< 24h) — running native check."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No default-branch commit in last 24h (HEAD ${age}s old) — skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  gpui:
+    needs: guard
+    if: needs.guard.outputs.run == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 40
+    # Shared target dir so the adapter, components, and preview crates reuse one
+    # compiled gpui dep tree instead of building it per crate.
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/ci-target
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # gpui's dep tree is large — cache aggressively to keep macOS minutes down.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            ci-target
+          key: native-${{ runner.os }}-${{ hashFiles('packages/gpui/**/Cargo.lock', 'packages/gpui/**/Cargo.toml') }}
+          restore-keys: native-${{ runner.os }}-
+
+      # ── effigy check:gpui ──────────────────────────────────────────
+      - name: gpui components compile-check
+        run: cargo check -p poodle-gpui-components --manifest-path packages/gpui/components/Cargo.toml
+      - name: gpui preview compile-check
+        run: cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml

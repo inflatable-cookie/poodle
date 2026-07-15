@@ -1,0 +1,56 @@
+# Rust gate — mirrors `effigy ci:rust`. Pure contract crates only, ubuntu (1x).
+# Native crates (packages/gpui, packages/jetstream) pull gpui/game_ui and are
+# NOT compiled here — they're covered locally / nightly, not per-PR.
+# Path-scoped: a web-only change never triggers this.
+name: ci-rust
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/ci-rust.yml"
+  pull_request:
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/ci-rust.yml"
+
+concurrency:
+  group: ci-rust-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # One shared target dir across the 8 separate crate trees, so common deps
+    # (poodle-headless, poodle-tokens) compile once instead of per-crate.
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/ci-target
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            ci-target
+          key: rust-${{ runner.os }}-${{ hashFiles('packages/contracts/**/Cargo.lock') }}
+          restore-keys: rust-${{ runner.os }}-
+
+      # ── effigy ci:rust — pure contract crates (conformance vectors, specs) ──
+      - name: contract crate tests
+        run: |
+          set -euo pipefail
+          for c in headless components layout style events workstation adapter tokens; do
+            echo "::group::cargo test contracts/$c"
+            cargo test --manifest-path "packages/contracts/$c/Cargo.toml"
+            echo "::endgroup::"
+          done
