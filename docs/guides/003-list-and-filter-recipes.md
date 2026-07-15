@@ -136,10 +136,52 @@ When host code owns the state region directly:
 - Use `secondary` rather than `ghost` for non-primary clustered actions outside
   the filter toolbar
 
+## Choosing A Filter Surface
+
+Four generic surfaces compose a browse page. They have distinct jobs and should
+not absorb each other:
+
+| Surface | Job | Use when |
+|---------|-----|----------|
+| `FilterToolbar` | Compact horizontal grouping of a *fixed, small* set of controls (a search box, one or two selects, a refresh action) | The filters are few and always visible |
+| `FilterBuilder` | A *growing/arbitrary* set of filter clauses built in a popover, shown as editable pills under one `Match all` / `Match any` combinator | You would otherwise accumulate one dropdown per filter and the toolbar is becoming unmanageable |
+| `OrderBy` | An ordered stack of sort directives (field + direction) in a popover | The list needs multi-field sorting |
+| `SelectionSummary` | A compact display of the current selection as removable chips | You need to show/clear what is currently selected |
+
+`FilterToolbar` and `FilterBuilder` compose cleanly side by side — the toolbar
+holds always-on controls (search, refresh, the `FilterBuilder` trigger itself);
+`FilterBuilder` owns the open-ended clause stack. Do **not** extend
+`FilterToolbar` into a clause builder, and do not put fixed search/refresh
+controls inside `FilterBuilder`.
+
+`FilterBuilder` is generic: the host supplies field definitions (`key`, `label`,
+`kind`, `options`, `operators`, `allowMultiple`) and evaluates the emitted
+`FilterExpression`. Poodle understands fields, operators, operands and a single
+AND/OR combinator — never app vocabulary (formats, tags, vendors) and never the
+evaluation or serialization of the expression.
+
+```svelte
+<script lang="ts">
+  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@poodle/svelte";
+
+  const fields: FilterFieldDefinition[] = [
+    { key: "format", label: "Format", kind: "multi-enum", options: [
+      { value: "clap", label: "CLAP" }, { value: "vst3", label: "VST3" },
+    ] },
+    { key: "hidden", label: "Hidden", kind: "boolean" },
+    { key: "tag-count", label: "Tag count", kind: "number" },
+  ];
+  let filter: FilterExpression = { combinator: "and", clauses: [] };
+</script>
+
+<FilterBuilder {fields} value={filter} onChange={(next) => (filter = next)} />
+```
+
 ## What Stays Out
 
 - row rendering
-- domain-specific filters
+- domain-specific filters and filter *evaluation* (`FilterBuilder` emits a
+  declarative expression; the host evaluates it)
 - order-by semantics
 - selection state
 - command wiring
@@ -152,12 +194,18 @@ root.
 
 - use `ListContainer` for list-page shell structure
 - use `FilterToolbar` for compact control grouping
-- keep query orchestration, list content, and app vocabulary in host code
+- use `FilterBuilder` when the filter set is open-ended (clause stack + pills)
+- use `OrderBy` for multi-field sort; `SelectionSummary` for selection chips
+- keep query orchestration, list content, filter *evaluation*, and app
+  vocabulary in host code
 
 ## Related Contracts
 
 - [ListContainer](../contracts/components/list-container.md)
 - [FilterToolbar](../contracts/components/filter-toolbar.md)
+- [FilterBuilder](../contracts/components/filter-builder.md)
+- [OrderBy](../contracts/components/order-by.md)
+- [SelectionSummary](../contracts/components/selection-summary.md)
 - [PageHeader](../contracts/components/page-header.md)
 
 ## Next Task

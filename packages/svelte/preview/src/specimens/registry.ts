@@ -40,6 +40,7 @@ import EyebrowSpecimen from "./EyebrowSpecimen.svelte";
 import FieldSpecimen from "./FieldSpecimen.svelte";
 import FieldSetSpecimen from "./FieldSetSpecimen.svelte";
 import FileUploadSpecimen from "./FileUploadSpecimen.svelte";
+import FilterBuilderSpecimen from "./FilterBuilderSpecimen.svelte";
 import FilterToolbarSpecimen from "./FilterToolbarSpecimen.svelte";
 import FormActionsSpecimen from "./FormActionsSpecimen.svelte";
 import FormDialogSpecimen from "./FormDialogSpecimen.svelte";
@@ -177,6 +178,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   field: FieldSpecimen,
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
+  "filter-builder": FilterBuilderSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,
   "form-dialog": FormDialogSpecimen,

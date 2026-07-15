@@ -181,6 +181,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "DataTableSpec",
     "DetailShellSpec",
     "DetailSectionSpec",
+    "FilterBuilderSpec",
     "FilterToolbarSpec",
     "PickerShellSpec",
     "RelationPickerSpec",

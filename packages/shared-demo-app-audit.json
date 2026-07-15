@@ -27,8 +27,8 @@
     "packages": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 160,
-        "previewedCount": 160,
+        "exportCount": 161,
+        "previewedCount": 161,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       }

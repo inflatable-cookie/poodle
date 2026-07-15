@@ -155,6 +155,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Collapsible", "data", "Show/hide content toggle without accordion grouping.", true),
   entry("OrderBy", "data", "Sort-control toolbar for data views.", true),
   entry("SelectionSummary", "data", "Summary display of current selection state.", true),
+  entry("FilterBuilder", "data", "Popover filter-clause builder with editable pills and AND/OR combinator.", true),
   entry("FilterToolbar", "data", "Toolbar with filter controls for data views.", true),
   entry("LogList", "data", "Operational log viewer and audit activity list.", true),
   entry("RelationPicker", "data", "Searchable picker for selecting related items.", true),

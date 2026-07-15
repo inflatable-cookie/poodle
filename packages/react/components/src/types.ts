@@ -174,6 +174,52 @@ export type ActiveSort = {
   direction: SortDirection;
 };
 
+// ── FilterBuilder ──────────────────────────────────────────────────────────
+// Mirrors @poodle/svelte's FilterBuilder type model verbatim (React keeps its own
+// copy, same as OrderBy). Generic filter-expression model — no app vocabulary,
+// no evaluation.
+export type FilterCombinator = "and" | "or";
+export type FilterFieldKind = "boolean" | "enum" | "multi-enum" | "text" | "number" | "range";
+export type FilterOperandKind = "none" | "text" | "number" | "boolean" | "options" | "range";
+export type FilterOperand =
+  | { kind: "none" }
+  | { kind: "text"; value: string }
+  | { kind: "number"; value: number }
+  | { kind: "boolean"; value: boolean }
+  | { kind: "options"; values: string[] }
+  | { kind: "range"; min: number | null; max: number | null };
+export type FilterOption = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  group?: string;
+};
+export type FilterOperatorDefinition = {
+  key: string;
+  label: string;
+  operandKind: FilterOperandKind;
+};
+export type FilterFieldDefinition = {
+  key: string;
+  label: string;
+  kind: FilterFieldKind;
+  operators?: FilterOperatorDefinition[];
+  options?: FilterOption[];
+  defaultOperator?: string;
+  allowMultiple?: boolean;
+  disabled?: boolean;
+};
+export type FilterClause = {
+  id: string;
+  key: string;
+  operator: string;
+  operand: FilterOperand;
+};
+export type FilterExpression = {
+  combinator: FilterCombinator;
+  clauses: FilterClause[];
+};
+
 export interface AccordionItem {
   value: string;
   label: string;

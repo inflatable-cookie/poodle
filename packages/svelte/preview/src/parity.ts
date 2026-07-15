@@ -502,6 +502,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Eyebrow",
       "FieldSet",
       "FileUpload",
+      "FilterBuilder",
       "Grid",
       "HoverCard",
       "Icon",

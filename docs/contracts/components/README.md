@@ -58,6 +58,7 @@ primitives and layout surfaces through higher-order application components.
 - `field-set.md`
 - `field.md`
 - `file-upload.md`
+- `filter-builder.md`
 - `filter-toolbar.md`
 - `form-actions.md`
 - `form-dialog.md`

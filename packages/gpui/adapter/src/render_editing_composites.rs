@@ -13,7 +13,7 @@ use poodle_specs::{
     EmptyStateSpec, LogListSpec, MarkdownEditorSpec, MediaPickerSpec, PageHeaderSpec,
     PageLoadingSpec, StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
-use poodle_specs::{BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec};
+use poodle_specs::{BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec};
 use poodle_style::StyleDescriptor;
 
 use crate::style_map::map_style;
@@ -172,6 +172,19 @@ impl RenderComponent<OrderBySpec> for GpuiAdapter {
     ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("order-by", "OrderBySpec")
+    }
+}
+
+impl RenderComponent<FilterBuilderSpec> for GpuiAdapter {
+    type Target = GpuiTarget;
+    fn render(
+        &self,
+        _spec: &FilterBuilderSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
+        let _s = map_style(style);
+        GpuiElementHandle::new("filter-builder", "FilterBuilderSpec")
     }
 }
 

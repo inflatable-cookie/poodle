@@ -161,6 +161,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | field | ok | 1 | 1 | ok |
 | field-set | fixed | 1 | 1 | ok |
 | file-upload | ok | 0 | 0 | ok |
+| filter-builder | ok | 1 | 1 | ok |
 | filter-toolbar | fixed | 0 | 0 | ok |
 | form-actions | ok | 1 | 1 | ok |
 | form-dialog | ok | 0 | 0 | ok |

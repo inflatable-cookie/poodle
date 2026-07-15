@@ -50,6 +50,7 @@ import { EyebrowSpecimen } from "./specimens/EyebrowSpecimen";
 import { FieldSetSpecimen } from "./specimens/FieldSetSpecimen";
 import { FieldSpecimen } from "./specimens/FieldSpecimen";
 import { FileUploadSpecimen } from "./specimens/FileUploadSpecimen";
+import { FilterBuilderSpecimen } from "./specimens/FilterBuilderSpecimen";
 import { FilterToolbarSpecimen } from "./specimens/FilterToolbarSpecimen";
 import { FormActionsSpecimen } from "./specimens/FormActionsSpecimen";
 import { FormDialogSpecimen } from "./specimens/FormDialogSpecimen";
@@ -185,6 +186,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "field": FieldSpecimen,
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
+  "filter-builder": FilterBuilderSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,
   "form-dialog": FormDialogSpecimen,

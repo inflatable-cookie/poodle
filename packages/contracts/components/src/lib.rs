@@ -32,6 +32,7 @@ mod eyebrow;
 mod field;
 mod field_set;
 mod file_upload;
+mod filter_builder;
 mod form_actions;
 mod form_dialog;
 mod form_layout;
@@ -294,6 +295,11 @@ pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
 pub use empty_state::EmptyStateSpec;
 pub use error_boundary::ErrorBoundarySpec;
+pub use filter_builder::{
+    default_operators_for_kind, FilterBuilderSpec, FilterClause, FilterCombinator, FilterExpression,
+    FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOperandKind,
+    FilterOperatorDefinition, FilterOption,
+};
 pub use filter_toolbar::FilterToolbarSpec;
 pub use form_shell::FormShellSpec;
 pub use inline_list_section::InlineListSectionSpec;

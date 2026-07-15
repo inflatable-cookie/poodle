@@ -1423,6 +1423,42 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "filter-builder": {
+    props: [
+      { name: "fields", type: "FilterFieldDefinition[]", default: "[]", description: "Host-supplied filter fields the user can choose from (key, label, kind, options, operators, allowMultiple)." },
+      { name: "value", type: "FilterExpression", default: '{ combinator: "and", clauses: [] }', description: "Controlled expression: combinator plus committed clauses. Hosts update it from onChange." },
+      { name: "maxClauses", type: "number | null", default: "null", description: "Optional cap on the number of active clauses; hides the add row when reached." },
+      { name: "compact", type: "boolean", default: "false", description: "Hides the static \"Filter\" label in the trigger." },
+      { name: "showClearButton", type: "boolean", default: "true", description: "Whether the reset (clear-all) button is rendered." },
+      { name: "showPills", type: "boolean", default: "true", description: "Whether active clauses render as external editable/removable pills." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "ariaLabel", type: "string", default: '"Filter"', description: "Accessible label for the filter control." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the filter control is disabled." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(value: FilterExpression) => void", description: "Called on every committed mutation (add, update, remove, clear, combinator change). Never fired for an in-progress draft." },
+    ],
+    usage: `<script lang="ts">
+  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@poodle/svelte";
+
+  const fields: FilterFieldDefinition[] = [
+    { key: "format", label: "Format", kind: "multi-enum", options: [
+      { value: "clap", label: "CLAP" },
+      { value: "vst3", label: "VST3" },
+    ] },
+    { key: "hidden", label: "Hidden", kind: "boolean" },
+    { key: "tag-count", label: "Tag count", kind: "number" },
+  ];
+
+  let value: FilterExpression = { combinator: "and", clauses: [] };
+</script>
+
+<FilterBuilder {fields} {value} onChange={(next) => (value = next)} />`,
+  },
+
   "filter-toolbar": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },

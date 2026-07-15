@@ -1,0 +1,224 @@
+/* Styles for FilterBuilder. Shares OrderBy's trigger/surface language and
+   SelectionSummary's pill treatment rather than duplicating them. */
+
+  .poodle-filter-builder-popover {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-filter-builder {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-filter-builder[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-filter-builder__trigger-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .poodle-filter-builder__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    box-sizing: border-box;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-filter-builder__trigger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
+  }
+
+  .poodle-filter-builder__trigger:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-filter-builder__label {
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.75rem;
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .poodle-filter-builder[data-compact="true"] .poodle-filter-builder__label {
+    display: none;
+  }
+
+  .poodle-filter-builder__summary {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .poodle-filter-builder__summary[data-placeholder="true"] {
+    color: var(--poodle-color-text-muted);
+  }
+
+  .poodle-filter-builder__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding: 0 0.3125rem;
+    border-radius: 999px;
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-inverse);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .poodle-filter-builder__chevron {
+    color: var(--poodle-color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  .poodle-filter-builder__reset {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .poodle-filter-builder__pills {
+    margin-top: 0.375rem;
+  }
+
+  /* ── Anchored popover surface ────────────────────────────────────────── */
+  .poodle-filter-builder__surface {
+    position: absolute;
+    z-index: var(--poodle-overlay-z-menu);
+    top: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 16rem;
+    max-width: min(24rem, 90vw);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-elevation-overlay);
+  }
+
+  .poodle-filter-builder__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .poodle-filter-builder__combinator {
+    padding-bottom: 0.5rem;
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-filter-builder__draft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated));
+  }
+
+  .poodle-filter-builder__draft-field {
+    font-size: 0.8125rem;
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-filter-builder__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 12rem;
+    overflow-y: auto;
+  }
+
+  .poodle-filter-builder__range {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .poodle-filter-builder__range-sep {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-filter-builder__draft-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .poodle-filter-builder__add {
+    display: flex;
+    align-items: center;
+  }
+
+  .poodle-filter-builder__empty {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    margin: 0;
+    padding: 0.25rem 0;
+  }
+
+  /* ── Size adjustments (trigger height + summary/label font) ───────────── */
+  .poodle-filter-builder[data-size="xs"] .poodle-filter-builder__trigger {
+    min-height: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  .poodle-filter-builder[data-size="xs"] .poodle-filter-builder__label { font-size: 0.5625rem; }
+  .poodle-filter-builder[data-size="xs"] .poodle-filter-builder__summary { font-size: 0.6875rem; }
+
+  .poodle-filter-builder[data-size="sm"] .poodle-filter-builder__trigger { min-height: 1.75rem; }
+  .poodle-filter-builder[data-size="sm"] .poodle-filter-builder__label { font-size: 0.625rem; }
+  .poodle-filter-builder[data-size="sm"] .poodle-filter-builder__summary { font-size: 0.8125rem; }
+
+  .poodle-filter-builder[data-size="lg"] .poodle-filter-builder__trigger {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+  }
+  .poodle-filter-builder[data-size="lg"] .poodle-filter-builder__label { font-size: 0.8125rem; }
+  .poodle-filter-builder[data-size="lg"] .poodle-filter-builder__summary { font-size: 0.9375rem; }
+
+  .poodle-filter-builder[data-size="xl"] .poodle-filter-builder__trigger {
+    min-height: 3.25rem;
+    padding: 0 1.125rem;
+  }
+  .poodle-filter-builder[data-size="xl"] .poodle-filter-builder__label { font-size: 0.875rem; }
+  .poodle-filter-builder[data-size="xl"] .poodle-filter-builder__summary { font-size: 1rem; }
+
+  /* ── Density adjustments (trigger gap) ────────────────────────────────── */
+  .poodle-filter-builder[data-density="compact"] .poodle-filter-builder__trigger { gap: 0.375rem; }
+  .poodle-filter-builder[data-density="comfortable"] .poodle-filter-builder__trigger { gap: 0.625rem; }

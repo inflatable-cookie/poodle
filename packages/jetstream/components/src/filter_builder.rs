@@ -1,0 +1,370 @@
+//! FilterBuilder — Jetstream filter-clause builder backed by FilterBuilderSpec.
+//!
+//! Contract: `docs/contracts/components/filter-builder.md`
+//! Reference: `packages/svelte/components/src/FilterBuilder.svelte`
+//!
+//! Anatomy: popover wrapper → root (trigger-wrap with FILTER label + summary +
+//! count badge + chevron, and an optional ghost reset IconButton) → clause pills
+//! → dialog surface (Match all / Match any combinator when 2+ clauses, an
+//! add-field Select, or "No filters" empty text).
+//!
+//! Interaction (menu open/close, draft field → operator → operand → Add, pill
+//! edit/remove) lives in the preview event loop, not the component — render-only,
+//! build/probe-verified.
+use jetstream_runtime::ui_element::{self, JsEl};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_specs::{
+    ButtonVariant, ChoiceOption, ControlSize, FilterBuilderSpec, FilterCombinator, IconButtonSpec,
+    SelectSpec,
+};
+
+use crate::icon_button::js_icon_button;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
+use crate::select::js_select;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+
+pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+    // ── Size table (contract §8) ──────────────────────────────────────────────
+    let trigger_h = rem_to_px(match effective_size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.75,
+        ControlSize::Xl => 3.25,
+    });
+    let label_font = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.5625,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    });
+    let summary_font = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.8125,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 0.9375,
+        ControlSize::Xl => 1.0,
+    });
+    let trigger_pad_x = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.5,
+        ControlSize::Lg => 1.0,
+        ControlSize::Xl => 1.125,
+        _ => 0.75 + size_padding_x_offset_rem(effective_size),
+    });
+    let trigger_gap = rem_to_px(match spec.density {
+        poodle_specs::ControlDensity::Compact => 0.375,
+        poodle_specs::ControlDensity::Default => 0.5,
+        poodle_specs::ControlDensity::Comfortable => 0.625,
+    });
+
+    let root_gap = rem_to_px(0.375);
+    let panel_gap = rem_to_px(0.5);
+
+    // ── Colors ────────────────────────────────────────────────────────────────
+    let text_primary = resolve_color(theme, spec.field_text_token());
+    let text_secondary = resolve_color(theme, spec.label_color_token());
+    let muted = resolve_color(theme, spec.muted_color_token());
+    let border = resolve_color(theme, spec.field_border_token());
+    let item_border = resolve_color(theme, spec.item_border_token());
+    let surface = resolve_color(theme, spec.field_fill_token());
+    let elevated = resolve_color(theme, spec.field_hover_fill_token());
+    let accent = resolve_color(theme, spec.count_fill_token());
+    let accent_text = resolve_color(theme, spec.count_text_token());
+    let radius = resolve_radius(theme, spec.radius_token());
+    let surface_radius = resolve_radius(theme, spec.surface_radius_token());
+    let item_bg = color_mix(surface, elevated, 0.90);
+
+    // ── Trigger ───────────────────────────────────────────────────────────────
+    let mut trigger = ui_element::div()
+        .flex_row()
+        .items_center()
+        .gap(trigger_gap)
+        .grow()
+        .min_w(0.0)
+        .min_h(trigger_h)
+        .pl(trigger_pad_x)
+        .pr(trigger_pad_x)
+        .rounded(radius)
+        .border_1()
+        .border_color(border)
+        .bg(surface);
+
+    if !spec.is_compact {
+        trigger = trigger.child(
+            ui_element::label("FILTER")
+                .text_color(text_secondary)
+                .text_size(label_font)
+                .text_weight(500)
+                .letter_spacing_em(0.05),
+        );
+    }
+
+    let is_placeholder = !spec.has_value();
+    trigger = trigger.child(
+        ui_element::label(&spec.summary_text())
+            .text_color(if is_placeholder { muted } else { text_primary })
+            .text_size(summary_font)
+            .grow()
+            .min_w(0.0)
+            .text_ellipsis()
+            .whitespace_nowrap(),
+    );
+
+    if spec.active_count() > 0 {
+        trigger = trigger.child(
+            ui_element::label(&format!("{}", spec.active_count()))
+                .min_w(rem_to_px(1.125))
+                .min_h(rem_to_px(1.125))
+                .pl(rem_to_px(0.3125))
+                .pr(rem_to_px(0.3125))
+                .flex_none()
+                .items_center()
+                .justify_center()
+                .rounded(rem_to_px(0.5625))
+                .bg(accent)
+                .text_color(accent_text)
+                .text_size(rem_to_px(0.6875))
+                .text_weight(600),
+        );
+    }
+
+    trigger = trigger.child(
+        ui_element::icon("chevron-down")
+            .w(summary_font)
+            .h(summary_font)
+            .text_color(text_secondary),
+    );
+
+    // ── Root row: trigger + optional ghost reset ──────────────────────────────
+    let mut trigger_row = ui_element::div()
+        .flex_row()
+        .items_center()
+        .gap(root_gap)
+        .min_w(0.0)
+        .child(trigger);
+
+    if spec.show_clear_button && spec.has_value() {
+        trigger_row = trigger_row.child(js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("x")
+                .with_aria_label("Clear filters")
+                .with_variant(ButtonVariant::Ghost)
+                .with_size(effective_size)
+                .with_disabled(spec.is_disabled),
+            theme,
+        ));
+    }
+
+    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0);
+    root = root.child(trigger_row);
+
+    // ── Clause pills ──────────────────────────────────────────────────────────
+    if spec.show_pills && spec.has_value() {
+        let mut pills = ui_element::div()
+            .flex_row()
+            .flex_wrap()
+            .items_center()
+            .gap(rem_to_px(0.375));
+        for clause in spec.value.clauses.iter() {
+            let label = spec.clause_label(clause);
+            pills = pills.child(
+                ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .gap(rem_to_px(0.25))
+                    .pl(rem_to_px(0.5))
+                    .pr(rem_to_px(0.1875))
+                    .min_h(rem_to_px(1.5))
+                    .rounded(radius)
+                    .border_1()
+                    .border_color(item_border)
+                    .bg(item_bg)
+                    .child(
+                        ui_element::label(&label)
+                            .text_color(text_primary)
+                            .text_size(rem_to_px(0.75)),
+                    )
+                    .child(js_icon_button(
+                        &IconButtonSpec::new()
+                            .with_icon("x")
+                            .with_aria_label(format!("Remove {label}"))
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Xs)
+                            .with_disabled(spec.is_disabled),
+                        theme,
+                    )),
+            );
+        }
+        root = root.child(pills);
+    }
+
+    // ── Dialog surface (rendered inline when open) ────────────────────────────
+    if spec.is_open {
+        let mut panel = ui_element::div().flex_col().gap(panel_gap);
+
+        // Combinator (2+ clauses) — static two-option indicator.
+        if spec.combinator_visible() {
+            let is_and = spec.value.combinator == FilterCombinator::And;
+            let mk = |text: &str, selected: bool| {
+                ui_element::label(text)
+                    .grow()
+                    .pl(rem_to_px(0.5))
+                    .pr(rem_to_px(0.5))
+                    .pt(rem_to_px(0.25))
+                    .pb(rem_to_px(0.25))
+                    .rounded(radius)
+                    .bg(if selected { accent } else { surface })
+                    .text_color(if selected { accent_text } else { text_secondary })
+                    .text_size(rem_to_px(0.75))
+            };
+            panel = panel.child(
+                ui_element::div()
+                    .flex_row()
+                    .gap(rem_to_px(0.25))
+                    .child(mk("Match all", is_and))
+                    .child(mk("Match any", !is_and)),
+            );
+        }
+
+        // Add-field Select.
+        let available = spec.available_fields();
+        if spec.can_add_more() && !available.is_empty() {
+            let options: Vec<ChoiceOption> = available
+                .into_iter()
+                .map(|field| ChoiceOption::new(field.key.clone(), field.label.clone()))
+                .collect();
+            let mut select_spec = SelectSpec::new(options)
+                .with_placeholder("+ Add filter")
+                .with_size(effective_size)
+                .with_density(spec.density);
+            select_spec.aria_label = Some("Add filter field".to_string());
+            select_spec.is_disabled = spec.is_disabled;
+            panel = panel.child(
+                ui_element::div()
+                    .flex_row()
+                    .items_center()
+                    .child(js_select(&select_spec, theme)),
+            );
+        }
+
+        if !spec.has_value() {
+            panel = panel.child(
+                ui_element::label("No filters")
+                    .text_color(text_secondary)
+                    .text_size(rem_to_px(0.75)),
+            );
+        }
+
+        root = root.child(
+            ui_element::div()
+                .min_w(rem_to_px(16.0))
+                .max_w(rem_to_px(24.0))
+                .rounded(surface_radius)
+                .border_1()
+                .border_color(item_border)
+                .bg(elevated)
+                .pl(rem_to_px(0.375))
+                .pr(rem_to_px(0.375))
+                .pt(rem_to_px(0.375))
+                .pb(rem_to_px(0.375))
+                .child(panel),
+        );
+    }
+
+    if spec.is_disabled {
+        root = root.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+    }
+
+    root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{
+        FilterClause, FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand,
+        FilterOption,
+    };
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn fields() -> Vec<FilterFieldDefinition> {
+        vec![
+            FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(
+                vec![FilterOption::new("clap", "CLAP"), FilterOption::new("vst3", "VST3")],
+            ),
+            FilterFieldDefinition::new("hidden", "Hidden", FilterFieldKind::Boolean),
+            FilterFieldDefinition::new("tag-count", "Tag count", FilterFieldKind::Number),
+        ]
+    }
+
+    fn populated() -> FilterBuilderSpec {
+        FilterBuilderSpec::new()
+            .with_fields(fields())
+            .with_open(true)
+            .with_value(FilterExpression {
+                combinator: FilterCombinator::And,
+                clauses: vec![
+                    FilterClause::new(
+                        "format-1",
+                        "format",
+                        "any_of",
+                        FilterOperand::Options(vec!["clap".into(), "vst3".into()]),
+                    ),
+                    FilterClause::new("hidden-1", "hidden", "is", FilterOperand::Boolean(false)),
+                ],
+            })
+    }
+
+    #[test]
+    fn empty_open_shows_no_filters_and_hides_reset() {
+        let el = js_filter_builder(
+            &FilterBuilderSpec::new().with_fields(fields()).with_open(true),
+            &theme(),
+        );
+        let tree = crate::render_probe::probe(&el, 320.0, 240.0);
+        assert!(tree.has_text("No filters"), "empty text wrong: {:?}", tree.texts());
+        assert!(tree.has_text("FILTER"));
+        assert!(tree.has_text("Filter"), "placeholder summary missing: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn populated_shows_pill_labels_and_count() {
+        let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
+        assert!(
+            tree.has_text("Format is any of CLAP, VST3"),
+            "multi-enum pill label wrong: {:?}",
+            tree.texts()
+        );
+        assert!(tree.has_text("Hidden is false"), "boolean pill wrong: {:?}", tree.texts());
+        assert!(tree.has_text("2 filters"), "summary count wrong: {:?}", tree.texts());
+    }
+
+    #[test]
+    fn combinator_shows_only_with_two_clauses() {
+        // Two clauses → combinator visible.
+        let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
+        assert!(tree.has_text("Match all") && tree.has_text("Match any"));
+
+        // One clause → combinator hidden.
+        let one = FilterBuilderSpec::new().with_fields(fields()).with_open(true).with_value(
+            FilterExpression {
+                combinator: FilterCombinator::And,
+                clauses: vec![FilterClause::new(
+                    "hidden-1",
+                    "hidden",
+                    "is",
+                    FilterOperand::Boolean(true),
+                )],
+            },
+        );
+        let tree = crate::render_probe::probe(&js_filter_builder(&one, &theme()), 360.0, 240.0);
+        assert!(!tree.has_text("Match all"), "combinator must hide with <2 clauses: {:?}", tree.texts());
+        assert!(tree.has_text("1 filter"));
+    }
+}

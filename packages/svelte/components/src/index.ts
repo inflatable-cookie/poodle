@@ -36,6 +36,7 @@ export {
   type FileUploadValidationError,
   type ImageCompressionOptions,
 } from "./file-upload";
+export { default as FilterBuilder } from "./FilterBuilder.svelte";
 export { default as FormActions } from "./FormActions.svelte";
 export { default as Grid } from "./Grid.svelte";
 export { default as HoverCard } from "./HoverCard.svelte";
@@ -245,6 +246,15 @@ export type {
   BreadcrumbItem,
   BulkAction,
   CardVariant,
+  FilterClause,
+  FilterCombinator,
+  FilterExpression,
+  FilterFieldDefinition,
+  FilterFieldKind,
+  FilterOperand,
+  FilterOperandKind,
+  FilterOperatorDefinition,
+  FilterOption,
   OrderByField,
   OrderByFieldDefinition,
   OrderByValue,

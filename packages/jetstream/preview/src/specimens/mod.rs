@@ -85,6 +85,7 @@ pub mod metric_tile;
 pub mod nav_card;
 pub mod navigation_menu;
 pub mod number_input;
+pub mod filter_builder;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;
@@ -335,6 +336,7 @@ fn render_specimen(
         "nav-card" => Some(nav_card::render(theme)),
         "navigation-menu" => Some(navigation_menu::render(theme)),
         "number-input" => Some(number_input::render(theme)),
+        "filter-builder" => Some(filter_builder::render(theme)),
         "order-by" => Some(order_by::render(theme)),
         "page-header" => Some(page_header::render(theme)),
         "page-loading" => Some(page_loading::render(theme)),

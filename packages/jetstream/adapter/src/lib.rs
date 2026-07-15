@@ -159,7 +159,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "InlineRemediationSpec", "ConfirmActionSpec",
     // Data and browse
     "DataTableSpec", "DetailShellSpec",
-    "DetailSectionSpec", "FilterToolbarSpec", "PickerShellSpec",
+    "DetailSectionSpec", "FilterBuilderSpec", "FilterToolbarSpec", "PickerShellSpec",
     "RelationPickerSpec", "SelectionSummarySpec", "PaginationSummarySpec",
     "MediaThumbnailSpec", "MediaPreviewSpec", "EmptyStateSpec",
     "ListContainerSpec", "MetricTileSpec",

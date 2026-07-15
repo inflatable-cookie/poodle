@@ -76,6 +76,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "nav-card", display_name: "NavCard", description: "Navigation-oriented card.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "navigation-menu", display_name: "NavigationMenu", description: "Navigation with dropdowns.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "number-input", display_name: "NumberInput", description: "Numeric input with controls.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "filter-builder", display_name: "FilterBuilder", description: "Popover filter-clause builder with editable pills.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "order-by", display_name: "OrderBy", description: "Sort-control toolbar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "pagination", display_name: "Pagination", description: "Page navigation controls.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "pagination-summary", display_name: "PaginationSummary", description: "Pagination state summary.", tier: Tier::Primitive, has_specimen: true },

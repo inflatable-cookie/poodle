@@ -27,6 +27,7 @@ export { StatusBar, type StatusBarProps } from "./StatusBar";
 export { Surface, type SurfaceProps } from "./Surface";
 export { BulkActionBar, type BulkActionBarProps } from "./BulkActionBar";
 export { CollapseToggle, type CollapseToggleProps } from "./CollapseToggle";
+export { FilterBuilder, type FilterBuilderProps } from "./FilterBuilder";
 export { FilterToolbar, type FilterToolbarProps } from "./FilterToolbar";
 export { MetaBar, type MetaBarProps } from "./MetaBar";
 export { PageLoading, type PageLoadingProps, type PageLoadingPresentation } from "./PageLoading";

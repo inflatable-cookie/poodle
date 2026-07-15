@@ -84,6 +84,7 @@ above it in downstream repos such as Loophole.
 - `components/field-set.md`
 - `components/field.md`
 - `components/file-upload.md`
+- `components/filter-builder.md`
 - `components/filter-toolbar.md`
 - `components/form-actions.md`
 - `components/form-dialog.md`

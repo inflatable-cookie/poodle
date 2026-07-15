@@ -167,6 +167,7 @@ pub mod media_preview;
 pub mod media_thumbnail;
 pub mod metric_tile;
 pub mod nav_card;
+pub mod filter_builder;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;

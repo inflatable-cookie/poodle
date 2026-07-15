@@ -284,6 +284,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Numeric input with optional steppers.",
     },
     ComponentEntry {
+        slug: "filter-builder",
+        display_name: "FilterBuilder",
+        description: "Popover filter-clause builder with editable pills and AND/OR combinator.",
+    },
+    ComponentEntry {
         slug: "order-by",
         display_name: "OrderBy",
         description: "Sort-control toolbar for data views.",

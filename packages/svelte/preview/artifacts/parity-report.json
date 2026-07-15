@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T13:24:55.580Z",
+  "generatedAt": "2026-07-15T13:18:10.839Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 160,
-        "componentCount": 131,
+        "exportCount": 161,
+        "componentCount": 132,
         "helperCount": 29,
-        "previewedCount": 160,
+        "previewedCount": 161,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 160,
-        "componentCount": 131,
+        "exportCount": 161,
+        "componentCount": 132,
         "helperCount": 29,
-        "previewedCount": 160,
+        "previewedCount": 161,
         "contractOnlyCount": 0
       }
     ],
@@ -925,6 +925,19 @@
       {
         "packageName": "@poodle/svelte",
         "exportName": "FileUpload",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "FilterBuilder",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
