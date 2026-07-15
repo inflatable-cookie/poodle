@@ -38,6 +38,48 @@
 ]
 "report:accessibility" = "bun run --cwd packages/svelte/preview accessibility:report"
 
+# CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
+# preview builds. The GitHub workflows (.github/workflows/ci-*.yml) mirror
+# ci:web / ci:rust so CI needs no effigy bootstrap; `effigy ci` is the local gate.
+"test:core" = "bun run --cwd packages/core test"
+# Pure contract crates only — each is a separate crate tree, all cross-platform
+# (no gpui/game_ui deps). Native component crates are covered locally/nightly.
+"test:contracts" = [
+  { run = "cargo test --manifest-path packages/contracts/headless/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/components/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/layout/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/style/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/events/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/workstation/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/adapter/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
+]
+"ci:web" = [
+  { task = "test:core" },
+  { task = "docs:lint" },
+  { task = "report:parity" },
+  { task = "report:accessibility" },
+]
+"ci:rust" = [{ task = "test:contracts" }]
+"ci" = [
+  { task = "ci:web" },
+  { task = "ci:rust" },
+]
+
+# Native compile-rot check (macOS: gpui pulls metal). The native component crates
+# have no unit tests yet, so `cargo check` is the gate — it catches build rot from
+# contract/spec changes. jetstream/components needs the sibling jetstream-runtime
+# repo, so it is LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
+"check:gpui" = [
+  { run = "cargo check -p poodle-gpui-components --manifest-path packages/gpui/components/Cargo.toml" },
+  { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+]
+"check:jetstream" = "cargo check -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
+"ci:native" = [
+  { task = "check:gpui" },
+  { task = "check:jetstream" },
+]
+
 # Documentation
 "docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
 "docs:dev" = [{ task = "svelte:run" }]

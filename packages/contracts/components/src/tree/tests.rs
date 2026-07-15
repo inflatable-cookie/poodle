@@ -1,8 +1,7 @@
 //! TreeSpec unit tests. Split out of `tree/mod.rs`.
 
 use super::*;
-
-    use super::*;
+use crate::CheckState;
 
     fn sample() -> TreeSpec {
         TreeSpec::new(vec![
