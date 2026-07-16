@@ -26,6 +26,16 @@ fn remove_node(nodes: Vec<TreeNode>, value: &str) -> Vec<TreeNode> {
         .collect()
 }
 
+/// Which view of a specimen page is active (mirrors the Svelte
+/// SpecimenLayout's Examples/Sizes/Densities tabs).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SpecimenView {
+    #[default]
+    Examples,
+    Sizes,
+    Densities,
+}
+
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Section {
@@ -354,6 +364,8 @@ pub struct AppState {
     pub contrast: f32,
     /// Sidebar/catalogue filter (toolbar search box).
     pub search: String,
+    /// Active specimen-page view (Examples/Sizes/Densities).
+    pub specimen_view: SpecimenView,
     pub active_component_idx: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub disabled: bool,
@@ -380,6 +392,7 @@ impl AppState {
             control_size: ControlSize::Md,
             contrast: 0.5,
             search: String::new(),
+            specimen_view: SpecimenView::Examples,
             active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,
             disabled: false,
@@ -412,6 +425,8 @@ impl AppState {
         if self.section == Section::Components {
             self.active_component_idx = idx;
         }
+        // A fresh component starts on its Examples view.
+        self.specimen_view = SpecimenView::Examples;
         self.dirty = true;
         // Only reset content scroll — sidebar stays where it is.
         self.reset_content_scroll = true;

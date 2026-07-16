@@ -368,6 +368,24 @@ fn snap_all_specimens() {
         .child(landing);
     snapshot(&landing_scene, 1200, 1400, "/tmp/poodle-specimens/_landing.png");
 
+    // Specimen page with view tabs (checkbox has Sizes + Densities sections).
+    {
+        let mut st = AppState::new();
+        let idx = component_registry::ALL_COMPONENTS
+            .iter()
+            .position(|c| c.slug == "checkbox");
+        st.set_active_component(idx);
+        let page = specimens::build_content(&st, &theme);
+        let scene = ui_element::div()
+            .w(1100.0)
+            .h(900.0)
+            .p(24.0)
+            .flex_col()
+            .bg(canvas)
+            .child(page);
+        snapshot(&scene, 1100, 900, "/tmp/poodle-specimens/_specimen-page.png");
+    }
+
     // Full app shell (header chrome + sidebar + landing).
     let shell_el = poodle_jetstream_preview::shell::build_shell(&state, &theme);
     snapshot(&shell_el, 1500, 900, "/tmp/poodle-specimens/_shell.png");

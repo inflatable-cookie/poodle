@@ -151,6 +151,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::*;
 
 use crate::app_state::{AppState, Section};
+use crate::app_state::SpecimenView;
 use crate::component_registry::{self, ComponentEntry};
 
 // ── Content routing ──
@@ -179,6 +180,46 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
                 .text_color(text_secondary).text_size(13.0)
         }
     }
+}
+
+// ── Specimen view filtering (Examples/Sizes/Densities tabs) ──
+
+/// A top-level specimen section's title, when the child follows the shared
+/// `group(title, …)` pattern (a panel whose first child is the title label).
+fn section_title(el: &jetstream_runtime::ui_element::JsEl) -> Option<&str> {
+    el.children.first().and_then(|c| match &c.kind {
+        jetstream_runtime::ui_element::WidgetKind::Label(t) => Some(t.as_str()),
+        _ => None,
+    })
+}
+
+fn is_sizes_section(el: &jetstream_runtime::ui_element::JsEl) -> bool {
+    section_title(el).is_some_and(|t| t.starts_with("Sizes") || t.starts_with("Size "))
+}
+
+fn is_densities_section(el: &jetstream_runtime::ui_element::JsEl) -> bool {
+    section_title(el).is_some_and(|t| t.starts_with("Densities") || t.starts_with("Density"))
+}
+
+/// Filter a rendered specimen to the active view. Specimens are uniformly a
+/// column of `group(...)` panels; Sizes/Densities sections move to their own
+/// tabs (mirroring the Svelte SpecimenLayout), everything else is Examples.
+/// Returns the filtered element plus whether sizes/densities sections exist
+/// (drives which tabs are offered).
+fn filter_specimen_view(
+    mut specimen: jetstream_runtime::ui_element::JsEl,
+    view: SpecimenView,
+) -> (jetstream_runtime::ui_element::JsEl, bool, bool) {
+    let has_sizes = specimen.children.iter().any(is_sizes_section);
+    let has_densities = specimen.children.iter().any(is_densities_section);
+    if has_sizes || has_densities {
+        specimen.children.retain(|c| match view {
+            SpecimenView::Examples => !is_sizes_section(c) && !is_densities_section(c),
+            SpecimenView::Sizes => is_sizes_section(c),
+            SpecimenView::Densities => is_densities_section(c),
+        });
+    }
+    (specimen, has_sizes, has_densities)
 }
 
 // ── Specimen page ──
@@ -222,20 +263,41 @@ fn build_specimen_page(
             )
     );
 
-    // Specimen section
+    // Specimen section — filtered to the active Examples/Sizes/Densities view,
+    // with a text-variant Tabs switcher when the specimen has those sections
+    // (mirrors the Svelte SpecimenLayout).
     if let Some(specimen) = render_specimen(entry.slug, theme, state) {
-        page = page.child(
-            div().flex_col().gap(8.0)
-                .child(
-                    label("Specimen").pl(2.0)
-                        .text_color(text_secondary).text_size(11.0)
-                )
-                .child(
-                    div().flex_col().p(24.0).gap(12.0)
-                        .bg(bg_elevated).border_1().border_color(border).rounded(8.0)
-                        .child(specimen)
-                )
+        let (filtered, has_sizes, has_densities) =
+            filter_specimen_view(specimen, state.specimen_view);
+
+        let mut section = div().flex_col().gap(12.0);
+        if has_sizes || has_densities {
+            let mut items = vec![poodle_specs::TabDefinition::new("examples", "Examples")];
+            if has_sizes {
+                items.push(poodle_specs::TabDefinition::new("sizes", "Sizes"));
+            }
+            if has_densities {
+                items.push(poodle_specs::TabDefinition::new("densities", "Densities"));
+            }
+            let value = match state.specimen_view {
+                SpecimenView::Examples => "examples",
+                SpecimenView::Sizes => "sizes",
+                SpecimenView::Densities => "densities",
+            };
+            section = section.child(poodle_jetstream_components::tabs::js_tabs(
+                &poodle_specs::TabsSpec::new(items)
+                    .with_variant(poodle_specs::TabVariant::Underline)
+                    .with_size(poodle_specs::ControlSize::Sm)
+                    .with_value(value),
+                theme,
+            ));
+        }
+        section = section.child(
+            div().flex_col().p(24.0).gap(12.0)
+                .bg(bg_elevated).border_1().border_color(border).rounded(8.0)
+                .child(filtered),
         );
+        page = page.child(section);
     } else {
         page = page.child(
             div().flex_col().gap(8.0)

@@ -864,6 +864,21 @@ impl PreviewState {
                     self.app.set_section(section);
                     return;
                 }
+                // Specimen-page view tabs (Examples/Sizes/Densities).
+                let view = match section_value {
+                    "examples" => Some(app_state::SpecimenView::Examples),
+                    "sizes" => Some(app_state::SpecimenView::Sizes),
+                    "densities" => Some(app_state::SpecimenView::Densities),
+                    _ => None,
+                };
+                if let Some(view) = view {
+                    if self.app.specimen_view != view {
+                        self.app.specimen_view = view;
+                        self.app.dirty = true;
+                        self.app.reset_content_scroll = true;
+                    }
+                    return;
+                }
             }
             if let Some(value) = tok.strip_prefix("toggle:") {
                 if let Some(&preset) = ThemePreset::ALL.iter().find(|t| t.label() == value) {
