@@ -213,6 +213,8 @@ fn build_specimen_page(
                         label(entry.display_name)
                             .text_color(text_primary).text_size(20.0)
                     )
+                    .child(div().grow())
+                    .child(crate::shell::build_state_probes(state, theme))
             )
             .child(
                 label(entry.description)

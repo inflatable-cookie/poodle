@@ -125,6 +125,11 @@ struct PreviewState {
     /// Cached text sprite instances per (clip group, font size), regenerated only on rebuild.
     /// Each entry: (scissor_rect, scaled_font_size, instances).
     cached_text: Vec<(Option<[u32; 4]>, f32, Vec<SpriteInstance>)>,
+    /// Persistent input system fed with platform events — the engine's
+    /// pointer interactions (slider drag, click dispatch) read mouse-button
+    /// state from here; a fresh InputSystem every frame reads as "never
+    /// pressed" and dead-ends all engine drag paths.
+    input: jetstream_input::InputSystem,
     /// SVG icon rasterizer (shared GPUI preview assets).
     icon_cache: IconCache,
     /// GPU textures per rasterized (icon name, pixel size).
@@ -235,6 +240,7 @@ impl PreviewState {
             scroll_suppress_frames: 0,
             cached_text: Vec::new(),
             text_cache_dirty: false,
+            input: jetstream_input::InputSystem::new(),
             icon_cache: IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../../gpui/preview/assets/icons"
@@ -411,6 +417,9 @@ impl PreviewState {
         // Process platform events
         let scale = frame.scale_factor as f32;
         for event in &frame.events {
+            // Keep the engine-facing input device state current (slider drag,
+            // click dispatch read mouse-button state from this).
+            self.input.process_events(std::slice::from_ref(event));
             match event {
                 // Escape exits — unless an inline tree rename is in progress
                 // (then Escape cancels the rename, handled in the tree arm).
@@ -602,11 +611,7 @@ impl PreviewState {
         }
 
         // Process UI input (keyboard/gamepad via InputSystem)
-        let ui_events = self.game_ui.process_input(
-            &jetstream_input::InputSystem::new(),
-            self.mouse_x,
-            self.mouse_y,
-        );
+        let ui_events = self.game_ui.process_input(&self.input, self.mouse_x, self.mouse_y);
 
         // Record the pointer so `.hover()` / `.active()` style overrides render this
         // frame (collect_draw_commands reads the hovered/pressed node off the tree).

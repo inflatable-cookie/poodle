@@ -88,7 +88,7 @@ fn build_tab_bar(
         .child(js_pill(&PillSpec::new().with_label(state.density.label()), theme))
         .child(js_pill(&PillSpec::new().with_label(state.control_size.label()), theme));
 
-    div().flex_row().w_full().min_h(44.0).px(12.0).py(6.0).gap(16.0)
+    div().flex_row().w_full().px(12.0).py(8.0).gap(16.0)
         .items_center()
         .bg(bg_surface).border_1().border_color(border)
         .child(label("Poodle").text_color(text_primary).text_size(15.0).text_weight(700).pr(8.0).pl(4.0))
@@ -106,9 +106,8 @@ fn build_controls_bar(
 ) -> JsEl {
     let text_secondary = resolve_color(theme, "color.text.secondary");
 
-    let mut bar = div().flex_row().w_full().min_h(56.0).px(16.0).py(8.0).gap(24.0)
+    let mut bar = div().flex_row().w_full().px(16.0).py(10.0).gap(20.0)
         .items_center()
-        .flex_wrap()
         .bg(bg_surface).border_1().border_color(border);
 
     // Theme / density / size — real Eyebrow + ToggleGroup components (the
@@ -147,40 +146,48 @@ fn build_controls_bar(
         .child(
             slider(state.contrast, 0.0, 1.0)
                 .id("contrast")
-                .w(120.0).h(16.0)
+                .w(140.0).h(14.0)
+                .rounded(999.0)
                 .focusable(),
         );
     bar = bar.child(contrast_group);
 
     // Search group — filters the sidebar + catalogue by name (Svelte parity).
+    let bg_canvas = resolve_color(theme, "color.background.canvas");
     let search_group = div().flex_col().gap(4.0)
         .flex_shrink_0()
         .child(label("SEARCH").text_color(text_secondary).text_size(9.0))
         .child(
-            text_input(state.search.clone(), "Find component...")
-                .id("search")
-                .w(180.0)
-                .h(26.0)
-                .text_size(11.0),
+            div().flex_row().items_center().gap(6.0)
+                .h(28.0).pl(8.0).pr(8.0)
+                .bg(bg_canvas)
+                .border_1().border_color(border)
+                .rounded(8.0)
+                .child(icon("search").w(13.0).h(13.0).text_color(text_secondary))
+                .child(
+                    text_input(state.search.clone(), "Find component...")
+                        .id("search")
+                        .w(160.0)
+                        .h(24.0)
+                        .bg(Color::TRANSPARENT)
+                        .text_size(11.5),
+                ),
         );
     bar = bar.child(search_group);
 
     // Separator
     bar = bar.child(div().w(1.0).h(28.0).bg(border));
 
-    // State probes
-    let probes = div().flex_col().gap(4.0)
-        .flex_shrink_0()
-        .child(label("STATE").text_color(text_secondary).text_size(9.0))
-        .child(
-            div().flex_row().gap(12.0).items_center()
-                .child(build_probe_toggle("disabled", state.disabled, theme))
-                .child(build_probe_toggle("invalid", state.invalid, theme))
-                .child(build_probe_toggle("busy", state.busy, theme))
-        );
-    bar = bar.child(probes);
-
     bar
+}
+
+/// State-probe toggles (disabled/invalid/busy) — shown on the specimen page,
+/// not in the global bar (the Svelte preview has no global STATE group).
+pub(crate) fn build_state_probes(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+    div().flex_row().gap(12.0).items_center()
+        .child(build_probe_toggle("disabled", state.disabled, theme))
+        .child(build_probe_toggle("invalid", state.invalid, theme))
+        .child(build_probe_toggle("busy", state.busy, theme))
 }
 
 /// A labeled toggle group (eyebrow label + row of buttons).
@@ -285,14 +292,14 @@ fn build_sidebar(
                 if current_tag != Some(entry.tag) {
                     current_tag = Some(entry.tag);
                     sidebar = sidebar.child(
-                        label(entry.tag.label())
-                            .px(12.0)
-                            .pt(if i == 0 { 8.0 } else { 16.0 })
-                            .pb(4.0)
+                        label(entry.tag.label().to_uppercase())
+                            .px(14.0)
+                            .pt(if i == 0 { 12.0 } else { 20.0 })
+                            .pb(6.0)
                             .text_color(accent)
                             .text_size(10.0)
                             .text_weight(700)
-                            .letter_spacing_em(0.08),
+                            .letter_spacing_em(0.1),
                     );
                 }
                 let is_active = active_idx == Some(i);
@@ -321,10 +328,11 @@ fn build_sidebar_item(
 
     button(name)
         .id(id)
-        .flex_row().h(32.0).self_stretch().px(12.0)
+        .flex_row().h(34.0).self_stretch().px(14.0)
         .items_center().justify_start()
-        .bg_opt(item_bg)
-        .text_color(item_text).text_size(12.0)
+        .rounded(6.0)
+        .bg(item_bg.map(Color::from).unwrap_or(Color::TRANSPARENT))
+        .text_color(item_text).text_size(13.0)
         .focusable()
 }
 
