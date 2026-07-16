@@ -155,7 +155,9 @@ fn build_trigger(
 ) -> JsEl {
     // Hover shifts both border (toward text) and background (toward elevated),
     // matching the contract focus-within treatment direction.
+    // Contract (select.css): trigger width: 100% — fill the parent container.
     let mut el = ui_element::div()
+        .w_full()
         .bg(fill)
         .border(1.0)
         .border_color(border_color)
