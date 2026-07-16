@@ -74,6 +74,7 @@ fn build_tab_bar(
             TabDefinition::new("tokens", "Tokens"),
         ])
         .with_variant(TabVariant::Pill)
+        .with_size(poodle_specs::ControlSize::Sm)
         .with_value(match state.section {
             Section::Components => "components",
             Section::Demo => "demo",
@@ -87,7 +88,7 @@ fn build_tab_bar(
         .child(js_pill(&PillSpec::new().with_label(state.density.label()), theme))
         .child(js_pill(&PillSpec::new().with_label(state.control_size.label()), theme));
 
-    div().flex_row().w_full().h(48.0).px(12.0).gap(16.0)
+    div().flex_row().w_full().min_h(44.0).px(12.0).py(6.0).gap(16.0)
         .items_center()
         .bg(bg_surface).border_1().border_color(border)
         .child(label("Poodle").text_color(text_primary).text_size(15.0).text_weight(700).pr(8.0).pl(4.0))
@@ -105,8 +106,9 @@ fn build_controls_bar(
 ) -> JsEl {
     let text_secondary = resolve_color(theme, "color.text.secondary");
 
-    let mut bar = div().flex_row().w_full().h(56.0).px(16.0).gap(24.0)
+    let mut bar = div().flex_row().w_full().min_h(56.0).px(16.0).py(8.0).gap(24.0)
         .items_center()
+        .flex_wrap()
         .bg(bg_surface).border_1().border_color(border);
 
     // Theme / density / size — real Eyebrow + ToggleGroup components (the
@@ -118,9 +120,12 @@ fn build_controls_bar(
             .map(|&o| ToggleGroupOption::new(o, o))
             .collect();
         div().flex_col().gap(4.0)
+            .flex_shrink_0()
             .child(js_eyebrow(&EyebrowSpec::default().with_content(eyebrow), theme))
             .child(js_toggle_group(
-                &ToggleGroupSpec::new(opts).with_value(vec![active.to_string()]),
+                &ToggleGroupSpec::new(opts)
+                    .with_value(vec![active.to_string()])
+                    .with_size(poodle_specs::ControlSize::Xs),
                 theme,
             ))
     };
@@ -137,6 +142,7 @@ fn build_controls_bar(
     // Contrast group — a real engine slider driving the oklch neutral-contrast
     // axis (mirrors the Svelte preview's CONTRAST control; 0.5 = library default).
     let contrast_group = div().flex_col().gap(4.0)
+        .flex_shrink_0()
         .child(label("CONTRAST").text_color(text_secondary).text_size(9.0))
         .child(
             slider(state.contrast, 0.0, 1.0)
@@ -148,6 +154,7 @@ fn build_controls_bar(
 
     // Search group — filters the sidebar + catalogue by name (Svelte parity).
     let search_group = div().flex_col().gap(4.0)
+        .flex_shrink_0()
         .child(label("SEARCH").text_color(text_secondary).text_size(9.0))
         .child(
             text_input(state.search.clone(), "Find component...")
@@ -163,6 +170,7 @@ fn build_controls_bar(
 
     // State probes
     let probes = div().flex_col().gap(4.0)
+        .flex_shrink_0()
         .child(label("STATE").text_color(text_secondary).text_size(9.0))
         .child(
             div().flex_row().gap(12.0).items_center()
