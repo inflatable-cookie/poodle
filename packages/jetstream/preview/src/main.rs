@@ -1107,7 +1107,7 @@ impl PreviewState {
                     c.rect.width,
                     c.rect.height,
                 ],
-                rotation_layer: [0.0, 0.0, 0.0, 0.0],
+                rotation_layer: [c.rotation, 0.0, 0.0, 0.0],
                 color: c.tint,
                 uv_rect: [0.0, 0.0, 1.0, 1.0],
                 clip_rect: [0.0; 4],
