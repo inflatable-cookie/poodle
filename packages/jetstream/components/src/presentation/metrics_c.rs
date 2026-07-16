@@ -167,6 +167,8 @@ pub fn calendar_day_font_rem(size: ControlSize) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::presentation::*;
+    use poodle_specs::SemanticControlSizeRole;
 
     // ── resolve_semantic_size ────────────────────────────────────
 

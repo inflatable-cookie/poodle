@@ -59,13 +59,15 @@ fn build_ring(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
         .border(border_width)
         .border_color(track_color)
         // Contract §8: border-top-color is the bright arc (full currentColor).
-        // JsEl supports a per-side top color, so the static two-tone ring is
-        // rendered faithfully; only the continuous rotation is preview-loop
-        // driven (no runtime animation hook here).
         .border_color_top(tone_color)
         .flex_row()
         .items_center()
         .justify_center()
+        // Contract §8: animation spinner-ring 0.8s linear infinite. The id keys
+        // the engine's animation clock across immediate-mode rebuilds (all ring
+        // spinners share one clock — they rotate in phase, like CSS keyframes).
+        .id("poodle-spinner-ring")
+        .spin(0.8)
 }
 
 /// Grid variant: 6 square cells in a 2x3 matrix with staggered opacity.
@@ -88,14 +90,14 @@ fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
     let cell_w = (width - gap) / 2.0;
     let cell_h = (height - gap * 2.0) / 3.0;
 
-    // Static snapshot of the snake within the contract opacity band
-    // (`opacity_floor` 0.2 → `opacity_peak` 0.76). The cells are laid out in
+    // The snake pulses each cell's opacity within the contract band
+    // (`opacity_floor` 0.2 → `opacity_peak` 0.76). Cells are laid out in
     // document order top-left, top-right, mid-left, mid-right, bottom-left,
-    // bottom-right; the staggered values are a single frame of the snake.
-    // Continuous animation is preview-loop driven (no runtime hook here).
+    // bottom-right; each carries a phase-shifted looping opacity animation
+    // (a sine sweep sampled into keyframes), so the snake runs continuously.
     let floor = spec.opacity_floor();
     let span = spec.opacity_peak() - spec.opacity_floor();
-    // Fractions along the floor→peak band, one per cell in layout order.
+    // Phase offset along the cycle, one per cell in layout order.
     let phase = [1.0_f32, 0.7, 0.4, 0.85, 0.1, 0.55];
 
     let mut root = ui_element::div()
@@ -107,19 +109,45 @@ fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
         .items_center()
         .justify_center();
 
-    for &t in &phase {
-        let opacity = floor + span * t;
-        let cell_color = tone_color.with_alpha(tone_color.a * opacity);
+    for (i, &ph) in phase.iter().enumerate() {
+        let cell_color = tone_color.with_alpha(tone_color.a);
         root = root.child(
             ui_element::div()
                 .w(cell_w)
                 .h(cell_h)
                 .rounded(cell_radius)
-                .bg(cell_color),
+                .bg(cell_color)
+                .id(format!("poodle-spinner-cell-{i}"))
+                .animation(cell_pulse(floor, span, ph)),
         );
     }
 
     root
+}
+
+/// Looping opacity pulse for one grid cell: a sine sweep through the contract
+/// opacity band, phase-shifted per cell so the six cells form a running snake.
+fn cell_pulse(floor: f32, span: f32, phase: f32) -> jetstream_runtime::game_ui::Animation {
+    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+    let sample = |t: f32| -> f32 {
+        let angle = (t + phase) * std::f32::consts::TAU;
+        floor + span * (0.5 + 0.5 * angle.sin())
+    };
+    let keyframes = (0..=4)
+        .map(|k| {
+            let at = k as f32 / 4.0;
+            Keyframe {
+                at,
+                values: vec![(AnimatableProperty::Opacity, sample(at))],
+            }
+        })
+        .collect();
+    Animation {
+        keyframes,
+        duration_secs: 1.2,
+        easing: Easing::Linear,
+        loop_mode: LoopMode::Loop,
+    }
 }
 
 #[cfg(test)]
@@ -198,6 +226,24 @@ mod tests {
         let spec = SpinnerSpec::new();
         assert!((spec.opacity_floor() - 0.2).abs() < f32::EPSILON);
         assert!((spec.opacity_peak() - 0.76).abs() < f32::EPSILON);
+    }
+
+
+    /// Ring declares the contract's 0.8s rotation as a real runtime animation,
+    /// with a stable id so the engine's clock survives immediate-mode rebuilds.
+    #[test]
+    fn ring_carries_spin_animation() {
+        let el = js_spinner(&SpinnerSpec::new(), &theme());
+        assert!(el.animation.is_some(), "ring declares a spin animation");
+        assert!(el.id.is_some(), "animated element carries a stable id");
+    }
+
+    /// Every grid cell carries its own phase-shifted opacity pulse + id.
+    #[test]
+    fn grid_cells_carry_staggered_pulses() {
+        let spec = SpinnerSpec::new().with_variant(SpinnerVariant::Grid);
+        let el = js_spinner(&spec, &theme());
+        assert!(el.children.iter().all(|c| c.animation.is_some() && c.id.is_some()));
     }
 
     #[test]

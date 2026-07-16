@@ -1,12 +1,13 @@
 //! Skeleton — Jetstream placeholder component backed by SkeletonSpec.
 //!
-//! NOTE: JsEl cannot animate and has no gradient fill, so skeletons render as a
-//! static flat tone (the contract shimmer mid-tone) with no motion. The shimmer
-//! sweep is a preview-loop / Known-Delta concern, not represented here.
-//! NOTE: JsEl has no percentage-width support; contract percentage widths
-//! (40/60/60/20%, 80/100/60%, etc.) are approximated with proportional
-//! `flex_basis` seeds inside growing cells. Relative proportions are faithful;
-//! absolute widths depend on the laid-out container width.
+//! Skeletons breathe via a looping opacity pulse (`skeleton_pulse`) — the
+//! engine persists animation clocks across immediate-mode rebuilds, keyed by
+//! the element id. The contract's travelling gradient sweep still isn't
+//! representable (needs animated gradient stops); the pulse is the stand-in.
+//! NOTE: contract percentage widths (40/60/60/20%, 80/100/60%, etc.) are
+//! approximated with proportional `flex_basis` seeds inside growing cells;
+//! JsEl now supports true percentages (`.w_pct`) — migrating the presets is a
+//! follow-up.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
@@ -121,10 +122,12 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
     };
 
     let Some(ref preset) = spec.preset else {
-        return single_shape(fill, radius, spec, theme);
+        return single_shape(fill, radius, spec, theme)
+            .id("poodle-skeleton")
+            .animation(skeleton_pulse());
     };
 
-    match preset {
+    let built = match preset {
         // Contract: avatar 2.25rem circle + single 10rem line, row, 0.75rem gap.
         SkeletonPreset::AvatarLine => ui_element::div()
             .flex_row()
@@ -224,6 +227,25 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
             }
             col
         }
+    };
+    // Shimmer approximation: the whole skeleton breathes (opacity pulse) —
+    // node opacity cascades multiplicatively to every shape. The id keys the
+    // engine's animation clock across immediate-mode rebuilds.
+    built.id("poodle-skeleton").animation(skeleton_pulse())
+}
+
+/// Ping-pong opacity pulse standing in for the contract's shimmer sweep
+/// (a travelling gradient needs animated gradient stops — not yet available).
+fn skeleton_pulse() -> jetstream_runtime::game_ui::Animation {
+    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+    Animation {
+        keyframes: vec![
+            Keyframe { at: 0.0, values: vec![(AnimatableProperty::Opacity, 1.0)] },
+            Keyframe { at: 1.0, values: vec![(AnimatableProperty::Opacity, 0.55)] },
+        ],
+        duration_secs: 1.1,
+        easing: Easing::EaseInOut,
+        loop_mode: LoopMode::PingPong,
     }
 }
 
@@ -231,6 +253,16 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
 mod tests {
     use super::*;
     use crate::render_probe::probe;
+
+    /// Skeletons breathe: the root declares a looping opacity pulse with a
+    /// stable id (the engine's animation-clock key).
+    #[test]
+    fn skeleton_carries_pulse_animation() {
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let el = js_skeleton(&SkeletonSpec::new(), &theme);
+        assert!(el.animation.is_some(), "skeleton pulses");
+        assert!(el.id.is_some(), "animated element carries a stable id");
+    }
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

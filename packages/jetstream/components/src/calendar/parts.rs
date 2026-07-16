@@ -33,6 +33,11 @@ pub(super) fn outside_cell(
 mod tests {
     use super::*;
     use crate::render_probe::probe;
+    use crate::calendar::js_calendar;
+    use crate::presentation::rem_to_px;
+    use crate::theme_ext::{resolve_color, resolve_opacity};
+    use poodle_jetstream::JetstreamThemeProvider;
+    use poodle_specs::{CalendarMode, CalendarSpec};
     use poodle_specs::{ControlSize, DateRangeValue};
 
     fn theme() -> JetstreamThemeProvider {

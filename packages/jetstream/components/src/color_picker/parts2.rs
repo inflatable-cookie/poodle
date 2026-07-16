@@ -76,6 +76,9 @@ pub(super) fn build_swatch_grid(
 mod tests {
     use super::*;
     use crate::render_probe::{probe, ProbeColor};
+    use crate::color_picker::js_color_picker;
+    use crate::theme_ext::resolve_color;
+    use poodle_specs::{ColorInputMode, ColorPickerSpec};
     use poodle_jetstream::JetstreamThemeProvider;
 
     fn theme() -> JetstreamThemeProvider {

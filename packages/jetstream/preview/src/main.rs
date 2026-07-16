@@ -610,9 +610,12 @@ impl PreviewState {
             self.sync_atlas_textures(frame.gpu);
         }
 
-        // Tick transitions/animations
+        // Tick transitions/animations and re-run layout (animated size/rotate
+        // affects geometry) — only while something is actually in motion.
         let dt = frame.dt.as_secs_f32();
-        self.game_ui.tree.tick_transitions(dt);
+        if self.game_ui.tree.has_active_animations() {
+            self.game_ui.advance_animations(dt);
+        }
 
         // Ensure GPU textures are available (handles initial frame + any
         // dynamically-created atlases from scroll or rebuild).
