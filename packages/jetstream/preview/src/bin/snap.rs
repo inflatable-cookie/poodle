@@ -46,7 +46,14 @@ fn headless_device() -> (wgpu::Device, wgpu::Queue) {
 
 /// Render a JsEl scene to a PNG at the given logical size.
 fn snapshot(el: &JsEl, w: u32, h: u32, path: &str) {
-    snapshot_opts(el, w, h, path, false, None);
+    snapshot_opts(el, w, h, path, false, None, 0.0);
+}
+
+/// As [`snapshot`], but advances animations by `dt` seconds after the build —
+/// for capturing animated components (spinner rotation, skeleton pulse) at a
+/// chosen point in their timeline.
+fn snapshot_at(el: &JsEl, w: u32, h: u32, path: &str, dt: f32) {
+    snapshot_opts(el, w, h, path, false, None, dt);
 }
 
 /// As [`snapshot`], optionally focusing the first focusable node (focus rings) and/or
@@ -58,6 +65,7 @@ fn snapshot_opts(
     path: &str,
     focus_first: bool,
     hover: Option<(f32, f32, bool)>,
+    dt: f32,
 ) {
     let (device, queue) = headless_device();
     let format = wgpu::TextureFormat::Rgba8UnormSrgb;
@@ -66,6 +74,9 @@ fn snapshot_opts(
     // glyph atlases so the text pass below can render labels.
     let mut ui = GameUi::with_text(w as f32, h as f32);
     ui.render_immediate(el);
+    if dt > 0.0 {
+        ui.advance_animations(dt);
+    }
     if focus_first {
         ui.focus.navigate(&ui.tree, NavDirection::Next);
     }
@@ -314,7 +325,7 @@ fn main() {
         .pl(30.0)
         .child(field())  // focused → should show focus ring
         .child(field()); // unfocused → plain border
-    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true, None);
+    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true, None, 0.0);
 
     // Gradient test: linear (white→transparent over red) + radial (cyan center → transparent).
     use glam::Vec4;
@@ -433,7 +444,7 @@ fn main() {
         .child(row_hov())  // y≈24..72 — pointer here → hover bg
         .child(row_hov()); // y≈88..136 — untouched
     // Pointer at (230, 48): over the first row.
-    snapshot_opts(&hov_scene, 460, 160, "/tmp/poodle-snap-hover.png", false, Some((230.0, 48.0, false)));
+    snapshot_opts(&hov_scene, 460, 160, "/tmp/poodle-snap-hover.png", false, Some((230.0, 48.0, false)), 0.0);
 
     // Real component spot-check: menu (items call .hover(|s| s.bg(hover))); pointer over
     // the 2nd item should show the hover fill.
@@ -450,7 +461,7 @@ fn main() {
         .w(320.0).h(180.0).p(20.0).bg(panel).flex_col().items_start()
         .child(menu);
     // Pointer over the 2nd item ("Open…") — items start ~y20, ~32px each → ~y 68.
-    snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)));
+    snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)), 0.0);
 
     // Border styles: solid / dashed / dotted (contract drop-zone / underline frames).
     use jetstream_runtime::ui_element::BorderStyle;
@@ -587,4 +598,21 @@ fn main() {
         .bg(Vec4::new(0.91, 0.92, 0.94, 1.0))
         .child(card);
     snapshot(&card_scene, 320, 180, "/tmp/poodle-snap-card.png");
+
+    // Spinner rotation proof: the ring's bright arc starts at the top (t=0)
+    // and must sit on the right after a quarter of the 0.8s spin (t=0.2).
+    // Same scene, two timeline points — pixel-different PNGs prove the engine
+    // animation actually rotates the rendered quads.
+    let spinner_scene = || {
+        let sp = poodle_jetstream_components::spinner::js_spinner(
+            &poodle_specs::SpinnerSpec::new().with_size(poodle_specs::SpinnerSize::Xl),
+            &theme,
+        );
+        ui_element::div()
+            .w(160.0).h(160.0).flex_row().items_center().justify_center()
+            .bg(Vec4::new(0.10, 0.11, 0.13, 1.0))
+            .child(sp)
+    };
+    snapshot_at(&spinner_scene(), 160, 160, "/tmp/poodle-snap-spin-t0.png", 0.001);
+    snapshot_at(&spinner_scene(), 160, 160, "/tmp/poodle-snap-spin-t02.png", 0.2);
 }
