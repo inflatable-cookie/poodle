@@ -83,7 +83,7 @@ fn snapshot_opts(
     if let Some((hx, hy, pressed)) = hover {
         ui.set_pointer_state(hx, hy, pressed);
     }
-    let cmds = collect_draw_commands(&ui.tree, &ui.focus, &Theme::default());
+    let cmds = collect_draw_commands(&ui.tree, &ui.focus, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)));
     let quads = convert_draw_commands_scaled(&cmds, 1.0);
 
     // Offscreen target.
@@ -215,7 +215,7 @@ fn snapshot_opts(
         }
 
         // ── Icon pass — SVG icons rasterized + drawn as tinted quads ──
-        let icon_cmds = collect_icon_commands(&ui.tree, &Theme::default(), 1.0);
+        let icon_cmds = collect_icon_commands(&ui.tree, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)), 1.0);
         if !icon_cmds.is_empty() {
             let mut icon_cache = IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),

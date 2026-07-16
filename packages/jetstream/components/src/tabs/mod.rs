@@ -358,10 +358,11 @@ mod tests {
         let tree = probe(&js_tabs(&spec, &th), width, 120.0);
 
         // Collect the three tab button widths.
+        // Tabs are focusable Panels (bare divs) directly under the bar.
         let tab_widths: Vec<f32> = tree
             .nodes
             .iter()
-            .filter(|n| n.kind == "Button")
+            .filter(|n| n.depth == 2 && n.kind == "Panel")
             .map(|n| n.w)
             .collect();
         assert_eq!(tab_widths.len(), 3, "expected 3 tab buttons");
@@ -437,10 +438,11 @@ mod tests {
         let tree = probe(&js_tabs(&spec, &th), 120.0, 300.0);
 
         // Buttons should be stacked: distinct y offsets, increasing down the column.
+        // Tabs are focusable Panels (bare divs) directly under the bar.
         let ys: Vec<f32> = tree
             .nodes
             .iter()
-            .filter(|n| n.kind == "Button")
+            .filter(|n| n.depth == 2 && n.kind == "Panel")
             .map(|n| n.y)
             .collect();
         assert_eq!(ys.len(), 3, "expected 3 stacked tab buttons");

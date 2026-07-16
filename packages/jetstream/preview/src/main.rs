@@ -4,6 +4,7 @@
 //! Run with: `cargo run -p poodle-jetstream-preview`
 
 use poodle_jetstream_preview::{app_state, component_registry, shell, specimens, theme_bridge};
+use theme_bridge::build_draw_theme;
 
 use glam::{Mat4, Vec4};
 use jetstream_platform::{
@@ -1412,26 +1413,8 @@ impl PreviewState {
     }
 }
 
-/// Build a Jetstream `Theme` from Poodle tokens for draw command rendering.
-fn build_draw_theme(poodle_theme: &dyn ThemeProvider) -> Theme {
-    let resolve = |token: &str| -> Vec4 { theme_bridge::resolve_vec4(poodle_theme, token) };
 
-    Theme {
-        text_color: resolve("color.text.primary"),
-        text_size: 14.0,
-        button_bg: resolve("color.background.surface"),
-        button_hover_bg: resolve("color.accent.hover"),
-        button_pressed_bg: resolve("color.accent.base"),
-        panel_bg: resolve("color.background.panel"),
-        focus_color: resolve("color.accent.focus"),
-        slider_track: resolve("color.border.subtle"),
-        slider_fill: resolve("color.accent.base"),
-        progress_track: resolve("color.border.subtle"),
-        progress_fill: resolve("color.accent.base"),
-        input_bg: resolve("color.background.canvas"),
-        input_border: resolve("color.border.default"),
-    }
-}
+
 
 fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();

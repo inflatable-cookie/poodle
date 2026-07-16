@@ -59,7 +59,11 @@ pub(super) fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) 
 
         let text_color = if is_active { text_primary } else { text_secondary };
 
-        let mut tab_el = ui_element::button("")
+        let mut tab_el = ui_element::div()
+            .focusable()
+            // Contract (tabs.css): tab fill defaults to transparent — a bare
+            // Button widget would pick up the engine's default button fill.
+            
             .flex_row()
             .items_center()
             .min_h(min_h)
@@ -156,7 +160,11 @@ pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
         // Contract Item — Card variant: uniform border + radius-control on all sides;
         // selected recolors border/bg only (no bottom-edge removal). Svelte matches.
-        let mut tab_el = ui_element::button("")
+        let mut tab_el = ui_element::div()
+            .focusable()
+            // Contract (tabs.css): tab fill defaults to transparent — a bare
+            // Button widget would pick up the engine's default button fill.
+            
             .flex_row()
             .items_center()
             .gap(resolve_px(theme, "space.inline.sm"))
@@ -236,7 +244,11 @@ pub(super) fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
         let text_color = if is_active { text_primary } else { text_secondary };
 
-        let mut tab_el = ui_element::button("")
+        let mut tab_el = ui_element::div()
+            .focusable()
+            // Contract (tabs.css): tab fill defaults to transparent — a bare
+            // Button widget would pick up the engine's default button fill.
+            
             .flex_row()
             .items_center()
             .px(pad_x)
@@ -317,7 +329,11 @@ pub(super) fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> J
         let text_color = if is_active { text_primary } else { text_secondary };
 
         // Block tabs fill equal space via flex_grow.
-        let mut tab_el = ui_element::button("")
+        let mut tab_el = ui_element::div()
+            .focusable()
+            // Contract (tabs.css): tab fill defaults to transparent — a bare
+            // Button widget would pick up the engine's default button fill.
+            
             .flex_grow()
             .flex_row()
             .items_center()
