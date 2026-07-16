@@ -599,6 +599,21 @@ fn main() {
         .child(card);
     snapshot(&card_scene, 320, 180, "/tmp/poodle-snap-card.png");
 
+    // Color-pipeline proof: four token swatches, hard-coded positions. Readback
+    // must match the CSS token hex (post contrast-transform) — pins down whether
+    // the sRGB→linear→sRGB round trip is correct end to end.
+    let swatch = |tok: &str| {
+        let c = resolve_color(&theme, tok);
+        ui_element::div().w(40.0).h(40.0).bg(c)
+    };
+    let color_scene = ui_element::div()
+        .w(200.0).h(50.0).flex_row().gap(8.0).p(5.0)
+        .child(swatch("color.background.canvas"))
+        .child(swatch("color.background.surface"))
+        .child(swatch("color.background.panel"))
+        .child(swatch("color.accent.base"));
+    snapshot(&color_scene, 200, 50, "/tmp/poodle-snap-colorproof.png");
+
     // Spinner rotation proof: the ring's bright arc starts at the top (t=0)
     // and must sit on the right after a quarter of the 0.8s spin (t=0.2).
     // Same scene, two timeline points — pixel-different PNGs prove the engine
