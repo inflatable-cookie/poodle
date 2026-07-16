@@ -175,7 +175,12 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
             .gap(item_gap)
             .child(accent_bar)
             .child(content)
-            .child(dismiss);
+            .child(dismiss)
+            // Enter animation: fade + rise, one-shot (holds its final frame —
+            // the engine persists completion across immediate-mode rebuilds,
+            // keyed by the toast's stable id, so it plays exactly once).
+            .id(format!("poodle-toast-{}", toast.id))
+            .animation(toast_enter());
 
         el = el.child(toast_el);
     }
@@ -183,11 +188,50 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
     el
 }
 
+/// One-shot enter animation: fade in + rise 0.5rem, ease-out. Mirrors the
+/// Svelte reference's fly/fade entrance.
+fn toast_enter() -> jetstream_runtime::game_ui::Animation {
+    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+    Animation {
+        keyframes: vec![
+            Keyframe {
+                at: 0.0,
+                values: vec![
+                    (AnimatableProperty::Opacity, 0.0),
+                    (AnimatableProperty::TranslateY, rem_to_px(0.5)),
+                ],
+            },
+            Keyframe {
+                at: 1.0,
+                values: vec![
+                    (AnimatableProperty::Opacity, 1.0),
+                    (AnimatableProperty::TranslateY, 0.0),
+                ],
+            },
+        ],
+        duration_secs: 0.18,
+        easing: Easing::EaseOut,
+        loop_mode: LoopMode::Once,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::render_probe::{probe, ProbeColor};
     use poodle_specs::{Toast, ToastTone};
+
+    /// Each toast declares a one-shot enter animation keyed by its stable id —
+    /// the engine plays it exactly once (completion persists across rebuilds).
+    #[test]
+    fn toasts_carry_enter_animation() {
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let spec = ToastStackSpec::new().with_toasts(vec![Toast::new("t1", "Saved")]);
+        let el = js_toast_stack(&spec, &theme);
+        let toast = &el.children[0];
+        assert!(toast.animation.is_some(), "toast enter animation declared");
+        assert!(toast.id.as_deref() == Some("poodle-toast-t1"), "stable per-toast id: {:?}", toast.id);
+    }
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

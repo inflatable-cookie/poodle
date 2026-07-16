@@ -31,10 +31,15 @@ pub fn js_text(spec: &TextSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .text_color(color)
         .text_size(rem_to_px(spec.font_size_rem()))
         .text_weight(weight)
-        .line_height(spec.line_height());
+        .line_height(spec.line_height())
+        // CSS-default soft wrap (`white-space: normal`): paragraphs reflow to
+        // the container width. Only engages under a width constraint — auto-
+        // sized text still lays out on one line, so chips/inline uses are safe.
+        .text_wrap(true);
 
     // `clamp` limits visible lines. JsEl has no line-clamp, so (like GPUI) this
-    // degrades to clipping overflow — the N-line cap is a runtime gap.
+    // degrades to wrapped text clipped at the box — the exact N-line cap +
+    // ellipsis is a runtime gap.
     if spec.clamp.is_some() {
         el = el.overflow_hidden();
     }
@@ -74,6 +79,14 @@ mod tests {
         let danger = resolve_color(&th, "color.status.danger");
         let el = js_text(&TextSpec::new("x").with_tone(TextTone::Danger), &th);
         assert_eq!(el.style.text_color, Some(danger.into()));
+    }
+
+    /// Paragraph text soft-wraps (CSS white-space: normal) — reflows under a
+    /// width constraint instead of running off the box.
+    #[test]
+    fn text_soft_wraps() {
+        let el = js_text(&TextSpec::new("hello"), &theme());
+        assert!(el.style.text_wrap, "js_text enables soft wrap");
     }
 
     #[test]

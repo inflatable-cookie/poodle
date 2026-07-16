@@ -4,10 +4,10 @@
 //! engine persists animation clocks across immediate-mode rebuilds, keyed by
 //! the element id. The contract's travelling gradient sweep still isn't
 //! representable (needs animated gradient stops); the pulse is the stand-in.
-//! NOTE: contract percentage widths (40/60/60/20%, 80/100/60%, etc.) are
-//! approximated with proportional `flex_basis` seeds inside growing cells;
-//! JsEl now supports true percentages (`.w_pct`) — migrating the presets is a
-//! follow-up.
+//! Column-context line widths (60/40%, 80/100/60%) are true percentages via
+//! `.w_pct`. TableRow cells stay proportional flex-basis weights on purpose —
+//! the contract's 40/60/60/20% sum to 180%, i.e. they're relative weights in a
+//! gapped row, not absolute percentages.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
@@ -110,12 +110,12 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
             .flex_grow()
             .flex_basis(pct * 100.0)
     };
-    // Full-width line for COLUMN contexts (list-text / card body). JsEl has no
-    // percentage width, so the contract's per-line widths (60/40%, 80/100/60%)
-    // are approximated as full-width lines; the height (line vs line-sm) is exact.
-    let line_full = |h_px: f32| -> JsEl {
-        ui_element::div().bg(fill).rounded(radius).w_full().h(h_px)
+    // Percentage-width line for COLUMN contexts (list-text / card body) — the
+    // contract's per-line widths (60/40%, 80/100/60%) are now true percentages.
+    let line_pct = |pct: f32, h_px: f32| -> JsEl {
+        ui_element::div().bg(fill).rounded(radius).w_pct(pct).h(h_px)
     };
+    let line_full = |h_px: f32| -> JsEl { line_pct(1.0, h_px) };
     // Circle skeleton block using the resolved pill radius (not a literal).
     let circle = |side: f32| -> JsEl {
         ui_element::div().bg(fill).rounded(pill_radius).w(side).h(side)
@@ -142,8 +142,8 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
                 .flex_col()
                 .gap(gap_0375)
                 .flex_grow()
-                .child(line_full(line_h)) // primary line (contract 60%)
-                .child(line_full(line_sm_h)); // secondary line-sm (contract 40%)
+                .child(line_pct(0.60, line_h)) // primary line (contract 60%)
+                .child(line_pct(0.40, line_sm_h)); // secondary line-sm (contract 40%)
             ui_element::div()
                 .flex_row()
                 .items_center()
@@ -172,9 +172,9 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
             let body = ui_element::div()
                 .flex_col()
                 .gap(gap_0375)
-                .child(line_full(line_h)) // contract 80%
+                .child(line_pct(0.80, line_h)) // contract 80%
                 .child(line_full(line_h)) // contract 100%
-                .child(line_full(line_h)); // contract 60%
+                .child(line_pct(0.60, line_h)); // contract 60%
             let pill = || {
                 ui_element::div()
                     .bg(fill)

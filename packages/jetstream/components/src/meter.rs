@@ -23,8 +23,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 /// ```
 ///
 /// The proportional fill uses the runtime `ProgressBar` widget so the fill is
-/// a true fraction of the parent-owned track width (JsEl has no percentage
-/// child sizing). The widget's fill color is the engine `status_success`,
+/// a true fraction of the parent-owned track width. The widget's fill color is the engine `status_success`,
 /// matching contract §8 (`--poodle-color-status-success`). The track shell is
 /// token-resolved here (`color-mix(surface 96%, text-primary)`).
 pub fn js_meter(spec: &MeterSpec, theme: &JetstreamThemeProvider) -> JsEl {
