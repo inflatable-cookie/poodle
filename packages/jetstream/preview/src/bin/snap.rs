@@ -213,6 +213,71 @@ fn snapshot_opts(
             }
             queue.submit(std::iter::once(enc.finish()));
         }
+
+        // ── Icon pass — SVG icons rasterized + drawn as tinted quads ──
+        let icon_cmds = collect_icon_commands(&ui.tree, &Theme::default(), 1.0);
+        if !icon_cmds.is_empty() {
+            let mut icon_cache = IconCache::new(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../gpui/preview/assets/icons"
+            ));
+            let mut groups: std::collections::HashMap<(String, u32), Vec<jetstream_renderer::sprite::SpriteInstance>> =
+                std::collections::HashMap::new();
+            for c in &icon_cmds {
+                groups.entry((c.name.clone(), c.size_px)).or_default().push(
+                    jetstream_renderer::sprite::SpriteInstance {
+                        position_scale: [
+                            c.rect.x + c.rect.width * 0.5,
+                            c.rect.y + c.rect.height * 0.5,
+                            c.rect.width,
+                            c.rect.height,
+                        ],
+                        rotation_layer: [0.0, 0.0, 0.0, 0.0],
+                        color: c.tint,
+                        uv_rect: [0.0, 0.0, 1.0, 1.0],
+                        clip_rect: [0.0; 4],
+                    },
+                );
+            }
+            for ((name, size_px), instances) in groups {
+                let Some((pixels, iw, ih)) = icon_cache
+                    .rasterize(&name, size_px)
+                    .map(|(p, w2, h2)| (p.to_vec(), w2, h2))
+                else {
+                    continue;
+                };
+                let itex = GpuTexture::from_rgba8(&device, &queue, &pixels, iw, ih, "snap_icon", &tex_bgl);
+                let ibuf2 = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("snap_icon_instances"),
+                    contents: bytemuck::cast_slice(&instances),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
+                let mut enc = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+                {
+                    let mut pass = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: Some("snap_icon_pass"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            depth_slice: None,
+                            view: &view,
+                            resolve_target: None,
+                            ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                        })],
+                        depth_stencil_attachment: None,
+                        timestamp_writes: None,
+                        occlusion_query_set: None,
+                        multiview_mask: None,
+                    });
+                    pass.set_pipeline(&pipeline);
+                    pass.set_bind_group(0, &camera.bind_group, &[]);
+                    pass.set_bind_group(1, &itex.bind_group, &[]);
+                    pass.set_vertex_buffer(0, vbo.slice(..));
+                    pass.set_vertex_buffer(1, ibuf2.slice(..));
+                    pass.set_index_buffer(ibo.slice(..), wgpu::IndexFormat::Uint16);
+                    pass.draw_indexed(0..QUAD_INDICES.len() as u32, 0, 0..instances.len() as u32);
+                }
+                queue.submit(std::iter::once(enc.finish()));
+            }
+        }
     }
 
     // Readback.
@@ -264,7 +329,42 @@ fn snapshot_opts(
     println!("wrote {path}");
 }
 
+/// Render every registered specimen to /tmp/poodle-specimens/{slug}.png for
+/// batch visual triage against the Svelte reference.
+fn snap_all_specimens() {
+    use poodle_jetstream_preview::{app_state::AppState, component_registry, specimens};
+    std::fs::create_dir_all("/tmp/poodle-specimens").ok();
+    let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+    let canvas = resolve_color(&theme, "color.background.canvas");
+    let state = AppState::new();
+    let mut done = 0;
+    for entry in component_registry::ALL_COMPONENTS {
+        if !entry.has_specimen {
+            continue;
+        }
+        let Some(specimen) = specimens::render_specimen(entry.slug, &theme, &state) else {
+            eprintln!("no renderer despite has_specimen: {}", entry.slug);
+            continue;
+        };
+        let scene = ui_element::div()
+            .w(900.0)
+            .h(640.0)
+            .p(24.0)
+            .flex_col()
+            .bg(canvas)
+            .child(specimen);
+        let path = format!("/tmp/poodle-specimens/{}.png", entry.slug);
+        snapshot(&scene, 900, 640, &path);
+        done += 1;
+    }
+    eprintln!("rendered {done} specimens to /tmp/poodle-specimens/");
+}
+
 fn main() {
+    if std::env::args().any(|a| a == "specimens") {
+        snap_all_specimens();
+        return;
+    }
     let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
     let panel = resolve_color(&theme, "color.background.panel");
     let border = resolve_color(&theme, "color.border.default");

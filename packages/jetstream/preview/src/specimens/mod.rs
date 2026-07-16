@@ -248,7 +248,7 @@ fn build_specimen_page(
 }
 
 /// Route a component slug to its specimen renderer.
-fn render_specimen(
+pub fn render_specimen(
     slug: &str,
     theme: &JetstreamThemeProvider,
     state: &AppState,

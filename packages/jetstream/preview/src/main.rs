@@ -3,11 +3,7 @@
 //!
 //! Run with: `cargo run -p poodle-jetstream-preview`
 
-mod app_state;
-mod component_registry;
-mod shell;
-mod specimens;
-mod theme_bridge;
+use poodle_jetstream_preview::{app_state, component_registry, shell, specimens, theme_bridge};
 
 use glam::{Mat4, Vec4};
 use jetstream_platform::{
@@ -128,6 +124,10 @@ struct PreviewState {
     /// Cached text sprite instances per (clip group, font size), regenerated only on rebuild.
     /// Each entry: (scissor_rect, scaled_font_size, instances).
     cached_text: Vec<(Option<[u32; 4]>, f32, Vec<SpriteInstance>)>,
+    /// SVG icon rasterizer (shared GPUI preview assets).
+    icon_cache: IconCache,
+    /// GPU textures per rasterized (icon name, pixel size).
+    icon_textures: std::collections::HashMap<(String, u32), GpuTexture>,
     /// Whether the text cache needs regenerating (deferred to once per frame).
     text_cache_dirty: bool,
 }
@@ -234,6 +234,11 @@ impl PreviewState {
             scroll_suppress_frames: 0,
             cached_text: Vec::new(),
             text_cache_dirty: false,
+            icon_cache: IconCache::new(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../gpui/preview/assets/icons"
+            )),
+            icon_textures: std::collections::HashMap::new(),
         };
 
         // Initial build
@@ -746,6 +751,12 @@ impl PreviewState {
                 }
             }
 
+            // 3.5) Icon pass — SVG icons rasterized on demand, tinted quads.
+            {
+                let scale = frame.scale_factor as f32;
+                self.render_icons(frame.gpu, surface_view, scale);
+            }
+
             // 4) Screenshot capture (if requested).
             if self.screenshot_requested {
                 self.screenshot_requested = false;
@@ -958,6 +969,106 @@ impl PreviewState {
 
     /// Render text sprite instances for a single atlas batch.
     /// `atlas_idx` indexes into `self.text_atlas_textures`.
+    /// Render all Icon widgets: collect commands from the tree, rasterize each
+    /// (name, size) once into a cached texture, and draw tinted quads through
+    /// the sprite pipeline (one pass per texture; icon counts are small).
+    fn render_icons(
+        &mut self,
+        gpu: &jetstream_platform::GpuContext,
+        surface_view: &wgpu::TextureView,
+        scale: f32,
+    ) {
+        let cmds = collect_icon_commands(&self.game_ui.tree, &self.draw_theme, scale);
+        if cmds.is_empty() {
+            return;
+        }
+
+        // Group instances by (name, size) so each texture binds once.
+        let mut groups: std::collections::HashMap<(String, u32), Vec<SpriteInstance>> =
+            std::collections::HashMap::new();
+        for c in &cmds {
+            let key = (c.name.clone(), c.size_px);
+            if !self.icon_textures.contains_key(&key) {
+                let Some((pixels, w, h)) = self
+                    .icon_cache
+                    .rasterize(&c.name, c.size_px)
+                    .map(|(p, w, h)| (p.to_vec(), w, h))
+                else {
+                    continue; // missing/unparseable SVG (warned by the cache)
+                };
+                let tex = GpuTexture::from_rgba8(
+                    &gpu.device,
+                    &gpu.queue,
+                    &pixels,
+                    w,
+                    h,
+                    "icon",
+                    &self.texture_bgl,
+                );
+                self.icon_textures.insert(key.clone(), tex);
+            }
+            groups.entry(key).or_default().push(SpriteInstance {
+                position_scale: [
+                    c.rect.x + c.rect.width * 0.5,
+                    c.rect.y + c.rect.height * 0.5,
+                    c.rect.width,
+                    c.rect.height,
+                ],
+                rotation_layer: [0.0, 0.0, 0.0, 0.0],
+                color: c.tint,
+                uv_rect: [0.0, 0.0, 1.0, 1.0],
+                clip_rect: [0.0; 4],
+            });
+        }
+
+        for (key, instances) in groups {
+            let Some(tex) = self.icon_textures.get(&key) else { continue };
+            if instances.len() > self.text_instance_capacity {
+                continue; // absurd icon count; skip rather than realloc mid-pass
+            }
+            gpu.queue.write_buffer(
+                &self.text_instance_buffer,
+                0,
+                bytemuck::cast_slice(&instances),
+            );
+            let mut encoder = gpu
+                .device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                    label: Some("icon_encoder"),
+                });
+            {
+                let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: Some("icon_pass"),
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        depth_slice: None,
+                        view: surface_view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Load,
+                            store: wgpu::StoreOp::Store,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
+                    multiview_mask: None,
+                });
+                pass.set_pipeline(&self.text_pipeline);
+                pass.set_bind_group(0, &self.text_camera.bind_group, &[]);
+                pass.set_bind_group(1, &tex.bind_group, &[]);
+                pass.set_vertex_buffer(0, self.text_quad_vbo.slice(..));
+                pass.set_vertex_buffer(1, self.text_instance_buffer.slice(..));
+                pass.set_index_buffer(self.text_quad_ibo.slice(..), wgpu::IndexFormat::Uint16);
+                pass.draw_indexed(
+                    0..SPRITE_QUAD_INDICES.len() as u32,
+                    0,
+                    0..instances.len() as u32,
+                );
+            }
+            gpu.queue.submit(std::iter::once(encoder.finish()));
+        }
+    }
+
     fn render_text_batch(
         &self,
         gpu: &jetstream_platform::GpuContext,
