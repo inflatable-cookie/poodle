@@ -124,6 +124,18 @@ fn build_controls_bar(
         );
     bar = bar.child(contrast_group);
 
+    // Search group — filters the sidebar + catalogue by name (Svelte parity).
+    let search_group = div().flex_col().gap(4.0)
+        .child(label("SEARCH").text_color(text_secondary).text_size(9.0))
+        .child(
+            text_input(state.search.clone(), "Find component...")
+                .id("search")
+                .w(180.0)
+                .h(26.0)
+                .text_size(11.0),
+        );
+    bar = bar.child(search_group);
+
     // Separator
     bar = bar.child(div().w(1.0).h(28.0).bg(border));
 
@@ -237,6 +249,9 @@ fn build_sidebar(
             let active_idx = state.active_component();
             let mut current_tag = None;
             for (i, entry) in components.iter().enumerate() {
+                if !state.matches_search(entry.display_name) {
+                    continue;
+                }
                 if current_tag != Some(entry.tag) {
                     current_tag = Some(entry.tag);
                     sidebar = sidebar.child(

@@ -410,49 +410,86 @@ fn build_catalogue_landing(state: &AppState, theme: &JetstreamThemeProvider) -> 
     let accent = resolve_color(theme, "color.accent.base");
 
     let components = component_registry::ALL_COMPONENTS;
-    let specimen_count = component_registry::specimen_count();
 
-    let mut landing = div().flex_col().gap(24.0);
-
-    landing = landing
-        .child(label(state.section.label()).text_color(text_primary).text_size(20.0))
-        .child(label(format!(
-            "{} components registered, {} with live specimens",
-            components.len(), specimen_count,
-        )).text_color(text_secondary).text_size(13.0));
-
-    // Component overview by first letter
-    let categories = categorize_components(components);
-    let mut grid = div().flex_col().gap(8.0);
-    for (letter, count) in &categories {
-        grid = grid.child(
-            div().flex_row().px(12.0).py(6.0).gap(8.0).items_center()
-                .bg(bg_elevated).border_1().border_color(border).rounded(6.0)
-                .child(label(letter.to_string()).text_color(accent).text_size(14.0))
-                .child(label(format!(
-                    "{} component{}", count, if *count == 1 { "" } else { "s" }
-                )).text_color(text_secondary).text_size(12.0))
-        );
-    }
-    landing = landing.child(grid);
+    // Mirrors the Svelte preview's landing: title + blurb + per-tag sections,
+    // each a three-column grid of clickable component cards.
+    let mut landing = div().flex_col().gap(20.0);
 
     landing = landing.child(
-        label("Select a component from the sidebar to view its specimen.")
-            .pt(8.0).text_color(tint(text_secondary, 0.7)).text_size(12.0)
+        div().flex_col().gap(6.0)
+            .child(
+                label("Component catalogue")
+                    .text_color(text_primary)
+                    .text_size(24.0)
+                    .text_weight(700),
+            )
+            .child(
+                label("Browse the full Poodle component library. Each component handles accessibility, keyboard support, and theming.")
+                    .text_color(text_secondary)
+                    .text_size(13.0)
+                    .text_wrap(true),
+            )
+            .child(
+                label(format!("{} COMPONENTS", components.len()))
+                    .text_color(text_secondary)
+                    .text_size(11.0)
+                    .text_weight(600)
+                    .letter_spacing_em(0.08),
+            ),
     );
 
-    landing
-}
-
-fn categorize_components(components: &[ComponentEntry]) -> Vec<(char, usize)> {
-    let mut categories: Vec<(char, usize)> = Vec::new();
-    for entry in components {
-        let first = entry.display_name.chars().next().unwrap_or('?');
-        if let Some(cat) = categories.iter_mut().find(|(c, _)| *c == first) {
-            cat.1 += 1;
-        } else {
-            categories.push((first, 1));
+    // Per-tag sections. Entries are pre-ordered by (tag order, name); a card's
+    // id reuses the sidebar action ("sidebar:{i}") so clicking navigates.
+    let mut current_tag = None;
+    let mut section_grid: Option<JsEl> = None;
+    for (i, entry) in components.iter().enumerate() {
+        if !state.matches_search(entry.display_name) {
+            continue;
         }
+        if current_tag != Some(entry.tag) {
+            if let Some(grid) = section_grid.take() {
+                landing = landing.child(grid);
+            }
+            current_tag = Some(entry.tag);
+            landing = landing.child(
+                label(entry.tag.label().to_uppercase())
+                    .pt(8.0)
+                    .text_color(accent)
+                    .text_size(11.0)
+                    .text_weight(700)
+                    .letter_spacing_em(0.08),
+            );
+            section_grid = Some(div().grid().grid_cols(3).gap(12.0).w_full());
+        }
+        let card = div()
+            .flex_col()
+            .gap(6.0)
+            .p(16.0)
+            .bg(bg_elevated)
+            .border_1()
+            .border_color(border)
+            .rounded(8.0)
+            .id(format!("sidebar:{i}"))
+            .focusable()
+            .cursor_pointer()
+            .hover(move |st| st.border_color(tint(accent, 0.5)))
+            .child(
+                label(entry.display_name)
+                    .text_color(text_primary)
+                    .text_size(14.0)
+                    .text_weight(600),
+            )
+            .child(
+                label(entry.description)
+                    .text_color(text_secondary)
+                    .text_size(12.0)
+                    .text_wrap(true),
+            );
+        section_grid = section_grid.map(|g| g.child(card));
     }
-    categories
+    if let Some(grid) = section_grid.take() {
+        landing = landing.child(grid);
+    }
+
+    landing
 }

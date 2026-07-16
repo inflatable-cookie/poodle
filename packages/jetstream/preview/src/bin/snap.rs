@@ -357,6 +357,17 @@ fn snap_all_specimens() {
         snapshot(&scene, 900, 640, &path);
         done += 1;
     }
+    // Landing catalogue page (default state = no active component).
+    let landing = specimens::build_content(&state, &theme);
+    let landing_scene = ui_element::div()
+        .w(1200.0)
+        .h(1400.0)
+        .p(24.0)
+        .flex_col()
+        .bg(canvas)
+        .child(landing);
+    snapshot(&landing_scene, 1200, 1400, "/tmp/poodle-specimens/_landing.png");
+
     eprintln!("rendered {done} specimens to /tmp/poodle-specimens/");
 }
 

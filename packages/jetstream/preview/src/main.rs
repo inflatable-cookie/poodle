@@ -485,6 +485,23 @@ impl PreviewState {
                     self.app.tree.insert_char(*c);
                     self.app.dirty = true;
                 }
+                // Characters route to the focused TextInput (e.g. the toolbar
+                // search box); the engine emits TextChanged next frame.
+                PlatformEvent::CharReceived(c)
+                    if self.focused_text_input() && !c.is_control() =>
+                {
+                    self.game_ui.text_insert_char(*c);
+                }
+                PlatformEvent::KeyPressed { key, .. }
+                    if self.focused_text_input()
+                        && matches!(*key, KeyCode::BACKSPACE | KeyCode::DELETE) =>
+                {
+                    if *key == KeyCode::BACKSPACE {
+                        self.game_ui.text_backspace();
+                    } else {
+                        self.game_ui.text_delete();
+                    }
+                }
                 PlatformEvent::MouseMoved { x, y } => {
                     // Winit 0.30 CursorMoved reports physical pixels.
                     self.mouse_x = *x as f32 / scale;
@@ -599,6 +616,18 @@ impl PreviewState {
         for event in &ui_events {
             match event {
                 UiEvent::Activated(node_id) => self.handle_activation(*node_id),
+                UiEvent::TextChanged { node, text } => {
+                    let is_search = self
+                        .game_ui
+                        .tree
+                        .get(*node)
+                        .and_then(|n| n.style.token_key.as_deref())
+                        == Some("search");
+                    if is_search && self.app.search != *text {
+                        self.app.search = text.clone();
+                        self.app.dirty = true;
+                    }
+                }
                 UiEvent::SliderChanged { node, value } => {
                     // Contrast knob: drive the oklch neutral-contrast axis.
                     let is_contrast = self
@@ -789,6 +818,16 @@ impl PreviewState {
             .get(hit)
             .and_then(|n| n.style.token_key.clone())?;
         token.strip_prefix("tabs:").map(|s| s.to_string())
+    }
+
+    /// Whether the currently focused game_ui node is a TextInput widget
+    /// (routes keyboard chars/edit keys to the engine's text editing).
+    fn focused_text_input(&self) -> bool {
+        self.game_ui
+            .focus
+            .focused()
+            .and_then(|id| self.game_ui.tree.get(id))
+            .map_or(false, |n| matches!(n.widget, Widget::TextInput { .. }))
     }
 
     fn handle_activation(&mut self, node_id: UiNodeId) {

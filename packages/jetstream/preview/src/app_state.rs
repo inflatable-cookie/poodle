@@ -352,6 +352,8 @@ pub struct AppState {
     pub control_size: ControlSize,
     /// Neutral-contrast knob (mirrors the CSS `--poodle-contrast`; 0.5 = default).
     pub contrast: f32,
+    /// Sidebar/catalogue filter (toolbar search box).
+    pub search: String,
     pub active_component_idx: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub disabled: bool,
@@ -377,6 +379,7 @@ impl AppState {
             density: Density::Comfortable,
             control_size: ControlSize::Md,
             contrast: 0.5,
+            search: String::new(),
             active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,
             disabled: false,
@@ -388,6 +391,12 @@ impl AppState {
             tree: TreePreviewState::new(),
             tabs: TabsPreviewState::new(),
         }
+    }
+
+    /// Case-insensitive search filter over component display names.
+    pub fn matches_search(&self, name: &str) -> bool {
+        self.search.is_empty()
+            || name.to_lowercase().contains(&self.search.to_lowercase())
     }
 
     /// Current active component index for the active section.
