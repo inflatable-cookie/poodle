@@ -112,6 +112,18 @@ fn build_controls_bar(
     let size_active = ControlSize::ALL.iter().position(|&s| s == state.control_size).unwrap_or(0);
     bar = bar.child(build_toggle_group("SIZE", "size", &size_labels, size_active, theme));
 
+    // Contrast group — a real engine slider driving the oklch neutral-contrast
+    // axis (mirrors the Svelte preview's CONTRAST control; 0.5 = library default).
+    let contrast_group = div().flex_col().gap(4.0)
+        .child(label("CONTRAST").text_color(text_secondary).text_size(9.0))
+        .child(
+            slider(state.contrast, 0.0, 1.0)
+                .id("contrast")
+                .w(120.0).h(16.0)
+                .focusable(),
+        );
+    bar = bar.child(contrast_group);
+
     // Separator
     bar = bar.child(div().w(1.0).h(28.0).bg(border));
 

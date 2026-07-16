@@ -350,6 +350,8 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
+    /// Neutral-contrast knob (mirrors the CSS `--poodle-contrast`; 0.5 = default).
+    pub contrast: f32,
     pub active_component_idx: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub disabled: bool,
@@ -374,6 +376,7 @@ impl AppState {
             theme_preset: ThemePreset::Dark,
             density: Density::Comfortable,
             control_size: ControlSize::Md,
+            contrast: 0.5,
             active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,
             disabled: false,

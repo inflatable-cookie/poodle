@@ -252,6 +252,7 @@ impl PreviewState {
         // Theme resolves tokens in logical pixels (scale_factor=1.0).
         // The engine handles logical→physical conversion via GameUi.scale_factor.
         self.theme = poodle_jetstream::JetstreamThemeProvider::from_theme(theme_def);
+        self.theme.contrast = self.app.contrast;
 
         // Pure function: state → UI description.
         let ui = shell::build_shell(&self.app, &self.theme);
@@ -590,8 +591,25 @@ impl PreviewState {
             .set_pointer_state(self.mouse_x, self.mouse_y, self.mouse_left_down);
 
         for event in &ui_events {
-            if let UiEvent::Activated(node_id) = event {
-                self.handle_activation(*node_id);
+            match event {
+                UiEvent::Activated(node_id) => self.handle_activation(*node_id),
+                UiEvent::SliderChanged { node, value } => {
+                    // Contrast knob: drive the oklch neutral-contrast axis.
+                    let is_contrast = self
+                        .game_ui
+                        .tree
+                        .get(*node)
+                        .and_then(|n| n.style.token_key.as_deref())
+                        == Some("contrast");
+                    if is_contrast {
+                        let v = (value * 100.0).round() / 100.0;
+                        if (v - self.app.contrast).abs() > f32::EPSILON {
+                            self.app.contrast = v;
+                            self.app.dirty = true;
+                        }
+                    }
+                }
+                _ => {}
             }
         }
 
