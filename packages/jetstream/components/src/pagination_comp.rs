@@ -60,7 +60,7 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     let current_border: Color = {
         let a: Color = accent.into();
         let b: Color = border_color.into();
-        a.mix(b, 0.58)
+        a.mix_srgb(b, 0.58)
     };
 
     // Border at 78% opacity (matches Svelte `color-mix … 78%`).

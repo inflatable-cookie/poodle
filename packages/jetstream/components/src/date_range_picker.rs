@@ -50,7 +50,7 @@ pub fn js_date_range_picker(spec: &DateRangePickerSpec, theme: &JetstreamThemePr
     // Contract trigger hover: color-mix(surface 86%, elevated).
     let fill_c: Color = fill.into();
     let elevated_c: Color = elevated.into();
-    let hover_bg = fill_c.mix(elevated_c, 0.14);
+    let hover_bg = fill_c.mix_srgb(elevated_c, 0.14);
 
     // ── Display text ──
     // Mirror Svelte `valueLabel`: show range text only when a start exists;

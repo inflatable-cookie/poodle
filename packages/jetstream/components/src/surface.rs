@@ -26,7 +26,7 @@ pub fn js_surface(spec: &SurfaceSpec, theme: &JetstreamThemeProvider, children: 
     let bg = match spec.fill_mix_over_token() {
         Some(over_token) => {
             let over: Color = resolve_color(theme, over_token).into();
-            base_fill.mix(over, mix_ratio)
+            base_fill.mix_srgb(over, mix_ratio)
         }
         // Non-elevated tones mix toward transparent → scale alpha only.
         None => base_fill.with_alpha(base_fill.a * mix_ratio),

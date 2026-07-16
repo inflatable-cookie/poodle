@@ -67,9 +67,9 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
 
     // ── Track base: color-mix(canvas 70%, black) ──
     let canvas: Color = resolve_color(theme, spec.track_base_token()).into();
-    let track_base = canvas.mix(Color::BLACK, 0.70);
+    let track_base = canvas.mix_srgb(Color::BLACK, 0.70);
     // Root background: color-mix(canvas 75%, black).
-    let root_bg = canvas.mix(Color::BLACK, 0.75);
+    let root_bg = canvas.mix_srgb(Color::BLACK, 0.75);
 
     // ── Sizing ──
     let height = rem_to_px(control_height_rem(effective_size));
@@ -89,14 +89,14 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
     let value = spec.value();
     let (selection_fill, selection_border) = match value {
         TriStateValue::Excluded => (
-            excluded_color.mix(track_base, 0.14),
+            excluded_color.mix_srgb(track_base, 0.14),
             // Contract: color-mix(excluded 58%, border-default).
-            excluded_color.mix(border_default, 0.58),
+            excluded_color.mix_srgb(border_default, 0.58),
         ),
-        TriStateValue::Default => (default_color.mix(track_base, 0.08), border_default),
+        TriStateValue::Default => (default_color.mix_srgb(track_base, 0.08), border_default),
         TriStateValue::Included => (
-            included_color.mix(track_base, 0.14),
-            included_color.mix(border_default, 0.58),
+            included_color.mix_srgb(track_base, 0.14),
+            included_color.mix_srgb(border_default, 0.58),
         ),
     };
 

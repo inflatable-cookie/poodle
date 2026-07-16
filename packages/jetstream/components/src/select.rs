@@ -56,8 +56,8 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let elevated_c: Color = panel_fill.into();
     let hover_border = validation_border
         .map(Into::into)
-        .unwrap_or_else(|| border_c.mix(text_c, 0.78));
-    let hover_fill = fill_c.mix(elevated_c, 0.5);
+        .unwrap_or_else(|| border_c.mix_srgb(text_c, 0.78));
+    let hover_fill = fill_c.mix_srgb(elevated_c, 0.5);
 
     // Trigger display text and colour
     let (display_text, display_color) = match spec.trigger_text() {

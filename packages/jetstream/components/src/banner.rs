@@ -28,7 +28,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let text_primary = resolve_color(theme, "color.text.primary");
     let panel: Color = resolve_color(theme, "color.background.panel").into();
 
-    let fill = tone_color.mix(panel, 0.12);
+    let fill = tone_color.mix_srgb(panel, 0.12);
 
     // Contract: padding 0.75rem 0.5rem, gap 0.5rem, font-size 0.8125rem (13px),
     // icon-size 1rem (16px)

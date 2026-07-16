@@ -37,12 +37,12 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
 
     let fill = match spec.appearance {
         PillAppearance::Badge => match spec.tone {
-            PillTone::Neutral => surface_bg.mix(text_primary, 0.96),
+            PillTone::Neutral => surface_bg.mix_srgb(text_primary, 0.96),
             _ => accent_base.with_alpha(accent_base.a * 0.18),
         },
         _ => match spec.tone {
             PillTone::Success | PillTone::Danger | PillTone::Info | PillTone::Warning => {
-                tone_color.mix(surface_bg, 0.14)
+                tone_color.mix_srgb(surface_bg, 0.14)
             }
             PillTone::Neutral => surface_bg.with_alpha(surface_bg.a * 0.9),
         },
@@ -58,7 +58,7 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
         PillAppearance::Badge => Color::TRANSPARENT,
         _ => match spec.tone {
             PillTone::Success | PillTone::Danger | PillTone::Info | PillTone::Warning => {
-                tone_color.mix(border_subtle, 0.38)
+                tone_color.mix_srgb(border_subtle, 0.38)
             }
             PillTone::Neutral => border_subtle.with_alpha(border_subtle.a * 0.82),
         },
@@ -95,9 +95,9 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
         let slate_12 = slate.with_alpha(0.12);
         let white = Color::WHITE;
         return (
-            accent.mix(slate_08, 0.18),
-            accent.mix(slate_12, 0.30),
-            accent.mix(white, 0.88),
+            accent.mix_srgb(slate_08, 0.18),
+            accent.mix_srgb(slate_12, 0.30),
+            accent.mix_srgb(white, 0.88),
         );
     }
 
@@ -238,7 +238,7 @@ mod tests {
             1.0,
         );
         let slate_08 = Color::new(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0, 0.08);
-        let expected = accent.mix(slate_08, 0.18);
+        let expected = accent.mix_srgb(slate_08, 0.18);
         assert_eq!(el.style.background, Some(expected));
     }
 
@@ -254,7 +254,7 @@ mod tests {
             rgb.b as f32 / 255.0,
             1.0,
         );
-        let expected = accent.mix(Color::WHITE, 0.88);
+        let expected = accent.mix_srgb(Color::WHITE, 0.88);
         assert_eq!(el.style.text_color, Some(expected));
     }
 }

@@ -85,26 +85,26 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
         (ButtonVariant::Ghost, Some(s)) => (Color::TRANSPARENT, Color::TRANSPARENT, s),
         // Primary base: accent fill, accent-84%-black border, inverse text.
         (ButtonVariant::Primary, None) => {
-            (accent, accent.mix(Color::BLACK, 0.84), text_inverse)
+            (accent, accent.mix_srgb(Color::BLACK, 0.84), text_inverse)
         }
         // Primary danger/success: solid status fill, status-84%-black border, inverse text.
         (ButtonVariant::Primary, Some(s)) => {
-            (s, s.mix(Color::BLACK, 0.84), text_inverse)
+            (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse)
         }
         // Danger compat variant ≈ primary status (status is Some(danger) here).
         (ButtonVariant::Danger, Some(s)) => {
-            (s, s.mix(Color::BLACK, 0.84), text_inverse)
+            (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse)
         }
         (ButtonVariant::Danger, None) => {
             // Unreachable: Danger variant always yields Some(danger) above.
-            (danger, danger.mix(Color::BLACK, 0.84), text_inverse)
+            (danger, danger.mix_srgb(Color::BLACK, 0.84), text_inverse)
         }
         // Secondary base: surface fill, border-default, text primary.
         (ButtonVariant::Secondary, None) => (surface, border_default, text_primary),
         // Secondary danger/success: status-16%-surface fill, status-46%-border, text primary.
         (ButtonVariant::Secondary, Some(s)) => (
-            s.mix(surface, 0.16),
-            s.mix(border_default, 0.46),
+            s.mix_srgb(surface, 0.16),
+            s.mix_srgb(border_default, 0.46),
             text_primary,
         ),
     };
@@ -112,14 +112,14 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
     // ── Pressed (non-primary): solid accent treatment (contract §8) ──
     if is_pressed && !matches!(spec.variant, ButtonVariant::Primary) {
         fill = accent;
-        border = accent.mix(Color::BLACK, 0.85);
+        border = accent.mix_srgb(Color::BLACK, 0.85);
         text_color = text_inverse;
     }
 
     // ── Hover: color-mix(fill 76%, elevated); border 74% toward text-primary ──
-    let hover_fill = fill.mix(elevated, 0.76);
-    let hover_border = border.mix(text_primary, 0.74);
-    let active_fill = fill.mix(elevated, 0.64);
+    let hover_fill = fill.mix_srgb(elevated, 0.76);
+    let hover_border = border.mix_srgb(text_primary, 0.74);
+    let active_fill = fill.mix_srgb(elevated, 0.64);
 
     let icon_name = spec.icon.as_deref().unwrap_or("help-circle");
 

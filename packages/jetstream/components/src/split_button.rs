@@ -69,14 +69,14 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) 
         // border, inverse text.
         (ButtonVariant::Primary, Some(status_color)) => SplitColors {
             fill: status_color,
-            border: status_color.mix(Color::BLACK, 0.84),
+            border: status_color.mix_srgb(Color::BLACK, 0.84),
             text: text_inverse,
         },
         // Primary default: accent fill, color-mix(accent 84%, black) border,
         // inverse text.
         (ButtonVariant::Primary, None) => SplitColors {
             fill: accent,
-            border: accent.mix(Color::BLACK, 0.84),
+            border: accent.mix_srgb(Color::BLACK, 0.84),
             text: text_inverse,
         },
 
@@ -84,8 +84,8 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) 
         // Secondary danger/success: color-mix(status 16%, surface) fill,
         // color-mix(status 46%, border-default) border, text-primary.
         (_, Some(status_color)) => SplitColors {
-            fill: status_color.mix(surface, 0.16),
-            border: status_color.mix(border_default, 0.46),
+            fill: status_color.mix_srgb(surface, 0.16),
+            border: status_color.mix_srgb(border_default, 0.46),
             text: text_primary,
         },
         // Secondary default: surface fill, border-default, text-primary.
@@ -119,9 +119,9 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
     let colors = resolve_split_colors(spec, theme);
     let elevated: Color = resolve_color(theme, "color.background.elevated").into();
     // Contract §4 hover: color-mix(split-fill 84%, background-elevated).
-    let hover_fill = colors.fill.mix(elevated, 0.84);
+    let hover_fill = colors.fill.mix_srgb(elevated, 0.84);
     // Contract §4 active: fill darkened further (mix toward elevated at 72%).
-    let active_fill = colors.fill.mix(elevated, 0.72);
+    let active_fill = colors.fill.mix_srgb(elevated, 0.72);
 
     // Contract §8 Divider: color-mix(split-text 22%, transparent).
     let divider_color = colors.text.with_alpha(colors.text.a * 0.22);

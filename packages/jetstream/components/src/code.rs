@@ -58,7 +58,7 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         // (contract §8 `[data-inline-variant="plain"]`).
         if spec.inline_variant == CodeInlineVariant::Default {
             // bg = color-mix(panel 72%, elevated).
-            let inline_bg = panel.mix(elevated, 0.72);
+            let inline_bg = panel.mix_srgb(elevated, 0.72);
             el = el
                 .pl(rem_to_px(0.375))
                 .pr(rem_to_px(0.375))
@@ -98,7 +98,7 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let has_toolbar = spec.language.is_some() || spec.is_copyable;
     if has_toolbar {
         // bg = color-mix(elevated 60%, panel); border-bottom = border-subtle.
-        let toolbar_bg = elevated.mix(panel, 0.60);
+        let toolbar_bg = elevated.mix_srgb(panel, 0.60);
         let mut toolbar = ui_element::div()
             .flex_row()
             .items_center()
@@ -158,7 +158,7 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // ── Code surface (scroll + pre + source) ──────────────────
     // bg = color-mix(canvas 92%, black) — the pre carries the visible surface.
-    let pre_bg = canvas.mix(Color::BLACK, 0.92);
+    let pre_bg = canvas.mix_srgb(Color::BLACK, 0.92);
     // Line-highlight bg = color-mix(accent-base 12%, transparent).
     let highlight_bg = accent.with_alpha(accent.a * 0.12);
 

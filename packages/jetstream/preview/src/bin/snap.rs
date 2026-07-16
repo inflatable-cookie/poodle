@@ -368,6 +368,10 @@ fn snap_all_specimens() {
         .child(landing);
     snapshot(&landing_scene, 1200, 1400, "/tmp/poodle-specimens/_landing.png");
 
+    // Full app shell (header chrome + sidebar + landing).
+    let shell_el = poodle_jetstream_preview::shell::build_shell(&state, &theme);
+    snapshot(&shell_el, 1500, 900, "/tmp/poodle-specimens/_shell.png");
+
     eprintln!("rendered {done} specimens to /tmp/poodle-specimens/");
 }
 

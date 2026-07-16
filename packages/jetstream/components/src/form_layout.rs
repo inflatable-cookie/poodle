@@ -36,8 +36,8 @@ fn field_errors_summary(spec: &FormLayoutSpec, theme: &JetstreamThemeProvider) -
 
     // color-mix toward transparent: 8% fill, 40% border (Svelte FormLayout:84-85).
     let transparent = Color::new(tone.r, tone.g, tone.b, 0.0);
-    let fill = tone.mix(transparent, 0.08);
-    let border = tone.mix(transparent, 0.40);
+    let fill = tone.mix_srgb(transparent, 0.08);
+    let border = tone.mix_srgb(transparent, 0.40);
 
     let mut block = ui_element::div()
         .bg(fill)

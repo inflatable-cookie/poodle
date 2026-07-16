@@ -32,12 +32,12 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
     //   default/outlined: color-mix(panel 10%, elevated)
     //   elevated:         color-mix(elevated 98%, panel)
     let fill = match spec.variant {
-        CardVariant::Elevated => elevated.mix(panel, 0.98),
-        _ => panel.mix(elevated, 0.10),
+        CardVariant::Elevated => elevated.mix_srgb(panel, 0.98),
+        _ => panel.mix_srgb(elevated, 0.10),
     };
 
     // Hover fill (contract §8): color-mix(elevated 94%, panel).
-    let hover_fill = elevated.mix(panel, 0.94);
+    let hover_fill = elevated.mix_srgb(panel, 0.94);
 
     let mut el = ui_element::div()
         .bg(fill)

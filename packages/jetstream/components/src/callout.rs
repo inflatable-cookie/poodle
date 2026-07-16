@@ -64,16 +64,16 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = if is_neutral {
         Color::new(panel.r, panel.g, panel.b, panel.a * 0.94)
     } else if is_pending {
-        tone_color.mix(panel, 0.08)
+        tone_color.mix_srgb(panel, 0.08)
     } else {
-        tone_color.mix(panel, 0.10)
+        tone_color.mix_srgb(panel, 0.10)
     };
     let border = if is_neutral {
         Color::new(border_subtle.x, border_subtle.y, border_subtle.z, border_subtle.w * 0.88)
     } else if is_pending {
-        tone_color.mix(border_default, 0.26)
+        tone_color.mix_srgb(border_default, 0.26)
     } else {
-        tone_color.mix(border_default, 0.34)
+        tone_color.mix_srgb(border_default, 0.34)
     };
 
     let mut el = ui_element::div()

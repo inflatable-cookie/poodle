@@ -843,6 +843,39 @@ impl PreviewState {
             self.app.dirty = true;
         }
 
+        // Component-emitted ids from the dogfooded header chrome: the Poodle
+        // Tabs nav ("tabs:{section}") and ToggleGroups ("toggle:{value}").
+        // Section values never collide with specimen tab values; toggle values
+        // are unique across the three groups.
+        if let Some(tok) = token_key.as_deref() {
+            if let Some(section_value) = tok.strip_prefix("tabs:") {
+                let section = match section_value {
+                    "components" => Some(Section::Components),
+                    "demo" => Some(Section::Demo),
+                    "tokens" => Some(Section::Tokens),
+                    _ => None,
+                };
+                if let Some(section) = section {
+                    self.app.set_section(section);
+                    return;
+                }
+            }
+            if let Some(value) = tok.strip_prefix("toggle:") {
+                if let Some(&preset) = ThemePreset::ALL.iter().find(|t| t.label() == value) {
+                    self.app.set_theme(preset);
+                    return;
+                }
+                if let Some(&density) = Density::ALL.iter().find(|d| d.label() == value) {
+                    self.app.set_density(density);
+                    return;
+                }
+                if let Some(&size) = ControlSize::ALL.iter().find(|c| c.label() == value) {
+                    self.app.set_control_size(size);
+                    return;
+                }
+            }
+        }
+
         match shell::parse_action(token_key.as_deref()) {
             shell::ShellAction::SelectTab(idx) => {
                 if let Some(&section) = Section::ALL.get(idx) {

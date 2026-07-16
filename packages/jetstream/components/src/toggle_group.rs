@@ -56,14 +56,14 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
 
     // Svelte/contract: item background = color-mix(surface 93%, text-primary)
     // (the previous surface/elevated 72% was the stale pre-Svelte contract value).
-    let item_fill = surface.mix(text_primary, 0.93);
+    let item_fill = surface.mix_srgb(text_primary, 0.93);
 
     // Svelte/contract: selected = accent tinted at 22% *over the item fill*
     // (not accent over transparent — the previous stale value).
-    let selected_fill = accent.mix(item_fill, 0.22);
+    let selected_fill = accent.mix_srgb(item_fill, 0.22);
 
     // Contract: selected border = color-mix(accent-base 42%, border-default)
-    let selected_border = accent.mix(border_default, 0.42);
+    let selected_border = accent.mix_srgb(border_default, 0.42);
 
     // Contract §8 Item: font-size = var(--poodle-typography-label-size) (flat
     // across sizes — data-size only changes height, not font-size), font-weight 600.
@@ -90,6 +90,9 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
         };
 
         let mut item = ui_element::button(&option.label)
+            // Hit-test id so a host can route option activation
+            // (matches the tree/tabs `prefix:<value>` convention).
+            .id(format!("toggle:{}", option.value))
             .min_h(item_height)
             .pl(item_pad_x)
             .pr(item_pad_x)
@@ -106,7 +109,7 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
             .focusable();
 
         if !is_item_disabled {
-            let hover_fill = bg.mix(elevated, 0.84);
+            let hover_fill = bg.mix_srgb(elevated, 0.84);
             item = item
                 .hover(|s| s.bg(hover_fill))
                 .cursor_pointer();
@@ -176,7 +179,7 @@ mod tests {
         let surface: Color = resolve_color(&th, "color.background.surface").into();
         let text_primary: Color = resolve_color(&th, "color.text.primary").into();
         // Svelte: color-mix(surface 93%, text-primary). Was the stale surface/elevated 72%.
-        let expected = surface.mix(text_primary, 0.93);
+        let expected = surface.mix_srgb(text_primary, 0.93);
         let el = js_toggle_group(&ToggleGroupSpec::new(sample_options()), &th);
         let bg = el.children[0].style.background.expect("item bg");
         assert!(
@@ -209,8 +212,8 @@ mod tests {
         let surface: Color = resolve_color(&th, "color.background.surface").into();
         let text_primary: Color = resolve_color(&th, "color.text.primary").into();
         // Selected fill = accent 22% over the surface-93%/text-primary item fill.
-        let item_fill = surface.mix(text_primary, 0.93);
-        let selected = accent.mix(item_fill, 0.22);
+        let item_fill = surface.mix_srgb(text_primary, 0.93);
+        let selected = accent.mix_srgb(item_fill, 0.22);
         let tree = probe(
             &js_toggle_group(
                 &ToggleGroupSpec::new(sample_options()).with_value(vec!["grid".into()]),

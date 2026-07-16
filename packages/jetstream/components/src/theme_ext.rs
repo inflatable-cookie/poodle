@@ -67,11 +67,33 @@ pub fn tint(color: Vec4, opacity_fraction: f32) -> Vec4 {
     Vec4::new(color.x, color.y, color.z, color.w * opacity_fraction)
 }
 
-/// Blend two colors: `a * ratio + b * (1 - ratio)` (emulates CSS
-/// `color-mix(a ratio%, b)`). Mixed in the linear space the Jetstream pipeline
-/// uses; GPUI mixes in sRGB, a minor cross-target color delta.
+/// Blend two colors with CSS `color-mix(in srgb, a ratio%, b)` semantics.
+/// Inputs/outputs are linear (the pipeline's working space), but the mix
+/// itself happens in sRGB gamma space like the CSS the contracts specify —
+/// a plain linear lerp pulls dark-dominant mixes far too light (measured
+/// ~40/255 per channel on the toggle-group item fill).
 pub fn color_mix(a: Vec4, b: Vec4, ratio: f32) -> Vec4 {
-    a * ratio + b * (1.0 - ratio)
+    fn to_srgb(c: f32) -> f32 {
+        if c <= 0.003_130_8 {
+            c * 12.92
+        } else {
+            1.055 * c.powf(1.0 / 2.4) - 0.055
+        }
+    }
+    fn to_linear(c: f32) -> f32 {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    }
+    let mix_c = |la: f32, lb: f32| to_linear(to_srgb(la) * ratio + to_srgb(lb) * (1.0 - ratio));
+    Vec4::new(
+        mix_c(a.x, b.x),
+        mix_c(a.y, b.y),
+        mix_c(a.z, b.z),
+        a.w * ratio + b.w * (1.0 - ratio),
+    )
 }
 
 // ── Color-picker color math ───────────────────────────────────────

@@ -86,7 +86,7 @@ fn toned_icon_button(
 
     let surface: Color = resolve_color(theme, "color.background.surface").into();
     let elevated: Color = resolve_color(theme, "color.background.elevated").into();
-    let hover_bg = surface.mix(elevated, 0.84);
+    let hover_bg = surface.mix_srgb(elevated, 0.84);
 
     let mut el = ui_element::button("")
         .h(height)

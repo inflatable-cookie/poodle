@@ -38,7 +38,7 @@ pub fn js_remediation_banner(spec: &RemediationBannerSpec, theme: &JetstreamThem
     let text_secondary = resolve_color(theme, spec.message_color_token());
 
     // Surface fill = color-mix(tone, panel) at the spec's tone ratio; border = tone.
-    let fill = tone_color.mix(panel, spec.fill_tone_ratio());
+    let fill = tone_color.mix_srgb(panel, spec.fill_tone_ratio());
     let border = resolve_color(theme, spec.border_token());
 
     // ── Dimensions ──

@@ -23,6 +23,15 @@ use poodle_jetstream::JetstreamThemeProvider;
 use jetstream_runtime::game_ui::Color;
 use poodle_jetstream_components::theme_ext::*;
 
+use poodle_jetstream_components::eyebrow::js_eyebrow;
+use poodle_jetstream_components::pill::js_pill;
+use poodle_jetstream_components::tabs::js_tabs;
+use poodle_jetstream_components::toggle_group::js_toggle_group;
+use poodle_specs::{
+    EyebrowSpec, PillSpec, TabDefinition, TabVariant, TabsSpec, ToggleGroupOption,
+    ToggleGroupSpec,
+};
+
 use crate::app_state::*;
 use crate::component_registry;
 use crate::specimens;
@@ -54,34 +63,37 @@ fn build_tab_bar(
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let mut bar = div().flex_row().w_full().h(44.0).px(8.0).gap(4.0)
+    let _ = (text_secondary, accent);
+    // Mirror the Svelte top bar: title, Poodle pill-variant Tabs for section
+    // navigation, and summary Pills (theme/density/size) on the right —
+    // dogfooding the real components instead of hand-rolled chrome.
+    let nav = js_tabs(
+        &TabsSpec::new(vec![
+            TabDefinition::new("components", "Components"),
+            TabDefinition::new("demo", "Demo"),
+            TabDefinition::new("tokens", "Tokens"),
+        ])
+        .with_variant(TabVariant::Pill)
+        .with_value(match state.section {
+            Section::Components => "components",
+            Section::Demo => "demo",
+            Section::Tokens => "tokens",
+        }),
+        theme,
+    );
+
+    let summary = div().flex_row().gap(8.0).items_center()
+        .child(js_pill(&PillSpec::new().with_label(state.theme_preset.label()), theme))
+        .child(js_pill(&PillSpec::new().with_label(state.density.label()), theme))
+        .child(js_pill(&PillSpec::new().with_label(state.control_size.label()), theme));
+
+    div().flex_row().w_full().h(48.0).px(12.0).gap(16.0)
         .items_center()
         .bg(bg_surface).border_1().border_color(border)
-        .child(
-            label("Poodle").text_color(text_primary).text_size(14.0).pr(12.0).pl(4.0)
-        );
-
-    for &section in Section::ALL {
-        let is_active = section == state.section;
-        let tab_bg: Option<Color> = if is_active { Some(tint(accent, 0.18).into()) } else { None };
-        let tab_text = if is_active { text_primary } else { text_secondary };
-        let tab_border: Option<Color> = if is_active { Some(tint(accent, 0.56).into()) } else { None };
-
-        bar = bar.child(
-            button(section.label())
-                .id(format!("tab:{}", section.label()))
-                .h(28.0).px(12.0)
-                .items_center().justify_center()
-                .rounded(6.0)
-                .bg_opt(tab_bg)
-                .border(if is_active { 1.0 } else { 0.0 })
-                .border_color_opt(tab_border)
-                .text_color(tab_text).text_size(12.0)
-                .focusable()
-        );
-    }
-
-    bar
+        .child(label("Poodle").text_color(text_primary).text_size(15.0).text_weight(700).pr(8.0).pl(4.0))
+        .child(nav)
+        .child(div().grow())
+        .child(summary)
 }
 
 /// Controls bar with theme, density, size toggles and state probes.
@@ -97,20 +109,30 @@ fn build_controls_bar(
         .items_center()
         .bg(bg_surface).border_1().border_color(border);
 
-    // Theme group
+    // Theme / density / size — real Eyebrow + ToggleGroup components (the
+    // Svelte DisplayControls uses exactly these). Option activation routes via
+    // the components' `toggle:{value}` ids.
+    let group = |eyebrow: &str, options: &[&str], active: &str| -> JsEl {
+        let opts = options
+            .iter()
+            .map(|&o| ToggleGroupOption::new(o, o))
+            .collect();
+        div().flex_col().gap(4.0)
+            .child(js_eyebrow(&EyebrowSpec::default().with_content(eyebrow), theme))
+            .child(js_toggle_group(
+                &ToggleGroupSpec::new(opts).with_value(vec![active.to_string()]),
+                theme,
+            ))
+    };
+
     let theme_labels: Vec<&str> = ThemePreset::ALL.iter().map(|t| t.label()).collect();
-    let theme_active = ThemePreset::ALL.iter().position(|&t| t == state.theme_preset).unwrap_or(0);
-    bar = bar.child(build_toggle_group("THEME", "theme", &theme_labels, theme_active, theme));
+    bar = bar.child(group("Theme", &theme_labels, state.theme_preset.label()));
 
-    // Density group
     let density_labels: Vec<&str> = Density::ALL.iter().map(|d| d.label()).collect();
-    let density_active = Density::ALL.iter().position(|&d| d == state.density).unwrap_or(0);
-    bar = bar.child(build_toggle_group("DENSITY", "density", &density_labels, density_active, theme));
+    bar = bar.child(group("Density", &density_labels, state.density.label()));
 
-    // Size group
     let size_labels: Vec<&str> = ControlSize::ALL.iter().map(|s| s.label()).collect();
-    let size_active = ControlSize::ALL.iter().position(|&s| s == state.control_size).unwrap_or(0);
-    bar = bar.child(build_toggle_group("SIZE", "size", &size_labels, size_active, theme));
+    bar = bar.child(group("Size", &size_labels, state.control_size.label()));
 
     // Contrast group — a real engine slider driving the oklch neutral-contrast
     // axis (mirrors the Svelte preview's CONTRAST control; 0.5 = library default).

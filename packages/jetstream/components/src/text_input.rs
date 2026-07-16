@@ -45,7 +45,7 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
     // Hover border: contract color-mix(border 78%, text-primary)
     let border_c: Color = border_color.into();
     let text_primary: Color = resolve_color(theme, "color.text.primary").into();
-    let hover_border = border_c.mix(text_primary, 0.78);
+    let hover_border = border_c.mix_srgb(text_primary, 0.78);
 
     // Slug mode: the editable value and the prefix affix use code-family so the
     // full slug reads as one code-like unit (contract §5 "Slug Mode").

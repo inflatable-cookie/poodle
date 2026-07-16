@@ -47,7 +47,7 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
             let elevated: Color = resolve_color(theme, "color.background.elevated").into();
             let text = resolve_color(theme, "color.text.secondary");
             // color-mix(surface 78%, elevated)
-            (surface.mix(elevated, 0.78), text)
+            (surface.mix_srgb(elevated, 0.78), text)
         }
     };
 

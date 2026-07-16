@@ -92,13 +92,13 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Contract: track fill = color-mix(in srgb, tone N%, surface)
     // off-track: mix(off-color 18%, surface)  → 18% off-color + 82% surface
     // on-track:  mix(on-color  24%, surface)  → 24% on-color  + 76% surface
-    // mix(other, f): self*f + other*(1-f), so self.mix(surface, 0.18) = 18% self + 82% surface
-    let off_track_c = off_color_c.mix(surface_c, 0.18);
-    let on_track_c  = on_color_c.mix(surface_c, 0.24);
+    // mix(other, f): self*f + other*(1-f), so self.mix_srgb(surface, 0.18) = 18% self + 82% surface
+    let off_track_c = off_color_c.mix_srgb(surface_c, 0.18);
+    let on_track_c  = on_color_c.mix_srgb(surface_c, 0.24);
     let track_fill: Color = if is_checked { on_track_c } else { off_track_c };
 
     // Contract: border = border-default (off), color-mix(on-thumb 58%, border-default) (on)
-    let on_border_c = on_color_c.mix(border_default_c, 0.58); // 58% on-thumb, 42% border
+    let on_border_c = on_color_c.mix_srgb(border_default_c, 0.58); // 58% on-thumb, 42% border
     let track_border: Color = if is_checked { on_border_c } else { border_default_c };
 
     // Contract: thumb = off-color (off) or on-color (on)
