@@ -218,9 +218,26 @@ fn build_sidebar(
             }
         }
         _ => {
-            let components = component_registry::components_for_section(state.section);
+            // Tag-grouped list mirroring the Svelte preview sidebar: a group
+            // heading (CONTROLS, INPUTS, …) whenever the tag changes — entries
+            // are pre-ordered by (tag order, name) in the registry.
+            let components = component_registry::ALL_COMPONENTS;
             let active_idx = state.active_component();
+            let mut current_tag = None;
             for (i, entry) in components.iter().enumerate() {
+                if current_tag != Some(entry.tag) {
+                    current_tag = Some(entry.tag);
+                    sidebar = sidebar.child(
+                        label(entry.tag.label())
+                            .px(12.0)
+                            .pt(if i == 0 { 8.0 } else { 16.0 })
+                            .pb(4.0)
+                            .text_color(accent)
+                            .text_size(10.0)
+                            .text_weight(700)
+                            .letter_spacing_em(0.08),
+                    );
+                }
                 let is_active = active_idx == Some(i);
                 sidebar = sidebar.child(build_sidebar_item(
                     entry.display_name, &format!("sidebar:{i}"), is_active,

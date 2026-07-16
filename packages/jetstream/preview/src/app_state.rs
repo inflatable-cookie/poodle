@@ -29,24 +29,21 @@ fn remove_node(nodes: Vec<TreeNode>, value: &str) -> Vec<TreeNode> {
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Section {
-    Primitives,
-    Composites,
+    Components,
     Demo,
     Tokens,
 }
 
 impl Section {
     pub const ALL: &[Section] = &[
-        Section::Primitives,
-        Section::Composites,
+        Section::Components,
         Section::Demo,
         Section::Tokens,
     ];
 
     pub fn label(self) -> &'static str {
         match self {
-            Section::Primitives => "Primitives",
-            Section::Composites => "Composites",
+            Section::Components => "Components",
             Section::Demo => "Demo",
             Section::Tokens => "Tokens",
         }
@@ -353,8 +350,7 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
-    pub active_primitive: Option<usize>,
-    pub active_composite: Option<usize>,
+    pub active_component_idx: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub disabled: bool,
     pub invalid: bool,
@@ -374,12 +370,11 @@ pub struct AppState {
 impl AppState {
     pub fn new() -> Self {
         Self {
-            section: Section::Primitives,
+            section: Section::Components,
             theme_preset: ThemePreset::Dark,
             density: Density::Comfortable,
             control_size: ControlSize::Md,
-            active_primitive: None,
-            active_composite: None,
+            active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,
             disabled: false,
             invalid: false,
@@ -395,18 +390,15 @@ impl AppState {
     /// Current active component index for the active section.
     pub fn active_component(&self) -> Option<usize> {
         match self.section {
-            Section::Primitives => self.active_primitive,
-            Section::Composites => self.active_composite,
+            Section::Components => self.active_component_idx,
             _ => None,
         }
     }
 
     /// Set the active component for the current section.
     pub fn set_active_component(&mut self, idx: Option<usize>) {
-        match self.section {
-            Section::Primitives => self.active_primitive = idx,
-            Section::Composites => self.active_composite = idx,
-            _ => {}
+        if self.section == Section::Components {
+            self.active_component_idx = idx;
         }
         self.dirty = true;
         // Only reset content scroll — sidebar stays where it is.
@@ -416,8 +408,9 @@ impl AppState {
     /// Whether the Tree specimen is the active component (for keyboard routing).
     pub fn is_tree_active(&self) -> bool {
         if let Some(idx) = self.active_component() {
-            let comps = crate::component_registry::components_for_section(self.section);
-            comps.get(idx).map_or(false, |c| c.slug == "tree")
+            crate::component_registry::ALL_COMPONENTS
+                .get(idx)
+                .map_or(false, |c| c.slug == "tree")
         } else {
             false
         }

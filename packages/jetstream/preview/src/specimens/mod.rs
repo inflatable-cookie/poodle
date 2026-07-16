@@ -158,8 +158,8 @@ use crate::component_registry::{self, ComponentEntry};
 /// Build the content for the specimen area based on current app state.
 pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
     match state.section {
-        Section::Primitives | Section::Composites => {
-            let components = component_registry::components_for_section(state.section);
+        Section::Components => {
+            let components = component_registry::ALL_COMPONENTS;
             match state.active_component() {
                 Some(idx) if idx < components.len() => {
                     build_specimen_page(&components[idx], theme, state)
@@ -204,7 +204,7 @@ fn build_specimen_page(
             .child(
                 div().flex_row().gap(8.0).items_center()
                     .child(
-                        label(entry.tier.label())
+                        label(entry.tag.label())
                             .px(8.0).py(2.0).rounded(4.0)
                             .bg(tint(accent, 0.20))
                             .text_color(accent).text_size(10.0)
@@ -409,8 +409,8 @@ fn build_catalogue_landing(state: &AppState, theme: &JetstreamThemeProvider) -> 
     let border = resolve_color(theme, "color.border.subtle");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let components = component_registry::components_for_section(state.section);
-    let specimen_count = component_registry::specimen_count(state.section);
+    let components = component_registry::ALL_COMPONENTS;
+    let specimen_count = component_registry::specimen_count();
 
     let mut landing = div().flex_col().gap(24.0);
 
