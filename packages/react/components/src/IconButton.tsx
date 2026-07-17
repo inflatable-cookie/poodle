@@ -153,6 +153,7 @@ export function IconButton({
   useEffect(() => clearTimer, [clearTimer]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    sendHover({ type: "DISMISS" });
     if (isToggle) {
       const next = !currentPressed;
       if (!pressedControlled) setUncontrolledPressed(next);

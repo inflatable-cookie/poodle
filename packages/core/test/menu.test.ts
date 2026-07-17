@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { menuTransition } from "../src/menu";
 
-import { menuListCanActivate, menuListNavigate, menuNavigableItems } from "../src/menu";
+import { menuItemHasSubmenu, menuListCanActivate, menuListNavigate, menuNavigableItems } from "../src/menu";
 
 describe("menu list machinery", () => {
   const items = [
@@ -74,5 +74,19 @@ describe("menuTransition", () => {
     expect(menuTransition("closed", {}, { type: "ACTION", value: "x" }).effects).toEqual([]);
     expect(menuTransition("open", {}, { type: "OPEN" }).effects).toEqual([]);
     expect(menuTransition("closed", { disabled: true }, { type: "TOGGLE" }).effects).toEqual([]);
+  });
+});
+
+describe("menuItemHasSubmenu", () => {
+  test("true only for non-separator items with at least one child", () => {
+    expect(menuItemHasSubmenu({ children: [{ value: "x" }] })).toBe(true);
+    expect(menuItemHasSubmenu({ kind: "action", children: [{ value: "x" }] })).toBe(true);
+    expect(menuItemHasSubmenu({})).toBe(false);
+    expect(menuItemHasSubmenu({ children: [] })).toBe(false);
+    expect(menuItemHasSubmenu({ kind: "separator", children: [{ value: "x" }] })).toBe(false);
+  });
+
+  test("disabled parents still report a submenu (activation gate is separate)", () => {
+    expect(menuItemHasSubmenu({ disabled: true, children: [{ value: "x" }] })).toBe(true);
   });
 });

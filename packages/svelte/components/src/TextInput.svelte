@@ -31,6 +31,7 @@
     pattern?: string | undefined;
     spellcheck?: HTMLInputAttributes["spellcheck"];
     autocapitalize?: HTMLInputAttributes["autocapitalize"];
+    autocorrect?: "on" | "off" | undefined;
     enterKeyHint?:
       | "enter"
       | "done"
@@ -98,6 +99,7 @@
     pattern = undefined,
     spellcheck = undefined,
     autocapitalize = undefined,
+    autocorrect = undefined,
     enterKeyHint = null,
     debounce = null,
     validate = undefined,
@@ -177,6 +179,7 @@
   const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const autocorrectAttributes = $derived(autocorrect ? { autocorrect } : {});
   const showValidationIndicator = $derived(showValidationStatus && effectiveValidationState !== "none");
   const validationIcon = $derived(
     effectiveValidationState === "valid"
@@ -200,6 +203,17 @@
     fieldEndAdornmentCount > 0
       ? `calc(var(--poodle-text-input-padding-inline) + (${fieldEndAdornmentCount} * var(--poodle-icon-size-default)) + (${fieldEndAdornmentCount} * var(--poodle-text-input-adornment-gap)))`
       : "var(--poodle-text-input-padding-inline)"
+  );
+  const clearInsetInlineEnd = $derived(
+    showValidationIndicator
+      ? "calc(0.5rem + var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap))"
+      : "0.5rem"
+  );
+  const trailingFollowingAdornmentCount = $derived(Number(canClear) + Number(showValidationIndicator));
+  const trailingInsetInlineEnd = $derived(
+    trailingFollowingAdornmentCount > 0
+      ? `calc(0.5rem + (${trailingFollowingAdornmentCount} * var(--poodle-icon-size-default)) + (${trailingFollowingAdornmentCount} * var(--poodle-text-input-adornment-gap)))`
+      : "0.5rem"
   );
   const multilineBottomPadding = $derived(
     showCharCount
@@ -470,7 +484,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-type={type}
-  style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding};`}
+  style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding}; --poodle-text-input-clear-inset-inline-end: ${clearInsetInlineEnd}; --poodle-text-input-trailing-inset-inline-end: ${trailingInsetInlineEnd};`}
 >
   {#if prefix}
     <span class="poodle-text-input__affix poodle-text-input__affix--prefix">{prefix}</span>
@@ -497,6 +511,7 @@
         {autocomplete}
         {spellcheck}
         autocapitalize={autocapitalize ?? undefined}
+        {...autocorrectAttributes}
         rows={rows ?? 4}
         style={resize !== "vertical" ? `resize: ${resize};` : undefined}
         maxlength={maxLength ?? undefined}
@@ -534,6 +549,7 @@
         {pattern}
         spellcheck={isSlug ? false : spellcheck}
         autocapitalize={isSlug ? "off" : autocapitalize ?? undefined}
+        {...(isSlug ? { autocorrect: "off" } : autocorrectAttributes)}
         enterkeyhint={enterKeyHint ?? undefined}
         maxlength={maxLength ?? undefined}
         disabled={disabled}
@@ -599,4 +615,3 @@
     {internalValidationMessage}
   </p>
 {/if}
-

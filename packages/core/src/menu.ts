@@ -120,6 +120,23 @@ export function menuListCanActivate(item: { disabled?: boolean; kind?: string })
   return !item.disabled && item.kind !== "separator";
 }
 
+/**
+ * Submenu parent guard: an enabled non-separator item with at least one
+ * child renders as a flyout parent. Parents open their submenu instead of
+ * emitting an action; only leaf items activate.
+ */
+export function menuItemHasSubmenu(item: {
+  disabled?: boolean;
+  kind?: string;
+  children?: unknown[];
+}): boolean {
+  return (
+    item.kind !== "separator" &&
+    Array.isArray(item.children) &&
+    item.children.length > 0
+  );
+}
+
 export function menuTransition(state: MenuState, context: MenuContext, event: MenuEvent): MenuResult {
   const stay: MenuResult = { state, context, effects: [] };
 

@@ -123,3 +123,9 @@
   /* Density variants */
   .poodle-editable-label[data-density="compact"] .poodle-editable-label__input { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
   .poodle-editable-label[data-density="comfortable"] .poodle-editable-label__input { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+
+  /* Flush remains edge-aligned regardless of size or density. */
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display,
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__input {
+    padding: 0;
+  }

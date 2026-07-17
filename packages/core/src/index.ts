@@ -43,6 +43,7 @@ export {
   menuNavigableItems,
   menuListNavigate,
   menuListCanActivate,
+  menuItemHasSubmenu,
   type MenuListItem,
   type MenuListMove,
   type MenuState,

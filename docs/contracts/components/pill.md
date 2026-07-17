@@ -15,6 +15,7 @@ Updated: 2026-07-10
 
 ```text
 [Root .pill]
+  ├── [Dot (optional, .poodle-pill__dot)]
   ├── [Icon (optional, inline svg / .poodle-icon)]
   └── [Content (default slot)]
 ```
@@ -22,6 +23,7 @@ Updated: 2026-07-10
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
 | Root | `<span>` | yes | rounded metadata shell with inline-flex layout; children separated by `--poodle-pill-gap` |
+| Dot | `.poodle-pill__dot` | no | optional leading status dot (`dot` prop), `0.5em` square, `aria-hidden`, fill follows the semantic tone |
 | Icon | `<svg>` / `.poodle-icon` | no | optional inline icon, sized `1em` square and `flex-shrink: 0` |
 | Content | slot | yes | short label text |
 
@@ -41,6 +43,8 @@ Updated: 2026-07-10
 | `accent` | `string \| null` | `null` | no | optional custom accent color overriding the semantic tone colors |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `adaptiveWidth` | `boolean` | `false` | no | when `true`, emits `data-adaptive-width` and sets `min-width: 0` so the pill collapses to its content instead of honoring the per-size `min-width` floor |
+| `dot` | `boolean` | `false` | no | renders a leading `0.5em` status dot filled with the tone's status color (accent color when `accent` is set, `--poodle-color-text-secondary` for neutral) |
+| `title` | `string \| null` | `null` | no | optional native tooltip forwarded to the root element's `title` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 
 ### Controlled And Uncontrolled
@@ -337,6 +341,25 @@ When `typography="inherit"`:
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` (collapses the pill to its content, overriding the per-size `min-width` floor) |
+
+### Dot `.poodle-pill__dot`
+
+| Property | Value |
+|----------|-------|
+| `width` / `height` | `0.5em` |
+| `border-radius` | `999px` |
+| `flex-shrink` | `0` |
+| `background` | `var(--poodle-pill-dot-fill, var(--poodle-color-text-secondary))` |
+
+Tone dot fills (`--poodle-pill-dot-fill` on the root):
+
+| Selector | Value |
+|----------|-------|
+| `[data-tone="info"]` | `var(--poodle-color-status-info)` |
+| `[data-tone="success"]` | `var(--poodle-color-status-success)` |
+| `[data-tone="warning"]` | `var(--poodle-color-status-warning)` |
+| `[data-tone="danger"]` | `var(--poodle-color-status-danger)` |
+| `[data-accent="custom"]` | `var(--poodle-pill-accent)` |
 
 ### Density
 

@@ -10,10 +10,9 @@ Updated: 2026-07-10
 - Summary: a triggered command list overlay for actions, toggles, or grouped
   choices
 - In scope: trigger/menu relationship, item semantics (action, checkbox, radio,
-  separator), disabled items, shortcut labels, focus movement, dismissal,
-  placement
-- Out of scope: arbitrary form content, multi-panel palettes, menu bars,
-  cascading submenus
+  separator), disabled items, shortcut labels, cascading submenus
+  (`children`), focus movement, dismissal, placement
+- Out of scope: arbitrary form content, multi-panel palettes, menu bars
 
 ## 2. Anatomy
 
@@ -33,6 +32,9 @@ Updated: 2026-07-10
 | Item | yes | actionable or selectable row | text, hover, focus, disabled state |
 | Meta | no | shortcut label column | secondary text, code font |
 | Separator | no | groups item clusters | border, spacing |
+| Submenu anchor | conditional | `position: relative` wrapper around each non-separator item hosting its flyout | relative positioning |
+| Submenu indicator | conditional | `›` glyph in the meta column of a submenu parent | secondary text |
+| Submenu flyout | conditional | nested menu surface, absolutely positioned at the parent item's right edge | same surface tokens as Overlay |
 
 ## 3. Props And Inputs
 
@@ -69,6 +71,7 @@ MenuItem: {
   checked?: boolean;
   shortcutLabel?: string;
   tone?: "default" | "danger";
+  children?: MenuItem[];
 }
 
 OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
@@ -151,7 +154,23 @@ behavior (the Svelte implementation is the parity authority).
 | `Home` | moves to first enabled item |
 | `End` | moves to last enabled item |
 | `Escape` | closes menu and restores focus to trigger |
+| `Arrow Right` | on a submenu parent: opens the flyout and focuses its first enabled item |
+| `Arrow Left` | inside a flyout: closes it and restores focus to the parent item |
 | character keys | optional typeahead over enabled items |
+
+### Submenus
+
+- An item with a non-empty `children` array renders as a submenu parent:
+  `data-kind="submenu"`, `aria-haspopup="menu"`, `aria-expanded` reflecting
+  flyout state, and a `›` indicator in the meta column.
+- The flyout opens on pointer hover, `Arrow Right`, `Enter`, `Space`, or
+  click; hovering any sibling item closes it. Parents never emit `onAction`
+  themselves — only leaf items activate, and a leaf action closes the whole
+  menu through the root machine.
+- The flyout is a nested menu surface anchored at the parent item's right
+  edge (`top` aligned to the parent row minus the overlay padding). When it
+  would overflow the right viewport edge it flips to the parent's left edge.
+- Nesting is recursive: flyout items may themselves carry `children`.
 
 ### Focus And Announcement
 
@@ -404,5 +423,5 @@ Menu with checkbox items:
 - approvers: pending
 - downstream adopters: shell action menus, field menus, compact command groups,
   toolbar overflow menus
-- future follow-up: define submenu and cascading behavior separately if real
-  adopters require it
+- submenu/cascading behavior adopted into this contract (Loophole track
+  context menu)

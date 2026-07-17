@@ -69,6 +69,7 @@ Updated: 2026-07-10
 | `pattern` | `string \| undefined` | `undefined` | no | native pattern attribute |
 | `spellcheck` | `boolean \| undefined` | `undefined` | no | native spellcheck attribute |
 | `autocapitalize` | `string \| undefined` | `undefined` | no | native autocapitalize attribute |
+| `autocorrect` | `"on" \| "off" \| undefined` | `undefined` | no | native autocorrection attribute |
 | `enterKeyHint` | `"enter" \| "done" \| "go" \| "next" \| "previous" \| "search" \| "send" \| null` | `null` | no | native enterkeyhint attribute |
 | `debounce` | `number \| null` | `null` | no | delays `onValueChange` while typing |
 | `validate` | `InputValidator \| undefined` | `undefined` | no | optional validator function for sync or async validation |
@@ -235,6 +236,7 @@ plumbing stay adapter-side.
 - `required`: native required attribute when required
 - `pattern`: native pattern attribute when provided
 - `autocomplete`: native autocomplete attribute when provided
+- `autocorrect`: native autocorrection attribute when provided
 - `maxlength`: from maxLength prop
 - `inputmode`: from inputMode prop
 - `list`: from list prop; associates a native datalist for browser-provided suggestions

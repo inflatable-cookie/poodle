@@ -71,6 +71,33 @@
     background: var(--poodle-recipe-menu-surface-separator-fill, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
+  /* Submenu flyout (cascading menus). The anchor keeps each item's flyout
+     positioned against its own row; the nested surface swaps the root's
+     fixed positioning for an absolute flyout at the anchor's right edge
+     (flipped to the left edge on viewport overflow via inline style). */
+  .poodle-menu-surface__item-anchor {
+    position: relative;
+    width: 100%;
+  }
+
+  .poodle-menu-surface__item[data-kind="submenu"][aria-expanded="true"] {
+    background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+  }
+
+  .poodle-menu-surface__submenu-indicator {
+    justify-self: end;
+    color: var(--poodle-recipe-menu-surface-meta-text, var(--poodle-color-text-secondary));
+    font-size: 1em;
+    line-height: 1;
+  }
+
+  .poodle-menu-surface.poodle-menu-surface--submenu {
+    position: absolute;
+    top: calc(-1 * var(--poodle-menu-overlay-padding));
+    left: 100%;
+    z-index: calc(var(--poodle-overlay-z-menu) + 1);
+  }
+
   .poodle-menu-surface[data-size="xs"] .poodle-menu-surface__item {
     --poodle-menu-item-min-height: 1.5rem;
     --poodle-menu-item-padding-y-base: 0.25rem;

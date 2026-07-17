@@ -10,10 +10,9 @@ Updated: 2026-07-10
 - Summary: a contextual command overlay opened from a pointer location or
   keyboard context invocation
 - In scope: pointer-position or target-position anchoring, menu semantics,
-  item kinds (action, checkbox, radio, separator), dismissal, keyboard context
-  invocation parity
-- Out of scope: menu bars, nested inspector popovers, custom canvas gestures,
-  cascading submenus
+  item kinds (action, checkbox, radio, separator), cascading submenus
+  (`children`), dismissal, keyboard context invocation parity
+- Out of scope: menu bars, nested inspector popovers, custom canvas gestures
 
 ## 2. Anatomy
 
@@ -59,6 +58,7 @@ MenuItem: {
   disabled?: boolean;
   checked?: boolean;
   shortcutLabel?: string;
+  children?: MenuItem[];
 }
 ```
 
@@ -148,8 +148,15 @@ pre-machine component re-fired the callback; recorded delta).
 | `End` | moves to last enabled item |
 | `Enter` or `Space` | activates the focused item |
 | `Escape` | closes the menu and restores focus to the invoking target |
+| `Arrow Right` | on a submenu parent: opens the flyout and focuses its first enabled item |
+| `Arrow Left` | inside a flyout: closes it and restores focus to the parent item |
 | Outside click | any mousedown outside the overlay closes the menu |
 | character keys | optional typeahead over enabled items |
+
+Submenus (`children` on an item) follow the shared menu-surface behavior
+defined in `menu.md` ("Submenus"): hover / `Arrow Right` flyouts anchored at
+the parent item's right edge, viewport-edge flip, recursive nesting, and
+leaf-only activation.
 
 ### Focus And Announcement
 

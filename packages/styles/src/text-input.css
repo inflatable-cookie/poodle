@@ -157,6 +157,12 @@
     opacity: var(--poodle-state-opacity-muted);
   }
 
+  .poodle-text-input__control[type="search"]::-webkit-search-cancel-button,
+  .poodle-text-input__control[type="search"]::-webkit-search-decoration {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
   .poodle-text-input__control:disabled {
     cursor: not-allowed;
   }
@@ -190,11 +196,11 @@
   }
 
   .poodle-text-input__affordance--trailing {
-    inset-inline-end: calc(var(--poodle-text-input-adornment-gap) * 2 + var(--poodle-icon-size-default));
+    inset-inline-end: var(--poodle-text-input-trailing-inset-inline-end, 0.5rem);
   }
 
   .poodle-text-input__clear {
-    inset-inline-end: calc(var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap));
+    inset-inline-end: var(--poodle-text-input-clear-inset-inline-end, 0.5rem);
     border: none;
     background: transparent;
     cursor: pointer;

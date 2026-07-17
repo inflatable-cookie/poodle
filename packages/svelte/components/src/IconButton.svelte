@@ -179,6 +179,7 @@
   }
 
   function handleClick(event: MouseEvent): void {
+    dismiss();
     if (isToggle) {
       const next = !currentPressed;
       if (pressedControlled) {
@@ -260,4 +261,3 @@
     </span>
   {/if}
 </span>
-

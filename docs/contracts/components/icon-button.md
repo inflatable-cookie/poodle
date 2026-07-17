@@ -98,7 +98,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 |-------|---------|-----------------|
 | default | resting | variant-specific surface with icon centered |
 | hover | pointer enters (when available) | elevated background, darkened border; tooltip appears after 300ms delay |
-| active | pointer or keyboard activation | further elevated background, slight downward translate |
+| active | pointer or keyboard activation | further elevated background, slight downward translate; visible tooltip dismisses before the action callback runs |
 | focus | keyboard focus | focus ring; tooltip appears after 300ms delay |
 | pressed | `pressed=true` | non-primary variants: solid accent-base fill, accent-85%-black border, inverse text, no shadow |
 | disabled | `disabled=true` | muted opacity, not-allowed cursor |
@@ -160,7 +160,7 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 - tooltip text is exposed via `aria-describedby` and announced as a
   description after the label
 - tooltip appears on hover (300ms delay) and focus (300ms delay); dismissed
-  on mouseleave, blur, or Escape key
+  on activation, mouseleave, blur, or Escape key
 - `aria-pressed` state change is announced for toggle buttons
 - live-region behavior: none by default
 - GPUI-native accessibility mapping notes: icon-only buttons must expose

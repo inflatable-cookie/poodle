@@ -18,6 +18,8 @@
     accent = null,
     muted = false,
     adaptiveWidth = false,
+    dot = false,
+    title = null,
     ariaLabel = null,
     children = undefined,
   }: {
@@ -31,6 +33,8 @@
     accent?: string | null;
     muted?: boolean;
     adaptiveWidth?: boolean;
+    dot?: boolean;
+    title?: string | null;
     ariaLabel?: string | null;
     children?: Snippet;
   } = $props();
@@ -56,9 +60,13 @@
   data-muted={muted}
   data-adaptive-width={adaptiveWidth || undefined}
   data-accent={accent ? "custom" : undefined}
+  title={title ?? undefined}
   aria-label={ariaLabel ?? undefined}
   style:--poodle-pill-accent={accent ?? undefined}
 >
+  {#if dot}
+    <span class="poodle-pill__dot" aria-hidden="true"></span>
+  {/if}
   {@render children?.()}
 </span>
 

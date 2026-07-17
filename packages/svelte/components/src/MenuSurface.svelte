@@ -1,6 +1,14 @@
 <script lang="ts">
   import "@poodle/styles/menu-surface.css";
-  import { menuListCanActivate, menuListNavigate, menuNavigableItems } from "@poodle/headless";
+  import {
+    menuItemHasSubmenu,
+    menuListCanActivate,
+    menuListNavigate,
+    menuNavigableItems,
+  } from "@poodle/headless";
+  import { tick } from "svelte";
+
+  import MenuSurface from "./MenuSurface.svelte";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
@@ -12,7 +20,11 @@
     overlayStyle?: string;
     placement?: OverlayPlacement | null;
     overlayElement?: HTMLDivElement | null;
+    /** True for a submenu flyout nested inside a parent surface. */
+    nested?: boolean;
     onAction?: ((value: string) => void) | undefined;
+    /** Nested surfaces: request the parent to close this flyout (ArrowLeft). */
+    onRequestClose?: (() => void) | undefined;
   }
 
   let {
@@ -23,11 +35,17 @@
     overlayStyle = "",
     placement = null,
     overlayElement = $bindable<HTMLDivElement | null>(null),
+    nested = false,
     onAction = undefined,
+    onRequestClose = undefined,
   }: Props = $props();
 
   let itemElements = $state<Array<HTMLButtonElement | null>>([]);
   let highlightIndex = $state(0);
+  let openSubmenuValue = $state<string | null>(null);
+  let submenuSurface = $state<{ focusFirstItem: () => void } | null>(null);
+  let submenuElement = $state<HTMLDivElement | null>(null);
+  let submenuFlippedValue = $state<string | null>(null);
 
   const actionableItems = $derived(menuNavigableItems(items));
 
@@ -40,6 +58,20 @@
 
     if (highlightIndex >= count || actionableItems[highlightIndex]?.disabled) {
       highlightIndex = menuListNavigate(actionableItems, 0, "first");
+    }
+  });
+
+  // Flip an open flyout to the parent's left edge when it would overflow
+  // the right viewport edge.
+  $effect(() => {
+    if (!openSubmenuValue || !submenuElement) {
+      submenuFlippedValue = null;
+      return;
+    }
+
+    const rect = submenuElement.getBoundingClientRect();
+    if (rect.right > window.innerWidth - 8) {
+      submenuFlippedValue = openSubmenuValue;
     }
   });
 
@@ -72,18 +104,66 @@
     focusIndex(menuListNavigate(actionableItems, highlightIndex, boundary === "start" ? "first" : "last"));
   }
 
+  function openSubmenu(item: MenuItem, focusFirst: boolean): void {
+    if (item.disabled || !menuItemHasSubmenu(item)) {
+      return;
+    }
+
+    openSubmenuValue = item.value;
+
+    if (focusFirst) {
+      tick().then(() => {
+        submenuSurface?.focusFirstItem();
+      });
+    }
+  }
+
+  function closeSubmenu(refocusParent: boolean): void {
+    if (openSubmenuValue === null) {
+      return;
+    }
+
+    const parentValue = openSubmenuValue;
+    openSubmenuValue = null;
+
+    if (refocusParent) {
+      const parentIndex = actionableItems.findIndex((candidate) => candidate.value === parentValue);
+      if (parentIndex >= 0) {
+        focusIndex(parentIndex);
+      }
+    }
+  }
+
   function activateItem(item: MenuItem): void {
     if (!menuListCanActivate(item)) {
       return;
     }
 
+    if (menuItemHasSubmenu(item)) {
+      if (openSubmenuValue === item.value) {
+        closeSubmenu(true);
+      } else {
+        openSubmenu(item, false);
+      }
+      return;
+    }
+
     onAction?.(item.value);
+  }
+
+  function handleItemPointerEnter(item: MenuItem): void {
+    if (menuItemHasSubmenu(item) && !item.disabled) {
+      openSubmenu(item, false);
+    } else if (openSubmenuValue !== null) {
+      openSubmenuValue = null;
+    }
   }
 </script>
 
 <div
   bind:this={overlayElement}
   class="poodle-menu-surface"
+  class:poodle-menu-surface--submenu={nested}
   data-size={size}
   data-density={density}
   data-placement={placement ?? undefined}
@@ -95,52 +175,93 @@
     {#if item.kind === "separator"}
       <div class="poodle-menu-surface__separator" role="separator"></div>
     {:else}
-      <button
-        bind:this={itemElements[actionableItems.findIndex((candidate) => candidate.value === item.value)]}
-        type="button"
-        class="poodle-menu-surface__item"
-        disabled={item.disabled === true}
-        data-kind={item.kind ?? "action"}
-        data-tone={item.tone ?? "default"}
-        role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
-        aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
-        onclick={() => activateItem(item)}
-        onkeydown={(event) => {
-          if (event.key === "ArrowDown") {
-            event.preventDefault();
-            moveHighlight(1);
-          }
-
-          if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveHighlight(-1);
-          }
-
-          if (event.key === "Home") {
-            event.preventDefault();
-            moveToBoundary("start");
-          }
-
-          if (event.key === "End") {
-            event.preventDefault();
-            moveToBoundary("end");
-          }
-
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            activateItem(item);
-          }
-        }}
+      {@const hasSubmenu = menuItemHasSubmenu(item)}
+      <div
+        class="poodle-menu-surface__item-anchor"
+        class:poodle-menu-surface__item-anchor--submenu-open={hasSubmenu && openSubmenuValue === item.value}
       >
-        <span class="poodle-menu-surface__label">{item.label}</span>
+        <button
+          bind:this={itemElements[actionableItems.findIndex((candidate) => candidate.value === item.value)]}
+          type="button"
+          class="poodle-menu-surface__item"
+          disabled={item.disabled === true}
+          data-kind={hasSubmenu ? "submenu" : (item.kind ?? "action")}
+          data-tone={item.tone ?? "default"}
+          role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
+          aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
+          aria-haspopup={hasSubmenu ? "menu" : undefined}
+          aria-expanded={hasSubmenu ? (openSubmenuValue === item.value ? "true" : "false") : undefined}
+          onclick={() => activateItem(item)}
+          onpointerenter={() => handleItemPointerEnter(item)}
+          onkeydown={(event) => {
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              moveHighlight(1);
+            }
 
-        {#if item.checked}
-          <span class="poodle-menu-surface__meta" aria-hidden="true">✓</span>
-        {:else if item.shortcutLabel}
-          <span class="poodle-menu-surface__meta" aria-hidden="true">{item.shortcutLabel}</span>
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              moveHighlight(-1);
+            }
+
+            if (event.key === "Home") {
+              event.preventDefault();
+              moveToBoundary("start");
+            }
+
+            if (event.key === "End") {
+              event.preventDefault();
+              moveToBoundary("end");
+            }
+
+            if (event.key === "ArrowRight" && hasSubmenu) {
+              event.preventDefault();
+              event.stopPropagation();
+              openSubmenu(item, true);
+            }
+
+            if (event.key === "ArrowLeft" && nested) {
+              event.preventDefault();
+              event.stopPropagation();
+              onRequestClose?.();
+            }
+
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              if (hasSubmenu) {
+                openSubmenu(item, true);
+              } else {
+                activateItem(item);
+              }
+            }
+          }}
+        >
+          <span class="poodle-menu-surface__label">{item.label}</span>
+
+          {#if hasSubmenu}
+            <span class="poodle-menu-surface__submenu-indicator" aria-hidden="true">›</span>
+          {:else if item.checked}
+            <span class="poodle-menu-surface__meta" aria-hidden="true">✓</span>
+          {:else if item.shortcutLabel}
+            <span class="poodle-menu-surface__meta" aria-hidden="true">{item.shortcutLabel}</span>
+          {/if}
+        </button>
+
+        {#if hasSubmenu && openSubmenuValue === item.value}
+          <MenuSurface
+            bind:this={submenuSurface}
+            bind:overlayElement={submenuElement}
+            items={item.children ?? []}
+            ariaLabel={item.label}
+            size={size}
+            density={density}
+            nested={true}
+            overlayStyle={submenuFlippedValue === item.value ? "left: auto; right: 100%;" : ""}
+            onAction={onAction}
+            onRequestClose={() => closeSubmenu(true)}
+          />
         {/if}
-      </button>
+      </div>
     {/if}
   {/each}
 </div>
-

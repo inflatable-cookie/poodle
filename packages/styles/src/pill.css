@@ -227,3 +227,19 @@
     width: 1em;
     height: 1em;
   }
+
+  /* Optional status dot (dot prop). Sized in em so it tracks the pill's
+     font-size across size presets; fill follows the semantic tone. */
+  .poodle-pill__dot {
+    flex-shrink: 0;
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 999px;
+    background: var(--poodle-pill-dot-fill, var(--poodle-color-text-secondary));
+  }
+
+  .poodle-pill[data-tone="info"] { --poodle-pill-dot-fill: var(--poodle-color-status-info, #3b82f6); }
+  .poodle-pill[data-tone="success"] { --poodle-pill-dot-fill: var(--poodle-color-status-success, #22c55e); }
+  .poodle-pill[data-tone="warning"] { --poodle-pill-dot-fill: var(--poodle-color-status-warning, #f59e0b); }
+  .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger, #ef4444); }
+  .poodle-pill[data-accent="custom"] { --poodle-pill-dot-fill: var(--poodle-pill-accent); }

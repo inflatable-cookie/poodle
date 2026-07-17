@@ -194,6 +194,12 @@ export interface MenuItem {
   shortcutLabel?: string;
   tone?: "default" | "danger";
   kind?: "action" | "checkbox" | "radio" | "separator";
+  /**
+   * Nested items turning this entry into a submenu parent. The surface
+   * renders a flyout (hover / ArrowRight / Enter) instead of emitting an
+   * action for the parent itself; leaf actions bubble to the root menu.
+   */
+  children?: MenuItem[];
 }
 
 export interface NavigationMenuItem {
