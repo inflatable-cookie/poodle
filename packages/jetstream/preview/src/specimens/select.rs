@@ -1,6 +1,6 @@
 //! Select specimen — dropdowns with placeholder, selected value, and disabled.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::select::js_select;
 use poodle_jetstream_components::theme_ext::*;

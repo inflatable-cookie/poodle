@@ -6,7 +6,7 @@
 //! Render-only: the click/navigation is handled by the preview event loop via
 //! the node id, matching the Jetstream interaction model. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::TextLinkSpec;
 

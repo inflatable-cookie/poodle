@@ -7,7 +7,7 @@
 //! (title + message + retry action); otherwise render the wrapped child. The
 //! actual error *catching* is the host app's job — this renders the fallback UI.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{EmptyStateSpec, ErrorBoundarySpec, RemediationAction};
 

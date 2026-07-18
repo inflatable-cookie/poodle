@@ -1,7 +1,7 @@
 //! Pill — Jetstream pill/chip component backed by PillSpec.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 

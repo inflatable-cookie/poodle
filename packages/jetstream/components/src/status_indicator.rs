@@ -5,7 +5,7 @@
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, StatusIndicatorSpec};
 
@@ -111,7 +111,7 @@ mod tests {
         );
         // Neutral status resolves to text-secondary, not accent-base.
         let dot = &el.children[0];
-        let expected: jetstream_runtime::game_ui::Color =
+        let expected: jetstream_ui::Color =
             resolve_color(&theme, "color.text.secondary").into();
         assert_eq!(dot.style.background, Some(expected));
     }

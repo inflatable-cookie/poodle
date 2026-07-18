@@ -6,8 +6,8 @@
 //! Supports: leading/trailing icons, prefix/suffix affixes, validation state
 //! indicators, multiline mode, char count display, and search clear button.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState,

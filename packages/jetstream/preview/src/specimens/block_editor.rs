@@ -14,7 +14,7 @@
 //! channel; the faithful equivalent is the spec block path, which is what these
 //! groups exercise. Editing / add / remove / reorder are preview-event-loop bound.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::block_editor::js_block_editor;
 use poodle_jetstream_components::theme_ext::*;

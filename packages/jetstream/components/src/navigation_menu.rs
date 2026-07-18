@@ -15,7 +15,7 @@
 //! (`elevation.overlay`) is NOT applied — JsEl has no box-shadow channel (only
 //! background gradients); this is an accepted runtime limit, noted here.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::NavigationMenuSpec;
 

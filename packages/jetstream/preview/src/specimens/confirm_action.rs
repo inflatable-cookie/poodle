@@ -11,7 +11,7 @@
 //! so this specimen demonstrates the tone/open-state matrix that the component
 //! actually supports rather than faking the unsupported groups.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::confirm_action::js_confirm_action;
 use poodle_jetstream_components::theme_ext::*;

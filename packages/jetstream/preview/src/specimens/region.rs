@@ -3,7 +3,7 @@
 //! Mirrors the GPUI/Svelte specimen states: Default, Custom colors, Layout
 //! composition. Region renders only its label (contract §3 forbids children).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::region::js_region;
 use poodle_jetstream_components::theme_ext::*;

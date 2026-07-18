@@ -10,7 +10,7 @@
 //! search input, option list, grouping, selected indicator, empty state, and
 //! size/density all come from the shared `Select` implementation for free.
 
-use jetstream_runtime::ui_element::JsEl;
+use jetstream_ui::ui_element::JsEl;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::TimeZoneSelectSpec;
 

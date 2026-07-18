@@ -15,7 +15,7 @@
 //! - No ARIA channel (Jetstream has no a11y tree); aria-labels are carried as the
 //!   transport buttons' fallback text alongside the icon glyph.
 
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::VideoPlayerSpec;
 

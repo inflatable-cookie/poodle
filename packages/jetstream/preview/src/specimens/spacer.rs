@@ -4,7 +4,7 @@
 //! min-size / no-grow coverage the Jetstream target already had. Every spacer
 //! is a real `js_spacer`; the surrounding boxes resolve tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::spacer::js_spacer;
 use poodle_jetstream_components::theme_ext::*;

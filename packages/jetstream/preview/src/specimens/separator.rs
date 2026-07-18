@@ -1,6 +1,6 @@
 //! Separator specimen — orientation, tone, and decorative/semantic modes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::separator::js_separator;

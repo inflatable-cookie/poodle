@@ -22,7 +22,7 @@ poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 
 # Jetstream runtime (cross-repo path)
-jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
+jetstream-ui = { path = "../../../../jetstream/crates/jetstream-ui" }
 jetstream-renderer = { path = "../../../../jetstream/crates/jetstream-renderer" }
 jetstream-platform = { path = "../../../../jetstream/crates/jetstream-platform" }
 jetstream-input = { path = "../../../../jetstream/crates/jetstream-input" }

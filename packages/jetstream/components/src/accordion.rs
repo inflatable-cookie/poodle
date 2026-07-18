@@ -5,7 +5,7 @@
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_specs::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity};

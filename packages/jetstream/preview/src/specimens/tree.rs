@@ -5,7 +5,7 @@
 //! keyboard navigation (handled in the main event loop). The remaining trees are
 //! static scaling demos.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::*;
 use poodle_jetstream_components::tree::js_tree;

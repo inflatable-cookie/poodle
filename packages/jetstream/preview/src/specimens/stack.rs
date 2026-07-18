@@ -1,6 +1,6 @@
 //! Stack specimen — vertical stack layouts with different gaps and alignment.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::stack::js_stack;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

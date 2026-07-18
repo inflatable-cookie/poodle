@@ -7,7 +7,7 @@
 //! and a multi-column grid for slotted field content. Children are passed in as
 //! a Vec of JsEl.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::FieldSetSpec;
 

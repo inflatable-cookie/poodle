@@ -16,7 +16,7 @@
 //!   - size variants: `TextLinkSpec` has no size prop; the link inherits the
 //!     surrounding text size.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::text_link::js_text_link;
 use poodle_jetstream_components::theme_ext::*;

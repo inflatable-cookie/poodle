@@ -7,7 +7,7 @@
 //! tokens (`js_detail_item` / `js_detail_item_with_slots`, `js_button`,
 //! `js_pill`) — no hand-coded chrome.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::detail_item::{js_detail_item, js_detail_item_with_slots};

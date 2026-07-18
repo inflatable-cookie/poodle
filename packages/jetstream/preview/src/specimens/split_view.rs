@@ -1,6 +1,6 @@
 //! SplitView specimen — two-pane split layout in horizontal and vertical orientations.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::split_view::js_split_view;

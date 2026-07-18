@@ -14,7 +14,7 @@
 //! controls render at the current spec state. ARIA (`role="group"`, aria-labels)
 //! is N/A (Jetstream has no accessibility channel).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     BlockEditorMode, BlockEditorSpec, ChoiceOption, ControlDensity, ControlSize, EditorBlock,

@@ -11,7 +11,7 @@
 //! label/focus are ARIA/interaction concerns with no Jetstream render surface,
 //! and keyboard scroll lives in the preview event loop (accepted deltas).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{Direction, ScrollShellSpec};
 

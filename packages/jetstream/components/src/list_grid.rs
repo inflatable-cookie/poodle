@@ -5,7 +5,7 @@
 //! Mirrors `packages/gpui/components/src/primitives/list_grid.rs`: `flex_wrap` with
 //! per-cell `min_w` + `flex_1` approximates CSS `auto-fill` / `minmax`.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ListGridSpec, ListGridVariant};
 

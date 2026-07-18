@@ -4,7 +4,7 @@
 //! count, contract §12). Trailing metadata uses `label()` sized from the spec's
 //! contract `font_size_rem()` (Svelte `font-size: inherit`) — no raw literals.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::presentation::rem_to_px;
 use poodle_jetstream_components::shell_status_bar::js_shell_status_bar;

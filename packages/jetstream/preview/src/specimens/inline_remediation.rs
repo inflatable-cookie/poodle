@@ -10,7 +10,7 @@
 //! via `RemediationAction`. The specimen adds no chrome beyond the eyebrow group
 //! label.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::inline_remediation::js_inline_remediation;
 use poodle_jetstream_components::theme_ext::resolve_color;

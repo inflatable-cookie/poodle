@@ -23,8 +23,8 @@
 //!
 //! ARIA: N/A for Jetstream (no accessibility API).
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, EditableLabelSpec, EditableLabelVariant};
 
@@ -203,7 +203,7 @@ pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvide
 #[cfg(test)]
 mod tests {
     use super::*;
-    use jetstream_runtime::ui_element::WidgetKind;
+    use jetstream_ui::ui_element::WidgetKind;
     use poodle_specs::{EditableLabelSpec, EditableLabelVariant};
 
     fn test_theme() -> JetstreamThemeProvider {

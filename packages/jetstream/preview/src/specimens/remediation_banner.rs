@@ -1,6 +1,6 @@
 //! RemediationBanner specimen — dismissible fix suggestion banner.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::remediation_banner::js_remediation_banner;
 use poodle_jetstream_components::theme_ext::*;

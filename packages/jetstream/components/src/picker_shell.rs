@@ -1,6 +1,6 @@
 //! PickerShell — Jetstream picker shell backed by PickerShellSpec.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{BrowseState, PickerShellSpec};
 

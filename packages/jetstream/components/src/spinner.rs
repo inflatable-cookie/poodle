@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens or spec methods. ZERO hardcoded pixel values.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{SpinnerSpec, SpinnerTone, SpinnerVariant};
 
@@ -127,8 +127,8 @@ fn build_grid(spec: &SpinnerSpec, tone_color: Color) -> JsEl {
 
 /// Looping opacity pulse for one grid cell: a sine sweep through the contract
 /// opacity band, phase-shifted per cell so the six cells form a running snake.
-fn cell_pulse(floor: f32, span: f32, phase: f32) -> jetstream_runtime::game_ui::Animation {
-    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+fn cell_pulse(floor: f32, span: f32, phase: f32) -> jetstream_ui::Animation {
+    use jetstream_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
     let sample = |t: f32| -> f32 {
         let angle = (t + phase) * std::f32::consts::TAU;
         floor + span * (0.5 + 0.5 * angle.sin())

@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ToggleGroupSpec;
 
@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn item_fill_uses_svelte_surface_text_mix() {
-        use jetstream_runtime::game_ui::Color;
+        use jetstream_ui::Color;
         let th = theme();
         let surface: Color = resolve_color(&th, "color.background.surface").into();
         let text_primary: Color = resolve_color(&th, "color.text.primary").into();
@@ -206,7 +206,7 @@ mod tests {
     // ── Probe: selected item paints the accent-tinted fill ──
     #[test]
     fn selected_item_paints_accent_tint() {
-        use jetstream_runtime::game_ui::Color;
+        use jetstream_ui::Color;
         let th = theme();
         let accent: Color = resolve_color(&th, "color.accent.base").into();
         let surface: Color = resolve_color(&th, "color.background.surface").into();

@@ -6,7 +6,7 @@
 //! preview-loop concern, not the pure-render component. Track fill + thumb
 //! position come from the spec's value via `js_slider` (no hand-rolled fill).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::slider::js_slider;
 use poodle_jetstream_components::theme_ext::*;

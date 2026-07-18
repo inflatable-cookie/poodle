@@ -13,8 +13,8 @@
 //! copied-state swap is a preview-loop interaction (the copy button is rendered
 //! but inert here).
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
 

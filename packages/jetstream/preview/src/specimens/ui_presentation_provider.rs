@@ -11,7 +11,7 @@
 //! controls. Mirrors the GPUI specimen's three rows: compact/sm, comfortable/lg,
 //! and a nested override (outer default/md, inner compact/sm).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::text_input::js_text_input;

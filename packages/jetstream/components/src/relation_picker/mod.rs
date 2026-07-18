@@ -10,7 +10,7 @@
 //! selection summary, candidate/drill list, footer). All geometry, colors, and
 //! type sizes resolve from size/density tokens — zero hardcoded px/hsla.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     BrowseState, ButtonSpec, ButtonVariant, ControlSize,

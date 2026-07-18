@@ -6,7 +6,7 @@
 //! loop (contract §12 Known Delta), so this renders the surface at its current
 //! open state — every surface visual property resolves from tokens.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::HoverCardSpec;
 

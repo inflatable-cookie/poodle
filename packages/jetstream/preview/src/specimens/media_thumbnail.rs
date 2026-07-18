@@ -1,6 +1,6 @@
 //! MediaThumbnail specimen — framed media preview with state posture.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::media_thumbnail::js_media_thumbnail;
 use poodle_jetstream_components::theme_ext::*;

@@ -1,6 +1,6 @@
 //! TimeField specimen — with value, placeholder, min/max, sizes, densities, disabled.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::time_field::js_time_field;
 use poodle_jetstream_components::theme_ext::*;

@@ -1,6 +1,6 @@
 //! EditableLabel specimen — display + editing modes, variants, sizes, densities.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::editable_label::js_editable_label;
 use poodle_jetstream_components::theme_ext::*;

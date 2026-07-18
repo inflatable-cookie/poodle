@@ -10,7 +10,7 @@
 //! indicator. JsEl has no rotation, so the chevron swaps icon name (Tier-3,
 //! matching the other Jetstream disclosure components).
 
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 

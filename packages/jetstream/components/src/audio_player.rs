@@ -1,5 +1,5 @@
 //! AudioPlayer — Jetstream audio player backed by AudioPlayerSpec.
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AudioPlayerSpec;
 

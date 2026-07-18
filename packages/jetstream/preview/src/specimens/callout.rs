@@ -3,7 +3,7 @@
 //! prop, dismissible (with the x control), without-title, density, sizes, and a
 //! real action button. Every visual resolves from `CallOutSpec` + tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::callout::js_callout;

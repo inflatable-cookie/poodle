@@ -5,7 +5,7 @@
 //! Every group composes the real `js_embed_preview` (which wraps the real
 //! `js_skeleton` block + `js_text_link` fallback) — no fakes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::embed_preview::js_embed_preview;
 use poodle_jetstream_components::theme_ext::*;

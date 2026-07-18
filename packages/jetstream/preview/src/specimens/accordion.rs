@@ -1,6 +1,6 @@
 //! Accordion specimen.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::accordion::js_accordion;
 use poodle_jetstream_components::theme_ext::*;

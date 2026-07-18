@@ -4,7 +4,7 @@
 //! full `EyebrowSize` (Xs/Sm/Md) and `EyebrowSpacing` (None/Bottom) axes from
 //! the contract. Every node is a real `js_eyebrow` resolving tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::eyebrow::js_eyebrow;
 use poodle_jetstream_components::theme_ext::*;

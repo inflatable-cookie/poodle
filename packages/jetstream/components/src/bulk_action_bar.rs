@@ -32,8 +32,8 @@
 //! Vertical pad is the contract-exact flat `0.5rem` (`rem_to_px(0.5)`); there is
 //! no dedicated token for it.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, IconButtonSpec,

@@ -25,8 +25,8 @@
 //! - No ARIA channel: `alertdialog` role / `aria-modal` / `aria-label` are carried
 //!   on the spec but not emitted (tracked repo-wide for Jetstream).
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, DialogKind,

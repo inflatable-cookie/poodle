@@ -11,8 +11,8 @@
 //! Drag/keyboard interaction is preview-event-loop bound; this renders the
 //! track + fill + thumb at the spec's current value only.
 
-use jetstream_runtime::game_ui::{BoxShadow, Color};
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::{BoxShadow, Color};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, SliderSpec};
 
@@ -210,7 +210,7 @@ mod tests {
 
     /// Walk the raw JsEl tree (the probe flattens away `style.shadow`) and
     /// collect every node carrying a box shadow.
-    fn shadows(el: &JsEl, out: &mut Vec<jetstream_runtime::game_ui::BoxShadow>) {
+    fn shadows(el: &JsEl, out: &mut Vec<jetstream_ui::BoxShadow>) {
         if let Some(s) = el.style.shadow {
             out.push(s);
         }

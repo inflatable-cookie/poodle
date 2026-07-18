@@ -1,6 +1,6 @@
 //! Tabs specimen — all four variants, icon+count tabs, disabled tabs.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tabs::js_tabs;
 use poodle_jetstream_components::theme_ext::*;

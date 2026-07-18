@@ -4,7 +4,7 @@
 //! (js_text_input / js_select / js_icon_button / js_button), mirroring the
 //! Svelte FilterToolbarSpecimen — no stand-in label chips.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::filter_toolbar::js_filter_toolbar;

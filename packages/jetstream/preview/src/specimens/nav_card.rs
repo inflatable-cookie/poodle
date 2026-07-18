@@ -5,7 +5,7 @@
 //! (icon glyph stands in for the host `icon()` snippet), so each specimen card
 //! varies the spec rather than passing separate elements.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::nav_card::js_nav_card;
 use poodle_jetstream_components::theme_ext::*;

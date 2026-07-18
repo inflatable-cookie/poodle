@@ -18,8 +18,8 @@
 //! ```
 //! Click / navigation lives in the preview event loop; this builds the visual tree.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, PageItem, PaginationSpec, PaginationVariant};
 

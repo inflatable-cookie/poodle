@@ -8,8 +8,8 @@
 //! `js_callout` primitive; actions delegate to `js_form_actions` (contract §8
 //! Composed Primitives). ALL spacing/colors from tokens.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CallOutSpec, FormActionsSpec, FormLayoutSpec, StatusTone};
 

@@ -1,5 +1,5 @@
 //! ToastStack — Jetstream toast notification stack backed by ToastStackSpec.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, ToastStackSpec};
 
@@ -190,8 +190,8 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
 
 /// One-shot enter animation: fade in + rise 0.5rem, ease-out. Mirrors the
 /// Svelte reference's fly/fade entrance.
-fn toast_enter() -> jetstream_runtime::game_ui::Animation {
-    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+fn toast_enter() -> jetstream_ui::Animation {
+    use jetstream_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
     Animation {
         keyframes: vec![
             Keyframe {

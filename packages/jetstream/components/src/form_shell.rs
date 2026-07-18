@@ -10,7 +10,7 @@
 //! optional SectionDescription + host-supplied field slots) → Actions row.
 //! All spacing/typography/opacity resolve from `FormShellSpec` token methods.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CallOutSpec, FormShellSpec, StatusTone};
 

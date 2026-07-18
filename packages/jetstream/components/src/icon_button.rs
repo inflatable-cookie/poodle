@@ -15,8 +15,8 @@
 //!   `tooltip` text is carried on the spec for consumer wiring.
 //! - **Click/keyboard activation** lives in the preview `main.rs` event loop.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec};
 

@@ -12,7 +12,7 @@
 //!   - explicit `rows` tracks are not honored (rows emerge from flex-wrap);
 //!   - CSS `gap` is one value on both axes — applied via a single `.gap()`.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{GridColumns, GridSpec, GridTrack};
 

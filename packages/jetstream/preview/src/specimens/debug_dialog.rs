@@ -6,7 +6,7 @@
 //! which wraps the real `js_button` + `js_code` — no fakes. The JSON payload
 //! mirrors the Svelte/GPUI specimens so all targets dump the same shape.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::debug_dialog::js_debug_dialog;
 use poodle_jetstream_components::theme_ext::*;

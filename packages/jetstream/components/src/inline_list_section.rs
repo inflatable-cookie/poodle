@@ -7,7 +7,7 @@
 //! empty message or the item list, optionally wrapped in a Card. Values resolve
 //! from tokens / contract exact-rem constants.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardSpec, InlineListSectionSpec};
 

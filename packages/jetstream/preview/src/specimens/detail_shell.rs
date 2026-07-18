@@ -1,6 +1,6 @@
 //! DetailShell specimen — detail page layout shell.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::detail_shell::js_detail_shell;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

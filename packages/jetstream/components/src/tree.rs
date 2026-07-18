@@ -6,7 +6,7 @@
 //! chevron glyph twisty; leaves reserve a twisty-sized spacer for alignment.
 
 use glam::Vec4;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     CheckState, CheckboxSpec, ControlDensity, ControlSize, DropPosition, SpinnerSpec, TreeNode,

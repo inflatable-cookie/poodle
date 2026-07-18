@@ -6,7 +6,7 @@
 //! Composes the real `js_text_input` primitive (multiline, rows=3) and the real
 //! `js_pill` provider chip — no hand-styled fakes. Debounced parse / onValueChange
 //! / onParse are preview-loop concerns (the spec pre-resolves parse state here).
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
 

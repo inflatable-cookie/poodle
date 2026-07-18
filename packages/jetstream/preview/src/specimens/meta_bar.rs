@@ -1,6 +1,6 @@
 //! MetaBar specimen — wrapping inline metadata row.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::code::js_code;
 use poodle_jetstream_components::meta_bar::{js_meta_bar, js_meta_bar_sep};

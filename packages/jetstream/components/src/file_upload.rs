@@ -10,8 +10,8 @@
 //! host-owned — `FileUploadItem::has_preview` only drives which anatomy part
 //! (preview surface vs file icon) renders.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 

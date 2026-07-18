@@ -1,6 +1,6 @@
 //! MarkdownEditor specimen — markdown authoring with live preview.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::markdown_editor::js_markdown_editor;
 use poodle_jetstream_components::theme_ext::*;

@@ -9,7 +9,7 @@
 //! - Pill: rounded pill container with tinted active state
 //! - Block: full-width tabs with vertical separators, accent-tinted selected fill
 
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{TabVariant, TabsSpec};
 

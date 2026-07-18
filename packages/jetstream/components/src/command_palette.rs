@@ -22,7 +22,7 @@
 //!   `shadow_lg()` (the closest available preset). Noted as a token gap.
 
 use glam::Vec4;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CommandActionItem, CommandPaletteSpec, DiscoveryState, TextInputSpec};
 

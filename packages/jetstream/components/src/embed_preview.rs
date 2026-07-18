@@ -8,7 +8,7 @@
 //! contract-sanctioned placeholder panel (GPUI Notes §iframe) honoring the
 //! effective aspect ratio. ZERO hardcoded hsla; dimensions resolve from named
 //! tokens where the contract rem aligns (exact rem noted where no token maps).
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{EmbedPreviewSpec, SkeletonSpec, TextLinkSpec};
 

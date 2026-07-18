@@ -1,6 +1,6 @@
 //! SelectionSummary specimen — summary of selected items.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::selection_summary::js_selection_summary;
 use poodle_jetstream_components::theme_ext::*;

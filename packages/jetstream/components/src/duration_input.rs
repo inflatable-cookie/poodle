@@ -13,8 +13,8 @@
 //! (rendered styling; actual focus tracking + keyboard ±1/onChange live in the
 //! preview event loop). ALL dimensions resolve from tokens.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, DurationInputSpec};
 

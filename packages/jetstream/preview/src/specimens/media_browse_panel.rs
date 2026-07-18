@@ -6,7 +6,7 @@
 //! real `js_media_browse_panel`, which composes the real `js_media_thumbnail`
 //! (grid cards), `js_callout` (error), and `js_button` (load-more) internally.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::media_browse_panel::js_media_browse_panel;
 use poodle_jetstream_components::theme_ext::*;

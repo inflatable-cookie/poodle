@@ -7,7 +7,7 @@
 //! column uses `FontFamily::Mono` per contract §8 (`typography.code.family`);
 //! `shadow_md()` approximates `elevation-overlay`.
 
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenuSpec};
 

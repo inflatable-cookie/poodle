@@ -7,7 +7,7 @@
 //! caption / empty state.  All visual properties resolve from tokens; size
 //! scales typography + vertical padding, density scales horizontal padding.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ColumnAlign, TableSpec};
 

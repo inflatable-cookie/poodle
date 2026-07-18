@@ -4,7 +4,7 @@
 //! uses `poodle_jetstream_components::theme_ext` instead.
 
 use glam::Vec4;
-use jetstream_runtime::game_ui::Theme;
+use jetstream_ui::Theme;
 use poodle_adapter::ThemeProvider;
 
 /// Convert a single sRGB component to linear light.

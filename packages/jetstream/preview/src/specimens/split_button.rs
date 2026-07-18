@@ -4,7 +4,7 @@
 //! (items + separator), loading, disabled, and the size grid. Every example
 //! is a real `js_split_button` resolving all visuals from tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::split_button::js_split_button;
 use poodle_jetstream_components::theme_ext::*;

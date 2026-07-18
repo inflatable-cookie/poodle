@@ -20,7 +20,7 @@
 //! - Keyboard nav + selection commit live in the preview event loop; tabs are
 //!   `.focusable()`.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{Orientation, TabStripSpec};
 

@@ -7,7 +7,7 @@
 //! colors resolve from semantic tokens. Real text editing + toolbar markdown
 //! insertion live in the preview event loop (Tier-3), so the edit pane is a
 //! `text_input` (placeholder + current value) and the preview shows source text.
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 

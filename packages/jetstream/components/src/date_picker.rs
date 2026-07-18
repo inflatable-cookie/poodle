@@ -15,8 +15,8 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_runtime::game_ui::{Color, color_mix};
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::{Color, color_mix};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarSpec, DatePickerSpec};
 

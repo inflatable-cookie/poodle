@@ -6,7 +6,7 @@
 //! states. Every group composes the real `js_embed_input` (which itself wraps
 //! the real `js_text_input` + `js_pill`) — no hand-rolled inputs or fakes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::embed_input::js_embed_input;
 use poodle_jetstream_components::field::js_field;

@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use glam::Vec4;
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ProgressSpec;
 

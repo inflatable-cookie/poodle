@@ -7,7 +7,7 @@
 //! The surface is taken out of flow and positioned using `anchor_h` / `anchor_w`
 //! estimates supplied by the caller.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_specs::OverlayPlacement;
 
 /// Gap between anchor and floating surface (px).

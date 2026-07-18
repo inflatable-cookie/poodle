@@ -7,7 +7,7 @@
 //! collapse (§8 Responsive Swap) is a host/preview-loop concern with no JsEl
 //! channel, so the inline danger group + overflow trigger both render.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::form_actions::{js_form_actions, js_form_actions_full};

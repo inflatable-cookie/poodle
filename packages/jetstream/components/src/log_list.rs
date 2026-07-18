@@ -10,7 +10,7 @@
 //! `encode.rs` break), so `poodle-jetstream-components` cannot compile here.
 //! This was authored by reading the runtime builder + sibling component APIs.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     CallOutSpec, LogFilterKind, LogListSpec, PaginationSpec, SpinnerSize, SpinnerSpec, StatusTone,

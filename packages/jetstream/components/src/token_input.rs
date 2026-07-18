@@ -9,7 +9,7 @@
 //! (each with its `×` remove affordance, omitted in disabled/read-only mode),
 //! the live text-input draft control, and the field chrome — all token-resolved.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{PillAppearance, PillSpec, PillTone, TextInputSpec, TokenInputSpec};
 

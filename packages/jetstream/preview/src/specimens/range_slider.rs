@@ -7,7 +7,7 @@
 //! between-fill window come from the spec's low/high values via `js_range_slider`
 //! (no hand-rolled fill bar).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::range_slider::js_range_slider;
 use poodle_jetstream_components::theme_ext::*;

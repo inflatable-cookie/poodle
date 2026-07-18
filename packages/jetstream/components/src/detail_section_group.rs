@@ -7,7 +7,7 @@
 //! the column min width resolves from `min_column_width` and the column count is
 //! capped at `max_columns` (contract §7) — no hardcoded px.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DetailSectionGroupLayout, DetailSectionGroupSpec};
 

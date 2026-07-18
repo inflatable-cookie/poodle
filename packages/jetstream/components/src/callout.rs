@@ -6,8 +6,8 @@
 //! Resolves tone fill/border via `Color::mix` and renders the leading icon
 //! badge, optional dismiss control, and all six tones (incl. neutral + pending).
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone};
 

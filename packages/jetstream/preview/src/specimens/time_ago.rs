@@ -4,7 +4,7 @@
 //! parse → diff → threshold-table formatting (not hand-typed relative strings).
 //! Live ticking is a preview-loop concern and is not wired here.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::*;
 use poodle_jetstream_components::time_ago::js_time_ago;

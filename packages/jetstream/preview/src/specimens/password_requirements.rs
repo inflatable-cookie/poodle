@@ -1,7 +1,7 @@
 //! PasswordRequirements specimen — met/unmet rules, all met, none met,
 //! mixed, loading, error, empty, and the size ladder.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::password_requirements::js_password_requirements;
 use poodle_jetstream_components::theme_ext::*;

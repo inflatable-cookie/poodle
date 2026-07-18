@@ -8,7 +8,7 @@
 //! static seeded selection rather than a live `on_change` readout (accepted
 //! limit, see parity/segmented-control.md).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::segmented_control::js_segmented_control;
 use poodle_jetstream_components::theme_ext::*;

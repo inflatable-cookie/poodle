@@ -5,7 +5,7 @@
 //! indicator), disabled, and a size sweep. Every node is a real
 //! `js_time_zone_select` delegating to the shared `Select`.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::time_zone_select::js_time_zone_select;
 use poodle_jetstream_components::theme_ext::*;

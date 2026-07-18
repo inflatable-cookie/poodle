@@ -10,7 +10,7 @@
 //! the icons below render. This specimen shows real `js_icon`s inside a labeled
 //! "provider scope" and states the boundary is non-visual.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::icon::js_icon;
 use poodle_jetstream_components::theme_ext::*;

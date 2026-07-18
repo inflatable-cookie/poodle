@@ -8,7 +8,7 @@
 //! `js_form_actions` (footer: default submit/cancel row) or a caller-owned custom
 //! actions slot. ALL sizing/colors resolve from tokens.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, DialogSpec, FormActionAlign, FormActionsSpec, FormDialogSpec,

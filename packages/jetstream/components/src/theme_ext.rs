@@ -3,7 +3,7 @@
 //! Mirrors `packages/gpui/components/src/theme_ext.rs` for API parity.
 
 use glam::Vec4;
-use jetstream_runtime::ui_element::JsEl;
+use jetstream_ui::ui_element::JsEl;
 use poodle_jetstream::JetstreamThemeProvider;
 
 /// Resolve a semantic color token to a linear-space Vec4.

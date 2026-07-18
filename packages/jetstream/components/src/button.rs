@@ -9,14 +9,14 @@
 //! This runtime’s `JsEl` builder does not yet map it onto an accessibility
 //! metadata channel; hosts should read the spec when they need disclosure state.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ButtonSpec;
 use poodle_specs::ButtonTone;
 use poodle_specs::ButtonVariant;
 
-use jetstream_runtime::ui_element::BoxShadow;
+use jetstream_ui::ui_element::BoxShadow;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,

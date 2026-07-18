@@ -4,8 +4,8 @@
 //! (eyebrow / title / description + pill metadata), and a body (caption), per
 //! the contract §3/§10 anatomy. Size and density resolve from the spec's
 //! contract-exact rem tables.
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 

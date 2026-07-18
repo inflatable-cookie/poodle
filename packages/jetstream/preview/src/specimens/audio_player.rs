@@ -1,6 +1,6 @@
 //! AudioPlayer specimen — transport, volume, speed, sizes, densities.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::audio_player::js_audio_player;
 use poodle_jetstream_components::theme_ext::*;

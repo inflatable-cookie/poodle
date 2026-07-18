@@ -1,6 +1,6 @@
 //! Drawer specimen — slide-out drawer panels with content.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::drawer::{js_drawer, js_drawer_with_actions};
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

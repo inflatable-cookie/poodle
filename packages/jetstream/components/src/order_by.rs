@@ -12,7 +12,7 @@
 //!
 //! Interaction (menu open/close, selection, drag, Alt-arrow reorder) lives in
 //! the preview event loop, not the component — render-only, build/probe-verified.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ChoiceOption, ControlSize, IconButtonSpec, OrderBySpec, SelectSpec, SortDirection,

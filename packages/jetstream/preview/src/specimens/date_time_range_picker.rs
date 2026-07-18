@@ -6,7 +6,7 @@
 //! sections all resolve from `DateTimeRangePickerSpec` + tokens. Specimens
 //! render static state, so the open flag is seeded directly on the spec.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::date_time_range_picker::js_date_time_range_picker;
 use poodle_jetstream_components::theme_ext::*;

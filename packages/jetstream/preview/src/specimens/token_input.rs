@@ -11,7 +11,7 @@
 //! size (xs–xl) and density scales. Entry/commit/remove wiring lives in the
 //! preview event loop (render-only here, per the parity doc).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::*;
 use poodle_jetstream_components::token_input::js_token_input;

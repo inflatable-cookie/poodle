@@ -5,7 +5,7 @@
 //! uppercase label. Per contract §3 it does NOT accept child content — it
 //! renders only the label.
 
-use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
+use jetstream_ui::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::RegionSpec;
 

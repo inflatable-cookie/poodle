@@ -11,7 +11,7 @@
 //! `relative().min_h(...)` container that confines the scrim to that group's
 //! region (the same posture as the GPUI specimen's `div().relative()`).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::command_palette::js_command_palette;
 use poodle_jetstream_components::theme_ext::*;

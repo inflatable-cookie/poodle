@@ -2,7 +2,7 @@
 //!
 //! Contract: `docs/contracts/components/empty-state.md`
 //! Reference: `packages/svelte/components/src/EmptyState.svelte`
-use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
+use jetstream_ui::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EmptyStateSpec, EmptyStateVariant,

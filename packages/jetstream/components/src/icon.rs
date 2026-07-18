@@ -6,7 +6,7 @@
 //! Renders an SVG icon via the engine's `icon()` constructor. The icon is
 //! rasterized on demand by the engine's IconCache and tinted by `text_color`.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::IconSpec;
 

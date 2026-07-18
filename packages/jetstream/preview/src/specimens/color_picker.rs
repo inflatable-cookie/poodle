@@ -7,7 +7,7 @@
 //! `NumberInput`s, and the preset swatch grid) — all from `js_color_picker`,
 //! no hand-rolled boxes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::color_picker::js_color_picker;
 use poodle_jetstream_components::theme_ext::*;

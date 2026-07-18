@@ -15,7 +15,7 @@
 //! focus ring is not rendered (`.focusable()` marks the node for the runtime's
 //! own focus handling). Noted in the parity doc.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::CollapseToggleSpec;
 

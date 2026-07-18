@@ -1,8 +1,8 @@
 //! calendar — helper builders. Split out of `calendar/mod.rs` (god-file
 //! decomposition); unchanged.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 
 
 

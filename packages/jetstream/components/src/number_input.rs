@@ -11,7 +11,7 @@
 //! preview event loop, not the component (immediate-mode runtime). JsEl has no
 //! `:focus-within` hook, so the contract focus ring is a documented JsEl gap.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{NumberInputSpec, ValidationState};
 
@@ -149,9 +149,9 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
 #[allow(clippy::too_many_arguments)]
 fn affix_box(
     text: &str,
-    text_color: impl Into<jetstream_runtime::game_ui::Color>,
-    bg: impl Into<jetstream_runtime::game_ui::Color>,
-    border_color: impl Into<jetstream_runtime::game_ui::Color>,
+    text_color: impl Into<jetstream_ui::Color>,
+    bg: impl Into<jetstream_ui::Color>,
+    border_color: impl Into<jetstream_ui::Color>,
     border_width: f32,
     font_size: f32,
     pad_x: f32,

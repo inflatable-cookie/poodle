@@ -3,7 +3,7 @@
 //! single shapes use rem widths (JsEl's `parse_dim` has no `%` support, so
 //! percentage strings would silently fall back to full width).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::presentation::rem_to_px;
 use poodle_jetstream_components::skeleton::js_skeleton;

@@ -19,7 +19,7 @@ use jetstream_renderer::sprite::{
 };
 use jetstream_renderer::texture::GpuTexture;
 use jetstream_renderer::ui_pass::UiPass;
-use jetstream_runtime::game_ui::*;
+use jetstream_ui::*;
 use poodle_adapter::ThemeProvider;
 use wgpu::util::DeviceExt;
 

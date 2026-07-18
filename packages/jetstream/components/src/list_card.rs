@@ -15,7 +15,7 @@
 //! spec fields, so they arrive through [`js_list_card_with_slots`];
 //! [`js_list_card`] delegates with empty slots for back-compat.
 
-use jetstream_runtime::ui_element::{self, BorderStyle, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BorderStyle, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 

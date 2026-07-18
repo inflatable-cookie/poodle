@@ -1,7 +1,7 @@
 //! ToastHost — Jetstream positioned toast container backed by ToastHostSpec.
 //!
 //! Wraps a ToastStack and positions it at the chosen screen corner.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastStackSpec};
 

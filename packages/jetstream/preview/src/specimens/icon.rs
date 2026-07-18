@@ -4,7 +4,7 @@
 //! inheritance, accessible/decorative modes (`with_aria_label`), and a
 //! representative icon grid. Every glyph is a real `js_icon` sized from tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::icon::js_icon;
 use poodle_jetstream_components::theme_ext::*;

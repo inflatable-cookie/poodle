@@ -14,8 +14,8 @@
 //! text caret are runtime/engine concerns. This builder renders the slot grid,
 //! the distributed value, the active-slot highlight, and the error label.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInputSpec, ValidationState};
 

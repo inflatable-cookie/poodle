@@ -1,6 +1,6 @@
 //! TriStateSwitch specimen — all three states, sizes, disabled.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tri_state_switch::js_tri_state_switch;
 use poodle_jetstream_components::theme_ext::*;

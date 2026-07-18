@@ -11,7 +11,7 @@
 //! options reflow in a flex-wrap grid with a density-driven gap; per-item and
 //! group `disabled` dim via the disabled-opacity token. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardSpec, CardToggleGroupSpec};
 

@@ -4,7 +4,7 @@
 //! Crumbs render statically here; click navigation + the `href` vs callback
 //! distinction live in the preview event loop (component renders crumbs only).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::breadcrumbs_comp::js_breadcrumbs;
 use poodle_jetstream_components::theme_ext::*;

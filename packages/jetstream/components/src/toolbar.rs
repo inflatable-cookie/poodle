@@ -9,7 +9,7 @@
 //! overrides only inline padding + gap. Roving focus is an accepted runtime
 //! limit (the preview event loop owns focus; see parity doc).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{Alignment, Orientation, ToolbarSpec};
 

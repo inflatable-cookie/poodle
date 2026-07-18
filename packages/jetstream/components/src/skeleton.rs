@@ -9,7 +9,7 @@
 //! the contract's 40/60/60/20% sum to 180%, i.e. they're relative weights in a
 //! gapped row, not absolute percentages.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{SkeletonPreset, SkeletonSpec};
 
@@ -236,8 +236,8 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
 /// Ping-pong opacity pulse standing in for the contract's shimmer sweep
 /// (a travelling gradient needs animated gradient stops — not yet available).
-fn skeleton_pulse() -> jetstream_runtime::game_ui::Animation {
-    use jetstream_runtime::game_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
+fn skeleton_pulse() -> jetstream_ui::Animation {
+    use jetstream_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
     Animation {
         keyframes: vec![
             Keyframe { at: 0.0, values: vec![(AnimatableProperty::Opacity, 1.0)] },

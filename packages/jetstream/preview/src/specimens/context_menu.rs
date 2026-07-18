@@ -8,7 +8,7 @@
 //! leading check indicator — plus the size and density matrices. All real
 //! `js_context_menu` instances.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::context_menu::js_context_menu;
 use poodle_jetstream_components::theme_ext::*;

@@ -5,7 +5,7 @@
 //!
 //! ALL dimensions resolve from the spec/tokens. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{TextSpec, TextWeight};
 

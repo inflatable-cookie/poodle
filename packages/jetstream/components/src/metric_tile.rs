@@ -5,7 +5,7 @@
 //!
 //! Anatomy: Root → Label | Body[Value + Sparkline] | Trend
 
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MetricTileSpec, MetricTrend};
 

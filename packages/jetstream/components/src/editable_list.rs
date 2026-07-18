@@ -22,8 +22,8 @@
 //!   and `aria-label`s are accepted omissions. Plain `div`s stand in.
 //! - **No window-nav / long-list warning**: feature scope, not yet built.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, IconButtonSpec, SemanticControlSizeRole, TextInputSpec,

@@ -5,7 +5,7 @@
 //! keyboard concern: ArrowUp/ArrowDown), so there is no "with steppers"
 //! group — steppers are not part of the DurationInput anatomy.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::duration_input::js_duration_input;
 use poodle_jetstream_components::theme_ext::*;

@@ -6,7 +6,7 @@
 //! presentation. Every panel is rendered by the real `js_action_discovery_panel`
 //! resolving values from the token system; the bordered frame uses token colors.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::action_discovery_panel::js_action_discovery_panel;
 use poodle_jetstream_components::presentation::rem_to_px;

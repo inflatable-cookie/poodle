@@ -8,7 +8,7 @@
 //! checkbox, clear button, and toned ghost `js_icon_button` actions — is built
 //! entirely by `js_bulk_action_bar` from the spec. No hand-rolled chrome.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::bulk_action_bar::js_bulk_action_bar;
 use poodle_jetstream_components::theme_ext::*;

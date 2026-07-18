@@ -6,8 +6,8 @@
 //! Inserts dot separators between children when show_separators is true.
 //! Uses color.text.secondary (at 72% opacity) for dot color.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::MetaBarSpec;
 

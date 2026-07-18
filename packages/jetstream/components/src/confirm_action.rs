@@ -21,7 +21,7 @@
 //!   row; an arbitrary body element is an AlertDialog-side capability and is
 //!   noted as a remaining limit rather than hand-rolled here.
 
-use jetstream_runtime::ui_element::JsEl;
+use jetstream_ui::ui_element::JsEl;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, ConfirmActionSpec,

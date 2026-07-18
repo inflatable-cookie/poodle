@@ -5,7 +5,7 @@
 //! empty state, and an unframed (no-card) variant. Rows compose real `js_text` +
 //! `js_pill`; header actions are real `js_icon_button`s — no hand-rolled boxes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::icon_button::js_icon_button;
 use poodle_jetstream_components::inline_list_section::js_inline_list_section;

@@ -9,7 +9,7 @@
 //! has no DOM/overlay-positioning engine in the component layer). `overlay()`
 //! lifts the surface above normal content.
 
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::PopoverSpec;
 

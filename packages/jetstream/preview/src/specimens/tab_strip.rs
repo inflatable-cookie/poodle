@@ -8,7 +8,7 @@
 //! affordance, overflow chrome, and reorder handles are out of scope, so none are
 //! drawn. Keyboard nav / selection commit are preview-event-loop bound.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tab_strip::js_tab_strip;
 use poodle_jetstream_components::theme_ext::*;

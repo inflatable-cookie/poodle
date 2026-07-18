@@ -7,8 +7,8 @@
 //! colors resolve from semantic tokens. Selection/activation lives in the
 //! preview event loop (Tier-3); the component renders the active state for the
 //! current `value`.
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SidebarNavSpec;
 

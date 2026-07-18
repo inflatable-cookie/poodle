@@ -1,6 +1,6 @@
 //! Eyebrow — Jetstream small label component backed by EyebrowSpec.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::EyebrowSpec;
 

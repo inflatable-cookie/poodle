@@ -6,7 +6,7 @@
 //! Pagination renders statically here; click navigation lives in the preview
 //! event loop. All visual properties resolve from PaginationSpec tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::pagination_comp::js_pagination;
 use poodle_jetstream_components::theme_ext::*;

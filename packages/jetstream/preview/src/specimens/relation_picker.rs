@@ -7,7 +7,7 @@
 //! the shared `PickerShell` / `SelectionSummary` / `Select` composites — no
 //! hand-rolled boxes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::relation_picker::js_relation_picker;
 use poodle_jetstream_components::theme_ext::*;

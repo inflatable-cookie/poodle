@@ -1,6 +1,6 @@
 //! MetricTile specimen — metric tiles with trend indicators and sparklines.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::metric_tile::js_metric_tile;
 use poodle_jetstream_components::theme_ext::*;

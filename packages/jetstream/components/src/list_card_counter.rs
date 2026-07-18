@@ -8,7 +8,7 @@
 //!   trigger+overlay helper the row renders alone (same as GPUI without
 //!   `on_tooltip_open_change`).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{IconSpec, ListCardCounterSpec};
 

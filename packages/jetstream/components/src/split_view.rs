@@ -14,7 +14,7 @@
 //! the affordances but emit no callbacks here. Rail-collapse (`*CollapsedSize`,
 //! `collapse*BelowSize`) is not in `SplitViewSpec`; legacy collapse hides the
 //! pane (`0`-size), matching the contract's non-railed collapse state.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     CollapseDirection, CollapseToggleSpec, Orientation, ResizeHandleSpec, SplitOrientation,

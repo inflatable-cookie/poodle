@@ -8,7 +8,7 @@
 //! Keyboard navigation / item activation are parent (event-loop) driven and
 //! are not wired here — the component renders at the current resolved state
 //! (`spec.active_id`, `spec.state`). No ARIA channel exists in Jetstream.
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
@@ -231,7 +231,7 @@ pub fn js_action_discovery_panel(
             // Active item (contract §9): accent-tinted bg + an inset accent ring (no
             // longer a border approximation — doesn't shift layout vs other rows).
             if is_active {
-                row = row.bg(active_bg).shadow_layers(vec![jetstream_runtime::ui_element::BoxShadow {
+                row = row.bg(active_bg).shadow_layers(vec![jetstream_ui::ui_element::BoxShadow {
                     offset_x: 0.0,
                     offset_y: 0.0,
                     blur: 0.0,

@@ -1,6 +1,6 @@
 //! Dialog specimen — dialogs with title, description, content, width variants, and actions.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::dialog::js_dialog;

@@ -8,7 +8,7 @@
 //! token — zero hardcoded hsla/px. Interaction (click / link navigation) lives in
 //! the preview event loop; this builder renders the resting + hover visuals.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::NavCardSpec;
 

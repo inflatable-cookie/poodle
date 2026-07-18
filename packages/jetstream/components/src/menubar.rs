@@ -24,7 +24,7 @@
 //! limit. Interaction (trigger click, item nav, outside-click close) lives in the
 //! preview event loop.
 
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenubarSpec};
 

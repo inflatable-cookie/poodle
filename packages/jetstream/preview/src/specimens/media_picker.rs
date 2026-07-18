@@ -1,6 +1,6 @@
 //! MediaPicker specimen — media asset selection dialog (single-select).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::media_picker::js_media_picker;
 use poodle_jetstream_components::theme_ext::*;

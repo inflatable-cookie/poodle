@@ -5,7 +5,7 @@
 //! Extra large). Selection / arrow-key / Space interaction is a preview-loop
 //! concern, not the pure-render component.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::radio_group::js_radio_group;
 use poodle_jetstream_components::theme_ext::*;

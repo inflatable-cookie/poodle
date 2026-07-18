@@ -3,7 +3,7 @@
 //!
 //! Contract: `docs/contracts/components/page-loading.md`
 //! Reference: `packages/svelte/components/src/PageLoading.svelte`
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     PageLoadingSpec, ProgressSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,

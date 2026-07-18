@@ -5,7 +5,7 @@
 //! handle sits between real token-styled panes so its grip + orientation read
 //! in context. Every handle is a real `js_resize_handle`.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::resize_handle::js_resize_handle;
 use poodle_jetstream_components::theme_ext::*;

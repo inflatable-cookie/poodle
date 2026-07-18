@@ -5,7 +5,7 @@
 //! three-layer `js_scroll_shell` (viewport owns overflow, content wraps,
 //! children slot in) with direction + label from `ScrollShellSpec`.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::scroll_shell::js_scroll_shell;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

@@ -7,7 +7,7 @@
 //! `js_card_toggle_group`. The spec carries no `columns`/`count` fields, so those
 //! are not exercised here (shared-spec gap noted in the parity doc).
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::card_toggle_group::js_card_toggle_group;
 use poodle_jetstream_components::theme_ext::*;

@@ -12,7 +12,7 @@
 //! (`crate::render_probe` covers the rendered structure). ZERO hardcoded
 //! hsla/px — every dimension comes from the spec size/density helpers or a token.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardRadioGroupSpec, CardSpec};
 

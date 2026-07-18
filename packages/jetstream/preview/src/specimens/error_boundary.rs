@@ -8,7 +8,7 @@
 //! fakes. Error is props-driven (`with_error_message`): Jetstream cannot catch
 //! render panics, so the boundary renders the fallback UI rather than catching.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::error_boundary::js_error_boundary;
 use poodle_jetstream_components::surface::js_surface;

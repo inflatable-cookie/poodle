@@ -7,7 +7,7 @@
 //! control only. Background / border / directional layout are out of scope per
 //! contract §1.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{BoxSpec, Dimension, Overflow};
 

@@ -3,7 +3,7 @@
 //! Covers all three contract §13 groups with real `js_surface` children:
 //! Three columns, Mixed column widths, Auto-fit responsive.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::grid::js_grid;
 use poodle_jetstream_components::surface::js_surface;

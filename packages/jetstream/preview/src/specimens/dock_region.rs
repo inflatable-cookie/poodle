@@ -5,7 +5,7 @@
 //! separate component and out of scope here). Every region is the real
 //! `js_dock_region`; postures are driven entirely from `DockRegionSpec`.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::dock_region::js_dock_region;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

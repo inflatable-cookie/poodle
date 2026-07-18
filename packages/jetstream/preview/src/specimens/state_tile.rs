@@ -1,6 +1,6 @@
 //! StateTile specimen — compact label-value tile with trend.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::state_tile::js_state_tile;
 use poodle_jetstream_components::theme_ext::*;

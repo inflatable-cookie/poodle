@@ -1,6 +1,6 @@
 //! LogList specimen — timestamped log viewer.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::log_list::js_log_list;
 use poodle_jetstream_components::theme_ext::*;

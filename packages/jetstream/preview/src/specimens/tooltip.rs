@@ -6,7 +6,7 @@
 //! (the contract's 2×2 Placements grid), each tagged with its placement so the
 //! bubble surface can be visually compared across placements.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tooltip::js_tooltip;
 use poodle_jetstream_components::theme_ext::*;

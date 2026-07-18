@@ -8,8 +8,8 @@
 //!
 //! Run: `cargo run --bin snap` → writes /tmp/poodle-snap-*.png
 
-use jetstream_runtime::game_ui::*;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::*;
+use jetstream_ui::ui_element::{self, JsEl};
 use jetstream_renderer::ui_pass::UiPass;
 use jetstream_renderer::camera::CameraGpu;
 use jetstream_renderer::pipeline::create_sprite_pipeline;
@@ -597,7 +597,7 @@ fn main() {
     snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)), 0.0);
 
     // Border styles: solid / dashed / dotted (contract drop-zone / underline frames).
-    use jetstream_runtime::ui_element::BorderStyle;
+    use jetstream_ui::ui_element::BorderStyle;
     let bbox = |style| {
         ui_element::div()
             .w(130.0).h(80.0).rounded(10.0)
@@ -622,7 +622,7 @@ fn main() {
     snapshot(&es_scene, 420, 200, "/tmp/poodle-snap-emptystate.png");
 
     // Multi-layer shadow: single token layer vs a 3-layer contract stack.
-    use jetstream_runtime::ui_element::BoxShadow;
+    use jetstream_ui::ui_element::BoxShadow;
     let blk = |a: f32| Vec4::new(0.0, 0.0, 0.0, a);
     let single = ui_element::div().w(180.0).h(110.0).rounded(12.0).bg(panel)
         .shadow(0.0, 8.0, 16.0, -2.0, blk(0.18));

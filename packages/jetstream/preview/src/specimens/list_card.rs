@@ -7,7 +7,7 @@
 //! `js_icon`), matching the GPUI specimen's `with_leading` / `with_trailing` /
 //! `with_footer` compositions.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::icon::js_icon;

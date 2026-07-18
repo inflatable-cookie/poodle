@@ -7,8 +7,8 @@
 //! resolve from tokens or `SurfaceSpec` methods. The CSS color-mix percentages
 //! (96% / 98% / 74%) are centralized on the spec, not hardcoded here.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SurfaceSpec;
 

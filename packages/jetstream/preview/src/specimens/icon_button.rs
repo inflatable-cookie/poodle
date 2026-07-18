@@ -5,7 +5,7 @@
 //! loading (spinner), and disabled. Every example is a real `js_icon_button`
 //! resolving all visuals from tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::icon_button::js_icon_button;
 use poodle_jetstream_components::theme_ext::*;

@@ -1,7 +1,7 @@
 //! relation_picker — helper builders. Split out of `relation_picker/mod.rs` (god-file
 //! decomposition); unchanged.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     CheckboxSpec, ChoiceOption, ControlSize, PickerItemSpec,

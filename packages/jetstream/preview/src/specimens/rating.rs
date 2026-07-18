@@ -4,7 +4,7 @@
 //! Real component (`js_rating`) only — fill is resolved from `RatingSpec`
 //! (`fill_ratio` = value/max), never hand-rolled.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::rating::js_rating;
 use poodle_jetstream_components::theme_ext::*;

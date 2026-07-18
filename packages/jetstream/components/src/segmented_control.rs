@@ -1,6 +1,6 @@
 //! SegmentedControl — Jetstream segmented control backed by SegmentedControlSpec.
 
-use jetstream_runtime::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SegmentedControlSpec;
 

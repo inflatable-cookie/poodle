@@ -3,7 +3,7 @@
 //! the REAL `js_spinner` builder; chips are plain host containers (the same
 //! role the Svelte `.poodle-specimen__chip` plays), not fakes of the component.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::presentation::rem_to_px;
 use poodle_jetstream_components::spinner::js_spinner;

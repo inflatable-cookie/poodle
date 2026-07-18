@@ -2,7 +2,7 @@
 //! bold + end-aligned column), caption, minimal key-value, empty state, plus
 //! the size and density variant axes. All visuals resolve from `js_table`/tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::table::js_table;
 use poodle_jetstream_components::theme_ext::*;

@@ -13,8 +13,8 @@
 //! font atlas is present, so absolute text widths are approximate; structure,
 //! colors, token keys, and non-text dimensions are exact.
 
-use jetstream_runtime::game_ui::{GameUi, Widget};
-use jetstream_runtime::ui_element::JsEl;
+use jetstream_ui::{GameUi, Widget};
+use jetstream_ui::ui_element::JsEl;
 
 /// An RGBA color sampled from a node's resolved style, components in `0.0..=1.0`.
 #[derive(Clone, Copy, Debug, PartialEq)]

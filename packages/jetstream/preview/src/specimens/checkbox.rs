@@ -4,7 +4,7 @@
 //! Checkboxes render statically here; toggle / Space / read-only-revert
 //! interaction is a preview-loop concern, not the pure-render component.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::checkbox::js_checkbox;
 use poodle_jetstream_components::theme_ext::*;

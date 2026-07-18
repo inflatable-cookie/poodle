@@ -16,7 +16,7 @@
 //! ALL colors + radius/border/typography resolve from spec token methods.
 //! Gaps/padding resolve from space tokens. ZERO hardcoded colors.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::StateTileSpec;
 
@@ -121,7 +121,7 @@ pub fn js_state_tile(spec: &StateTileSpec, theme: &JetstreamThemeProvider) -> Js
 mod tests {
     use super::*;
     use crate::render_probe::probe;
-    use jetstream_runtime::game_ui::Color;
+    use jetstream_ui::Color;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

@@ -1,7 +1,7 @@
 //! TextInput specimen — placeholder, value, validation states, affordances,
 //! affixes, char count, read-only, disabled, plus the size and density ladders.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::text_input::js_text_input;
 use poodle_jetstream_components::theme_ext::*;

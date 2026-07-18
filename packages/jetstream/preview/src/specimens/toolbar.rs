@@ -12,7 +12,7 @@
 //! resolving its chrome (panel-mix fill, border-subtle, radius.surface) and its
 //! size/density padding + gap from tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::icon_button::js_icon_button;
 use poodle_jetstream_components::separator::js_separator;

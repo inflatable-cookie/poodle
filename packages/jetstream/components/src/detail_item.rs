@@ -10,7 +10,7 @@
 //! empty placeholder. ALL geometry/colour resolves from tokens / the
 //! density-aware spec helpers (no raw font literals).
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
 
@@ -196,7 +196,7 @@ mod tests {
 
     #[test]
     fn surface_presentation_has_background() {
-        use jetstream_runtime::game_ui::Color;
+        use jetstream_ui::Color;
         let bg: Color = resolve_color(&theme(), DetailItemSpec::new("x").background_token()).into();
         let expected = crate::render_probe::ProbeColor {
             r: bg.r,

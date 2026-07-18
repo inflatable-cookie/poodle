@@ -1,6 +1,6 @@
 //! FileUpload specimen — dropzone states + populated file list.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::file_upload::js_file_upload;
 use poodle_jetstream_components::theme_ext::*;

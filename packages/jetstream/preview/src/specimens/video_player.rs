@@ -5,7 +5,7 @@
 //! can't be rendered honestly here. (GPUI shows captions via its own
 //! `VideoPlayer::with_captions` component builder, which has no Jetstream analogue.)
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::video_player::js_video_player;
 use poodle_jetstream_components::theme_ext::*;

@@ -146,7 +146,7 @@ pub mod validation_summary;
 pub mod video_player;
 pub mod date_time_zone_picker;
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::theme_ext::*;
 
@@ -186,18 +186,18 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
 
 /// A top-level specimen section's title, when the child follows the shared
 /// `group(title, …)` pattern (a panel whose first child is the title label).
-fn section_title(el: &jetstream_runtime::ui_element::JsEl) -> Option<&str> {
+fn section_title(el: &jetstream_ui::ui_element::JsEl) -> Option<&str> {
     el.children.first().and_then(|c| match &c.kind {
-        jetstream_runtime::ui_element::WidgetKind::Label(t) => Some(t.as_str()),
+        jetstream_ui::ui_element::WidgetKind::Label(t) => Some(t.as_str()),
         _ => None,
     })
 }
 
-fn is_sizes_section(el: &jetstream_runtime::ui_element::JsEl) -> bool {
+fn is_sizes_section(el: &jetstream_ui::ui_element::JsEl) -> bool {
     section_title(el).is_some_and(|t| t.starts_with("Sizes") || t.starts_with("Size "))
 }
 
-fn is_densities_section(el: &jetstream_runtime::ui_element::JsEl) -> bool {
+fn is_densities_section(el: &jetstream_ui::ui_element::JsEl) -> bool {
     section_title(el).is_some_and(|t| t.starts_with("Densities") || t.starts_with("Density"))
 }
 
@@ -207,9 +207,9 @@ fn is_densities_section(el: &jetstream_runtime::ui_element::JsEl) -> bool {
 /// Returns the filtered element plus whether sizes/densities sections exist
 /// (drives which tabs are offered).
 fn filter_specimen_view(
-    mut specimen: jetstream_runtime::ui_element::JsEl,
+    mut specimen: jetstream_ui::ui_element::JsEl,
     view: SpecimenView,
-) -> (jetstream_runtime::ui_element::JsEl, bool, bool) {
+) -> (jetstream_ui::ui_element::JsEl, bool, bool) {
     let has_sizes = specimen.children.iter().any(is_sizes_section);
     let has_densities = specimen.children.iter().any(is_densities_section);
     if has_sizes || has_densities {

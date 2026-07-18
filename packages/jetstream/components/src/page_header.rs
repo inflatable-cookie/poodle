@@ -13,7 +13,7 @@
 //!
 //! Render-only / build-/probe-verified: the back-link click handler and any
 //! action behavior live in the host event loop, not the component.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ControlSize, PageHeaderAlign, PageHeaderSpec, PillAppearance, PillSize, PillSpec, PillTone,

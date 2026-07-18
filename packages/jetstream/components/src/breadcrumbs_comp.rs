@@ -9,7 +9,7 @@
 //! dimensions resolve from tokens / contract-exact rem. Click navigation and
 //! the `href` vs callback distinction live in the preview event loop.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{BreadcrumbsSpec, IconSize, IconSpec};
 

@@ -1,7 +1,7 @@
 //! PageLoading specimen — inline + overlay presentation, indeterminate,
 //! determinate, cancel control, and the size ladder.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::page_loading::js_page_loading;
 use poodle_jetstream_components::theme_ext::*;

@@ -5,7 +5,7 @@
 //! expanded rows, row-action column, loading skeleton, empty state, and the
 //! size + density axes. All visuals resolve from tokens.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::data_table::{js_data_table, js_data_table_loading};
 use poodle_jetstream_components::theme_ext::*;

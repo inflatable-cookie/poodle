@@ -1,6 +1,6 @@
 //! SidebarNav specimen — vertical navigation with grouped items.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::sidebar_nav::js_sidebar_nav;
 use poodle_jetstream_components::theme_ext::*;

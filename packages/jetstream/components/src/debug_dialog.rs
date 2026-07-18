@@ -7,7 +7,7 @@
 //! open/close dialog behavior lives in the preview event loop). Nothing renders
 //! without a value. ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonSpec, CodeSpec, DebugDialogSpec};
 

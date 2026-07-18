@@ -5,7 +5,7 @@
 //! (`normalized_progress` = value/max), never hand-rolled. Values are on the
 //! default 0..100 scale so the spec resolves the proportional fill.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::progress::js_progress;
 use poodle_jetstream_components::theme_ext::*;

@@ -5,7 +5,7 @@
 //! variants. Sections are real `js_detail_section` composites holding real
 //! `js_detail_item` rows — no hand-coded chrome.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::detail_item::js_detail_item;
 use poodle_jetstream_components::detail_section::js_detail_section;

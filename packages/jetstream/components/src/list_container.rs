@@ -10,7 +10,7 @@
 //!
 //! Interaction (page change via the built-in `Pagination`) lives in the preview
 //! event loop — `js_pagination` renders the controls but emits no callback here.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     CallOutSpec, CalloutAnnounceMode, EmptyStateSpec, EmptyStateVariant, ListContainerSpec,
@@ -208,7 +208,7 @@ fn empty_variant(_spec: &ListContainerSpec) -> EmptyStateVariant {
 mod tests {
     use super::*;
     use crate::render_probe::probe;
-    use jetstream_runtime::ui_element;
+    use jetstream_ui::ui_element;
     use poodle_specs::ListContainerState;
 
     fn theme() -> JetstreamThemeProvider {

@@ -5,7 +5,7 @@
 //!
 //! Renders a small uppercase label followed by a value slot.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::MetaItemSpec;
 
@@ -73,7 +73,7 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
 mod tests {
     use super::*;
     use crate::render_probe::probe;
-    use jetstream_runtime::game_ui::Color;
+    use jetstream_ui::Color;
     use poodle_specs::InlineTypographyMode;
 
     fn theme() -> JetstreamThemeProvider {

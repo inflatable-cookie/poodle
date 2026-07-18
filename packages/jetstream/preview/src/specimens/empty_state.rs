@@ -1,6 +1,6 @@
 //! EmptyState specimen — placeholder for empty content areas.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::empty_state::js_empty_state;
 use poodle_jetstream_components::theme_ext::*;

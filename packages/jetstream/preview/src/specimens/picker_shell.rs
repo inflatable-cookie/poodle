@@ -7,7 +7,7 @@
 //! footers are the real `js_form_actions` primitive with `js_button` actions, and
 //! the selection summary is the real `js_selection_summary` — no hand-rolled boxes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::button::js_button;
 use poodle_jetstream_components::form_actions::js_form_actions;

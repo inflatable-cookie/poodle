@@ -3,7 +3,7 @@
 //! Contract: `docs/contracts/components/spacer.md`
 //! Reference: `packages/gpui/components/src/primitives/spacer.rs`
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_specs::SpacerSpec;
 
 pub fn js_spacer(spec: &SpacerSpec) -> JsEl {

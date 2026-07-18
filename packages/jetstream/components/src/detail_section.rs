@@ -9,7 +9,7 @@
 //! multi-column body (flex-wrap approximation of the Svelte grid). ALL
 //! geometry/colour resolves from tokens / the density-aware spec helpers.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::DetailSectionSpec;
 
@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn separated_draws_divider_rule() {
-        use jetstream_runtime::game_ui::Color;
+        use jetstream_ui::Color;
         let th = theme();
         let border: Color =
             resolve_color(&th, DetailSectionSpec::new().separator_color_token()).into();
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn unseparated_omits_divider_rule() {
-        use jetstream_runtime::game_ui::Color;
+        use jetstream_ui::Color;
         let th = theme();
         let border: Color =
             resolve_color(&th, DetailSectionSpec::new().separator_color_token()).into();

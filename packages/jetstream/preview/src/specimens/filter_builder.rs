@@ -1,6 +1,6 @@
 //! FilterBuilder specimen — filter-clause builder with editable pills.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::filter_builder::js_filter_builder;
 use poodle_jetstream_components::theme_ext::*;

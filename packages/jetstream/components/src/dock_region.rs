@@ -1,5 +1,5 @@
 //! DockRegion — Jetstream dock region backed by DockRegionSpec.
-use jetstream_runtime::ui_element::{self, BorderStyle, JsEl};
+use jetstream_ui::ui_element::{self, BorderStyle, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing};
 

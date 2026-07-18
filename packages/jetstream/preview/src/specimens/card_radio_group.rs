@@ -1,6 +1,6 @@
 //! CardRadioGroup specimen — radio selection across styled cards.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::card_radio_group::js_card_radio_group;
 use poodle_jetstream_components::theme_ext::*;

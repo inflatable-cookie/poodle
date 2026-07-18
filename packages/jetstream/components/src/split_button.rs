@@ -12,8 +12,8 @@
 //! contract §6 ARIA roles (menu/menuitem/separator, aria-haspopup/expanded) are
 //! an accepted delta.
 
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonTone, ButtonVariant, SplitButtonSpec, SplitMenuItem};
 
@@ -307,7 +307,7 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
 mod tests {
     use super::*;
     use crate::render_probe::{probe, ProbeColor};
-    use jetstream_runtime::game_ui::Color;
+    use jetstream_ui::Color;
     use poodle_specs::{ControlDensity, ControlSize};
 
     fn theme() -> JetstreamThemeProvider {

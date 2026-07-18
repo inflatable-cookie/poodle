@@ -7,7 +7,7 @@
 //! composed via `js_app_header_with_slots`; action / utility clusters are real
 //! `js_button` / `js_icon_button` rows. Zero hand-rolled boxes.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::app_header::{js_app_header, js_app_header_with_slots};
 use poodle_jetstream_components::button::js_button;

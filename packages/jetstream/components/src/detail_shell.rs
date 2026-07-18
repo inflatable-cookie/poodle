@@ -14,7 +14,7 @@
 //! so `aria_label` is not emitted. Noted once in the parity doc. Scroll
 //! ownership is approximated with `overflow_scroll` on the chosen region.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};

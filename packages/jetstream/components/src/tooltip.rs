@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/components/tooltip.md`
 //! Uses overlay() for the tooltip panel. Triggered by on_pointer_enter/leave.
 
-use jetstream_runtime::game_ui::{BoxShadow, Color};
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::{BoxShadow, Color};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::TooltipSpec;
 

@@ -15,7 +15,7 @@
 //!   Toolbar/filter/pager render the chrome; interaction is host-owned (matches
 //!   the GPUI build and the contract's host-ownership note).
 //! - No ARIA channel (`<table>` semantics / `aria-sort` / `aria-selected`).
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CheckboxSpec, CheckState, DataTableSpec, StatusTone, TableSortDirection};
 

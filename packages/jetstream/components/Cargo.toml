@@ -9,7 +9,7 @@ poodle-adapter = { path = "../../contracts/adapter" }
 poodle-specs = { path = "../../contracts/components" }
 poodle-tokens = { path = "../../contracts/tokens" }
 poodle-jetstream = { path = "../adapter" }
-jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
+jetstream-ui = { path = "../../../../jetstream/crates/jetstream-ui" }
 glam = "0.29"
 taffy = "0.9"
 

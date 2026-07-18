@@ -2,7 +2,7 @@
 //! (contract: status-bar). A `<footer>`-equivalent strip with a leading
 //! region (slot content or summary fallback) and a trailing region (only
 //! rendered when trailing items exist), arranged space-between.
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ShellStatusBarSpec;
 

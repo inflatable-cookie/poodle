@@ -3,7 +3,7 @@
 //! All groups are spec-driven: dimensions and overflow resolve through the
 //! `BoxSpec` / `js_box` path, not hand-coded wrappers.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::bx::js_box;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};

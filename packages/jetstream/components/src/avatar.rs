@@ -6,7 +6,7 @@
 //! Renders the initials fallback in a tone-colored, shaped frame. Image `src`
 //! loading is a runtime gap (GPUI is also initials-only). ZERO hardcoded values.
 
-use jetstream_runtime::ui_element::{self, JsEl};
+use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AvatarSpec;
 

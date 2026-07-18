@@ -2,8 +2,8 @@
 //! decomposition); unchanged.
 
 use glam::Vec4;
-use jetstream_runtime::game_ui::Color;
-use jetstream_runtime::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
+use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,

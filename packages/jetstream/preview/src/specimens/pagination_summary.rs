@@ -3,7 +3,7 @@
 //!
 //! `PaginationSummarySpec::new(page, page_size, total_items)`.
 
-use jetstream_runtime::ui_element::*;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::pagination_summary::js_pagination_summary;
 use poodle_jetstream_components::theme_ext::*;
