@@ -11,6 +11,7 @@ import type {
   ControlDensity,
   ControlSize,
   OrderByFieldDefinition,
+  OrderByTriggerVariant,
   OrderByValue,
   SemanticControlSizeRole,
   SortDirection,
@@ -28,6 +29,7 @@ export interface OrderByProps {
   density?: ControlDensity | null;
   maxFields?: number | null;
   compact?: boolean;
+  triggerVariant?: OrderByTriggerVariant;
   showClearButton?: boolean;
   onChange?: ((value: OrderByValue) => void) | null;
   onActiveSortChange?: ((value: ActiveSort | null) => void) | null;
@@ -44,6 +46,7 @@ export function OrderBy({
   density = null,
   maxFields = null,
   compact = false,
+  triggerVariant = "summary",
   showClearButton = true,
   onChange = null,
   onActiveSortChange = null,
@@ -175,55 +178,95 @@ export function OrderBy({
   }
 
   return (
-    <div ref={rootRef} className="poodle-order-by-popover" data-size={resolvedSize} data-density={resolvedDensity}>
+    <div
+      ref={rootRef}
+      className="poodle-order-by-popover"
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+      data-trigger-variant={triggerVariant}
+    >
       <div
         className="poodle-order-by"
         role="group"
         aria-label={ariaLabel}
         data-disabled={disabled}
         data-compact={compact}
+        data-trigger-variant={triggerVariant}
         data-size={resolvedSize}
         data-density={resolvedDensity}
       >
-        <div className="poodle-order-by__trigger-wrap">
-          <button
-            type="button"
-            className="poodle-order-by__trigger"
+        {triggerVariant === "icon" ? (
+          <IconButton
+            icon="arrow-up-down"
+            ariaLabel={ariaLabel}
+            tooltip={ariaLabel}
+            variant="secondary"
+            size={resolvedSize}
             disabled={disabled}
-            aria-label={ariaLabel}
-            aria-expanded={open}
-            aria-controls={open ? panelId : undefined}
+            expanded={open}
+            controls={open ? panelId : null}
             onClick={() => {
               if (!disabled) setOpen((o) => !o);
             }}
-          >
-            <span className="poodle-order-by__label">Sort by</span>
-            <span className="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
-              {triggerText}
-            </span>
-            <span className="poodle-order-by__chevron" aria-hidden="true">
-              ▾
-            </span>
-          </button>
-        </div>
-
-        {showClearButton && effectiveValue.length > 0 ? (
-          <span className="poodle-order-by__reset">
-            <IconButton
-              icon="x"
-              ariaLabel="Clear sort"
-              variant="ghost"
-              size={resolvedSize}
+          />
+        ) : (
+          <div className="poodle-order-by__trigger-wrap">
+            <button
+              type="button"
+              className="poodle-order-by__trigger"
               disabled={disabled}
-              onClick={handleResetClick}
-            />
-          </span>
-        ) : null}
+              aria-label={ariaLabel}
+              aria-expanded={open}
+              aria-controls={open ? panelId : undefined}
+              onClick={() => {
+                if (!disabled) setOpen((o) => !o);
+              }}
+            >
+              <span className="poodle-order-by__label">Sort by</span>
+              <span className="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
+                {triggerText}
+              </span>
+              <span className="poodle-order-by__chevron" aria-hidden="true">
+                ▾
+              </span>
+            </button>
+
+            {showClearButton && effectiveValue.length > 0 ? (
+              <span className="poodle-order-by__reset">
+                <IconButton
+                  icon="x"
+                  ariaLabel="Clear sort"
+                  variant="ghost"
+                  size={resolvedSize}
+                  disabled={disabled}
+                  onClick={handleResetClick}
+                />
+              </span>
+            ) : null}
+          </div>
+        )}
       </div>
 
       {open ? (
         <div ref={panelRef} id={panelId} className="poodle-order-by__surface" role="dialog" aria-label={ariaLabel} tabIndex={-1}>
           <div className="poodle-order-by__panel">
+            {triggerVariant === "icon" ? (
+              <div className="poodle-order-by__panel-header">
+                <span className="poodle-order-by__panel-title">Sort order</span>
+                {showClearButton && effectiveValue.length > 0 ? (
+                  <IconButton
+                    icon="x"
+                    ariaLabel="Clear sort"
+                    tooltip="Clear sort"
+                    variant="ghost"
+                    size="xs"
+                    disabled={disabled}
+                    onClick={handleResetClick}
+                  />
+                ) : null}
+              </div>
+            ) : null}
+
             {effectiveValue.length > 0 ? (
               <div className="poodle-order-by__list" role="list">
                 {effectiveValue.map((item, index) => {

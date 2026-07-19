@@ -3,19 +3,21 @@
 //! Contract: `docs/contracts/components/order-by.md`
 //! Reference: `packages/svelte/components/src/OrderBy.svelte`
 //!
-//! Anatomy (single flex-row items): popover wrapper → root (trigger-wrap +
-//! ghost reset IconButton) → dialog surface (list of items, each = drag handle
-//! + label + direction-toggle IconButton + remove IconButton; or empty text;
-//! plus an add-field Select). Sizes match the corrected size table; the
-//! move-up/move-down buttons and the footer "Clear all" button are gone (drag +
-//! Alt-arrow reorder is the contract's reorder path; the reset `×` clears all).
+//! Anatomy (single flex-row items): popover wrapper → root (trigger wrap with
+//! trigger content + integrated ghost reset IconButton) → dialog surface (list
+//! of items, each = drag handle + label + direction-toggle IconButton + remove
+//! IconButton; or empty text; plus an add-field Select). Sizes match the
+//! corrected size table; the move-up/move-down buttons and the footer "Clear
+//! all" button are gone (drag + Alt-arrow reorder is the contract's reorder
+//! path; the reset `×` clears all).
 //!
 //! Interaction (menu open/close, selection, drag, Alt-arrow reorder) lives in
 //! the preview event loop, not the component — render-only, build/probe-verified.
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
-    ChoiceOption, ControlSize, IconButtonSpec, OrderBySpec, SelectSpec, SortDirection,
+    ButtonVariant, ChoiceOption, ControlSize, IconButtonSpec, OrderBySpec, OrderByTriggerVariant,
+    SelectSpec, SortDirection,
 };
 
 use crate::icon_button::js_icon_button;
@@ -86,80 +88,117 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
     let item_bg = color_mix(surface, elevated, 0.90);
 
     // ── Trigger ───────────────────────────────────────────────────────────────
-    let mut trigger = ui_element::div()
-        .flex_row()
-        .items_center()
-        .gap(trigger_gap)
-        .grow()
-        .min_w(0.0)
-        .min_h(trigger_h)
-        .pl(trigger_pad_x)
-        .pr(trigger_pad_x)
-        .rounded(radius)
-        .border_1()
-        .border_color(border)
-        .bg(surface);
+    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0);
 
-    // Static "SORT BY" label, hidden when compact.
-    if !spec.compact {
-        trigger = trigger.child(
-            ui_element::label("SORT BY")
-                .text_color(text_secondary)
-                .text_size(label_font)
-                .text_weight(500)
-                .letter_spacing_em(0.05), // contract §8 label: letter-spacing 0.05em
-        );
-    }
-
-    let summary_is_placeholder = !spec.has_value();
-    trigger = trigger
-        .child(
-            ui_element::label(&spec.summary_text())
-                .text_color(if summary_is_placeholder {
-                    muted
-                } else {
-                    text_primary
-                })
-                .text_size(summary_font)
+    match spec.trigger_variant {
+        OrderByTriggerVariant::Icon => {
+            root = root.child(js_icon_button(
+                &IconButtonSpec::new()
+                    .with_icon("arrow-up-down")
+                    .with_aria_label(spec.aria_label.clone())
+                    .with_tooltip(spec.aria_label.clone())
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(effective_size)
+                    .with_expanded(spec.is_open)
+                    .with_controls("order-by-surface")
+                    .with_disabled(spec.is_disabled),
+                theme,
+            ));
+        }
+        OrderByTriggerVariant::Summary => {
+            let mut trigger = ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(trigger_gap)
                 .grow()
                 .min_w(0.0)
-                .text_ellipsis()
-                .whitespace_nowrap(),
-        )
-        .child(
-            ui_element::icon("chevron-down")
-                .w(summary_font)
-                .h(summary_font)
-                .text_color(text_secondary),
-        );
+                .min_h(trigger_h)
+                .pl(trigger_pad_x)
+                .pr(trigger_pad_x)
+                .rounded(radius)
+                .border_1()
+                .border_color(border)
+                .bg(surface);
 
-    // ── Root row: trigger + (optional) ghost reset IconButton ────────────────
-    let mut trigger_row = ui_element::div()
-        .flex_row()
-        .items_center()
-        .gap(root_gap)
-        .min_w(0.0)
-        .child(trigger);
+            if !spec.compact {
+                trigger = trigger.child(
+                    ui_element::label("SORT BY")
+                        .text_color(text_secondary)
+                        .text_size(label_font)
+                        .text_weight(500)
+                        .letter_spacing_em(0.05),
+                );
+            }
 
-    if spec.has_value() {
-        trigger_row = trigger_row.child(js_icon_button(
-            &IconButtonSpec::new()
-                .with_icon("x")
-                .with_aria_label("Clear sort")
-                .with_variant(poodle_specs::ButtonVariant::Ghost)
-                .with_size(effective_size)
-                .with_disabled(spec.is_disabled),
-            theme,
-        ));
+            let summary_is_placeholder = !spec.has_value();
+            trigger = trigger.child(
+                ui_element::label(&spec.summary_text())
+                    .text_color(if summary_is_placeholder {
+                        muted
+                    } else {
+                        text_primary
+                    })
+                    .text_size(summary_font)
+                    .grow()
+                    .min_w(0.0)
+                    .text_ellipsis()
+                    .whitespace_nowrap(),
+            );
+
+            if spec.show_clear_button && spec.has_value() {
+                trigger = trigger.child(js_icon_button(
+                    &IconButtonSpec::new()
+                        .with_icon("x")
+                        .with_aria_label("Clear sort")
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(effective_size)
+                        .with_disabled(spec.is_disabled),
+                    theme,
+                ));
+            }
+
+            trigger = trigger.child(
+                ui_element::icon("chevron-down")
+                    .w(summary_font)
+                    .h(summary_font)
+                    .text_color(text_secondary),
+            );
+            root = root.child(trigger);
+        }
     }
-
-    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0);
-    root = root.child(trigger_row);
 
     // ── Dialog surface (rendered inline when open) ───────────────────────────
     if spec.is_open {
         let current_value = spec.current_value();
         let mut panel = ui_element::div().flex_col().gap(panel_gap);
+
+        if matches!(spec.trigger_variant, OrderByTriggerVariant::Icon) {
+            let mut header = ui_element::div()
+                .flex_row()
+                .items_center()
+                .justify_between()
+                .gap(rem_to_px(0.5))
+                .pl(rem_to_px(0.25))
+                .pr(rem_to_px(0.25))
+                .child(
+                    ui_element::label("Sort order")
+                        .text_color(text_secondary)
+                        .text_size(rem_to_px(0.75)),
+                );
+            if spec.show_clear_button && spec.has_value() {
+                header = header.child(js_icon_button(
+                    &IconButtonSpec::new()
+                        .with_icon("x")
+                        .with_aria_label("Clear sort")
+                        .with_tooltip("Clear sort")
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Xs)
+                        .with_disabled(spec.is_disabled),
+                    theme,
+                ));
+            }
+            panel = panel.child(header);
+        }
 
         if current_value.is_empty() {
             panel = panel.child(
@@ -214,9 +253,7 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
                     .child(js_icon_button(
                         &IconButtonSpec::new()
                             .with_icon(dir_icon)
-                            .with_aria_label(format!(
-                                "{field_label}: {dir_word}. Click to toggle."
-                            ))
+                            .with_aria_label(format!("{field_label}: {dir_word}. Click to toggle."))
                             .with_tooltip(dir_tooltip)
                             .with_variant(poodle_specs::ButtonVariant::Ghost)
                             .with_size(ControlSize::Xs)
@@ -333,10 +370,13 @@ mod tests {
 
     #[test]
     fn populated_item_shows_label_and_direction_icon() {
-        let spec = OrderBySpec::new().with_fields(fields()).with_open(true).with_value(vec![
-            OrderByField::new("updated", SortDirection::Desc),
-            OrderByField::new("title", SortDirection::Asc),
-        ]);
+        let spec = OrderBySpec::new()
+            .with_fields(fields())
+            .with_open(true)
+            .with_value(vec![
+                OrderByField::new("updated", SortDirection::Desc),
+                OrderByField::new("title", SortDirection::Asc),
+            ]);
         let el = js_order_by(&spec, &theme());
         let tree = crate::render_probe::probe(&el, 320.0, 320.0);
 
@@ -354,7 +394,11 @@ mod tests {
             tree.texts()
         );
         // Drag handle glyph present.
-        assert!(tree.has_text("⠿"), "drag handle missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("⠿"),
+            "drag handle missing: {:?}",
+            tree.texts()
+        );
         // No move-up/move-down chevrons, no footer "Clear all".
         assert!(!tree.has_text("Clear all"), "footer Clear all must be gone");
     }
@@ -369,6 +413,50 @@ mod tests {
             tree.has_text("Title ↑"),
             "summary should read 'Title ↑': {:?}",
             tree.texts()
+        );
+    }
+
+    #[test]
+    fn show_clear_button_false_suppresses_trigger_reset() {
+        let spec = OrderBySpec::new()
+            .with_fields(fields())
+            .with_value(vec![OrderByField::new("title", SortDirection::Asc)])
+            .with_show_clear_button(false);
+        let tree = crate::render_probe::probe(&js_order_by(&spec, &theme()), 320.0, 80.0);
+        assert!(
+            !tree.has_text("x"),
+            "reset icon should be hidden when show_clear_button=false: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn icon_trigger_moves_reset_into_open_panel() {
+        let spec = OrderBySpec::new()
+            .with_fields(fields())
+            .with_value(vec![OrderByField::new("title", SortDirection::Asc)])
+            .with_trigger_variant(OrderByTriggerVariant::Icon)
+            .with_open(true);
+        let tree = crate::render_probe::probe(&js_order_by(&spec, &theme()), 320.0, 240.0);
+        assert!(
+            tree.has_text("arrow-up-down"),
+            "sort trigger icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Sort order"),
+            "icon popover header missing: {:?}",
+            tree.texts()
+        );
+        assert_eq!(
+            tree.texts().into_iter().filter(|text| *text == "x").count(),
+            2,
+            "panel reset and row remove icons should both render: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("SORT BY"),
+            "summary trigger must be hidden in icon mode"
         );
     }
 }

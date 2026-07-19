@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-19
 
 ## 1. Purpose
 
@@ -55,6 +55,8 @@ Updated: 2026-07-10
 | `tooltip` | `string \| null` | `null` | no | override text for the built-in tooltip; defaults to `ariaLabel` when null |
 | `tooltipPlacement` | `OverlayPlacement` | `"top"` | no | positioning of the tooltip relative to the button |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby reference |
+| `expanded` | `boolean \| null` | `null` | no | optional `aria-expanded` state when the button triggers a disclosure or popover |
+| `controls` | `string \| null` | `null` | no | optional `aria-controls` reference for the controlled surface |
 | `type` | `HTMLButtonElement["type"]` | `"button"` | no | HTML button type attribute |
 
 ### ButtonVariant
@@ -135,6 +137,7 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 - Required attributes: `aria-label` from prop (required, always present)
 - `aria-busy="true"` when `loading=true`
 - `aria-pressed` when `pressed !== null` (renders true or false)
+- `aria-expanded` when `expanded !== null`; `aria-controls` when `controls` is provided
 - `aria-describedby` links to the built-in tooltip element (auto-generated id);
   when the tooltip is open, the tooltip id replaces any `describedBy` value (not combined)
 - The tooltip element uses `role="tooltip"` and is referenced by

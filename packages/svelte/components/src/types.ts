@@ -296,6 +296,8 @@ export type OrderByField = {
 
 export type OrderByValue = OrderByField[];
 
+export type OrderByTriggerVariant = "summary" | "icon";
+
 export type ActiveSort = {
   field: string;
   direction: SortDirection;

@@ -6,7 +6,9 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, OrderBy};
-use poodle_specs::{EyebrowSpec, OrderByField, OrderBySpec, SortDirection, SortField};
+use poodle_specs::{
+    EyebrowSpec, OrderByField, OrderBySpec, OrderByTriggerVariant, SortDirection, SortField,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -53,6 +55,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .child("Sorted by: name (ascending)"),
                         ),
                 ),
+        )
+        // --- Icon trigger ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Icon trigger"),
+                    theme,
+                ))
+                .child(OrderBy::from_spec(
+                    OrderBySpec::new()
+                        .with_fields(vec![
+                            SortField::new("name", "Name"),
+                            SortField::new("date", "Date"),
+                            SortField::new("size", "Size"),
+                        ])
+                        .with_value(vec![
+                            OrderByField::new("name", SortDirection::Asc),
+                            OrderByField::new("date", SortDirection::Desc),
+                        ])
+                        .with_trigger_variant(OrderByTriggerVariant::Icon)
+                        .with_open(true),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(

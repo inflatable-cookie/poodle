@@ -18,6 +18,10 @@ export function OrderBySpecimen() {
   ]);
   const [sizeValue, setSizeValue] = useState<OrderByValue>([{ key: "title", direction: "asc" }]);
   const [densityValue, setDensityValue] = useState<OrderByValue>([{ key: "title", direction: "asc" }]);
+  const [iconValue, setIconValue] = useState<OrderByValue>([
+    { key: "updatedAt", direction: "desc" },
+    { key: "title", direction: "asc" },
+  ]);
 
   return (
     <SpecimenLayout
@@ -33,6 +37,10 @@ export function OrderBySpecimen() {
 
       <SpecimenGroup label="Disabled">
         <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} disabled />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Icon trigger">
+        <OrderBy fields={fields} value={iconValue} onChange={setIconValue} triggerVariant="icon" />
       </SpecimenGroup>
     </SpecimenLayout>
   );

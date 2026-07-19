@@ -10,6 +10,10 @@
 
   let sizeValue = $state<OrderByValue>([{ key: "title", direction: "asc" }]);
   let densityValue = $state<OrderByValue>([{ key: "title", direction: "asc" }]);
+  let iconValue = $state<OrderByValue>([
+    { key: "updatedAt", direction: "desc" },
+    { key: "title", direction: "asc" },
+  ]);
 
   const fields: SortField[] = [
     { key: "title", label: "Title" },
@@ -28,6 +32,10 @@
 
   <SpecimenGroup label="Disabled">
     <OrderBy {fields} value={[{ key: "title", direction: "asc" }]} disabled />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Icon trigger">
+    <OrderBy {fields} bind:value={iconValue} triggerVariant="icon" />
   </SpecimenGroup>
 
   {#snippet sizes(size)}

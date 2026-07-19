@@ -43,6 +43,8 @@ export interface IconButtonProps {
   pressed?: boolean | null;
   defaultPressed?: boolean | null;
   describedBy?: string | null;
+  expanded?: boolean | null;
+  controls?: string | null;
   type?: "button" | "submit" | "reset";
   onClick?: ((event: MouseEvent<HTMLButtonElement>) => void) | null;
   onFocus?: ((event: FocusEvent<HTMLButtonElement>) => void) | null;
@@ -66,6 +68,8 @@ export function IconButton({
   pressed = null,
   defaultPressed = null,
   describedBy = null,
+  expanded = null,
+  controls = null,
   type = "button",
   onClick = null,
   onFocus = null,
@@ -184,6 +188,8 @@ export function IconButton({
         aria-describedby={tooltipOpen ? tooltipId : (describedBy ?? undefined)}
         aria-busy={loading ? "true" : undefined}
         aria-pressed={isToggle ? currentPressed : undefined}
+        aria-expanded={expanded ?? undefined}
+        aria-controls={controls ?? undefined}
         onClick={handleClick}
         onFocus={(event) => {
           sendHover({ type: "ENTER" });

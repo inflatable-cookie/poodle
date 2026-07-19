@@ -1,7 +1,7 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-19
 
 ## 1. Purpose
 
@@ -11,7 +11,7 @@ Updated: 2026-07-10
   ordered list of sort fields with per-field direction toggles, drag reordering
   (via a focusable drag handle + Alt+Arrow keyboard), field removal, and an
   add-field dropdown
-- In scope: dropdown trigger with summary text, panel with sort field list,
+- In scope: summary or single-IconButton dropdown trigger, panel with sort field list,
   drag-and-drop reordering via the drag-handle button, Alt+ArrowUp/ArrowDown
   keyboard reorder, direction toggle buttons, remove buttons, add-field Select
   dropdown, compact summary mode, maxFields cap, legacy `activeSort` compatibility
@@ -23,14 +23,18 @@ Updated: 2026-07-10
 ```text
 [Popover .order-by-popover] <div>  (position: relative wrapper, carries data-size/data-density)
   ├── [Root .order-by] <div role="group">
-  │   ├── [Trigger Wrap .order-by__trigger-wrap] <div>
-  │   │   └── [Trigger .order-by__trigger] <button aria-expanded aria-controls>
+  │   ├── [Trigger Wrap .order-by__trigger-wrap] <div> (summary variant)
+  │   │   ├── [Trigger .order-by__trigger] <button aria-expanded aria-controls>
   │   │       ├── [Label .order-by__label] <span>  (hidden when compact)
   │   │       ├── [Summary .order-by__summary] <span>
   │   │       └── [Chevron .order-by__chevron] <span aria-hidden="true">
-  │   └── [Reset .order-by__reset] <span> (conditional: showClearButton && value non-empty)
-  │       └── IconButton (icon="x", variant="ghost", ariaLabel="Clear sort")
+  │   │   └── [Reset .order-by__reset] <span> (conditional: showClearButton && value non-empty)
+  │   │       └── IconButton (icon="x", variant="ghost", ariaLabel="Clear sort")
+  │   └── [Icon Trigger] IconButton (icon="arrow-up-down", variant="secondary") (icon variant)
   └── [Surface .order-by__surface > .order-by__panel] <div role="dialog"> (rendered inline when open)
+      ├── [Panel Header .order-by__panel-header] <div> (icon variant)
+      │   ├── [Panel Title .order-by__panel-title] <span>Sort order</span>
+      │   └── IconButton (icon="x", variant="ghost", ariaLabel="Clear sort") (conditional)
       ├── [List .order-by__list] <div role="list"> (conditional: visible when value non-empty)
       │   └── [Item .order-by__item] <div role="listitem"> (repeated, single flex row)
       │       ├── [Drag Handle .order-by__drag-handle] <button draggable aria-label="Reorder …">
@@ -45,13 +49,15 @@ Updated: 2026-07-10
 | Part | Required | Description |
 |------|----------|-------------|
 | Popover | yes | `position: relative` wrapper anchoring the surface; carries `data-size`, `data-density` |
-| Root | yes | flex container wrapping trigger and reset; `role="group"`, carries `data-disabled`, `data-compact` |
-| Trigger Wrap | yes | flex-1 wrapper around the trigger button |
-| Trigger | yes | button that opens the dropdown; displays label, summary, and chevron; carries `aria-expanded` / `aria-controls` |
-| Label | yes | static "Sort by" uppercase text inside the trigger; hidden when `compact` is true |
-| Summary | yes | dynamic text summarizing the active sort fields |
-| Chevron | yes | dropdown indicator arrow (`▾`) |
-| Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear sort"`), shown when `showClearButton` and at least one sort field is active |
+| Root | yes | flex container wrapping the selected trigger form; `role="group"`, carries `data-disabled`, `data-compact`, `data-trigger-variant` |
+| Trigger Wrap | no | summary-variant flex-1 wrapper around the trigger button |
+| Trigger | no | summary-variant button that opens the dropdown; displays label, summary, and chevron; carries `aria-expanded` / `aria-controls` |
+| Icon Trigger | no | icon-variant `IconButton icon="arrow-up-down" variant="secondary"`; the only closed-state control |
+| Label | no | summary-variant static "Sort by" uppercase text; hidden when `compact` is true |
+| Summary | no | summary-variant dynamic text summarizing the active sort fields |
+| Chevron | no | summary-variant dropdown indicator arrow (`▾`) |
+| Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear sort"`), shown inside the summary trigger wrap or icon-variant panel header when `showClearButton` and at least one sort field is active |
+| Panel Header | no | icon-variant header containing the title and optional reset action |
 | Surface | yes | anchored `role="dialog"` dropdown surface (`tabindex="-1"`) containing the sort builder UI |
 | List | no | vertical list of active sort items (shown when value is non-empty) |
 | Item | no | one active sort field row, a single flex row: drag handle, field label, direction toggle, remove; supports drag reorder |
@@ -76,6 +82,7 @@ Updated: 2026-07-10
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override (`"compact"`, `"default"`, `"comfortable"`) |
 | `maxFields` | `number \| null` | `null` | no | maximum number of simultaneously active sort fields; `null` means no limit |
 | `compact` | `boolean` | `false` | no | when true, hides the static "Sort by" label and, with more than 2 fields active, truncates the summary to first two plus a count badge |
+| `triggerVariant` | `"summary" \| "icon"` | `"summary"` | no | `"summary"` renders the full text trigger; `"icon"` renders one sort IconButton and keeps reset/editing controls inside the popover |
 | `showClearButton` | `boolean` | `true` | no | when false, the reset `×` IconButton is never rendered |
 | `onChange` | `(value: OrderByValue) => void \| null` | `null` | no | callback fired on every sort mutation |
 
@@ -152,6 +159,7 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 | empty | no active sort fields | trigger summary shows "Sort by..." in muted text; panel shows "No sort fields"; reset IconButton hidden |
 | populated | one or more sort fields active | trigger summary shows field labels with direction arrows; reset IconButton visible (when `showClearButton`) |
 | compact | `compact=true` | the static "Sort by" label is hidden; with 3+ fields the summary shows first two then `+N` count (e.g. "Title ↑, Updated ↓ +1") |
+| icon trigger | `triggerVariant="icon"` | closed state is one secondary sort IconButton; opening shows the sort rows, add control, and reset in the panel header |
 | disabled | `disabled=true` | root reduced to disabled opacity; all buttons and controls disabled |
 | dropdown open | user clicks trigger | anchored dialog surface appears below the trigger |
 | item dragging | user drags a sort item | dragging item reduced to 0.65 opacity |
@@ -190,6 +198,9 @@ Dropdown open/dismiss (now on the dismissable-layer stack) plus direction toggli
 | Trigger | `aria-expanded` | `"true"` when open, `"false"` otherwise |
 | Trigger | `aria-controls` | the dialog surface id when open |
 | Trigger | `disabled` | native disabled attribute when `disabled=true` |
+| Icon Trigger | `aria-label` | from `ariaLabel` prop |
+| Icon Trigger | `aria-expanded` | `"true"` when open, `"false"` otherwise |
+| Icon Trigger | `aria-controls` | the dialog surface id when open |
 | Dialog surface | `role` | `"dialog"` |
 | Dialog surface | `aria-label` | from `ariaLabel` prop |
 | Dialog surface | `tabindex` | `"-1"` |
@@ -221,7 +232,7 @@ moves it one position later.
 
 ### Focus
 
-- Trigger button receives standard focus ring on `focus-visible`
+- Summary trigger button receives the trigger-wrap focus ring; the icon trigger uses the IconButton focus ring
 - Reset IconButton manages its own focus ring
 - Panel controls (drag-handle button, IconButton, Select) each manage their own
   focus rings
@@ -233,12 +244,13 @@ moves it one position later.
 
 ### Sizing
 
-- Popover: `position: relative`, `display: flex`, `width: 100%`, `min-width: 0`
-- Root: `flex`, `align-items: center`, `width: 100%`
+- Popover: `position: relative`, `display: flex`, `width: 100%`, `min-width: 0`; icon variant uses `width: fit-content`
+- Root: `flex`, `align-items: center`, `width: 100%`; icon variant uses `width: auto`
 - Trigger: `inline-flex`, `flex: 1`, `width: 100%`, min-height from
   `var(--poodle-size-control-height)` (size-stepped)
 - Reset: `inline-flex` wrapper around an `xs`/size-matched IconButton (no bespoke
   square dimensions)
+- Icon trigger: shared secondary `IconButton`, size matched to the resolved control size
 - Surface: anchored `position: absolute`, `min-width: 14rem`,
   `max-width: min(24rem, 90vw)`, `top: calc(100% + 0.5rem)`
 - Panel: flex column
@@ -280,6 +292,40 @@ moves it one position later.
 |----------|-------|
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Trigger Wrap (.order-by__trigger-wrap)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `flex` | `1` |
+| `min-width` | `0` |
+| `width` | `100%` |
+| `max-width` | `100%` |
+| `box-sizing` | `border-box` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `transition` | `background, border-color` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+
+The trigger wrap is rendered only for `triggerVariant="summary"`. The icon
+variant delegates its square dimensions, border, radius, hover, and focus
+treatment to the shared secondary `IconButton` contract.
+
+### Trigger Wrap hover (.order-by__trigger-wrap:hover)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))` |
+
+### Trigger Wrap focus (.order-by__trigger-wrap:focus-within)
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
+| `outline-offset` | `0.0625rem` |
+
 ### Trigger (.order-by__trigger)
 
 | Property | Value |
@@ -289,32 +335,14 @@ moves it one position later.
 | `gap` | `0.5rem` |
 | `flex` | `1` |
 | `min-width` | `0` |
-| `width` | `100%` |
-| `max-width` | `100%` |
 | `min-height` | `var(--poodle-size-control-height)` (size-stepped) |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `box-sizing` | `border-box` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-color-background-surface)` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `inherit` |
 | `cursor` | `pointer` |
 | `text-align` | `left` |
 | `user-select` | `none` |
-| `transition` | `background, border-color` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
-
-### Trigger hover (.order-by__trigger:hover:not(:disabled))
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))` |
-
-### Trigger focus (.order-by__trigger:focus-visible)
-
-| Property | Value |
-|----------|-------|
-| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.0625rem` |
 
 ### Label (.order-by__label)
 
@@ -353,10 +381,13 @@ moves it one position later.
 
 ### Reset (.order-by__reset)
 
-The reset is an `IconButton icon="x" variant="ghost"` (aria-label `"Clear sort"`,
-`size` matched to the resolved control size), wrapped in an `inline-flex`,
-`flex-shrink: 0` span. It owns its own hover/focus treatment via the IconButton
-primitive — there is no bespoke reset button chrome.
+In summary mode, the reset is an `IconButton icon="x" variant="ghost"`
+(aria-label `"Clear sort"`, size matched to the resolved control size), wrapped
+in an `inline-flex`, `flex-shrink: 0` span inside `.order-by__trigger-wrap`. It is
+visually part of the trigger shell but remains a sibling of the trigger
+`<button>` so HTML implementations do not nest buttons. In icon mode, the same
+action renders at size `xs` in the panel header. Both use the IconButton
+primitive's hover/focus treatment; there is no bespoke reset button chrome.
 
 ### Compact label hide (.order-by[data-compact="true"] .order-by__label)
 
@@ -389,6 +420,17 @@ primitive — there is no bespoke reset button chrome.
 | `gap` | `0.375rem` |
 | `margin` | `calc(-0.5 * var(--poodle-space-panel-y)) calc(-0.5 * var(--poodle-space-panel-x))` |
 | `padding` | `0.375rem` |
+
+### Icon-variant panel header (.order-by__panel-header)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `space-between` |
+| `gap` | `0.5rem` |
+| `min-height` | `1.5rem` |
+| `padding` | `0 0.25rem` |
 
 ### List (.order-by__list)
 
@@ -503,6 +545,7 @@ default `0 var(--poodle-space-control-x)`.
 | `data-disabled` | Root | `"true"` / `"false"` | reflects disabled state |
 | `data-size` | Root | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` | resolved control size |
 | `data-density` | Root | `"compact"`, `"default"`, `"comfortable"` | resolved density |
+| `data-trigger-variant` | Popover, Root | `"summary"`, `"icon"` | selects the closed trigger form and width behavior |
 | `data-placeholder` | Summary | `"true"` / `"false"` | whether the summary is showing placeholder text (empty state) |
 
 ## 10. Drag-And-Drop Behavior
@@ -527,7 +570,8 @@ The panel uses the following internal component instances:
 | Component | Usage | Props |
 |-----------|-------|-------|
 | local dialog surface | wraps the sort-builder UI when open | `role="dialog"`, `aria-label` from prop, `tabindex="-1"` |
-| `IconButton` (reset) | clears all sort fields | `icon="x"`, `variant="ghost"`, `ariaLabel="Clear sort"`, `size` from resolved size |
+| `IconButton` (icon trigger) | opens the popover in icon mode | `icon="arrow-up-down"`, `variant="secondary"`, `ariaLabel` from prop, `expanded` from open state, `controls` from panel id |
+| `IconButton` (reset) | clears all sort fields | `icon="x"`, `variant="ghost"`, `ariaLabel="Clear sort"`; resolved size in summary trigger, `xs` in icon panel header |
 | drag-handle `<button>` | initiates drag + Alt+Arrow reorder | `draggable`, `aria-label="Reorder {field}. Drag or use Alt plus arrow keys."` |
 | `IconButton` (direction toggle) | toggles asc/desc per field | `icon="arrow-up"` or `"arrow-down"`, `size="xs"`, `variant="ghost"`, `tooltip="Asc"`/`"Desc"` |
 | `IconButton` (remove) | removes field from sort | `icon="x"`, `size="xs"`, `variant="ghost"`, `tooltip="Remove"` (no danger tone) |
@@ -541,7 +585,7 @@ The panel uses the following internal component instances:
 - The `activeSort` prop provides backward compatibility: when `value` is empty, `activeSort` is converted to a one-element value; on every mutation, `activeSort` is updated to reflect the first value element
 - CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive
 - The add-field Select uses its value-change callback to call `addField(key)`, then resets its own value to `""` to allow re-selection
-- Clearing all sort fields is done via the reset `×` IconButton only — there is no footer or "Clear all" Button
+- Clearing all sort fields is done via the reset `×` IconButton only — in the summary trigger for `summary`, in the panel header for `icon`; there is no footer or "Clear all" Button
 - The reset `×` IconButton handler uses `stopPropagation` and `preventDefault` to avoid toggling the dropdown
 - The surface is a `role="dialog"` element with `tabindex="-1"`; on open the component auto-focuses the first focusable control, and closes on outside-click or Escape
 
@@ -559,6 +603,7 @@ The panel uses the following internal component instances:
 - [ ] `activeSort` legacy bridging: value-to-activeSort and activeSort-to-value
 - [ ] reset IconButton clears all sort fields (value to `[]`, activeSort to `null`)
 - [ ] `showClearButton=false` suppresses the reset IconButton
+- [ ] `triggerVariant="icon"` renders one closed-state sort IconButton and moves reset into the open panel
 - [ ] maxFields enforced: add-field hidden when limit reached
 - [ ] disabled state suppresses all interactions
 - [ ] summary text format: `"FieldName ↑"` / `"FieldName ↓"` joined by `", "`
@@ -576,6 +621,7 @@ The panel uses the following internal component instances:
 - [ ] summary placeholder color matches (muted)
 - [ ] chevron color matches (secondary)
 - [ ] reset renders as a ghost IconButton (no bespoke square chrome)
+- [ ] icon trigger renders as a secondary IconButton at the resolved size
 - [ ] item layout matches (single row, padding 0.3125rem 0.5rem, border-subtle, radius control-0.0625rem, surface 90%/elevated bg)
 - [ ] item label is single-line with ellipsis (0.8125rem, primary color)
 - [ ] drag handle is a button (muted, grab cursor, 1.5rem min square)
@@ -617,3 +663,9 @@ The panel uses the following internal component instances:
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Disabled | Same fields, single value, `disabled=true` | Trigger at reduced opacity, all controls non-interactive |
+
+### Icon trigger
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Icon trigger | Same fields, Updated desc + Title asc, `triggerVariant="icon"` | One sort IconButton when closed; open panel contains header reset, active sort rows, and add-field control |

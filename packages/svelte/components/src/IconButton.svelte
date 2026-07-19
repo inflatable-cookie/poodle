@@ -39,6 +39,8 @@
     pressed?: boolean | null;
     defaultPressed?: boolean | null;
     describedBy?: string | null;
+    expanded?: boolean | null;
+    controls?: string | null;
     type?: HTMLButtonElement["type"];
     onClick?: ((event: MouseEvent) => void) | null;
     onFocus?: ((event: FocusEvent) => void) | null;
@@ -62,6 +64,8 @@
     pressed = $bindable<boolean | null>(null),
     defaultPressed = null,
     describedBy = null,
+    expanded = null,
+    controls = null,
     type = "button",
     onClick = null,
     onFocus = null,
@@ -226,6 +230,8 @@
     aria-describedby={tooltipOpen ? tooltipId : describedBy ?? undefined}
     aria-busy={loading ? "true" : undefined}
     aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
+    aria-expanded={expanded === null ? undefined : expanded ? "true" : "false"}
+    aria-controls={controls ?? undefined}
     onclick={handleClick}
     onfocus={handleFocus}
     onblur={handleBlur}

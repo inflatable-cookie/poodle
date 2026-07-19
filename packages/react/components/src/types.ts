@@ -163,6 +163,7 @@ export type OrderByField = {
   direction: SortDirection;
 };
 export type OrderByValue = OrderByField[];
+export type OrderByTriggerVariant = "summary" | "icon";
 export type OrderByFieldDefinition = {
   key: string;
   label: string;

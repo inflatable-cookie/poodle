@@ -257,6 +257,7 @@ export type {
   FilterOption,
   OrderByField,
   OrderByFieldDefinition,
+  OrderByTriggerVariant,
   OrderByValue,
   SortField,
   SortDirection,

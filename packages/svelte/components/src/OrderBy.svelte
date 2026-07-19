@@ -17,6 +17,7 @@
     ControlDensity,
     ControlSize,
     OrderByFieldDefinition,
+    OrderByTriggerVariant,
     OrderByValue,
     SemanticControlSizeRole,
     SortDirection,
@@ -34,6 +35,7 @@
     density?: ControlDensity | null;
     maxFields?: number | null;
     compact?: boolean;
+    triggerVariant?: OrderByTriggerVariant;
     showClearButton?: boolean;
     onChange?: ((value: OrderByValue) => void) | null;
   }
@@ -49,6 +51,7 @@
     density = null,
     maxFields = null,
     compact = false,
+    triggerVariant = "summary",
     showClearButton = true,
     onChange = null,
   }: Props = $props();
@@ -269,6 +272,7 @@
   class="poodle-order-by-popover"
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-trigger-variant={triggerVariant}
 >
   <div
     class="poodle-order-by"
@@ -276,40 +280,53 @@
     aria-label={ariaLabel}
     data-disabled={disabled}
     data-compact={compact}
+    data-trigger-variant={triggerVariant}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
-    <div
-      class="poodle-order-by__trigger-wrap"
-    >
-      <button
-        type="button"
-        class="poodle-order-by__trigger"
+    {#if triggerVariant === "icon"}
+      <IconButton
+        icon="arrow-up-down"
+        ariaLabel={ariaLabel}
+        tooltip={ariaLabel}
+        variant="secondary"
+        size={resolvedSize}
         disabled={disabled}
-        aria-label={ariaLabel}
-        aria-expanded={open ? "true" : "false"}
-        aria-controls={open ? panelId : undefined}
-        onclick={toggleOpen}
-      >
-        <span class="poodle-order-by__label">Sort by</span>
-        <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
-          {triggerText}
-        </span>
-        <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
-      </button>
-    </div>
-
-    {#if showClearButton && effectiveValue.length > 0}
-      <span class="poodle-order-by__reset">
-        <IconButton
-          icon="x"
-          ariaLabel="Clear sort"
-          variant="ghost"
-          size={resolvedSize}
+        expanded={open}
+        controls={open ? panelId : null}
+        onClick={toggleOpen}
+      />
+    {:else}
+      <div class="poodle-order-by__trigger-wrap">
+        <button
+          type="button"
+          class="poodle-order-by__trigger"
           disabled={disabled}
-          onClick={handleResetClick}
-        />
-      </span>
+          aria-label={ariaLabel}
+          aria-expanded={open ? "true" : "false"}
+          aria-controls={open ? panelId : undefined}
+          onclick={toggleOpen}
+        >
+          <span class="poodle-order-by__label">Sort by</span>
+          <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
+            {triggerText}
+          </span>
+          <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
+        </button>
+
+        {#if showClearButton && effectiveValue.length > 0}
+          <span class="poodle-order-by__reset">
+            <IconButton
+              icon="x"
+              ariaLabel="Clear sort"
+              variant="ghost"
+              size={resolvedSize}
+              disabled={disabled}
+              onClick={handleResetClick}
+            />
+          </span>
+        {/if}
+      </div>
     {/if}
   </div>
 
@@ -323,6 +340,23 @@
       tabindex="-1"
     >
       <div class="poodle-order-by__panel">
+        {#if triggerVariant === "icon"}
+          <div class="poodle-order-by__panel-header">
+            <span class="poodle-order-by__panel-title">Sort order</span>
+            {#if showClearButton && effectiveValue.length > 0}
+              <IconButton
+                icon="x"
+                ariaLabel="Clear sort"
+                tooltip="Clear sort"
+                variant="ghost"
+                size="xs"
+                disabled={disabled}
+                onClick={handleResetClick}
+              />
+            {/if}
+          </div>
+        {/if}
+
         {#if effectiveValue.length > 0}
           <div class="poodle-order-by__list" role="list">
             {#each effectiveValue as item, index (`${item.key}-${index}`)}
@@ -401,4 +435,3 @@
     </div>
   {/if}
 </div>
-

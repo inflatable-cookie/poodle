@@ -199,7 +199,9 @@ pub use meter::MeterSpec;
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_input::NumberInputSpec;
-pub use order_by::{ActiveSort, OrderByField, OrderBySpec, SortDirection, SortField};
+pub use order_by::{
+    ActiveSort, OrderByField, OrderBySpec, OrderByTriggerVariant, SortDirection, SortField,
+};
 pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
@@ -521,11 +523,15 @@ mod tests {
             .with_variant(ButtonVariant::Ghost)
             .with_icon("close")
             .with_aria_label("Close panel")
+            .with_expanded(true)
+            .with_controls("panel")
             .with_pressed(true);
 
         assert!(spec.has_required_icon());
         assert!(spec.has_required_accessible_name());
         assert!(spec.uses_pressed_semantics());
+        assert_eq!(spec.is_expanded, Some(true));
+        assert_eq!(spec.controls.as_deref(), Some("panel"));
         assert_eq!(spec.control_height_token(), semantic::SIZE_CONTROL_HEIGHT);
     }
 

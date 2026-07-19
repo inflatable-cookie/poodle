@@ -5,7 +5,8 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::order_by::js_order_by;
 use poodle_jetstream_components::theme_ext::*;
 use poodle_specs::{
-    ControlDensity, ControlSize, OrderByField, OrderBySpec, SortDirection, SortField,
+    ControlDensity, ControlSize, OrderByField, OrderBySpec, OrderByTriggerVariant, SortDirection,
+    SortField,
 };
 
 fn fields() -> Vec<SortField> {
@@ -38,6 +39,21 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                         OrderByField::new("title", SortDirection::Asc),
                     ])
                     .with_compact(true)
+                    .with_open(true),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Icon trigger (open)",
+            secondary,
+            js_order_by(
+                &OrderBySpec::new()
+                    .with_fields(fields())
+                    .with_value(vec![
+                        OrderByField::new("updated", SortDirection::Desc),
+                        OrderByField::new("title", SortDirection::Asc),
+                    ])
+                    .with_trigger_variant(OrderByTriggerVariant::Icon)
                     .with_open(true),
                 theme,
             ),

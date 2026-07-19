@@ -12,6 +12,8 @@ pub struct IconButtonSpec {
     pub size: ControlSize,
     pub icon: Option<String>,
     pub aria_label: Option<String>,
+    pub is_expanded: Option<bool>,
+    pub controls: Option<String>,
     pub is_disabled: bool,
     pub is_loading: bool,
     pub is_pressed: Option<bool>,
@@ -33,6 +35,8 @@ impl Default for IconButtonSpec {
             size: ControlSize::Md,
             icon: None,
             aria_label: None,
+            is_expanded: None,
+            controls: None,
             is_disabled: false,
             is_loading: false,
             is_pressed: None,
@@ -81,6 +85,16 @@ impl IconButtonSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_expanded(mut self, is_expanded: bool) -> Self {
+        self.is_expanded = Some(is_expanded);
+        self
+    }
+
+    pub fn with_controls(mut self, controls: impl Into<String>) -> Self {
+        self.controls = Some(controls.into());
         self
     }
 

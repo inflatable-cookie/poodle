@@ -2,7 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ButtonVariant, ChoiceOption, ControlDensity, ControlSize, IconButtonSpec, IconSize, IconSpec,
-    OrderBySpec, SelectSpec, SemanticControlSizeRole, SortDirection,
+    OrderBySpec, OrderByTriggerVariant, SelectSpec, SemanticControlSizeRole, SortDirection,
 };
 
 use super::{Icon, IconButton, Select};
@@ -13,8 +13,8 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius
 ///
 /// Contract: `docs/contracts/components/order-by.md`. Mirrors the corrected
 /// contract (reconciled against `OrderBy.svelte`): single-row items (drag
-/// handle + label + direction-toggle IconButton + remove IconButton), a ghost
-/// `×` reset IconButton, "No sort fields" empty text, and an add-field `Select`.
+/// handle + label + direction-toggle IconButton + remove IconButton), an
+/// integrated trigger reset IconButton, "No sort fields" empty text, and an add-field `Select`.
 /// The move-up/move-down buttons and the footer "Clear all" button are gone.
 /// GPUI has no ARIA channel and no anchored-popover positioning — the surface
 /// renders inline below the trigger; interaction (open/select/drag/Alt-arrow)
@@ -22,6 +22,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius
 pub struct OrderBy {
     spec: OrderBySpec,
     theme: GpuiThemeProvider,
+    on_trigger: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
     on_reset: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
@@ -41,6 +42,7 @@ impl OrderBy {
         Self {
             spec,
             theme: theme.clone(),
+            on_trigger: None,
             on_reset: None,
         }
     }
@@ -67,12 +69,22 @@ impl OrderBy {
         self.on_reset = Some(Box::new(handler));
         self
     }
+
+    pub fn on_trigger(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_trigger = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for OrderBy {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        let mut on_reset = self.on_reset;
+        let on_trigger = self.on_trigger;
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -127,85 +139,132 @@ impl IntoElement for OrderBy {
         let item_bg = color_mix(surface, elevated, 0.90);
 
         // ── Trigger ───────────────────────────────────────────────────────────
-        let mut trigger = div()
-            .min_w(px(rem_to_px(0.0)))
-            .max_w(px(rem_to_px(28.0)))
-            .h(trigger_height)
-            .px(trigger_pad_x)
-            .rounded(radius)
-            .border_1()
-            .border_color(border)
-            .bg(surface)
-            .flex()
-            .items_center()
-            .gap(trigger_gap)
-            .text_color(text_primary);
-
-        if !spec.compact {
-            trigger = trigger.child(
-                div()
-                    .text_size(label_size)
-                    .text_color(text_secondary)
-                    .child("SORT BY"),
-            );
-        }
-
-        let summary_is_placeholder = !spec.has_value();
-        trigger = trigger
-            .child(
-                div()
-                    .flex_grow()
-                    .min_w(px(0.0))
-                    .text_size(summary_size)
-                    .text_color(if summary_is_placeholder {
-                        muted
-                    } else {
-                        text_primary
-                    })
-                    .child(spec.summary_text()),
-            )
-            .child(
-                Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
-                    .with_color(text_secondary),
-            );
-
         let mut root = div()
             .id("order-by")
             .flex()
             .flex_col()
             .gap(px(rem_to_px(0.375)));
 
-        let mut trigger_row = div()
-            .flex()
-            .items_center()
-            .gap(px(rem_to_px(0.375)))
-            .child(trigger);
-
-        // Reset = ghost IconButton (no bespoke square chrome).
-        if spec.has_value() {
-            let mut reset = IconButton::from_spec(
-                IconButtonSpec::new()
-                    .with_icon("x")
-                    .with_aria_label("Clear sort")
-                    .with_variant(ButtonVariant::Ghost)
-                    .with_size(effective_size)
-                    .with_disabled(spec.is_disabled),
-                theme,
-            )
-            .with_id("order-by-reset");
-
-            if let Some(handler) = self.on_reset {
-                reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
+        match spec.trigger_variant {
+            OrderByTriggerVariant::Icon => {
+                let mut trigger = IconButton::from_spec(
+                    IconButtonSpec::new()
+                        .with_icon("arrow-up-down")
+                        .with_aria_label(spec.aria_label.clone())
+                        .with_tooltip(spec.aria_label.clone())
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(effective_size)
+                        .with_expanded(spec.is_open)
+                        .with_controls("order-by-surface")
+                        .with_disabled(spec.is_disabled),
+                    theme,
+                )
+                .with_id("order-by-trigger");
+                if let Some(handler) = on_trigger {
+                    trigger = trigger.on_click(move |event, window, cx| handler(event, window, cx));
+                }
+                root = root.child(trigger);
             }
-            trigger_row = trigger_row.child(reset);
-        }
+            OrderByTriggerVariant::Summary => {
+                let mut trigger = div()
+                    .min_w(px(rem_to_px(0.0)))
+                    .max_w(px(rem_to_px(28.0)))
+                    .h(trigger_height)
+                    .px(trigger_pad_x)
+                    .rounded(radius)
+                    .border_1()
+                    .border_color(border)
+                    .bg(surface)
+                    .flex()
+                    .items_center()
+                    .gap(trigger_gap)
+                    .text_color(text_primary);
 
-        root = root.child(trigger_row);
+                if !spec.compact {
+                    trigger = trigger.child(
+                        div()
+                            .text_size(label_size)
+                            .text_color(text_secondary)
+                            .child("SORT BY"),
+                    );
+                }
+
+                let summary_is_placeholder = !spec.has_value();
+                trigger = trigger.child(
+                    div()
+                        .flex_grow()
+                        .min_w(px(0.0))
+                        .text_size(summary_size)
+                        .text_color(if summary_is_placeholder {
+                            muted
+                        } else {
+                            text_primary
+                        })
+                        .child(spec.summary_text()),
+                );
+
+                if spec.show_clear_button && spec.has_value() {
+                    let mut reset = IconButton::from_spec(
+                        IconButtonSpec::new()
+                            .with_icon("x")
+                            .with_aria_label("Clear sort")
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(effective_size)
+                            .with_disabled(spec.is_disabled),
+                        theme,
+                    )
+                    .with_id("order-by-reset");
+                    if let Some(handler) = on_reset.take() {
+                        reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
+                    }
+                    trigger = trigger.child(reset);
+                }
+
+                trigger = trigger.child(
+                    Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
+                        .with_color(text_secondary),
+                );
+                root = root.child(trigger);
+            }
+        }
 
         // ── Dialog surface (rendered inline when open) ────────────────────────
         if spec.is_open {
             let current_value = spec.current_value();
             let mut panel = div().flex().flex_col().gap(px(rem_to_px(0.375)));
+
+            if matches!(spec.trigger_variant, OrderByTriggerVariant::Icon) {
+                let mut header = div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap(px(rem_to_px(0.5)))
+                    .px(px(rem_to_px(0.25)))
+                    .child(
+                        div()
+                            .text_size(px(rem_to_px(0.75)))
+                            .text_color(text_secondary)
+                            .child("Sort order"),
+                    );
+                if spec.show_clear_button && spec.has_value() {
+                    let mut reset = IconButton::from_spec(
+                        IconButtonSpec::new()
+                            .with_icon("x")
+                            .with_aria_label("Clear sort")
+                            .with_tooltip("Clear sort")
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Xs)
+                            .with_disabled(spec.is_disabled),
+                        theme,
+                    )
+                    .with_id("order-by-panel-reset");
+                    if let Some(handler) = on_reset.take() {
+                        reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
+                    }
+                    header = header.child(reset);
+                }
+                panel = panel.child(header);
+            }
 
             if current_value.is_empty() {
                 panel = panel.child(

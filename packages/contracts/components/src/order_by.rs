@@ -13,6 +13,13 @@ impl Default for SortDirection {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum OrderByTriggerVariant {
+    #[default]
+    Summary,
+    Icon,
+}
+
 #[derive(Clone, Debug)]
 pub struct SortField {
     pub value: String,
@@ -95,6 +102,8 @@ pub struct OrderBySpec {
     pub density: ControlDensity,
     pub max_fields: Option<usize>,
     pub compact: bool,
+    pub trigger_variant: OrderByTriggerVariant,
+    pub show_clear_button: bool,
     pub is_open: bool,
 }
 
@@ -111,6 +120,8 @@ impl OrderBySpec {
             density: ControlDensity::Default,
             max_fields: None,
             compact: false,
+            trigger_variant: OrderByTriggerVariant::Summary,
+            show_clear_button: true,
             is_open: false,
         }
     }
@@ -147,6 +158,16 @@ impl OrderBySpec {
 
     pub fn with_compact(mut self, compact: bool) -> Self {
         self.compact = compact;
+        self
+    }
+
+    pub fn with_trigger_variant(mut self, trigger_variant: OrderByTriggerVariant) -> Self {
+        self.trigger_variant = trigger_variant;
+        self
+    }
+
+    pub fn with_show_clear_button(mut self, show_clear_button: bool) -> Self {
+        self.show_clear_button = show_clear_button;
         self
     }
 

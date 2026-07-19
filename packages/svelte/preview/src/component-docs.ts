@@ -1736,6 +1736,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading indicator." },
       { name: "pressed", type: "boolean | null", default: "null", description: "Pressed state for toggle buttons." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of an element that describes the button." },
+      { name: "expanded", type: "boolean | null", default: "null", description: "Optional expanded state for disclosure or popover triggers." },
+      { name: "controls", type: "string | null", default: "null", description: "ID of the surface controlled by the button." },
       { name: "type", type: 'HTMLButtonElement["type"]', default: '"button"', description: "HTML button type attribute." },
     ],
     slots: [
@@ -2311,6 +2313,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "activeSort", type: "ActiveSort | null", default: "null", description: "Legacy single-sort compatibility signal derived from the first sort item." },
       { name: "maxFields", type: "number | null", default: "null", description: "Optional cap on number of active sort fields." },
       { name: "compact", type: "boolean", default: "false", description: "Collapses long trigger summaries after the first two items." },
+      { name: "triggerVariant", type: '"summary" | "icon"', default: '"summary"', description: "Renders either the full summary trigger or a single sort IconButton with editing in the popover." },
+      { name: "showClearButton", type: "boolean", default: "true", description: "Whether to show the clear action in the summary trigger or icon-trigger popover." },
       { name: "ariaLabel", type: "string", default: '"Sort by"', description: "Accessible label for the sort control." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the sort control is disabled." },
     ],
