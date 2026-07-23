@@ -201,6 +201,15 @@
 
     resolvedPlacement = nextPosition.placement;
     bubbleStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
+    await tick();
+
+    const renderedRect = bubbleElement.getBoundingClientRect();
+    const correctedTop = nextPosition.top + (nextPosition.top - renderedRect.top);
+    const correctedLeft = nextPosition.left + (nextPosition.left - renderedRect.left);
+    if (Math.abs(correctedTop - nextPosition.top) > 0.5
+      || Math.abs(correctedLeft - nextPosition.left) > 0.5) {
+      bubbleStyle = `top: ${correctedTop}px; left: ${correctedLeft}px;`;
+    }
     triggerElement.setAttribute("aria-describedby", tooltipId);
   }
 
@@ -255,4 +264,3 @@
     </span>
   {/if}
 </span>
-
