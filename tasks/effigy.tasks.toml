@@ -42,6 +42,10 @@
 # preview builds. The GitHub workflows (.github/workflows/ci-*.yml) mirror
 # ci:web / ci:rust so CI needs no effigy bootstrap; `effigy ci` is the local gate.
 "test:core" = "bun run --cwd packages/core test"
+# Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
+# Verifies the machine -> DOM wiring the framework packages add on top of the
+# @poodle/headless machines (which test:core covers).
+"test:components" = "bunx vitest run"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -56,6 +60,7 @@
 ]
 "ci:web" = [
   { task = "test:core" },
+  { task = "test:components" },
   { task = "docs:lint" },
   { task = "report:parity" },
   { task = "report:accessibility" },
