@@ -31,12 +31,11 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
-<section class="poodle-toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>
+<ul class="poodle-toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" data-size={resolvedSize} data-density={resolvedDensity}>
   {#each items as item (item.id)}
-    <article
+    <li
       class="poodle-toast"
       data-tone={item.tone ?? "info"}
-      role="listitem"
       aria-live={item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
     >
@@ -58,7 +57,7 @@
           </Button>
         </div>
       {/if}
-    </article>
+    </li>
   {/each}
-</section>
+</ul>
 

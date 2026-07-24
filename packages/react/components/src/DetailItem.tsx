@@ -54,7 +54,7 @@ export function DetailItem({
       aria-label={ariaLabel ?? undefined}
     >
       <div className="poodle-detail-item__label-block">
-        <dt className="poodle-detail-item__label">
+        <span className="poodle-detail-item__label">
           {label}
           {description ? (
             <Popover
@@ -72,12 +72,12 @@ export function DetailItem({
               <p className="poodle-detail-item__info-content">{description}</p>
             </Popover>
           ) : null}
-        </dt>
+        </span>
       </div>
 
-      <dd className={truncateValue ? "poodle-detail-item__value poodle-truncate" : "poodle-detail-item__value"}>
+      <div className={truncateValue ? "poodle-detail-item__value poodle-truncate" : "poodle-detail-item__value"}>
         {valueContent ?? children ?? renderedValue}
-      </dd>
+      </div>
 
       {action ? <div className="poodle-detail-item__action">{action}</div> : null}
     </div>

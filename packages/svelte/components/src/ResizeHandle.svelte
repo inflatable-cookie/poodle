@@ -116,7 +116,7 @@
   role="separator"
   aria-orientation={orientation}
   aria-label={ariaLabel ?? "Resize"}
-  aria-valuenow={ariaValueNow}
+  aria-valuenow={ariaValueNow ?? ariaValueMin}
   aria-valuemin={ariaValueMin}
   aria-valuemax={ariaValueMax}
   tabindex={disabled ? -1 : 0}

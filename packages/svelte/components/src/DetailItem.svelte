@@ -54,7 +54,7 @@
   aria-label={ariaLabel ?? undefined}
 >
   <div class="poodle-detail-item__label-block">
-    <dt class="poodle-detail-item__label">
+    <span class="poodle-detail-item__label">
       {label}
       {#if description}
         <Popover placement="top" offset={6} ariaLabel="More information">
@@ -68,10 +68,10 @@
           <p class="poodle-detail-item__info-content">{description}</p>
         </Popover>
       {/if}
-    </dt>
+    </span>
   </div>
 
-  <dd class:poodle-truncate={truncateValue} class="poodle-detail-item__value">
+  <div class:poodle-truncate={truncateValue} class="poodle-detail-item__value">
     {#if valueContent}
       {@render valueContent()}
     {:else if children}
@@ -79,7 +79,7 @@
     {:else}
       {renderedValue}
     {/if}
-  </dd>
+  </div>
 
   {#if action}
     <div class="poodle-detail-item__action">

@@ -292,6 +292,7 @@
     class:poodle-block-editor--disabled={disabled}
     data-size={resolvedSize}
     data-density={resolvedDensity}
+    role="group"
     aria-label={ariaLabel}
   >
     {#each blocks as blockItem, index (blockItem.id)}

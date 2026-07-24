@@ -4,6 +4,10 @@
   .poodle-toast-stack {
     display: grid;
     gap: var(--poodle-space-stack-sm);
+    /* Native <ul>: strip UA list affordances (grid already hides markers). */
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .poodle-toast {

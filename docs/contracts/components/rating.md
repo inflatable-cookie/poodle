@@ -121,7 +121,9 @@ and DOM geometry reads stay adapter-side.
   - root role: `slider`
   - root exposes `aria-valuemin="0"`, `aria-valuemax="{max}"`,
     `aria-valuenow`, and `aria-valuetext`
-  - item buttons remain pointer targets but are `aria-hidden="true"`
+  - items render as non-interactive `<span>` pointer targets with
+    `aria-hidden="true"` — `role="slider"` may not contain focusable elements,
+    so they must not be `<button>` in this mode
 - `aria-label` on root from `ariaLabel` prop
 - Disabled items: `disabled` attribute on button
 

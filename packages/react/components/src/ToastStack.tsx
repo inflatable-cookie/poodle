@@ -29,21 +29,19 @@ export function ToastStack({
   const resolvedDensity = density ?? uiPresentation.density;
 
   return (
-    <section
+    <ul
       className="poodle-toast-stack"
       aria-label={ariaLabel}
       aria-live="polite"
       aria-atomic="false"
-      role="list"
       data-size={resolvedSize}
       data-density={resolvedDensity}
     >
       {items.map((item) => (
-        <article
+        <li
           key={item.id}
           className="poodle-toast"
           data-tone={item.tone ?? "info"}
-          role="listitem"
           aria-live={item.tone === "danger" ? "assertive" : "polite"}
           aria-atomic="true"
         >
@@ -68,8 +66,8 @@ export function ToastStack({
               </Button>
             </div>
           ) : null}
-        </article>
+        </li>
       ))}
-    </section>
+    </ul>
   );
 }

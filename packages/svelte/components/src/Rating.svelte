@@ -178,17 +178,18 @@
   onkeydown={isFractional ? handleSliderKeydown : undefined}
 >
   {#each Array.from({ length: itemCount }, (_, index) => index) as index}
-    <button
+    <svelte:element
+      this={isFractional ? "span" : "button"}
       bind:this={itemElements[index]}
-      type="button"
+      type={isFractional ? undefined : "button"}
       class="poodle-rating__item"
       data-hovered={hoverIndex === index}
-      disabled={disabled}
+      disabled={isFractional ? undefined : disabled}
       role={isFractional ? undefined : "radio"}
       aria-hidden={isFractional ? "true" : undefined}
       aria-checked={isFractional ? undefined : currentValue === index + 1 ? "true" : "false"}
       aria-label={isFractional ? undefined : `${index + 1} of ${itemCount}`}
-      tabindex={isFractional ? -1 : focusIndex === index ? 0 : -1}
+      tabindex={isFractional ? undefined : focusIndex === index ? 0 : -1}
       onmouseenter={(event) => {
         if (disabled) return;
         if (isFractional) {
@@ -253,7 +254,7 @@
           </span>
         </span>
       </span>
-    </button>
+    </svelte:element>
   {/each}
 </div>
 

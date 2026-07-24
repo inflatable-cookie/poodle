@@ -23,13 +23,13 @@ Updated: 2026-07-10
 ```text
 [Root .detail-item]  <div>
   ├── [Label Block .detail-item__label-block]  <div>
-  │     └── [Label .detail-item__label]  <dt>
+  │     └── [Label .detail-item__label]  <span>
   │           ├── label text
   │           └── [Info Popover] (conditional, when description prop set)
   │                 └── [Info Trigger .detail-item__info-trigger]  <span>
   │                       └── [Info Icon .detail-item__info-icon]  <span>
   │                             └── Icon name="info"
-  ├── [Value .detail-item__value]  <dd>
+  ├── [Value .detail-item__value]  <div>
   │     ├── valueContent() OR children() OR text value OR emptyText
   └── [Action .detail-item__action]  <div> (conditional, when action snippet present)
         └── action()
@@ -39,11 +39,11 @@ Updated: 2026-07-10
 |------|----------|-------------|---------------|
 | Root | yes | grid container; layout varies by `layout` and `presentation` props | gap, grid-template-columns, padding, radius, background |
 | Label Block | yes | flex wrapper for label and info icon | gap |
-| Label | yes | semantic `<dt>` element for the metadata key | color, font-family, font-size, line-height |
+| Label | yes | `<span>` for the metadata key | color, font-family, font-size, line-height |
 | Info Popover | no | Popover component with info Icon, shown when `description` is set | background, border-radius, color |
 | Info Trigger | no | inline-flex wrapper for the info icon button | alignment |
 | Info Icon | no | circular badge containing the info icon | width, height, background, color, border-radius |
-| Value | yes | semantic `<dd>` element for the metadata value | color, font-family, font-size, line-height, word-break |
+| Value | yes | `<div>` for the metadata value | color, font-family, font-size, line-height, word-break |
 | Action | no | container for action slot content (e.g. buttons, links) | none (container) |
 
 ### Snippets (Svelte)
@@ -118,7 +118,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 6. Accessibility
 
-- Renders semantic `<dt>` and `<dd>` pairs within a description list context
+- Does NOT use `<dt>`/`<dd>`: nothing in the component tree supplies the required
+  `<dl>` ancestor, and a valid `<dl>` grouping would need a wrapper element that
+  the label/value/action grid layout cannot accommodate. Orphaned `<dt>`/`<dd>`
+  is invalid HTML, so the label and value render as `<span>` and `<div>`
 - `ariaLabel` prop sets `aria-label` on the root element when provided
 - Info icon Popover has `ariaLabel="More information"` on both the Popover and the icon span
 - Info icon trigger receives keyboard focus; `focus-visible` shows focus ring

@@ -130,16 +130,9 @@ export const A11Y_BASELINE: Record<string, string[]> = {
   // delete the entry when fixed. See the a11y follow-up task.
   //
   // <dt>/<dd> rendered with no <dl> ancestor — no parent supplies one.
-  DetailItem: ["dlitem"],
   // Nested interactive controls (the same defect class fixed in FilterToolbar:
   // an interactive ancestor wrapping interactive children).
-  Rating: ["nested-interactive"],
   // Role used without its required ARIA attributes.
-  ResizeHandle: ["aria-required-attr"],
-  SplitView: ["aria-required-attr"],
   // Role not permitted on the element it is applied to.
-  ToastHost: ["aria-allowed-role"],
-  ToastStack: ["aria-allowed-role"],
   // ARIA attribute not permitted on that role/element.
-  BlockEditor: ["aria-prohibited-attr"],
 };

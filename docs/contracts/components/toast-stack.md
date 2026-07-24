@@ -21,8 +21,8 @@ Updated: 2026-07-10
 ## 2. Anatomy
 
 ```text
-[Stack .toast-stack]  <section role="list">
-  └── [Toast .toast]  <article role="listitem"> (repeated)
+[Stack .toast-stack]  <ul>
+  └── [Toast .toast]  <li> (repeated)
         ├── [AccentBar .toast::before]  pseudo-element
         ├── [DismissButton .toast__dismiss]  <button>
         │     └── [Icon]  Icon primitive (name="x")
@@ -35,8 +35,8 @@ Updated: 2026-07-10
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Stack | yes | `<section>` container with `role="list"` | stack gap |
-| Toast | yes | `<article>` with `role="listitem"` | tone color, border, background, elevation, radius |
+| Stack | yes | `<ul>` container (native list semantics; `role="list"` is not permitted on `<section>`) | stack gap |
+| Toast | yes | `<li>` (native list item; `role="listitem"` is not permitted on `<article>`) | tone color, border, background, elevation, radius |
 | AccentBar | yes | `::before` pseudo-element left accent stripe | tone color (82% mix with white) |
 | DismissButton | yes | absolute-positioned close button (x icon) | text-secondary, hover: text-primary |
 | Copy | yes | title and optional message | layout only |
@@ -112,9 +112,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Semantics
 
-- Stack: `<section>` with `aria-label`, `aria-live="polite"`,
-  `aria-atomic="false"`, `role="list"`
-- Toast: `<article>` with `role="listitem"`, `aria-atomic="true"`
+- Stack: `<ul>` with `aria-label`, `aria-live="polite"`, `aria-atomic="false"`.
+  Native list semantics — an explicit `role="list"` on a `<section>` is an
+  invalid role/element combination
+- Toast: `<li>` with `aria-atomic="true"` (native list-item semantics)
 - Toast live region: `aria-live="polite"` by default; `aria-live="assertive"`
   for `tone="danger"`
 - Dismiss button: `aria-label="Dismiss {item.title}"`

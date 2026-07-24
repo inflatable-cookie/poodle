@@ -58,6 +58,9 @@ export function Rating({
   const resolvedDensity = density ?? uiPresentation.density;
   const effectiveStep = resolveRatingStep(step);
   const isFractional = effectiveStep < 1;
+  // Fractional (slider) mode: items are aria-hidden pointer targets only, so
+  // they render as <span>. role="slider" may not contain focusable elements.
+  const ItemTag = (isFractional ? "span" : "button") as "button";
   const minSelectableValue = allowClear ? 0 : effectiveStep;
   const isControlled = value !== undefined;
   const currentValue = clampRatingDisplayValue(isControlled ? value : uncontrolledValue, itemCount);
@@ -145,20 +148,20 @@ export function Rating({
       onKeyDown={isFractional ? handleSliderKeydown : undefined}
     >
       {Array.from({ length: itemCount }, (_, index) => (
-        <button
+        <ItemTag
           key={index}
           ref={(node) => {
             itemRefs.current[index] = node;
           }}
-          type="button"
+          type={isFractional ? undefined : "button"}
           className="poodle-rating__item"
           data-hovered={hoverIndex === index}
-          disabled={disabled}
+          disabled={isFractional ? undefined : disabled}
           role={isFractional ? undefined : "radio"}
           aria-hidden={isFractional ? "true" : undefined}
           aria-checked={isFractional ? undefined : currentValue === index + 1}
           aria-label={isFractional ? undefined : `${index + 1} of ${itemCount}`}
-          tabIndex={isFractional ? -1 : focusIndex === index ? 0 : -1}
+          tabIndex={isFractional ? undefined : focusIndex === index ? 0 : -1}
           onMouseEnter={(event) => {
             if (disabled) return;
             if (isFractional) {
@@ -216,7 +219,7 @@ export function Rating({
               </span>
             </span>
           </span>
-        </button>
+        </ItemTag>
       ))}
     </div>
   );
