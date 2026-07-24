@@ -150,8 +150,12 @@ interface ImageCompressionOptions {
 
 ### Semantics
 
-- Dropzone: focusable `<div>` with `role="button"`, `tabindex="0"`
-- Hidden input: `<input type="file">` with `accept` and `multiple` attributes
+- Dropzone: non-interactive `<div>` drop target. It must NOT be a focusable
+  `role="button"`: it contains the file input and the browse button, and nesting
+  interactive controls is invalid HTML with ambiguous activation semantics
+- Hidden input: `<input type="file">` with `accept` and `multiple` attributes.
+  Visually hidden but focusable, and carries the accessible label — it is the
+  real control that keyboard and assistive technology use
 - File list: `<ul>` with `<li>` items
 - Remove button: `<button>` with accessible label (e.g., "Remove filename")
 - Disabled: modifier class `.file-upload--disabled` on root

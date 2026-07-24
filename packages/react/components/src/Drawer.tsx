@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import {
   getFocusableElements,
   modalTransition,
@@ -58,6 +58,10 @@ export function Drawer({
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
+  // Titled drawers take their accessible name from the rendered title via
+  // aria-labelledby; ariaLabel is the fallback only when there is no title.
+  const titleId = useId();
+  const labelledBy = title ? titleId : undefined;
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open === true : uncontrolledOpen;
 
@@ -128,14 +132,15 @@ export function Drawer({
         role="dialog"
         tabIndex={-1}
         aria-modal={modal ? "true" : undefined}
-        aria-label={title ? undefined : (ariaLabel ?? undefined)}
+        aria-labelledby={labelledBy}
+        aria-label={labelledBy ? undefined : (ariaLabel ?? undefined)}
         onKeyDown={(event: KeyboardEvent) => {
           if (modal) trapFocusKeydown(surfaceRef.current, event.nativeEvent);
         }}
       >
         {title || description ? (
           <div className="poodle-drawer__header">
-            {title ? <strong>{title}</strong> : null}
+            {title ? <strong id={titleId}>{title}</strong> : null}
             {description ? <p>{description}</p> : null}
           </div>
         ) : null}

@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let nextDialogId = 0;
+</script>
+
 <script lang="ts">
   import "@poodle/styles/dialog.css";
   import {
@@ -91,6 +95,12 @@
   });
 
   const effectiveRole = $derived(kind ?? role);
+  // A titled dialog takes its accessible name from the rendered title via
+  // aria-labelledby; ariaLabel is the fallback only when there is no title.
+  // A custom `header` snippet replaces the title element, so there is nothing
+  // to point at — fall back to ariaLabel there too.
+  const titleId = `poodle-dialog-title-${nextDialogId++}`;
+  const labelledBy = $derived(!header && title ? titleId : undefined);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedCloseButtonSize = $derived(closeButtonSize ?? resolveSemanticControlSize($uiPresentation.sizeScale, "chrome"));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -187,7 +197,8 @@
       style={contentStyle}
       role={effectiveRole}
       tabindex="-1"
-      aria-label={title ? undefined : ariaLabel ?? undefined}
+      aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : ariaLabel ?? undefined}
       aria-modal="true"
       onkeydown={trapFocus}
     >
@@ -216,7 +227,7 @@
             {:else if title || description}
               <div class="poodle-dialog__header">
                 {#if title}
-                  <strong class="poodle-dialog__title">{title}</strong>
+                  <strong id={titleId} class="poodle-dialog__title">{title}</strong>
                 {/if}
 
                 {#if description}

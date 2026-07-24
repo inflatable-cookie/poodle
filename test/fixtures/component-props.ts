@@ -129,21 +129,11 @@ export const A11Y_BASELINE: Record<string, string[]> = {
   // --- Real defects found by this sweep. Each is tracked for reconciliation;
   // delete the entry when fixed. See the a11y follow-up task.
   //
-  // Dialogs render `title` but never associate it: aria-label is set to
-  // undefined when a title exists and no aria-labelledby points at it, so a
-  // titled dialog has NO accessible name (Dialog.svelte:190 and friends).
-  AlertDialog: ["aria-dialog-name"],
-  Dialog: ["aria-dialog-name"],
-  Drawer: ["aria-dialog-name"],
-  FormDialog: ["aria-dialog-name"],
-  MediaPicker: ["aria-dialog-name"],
   // <dt>/<dd> rendered with no <dl> ancestor — no parent supplies one.
   DetailItem: ["dlitem"],
   // Nested interactive controls (the same defect class fixed in FilterToolbar:
   // an interactive ancestor wrapping interactive children).
-  FileUpload: ["label", "nested-interactive"],
   Rating: ["nested-interactive"],
-  VideoPlayer: ["nested-interactive"],
   // Role used without its required ARIA attributes.
   ResizeHandle: ["aria-required-attr"],
   SplitView: ["aria-required-attr"],

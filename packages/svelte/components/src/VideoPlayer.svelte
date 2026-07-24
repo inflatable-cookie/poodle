@@ -160,13 +160,10 @@
   class="poodle-video-player"
   bind:this={wrapperEl}
   style="aspect-ratio: {aspectRatio}"
-  role="button"
-  tabindex="0"
   onmousemove={resetControlsTimer}
   onclick={togglePlay}
   onkeydown={handleWrapperKeydown}
   aria-label={ariaLabel}
-  aria-pressed={isPlaying}
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >

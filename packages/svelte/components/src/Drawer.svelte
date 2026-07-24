@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let nextDrawerId = 0;
+</script>
+
 <script lang="ts">
   import "@poodle/styles/drawer.css";
   import {
@@ -70,6 +74,10 @@
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  // Titled drawers take their accessible name from the rendered title via
+  // aria-labelledby; ariaLabel is the fallback only when there is no title.
+  const titleId = `poodle-drawer-title-${nextDrawerId++}`;
+  const labelledBy = $derived(title ? titleId : undefined);
   const isControlled = $derived(open !== undefined);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
@@ -192,14 +200,15 @@
       role="dialog"
       tabindex="-1"
       aria-modal={modal ? "true" : undefined}
-      aria-label={title ? undefined : ariaLabel ?? undefined}
+      aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : ariaLabel ?? undefined}
       transition:slideEdge
       onkeydown={trapFocus}
     >
       {#if title || description}
         <div class="poodle-drawer__header">
           {#if title}
-            <strong>{title}</strong>
+            <strong id={titleId}>{title}</strong>
           {/if}
 
           {#if description}

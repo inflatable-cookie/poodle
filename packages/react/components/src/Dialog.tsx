@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -88,6 +89,12 @@ export function Dialog({
   const bodyOverflow = useRef<string | null>(null);
 
   const effectiveRole = kind ?? role;
+  // A titled dialog takes its accessible name from the rendered title via
+  // aria-labelledby; ariaLabel is the fallback only when there is no title.
+  // A custom `header` node replaces the title element, so there is nothing to
+  // point at — fall back to ariaLabel there too.
+  const titleId = useId();
+  const labelledBy = !header && title ? titleId : undefined;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedCloseButtonSize = closeButtonSize ?? resolveSemanticControlSize(uiPresentation.sizeScale, "chrome");
   const resolvedDensity = density ?? uiPresentation.density;
@@ -174,7 +181,8 @@ export function Dialog({
           style={contentStyle}
           role={effectiveRole}
           tabIndex={-1}
-          aria-label={title ? undefined : (ariaLabel ?? undefined)}
+          aria-labelledby={labelledBy}
+          aria-label={labelledBy ? undefined : (ariaLabel ?? undefined)}
           aria-modal="true"
           onKeyDown={(event: KeyboardEvent) => trapFocusKeydown(surfaceRef.current, event.nativeEvent)}
         >
@@ -191,7 +199,7 @@ export function Dialog({
                     <div className="poodle-dialog__header">{header}</div>
                   ) : title || description ? (
                     <div className="poodle-dialog__header">
-                      {title ? <strong className="poodle-dialog__title">{title}</strong> : null}
+                      {title ? <strong id={titleId} className="poodle-dialog__title">{title}</strong> : null}
                       {description ? <p>{description}</p> : null}
                     </div>
                   ) : null}

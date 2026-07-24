@@ -275,9 +275,6 @@ export const FileUpload = forwardRef<FileUploadHandle, FileUploadProps>(function
             ? "poodle-file-upload__dropzone poodle-file-upload__dropzone--active"
             : "poodle-file-upload__dropzone"
         }
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -291,8 +288,8 @@ export const FileUpload = forwardRef<FileUploadHandle, FileUploadProps>(function
           multiple={multiple}
           disabled={disabled}
           className="poodle-file-upload__input"
+          aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
           onChange={handleInputChange}
-          tabIndex={-1}
         />
         <div className="poodle-file-upload__dropzone-content">
           <svg className="poodle-file-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

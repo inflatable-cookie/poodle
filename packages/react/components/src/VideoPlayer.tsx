@@ -167,13 +167,10 @@ export function VideoPlayer({
       className="poodle-video-player"
       ref={wrapperRef}
       style={{ aspectRatio: `${aspectRatio}` }}
-      role="button"
-      tabIndex={0}
       onMouseMove={resetControlsTimer}
       onClick={togglePlay}
       onKeyDown={handleWrapperKeydown}
       aria-label={ariaLabel}
-      aria-pressed={isPlaying}
       data-size={resolvedSize}
       data-density={resolvedDensity}
     >

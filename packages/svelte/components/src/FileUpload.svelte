@@ -233,9 +233,6 @@
   <div
     class="poodle-file-upload__dropzone"
     class:poodle-file-upload__dropzone--active={dragActive}
-    role="button"
-    tabindex={disabled ? -1 : 0}
-    aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
     ondrop={handleDrop}
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}
@@ -250,7 +247,7 @@
       {disabled}
       class="poodle-file-upload__input"
       onchange={handleInputChange}
-      tabindex="-1"
+      aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
     />
     <div class="poodle-file-upload__dropzone-content">
       <svg class="poodle-file-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

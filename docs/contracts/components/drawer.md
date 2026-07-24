@@ -137,6 +137,8 @@ identical.
 - Surface: `role="dialog"` on the surface element
 - Required attributes: accessible title from `title` prop or `ariaLabel`,
   description when present, drawer modality state
+- Surface: `aria-labelledby` pointing at the rendered title element whenever a
+  `title` is present; `aria-label` is the fallback only when there is no title
 - Optional attributes: close button label and helper relations
 - Labeling rules: non-modal drawers still need a stable accessible label
 - Backdrop: `aria-label="Dismiss drawer backdrop"` on the backdrop button

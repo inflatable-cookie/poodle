@@ -21,7 +21,7 @@ Updated: 2026-07-10
 ```text
 [Wrapper .dialog]  <div data-size data-density data-width> (fixed overlay, conditional render)
   ├── [Backdrop .dialog__backdrop]  <button aria-label="Dismiss dialog backdrop">
-  └── [Surface .dialog__surface]  <div role={role} aria-modal tabindex="-1">
+  └── [Surface .dialog__surface]  <div role={role} aria-modal tabindex="-1" aria-labelledby=title-id>
       ├── [Close Button .dialog__close]  <IconButton> (optional, receives resolvedSize)
       │
       │   ── when bare=true ──
@@ -159,7 +159,11 @@ and Drawer.
 
 - Surface: `role` set to `role` prop value (`"dialog"` or `"alertdialog"`); legacy `kind` prop overrides when provided
 - Surface: `aria-modal="true"`
-- Surface: `aria-label` from prop when no `title` is present
+- Surface: `aria-labelledby` pointing at the rendered `.dialog__title` element
+  whenever a `title` is present — this is how a titled dialog gets its
+  accessible name
+- Surface: `aria-label` from prop only when there is no `title` to reference
+  (including when a custom `header` snippet replaces the title element)
 - Surface: `tabindex="-1"` for programmatic focus
 - Backdrop: `<button>` with `aria-label="Dismiss dialog backdrop"`
 - Close button: `IconButton` with `ariaLabel` from `closeLabel`, `sizeRole="chrome"`, `size={resolvedSize}`
