@@ -86,7 +86,7 @@ function applyUnderlayTheme(el: HTMLElement, underlayThemeId: string) {
 }
 
 // In your app shell:
-applyUnderlayTheme(document.documentElement, "underlay-night");  // → data-theme="dark"
+applyUnderlayTheme(document.documentElement, "underlay-night");  // → data-theme="eclipse"
 ```
 
 Theme identifiers:

@@ -48,7 +48,7 @@ input {
 .app-shell[data-theme="iceberg"] {
   color-scheme: light;
 }
-.app-shell[data-theme="dark"],
+.app-shell[data-theme="eclipse"],
 .app-shell[data-theme="graphite"],
 .app-shell[data-theme="midnight"],
 .app-shell[data-theme="nord"],

@@ -7,9 +7,9 @@ pub struct ThemeDefinition {
     pub overrides: &'static [(&'static str, &'static str)],
 }
 
-pub const DARK: ThemeDefinition = ThemeDefinition {
-    name: "dark",
-    selector: "[data-theme=\"dark\"]",
+pub const ECLIPSE: ThemeDefinition = ThemeDefinition {
+    name: "eclipse",
+    selector: "[data-theme=\"eclipse\"]",
     overrides: &[
     ("color.background.canvas", "#0e1012"),
     ("color.background.surface", "#15181b"),

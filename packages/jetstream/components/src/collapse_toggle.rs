@@ -74,7 +74,7 @@ mod tests {
     use poodle_specs::{CollapseDirection, ControlDensity, ControlSize};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Expanded points toward `direction`; collapsed flips to the opposite.

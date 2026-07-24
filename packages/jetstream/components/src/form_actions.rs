@@ -110,7 +110,7 @@ mod tests {
     use poodle_specs::{ButtonSpec, ButtonVariant, ControlDensity};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn primary_secondary(theme: &JetstreamThemeProvider) -> Vec<JsEl> {

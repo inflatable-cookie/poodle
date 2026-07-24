@@ -80,7 +80,7 @@ mod tests {
     use poodle_specs::PaddingScale;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     #[test]

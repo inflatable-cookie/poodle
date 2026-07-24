@@ -283,7 +283,7 @@ mod tests {
     use poodle_specs::{DrillDownConfig, DrillDownItem, DrillDownLevel, PickerItemSpec};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn sample_items() -> Vec<PickerItemSpec> {

@@ -207,7 +207,7 @@ mod tests {
     use poodle_specs::{EditableLabelSpec, EditableLabelVariant};
 
     fn test_theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Recursively search the element tree for a Label whose text matches.

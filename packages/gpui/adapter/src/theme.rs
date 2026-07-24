@@ -355,7 +355,7 @@ mod tests {
 
     #[test]
     fn dark_theme_overrides_accent_color() {
-        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let color = theme.resolve_color(semantic::COLOR_ACCENT_BASE);
         // Dark theme: #f0b24d → approximately (0.941, 0.698, 0.302, 1.0)
         assert!((color.0 - 0.941).abs() < 0.01, "r={}", color.0);
@@ -421,7 +421,7 @@ mod tests {
 
     #[test]
     fn theme_switching_changes_colors() {
-        let dark = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let dark = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let light = GpuiThemeProvider::default();
         let dark_accent = dark.resolve_color(semantic::COLOR_ACCENT_BASE);
         let light_accent = light.resolve_color(semantic::COLOR_ACCENT_BASE);
@@ -436,7 +436,7 @@ mod contrast_tests {
 
     #[test]
     fn neutral_contrast_scales_dark_surface() {
-        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         // default contrast 0.5 — surface sits halfway (in oklab L) to canvas
         let surface = theme.resolve_color_value("color.background.surface");
         let full = theme.clone().with_contrast(1.0);
@@ -450,7 +450,7 @@ mod contrast_tests {
 
     #[test]
     fn accent_and_text_are_untouched() {
-        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let full = theme.clone().with_contrast(1.0);
         for token in ["color.accent.base", "color.text.primary", "color.background.overlay"] {
             let a = theme.resolve_color_value(token);
@@ -462,7 +462,7 @@ mod contrast_tests {
 
     #[test]
     fn translucent_borders_scale_alpha() {
-        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK);
+        let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let border = theme.resolve_color_value("color.border.default");
         assert!((border.3 - 0.11).abs() < 0.001, "alpha {}", border.3);
     }

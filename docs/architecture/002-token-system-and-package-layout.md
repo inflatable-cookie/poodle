@@ -202,7 +202,7 @@ packages/tokens/artifacts/
   css/
     poodle-tokens.css              # Base tokens as CSS custom properties
     poodle-theme-iceberg.css       # Iceberg theme overrides
-    poodle-theme-dark.css          # Dark theme overrides
+    poodle-theme-eclipse.css       # Eclipse theme overrides
     poodle-density-compact.css     # Compact density overrides
     poodle-density-comfortable.css # Comfortable density overrides
   ts/
@@ -227,8 +227,8 @@ packages/tokens/artifacts/
   --poodle-color-text-primary: var(--poodle-color-gray-900);
 }
 
-/* poodle-theme-dark.css */
-[data-theme="dark"] {
+/* poodle-theme-eclipse.css */
+[data-theme="eclipse"] {
   --poodle-color-background-primary: var(--poodle-color-gray-900);
   --poodle-color-text-primary: var(--poodle-color-white);
 }

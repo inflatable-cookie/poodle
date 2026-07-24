@@ -134,7 +134,7 @@ mod tests {
     use poodle_specs::{ValidationState, ValidationSummaryEntry};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn invalid_entries() -> Vec<ValidationSummaryEntry> {

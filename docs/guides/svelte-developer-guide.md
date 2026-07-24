@@ -55,14 +55,14 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
 
   onMount(() => {
     applyThemeAttributes(shell, {
-      theme: "dark",          // "light" | "dark" | "loophole-studio"
+      theme: "eclipse",       // "eclipse" | "iceberg" | "graphite"
       density: "default",     // "compact" | "default" | "comfortable"
       controlSize: "sm",      // "xs" | "sm" | "md" | "lg" | "xl"
     });
   });
 </script>
 
-<div bind:this={shell} data-theme="dark" data-density="default" data-control-size="sm">
+<div bind:this={shell} data-theme="eclipse" data-density="default" data-control-size="sm">
   <!-- your app -->
 </div>
 ```
@@ -70,7 +70,7 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
 Or simply apply the data attributes in your HTML:
 
 ```html
-<div data-theme="dark" data-density="compact">
+<div data-theme="eclipse" data-density="compact">
   <!-- everything inside inherits these theme tokens -->
 </div>
 ```
@@ -1229,7 +1229,7 @@ interface MenuItem {
   import { Surface, Stack } from "@poodle/svelte";
 </script>
 
-<div data-theme="dark" data-density="compact">
+<div data-theme="eclipse" data-density="compact">
   <Surface tone="canvas" style="min-height: 100vh; padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x)">
     <Stack gap="lg">
       <!-- page content -->

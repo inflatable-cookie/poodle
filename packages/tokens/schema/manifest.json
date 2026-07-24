@@ -20,7 +20,7 @@
   ],
   "requiredThemes": [
     "iceberg",
-    "dark",
+    "eclipse",
     "graphite"
   ],
   "requiredDensityModes": [
@@ -39,7 +39,7 @@
     "css": [
       "packages/tokens/artifacts/css/poodle-tokens.css",
       "packages/tokens/artifacts/css/poodle-theme-iceberg.css",
-      "packages/tokens/artifacts/css/poodle-theme-dark.css",
+      "packages/tokens/artifacts/css/poodle-theme-eclipse.css",
       "packages/tokens/artifacts/css/poodle-theme-graphite.css",
       "packages/tokens/artifacts/css/poodle-density-compact.css",
       "packages/tokens/artifacts/css/poodle-density-default.css",

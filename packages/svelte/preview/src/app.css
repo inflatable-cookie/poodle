@@ -70,7 +70,7 @@ input:focus-visible {
   );
 }
 
-.app-shell[data-theme="dark"] {
+.app-shell[data-theme="eclipse"] {
   color-scheme: dark;
   background: color-mix(
     in srgb,

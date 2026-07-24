@@ -145,7 +145,7 @@ mod tests {
     use crate::render_probe::probe;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Overlay indeterminate renders the ring Spinner (not a static loader icon)

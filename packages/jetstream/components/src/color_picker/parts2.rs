@@ -82,7 +82,7 @@ mod tests {
     use poodle_jetstream::JetstreamThemeProvider;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// The parsed-value color as a ProbeColor (what the trigger swatch must show).

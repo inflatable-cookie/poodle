@@ -88,7 +88,7 @@ mod tests {
     use poodle_specs::{ControlSize, SemanticControlSizeRole, StatusTone};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn base_spec() -> ConfirmActionSpec {

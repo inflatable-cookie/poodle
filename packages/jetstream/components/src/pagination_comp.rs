@@ -368,7 +368,7 @@ mod tests {
     use poodle_specs::PaginationVariant;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Numbered variant renders page-number buttons plus ellipsis truncation.

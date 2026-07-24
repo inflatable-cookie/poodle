@@ -16,7 +16,7 @@
     "./css/poodle-tokens.css": "./src/generated/css/poodle-tokens.css",
     "./themes.css": "./src/generated/css/poodle-themes.css",
     "./theme-iceberg.css": "./src/generated/css/poodle-theme-iceberg.css",
-    "./theme-dark.css": "./src/generated/css/poodle-theme-dark.css",
+    "./theme-eclipse.css": "./src/generated/css/poodle-theme-eclipse.css",
     "./theme-graphite.css": "./src/generated/css/poodle-theme-graphite.css",
     "./theme-midnight.css": "./src/generated/css/poodle-theme-midnight.css",
     "./theme-nord.css": "./src/generated/css/poodle-theme-nord.css",

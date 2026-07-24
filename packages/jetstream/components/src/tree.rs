@@ -369,7 +369,7 @@ mod tests {
     use crate::theme_ext::resolve_color;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Recursively find the first descendant (incl. self) matching `pred`.

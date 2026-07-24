@@ -78,7 +78,7 @@ mod tests {
     use poodle_specs::{ControlSize, StatusTone};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn probe_color(theme: &JetstreamThemeProvider, token: &str) -> ProbeColor {

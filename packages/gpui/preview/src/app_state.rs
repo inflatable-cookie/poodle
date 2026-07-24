@@ -66,7 +66,7 @@ impl Section {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemePreset {
     Graphite,
-    Dark,
+    Eclipse,
     Iceberg,
     Default,
 }
@@ -74,7 +74,7 @@ pub enum ThemePreset {
 impl ThemePreset {
     /// Order matches Svelte preview: dark, light, graphite.
     pub const ALL: &[ThemePreset] = &[
-        ThemePreset::Dark,
+        ThemePreset::Eclipse,
         ThemePreset::Iceberg,
         ThemePreset::Graphite,
     ];
@@ -82,7 +82,7 @@ impl ThemePreset {
     pub fn label(self) -> &'static str {
         match self {
             ThemePreset::Default => "default",
-            ThemePreset::Dark => "dark",
+            ThemePreset::Eclipse => "eclipse",
             ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
         }
@@ -91,7 +91,7 @@ impl ThemePreset {
     pub fn build_theme(self) -> GpuiThemeProvider {
         match self {
             ThemePreset::Default => GpuiThemeProvider::new(),
-            ThemePreset::Dark => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK),
+            ThemePreset::Eclipse => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
             ThemePreset::Iceberg => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ICEBERG)
             }
@@ -421,7 +421,7 @@ pub struct AppState {
 
 impl AppState {
     pub fn new() -> Self {
-        let preset = ThemePreset::Dark;
+        let preset = ThemePreset::Eclipse;
         let density = Density::Compact;
         let control_size = ControlSize::Sm;
 

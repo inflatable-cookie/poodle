@@ -7,7 +7,7 @@ import { SpecimenLayout } from "../SpecimenLayout";
 const themes = themeOptions();
 
 export function ThemeSelectSpecimen() {
-  const [value, setValue] = useState("dark");
+  const [value, setValue] = useState("eclipse");
   const [sizeValue, setSizeValue] = useState("nord");
   const [densityValue, setDensityValue] = useState("rose");
   const selected = themes.find((t) => t.value === value);

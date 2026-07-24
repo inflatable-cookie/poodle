@@ -320,8 +320,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("command-suite", "baseline", "Default command-discovery review."),
-      route("command-suite", "dark", "Dark neutral command review.", {
-        theme: "dark",
+      route("command-suite", "eclipse", "Eclipse neutral command review.", {
+        theme: "eclipse",
         density: "comfortable",
       }),
     ],
@@ -343,8 +343,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("workspace-suite", "baseline", "Primary workstation-shell review."),
-      route("workspace-suite", "dark", "Dark neutral workstation-shell review.", {
-        theme: "dark",
+      route("workspace-suite", "eclipse", "Eclipse neutral workstation-shell review.", {
+        theme: "eclipse",
         density: "comfortable",
       }),
     ],
@@ -365,8 +365,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("token-summary-section", "loophole", "Workstation token overlay review."),
-      route("token-summary-section", "dark", "Dark token overlay review.", {
-        theme: "dark",
+      route("token-summary-section", "eclipse", "Eclipse token overlay review.", {
+        theme: "eclipse",
         density: "comfortable",
       }),
       route("token-summary-section", "iceberg", "Iceberg token overlay review.", {
@@ -391,8 +391,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("token-inspector", "loophole", "Workstation token-inspector review."),
-      route("token-inspector", "dark", "Dark token-inspector review.", {
-        theme: "dark",
+      route("token-inspector", "eclipse", "Eclipse token-inspector review.", {
+        theme: "eclipse",
         density: "comfortable",
       }),
       route("token-inspector", "iceberg", "Iceberg token-inspector review.", {

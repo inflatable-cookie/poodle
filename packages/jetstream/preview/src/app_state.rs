@@ -63,21 +63,21 @@ impl Section {
 /// Available theme presets.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemePreset {
-    Dark,
+    Eclipse,
     Iceberg,
     Graphite,
 }
 
 impl ThemePreset {
     pub const ALL: &[ThemePreset] = &[
-        ThemePreset::Dark,
+        ThemePreset::Eclipse,
         ThemePreset::Iceberg,
         ThemePreset::Graphite,
     ];
 
     pub fn label(self) -> &'static str {
         match self {
-            ThemePreset::Dark => "dark",
+            ThemePreset::Eclipse => "eclipse",
             ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
         }
@@ -387,7 +387,7 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             section: Section::Components,
-            theme_preset: ThemePreset::Dark,
+            theme_preset: ThemePreset::Eclipse,
             density: Density::Comfortable,
             control_size: ControlSize::Md,
             contrast: 0.5,

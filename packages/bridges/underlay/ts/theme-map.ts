@@ -24,8 +24,8 @@ export const underlayThemeMap: UnderlayThemeBridge[] = [
   },
   {
     underlayThemeId: "underlay-night",
-    poodleThemeId: "dark",
-    cssFile: "packages/tokens/artifacts/css/poodle-theme-dark.css",
+    poodleThemeId: "eclipse",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-eclipse.css",
   },
   {
     underlayThemeId: "underlay-studio",

@@ -418,7 +418,7 @@ mod tests {
     use poodle_specs::{LeadingFill, LeadingShape, SelectionIndicator};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn accent(th: &JetstreamThemeProvider) -> ProbeColor {

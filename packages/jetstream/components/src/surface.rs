@@ -82,7 +82,7 @@ mod tests {
     use poodle_specs::{SurfaceBorder, SurfaceTone};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn fill_of(spec: &SurfaceSpec) -> ProbeColor {

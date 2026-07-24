@@ -34,7 +34,7 @@ function parseRoute(hash: string): Route {
 export function App() {
   const shellRef = useRef<HTMLDivElement | null>(null);
 
-  const [theme, setTheme] = useState<ThemeName>("dark");
+  const [theme, setTheme] = useState<ThemeName>("eclipse");
   const [density, setDensity] = useState<DensityName>("compact");
   const [controlSize, setControlSize] = useState<ControlSizeName>("sm");
   const [contrast, setContrast] = useState(0.5);

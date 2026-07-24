@@ -194,7 +194,7 @@ mod tests {
     use poodle_specs::AccordionSelectionValue;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn sample_items() -> Vec<AccordionItemSpec> {

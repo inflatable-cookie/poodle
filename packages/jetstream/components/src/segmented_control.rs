@@ -115,7 +115,7 @@ mod tests {
     use poodle_specs::{ChoiceOption, ControlDensity, ControlSize};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn opts() -> Vec<ChoiceOption> {

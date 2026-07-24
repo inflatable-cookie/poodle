@@ -4,7 +4,7 @@
     "tokenSource": "poodle-tokens",
     "themeIds": [
       "iceberg",
-      "dark",
+      "eclipse",
       "graphite"
     ],
     "densityModes": [

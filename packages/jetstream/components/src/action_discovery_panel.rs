@@ -323,7 +323,7 @@ mod tests {
     use poodle_specs::{ActionDiscoverySection, CommandActionItem};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn sample_sections() -> Vec<ActionDiscoverySection> {

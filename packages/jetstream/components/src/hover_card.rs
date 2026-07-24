@@ -69,7 +69,7 @@ mod tests {
     use crate::theme_ext::color_mix;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn open_spec() -> HoverCardSpec {

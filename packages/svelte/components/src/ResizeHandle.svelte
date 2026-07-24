@@ -28,27 +28,43 @@
   } = $props();
 
   let isDragging = $state(false);
-  let lastPosition = $state(0);
-  let isListening = $state(false);
+  let lastPosition = 0;
+  let pendingPosition = 0;
+  let resizeFrame: number | null = null;
+  let isListening = false;
 
   function handlePointerDown(event: MouseEvent): void {
     if (disabled) return;
     event.preventDefault();
     isDragging = true;
     lastPosition = resizeAxisPosition(orientation, event.clientX, event.clientY);
+    pendingPosition = lastPosition;
     onResizeStart?.(lastPosition);
     startListening();
   }
 
   function handlePointerMove(event: MouseEvent): void {
     if (!isDragging) return;
-    const move = resizeDragDelta(lastPosition, resizeAxisPosition(orientation, event.clientX, event.clientY));
+    pendingPosition = resizeAxisPosition(orientation, event.clientX, event.clientY);
+    if (resizeFrame !== null) return;
+    resizeFrame = requestAnimationFrame(flushPointerMove);
+  }
+
+  function flushPointerMove(): void {
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = null;
+    }
+    if (!isDragging || pendingPosition === lastPosition) return;
+    const move = resizeDragDelta(lastPosition, pendingPosition);
     lastPosition = move.position;
     onResizeMove?.(move.delta);
   }
 
-  function handlePointerUp(): void {
+  function handlePointerUp(event: MouseEvent): void {
     if (!isDragging) return;
+    pendingPosition = resizeAxisPosition(orientation, event.clientX, event.clientY);
+    flushPointerMove();
     isDragging = false;
     onResizeEnd?.(lastPosition);
     stopListening();
@@ -65,6 +81,10 @@
     if (!isListening || typeof window === "undefined") return;
     window.removeEventListener("mousemove", handlePointerMove);
     window.removeEventListener("mouseup", handlePointerUp);
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = null;
+    }
     isListening = false;
   }
 
@@ -105,4 +125,3 @@
 >
   <span class="poodle-resize-handle__line" aria-hidden="true"></span>
 </div>
-

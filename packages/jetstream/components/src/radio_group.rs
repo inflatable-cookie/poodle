@@ -169,7 +169,7 @@ mod tests {
     use poodle_specs::ChoiceOption;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn vec4_to_probe(c: glam::Vec4) -> ProbeColor {

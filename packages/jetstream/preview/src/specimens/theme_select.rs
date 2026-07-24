@@ -8,7 +8,7 @@ use poodle_specs::{ControlDensity, ControlSize, ThemeOption, ThemeSelectSpec, Th
 
 fn themes() -> Vec<ThemeOption> {
     vec![
-        ThemeOption::new("dark", "Dark", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
+        ThemeOption::new("eclipse", "Eclipse", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
         ThemeOption::new("iceberg", "Iceberg", ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b")),
         ThemeOption::new("midnight", "Midnight", ThemeSwatch::new("#0b1020", "#121933", "#6d8cff", "#e6ecff", "#333")),
         ThemeOption::new("nord", "Nord", ThemeSwatch::new("#2e3440", "#3b4252", "#88c0d0", "#eceff4", "#4c566a")),
@@ -47,7 +47,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     .into_iter()
                     .map(|size| {
                         js_theme_select(
-                            &ThemeSelectSpec::new().with_themes(themes()).with_value("dark").with_size(size),
+                            &ThemeSelectSpec::new().with_themes(themes()).with_value("eclipse").with_size(size),
                             theme,
                         )
                     }),
@@ -61,7 +61,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     .into_iter()
                     .map(|density| {
                         js_theme_select(
-                            &ThemeSelectSpec::new().with_themes(themes()).with_value("dark").with_density(density),
+                            &ThemeSelectSpec::new().with_themes(themes()).with_value("eclipse").with_density(density),
                             theme,
                         )
                     }),

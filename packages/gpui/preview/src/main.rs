@@ -1346,7 +1346,7 @@ fn parse_cli_args() -> CliArgs {
                 if let Some(val) = args.get(i + 1) {
                     theme = match val.as_str() {
                         "graphite" => Some(ThemePreset::Graphite),
-                        "dark" => Some(ThemePreset::Dark),
+                        "eclipse" => Some(ThemePreset::Eclipse),
                         "iceberg" => Some(ThemePreset::Iceberg),
                         "default" => Some(ThemePreset::Default),
                         _ => None,

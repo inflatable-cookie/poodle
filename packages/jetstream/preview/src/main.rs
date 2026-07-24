@@ -257,7 +257,7 @@ impl PreviewState {
     fn rebuild_shell(&mut self) {
         // Update the theme provider to match the selected preset.
         let theme_def = match self.app.theme_preset {
-            ThemePreset::Dark => &poodle_tokens::themes::DARK,
+            ThemePreset::Eclipse => &poodle_tokens::themes::ECLIPSE,
             ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
         };

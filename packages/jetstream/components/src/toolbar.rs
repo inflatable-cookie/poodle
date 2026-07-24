@@ -80,7 +80,7 @@ mod tests {
     use poodle_specs::{Alignment, ControlDensity, ControlSize, Orientation, ToolbarSpec};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn items() -> Vec<JsEl> {

@@ -255,7 +255,7 @@ mod tests {
     use poodle_specs::{DockEdge, PanelTabItem};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn items() -> Vec<PanelTabItem> {

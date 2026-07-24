@@ -79,7 +79,9 @@
   let uncontrolledRatio = $state(0.5);
   let uncontrolledPrimaryCollapsed = $state(false);
   let uncontrolledSecondaryCollapsed = $state(false);
-  let dragMousePos = $state(0);
+  let dragMousePos = 0;
+  let dragContainerStart = 0;
+  let dragContainerSize = 0;
   let seededDefaultRatio = $state(false);
 
   $effect.pre(() => {
@@ -185,19 +187,26 @@
     onSecondaryCollapsedChange?.(nextCollapsed);
   }
 
-  function rawRatio(mousePos: number): number {
-    if (!container) return currentRatio;
+  function measureContainer(): { start: number; size: number } | null {
+    if (!container) return null;
     const rect = container.getBoundingClientRect();
     const start = orientation === "horizontal" ? rect.left : rect.top;
-    const total = orientation === "horizontal" ? rect.width : rect.height;
-    if (total <= 0) return currentRatio;
-    return (mousePos - start) / total;
+    const size = orientation === "horizontal" ? rect.width : rect.height;
+    return size > 0 ? { start, size } : null;
+  }
+
+  function rawRatio(mousePos: number): number {
+    if (dragContainerSize <= 0) return currentRatio;
+    return (mousePos - dragContainerStart) / dragContainerSize;
   }
 
   const RAIL_EXPAND_HYSTERESIS_PX = 8;
 
   function handleResizeStart(position: number): void {
     dragMousePos = position;
+    const measurement = measureContainer();
+    dragContainerStart = measurement?.start ?? 0;
+    dragContainerSize = measurement?.size ?? 0;
 
     // Legacy hidden-collapse panes re-open on drag start. Railed panes
     // (a collapsed size is configured) stay railed until the drag pulls
@@ -213,11 +222,9 @@
   }
 
   function handleResizeMove(delta: number): void {
-    if (!container) return;
+    if (!container || dragContainerSize <= 0) return;
     dragMousePos += delta;
-    const rect = container.getBoundingClientRect();
-    const total = orientation === "horizontal" ? rect.width : rect.height;
-    if (total <= 0) return;
+    const total = dragContainerSize;
     const raw = rawRatio(dragMousePos);
 
     // Rail-collapse lanes resolve collapse/expand from drag intent here,
@@ -277,12 +284,15 @@
     setRatio(raw);
   }
 
+  function handleResizeEnd(): void {
+    dragContainerStart = 0;
+    dragContainerSize = 0;
+  }
+
   function handleResizeStep(delta: number): void {
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const total = orientation === "horizontal" ? rect.width : rect.height;
-    if (total <= 0) return;
-    setRatio(currentRatio + delta / total);
+    const measurement = measureContainer();
+    if (!measurement) return;
+    setRatio(currentRatio + delta / measurement.size);
   }
 
   function toggleCollapsePrimary(nextCollapsed: boolean): void {
@@ -325,6 +335,7 @@
       ariaLabel="Resize"
       onResizeStart={handleResizeStart}
       onResizeMove={handleResizeMove}
+      onResizeEnd={handleResizeEnd}
       onResizeStep={handleResizeStep}
     />
 

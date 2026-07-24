@@ -369,7 +369,7 @@ mod tests {
     use poodle_specs::DiscoveryState;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn sample_actions() -> Vec<CommandActionItem> {

@@ -154,7 +154,7 @@ mod tests {
     use crate::render_probe::probe;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Ready state renders the header (title) and the body content slot.

@@ -209,7 +209,7 @@ mod tests {
     use poodle_specs::{ControlSize, VideoPlayerSpec};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Transport controls render real Icon glyphs (not text labels).

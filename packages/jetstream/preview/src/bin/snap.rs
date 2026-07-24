@@ -83,7 +83,7 @@ fn snapshot_opts(
     if let Some((hx, hy, pressed)) = hover {
         ui.set_pointer_state(hx, hy, pressed);
     }
-    let cmds = collect_draw_commands(&ui.tree, &ui.focus, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)));
+    let cmds = collect_draw_commands(&ui.tree, &ui.focus, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)));
     let quads = convert_draw_commands_scaled(&cmds, 1.0);
 
     // Offscreen target.
@@ -215,7 +215,7 @@ fn snapshot_opts(
         }
 
         // ── Icon pass — SVG icons rasterized + drawn as tinted quads ──
-        let icon_cmds = collect_icon_commands(&ui.tree, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)), 1.0);
+        let icon_cmds = collect_icon_commands(&ui.tree, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)), 1.0);
         if !icon_cmds.is_empty() {
             let mut icon_cache = IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
@@ -334,7 +334,7 @@ fn snapshot_opts(
 fn snap_all_specimens() {
     use poodle_jetstream_preview::{app_state::AppState, component_registry, specimens};
     std::fs::create_dir_all("/tmp/poodle-specimens").ok();
-    let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+    let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
     let canvas = resolve_color(&theme, "color.background.canvas");
     let state = AppState::new();
     let mut done = 0;
@@ -398,7 +398,7 @@ fn main() {
         snap_all_specimens();
         return;
     }
-    let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+    let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
     let panel = resolve_color(&theme, "color.background.panel");
     let border = resolve_color(&theme, "color.border.default");
 

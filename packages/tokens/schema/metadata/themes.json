@@ -4,9 +4,9 @@
       "selector": "[data-theme=\"iceberg\"]",
       "description": "Cool pale light theme with a blue accent."
     },
-    "dark": {
-      "selector": "[data-theme=\"dark\"]",
-      "description": "Dark neutral application theme."
+    "eclipse": {
+      "selector": "[data-theme=\"eclipse\"]",
+      "description": "Blue-tinted near-black theme with a warm gold accent."
     },
     "graphite": {
       "selector": "[data-theme=\"graphite\"]",

@@ -37,7 +37,7 @@
   // ── State ───────────────────────────────────────────────────────────
 
   let appShell: HTMLElement | null = null;
-  let theme: ThemeName = "dark";
+  let theme: ThemeName = "eclipse";
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "sm";
   let contrast = 0.5;

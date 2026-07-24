@@ -228,7 +228,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "command-suite-baseline",
-        "command-suite-dark"
+        "command-suite-eclipse"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/workstation-shell-command-layout-baseline.json",
@@ -253,7 +253,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "workspace-suite-baseline",
-        "workspace-suite-dark"
+        "workspace-suite-eclipse"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/workstation-shell-command-layout-baseline.json",

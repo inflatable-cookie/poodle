@@ -212,7 +212,7 @@ mod tests {
     use poodle_specs::{ControlSize, DateTimeRangeValue, DateTimeValue};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Recursively find the first descendant (incl. self) matching `pred`.

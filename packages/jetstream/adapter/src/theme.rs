@@ -521,12 +521,12 @@ mod contrast_tests {
 
     #[test]
     fn neutral_contrast_matches_gpui_reference() {
-        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let surface = theme.resolve_color("color.background.surface");
         assert!((surface.0 - 17.073 / 255.0).abs() < 0.002, "surface r {}", surface.0);
         let border = theme.resolve_color("color.border.default");
         assert!((border.3 - 0.11).abs() < 0.001, "border alpha {}", border.3);
-        let full = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK).with_contrast(1.0);
+        let full = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE).with_contrast(1.0);
         let literal = full.resolve_color("color.background.surface");
         assert!((literal.0 - 21.0 / 255.0).abs() < 0.002, "k=1 literal");
         let accent = theme.resolve_color("color.accent.base");

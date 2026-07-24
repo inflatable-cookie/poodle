@@ -41,7 +41,7 @@ mod tests {
     use poodle_specs::{EyebrowSize, EyebrowSpacing};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Contract §8 + Svelte `text-transform: uppercase`: mixed-case input is

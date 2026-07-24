@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T15:43:13.163Z",
+  "generatedAt": "2026-07-24T16:23:30.953Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -2859,16 +2859,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#command-suite"
         },
         {
-          "id": "command-suite-dark",
-          "label": "dark",
-          "note": "Dark neutral command review.",
+          "id": "command-suite-eclipse",
+          "label": "eclipse",
+          "note": "Eclipse neutral command review.",
           "state": {
             "sectionId": "command-suite",
-            "theme": "dark",
+            "theme": "eclipse",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=dark&density=comfortable&controlSize=md#command-suite"
+          "url": "/?theme=eclipse&density=comfortable&controlSize=md#command-suite"
         }
       ]
     },
@@ -2907,16 +2907,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#workspace-suite"
         },
         {
-          "id": "workspace-suite-dark",
-          "label": "dark",
-          "note": "Dark neutral workstation-shell review.",
+          "id": "workspace-suite-eclipse",
+          "label": "eclipse",
+          "note": "Eclipse neutral workstation-shell review.",
           "state": {
             "sectionId": "workspace-suite",
-            "theme": "dark",
+            "theme": "eclipse",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=dark&density=comfortable&controlSize=md#workspace-suite"
+          "url": "/?theme=eclipse&density=comfortable&controlSize=md#workspace-suite"
         }
       ]
     },
@@ -2954,16 +2954,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#token-summary-section"
         },
         {
-          "id": "token-summary-section-dark",
-          "label": "dark",
-          "note": "Dark token overlay review.",
+          "id": "token-summary-section-eclipse",
+          "label": "eclipse",
+          "note": "Eclipse token overlay review.",
           "state": {
             "sectionId": "token-summary-section",
-            "theme": "dark",
+            "theme": "eclipse",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=dark&density=comfortable&controlSize=md#token-summary-section"
+          "url": "/?theme=eclipse&density=comfortable&controlSize=md#token-summary-section"
         },
         {
           "id": "token-summary-section-iceberg",
@@ -3013,16 +3013,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#token-inspector"
         },
         {
-          "id": "token-inspector-dark",
-          "label": "dark",
-          "note": "Dark token-inspector review.",
+          "id": "token-inspector-eclipse",
+          "label": "eclipse",
+          "note": "Eclipse token-inspector review.",
           "state": {
             "sectionId": "token-inspector",
-            "theme": "dark",
+            "theme": "eclipse",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=dark&density=comfortable&controlSize=md#token-inspector"
+          "url": "/?theme=eclipse&density=comfortable&controlSize=md#token-inspector"
         },
         {
           "id": "token-inspector-iceberg",

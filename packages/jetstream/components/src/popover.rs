@@ -78,7 +78,7 @@ mod tests {
     use crate::render_probe::{probe, ProbeColor};
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     /// Surface paints the elevated background fill and carries a border.

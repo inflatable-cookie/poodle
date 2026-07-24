@@ -110,7 +110,7 @@ mod tests {
     use crate::theme_ext::tint;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn px_color(v: glam::Vec4) -> ProbeColor {

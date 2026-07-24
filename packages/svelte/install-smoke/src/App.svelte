@@ -10,7 +10,7 @@
     if (!shell) return;
 
     applyThemeAttributes(shell, {
-      theme: "dark",
+      theme: "eclipse",
       density: "compact",
       controlSize: "md",
     });

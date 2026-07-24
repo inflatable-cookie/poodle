@@ -26,7 +26,7 @@ theme / density / control-size layers you use (published by
 
 ```ts
 import "@poodle/svelte-tokens/styles.css";        // semantic token definitions
-import "@poodle/svelte-tokens/theme-dark.css";    // + theme-light / theme-loophole-studio
+import "@poodle/svelte-tokens/theme-eclipse.css"; // + theme-iceberg / theme-graphite
 import "@poodle/svelte-tokens/density-default.css";
 import "@poodle/svelte-tokens/control-size-md.css";
 ```
@@ -43,7 +43,7 @@ keys off):
 ```ts
 import { applyThemeAttributes } from "@poodle/svelte-tokens";
 applyThemeAttributes(document.documentElement, {
-  theme: "dark",
+  theme: "eclipse",
   density: "default",
   controlSize: "md",
 });

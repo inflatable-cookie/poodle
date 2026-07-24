@@ -225,7 +225,7 @@ mod tests {
     /// the engine plays it exactly once (completion persists across rebuilds).
     #[test]
     fn toasts_carry_enter_animation() {
-        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let spec = ToastStackSpec::new().with_toasts(vec![Toast::new("t1", "Saved")]);
         let el = js_toast_stack(&spec, &theme);
         let toast = &el.children[0];
@@ -234,7 +234,7 @@ mod tests {
     }
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     #[test]

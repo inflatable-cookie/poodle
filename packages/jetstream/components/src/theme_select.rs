@@ -187,7 +187,7 @@ mod tests {
     use poodle_specs::ThemeSwatch;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn themes() -> Vec<ThemeOption> {

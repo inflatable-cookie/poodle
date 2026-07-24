@@ -77,7 +77,7 @@ mod tests {
     use poodle_specs::InlineTypographyMode;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     #[test]

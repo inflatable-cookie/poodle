@@ -258,14 +258,14 @@ mod tests {
     /// stable id (the engine's animation-clock key).
     #[test]
     fn skeleton_carries_pulse_animation() {
-        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK);
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let el = js_skeleton(&SkeletonSpec::new(), &theme);
         assert!(el.animation.is_some(), "skeleton pulses");
         assert!(el.id.is_some(), "animated element carries a stable id");
     }
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
     fn spec() -> SkeletonSpec {
