@@ -1,5 +1,6 @@
 import { render } from "@testing-library/svelte";
 import axe from "axe-core";
+import { createRawSnippet } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import { A11Y_BASELINE, A11Y_EXCLUDE, COMPONENT_PROPS } from "../fixtures/component-props";
@@ -24,6 +25,20 @@ const PAGE_LEVEL_RULES = [
   "bypass",
 ];
 
+// Svelte-only snippet fixtures. Components whose trigger content is supplied by
+// the consumer have no accessible name when rendered bare — that is correct
+// behaviour, not a defect, so give them content and assert the real thing
+// instead of excluding them. (Verified: all four are axe-clean with content.)
+const text = (value: string) =>
+  createRawSnippet(() => ({ render: () => `<span>${value}</span>` }));
+
+const SNIPPET_PROPS: Record<string, Record<string, unknown>> = {
+  Menu: { trigger: text("Open menu") },
+  Popover: { trigger: text("Open popover") },
+  HoverCard: { trigger: text("Show details") },
+  ContextMenu: { children: text("Right click me") },
+};
+
 const modules = import.meta.glob("../../packages/svelte/components/src/*.svelte", {
   eager: true,
 }) as Record<string, { default: unknown }>;
@@ -40,7 +55,8 @@ describe("component accessibility (axe)", () => {
 
   for (const [name, Comp] of entries) {
     it(`${name} has no axe violations`, async () => {
-      const { container } = render(Comp as never, { props: COMPONENT_PROPS[name] ?? {} });
+      const props = { ...(COMPONENT_PROPS[name] ?? {}), ...(SNIPPET_PROPS[name] ?? {}) };
+      const { container } = render(Comp as never, { props });
       // Overlays portal into document.body, so scan the document.
       const results = await axe.run(document.body, {
         resultTypes: ["violations"],

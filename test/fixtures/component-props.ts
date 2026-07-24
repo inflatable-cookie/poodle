@@ -115,24 +115,9 @@ export const SMOKE_EXCLUDE: Record<string, string> = {
 // Components excluded from the axe sweep, with the reason.
 export const A11Y_EXCLUDE: Record<string, string> = {};
 
-// Accepted axe violations per component (rule ids), held as an explicit baseline
-// so the gate stays green while the debt stays visible. Closing an issue means
-// deleting its entry — never add one without a reason in the commit.
-export const A11Y_BASELINE: Record<string, string[]> = {
-  // --- Harness artifacts: the trigger's content is a consumer-supplied snippet,
-  // so rendering bare leaves the trigger with no accessible name. Not a defect.
-  ContextMenu: ["aria-command-name"],
-  HoverCard: ["aria-command-name"],
-  Menu: ["aria-command-name"],
-  Popover: ["aria-command-name"],
-
-  // --- Real defects found by this sweep. Each is tracked for reconciliation;
-  // delete the entry when fixed. See the a11y follow-up task.
-  //
-  // <dt>/<dd> rendered with no <dl> ancestor — no parent supplies one.
-  // Nested interactive controls (the same defect class fixed in FilterToolbar:
-  // an interactive ancestor wrapping interactive children).
-  // Role used without its required ARIA attributes.
-  // Role not permitted on the element it is applied to.
-  // ARIA attribute not permitted on that role/element.
-};
+// Accepted axe violations per component (rule ids). Currently EMPTY: every
+// component passes the sweep outright. Components whose trigger content comes
+// from the consumer are given snippet fixtures in test/a11y/ rather than being
+// excluded, so they are genuinely asserted. Never add an entry without a reason
+// in the commit — an entry here is debt, not a fix.
+export const A11Y_BASELINE: Record<string, string[]> = {};
