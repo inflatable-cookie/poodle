@@ -62,6 +62,8 @@ jobs:
       # ── effigy ci:web ──────────────────────────────────────────────
       - name: core state-machine tests
         run: bun run --cwd packages/core test
+      - name: component + parity tests (svelte + react)
+        run: bunx vitest run
       - name: contract / manifest lint
         run: bun run --cwd packages/svelte/preview docs:lint
       - name: parity report (tokens:build + data-layer smoke)
