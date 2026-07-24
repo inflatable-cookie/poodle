@@ -93,7 +93,7 @@ ComponentSpec (e.g. ButtonSpec)
 
 ### Key Crates
 
-- `poodle-tokens` — semantic token definitions, themes (dark, light, loophole-studio)
+- `poodle-tokens` — semantic token definitions and named themes (eclipse, iceberg, graphite, and others)
 - `poodle-specs` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
 - `poodle-adapter` — `ThemeProvider` trait
 - `poodle-jetstream` (adapter) — `JetstreamThemeProvider` for token resolution

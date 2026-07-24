@@ -43,7 +43,7 @@
   }
 
   [data-theme="iceberg"] .poodle-card[data-variant="elevated"] {
-    box-shadow: var(--poodle-recipe-card-theme-light-elevated-shadow, 0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
+    box-shadow: var(--poodle-recipe-card-theme-iceberg-elevated-shadow, 0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
       0 0.25rem 0.625rem rgba(49, 66, 85, 0.06),
       inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72),
       0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 10%, transparent));

@@ -45,7 +45,9 @@ input {
   min-height: 100vh;
 }
 
-.app-shell[data-theme="iceberg"] {
+.app-shell[data-theme="iceberg"],
+.app-shell[data-theme="clay"],
+.app-shell[data-theme="meadow"] {
   color-scheme: light;
 }
 .app-shell[data-theme="eclipse"],
@@ -55,7 +57,8 @@ input {
 .app-shell[data-theme="rose"],
 .app-shell[data-theme="forest"],
 .app-shell[data-theme="solarized"],
-.app-shell[data-theme="high-contrast"] {
+.app-shell[data-theme="hornet"],
+.app-shell[data-theme="cobalt"] {
   color-scheme: dark;
 }
 

@@ -8,7 +8,7 @@
 #
 # Examples:
 #   ./scripts/gpui-screenshot.sh button /tmp/gpui-button.png
-#   ./scripts/gpui-screenshot.sh button /tmp/gpui-button.png -- --theme loophole-studio --density compact
+#   ./scripts/gpui-screenshot.sh button /tmp/gpui-button.png -- --theme graphite --density compact
 #   ./scripts/gpui-screenshot.sh data-table
 #
 # Defaults:

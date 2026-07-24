@@ -218,17 +218,17 @@ mod tests {
     fn sample() -> ThemeSelectSpec {
         ThemeSelectSpec::new()
             .with_themes(vec![
-                ThemeOption::new("dark", "Dark", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
-                ThemeOption::new("light", "Light", ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b")),
+                ThemeOption::new("eclipse", "Eclipse", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
+                ThemeOption::new("iceberg", "Iceberg", ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b")),
             ])
-            .with_value("light")
+            .with_value("iceberg")
     }
 
     #[test]
     fn current_option_and_label() {
         let spec = sample();
-        assert_eq!(spec.current_option().map(|t| t.value.as_str()), Some("light"));
-        assert_eq!(spec.trigger_label(), "Light");
+        assert_eq!(spec.current_option().map(|t| t.value.as_str()), Some("iceberg"));
+        assert_eq!(spec.trigger_label(), "Iceberg");
     }
 
     #[test]

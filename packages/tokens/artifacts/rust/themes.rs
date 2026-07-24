@@ -7,6 +7,52 @@ pub struct ThemeDefinition {
     pub overrides: &'static [(&'static str, &'static str)],
 }
 
+pub const CLAY: ThemeDefinition = ThemeDefinition {
+    name: "clay",
+    selector: "[data-theme=\"clay\"]",
+    overrides: &[
+    ("color.background.canvas", "#f4eee3"),
+    ("color.background.surface", "#ece4d5"),
+    ("color.background.panel", "#f9f4ea"),
+    ("color.background.elevated", "#fffdf8"),
+    ("color.background.overlay", "rgba(60,50,38,0.32)"),
+    ("color.text.primary", "#2a2622"),
+    ("color.text.secondary", "#6b6157"),
+    ("color.text.inverse", "#faf6ef"),
+    ("color.border.subtle", "#e2d8c8"),
+    ("color.border.default", "#c9bca8"),
+    ("color.border.strong", "#a89a85"),
+    ("color.accent.base", "#c96442"),
+    ("color.accent.hover", "#d97757"),
+    ("color.accent.focusRing", "#c96442"),
+    ("color.icon.primary", "#2a2622"),
+    ("color.icon.muted", "#6b6157"),
+    ],
+};
+
+pub const COBALT: ThemeDefinition = ThemeDefinition {
+    name: "cobalt",
+    selector: "[data-theme=\"cobalt\"]",
+    overrides: &[
+    ("color.background.canvas", "#000000"),
+    ("color.background.surface", "#0a0a0a"),
+    ("color.background.panel", "#141414"),
+    ("color.background.elevated", "#1f1f1f"),
+    ("color.background.overlay", "rgba(0,0,0,0.90)"),
+    ("color.text.primary", "#ffffff"),
+    ("color.text.secondary", "#d4d4d4"),
+    ("color.text.inverse", "#000000"),
+    ("color.border.subtle", "rgba(255,255,255,0.24)"),
+    ("color.border.default", "rgba(255,255,255,0.50)"),
+    ("color.border.strong", "rgba(255,255,255,0.80)"),
+    ("color.accent.base", "#4d9bff"),
+    ("color.accent.hover", "#6faaff"),
+    ("color.accent.focusRing", "#6faaff"),
+    ("color.icon.primary", "#ffffff"),
+    ("color.icon.muted", "#d4d4d4"),
+    ],
+};
+
 pub const ECLIPSE: ThemeDefinition = ThemeDefinition {
     name: "eclipse",
     selector: "[data-theme=\"eclipse\"]",
@@ -80,9 +126,9 @@ pub const GRAPHITE: ThemeDefinition = ThemeDefinition {
     ],
 };
 
-pub const HIGH_CONTRAST: ThemeDefinition = ThemeDefinition {
-    name: "high-contrast",
-    selector: "[data-theme=\"high-contrast\"]",
+pub const HORNET: ThemeDefinition = ThemeDefinition {
+    name: "hornet",
+    selector: "[data-theme=\"hornet\"]",
     overrides: &[
     ("color.background.canvas", "#000000"),
     ("color.background.surface", "#0a0a0a"),
@@ -117,6 +163,32 @@ pub const ICEBERG: ThemeDefinition = ThemeDefinition {
     ("color.border.default", "#75869b"),
     ("color.icon.primary", "#131a22"),
     ("color.icon.muted", "#314255"),
+    ("color.accent.base", "#1668d6"),
+    ("color.accent.hover", "#2d86f3"),
+    ("color.accent.focusRing", "#1668d6"),
+    ],
+};
+
+pub const MEADOW: ThemeDefinition = ThemeDefinition {
+    name: "meadow",
+    selector: "[data-theme=\"meadow\"]",
+    overrides: &[
+    ("color.background.canvas", "#eef2ec"),
+    ("color.background.surface", "#e6ebe3"),
+    ("color.background.panel", "#f4f7f1"),
+    ("color.background.elevated", "#ffffff"),
+    ("color.background.overlay", "rgba(40,50,42,0.30)"),
+    ("color.text.primary", "#1b241e"),
+    ("color.text.secondary", "#5b655d"),
+    ("color.text.inverse", "#f4f7f1"),
+    ("color.border.subtle", "#dce3d6"),
+    ("color.border.default", "#c1ccb9"),
+    ("color.border.strong", "#9caf93"),
+    ("color.accent.base", "#188f52"),
+    ("color.accent.hover", "#22a862"),
+    ("color.accent.focusRing", "#188f52"),
+    ("color.icon.primary", "#1b241e"),
+    ("color.icon.muted", "#5b655d"),
     ],
 };
 
@@ -147,22 +219,22 @@ pub const NORD: ThemeDefinition = ThemeDefinition {
     name: "nord",
     selector: "[data-theme=\"nord\"]",
     overrides: &[
-    ("color.background.canvas", "#2e3440"),
-    ("color.background.surface", "#3b4252"),
-    ("color.background.panel", "#434c5e"),
-    ("color.background.elevated", "#4c566a"),
-    ("color.background.overlay", "rgba(30,34,42,0.80)"),
-    ("color.text.primary", "#eceff4"),
-    ("color.text.secondary", "#d8dee9"),
-    ("color.text.inverse", "#2e3440"),
-    ("color.border.subtle", "rgba(216,222,233,0.12)"),
-    ("color.border.default", "rgba(216,222,233,0.24)"),
-    ("color.border.strong", "rgba(216,222,233,0.42)"),
+    ("color.background.canvas", "#191d24"),
+    ("color.background.surface", "#20252e"),
+    ("color.background.panel", "#272d38"),
+    ("color.background.elevated", "#2f3542"),
+    ("color.background.overlay", "rgba(12,15,19,0.80)"),
+    ("color.text.primary", "#e9edf4"),
+    ("color.text.secondary", "#99a2b2"),
+    ("color.text.inverse", "#191d24"),
+    ("color.border.subtle", "rgba(216,222,233,0.10)"),
+    ("color.border.default", "rgba(216,222,233,0.18)"),
+    ("color.border.strong", "rgba(216,222,233,0.34)"),
     ("color.accent.base", "#88c0d0"),
-    ("color.accent.hover", "#8fbcbb"),
-    ("color.accent.focusRing", "#8fbcbb"),
-    ("color.icon.primary", "#eceff4"),
-    ("color.icon.muted", "#d8dee9"),
+    ("color.accent.hover", "#9fd0de"),
+    ("color.accent.focusRing", "#9fd0de"),
+    ("color.icon.primary", "#e9edf4"),
+    ("color.icon.muted", "#99a2b2"),
     ],
 };
 

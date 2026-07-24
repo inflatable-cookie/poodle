@@ -32,9 +32,21 @@
       "selector": "[data-theme=\"solarized\"]",
       "description": "Solarized-dark inspired theme with a warm amber accent."
     },
-    "high-contrast": {
-      "selector": "[data-theme=\"high-contrast\"]",
+    "hornet": {
+      "selector": "[data-theme=\"hornet\"]",
       "description": "Maximum-contrast black theme with a high-visibility yellow accent."
+    },
+    "cobalt": {
+      "selector": "[data-theme=\"cobalt\"]",
+      "description": "Maximum-contrast black theme with a high-visibility blue accent."
+    },
+    "clay": {
+      "selector": "[data-theme=\"clay\"]",
+      "description": "Warm cream light theme with a coral-orange Claude-style accent."
+    },
+    "meadow": {
+      "selector": "[data-theme=\"meadow\"]",
+      "description": "Soft light theme with an emerald-green accent."
     }
   },
   "density": {

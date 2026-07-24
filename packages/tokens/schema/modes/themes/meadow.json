@@ -3,63 +3,75 @@
     "background": {
       "canvas": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.50}"
+        "$value": "#eef2ec"
       },
       "surface": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.100}"
+        "$value": "#e6ebe3"
       },
       "panel": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.25}"
+        "$value": "#f4f7f1"
       },
       "elevated": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.0}"
+        "$value": "#ffffff"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "rgba(40,50,42,0.30)"
       }
     },
     "text": {
       "primary": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.900}"
+        "$value": "#1b241e"
       },
       "secondary": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.700}"
+        "$value": "#5b655d"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#f4f7f1"
       }
     },
     "border": {
       "subtle": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.200}"
+        "$value": "#dce3d6"
       },
       "default": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.400}"
-      }
-    },
-    "icon": {
-      "primary": {
-        "$type": "color",
-        "$value": "{primitives.color.neutral.900}"
+        "$value": "#c1ccb9"
       },
-      "muted": {
+      "strong": {
         "$type": "color",
-        "$value": "{primitives.color.neutral.700}"
+        "$value": "#9caf93"
       }
     },
     "accent": {
       "base": {
         "$type": "color",
-        "$value": "#1668d6"
+        "$value": "#188f52"
       },
       "hover": {
         "$type": "color",
-        "$value": "#2d86f3"
+        "$value": "#22a862"
       },
       "focusRing": {
         "$type": "color",
-        "$value": "#1668d6"
+        "$value": "#188f52"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "#1b241e"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#5b655d"
       }
     }
   }

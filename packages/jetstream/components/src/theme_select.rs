@@ -192,7 +192,7 @@ mod tests {
 
     fn themes() -> Vec<ThemeOption> {
         vec![
-            ThemeOption::new("dark", "Dark", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
+            ThemeOption::new("eclipse", "Eclipse", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
             ThemeOption::new("nord", "Nord", ThemeSwatch::new("#2e3440", "#3b4252", "#88c0d0", "#eceff4", "#4c566a")),
         ]
     }
@@ -210,10 +210,10 @@ mod tests {
     #[test]
     fn open_grid_lists_all_themes() {
         let el = js_theme_select(
-            &ThemeSelectSpec::new().with_themes(themes()).with_value("dark").with_open(true),
+            &ThemeSelectSpec::new().with_themes(themes()).with_value("eclipse").with_open(true),
             &theme(),
         );
         let tree = crate::render_probe::probe(&el, 360.0, 240.0);
-        assert!(tree.has_text("Dark") && tree.has_text("Nord"), "tiles missing: {:?}", tree.texts());
+        assert!(tree.has_text("Eclipse") && tree.has_text("Nord"), "tiles missing: {:?}", tree.texts());
     }
 }

@@ -93,9 +93,9 @@ Theme identifiers:
 
 | Underlay ID | Maps to Poodle theme | CSS artifact |
 |---|---|---|
-| `underlay-default` | `light` | Poodle light theme |
-| `underlay-night` | `dark` | Poodle dark theme |
-| `underlay-studio` | `loophole-studio` | Workstation-oriented dark |
+| `underlay-default` | `iceberg` | Poodle light theme |
+| `underlay-night` | `eclipse` | Poodle dark theme |
+| `underlay-studio` | `graphite` | Workstation-oriented dark |
 
 Density and control-size are applied the same way using `underlayDensityModeMap`
 and `underlayControlSizeMap`:

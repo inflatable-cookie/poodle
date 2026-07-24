@@ -3,75 +3,75 @@
     "background": {
       "canvas": {
         "$type": "color",
-        "$value": "#191d24"
+        "$value": "#000000"
       },
       "surface": {
         "$type": "color",
-        "$value": "#20252e"
+        "$value": "#0a0a0a"
       },
       "panel": {
         "$type": "color",
-        "$value": "#272d38"
+        "$value": "#141414"
       },
       "elevated": {
         "$type": "color",
-        "$value": "#2f3542"
+        "$value": "#1f1f1f"
       },
       "overlay": {
         "$type": "color",
-        "$value": "rgba(12,15,19,0.80)"
+        "$value": "rgba(0,0,0,0.90)"
       }
     },
     "text": {
       "primary": {
         "$type": "color",
-        "$value": "#e9edf4"
+        "$value": "#ffffff"
       },
       "secondary": {
         "$type": "color",
-        "$value": "#99a2b2"
+        "$value": "#d4d4d4"
       },
       "inverse": {
         "$type": "color",
-        "$value": "#191d24"
+        "$value": "#000000"
       }
     },
     "border": {
       "subtle": {
         "$type": "color",
-        "$value": "rgba(216,222,233,0.10)"
+        "$value": "rgba(255,255,255,0.24)"
       },
       "default": {
         "$type": "color",
-        "$value": "rgba(216,222,233,0.18)"
+        "$value": "rgba(255,255,255,0.50)"
       },
       "strong": {
         "$type": "color",
-        "$value": "rgba(216,222,233,0.34)"
+        "$value": "rgba(255,255,255,0.80)"
       }
     },
     "accent": {
       "base": {
         "$type": "color",
-        "$value": "#88c0d0"
+        "$value": "#4d9bff"
       },
       "hover": {
         "$type": "color",
-        "$value": "#9fd0de"
+        "$value": "#6faaff"
       },
       "focusRing": {
         "$type": "color",
-        "$value": "#9fd0de"
+        "$value": "#6faaff"
       }
     },
     "icon": {
       "primary": {
         "$type": "color",
-        "$value": "#e9edf4"
+        "$value": "#ffffff"
       },
       "muted": {
         "$type": "color",
-        "$value": "#99a2b2"
+        "$value": "#d4d4d4"
       }
     }
   }

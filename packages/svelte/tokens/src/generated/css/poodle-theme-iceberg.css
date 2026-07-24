@@ -12,4 +12,7 @@
   --poodle-color-border-default: oklch(from #75869b calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
   --poodle-color-icon-primary: #131a22;
   --poodle-color-icon-muted: #314255;
+  --poodle-color-accent-base: #1668d6;
+  --poodle-color-accent-hover: #2d86f3;
+  --poodle-color-accent-focusRing: #1668d6;
 }

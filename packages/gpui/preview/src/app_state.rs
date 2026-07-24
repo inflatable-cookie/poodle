@@ -72,7 +72,7 @@ pub enum ThemePreset {
 }
 
 impl ThemePreset {
-    /// Order matches Svelte preview: dark, light, graphite.
+    /// Order matches Svelte preview: eclipse, iceberg, graphite.
     pub const ALL: &[ThemePreset] = &[
         ThemePreset::Eclipse,
         ThemePreset::Iceberg,

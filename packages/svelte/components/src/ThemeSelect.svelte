@@ -21,7 +21,6 @@
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-    ThemeOption,
   } from "./types";
 
   interface Props {
