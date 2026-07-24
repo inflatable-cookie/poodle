@@ -134,6 +134,11 @@
   const currentQuery = $derived(hasQueryProp ? query ?? "" : uncontrolledQuery);
   const toolbarSnippet = $derived(toolbarContent as unknown as Snippet<[]>);
   const selectionSnippet = $derived(selectionContent as unknown as Snippet<[]>);
+  // Guard lives here, not inside the snippet: PickerShell renders its
+  // __selection wrapper whenever a snippet is passed, so a snippet that renders
+  // nothing would still emit an empty region. Contract: the selection summary is
+  // visible only when there is a selection.
+  const hasSelectionSummary = $derived(showSelectionSummary && currentSelectedIds.length > 0);
   const footerSnippet = $derived(footerContent as unknown as Snippet<[]>);
 
   // Drill-down state
@@ -504,13 +509,11 @@
 {/snippet}
 
 {#snippet selectionContent()}
-  {#if showSelectionSummary && currentSelectedIds.length > 0}
-    <SelectionSummary
-      items={selectedItems}
-      onRemove={(id) => setSelection(currentSelectedIds.filter((selectedId) => selectedId !== id))}
-      onClear={() => setSelection([])}
-    />
-  {/if}
+  <SelectionSummary
+    items={selectedItems}
+    onRemove={(id) => setSelection(currentSelectedIds.filter((selectedId) => selectedId !== id))}
+    onClear={() => setSelection([])}
+  />
 {/snippet}
 
 {#snippet footerContent()}
@@ -548,7 +551,7 @@
       stateTitle={stateTitle ?? (isDrilling ? "Loading" : (browseState === "loading" ? "Loading candidates" : browseState === "error" ? "Picker unavailable" : browseState === "empty" ? "No candidates available" : "No matching candidates"))}
       stateMessage={stateMessage ?? (isDrilling ? "Loading items..." : (browseState === "loading" ? "Picker results are loading while selection state stays host-owned." : browseState === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : browseState === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters."))}
       toolbar={toolbarSnippet}
-      selection={selectionSnippet}
+      selection={hasSelectionSummary ? selectionSnippet : undefined}
       stateContent={stateContent}
       footer={showFooter ? footerSnippet : undefined}
     >

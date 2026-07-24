@@ -45,19 +45,11 @@ const shared = [...svelteByName.keys()]
 // providers render a wrapper element; React context emits no DOM node.
 const IGNORE = new Set(["poodle-ui-presentation-provider"]);
 
-// Genuine anatomy divergences found by this gate, held as an explicit baseline
-// so the gate stays green while the debt stays visible. Svelte is the parity
-// authority — each entry is a React shell to reconcile (or a contract call).
-// Closing one means deleting its entry.
-const KNOWN_DIVERGENCE: Record<string, string[]> = {
-  // React renders a placeholder thumbnail (with an icon) in the empty state;
-  // Svelte renders nothing there.
-  MediaPreview: ["poodle-icon", "poodle-media-thumbnail__placeholder"],
-  // React always renders a spinner element; Svelte omits it in this state.
-  PageLoading: ["poodle-page-loading__spinner"],
-  // Svelte renders the picker-shell selection region; React omits it.
-  RelationPicker: ["poodle-picker-shell__selection"],
-};
+// Genuine anatomy divergences, held as an explicit baseline so the gate stays
+// green while the debt stays visible. Closing one means deleting its entry.
+// Currently EMPTY — every shared component matches. Keep it that way: a new
+// entry is debt, not a fix.
+const KNOWN_DIVERGENCE: Record<string, string[]> = {};
 
 function anatomy(root: ParentNode): string[] {
   const set = new Set<string>();

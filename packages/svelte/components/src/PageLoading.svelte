@@ -41,7 +41,9 @@
       <div class="poodle-page-loading__backdrop" aria-hidden="true"></div>
     {/if}
     <div class="poodle-page-loading__card">
-      <Spinner className="poodle-page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
+      <!-- Spinner takes `class`, not `className`; passing the wrong name here
+           silently dropped the page-loading__spinner class. -->
+      <Spinner class="poodle-page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
 
       {#if !isIndeterminate}
         <div class="poodle-page-loading__progress">

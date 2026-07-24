@@ -17,7 +17,7 @@ Updated: 2026-07-10
 [Root .page-loading]  <div role="status"> aria-label, aria-live="polite"
   ├── [Backdrop .page-loading__backdrop]  <div> (overlay only, aria-hidden)
   └── [Card .page-loading__card]  <div>
-        ├── [Spinner]  Spinner primitive (variant="ring", sizeRole="prominent", tone="accent")
+        ├── [Spinner .page-loading__spinner]  Spinner primitive (variant="ring", sizeRole="prominent", tone="accent")
         ├── [Progress .page-loading__progress]  <div> (optional, when value !== null)
         │     └── [ProgressBar]  Progress primitive
         ├── [Message .page-loading__message]  <p> (optional, when message is provided)
@@ -31,7 +31,7 @@ Updated: 2026-07-10
 | Root | `<div>` | yes | `role="status"`, `aria-live="polite"`, centered flex; conditionally rendered based on `visible` |
 | Backdrop | `<div>` | no | Overlay-only; semi-transparent background with `backdrop-filter: blur(2px)`, `aria-hidden="true"` |
 | Card | `<div>` | yes | Elevated card in overlay mode; simplified transparent container in inline mode |
-| Spinner | `Spinner` primitive | yes | Shared spinner with `variant="ring"`, `sizeRole="prominent"`, `tone="accent"` |
+| Spinner | `Spinner` primitive | yes | Shared spinner with `variant="ring"`, `sizeRole="prominent"`, `tone="accent"`; carries the `page-loading__spinner` class |
 | Progress | `<div>` wrapper | no | Shown when `value` is not null; contains `Progress` primitive |
 | Message | `<p>` | no | Status text, centered |
 | CancelButton | `<button>` | no | Shown when `canCancel` is true |

@@ -55,6 +55,13 @@
   const uiPresentation = getUiPresentation();
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+
+  // Aliased because the template declares a `mediaContent` snippet for Card,
+  // which shadows this prop. Passed straight through as MediaThumbnail's
+  // `children` so that an absent snippet stays undefined — wrapping it in a
+  // snippet that renders nothing would suppress MediaThumbnail's empty-state
+  // placeholder, which the contract requires.
+  const mediaSnippet = $derived(mediaContent);
 </script>
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
@@ -71,9 +78,8 @@
           ariaLabel={title}
           stateTitle={stateTitle}
           stateMessage={stateMessage}
-        >
-          {@render mediaContent?.()}
-        </MediaThumbnail>
+          children={mediaSnippet}
+        />
       {/snippet}
 
       {#snippet header()}
