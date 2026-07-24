@@ -1,7 +1,13 @@
 import { cleanup as cleanupReact, render as renderReact } from "@testing-library/react";
 import { cleanup as cleanupSvelte, render as renderSvelte } from "@testing-library/svelte";
 import type { ReactElement } from "react";
+import { createRawSnippet } from "svelte";
 import { describe, expect, it } from "vitest";
+
+// Text children for Svelte components that take a Snippet, so both frameworks
+// render equivalent content (e.g. Button's label wrapper is gated on children).
+const text = (value: string) =>
+  createRawSnippet(() => ({ render: () => `<span>${value}</span>` }));
 
 import SvAvatar from "../../packages/svelte/components/src/Avatar.svelte";
 import SvButton from "../../packages/svelte/components/src/Button.svelte";
@@ -44,16 +50,12 @@ import {
 // providers render a wrapper element; React context emits no DOM node.
 const IGNORE = new Set(["poodle-ui-presentation-provider"]);
 
-// Known, accepted anatomy divergences per component (the current Svelte<->React
-// gap inventory). Keyed by case name -> allowed divergent classes (either side).
-// The gate fails on any divergence NOT listed here; closing a gap means deleting
-// its entry. Svelte is the parity authority (see contracts) — these are React
-// shells to reconcile.
-//   Button: React wraps the label in poodle-button__label; Svelte renders
-//   children directly. Reconcile in a follow-up.
-const KNOWN_DIVERGENCE: Record<string, string[]> = {
-  Button: ["poodle-button__label"],
-};
+// Known, accepted anatomy divergences per component: case name -> allowed
+// divergent classes (either side). The gate fails on any divergence NOT listed
+// here; closing a gap means deleting its entry. Svelte is the parity authority
+// (see contracts) — any entry here is a React shell to reconcile. Currently
+// empty: all covered components emit identical anatomy given matched content.
+const KNOWN_DIVERGENCE: Record<string, string[]> = {};
 
 function anatomy(container: HTMLElement): string[] {
   const set = new Set<string>();
@@ -74,17 +76,17 @@ interface Case {
 
 // Matched props so both implementations render equivalent anatomy.
 const cases: Case[] = [
-  { name: "Button", svelte: SvButton, props: {}, react: <Button>Go</Button> },
-  { name: "Pill", svelte: SvPill, props: {}, react: <Pill>New</Pill> },
+  { name: "Button", svelte: SvButton, props: { children: text("Go") }, react: <Button>Go</Button> },
+  { name: "Pill", svelte: SvPill, props: { children: text("New") }, react: <Pill>New</Pill> },
   { name: "Icon", svelte: SvIcon, props: { name: "info" }, react: <Icon name="info" /> },
   { name: "Spinner", svelte: SvSpinner, props: {}, react: <Spinner /> },
   { name: "Avatar", svelte: SvAvatar, props: { name: "Ada Lovelace" }, react: <Avatar name="Ada Lovelace" /> },
-  { name: "Callout", svelte: SvCallout, props: {}, react: <Callout>Heads up</Callout> },
-  { name: "Code", svelte: SvCode, props: {}, react: <Code>npm i</Code> },
+  { name: "Callout", svelte: SvCallout, props: { children: text("Heads up") }, react: <Callout>Heads up</Callout> },
+  { name: "Code", svelte: SvCode, props: { children: text("npm i") }, react: <Code>npm i</Code> },
   { name: "Checkbox", svelte: SvCheckbox, props: {}, react: <Checkbox /> },
   { name: "Switch", svelte: SvSwitch, props: {}, react: <Switch /> },
   { name: "Radio", svelte: SvRadio, props: { value: "a" }, react: <Radio value="a" /> },
-  { name: "TextLink", svelte: SvTextLink, props: { href: "#" }, react: <TextLink href="#">link</TextLink> },
+  { name: "TextLink", svelte: SvTextLink, props: { href: "#", children: text("link") }, react: <TextLink href="#">link</TextLink> },
   { name: "Meter", svelte: SvMeter, props: { value: 50 }, react: <Meter value={50} /> },
   { name: "MetricTile", svelte: SvMetricTile, props: { label: "Streams", value: "1.2k" }, react: <MetricTile label="Streams" value="1.2k" /> },
   { name: "StatusIndicator", svelte: SvStatusIndicator, props: {}, react: <StatusIndicator /> },
