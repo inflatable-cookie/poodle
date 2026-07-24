@@ -1,65 +1,67 @@
 import { cleanup as cleanupReact, render as renderReact } from "@testing-library/react";
 import { cleanup as cleanupSvelte, render as renderSvelte } from "@testing-library/svelte";
-import type { ReactElement } from "react";
-import { createRawSnippet } from "svelte";
+import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
-// Text children for Svelte components that take a Snippet, so both frameworks
-// render equivalent content (e.g. Button's label wrapper is gated on children).
-const text = (value: string) =>
-  createRawSnippet(() => ({ render: () => `<span>${value}</span>` }));
+import { COMPONENT_PROPS, PARITY_EXCLUDE } from "../fixtures/component-props";
 
-import SvAvatar from "../../packages/svelte/components/src/Avatar.svelte";
-import SvButton from "../../packages/svelte/components/src/Button.svelte";
-import SvCallout from "../../packages/svelte/components/src/Callout.svelte";
-import SvCheckbox from "../../packages/svelte/components/src/Checkbox.svelte";
-import SvCode from "../../packages/svelte/components/src/Code.svelte";
-import SvEmptyState from "../../packages/svelte/components/src/EmptyState.svelte";
-import SvField from "../../packages/svelte/components/src/Field.svelte";
-import SvIcon from "../../packages/svelte/components/src/Icon.svelte";
-import SvMeter from "../../packages/svelte/components/src/Meter.svelte";
-import SvMetricTile from "../../packages/svelte/components/src/MetricTile.svelte";
-import SvPill from "../../packages/svelte/components/src/Pill.svelte";
-import SvRadio from "../../packages/svelte/components/src/Radio.svelte";
-import SvSkeleton from "../../packages/svelte/components/src/Skeleton.svelte";
-import SvSpinner from "../../packages/svelte/components/src/Spinner.svelte";
-import SvStatusIndicator from "../../packages/svelte/components/src/StatusIndicator.svelte";
-import SvSwitch from "../../packages/svelte/components/src/Switch.svelte";
-import SvTextLink from "../../packages/svelte/components/src/TextLink.svelte";
-import {
-  Avatar,
-  Button,
-  Callout,
-  Checkbox,
-  Code,
-  EmptyState,
-  Field,
-  Icon,
-  Meter,
-  MetricTile,
-  Pill,
-  Radio,
-  Skeleton,
-  Spinner,
-  StatusIndicator,
-  Switch,
-  TextLink,
-} from "../../packages/react/components/src";
+// Svelte <-> React anatomy parity across EVERY component present in both
+// packages. Each side renders with the SAME props and no children (symmetric by
+// construction), then the emitted poodle-* class sets are diffed.
+//
+// The module globs mean new components are gated automatically.
+
+const svelteModules = import.meta.glob("../../packages/svelte/components/src/*.svelte", {
+  eager: true,
+}) as Record<string, { default: unknown }>;
+
+const reactModules = import.meta.glob("../../packages/react/components/src/*.tsx", {
+  eager: true,
+}) as Record<string, Record<string, unknown>>;
+
+function basename(file: string, ext: string): string {
+  return file.split("/").pop()!.replace(ext, "");
+}
+
+const svelteByName = new Map<string, unknown>(
+  Object.entries(svelteModules).map(([f, m]) => [basename(f, ".svelte"), m.default]),
+);
+const reactByName = new Map<string, unknown>(
+  Object.entries(reactModules)
+    .map(([f, m]) => {
+      const name = basename(f, ".tsx");
+      return [name, m[name]] as const;
+    })
+    .filter(([name, comp]) => /^[A-Z]/.test(name) && typeof comp === "function"),
+);
+
+// Only components implemented in BOTH packages are parity-gated.
+const shared = [...svelteByName.keys()]
+  .filter((name) => reactByName.has(name))
+  .filter((name) => !(name in PARITY_EXCLUDE))
+  .sort();
 
 // Classes that differ by framework idiom, not component anatomy: Svelte context
 // providers render a wrapper element; React context emits no DOM node.
 const IGNORE = new Set(["poodle-ui-presentation-provider"]);
 
-// Known, accepted anatomy divergences per component: case name -> allowed
-// divergent classes (either side). The gate fails on any divergence NOT listed
-// here; closing a gap means deleting its entry. Svelte is the parity authority
-// (see contracts) — any entry here is a React shell to reconcile. Currently
-// empty: all covered components emit identical anatomy given matched content.
-const KNOWN_DIVERGENCE: Record<string, string[]> = {};
+// Genuine anatomy divergences found by this gate, held as an explicit baseline
+// so the gate stays green while the debt stays visible. Svelte is the parity
+// authority — each entry is a React shell to reconcile (or a contract call).
+// Closing one means deleting its entry.
+const KNOWN_DIVERGENCE: Record<string, string[]> = {
+  // React renders a placeholder thumbnail (with an icon) in the empty state;
+  // Svelte renders nothing there.
+  MediaPreview: ["poodle-icon", "poodle-media-thumbnail__placeholder"],
+  // React always renders a spinner element; Svelte omits it in this state.
+  PageLoading: ["poodle-page-loading__spinner"],
+  // Svelte renders the picker-shell selection region; React omits it.
+  RelationPicker: ["poodle-picker-shell__selection"],
+};
 
-function anatomy(container: HTMLElement): string[] {
+function anatomy(root: ParentNode): string[] {
   const set = new Set<string>();
-  for (const el of container.querySelectorAll("*")) {
+  for (const el of root.querySelectorAll("*")) {
     for (const c of el.classList) {
       if (c.startsWith("poodle-") && !IGNORE.has(c)) set.add(c);
     }
@@ -67,45 +69,24 @@ function anatomy(container: HTMLElement): string[] {
   return [...set].sort();
 }
 
-interface Case {
-  name: string;
-  svelte: unknown;
-  props: Record<string, unknown>;
-  react: ReactElement;
-}
-
-// Matched props so both implementations render equivalent anatomy.
-const cases: Case[] = [
-  { name: "Button", svelte: SvButton, props: { children: text("Go") }, react: <Button>Go</Button> },
-  { name: "Pill", svelte: SvPill, props: { children: text("New") }, react: <Pill>New</Pill> },
-  { name: "Icon", svelte: SvIcon, props: { name: "info" }, react: <Icon name="info" /> },
-  { name: "Spinner", svelte: SvSpinner, props: {}, react: <Spinner /> },
-  { name: "Avatar", svelte: SvAvatar, props: { name: "Ada Lovelace" }, react: <Avatar name="Ada Lovelace" /> },
-  { name: "Callout", svelte: SvCallout, props: { children: text("Heads up") }, react: <Callout>Heads up</Callout> },
-  { name: "Code", svelte: SvCode, props: { children: text("npm i") }, react: <Code>npm i</Code> },
-  { name: "Checkbox", svelte: SvCheckbox, props: {}, react: <Checkbox /> },
-  { name: "Switch", svelte: SvSwitch, props: {}, react: <Switch /> },
-  { name: "Radio", svelte: SvRadio, props: { value: "a" }, react: <Radio value="a" /> },
-  { name: "TextLink", svelte: SvTextLink, props: { href: "#", children: text("link") }, react: <TextLink href="#">link</TextLink> },
-  { name: "Meter", svelte: SvMeter, props: { value: 50 }, react: <Meter value={50} /> },
-  { name: "MetricTile", svelte: SvMetricTile, props: { label: "Streams", value: "1.2k" }, react: <MetricTile label="Streams" value="1.2k" /> },
-  { name: "StatusIndicator", svelte: SvStatusIndicator, props: {}, react: <StatusIndicator /> },
-  { name: "Skeleton", svelte: SvSkeleton, props: {}, react: <Skeleton /> },
-  { name: "Field", svelte: SvField, props: { id: "f1", label: "Name" }, react: <Field id="f1" label="Name" /> },
-  { name: "EmptyState", svelte: SvEmptyState, props: { title: "None" }, react: <EmptyState title="None" /> },
-];
-
 describe("svelte <-> react anatomy parity", () => {
-  for (const c of cases) {
-    it(`${c.name} emits matching poodle- anatomy classes`, () => {
-      const sv = renderSvelte(c.svelte as never, { props: c.props }).container;
-      const svClasses = anatomy(sv);
+  it("gates a substantial shared component surface", () => {
+    expect(shared.length).toBeGreaterThan(100);
+  });
+
+  for (const name of shared) {
+    it(`${name} emits matching poodle- anatomy classes`, () => {
+      const props = COMPONENT_PROPS[name] ?? {};
+
+      const svContainer = renderSvelte(svelteByName.get(name) as never, { props }).container;
+      const svClasses = anatomy(svContainer.parentNode ?? svContainer);
       cleanupSvelte();
-      const re = renderReact(c.react).container;
-      const reClasses = anatomy(re);
+
+      const reContainer = renderReact(createElement(reactByName.get(name) as never, props)).container;
+      const reClasses = anatomy(reContainer.parentNode ?? reContainer);
       cleanupReact();
 
-      const allowed = new Set(KNOWN_DIVERGENCE[c.name] ?? []);
+      const allowed = new Set(KNOWN_DIVERGENCE[name] ?? []);
       const svelteOnly = svClasses.filter((x) => !reClasses.includes(x) && !allowed.has(x));
       const reactOnly = reClasses.filter((x) => !svClasses.includes(x) && !allowed.has(x));
       expect({ svelteOnly, reactOnly }).toEqual({ svelteOnly: [], reactOnly: [] });

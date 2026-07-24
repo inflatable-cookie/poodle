@@ -1,55 +1,36 @@
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
-import Avatar from "../src/Avatar.svelte";
-import Pill from "../src/Pill.svelte";
-import Button from "../src/Button.svelte";
-import Callout from "../src/Callout.svelte";
-import Checkbox from "../src/Checkbox.svelte";
-import Code from "../src/Code.svelte";
-import EmptyState from "../src/EmptyState.svelte";
-import Field from "../src/Field.svelte";
-import Icon from "../src/Icon.svelte";
-import Meter from "../src/Meter.svelte";
-import MetricTile from "../src/MetricTile.svelte";
-import Radio from "../src/Radio.svelte";
-import Skeleton from "../src/Skeleton.svelte";
-import Spinner from "../src/Spinner.svelte";
-import StatusIndicator from "../src/StatusIndicator.svelte";
-import Switch from "../src/Switch.svelte";
-import TextLink from "../src/TextLink.svelte";
+import { COMPONENT_PROPS, SMOKE_EXCLUDE } from "../../../../test/fixtures/component-props";
 
-// Data-driven anatomy smoke: every listed component mounts, emits a poodle-*
-// class (proof the Spec/token wiring resolved), and logs no console.error
-// (guarded globally in test/vitest.setup.ts).
-const cases: Array<[string, unknown, Record<string, unknown>]> = [
-  ["Button", Button, {}],
-  ["Pill", Pill, {}],
-  ["Icon", Icon, { name: "info" }],
-  ["Spinner", Spinner, {}],
-  ["Avatar", Avatar, { name: "Ada Lovelace" }],
-  ["Callout", Callout, {}],
-  ["Code", Code, {}],
-  ["Checkbox", Checkbox, {}],
-  ["Switch", Switch, {}],
-  ["Radio", Radio, { value: "a" }],
-  ["TextLink", TextLink, { href: "#" }],
-  ["Meter", Meter, { value: 50 }],
-  ["MetricTile", MetricTile, { label: "Streams", value: "1.2k" }],
-  ["StatusIndicator", StatusIndicator, {}],
-  ["Skeleton", Skeleton, {}],
-  ["Field", Field, { id: "f1", label: "Name" }],
-  ["EmptyState", EmptyState, { title: "Nothing here" }],
-];
+// Anatomy smoke across EVERY Svelte component. The module glob means new
+// components are covered automatically — coverage cannot silently regress.
+// Each component must mount, emit a poodle-* class (proof the Spec/token wiring
+// resolved), and log no console.error (guarded in test/vitest.setup.ts).
+const modules = import.meta.glob("../src/*.svelte", { eager: true }) as Record<
+  string,
+  { default: unknown }
+>;
+
+const entries = Object.entries(modules)
+  .map(([file, mod]) => [file.split("/").pop()!.replace(".svelte", ""), mod.default] as const)
+  .filter(([name]) => !(name in SMOKE_EXCLUDE))
+  .sort(([a], [b]) => a.localeCompare(b));
 
 describe("svelte component smoke", () => {
-  for (const [name, Comp, props] of cases) {
+  it("covers every component in the package", () => {
+    expect(entries.length).toBeGreaterThan(120);
+  });
+
+  for (const [name, Comp] of entries) {
     it(`${name} mounts and emits a poodle- class`, () => {
-      const { container } = render(Comp as never, { props });
-      expect(
-        container.querySelector('[class*="poodle-"]'),
-        `${name}: no poodle- classed element rendered`,
-      ).not.toBeNull();
+      const { container } = render(Comp as never, { props: COMPONENT_PROPS[name] ?? {} });
+      // Overlays (Dialog, Drawer, ToastHost, ...) portal into document.body, so
+      // fall back to the document when the render container itself is empty.
+      const found =
+        container.querySelector('[class*="poodle-"]') ??
+        document.body.querySelector('[class*="poodle-"]');
+      expect(found, `${name}: no poodle- classed element rendered`).not.toBeNull();
     });
   }
 });
