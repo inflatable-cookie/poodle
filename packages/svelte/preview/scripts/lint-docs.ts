@@ -9,6 +9,7 @@ import {
   parityTargets,
 } from "../src/parity";
 import { accessibilityAuditTargets } from "../src/accessibility";
+import { contractPropDrift } from "./contract-prop-drift";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const previewDir = path.resolve(scriptDir, "..");
@@ -3156,10 +3157,21 @@ const gpuiCrossRuntimeParityCounts = validateGpuiCrossRuntimeParityReport(errors
 const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
 const sharedDemoAppContractCounts = validateSharedDemoAppContract(errors);
 
+// Contract <-> Svelte prop-surface drift: every documented Public Prop must be
+// implemented in the authoritative Svelte component.
+const contractDriftResult = contractPropDrift();
+for (const f of contractDriftResult.findings) {
+  if (f.contractOnly.length > 0) {
+    errors.push(
+      `contract prop drift: ${f.slug}.md documents prop(s) not implemented in the ${f.slug} Svelte component: ${f.contractOnly.join(", ")}`,
+    );
+  }
+}
+
 if (errors.length > 0) {
   throw new Error(errors.join("\n"));
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiWorkstationCounts.gpuiWorkstationExportCount} GPUI workstation exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, and ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions.`,
+  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiWorkstationCounts.gpuiWorkstationExportCount} GPUI workstation exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, and ${contractDriftResult.checked} contract<->Svelte prop surfaces.`,
 );

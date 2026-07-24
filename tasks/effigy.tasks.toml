@@ -49,6 +49,9 @@
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
 "test:parity" = "bunx vitest run --project parity"
+# Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
+# selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
+"docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
