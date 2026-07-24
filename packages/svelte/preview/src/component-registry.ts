@@ -68,6 +68,7 @@ export const allComponents: ComponentEntry[] = [
   entry("DateTimeRangePicker", "input", "Start/end date-time range selection.", true),
   entry("DateTimeZonePicker", "input", "Date-time picker with timezone awareness.", true),
   entry("TimeInput", "input", "Time-of-day input with hour/minute selection.", true),
+  entry("ThemeSelect", "input", "Theme picker: popover of theme swatch tiles with an optional modular controller.", true),
   entry("TimeZoneSelect", "input", "Timezone selection dropdown.", true),
   entry("DurationInput", "input", "Segmented hours/minutes/seconds duration entry.", true),
   entry("Calendar", "input", "Date grid for picking a single date or a date range.", true),

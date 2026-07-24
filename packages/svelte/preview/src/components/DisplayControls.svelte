@@ -3,13 +3,14 @@
     Eyebrow,
     Slider,
     TextInput,
+    ThemeSelect,
     ToggleGroup,
     type ToggleGroupOption,
   } from "@poodle/svelte";
   import {
-    themes,
     densityModes,
     controlSizes,
+    themeOptions,
   } from "@poodle/svelte-tokens";
 
   export let theme: string;
@@ -23,18 +24,16 @@
   export let contrast: number = 1;
   export let onContrastChange: (value: number) => void = () => {};
 
-  type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
 
   const densityOrder: DensityName[] = ["compact", "default", "comfortable"];
   const controlSizeOrder: ControlSizeName[] = ["xs", "sm", "md", "lg", "xl"];
 
-  const themeEntries = Object.entries(themes) as [ThemeName, (typeof themes)[ThemeName]][];
   const densityEntries = Object.entries(densityModes) as [DensityName, (typeof densityModes)[DensityName]][];
   const controlSizeEntries = Object.entries(controlSizes) as [ControlSizeName, (typeof controlSizes)[ControlSizeName]][];
 
-  const themeOptions: ToggleGroupOption[] = themeEntries.map(([name]) => ({ value: name, label: name }));
+  const themeCatalogue = themeOptions();
   const densityOptions: ToggleGroupOption[] = densityOrder
     .filter((name) => densityEntries.some(([entryName]) => entryName === name))
     .map((name) => ({ value: name, label: name }));
@@ -46,11 +45,11 @@
 <div class="poodle-display-controls">
   <div class="poodle-display-controls__group">
     <Eyebrow>Theme</Eyebrow>
-    <ToggleGroup
+    <ThemeSelect
+      themes={themeCatalogue}
       value={theme}
-      options={themeOptions}
       ariaLabel="Theme"
-      onValueChange={(value) => onThemeChange(value as string)}
+      onChange={(value) => onThemeChange(value)}
     />
   </div>
 

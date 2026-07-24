@@ -107,6 +107,14 @@ export { DateTimePicker, type DateTimePickerProps } from "./DateTimePicker";
 export { DateTimeRangePicker, type DateTimeRangePickerProps } from "./DateTimeRangePicker";
 export { DateTimeZonePicker, type DateTimeZonePickerProps } from "./DateTimeZonePicker";
 export { TimeZoneSelect, type TimeZoneSelectProps } from "./TimeZoneSelect";
+export { ThemeSelect, type ThemeSelectProps } from "./ThemeSelect";
+export {
+  ThemeControllerProvider,
+  useThemeController,
+  type ThemeController,
+  type ThemeControllerConfig,
+  type ThemeControllerProviderProps,
+} from "./theme-controller";
 export { DateRangePicker, type DateRangePickerProps } from "./DateRangePicker";
 export { Dialog, type DialogProps } from "./Dialog";
 export { Drawer, type DrawerProps } from "./Drawer";

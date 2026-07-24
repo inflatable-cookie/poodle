@@ -119,6 +119,7 @@ import { TextLinkSpecimen } from "./specimens/TextLinkSpecimen";
 import { TextSpecimen } from "./specimens/TextSpecimen";
 import { TimeAgoSpecimen } from "./specimens/TimeAgoSpecimen";
 import { TimeInputSpecimen } from "./specimens/TimeInputSpecimen";
+import { ThemeSelectSpecimen } from "./specimens/ThemeSelectSpecimen";
 import { TimeZoneSelectSpecimen } from "./specimens/TimeZoneSelectSpecimen";
 import { ToastHostSpecimen } from "./specimens/ToastHostSpecimen";
 import { ToastStackSpecimen } from "./specimens/ToastStackSpecimen";
@@ -257,6 +258,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "text-link": TextLinkSpecimen,
   "time-ago": TimeAgoSpecimen,
   "time-input": TimeInputSpecimen,
+  "theme-select": ThemeSelectSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-host": ToastHostSpecimen,
   "toast-stack": ToastStackSpecimen,

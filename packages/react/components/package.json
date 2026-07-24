@@ -22,6 +22,7 @@
     "@poodle/headless": "workspace:*",
     "@poodle/icons-lucide": "workspace:*",
     "@poodle/styles": "workspace:*",
+    "@poodle/svelte-tokens": "workspace:*",
     "marked": "^18.0.0"
   },
   "poodleRelease": {

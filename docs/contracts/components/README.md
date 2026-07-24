@@ -136,6 +136,7 @@ primitives and layout surfaces through higher-order application components.
 - `text-link.md`
 - `tabs.md`
 - `text-input.md`
+- `theme-select.md`
 - `token-input.md`
 - `time-ago.md`
 - `time-input.md`

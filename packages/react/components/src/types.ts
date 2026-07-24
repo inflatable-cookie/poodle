@@ -221,6 +221,21 @@ export type FilterExpression = {
   clauses: FilterClause[];
 };
 
+// ── ThemeSelect ──────────────────────────────────────────────────────────
+export type ThemeSwatch = {
+  canvas: string;
+  surface: string;
+  accent: string;
+  text: string;
+  border: string;
+};
+export type ThemeOption = {
+  value: string;
+  label: string;
+  description?: string;
+  swatch: ThemeSwatch;
+};
+
 export interface AccordionItem {
   value: string;
   label: string;

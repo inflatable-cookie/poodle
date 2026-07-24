@@ -90,6 +90,14 @@ export { default as TextInput } from "./TextInput.svelte";
 export { default as TokenInput } from "./TokenInput.svelte";
 export { default as TimeInput } from "./TimeInput.svelte";
 export { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
+export { default as ThemeSelect } from "./ThemeSelect.svelte";
+export {
+  createThemeController,
+  getThemeController,
+  currentTheme,
+  type ThemeController,
+  type ThemeControllerConfig,
+} from "./theme-controller";
 export { default as ToggleGroup } from "./ToggleGroup.svelte";
 export { default as Toolbar } from "./Toolbar.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
@@ -262,6 +270,8 @@ export type {
   SortField,
   SortDirection,
   SplitOrientation,
+  ThemeOption,
+  ThemeSwatch,
   // Composite types
   AspectRatio,
   BlockType,

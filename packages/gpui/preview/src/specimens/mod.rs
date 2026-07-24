@@ -129,6 +129,7 @@ mod meta_bar;
 mod metric_tile_specimen;
 mod nav_card;
 mod filter_builder_specimen;
+mod theme_select_specimen;
 mod order_by_specimen;
 mod page_header_specimen;
 mod page_loading_specimen;
@@ -435,6 +436,9 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "tree" => specimen_card("Tree", theme, tree::render(state, cx)),
         "filter-builder" => {
             specimen_card("FilterBuilder", theme, filter_builder_specimen::render(state, cx))
+        }
+        "theme-select" => {
+            specimen_card("ThemeSelect", theme, theme_select_specimen::render(state, cx))
         }
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),

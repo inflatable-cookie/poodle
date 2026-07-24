@@ -30,6 +30,52 @@ pub const DARK: ThemeDefinition = ThemeDefinition {
     ],
 };
 
+pub const FOREST: ThemeDefinition = ThemeDefinition {
+    name: "forest",
+    selector: "[data-theme=\"forest\"]",
+    overrides: &[
+    ("color.background.canvas", "#0e1512"),
+    ("color.background.surface", "#15201b"),
+    ("color.background.panel", "#1b2a22"),
+    ("color.background.elevated", "#22352b"),
+    ("color.background.overlay", "rgba(8,14,11,0.80)"),
+    ("color.text.primary", "#e8f3ec"),
+    ("color.text.secondary", "#97b8a4"),
+    ("color.text.inverse", "#0e1512"),
+    ("color.border.subtle", "rgba(227,238,232,0.12)"),
+    ("color.border.default", "rgba(227,238,232,0.22)"),
+    ("color.border.strong", "rgba(227,238,232,0.42)"),
+    ("color.accent.base", "#4dc98a"),
+    ("color.accent.hover", "#6fe0a3"),
+    ("color.accent.focusRing", "#6fe0a3"),
+    ("color.icon.primary", "#e8f3ec"),
+    ("color.icon.muted", "#97b8a4"),
+    ],
+};
+
+pub const HIGH_CONTRAST: ThemeDefinition = ThemeDefinition {
+    name: "high-contrast",
+    selector: "[data-theme=\"high-contrast\"]",
+    overrides: &[
+    ("color.background.canvas", "#000000"),
+    ("color.background.surface", "#0a0a0a"),
+    ("color.background.panel", "#141414"),
+    ("color.background.elevated", "#1f1f1f"),
+    ("color.background.overlay", "rgba(0,0,0,0.90)"),
+    ("color.text.primary", "#ffffff"),
+    ("color.text.secondary", "#d4d4d4"),
+    ("color.text.inverse", "#000000"),
+    ("color.border.subtle", "rgba(255,255,255,0.24)"),
+    ("color.border.default", "rgba(255,255,255,0.50)"),
+    ("color.border.strong", "rgba(255,255,255,0.80)"),
+    ("color.accent.base", "#ffd400"),
+    ("color.accent.hover", "#ffe14d"),
+    ("color.accent.focusRing", "#ffe14d"),
+    ("color.icon.primary", "#ffffff"),
+    ("color.icon.muted", "#d4d4d4"),
+    ],
+};
+
 pub const LIGHT: ThemeDefinition = ThemeDefinition {
     name: "light",
     selector: "[data-theme=\"light\"]",
@@ -71,5 +117,97 @@ pub const LOOPHOLE_STUDIO: ThemeDefinition = ThemeDefinition {
     ("color.status.info", "#6ea9d4"),
     ("color.icon.primary", "#efefef"),
     ("color.icon.muted", "#a6a6a6"),
+    ],
+};
+
+pub const MIDNIGHT: ThemeDefinition = ThemeDefinition {
+    name: "midnight",
+    selector: "[data-theme=\"midnight\"]",
+    overrides: &[
+    ("color.background.canvas", "#0b1020"),
+    ("color.background.surface", "#121933"),
+    ("color.background.panel", "#1a2340"),
+    ("color.background.elevated", "#222d52"),
+    ("color.background.overlay", "rgba(6,10,22,0.80)"),
+    ("color.text.primary", "#e6ecff"),
+    ("color.text.secondary", "#97a3c8"),
+    ("color.text.inverse", "#0b1020"),
+    ("color.border.subtle", "rgba(210,220,255,0.12)"),
+    ("color.border.default", "rgba(210,220,255,0.22)"),
+    ("color.border.strong", "rgba(210,220,255,0.42)"),
+    ("color.accent.base", "#6d8cff"),
+    ("color.accent.hover", "#8aa4ff"),
+    ("color.accent.focusRing", "#8aa4ff"),
+    ("color.icon.primary", "#e6ecff"),
+    ("color.icon.muted", "#97a3c8"),
+    ],
+};
+
+pub const NORD: ThemeDefinition = ThemeDefinition {
+    name: "nord",
+    selector: "[data-theme=\"nord\"]",
+    overrides: &[
+    ("color.background.canvas", "#2e3440"),
+    ("color.background.surface", "#3b4252"),
+    ("color.background.panel", "#434c5e"),
+    ("color.background.elevated", "#4c566a"),
+    ("color.background.overlay", "rgba(30,34,42,0.80)"),
+    ("color.text.primary", "#eceff4"),
+    ("color.text.secondary", "#d8dee9"),
+    ("color.text.inverse", "#2e3440"),
+    ("color.border.subtle", "rgba(216,222,233,0.12)"),
+    ("color.border.default", "rgba(216,222,233,0.24)"),
+    ("color.border.strong", "rgba(216,222,233,0.42)"),
+    ("color.accent.base", "#88c0d0"),
+    ("color.accent.hover", "#8fbcbb"),
+    ("color.accent.focusRing", "#8fbcbb"),
+    ("color.icon.primary", "#eceff4"),
+    ("color.icon.muted", "#d8dee9"),
+    ],
+};
+
+pub const ROSE: ThemeDefinition = ThemeDefinition {
+    name: "rose",
+    selector: "[data-theme=\"rose\"]",
+    overrides: &[
+    ("color.background.canvas", "#1a1114"),
+    ("color.background.surface", "#241a1e"),
+    ("color.background.panel", "#2e2228"),
+    ("color.background.elevated", "#382a30"),
+    ("color.background.overlay", "rgba(16,10,12,0.80)"),
+    ("color.text.primary", "#f6eef1"),
+    ("color.text.secondary", "#c8a6b2"),
+    ("color.text.inverse", "#1a1114"),
+    ("color.border.subtle", "rgba(238,227,232,0.12)"),
+    ("color.border.default", "rgba(238,227,232,0.22)"),
+    ("color.border.strong", "rgba(238,227,232,0.42)"),
+    ("color.accent.base", "#f65c8a"),
+    ("color.accent.hover", "#ff7ba3"),
+    ("color.accent.focusRing", "#ff7ba3"),
+    ("color.icon.primary", "#f6eef1"),
+    ("color.icon.muted", "#c8a6b2"),
+    ],
+};
+
+pub const SOLARIZED: ThemeDefinition = ThemeDefinition {
+    name: "solarized",
+    selector: "[data-theme=\"solarized\"]",
+    overrides: &[
+    ("color.background.canvas", "#002b36"),
+    ("color.background.surface", "#073642"),
+    ("color.background.panel", "#0a4250"),
+    ("color.background.elevated", "#0f4d5c"),
+    ("color.background.overlay", "rgba(0,20,26,0.80)"),
+    ("color.text.primary", "#eee8d5"),
+    ("color.text.secondary", "#93a1a1"),
+    ("color.text.inverse", "#002b36"),
+    ("color.border.subtle", "rgba(147,161,161,0.16)"),
+    ("color.border.default", "rgba(147,161,161,0.28)"),
+    ("color.border.strong", "rgba(147,161,161,0.48)"),
+    ("color.accent.base", "#b58900"),
+    ("color.accent.hover", "#cb9a10"),
+    ("color.accent.focusRing", "#cb9a10"),
+    ("color.icon.primary", "#eee8d5"),
+    ("color.icon.muted", "#93a1a1"),
     ],
 };

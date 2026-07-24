@@ -423,6 +423,15 @@ for (const theme of themeDefinitions) {
   );
 }
 
+// Aggregate: every theme layer in one file, so consumers offering a theme
+// selector import a single stylesheet regardless of how many themes exist.
+writeFile(
+  "css/poodle-themes.css",
+  `${cssHeader}${themeDefinitions
+    .map((theme) => buildCssBlock(theme.selector, theme.entries))
+    .join("\n")}`,
+);
+
 for (const density of densityDefinitions) {
   writeFile(
     `css/poodle-density-${density.name}.css`,

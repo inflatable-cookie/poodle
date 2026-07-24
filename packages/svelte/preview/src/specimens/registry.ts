@@ -108,6 +108,7 @@ import TextLinkSpecimen from "./TextLinkSpecimen.svelte";
 import TextSpecimen from "./TextSpecimen.svelte";
 import TokenInputSpecimen from "./TokenInputSpecimen.svelte";
 import TimeInputSpecimen from "./TimeInputSpecimen.svelte";
+import ThemeSelectSpecimen from "./ThemeSelectSpecimen.svelte";
 import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
 import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
 import ToastStackSpecimen from "./ToastStackSpecimen.svelte";
@@ -249,6 +250,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "text-link": TextLinkSpecimen,
   "token-input": TokenInputSpecimen,
   "time-input": TimeInputSpecimen,
+  "theme-select": ThemeSelectSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,
   "toast-host": ToastHostSpecimen,

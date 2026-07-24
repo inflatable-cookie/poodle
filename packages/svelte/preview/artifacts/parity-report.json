@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T10:41:05.026Z",
+  "generatedAt": "2026-07-24T08:32:38.601Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 161,
-        "componentCount": 132,
-        "helperCount": 29,
-        "previewedCount": 161,
+        "exportCount": 167,
+        "componentCount": 133,
+        "helperCount": 34,
+        "previewedCount": 167,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 161,
-        "componentCount": 132,
-        "helperCount": 29,
-        "previewedCount": 161,
+        "exportCount": 167,
+        "componentCount": 133,
+        "helperCount": 34,
+        "previewedCount": 167,
         "contractOnlyCount": 0
       }
     ],
@@ -582,6 +582,32 @@
         ],
         "sectionTitles": [
           "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "createThemeController",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "currentTheme",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -1045,6 +1071,19 @@
         "kind": "helper",
         "status": "previewed",
         "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "getThemeController",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2087,6 +2126,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "ThemeSelect",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "TimeAgo",
         "kind": "component",
         "status": "previewed",
@@ -2244,6 +2296,32 @@
       {
         "packageName": "@poodle/svelte",
         "exportName": "type ImageCompressionOptions",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "type ThemeController",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "type ThemeControllerConfig",
         "kind": "helper",
         "status": "previewed",
         "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",

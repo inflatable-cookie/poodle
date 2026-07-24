@@ -83,6 +83,7 @@ mod text;
 mod text_input;
 mod text_link;
 mod time_ago;
+mod theme_select;
 mod time_field;
 mod time_zone_select;
 mod toggle_group;
@@ -303,6 +304,7 @@ pub use filter_builder::{
     FilterOperatorDefinition, FilterOption,
 };
 pub use filter_toolbar::FilterToolbarSpec;
+pub use theme_select::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
 pub use form_shell::FormShellSpec;
 pub use inline_list_section::InlineListSectionSpec;
 pub use inline_remediation::InlineRemediationSpec;

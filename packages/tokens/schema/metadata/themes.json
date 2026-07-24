@@ -11,6 +11,30 @@
     "loophole-studio": {
       "selector": "[data-theme=\"loophole-studio\"]",
       "description": "Downstream workstation-oriented theme tuned for Aura and Spark shell surfaces."
+    },
+    "midnight": {
+      "selector": "[data-theme=\"midnight\"]",
+      "description": "Deep indigo dark theme with a periwinkle-blue accent."
+    },
+    "nord": {
+      "selector": "[data-theme=\"nord\"]",
+      "description": "Cool slate theme with a frost-blue accent."
+    },
+    "rose": {
+      "selector": "[data-theme=\"rose\"]",
+      "description": "Warm charcoal dark theme with a rose accent."
+    },
+    "forest": {
+      "selector": "[data-theme=\"forest\"]",
+      "description": "Dark green-tinted theme with an emerald accent."
+    },
+    "solarized": {
+      "selector": "[data-theme=\"solarized\"]",
+      "description": "Solarized-dark inspired theme with a warm amber accent."
+    },
+    "high-contrast": {
+      "selector": "[data-theme=\"high-contrast\"]",
+      "description": "Maximum-contrast black theme with a high-visibility yellow accent."
     }
   },
   "density": {

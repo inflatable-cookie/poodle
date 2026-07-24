@@ -233,6 +233,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tabs | fixed | 2 | 2 | ok |
 | text | ok | 0 | 1 | ok |
 | text-input | fixed | 2 | 2 | ok |
+| theme-select | ok | 1 | 1 | ok |
 | text-link | ok | 0 | 0 | ok |
 | time-ago | fixed | 2 | 2 | ok |
 | time-input | fixed | 0 | 0 | ok |

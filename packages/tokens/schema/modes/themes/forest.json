@@ -1,0 +1,78 @@
+{
+  "color": {
+    "background": {
+      "canvas": {
+        "$type": "color",
+        "$value": "#0e1512"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#15201b"
+      },
+      "panel": {
+        "$type": "color",
+        "$value": "#1b2a22"
+      },
+      "elevated": {
+        "$type": "color",
+        "$value": "#22352b"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "rgba(8,14,11,0.80)"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "#e8f3ec"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#97b8a4"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#0e1512"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "rgba(227,238,232,0.12)"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "rgba(227,238,232,0.22)"
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "rgba(227,238,232,0.42)"
+      }
+    },
+    "accent": {
+      "base": {
+        "$type": "color",
+        "$value": "#4dc98a"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "#6fe0a3"
+      },
+      "focusRing": {
+        "$type": "color",
+        "$value": "#6fe0a3"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "#e8f3ec"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#97b8a4"
+      }
+    }
+  }
+}

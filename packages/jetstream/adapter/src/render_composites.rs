@@ -19,7 +19,7 @@ use poodle_specs::{
     VideoPlayerSpec,
 };
 use poodle_specs::{
-    BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec,
+    BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec, ThemeSelectSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -293,6 +293,14 @@ impl RenderComponent<FilterBuilderSpec> for JetstreamAdapter {
     fn render(&self, _spec: &FilterBuilderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("filter-builder", "FilterBuilderSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<ThemeSelectSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ThemeSelectSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("theme-select", "ThemeSelectSpec", WidgetKind::Panel, mapped)
     }
 }
 

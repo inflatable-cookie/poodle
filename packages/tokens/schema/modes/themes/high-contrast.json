@@ -1,0 +1,78 @@
+{
+  "color": {
+    "background": {
+      "canvas": {
+        "$type": "color",
+        "$value": "#000000"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#0a0a0a"
+      },
+      "panel": {
+        "$type": "color",
+        "$value": "#141414"
+      },
+      "elevated": {
+        "$type": "color",
+        "$value": "#1f1f1f"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "rgba(0,0,0,0.90)"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#d4d4d4"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#000000"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.24)"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.50)"
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.80)"
+      }
+    },
+    "accent": {
+      "base": {
+        "$type": "color",
+        "$value": "#ffd400"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "#ffe14d"
+      },
+      "focusRing": {
+        "$type": "color",
+        "$value": "#ffe14d"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#d4d4d4"
+      }
+    }
+  }
+}

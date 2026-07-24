@@ -182,6 +182,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "DetailShellSpec",
     "DetailSectionSpec",
     "FilterBuilderSpec",
+    "ThemeSelectSpec",
     "FilterToolbarSpec",
     "PickerShellSpec",
     "RelationPickerSpec",

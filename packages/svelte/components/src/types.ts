@@ -370,6 +370,25 @@ export type FilterExpression = {
   clauses: FilterClause[];
 };
 
+// ── ThemeSelect ─────────────────────────────────────────────────────────────
+/** Representative colors for a theme's mini preview swatch. */
+export type ThemeSwatch = {
+  canvas: string;
+  surface: string;
+  accent: string;
+  text: string;
+  border: string;
+};
+
+/** A selectable theme: `data-theme` value + label + preview swatch. Matches
+ * `themeOptions()` from `@poodle/svelte-tokens`. */
+export type ThemeOption = {
+  value: string;
+  label: string;
+  description?: string;
+  swatch: ThemeSwatch;
+};
+
 export type SplitOrientation = "horizontal" | "vertical";
 
 export type BreadcrumbItem = {

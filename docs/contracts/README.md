@@ -162,6 +162,7 @@ above it in downstream repos such as Loophole.
 - `components/text.md`
 - `components/text-link.md`
 - `components/text-input.md`
+- `components/theme-select.md`
 - `components/token-input.md`
 - `components/time-ago.md`
 - `components/time-input.md`

@@ -289,6 +289,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Popover filter-clause builder with editable pills and AND/OR combinator.",
     },
     ComponentEntry {
+        slug: "theme-select",
+        display_name: "ThemeSelect",
+        description: "Theme picker: popover of theme swatch tiles.",
+    },
+    ComponentEntry {
         slug: "order-by",
         display_name: "OrderBy",
         description: "Sort-control toolbar for data views.",

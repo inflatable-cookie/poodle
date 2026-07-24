@@ -3613,6 +3613,36 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <TimeInput id="start-time" bind:value={time} min="08:00" max="18:00" step={60} />`,
   },
 
+  "theme-select": {
+    props: [
+      { name: "themes", type: "ThemeOption[]", default: "controller list", description: "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @poodle/svelte-tokens for the full Poodle set." },
+      { name: "value", type: "string", default: "controller / uncontrolled", description: "Controlled current theme value. Omit to use the theme controller (if present) or internal state." },
+      { name: "columns", type: "number", default: "3", description: "Swatch-tile columns in the popover grid." },
+      { name: "showLabel", type: "boolean", default: "true", description: "Show the current theme name in the trigger." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "ariaLabel", type: "string", default: '"Theme"', description: "Accessible label for the theme control." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the theme control is disabled." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(value: string) => void", description: "Called when a theme is selected (fires alongside the controlled value / controller update)." },
+    ],
+    usage: `<script lang="ts">
+  // With the modular controller — reads all Poodle themes, applies + persists.
+  import { ThemeSelect, createThemeController } from "@poodle/svelte";
+  import "@poodle/svelte-tokens/themes.css"; // load every theme layer
+
+  createThemeController(); // in a root component; ThemeSelect auto-wires
+</script>
+
+<ThemeSelect />
+
+<!-- Standalone (no controller): -->
+<!-- <ThemeSelect themes={themeOptions()} value={theme} onChange={(v) => (theme = v)} /> -->`,
+  },
+
   "time-zone-select": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
