@@ -88,6 +88,14 @@
       "channel": "preview"
     },
     {
+      "name": "poodle-headless",
+      "path": "packages/contracts/headless",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
       "name": "poodle-specs",
       "path": "packages/contracts/components",
       "kind": "contract-crate",

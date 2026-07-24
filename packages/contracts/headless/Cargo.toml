@@ -1,6 +1,6 @@
 [package]
 name = "poodle-headless"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 description = "Poodle headless behavior core, Rust mirror: pure component state machines and shared interaction logic, conformance-tested against the TypeScript core."
 

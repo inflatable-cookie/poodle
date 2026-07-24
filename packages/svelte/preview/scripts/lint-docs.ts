@@ -806,9 +806,24 @@ function validateReleaseOperations(errors: string[]): void {
       }
     } else if (manifestEntry.language === "rust") {
       const cargoPath = path.join(repoRoot, manifestEntry.path, "Cargo.toml");
-      const cargoMetadata = parseCargoPoodleMetadata(fs.readFileSync(cargoPath, "utf8"));
+      const cargoSource = fs.readFileSync(cargoPath, "utf8");
+      const cargoMetadata = parseCargoPoodleMetadata(cargoSource);
+      const cargoVersion = cargoSource.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
 
       expect(cargoMetadata.name === manifestEntry.name, `${cargoPath} package name does not match release manifest.`, errors);
+      expect(
+        typeof cargoVersion === "string" && /^0\.\d+\.\d+$/.test(cargoVersion),
+        `${cargoPath} version must be present and 0.x semver (got ${String(cargoVersion)}).`,
+        errors,
+      );
+      if (manifestEntry.channel === "preview" && typeof cargoVersion === "string" && cargoVersion !== "0.0.0") {
+        const notePath = path.join(repoRoot, "docs", "release-notes", `${cargoVersion}.md`);
+        if (!fs.existsSync(notePath)) {
+          errors.push(`${manifestEntry.name} is at ${cargoVersion} but docs/release-notes/${cargoVersion}.md is missing.`);
+        } else if (!fs.readFileSync(notePath, "utf8").includes(manifestEntry.name)) {
+          errors.push(`docs/release-notes/${cargoVersion}.md must list ${manifestEntry.name}.`);
+        }
+      }
       expect(
         cargoMetadata.publicIntent === manifestEntry.publicIntent,
         `${cargoPath} public-intent metadata does not match release manifest.`,
@@ -837,7 +852,7 @@ function validateReleaseOperations(errors: string[]): void {
   while (stack.length > 0) {
     const dir = stack.pop() as string;
     for (const dirent of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (dirent.name === "node_modules" || dirent.name.startsWith(".")) continue;
+      if (dirent.name === "node_modules" || dirent.name === "target" || dirent.name.startsWith(".")) continue;
       const full = path.join(dir, dirent.name);
       if (dirent.isDirectory()) {
         stack.push(full);
@@ -845,6 +860,13 @@ function validateReleaseOperations(errors: string[]): void {
         const pkg = JSON.parse(fs.readFileSync(full, "utf8")) as { name?: string; poodleRelease?: unknown };
         if (pkg.poodleRelease && pkg.name && !manifestNames.has(pkg.name)) {
           errors.push(`${full} declares poodleRelease but is missing from packages/release-manifest.json.`);
+        }
+      } else if (dirent.name === "Cargo.toml") {
+        const cargoSource = fs.readFileSync(full, "utf8");
+        const hasMeta = cargoSource.includes("[package.metadata.poodle]") || /^public-intent\s*=/m.test(cargoSource);
+        const cargoName = cargoSource.match(/^name\s*=\s*"([^"]+)"/m)?.[1];
+        if (hasMeta && cargoName && !manifestNames.has(cargoName)) {
+          errors.push(`${full} declares poodle release metadata but is missing from packages/release-manifest.json.`);
         }
       }
     }

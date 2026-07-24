@@ -1,6 +1,6 @@
 [package]
 name = "poodle-gpui-components"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 description = "Real GPUI renderable components for Poodle — contract-backed, token-resolved, interactive."
 

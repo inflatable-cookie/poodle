@@ -1,6 +1,6 @@
 [package]
 name = "poodle-events"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 description = "Renderer-agnostic semantic event types for Poodle multi-renderer targets."
 
