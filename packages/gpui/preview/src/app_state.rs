@@ -68,6 +68,15 @@ pub enum ThemePreset {
     Graphite,
     Eclipse,
     Iceberg,
+    Midnight,
+    Nord,
+    Rose,
+    Forest,
+    Solarized,
+    Hornet,
+    Cobalt,
+    Clay,
+    Meadow,
     Default,
 }
 
@@ -77,6 +86,15 @@ impl ThemePreset {
         ThemePreset::Eclipse,
         ThemePreset::Iceberg,
         ThemePreset::Graphite,
+        ThemePreset::Midnight,
+        ThemePreset::Nord,
+        ThemePreset::Rose,
+        ThemePreset::Forest,
+        ThemePreset::Solarized,
+        ThemePreset::Hornet,
+        ThemePreset::Cobalt,
+        ThemePreset::Clay,
+        ThemePreset::Meadow,
     ];
 
     pub fn label(self) -> &'static str {
@@ -85,6 +103,15 @@ impl ThemePreset {
             ThemePreset::Eclipse => "eclipse",
             ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
+            ThemePreset::Midnight => "midnight",
+            ThemePreset::Nord => "nord",
+            ThemePreset::Rose => "rose",
+            ThemePreset::Forest => "forest",
+            ThemePreset::Solarized => "solarized",
+            ThemePreset::Hornet => "hornet",
+            ThemePreset::Cobalt => "cobalt",
+            ThemePreset::Clay => "clay",
+            ThemePreset::Meadow => "meadow",
         }
     }
 
@@ -98,6 +125,15 @@ impl ThemePreset {
             ThemePreset::Graphite => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::GRAPHITE)
             }
+            ThemePreset::Midnight => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MIDNIGHT),
+            ThemePreset::Nord => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::NORD),
+            ThemePreset::Rose => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ROSE),
+            ThemePreset::Forest => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::FOREST),
+            ThemePreset::Solarized => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::SOLARIZED),
+            ThemePreset::Hornet => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::HORNET),
+            ThemePreset::Cobalt => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT),
+            ThemePreset::Clay => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::CLAY),
+            ThemePreset::Meadow => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MEADOW),
         }
     }
 }

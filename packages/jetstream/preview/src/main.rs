@@ -260,6 +260,15 @@ impl PreviewState {
             ThemePreset::Eclipse => &poodle_tokens::themes::ECLIPSE,
             ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
+            ThemePreset::Midnight => &poodle_tokens::themes::MIDNIGHT,
+            ThemePreset::Nord => &poodle_tokens::themes::NORD,
+            ThemePreset::Rose => &poodle_tokens::themes::ROSE,
+            ThemePreset::Forest => &poodle_tokens::themes::FOREST,
+            ThemePreset::Solarized => &poodle_tokens::themes::SOLARIZED,
+            ThemePreset::Hornet => &poodle_tokens::themes::HORNET,
+            ThemePreset::Cobalt => &poodle_tokens::themes::COBALT,
+            ThemePreset::Clay => &poodle_tokens::themes::CLAY,
+            ThemePreset::Meadow => &poodle_tokens::themes::MEADOW,
         };
         // Theme resolves tokens in logical pixels (scale_factor=1.0).
         // The engine handles logical→physical conversion via GameUi.scale_factor.

@@ -66,6 +66,15 @@ pub enum ThemePreset {
     Eclipse,
     Iceberg,
     Graphite,
+    Midnight,
+    Nord,
+    Rose,
+    Forest,
+    Solarized,
+    Hornet,
+    Cobalt,
+    Clay,
+    Meadow,
 }
 
 impl ThemePreset {
@@ -73,6 +82,15 @@ impl ThemePreset {
         ThemePreset::Eclipse,
         ThemePreset::Iceberg,
         ThemePreset::Graphite,
+        ThemePreset::Midnight,
+        ThemePreset::Nord,
+        ThemePreset::Rose,
+        ThemePreset::Forest,
+        ThemePreset::Solarized,
+        ThemePreset::Hornet,
+        ThemePreset::Cobalt,
+        ThemePreset::Clay,
+        ThemePreset::Meadow,
     ];
 
     pub fn label(self) -> &'static str {
@@ -80,6 +98,15 @@ impl ThemePreset {
             ThemePreset::Eclipse => "eclipse",
             ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
+            ThemePreset::Midnight => "midnight",
+            ThemePreset::Nord => "nord",
+            ThemePreset::Rose => "rose",
+            ThemePreset::Forest => "forest",
+            ThemePreset::Solarized => "solarized",
+            ThemePreset::Hornet => "hornet",
+            ThemePreset::Cobalt => "cobalt",
+            ThemePreset::Clay => "clay",
+            ThemePreset::Meadow => "meadow",
         }
     }
 }
