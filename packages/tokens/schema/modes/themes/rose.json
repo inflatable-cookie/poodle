@@ -3,51 +3,51 @@
     "background": {
       "canvas": {
         "$type": "color",
-        "$value": "#1a1114"
+        "$value": "#141010"
       },
       "surface": {
         "$type": "color",
-        "$value": "#241a1e"
+        "$value": "#1b1617"
       },
       "panel": {
         "$type": "color",
-        "$value": "#2e2228"
+        "$value": "#221d1e"
       },
       "elevated": {
         "$type": "color",
-        "$value": "#382a30"
+        "$value": "#292325"
       },
       "overlay": {
         "$type": "color",
-        "$value": "rgba(16,10,12,0.80)"
+        "$value": "rgba(12,9,9,0.80)"
       }
     },
     "text": {
       "primary": {
         "$type": "color",
-        "$value": "#f6eef1"
+        "$value": "#f0eaeb"
       },
       "secondary": {
         "$type": "color",
-        "$value": "#c8a6b2"
+        "$value": "#a89fa1"
       },
       "inverse": {
         "$type": "color",
-        "$value": "#1a1114"
+        "$value": "#141010"
       }
     },
     "border": {
       "subtle": {
         "$type": "color",
-        "$value": "rgba(238,227,232,0.12)"
+        "$value": "rgba(235,226,228,0.11)"
       },
       "default": {
         "$type": "color",
-        "$value": "rgba(238,227,232,0.22)"
+        "$value": "rgba(235,226,228,0.21)"
       },
       "strong": {
         "$type": "color",
-        "$value": "rgba(238,227,232,0.42)"
+        "$value": "rgba(235,226,228,0.40)"
       }
     },
     "accent": {
@@ -67,11 +67,11 @@
     "icon": {
       "primary": {
         "$type": "color",
-        "$value": "#f6eef1"
+        "$value": "#f0eaeb"
       },
       "muted": {
         "$type": "color",
-        "$value": "#c8a6b2"
+        "$value": "#a89fa1"
       }
     }
   }
