@@ -71,16 +71,17 @@
     density={density ?? $uiPresentation.density}
   >
     {#if collapsible && collapsed}
-      <button
-        type="button"
+      <!-- Non-interactive container: the header holds interactive children
+           (CollapseToggle, action buttons), so it must not be a <button> itself.
+           CollapseToggle owns the accessible name and aria-expanded; the click
+           handler here is a pointer convenience for the whole row. -->
+      <div
         class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
         onclick={handleHeaderClick}
-        aria-expanded="false"
-        aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
       >
         <CollapseToggle
           {collapsed}
-          ariaLabel="Show filters"
+          ariaLabel={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
           onToggle={(isCollapsed) => (collapsed = isCollapsed)}
         />
 
@@ -97,13 +98,12 @@
             {@render actions()}
           </span>
         {/if}
-      </button>
+      </div>
     {:else}
       {#if collapsible}
-        <button
-          type="button"
+        <!-- See the collapsed branch: header is a container, not a control. -->
+        <div
           class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
-          aria-expanded={!collapsed}
           onclick={handleHeaderClick}
         >
           <CollapseToggle
@@ -125,7 +125,7 @@
               {@render actions()}
             </span>
           {/if}
-        </button>
+        </div>
       {:else}
         <div class="poodle-filter-toolbar__header">
           {#if summary}

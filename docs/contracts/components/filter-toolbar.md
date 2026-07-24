@@ -15,7 +15,7 @@ Updated: 2026-07-10
 
 ```text
 [Root .filter-toolbar]  <div role="toolbar"> aria-label
-  ├── [Header .filter-toolbar__header]  (when collapsible: <button>, otherwise: <div>)
+  ├── [Header .filter-toolbar__header]  <div> (never a <button> — it contains controls)
   │     ├── [CollapseToggle]  (optional, when collapsible)
   │     ├── [Summary .filter-toolbar__summary]  <p>/<span> (optional, when summaryText or summary snippet)
   │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions snippet)
@@ -31,7 +31,7 @@ Updated: 2026-07-10
 | Part | Element | Required | Notes |
 |------|---------|----------|-------|
 | Root | `<div>` | yes | Grid container with `role="toolbar"` and `aria-label` |
-| Header | `<div>` or `<button>` | yes | Flex row; renders as `<button>` whenever `collapsible` is true so the whole summary row remains the toggle target |
+| Header | `<div>` | yes | Flex row. Always a non-interactive container: it holds interactive children (CollapseToggle, action buttons), so making it a `<button>` would nest interactive controls (invalid HTML). When `collapsible`, a click handler on the row is a pointer convenience; CollapseToggle remains the real control |
 | CollapseToggle | `CollapseToggle` primitive | no | Present when `collapsible` is true |
 | Summary | `<p>` / `<span>` | no | Result count or active-filter summary text |
 | Actions | `<div>` / `<span>` | no | Icon buttons (refresh, etc.) aligned right via `margin-left: auto` |
@@ -79,7 +79,7 @@ Updated: 2026-07-10
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | expanded | default or `collapsed=false` | Header + controls grid visible |
-| collapsed | `collapsible=true`, `collapsed=true` | Header only (as `<button>`), controls hidden; header click toggles open |
+| collapsed | `collapsible=true`, `collapsed=true` | Header only, controls hidden; clicking the header row toggles open |
 | summarized | `summaryText` present | Summary text in header row |
 | with-actions | actions snippet populated | Icon buttons right-aligned in header |
 | sticky | `sticky=true` | Sticky positioning with elevation shadow |
@@ -105,9 +105,15 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 ### Semantics
 
 - Root: `role="toolbar"` with `aria-label` (default `"Filters"`)
-- Collapsed header: renders as `<button>` with `aria-expanded="false"` and descriptive `aria-label` including summary text
-- Expanded header: when `collapsible` is true, still renders as a `<button>`
-  with `aria-expanded="true"` so the full header row remains clickable
+- Header: a non-interactive `<div>` in every state. It must not be a `<button>`:
+  it contains interactive children (CollapseToggle, action buttons) and nesting
+  interactive controls is invalid HTML with ambiguous activation semantics
+- Collapse affordance: CollapseToggle is the single accessible control. It owns
+  `aria-expanded` and the descriptive `aria-label` (including summary text when
+  collapsed), and provides the keyboard/AT semantics for expanding
+- Header row click: pointer-only convenience that toggles collapse, ignoring
+  clicks on the actions slot and on CollapseToggle itself. Keyboard and assistive
+  technology use CollapseToggle, so no behaviour is pointer-exclusive
 - CollapseToggle: managed by CollapseToggle primitive accessibility
 
 ### Keyboard

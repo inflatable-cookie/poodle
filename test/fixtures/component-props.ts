@@ -29,10 +29,6 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   EmptyState: { title: "Nothing here" },
   Field: { id: "f1", label: "Name" },
   FilterBuilder: { fields: [{ key: "name", label: "Name", kind: "text" }] },
-  // Non-collapsible variant: the collapsible header nests a <button> (the
-  // CollapseToggle) inside a <button>, which is invalid HTML in BOTH
-  // implementations. Tracked separately; smoke covers the valid variant.
-  FilterToolbar: { collapsible: false },
   FormDialog: { title: "Edit", open: true },
   IconButton: { icon: "info", ariaLabel: "Info" },
   ListCard: { title: "Card" },
@@ -143,7 +139,8 @@ export const A11Y_BASELINE: Record<string, string[]> = {
   MediaPicker: ["aria-dialog-name"],
   // <dt>/<dd> rendered with no <dl> ancestor — no parent supplies one.
   DetailItem: ["dlitem"],
-  // Nested interactive controls (same class as the FilterToolbar defect).
+  // Nested interactive controls (the same defect class fixed in FilterToolbar:
+  // an interactive ancestor wrapping interactive children).
   FileUpload: ["label", "nested-interactive"],
   Rating: ["nested-interactive"],
   VideoPlayer: ["nested-interactive"],

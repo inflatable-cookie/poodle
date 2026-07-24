@@ -91,26 +91,26 @@ export function FilterToolbar({
         density={density ?? uiPresentation.density}
       >
         {collapsible && collapsed ? (
-          <button
-            type="button"
+          // Non-interactive container: the header holds interactive children
+          // (CollapseToggle, action buttons), so it must not be a <button>
+          // itself. CollapseToggle owns the accessible name and aria-expanded;
+          // the click handler here is a pointer convenience for the whole row.
+          <div
             className="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
             onClick={handleHeaderClick}
-            aria-expanded="false"
-            aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
           >
             <CollapseToggle
               collapsed={collapsed}
-              ariaLabel="Show filters"
+              ariaLabel={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
               onToggle={(isCollapsed) => setCollapsed(isCollapsed)}
             />
             {summaryNode}
             {actionsNode}
-          </button>
+          </div>
         ) : collapsible ? (
-          <button
-            type="button"
+          // See the collapsed branch: header is a container, not a control.
+          <div
             className="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
-            aria-expanded={!collapsed}
             onClick={handleHeaderClick}
           >
             <CollapseToggle
@@ -120,7 +120,7 @@ export function FilterToolbar({
             />
             {summaryNode}
             {actionsNode}
-          </button>
+          </div>
         ) : (
           <div className="poodle-filter-toolbar__header">
             {summary ? (
