@@ -49,6 +49,9 @@
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
 "test:parity" = "bunx vitest run --project parity"
+# Runtime accessibility sweep (axe-core) over every Svelte component. Runs inside
+# test:components already; A11Y_REPORT=1 lists findings instead of failing.
+"test:a11y" = "bunx vitest run --project a11y"
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"

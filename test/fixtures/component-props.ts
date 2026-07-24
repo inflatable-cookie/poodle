@@ -22,9 +22,9 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   ConfirmAction: { title: "Are you sure?" },
   CommandPalette: { open: true },
   DebugDialog: { open: true, value: { a: 1 } },
-  Dialog: { open: true },
-  Drawer: { open: true },
-  ContextMenu: { items: menuItems },
+  Dialog: { open: true, title: "Dialog" },
+  Drawer: { open: true, title: "Drawer" },
+  ContextMenu: { items: menuItems, ariaLabel: "Actions" },
   EditableLabel: { value: "Label" },
   EmptyState: { title: "Nothing here" },
   Field: { id: "f1", label: "Name" },
@@ -37,9 +37,9 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   IconButton: { icon: "info", ariaLabel: "Info" },
   ListCard: { title: "Card" },
   ListContainer: { title: "Items" },
-  Menu: { items: menuItems },
+  Menu: { items: menuItems, ariaLabel: "Menu" },
   Menubar: { items: [{ value: "file", label: "File", items: menuItems }] },
-  MediaPicker: { open: true },
+  MediaPicker: { open: true, title: "Pick media" },
   // Empty list: rendering rows needs an `item` snippet/render-prop, which is
   // framework-specific. The empty state still exercises the section anatomy.
   InlineListSection: { title: "Section", items: [] },
@@ -52,12 +52,12 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   PickerShell: { title: "Pick one" },
   RadioGroup: { options: opts },
   SegmentedControl: { options: opts },
-  Select: { options: opts },
+  Select: { options: opts, ariaLabel: "Choose" },
   SidebarNav: { groups: [{ id: "g1", label: "Group", items: [] }] },
-  SplitButton: { items: menuItems },
+  SplitButton: { items: menuItems, ariaLabel: "Split action" },
   Table: { columns: [{ id: "name", label: "Name" }] },
   Tabs: { items: opts },
-  TextInput: { id: "t1" },
+  TextInput: { id: "t1", ariaLabel: "Search" },
   ToastHost: {
     store: {
       // Minimal store protocol: `toasts` is subscribable, plus `dismiss`.
@@ -71,6 +71,21 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
     },
   },
   ToggleGroup: { options: opts },
+  Button: { ariaLabel: "Action" },
+  Checkbox: { label: "Accept" },
+  Radio: { value: "a", label: "Option A" },
+  Switch: { label: "Enabled" },
+  NumberInput: { ariaLabel: "Amount" },
+  TimeInput: { ariaLabel: "Time" },
+  TokenInput: { ariaLabel: "Tags" },
+  Slider: { ariaLabel: "Volume" },
+  Progress: { ariaLabel: "Loading" },
+  Rating: { ariaLabel: "Rating" },
+  HoverCard: { ariaLabel: "Details" },
+  Popover: { ariaLabel: "Popover" },
+  Collapsible: { title: "Section" },
+  TextLink: { href: "#", ariaLabel: "Link" },
+  MediaPreview: { title: "Preview" },
   Tooltip: { content: "Tip" },
   Tree: { nodes: [{ value: "n1", label: "Node" }] },
   TriStateSwitch: { ariaLabel: "Toggle" },
@@ -99,4 +114,45 @@ export const SMOKE_EXCLUDE: Record<string, string> = {
   // Pure context providers: they render only their children and never emit a
   // poodle-* element of their own, so the anatomy assertion does not apply.
   IconProvider: "context provider — renders children only, no DOM of its own",
+};
+
+// Components excluded from the axe sweep, with the reason.
+export const A11Y_EXCLUDE: Record<string, string> = {};
+
+// Accepted axe violations per component (rule ids), held as an explicit baseline
+// so the gate stays green while the debt stays visible. Closing an issue means
+// deleting its entry — never add one without a reason in the commit.
+export const A11Y_BASELINE: Record<string, string[]> = {
+  // --- Harness artifacts: the trigger's content is a consumer-supplied snippet,
+  // so rendering bare leaves the trigger with no accessible name. Not a defect.
+  ContextMenu: ["aria-command-name"],
+  HoverCard: ["aria-command-name"],
+  Menu: ["aria-command-name"],
+  Popover: ["aria-command-name"],
+
+  // --- Real defects found by this sweep. Each is tracked for reconciliation;
+  // delete the entry when fixed. See the a11y follow-up task.
+  //
+  // Dialogs render `title` but never associate it: aria-label is set to
+  // undefined when a title exists and no aria-labelledby points at it, so a
+  // titled dialog has NO accessible name (Dialog.svelte:190 and friends).
+  AlertDialog: ["aria-dialog-name"],
+  Dialog: ["aria-dialog-name"],
+  Drawer: ["aria-dialog-name"],
+  FormDialog: ["aria-dialog-name"],
+  MediaPicker: ["aria-dialog-name"],
+  // <dt>/<dd> rendered with no <dl> ancestor — no parent supplies one.
+  DetailItem: ["dlitem"],
+  // Nested interactive controls (same class as the FilterToolbar defect).
+  FileUpload: ["label", "nested-interactive"],
+  Rating: ["nested-interactive"],
+  VideoPlayer: ["nested-interactive"],
+  // Role used without its required ARIA attributes.
+  ResizeHandle: ["aria-required-attr"],
+  SplitView: ["aria-required-attr"],
+  // Role not permitted on the element it is applied to.
+  ToastHost: ["aria-allowed-role"],
+  ToastStack: ["aria-allowed-role"],
+  // ARIA attribute not permitted on that role/element.
+  BlockEditor: ["aria-prohibited-attr"],
 };

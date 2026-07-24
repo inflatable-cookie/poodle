@@ -31,6 +31,18 @@ export default defineConfig({
         },
       },
       {
+        // Runtime accessibility sweep (axe-core) over the Svelte components.
+        plugins: [svelte()],
+        resolve: { conditions: ["browser"] },
+        test: {
+          name: "a11y",
+          environment: "happy-dom",
+          globals: true,
+          include: ["test/a11y/**/*.test.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
         // Svelte <-> React parity: renders both implementations of a component in
         // one happy-dom process and diffs their emitted poodle-* anatomy classes.
         // Needs both toolchains (svelte plugin + react jsx) in the same project.
