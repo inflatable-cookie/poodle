@@ -46,6 +46,9 @@
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @poodle/headless machines (which test:core covers).
 "test:components" = "bunx vitest run"
+# Svelte <-> React anatomy parity gate (subset of the vitest run above; also
+# usable standalone). Diffs the poodle-* classes each implementation emits.
+"test:parity" = "bunx vitest run --project parity"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [

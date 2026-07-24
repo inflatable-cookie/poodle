@@ -21,6 +21,8 @@
     "@testing-library/svelte": "^5.4.2",
     "@types/node": "^25.5.2",
     "happy-dom": "^20.11.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "svelte": "5.53.10",
     "vitest": "^4.1.10"
   },

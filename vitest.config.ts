@@ -30,6 +30,21 @@ export default defineConfig({
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },
+      {
+        // Svelte <-> React parity: renders both implementations of a component in
+        // one happy-dom process and diffs their emitted poodle-* anatomy classes.
+        // Needs both toolchains (svelte plugin + react jsx) in the same project.
+        plugins: [svelte()],
+        esbuild: { jsx: "automatic" },
+        resolve: { conditions: ["browser"] },
+        test: {
+          name: "parity",
+          environment: "happy-dom",
+          globals: true,
+          include: ["test/parity/**/*.test.tsx"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
     ],
   },
 });
