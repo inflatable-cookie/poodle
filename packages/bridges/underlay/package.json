@@ -1,5 +1,6 @@
 {
   "name": "@poodle/bridge-underlay",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "description": "Internal Underlay bridge layer for token and wrapper mapping.",

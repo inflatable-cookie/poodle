@@ -40,6 +40,30 @@
       "channel": "preview"
     },
     {
+      "name": "@poodle/headless",
+      "path": "packages/core",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@poodle/styles",
+      "path": "packages/styles",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@poodle/react",
+      "path": "packages/react/components",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
       "name": "@poodle/bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",

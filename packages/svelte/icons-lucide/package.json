@@ -1,6 +1,6 @@
 {
   "name": "@poodle/icons-lucide",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Tree-shakeable Lucide icon entries for the Poodle icon system.",

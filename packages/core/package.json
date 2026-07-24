@@ -1,6 +1,6 @@
 {
   "name": "@poodle/headless",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Poodle framework-free headless behavior core: component state machines, prop getters, and shared interaction machinery.",

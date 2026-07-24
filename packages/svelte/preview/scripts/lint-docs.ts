@@ -754,6 +754,7 @@ function validateReleaseOperations(errors: string[]): void {
       const packageJsonPath = path.join(repoRoot, manifestEntry.path, "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
+        version?: string;
         poodleRelease?: {
           publicIntent?: boolean;
           channel?: string;
@@ -763,6 +764,24 @@ function validateReleaseOperations(errors: string[]): void {
 
       expect(packageJson.name === manifestEntry.name, `${packageJsonPath} name does not match release manifest.`, errors);
       expect(Boolean(packageJson.poodleRelease), `${packageJsonPath} is missing poodleRelease metadata.`, errors);
+
+      // Version must be present and pre-1.0 (0.x) per the version policy.
+      const version = packageJson.version;
+      expect(
+        typeof version === "string" && /^0\.\d+\.\d+$/.test(version),
+        `${packageJsonPath} version must be present and 0.x semver (got ${String(version)}).`,
+        errors,
+      );
+      // Preview packages on a real version (past the 0.0.0 baseline) require a
+      // release note that lists them (operations requiresReleaseNotes).
+      if (manifestEntry.channel === "preview" && typeof version === "string" && version !== "0.0.0") {
+        const notePath = path.join(repoRoot, "docs", "release-notes", `${version}.md`);
+        if (!fs.existsSync(notePath)) {
+          errors.push(`${manifestEntry.name} is at ${version} but docs/release-notes/${version}.md is missing.`);
+        } else if (!fs.readFileSync(notePath, "utf8").includes(manifestEntry.name)) {
+          errors.push(`docs/release-notes/${version}.md must list ${manifestEntry.name}.`);
+        }
+      }
 
       if (packageJson.poodleRelease) {
         expect(
@@ -778,8 +797,9 @@ function validateReleaseOperations(errors: string[]): void {
 
         if (manifestEntry.channel === "preview") {
           expect(
-            packageJson.poodleRelease.stability === "pre-release",
-            `${packageJsonPath} preview packages must use stability "pre-release".`,
+            packageJson.poodleRelease.stability === "pre-release" ||
+              packageJson.poodleRelease.stability === "experimental",
+            `${packageJsonPath} preview packages must use stability "pre-release" or "experimental".`,
             errors,
           );
         }
@@ -806,6 +826,26 @@ function validateReleaseOperations(errors: string[]): void {
           `${cargoPath} preview packages must use stability "pre-release".`,
           errors,
         );
+      }
+    }
+  }
+
+  // Reverse check: every JS package that declares poodleRelease must be recorded
+  // in the release manifest (the forward checks above only cover manifest entries).
+  const manifestNames = new Set(releaseManifest.packages.map((p) => p.name));
+  const stack = [path.join(repoRoot, "packages")];
+  while (stack.length > 0) {
+    const dir = stack.pop() as string;
+    for (const dirent of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (dirent.name === "node_modules" || dirent.name.startsWith(".")) continue;
+      const full = path.join(dir, dirent.name);
+      if (dirent.isDirectory()) {
+        stack.push(full);
+      } else if (dirent.name === "package.json") {
+        const pkg = JSON.parse(fs.readFileSync(full, "utf8")) as { name?: string; poodleRelease?: unknown };
+        if (pkg.poodleRelease && pkg.name && !manifestNames.has(pkg.name)) {
+          errors.push(`${full} declares poodleRelease but is missing from packages/release-manifest.json.`);
+        }
       }
     }
   }

@@ -1,5 +1,6 @@
 {
   "name": "@poodle/svelte-preview",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "description": "Internal preview and docs harness for Poodle.",

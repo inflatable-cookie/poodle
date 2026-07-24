@@ -50,7 +50,13 @@
     }
   },
   "deprecationWorkflow": {
-    "stages": ["proposed", "documented", "deprecated", "removal-ready", "removed"],
+    "stages": [
+      "proposed",
+      "documented",
+      "deprecated",
+      "removal-ready",
+      "removed"
+    ],
     "minimumRemovalGenerationDelay": 1,
     "minimumRequirements": [
       "public-intent packages must document deprecations in contracts, specs, metadata, or package README surfaces plus release notes",
@@ -91,6 +97,33 @@
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@poodle/headless",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@poodle/styles",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "artifact-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@poodle/react",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
       "requiresReleaseNotes": true,
       "requiresDeprecationRecord": true,
       "removalGate": "successor-and-generation-delay"
