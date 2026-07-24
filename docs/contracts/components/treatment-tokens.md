@@ -261,7 +261,7 @@ opacity values for lighter backgrounds.
   /* Gradient fills, layered shadows for all roles */
 }
 
-.app-shell[data-appearance-treatment="brand-raised"][data-theme="light"] {
+.app-shell[data-appearance-treatment="brand-raised"][data-theme="iceberg"] {
   /* Adjusted shadow opacity for light backgrounds */
 }
 ```
@@ -291,7 +291,7 @@ established pattern is:
     0 0.125rem 0.375rem rgba(9, 13, 18, 0.1);
 }
 
-[data-appearance-treatment="my-treatment"][data-theme="light"] {
+[data-appearance-treatment="my-treatment"][data-theme="iceberg"] {
   --poodle-treatment-interactive-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.48),
     0 0.125rem 0.375rem rgba(49, 66, 85, 0.06);

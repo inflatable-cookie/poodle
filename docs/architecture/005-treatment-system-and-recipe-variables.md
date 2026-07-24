@@ -216,7 +216,7 @@ Treatments may need per-theme overrides, especially for shadows which look
 different on light versus dark backgrounds:
 
 ```css
-[data-appearance-treatment="brand-glass"][data-theme="light"] {
+[data-appearance-treatment="brand-glass"][data-theme="iceberg"] {
   --poodle-treatment-interactive-shadow: /* lighter shadow */;
   --poodle-treatment-surface-shadow: /* lighter shadow */;
 }

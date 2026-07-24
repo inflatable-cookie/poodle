@@ -116,6 +116,6 @@
     --poodle-media-preview-section-gap: 0.625rem;
   }
 
-  [data-theme="light"] .poodle-media-preview__meta li {
+  [data-theme="iceberg"] .poodle-media-preview__meta li {
     box-shadow: var(--poodle-recipe-media-preview-meta-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent));
   }

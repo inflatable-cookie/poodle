@@ -258,7 +258,7 @@ impl PreviewState {
         // Update the theme provider to match the selected preset.
         let theme_def = match self.app.theme_preset {
             ThemePreset::Dark => &poodle_tokens::themes::DARK,
-            ThemePreset::Light => &poodle_tokens::themes::LIGHT,
+            ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
         };
         // Theme resolves tokens in logical pixels (scale_factor=1.0).

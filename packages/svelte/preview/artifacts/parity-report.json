@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T15:31:30.501Z",
+  "generatedAt": "2026-07-24T15:43:13.163Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -2456,11 +2456,11 @@
           "note": "Light-theme docs shell review.",
           "state": {
             "sectionId": "catalog-hub",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#catalog-hub"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#catalog-hub"
         }
       ]
     },
@@ -2499,16 +2499,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#form-suite"
         },
         {
-          "id": "form-suite-light",
-          "label": "light",
-          "note": "Light-theme form contrast review.",
+          "id": "form-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme form contrast review.",
           "state": {
             "sectionId": "form-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#form-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#form-suite"
         },
         {
           "id": "form-suite-small",
@@ -2571,16 +2571,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#table-suite"
         },
         {
-          "id": "table-suite-light",
-          "label": "light",
-          "note": "Light-theme table review.",
+          "id": "table-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme table review.",
           "state": {
             "sectionId": "table-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#table-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#table-suite"
         }
       ]
     },
@@ -2619,16 +2619,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#browse-suite"
         },
         {
-          "id": "browse-suite-light",
-          "label": "light",
-          "note": "Light-theme browse review.",
+          "id": "browse-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme browse review.",
           "state": {
             "sectionId": "browse-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#browse-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#browse-suite"
         }
       ]
     },
@@ -2667,16 +2667,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#detail-suite"
         },
         {
-          "id": "detail-suite-light",
-          "label": "light",
-          "note": "Light-theme detail review.",
+          "id": "detail-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme detail review.",
           "state": {
             "sectionId": "detail-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#detail-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#detail-suite"
         }
       ]
     },
@@ -2715,16 +2715,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#picker-suite"
         },
         {
-          "id": "picker-suite-light",
-          "label": "light",
-          "note": "Light-theme picker review.",
+          "id": "picker-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme picker review.",
           "state": {
             "sectionId": "picker-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#picker-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#picker-suite"
         }
       ]
     },
@@ -2763,16 +2763,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#media-suite"
         },
         {
-          "id": "media-suite-light",
-          "label": "light",
-          "note": "Light-theme media review.",
+          "id": "media-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme media review.",
           "state": {
             "sectionId": "media-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#media-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#media-suite"
         }
       ]
     },
@@ -2811,16 +2811,16 @@
           "url": "/?theme=graphite&density=compact&controlSize=md#notification-suite"
         },
         {
-          "id": "notification-suite-light",
-          "label": "light",
-          "note": "Light-theme state-surface review.",
+          "id": "notification-suite-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg-theme state-surface review.",
           "state": {
             "sectionId": "notification-suite",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#notification-suite"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#notification-suite"
         }
       ]
     },
@@ -2966,16 +2966,16 @@
           "url": "/?theme=dark&density=comfortable&controlSize=md#token-summary-section"
         },
         {
-          "id": "token-summary-section-light",
-          "label": "light",
-          "note": "Light token overlay review.",
+          "id": "token-summary-section-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg token overlay review.",
           "state": {
             "sectionId": "token-summary-section",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#token-summary-section"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#token-summary-section"
         }
       ]
     },
@@ -3025,16 +3025,16 @@
           "url": "/?theme=dark&density=comfortable&controlSize=md#token-inspector"
         },
         {
-          "id": "token-inspector-light",
-          "label": "light",
-          "note": "Light token-inspector review.",
+          "id": "token-inspector-iceberg",
+          "label": "iceberg",
+          "note": "Iceberg token-inspector review.",
           "state": {
             "sectionId": "token-inspector",
-            "theme": "light",
+            "theme": "iceberg",
             "density": "comfortable",
             "controlSize": "md"
           },
-          "url": "/?theme=light&density=comfortable&controlSize=md#token-inspector"
+          "url": "/?theme=iceberg&density=comfortable&controlSize=md#token-inspector"
         }
       ]
     }

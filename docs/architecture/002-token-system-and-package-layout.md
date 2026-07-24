@@ -201,7 +201,7 @@ Planned files:
 packages/tokens/artifacts/
   css/
     poodle-tokens.css              # Base tokens as CSS custom properties
-    poodle-theme-light.css         # Light theme overrides
+    poodle-theme-iceberg.css       # Iceberg theme overrides
     poodle-theme-dark.css          # Dark theme overrides
     poodle-density-compact.css     # Compact density overrides
     poodle-density-comfortable.css # Comfortable density overrides

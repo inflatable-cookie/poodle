@@ -1,8 +1,8 @@
 {
   "themes": {
-    "light": {
-      "selector": "[data-theme=\"light\"]",
-      "description": "Default neutral application theme."
+    "iceberg": {
+      "selector": "[data-theme=\"iceberg\"]",
+      "description": "Cool pale light theme with a blue accent."
     },
     "dark": {
       "selector": "[data-theme=\"dark\"]",

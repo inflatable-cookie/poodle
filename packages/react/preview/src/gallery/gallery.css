@@ -45,7 +45,7 @@ input {
   min-height: 100vh;
 }
 
-.app-shell[data-theme="light"] {
+.app-shell[data-theme="iceberg"] {
   color-scheme: light;
 }
 .app-shell[data-theme="dark"],

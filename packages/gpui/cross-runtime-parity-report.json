@@ -60,7 +60,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "form-suite-baseline",
-        "form-suite-light",
+        "form-suite-iceberg",
         "form-suite-small"
       ],
       "gpuiEvidenceArtifacts": [
@@ -84,7 +84,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "table-suite-baseline",
-        "table-suite-light"
+        "table-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/data-browse-detail-picker-media-baseline.json",
@@ -108,7 +108,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "browse-suite-baseline",
-        "browse-suite-light"
+        "browse-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/data-browse-detail-picker-media-baseline.json",
@@ -132,7 +132,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "detail-suite-baseline",
-        "detail-suite-light"
+        "detail-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/data-browse-detail-picker-media-baseline.json",
@@ -154,7 +154,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "picker-suite-baseline",
-        "picker-suite-light"
+        "picker-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/data-browse-detail-picker-media-baseline.json",
@@ -179,7 +179,7 @@
       "sideBySideReview": false,
       "svelteRouteIds": [
         "media-suite-baseline",
-        "media-suite-light"
+        "media-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/data-browse-detail-picker-media-baseline.json",
@@ -203,7 +203,7 @@
       "sideBySideReview": true,
       "svelteRouteIds": [
         "notification-suite-baseline",
-        "notification-suite-light"
+        "notification-suite-iceberg"
       ],
       "gpuiEvidenceArtifacts": [
         "packages/gpui/selection-feedback-date-baseline.json",

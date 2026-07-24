@@ -93,9 +93,9 @@ export const themes = {
       "color.icon.muted": "#d4d4d4"
     }
   },
-  "light": {
-    "selector": "[data-theme=\"light\"]",
-    "description": "Default neutral application theme.",
+  "iceberg": {
+    "selector": "[data-theme=\"iceberg\"]",
+    "description": "Cool pale light theme with a blue accent.",
     "overrides": {
       "color.background.canvas": "#e7eef5",
       "color.background.surface": "#dbe5ef",

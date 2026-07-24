@@ -21,7 +21,7 @@ export const manifest = {
     "state"
   ],
   "requiredThemes": [
-    "light",
+    "iceberg",
     "dark",
     "graphite"
   ],
@@ -40,7 +40,7 @@ export const manifest = {
   "artifactTargets": {
     "css": [
       "packages/tokens/artifacts/css/poodle-tokens.css",
-      "packages/tokens/artifacts/css/poodle-theme-light.css",
+      "packages/tokens/artifacts/css/poodle-theme-iceberg.css",
       "packages/tokens/artifacts/css/poodle-theme-dark.css",
       "packages/tokens/artifacts/css/poodle-theme-graphite.css",
       "packages/tokens/artifacts/css/poodle-density-compact.css",

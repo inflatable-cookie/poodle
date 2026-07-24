@@ -83,8 +83,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     blockerNotes: [],
     reviewRoutes: [
       route("catalog-hub", "baseline", "Primary catalog landing review."),
-      route("catalog-hub", "light", "Light-theme catalog and navigation review.", {
-        theme: "light",
+      route("catalog-hub", "iceberg", "Iceberg-theme catalog and navigation review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -115,8 +115,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("form-suite", "baseline", "Default form suite audit."),
-      route("form-suite", "light", "Light-theme contrast and field grouping audit.", {
-        theme: "light",
+      route("form-suite", "iceberg", "Iceberg-theme contrast and field grouping audit.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
       route("form-suite", "small", "Minimum-size input and label audit.", {
@@ -150,8 +150,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("table-suite", "baseline", "Primary table interaction audit."),
-      route("table-suite", "light", "Light-theme table review.", {
-        theme: "light",
+      route("table-suite", "iceberg", "Iceberg-theme table review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -182,8 +182,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("browse-suite", "baseline", "Default browse audit."),
-      route("browse-suite", "light", "Light-theme browse-shell review.", {
-        theme: "light",
+      route("browse-suite", "iceberg", "Iceberg-theme browse-shell review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -214,8 +214,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("detail-suite", "baseline", "Primary detail layout audit."),
-      route("detail-suite", "light", "Light-theme detail contrast audit.", {
-        theme: "light",
+      route("detail-suite", "iceberg", "Iceberg-theme detail contrast audit.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -246,8 +246,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("picker-suite", "baseline", "Primary picker audit."),
-      route("picker-suite", "light", "Light-theme picker review.", {
-        theme: "light",
+      route("picker-suite", "iceberg", "Iceberg-theme picker review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
       route("picker-suite", "small", "Small control-size picker audit.", {
@@ -281,8 +281,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("media-suite", "baseline", "Primary media review."),
-      route("media-suite", "light", "Light-theme media audit.", {
-        theme: "light",
+      route("media-suite", "iceberg", "Iceberg-theme media audit.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -313,8 +313,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("notification-suite", "baseline", "Primary notification audit."),
-      route("notification-suite", "light", "Light-theme notification tone audit.", {
-        theme: "light",
+      route("notification-suite", "iceberg", "Iceberg-theme notification tone audit.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -345,8 +345,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("command-suite", "baseline", "Primary command discovery audit."),
-      route("command-suite", "light", "Light-theme command review.", {
-        theme: "light",
+      route("command-suite", "iceberg", "Iceberg-theme command review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -377,8 +377,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     ],
     reviewRoutes: [
       route("workspace-suite", "baseline", "Primary workspace shell audit."),
-      route("workspace-suite", "light", "Light-theme workspace review.", {
-        theme: "light",
+      route("workspace-suite", "iceberg", "Iceberg-theme workspace review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -405,8 +405,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     blockerNotes: [],
     reviewRoutes: [
       route("token-summary-section", "baseline", "Primary token summary audit."),
-      route("token-summary-section", "light", "Light-theme token summary review.", {
-        theme: "light",
+      route("token-summary-section", "iceberg", "Iceberg-theme token summary review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -433,8 +433,8 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
     blockerNotes: [],
     reviewRoutes: [
       route("token-inspector", "baseline", "Primary token inspector audit."),
-      route("token-inspector", "light", "Light-theme inspector review.", {
-        theme: "light",
+      route("token-inspector", "iceberg", "Iceberg-theme inspector review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],

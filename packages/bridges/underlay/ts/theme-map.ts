@@ -19,8 +19,8 @@ export type UnderlayModeBridge = {
 export const underlayThemeMap: UnderlayThemeBridge[] = [
   {
     underlayThemeId: "underlay-default",
-    poodleThemeId: "light",
-    cssFile: "packages/tokens/artifacts/css/poodle-theme-light.css",
+    poodleThemeId: "iceberg",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-iceberg.css",
   },
   {
     underlayThemeId: "underlay-night",

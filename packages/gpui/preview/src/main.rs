@@ -1347,7 +1347,7 @@ fn parse_cli_args() -> CliArgs {
                     theme = match val.as_str() {
                         "graphite" => Some(ThemePreset::Graphite),
                         "dark" => Some(ThemePreset::Dark),
-                        "light" => Some(ThemePreset::Light),
+                        "iceberg" => Some(ThemePreset::Iceberg),
                         "default" => Some(ThemePreset::Default),
                         _ => None,
                     };

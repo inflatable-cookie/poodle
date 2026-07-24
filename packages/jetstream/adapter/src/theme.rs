@@ -37,7 +37,7 @@ pub struct JetstreamThemeProvider {
 
 impl Default for JetstreamThemeProvider {
     fn default() -> Self {
-        Self::from_theme(&poodle_tokens::themes::LIGHT)
+        Self::from_theme(&poodle_tokens::themes::ICEBERG)
     }
 }
 

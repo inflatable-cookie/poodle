@@ -3,7 +3,7 @@
   "themeRuntime": {
     "tokenSource": "poodle-tokens",
     "themeIds": [
-      "light",
+      "iceberg",
       "dark",
       "graphite"
     ],

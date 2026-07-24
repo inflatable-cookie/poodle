@@ -103,9 +103,9 @@ pub const HIGH_CONTRAST: ThemeDefinition = ThemeDefinition {
     ],
 };
 
-pub const LIGHT: ThemeDefinition = ThemeDefinition {
-    name: "light",
-    selector: "[data-theme=\"light\"]",
+pub const ICEBERG: ThemeDefinition = ThemeDefinition {
+    name: "iceberg",
+    selector: "[data-theme=\"iceberg\"]",
     overrides: &[
     ("color.background.canvas", "#e7eef5"),
     ("color.background.surface", "#dbe5ef"),

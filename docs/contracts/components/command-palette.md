@@ -254,7 +254,7 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 | `font-size` | `0.75rem` |
 | `line-height` | `1.4` |
 
-### Light Theme Override: `:global([data-theme="light"]) .command-palette`
+### Iceberg Theme Override: `:global([data-theme="iceberg"]) .command-palette`
 
 | Property | Value |
 |----------|-------|
@@ -286,7 +286,7 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
-| `data-theme` | global (`:global([data-theme="light"])`) | light theme override selector |
+| `data-theme` | global (`:global([data-theme="iceberg"])`) | iceberg theme override selector |
 
 ## 10. Composition
 

@@ -9,7 +9,7 @@ use poodle_specs::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
 fn demo_themes() -> Vec<ThemeOption> {
     vec![
         ThemeOption::new("dark", "Dark", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
-        ThemeOption::new("light", "Light", ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b")),
+        ThemeOption::new("iceberg", "Iceberg", ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b")),
         ThemeOption::new("midnight", "Midnight", ThemeSwatch::new("#0b1020", "#121933", "#6d8cff", "#e6ecff", "#333")),
         ThemeOption::new("nord", "Nord", ThemeSwatch::new("#2e3440", "#3b4252", "#88c0d0", "#eceff4", "#4c566a")),
         ThemeOption::new("rose", "Rose", ThemeSwatch::new("#1a1114", "#241a1e", "#f65c8a", "#f6eef1", "#333")),

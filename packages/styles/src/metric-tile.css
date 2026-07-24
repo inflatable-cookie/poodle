@@ -77,7 +77,7 @@
     --poodle-state-tile-body-gap: 0.875rem;
   }
 
-  [data-theme="light"] .poodle-state-tile {
+  [data-theme="iceberg"] .poodle-state-tile {
     background: var(
       --poodle-recipe-metric-tile-theme-light-fill,
       color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated))

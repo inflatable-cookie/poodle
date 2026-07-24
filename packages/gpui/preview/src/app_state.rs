@@ -67,7 +67,7 @@ impl Section {
 pub enum ThemePreset {
     Graphite,
     Dark,
-    Light,
+    Iceberg,
     Default,
 }
 
@@ -75,7 +75,7 @@ impl ThemePreset {
     /// Order matches Svelte preview: dark, light, graphite.
     pub const ALL: &[ThemePreset] = &[
         ThemePreset::Dark,
-        ThemePreset::Light,
+        ThemePreset::Iceberg,
         ThemePreset::Graphite,
     ];
 
@@ -83,7 +83,7 @@ impl ThemePreset {
         match self {
             ThemePreset::Default => "default",
             ThemePreset::Dark => "dark",
-            ThemePreset::Light => "light",
+            ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
         }
     }
@@ -92,8 +92,8 @@ impl ThemePreset {
         match self {
             ThemePreset::Default => GpuiThemeProvider::new(),
             ThemePreset::Dark => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK),
-            ThemePreset::Light => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LIGHT)
+            ThemePreset::Iceberg => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ICEBERG)
             }
             ThemePreset::Graphite => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::GRAPHITE)

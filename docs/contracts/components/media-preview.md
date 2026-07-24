@@ -226,11 +226,11 @@ Card header and body always render regardless of media state.
 | `default` | `var(--poodle-space-stack-md)` | `var(--poodle-space-stack-sm)` |
 | `comfortable` | `1rem` | `0.625rem` |
 
-### Light Theme Overrides
+### Iceberg Theme Overrides
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `:global([data-theme="light"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
+| `:global([data-theme="iceberg"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
 
 ## 10. Composition
 

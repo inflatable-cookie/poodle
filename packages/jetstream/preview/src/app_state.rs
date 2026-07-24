@@ -64,21 +64,21 @@ impl Section {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemePreset {
     Dark,
-    Light,
+    Iceberg,
     Graphite,
 }
 
 impl ThemePreset {
     pub const ALL: &[ThemePreset] = &[
         ThemePreset::Dark,
-        ThemePreset::Light,
+        ThemePreset::Iceberg,
         ThemePreset::Graphite,
     ];
 
     pub fn label(self) -> &'static str {
         match self {
             ThemePreset::Dark => "dark",
-            ThemePreset::Light => "light",
+            ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",
         }
     }

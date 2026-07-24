@@ -132,7 +132,7 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
         "catalog-hub",
         "light",
         "Light-theme docs shell review.",
-        { theme: "light", density: "comfortable" },
+        { theme: "iceberg", density: "comfortable" },
       ),
     ],
   },
@@ -153,8 +153,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("form-suite", "baseline", "Default workstation-oriented form review."),
-      route("form-suite", "light", "Light-theme form contrast review.", {
-        theme: "light",
+      route("form-suite", "iceberg", "Iceberg-theme form contrast review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
       route("form-suite", "small", "Minimum control sizing review.", {
@@ -182,8 +182,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("table-suite", "baseline", "Default table review."),
-      route("table-suite", "light", "Light-theme table review.", {
-        theme: "light",
+      route("table-suite", "iceberg", "Iceberg-theme table review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -205,8 +205,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("browse-suite", "baseline", "Default browse-shell review."),
-      route("browse-suite", "light", "Light-theme browse review.", {
-        theme: "light",
+      route("browse-suite", "iceberg", "Iceberg-theme browse review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -228,8 +228,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("detail-suite", "baseline", "Primary detail-surface review."),
-      route("detail-suite", "light", "Light-theme detail review.", {
-        theme: "light",
+      route("detail-suite", "iceberg", "Iceberg-theme detail review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -251,8 +251,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("picker-suite", "baseline", "Default picker workflow review."),
-      route("picker-suite", "light", "Light-theme picker review.", {
-        theme: "light",
+      route("picker-suite", "iceberg", "Iceberg-theme picker review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -274,8 +274,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("media-suite", "baseline", "Default media review."),
-      route("media-suite", "light", "Light-theme media review.", {
-        theme: "light",
+      route("media-suite", "iceberg", "Iceberg-theme media review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -297,8 +297,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
     ],
     reviewRoutes: [
       route("notification-suite", "baseline", "Default state-surface review."),
-      route("notification-suite", "light", "Light-theme state-surface review.", {
-        theme: "light",
+      route("notification-suite", "iceberg", "Iceberg-theme state-surface review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -369,8 +369,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
         theme: "dark",
         density: "comfortable",
       }),
-      route("token-summary-section", "light", "Light token overlay review.", {
-        theme: "light",
+      route("token-summary-section", "iceberg", "Iceberg token overlay review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
@@ -395,8 +395,8 @@ const sectionParityConfig: Record<DocsSectionId, SectionParityConfig> = {
         theme: "dark",
         density: "comfortable",
       }),
-      route("token-inspector", "light", "Light token-inspector review.", {
-        theme: "light",
+      route("token-inspector", "iceberg", "Iceberg token-inspector review.", {
+        theme: "iceberg",
         density: "comfortable",
       }),
     ],
