@@ -259,7 +259,7 @@ impl PreviewState {
         let theme_def = match self.app.theme_preset {
             ThemePreset::Dark => &poodle_tokens::themes::DARK,
             ThemePreset::Light => &poodle_tokens::themes::LIGHT,
-            ThemePreset::LoopholeStudio => &poodle_tokens::themes::LOOPHOLE_STUDIO,
+            ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
         };
         // Theme resolves tokens in logical pixels (scale_factor=1.0).
         // The engine handles logical→physical conversion via GameUi.scale_factor.

@@ -74,7 +74,7 @@ mod tests {
             .with_utility_item_count(1);
         let project = ProjectHeaderSpec::new("Aura mix review")
             .with_dirty(true)
-            .with_subtitle("loophole-studio")
+            .with_subtitle("graphite")
             .with_action_count(3);
 
         assert!(app.is_utility_heavy());

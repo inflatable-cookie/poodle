@@ -29,8 +29,8 @@ export const underlayThemeMap: UnderlayThemeBridge[] = [
   },
   {
     underlayThemeId: "underlay-studio",
-    poodleThemeId: "loophole-studio",
-    cssFile: "packages/tokens/artifacts/css/poodle-theme-loophole-studio.css",
+    poodleThemeId: "graphite",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-graphite.css",
     note: "Reserved for workstation-oriented adoption pressure from Aura and Spark.",
   },
 ];

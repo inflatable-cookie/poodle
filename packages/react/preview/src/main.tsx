@@ -2,9 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "@poodle/svelte-tokens/styles.css";
-import "../../../tokens/artifacts/css/poodle-theme-light.css";
-import "../../../tokens/artifacts/css/poodle-theme-dark.css";
-import "../../../tokens/artifacts/css/poodle-theme-loophole-studio.css";
+// All theme layers in one aggregate — the selector offers every registered theme.
+import "../../../tokens/artifacts/css/poodle-themes.css";
 import "../../../tokens/artifacts/css/poodle-density-comfortable.css";
 import "../../../tokens/artifacts/css/poodle-density-compact.css";
 import "../../../tokens/artifacts/css/poodle-density-default.css";

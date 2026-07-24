@@ -65,18 +65,18 @@ impl Section {
 /// Available theme presets.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemePreset {
-    LoopholeStudio,
+    Graphite,
     Dark,
     Light,
     Default,
 }
 
 impl ThemePreset {
-    /// Order matches Svelte preview: dark, light, loophole-studio.
+    /// Order matches Svelte preview: dark, light, graphite.
     pub const ALL: &[ThemePreset] = &[
         ThemePreset::Dark,
         ThemePreset::Light,
-        ThemePreset::LoopholeStudio,
+        ThemePreset::Graphite,
     ];
 
     pub fn label(self) -> &'static str {
@@ -84,7 +84,7 @@ impl ThemePreset {
             ThemePreset::Default => "default",
             ThemePreset::Dark => "dark",
             ThemePreset::Light => "light",
-            ThemePreset::LoopholeStudio => "loophole-studio",
+            ThemePreset::Graphite => "graphite",
         }
     }
 
@@ -95,8 +95,8 @@ impl ThemePreset {
             ThemePreset::Light => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LIGHT)
             }
-            ThemePreset::LoopholeStudio => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LOOPHOLE_STUDIO)
+            ThemePreset::Graphite => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::GRAPHITE)
             }
         }
     }

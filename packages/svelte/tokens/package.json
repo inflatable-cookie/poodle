@@ -17,7 +17,7 @@
     "./themes.css": "./src/generated/css/poodle-themes.css",
     "./theme-light.css": "./src/generated/css/poodle-theme-light.css",
     "./theme-dark.css": "./src/generated/css/poodle-theme-dark.css",
-    "./theme-loophole-studio.css": "./src/generated/css/poodle-theme-loophole-studio.css",
+    "./theme-graphite.css": "./src/generated/css/poodle-theme-graphite.css",
     "./theme-midnight.css": "./src/generated/css/poodle-theme-midnight.css",
     "./theme-nord.css": "./src/generated/css/poodle-theme-nord.css",
     "./theme-rose.css": "./src/generated/css/poodle-theme-rose.css",

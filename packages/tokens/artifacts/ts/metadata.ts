@@ -23,7 +23,7 @@ export const manifest = {
   "requiredThemes": [
     "light",
     "dark",
-    "loophole-studio"
+    "graphite"
   ],
   "requiredDensityModes": [
     "compact",
@@ -42,7 +42,7 @@ export const manifest = {
       "packages/tokens/artifacts/css/poodle-tokens.css",
       "packages/tokens/artifacts/css/poodle-theme-light.css",
       "packages/tokens/artifacts/css/poodle-theme-dark.css",
-      "packages/tokens/artifacts/css/poodle-theme-loophole-studio.css",
+      "packages/tokens/artifacts/css/poodle-theme-graphite.css",
       "packages/tokens/artifacts/css/poodle-density-compact.css",
       "packages/tokens/artifacts/css/poodle-density-default.css",
       "packages/tokens/artifacts/css/poodle-density-comfortable.css"

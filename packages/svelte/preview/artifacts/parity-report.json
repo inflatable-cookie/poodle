@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T08:32:38.601Z",
+  "generatedAt": "2026-07-24T15:27:56.494Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -2444,11 +2444,11 @@
           "note": "Primary docs landing review.",
           "state": {
             "sectionId": "catalog-hub",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#catalog-hub"
+          "url": "/?theme=graphite&density=compact&controlSize=md#catalog-hub"
         },
         {
           "id": "catalog-hub-light",
@@ -2492,11 +2492,11 @@
           "note": "Default workstation-oriented form review.",
           "state": {
             "sectionId": "form-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#form-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#form-suite"
         },
         {
           "id": "form-suite-light",
@@ -2516,11 +2516,11 @@
           "note": "Minimum control sizing review.",
           "state": {
             "sectionId": "form-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "sm"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=sm#form-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=sm#form-suite"
         },
         {
           "id": "form-suite-large",
@@ -2528,11 +2528,11 @@
           "note": "Large control sizing review.",
           "state": {
             "sectionId": "form-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "lg"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=lg#form-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=lg#form-suite"
         }
       ]
     },
@@ -2564,11 +2564,11 @@
           "note": "Default table review.",
           "state": {
             "sectionId": "table-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#table-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#table-suite"
         },
         {
           "id": "table-suite-light",
@@ -2612,11 +2612,11 @@
           "note": "Default browse-shell review.",
           "state": {
             "sectionId": "browse-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#browse-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#browse-suite"
         },
         {
           "id": "browse-suite-light",
@@ -2660,11 +2660,11 @@
           "note": "Primary detail-surface review.",
           "state": {
             "sectionId": "detail-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#detail-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#detail-suite"
         },
         {
           "id": "detail-suite-light",
@@ -2708,11 +2708,11 @@
           "note": "Default picker workflow review.",
           "state": {
             "sectionId": "picker-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#picker-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#picker-suite"
         },
         {
           "id": "picker-suite-light",
@@ -2756,11 +2756,11 @@
           "note": "Default media review.",
           "state": {
             "sectionId": "media-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#media-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#media-suite"
         },
         {
           "id": "media-suite-light",
@@ -2804,11 +2804,11 @@
           "note": "Default state-surface review.",
           "state": {
             "sectionId": "notification-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#notification-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#notification-suite"
         },
         {
           "id": "notification-suite-light",
@@ -2852,11 +2852,11 @@
           "note": "Default command-discovery review.",
           "state": {
             "sectionId": "command-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#command-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#command-suite"
         },
         {
           "id": "command-suite-dark",
@@ -2900,11 +2900,11 @@
           "note": "Primary workstation-shell review.",
           "state": {
             "sectionId": "workspace-suite",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#workspace-suite"
+          "url": "/?theme=graphite&density=compact&controlSize=md#workspace-suite"
         },
         {
           "id": "workspace-suite-dark",
@@ -2947,11 +2947,11 @@
           "note": "Workstation token overlay review.",
           "state": {
             "sectionId": "token-summary-section",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-summary-section"
+          "url": "/?theme=graphite&density=compact&controlSize=md#token-summary-section"
         },
         {
           "id": "token-summary-section-dark",
@@ -3006,11 +3006,11 @@
           "note": "Workstation token-inspector review.",
           "state": {
             "sectionId": "token-inspector",
-            "theme": "loophole-studio",
+            "theme": "graphite",
             "density": "compact",
             "controlSize": "md"
           },
-          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-inspector"
+          "url": "/?theme=graphite&density=compact&controlSize=md#token-inspector"
         },
         {
           "id": "token-inspector-dark",

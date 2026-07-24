@@ -73,7 +73,7 @@ type PackageSurfaceCoverageGroup = Omit<PackageSurfaceCoverageEntry, "exportName
 
 export const previewStateDefaults: PreviewHarnessState = {
   sectionId: "catalog-hub",
-  theme: "loophole-studio",
+  theme: "graphite",
   density: "compact",
   controlSize: "md",
 };

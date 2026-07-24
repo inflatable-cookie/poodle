@@ -53,6 +53,33 @@ pub const FOREST: ThemeDefinition = ThemeDefinition {
     ],
 };
 
+pub const GRAPHITE: ThemeDefinition = ThemeDefinition {
+    name: "graphite",
+    selector: "[data-theme=\"graphite\"]",
+    overrides: &[
+    ("color.background.canvas", "#111111"),
+    ("color.background.surface", "#181818"),
+    ("color.background.panel", "#202020"),
+    ("color.background.elevated", "#292929"),
+    ("color.background.overlay", "rgba(8, 8, 8, 0.82)"),
+    ("color.text.primary", "#efefef"),
+    ("color.text.secondary", "#a6a6a6"),
+    ("color.text.inverse", "#151515"),
+    ("color.border.subtle", "rgba(198, 198, 198, 0.14)"),
+    ("color.border.default", "rgba(198, 198, 198, 0.24)"),
+    ("color.border.strong", "rgba(198, 198, 198, 0.42)"),
+    ("color.accent.base", "#97d14d"),
+    ("color.accent.hover", "#b5e36f"),
+    ("color.accent.focusRing", "#b5e36f"),
+    ("color.status.success", "#97d14d"),
+    ("color.status.warning", "#f0ba55"),
+    ("color.status.danger", "#ef7c72"),
+    ("color.status.info", "#6ea9d4"),
+    ("color.icon.primary", "#efefef"),
+    ("color.icon.muted", "#a6a6a6"),
+    ],
+};
+
 pub const HIGH_CONTRAST: ThemeDefinition = ThemeDefinition {
     name: "high-contrast",
     selector: "[data-theme=\"high-contrast\"]",
@@ -90,33 +117,6 @@ pub const LIGHT: ThemeDefinition = ThemeDefinition {
     ("color.border.default", "#75869b"),
     ("color.icon.primary", "#131a22"),
     ("color.icon.muted", "#314255"),
-    ],
-};
-
-pub const LOOPHOLE_STUDIO: ThemeDefinition = ThemeDefinition {
-    name: "loophole-studio",
-    selector: "[data-theme=\"loophole-studio\"]",
-    overrides: &[
-    ("color.background.canvas", "#111111"),
-    ("color.background.surface", "#181818"),
-    ("color.background.panel", "#202020"),
-    ("color.background.elevated", "#292929"),
-    ("color.background.overlay", "rgba(8, 8, 8, 0.82)"),
-    ("color.text.primary", "#efefef"),
-    ("color.text.secondary", "#a6a6a6"),
-    ("color.text.inverse", "#151515"),
-    ("color.border.subtle", "rgba(198, 198, 198, 0.14)"),
-    ("color.border.default", "rgba(198, 198, 198, 0.24)"),
-    ("color.border.strong", "rgba(198, 198, 198, 0.42)"),
-    ("color.accent.base", "#97d14d"),
-    ("color.accent.hover", "#b5e36f"),
-    ("color.accent.focusRing", "#b5e36f"),
-    ("color.status.success", "#97d14d"),
-    ("color.status.warning", "#f0ba55"),
-    ("color.status.danger", "#ef7c72"),
-    ("color.status.info", "#6ea9d4"),
-    ("color.icon.primary", "#efefef"),
-    ("color.icon.muted", "#a6a6a6"),
     ],
 };
 

@@ -65,21 +65,21 @@ impl Section {
 pub enum ThemePreset {
     Dark,
     Light,
-    LoopholeStudio,
+    Graphite,
 }
 
 impl ThemePreset {
     pub const ALL: &[ThemePreset] = &[
         ThemePreset::Dark,
         ThemePreset::Light,
-        ThemePreset::LoopholeStudio,
+        ThemePreset::Graphite,
     ];
 
     pub fn label(self) -> &'static str {
         match self {
             ThemePreset::Dark => "dark",
             ThemePreset::Light => "light",
-            ThemePreset::LoopholeStudio => "loophole-studio",
+            ThemePreset::Graphite => "graphite",
         }
     }
 }

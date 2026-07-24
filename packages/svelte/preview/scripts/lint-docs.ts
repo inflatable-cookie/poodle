@@ -1354,7 +1354,7 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
   compareLists(
     "packages/gpui/preview-app-baseline.json theme ids",
     [...previewBaseline.themeRuntime.themeIds].sort(),
-    ["dark", "light", "loophole-studio"],
+    ["dark", "light", "graphite"],
     errors,
   );
   compareLists(

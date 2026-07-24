@@ -8,9 +8,9 @@
       "selector": "[data-theme=\"dark\"]",
       "description": "Dark neutral application theme."
     },
-    "loophole-studio": {
-      "selector": "[data-theme=\"loophole-studio\"]",
-      "description": "Downstream workstation-oriented theme tuned for Aura and Spark shell surfaces."
+    "graphite": {
+      "selector": "[data-theme=\"graphite\"]",
+      "description": "Near-black neutral theme with a lime accent."
     },
     "midnight": {
       "selector": "[data-theme=\"midnight\"]",

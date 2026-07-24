@@ -1345,7 +1345,7 @@ fn parse_cli_args() -> CliArgs {
             "--theme" => {
                 if let Some(val) = args.get(i + 1) {
                     theme = match val.as_str() {
-                        "loophole-studio" => Some(ThemePreset::LoopholeStudio),
+                        "graphite" => Some(ThemePreset::Graphite),
                         "dark" => Some(ThemePreset::Dark),
                         "light" => Some(ThemePreset::Light),
                         "default" => Some(ThemePreset::Default),
