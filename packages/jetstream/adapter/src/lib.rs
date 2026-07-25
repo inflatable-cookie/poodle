@@ -14,7 +14,7 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (poodle-components, poodle-workstation)
+//! Shared Contract Layer (poodle-components)
 //!     │
 //!     ▼
 //! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
@@ -46,7 +46,6 @@ mod render_input;
 mod render_overlay;
 mod render_selection;
 mod render_structural;
-mod render_workstation;
 mod style_map;
 mod theme;
 
