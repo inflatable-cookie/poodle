@@ -52,6 +52,31 @@
 # Runtime accessibility sweep (axe-core) over every Svelte component. Runs inside
 # test:components already; A11Y_REPORT=1 lists findings instead of failing.
 "test:a11y" = "bunx vitest run --project a11y"
+# Cross-framework visual gate (g12.009): boots both vite previews and pixel-diffs
+# the Svelte and React specimens at the same slug + axis. Needs a browser
+# (`bunx playwright install chromium`) and two preview servers, so it stays out of
+# ci:web — ci:visual is the gate, mirroring how ci:native handles the crates.
+# Tiers: smoke (15 components, 1 axis), axis (15 x 12 size/density/contrast axes),
+# sweep (every specimen slug x 2 themes).
+"test:visual" = "bun test/visual/run.ts --tier=axis"
+"test:visual-smoke" = "bun test/visual/run.ts --tier=smoke"
+"test:visual-sweep" = "bun test/visual/run.ts --tier=sweep"
+# Same capture, never fails the process — writes diffs + summary to test/visual/out.
+"visual:report" = "bun test/visual/run.ts --tier=sweep --report"
+"ci:visual" = [{ task = "test:visual" }]
+
+# Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
+# because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks
+# the WHOLE linked component package, not just what the smoke app imports
+# (verified: an error planted in an unimported component fails this). install-smoke
+# sits outside the root workspace on purpose (it proves a real consumer install),
+# so it needs its own install first. Errors fail; the 6 pre-existing a11y warnings
+# do not.
+"check:svelte" = [
+  { run = "bun install --cwd packages/svelte/install-smoke" },
+  { run = "bun run --cwd packages/svelte/install-smoke check --threshold error" },
+]
+
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
@@ -70,6 +95,7 @@
 "ci:web" = [
   { task = "test:core" },
   { task = "test:components" },
+  { task = "check:svelte" },
   { task = "docs:lint" },
   { task = "report:parity" },
   { task = "report:accessibility" },

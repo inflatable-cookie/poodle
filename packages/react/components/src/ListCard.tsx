@@ -129,7 +129,6 @@ export function ListCard({
   const uiPresentation = useUiPresentation();
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
-  const resolvedContextMenuSize = resolveSemanticControlSize(uiPresentation.sizeScale, "chrome");
   const resolvedDensity = density ?? uiPresentation.density;
   const resolvedLeadingSize = offsetControlSize(resolvedSize, leadingSizeOffset);
   const isCompact = layout === "compact";
@@ -535,7 +534,7 @@ export function ListCard({
           }}
           className={rootClassName}
           href={href}
-          data-size={resolvedContextMenuSize}
+          data-size={resolvedSize}
           {...sharedDataProps}
           aria-label={ariaLabel ?? title}
           style={rootStyle}

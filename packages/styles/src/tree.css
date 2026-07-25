@@ -178,6 +178,23 @@
     text-overflow: ellipsis;
   }
 
+  .poodle-tree__end-label {
+    flex: 0 0 auto;
+    color: var(--poodle-recipe-tree-end-label-text, var(--poodle-color-text-tertiary));
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .poodle-tree__item[data-muted="true"] > .poodle-tree__row {
+    opacity: 0.55;
+  }
+
+  .poodle-tree__item[data-muted="true"]:hover > .poodle-tree__row,
+  .poodle-tree__item[data-muted="true"]:focus-visible > .poodle-tree__row,
+  .poodle-tree__item[data-muted="true"][data-selected="true"] > .poodle-tree__row {
+    opacity: 1;
+  }
+
   .poodle-tree__row:hover {
     color: var(--poodle-recipe-tree-hover-row-text, var(--poodle-color-text-primary));
     background: var(--poodle-recipe-tree-hover-row-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent));

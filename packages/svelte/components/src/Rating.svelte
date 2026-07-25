@@ -45,7 +45,9 @@
     onValueChange = undefined,
   }: Props = $props();
 
-  let itemElements: Array<HTMLButtonElement | null> = [];
+  // <svelte:element> renders a <button> in whole-star mode and a <span> in
+  // fractional mode, so the binding target is either.
+  let itemElements: Array<HTMLButtonElement | HTMLSpanElement | null> = [];
   let uncontrolledValue = $state<number | null>(null);
   let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
@@ -190,7 +192,7 @@
       aria-checked={isFractional ? undefined : currentValue === index + 1 ? "true" : "false"}
       aria-label={isFractional ? undefined : `${index + 1} of ${itemCount}`}
       tabindex={isFractional ? undefined : focusIndex === index ? 0 : -1}
-      onmouseenter={(event) => {
+      onmouseenter={(event: MouseEvent) => {
         if (disabled) return;
         if (isFractional) {
           handleFractionalHover(event, index);
@@ -199,13 +201,13 @@
           hoverValue = index + 1;
         }
       }}
-      onmousemove={isFractional ? (event) => handleFractionalHover(event, index) : undefined}
+      onmousemove={isFractional ? (event: MouseEvent) => handleFractionalHover(event, index) : undefined}
       onfocus={() => {
         if (!isFractional) {
           moveFocus(index);
         }
       }}
-      onclick={(event) => {
+      onclick={(event: MouseEvent) => {
         if (isFractional) {
           handleFractionalSelect(event, index);
         } else {
@@ -213,7 +215,7 @@
         }
       }}
       onkeydown={!isFractional
-        ? (event) => {
+        ? (event: KeyboardEvent) => {
             if (event.key === "ArrowRight" || event.key === "ArrowUp") {
               event.preventDefault();
               moveFocus(index + 1);

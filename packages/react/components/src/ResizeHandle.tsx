@@ -100,6 +100,7 @@ export function ResizeHandle({
       onMouseDown={handlePointerDown}
       onKeyDown={handleKeydown}
     >
+      <span className="poodle-resize-handle__hit" aria-hidden="true" />
       <span className="poodle-resize-handle__line" aria-hidden="true" />
     </div>
   );

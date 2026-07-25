@@ -96,6 +96,7 @@ mod ui_presentation_provider;
 
 // Composite modules
 mod action_discovery_panel;
+mod agent_chat_input;
 mod app_header;
 mod audio_player;
 mod block_editor;
@@ -126,6 +127,7 @@ mod media_picker;
 mod media_preview;
 mod media_thumbnail;
 mod metric_tile;
+mod model_picker;
 mod page_header;
 mod page_loading;
 mod pagination_summary;
@@ -196,7 +198,17 @@ pub use menu::MenuSpec;
 pub use menubar::MenubarSpec;
 pub use meta_bar::MetaBarSpec;
 pub use meta_item::MetaItemSpec;
-pub use meter::MeterSpec;
+pub use meter::{MeterLevel, MeterShape, MeterSpec, MeterTone};
+pub use model_picker::{
+    ModelAxisBinding, ModelAxisControl, ModelAxisControlKind, ModelAxisKind, ModelAxisOption,
+    ModelAxisRef, ModelAxisValue, ModelCapabilityAxis, ModelImage, ModelOption,
+    ModelPickerEmphasis, ModelPickerSpec, ModelPickerVariant, ModelSelection,
+    SEGMENTED_AXIS_MAX_OPTIONS,
+};
+pub use agent_chat_input::{
+    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ComposerKey, ComposerKeyModifiers,
+    SubmitIntent,
+};
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_input::NumberInputSpec;

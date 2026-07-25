@@ -10,6 +10,7 @@ primitives and layout surfaces through higher-order application components.
 
 - `accordion.md`
 - `action-discovery-panel.md`
+- `agent-chat-input.md`
 - `alert-dialog.md`
 - `app-header.md`
 - `audio-player.md`
@@ -89,6 +90,7 @@ primitives and layout surfaces through higher-order application components.
 - `meta-item.md`
 - `meter.md`
 - `metric-tile.md`
+- `model-picker.md`
 - `nav-card.md`
 - `navigation-menu.md`
 - `number-input.md`

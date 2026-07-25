@@ -1,0 +1,301 @@
+/* Styles for AgentChatInput. A rounded composer block (attachments → editor →
+   toolbar) with an optional secondary footer bar tucked underneath. The action
+   button is a circular accent box that flips to the danger fill while busy. */
+
+  .poodle-agent-chat-input {
+    --poodle-agent-chat-input-pad-y: 0.625rem;
+    --poodle-agent-chat-input-pad-x: 0.75rem;
+    --poodle-agent-chat-input-font: 0.875rem;
+    --poodle-agent-chat-input-action: 2rem;
+    --poodle-agent-chat-input-gap: 0.5rem;
+    --poodle-agent-chat-input-thumb: 3rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-agent-chat-input[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* ── Composer block ──────────────────────────────────────────────────── */
+  .poodle-agent-chat-input__field {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--poodle-agent-chat-input-gap);
+    width: 100%;
+    min-width: 0;
+    padding: var(--poodle-agent-chat-input-pad-y) var(--poodle-agent-chat-input-pad-x);
+    box-sizing: border-box;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: calc(var(--poodle-radius-surface) * 1.5);
+    /* Two steps up the background ladder (canvas → surface → panel): one step is
+       too close to the page to read as a distinct block. */
+    background: var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-color-background-panel));
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-agent-chat-input__field:hover {
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary));
+  }
+
+  .poodle-agent-chat-input__field:focus-within {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  /* ── Attachments ─────────────────────────────────────────────────────── */
+  .poodle-agent-chat-input__attachments {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--poodle-space-inline-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .poodle-agent-chat-input__attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 14rem;
+    padding: 0.125rem 0.125rem 0.125rem 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-elevated);
+  }
+
+  /* Image attachments are tiles, not chips: the picture says more than the
+     filename does. The remove control floats over the corner so the tile stays
+     square. */
+  .poodle-agent-chat-input__attachment[data-variant="thumbnail"] {
+    position: relative;
+    width: var(--poodle-agent-chat-input-thumb);
+    height: var(--poodle-agent-chat-input-thumb);
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .poodle-agent-chat-input__attachment-thumb {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+  }
+
+  /* Position IconButton's wrapper, not the button: the wrapper is the flex child
+     and establishes its own containing block. */
+  .poodle-agent-chat-input__attachment[data-variant="thumbnail"] > :last-child {
+    position: absolute;
+    top: -0.3125rem;
+    right: -0.3125rem;
+    z-index: 1;
+  }
+
+  .poodle-agent-chat-input__attachment[data-variant="thumbnail"] .poodle-icon-button {
+    border-radius: 999px;
+    background: var(--poodle-color-background-canvas);
+    box-shadow: 0 0 0 0.0625rem var(--poodle-color-border-subtle);
+  }
+
+  .poodle-agent-chat-input__attachment-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-agent-chat-input__attachment-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--poodle-color-text-primary);
+    font-size: 0.75rem;
+  }
+
+  /* ── Editor ──────────────────────────────────────────────────────────── */
+  .poodle-agent-chat-input__editor {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-agent-chat-input-font);
+    line-height: 1.5;
+    resize: none;
+    overflow-y: auto;
+  }
+
+  .poodle-agent-chat-input__editor:focus {
+    outline: none;
+  }
+
+  /* Dimmer than the shared input convention (secondary at `opacity-muted`): the
+     composer's placeholder is a standing hint, not a value, and sits on a panel
+     that is already close to the text colour. */
+  .poodle-agent-chat-input__editor::placeholder {
+    color: var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-color-text-secondary));
+    opacity: calc(var(--poodle-state-opacity-muted) * 0.62);
+  }
+
+  .poodle-agent-chat-input__editor:disabled {
+    cursor: not-allowed;
+  }
+
+  /* ── Toolbar ─────────────────────────────────────────────────────────── */
+  .poodle-agent-chat-input__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--poodle-agent-chat-input-gap);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-agent-chat-input__leading {
+    display: flex;
+    align-items: center;
+    gap: var(--poodle-agent-chat-input-gap);
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Hairline dividers between toolbar controls, as in the reference composer. */
+  .poodle-agent-chat-input__leading[data-dividers="true"] > * + * {
+    padding-left: var(--poodle-agent-chat-input-gap);
+    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-agent-chat-input__trailing {
+    display: flex;
+    align-items: center;
+    gap: var(--poodle-agent-chat-input-gap);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .poodle-agent-chat-input__context {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  /* ── Action button (submit ↔ stop) ───────────────────────────────────── */
+  .poodle-agent-chat-input__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--poodle-agent-chat-input-action);
+    height: var(--poodle-agent-chat-input-action);
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-inverse);
+    cursor: pointer;
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-agent-chat-input__action:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white);
+  }
+
+  .poodle-agent-chat-input__action:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .poodle-agent-chat-input__action:disabled {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .poodle-agent-chat-input__action[data-state="stop"] {
+    background: var(--poodle-color-status-danger);
+  }
+
+  .poodle-agent-chat-input__action[data-state="stop"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 88%, white);
+  }
+
+  /* ── Footer bar ──────────────────────────────────────────────────────── */
+  .poodle-agent-chat-input__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--poodle-agent-chat-input-gap);
+    margin: calc(var(--poodle-radius-surface) * -1) 1.5rem 0;
+    padding: calc(var(--poodle-agent-chat-input-pad-y) + var(--poodle-radius-surface)) var(--poodle-agent-chat-input-pad-x) var(--poodle-agent-chat-input-pad-y);
+    box-sizing: border-box;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-top: 0;
+    border-radius: 0 0 var(--poodle-radius-surface) var(--poodle-radius-surface);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  /* ── Size ladder ─────────────────────────────────────────────────────── */
+  .poodle-agent-chat-input[data-size="xs"] {
+    --poodle-agent-chat-input-thumb: 2rem;
+    --poodle-agent-chat-input-pad-y: 0.375rem;
+    --poodle-agent-chat-input-pad-x: 0.5rem;
+    --poodle-agent-chat-input-font: 0.75rem;
+    --poodle-agent-chat-input-action: 1.5rem;
+    --poodle-agent-chat-input-gap: 0.25rem;
+  }
+
+  .poodle-agent-chat-input[data-size="sm"] {
+    --poodle-agent-chat-input-thumb: 2.5rem;
+    --poodle-agent-chat-input-pad-y: 0.5rem;
+    --poodle-agent-chat-input-pad-x: 0.625rem;
+    --poodle-agent-chat-input-font: 0.8125rem;
+    --poodle-agent-chat-input-action: 1.75rem;
+    --poodle-agent-chat-input-gap: 0.375rem;
+  }
+
+  .poodle-agent-chat-input[data-size="lg"] {
+    --poodle-agent-chat-input-thumb: 3.5rem;
+    --poodle-agent-chat-input-pad-y: 0.75rem;
+    --poodle-agent-chat-input-pad-x: 1rem;
+    --poodle-agent-chat-input-font: 0.9375rem;
+    --poodle-agent-chat-input-action: 2.375rem;
+    --poodle-agent-chat-input-gap: 0.625rem;
+  }
+
+  .poodle-agent-chat-input[data-size="xl"] {
+    --poodle-agent-chat-input-thumb: 4rem;
+    --poodle-agent-chat-input-pad-y: 0.875rem;
+    --poodle-agent-chat-input-pad-x: 1.125rem;
+    --poodle-agent-chat-input-font: 1rem;
+    --poodle-agent-chat-input-action: 2.75rem;
+    --poodle-agent-chat-input-gap: 0.75rem;
+  }
+
+  /* ── Density ─────────────────────────────────────────────────────────────
+     Sibling spacing only — never the field's vertical padding or the action. */
+  .poodle-agent-chat-input[data-density="compact"] .poodle-agent-chat-input__toolbar,
+  .poodle-agent-chat-input[data-density="compact"] .poodle-agent-chat-input__leading,
+  .poodle-agent-chat-input[data-density="compact"] .poodle-agent-chat-input__trailing,
+  .poodle-agent-chat-input[data-density="compact"] .poodle-agent-chat-input__attachments {
+    gap: calc(var(--poodle-agent-chat-input-gap) * 0.75);
+  }
+
+  .poodle-agent-chat-input[data-density="comfortable"] .poodle-agent-chat-input__toolbar,
+  .poodle-agent-chat-input[data-density="comfortable"] .poodle-agent-chat-input__leading,
+  .poodle-agent-chat-input[data-density="comfortable"] .poodle-agent-chat-input__trailing,
+  .poodle-agent-chat-input[data-density="comfortable"] .poodle-agent-chat-input__attachments {
+    gap: calc(var(--poodle-agent-chat-input-gap) * 1.25);
+  }

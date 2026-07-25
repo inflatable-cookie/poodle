@@ -1,0 +1,94 @@
+# Cross-framework visual gate — mirrors `effigy ci:visual` (g12.009).
+# Diffs the Svelte and React previews pixel-for-pixel at the same specimen slug
+# and display axis. Kept OUT of ci-web: it downloads a browser and boots two vite
+# dev servers, which that gate deliberately excludes.
+#
+# Runs NIGHTLY behind the same cheap guard as ci-native (skip when the default
+# branch has not moved in 24h), plus on demand. The axis tier is ~360 captures.
+name: ci-visual
+
+on:
+  schedule:
+    - cron: "30 6 * * *" # 06:30 UTC daily — guarded below
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "smoke | axis | sweep"
+        default: axis
+        required: false
+
+concurrency:
+  group: ci-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch — proceeding."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last=$(git log -1 --format=%ct)
+          age=$(( $(date +%s) - last ))
+          if [ "$age" -lt 86400 ]; then
+            echo "HEAD is ${age}s old (< 24h) — running visual gate."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No default-branch commit in last 24h (HEAD ${age}s old) — skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  visual:
+    needs: guard
+    if: needs.guard.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - run: bun install --frozen-lockfile
+
+      # Browser binaries are versioned with the playwright package.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: playwright-${{ runner.os }}-
+
+      - name: install chromium
+        run: bunx playwright install --with-deps chromium
+
+      # ── effigy ci:visual ───────────────────────────────────────────
+      - name: cross-framework visual diff
+        run: bun test/visual/run.ts --tier=${{ inputs.tier || 'axis' }}
+
+      # Diff images only exist when something failed; they are the whole point of
+      # the run when it does.
+      - name: upload diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: test/visual/out/
+          retention-days: 14

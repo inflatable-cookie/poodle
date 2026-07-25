@@ -13,7 +13,9 @@ export function ComponentPage({ entry, specimenComponent: Specimen = null }: Com
   const docs = componentDocsMap[entry.slug] ?? null;
 
   return (
-    <article className="poodle-component-page">
+    // data-component scopes the per-specimen style overrides in gallery.css the
+    // way Svelte's scoped <style> blocks scope theirs.
+    <article className="poodle-component-page" data-component={entry.slug}>
       <header className="poodle-component-page__hero">
         <div className="poodle-component-page__hero-top">
           <Pill size="lg">{entry.packageName}</Pill>

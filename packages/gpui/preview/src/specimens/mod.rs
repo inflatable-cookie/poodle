@@ -128,7 +128,9 @@ mod media_thumbnail_specimen;
 mod meta_bar;
 mod metric_tile_specimen;
 mod nav_card;
+mod agent_chat_input_specimen;
 mod filter_builder_specimen;
+mod model_picker_specimen;
 mod theme_select_specimen;
 mod order_by_specimen;
 mod page_header_specimen;
@@ -437,6 +439,14 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "filter-builder" => {
             specimen_card("FilterBuilder", theme, filter_builder_specimen::render(state, cx))
         }
+        "model-picker" => {
+            specimen_card("ModelPicker", theme, model_picker_specimen::render(state, cx))
+        }
+        "agent-chat-input" => specimen_card(
+            "AgentChatInput",
+            theme,
+            agent_chat_input_specimen::render(state, cx),
+        ),
         "theme-select" => {
             specimen_card("ThemeSelect", theme, theme_select_specimen::render(state, cx))
         }

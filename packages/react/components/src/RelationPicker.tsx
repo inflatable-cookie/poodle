@@ -1,6 +1,6 @@
 import "@poodle/styles/relation-picker.css";
 
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
@@ -399,12 +399,12 @@ export function RelationPicker({
           <Icon name="chevron-left" />
         </button>
         {drillBreadcrumbs.map((crumb, i) => (
-          <span key={crumb.key} style={{ display: "contents" }}>
+          <Fragment key={crumb.key}>
             {i > 0 ? <span className="poodle-drill-breadcrumbs__sep">/</span> : null}
             <button type="button" className="poodle-drill-breadcrumbs__item" onClick={() => drillNavigateTo(crumb.depth)}>
               {crumb.label}
             </button>
-          </span>
+          </Fragment>
         ))}
       </div>
     ) : null;

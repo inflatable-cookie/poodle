@@ -47,7 +47,14 @@
     display: none;
   }
 
-  .poodle-meta-bar .poodle-code--inline {
+  /*
+   * `[data-size]` is carried for specificity, not selection: without it this
+   * ties with `.poodle-code--inline[data-size="sm"]` in code.css (both 0-2-0)
+   * and the winner comes down to stylesheet import order — which differed
+   * between the Svelte and React previews and rendered the meta-bar ID at two
+   * different sizes. Meta-bar code always tracks the surrounding text size.
+   */
+  .poodle-meta-bar .poodle-code--inline[data-size] {
     font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
     line-height: inherit;
   }

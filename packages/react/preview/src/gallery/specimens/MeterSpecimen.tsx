@@ -2,6 +2,8 @@ import { Meter } from "@poodle/react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
+const row = { display: "flex", alignItems: "center", gap: "0.75rem" } as const;
+
 export function MeterSpecimen() {
   return (
     <SpecimenLayout
@@ -31,6 +33,36 @@ export function MeterSpecimen() {
         <SpecimenGroup label="Custom range (0–500)">
           <Meter value={350} min={0} max={500} ariaLabel="API calls" />
           <p>350 / 500 API calls used</p>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Ring">
+          <div style={row}>
+            <Meter shape="ring" value={38} ariaLabel="Context used" />
+            <Meter
+              shape="ring"
+              value={86}
+              high={80}
+              ariaLabel="Context used, above warn threshold"
+            />
+            <Meter shape="ring" value={64} showValue size="xl" ariaLabel="Context used" />
+          </div>
+          <p>38% · 86% (above high) · 64% with readout</p>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Ring sizes">
+          <div style={row}>
+            {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
+              <Meter key={size} shape="ring" value={60} size={size} ariaLabel={`Ring ${size}`} />
+            ))}
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Ring tones">
+          <div style={row}>
+            {(["success", "accent", "warning", "danger", "neutral"] as const).map((tone) => (
+              <Meter key={tone} shape="ring" value={60} tone={tone} ariaLabel={`${tone} tone`} />
+            ))}
+          </div>
         </SpecimenGroup>
       </div>
     </SpecimenLayout>

@@ -289,6 +289,16 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Popover filter-clause builder with editable pills and AND/OR combinator.",
     },
     ComponentEntry {
+        slug: "model-picker",
+        display_name: "ModelPicker",
+        description: "Combined model and capability-axis picker in one popover widget.",
+    },
+    ComponentEntry {
+        slug: "agent-chat-input",
+        display_name: "AgentChatInput",
+        description: "Agent composer: editor, control toolbar, context ring, submit/stop action.",
+    },
+    ComponentEntry {
         slug: "theme-select",
         display_name: "ThemeSelect",
         description: "Theme picker: popover of theme swatch tiles.",

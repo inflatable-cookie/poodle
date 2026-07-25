@@ -8,7 +8,9 @@
   // theme to the document — that is the controller's job, see usage docs).
   const themes = themeOptions();
 
-  let value = $state("dark");
+  // "dark" was renamed to "eclipse"; the stale id matched no option, so the
+  // trigger fell back to the placeholder label instead of a theme.
+  let value = $state("eclipse");
   let sizeValue = $state("nord");
   let densityValue = $state("rose");
   const selected = $derived(themes.find((t) => t.value === value));

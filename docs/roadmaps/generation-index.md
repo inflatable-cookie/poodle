@@ -2,15 +2,26 @@
 
 ## Active Execution Track
 
-- `g11`
+- `g12`
   - Status: active
-  - Range: `001` to `007` on disk
-  - Notes: `g11.001` (systematic Svelte modernization and audited consumer
-    rollout) is complete. The generation continues with the headless-core
-    dual-layer program — framework-free state-machine core, interface-stable
-    Svelte adapter layer, appearance-recipe overrides, Rust machine mirror,
-    and multi-framework adapter pilot. Master spec:
-    `docs/specs/062-headless-core-and-dual-layer-strategy.md`.
+  - Range: `001` to `009` on disk
+  - Notes: React full parity (`001`–`008`) is complete — all 132 components
+    ported to `@poodle/react` against a single shared stylesheet, with a
+    full per-component preview gallery mirroring the Svelte preview's slugs.
+    The generation continues with web verification depth, starting at
+    `g12.009` (cross-framework visual regression gate).
+
+- `g11`
+  - Status: completed
+  - Range: `001` to `008`
+  - Notes: Svelte modernization and audited consumer rollout, plus the
+    headless-core dual-layer program — framework-free state-machine core,
+    interface-stable Svelte adapter layer, appearance-recipe overrides and
+    full recipe-hook coverage, Rust machine mirror, and the multi-framework
+    adapter pilot that seeded g12. Master spec:
+    `docs/specs/062-headless-core-and-dual-layer-strategy.md`. Recorded
+    residual debt stays in `g11.004` (extraction register) and `g11.006`
+    (domain-math port, Jetstream adoption).
 
 - `g10`
   - Status: completed
@@ -75,7 +86,7 @@ When roadmap files disagree:
 
 1. treat this index as the top-level source of truth
 2. treat `docs/roadmaps/README.md` as the entrypoint
-3. treat `g11` as the active generation until it is explicitly closed
+3. treat `g12` as the active generation until it is explicitly closed
 
 ## Rollover policy
 
@@ -99,8 +110,7 @@ closeout there first.
 
 ## Next Task
 
-Open `g11/README.md`. `g11.001` is complete. Active seam: the headless-core
-dual-layer program — master spec
-`docs/specs/062-headless-core-and-dual-layer-strategy.md`, runway `g11.002`
-through `g11.007`, starting with `g11.002` machine-spec format and pilot
-contracts.
+Open `g12/README.md`. `g12.001`–`g12.009` are complete (React full parity
+plus the cross-framework visual regression gate, now green at 256/256
+sweep pairs). No seam is currently open — the next one is a maintainer
+choice; `g12/README.md` records the candidates.

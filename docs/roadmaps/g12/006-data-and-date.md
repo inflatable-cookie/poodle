@@ -45,7 +45,7 @@ Depends on: `g12.005`
   measure-then-reveal useLayoutEffect, registerDismissLayer). Verified
   15/15. Batch complete — 76/132.
 
-Note: Svelte ListCard's anchor variant emits `data-size` from the chrome
-role (`resolvedContextMenuSize`) while the div variant uses `resolvedSize`.
-Looks unintentional; React replicates it for pixel parity. Fix both
-together if confirmed a bug.
+Note (resolved): Svelte ListCard's anchor variant emitted `data-size`
+from the chrome role (`resolvedContextMenuSize`) while the div variant used
+`resolvedSize`. Confirmed a bug — both roots now use `resolvedSize` in
+Svelte and React, covered by per-framework regression tests.

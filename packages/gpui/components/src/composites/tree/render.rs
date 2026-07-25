@@ -382,6 +382,14 @@ impl Tree {
                     .text_ellipsis()
                     .child(SharedString::from(node.label.clone())),
             );
+            if let Some(end_label) = &node.end_label {
+                row = row.child(
+                    div()
+                        .flex_none()
+                        .font_weight(FontWeight::MEDIUM)
+                        .child(SharedString::from(end_label.clone())),
+                );
+            }
         }
 
         // Selected fill (alpha-only). The contract's inset ring is a Svelte-only
@@ -395,6 +403,9 @@ impl Tree {
                 .opacity(m.disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
+            if node.is_muted && !is_selected && !is_focused {
+                row = row.opacity(0.55);
+            }
             let hover_bg = m.hover_bg;
             let hover_text = m.selected_color;
             row = row.cursor_pointer().hover(move |s| s.text_color(hover_text).bg(hover_bg));

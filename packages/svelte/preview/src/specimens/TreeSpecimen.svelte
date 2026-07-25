@@ -8,6 +8,7 @@
     {
       value: "src",
       label: "src",
+      endLabel: "3",
       icon: "folder",
       children: [
         {
@@ -20,7 +21,7 @@
           ],
         },
         // Empty-but-branch folder (lazy / no children yet).
-        { value: "src/lib", label: "lib", icon: "folder", isBranch: true },
+        { value: "src/lib", label: "lib", endLabel: "0", icon: "folder", isBranch: true, isMuted: true },
         { value: "src/index.ts", label: "index.ts", icon: "file" },
       ],
     },

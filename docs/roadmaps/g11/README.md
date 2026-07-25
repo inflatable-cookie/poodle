@@ -1,7 +1,7 @@
 # g11 Svelte Modernization, Headless Core, And Consumer Rollout
 
-Status: active
-Updated: 2026-07-10
+Status: complete (2026-07-24)
+Updated: 2026-07-24
 
 ## Context
 
@@ -85,7 +85,7 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
 
 ## Next Task
 
-The headless-core runway (g11.002–007) is complete. Spec 062 is promoted;
-remaining recorded debt lives in g11.004 (extraction register) and g11.006
-(domain-math port, Jetstream adoption). Generation rollover is an explicit
-maintainer decision.
+The g11 runway (001–008) is complete and Spec 062 is promoted. Remaining
+recorded debt lives in g11.004 (extraction register) and g11.006
+(domain-math port, Jetstream adoption). The live queue is `g12` — see
+`docs/roadmaps/g12/README.md`.

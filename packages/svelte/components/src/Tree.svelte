@@ -487,6 +487,9 @@
       />
     {:else}
       <span class="poodle-tree__label">{node.label}</span>
+      {#if node.endLabel}
+        <span class="poodle-tree__end-label">{node.endLabel}</span>
+      {/if}
     {/if}
   </div>
 {/snippet}
@@ -501,6 +504,7 @@
     data-value={node.value}
     data-branch={branch ? "true" : undefined}
     data-selected={selected ? "true" : undefined}
+    data-muted={node.isMuted ? "true" : undefined}
     data-drop={dropTarget === node.value ? dropPosition : undefined}
     draggable={reorderable && !node.isDisabled && !isEditing(node.value)}
     tabindex={effectiveFocus === node.value ? 0 : -1}
@@ -544,6 +548,7 @@
     data-value={node.value}
     data-branch={branch ? "true" : undefined}
     data-selected={selected ? "true" : undefined}
+    data-muted={node.isMuted ? "true" : undefined}
     data-drop={dropTarget === node.value ? dropPosition : undefined}
     draggable={reorderable && !node.isDisabled && !isEditing(node.value)}
     tabindex={effectiveFocus === node.value ? 0 : -1}
@@ -582,4 +587,3 @@
     </div>
   </div>
 {/snippet}
-

@@ -317,6 +317,15 @@ fn render_row(
                 .text_color(text_color)
                 .text_weight(weight),
         );
+        if let Some(end_label) = &node.end_label {
+            row = row.child(
+                ui_element::label(end_label)
+                    .flex_none()
+                    .text_size(m.row_font)
+                    .text_color(text_color)
+                    .text_weight(500),
+            );
+        }
     }
 
     // Selected fill. The contract's inset ring is a Svelte-only refinement: a
@@ -356,6 +365,9 @@ fn render_row(
     if node.is_disabled {
         row = row.opacity(m.disabled_opacity);
     } else {
+        if node.is_muted && !is_selected && !is_focused {
+            row = row.opacity(0.55);
+        }
         row = row.focusable().cursor_pointer();
     }
 

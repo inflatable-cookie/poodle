@@ -1,6 +1,9 @@
-# g12 — React Full Parity
+# g12 — React Full Parity And Web Verification Depth
 
-**Status: COMPLETE.** All 132 components ported to `@poodle/react` and
+**Status: active.** The React parity program (`001`–`008`) is complete;
+the generation continues with cross-framework verification depth.
+
+**React parity: COMPLETE.** All 132 components ported to `@poodle/react` and
 Playwright-verified against the Svelte preview. The React preview is a full
 per-component gallery matching the Svelte preview (shell, controls, Tokens
 inspector, usage docs, 131/131 specimen slugs) plus docs / parity /
@@ -31,5 +34,26 @@ Runway:
 - `003`–`008` — family batches: primitives/display, controls/forms,
   overlays/navigation, layout/form shells, data/date, media/workstation
   composites.
-- `009-parity-verification-and-closeout.md` — preview coverage sweep,
-  Playwright behavior parity samples against the Svelte preview, docs.
+- `008-parity-verification.md` — preview coverage sweep, Playwright
+  behavior parity samples against the Svelte preview, docs. **Complete.**
+- `009-visual-regression-gate.md` — cross-framework pixel diff (Svelte vs
+  React, same slug, same axes). The structural gates cannot see a
+  component render at the wrong size; the ListCard `data-size` bug proved
+  it. **Complete** — 256/256 sweep pairs and 180/180 axis pairs green,
+  after 14 divergences found and fixed across specimens, shells and
+  `@poodle/styles`.
+- `010-agent-composer.md` — the agent composer family across all four
+  targets: `Meter shape="ring"`, `ModelPicker` (model + host-declared
+  capability axes in one popover) and `AgentChatInput`. **Complete.**
+
+- Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
+  through the isolated `install-smoke` consumer) now runs in `ci:web` and
+  `ci-web.yml`. Added after five type errors in `Rating.svelte` were found
+  from a consumer repo rather than from Poodle's own gates.
+
+## Next Task
+
+`g12.009` is complete. Pick the next seam for this generation — the
+visual gate now guards every web-side change, so the open ground is the
+Rust targets (GPUI/Jetstream have not tracked g12-era Svelte changes) or
+deeper `@poodle/headless` machine coverage.

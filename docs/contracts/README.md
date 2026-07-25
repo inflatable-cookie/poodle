@@ -36,6 +36,7 @@ above it in downstream repos such as Loophole.
 - `components/README.md`
 - `components/accordion.md`
 - `components/action-discovery-panel.md`
+- `components/agent-chat-input.md`
 - `components/alert-dialog.md`
 - `components/app-header.md`
 - `components/audio-player.md`
@@ -115,6 +116,7 @@ above it in downstream repos such as Loophole.
 - `components/meta-item.md`
 - `components/meter.md`
 - `components/metric-tile.md`
+- `components/model-picker.md`
 - `components/nav-card.md`
 - `components/navigation-menu.md`
 - `components/number-input.md`

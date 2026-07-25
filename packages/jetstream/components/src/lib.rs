@@ -168,6 +168,8 @@ pub mod media_thumbnail;
 pub mod metric_tile;
 pub mod nav_card;
 pub mod filter_builder;
+pub mod model_picker;
+pub mod agent_chat_input;
 pub mod theme_select;
 pub mod order_by;
 pub mod page_header;

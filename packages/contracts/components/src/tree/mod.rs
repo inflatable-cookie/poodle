@@ -6,11 +6,13 @@ use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 pub struct TreeNode {
     pub value: String,
     pub label: String,
+    pub end_label: Option<String>,
     pub icon: Option<String>,
     pub children: Vec<TreeNode>,
     /// Force branch posture even when `children` is empty (empty / lazy folder).
     pub is_branch: bool,
     pub is_disabled: bool,
+    pub is_muted: bool,
 }
 
 impl TreeNode {
@@ -19,10 +21,12 @@ impl TreeNode {
         Self {
             value: value.into(),
             label: label.into(),
+            end_label: None,
             icon: None,
             children: Vec::new(),
             is_branch: false,
             is_disabled: false,
+            is_muted: false,
         }
     }
 
@@ -43,6 +47,11 @@ impl TreeNode {
         self
     }
 
+    pub fn with_end_label(mut self, end_label: impl Into<String>) -> Self {
+        self.end_label = Some(end_label.into());
+        self
+    }
+
     pub fn with_children(mut self, children: Vec<TreeNode>) -> Self {
         self.children = children;
         self
@@ -56,6 +65,11 @@ impl TreeNode {
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_muted(mut self, is_muted: bool) -> Self {
+        self.is_muted = is_muted;
         self
     }
 

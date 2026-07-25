@@ -1423,6 +1423,116 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "agent-chat-input": {
+    props: [
+      { name: "value", type: "string", default: '""', description: "Message text. Bindable; submitting never clears it — the host decides." },
+      { name: "placeholder", type: "string", default: '"Send a message"', description: "Editor placeholder." },
+      { name: "status", type: '"idle" | "busy"', default: '"idle"', description: "Busy flips the action button to stop and routes activations to onStop." },
+      { name: "submitOnEnter", type: "boolean", default: "true", description: "When false only Cmd/Ctrl+Enter submits; bare Enter inserts a newline." },
+      { name: "minRows", type: "number", default: "2", description: "Editor floor in text rows." },
+      { name: "maxRows", type: "number", default: "12", description: "Editor ceiling in text rows; beyond it the editor scrolls." },
+      { name: "maxLength", type: "number | null", default: "null", description: "Native maxlength on the editor." },
+      { name: "allowEmptySubmit", type: "boolean", default: "false", description: "Keep the action button enabled with an empty editor." },
+      { name: "attachments", type: "AgentChatAttachment[]", default: "[]", description: "Pending attachment chips (id, label, kind, icon, disabled)." },
+      { name: "contextUsed", type: "number | null", default: "null", description: "Consumed context budget, in the host's own unit." },
+      { name: "contextLimit", type: "number | null", default: "null", description: "Total context budget. When null the context ring is not rendered." },
+      { name: "contextWarnAt", type: "number", default: "0.8", description: "Fraction of contextLimit at which the ring switches to the warning tone." },
+      { name: "contextLabel", type: "string", default: '"Context used"', description: "Accessible name for the context ring; the percentage is appended." },
+      { name: "toolbarDividers", type: "boolean", default: "true", description: "Hairline dividers between leading toolbar children." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "ariaLabel", type: "string", default: '"Message"', description: "Accessible label for the editor." },
+      { name: "submitLabel", type: "string", default: '"Send"', description: "Accessible name for the action button while idle." },
+      { name: "stopLabel", type: "string", default: '"Stop"', description: "Accessible name for the action button while busy." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Editor is not editable; submitting still works." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables the editor, action button and attachment removal." },
+    ],
+    slots: [
+      { name: "toolbar", description: "Leading toolbar controls — canonically a ModelPicker." },
+      { name: "footer", description: "Secondary bar under the composer (scope, branch, status rows)." },
+    ],
+    events: [
+      { name: "onSubmit", payload: "(value: string) => void", description: "Fired on a valid submit gesture. Never while busy, and never when the editor is empty unless allowEmptySubmit." },
+      { name: "onStop", payload: "() => void", description: "Fired from the action button while busy, and on Escape while busy." },
+      { name: "onValueChange", payload: "(value: string) => void", description: "Fired on every edit." },
+      { name: "onRemoveAttachment", payload: "(id: string) => void", description: "Fired from an attachment chip's remove button." },
+    ],
+    usage: `<script lang="ts">
+  import { AgentChatInput, ModelPicker } from "@poodle/svelte";
+
+  let message = $state("");
+  let status = $state<"idle" | "busy">("idle");
+</script>
+
+<AgentChatInput
+  bind:value={message}
+  {status}
+  contextUsed={64000}
+  contextLimit={200000}
+  onSubmit={(text) => send(text)}
+  onStop={() => abort()}
+>
+  {#snippet toolbar()}
+    <ModelPicker {models} {axes} bind:value={selection} emphasis="subdued" />
+  {/snippet}
+</AgentChatInput>`,
+  },
+
+  "model-picker": {
+    props: [
+      { name: "models", type: "ModelOption[]", default: "[]", description: "Host-supplied model list (value, label, description, badge, group, disabled, axes). A model's mark is either `icon` (a name from the icon registry) or `image: { src, alt? }` (any image URL — provider logo, data URI, asset path), which wins when both are set. A model's `axes` lists the axis keys it exposes, optionally as bindings that override the shared definition; omit to inherit every axis, `[]` to expose none." },
+      { name: "axes", type: "ModelCapabilityAxis[]", default: "[]", description: "Capability axes declared once by key: single-select level sets or boolean toggles. The key is what lands in the selection, so a cross-provider list keeps `selection.axes.effort` stable while each model supplies its own levels." },
+      { name: "value", type: "ModelSelection", default: "first enabled model + axis defaults", description: "Controlled selection: model plus its applicable axis values. Hosts update it from onChange." },
+      { name: "placeholder", type: "string", default: '"Select model"', description: "Trigger label when no model is selected." },
+      { name: "showAxisSummary", type: "boolean", default: "true", description: "Whether the trigger shows the axis summary (joined with \u00b7) beside the model label." },
+      { name: "showModelDescriptions", type: "boolean", default: "true", description: "Whether option descriptions render in the panel." },
+      { name: "variant", type: '"bare" | "outlined"', default: '"bare"', description: "Borderless inline trigger (composer toolbars) or the standard bordered control." },
+      { name: "emphasis", type: '"default" | "subdued"', default: '"default"', description: "Subdued dims the trigger so the picker recedes beside a more important control — its home inside AgentChatInput. Hover, focus and the open state restore full strength." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "ariaLabel", type: "string", default: '"Model"', description: "Accessible label for the trigger and dialog." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(value: ModelSelection) => void", description: "Called when the model or any axis changes. The payload is already normalised, so axes scoped out of the selected model never leak." },
+    ],
+    usage: `<script lang="ts">
+  import { ModelPicker, type ModelCapabilityAxis, type ModelOption, type ModelSelection } from "@poodle/svelte";
+
+  const models: ModelOption[] = [
+    // Each model names the axis keys it exposes; a binding overrides the levels.
+    { value: "atlas-pro", label: "Atlas Pro", badge: "1M", axes: ["effort", "fast", "context"] },
+    { value: "atlas", label: "Atlas", axes: ["effort", "fast"] },
+    { value: "corvid-1", label: "Corvid 1", axes: [
+      { key: "effort", options: [
+        { value: "minimal", label: "Minimal" },
+        { value: "deep", label: "Deep" },
+      ], defaultValue: "minimal" },
+    ] },
+  ];
+
+  const axes: ModelCapabilityAxis[] = [
+    { key: "effort", label: "Effort", kind: "select", defaultValue: "medium", options: [
+      { value: "low", label: "Low" },
+      { value: "medium", label: "Medium" },
+      { value: "high", label: "High" },
+    ] },
+    { key: "fast", label: "Fast mode", kind: "toggle", onLabel: "Fast", offLabel: "Normal" },
+    { key: "context", label: "Context window", kind: "select", options: [
+      { value: "200k", label: "200K" },
+      { value: "1m", label: "1M" },
+    ] },
+  ];
+
+  let value: ModelSelection = { model: "atlas-pro", axes: {} };
+</script>
+
+<ModelPicker {models} {axes} {value} onChange={(next) => (value = next)} />`,
+  },
+
   "filter-builder": {
     props: [
       { name: "fields", type: "FilterFieldDefinition[]", default: "[]", description: "Host-supplied filter fields the user can choose from (key, label, kind, options, operators, allowMultiple)." },
@@ -3116,6 +3226,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     {
       value: "src",
       label: "src",
+      endLabel: "1",
       icon: "folder",
       children: [
         { value: "src/index.ts", label: "index.ts", icon: "file" },

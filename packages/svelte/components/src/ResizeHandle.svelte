@@ -123,5 +123,6 @@
   onmousedown={handlePointerDown}
   onkeydown={handleKeydown}
 >
+  <span class="poodle-resize-handle__hit" aria-hidden="true"></span>
   <span class="poodle-resize-handle__line" aria-hidden="true"></span>
 </div>

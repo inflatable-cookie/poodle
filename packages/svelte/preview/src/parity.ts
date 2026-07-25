@@ -482,6 +482,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     sectionIds: ["catalog-hub"],
     note: "Every public primitive export is directly reviewable from the catalogue.",
     exportNames: [
+      "AgentChatInput",
       "AlertDialog",
       "AudioPlayer",
       "Box",
@@ -513,6 +514,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "ListGrid",
       "Meter",
       "Menubar",
+      "ModelPicker",
       "NavCard",
       "NavigationMenu",
       "NumberInput",

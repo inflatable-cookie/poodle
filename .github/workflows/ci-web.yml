@@ -64,6 +64,15 @@ jobs:
         run: bun run --cwd packages/core test
       - name: component + parity tests (svelte + react)
         run: bunx vitest run
+      # Type gate over @poodle/svelte. install-smoke is outside the root
+      # workspace on purpose (it proves a real consumer install), so it installs
+      # its own deps; svelte-check then covers the whole linked component
+      # package. Errors fail, pre-existing a11y warnings do not.
+      - name: svelte component typecheck
+        run: |
+          bun install --cwd packages/svelte/install-smoke
+          bun run --cwd packages/svelte/install-smoke check --threshold error
+
       - name: contract / manifest lint
         run: bun run --cwd packages/svelte/preview docs:lint
       - name: parity report (tokens:build + data-layer smoke)

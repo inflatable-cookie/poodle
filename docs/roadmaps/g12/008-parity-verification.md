@@ -34,9 +34,12 @@ they drive the same hash-routed specimens as the Svelte preview.
   30/30 probes + Tabs-consumer regression. **132/132.**
 - [x] **SegmentedControl option icons** — icon/iconOnly mirrored in the
   React type + component; verified in the dock-region suite.
-- [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
-  role on the anchor variant), replicated in React for pixel parity.
-  Fix both together if confirmed (noted in 006).
+- [x] **ListCard anchor `data-size`** — confirmed a Svelte bug: the
+  anchor root emitted the `chrome` role size while the div root used the
+  card's own `sizeRole`, so identical props rendered at different sizes
+  depending on `href`. Both roots now emit `resolvedSize`; the unused
+  `chrome` derivation is gone in Svelte and React. Regression tests:
+  `packages/{svelte,react}/components/test/ListCard.test.*`.
 - [x] **React preview gallery** — full per-component gallery matching
   the Svelte preview: app shell (theme/density/size/contrast controls +
   URL sync), tag-grouped SidebarNav, catalogue landing, per-component
@@ -48,9 +51,6 @@ they drive the same hash-routed specimens as the Svelte preview.
   benign warnings — see the gallery commit). Deferred vs the Svelte
   preview: Tokens section, component-docs/UsageDocs, and the
   accessibility.ts/parity.ts report generators.
-- [ ] **ListCard anchor `data-size`** — suspected Svelte bug (chrome
-  role on the anchor variant), replicated in React for pixel parity.
-  Fix both together if confirmed (noted in 006).
 - [x] **Gallery closeout (deferred items done)**:
   - Removed the detached probe harness (`harness.tsx` + 34 batch
     specimens) now that the per-component gallery supersedes it.

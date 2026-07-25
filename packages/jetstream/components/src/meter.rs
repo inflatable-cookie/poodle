@@ -7,7 +7,7 @@
 
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{ControlSize, MeterSpec};
+use poodle_specs::{ControlSize, MeterShape, MeterSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
@@ -43,6 +43,12 @@ pub fn js_meter(spec: &MeterSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let fraction = spec.normalized_progress() as f32;
 
+    if spec.shape == MeterShape::Ring {
+        // Contract §8 ring shape: the track mixes at 88%, not the bar's 96%.
+        let ring_track = color_mix(surface, text_primary, spec.ring_track_mix_ratio());
+        return ring(spec, theme, effective_size, ring_track);
+    }
+
     // The ProgressBar widget draws a proportional fill of `fraction` over a
     // parent-owned (stretched) track. Width is owned by the parent (contract
     // §7: width 100%), not a hardcoded absolute.
@@ -52,6 +58,42 @@ pub fn js_meter(spec: &MeterSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .self_stretch()
         .rounded(radius)
         .bg(track_bg)
+}
+
+/// Ring shape. Contract §12 accepted delta: Jetstream has no conic gradient or
+/// arc primitive, so the ring renders as a circular track stroked in the
+/// level-resolved fill colour, with the value readout carrying the proportion.
+fn ring(
+    spec: &MeterSpec,
+    theme: &JetstreamThemeProvider,
+    size: ControlSize,
+    track_bg: glam::Vec4,
+) -> JsEl {
+    // The stroke colour already carries the `high` escalation from the spec.
+    let diameter = rem_to_px(spec.ring_size_rem(size));
+    let thickness = rem_to_px(spec.ring_thickness_rem(size));
+    let fill = resolve_color(theme, spec.fill_token());
+
+    let mut el = ui_element::div()
+        .w(diameter)
+        .h(diameter)
+        .flex_none()
+        .items_center()
+        .justify_center()
+        .rounded(diameter / 2.0)
+        .border(thickness)
+        .border_color(fill)
+        .bg(track_bg);
+
+    if spec.show_value {
+        el = el.child(
+            ui_element::label(&spec.value_display_text())
+                .text_color(resolve_color(theme, spec.value_color_token()))
+                .text_size(diameter * 0.34),
+        );
+    }
+
+    el
 }
 
 #[cfg(test)]

@@ -1,6 +1,7 @@
 import "@poodle/styles/tabs.css";
 
 import {
+  Fragment,
   useEffect,
   useId,
   useRef,
@@ -426,7 +427,7 @@ export function Tabs({
         <div className="poodle-tabs__measure-shell" aria-hidden="true">
           <div ref={measureListRef} className="poodle-tabs__list poodle-tabs__list--measure">
             {renderedItems.map((item, index) => (
-              <span key={item.value} style={{ display: "contents" }}>
+              <Fragment key={item.value}>
                 <div className="poodle-tabs__item" role="presentation" data-selected={currentValue === item.value}>
                   <span className="poodle-tabs__tab">{tabContent(item)}</span>
 
@@ -439,7 +440,7 @@ export function Tabs({
                 {item.separator && index < renderedItems.length - 1 ? (
                   <span className="poodle-tabs__separator" aria-hidden="true" />
                 ) : null}
-              </span>
+              </Fragment>
             ))}
           </div>
         </div>
@@ -474,7 +475,7 @@ export function Tabs({
       ) : (
         <div className="poodle-tabs__list" role="tablist" aria-label={ariaLabel ?? undefined} aria-orientation={orientation}>
           {renderedItems.map((item, index) => (
-            <span key={item.value} style={{ display: "contents" }}>
+            <Fragment key={item.value}>
               <div
                 className="poodle-tabs__item"
                 role="presentation"
@@ -545,7 +546,7 @@ export function Tabs({
               {item.separator && index < renderedItems.length - 1 ? (
                 <span className="poodle-tabs__separator" aria-hidden="true" />
               ) : null}
-            </span>
+            </Fragment>
           ))}
 
           {actions ? <div className="poodle-tabs__actions">{actions}</div> : null}

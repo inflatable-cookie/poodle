@@ -70,20 +70,33 @@
             class="poodle-media-browse-panel__item"
             onclick={() => onSelect?.(item)}
           >
-            <MediaThumbnail
-              kind={toMediaKind(item.kind)}
-              presentation="compact"
-              aspectRatio="square"
-              ariaLabel={item.label}
-            >
-              {#if item.thumbnailUrl}
+            <!--
+              Two branches rather than one with an `{#if}` inside: MediaThumbnail
+              falls back to the kind placeholder icon only when no slot content
+              is supplied at all, and a slot that is present but renders nothing
+              suppressed that placeholder.
+            -->
+            {#if item.thumbnailUrl}
+              <MediaThumbnail
+                kind={toMediaKind(item.kind)}
+                presentation="compact"
+                aspectRatio="square"
+                ariaLabel={item.label}
+              >
                 <img
                   src={item.thumbnailUrl}
                   alt={item.label}
                   class="poodle-media-browse-panel__image"
                 />
-              {/if}
-            </MediaThumbnail>
+              </MediaThumbnail>
+            {:else}
+              <MediaThumbnail
+                kind={toMediaKind(item.kind)}
+                presentation="compact"
+                aspectRatio="square"
+                ariaLabel={item.label}
+              />
+            {/if}
             <span class="poodle-media-browse-panel__label">{item.label}</span>
             {#if item.meta}
               <span class="poodle-media-browse-panel__meta">{item.meta}</span>

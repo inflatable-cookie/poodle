@@ -87,17 +87,15 @@ impl IntoElement for ResizeHandle {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
-        // Idle line color: 82% border-default (Svelte: color-mix(border-default 82%, transparent))
-        let idle_line_color = Hsla { a: border_color.a * 0.82, ..border_color };
-
         let is_horizontal = spec.orientation == Orientation::Horizontal;
         let handle_id = SharedString::from(format!("{}-handle", self.id_prefix));
         // Group name lets the hover state on the hit target recolor the line
         // (contract §8: hover changes the *line* background to accent-base).
         let group_name = SharedString::from(format!("{}-group", self.id_prefix));
 
-        // Hit target container: 8px perpendicular to resize direction.
-        // Contains a centered 2px visual affordance line.
+        // Root: only as thick as the line, so the divider costs no layout space
+        // beyond the hairline itself. The grab area is an absolutely positioned
+        // overlay centred on it (contract §7), overlapping the neighbours.
         let mut container = div()
             .id(handle_id)
             .group(group_name.clone())
@@ -112,31 +110,49 @@ impl IntoElement for ResizeHandle {
                     .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             });
 
-        // Visual affordance: 0.125rem line centered in hit target.
+        // Visual affordance: the line fills the root.
         // Contract §8: hover/dragging recolors this line to accent-base — wired
         // via group_hover so the hit target's hover drives the line color, not
         // a translucent fill on the container.
         let mut line = if is_horizontal {
             div()
-                .w(px(rem_to_px(0.125)))
+                .w(px(rem_to_px(spec.thickness_rem())))
                 .h_full()
                 .rounded(px(999.0))
-                .bg(idle_line_color)
+                .bg(border_color)
         } else {
             div()
                 .w_full()
-                .h(px(rem_to_px(0.125)))
+                .h(px(rem_to_px(spec.thickness_rem())))
                 .rounded(px(999.0))
-                .bg(idle_line_color)
+                .bg(border_color)
         };
         if !spec.is_disabled {
             line = line.group_hover(group_name, move |s| s.bg(hover_color));
         }
 
-        if is_horizontal {
-            container = container.w(px(rem_to_px(0.5))).h_full().cursor_col_resize();
+        // Grab overlay: wider than the line, centred on it, absolutely
+        // positioned so it never contributes to layout.
+        let hit_size = px(rem_to_px(spec.hit_size_rem()));
+        let hit_offset = px(rem_to_px(spec.hit_offset_rem()));
+        let hit = if is_horizontal {
+            div().absolute().top_0().left(hit_offset).w(hit_size).h_full()
         } else {
-            container = container.w_full().h(px(rem_to_px(0.5))).cursor_row_resize();
+            div().absolute().left_0().top(hit_offset).h(hit_size).w_full()
+        };
+
+        if is_horizontal {
+            container = container
+                .relative()
+                .w(px(rem_to_px(spec.thickness_rem())))
+                .h_full()
+                .cursor_col_resize();
+        } else {
+            container = container
+                .relative()
+                .w_full()
+                .h(px(rem_to_px(spec.thickness_rem())))
+                .cursor_row_resize();
         }
 
         // Disabled state: reduced opacity, default cursor, no hover.
@@ -146,7 +162,7 @@ impl IntoElement for ResizeHandle {
                 .cursor(CursorStyle::OperationNotAllowed);
         }
 
-        container = container.child(line);
+        container = container.child(hit).child(line);
 
         container.into_any_element()
     }

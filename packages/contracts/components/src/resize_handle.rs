@@ -7,9 +7,11 @@ use crate::types::Orientation;
 /// Contract: `docs/contracts/components/resize-handle.md`
 ///
 /// Anatomy:
-///   [Resize Handle]
-///     ├── [Hit Target] (invisible, larger than visual — min 8px)
-///     └── [Visual Affordance] (thin line centered in hit target)
+///   [Resize Handle]  (layout footprint == the line's thickness)
+///     ├── [Hit Target] (invisible overlay, centred on the line and wider than
+///     │                 it — costs no layout space, so the divider reads as a
+///     │                 single hairline between two bordered regions)
+///     └── [Visual Affordance] (the line; fills the root)
 #[derive(Clone, Debug, PartialEq)]
 pub struct ResizeHandleSpec {
     /// Resize axis: `Horizontal` means left/right drag (vertical line),
@@ -79,9 +81,9 @@ impl ResizeHandleSpec {
     // -- Token methods --
 
     /// Border color for the visual affordance line in idle state.
-    /// Matches Svelte: `color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent)`.
+    /// Matches Svelte: `var(--poodle-color-border-subtle)`.
     pub fn border_color_token(&self) -> &'static str {
-        semantic::COLOR_BORDER_DEFAULT
+        semantic::COLOR_BORDER_SUBTLE
     }
 
     /// Highlight color for hover and active/dragging states.
@@ -103,6 +105,28 @@ impl ResizeHandleSpec {
     /// Focus ring width token.
     pub fn focus_ring_width_token(&self) -> &'static str {
         semantic::BORDER_WIDTH_FOCUS
+    }
+
+    // -- Geometry --
+
+    /// Thickness of the visual line — and of the handle's whole layout
+    /// footprint, in rem. The grab area is an overlay (see
+    /// [`Self::hit_size_rem`]), so the handle costs no layout space beyond the
+    /// line itself. Contract §8 value.
+    pub fn thickness_rem(&self) -> f32 {
+        0.125
+    }
+
+    /// Grab-area extent across the resize axis, in rem. Centred on the line and
+    /// overlapping the adjacent regions, so it never widens the divider.
+    pub fn hit_size_rem(&self) -> f32 {
+        0.5
+    }
+
+    /// Offset of the grab overlay from the line's leading edge, in rem. Negative:
+    /// the overlay starts before the line and ends after it.
+    pub fn hit_offset_rem(&self) -> f32 {
+        -(self.hit_size_rem() - self.thickness_rem()) / 2.0
     }
 
     // -- Derived helpers --

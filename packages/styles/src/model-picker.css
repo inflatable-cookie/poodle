@@ -1,0 +1,478 @@
+/* Styles for ModelPicker. One trigger (model label + axis summary) over an
+   anchored dialog holding the model radiogroup and one section per applicable
+   capability axis. The surface opens *upward*: the picker's home is a composer
+   toolbar pinned to the bottom of a viewport. */
+
+  .poodle-model-picker {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  /* ── Trigger ─────────────────────────────────────────────────────────────
+     `bare` is borderless (composer toolbars); `outlined` draws the standard
+     control border + fill. */
+  .poodle-model-picker__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    min-height: var(--poodle-size-control-height);
+    padding: 0 0.375rem;
+    border: 0.0625rem solid transparent;
+    border-radius: var(--poodle-radius-control);
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-model-picker[data-variant="outlined"] .poodle-model-picker__trigger {
+    padding: 0 var(--poodle-space-control-x);
+    border-color: var(--poodle-color-border-default);
+    background: var(--poodle-color-background-surface);
+  }
+
+  .poodle-model-picker__trigger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
+  }
+
+  .poodle-model-picker__trigger:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  .poodle-model-picker[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-model-picker__trigger:disabled {
+    cursor: not-allowed;
+  }
+
+  .poodle-model-picker__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  /* Arbitrary image (a provider logo) in place of a registry icon. Sized to the
+     icon box it replaces so rows stay aligned whichever a model supplies. */
+  .poodle-model-picker__image {
+    display: block;
+    width: 0.875rem;
+    height: 0.875rem;
+    object-fit: contain;
+    border-radius: 0.125rem;
+  }
+
+  .poodle-model-picker__label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  .poodle-model-picker__label[data-placeholder="true"] {
+    color: var(--poodle-color-text-muted, var(--poodle-color-text-secondary));
+    font-weight: 400;
+  }
+
+  .poodle-model-picker__summary {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  /* The summary reads as a second column, separated by a hairline. */
+  .poodle-model-picker__summary::before {
+    content: "";
+    display: inline-block;
+    width: 0.0625rem;
+    height: 0.875em;
+    margin-right: 0.5rem;
+    vertical-align: -0.125em;
+    background: var(--poodle-color-border-subtle);
+  }
+
+  .poodle-model-picker__chevron {
+    flex-shrink: 0;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.875em;
+    line-height: 1;
+  }
+
+  /* ── Subdued emphasis ────────────────────────────────────────────────────
+     The trigger recedes so a neighbouring control (the composer's editor) holds
+     the eye; hover and focus restore full strength, so the control never looks
+     disabled once you reach for it. */
+  /* Colour and opacity only — never weight. Changing weight on hover reflows the
+     label and shifts everything after it. */
+  .poodle-model-picker[data-emphasis="subdued"] .poodle-model-picker__label {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-model-picker[data-emphasis="subdued"] .poodle-model-picker__summary,
+  .poodle-model-picker[data-emphasis="subdued"] .poodle-model-picker__icon,
+  .poodle-model-picker[data-emphasis="subdued"] .poodle-model-picker__chevron {
+    opacity: var(--poodle-state-opacity-muted);
+  }
+
+  .poodle-model-picker[data-emphasis="subdued"]:hover .poodle-model-picker__label,
+  .poodle-model-picker[data-emphasis="subdued"]:focus-within .poodle-model-picker__label,
+  .poodle-model-picker[data-emphasis="subdued"][data-open="true"] .poodle-model-picker__label {
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-model-picker[data-emphasis="subdued"]:hover .poodle-model-picker__summary,
+  .poodle-model-picker[data-emphasis="subdued"]:hover .poodle-model-picker__icon,
+  .poodle-model-picker[data-emphasis="subdued"]:hover .poodle-model-picker__chevron,
+  .poodle-model-picker[data-emphasis="subdued"]:focus-within .poodle-model-picker__summary,
+  .poodle-model-picker[data-emphasis="subdued"]:focus-within .poodle-model-picker__icon,
+  .poodle-model-picker[data-emphasis="subdued"]:focus-within .poodle-model-picker__chevron,
+  .poodle-model-picker[data-emphasis="subdued"][data-open="true"] .poodle-model-picker__summary,
+  .poodle-model-picker[data-emphasis="subdued"][data-open="true"] .poodle-model-picker__icon,
+  .poodle-model-picker[data-emphasis="subdued"][data-open="true"] .poodle-model-picker__chevron {
+    opacity: 1;
+  }
+
+  /* ── Anchored surface ────────────────────────────────────────────────────
+     Opens upward by default (the picker's home is a composer toolbar pinned to
+     the bottom of a viewport) and flips down when there is no room above. */
+  .poodle-model-picker__surface {
+    position: absolute;
+    z-index: var(--poodle-overlay-z-menu);
+    bottom: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 18rem;
+    max-width: min(26rem, 90vw);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-elevation-overlay);
+  }
+
+  /* The split layout needs room for both columns. */
+  .poodle-model-picker__surface[data-layout="split"] {
+    min-width: 34rem;
+    max-width: min(42rem, 92vw);
+  }
+
+  .poodle-model-picker__surface[data-placement="bottom"] {
+    top: calc(100% + 0.5rem);
+    bottom: auto;
+  }
+
+  /* Single column when there are no applicable axes; two columns (models |
+     axes) when there are — the axes read as a settings rail beside the list
+     rather than a stack the user has to scroll past. */
+  .poodle-model-picker__panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .poodle-model-picker__surface[data-layout="split"] .poodle-model-picker__panel {
+    grid-template-columns: minmax(0, 1fr) minmax(11rem, 15rem);
+    gap: 0.75rem;
+    /* Stretch, not start: the rail's left rule must run the panel's full
+       height even when the axes stack is shorter than the model list. */
+    align-items: stretch;
+  }
+
+  .poodle-model-picker__models {
+    display: flex;
+    flex-direction: column;
+    /* Enough separation that two rows with wrapping descriptions still read as
+       two rows. */
+    gap: 0.25rem;
+    max-height: 18rem;
+    overflow-y: auto;
+  }
+
+  .poodle-model-picker__group {
+    /* Never shrink inside the scrolling list. */
+    flex: none;
+    padding: 0.5rem 0.5rem 0.25rem;
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: var(--poodle-typography-label-weight);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── Model option row ────────────────────────────────────────────────── */
+  /* Group runs read as sections: space above every heading but the first. */
+  .poodle-model-picker__group:not(:first-child) {
+    margin-top: 0.375rem;
+  }
+
+  .poodle-model-picker__option {
+    display: flex;
+    /* Never shrink: the list is height-capped and scrolls, so a shrinkable row
+       would squash below its own content and spill the description out of the
+       hover/selected box. */
+    flex: none;
+    /* Top-aligned, not centred: a wrapping description would otherwise drag the
+       icon and check down beside the second line. */
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    border: 0;
+    border-radius: var(--poodle-radius-control);
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .poodle-model-picker__option:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  }
+
+  .poodle-model-picker__option:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: -0.0625rem;
+  }
+
+  .poodle-model-picker__option[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .poodle-model-picker__option-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-model-picker__option-image {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+    border-radius: 0.1875rem;
+  }
+
+  .poodle-model-picker__option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .poodle-model-picker__option-label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .poodle-model-picker__option[data-selected="true"] .poodle-model-picker__option-label {
+    font-weight: 600;
+  }
+
+  /* One line, ellipsised: a wrapping description in the narrow model column
+     collides with the next row's label. */
+  .poodle-model-picker__option-description {
+    margin-top: 0.0625rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .poodle-model-picker__option-badge {
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+    padding: 0.0625rem 0.375rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: 999px;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+  }
+
+  .poodle-model-picker__option-check {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    color: var(--poodle-color-accent-base);
+  }
+
+  /* ── Capability axes ─────────────────────────────────────────────────────
+     In the split layout the column is separated from the model list by a
+     vertical rule; stacked, each section keeps its own top rule. */
+  .poodle-model-picker__axes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .poodle-model-picker__surface[data-layout="split"] .poodle-model-picker__panel .poodle-model-picker__axes {
+    padding-left: 0.75rem;
+    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-model-picker__axis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+    padding-top: 0.5rem;
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  /* In the split column the rule between the list and the axes already does the
+     separating work, so the first section needs no top rule. */
+  .poodle-model-picker__surface[data-layout="split"] .poodle-model-picker__panel .poodle-model-picker__axis:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .poodle-model-picker__axis[data-kind="toggle"] {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  /* The narrow column cannot hold label + control on one line once a
+     description is present, so toggles stack there too. */
+  .poodle-model-picker__surface[data-layout="split"] .poodle-model-picker__panel .poodle-model-picker__axis[data-kind="toggle"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+  }
+
+  .poodle-model-picker__axis-label {
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: var(--poodle-typography-label-weight);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Vertical option list for a many-level `select` axis (6–7 effort levels do
+     not read as segments in the rail's width). */
+  .poodle-model-picker__axis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    min-width: 0;
+  }
+
+  .poodle-model-picker__axis-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.25rem 0.375rem;
+    border: 0;
+    border-radius: var(--poodle-radius-control);
+    background: transparent;
+    color: var(--poodle-color-text-secondary);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .poodle-model-picker__axis-option:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  }
+
+  .poodle-model-picker__axis-option:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: -0.0625rem;
+  }
+
+  .poodle-model-picker__axis-option[data-selected="true"] {
+    color: var(--poodle-color-text-primary);
+    font-weight: 600;
+  }
+
+  .poodle-model-picker__axis-option[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .poodle-model-picker__axis-option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .poodle-model-picker__axis-option-check {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--poodle-color-accent-base);
+  }
+
+  .poodle-model-picker__axis-description {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  /* ── Size ladder ─────────────────────────────────────────────────────── */
+  .poodle-model-picker[data-size="xs"] .poodle-model-picker__trigger {
+    min-height: 1.5rem;
+    font-size: 0.6875rem;
+    gap: 0.25rem;
+  }
+
+  .poodle-model-picker[data-size="sm"] .poodle-model-picker__trigger {
+    min-height: 1.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .poodle-model-picker[data-size="lg"] .poodle-model-picker__trigger {
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .poodle-model-picker[data-size="xl"] .poodle-model-picker__trigger {
+    min-height: 3.25rem;
+    font-size: 1rem;
+  }
+
+  /* ── Density (sibling spacing only) ──────────────────────────────────── */
+  .poodle-model-picker[data-density="compact"] .poodle-model-picker__trigger {
+    gap: 0.25rem;
+  }
+
+  .poodle-model-picker[data-density="compact"] .poodle-model-picker__panel {
+    gap: 0.375rem;
+  }
+
+  .poodle-model-picker[data-density="comfortable"] .poodle-model-picker__trigger {
+    gap: 0.5rem;
+  }
+
+  .poodle-model-picker[data-density="comfortable"] .poodle-model-picker__panel {
+    gap: 0.75rem;
+  }

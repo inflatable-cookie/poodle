@@ -1,0 +1,290 @@
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+import { ModelPicker } from "../src/ModelPicker";
+import type { ModelCapabilityAxis, ModelOption } from "../src/types";
+
+// Mirrors packages/svelte/components/test/ModelPicker.test.ts — per-model axis
+// resolution and binding overrides must behave identically in both frameworks.
+const models: ModelOption[] = [
+  { value: "pro", label: "Pro", group: "Frontier", axes: ["effort", "context"] },
+  { value: "mini", label: "Mini", group: "Frontier", axes: ["effort"] },
+  {
+    value: "other",
+    label: "Other",
+    group: "Frontier",
+    axes: [
+      {
+        key: "effort",
+        options: [
+          { value: "minimal", label: "Minimal" },
+          { value: "deep", label: "Deep" },
+        ],
+        defaultValue: "minimal",
+      },
+    ],
+  },
+];
+
+const axes: ModelCapabilityAxis[] = [
+  {
+    key: "effort",
+    label: "Effort",
+    kind: "select",
+    options: [
+      { value: "low", label: "Low" },
+      { value: "high", label: "High" },
+    ],
+    defaultValue: "low",
+  },
+  {
+    key: "context",
+    label: "Context window",
+    kind: "select",
+    options: [
+      { value: "200k", label: "200K" },
+      { value: "1m", label: "1M" },
+    ],
+    defaultValue: "1m",
+  },
+];
+
+describe("ModelPicker (react)", () => {
+  const triggerOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-model-picker__trigger") as HTMLButtonElement;
+
+  it("summarises the axes the selected model exposes", () => {
+    const { container } = render(
+      <ModelPicker
+        models={models}
+        axes={axes}
+        value={{ model: "pro", axes: { effort: "high", context: "1m" } }}
+      />,
+    );
+    const summary = container.querySelector(".poodle-model-picker__summary") as HTMLElement;
+    expect(summary.textContent?.trim()).toBe("High · 1M");
+    expect(triggerOf(container).getAttribute("aria-label")).toBe("Model: Pro, High · 1M");
+  });
+
+  it("drops an axis the model does not reference", () => {
+    const { container } = render(
+      <ModelPicker
+        models={models}
+        axes={axes}
+        value={{ model: "mini", axes: { effort: "high", context: "1m" } }}
+      />,
+    );
+    expect(
+      (container.querySelector(".poodle-model-picker__summary") as HTMLElement).textContent?.trim(),
+    ).toBe("High");
+  });
+
+  it("applies a per-model binding: same key, different levels", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "other", axes: {} }} />,
+    );
+    // The binding's option set replaced the shared one; the label is inherited.
+    expect(
+      (container.querySelector(".poodle-model-picker__summary") as HTMLElement).textContent?.trim(),
+    ).toBe("Minimal");
+
+    fireEvent.click(triggerOf(container));
+    expect(
+      (container.querySelector(".poodle-model-picker__axis-label") as HTMLElement).textContent,
+    ).toBe("Effort");
+    expect(container.querySelector(".poodle-model-picker__axis")?.textContent).toContain("Minimal");
+  });
+
+  it("normalises the emitted selection: another provider's level never leaks", () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <ModelPicker
+        models={models}
+        axes={axes}
+        // `high` belongs to the shared scale, not to `other`'s binding.
+        value={{ model: "pro", axes: { effort: "high", context: "1m" } }}
+        onChange={onChange}
+      />,
+    );
+
+    fireEvent.click(triggerOf(container));
+    const options = container.querySelectorAll<HTMLButtonElement>(".poodle-model-picker__option");
+    fireEvent.click(options[2]);
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    // `context` is not referenced by `other`, and `high` is not one of its levels.
+    expect(onChange.mock.calls[0][0]).toEqual({ model: "other", axes: { effort: "minimal" } });
+  });
+
+  it("a model with an empty axis list exposes none", () => {
+    const bare: ModelOption[] = [{ value: "bare", label: "Bare", axes: [] }];
+    const { container } = render(
+      <ModelPicker models={bare} axes={axes} value={{ model: "bare", axes: {} }} />,
+    );
+    expect(container.querySelector(".poodle-model-picker__summary")).toBeNull();
+    fireEvent.click(triggerOf(container));
+    expect(container.querySelector(".poodle-model-picker__axes")).toBeNull();
+    expect(
+      (container.querySelector(".poodle-model-picker__surface") as HTMLElement).dataset.layout,
+    ).toBe("single");
+  });
+
+  it("a model with no axis declaration inherits every axis", () => {
+    const inherits: ModelOption[] = [{ value: "all", label: "All" }];
+    const { container } = render(
+      <ModelPicker models={inherits} axes={axes} value={{ model: "all", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(container));
+    expect(container.querySelectorAll(".poodle-model-picker__axis")).toHaveLength(2);
+  });
+
+  it("renders an arbitrary image in place of a registry icon", () => {
+    const withImage: ModelOption[] = [
+      { value: "logo", label: "Logo", icon: "sparkles", image: { src: "/m.svg", alt: "Mark" } },
+      { value: "icon-only", label: "Icon only", icon: "sparkles" },
+    ];
+    const { container } = render(
+      <ModelPicker models={withImage} axes={axes} value={{ model: "logo", axes: {} }} />,
+    );
+
+    // Trigger: image wins over the icon name when a model sets both.
+    const triggerImage = container.querySelector(
+      ".poodle-model-picker__image",
+    ) as HTMLImageElement;
+    expect(triggerImage.getAttribute("src")).toBe("/m.svg");
+    expect(triggerImage.getAttribute("alt")).toBe("Mark");
+    expect(container.querySelector(".poodle-model-picker__icon .poodle-icon")).toBeNull();
+
+    fireEvent.click(triggerOf(container));
+    const rows = container.querySelectorAll(".poodle-model-picker__option");
+    expect(rows[0].querySelector(".poodle-model-picker__option-image")).not.toBeNull();
+    // The icon-only model still renders a registry icon.
+    expect(rows[1].querySelector(".poodle-model-picker__option-image")).toBeNull();
+    expect(rows[1].querySelector(".poodle-model-picker__option-icon")).not.toBeNull();
+  });
+
+  it("defaults image alt to empty (the label sits beside it)", () => {
+    const decorative: ModelOption[] = [{ value: "logo", label: "Logo", image: { src: "/m.svg" } }];
+    const { container } = render(
+      <ModelPicker models={decorative} axes={axes} value={{ model: "logo", axes: {} }} />,
+    );
+    expect(
+      (container.querySelector(".poodle-model-picker__image") as HTMLImageElement).getAttribute(
+        "alt",
+      ),
+    ).toBe("");
+  });
+
+  it("carries the emphasis axis for embedding beside a louder control", () => {
+    const plain = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
+    );
+    expect(
+      (plain.container.querySelector(".poodle-model-picker") as HTMLElement).dataset.emphasis,
+    ).toBe("default");
+
+    const quiet = render(
+      <ModelPicker
+        models={models}
+        axes={axes}
+        value={{ model: "pro", axes: {} }}
+        emphasis="subdued"
+      />,
+    );
+    expect(
+      (quiet.container.querySelector(".poodle-model-picker") as HTMLElement).dataset.emphasis,
+    ).toBe("subdued");
+    // Emphasis is presentation only — the trigger still reads the same.
+    expect(
+      quiet.container.querySelector(".poodle-model-picker__trigger")?.getAttribute("aria-label"),
+    ).toBe(
+      plain.container.querySelector(".poodle-model-picker__trigger")?.getAttribute("aria-label"),
+    );
+  });
+
+  it("shows the placeholder and group headings", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "", axes: {} }} />,
+    );
+    const label = container.querySelector(".poodle-model-picker__label") as HTMLElement;
+    expect(label.dataset.placeholder).toBe("true");
+    expect(label.textContent?.trim()).toBe("Select model");
+
+    fireEvent.click(triggerOf(container));
+    const groups = container.querySelectorAll(".poodle-model-picker__group");
+    // All three models share one group, so the heading is emitted once.
+    expect(groups).toHaveLength(1);
+    expect(groups[0].textContent?.trim()).toBe("Frontier");
+  });
+
+  it("renders a many-level select axis as a list, and honours the control hint", () => {
+    const levels = ["a", "b", "c", "d", "e", "f", "g"].map((value) => ({ value, label: value }));
+    const many = render(
+      <ModelPicker
+        models={models}
+        axes={[{ key: "effort", label: "Effort", kind: "select", options: levels }]}
+        value={{ model: "mini", axes: { effort: "c" } }}
+      />,
+    );
+    fireEvent.click(triggerOf(many.container));
+    const axis = many.container.querySelector(".poodle-model-picker__axis") as HTMLElement;
+    expect(axis.dataset.control).toBe("list");
+    expect(many.container.querySelectorAll(".poodle-model-picker__axis-option")).toHaveLength(7);
+    expect(many.container.querySelector(".poodle-segmented-control")).toBeNull();
+
+    // Two options stay segmented…
+    const short = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "mini", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(short.container));
+    expect(
+      (short.container.querySelector(".poodle-model-picker__axis") as HTMLElement).dataset.control,
+    ).toBe("segmented");
+
+    // …unless the host says otherwise.
+    const forced = render(
+      <ModelPicker
+        models={models}
+        axes={[{ ...axes[0], control: "list" as const }]}
+        value={{ model: "mini", axes: {} }}
+      />,
+    );
+    fireEvent.click(triggerOf(forced.container));
+    expect(
+      (forced.container.querySelector(".poodle-model-picker__axis") as HTMLElement).dataset.control,
+    ).toBe("list");
+  });
+
+  it("splits into models | axes columns only when axes apply", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(container));
+    const surface = container.querySelector(".poodle-model-picker__surface") as HTMLElement;
+    expect(surface.dataset.layout).toBe("split");
+    expect(container.querySelectorAll(".poodle-model-picker__axes")).toHaveLength(1);
+
+    // No axes declared → single column, no axes rail.
+    const plain = render(<ModelPicker models={models} value={{ model: "pro", axes: {} }} />);
+    fireEvent.click(triggerOf(plain.container));
+    const plainSurface = plain.container.querySelector(
+      ".poodle-model-picker__surface",
+    ) as HTMLElement;
+    expect(plainSurface.dataset.layout).toBe("single");
+    expect(plain.container.querySelector(".poodle-model-picker__axes")).toBeNull();
+  });
+
+  it("stays open after selecting a model so the axes can still be edited", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(container));
+    expect(container.querySelector(".poodle-model-picker__surface")).not.toBeNull();
+
+    fireEvent.click(
+      container.querySelectorAll<HTMLButtonElement>(".poodle-model-picker__option")[1],
+    );
+    expect(container.querySelector(".poodle-model-picker__surface")).not.toBeNull();
+    expect(container.querySelector(".poodle-model-picker__axes")).not.toBeNull();
+  });
+});

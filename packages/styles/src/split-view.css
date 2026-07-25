@@ -20,20 +20,28 @@
 
   .poodle-split-view__divider {
     position: relative;
+    /* Above the panes: the handle's grab area is an overlay that reaches into
+       them, and a pane given `position: relative` by a consumer would otherwise
+       paint over it (later sibling, same stacking level) and swallow the drag. */
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
+  /* The divider is only as wide as the handle's line: the handle carries its
+     own overlaid grab area, so reserving 0.5rem here would reintroduce the gap
+     between the panes that the overlay exists to remove. Collapse toggles are
+     absolutely positioned and float over the panes. */
   .poodle-split-view__divider[data-orientation="horizontal"] {
-    width: 0.5rem;
+    width: var(--poodle-resize-handle-thickness, 0.125rem);
     height: 100%;
   }
 
   .poodle-split-view__divider[data-orientation="vertical"] {
     width: 100%;
-    height: 0.5rem;
+    height: var(--poodle-resize-handle-thickness, 0.125rem);
   }
 
   .poodle-split-view__toggles {

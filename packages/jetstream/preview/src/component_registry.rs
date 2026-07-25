@@ -146,6 +146,8 @@ pub static ALL_COMPONENTS: &[ComponentEntry] = &[
     ComponentEntry { slug: "data-table", display_name: "DataTable", description: "Feature-rich table with sorting, selection, and pagination.", tag: ComponentTag::Data, has_specimen: true },
     ComponentEntry { slug: "editable-list", display_name: "EditableList", description: "Editable/reorderable list with add, remove, and drag-and-drop.", tag: ComponentTag::Data, has_specimen: true },
     ComponentEntry { slug: "filter-builder", display_name: "FilterBuilder", description: "Popover filter-clause builder with editable pills and AND/OR combinator.", tag: ComponentTag::Data, has_specimen: true },
+    ComponentEntry { slug: "model-picker", display_name: "ModelPicker", description: "Combined model and capability-axis picker in one popover widget.", tag: ComponentTag::Input, has_specimen: true },
+    ComponentEntry { slug: "agent-chat-input", display_name: "AgentChatInput", description: "Agent composer: editor, control toolbar, context ring, submit/stop action.", tag: ComponentTag::Input, has_specimen: true },
     ComponentEntry { slug: "filter-toolbar", display_name: "FilterToolbar", description: "Toolbar with filter controls for data views.", tag: ComponentTag::Data, has_specimen: true },
     ComponentEntry { slug: "list-card", display_name: "ListCard", description: "Structured list item card with snippet-based leading, footer, and trailing composition.", tag: ComponentTag::Data, has_specimen: true },
     ComponentEntry { slug: "list-card-counter", display_name: "ListCardCounter", description: "Compact icon-count item used in ListCard footer composition.", tag: ComponentTag::Data, has_specimen: true },

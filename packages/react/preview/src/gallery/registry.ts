@@ -53,6 +53,8 @@ export const allComponents: ComponentEntry[] = [
   entry("CollapseToggle", "control", "Directional chevron toggle for collapsing/expanding regions.", true),
 
   // Input
+  entry("ModelPicker", "input", "Combined model and capability-axis picker in one popover widget.", true),
+  entry("AgentChatInput", "input", "Agent composer: auto-growing editor, control toolbar, context ring, submit/stop action.", true),
   entry("TextInput", "input", "Single or multi-line text input with search, slug, and multiline modes.", true),
   entry("TokenInput", "input", "Tokenizing text input for badge-like multi-value entry with separator-driven commit semantics.", true),
   entry("NumberInput", "input", "Numeric input with optional steppers.", true),

@@ -237,8 +237,9 @@ impl IntoElement for SplitView {
         // Divider — composes the real ResizeHandle primitive plus optional
         // CollapseToggle primitives.
         //
-        // The divider container is 0.5rem on the split axis (contract §8),
-        // running the full cross-axis length. The ResizeHandle renders the
+        // The divider container is the handle's line thickness on the split axis
+        // (contract §7 — the grab area is an overlay), running the full
+        // cross-axis length. The ResizeHandle renders the
         // draggable / keyboard-resizable separator (separator semantics,
         // aria-label="Resize"). When collapse toggles are enabled they overlay
         // the handle as a centred cluster. Clicking a toggle fires the matching
@@ -347,7 +348,11 @@ impl IntoElement for SplitView {
                 None
             };
 
-            // Divider container: 0.5rem on the split axis, full cross-axis.
+            // Divider container: as thick as the handle's line on the split
+            // axis, full cross-axis. The handle overlays its own grab area, so
+            // reserving the grab width here would push the panes apart again
+            // (contract §7).
+            let divider_thickness = px(rem_to_px(ResizeHandleSpec::new().thickness_rem()));
             let mut divider = div()
                 .flex_shrink_0()
                 .relative()
@@ -355,12 +360,12 @@ impl IntoElement for SplitView {
                 .items_center()
                 .justify_center();
             if is_horizontal {
-                divider = divider.w(px(rem_to_px(0.5))).h_full();
+                divider = divider.w(divider_thickness).h_full();
                 if !spec.is_disabled {
                     divider = divider.cursor_col_resize();
                 }
             } else {
-                divider = divider.h(px(rem_to_px(0.5))).w_full();
+                divider = divider.h(divider_thickness).w_full();
                 if !spec.is_disabled {
                     divider = divider.cursor_row_resize();
                 }

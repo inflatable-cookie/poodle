@@ -68,4 +68,6 @@ Before rollover:
 
 ## Next Task
 
-Open `g11/README.md`, then `g11/001-svelte-modernization-and-consumer-rollout.md`.
+Open `g12/README.md`, then `g12/009-visual-regression-gate.md`. The React
+parity program (`g12.001`–`g12.008`) is complete; `g12` stays the live queue
+while verification depth continues.

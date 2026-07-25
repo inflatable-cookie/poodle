@@ -1,0 +1,191 @@
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
+use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{AgentChatInput, Eyebrow, ModelPicker};
+use poodle_specs::{
+    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlSize, EyebrowSpec,
+    ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerEmphasis,
+    ModelPickerSpec, ModelSelection,
+};
+
+fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> AnyElement {
+    let spec = ModelPickerSpec::new()
+        .with_models(vec![
+            ModelOption::new("atlas-pro", "Atlas Pro")
+                .with_description("Deepest reasoning")
+                .with_badge("1M")
+                .with_icon("sparkles"),
+            ModelOption::new("atlas", "Atlas").with_description("Balanced"),
+        ])
+        .with_axes(vec![
+            ModelCapabilityAxis::select(
+                "effort",
+                "Effort",
+                vec![
+                    ModelAxisOption::new("low", "Low"),
+                    ModelAxisOption::new("high", "High"),
+                ],
+            ),
+            ModelCapabilityAxis::toggle("fast", "Fast mode").with_labels("Fast", "Normal"),
+        ])
+        .with_value(
+            ModelSelection::new("atlas-pro")
+                .with_axis("effort", ModelAxisValue::Text("high".into()))
+                .with_axis("fast", ModelAxisValue::Flag(false)),
+        )
+        .with_size(size)
+        // Subdued inside the composer: the editor should hold the eye.
+        .with_emphasis(ModelPickerEmphasis::Subdued);
+    ModelPicker::from_spec(spec, theme).into_any_element()
+}
+
+fn demo_spec() -> AgentChatInputSpec {
+    AgentChatInputSpec::new().with_placeholder("Ask for follow-up changes or attach images")
+}
+
+fn section(title: &str, theme: &GpuiThemeProvider, content: AnyElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(title),
+            theme,
+        ))
+        .child(content)
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
+
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(section(
+            "Composer with model picker + context ring",
+            theme,
+            // Three controls, so the hairline dividers between them render.
+            AgentChatInput::from_spec(demo_spec().with_context(64_000.0, 200_000.0), theme)
+                .toolbar_child(demo_picker(theme, ControlSize::Md))
+                .toolbar_child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("Full access"),
+                )
+                .toolbar_child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("Build"),
+                )
+                .into_any_element(),
+        ))
+        .child(section(
+            "Composing (submit enabled)",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_value("Summarise the release notes and open a PR")
+                    .with_context(64_000.0, 200_000.0),
+                theme,
+            )
+            .toolbar_child(demo_picker(theme, ControlSize::Md))
+            .into_any_element(),
+        ))
+        .child(section(
+            "Busy (stop state, context above the warn threshold)",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_value("Summarise the release notes and open a PR")
+                    .with_status(AgentChatStatus::Busy)
+                    .with_context(172_000.0, 200_000.0),
+                theme,
+            )
+            .toolbar_child(demo_picker(theme, ControlSize::Md))
+            .into_any_element(),
+        ))
+        .child(section(
+            "Attachments (image tile + file chip) + footer bar",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_value("Fix the failing parity gate")
+                    .with_attachments(vec![
+                        AgentChatAttachment::new("a1", "architecture.png")
+                            .with_kind("image")
+                            // Images render as tiles, not chips.
+                            .with_thumbnail("assets/thumbs/architecture.png"),
+                        AgentChatAttachment::new("a2", "release-notes.md")
+                            .with_kind("document")
+                            .with_icon("file-text"),
+                    ])
+                    .with_context(22_000.0, 200_000.0),
+                theme,
+            )
+            .toolbar_child(demo_picker(theme, ControlSize::Md))
+            .footer_child(
+                div()
+                    .text_xs()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("Current checkout"),
+            )
+            .footer_child(
+                div()
+                    .text_xs()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("main"),
+            )
+            .into_any_element(),
+        ))
+        .child(section(
+            "Grown editor (at the maxRows ceiling)",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_value("Line one\nLine two\nLine three\nLine four\nLine five\nLine six")
+                    .with_rows(2, 4),
+                theme,
+            )
+            .into_any_element(),
+        ))
+        .child(section(
+            "Disabled",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_value("Composer unavailable")
+                    .with_disabled(true)
+                    .with_context(10_000.0, 200_000.0),
+                theme,
+            )
+            .into_any_element(),
+        ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "agent-chat-input",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
+                .size(size)
+                .toolbar_child(demo_picker(theme, size))
+                .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
+                .with_density(density)
+                .toolbar_child(demo_picker(theme, ControlSize::Md))
+                .into_any_element()
+        },
+    )
+}

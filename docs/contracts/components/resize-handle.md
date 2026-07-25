@@ -9,7 +9,7 @@ Updated: 2026-07-10
 - Layer: `foundation`
 - Summary: a standalone resize interaction primitive for adjusting the size of
   adjacent regions via mouse drag or keyboard input, rendering as a thin visual
-  line within an invisible hit target
+  line with an invisible, larger grab overlay that costs no layout space
 - In scope: horizontal and vertical orientation, mouse drag interaction with
   window-level move/up listeners, keyboard resize with arrow keys and Home/End,
   visual affordance line, hover/active/disabled states, ARIA separator role with
@@ -21,13 +21,23 @@ Updated: 2026-07-10
 
 ```text
 [Root .resize-handle]  <div role="separator" aria-orientation="..." tabindex="...">
+  ├── [Hit .resize-handle__hit]  <span aria-hidden="true">
   └── [Line .resize-handle__line]  <span aria-hidden="true">
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | `<div>` with separator role; serves as the hit target and focus receiver | position, display, flex-shrink, cursor, width/height per orientation |
-| Line | yes | `<span>` visual affordance line centered in the hit target | position, width/height, border-radius, background, transition |
+| Root | yes | `<div>` with separator role; focus receiver. Its layout footprint is exactly the line's thickness | position, display, flex-shrink, cursor, width/height per orientation |
+| Hit | yes | `<span>` grab area: absolutely positioned overlay, centred on the line and wider than it. Contributes nothing to layout, so it overlaps the adjacent regions instead of widening the divider | position, inset, z-index |
+| Line | yes | `<span>` visual affordance line; fills the root | position, inset, border-radius, background, transition |
+
+### Why The Grab Area Is An Overlay
+
+A handle that reserves its whole grab width in layout pushes the adjacent
+regions apart. Between two bordered panels that reads as two borders with a gap
+between them rather than as one divider. Keeping the root at line thickness and
+overlaying the grab area gives a hairline divider that is still comfortable to
+grab.
 
 ## 3. Props And Inputs
 
@@ -115,11 +125,27 @@ stay adapter-side (drag-gesture effects).
 
 ### Sizing
 
-- **Horizontal orientation**: `width: 0.5rem`, `height: 100%`, `cursor: col-resize`
-- **Vertical orientation**: `width: 100%`, `height: 0.5rem`, `cursor: row-resize`
-- Line (horizontal): `width: 0.125rem`, `height: 100%`
-- Line (vertical): `width: 100%`, `height: 0.125rem`
+- **Horizontal orientation**: `width: var(--poodle-resize-handle-thickness)`, `height: 100%`, `cursor: col-resize`
+- **Vertical orientation**: `width: 100%`, `height: var(--poodle-resize-handle-thickness)`, `cursor: row-resize`
+- Line: `inset: 0` — fills the root, so the visible line is the handle's whole footprint
+- Hit (horizontal): `inset-block: 0`, `inset-inline: calc((hit-size - thickness) / -2)`
+- Hit (vertical): `inset-inline: 0`, `inset-block: calc((hit-size - thickness) / -2)`
 - `flex-shrink: 0` prevents the handle from collapsing in flex layouts
+
+### Tunable Custom Properties
+
+| Property | Default | Purpose |
+|----------|---------|---------|
+| `--poodle-resize-handle-thickness` | `0.125rem` | visible line thickness, and the handle's entire layout footprint |
+| `--poodle-resize-handle-hit-size` | `0.5rem` | grab extent across the resize axis; overlays the neighbours |
+
+Both are read as `var(..., <default>)` and are never declared on the root: a
+declaration there would shadow whatever an ancestor sets, and consumers scope
+these on a shell element so that SplitView's divider and the handle inside it
+resolve the same value.
+
+A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
+0.0625rem` without touching the grab size.
 
 ### Composition
 
@@ -143,7 +169,7 @@ stay adapter-side (drag-gesture effects).
 
 | Property | Value |
 |----------|-------|
-| `width` | `0.5rem` |
+| `width` | `var(--poodle-resize-handle-thickness)` (`0.125rem`) |
 | `height` | `100%` |
 | `cursor` | `col-resize` |
 
@@ -152,8 +178,30 @@ stay adapter-side (drag-gesture effects).
 | Property | Value |
 |----------|-------|
 | `width` | `100%` |
-| `height` | `0.5rem` |
+| `height` | `var(--poodle-resize-handle-thickness)` (`0.125rem`) |
 | `cursor` | `row-resize` |
+
+### Hit `.resize-handle__hit`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `z-index` | `1` |
+| `cursor` | `inherit` |
+
+### Hit -- horizontal orientation
+
+| Property | Value |
+|----------|-------|
+| `inset-block` | `0` |
+| `inset-inline` | `calc((var(--poodle-resize-handle-hit-size) - var(--poodle-resize-handle-thickness)) / -2)` (`-0.1875rem`) |
+
+### Hit -- vertical orientation
+
+| Property | Value |
+|----------|-------|
+| `inset-inline` | `0` |
+| `inset-block` | `calc((var(--poodle-resize-handle-hit-size) - var(--poodle-resize-handle-thickness)) / -2)` (`-0.1875rem`) |
 
 ### Root -- disabled `[data-disabled]`
 
@@ -174,23 +222,10 @@ stay adapter-side (drag-gesture effects).
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
+| `inset` | `0` |
 | `border-radius` | `999rem` |
-| `background` | `color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent)` |
+| `background` | `var(--poodle-color-border-subtle)` |
 | `transition` | `background 120ms ease` |
-
-### Line -- horizontal orientation
-
-| Property | Value |
-|----------|-------|
-| `width` | `0.125rem` |
-| `height` | `100%` |
-
-### Line -- vertical orientation
-
-| Property | Value |
-|----------|-------|
-| `width` | `100%` |
-| `height` | `0.125rem` |
 
 ### Line -- hover / dragging
 

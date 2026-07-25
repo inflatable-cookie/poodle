@@ -5,18 +5,21 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{Orientation, ResizeHandleSpec};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_opacity, tint};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    // Contract idle line: color-mix(border-default 82%, transparent).
-    let handle_color = tint(resolve_color(theme, spec.border_color_token()), 0.82);
+    let handle_color = resolve_color(theme, spec.border_color_token());
     // Contract §8 hover/dragging: line recolors to accent-base.
     let hover_color = resolve_color(theme, spec.hover_color_token());
     let is_disabled = spec.is_disabled;
 
-    // Contract: visual affordance 2px (0.125rem), hit target min 8px (0.5rem)
-    let visual_size = rem_to_px(0.125);
-    let hit_target = rem_to_px(0.5);
+    // Contract §7: the root is only as thick as the line (0.125rem), so the
+    // divider costs no layout space beyond the hairline. The grab area
+    // (0.5rem) is an absolutely positioned overlay centred on the line, which
+    // overlaps the neighbouring regions instead of widening the gap.
+    let visual_size = rem_to_px(spec.thickness_rem());
+    let hit_size = rem_to_px(spec.hit_size_rem());
+    let hit_offset = rem_to_px(spec.hit_offset_rem());
 
     // The affordance line. Contract §8 hover/dragging recolors it to accent-base;
     // wired on the line itself (JsEl has no group-hover). The line spans the full
@@ -34,27 +37,39 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
     let mut el = match spec.orientation {
         Orientation::Horizontal => {
             // Contract §7: horizontal orientation = vertical line.
-            // Hit target: width 0.5rem (fixed), height 100% (stretch to parent —
+            // Root: width 0.125rem (the line), height 100% (stretch to parent —
             // NOT flex-grow, which would fill the whole row). col-resize cursor.
-            // Line: width 0.125rem (fixed), height 100%.
+            // Grab overlay: 0.5rem wide, centred, absolute (no layout cost).
             ui_element::div()
-                .w(hit_target).self_stretch().flex_shrink_0()
+                .relative()
+                .w(visual_size).self_stretch().flex_shrink_0()
                 .flex_col().items_center().justify_center()
                 .cursor_col_resize()
+                .child(
+                    ui_element::div()
+                        .absolute().left(hit_offset).top(0.0)
+                        .w(hit_size).h_full(),
+                )
                 .child(build_line(
-                    ui_element::div().w(visual_size).h_full().rounded(999.0),
+                    ui_element::div().w_full().h_full().rounded(999.0),
                 ))
         }
         Orientation::Vertical => {
             // Contract §7: vertical orientation = horizontal line.
-            // Hit target: height 0.5rem (fixed), width 100% (stretch). row-resize.
-            // Line: height 0.125rem (fixed), width 100%.
+            // Root: height 0.125rem (the line), width 100% (stretch). row-resize.
+            // Grab overlay: 0.5rem tall, centred, absolute (no layout cost).
             ui_element::div()
-                .h(hit_target).self_stretch().flex_shrink_0()
+                .relative()
+                .h(visual_size).self_stretch().flex_shrink_0()
                 .flex_row().items_center().justify_center()
                 .cursor_row_resize()
+                .child(
+                    ui_element::div()
+                        .absolute().top(hit_offset).left(0.0)
+                        .h(hit_size).w_full(),
+                )
                 .child(build_line(
-                    ui_element::div().h(visual_size).w_full().rounded(999.0),
+                    ui_element::div().h_full().w_full().rounded(999.0),
                 ))
         }
     };
@@ -93,14 +108,27 @@ mod tests {
         let row = ui_element::div().flex_row().w(200.0).h(100.0).child(handle);
         let tree = probe(&row, 200.0, 100.0);
 
-        // tree.nodes[0] = row wrapper, [1] = handle hit target, [2] = line.
+        // tree.nodes[0] = row wrapper, [1] = handle root, [2] = grab overlay,
+        // [3] = line.
         let root = &tree.nodes[1];
         assert!(
-            (root.w - 8.0).abs() < 0.01,
-            "horizontal hit target should be 0.5rem (8px) wide; got {}px",
+            (root.w - 2.0).abs() < 0.01,
+            "root must be line-thin (0.125rem / 2px) so it costs no layout space; got {}px",
             root.w
         );
-        let line = &tree.nodes[2];
+        let hit = &tree.nodes[2];
+        assert!(
+            (hit.w - 8.0).abs() < 0.01,
+            "grab overlay should be 0.5rem (8px) wide; got {}px",
+            hit.w
+        );
+        assert!(
+            (hit.x - (root.x - 3.0)).abs() < 0.01,
+            "grab overlay must be centred on the line (3px either side); overlay x {} vs root x {}",
+            hit.x,
+            root.x
+        );
+        let line = &tree.nodes[3];
         assert!(
             (line.w - 2.0).abs() < 0.01,
             "horizontal line should be 0.125rem (2px) wide; got {}px",
@@ -126,11 +154,23 @@ mod tests {
 
         let root = &tree.nodes[1];
         assert!(
-            (root.h - 8.0).abs() < 0.01,
-            "vertical hit target should be 0.5rem (8px) tall; got {}px",
+            (root.h - 2.0).abs() < 0.01,
+            "root must be line-thin (0.125rem / 2px) so it costs no layout space; got {}px",
             root.h
         );
-        let line = &tree.nodes[2];
+        let hit = &tree.nodes[2];
+        assert!(
+            (hit.h - 8.0).abs() < 0.01,
+            "grab overlay should be 0.5rem (8px) tall; got {}px",
+            hit.h
+        );
+        assert!(
+            (hit.y - (root.y - 3.0)).abs() < 0.01,
+            "grab overlay must be centred on the line (3px either side); overlay y {} vs root y {}",
+            hit.y,
+            root.y
+        );
+        let line = &tree.nodes[3];
         assert!(
             (line.h - 2.0).abs() < 0.01,
             "vertical line should be 0.125rem (2px) tall; got {}px",
@@ -145,12 +185,10 @@ mod tests {
     }
 
     #[test]
-    fn idle_line_is_82pct_border() {
-        // Contract §8 idle: color-mix(border-default 82%, transparent) — the
-        // border color at 0.82 alpha.
+    fn idle_line_uses_subtle_border() {
         let th = theme();
         let spec = ResizeHandleSpec::new();
-        let expected = tint(resolve_color(&th, spec.border_color_token()), 0.82);
+        let expected = resolve_color(&th, spec.border_color_token());
         let el = js_resize_handle(&spec, &th);
         let tree = probe(&el, 200.0, 200.0);
         let want = ProbeColor {
@@ -161,7 +199,7 @@ mod tests {
         };
         assert!(
             tree.has_background(want, 0.001),
-            "idle line should be 82%-alpha border-default; want {want:?}, tree: {}",
+            "idle line should use border-subtle; want {want:?}, tree: {}",
             tree.to_json()
         );
     }

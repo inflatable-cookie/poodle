@@ -1,5 +1,6 @@
 // --- Primitives ---
 export { default as Accordion } from "./Accordion.svelte";
+export { default as AgentChatInput } from "./AgentChatInput.svelte";
 export { default as AudioPlayer } from "./AudioPlayer.svelte";
 export { default as AlertDialog } from "./AlertDialog.svelte";
 export { default as Avatar } from "./Avatar.svelte";
@@ -176,6 +177,7 @@ export { default as SidebarNav } from "./SidebarNav.svelte";
 export { default as Tree } from "./Tree.svelte";
 export { default as SplitView } from "./SplitView.svelte";
 export { default as MetricTile } from "./MetricTile.svelte";
+export { default as ModelPicker } from "./ModelPicker.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
 export {
@@ -263,6 +265,14 @@ export type {
   FilterOperandKind,
   FilterOperatorDefinition,
   FilterOption,
+  AgentChatAttachment,
+  AgentChatStatus,
+  ModelAxisKind,
+  ModelAxisOption,
+  ModelAxisValue,
+  ModelCapabilityAxis,
+  ModelOption,
+  ModelSelection,
   OrderByField,
   OrderByFieldDefinition,
   OrderByTriggerVariant,

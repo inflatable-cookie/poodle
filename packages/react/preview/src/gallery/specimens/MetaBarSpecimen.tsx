@@ -34,7 +34,7 @@ export function MetaBarSpecimen() {
           Release metadata:{" "}
           <MetaItem label="Status" typography="inherit">
             Stable
-          </MetaItem>
+          </MetaItem>{" "}
           <MetaItem label="Version" typography="inherit">
             2.4.1
           </MetaItem>

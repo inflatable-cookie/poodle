@@ -162,7 +162,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
   (fixed), `0 0 0` (collapsed), `1 1 0` (opposite collapsed or opposite fixed)
 - secondary pane flex: `1 1 0` (default), `0 0 {secondarySize}px` (fixed),
   `0 0 0` (collapsed)
-- divider width: 0.5rem (horizontal) or height: 0.5rem (vertical)
+- divider width: `var(--poodle-resize-handle-thickness, 0.125rem)` (horizontal)
+  or height (vertical) — the divider matches the handle's line, not its grab
+  area; ResizeHandle overlays the grab area so the panes stay flush
 - min-size constraints applied via inline style when not collapsed
 - panes have `overflow: hidden`
 
@@ -243,14 +245,14 @@ Pane `flex` and `overflow` are applied via inline style:
 
 | Property | Value |
 |----------|-------|
-| width | `0.5rem` |
+| width | `var(--poodle-resize-handle-thickness, 0.125rem)` |
 | height | `100%` |
 
 #### Divider Vertical (`[data-orientation="vertical"]`)
 
 | Property | Value |
 |----------|-------|
-| height | `0.5rem` |
+| height | `var(--poodle-resize-handle-thickness, 0.125rem)` |
 | width | `100%` |
 
 ### Toggles (`.split-view__toggles`)

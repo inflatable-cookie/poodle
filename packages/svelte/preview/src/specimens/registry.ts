@@ -40,6 +40,7 @@ import EyebrowSpecimen from "./EyebrowSpecimen.svelte";
 import FieldSpecimen from "./FieldSpecimen.svelte";
 import FieldSetSpecimen from "./FieldSetSpecimen.svelte";
 import FileUploadSpecimen from "./FileUploadSpecimen.svelte";
+import AgentChatInputSpecimen from "./AgentChatInputSpecimen.svelte";
 import FilterBuilderSpecimen from "./FilterBuilderSpecimen.svelte";
 import FilterToolbarSpecimen from "./FilterToolbarSpecimen.svelte";
 import FormActionsSpecimen from "./FormActionsSpecimen.svelte";
@@ -65,6 +66,7 @@ import MediaThumbnailSpecimen from "./MediaThumbnailSpecimen.svelte";
 import MenuSpecimen from "./MenuSpecimen.svelte";
 import MenubarSpecimen from "./MenubarSpecimen.svelte";
 import MeterSpecimen from "./MeterSpecimen.svelte";
+import ModelPickerSpecimen from "./ModelPickerSpecimen.svelte";
 import NavigationMenuSpecimen from "./NavigationMenuSpecimen.svelte";
 import NumberInputSpecimen from "./NumberInputSpecimen.svelte";
 import PageHeaderSpecimen from "./PageHeaderSpecimen.svelte";
@@ -179,6 +181,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   field: FieldSpecimen,
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
+  "agent-chat-input": AgentChatInputSpecimen,
   "filter-builder": FilterBuilderSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,
@@ -204,6 +207,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "meta-item": MetaBarSpecimen,
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
+  "model-picker": ModelPickerSpecimen,
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,
   "order-by": OrderBySpecimen,

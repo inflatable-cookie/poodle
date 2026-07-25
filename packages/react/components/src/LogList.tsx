@@ -318,8 +318,12 @@ export function LogList({
                   const resourceContent = (
                     <>
                       {resolveResourceLabel(entry.resourceType)}
+                      {/* Svelte's template keeps the newline as a space here. */}
                       {entry.resourceLabel ? (
-                        <span className="poodle-log-list__audit-resource-label">"{entry.resourceLabel}"</span>
+                        <>
+                          {" "}
+                          <span className="poodle-log-list__audit-resource-label">"{entry.resourceLabel}"</span>
+                        </>
                       ) : null}
                     </>
                   );

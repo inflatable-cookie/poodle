@@ -8,6 +8,13 @@ const tiles: CSSProperties = {
   gridTemplateColumns: "repeat(auto-fit, minmax(16rem, 1fr))",
   gap: "0.75rem",
 };
+// The Svelte specimen scopes a tighter stack gap for list rows; the shared
+// gallery rule is 0.5rem. Kept in sync so the visual gate compares the cards,
+// not the harness spacing.
+const stack: CSSProperties = { display: "flex", flexDirection: "column", gap: "0.25rem" };
+// Svelte's ListCard specimen scopes `p { margin: 0 }`; other specimens keep the
+// UA margin, so this reset stays local rather than global in gallery.css.
+const inlineCopy: CSSProperties = { margin: 0 };
 const densityDemo: CSSProperties = { width: "min(100%, 26rem)" };
 const secondary: CSSProperties = { color: "var(--poodle-color-text-secondary)" };
 
@@ -44,7 +51,7 @@ export function ListCardSpecimen() {
     >
       <div className="poodle-specimen">
         <SpecimenGroup label="Interactive list cards">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="design-system-v2.figma"
               subtitle="Updated by Clay · 2h ago"
@@ -73,7 +80,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Link roots and explicit actions">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Billing settings"
               subtitle="Manage invoices and payment methods"
@@ -93,7 +100,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Hierarchy titles">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Cash flow forecasts"
               subtitle="Module content"
@@ -102,10 +109,10 @@ export function ListCardSpecimen() {
               leading={<Icon icon="grid-2x2" />}
               titleContent={
                 <>
-                  <span style={secondary}>Pathway</span>
-                  <Icon name="chevron-right" size="xs" />
-                  <span style={secondary}>Module</span>
-                  <Icon name="chevron-right" size="xs" />
+                  <span style={secondary}>Pathway</span>{" "}
+                  <Icon name="chevron-right" size="xs" />{" "}
+                  <span style={secondary}>Module</span>{" "}
+                  <Icon name="chevron-right" size="xs" />{" "}
                   <span>Cash flow forecasts</span>
                 </>
               }
@@ -118,8 +125,8 @@ export function ListCardSpecimen() {
               showReorderHandle
               titleContent={
                 <>
-                  <span style={secondary}>Module</span>
-                  <Icon name="chevron-right" size="xs" />
+                  <span style={secondary}>Module</span>{" "}
+                  <Icon name="chevron-right" size="xs" />{" "}
                   <span>Week 1: Cash Flow</span>
                 </>
               }
@@ -129,7 +136,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Selectable cards">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Selected row"
               subtitle="Batch-selection ready"
@@ -153,8 +160,8 @@ export function ListCardSpecimen() {
               showReorderHandle
               titleContent={
                 <>
-                  <span style={secondary}>Module</span>
-                  <Icon name="chevron-right" size="xs" />
+                  <span style={secondary}>Module</span>{" "}
+                  <Icon name="chevron-right" size="xs" />{" "}
                   <span>Week 1: Cash Flow</span>
                 </>
               }
@@ -164,7 +171,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Rounded-square leading (thumbnails)">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="hero-banner.png"
               subtitle="Uploaded by Jamie · 4h ago"
@@ -187,7 +194,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Leading size offset">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Default leading"
               subtitle="Matches the card size ladder"
@@ -236,7 +243,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="With badges">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="API integration guide"
               subtitle="Updated yesterday"
@@ -263,7 +270,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="With footer counters">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Design system"
               subtitle="12 contributors"
@@ -298,7 +305,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Inherited footer counters">
-          <p className="poodle-specimen__inline-copy">
+          <p className="poodle-specimen__inline-copy" style={inlineCopy}>
             Summary:{" "}
             <ListCardCounter icon="file-text" count={24} tooltip="24 documents" typography="inherit" />
             {" "}and{" "}
@@ -308,7 +315,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Solid fill with accent colors">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Design tokens"
               subtitle="Foundation layer"
@@ -352,7 +359,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="With built-in context menu">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Right-click for actions"
               subtitle="Context menu on the whole card"
@@ -374,7 +381,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="With wrapped context menu">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ContextMenu
               items={[
                 { label: "Open", value: "open" },
@@ -398,7 +405,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Exclusive trailing lane">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Workspace settings"
               subtitle="Shared defaults and access controls"
@@ -411,7 +418,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Not live (dashed border, interactive)">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Unpublished draft"
               subtitle="Created yesterday · not yet deployed"
@@ -434,7 +441,7 @@ export function ListCardSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Corner sash badges">
-          <div className="poodle-specimen__stack">
+          <div className="poodle-specimen__stack" style={stack}>
             <ListCard
               title="Free tier plan"
               subtitle="No credit card required"

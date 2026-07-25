@@ -455,6 +455,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Footer snippet renders below subtitle for counter icons
 - Built-in context menu: when `contextMenuItems` is non-empty the card owns a context-menu overlay (right-click, or leading-trigger via `contextMenuTrigger="leading"`), with `ContextMenu`/`Shift+F10` keyboard support and `onContextAction(value)`; a standalone ContextMenu wrapper remains an alternative for fully external ownership
 - `data-highlighted` reflects the `highlighted` prop on root
+- Both roots (`<a>` when `href` is set and not `selectable`, `<div>` otherwise) emit `data-size` from the same resolved size — the explicit `size` prop, else `sizeRole` against inherited presentation. The root variant must never change the resolved size.
 
 ## 11. GPUI Notes
 

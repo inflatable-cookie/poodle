@@ -67,6 +67,10 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
     },
   },
   ToggleGroup: { options: opts },
+  ModelPicker: {
+    models: [{ value: "a", label: "Model A" }],
+    axes: [{ key: "effort", label: "Effort", kind: "select", options: opts }],
+  },
   Button: { ariaLabel: "Action" },
   Checkbox: { label: "Accept" },
   Radio: { value: "a", label: "Option A" },

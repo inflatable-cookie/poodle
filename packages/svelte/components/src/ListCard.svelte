@@ -96,7 +96,6 @@
   const controlSizes: ControlSize[] = ["xs", "sm", "md", "lg", "xl"];
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
-  const resolvedContextMenuSize = $derived(resolveSemanticControlSize($uiPresentation.sizeScale, "chrome"));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const resolvedLeadingSize = $derived(offsetControlSize(resolvedSize, leadingSizeOffset));
   const isCompact = $derived(layout === "compact");
@@ -280,7 +279,7 @@
     class="poodle-list-card"
     class:poodle-list-card--interactive={isInteractive}
     href={href}
-    data-size={resolvedContextMenuSize}
+    data-size={resolvedSize}
     data-density={resolvedDensity}
     data-disabled={disabled}
     data-not-live={notLive}

@@ -50,6 +50,7 @@ import { EyebrowSpecimen } from "./specimens/EyebrowSpecimen";
 import { FieldSetSpecimen } from "./specimens/FieldSetSpecimen";
 import { FieldSpecimen } from "./specimens/FieldSpecimen";
 import { FileUploadSpecimen } from "./specimens/FileUploadSpecimen";
+import { AgentChatInputSpecimen } from "./specimens/AgentChatInputSpecimen";
 import { FilterBuilderSpecimen } from "./specimens/FilterBuilderSpecimen";
 import { FilterToolbarSpecimen } from "./specimens/FilterToolbarSpecimen";
 import { FormActionsSpecimen } from "./specimens/FormActionsSpecimen";
@@ -74,6 +75,7 @@ import { MenubarSpecimen } from "./specimens/MenubarSpecimen";
 import { MenuSpecimen } from "./specimens/MenuSpecimen";
 import { MetaBarSpecimen } from "./specimens/MetaBarSpecimen";
 import { MeterSpecimen } from "./specimens/MeterSpecimen";
+import { ModelPickerSpecimen } from "./specimens/ModelPickerSpecimen";
 import { MetricTileSpecimen } from "./specimens/MetricTileSpecimen";
 import { NavCardSpecimen } from "./specimens/NavCardSpecimen";
 import { NavigationMenuSpecimen } from "./specimens/NavigationMenuSpecimen";
@@ -187,6 +189,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "field": FieldSpecimen,
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
+  "agent-chat-input": AgentChatInputSpecimen,
   "filter-builder": FilterBuilderSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,
@@ -213,6 +216,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "meta-bar": MetaBarSpecimen,
   "meta-item": MetaBarSpecimen,
   "meter": MeterSpecimen,
+  "model-picker": ModelPickerSpecimen,
   "metric-tile": MetricTileSpecimen,
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,

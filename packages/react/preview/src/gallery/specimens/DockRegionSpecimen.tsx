@@ -40,17 +40,6 @@ const panelStrong: CSSProperties = {
   textTransform: "capitalize",
 };
 
-const staticPanel: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "0.5rem 0.75rem",
-  fontSize: "0.75rem",
-  fontWeight: 600,
-  color: "var(--poodle-color-text-secondary)",
-  borderRight: "0.0625rem solid var(--poodle-color-border-subtle)",
-};
-
 const dndLayout: CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" };
 const variantBlock: CSSProperties = {
   display: "flex",
@@ -357,7 +346,7 @@ export function DockRegionSpecimen() {
         <SpecimenGroup label="Static dock — horizontal (top edge)" bare>
           <div style={frameShort}>
             <DockRegion edge="top" sizing="static" items={staticItems} onReorder={handleStaticReorder}
-              panel={(item) => <div style={staticPanel}>{item.label}</div>}
+              panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
             />
           </div>
         </SpecimenGroup>
@@ -370,7 +359,7 @@ export function DockRegionSpecimen() {
               sizing="static"
               items={staticVerticalItems}
               onReorder={handleStaticVerticalReorder}
-              panel={(item) => <div style={staticPanel}>{item.label}</div>}
+              panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
             />
           </div>
         </SpecimenGroup>

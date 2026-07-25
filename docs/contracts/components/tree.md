@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-25
 
 ## 1. Purpose
 
@@ -29,7 +29,8 @@ Updated: 2026-07-10
         │     ├── [Indent <div>]*                  (depth cells, guide border)
         │     ├── [Twisty <div>]                   (chevron for branch, spacer for leaf)
         │     ├── [Icon]                           (optional, when showIcons)
-        │     └── [Label <span>]
+        │     ├── [Label <span>]
+        │     └── [EndLabel <span>]                (optional compact metadata)
         └── [Group <div role="group">]             (children, only when expanded)
               └── [TreeItem]*                       (recursion)
 ```
@@ -46,6 +47,7 @@ Updated: 2026-07-10
 | Checkbox | `Checkbox` | no | Class `tree__checkbox`; rendered before the icon when `showCheckboxes`. Tri-state (checked / unchecked / mixed) derived from descendants |
 | Icon | `Icon` | no | Class `tree__icon`; rendered when `showIcons` and `node.icon` set; empty box reserves alignment when `showIcons` and no icon |
 | Label | `<span>` | yes | Class `tree__label`, single-line, ellipsis-truncated; swapped for RenameInput when `editingValue` matches |
+| EndLabel | `<span>` | when `endLabel` set | Class `tree__end-label`, compact trailing metadata aligned after the flexible label |
 | RenameInput | `<input>` | when editing | Class `tree__rename`; inline text editor seeded with the node label (F2 / context-menu Rename) |
 | LoadingRow | `<div role="treeitem">` | when lazy branch loading | A spinner + "Loading…" row shown under an expanded branch whose children are still loading (`loadingValues`) |
 | Group | `<div role="group">` | when branch expanded | Class `tree__group`, contains child TreeItems |
@@ -124,10 +126,12 @@ Updated: 2026-07-10
 |-------|------|---------|----------|-------|
 | `value` | `string` | — | yes | Stable unique key used for selection and expansion |
 | `label` | `string` | — | yes | Visible row text |
+| `endLabel` | `string \| null` | `null` | no | Compact metadata aligned to the row end |
 | `icon` | `string \| null` | `null` | no | Leading icon name resolved through `Icon` |
 | `children` | `TreeNode[]` | `[]` | no | Child nodes |
 | `isBranch` | `boolean` | `false` | no | Force branch posture when `children` is empty (empty / lazy folder) |
 | `isDisabled` | `boolean` | `false` | no | Disabled rows render inertly, suppress select and expand |
+| `isMuted` | `boolean` | `false` | no | Reduces passive emphasis without changing interaction |
 
 Branch rule: a node is a **branch** iff `isBranch || children.length > 0`. Branches
 get a twisty and `aria-expanded`. All other nodes are **leaves** and render a
@@ -158,6 +162,7 @@ None.
 | hover | Pointer over non-disabled row | Elevated background, text primary |
 | focus-visible | Keyboard focus on row | Focus ring via `--poodle-border-width-focus` + `--poodle-color-accent-focusRing` |
 | disabled | Node `isDisabled: true` | Reduced opacity, `cursor: not-allowed`, no select / expand, `aria-disabled="true"` |
+| muted | Node `isMuted: true` | Reduced passive emphasis; hover, focus, selection, and all interaction remain active |
 
 ### Component States
 
@@ -250,6 +255,7 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 | `data-size-role` | Root | `"chrome"`, `"control"`, `"prominent"` |
 | `data-branch` | TreeItem | `"true"` when the node is a branch |
 | `data-selected` | TreeItem | `"true"` when selected |
+| `data-muted` | TreeItem | `"true"` when muted |
 
 ### CSS Custom Properties (Internal)
 
