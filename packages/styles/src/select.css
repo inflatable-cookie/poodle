@@ -244,12 +244,10 @@
     color: var(--poodle-recipe-select-hover-clear-text, var(--poodle-color-text-primary));
   }
 
-  /* Listbox dropdown */
+  /* Listbox dropdown. Portalled to the theme root and placed in viewport
+     coordinates by the anchored action, so it carries no offsets of its own;
+     `--above` and `--align-end` survive as state hooks for consumers. */
   .poodle-select__listbox {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: -0.0625rem;
-    right: -0.0625rem;
     z-index: var(--poodle-overlay-z-menu);
     display: grid;
     gap: 0.0625rem;
@@ -260,11 +258,6 @@
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-select-listbox-fill, var(--poodle-color-background-elevated));
     box-shadow: var(--poodle-recipe-select-listbox-shadow, var(--poodle-elevation-overlay));
-  }
-
-  .poodle-select__listbox--above {
-    top: auto;
-    bottom: calc(100% + 0.25rem);
   }
 
   /* Group */
@@ -377,31 +370,9 @@
     line-height: 1;
   }
 
-  .poodle-select[data-variant="ghost"] .poodle-select__listbox {
-    left: 0;
-    right: 0;
-    top: calc(100% + 0.375rem);
-  }
-
-  .poodle-select[data-variant="ghost"] .poodle-select__listbox--above {
-    top: auto;
-    bottom: calc(100% + 0.375rem);
-  }
-
-  .poodle-select[data-variant="ghost"] .poodle-select__listbox--align-end {
-    left: auto;
-    right: 0;
-  }
-
   /* Auto-width listbox (used with menuMinWidth) */
   .poodle-select__listbox--auto-width {
-    right: auto;
     width: max-content;
-  }
-
-  .poodle-select__listbox--align-end {
-    left: auto;
-    right: -0.0625rem;
   }
 
   /* ═══ DENSITY VARIANTS ═══ */

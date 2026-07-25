@@ -136,7 +136,8 @@ dismissable-layer stack; selection is plain state.
 - Trigger: `inline-flex`, size-stepped `min-height` from control-height
 - Swatch: fixed mini rect (trigger `1.25rem`; tile `2.75×2rem`), literal per-theme
   colors, `overflow: hidden`, positioned surface/accent/text children
-- Surface: anchored `position: absolute`, `top: calc(100% + 0.5rem)`
+- Surface: portalled and viewport-positioned (`002-anchored-overlays.md`),
+  requesting `bottom-start` with an `8px` offset
 - Grid: `repeat(columns, …)`, `max-height` with vertical scroll for many themes
 
 ## 8. Token Usage

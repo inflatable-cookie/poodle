@@ -131,6 +131,7 @@ mod nav_card;
 mod agent_chat_input_specimen;
 mod filter_builder_specimen;
 mod model_picker_specimen;
+mod ref_select_specimen;
 mod theme_select_specimen;
 mod order_by_specimen;
 mod page_header_specimen;
@@ -441,6 +442,9 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         }
         "model-picker" => {
             specimen_card("ModelPicker", theme, model_picker_specimen::render(state, cx))
+        }
+        "ref-select" => {
+            specimen_card("RefSelect", theme, ref_select_specimen::render(state, cx))
         }
         "agent-chat-input" => specimen_card(
             "AgentChatInput",

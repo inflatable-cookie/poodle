@@ -19,8 +19,10 @@ import {
   isValidHex,
   normalizeHex,
   rgbToHsv,
+  layerContains,
 } from "@poodle/headless";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { NumberInput } from "./NumberInput";
 import { SegmentedControl } from "./SegmentedControl";
 import { Slider } from "./Slider";
@@ -84,7 +86,10 @@ export function ColorPicker({
   const pickerId = useId();
   const surfaceId = `poodle-color-picker-surface-${pickerId}`;
 
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const gradientRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
 
@@ -173,11 +178,6 @@ export function ColorPicker({
   }
 
   function setOpenState(next: boolean): void {
-    if (next && rootRef.current) {
-      const rect = rootRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setPlacement(spaceBelow < 360 ? "above" : "below");
-    }
     if (open === undefined) {
       setUncontrolledOpen(next);
     }
@@ -320,8 +320,9 @@ export function ColorPicker({
     }
 
     function handlePointerDown(event: MouseEvent): void {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target as Node)) {
+      if (!rootElement) return;
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
         setOpenState(false);
       }
     }
@@ -369,7 +370,7 @@ export function ColorPicker({
       data-disabled={disabled || undefined}
       data-size={resolvedSize}
       data-density={resolvedDensity}
-      ref={rootRef}
+      ref={setRootElement}
     >
       <div className="poodle-color-picker__controls">
         <button
@@ -400,7 +401,12 @@ export function ColorPicker({
       </div>
 
       {isOpen ? (
-        <div
+        <AnchoredSurface
+          ref={surfaceRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={4}
+          onPlacement={(next) => setPlacement(next.startsWith("top") ? "above" : "below")}
           id={surfaceId}
           className={
             placement === "above"
@@ -567,7 +573,7 @@ export function ColorPicker({
               ))}
             </div>
           ) : null}
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

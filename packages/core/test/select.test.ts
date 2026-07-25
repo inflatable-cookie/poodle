@@ -5,7 +5,6 @@ import {
   filterSelectOptions,
   flattenSelectOptions,
   isSelectOptionDisabled,
-  selectMenuPlacement,
   selectOpenHighlightIndex,
 } from "../src/select";
 
@@ -44,21 +43,6 @@ describe("option helpers", () => {
     const filtered = filterSelectGroups(grouped, "app");
     expect(filtered).toHaveLength(1);
     expect(filtered[0]?.options.map((option) => option.value)).toEqual(["a"]);
-  });
-});
-
-describe("selectMenuPlacement", () => {
-  const viewport = { width: 1000, height: 800 };
-
-  test("flips above when under 280px remain below", () => {
-    expect(selectMenuPlacement({ top: 600, bottom: 640, left: 100, right: 300 }, viewport, null).placement).toBe("above");
-    expect(selectMenuPlacement({ top: 100, bottom: 140, left: 100, right: 300 }, viewport, null).placement).toBe("below");
-  });
-
-  test("aligns end only when min-width overflows right but fits against trigger right", () => {
-    expect(selectMenuPlacement({ top: 0, bottom: 40, left: 900, right: 990 }, viewport, 400).alignEnd).toBe(true);
-    expect(selectMenuPlacement({ top: 0, bottom: 40, left: 100, right: 300 }, viewport, 400).alignEnd).toBe(false);
-    expect(selectMenuPlacement({ top: 0, bottom: 40, left: 900, right: 990 }, viewport, null).alignEnd).toBe(false);
   });
 });
 

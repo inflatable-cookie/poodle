@@ -2,9 +2,10 @@
   import "@poodle/styles/list-card.css";
   import { tick, type Snippet } from "svelte";
 
-  import { registerDismissLayer } from "@poodle/headless";
+  import { registerDismissLayer, pointAnchor } from "@poodle/headless";
 
   import { menuNavigableItems } from "./internal";
+  import { anchored } from "./anchored";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
@@ -117,7 +118,6 @@
   let overlayElement = $state<HTMLDivElement | null>(null);
   let contextMenuOpen = $state(false);
   let contextMenuAnchorPoint = $state<{ x: number; y: number } | null>(null);
-  let contextMenuAdjustedPosition = $state<{ left: string; top: string } | null>(null);
   let contextMenuHighlightIndex = $state(0);
   let contextMenuItemElements = $state<Array<HTMLButtonElement | null>>([]);
 
@@ -233,27 +233,7 @@
       return;
     }
 
-    contextMenuAdjustedPosition = null;
     tick().then(() => {
-      if (overlayElement && contextMenuAnchorPoint) {
-        const rect = overlayElement.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const pad = 8;
-        let x = contextMenuAnchorPoint.x;
-        let y = contextMenuAnchorPoint.y;
-
-        if (x + rect.width > vw - pad) {
-          x = Math.max(pad, x - rect.width);
-        }
-
-        if (y + rect.height > vh - pad) {
-          y = Math.max(pad, vh - rect.height - pad);
-        }
-
-        contextMenuAdjustedPosition = { left: `${x}px`, top: `${y}px` };
-      }
-
       contextMenuItemElements[contextMenuHighlightIndex]?.focus();
     });
   });
@@ -693,14 +673,18 @@
 {#if contextMenuOpen && hasContextMenu && contextMenuAnchorPoint}
   <div
     bind:this={overlayElement}
+    use:anchored={{
+      // A right-click has no element behind it, so the menu anchors to the
+      // point itself and the shared resolver handles the edge flipping.
+      anchor: pointAnchor(contextMenuAnchorPoint.x, contextMenuAnchorPoint.y, rootElement),
+      placement: "bottom-start",
+      offset: 0,
+    }}
     class="poodle-list-card__context-menu"
     data-size={resolvedSize}
     data-density={resolvedDensity}
     role="menu"
     aria-label={contextMenuAriaLabel ?? undefined}
-    style={contextMenuAdjustedPosition
-      ? `left: ${contextMenuAdjustedPosition.left}; top: ${contextMenuAdjustedPosition.top};`
-      : `left: ${contextMenuAnchorPoint.x}px; top: ${contextMenuAnchorPoint.y}px; visibility: hidden;`}
   >
     {#each contextMenuItems ?? [] as item (item.value)}
       {#if item.kind === "separator"}

@@ -43,10 +43,9 @@
     outline: none;
   }
 
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own. */
   .poodle-menubar__overlay {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 0;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
@@ -105,7 +104,7 @@
     font-size: 0.6875rem;
   }
 
-  .poodle-menubar[data-size="xs"] .poodle-menubar__item {
+  .poodle-menubar__overlay[data-size="xs"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 0.75rem;
   }
@@ -115,7 +114,7 @@
     padding: 0 var(--poodle-space-control-x);
   }
 
-  .poodle-menubar[data-size="sm"] .poodle-menubar__item {
+  .poodle-menubar__overlay[data-size="sm"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
   }
 
@@ -125,7 +124,7 @@
     font-size: 0.875rem;
   }
 
-  .poodle-menubar[data-size="lg"] .poodle-menubar__item {
+  .poodle-menubar__overlay[data-size="lg"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
@@ -136,11 +135,11 @@
     font-size: 0.9375rem;
   }
 
-  .poodle-menubar[data-size="xl"] .poodle-menubar__item {
+  .poodle-menubar__overlay[data-size="xl"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .poodle-menubar[data-density="compact"] .poodle-menubar__item { padding-inline: 0.5rem; }
-  .poodle-menubar[data-density="comfortable"] .poodle-menubar__item { padding-inline: 0.75rem; }
+  .poodle-menubar__overlay[data-density="compact"] .poodle-menubar__item { padding-inline: 0.5rem; }
+  .poodle-menubar__overlay[data-density="comfortable"] .poodle-menubar__item { padding-inline: 0.75rem; }

@@ -1,0 +1,24 @@
+/* Shared positioning shell for portalled anchored overlays (g12.011).
+
+   Every anchored surface — Popover, Select, ModelPicker, RefSelect, the date
+   pickers, Menu, Tooltip, ... — is mounted at the theme root and placed in
+   viewport coordinates by the `anchored` action / AnchoredSurface component.
+   Those own `top` / `left`; this file owns everything that is the same for all
+   of them, so a component stylesheet only ever describes how its surface
+   looks.
+
+   `data-anchor-hidden` is set when the anchor has scrolled out of its own
+   clipping ancestor. `visibility` rather than `display` keeps the surface
+   measurable, so it reappears in the right place without a reflow flash. */
+
+  [data-poodle-anchored="true"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+  }
+
+  [data-poodle-anchored="true"][data-anchor-hidden="true"] {
+    visibility: hidden;
+    pointer-events: none;
+  }

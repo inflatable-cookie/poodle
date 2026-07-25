@@ -193,10 +193,9 @@
     justify-content: center;
   }
 
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own. */
   .poodle-split-button__menu {
-    position: absolute;
-    top: calc(100% + 0.375rem);
-    left: 0;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
@@ -205,11 +204,6 @@
     background: var(--poodle-recipe-split-button-menu-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
     box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-elevation-overlay));
     overflow-y: auto;
-  }
-
-  .poodle-split-button__menu[data-placement="top-start"] {
-    top: auto;
-    bottom: calc(100% + 0.375rem);
   }
 
   .poodle-split-button__item {

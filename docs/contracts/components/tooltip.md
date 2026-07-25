@@ -206,13 +206,13 @@ shadow (not the `--poodle-elevation-overlay` token).
 
 ### Placement — JS-resolved viewport coordinates
 
-The bubble is `position: fixed` and its `top`/`left` are computed in pixels by
-`resolveOverlayPosition(triggerRect, bubbleRect, placement)`, which also returns
-the final resolved placement (it may flip to fit the viewport). There are no CSS
-`calc()`/`transform` offset rules; the requested `placement` and its `-start` /
-`-end` alignment modifiers are inputs to the resolver, which positions the bubble
-at a `0.5rem` gap from the trigger and exposes the resolved value via
-`data-placement`.
+The bubble is portalled to the theme root and positioned in viewport
+coordinates by the shared anchored-overlay primitive
+(`002-anchored-overlays.md`), which returns the placement that survived
+collision resolution. There are no CSS `calc()`/`transform` offset rules; the
+requested `placement` and its `-start` / `-end` alignment modifiers are inputs
+to the resolver, which positions the bubble at a `0.5rem` gap from the trigger
+and exposes the resolved value via `data-placement`.
 
 ### Data Attributes
 
@@ -227,9 +227,10 @@ at a `0.5rem` gap from the trigger and exposes the resolved value via
 - root is `display: contents` (no positioning box); the trigger `children` render
   inline and the root's first child element is used as the anchor. No
   `.tooltip__trigger` wrapper is injected
-- the bubble is `position: fixed` and positioned at JS-computed viewport
-  coordinates via `resolveOverlayPosition`; the resolver may flip placement to fit
-  the viewport and writes the resolved value to `data-placement`
+- the bubble is portalled out of the trigger's subtree and positioned in
+  viewport coordinates, so no ancestor `overflow`, `transform` or stacking
+  context can clip it; the resolver may flip placement to fit the viewport and
+  writes the resolved value to `data-placement`
 - interactive content should escalate to `Popover`
 - bubble uses a fixed 0.5rem offset gap for all placements
 - border, radius, and background resolve through

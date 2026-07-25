@@ -9,12 +9,11 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { menuTransition, registerDismissLayer, type MenuEvent as MenuMachineEvent } from "@poodle/headless";
+import { menuTransition, registerDismissLayer, type MenuEvent as MenuMachineEvent, layerContains } from "@poodle/headless";
 
 import "@poodle/styles/menu.css";
 
 import { MenuSurface, type MenuSurfaceHandle } from "./MenuSurface";
-import { resolveOverlayPosition } from "./overlay-position";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
 
@@ -50,11 +49,11 @@ export function Menu({
   const uiPresentation = useUiPresentation();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLDivElement | null>(null);
+  // The trigger is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null);
   const surfaceRef = useRef<MenuSurfaceHandle | null>(null);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
-  const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>(placement);
-  const [overlayStyle, setOverlayStyle] = useState<CSSProperties>({});
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -75,45 +74,21 @@ export function Menu({
     }
   };
 
-  const updateOverlayPosition = useCallback(() => {
-    const triggerEl = triggerRef.current;
-    const overlayEl = surfaceRef.current?.element ?? null;
-    if (!triggerEl || !overlayEl) return;
-    const next = resolveOverlayPosition(triggerEl.getBoundingClientRect(), overlayEl.getBoundingClientRect(), placement);
-    setResolvedPlacement((prev) => (prev === next.placement ? prev : next.placement));
-    setOverlayStyle((prev) => {
-      const top = `${next.top}px`;
-      const left = `${next.left}px`;
-      return prev.top === top && prev.left === left ? prev : { top, left };
-    });
-  }, [placement]);
-
   useLayoutEffect(() => {
     if (!isOpen) return;
-    updateOverlayPosition();
     surfaceRef.current?.focusFirstItem();
-  }, [isOpen, updateOverlayPosition]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) =>
+        layerContains(target as Node, rootRef.current, surfaceRef.current?.element),
       dismissOnOutsideInteract: true,
       onDismiss: (reason) => sendRef.current(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
   }, [isOpen]);
-
-  useEffect(() => {
-    const onViewportChange = () => {
-      if (surfaceRef.current?.element) updateOverlayPosition();
-    };
-    window.addEventListener("resize", onViewportChange);
-    window.addEventListener("scroll", onViewportChange, true);
-    return () => {
-      window.removeEventListener("resize", onViewportChange);
-      window.removeEventListener("scroll", onViewportChange, true);
-    };
-  }, [updateOverlayPosition]);
 
   function handleTriggerClick(event: MouseEvent): void {
     event.preventDefault();
@@ -132,7 +107,7 @@ export function Menu({
   return (
     <div className="poodle-menu" ref={rootRef} data-size={resolvedSize} data-density={resolvedDensity}>
       <div
-        ref={triggerRef}
+        ref={setTriggerElement}
         className="poodle-menu__trigger"
         role="button"
         tabIndex={0}
@@ -151,8 +126,8 @@ export function Menu({
           ariaLabel={ariaLabel}
           size={resolvedSize}
           density={resolvedDensity}
-          placement={resolvedPlacement}
-          overlayStyle={overlayStyle}
+          anchor={triggerElement}
+          placement={placement}
           onAction={(value) => sendRef.current({ type: "ACTION", value })}
         />
       ) : null}

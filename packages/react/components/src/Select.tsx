@@ -12,18 +12,20 @@ import {
   filterSelectGroups,
   flattenSelectOptions,
   isSelectOptionDisabled,
+  layerContains,
   registerDismissLayer,
-  selectMenuPlacement,
   selectOpenHighlightIndex,
 } from "@poodle/headless";
 
 import "@poodle/styles/select.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
   ControlDensity,
   ControlSize,
+  OverlayPlacement,
   SelectEmptyRenderState,
   SelectItems,
   SelectLoadOptions,
@@ -68,12 +70,6 @@ export interface SelectProps {
   empty?: (state: SelectEmptyRenderState) => ReactNode;
 }
 
-function parseMinWidth(value: string): number {
-  const num = parseFloat(value);
-  if (value.endsWith("rem")) return num * 16;
-  return num;
-}
-
 export function Select({
   id,
   name,
@@ -109,13 +105,19 @@ export function Select({
   const generatedSelectId = useId();
   const uiPresentation = useUiPresentation();
 
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled listbox has to re-render once
+  // it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+  const listboxRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpenState] = useState(false);
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(0);
-  const [placement, setPlacement] = useState<"below" | "above">("below");
-  const [alignEnd, setAlignEnd] = useState(false);
+  // Reported by the anchored surface once the listbox is measured; the classes
+  // below only need the side and the alignment, not the full placement.
+  const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>("bottom-start");
+  const placement = resolvedPlacement.startsWith("top") ? "above" : "below";
+  const alignEnd = resolvedPlacement.endsWith("-end");
   const [loadedOptions, setLoadedOptions] = useState<SelectItems | null>(null);
   const [loadState, setLoadState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -185,16 +187,6 @@ export function Select({
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (nextOpen && rootRef.current) {
-      const rect = rootRef.current.getBoundingClientRect();
-      const menuPlacement = selectMenuPlacement(
-        rect,
-        { width: window.innerWidth, height: window.innerHeight },
-        menuMinWidth ? parseMinWidth(menuMinWidth) : null,
-      );
-      setPlacement(menuPlacement.placement);
-      setAlignEnd(menuPlacement.alignEnd);
-    }
     setOpenState(nextOpen);
     onOpenChange?.(nextOpen);
     if (nextOpen) {
@@ -297,12 +289,13 @@ export function Select({
   useEffect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The listbox is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target as Node, rootElement, listboxRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: () => setOpen(false),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, rootElement]);
 
   function renderOption(option: SelectOption, flatIdx: number) {
     return (
@@ -427,7 +420,7 @@ export function Select({
   // ═══ CUSTOM MODE ═══
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-select poodle-select--custom"
       data-open={open}
       data-placeholder={!hasSelection}
@@ -534,7 +527,16 @@ export function Select({
       {name ? <input type="hidden" name={name} value={currentValue} /> : null}
 
       {open ? (
-        <div
+        <AnchoredSurface
+          ref={listboxRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          // Ghost triggers sit tighter to their menu than bordered ones.
+          offset={variant === "ghost" ? 6 : 4}
+          // A fixed min-width means the listbox sizes to its content; without
+          // one it tracks the trigger exactly, as the old absolute inset did.
+          matchWidth={!menuMinWidth}
+          onPlacement={setResolvedPlacement}
           id={listboxId}
           className={[
             "poodle-select__listbox",
@@ -544,6 +546,9 @@ export function Select({
           ]
             .filter(Boolean)
             .join(" ")}
+          data-variant={variant}
+          data-size={resolvedSize}
+          data-density={resolvedDensity}
           role="listbox"
           aria-label={ariaLabel ?? undefined}
           style={menuMinWidth ? { minWidth: menuMinWidth } : undefined}
@@ -575,7 +580,7 @@ export function Select({
               <div className="poodle-select__empty">{emptyMessage}</div>
             )
           ) : null}
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

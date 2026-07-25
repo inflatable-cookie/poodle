@@ -4,10 +4,12 @@ import {
   Button,
   Icon,
   ModelPicker,
+  RefSelect,
   type AgentChatAttachment,
   type ModelCapabilityAxis,
   type ModelOption,
   type ModelSelection,
+  type RefOption,
 } from "@poodle/react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -70,6 +72,14 @@ const axes: ModelCapabilityAxis[] = [
   },
 ];
 
+// The footer's ref switcher — the "main" in the reference is a control, not a
+// label.
+const refs: RefOption[] = [
+  { value: "main", label: "main", kind: "branch", description: "a1b2c3d", group: "Branches" },
+  { value: "agent-composer", label: "agent-composer", kind: "branch", group: "Branches" },
+  { value: "v1.4.0", label: "v1.4.0", kind: "tag", group: "Tags" },
+];
+
 const footerItem = { display: "inline-flex", alignItems: "center", gap: "0.375rem" } as const;
 
 export function AgentChatInputSpecimen() {
@@ -83,6 +93,7 @@ export function AgentChatInputSpecimen() {
   const [densityMessage, setDensityMessage] = useState("");
   const [lastSubmitted, setLastSubmitted] = useState<string | null>(null);
   const [stopCount, setStopCount] = useState(0);
+  const [currentRef, setCurrentRef] = useState("main");
   const [attachments, setAttachments] = useState<AgentChatAttachment[]>([
     { id: "a1", label: "architecture.png", kind: "image", thumbnailUrl: diagramThumb },
     { id: "a2", label: "release-notes.md", kind: "document", icon: "file-text" },
@@ -169,9 +180,14 @@ export function AgentChatInputSpecimen() {
                 <Icon name="folder" size="xs" /> Current checkout
               </span>
               <span style={{ flex: 1 }} />
-              <span style={footerItem}>
-                <Icon name="git-branch" size="xs" /> main
-              </span>
+              <RefSelect
+                refs={refs}
+                value={currentRef}
+                onChange={setCurrentRef}
+                currentRef="main"
+                emphasis="subdued"
+                size="sm"
+              />
             </>
           }
         />

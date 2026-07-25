@@ -153,7 +153,8 @@ redundant close callback.
 
 - Root: `display: inline-flex`, `position: relative`
 - Trigger: `display: inline-flex`
-- Surface: `position: fixed`, positioned via JS after render
+- Surface: portalled to the theme root and positioned in viewport coordinates
+  (`002-anchored-overlays.md`)
 - Surface min-width: `14rem`, max-width: `min(22rem, 90vw)`
 
 ### Placement Positioning
@@ -225,8 +226,9 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 ## 9. Svelte Notes
 
 - Root and trigger and surface are `<span>` elements (not `<div>`) for inline context
-- Surface uses `position: fixed` with JS-computed coordinates for viewport clamping
-- After open, surface renders hidden, measures its bounding rect, then positions with clamping
+- Surface is portalled out of the trigger's subtree and positioned in viewport
+  coordinates by the shared anchored-overlay primitive, which also repositions
+  it on scroll and resize and hides it when the trigger scrolls out of view
 - Module-level `nextHoverCardId` counter for unique IDs across instances
 - Separate `openTimer` and `closeTimer` cleared via `clearTimers()` helper
 - Timers cleared on `onDestroy`

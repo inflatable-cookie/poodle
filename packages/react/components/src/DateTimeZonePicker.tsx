@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatZonedDateTimeLabel, monthAnchorIso, normalizeZonedDateTimeValue, todayIsoDate } from "@poodle/headless";
+import { formatZonedDateTimeLabel, monthAnchorIso, normalizeZonedDateTimeValue, todayIsoDate, layerContains } from "@poodle/headless";
 
 import "@poodle/styles/date-time-zone-picker.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Calendar } from "./Calendar";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { TimeInput } from "./TimeInput";
@@ -54,7 +55,10 @@ export function DateTimeZonePicker({
 }: DateTimeZonePickerProps) {
   const surfaceId = useId();
   const uiPresentation = useUiPresentation();
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState<ZonedDateTimeValue>(() =>
     normalizeZonedDateTimeValue(defaultValue),
   );
@@ -84,8 +88,10 @@ export function DateTimeZonePicker({
   useEffect(() => {
     if (!isOpen) return;
     function handlePointerDown(event: MouseEvent): void {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target as Node)) setOpenRef.current(false);
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
+        setOpenRef.current(false);
+      }
     }
     function handleKeydown(event: KeyboardEvent): void {
       if (event.key === "Escape") {
@@ -110,7 +116,7 @@ export function DateTimeZonePicker({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-date-time-zone-picker"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -138,7 +144,11 @@ export function DateTimeZonePicker({
       </button>
 
       {isOpen ? (
-        <div
+        <AnchoredSurface
+          ref={surfaceRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={6}
           id={surfaceId}
           className="poodle-date-time-zone-picker__surface"
           role="dialog"
@@ -193,7 +203,7 @@ export function DateTimeZonePicker({
               </div>
             </div>
           </div>
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

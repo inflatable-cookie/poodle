@@ -13,6 +13,7 @@
     type TabsEvent as HeadlessTabsEvent,
   } from "@poodle/headless";
 
+  import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Menu } from "./Menu.svelte";
@@ -590,7 +591,16 @@
           {/if}
 
           {#if hasTooltips && tooltipIndex === index}
-            <span class="poodle-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
+            <span
+              use:anchored={{
+                anchor: tabElements[index],
+                placement: isVertical ? "right" : "bottom",
+                offset: 6,
+              }}
+              class="poodle-tabs__tooltip"
+              data-placement={isVertical ? "right" : "bottom"}
+              role="tooltip"
+            >
               {item.label}
             </span>
           {/if}
@@ -621,4 +631,3 @@
     </div>
   {/if}
 </div>
-

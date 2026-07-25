@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import {
   createInstanceId,
   getFocusableElements,
+  layerContains,
   popoverParts,
   popoverTransition,
   registerDismissLayer,
@@ -11,6 +12,7 @@ import {
 
 import "@poodle/styles/popover.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { reactifyPart } from "./parts";
 import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
@@ -52,10 +54,13 @@ export function Popover({
   const popoverId = useRef<string | null>(null);
   if (popoverId.current === null) popoverId.current = createInstanceId("popover");
 
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render once
+  // it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>(placement);
   const previousOpen = useRef(false);
 
   const isControlled = open !== null;
@@ -95,31 +100,36 @@ export function Popover({
   };
 
   useEffect(() => {
+    if (isOpen) return;
+    setResolvedPlacement(placement);
+  }, [isOpen, placement]);
+
+  useEffect(() => {
     if (!isOpen) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target as Node, rootElement, surfaceRef.current),
       dismissOnOutsideInteract,
       onDismiss: (reason) =>
         sendRef.current(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
-  }, [isOpen, dismissOnOutsideInteract]);
+  }, [isOpen, dismissOnOutsideInteract, rootElement]);
 
   const parts = popoverParts(isOpen ? "open" : "closed", machineContext, {
     surfaceId: popoverId.current,
     ariaLabel,
     block,
-    placement,
+    placement: resolvedPlacement,
     surfaceWidth,
   });
 
   const surfaceStyle: CSSProperties & Record<string, string> = {
-    "--poodle-popover-offset": `${offset}px`,
     ...(surfaceMinWidth ? { "--poodle-popover-surface-min-width": surfaceMinWidth } : null),
     ...(surfaceMaxWidth ? { "--poodle-popover-surface-max-width": surfaceMaxWidth } : null),
   };
 
   return (
-    <div {...reactifyPart(parts.root)} className="poodle-popover" ref={rootRef}>
+    <div {...reactifyPart(parts.root)} className="poodle-popover" ref={setRootElement}>
       <div
         ref={triggerRef}
         {...reactifyPart(parts.trigger)}
@@ -137,9 +147,19 @@ export function Popover({
       </div>
 
       {isOpen ? (
-        <div ref={surfaceRef} {...reactifyPart(parts.surface)} className="poodle-popover__surface" style={surfaceStyle}>
+        <AnchoredSurface
+          ref={surfaceRef}
+          anchor={rootElement}
+          placement={placement}
+          offset={offset}
+          matchWidth={surfaceWidth === "trigger"}
+          onPlacement={setResolvedPlacement}
+          {...reactifyPart(parts.surface)}
+          className="poodle-popover__surface"
+          style={surfaceStyle}
+        >
           {children}
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

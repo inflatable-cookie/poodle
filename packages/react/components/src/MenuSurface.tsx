@@ -1,8 +1,14 @@
 import { forwardRef, useImperativeHandle, useRef, useState, type CSSProperties } from "react";
-import { menuListCanActivate, menuListNavigate, menuNavigableItems } from "@poodle/headless";
+import {
+  menuListCanActivate,
+  menuListNavigate,
+  menuNavigableItems,
+  type AnchorTarget,
+} from "@poodle/headless";
 
 import "@poodle/styles/menu-surface.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
 export interface MenuSurfaceHandle {
@@ -18,15 +24,31 @@ export interface MenuSurfaceProps {
   size?: ControlSize;
   density?: ControlDensity;
   overlayStyle?: CSSProperties;
+  /** Anchor for a root surface. Null leaves the surface in place, positioned
+   * by `overlayStyle` — the pointer-anchored and nested-flyout cases. */
+  anchor?: AnchorTarget | null;
+  offset?: number;
   placement?: OverlayPlacement | null;
   onAction?: (value: string) => void;
 }
 
 export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurface(
-  { items = [], ariaLabel = null, size = "md", density = "default", overlayStyle, placement = null, onAction },
+  {
+    items = [],
+    ariaLabel = null,
+    size = "md",
+    density = "default",
+    overlayStyle,
+    anchor = null,
+    offset = 6,
+    placement = null,
+    onAction,
+  },
   ref,
 ) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  // `placement` is the request; this is what survived collision resolution.
+  const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
 
@@ -70,17 +92,8 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
     onAction?.(item.value);
   }
 
-  return (
-    <div
-      ref={overlayRef}
-      className="poodle-menu-surface"
-      data-size={size}
-      data-density={density}
-      data-placement={placement ?? undefined}
-      style={overlayStyle}
-      role="menu"
-      aria-label={ariaLabel ?? undefined}
-    >
+  const rows = (
+    <>
       {items.map((item, itemIndex) =>
         item.kind === "separator" ? (
           <div key={`sep-${itemIndex}`} className="poodle-menu-surface__separator" role="separator" />
@@ -135,6 +148,34 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
           </button>
         ),
       )}
+    </>
+  );
+
+  const shell = {
+    className: "poodle-menu-surface",
+    "data-size": size,
+    "data-density": density,
+    "data-placement": (anchor ? resolvedPlacement : placement) ?? undefined,
+    role: "menu",
+    "aria-label": ariaLabel ?? undefined,
+  } as const;
+
+  // Anchored surfaces portal to the theme root; an unanchored one stays put and
+  // is positioned by the caller's `overlayStyle`.
+  return anchor ? (
+    <AnchoredSurface
+      ref={overlayRef}
+      anchor={anchor}
+      placement={placement ?? "bottom-start"}
+      offset={offset}
+      onPlacement={setResolvedPlacement}
+      {...shell}
+    >
+      {rows}
+    </AnchoredSurface>
+  ) : (
+    <div ref={overlayRef} style={overlayStyle} {...shell}>
+      {rows}
     </div>
   );
 });

@@ -3,7 +3,9 @@
 </script>
 
 <script lang="ts">
+  import { layerContains } from "@poodle/headless";
   import "@poodle/styles/color-picker.css";
+  import { anchored } from "./anchored";
   import { default as Slider } from "./Slider.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as NumberInput } from "./NumberInput.svelte";
@@ -61,6 +63,7 @@
   const surfaceId = `poodle-color-picker-surface-${pickerId}`;
 
   let rootElement = $state<HTMLDivElement | null>(null);
+  let surfaceElement = $state<HTMLDivElement | null>(null);
   let gradientElement = $state<HTMLDivElement | null>(null);
   let uncontrolledValue = $state("#6366f1");
   let uncontrolledOpen = $state(false);
@@ -158,11 +161,6 @@
   }
 
   function setOpen(next: boolean): void {
-    if (next && rootElement) {
-      const rect = rootElement.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      placement = spaceBelow < 360 ? "above" : "below";
-    }
     if (open === undefined) {
       uncontrolledOpen = next;
     }
@@ -331,7 +329,8 @@
 
     function handlePointerDown(event: MouseEvent): void {
       if (!rootElement) return;
-      if (!rootElement.contains(event.target as Node)) {
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceElement)) {
         setOpen(false);
       }
     }
@@ -397,6 +396,13 @@
   <!-- Surface (popover) -->
   {#if isOpen}
     <div
+      bind:this={surfaceElement}
+      use:anchored={{
+        anchor: rootElement,
+        placement: "bottom-start",
+        offset: 4,
+        onPlacement: (next) => (placement = next.startsWith("top") ? "above" : "below"),
+      }}
       id={surfaceId}
       class="poodle-color-picker__surface"
       class:poodle-color-picker__surface--above={placement === "above"}

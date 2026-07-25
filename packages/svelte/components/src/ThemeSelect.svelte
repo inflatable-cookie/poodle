@@ -10,10 +10,11 @@
 
 <script lang="ts">
   import "@poodle/styles/theme-select.css";
-  import { registerDismissLayer } from "@poodle/headless";
+  import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
   import { get } from "svelte/store";
 
+  import { anchored } from "./anchored";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import { getThemeController } from "./theme-controller";
@@ -92,7 +93,8 @@
   $effect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, panelElement),
       dismissOnOutsideInteract: true,
       onDismiss: () => {
         open = false;
@@ -155,6 +157,7 @@
   {#if open}
     <div
       bind:this={panelElement}
+      use:anchored={{ anchor: rootElement, placement: "bottom-start", offset: 8 }}
       id={panelId}
       class="poodle-theme-select__surface"
       role="dialog"

@@ -926,3 +926,23 @@ export type AgentChatAttachment = {
   thumbnailUrl?: string;
   disabled?: boolean;
 };
+
+// ---------------------------------------------------------------------------
+// RefSelect
+// ---------------------------------------------------------------------------
+
+export type RefKind = "branch" | "tag" | "commit";
+
+/** One version-control ref. Poodle knows the shape, never git itself. */
+export type RefOption = {
+  value: string;
+  label: string;
+  /** Drives the default glyph. Unknown kinds fall back to the branch glyph. */
+  kind?: RefKind;
+  /** Secondary line — a short sha, an ahead/behind summary, a commit subject. */
+  description?: string;
+  /** Overrides the kind glyph. */
+  icon?: string;
+  group?: string;
+  disabled?: boolean;
+};

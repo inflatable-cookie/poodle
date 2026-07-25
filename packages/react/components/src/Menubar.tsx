@@ -9,8 +9,10 @@ import {
   menuListNavigate,
   menuNavigableItems,
   registerDismissLayer,
+  layerContains,
 } from "@poodle/headless";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
 
@@ -41,6 +43,12 @@ export function Menubar({
   const uiPresentation = useUiPresentation();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
+  // Each menu anchors to its own trigger group, not to the whole bar. The
+  // groups are refs; only the open one is promoted to state, so the portalled
+  // surface re-renders exactly once per open instead of on every ref attach.
+  const groupRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const menuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const focusIndexRef = useRef(firstEnabledIndex(items));
@@ -116,12 +124,18 @@ export function Menubar({
   }
 
   useEffect(() => {
+    const index = items.findIndex((item) => item.value === currentValue);
+    setMenuAnchor(index >= 0 ? groupRefs.current[index] ?? null : null);
+  }, [currentValue, items]);
+
+  useEffect(() => {
     if (!currentValue) {
       return;
     }
 
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target) ?? false,
+      // The open menu is portalled out of the bar, so both are "inside".
+      contains: (target) => layerContains(target, rootRef.current, overlayRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: () => setValue(null),
     });
@@ -132,7 +146,13 @@ export function Menubar({
     <div ref={rootRef} className="poodle-menubar" data-size={resolvedSize} data-density={resolvedDensity}>
       <div className="poodle-menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
         {items.map((item, index) => (
-          <div key={item.value} className="poodle-menubar__group">
+          <div
+            key={item.value}
+            className="poodle-menubar__group"
+            ref={(el) => {
+              groupRefs.current[index] = el;
+            }}
+          >
             <button
               ref={(el) => {
                 triggerRefs.current[index] = el;
@@ -192,9 +212,15 @@ export function Menubar({
             </button>
 
             {currentValue === item.value ? (
-              <div
+              <AnchoredSurface
+                ref={overlayRef}
+                anchor={menuAnchor}
+                placement="bottom-start"
+                offset={4}
                 id={`poodle-menubar-menu-${menubarId}-${item.value}`}
                 className="poodle-menubar__overlay"
+                data-size={resolvedSize}
+                data-density={resolvedDensity}
                 role="menu"
                 aria-label={item.label}
               >
@@ -289,7 +315,7 @@ export function Menubar({
                     </button>
                   ),
                 )}
-              </div>
+              </AnchoredSurface>
             ) : null}
           </div>
         ))}

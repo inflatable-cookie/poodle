@@ -67,34 +67,6 @@ export function filterSelectGroups<T extends SelectOptionLike>(
     .filter((group) => group.options.length > 0);
 }
 
-export interface SelectMenuPlacement {
-  placement: "above" | "below";
-  alignEnd: boolean;
-}
-
-/**
- * Menu placement on open: flips above when fewer than 280px remain below the
- * trigger; right-aligns when a fixed min-width menu would overflow the right
- * edge but fits against the trigger's right edge.
- */
-export function selectMenuPlacement(
-  rootRect: { top: number; bottom: number; left: number; right: number },
-  viewport: { width: number; height: number },
-  minWidthPx: number | null,
-): SelectMenuPlacement {
-  const spaceBelow = viewport.height - rootRect.bottom;
-  const placement = spaceBelow < 280 ? "above" : "below";
-
-  let alignEnd = false;
-
-  if (minWidthPx !== null) {
-    const spaceRight = viewport.width - rootRect.left;
-    alignEnd = minWidthPx > spaceRight && rootRect.right > minWidthPx;
-  }
-
-  return { placement, alignEnd };
-}
-
 /** Highlight index on open: the selected option when present, else the first. */
 export function selectOpenHighlightIndex<T extends SelectOptionLike>(
   filtered: readonly T[],

@@ -3,7 +3,9 @@
 </script>
 
 <script lang="ts">
+  import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-range-picker.css";
+  import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -46,7 +48,8 @@
 
   const surfaceId = `poodle-date-range-picker-surface-${++nextDateRangePickerId}`;
   const uiPresentation = getUiPresentation();
-  let rootElement: HTMLDivElement | null = null;
+  let rootElement: HTMLDivElement | null = $state(null);
+  let surfaceElement: HTMLDivElement | null = $state(null);
   let uncontrolledValue = $state<DateRangeValue>({ start: null, end: null });
   let uncontrolledOpen = $state(false);
   let visibleMonth = $state(todayIsoDate());
@@ -93,7 +96,8 @@
         return;
       }
 
-      if (!rootElement.contains(event.target as Node)) {
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceElement)) {
         setOpen(false);
       }
     }
@@ -166,6 +170,8 @@
 
   {#if isOpen}
     <div
+      bind:this={surfaceElement}
+      use:anchored={{ anchor: rootElement, placement: "bottom-start", offset: 6 }}
       id={surfaceId}
       class="poodle-date-range-picker__surface"
       role="dialog"

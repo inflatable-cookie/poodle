@@ -9,9 +9,9 @@
     type HoverEvent as HoverMachineEvent,
     type HoverState,
   } from "@poodle/headless";
-  import { onDestroy, tick, type Snippet } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
 
-  import { resolveOverlayPosition } from "./overlay-position";
+  import { anchored } from "./anchored";
   import type { OverlayPlacement } from "./types";
 
   interface Props {
@@ -44,7 +44,6 @@
   let uncontrolledOpen = $state(false);
   let triggerElement = $state<HTMLSpanElement | null>(null);
   let surfaceElement = $state<HTMLSpanElement | null>(null);
-  let surfaceStyle = $state("");
 
   $effect.pre(() => {
     if (!triggerElement) {
@@ -60,11 +59,6 @@
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
-    }
-
-    if (nextOpen) {
-      surfaceStyle = "visibility: hidden;";
-      tick().then(positionSurface);
     }
 
     onOpenChange?.(nextOpen);
@@ -84,21 +78,6 @@
         setOpen(effect.open);
       }
     }
-  }
-
-  function positionSurface(): void {
-    if (!triggerElement || !surfaceElement) {
-      return;
-    }
-
-    const position = resolveOverlayPosition(
-      triggerElement.getBoundingClientRect(),
-      surfaceElement.getBoundingClientRect(),
-      placement,
-      8,
-    );
-
-    surfaceStyle = `left: ${position.left}px; top: ${position.top}px;`;
   }
 
   function clearTimers(): void {
@@ -152,12 +131,12 @@
   {#if isOpen}
     <span
       bind:this={surfaceElement}
+      use:anchored={{ anchor: triggerElement, placement, offset: 8 }}
       id={hoverCardId}
       class="poodle-hover-card__surface"
       role="dialog"
       tabindex="-1"
       aria-label={ariaLabel ?? undefined}
-      style={surfaceStyle}
       onmouseenter={clearTimers}
       onmouseleave={scheduleClose}
     >

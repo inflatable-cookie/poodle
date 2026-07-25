@@ -109,11 +109,10 @@
   }
 
   /* ── Popover surface ─────────────────────────────────────────────────── */
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own. */
   .poodle-theme-select__surface {
-    position: absolute;
     z-index: var(--poodle-overlay-z-menu);
-    top: calc(100% + 0.5rem);
-    left: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
     border-radius: var(--poodle-radius-surface);

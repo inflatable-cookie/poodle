@@ -1,13 +1,13 @@
 <script lang="ts">
   import "@poodle/styles/menu.css";
   import {
+    layerContains,
     menuTransition,
     registerDismissLayer,
     type MenuEvent as MenuMachineEvent,
   } from "@poodle/headless";
-  import { onMount, tick, type Snippet } from "svelte";
+  import { tick, type Snippet } from "svelte";
 
-  import { resolveOverlayPosition } from "./overlay-position";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import MenuSurface from "./MenuSurface.svelte";
 
@@ -57,13 +57,10 @@
   let surface = $state<{ focusFirstItem: () => void } | null>(null);
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
-  let resolvedPlacement = $state<OverlayPlacement>("bottom-start");
-  let overlayStyle = $state("");
 
   $effect.pre(() => {
     if (!seededDefaultOpen) {
       uncontrolledOpen = defaultOpen;
-      resolvedPlacement = placement;
       seededDefaultOpen = true;
     }
   });
@@ -79,9 +76,7 @@
     }
 
     tick().then(() => {
-      void updateOverlayPosition().then(() => {
-        surface?.focusFirstItem();
-      });
+      surface?.focusFirstItem();
     });
   });
 
@@ -117,54 +112,19 @@
     }
   }
 
-  async function updateOverlayPosition(): Promise<void> {
-    if (!isOpen || !triggerElement) {
-      return;
-    }
-
-    await tick();
-
-    if (!overlayElement) {
-      return;
-    }
-
-    const nextPosition = resolveOverlayPosition(
-      triggerElement.getBoundingClientRect(),
-      overlayElement.getBoundingClientRect(),
-      placement,
-    );
-
-    resolvedPlacement = nextPosition.placement;
-    overlayStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
-  }
-
   $effect(() => {
     if (!isOpen) {
       return;
     }
 
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, overlayElement),
       dismissOnOutsideInteract: true,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
   });
 
-  onMount(() => {
-    function handleViewportChange(): void {
-      if (isOpen) {
-        void updateOverlayPosition();
-      }
-    }
-
-    window.addEventListener("resize", handleViewportChange);
-    window.addEventListener("scroll", handleViewportChange, true);
-
-    return () => {
-      window.removeEventListener("resize", handleViewportChange);
-      window.removeEventListener("scroll", handleViewportChange, true);
-    };
-  });
 </script>
 
 <div class="poodle-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
@@ -189,8 +149,8 @@
       ariaLabel={ariaLabel}
       size={resolvedSize}
       density={resolvedDensity}
-      placement={resolvedPlacement}
-      overlayStyle={overlayStyle}
+      anchor={triggerElement}
+      placement={placement}
       onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}

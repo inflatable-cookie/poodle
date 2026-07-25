@@ -184,8 +184,10 @@ leaf-only activation.
   anchor point
 - Keyboard invocation (`ContextMenu` key or `Shift+F10`) calculates anchor from
   the focused element's bounding rect with a +16px offset
-- Overlay is positioned using `position: fixed` at the anchor point via inline
-  `left`/`top` styles
+- The overlay is portalled to the theme root and anchored to the pointer
+  position itself — a **virtual anchor** (`pointAnchor(x, y)`), since a
+  right-click has no element behind it. The shared resolver then does the
+  edge-flipping (`002-anchored-overlays.md`)
 
 ### Composition
 
@@ -289,8 +291,8 @@ leaf-only activation.
 - Should reuse core menu item rendering and keyboard navigation patterns from
   `Menu`, while sourcing position from the contextmenu event or focused target
   geometry
-- Uses `position: fixed` instead of `position: absolute` since the anchor is
-  viewport-relative (clientX/clientY) rather than trigger-relative
+- Anchors to a virtual point (clientX/clientY) rather than to a trigger
+  element, which is the one difference from `Menu`'s use of the same primitive
 - Keyboard context invocation must not be treated as a lesser path than
   right-click; both must produce identical overlay and focus behavior
 - Overlay and item CSS values are identical to `Menu` except for the positioning

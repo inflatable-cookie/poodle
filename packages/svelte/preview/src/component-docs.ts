@@ -1533,6 +1533,42 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <ModelPicker {models} {axes} {value} onChange={(next) => (value = next)} />`,
   },
 
+  "ref-select": {
+    props: [
+      { name: "refs", type: "RefOption[]", default: "[]", description: "Host-supplied refs (value, label, kind, description, icon, group, disabled). Poodle knows the shape of a ref, never git itself." },
+      { name: "value", type: "string", default: '""', description: "Selected ref. Bindable." },
+      { name: "currentRef", type: "string | null", default: "null", description: "The checked-out ref, marked in the list. Often equals value, but a host browsing another ref keeps the marker where it belongs." },
+      { name: "currentLabel", type: "string", default: '"current"', description: "Marker text on the checked-out ref." },
+      { name: "searchable", type: "boolean", default: "true", description: "Render the search field." },
+      { name: "searchValue", type: "string | null", default: "null", description: "Controlled query. When supplied the component stops filtering — the host owns which refs to pass." },
+      { name: "loading", type: "boolean", default: "false", description: "Show the loading footer; suppresses the empty message, since results may still be arriving." },
+      { name: "emptyLabel", type: "string", default: '"No refs found"', description: "Empty-state text." },
+      { name: "variant", type: '"bare" | "outlined"', default: '"bare"', description: "Borderless inline trigger (composer footers) or the standard bordered control." },
+      { name: "emphasis", type: '"default" | "subdued"', default: '"default"', description: "Subdued dims the trigger so it recedes in a composer footer; hover, focus and open restore it." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "ariaLabel", type: "string", default: '"Ref"', description: "Accessible name for the trigger and dialog." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(value: string) => void", description: "Fired when a ref is chosen. Choosing closes the popover — selecting a ref is the terminal action." },
+      { name: "onSearchChange", payload: "(query: string) => void", description: "Fired on every keystroke in the search field, for host-driven querying. Fires whether or not searchValue is supplied." },
+    ],
+    usage: `<script lang="ts">
+  import { RefSelect, type RefOption } from "@poodle/svelte";
+
+  const refs: RefOption[] = [
+    { value: "main", label: "main", kind: "branch", description: "a1b2c3d", group: "Branches" },
+    { value: "v1.4.0", label: "v1.4.0", kind: "tag", group: "Tags" },
+  ];
+
+  let value = $state("main");
+</script>
+
+<RefSelect {refs} bind:value currentRef="main" emphasis="subdued" />`,
+  },
+
   "filter-builder": {
     props: [
       { name: "fields", type: "FilterFieldDefinition[]", default: "[]", description: "Host-supplied filter fields the user can choose from (key, label, kind, options, operators, allowMultiple)." },

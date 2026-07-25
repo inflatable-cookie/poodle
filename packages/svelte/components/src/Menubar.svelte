@@ -8,10 +8,12 @@
     menuListCanActivate,
     menuListNavigate,
     registerDismissLayer,
+    layerContains,
   } from "@poodle/headless";
   import { tick } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
+  import { anchored } from "./anchored";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
@@ -44,6 +46,9 @@
   const uiPresentation = getUiPresentation();
 
   let rootElement = $state<HTMLDivElement | null>(null);
+  // Each menu anchors to its own trigger group, not to the whole bar.
+  let groupElements = $state<Array<HTMLDivElement | null>>([]);
+  let overlayElement = $state<HTMLDivElement | null>(null);
   let triggerElements = $state<Array<HTMLButtonElement | null>>([]);
   let menuItemElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledValue = $state<string | null>(null);
@@ -139,7 +144,8 @@
     }
 
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The open menu is portalled out of the bar, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, overlayElement),
       dismissOnOutsideInteract: true,
       onDismiss: () => setValue(null),
     });
@@ -149,7 +155,7 @@
 <div bind:this={rootElement} class="poodle-menubar" data-size={resolvedSize} data-density={resolvedDensity}>
   <div class="poodle-menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
     {#each items as item, index (item.value)}
-      <div class="poodle-menubar__group">
+      <div class="poodle-menubar__group" bind:this={groupElements[index]}>
         <button
           bind:this={triggerElements[index]}
           type="button"
@@ -204,8 +210,12 @@
 
         {#if currentValue === item.value}
           <div
+            bind:this={overlayElement}
+            use:anchored={{ anchor: groupElements[index], placement: "bottom-start", offset: 4 }}
             id={`poodle-menubar-menu-${menubarId}-${item.value}`}
             class="poodle-menubar__overlay"
+            data-size={resolvedSize}
+            data-density={resolvedDensity}
             role="menu"
             aria-label={item.label}
           >

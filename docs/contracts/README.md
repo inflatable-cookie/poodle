@@ -30,6 +30,15 @@ docs/contracts/
 App-specific DAW widgets do not belong in this contract surface. They build
 above it in downstream repos such as Loophole.
 
+## Cross-Cutting Rules
+
+Rules that bind more than one contract live beside them, and a component
+contract references the rule rather than restating it:
+
+- `001-working-rules.md` — roadmap/spec/log authority chain
+- `002-anchored-overlays.md` — every anchored surface portals to the theme root
+  and is positioned in viewport coordinates
+
 ## Current Contracts
 
 - `template/component-contract-template.md`
@@ -134,6 +143,7 @@ above it in downstream repos such as Loophole.
 - `components/radio-group.md`
 - `components/range-slider.md`
 - `components/rating.md`
+- `components/ref-select.md`
 - `components/region.md`
 - `components/relation-picker.md`
 - `components/remediation-banner.md`

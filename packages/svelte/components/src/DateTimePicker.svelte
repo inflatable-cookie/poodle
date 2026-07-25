@@ -3,7 +3,9 @@
 </script>
 
 <script lang="ts">
+  import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-time-picker.css";
+  import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
   import { default as TimeInput } from "./TimeInput.svelte";
   import {
@@ -52,7 +54,8 @@
 
   const surfaceId = `poodle-date-time-picker-surface-${++nextDateTimePickerId}`;
   const uiPresentation = getUiPresentation();
-  let rootElement: HTMLDivElement | null = null;
+  let rootElement: HTMLDivElement | null = $state(null);
+  let surfaceElement: HTMLDivElement | null = $state(null);
   let uncontrolledValue = $state<DateTimeValue>({ date: null, time: null });
   let uncontrolledOpen = $state(false);
   let visibleMonth = $state(todayIsoDate());
@@ -96,7 +99,8 @@
         return;
       }
 
-      if (!rootElement.contains(event.target as Node)) {
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceElement)) {
         setOpen(false);
       }
     }
@@ -172,6 +176,8 @@
 
   {#if isOpen}
     <div
+      bind:this={surfaceElement}
+      use:anchored={{ anchor: rootElement, placement: "bottom-start", offset: 6 }}
       id={surfaceId}
       class="poodle-date-time-picker__surface"
       role="dialog"

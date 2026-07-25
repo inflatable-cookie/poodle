@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T21:43:32.436Z",
+  "generatedAt": "2026-07-25T20:31:47.299Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 167,
-        "componentCount": 133,
-        "helperCount": 34,
-        "previewedCount": 167,
+        "exportCount": 173,
+        "componentCount": 136,
+        "helperCount": 37,
+        "previewedCount": 173,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 167,
-        "componentCount": 133,
-        "helperCount": 34,
-        "previewedCount": 167,
+        "exportCount": 173,
+        "componentCount": 136,
+        "helperCount": 37,
+        "previewedCount": 173,
         "contractOnlyCount": 0
       }
     ],
@@ -222,10 +222,36 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "AgentChatInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "AlertDialog",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "anchored",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -498,7 +524,7 @@
         "exportName": "compressImage",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -550,7 +576,7 @@
         "exportName": "controlHeightRem",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -563,7 +589,7 @@
         "exportName": "controlSpaceXRem",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -589,7 +615,7 @@
         "exportName": "createThemeController",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -602,7 +628,7 @@
         "exportName": "currentTheme",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -706,7 +732,7 @@
         "exportName": "DEFAULT_COMPRESSION",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1005,7 +1031,7 @@
         "exportName": "formatDisplayDate",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1018,7 +1044,7 @@
         "exportName": "formatDisplayDateTime",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1031,7 +1057,7 @@
         "exportName": "formatFileSize",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1083,7 +1109,7 @@
         "exportName": "getThemeController",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1109,7 +1135,7 @@
         "exportName": "getUiPresentation",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1444,6 +1470,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "ModelPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "NavCard",
         "kind": "component",
         "status": "previewed",
@@ -1551,7 +1590,7 @@
         "exportName": "panelSpaceXRem",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1564,7 +1603,7 @@
         "exportName": "panelSpaceYRem",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1654,6 +1693,19 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "portal",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Progress",
         "kind": "component",
         "status": "previewed",
@@ -1707,6 +1759,19 @@
       {
         "packageName": "@poodle/svelte",
         "exportName": "Rating",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "RefSelect",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -1789,7 +1854,7 @@
         "exportName": "resolveSemanticControlSize",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1802,7 +1867,7 @@
         "exportName": "resolveSupportingVisualSize",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2282,10 +2347,23 @@
       },
       {
         "packageName": "@poodle/svelte",
+        "exportName": "type AnchoredOptions",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "type FileUploadValidationError",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2298,7 +2376,7 @@
         "exportName": "type ImageCompressionOptions",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2311,7 +2389,7 @@
         "exportName": "type ThemeController",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2324,7 +2402,7 @@
         "exportName": "type ThemeControllerConfig",
         "kind": "helper",
         "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
         "sectionIds": [
           "catalog-hub"
         ],

@@ -11,8 +11,9 @@ import {
   type ReactNode,
 } from "react";
 
-import { menuNavigableItems, registerDismissLayer } from "@poodle/headless";
+import { menuNavigableItems, registerDismissLayer, pointAnchor } from "@poodle/headless";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
@@ -145,22 +146,18 @@ export function ListCard({
 
   const rootRef = useRef<HTMLElement | null>(null);
   const leadingRef = useRef<HTMLElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const highlightRef = useRef(0);
   const pendingMenuFocus = useRef(false);
 
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuAnchorPoint, setContextMenuAnchorPoint] = useState<{ x: number; y: number } | null>(null);
-  const [contextMenuAdjustedPosition, setContextMenuAdjustedPosition] = useState<{ left: string; top: string } | null>(
-    null,
-  );
 
   function openContextMenuAt(x: number, y: number) {
     if (!hasContextMenu) return;
     highlightRef.current = 0;
     setContextMenuAnchorPoint({ x, y });
-    setContextMenuAdjustedPosition(null);
     pendingMenuFocus.current = true;
     setContextMenuOpen(true);
   }
@@ -260,36 +257,12 @@ export function ListCard({
     handleContextMenuKeydown(event);
   }
 
-  useLayoutEffect(() => {
-    if (!contextMenuOpen || !contextMenuAnchorPoint) return;
-    if (contextMenuAdjustedPosition) return;
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
-    const rect = overlay.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const pad = 8;
-    let x = contextMenuAnchorPoint.x;
-    let y = contextMenuAnchorPoint.y;
-
-    if (x + rect.width > vw - pad) {
-      x = Math.max(pad, x - rect.width);
-    }
-
-    if (y + rect.height > vh - pad) {
-      y = Math.max(pad, vh - rect.height - pad);
-    }
-
-    setContextMenuAdjustedPosition({ left: `${x}px`, top: `${y}px` });
-  }, [contextMenuOpen, contextMenuAnchorPoint, contextMenuAdjustedPosition]);
-
   useEffect(() => {
-    if (!contextMenuOpen || !contextMenuAdjustedPosition) return;
+    if (!contextMenuOpen) return;
     if (!pendingMenuFocus.current) return;
     pendingMenuFocus.current = false;
     itemRefs.current[highlightRef.current]?.focus();
-  }, [contextMenuOpen, contextMenuAdjustedPosition]);
+  }, [contextMenuOpen]);
 
   useEffect(() => {
     if (!contextMenuOpen) return;
@@ -445,18 +418,18 @@ export function ListCard({
 
   const contextMenuOverlay =
     contextMenuOpen && hasContextMenu && contextMenuAnchorPoint ? (
-      <div
+      <AnchoredSurface
         ref={overlayRef}
+        // A right-click has no element behind it, so the menu anchors to the
+        // point itself and the shared resolver handles the edge flipping.
+        anchor={pointAnchor(contextMenuAnchorPoint.x, contextMenuAnchorPoint.y, rootRef.current)}
+        placement="bottom-start"
+        offset={0}
         className="poodle-list-card__context-menu"
         data-size={resolvedSize}
         data-density={resolvedDensity}
         role="menu"
         aria-label={contextMenuAriaLabel ?? undefined}
-        style={
-          contextMenuAdjustedPosition
-            ? { left: contextMenuAdjustedPosition.left, top: contextMenuAdjustedPosition.top }
-            : { left: `${contextMenuAnchorPoint.x}px`, top: `${contextMenuAnchorPoint.y}px`, visibility: "hidden" }
-        }
       >
         {(contextMenuItems ?? []).map((item) =>
           item.kind === "separator" ? (
@@ -522,7 +495,7 @@ export function ListCard({
             </button>
           ),
         )}
-      </div>
+      </AnchoredSurface>
     ) : null;
 
   if (href && !disabled && !selectable) {

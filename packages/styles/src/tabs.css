@@ -505,8 +505,9 @@
 
   /* ── Tooltip (vertical icon-only mode) ── */
 
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own. */
   .poodle-tabs__tooltip {
-    position: absolute;
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
@@ -519,18 +520,6 @@
     line-height: 1.35;
     white-space: nowrap;
     pointer-events: none;
-  }
-
-  .poodle-tabs__tooltip[data-placement="right"] {
-    top: 50%;
-    left: calc(100% + 0.375rem);
-    transform: translateY(-50%);
-  }
-
-  .poodle-tabs__tooltip[data-placement="bottom"] {
-    top: calc(100% + 0.375rem);
-    left: 50%;
-    transform: translateX(-50%);
   }
 
   /* ── Panel ── */

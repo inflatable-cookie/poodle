@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { registerDismissLayer } from "@poodle/headless";
+import { layerContains, registerDismissLayer } from "@poodle/headless";
 
 import "@poodle/styles/theme-select.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { useThemeController } from "./theme-controller";
@@ -43,7 +44,9 @@ export function ThemeSelect({
 
   const [open, setOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState("");
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
@@ -64,7 +67,8 @@ export function ThemeSelect({
   useEffect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: () => setOpen(false),
     });
@@ -80,7 +84,7 @@ export function ThemeSelect({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-theme-select"
       role="group"
       aria-label={ariaLabel}
@@ -115,8 +119,11 @@ export function ThemeSelect({
       </button>
 
       {open ? (
-        <div
+        <AnchoredSurface
           ref={panelRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={8}
           id={panelId}
           className="poodle-theme-select__surface"
           role="dialog"
@@ -158,7 +165,7 @@ export function ThemeSelect({
               </button>
             ))}
           </div>
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

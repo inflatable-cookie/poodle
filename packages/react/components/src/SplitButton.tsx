@@ -9,8 +9,9 @@ import {
   type ReactNode,
 } from "react";
 
-import { menuNavigableItems, registerDismissLayer } from "@poodle/headless";
+import { menuNavigableItems, registerDismissLayer, layerContains } from "@poodle/headless";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Spinner } from "./Spinner";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";
 import type {
@@ -39,24 +40,6 @@ export interface SplitButtonProps {
   children?: ReactNode;
 }
 
-function getScrollContainer(element: HTMLElement | null): HTMLElement | null {
-  let current = element?.parentElement ?? null;
-
-  while (current) {
-    const style = getComputedStyle(current);
-    const overflowY = style.overflowY;
-    if (
-      (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
-      current.scrollHeight > current.clientHeight
-    ) {
-      return current;
-    }
-    current = current.parentElement;
-  }
-
-  return null;
-}
-
 export function SplitButton({
   variant = "secondary",
   tone = "default",
@@ -75,9 +58,11 @@ export function SplitButton({
 }: SplitButtonProps) {
   const uiPresentation = useUiPresentation();
 
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled menu has to re-render once
+  // it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const highlightRef = useRef(0);
   const pendingMenuFocus = useRef(false);
@@ -92,24 +77,18 @@ export function SplitButton({
   const resolvedVisualSize = resolveSupportingVisualSize(resolvedSize);
   const actionableItems = menuNavigableItems(items);
 
-  function syncMenuLayout(): void {
-    const root = rootRef.current;
-    const menu = menuRef.current;
-    if (!root || !menu) return;
+  /** Cap the menu at the room available on whichever side it opened, so a long
+   * list scrolls inside the surface instead of running off the viewport. */
+  function syncMenuHeight(placement: "bottom-start" | "top-start"): void {
+    const root = rootElement;
+    if (!root) return;
 
     const rootRect = root.getBoundingClientRect();
-    const menuRect = menu.getBoundingClientRect();
-    const scrollContainer = getScrollContainer(root);
-    const boundaryTop = scrollContainer?.getBoundingClientRect().top ?? 0;
-    const boundaryBottom = scrollContainer?.getBoundingClientRect().bottom ?? window.innerHeight;
     const gutter = 6;
-    const availableBelow = Math.max(0, boundaryBottom - rootRect.bottom - gutter);
-    const availableAbove = Math.max(0, rootRect.top - boundaryTop - gutter);
-    const shouldOpenUpward = availableBelow < menuRect.height && availableAbove > availableBelow;
-    const availableSpace = shouldOpenUpward ? availableAbove : availableBelow;
+    const available =
+      placement === "top-start" ? rootRect.top - gutter : window.innerHeight - rootRect.bottom - gutter;
 
-    setMenuPlacement(shouldOpenUpward ? "top-start" : "bottom-start");
-    setMenuMaxHeight(availableSpace > 0 ? `${Math.floor(availableSpace)}px` : null);
+    setMenuMaxHeight(available > 0 ? `${Math.floor(available)}px` : null);
   }
 
   useEffect(() => {
@@ -117,7 +96,6 @@ export function SplitButton({
       return;
     }
 
-    syncMenuLayout();
     if (pendingMenuFocus.current) {
       pendingMenuFocus.current = false;
       itemRefs.current[highlightRef.current]?.focus();
@@ -174,7 +152,8 @@ export function SplitButton({
     }
 
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target) ?? false,
+      // The menu is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, menuRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: (reason) => {
         closeMenu();
@@ -187,20 +166,6 @@ export function SplitButton({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
-  useEffect(() => {
-    function handleBoundaryChange(): void {
-      syncMenuLayout();
-    }
-
-    window.addEventListener("resize", handleBoundaryChange);
-    document.addEventListener("scroll", handleBoundaryChange, true);
-
-    return () => {
-      window.removeEventListener("resize", handleBoundaryChange);
-      document.removeEventListener("scroll", handleBoundaryChange, true);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   function handleToggleKeydown(event: ReactKeyboardEvent): void {
     if (event.key === "ArrowDown") {
@@ -224,7 +189,7 @@ export function SplitButton({
       data-tone={tone !== "default" ? tone : undefined}
       data-size={resolvedSize}
       data-density={resolvedDensity}
-      ref={rootRef}
+      ref={setRootElement}
     >
       <button
         type={type}
@@ -261,8 +226,16 @@ export function SplitButton({
       </button>
 
       {menuOpen ? (
-        <div
+        <AnchoredSurface
           ref={menuRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={6}
+          onPlacement={(next) => {
+            const side = next.startsWith("top") ? "top-start" : "bottom-start";
+            setMenuPlacement(side);
+            syncMenuHeight(side);
+          }}
           className="poodle-split-button__menu"
           data-placement={menuPlacement}
           role="menu"
@@ -315,7 +288,7 @@ export function SplitButton({
               </button>
             ),
           )}
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

@@ -3,7 +3,9 @@
 </script>
 
 <script lang="ts">
+  import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-picker.css";
+  import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -46,7 +48,8 @@
 
   const surfaceId = `poodle-date-picker-surface-${++nextDatePickerId}`;
   const uiPresentation = getUiPresentation();
-  let rootElement: HTMLDivElement | null = null;
+  let rootElement: HTMLDivElement | null = $state(null);
+  let surfaceElement: HTMLDivElement | null = $state(null);
   let uncontrolledValue = $state<string | null>(null);
   let uncontrolledOpen = $state(false);
   let visibleMonth = $state(todayIsoDate());
@@ -87,7 +90,8 @@
         return;
       }
 
-      if (!rootElement.contains(event.target as Node)) {
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceElement)) {
         setOpen(false);
       }
     }
@@ -151,7 +155,14 @@
   </button>
 
   {#if isOpen}
-    <div id={surfaceId} class="poodle-date-picker__surface" role="dialog" aria-label={ariaLabel ?? placeholder}>
+    <div
+      bind:this={surfaceElement}
+      use:anchored={{ anchor: rootElement, placement: "bottom-start", offset: 6 }}
+      id={surfaceId}
+      class="poodle-date-picker__surface"
+      role="dialog"
+      aria-label={ariaLabel ?? placeholder}
+    >
       <Calendar
         value={currentValue}
         visibleMonth={visibleMonth}

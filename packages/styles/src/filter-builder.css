@@ -151,11 +151,10 @@
   }
 
   /* ── Anchored popover surface ────────────────────────────────────────── */
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own. */
   .poodle-filter-builder__surface {
-    position: absolute;
     z-index: var(--poodle-overlay-z-menu);
-    top: calc(100% + 0.5rem);
-    left: 0;
     min-width: 16rem;
     max-width: min(24rem, 90vw);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);

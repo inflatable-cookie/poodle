@@ -38,7 +38,7 @@
     },
     "cobalt": {
       "selector": "[data-theme=\"cobalt\"]",
-      "description": "Maximum-contrast black theme with a high-visibility blue accent."
+      "description": "Neutral dark-grey theme, a shade deeper than graphite, with a blue accent."
     },
     "clay": {
       "selector": "[data-theme=\"clay\"]",

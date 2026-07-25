@@ -88,6 +88,7 @@ pub mod number_input;
 pub mod agent_chat_input;
 pub mod filter_builder;
 pub mod model_picker;
+pub mod ref_select;
 pub mod theme_select;
 pub mod order_by;
 pub mod page_header;
@@ -405,6 +406,7 @@ pub fn render_specimen(
         "number-input" => Some(number_input::render(theme)),
         "filter-builder" => Some(filter_builder::render(theme)),
         "model-picker" => Some(model_picker::render(theme)),
+        "ref-select" => Some(ref_select::render(theme)),
         "agent-chat-input" => Some(agent_chat_input::render(theme)),
         "theme-select" => Some(theme_select::render(theme)),
         "order-by" => Some(order_by::render(theme)),

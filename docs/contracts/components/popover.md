@@ -140,7 +140,7 @@ and outside listeners are document-level and active only while open.
 | `focusOnOpen` | after render: `first-focusable` focuses first focusable element in surface; `content` focuses the surface itself; `none` does nothing | none |
 | `restoreTriggerFocus` | focuses the trigger element on close | none |
 | `registerDismissLayer` | attaches document `mousedown` + `keydown(Escape)` handlers; in core this becomes registration on the shared dismissable-layer stack so nested overlays dismiss innermost-first | detach/unregister on close and on unmount |
-| `positionSurface` | anchors the surface per `placement`/`offset`. Current implementation is CSS-only (absolute positioning off the relative root, no collision handling); core replaces this with the shared anchor-positioning service (Floating UI). Documented delta until then | dispose positioning subscription on close |
+| `positionSurface` | anchors the surface per `placement`/`offset` through the shared anchored-overlay primitive: portalled to the theme root, placed in viewport coordinates by the collision-aware resolver, repositioned on scroll and resize (`002-anchored-overlays.md`) | dispose positioning subscription on close |
 
 #### Part Attribute Output
 
@@ -232,7 +232,6 @@ wiring, presence (if open/close animation is added later).
 
 | Var | Purpose |
 |-----|---------|
-| `--poodle-popover-offset` | set from `offset` prop (default produces `0.5rem` equivalent at 8px) |
 | `--poodle-popover-surface-min-width` | set from `surfaceMinWidth` prop when provided; defaults to `14rem` |
 | `--poodle-popover-surface-max-width` | set from `surfaceMaxWidth` prop when provided; defaults to `min(24rem, 90vw)` |
 
@@ -266,7 +265,7 @@ wiring, presence (if open/close animation is added later).
 
 | Property | Value |
 |----------|-------|
-| `position` | `absolute` |
+| `position` | `fixed` (from `anchored-surface.css`; `top` / `left` are written by the primitive) |
 | `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `var(--poodle-popover-surface-min-width, 14rem)` |
 | `max-width` | `var(--poodle-popover-surface-max-width, min(24rem, 90vw))` |
@@ -285,26 +284,20 @@ wiring, presence (if open/close animation is added later).
 | `min-width` | `100%` |
 | `box-sizing` | `border-box` |
 
-### Placement rules — position offsets by placement value
+### Placement
 
-| Placement prefix | Properties |
-|------------------|------------|
-| `bottom-*` | `top: calc(100% + var(--poodle-popover-offset))`, `left: 0` |
-| `top-*` | `bottom: calc(100% + var(--poodle-popover-offset))`, `left: 0` |
-| `right-*` | `top: 0`, `left: calc(100% + var(--poodle-popover-offset))` |
-| `left-*` | `top: 0`, `right: calc(100% + var(--poodle-popover-offset))` |
-
-### Placement alignment — end modifier
-
-| Modifier | Properties |
-|----------|------------|
-| `*-end` | `left: auto`, `right: 0` |
+The surface carries no placement CSS. `placement` and `offset` are passed to
+the anchored-overlay primitive, which measures the trigger and the surface,
+picks the first candidate that clears the viewport, and writes `top` / `left`
+in viewport coordinates. See `002-anchored-overlays.md`.
 
 ### Data Attributes
 
 | Attribute | Source |
 |-----------|--------|
-| `data-placement` | resolved placement value |
+| `data-placement` | placement in effect after collision resolution |
+| `data-poodle-anchored` | `true` — the surface is portalled and viewport-positioned |
+| `data-anchor-hidden` | `true` when the trigger has scrolled out of its clipping ancestor |
 | `data-surface-width` | resolved `surfaceWidth` value (`content` / `trigger`) |
 | `data-disabled` | `true` when `disabled` (on trigger) |
 | `data-block` | `true` when `block` (on root and trigger) |
@@ -315,9 +308,14 @@ wiring, presence (if open/close animation is added later).
   focus-restoration semantics
 - if the content traps focus, the component should likely be `Dialog` or
   `Drawer` instead
-- `--poodle-popover-offset` CSS custom property is set from the `offset` prop,
-  enabling placement rules to reference it in `calc()` expressions
-- surface uses `position: absolute` relative to the root's `position: relative`
+- `offset` is passed to the anchored-overlay primitive as a px gap; there is no
+  `--poodle-popover-offset` custom property, because the surface no longer
+  positions itself in CSS
+- the surface is portalled out of the root and positioned in viewport
+  coordinates (`002-anchored-overlays.md`), so no ancestor `overflow`,
+  `transform` or stacking context can clip it
+- `surfaceWidth="trigger"` is honoured by measuring the trigger, not by
+  `width: 100%`
 
 ## 10. GPUI Notes
 
@@ -347,7 +345,7 @@ wiring, presence (if open/close animation is added later).
 - [ ] box-shadow: 3-layer stack (inset highlight + two drop shadows)
 - [ ] padding: panel-y / panel-x
 - [ ] trigger focus ring matches (focus width, focusRing color, 0.125rem offset)
-- [ ] placement offset uses --poodle-popover-offset custom property
+- [ ] `offset` is honoured as the gap between trigger and surface
 
 ### Tier 3: Implementation Freedom
 
@@ -373,7 +371,7 @@ wiring, presence (if open/close animation is added later).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; offset matches --poodle-popover-offset |
+| Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; the gap matches `offset` |
 
 ## 14. Approval And Adoption Notes
 

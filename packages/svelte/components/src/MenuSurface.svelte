@@ -5,10 +5,12 @@
     menuListCanActivate,
     menuListNavigate,
     menuNavigableItems,
+    type AnchorTarget,
   } from "@poodle/headless";
   import { tick } from "svelte";
 
   import MenuSurface from "./MenuSurface.svelte";
+  import { anchored } from "./anchored";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
@@ -17,11 +19,16 @@
     ariaLabel?: string | null;
     size?: ControlSize;
     density?: ControlDensity;
-    overlayStyle?: string;
+    /** Anchor for a root surface. Null for a nested flyout, which is
+     * positioned against its own row inside the already-portalled parent. */
+    anchor?: AnchorTarget | null;
+    offset?: number;
     placement?: OverlayPlacement | null;
     overlayElement?: HTMLDivElement | null;
     /** True for a submenu flyout nested inside a parent surface. */
     nested?: boolean;
+    /** Nested flyout that ran out of room on the right and opens leftward. */
+    flipped?: boolean;
     onAction?: ((value: string) => void) | undefined;
     /** Nested surfaces: request the parent to close this flyout (ArrowLeft). */
     onRequestClose?: (() => void) | undefined;
@@ -32,13 +39,19 @@
     ariaLabel = null,
     size = "md",
     density = "default",
-    overlayStyle = "",
+    anchor = null,
+    offset = 6,
     placement = null,
     overlayElement = $bindable<HTMLDivElement | null>(null),
     nested = false,
+    flipped = false,
     onAction = undefined,
     onRequestClose = undefined,
   }: Props = $props();
+
+  // `placement` is the request; this is what survived collision resolution.
+  let resolvedPlacement = $state<OverlayPlacement | null>(null);
+  const displayPlacement = $derived(anchor ? resolvedPlacement : placement);
 
   let itemElements = $state<Array<HTMLButtonElement | null>>([]);
   let highlightIndex = $state(0);
@@ -162,12 +175,18 @@
 
 <div
   bind:this={overlayElement}
+  use:anchored={{
+    anchor,
+    placement: placement ?? "bottom-start",
+    offset,
+    onPlacement: (next) => (resolvedPlacement = next),
+  }}
   class="poodle-menu-surface"
   class:poodle-menu-surface--submenu={nested}
+  class:poodle-menu-surface--flipped={flipped}
   data-size={size}
   data-density={density}
-  data-placement={placement ?? undefined}
-  style={overlayStyle}
+  data-placement={displayPlacement ?? undefined}
   role="menu"
   aria-label={ariaLabel ?? undefined}
 >
@@ -256,7 +275,7 @@
             size={size}
             density={density}
             nested={true}
-            overlayStyle={submenuFlippedValue === item.value ? "left: auto; right: 100%;" : ""}
+            flipped={submenuFlippedValue === item.value}
             onAction={onAction}
             onRequestClose={() => closeSubmenu(true)}
           />

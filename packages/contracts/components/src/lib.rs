@@ -132,6 +132,7 @@ mod page_header;
 mod page_loading;
 mod pagination_summary;
 mod picker_shell;
+mod ref_select;
 mod relation_picker;
 mod remediation_banner;
 mod selection_summary;
@@ -208,6 +209,9 @@ pub use model_picker::{
 pub use agent_chat_input::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ComposerKey, ComposerKeyModifiers,
     SubmitIntent,
+};
+pub use ref_select::{
+    RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant,
 };
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;

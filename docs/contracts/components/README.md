@@ -108,6 +108,7 @@ primitives and layout surfaces through higher-order application components.
 - `radio-group.md`
 - `range-slider.md`
 - `rating.md`
+- `ref-select.md`
 - `region.md`
 - `relation-picker.md`
 - `remediation-banner.md`

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
-import { registerDismissLayer } from "@poodle/headless";
+import { layerContains, registerDismissLayer } from "@poodle/headless";
 
 import "@poodle/styles/filter-builder.css";
 // Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
@@ -7,6 +7,7 @@ import "@poodle/styles/filter-builder.css";
 // trigger block rather than via the SelectionSummary section component.
 import "@poodle/styles/selection-summary.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
 import { Icon } from "./Icon";
@@ -84,7 +85,9 @@ export function FilterBuilder({
   const [draftOperator, setDraftOperator] = useState("");
   const [draftOperand, setDraftOperand] = useState<FilterOperand>({ kind: "none" });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
@@ -135,7 +138,8 @@ export function FilterBuilder({
   useEffect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: () => {
         setOpen(false);
@@ -267,7 +271,7 @@ export function FilterBuilder({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-filter-builder-popover"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -371,8 +375,11 @@ export function FilterBuilder({
       </div>
 
       {open ? (
-        <div
+        <AnchoredSurface
           ref={panelRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={8}
           id={panelId}
           className="poodle-filter-builder__surface"
           role="dialog"
@@ -473,7 +480,7 @@ export function FilterBuilder({
               <p className="poodle-filter-builder__empty">No filters</p>
             ) : null}
           </div>
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

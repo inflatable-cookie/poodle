@@ -9,9 +9,10 @@
   // clause pills — single CSS source, no visual fork. The pills render inline in
   // the trigger block rather than via the SelectionSummary section component.
   import "@poodle/styles/selection-summary.css";
-  import { registerDismissLayer } from "@poodle/headless";
+  import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
+  import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
   import { default as Icon } from "./Icon.svelte";
@@ -153,7 +154,8 @@
   $effect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, panelElement),
       dismissOnOutsideInteract: true,
       onDismiss: () => {
         open = false;
@@ -392,6 +394,7 @@
   {#if open}
     <div
       bind:this={panelElement}
+      use:anchored={{ anchor: rootElement, placement: "bottom-start", offset: 8 }}
       id={panelId}
       class="poodle-filter-builder__surface"
       role="dialog"

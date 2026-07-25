@@ -49,6 +49,18 @@ export function resolveDismiss(
   return top;
 }
 
+/**
+ * `contains` for a layer whose parts are not one subtree. A portalled surface
+ * is not a descendant of its trigger, so an outside-interaction check has to
+ * ask both — otherwise the first click inside the surface dismisses the layer.
+ */
+export function layerContains(
+  target: Node,
+  ...elements: Array<Element | null | undefined>
+): boolean {
+  return elements.some((element) => element?.contains(target) ?? false);
+}
+
 const stack: DismissLayer[] = [];
 let listenersAttached = false;
 

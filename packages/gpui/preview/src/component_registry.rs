@@ -289,6 +289,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Popover filter-clause builder with editable pills and AND/OR combinator.",
     },
     ComponentEntry {
+        slug: "ref-select",
+        display_name: "RefSelect",
+        description: "Version-control ref chooser with search, a current marker and a loading footer.",
+    },
+    ComponentEntry {
         slug: "model-picker",
         display_name: "ModelPicker",
         description: "Combined model and capability-axis picker in one popover widget.",

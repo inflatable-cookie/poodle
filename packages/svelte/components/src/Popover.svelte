@@ -3,6 +3,7 @@
   import {
     createInstanceId,
     getFocusableElements,
+    layerContains,
     popoverParts,
     popoverTransition,
     registerDismissLayer,
@@ -11,6 +12,7 @@
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
+  import { anchored } from "./anchored";
   import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
   interface Props {
@@ -66,6 +68,10 @@
 
   const isControlled = $derived(open !== null);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+  // Null until the surface is measured; the anchored action reports back
+  // whichever candidate survived collision resolution.
+  let placementFromAnchor = $state<OverlayPlacement | null>(null);
+  const resolvedPlacement = $derived(isOpen ? (placementFromAnchor ?? placement) : placement);
 
   $effect(() => {
     if (!(isOpen && !previousOpen)) {
@@ -102,7 +108,7 @@
       surfaceId: popoverId,
       ariaLabel,
       block,
-      placement,
+      placement: resolvedPlacement,
       surfaceWidth,
     }),
   );
@@ -141,7 +147,8 @@
     }
 
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, surfaceElement),
       dismissOnOutsideInteract,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
@@ -171,10 +178,16 @@
   {#if isOpen}
     <div
       bind:this={surfaceElement}
+      use:anchored={{
+        anchor: rootElement,
+        placement,
+        offset,
+        matchWidth: surfaceWidth === "trigger",
+        onPlacement: (next) => (placementFromAnchor = next),
+      }}
       {...parts.surface}
       class="poodle-popover__surface"
       style={[
-        `--poodle-popover-offset: ${offset}px`,
         surfaceMinWidth ? `--poodle-popover-surface-min-width: ${surfaceMinWidth}` : "",
         surfaceMaxWidth ? `--poodle-popover-surface-max-width: ${surfaceMaxWidth}` : "",
       ].filter(Boolean).join("; ")}

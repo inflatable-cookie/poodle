@@ -12,7 +12,7 @@ import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState 
 
 import "@poodle/styles/hover-card.css";
 
-import { resolveOverlayPosition } from "./overlay-position";
+import { AnchoredSurface } from "./AnchoredSurface";
 import type { OverlayPlacement } from "./types";
 
 export interface HoverCardProps {
@@ -40,10 +40,11 @@ export function HoverCard({
 }: HoverCardProps) {
   const hoverCardId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
-  const [surfaceStyle, setSurfaceStyle] = useState<CSSProperties>({});
 
-  const triggerRef = useRef<HTMLSpanElement | null>(null);
-  const surfaceRef = useRef<HTMLSpanElement | null>(null);
+  // The trigger is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [triggerElement, setTriggerElement] = useState<HTMLSpanElement | null>(null);
+  const surfaceRef = useRef<HTMLElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const machineState = useRef<HoverState>("closed");
 
@@ -76,27 +77,6 @@ export function HoverCard({
     [clearTimers, closeDelayMs, isControlled, onOpenChange, openDelayMs],
   );
 
-  const positionSurface = useCallback(() => {
-    const triggerEl = triggerRef.current;
-    const surfaceEl = surfaceRef.current;
-    if (!triggerEl || !surfaceEl) return;
-    const position = resolveOverlayPosition(
-      triggerEl.getBoundingClientRect(),
-      surfaceEl.getBoundingClientRect(),
-      placement,
-      8,
-    );
-    setSurfaceStyle((prev) => {
-      const top = `${position.top}px`;
-      const left = `${position.left}px`;
-      return prev.top === top && prev.left === left ? prev : { top, left };
-    });
-  }, [placement]);
-
-  useLayoutEffect(() => {
-    if (isOpen) positionSurface();
-  }, [isOpen, positionSurface]);
-
   useEffect(() => clearTimers, [clearTimers]);
 
   return (
@@ -117,7 +97,7 @@ export function HoverCard({
       }}
     >
       <span
-        ref={triggerRef}
+        ref={setTriggerElement}
         className="poodle-hover-card__trigger"
         role="button"
         tabIndex={0}
@@ -128,19 +108,22 @@ export function HoverCard({
       </span>
 
       {isOpen ? (
-        <span
+        <AnchoredSurface
           ref={surfaceRef}
+          tag="span"
+          anchor={triggerElement}
+          placement={placement}
+          offset={8}
           id={hoverCardId}
           className="poodle-hover-card__surface"
           role="dialog"
           tabIndex={-1}
           aria-label={ariaLabel ?? undefined}
-          style={surfaceStyle}
           onMouseEnter={clearTimers}
           onMouseLeave={() => send({ type: "LEAVE" })}
         >
           {children}
-        </span>
+        </AnchoredSurface>
       ) : null}
     </span>
   );

@@ -9,9 +9,9 @@
     type HoverEvent as HoverMachineEvent,
     type HoverState,
   } from "@poodle/headless";
-  import { onDestroy, onMount, tick, type Snippet } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
 
-  import { resolveOverlayPosition } from "./overlay-position";
+  import { anchored } from "./anchored";
   import type { OverlayPlacement } from "./types";
 
   interface Props {
@@ -41,7 +41,6 @@
   let triggerElement = $state<HTMLElement | null>(null);
   let bubbleElement = $state<HTMLSpanElement | null>(null);
   let resolvedPlacement = $state<OverlayPlacement>("top");
-  let bubbleStyle = $state("");
   let seededDefaults = $state(false);
 
   $effect.pre(() => {
@@ -56,8 +55,9 @@
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
   $effect(() => {
-    if (isOpen) {
-      void updateTooltipPosition();
+    if (isOpen && triggerElement) {
+      // Announced only while shown: a stale describedby outlives the bubble.
+      triggerElement.setAttribute("aria-describedby", tooltipId);
     }
   });
 
@@ -182,53 +182,6 @@
     dismiss();
   }
 
-  async function updateTooltipPosition(): Promise<void> {
-    if (!isOpen || !triggerElement) {
-      return;
-    }
-
-    await tick();
-
-    if (!bubbleElement) {
-      return;
-    }
-
-    const nextPosition = resolveOverlayPosition(
-      triggerElement.getBoundingClientRect(),
-      bubbleElement.getBoundingClientRect(),
-      placement,
-    );
-
-    resolvedPlacement = nextPosition.placement;
-    bubbleStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
-    await tick();
-
-    const renderedRect = bubbleElement.getBoundingClientRect();
-    const correctedTop = nextPosition.top + (nextPosition.top - renderedRect.top);
-    const correctedLeft = nextPosition.left + (nextPosition.left - renderedRect.left);
-    if (Math.abs(correctedTop - nextPosition.top) > 0.5
-      || Math.abs(correctedLeft - nextPosition.left) > 0.5) {
-      bubbleStyle = `top: ${correctedTop}px; left: ${correctedLeft}px;`;
-    }
-    triggerElement.setAttribute("aria-describedby", tooltipId);
-  }
-
-  function handleViewportChange(): void {
-    if (isOpen) {
-      void updateTooltipPosition();
-    }
-  }
-
-  onMount(() => {
-    window.addEventListener("resize", handleViewportChange);
-    window.addEventListener("scroll", handleViewportChange, true);
-
-    return () => {
-      window.removeEventListener("resize", handleViewportChange);
-      window.removeEventListener("scroll", handleViewportChange, true);
-    };
-  });
-
   onDestroy(() => {
     clearTimer();
     triggerElement?.removeAttribute("aria-describedby");
@@ -255,9 +208,13 @@
     <span
       id={tooltipId}
       bind:this={bubbleElement}
+      use:anchored={{
+        anchor: triggerElement,
+        placement,
+        onPlacement: (next) => (resolvedPlacement = next),
+      }}
       class="poodle-tooltip__bubble"
       data-placement={resolvedPlacement}
-      style={bubbleStyle}
       role="tooltip"
     >
       {content}

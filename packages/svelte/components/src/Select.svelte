@@ -4,17 +4,19 @@
     filterSelectGroups,
     flattenSelectOptions,
     isSelectOptionDisabled,
+    layerContains,
     registerDismissLayer,
-    selectMenuPlacement,
     selectOpenHighlightIndex,
   } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
+  import { anchored } from "./anchored";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
+    OverlayPlacement,
     SemanticControlSizeRole,
     SelectEmptyRenderState,
     SelectLoadOptions,
@@ -95,12 +97,18 @@
   const generatedSelectId = `poodle-select-${crypto.randomUUID()}`;
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = $state(null);
+  let listboxElement: HTMLDivElement | null = $state(null);
   let inputElement: HTMLInputElement | null = $state(null);
   let open = $state(false);
   let query = $state("");
   let highlightIndex = $state(0);
-  let placement: "below" | "above" = $state("below");
-  let alignEnd = $state(false);
+  // Reported by the anchored action once the listbox is measured; the classes
+  // below only need the side and the alignment, not the full placement.
+  let resolvedPlacement = $state<OverlayPlacement>("bottom-start");
+  const placement = $derived<"below" | "above">(
+    resolvedPlacement.startsWith("top") ? "above" : "below",
+  );
+  const alignEnd = $derived(resolvedPlacement.endsWith("-end"));
   let loadedOptions: SelectItems | null = $state(null);
   let loadState: "idle" | "loading" | "loaded" | "error" = $state("idle");
   let loadError: string | null = $state(null);
@@ -162,12 +170,6 @@
     return isSelectOptionDisabled(o);
   }
 
-  function parseMinWidth(value: string): number {
-    const num = parseFloat(value);
-    if (value.endsWith("rem")) return num * 16;
-    return num;
-  }
-
   async function startLoad(nextQuery = query): Promise<void> {
     const requestId = ++activeLoadRequestId;
     loadState = "loading";
@@ -209,17 +211,6 @@
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (nextOpen && rootElement) {
-      const rect = rootElement.getBoundingClientRect();
-      const menuPlacement = selectMenuPlacement(
-        rect,
-        { width: window.innerWidth, height: window.innerHeight },
-        menuMinWidth ? parseMinWidth(menuMinWidth) : null,
-      );
-
-      placement = menuPlacement.placement;
-      alignEnd = menuPlacement.alignEnd;
-    }
     open = nextOpen;
     onOpenChange?.(nextOpen);
 
@@ -346,7 +337,8 @@
     }
 
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The listbox is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, listboxElement),
       dismissOnOutsideInteract: true,
       onDismiss: () => setOpen(false),
     });
@@ -469,11 +461,25 @@
     <!-- Dropdown listbox -->
     {#if open}
       <div
+        bind:this={listboxElement}
+        use:anchored={{
+          anchor: rootElement,
+          placement: "bottom-start",
+          // Ghost triggers sit tighter to their menu than bordered ones.
+          offset: variant === "ghost" ? 6 : 4,
+          // A fixed min-width means the listbox sizes to its content; without
+          // one it tracks the trigger exactly, as the old absolute inset did.
+          matchWidth: !menuMinWidth,
+          onPlacement: (next) => (resolvedPlacement = next),
+        }}
         id={listboxId}
         class="poodle-select__listbox"
         class:poodle-select__listbox--above={placement === "above"}
         class:poodle-select__listbox--auto-width={!!menuMinWidth}
         class:poodle-select__listbox--align-end={alignEnd}
+        data-variant={variant}
+        data-size={resolvedSize}
+        data-density={resolvedDensity}
         role="listbox"
         aria-label={ariaLabel ?? undefined}
         style={menuMinWidth ? `min-width: ${menuMinWidth}` : undefined}

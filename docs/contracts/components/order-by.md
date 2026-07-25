@@ -251,7 +251,8 @@ moves it one position later.
 - Reset: `inline-flex` wrapper around an `xs`/size-matched IconButton (no bespoke
   square dimensions)
 - Icon trigger: shared secondary `IconButton`, size matched to the resolved control size
-- Surface: anchored `position: absolute`, `min-width: 14rem`,
+- Surface: portalled and viewport-positioned (`002-anchored-overlays.md`),
+  requesting `bottom-start` with an `8px` offset; `min-width: 14rem`,
   `max-width: min(24rem, 90vw)`, `top: calc(100% + 0.5rem)`
 - Panel: flex column
 - List: flex column

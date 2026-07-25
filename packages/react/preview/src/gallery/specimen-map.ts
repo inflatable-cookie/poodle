@@ -76,6 +76,7 @@ import { MenuSpecimen } from "./specimens/MenuSpecimen";
 import { MetaBarSpecimen } from "./specimens/MetaBarSpecimen";
 import { MeterSpecimen } from "./specimens/MeterSpecimen";
 import { ModelPickerSpecimen } from "./specimens/ModelPickerSpecimen";
+import { RefSelectSpecimen } from "./specimens/RefSelectSpecimen";
 import { MetricTileSpecimen } from "./specimens/MetricTileSpecimen";
 import { NavCardSpecimen } from "./specimens/NavCardSpecimen";
 import { NavigationMenuSpecimen } from "./specimens/NavigationMenuSpecimen";
@@ -217,6 +218,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "meta-item": MetaBarSpecimen,
   "meter": MeterSpecimen,
   "model-picker": ModelPickerSpecimen,
+  "ref-select": RefSelectSpecimen,
   "metric-tile": MetricTileSpecimen,
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,

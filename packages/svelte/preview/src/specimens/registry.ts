@@ -67,6 +67,7 @@ import MenuSpecimen from "./MenuSpecimen.svelte";
 import MenubarSpecimen from "./MenubarSpecimen.svelte";
 import MeterSpecimen from "./MeterSpecimen.svelte";
 import ModelPickerSpecimen from "./ModelPickerSpecimen.svelte";
+import RefSelectSpecimen from "./RefSelectSpecimen.svelte";
 import NavigationMenuSpecimen from "./NavigationMenuSpecimen.svelte";
 import NumberInputSpecimen from "./NumberInputSpecimen.svelte";
 import PageHeaderSpecimen from "./PageHeaderSpecimen.svelte";
@@ -208,6 +209,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
   "model-picker": ModelPickerSpecimen,
+  "ref-select": RefSelectSpecimen,
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,
   "order-by": OrderBySpecimen,

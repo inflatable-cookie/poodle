@@ -119,6 +119,9 @@ export { DateRangePicker, type DateRangePickerProps } from "./DateRangePicker";
 export { Dialog, type DialogProps } from "./Dialog";
 export { Drawer, type DrawerProps } from "./Drawer";
 export { ThemePortal } from "./portal";
+// Overlay infrastructure: hosts building their own anchored surface get the
+// same portalling and placement the library uses (002-anchored-overlays.md).
+export { AnchoredSurface, type AnchoredSurfaceProps } from "./AnchoredSurface";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { ListCard, type ListCardProps } from "./ListCard";
 export { ListCardCounter, type ListCardCounterProps } from "./ListCardCounter";
@@ -147,6 +150,7 @@ export { TriStateSwitch, type TriStateSwitchProps } from "./TriStateSwitch";
 export { AgentChatInput, type AgentChatInputProps } from "./AgentChatInput";
 export { Meter, type MeterProps } from "./Meter";
 export { ModelPicker, type ModelPickerProps } from "./ModelPicker";
+export { RefSelect, type RefSelectProps } from "./RefSelect";
 export { OrderBy, type OrderByProps } from "./OrderBy";
 export { MetaItem, type MetaItemProps } from "./MetaItem";
 export { Pill, type PillProps } from "./Pill";

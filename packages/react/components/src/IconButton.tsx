@@ -15,7 +15,7 @@ import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState 
 import "@poodle/styles/icon-button.css";
 
 import { Icon } from "./Icon";
-import { resolveOverlayPosition } from "./overlay-position";
+import { AnchoredSurface } from "./AnchoredSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
 import type {
@@ -82,11 +82,12 @@ export function IconButton({
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [resolvedTooltipPlacement, setResolvedTooltipPlacement] = useState<OverlayPlacement>(tooltipPlacement);
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
   const [uncontrolledPressed, setUncontrolledPressed] = useState(defaultPressed === true);
 
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  // The button is state, not a ref: the portalled tooltip has to re-render
+  // once it exists so it can be positioned against it.
+  const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(null);
+  const tooltipRef = useRef<HTMLElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverStateRef = useRef<HoverState>("closed");
 
@@ -123,37 +124,6 @@ export function IconButton({
     [clearTimer],
   );
 
-  const updateTooltipPosition = useCallback(() => {
-    const button = buttonRef.current;
-    const tip = tooltipRef.current;
-    if (!button || !tip) return;
-    const next = resolveOverlayPosition(button.getBoundingClientRect(), tip.getBoundingClientRect(), tooltipPlacement);
-    // Guard: only set state on real change, or the position pass re-renders
-    // itself into an update loop.
-    setResolvedTooltipPlacement((prev) => (prev === next.placement ? prev : next.placement));
-    setTooltipStyle((prev) => {
-      const top = `${next.top}px`;
-      const left = `${next.left}px`;
-      return prev.top === top && prev.left === left ? prev : { top, left };
-    });
-  }, [tooltipPlacement]);
-
-  useLayoutEffect(() => {
-    if (tooltipOpen && tooltipText) updateTooltipPosition();
-  }, [tooltipOpen, tooltipText, updateTooltipPosition]);
-
-  useEffect(() => {
-    const onViewportChange = () => {
-      if (tooltipRef.current) updateTooltipPosition();
-    };
-    window.addEventListener("resize", onViewportChange);
-    window.addEventListener("scroll", onViewportChange, true);
-    return () => {
-      window.removeEventListener("resize", onViewportChange);
-      window.removeEventListener("scroll", onViewportChange, true);
-    };
-  }, [updateTooltipPosition]);
-
   useEffect(() => clearTimer, [clearTimer]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -175,7 +145,7 @@ export function IconButton({
     >
       <button
         type={type}
-        ref={buttonRef}
+        ref={setButtonElement}
         className="poodle-icon-button"
         data-variant={variant}
         data-tone={tone !== "default" ? tone : undefined}
@@ -215,16 +185,19 @@ export function IconButton({
       </button>
 
       {tooltipOpen && tooltipText ? (
-        <span
+        <AnchoredSurface
           id={tooltipId}
           ref={tooltipRef}
+          tag="span"
+          anchor={buttonElement}
+          placement={tooltipPlacement}
+          onPlacement={setResolvedTooltipPlacement}
           className="poodle-icon-button__tooltip"
           data-placement={resolvedTooltipPlacement}
-          style={tooltipStyle}
           role="tooltip"
         >
           {tooltipText}
-        </span>
+        </AnchoredSurface>
       ) : null}
     </span>
   );

@@ -53,6 +53,41 @@ describe("ModelPicker (react)", () => {
   const triggerOf = (container: HTMLElement) =>
     container.querySelector(".poodle-model-picker__trigger") as HTMLButtonElement;
 
+  // The surface is portalled to the theme root, so it is not reachable from the
+  // render container. `aria-controls` is the link back — and going through it
+  // keeps concurrently-rendered pickers apart.
+  const surfaceOf = (container: HTMLElement) =>
+    document.getElementById(
+      triggerOf(container).getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
+
+  it("portals its surface out of the trigger's subtree", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(container));
+
+    const surface = surfaceOf(container);
+    expect(surface).not.toBeNull();
+    // Escaping the subtree is the whole point: no ancestor of the trigger can
+    // clip it or trap it in a stacking context.
+    expect(container.querySelector(".poodle-model-picker__surface")).toBeNull();
+    expect(surface.closest(".poodle-model-picker")).toBeNull();
+    expect(surface.dataset.poodleAnchored).toBe("true");
+  });
+
+  it("keeps the portalled surface inside its dismiss layer", () => {
+    const { container } = render(
+      <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
+    );
+    fireEvent.click(triggerOf(container));
+
+    // A click in the surface is no longer a DOM descendant of the trigger, so
+    // without `layerContains` it would read as an outside interaction and close.
+    fireEvent.mouseDown(surfaceOf(container).querySelector(".poodle-model-picker__option")!);
+    expect(surfaceOf(container)).not.toBeNull();
+  });
+
   it("summarises the axes the selected model exposes", () => {
     const { container } = render(
       <ModelPicker
@@ -89,10 +124,11 @@ describe("ModelPicker (react)", () => {
     ).toBe("Minimal");
 
     fireEvent.click(triggerOf(container));
+    const surface = surfaceOf(container);
     expect(
-      (container.querySelector(".poodle-model-picker__axis-label") as HTMLElement).textContent,
+      (surface.querySelector(".poodle-model-picker__axis-label") as HTMLElement).textContent,
     ).toBe("Effort");
-    expect(container.querySelector(".poodle-model-picker__axis")?.textContent).toContain("Minimal");
+    expect(surface.querySelector(".poodle-model-picker__axis")?.textContent).toContain("Minimal");
   });
 
   it("normalises the emitted selection: another provider's level never leaks", () => {
@@ -108,7 +144,9 @@ describe("ModelPicker (react)", () => {
     );
 
     fireEvent.click(triggerOf(container));
-    const options = container.querySelectorAll<HTMLButtonElement>(".poodle-model-picker__option");
+    const options = surfaceOf(container).querySelectorAll<HTMLButtonElement>(
+      ".poodle-model-picker__option",
+    );
     fireEvent.click(options[2]);
 
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -123,10 +161,9 @@ describe("ModelPicker (react)", () => {
     );
     expect(container.querySelector(".poodle-model-picker__summary")).toBeNull();
     fireEvent.click(triggerOf(container));
-    expect(container.querySelector(".poodle-model-picker__axes")).toBeNull();
-    expect(
-      (container.querySelector(".poodle-model-picker__surface") as HTMLElement).dataset.layout,
-    ).toBe("single");
+    const surface = surfaceOf(container);
+    expect(surface.querySelector(".poodle-model-picker__axes")).toBeNull();
+    expect(surface.dataset.layout).toBe("single");
   });
 
   it("a model with no axis declaration inherits every axis", () => {
@@ -135,7 +172,7 @@ describe("ModelPicker (react)", () => {
       <ModelPicker models={inherits} axes={axes} value={{ model: "all", axes: {} }} />,
     );
     fireEvent.click(triggerOf(container));
-    expect(container.querySelectorAll(".poodle-model-picker__axis")).toHaveLength(2);
+    expect(surfaceOf(container).querySelectorAll(".poodle-model-picker__axis")).toHaveLength(2);
   });
 
   it("renders an arbitrary image in place of a registry icon", () => {
@@ -156,7 +193,7 @@ describe("ModelPicker (react)", () => {
     expect(container.querySelector(".poodle-model-picker__icon .poodle-icon")).toBeNull();
 
     fireEvent.click(triggerOf(container));
-    const rows = container.querySelectorAll(".poodle-model-picker__option");
+    const rows = surfaceOf(container).querySelectorAll(".poodle-model-picker__option");
     expect(rows[0].querySelector(".poodle-model-picker__option-image")).not.toBeNull();
     // The icon-only model still renders a registry icon.
     expect(rows[1].querySelector(".poodle-model-picker__option-image")).toBeNull();
@@ -211,7 +248,7 @@ describe("ModelPicker (react)", () => {
     expect(label.textContent?.trim()).toBe("Select model");
 
     fireEvent.click(triggerOf(container));
-    const groups = container.querySelectorAll(".poodle-model-picker__group");
+    const groups = surfaceOf(container).querySelectorAll(".poodle-model-picker__group");
     // All three models share one group, so the heading is emitted once.
     expect(groups).toHaveLength(1);
     expect(groups[0].textContent?.trim()).toBe("Frontier");
@@ -227,10 +264,11 @@ describe("ModelPicker (react)", () => {
       />,
     );
     fireEvent.click(triggerOf(many.container));
-    const axis = many.container.querySelector(".poodle-model-picker__axis") as HTMLElement;
+    const manySurface = surfaceOf(many.container);
+    const axis = manySurface.querySelector(".poodle-model-picker__axis") as HTMLElement;
     expect(axis.dataset.control).toBe("list");
-    expect(many.container.querySelectorAll(".poodle-model-picker__axis-option")).toHaveLength(7);
-    expect(many.container.querySelector(".poodle-segmented-control")).toBeNull();
+    expect(manySurface.querySelectorAll(".poodle-model-picker__axis-option")).toHaveLength(7);
+    expect(manySurface.querySelector(".poodle-segmented-control")).toBeNull();
 
     // Two options stay segmented…
     const short = render(
@@ -238,7 +276,8 @@ describe("ModelPicker (react)", () => {
     );
     fireEvent.click(triggerOf(short.container));
     expect(
-      (short.container.querySelector(".poodle-model-picker__axis") as HTMLElement).dataset.control,
+      (surfaceOf(short.container).querySelector(".poodle-model-picker__axis") as HTMLElement).dataset
+        .control,
     ).toBe("segmented");
 
     // …unless the host says otherwise.
@@ -251,7 +290,8 @@ describe("ModelPicker (react)", () => {
     );
     fireEvent.click(triggerOf(forced.container));
     expect(
-      (forced.container.querySelector(".poodle-model-picker__axis") as HTMLElement).dataset.control,
+      (surfaceOf(forced.container).querySelector(".poodle-model-picker__axis") as HTMLElement)
+        .dataset.control,
     ).toBe("list");
   });
 
@@ -260,18 +300,16 @@ describe("ModelPicker (react)", () => {
       <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
     );
     fireEvent.click(triggerOf(container));
-    const surface = container.querySelector(".poodle-model-picker__surface") as HTMLElement;
+    const surface = surfaceOf(container);
     expect(surface.dataset.layout).toBe("split");
-    expect(container.querySelectorAll(".poodle-model-picker__axes")).toHaveLength(1);
+    expect(surface.querySelectorAll(".poodle-model-picker__axes")).toHaveLength(1);
 
     // No axes declared → single column, no axes rail.
     const plain = render(<ModelPicker models={models} value={{ model: "pro", axes: {} }} />);
     fireEvent.click(triggerOf(plain.container));
-    const plainSurface = plain.container.querySelector(
-      ".poodle-model-picker__surface",
-    ) as HTMLElement;
+    const plainSurface = surfaceOf(plain.container);
     expect(plainSurface.dataset.layout).toBe("single");
-    expect(plain.container.querySelector(".poodle-model-picker__axes")).toBeNull();
+    expect(plainSurface.querySelector(".poodle-model-picker__axes")).toBeNull();
   });
 
   it("stays open after selecting a model so the axes can still be edited", () => {
@@ -279,12 +317,12 @@ describe("ModelPicker (react)", () => {
       <ModelPicker models={models} axes={axes} value={{ model: "pro", axes: {} }} />,
     );
     fireEvent.click(triggerOf(container));
-    expect(container.querySelector(".poodle-model-picker__surface")).not.toBeNull();
+    expect(surfaceOf(container)).not.toBeNull();
 
     fireEvent.click(
-      container.querySelectorAll<HTMLButtonElement>(".poodle-model-picker__option")[1],
+      surfaceOf(container).querySelectorAll<HTMLButtonElement>(".poodle-model-picker__option")[1],
     );
-    expect(container.querySelector(".poodle-model-picker__surface")).not.toBeNull();
-    expect(container.querySelector(".poodle-model-picker__axes")).not.toBeNull();
+    expect(surfaceOf(container)).not.toBeNull();
+    expect(surfaceOf(container).querySelector(".poodle-model-picker__axes")).not.toBeNull();
   });
 });

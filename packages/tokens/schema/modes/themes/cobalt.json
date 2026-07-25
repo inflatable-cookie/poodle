@@ -3,75 +3,93 @@
     "background": {
       "canvas": {
         "$type": "color",
-        "$value": "#000000"
+        "$value": "#0d0d0d"
       },
       "surface": {
         "$type": "color",
-        "$value": "#0a0a0a"
+        "$value": "#141414"
       },
       "panel": {
         "$type": "color",
-        "$value": "#141414"
+        "$value": "#1c1c1c"
       },
       "elevated": {
         "$type": "color",
-        "$value": "#1f1f1f"
+        "$value": "#242424"
       },
       "overlay": {
         "$type": "color",
-        "$value": "rgba(0,0,0,0.90)"
+        "$value": "rgba(6, 6, 6, 0.82)"
       }
     },
     "text": {
       "primary": {
         "$type": "color",
-        "$value": "#ffffff"
+        "$value": "#ededed"
       },
       "secondary": {
         "$type": "color",
-        "$value": "#d4d4d4"
+        "$value": "#a3a3a3"
       },
       "inverse": {
         "$type": "color",
-        "$value": "#000000"
+        "$value": "#121212"
       }
     },
     "border": {
       "subtle": {
         "$type": "color",
-        "$value": "rgba(255,255,255,0.24)"
+        "$value": "rgba(198, 198, 198, 0.14)"
       },
       "default": {
         "$type": "color",
-        "$value": "rgba(255,255,255,0.50)"
+        "$value": "rgba(198, 198, 198, 0.24)"
       },
       "strong": {
         "$type": "color",
-        "$value": "rgba(255,255,255,0.80)"
+        "$value": "rgba(198, 198, 198, 0.42)"
       }
     },
     "accent": {
       "base": {
         "$type": "color",
-        "$value": "#4d9bff"
+        "$value": "#5b9dff"
       },
       "hover": {
         "$type": "color",
-        "$value": "#6faaff"
+        "$value": "#7db2ff"
       },
       "focusRing": {
         "$type": "color",
-        "$value": "#6faaff"
+        "$value": "#7db2ff"
+      }
+    },
+    "status": {
+      "success": {
+        "$type": "color",
+        "$value": "#7fc99a"
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "#f0ba55"
+      },
+      "danger": {
+        "$type": "color",
+        "$value": "#ef7c72"
+      },
+      "info": {
+        "$type": "color",
+        "$value": "#5b9dff"
       }
     },
     "icon": {
       "primary": {
         "$type": "color",
-        "$value": "#ffffff"
+        "$value": "#ededed"
       },
       "muted": {
         "$type": "color",
-        "$value": "#d4d4d4"
+        "$value": "#a3a3a3"
       }
     }
   }

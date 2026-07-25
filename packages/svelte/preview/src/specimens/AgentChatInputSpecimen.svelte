@@ -3,7 +3,9 @@
     AgentChatInput,
     Button,
     ModelPicker,
+    RefSelect,
     Icon,
+    type RefOption,
     type AgentChatAttachment,
     type ModelCapabilityAxis,
     type ModelOption,
@@ -94,6 +96,15 @@
   let lastSubmitted = $state<string | null>(null);
   let stopCount = $state(0);
 
+  // The footer's ref switcher — the "main" in the reference is a control, not
+  // a label.
+  const refs: RefOption[] = [
+    { value: "main", label: "main", kind: "branch", description: "a1b2c3d", group: "Branches" },
+    { value: "agent-composer", label: "agent-composer", kind: "branch", group: "Branches" },
+    { value: "v1.4.0", label: "v1.4.0", kind: "tag", group: "Tags" },
+  ];
+  let currentRef = $state("main");
+
   let attachments = $state<AgentChatAttachment[]>([
     { id: "a1", label: "architecture.png", kind: "image", thumbnailUrl: diagramThumb },
     { id: "a2", label: "release-notes.md", kind: "document", icon: "file-text" },
@@ -153,9 +164,13 @@
           <Icon name="folder" size="xs" /> Current checkout
         </span>
         <span class="poodle-agent-chat-specimen__footer-spacer"></span>
-        <span class="poodle-agent-chat-specimen__footer-item">
-          <Icon name="git-branch" size="xs" /> main
-        </span>
+        <RefSelect
+          {refs}
+          bind:value={currentRef}
+          currentRef="main"
+          emphasis="subdued"
+          size="sm"
+        />
       {/snippet}
     </AgentChatInput>
   </SpecimenGroup>

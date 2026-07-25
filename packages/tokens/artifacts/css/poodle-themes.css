@@ -22,23 +22,27 @@
 
 [data-theme="cobalt"] {
   /* Contrast axis anchor: oklch lightness of this theme's canvas. */
-  --poodle-contrast-anchor-l: 0.000000;
-  --poodle-color-background-canvas: oklch(from #000000 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
-  --poodle-color-background-surface: oklch(from #0a0a0a calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
-  --poodle-color-background-panel: oklch(from #141414 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
-  --poodle-color-background-elevated: oklch(from #1f1f1f calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
-  --poodle-color-background-overlay: rgba(0,0,0,0.90);
-  --poodle-color-text-primary: #ffffff;
-  --poodle-color-text-secondary: #d4d4d4;
-  --poodle-color-text-inverse: #000000;
-  --poodle-color-border-subtle: rgba(255, 255, 255, calc(0.24 * max(0.4, var(--poodle-contrast, 0.5))));
-  --poodle-color-border-default: rgba(255, 255, 255, calc(0.5 * max(0.4, var(--poodle-contrast, 0.5))));
-  --poodle-color-border-strong: rgba(255, 255, 255, calc(0.8 * max(0.4, var(--poodle-contrast, 0.5))));
-  --poodle-color-accent-base: #4d9bff;
-  --poodle-color-accent-hover: #6faaff;
-  --poodle-color-accent-focusRing: #6faaff;
-  --poodle-color-icon-primary: #ffffff;
-  --poodle-color-icon-muted: #d4d4d4;
+  --poodle-contrast-anchor-l: 0.159066;
+  --poodle-color-background-canvas: oklch(from #0d0d0d calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-surface: oklch(from #141414 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-panel: oklch(from #1c1c1c calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-elevated: oklch(from #242424 calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
+  --poodle-color-background-overlay: rgba(6, 6, 6, 0.82);
+  --poodle-color-text-primary: #ededed;
+  --poodle-color-text-secondary: #a3a3a3;
+  --poodle-color-text-inverse: #121212;
+  --poodle-color-border-subtle: rgba(198, 198, 198, calc(0.14 * max(0.4, var(--poodle-contrast, 0.5))));
+  --poodle-color-border-default: rgba(198, 198, 198, calc(0.24 * max(0.4, var(--poodle-contrast, 0.5))));
+  --poodle-color-border-strong: rgba(198, 198, 198, calc(0.42 * max(0.4, var(--poodle-contrast, 0.5))));
+  --poodle-color-accent-base: #5b9dff;
+  --poodle-color-accent-hover: #7db2ff;
+  --poodle-color-accent-focusRing: #7db2ff;
+  --poodle-color-status-success: #7fc99a;
+  --poodle-color-status-warning: #f0ba55;
+  --poodle-color-status-danger: #ef7c72;
+  --poodle-color-status-info: #5b9dff;
+  --poodle-color-icon-primary: #ededed;
+  --poodle-color-icon-muted: #a3a3a3;
 }
 
 [data-theme="eclipse"] {

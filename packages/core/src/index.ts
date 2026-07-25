@@ -61,8 +61,31 @@ export {
   type ModalEffect,
   type ModalResult,
 } from "./modal";
-export { registerDismissLayer, resolveDismiss, type DismissLayer } from "./dom/dismiss";
+export {
+  layerContains,
+  registerDismissLayer,
+  resolveDismiss,
+  type DismissLayer,
+} from "./dom/dismiss";
 export { createInstanceId } from "./dom/id";
+export {
+  anchorElement,
+  clipsOverflow,
+  collectClipAncestors,
+  collectScrollParents,
+  intersectClip,
+  isAnchorClipped,
+  observeAnchorMovement,
+  pointAnchor,
+  resolveClipRect,
+  resolvePortalTarget,
+  viewportClipRect,
+  type AnchorObservation,
+  type AnchorTarget,
+  type AnchorViewport,
+  type ClipRect,
+  type VirtualAnchor,
+} from "./dom/anchor";
 
 export {
   checkboxTransition,
@@ -225,11 +248,9 @@ export {
   flattenSelectOptions,
   filterSelectOptions,
   filterSelectGroups,
-  selectMenuPlacement,
   selectOpenHighlightIndex,
   type SelectOptionLike,
   type SelectGroupLike,
-  type SelectMenuPlacement,
 } from "./select";
 
 export {

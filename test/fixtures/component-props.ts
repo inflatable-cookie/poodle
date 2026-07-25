@@ -67,6 +67,11 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
     },
   },
   ToggleGroup: { options: opts },
+  RefSelect: {
+    refs: [{ value: "main", label: "main", kind: "branch" as const }],
+    currentRef: "main",
+    value: "main",
+  },
   ModelPicker: {
     models: [{ value: "a", label: "Model A" }],
     axes: [{ key: "effort", label: "Effort", kind: "select", options: opts }],
@@ -99,6 +104,10 @@ export const SMOKE_EXCLUDE_REACT: Record<string, string> = {
   // Returns `children` unchanged in the happy path, so it emits no DOM of its
   // own. Svelte's version renders an EmptyState fallback, so it stays covered.
   ErrorBoundary: "passthrough — renders children only in the non-error path",
+  // Infrastructure, not a component: without an `anchor` there is nothing to
+  // position against, so it renders nothing. Covered through its consumers
+  // (Popover, Select, ModelPicker, ...) and by test/overlays/portalling.test.tsx.
+  AnchoredSurface: "overlay positioning primitive — inert without an anchor",
 };
 
 // Components excluded from the Svelte<->React parity gate, with the reason.

@@ -32,8 +32,10 @@
     cursor: not-allowed;
   }
 
+  /* Positioning lives in anchored-surface.css: the surface is portalled to the
+     theme root and placed in viewport coordinates, so it carries no offsets of
+     its own. */
   .poodle-popover__surface {
-    position: absolute;
     z-index: var(--poodle-overlay-z-menu);
     min-width: var(--poodle-popover-surface-min-width, 14rem);
     max-width: var(--poodle-popover-surface-max-width, min(24rem, 90vw));
@@ -47,33 +49,9 @@
       0 0.125rem 0.375rem rgba(0, 0, 0, 0.15));
   }
 
+  /* Trigger-width surfaces are sized by the anchored action against the
+     measured trigger, so the min-width floor must not fight it. */
   .poodle-popover__surface[data-surface-width="trigger"] {
-    width: 100%;
-    min-width: 100%;
+    min-width: 0;
     box-sizing: border-box;
-  }
-
-  .poodle-popover__surface[data-placement^="bottom"] {
-    top: calc(100% + var(--poodle-popover-offset));
-    left: 0;
-  }
-
-  .poodle-popover__surface[data-placement^="top"] {
-    bottom: calc(100% + var(--poodle-popover-offset));
-    left: 0;
-  }
-
-  .poodle-popover__surface[data-placement^="right"] {
-    top: 0;
-    left: calc(100% + var(--poodle-popover-offset));
-  }
-
-  .poodle-popover__surface[data-placement^="left"] {
-    top: 0;
-    right: calc(100% + var(--poodle-popover-offset));
-  }
-
-  .poodle-popover__surface[data-placement$="end"] {
-    left: auto;
-    right: 0;
   }

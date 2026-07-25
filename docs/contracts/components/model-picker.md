@@ -34,7 +34,7 @@ level set behind it changes.
 ## 2. Anatomy
 
 ```text
-[Root .model-picker] <div>  (position: relative wrapper, carries data-size/data-density/data-open/data-disabled)
+[Root .model-picker] <div>  (trigger wrapper, carries data-size/data-density/data-open/data-disabled)
   ├── [Trigger .model-picker__trigger] <button aria-haspopup="dialog" aria-expanded aria-controls>
   │   ├── [Icon .model-picker__icon] <span> (conditional: selected model has `image` or `icon`)
   │   │   └── Icon, or [Image .model-picker__image] <img> when the model supplies one
@@ -67,14 +67,14 @@ level set behind it changes.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | `position: relative` anchor; carries `data-size`, `data-density`, `data-open`, `data-disabled` | — |
+| Root | yes | trigger wrapper; carries `data-size`, `data-density`, `data-open`, `data-disabled` | — |
 | Trigger | yes | borderless-by-default opener showing icon + model label + axis summary + chevron; `aria-haspopup="dialog"` | `--poodle-size-control-height`, `--poodle-radius-control`, `--poodle-color-text-primary` |
 | Icon | no | leading mark for the selected model: a registry `Icon`, or an `<img>` when the model supplies `image` | `--poodle-color-text-secondary` |
 | Image | no | `<img>` sized to the icon box it replaces (`object-fit: contain`, small radius) so rows align whichever a model supplies | — |
 | Label | yes | selected model label, or `placeholder` when nothing is selected (`data-placeholder="true"`) | `--poodle-color-text-primary` / `--poodle-color-text-muted` |
 | Summary | no | axis values joined by `·` (e.g. `High · Fast · 1M`); mirrors the panel state so the axes are readable without opening | `--poodle-color-text-secondary` |
 | Chevron | yes | popover indicator (`▾`) | `--poodle-color-text-secondary` |
-| Surface | yes | anchored `role="dialog"` panel | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` |
+| Surface | yes | anchored `role="dialog"` panel, portalled to the theme root (`002-anchored-overlays.md`) | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` |
 | Models | yes | `role="radiogroup"` list of model options | — |
 | Group Label | no | section heading emitted before the first option of each `group` | `--poodle-color-text-secondary` |
 | Option | yes | one model row; `role="radio"`, `aria-checked`, `data-selected`, `data-disabled` | `--poodle-color-background-hover`, `--poodle-radius-control` |
@@ -381,13 +381,13 @@ adjust them. Escape or an outside interaction dismisses.
 - Root: `position: relative`, `display: inline-flex`, `min-width: 0`
 - Trigger: `inline-flex`, `min-height: var(--poodle-size-control-height)`,
   gap `0.375rem`, label ellipsis on overflow
-- Surface: `position: absolute`, `min-width: 18rem`,
-  `max-width: min(26rem, 90vw)`. It opens **upward**
-  (`bottom: calc(100% + 0.5rem)`) by default — the picker's home is a composer
-  toolbar at the bottom of a viewport — and flips down
-  (`data-placement="bottom"`, `top: calc(100% + 0.5rem)`) when there is not
-  enough room above. Placement is estimated from the trigger's viewport
-  position on open, then corrected against the panel's measured height
+- Surface: `min-width: 18rem`, `max-width: min(26rem, 90vw)`. It is portalled
+  and viewport-positioned per `002-anchored-overlays.md`, requesting
+  `top-start` with an `8px` offset — the picker's home is a composer toolbar at
+  the bottom of a viewport, so it opens **upward** and the resolver flips it
+  down when there is no room above. It publishes the coarse side it landed on
+  as `data-placement="top" | "bottom"`, and carries its own `data-size` /
+  `data-density` so the density rules still reach the panel
 - Panel: a grid. With applicable axes it is two columns —
   `minmax(0, 1fr)` model list and a `minmax(11rem, 15rem)` axes rail divided by
   a vertical rule — and the surface widens to `min-width: 34rem`,

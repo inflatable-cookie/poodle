@@ -14,7 +14,7 @@ import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState 
 
 import "@poodle/styles/tooltip.css";
 
-import { resolveOverlayPosition } from "./overlay-position";
+import { AnchoredSurface } from "./AnchoredSurface";
 import type { OverlayPlacement } from "./types";
 
 export interface TooltipProps {
@@ -39,11 +39,13 @@ export function Tooltip({
   const tooltipId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>(placement);
-  const [bubbleStyle, setBubbleStyle] = useState<CSSProperties>({});
 
   const rootRef = useRef<HTMLSpanElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
-  const bubbleRef = useRef<HTMLSpanElement | null>(null);
+  const bubbleRef = useRef<HTMLElement | null>(null);
+  // The anchor is state, not just a ref: the portalled bubble has to
+  // re-render once the hovered element is known so it can be placed.
+  const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const machineState = useRef<HoverState>("closed");
 
@@ -100,6 +102,7 @@ export function Tooltip({
       triggerRef.current.removeAttribute("aria-describedby");
     }
     triggerRef.current = anchor;
+    setAnchorElement(anchor);
     send({ type: "ENTER" });
   }
 
@@ -109,35 +112,11 @@ export function Tooltip({
     send({ type: "DISMISS" });
   }
 
-  const updateTooltipPosition = useCallback(() => {
-    const trigger = triggerRef.current;
-    const bubble = bubbleRef.current;
-    if (!trigger || !bubble) return;
-    const next = resolveOverlayPosition(trigger.getBoundingClientRect(), bubble.getBoundingClientRect(), placement);
-    setResolvedPlacement((prev) => (prev === next.placement ? prev : next.placement));
-    setBubbleStyle((prev) => {
-      const top = `${next.top}px`;
-      const left = `${next.left}px`;
-      return prev.top === top && prev.left === left ? prev : { top, left };
-    });
-    trigger.setAttribute("aria-describedby", tooltipId);
-  }, [placement, tooltipId]);
-
   useLayoutEffect(() => {
-    if (isOpen) updateTooltipPosition();
-  }, [isOpen, updateTooltipPosition]);
-
-  useEffect(() => {
-    const onViewportChange = () => {
-      if (bubbleRef.current) updateTooltipPosition();
-    };
-    window.addEventListener("resize", onViewportChange);
-    window.addEventListener("scroll", onViewportChange, true);
-    return () => {
-      window.removeEventListener("resize", onViewportChange);
-      window.removeEventListener("scroll", onViewportChange, true);
-    };
-  }, [updateTooltipPosition]);
+    if (!isOpen) return;
+    // Announced only while shown: a stale describedby outlives the bubble.
+    triggerRef.current?.setAttribute("aria-describedby", tooltipId);
+  }, [isOpen, tooltipId]);
 
   useEffect(
     () => () => {
@@ -166,9 +145,19 @@ export function Tooltip({
       {children}
 
       {isOpen ? (
-        <span id={tooltipId} ref={bubbleRef} className="poodle-tooltip__bubble" data-placement={resolvedPlacement} style={bubbleStyle} role="tooltip">
+        <AnchoredSurface
+          id={tooltipId}
+          ref={bubbleRef}
+          tag="span"
+          anchor={anchorElement}
+          placement={placement}
+          onPlacement={setResolvedPlacement}
+          className="poodle-tooltip__bubble"
+          data-placement={resolvedPlacement}
+          role="tooltip"
+        >
           {content}
-        </span>
+        </AnchoredSurface>
       ) : null}
     </span>
   );

@@ -3,6 +3,8 @@
     menuTransition,
     registerDismissLayer,
     type MenuEvent as MenuMachineEvent,
+    layerContains,
+    pointAnchor,
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
@@ -47,7 +49,6 @@
   let uncontrolledOpen = $state(false);
   let uncontrolledAnchorPoint = $state<{ x: number; y: number } | null>(null);
   let seededDefaults = $state(false);
-  let adjustedPosition = $state<{ left: string; top: string } | null>(null);
 
   $effect.pre(() => {
     if (!seededDefaults) {
@@ -62,12 +63,11 @@
   const isControlled = $derived(open !== null);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
   const currentAnchorPoint = $derived(anchorPoint ?? uncontrolledAnchorPoint);
-  const overlayStyle = $derived(
-    adjustedPosition
-      ? `left: ${adjustedPosition.left}; top: ${adjustedPosition.top};`
-      : currentAnchorPoint
-        ? `left: ${currentAnchorPoint.x}px; top: ${currentAnchorPoint.y}px; visibility: hidden;`
-        : "",
+  // A right-click has no element behind it, so the menu anchors to the point
+  // itself; the shared resolver then does the edge-flipping that used to be
+  // hand-rolled here.
+  const anchor = $derived(
+    currentAnchorPoint ? pointAnchor(currentAnchorPoint.x, currentAnchorPoint.y, rootElement) : null,
   );
 
   $effect(() => {
@@ -75,27 +75,7 @@
       return;
     }
 
-    adjustedPosition = null;
     tick().then(() => {
-      if (overlayElement && currentAnchorPoint) {
-        const rect = overlayElement.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const pad = 8;
-        let x = currentAnchorPoint.x;
-        let y = currentAnchorPoint.y;
-
-        if (x + rect.width > vw - pad) {
-          x = Math.max(pad, x - rect.width);
-        }
-
-        if (y + rect.height > vh - pad) {
-          y = Math.max(pad, vh - rect.height - pad);
-        }
-
-        adjustedPosition = { left: `${x}px`, top: `${y}px` };
-      }
-
       surface?.focusFirstItem();
     });
   });
@@ -175,7 +155,9 @@
       ariaLabel={ariaLabel}
       size={resolvedSize}
       density={resolvedDensity}
-      overlayStyle={overlayStyle}
+      anchor={anchor}
+      placement="bottom-start"
+      offset={0}
       onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}

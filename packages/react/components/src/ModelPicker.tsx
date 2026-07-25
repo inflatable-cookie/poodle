@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { registerDismissLayer } from "@poodle/headless";
+import { layerContains, registerDismissLayer } from "@poodle/headless";
 
 import "@poodle/styles/model-picker.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";
 import { SegmentedControl } from "./SegmentedControl";
 import { Switch } from "./Switch";
@@ -15,7 +16,6 @@ import {
   initialSelection,
   modelLabel,
   resolveSelection,
-  resolveSurfacePlacement,
   summaryText,
 } from "./model-picker-model";
 import type {
@@ -72,8 +72,12 @@ export function ModelPicker({
 
   const [open, setOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState<ModelSelection | null>(null);
+  // The picker's home is a composer toolbar pinned to the bottom of a
+  // viewport, so it prefers to open upward and flips only when it must.
   const [placement, setPlacement] = useState<"top" | "bottom">("top");
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render once
+  // it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -99,27 +103,20 @@ export function ModelPicker({
     if (!open) return;
     const panel = panelRef.current;
     if (!panel) return;
-    // Correct the pre-open estimate against the panel's real height: the
-    // estimate only knows the max, so a tall panel can still overshoot.
-    const rect = panel.getBoundingClientRect();
-    if (placement === "top" && rect.top < 0) {
-      setPlacement("bottom");
-    } else if (placement === "bottom" && rect.bottom > window.innerHeight) {
-      setPlacement("top");
-    }
     const selected = panel.querySelector<HTMLElement>('[data-selected="true"]:not([disabled])');
     const first = panel.querySelector<HTMLElement>(".poodle-model-picker__option:not([disabled])");
     (selected ?? first)?.focus();
-  }, [open, placement]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootRef.current?.contains(target as Node) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
       dismissOnOutsideInteract: true,
       onDismiss: () => setOpen(false),
     });
-  }, [open]);
+  }, [open, rootElement]);
 
   function sync(next: ModelSelection): void {
     // Every emission is normalised, so a scoped-out axis value never leaks.
@@ -159,7 +156,7 @@ export function ModelPicker({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-model-picker"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -179,12 +176,6 @@ export function ModelPicker({
         aria-controls={open ? panelId : undefined}
         onClick={() => {
           if (disabled) return;
-          if (!open) {
-            const rect = rootRef.current?.getBoundingClientRect();
-            if (rect) {
-              setPlacement(resolveSurfacePlacement(rect.top, rect.bottom, window.innerHeight));
-            }
-          }
           setOpen((current) => !current);
         }}
       >
@@ -215,12 +206,18 @@ export function ModelPicker({
       </button>
 
       {open ? (
-        <div
+        <AnchoredSurface
           ref={panelRef}
+          anchor={rootElement}
+          placement="top-start"
+          offset={8}
+          onPlacement={(next) => setPlacement(next.startsWith("top") ? "top" : "bottom")}
           id={panelId}
           className="poodle-model-picker__surface"
           data-layout={panelLayout}
           data-placement={placement}
+          data-size={resolvedSize}
+          data-density={resolvedDensity}
           role="dialog"
           aria-label={ariaLabel}
           tabIndex={-1}
@@ -358,7 +355,7 @@ export function ModelPicker({
               </div>
             ) : null}
           </div>
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

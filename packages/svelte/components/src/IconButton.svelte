@@ -5,7 +5,7 @@
 <script lang="ts">
   import "@poodle/styles/icon-button.css";
   import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@poodle/headless";
-  import { onDestroy, onMount, tick, type Snippet } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
   import {
@@ -13,7 +13,7 @@
     resolveSemanticControlSize,
   } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import { resolveOverlayPosition } from "./overlay-position";
+  import { anchored } from "./anchored";
   import type {
     ButtonTone,
     ButtonVariant,
@@ -82,7 +82,6 @@
   let buttonElement = $state<HTMLButtonElement | null>(null);
   let tooltipElement = $state<HTMLSpanElement | null>(null);
   let resolvedTooltipPlacement = $state<OverlayPlacement>("top");
-  let tooltipStyle = $state("");
   let seededDefaultPressed = $state(false);
   let uncontrolledPressed = $state(false);
 
@@ -104,12 +103,6 @@
 
   $effect(() => {
     resolvedTooltipPlacement = tooltipPlacement;
-  });
-
-  $effect(() => {
-    if (tooltipOpen && tooltipText) {
-      void updateTooltipPosition();
-    }
   });
 
   let hoverMachineState: HoverState = "closed";
@@ -145,33 +138,6 @@
     }
   }
 
-  async function updateTooltipPosition(): Promise<void> {
-    if (!tooltipOpen || !buttonElement) {
-      return;
-    }
-
-    await tick();
-
-    if (!tooltipElement) {
-      return;
-    }
-
-    const nextPosition = resolveOverlayPosition(
-      buttonElement.getBoundingClientRect(),
-      tooltipElement.getBoundingClientRect(),
-      tooltipPlacement,
-    );
-
-    resolvedTooltipPlacement = nextPosition.placement;
-    tooltipStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
-  }
-
-  function handleViewportChange(): void {
-    if (tooltipOpen) {
-      void updateTooltipPosition();
-    }
-  }
-
   function handleFocus(event: FocusEvent): void {
     scheduleOpen();
     onFocus?.(event);
@@ -195,16 +161,6 @@
     }
     onClick?.(event);
   }
-
-  onMount(() => {
-    window.addEventListener("resize", handleViewportChange);
-    window.addEventListener("scroll", handleViewportChange, true);
-
-    return () => {
-      window.removeEventListener("resize", handleViewportChange);
-      window.removeEventListener("scroll", handleViewportChange, true);
-    };
-  });
 
   onDestroy(() => clearTimer());
 </script>
@@ -258,9 +214,13 @@
     <span
       id={tooltipId}
       bind:this={tooltipElement}
+      use:anchored={{
+        anchor: buttonElement,
+        placement: tooltipPlacement,
+        onPlacement: (next) => (resolvedTooltipPlacement = next),
+      }}
       class="poodle-icon-button__tooltip"
       data-placement={resolvedTooltipPlacement}
-      style={tooltipStyle}
       role="tooltip"
     >
       {tooltipText}

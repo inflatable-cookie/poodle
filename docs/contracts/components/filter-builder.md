@@ -293,7 +293,8 @@ roving tabindex.
   `width: 100%`, `min-width: 0`
 - Trigger: `inline-flex`, `flex: 1`, `min-height` from
   `var(--poodle-size-control-height)` (size-stepped), ellipsis summary overflow
-- Surface: anchored `position: absolute`, `min-width: 16rem`,
+- Surface: portalled and viewport-positioned (`002-anchored-overlays.md`),
+  requesting `bottom-start` with an `8px` offset; `min-width: 16rem`,
   `max-width: min(24rem, 90vw)`, `top: calc(100% + 0.5rem)`
 - Pills: flow inline inside the single field block, filling the row beside the
   opener and wrapping to further rows only when needed; long labels ellipsis at a

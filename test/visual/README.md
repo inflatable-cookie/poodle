@@ -69,3 +69,16 @@ Order of suspicion, learned from wave 1:
 Components whose paint is inherently non-deterministic are skipped and
 listed in every run summary: Spinner, Skeleton, indeterminate Progress,
 PageLoading, VideoPlayer, AudioPlayer, MediaThumbnail.
+
+## Overlay containment probe
+
+```sh
+bun test/visual/overlay-portal-probe.ts
+```
+
+A pixel diff cannot see this class of bug — the markup is identical whether or
+not an ancestor clips the surface. The probe wraps a specimen in a hostile
+ancestor (scrolling + transformed + low stacking context, with a higher-z
+sibling beside it), opens each anchored overlay, and asserts it portalled out,
+fits the viewport, is the topmost painted element at its own centre, and hides
+when its anchor scrolls out of the pane. Roadmap: `docs/roadmaps/g12/011`.

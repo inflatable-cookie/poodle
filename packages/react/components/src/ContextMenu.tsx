@@ -1,15 +1,19 @@
 import {
   useEffect,
-  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
 
-import { menuTransition, registerDismissLayer, type MenuEvent as MenuMachineEvent } from "@poodle/headless";
+import {
+  menuTransition,
+  pointAnchor,
+  registerDismissLayer,
+  type MenuEvent as MenuMachineEvent,
+} from "@poodle/headless";
 
 import { MenuSurface, type MenuSurfaceHandle } from "./MenuSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
@@ -45,54 +49,33 @@ export function ContextMenu({
   const uiPresentation = useUiPresentation();
 
   const surfaceRef = useRef<MenuSurfaceHandle | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const pendingFocus = useRef(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [uncontrolledAnchorPoint, setUncontrolledAnchorPoint] = useState<{ x: number; y: number } | null>(anchorPoint);
-  const [adjustedPosition, setAdjustedPosition] = useState<{ left: string; top: string } | null>(null);
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const isControlled = open !== null;
   const isOpen = isControlled ? open === true : uncontrolledOpen;
   const currentAnchorPoint = anchorPoint ?? uncontrolledAnchorPoint;
-  const overlayStyle: CSSProperties = adjustedPosition
-    ? { left: adjustedPosition.left, top: adjustedPosition.top }
-    : currentAnchorPoint
-      ? { left: `${currentAnchorPoint.x}px`, top: `${currentAnchorPoint.y}px`, visibility: "hidden" }
-      : {};
-
-  // Measure the overlay after the open render, clamp to the viewport, then
-  // reveal and focus (measure-then-reveal — same pattern as ListCard).
-  useLayoutEffect(() => {
-    if (!isOpen || !currentAnchorPoint) return;
-    if (adjustedPosition) return;
-    const overlay = surfaceRef.current?.element;
-    if (!overlay) return;
-
-    const rect = overlay.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const pad = 8;
-    let x = currentAnchorPoint.x;
-    let y = currentAnchorPoint.y;
-
-    if (x + rect.width > vw - pad) {
-      x = Math.max(pad, x - rect.width);
-    }
-
-    if (y + rect.height > vh - pad) {
-      y = Math.max(pad, vh - rect.height - pad);
-    }
-
-    setAdjustedPosition({ left: `${x}px`, top: `${y}px` });
-  }, [isOpen, currentAnchorPoint, adjustedPosition]);
+  // A right-click has no element behind it, so the menu anchors to the point
+  // itself; the shared resolver then does the edge-flipping that used to be
+  // hand-rolled here.
+  const anchor = useMemo(
+    () =>
+      currentAnchorPoint
+        ? pointAnchor(currentAnchorPoint.x, currentAnchorPoint.y, rootRef.current)
+        : null,
+    [currentAnchorPoint],
+  );
 
   useEffect(() => {
-    if (!isOpen || !adjustedPosition) return;
+    if (!isOpen) return;
     if (!pendingFocus.current) return;
     pendingFocus.current = false;
     surfaceRef.current?.focusFirstItem();
-  }, [isOpen, adjustedPosition]);
+  }, [isOpen]);
 
   function send(event: MenuMachineEvent): void {
     const result = menuTransition(isOpen ? "open" : "closed", {}, event);
@@ -103,7 +86,6 @@ export function ContextMenu({
           setUncontrolledOpen(effect.open);
         }
         if (effect.open) {
-          setAdjustedPosition(null);
           pendingFocus.current = true;
         }
 
@@ -117,7 +99,6 @@ export function ContextMenu({
   function handleContextMenu(event: ReactMouseEvent): void {
     event.preventDefault();
     setUncontrolledAnchorPoint({ x: event.clientX, y: event.clientY });
-    setAdjustedPosition(null);
     pendingFocus.current = true;
     send({ type: "OPEN" });
   }
@@ -135,7 +116,6 @@ export function ContextMenu({
 
     const rect = target.getBoundingClientRect();
     setUncontrolledAnchorPoint({ x: rect.left + 16, y: rect.top + 16 });
-    setAdjustedPosition(null);
     pendingFocus.current = true;
     send({ type: "OPEN" });
   }
@@ -157,6 +137,7 @@ export function ContextMenu({
 
   return (
     <div
+      ref={rootRef}
       className="poodle-context-menu"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -175,7 +156,9 @@ export function ContextMenu({
           ariaLabel={ariaLabel}
           size={resolvedSize}
           density={resolvedDensity}
-          overlayStyle={overlayStyle}
+          anchor={anchor}
+          placement="bottom-start"
+          offset={0}
           onAction={(value) => send({ type: "ACTION", value })}
         />
       ) : null}

@@ -9,7 +9,6 @@
     --poodle-menu-item-padding-y-adjust: 0rem;
     --poodle-menu-item-padding-x-adjust: 0rem;
     --poodle-menu-separator-margin: 0.25rem;
-    position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
     padding: var(--poodle-menu-overlay-padding);
@@ -71,10 +70,10 @@
     background: var(--poodle-recipe-menu-surface-separator-fill, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
-  /* Submenu flyout (cascading menus). The anchor keeps each item's flyout
-     positioned against its own row; the nested surface swaps the root's
-     fixed positioning for an absolute flyout at the anchor's right edge
-     (flipped to the left edge on viewport overflow via inline style). */
+  /* Submenu flyout (cascading menus). The root surface is portalled; a nested
+     flyout is not — it is positioned against its own row inside that already
+     portalled parent, so it stays in flow and keeps absolute positioning at
+     the anchor's right edge, flipping to the left on viewport overflow. */
   .poodle-menu-surface__item-anchor {
     position: relative;
     width: 100%;
@@ -96,6 +95,11 @@
     top: calc(-1 * var(--poodle-menu-overlay-padding));
     left: 100%;
     z-index: calc(var(--poodle-overlay-z-menu) + 1);
+  }
+
+  .poodle-menu-surface.poodle-menu-surface--submenu.poodle-menu-surface--flipped {
+    left: auto;
+    right: 100%;
   }
 
   .poodle-menu-surface[data-size="xs"] .poodle-menu-surface__item {

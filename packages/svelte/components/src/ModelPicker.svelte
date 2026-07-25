@@ -4,9 +4,10 @@
 
 <script lang="ts">
   import "@poodle/styles/model-picker.css";
-  import { registerDismissLayer } from "@poodle/headless";
+  import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
+  import { anchored } from "./anchored";
   import { default as Icon } from "./Icon.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as Switch } from "./Switch.svelte";
@@ -19,7 +20,6 @@
     initialSelection,
     modelLabel,
     resolveSelection,
-    resolveSurfacePlacement,
     summaryText,
   } from "./model-picker-model";
   import type {
@@ -79,6 +79,8 @@
   let rootElement = $state<HTMLDivElement | null>(null);
   let panelElement = $state<HTMLDivElement | null>(null);
   let uncontrolledValue = $state<ModelSelection | null>(null);
+  // The picker's home is a composer toolbar pinned to the bottom of a
+  // viewport, so it prefers to open upward and flips only when it must.
   let placement = $state<"top" | "bottom">("top");
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
@@ -106,14 +108,6 @@
     tick().then(() => {
       const panel = panelElement;
       if (!panel) return;
-      // Correct the pre-open estimate against the panel's real height: the
-      // estimate only knows the max, so a tall panel can still overshoot.
-      const rect = panel.getBoundingClientRect();
-      if (placement === "top" && rect.top < 0) {
-        placement = "bottom";
-      } else if (placement === "bottom" && rect.bottom > window.innerHeight) {
-        placement = "top";
-      }
       const selected = panel.querySelector<HTMLElement>('[data-selected="true"]:not([disabled])');
       const first = panel.querySelector<HTMLElement>(".poodle-model-picker__option:not([disabled])");
       (selected ?? first)?.focus();
@@ -123,7 +117,8 @@
   $effect(() => {
     if (!open) return;
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The surface is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, panelElement),
       dismissOnOutsideInteract: true,
       onDismiss: () => {
         open = false;
@@ -158,12 +153,6 @@
 
   function toggleOpen(): void {
     if (disabled) return;
-    if (!open) {
-      const rect = rootElement?.getBoundingClientRect();
-      if (rect) {
-        placement = resolveSurfacePlacement(rect.top, rect.bottom, window.innerHeight);
-      }
-    }
     open = !open;
   }
 
@@ -236,10 +225,18 @@
   {#if open}
     <div
       bind:this={panelElement}
+      use:anchored={{
+        anchor: rootElement,
+        placement: "top-start",
+        offset: 8,
+        onPlacement: (next) => (placement = next.startsWith("top") ? "top" : "bottom"),
+      }}
       id={panelId}
       class="poodle-model-picker__surface"
       data-layout={panelLayout}
       data-placement={placement}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
       role="dialog"
       aria-label={ariaLabel}
       tabindex="-1"

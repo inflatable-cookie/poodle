@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatDateLabel, monthAnchorIso, todayIsoDate } from "@poodle/headless";
+import { formatDateLabel, monthAnchorIso, todayIsoDate, layerContains } from "@poodle/headless";
 
 import "@poodle/styles/date-picker.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Calendar } from "./Calendar";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
@@ -48,7 +49,10 @@ export function DatePicker({
 }: DatePickerProps) {
   const surfaceId = useId();
   const uiPresentation = useUiPresentation();
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(defaultValue);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [visibleMonth, setVisibleMonth] = useState(() => monthAnchorIso(defaultValue ?? todayIsoDate()));
@@ -75,8 +79,10 @@ export function DatePicker({
   useEffect(() => {
     if (!isOpen) return;
     function handlePointerDown(event: MouseEvent): void {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target as Node)) setOpenRef.current(false);
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
+        setOpenRef.current(false);
+      }
     }
     function handleKeydown(event: KeyboardEvent): void {
       if (event.key === "Escape") {
@@ -101,7 +107,7 @@ export function DatePicker({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-date-picker"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -126,7 +132,16 @@ export function DatePicker({
       </button>
 
       {isOpen ? (
-        <div id={surfaceId} className="poodle-date-picker__surface" role="dialog" aria-label={ariaLabel ?? placeholder}>
+        <AnchoredSurface
+          ref={surfaceRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={6}
+          id={surfaceId}
+          className="poodle-date-picker__surface"
+          role="dialog"
+          aria-label={ariaLabel ?? placeholder}
+        >
           <Calendar
             value={currentValue}
             visibleMonth={visibleMonth}
@@ -141,7 +156,7 @@ export function DatePicker({
             }}
             onMonthChange={setVisibleMonth}
           />
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

@@ -75,28 +75,20 @@
 
   /* ── Surface (popover) ───────────────────────────────────── */
 
+  /* Portalled to the theme root and placed in viewport coordinates by the
+     anchored action, so it carries no offsets of its own; `--above` survives
+     as a state hook for consumers. */
   .poodle-color-picker__surface {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 50;
+    z-index: var(--poodle-overlay-z-menu);
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
     width: 24rem;
-    margin-top: 0.25rem;
     padding: 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-color-picker-surface-fill, var(--poodle-color-background-elevated));
     box-shadow: var(--poodle-recipe-color-picker-surface-shadow, var(--poodle-shadow-lg));
-  }
-
-  .poodle-color-picker__surface--above {
-    top: auto;
-    bottom: 100%;
-    margin-top: 0;
-    margin-bottom: 0.25rem;
   }
 
   /* ── Picker area (gradient + controls side by side) ────── */

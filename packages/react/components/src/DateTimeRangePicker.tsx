@@ -5,10 +5,12 @@ import {
   normalizeDateRange,
   normalizeDateTimeRangeValue,
   todayIsoDate,
+  layerContains,
 } from "@poodle/headless";
 
 import "@poodle/styles/date-time-range-picker.css";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Calendar } from "./Calendar";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { TimeInput } from "./TimeInput";
@@ -58,7 +60,10 @@ export function DateTimeRangePicker({
 }: DateTimeRangePickerProps) {
   const surfaceId = useId();
   const uiPresentation = useUiPresentation();
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The root is state, not a ref: the portalled surface has to re-render
+  // once it exists so it can be positioned against it.
+  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState<DateTimeRangeValue>(() =>
     normalizeDateTimeRangeValue(defaultValue),
   );
@@ -87,8 +92,10 @@ export function DateTimeRangePicker({
   useEffect(() => {
     if (!isOpen) return;
     function handlePointerDown(event: MouseEvent): void {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target as Node)) setOpenRef.current(false);
+      // The surface is portalled out of the root, so both count as inside.
+      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
+        setOpenRef.current(false);
+      }
     }
     function handleKeydown(event: KeyboardEvent): void {
       if (event.key === "Escape") {
@@ -113,7 +120,7 @@ export function DateTimeRangePicker({
 
   return (
     <div
-      ref={rootRef}
+      ref={setRootElement}
       className="poodle-date-time-range-picker"
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -141,7 +148,11 @@ export function DateTimeRangePicker({
       </button>
 
       {isOpen ? (
-        <div
+        <AnchoredSurface
+          ref={surfaceRef}
+          anchor={rootElement}
+          placement="bottom-start"
+          offset={6}
           id={surfaceId}
           className="poodle-date-time-range-picker__surface"
           role="dialog"
@@ -204,7 +215,7 @@ export function DateTimeRangePicker({
               </div>
             </div>
           </div>
-        </div>
+        </AnchoredSurface>
       ) : null}
     </div>
   );

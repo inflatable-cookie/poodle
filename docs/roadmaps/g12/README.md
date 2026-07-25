@@ -45,6 +45,11 @@ Runway:
 - `010-agent-composer.md` — the agent composer family across all four
   targets: `Meter shape="ring"`, `ModelPicker` (model + host-declared
   capability axes in one popover) and `AgentChatInput`. **Complete.**
+- `011-overlay-portalling.md` — every anchored overlay portals to the theme
+  root and is positioned in viewport coordinates. Found from g12.010: a
+  scrolling ancestor clips a surface whatever its z-index, and a transformed
+  one traps even `position: fixed`. 23 components across both web frameworks,
+  behind one shared primitive. **Complete.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -53,7 +58,6 @@ Runway:
 
 ## Next Task
 
-`g12.009` is complete. Pick the next seam for this generation — the
-visual gate now guards every web-side change, so the open ground is the
-Rust targets (GPUI/Jetstream have not tracked g12-era Svelte changes) or
-deeper `@poodle/headless` machine coverage.
+`g12.011` is complete. The open ground for this generation is the Rust
+targets — GPUI and Jetstream have not tracked the g12-era Svelte changes —
+or deeper `@poodle/headless` machine coverage.

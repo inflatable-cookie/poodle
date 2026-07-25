@@ -53,6 +53,7 @@ export const allComponents: ComponentEntry[] = [
   entry("CollapseToggle", "control", "Directional chevron toggle for collapsing/expanding regions.", true),
 
   // Input
+  entry("RefSelect", "input", "Version-control ref chooser with search, a current marker and a loading footer.", true),
   entry("ModelPicker", "input", "Combined model and capability-axis picker in one popover widget.", true),
   entry("AgentChatInput", "input", "Agent composer: auto-growing editor, control toolbar, context ring, submit/stop action.", true),
   entry("TextInput", "input", "Single or multi-line text input with search, slug, and multiline modes.", true),

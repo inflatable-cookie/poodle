@@ -19,6 +19,7 @@ import {
   type TabsEvent as HeadlessTabsEvent,
 } from "@poodle/headless";
 
+import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
@@ -125,6 +126,13 @@ export function Tabs({
   const [renderedItems, setRenderedItems] = useState<TabItem[]>(items);
   const [focusIndex, setFocusIndex] = useState(0);
   const [tooltipIndex, setTooltipIndex] = useState<number | null>(null);
+  // The hovered tab is promoted to state so the portalled tooltip can be
+  // positioned against it.
+  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setTooltipAnchor(tooltipIndex === null ? null : (tabRefs.current[tooltipIndex] ?? null));
+  }, [tooltipIndex]);
   const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
@@ -538,9 +546,17 @@ export function Tabs({
                 ) : null}
 
                 {hasTooltips && tooltipIndex === index ? (
-                  <span className="poodle-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
+                  <AnchoredSurface
+                    tag="span"
+                    anchor={tooltipAnchor}
+                    placement={isVertical ? "right" : "bottom"}
+                    offset={6}
+                    className="poodle-tabs__tooltip"
+                    data-placement={isVertical ? "right" : "bottom"}
+                    role="tooltip"
+                  >
                     {item.label}
-                  </span>
+                  </AnchoredSurface>
                 ) : null}
               </div>
               {item.separator && index < renderedItems.length - 1 ? (

@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/split-button.css";
-  import { registerDismissLayer } from "@poodle/headless";
-  import { onMount, tick, type Snippet } from "svelte";
+  import { registerDismissLayer, layerContains } from "@poodle/headless";
+  import { tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
   import {
@@ -9,6 +9,7 @@
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
   } from "./presentation";
+  import { anchored } from "./anchored";
   import { default as Spinner } from "./Spinner.svelte";
 
   import type {
@@ -76,7 +77,7 @@
     }
 
     tick().then(() => {
-      syncMenuLayout();
+      syncMenuHeight();
       itemElements[highlightIndex]?.focus();
     });
   });
@@ -94,42 +95,19 @@
     menuMaxHeight = null;
   }
 
-  function getScrollContainer(element: HTMLElement | null): HTMLElement | null {
-    let current = element?.parentElement ?? null;
-
-    while (current) {
-      const style = getComputedStyle(current);
-      const overflowY = style.overflowY;
-      if (
-        (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
-        current.scrollHeight > current.clientHeight
-      ) {
-        return current;
-      }
-      current = current.parentElement;
-    }
-
-    return null;
-  }
-
-  function syncMenuLayout(): void {
-    if (!menuOpen || !rootElement || !menuElement) return;
+  /** Cap the menu at the room available on whichever side it opened, so a long
+   * list scrolls inside the surface instead of running off the viewport. */
+  function syncMenuHeight(): void {
+    if (!menuOpen || !rootElement) return;
 
     const rootRect = rootElement.getBoundingClientRect();
-    const menuRect = menuElement.getBoundingClientRect();
-    const scrollContainer = getScrollContainer(rootElement);
-    const boundaryTop = scrollContainer?.getBoundingClientRect().top ?? 0;
-    const boundaryBottom =
-      scrollContainer?.getBoundingClientRect().bottom ?? window.innerHeight;
     const gutter = 6;
-    const availableBelow = Math.max(0, boundaryBottom - rootRect.bottom - gutter);
-    const availableAbove = Math.max(0, rootRect.top - boundaryTop - gutter);
-    const shouldOpenUpward =
-      availableBelow < menuRect.height && availableAbove > availableBelow;
-    const availableSpace = shouldOpenUpward ? availableAbove : availableBelow;
+    const available =
+      menuPlacement === "top-start"
+        ? rootRect.top - gutter
+        : window.innerHeight - rootRect.bottom - gutter;
 
-    menuPlacement = shouldOpenUpward ? "top-start" : "bottom-start";
-    menuMaxHeight = availableSpace > 0 ? `${Math.floor(availableSpace)}px` : null;
+    menuMaxHeight = available > 0 ? `${Math.floor(available)}px` : null;
   }
 
   function moveHighlight(direction: 1 | -1): void {
@@ -159,7 +137,8 @@
     }
 
     return registerDismissLayer({
-      contains: (target) => rootElement?.contains(target) ?? false,
+      // The menu is portalled out of the root, so both are "inside".
+      contains: (target) => layerContains(target, rootElement, menuElement),
       dismissOnOutsideInteract: true,
       onDismiss: (reason) => {
         closeMenu();
@@ -171,21 +150,6 @@
     });
   });
 
-  onMount(() => {
-    function handleBoundaryChange(): void {
-      if (menuOpen) {
-        syncMenuLayout();
-      }
-    }
-
-    window.addEventListener("resize", handleBoundaryChange);
-    document.addEventListener("scroll", handleBoundaryChange, true);
-
-    return () => {
-      window.removeEventListener("resize", handleBoundaryChange);
-      document.removeEventListener("scroll", handleBoundaryChange, true);
-    };
-  });
 </script>
 
 <div class="poodle-split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} data-density={resolvedDensity} bind:this={rootElement}>
@@ -241,6 +205,15 @@
   {#if menuOpen}
     <div
       bind:this={menuElement}
+      use:anchored={{
+        anchor: rootElement,
+        placement: "bottom-start",
+        offset: 6,
+        onPlacement: (next) => {
+          menuPlacement = next.startsWith("top") ? "top-start" : "bottom-start";
+          syncMenuHeight();
+        },
+      }}
       class="poodle-split-button__menu"
       data-placement={menuPlacement}
       role="menu"

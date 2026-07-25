@@ -174,19 +174,3 @@ export function axisControlKind(axis: ModelCapabilityAxis): "segmented" | "list"
   if (axis.control === "segmented" || axis.control === "list") return axis.control;
   return (axis.options ?? []).length > SEGMENTED_AXIS_MAX_OPTIONS ? "list" : "segmented";
 }
-
-/** Which side the anchored surface should open on. The picker's home is a
- * composer toolbar pinned to the bottom of a viewport, so upward is the
- * default — but it flips down when there is not enough room above (a picker in
- * a settings row near the top of the page would otherwise clip off-screen). */
-export function resolveSurfacePlacement(
-  triggerTop: number,
-  triggerBottom: number,
-  viewportHeight: number,
-  estimatedHeight = 384,
-): "top" | "bottom" {
-  const spaceAbove = triggerTop;
-  const spaceBelow = viewportHeight - triggerBottom;
-  if (spaceAbove >= estimatedHeight) return "top";
-  return spaceBelow > spaceAbove ? "bottom" : "top";
-}
