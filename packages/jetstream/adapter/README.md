@@ -26,7 +26,7 @@ renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
 - Component render functions (`js_button`, `js_checkbox`, etc.) — owned by
   `poodle-jetstream-components`
 - Token definitions and values — owned by `poodle-tokens`
-- Component spec structs — owned by `poodle-specs` and `poodle-workstation`
+- Component spec structs — owned by `poodle-specs`
 
 ## Component Pipeline
 
@@ -145,7 +145,6 @@ rarely calls this directly.
 [dependencies]
 poodle-adapter    = { path = "../../contracts/adapter" }
 poodle-specs      = { path = "../../contracts/components" }
-poodle-workstation = { path = "../../contracts/workstation" }
 poodle-tokens     = { path = "../../contracts/tokens" }
 poodle-layout     = { path = "../../contracts/layout" }
 poodle-style      = { path = "../../contracts/style" }

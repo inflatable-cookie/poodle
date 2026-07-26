@@ -47,7 +47,7 @@ pub struct EditableList {
     children: Vec<AnyElement>,
 }
 
-use poodle_specs::EditableListSpec;
+use poodle_specs::{EditableListItem, EditableListSpec};
 
 impl std::ops::Deref for EditableList {
     type Target = EditableListSpec;
@@ -147,6 +147,13 @@ impl EditableList {
 
     // ── Content builders ──────────────────────────────────────
     pub fn items(mut self, items: Vec<String>) -> Self {
+        // Mirror the labels onto the spec, not just the builder: a caller that
+        // round-trips through the spec used to get the count and lose the rows.
+        self.spec.items = items
+            .iter()
+            .enumerate()
+            .map(|(i, label)| EditableListItem::new(i.to_string()).with_label(label.clone()))
+            .collect();
         self.spec.item_count = items.len();
         self.items = items;
         self
@@ -198,8 +205,27 @@ impl IntoElement for EditableList {
         let label_size = resolve_px(theme, "typography.label.size");
         let panel_font = px(rem_to_px(0.875)); // contract: error/info font-size 0.875rem
 
-        let total = if !self.items.is_empty() {
-            self.items.len()
+        // The builder's own labels win; the spec's are the fallback for a
+        // caller that built the spec directly.
+        let spec_labels: Vec<String> = self
+            .spec
+            .items
+            .iter()
+            .enumerate()
+            .map(|(i, item)| {
+                item.label
+                    .clone()
+                    .unwrap_or_else(|| format!("Item {}", i + 1))
+            })
+            .collect();
+        let item_labels: &Vec<String> = if self.items.is_empty() {
+            &spec_labels
+        } else {
+            &self.items
+        };
+
+        let total = if !item_labels.is_empty() {
+            item_labels.len()
         } else {
             self.children.len()
         };
@@ -367,7 +393,7 @@ impl IntoElement for EditableList {
             row
         };
 
-        for item_text in &self.items {
+        for item_text in item_labels {
             let label = div()
                 .text_size(item_font)
                 .text_color(text_primary)

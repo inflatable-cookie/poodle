@@ -10,10 +10,9 @@
 
 use poodle_adapter::{AdapterManifest, RenderComponent, ThemeProvider};
 use poodle_gpui::{GpuiAdapter, GpuiThemeProvider};
-use poodle_specs::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
+use poodle_specs::{AppHeaderSpec, ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
 use poodle_specs::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
 use poodle_style::StyleDescriptor;
-use poodle_workstation::{AppHeaderSpec, WorkspaceShellSpec};
 
 fn main() {
     // 1. Create the adapter with default theme
@@ -45,10 +44,7 @@ fn main() {
     // 3. Build and render component specs
     let style = StyleDescriptor::new();
 
-    println!("Rendering workspace shell...");
-    let shell = adapter.render(&WorkspaceShellSpec::new(), &style, theme);
-    println!("  → {} ({})", shell.element_id, shell.spec_type);
-
+    println!("Rendering shell chrome...");
     let header = adapter.render(&AppHeaderSpec::new(), &style, theme);
     println!("  → {} ({})", header.element_id, header.spec_type);
 

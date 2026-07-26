@@ -27,6 +27,8 @@ pub struct AlertDialogSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Confirm-button copy while the action is in flight.
+    pub working_label: String,
 }
 
 impl Default for AlertDialogSpec {
@@ -44,11 +46,17 @@ impl Default for AlertDialogSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            working_label: "Working…".to_string(),
         }
     }
 }
 
 impl AlertDialogSpec {
+    pub fn with_working_label(mut self, value: impl Into<String>) -> Self {
+        self.working_label = value.into();
+        self
+    }
+
     pub fn new(title: impl Into<String>) -> Self {
         Self {
             title: title.into(),

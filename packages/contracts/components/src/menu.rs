@@ -14,6 +14,8 @@ pub struct MenuSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name for the trigger, distinct from the menu's own.
+    pub trigger_aria_label: Option<String>,
 }
 
 impl Default for MenuSpec {
@@ -27,6 +29,7 @@ impl Default for MenuSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
+            trigger_aria_label: None,
         }
     }
 }

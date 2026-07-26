@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, MenuEntry, SemanticControlSizeRole};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LeadingShape {
@@ -53,6 +54,16 @@ impl Default for SelectionIndicator {
     }
 }
 
+/// What opens a ListCard's context menu.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ListCardContextMenuTrigger {
+    /// A right-click anywhere on the card.
+    #[default]
+    Context,
+    /// A click on the leading slot, for a card whose row is otherwise a link.
+    Leading,
+}
+
 #[derive(Clone, Debug)]
 pub struct ListCardSpec {
     pub title: String,
@@ -94,6 +105,17 @@ pub struct ListCardSpec {
     /// Selection-indicator mode. Contract §3: when `Checkbox` and selectable,
     /// renders a checkbox selection indicator.
     pub selection_indicator: SelectionIndicator,
+    /// Presentation axes (contract §3): size is intrinsic, density is sibling
+    /// spacing, size_role resolves size from the inherited presentation.
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
+    /// Context-menu entries; empty means the card has no context menu.
+    pub context_menu_items: Vec<MenuEntry>,
+    /// What opens the context menu: a right-click, or the leading slot.
+    pub context_menu_trigger: ListCardContextMenuTrigger,
+    /// Accessible name for the context menu.
+    pub context_menu_aria_label: Option<String>,
 }
 
 impl Default for ListCardSpec {
@@ -119,11 +141,47 @@ impl Default for ListCardSpec {
             layout: ListCardLayout::Default,
             is_highlighted: false,
             selection_indicator: SelectionIndicator::None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
+            context_menu_items: Vec::new(),
+            context_menu_trigger: ListCardContextMenuTrigger::Context,
+            context_menu_aria_label: None,
         }
     }
 }
 
 impl ListCardSpec {
+    pub fn with_context_menu_items(mut self, items: Vec<MenuEntry>) -> Self {
+        self.context_menu_items = items;
+        self
+    }
+
+    pub fn with_context_menu_trigger(mut self, trigger: ListCardContextMenuTrigger) -> Self {
+        self.context_menu_trigger = trigger;
+        self
+    }
+
+    pub fn with_context_menu_aria_label(mut self, label: impl Into<String>) -> Self {
+        self.context_menu_aria_label = Some(label.into());
+        self
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }
@@ -328,26 +386,61 @@ impl ListCardSpec {
 
     /// Leading square edge length in rem. Contract §7: circle 2rem,
     /// rounded-square 2.75rem. Compact layout shrinks one step.
-    /// `leadingSizeOffset` (contract §3) shifts the box by whole 0.25rem steps,
-    /// clamped to the `xs`→`xl` ladder span (±2 steps from the shape base, box
-    /// kept ≥ 1rem so it never collapses).
-    pub fn leading_size_rem(&self) -> f32 {
-        let base = match self.leading_shape {
-            LeadingShape::Circle => 2.0,
-            LeadingShape::RoundedSquare => 2.75,
-        };
-        let compact_adjust = if self.layout == ListCardLayout::Compact {
-            -0.25
-        } else {
-            0.0
-        };
-        let step = self.leading_size_offset.clamp(-2, 2) as f32;
-        (base + compact_adjust + step * 0.25).max(1.0)
+    /// The size ladder the leading box sits on: the resolved control size,
+    /// shifted by `leading_size_offset` and clamped to the `xs`→`xl` span.
+    ///
+    /// Mirrors the Svelte `offsetControlSize(resolvedSize, leadingSizeOffset)`.
+    pub fn resolved_leading_size(&self) -> ControlSize {
+        const LADDER: [ControlSize; 5] = [
+            ControlSize::Xs,
+            ControlSize::Sm,
+            ControlSize::Md,
+            ControlSize::Lg,
+            ControlSize::Xl,
+        ];
+        let resolved = crate::types::resolve_semantic_control_size(self.size, self.size_role);
+        let base = LADDER.iter().position(|s| *s == resolved).unwrap_or(2) as i32;
+        let index = (base + self.leading_size_offset).clamp(0, LADDER.len() as i32 - 1);
+        LADDER[index as usize]
     }
 
-    /// Leading icon glyph font-size in rem. Contract §8 Leading: `0.875rem`.
+    /// Leading box edge in rem.
+    ///
+    /// This used to derive from `leading_shape` alone, so a `ListCard` rendered
+    /// at the same box size whatever `size` the host asked for — the prop was
+    /// carried and ignored. The ladder below is the `data-leading-size` table
+    /// from `list-card.css`.
+    pub fn leading_size_rem(&self) -> f32 {
+        match self.resolved_leading_size() {
+            ControlSize::Xs => 1.75,
+            ControlSize::Sm => 2.0,
+            ControlSize::Md => 2.25,
+            ControlSize::Lg => 2.75,
+            ControlSize::Xl => 3.0,
+        }
+    }
+
+    /// Leading glyph size in rem — the same ladder's icon row.
+    pub fn leading_icon_size_rem(&self) -> f32 {
+        match self.resolved_leading_size() {
+            ControlSize::Xs => 0.875,
+            ControlSize::Sm => 1.0,
+            ControlSize::Md => 1.125,
+            ControlSize::Lg => 1.375,
+            ControlSize::Xl => 1.5,
+        }
+    }
+
+    /// Leading text font-size in rem — the ladder's font row. Was a flat
+    /// `0.875rem`, which is the `md` cell.
     pub fn leading_font_size_rem(&self) -> f32 {
-        0.875
+        match self.resolved_leading_size() {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 1.0,
+            ControlSize::Xl => 1.125,
+        }
     }
 
     /// Body column gap in rem. Contract §8 Body: `0.0625rem`.
@@ -378,5 +471,98 @@ impl ListCardSpec {
     /// Not-live opacity. Contract §4/§8: `0.72`.
     pub fn not_live_opacity(&self) -> f32 {
         0.72
+    }
+}
+
+#[cfg(test)]
+mod leading_size_tests {
+    use super::*;
+
+    /// The leading box used to derive from `leading_shape` alone, so `size` was
+    /// carried and ignored — every card drew the same box. These values are the
+    /// `data-leading-size` ladder from `list-card.css`.
+    #[test]
+    fn the_box_follows_the_size_ladder() {
+        let cases = [
+            (ControlSize::Xs, 1.75, 0.875, 0.6875),
+            (ControlSize::Sm, 2.0, 1.0, 0.75),
+            (ControlSize::Md, 2.25, 1.125, 0.875),
+            (ControlSize::Lg, 2.75, 1.375, 1.0),
+            (ControlSize::Xl, 3.0, 1.5, 1.125),
+        ];
+
+        for (size, box_rem, icon_rem, font_rem) in cases {
+            let spec = ListCardSpec::new().with_size(size);
+            assert_eq!(spec.leading_size_rem(), box_rem, "{size:?} box");
+            // `leading_icon_size_rem` has no in-repo caller — the leading slot
+            // is host-provided — so the test is what keeps it from drifting
+            // away from the stylesheet.
+            assert_eq!(spec.leading_icon_size_rem(), icon_rem, "{size:?} icon");
+            assert_eq!(spec.leading_font_size_rem(), font_rem, "{size:?} font");
+        }
+    }
+
+    /// The offset walks the same ladder and clamps at both ends, so a large
+    /// offset can never fall off the scale.
+    #[test]
+    fn the_offset_walks_and_clamps() {
+        let up = ListCardSpec::new()
+            .with_size(ControlSize::Md)
+            .with_leading_size_offset(1);
+        assert_eq!(up.resolved_leading_size(), ControlSize::Lg);
+
+        let down = ListCardSpec::new()
+            .with_size(ControlSize::Md)
+            .with_leading_size_offset(-1);
+        assert_eq!(down.resolved_leading_size(), ControlSize::Sm);
+
+        let past_the_top = ListCardSpec::new()
+            .with_size(ControlSize::Xl)
+            .with_leading_size_offset(5);
+        assert_eq!(past_the_top.resolved_leading_size(), ControlSize::Xl);
+
+        let past_the_bottom = ListCardSpec::new()
+            .with_size(ControlSize::Xs)
+            .with_leading_size_offset(-5);
+        assert_eq!(past_the_bottom.resolved_leading_size(), ControlSize::Xs);
+    }
+
+    /// `size_role` shifts the base before the offset applies.
+    #[test]
+    fn the_size_role_shifts_the_base() {
+        let chrome = ListCardSpec::new()
+            .with_size(ControlSize::Md)
+            .with_size_role(SemanticControlSizeRole::Chrome);
+        assert_eq!(chrome.resolved_leading_size(), ControlSize::Sm);
+    }
+}
+
+#[cfg(test)]
+mod context_menu_tests {
+    use super::*;
+
+    /// Neither native target draws a ListCard context menu yet. The spec
+    /// carrying the entries is the precondition for that, not the feature —
+    /// without it a renderer had nothing to read.
+    #[test]
+    fn a_card_has_no_context_menu_until_it_is_given_entries() {
+        let plain = ListCardSpec::new();
+        assert!(plain.context_menu_items.is_empty());
+        assert_eq!(
+            plain.context_menu_trigger,
+            ListCardContextMenuTrigger::Context,
+        );
+    }
+
+    /// The leading trigger exists for a card whose whole row is already a link,
+    /// where a right-click is the browser's, not the component's.
+    #[test]
+    fn the_trigger_can_move_to_the_leading_slot() {
+        let spec = ListCardSpec::new()
+            .with_context_menu_trigger(ListCardContextMenuTrigger::Leading);
+        assert_eq!(
+            spec.context_menu_trigger,
+            ListCardContextMenuTrigger::Leading,
+        );
     }
 }

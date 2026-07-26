@@ -136,14 +136,6 @@
       "channel": "preview"
     },
     {
-      "name": "poodle-workstation",
-      "path": "packages/contracts/workstation",
-      "kind": "contract-crate",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
       "name": "poodle-gpui",
       "path": "packages/gpui/adapter",
       "kind": "renderer-adapter",

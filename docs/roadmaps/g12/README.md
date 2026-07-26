@@ -50,6 +50,15 @@ Runway:
   scrolling ancestor clips a surface whatever its z-index, and a transformed
   one traps even `position: fixed`. 23 components across both web frameworks,
   behind one shared primitive. **Complete.**
+- `012-workstation-tier-removal.md` — delete the retired `poodle-workstation`
+  spec crate and its GPUI remnants. Six of its thirteen specs duplicated
+  `poodle-specs`; the other seven had no component, contract or Svelte
+  counterpart on any target. Closes the "Remaining" section g09.006 left open.
+  **Complete.**
+- `013-native-spec-surface-parity.md` — nothing measured whether a documented
+  prop reached `poodle-specs`, so nothing could tell whether GPUI and Jetstream
+  had tracked the web. New `contract-spec-drift` gate found 93 real gaps;
+  42 closed, 51 held as baselined debt. **Active.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -58,6 +67,6 @@ Runway:
 
 ## Next Task
 
-`g12.011` is complete. The open ground for this generation is the Rust
-targets — GPUI and Jetstream have not tracked the g12-era Svelte changes —
-or deeper `@poodle/headless` machine coverage.
+`g12.013` is active: the spec-surface half is measured and half closed. Next
+is either the rest of its baseline (51 props) or its second half — teaching the
+GPUI and Jetstream renderers to draw the props now reachable.

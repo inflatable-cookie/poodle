@@ -53,6 +53,8 @@ pub struct TextInputSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Whether the inline validation status icon renders.
+    pub shows_validation_status: bool,
 }
 
 impl Default for TextInputSpec {
@@ -90,6 +92,7 @@ impl Default for TextInputSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            shows_validation_status: true,
         }
     }
 }

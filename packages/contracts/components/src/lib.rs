@@ -146,7 +146,7 @@ mod tree;
 mod validation_summary;
 mod video_player;
 
-pub use accordion::AccordionSpec;
+pub use accordion::{AccordionSelectionMode, AccordionSpec};
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
@@ -191,7 +191,8 @@ pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
 pub use icon_provider::IconProviderSpec;
 pub use list_card::{
-    LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator,
+    LeadingFill, LeadingShape, ListCardContextMenuTrigger, ListCardLayout, ListCardSpec,
+    SelectionIndicator,
 };
 pub use list_card_counter::ListCardCounterSpec;
 pub use list_grid::{ListGridSpec, ListGridVariant};
@@ -280,6 +281,7 @@ pub use types::{
     FormActionAlign, FormActionDangerItem, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
     NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
     PopoverInitialFocus, PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole,
+    resolve_semantic_control_size,
     SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
     TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
@@ -309,10 +311,10 @@ pub use detail_shell::{DetailShellSpec, DetailState};
 pub use dock_region::{
     DockCollapsedPosture, DockEmphasis, DockRegionSpec, DockSizing, DockTabsPlacement,
 };
-pub use editable_list::EditableListSpec;
+pub use editable_list::{EditableListItem, EditableListSpec};
 pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
-pub use empty_state::EmptyStateSpec;
+pub use empty_state::{EmptyStateSize, EmptyStateSpec};
 pub use error_boundary::ErrorBoundarySpec;
 pub use filter_builder::{
     default_operators_for_kind, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
@@ -334,7 +336,7 @@ pub use media_thumbnail::{
     MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec,
 };
 pub use metric_tile::{MetricTileSpec, MetricTrend};
-pub use page_header::{PageHeaderAlign, PageHeaderSpec};
+pub use page_header::{PageHeaderAlign, PageHeaderPosture, PageHeaderSpec};
 pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;

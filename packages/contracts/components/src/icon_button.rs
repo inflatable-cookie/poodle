@@ -25,6 +25,8 @@ pub struct IconButtonSpec {
     pub tooltip_placement: OverlayPlacement,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Initial pressed state for an uncontrolled toggle button.
+    pub default_pressed: Option<bool>,
 }
 
 impl Default for IconButtonSpec {
@@ -44,6 +46,7 @@ impl Default for IconButtonSpec {
             tooltip_placement: OverlayPlacement::Bottom,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            default_pressed: None,
         }
     }
 }

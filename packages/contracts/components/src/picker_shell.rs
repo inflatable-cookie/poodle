@@ -18,9 +18,16 @@ pub struct PickerShellSpec {
     pub state_message: Option<String>,
     pub status_text: Option<String>,
     pub status_id: Option<String>,
+    /// How many items are currently selected — drives the summary copy.
+    pub selection_count: usize,
 }
 
 impl PickerShellSpec {
+    pub fn with_selection_count(mut self, value: usize) -> Self {
+        self.selection_count = value;
+        self
+    }
+
     pub fn new(title: impl Into<String>) -> Self {
         Self {
             title: title.into(),
@@ -36,6 +43,7 @@ impl PickerShellSpec {
             state_message: None,
             status_text: None,
             status_id: None,
+            selection_count: 0,
         }
     }
 

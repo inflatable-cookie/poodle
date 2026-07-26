@@ -34,6 +34,10 @@ pub struct CodeSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
+    /// Whether the copy-to-clipboard control renders.
+    pub shows_copy_button: bool,
 }
 
 impl Default for CodeSpec {
@@ -51,11 +55,23 @@ impl Default for CodeSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
+            aria_label: None,
+            shows_copy_button: true,
         }
     }
 }
 
 impl CodeSpec {
+    pub fn with_copy_button(mut self, value: bool) -> Self {
+        self.shows_copy_button = value;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

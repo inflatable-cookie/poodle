@@ -10,6 +10,7 @@ import {
 } from "../src/parity";
 import { accessibilityAuditTargets } from "../src/accessibility";
 import { contractPropDrift } from "./contract-prop-drift";
+import { contractSpecDrift } from "./contract-spec-drift";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const previewDir = path.resolve(scriptDir, "..");
@@ -38,12 +39,6 @@ const gpuiDataBrowseDetailPickerMediaBaselinePath = path.join(
   "gpui",
   "data-browse-detail-picker-media-baseline.json",
 );
-const gpuiWorkstationBaselinePath = path.join(
-  repoRoot,
-  "packages",
-  "gpui",
-  "workstation-shell-command-layout-baseline.json",
-);
 const gpuiNativeAccessibilityProofPath = path.join(
   repoRoot,
   "packages",
@@ -58,8 +53,6 @@ const gpuiCrossRuntimeParityReportPath = path.join(
 );
 const sharedDemoAppAuditPath = path.join(repoRoot, "packages", "shared-demo-app-audit.json");
 const sharedDemoAppContractPath = path.join(repoRoot, "packages", "shared-demo-app-contract.json");
-const workstationContractsPath = path.join(contractsDir, "workstation");
-const hasWorkstationContracts = fs.existsSync(workstationContractsPath);
 const gpuiAdapterCrateName = "poodle-gpui";
 const gpuiAdapterCratePath = "packages/gpui/adapter";
 const gpuiTokenSource = "poodle-tokens";
@@ -223,9 +216,6 @@ function parseCargoPoodleMetadata(source: string): {
 function validateComponentContracts(errors: string[]): number {
   const componentContractFiles = [
     ...collectMarkdownFiles(path.join(contractsDir, "components")).filter((file) => !file.endsWith("README.md")),
-    ...(hasWorkstationContracts
-      ? collectMarkdownFiles(workstationContractsPath).filter((file) => !file.endsWith("README.md"))
-      : []),
   ];
 
   for (const filePath of componentContractFiles) {
@@ -263,9 +253,6 @@ function validateComponentContracts(errors: string[]): number {
 function validateContractIndexes(errors: string[]): void {
   const componentContracts = collectMarkdownFiles(path.join(contractsDir, "components"))
     .map((file) => path.basename(file));
-  const workstationContracts = hasWorkstationContracts
-    ? collectMarkdownFiles(workstationContractsPath).map((file) => path.basename(file))
-    : [];
 
   compareLists(
     "docs/contracts/components/README.md current contracts",
@@ -277,18 +264,6 @@ function validateContractIndexes(errors: string[]): void {
     errors,
   );
 
-  if (hasWorkstationContracts) {
-    compareLists(
-      "docs/contracts/workstation/README.md current contracts",
-      parseBulletList(
-        fs.readFileSync(path.join(workstationContractsPath, "README.md"), "utf8"),
-        "## Current Contracts",
-      ),
-      workstationContracts.filter((file) => file !== "README.md"),
-      errors,
-    );
-  }
-
   compareLists(
     "docs/contracts/README.md current contracts",
     parseBulletList(
@@ -298,7 +273,6 @@ function validateContractIndexes(errors: string[]): void {
     [
       "template/component-contract-template.md",
       ...componentContracts.map((file) => `components/${file}`),
-      ...workstationContracts.map((file) => `workstation/${file}`),
     ],
     errors,
   );
@@ -2010,106 +1984,6 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
   };
 }
 
-function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExportCount: number } {
-  const baseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = [
-    "action-discovery-panel",
-    "app-header",
-    "command-palette",
-    "command-palette-shell",
-    "dock-region",
-    "panel-header",
-    "panel-surface",
-    "panel-tabs",
-    "project-header",
-    "shell-status-bar",
-    "split-view",
-    "surface-tabs",
-    "workspace-shell",
-  ];
-  const expectedExportNames = [
-    "ActionDiscoveryPanelSpec",
-    "AppHeaderSpec",
-    "CommandPaletteShellSpec",
-    "CommandPaletteSpec",
-    "DockRegionSpec",
-    "PanelHeaderSpec",
-    "PanelSurfaceSpec",
-    "PanelTabsSpec",
-    "ProjectHeaderSpec",
-    "ShellStatusBarSpec",
-    "SplitViewSpec",
-    "SurfaceTabsSpec",
-    "WorkspaceShellSpec",
-  ];
-  const crateRoot = path.join(repoRoot, baseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    baseline.generation === "g04.009",
-    "packages/gpui/workstation-shell-command-layout-baseline.json must target g04.009.",
-    errors,
-  );
-  expect(
-    baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/workstation-shell-command-layout-baseline.json contract coverage",
-    [...baseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/workstation-shell-command-layout-baseline.json export names",
-    [...baseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "README.md")),
-    `packages/gpui/workstation-shell-command-layout-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
-    errors,
-  );
-  expect(
-    baseline.knownDeltas.length >= 2,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    baseline.nonGoals.length >= 3,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of baseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI workstation export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    gpuiWorkstationExportCount: baseline.exportNames.length,
-  };
-}
-
 function validateGpuiNativeAccessibilityProof(errors: string[]): {
   gpuiAccessibilityLayerCount: number;
   gpuiAccessibilitySectionCount: number;
@@ -2180,10 +2054,22 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).contractIds,
     ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).contractIds,
   ].sort();
-  const workstationBaseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
-    exportNames: string[];
-    contractIds: string[];
-  };
+  const shellExportNames = [
+    "ActionDiscoveryPanelSpec",
+    "AppHeaderSpec",
+    "CommandPaletteSpec",
+    "DockRegionSpec",
+    "ShellStatusBarSpec",
+    "SplitViewSpec",
+  ];
+  const shellContractIds = [
+    "action-discovery-panel",
+    "app-header",
+    "command-palette",
+    "dock-region",
+    "split-view",
+    "status-bar",
+  ];
   const sectionTargets = new Map(
     accessibilityAuditTargets
       .filter((target) => target.auditAreas.gpui !== "not-applicable")
@@ -2259,12 +2145,14 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
       },
     ],
     [
+      // Shell surfaces. The retired poodle-workstation crate carried a parallel
+      // spec tier here; what survives are the six that poodle-specs owns.
       "workstation",
       {
         crateName: gpuiAdapterCrateName,
         cratePath: gpuiAdapterCratePath,
-      exportNames: [...workstationBaseline.exportNames].sort(),
-      contractIds: [...workstationBaseline.contractIds].sort(),
+        exportNames: [...shellExportNames].sort(),
+        contractIds: [...shellContractIds].sort(),
       },
     ],
   ]);
@@ -3213,7 +3101,6 @@ const gpuiSelectionFeedbackDateCounts = validateGpuiSelectionFeedbackDateBaselin
 const gpuiOverlayNavigationMenuCounts = validateGpuiOverlayNavigationMenuBaseline(errors);
 const gpuiFormValidationRemediationCounts = validateGpuiFormValidationRemediationBaseline(errors);
 const gpuiDataBrowseDetailPickerMediaCounts = validateGpuiDataBrowseDetailPickerMediaBaseline(errors);
-const gpuiWorkstationCounts = validateGpuiWorkstationBaseline(errors);
 const gpuiNativeAccessibilityCounts = validateGpuiNativeAccessibilityProof(errors);
 const gpuiCrossRuntimeParityCounts = validateGpuiCrossRuntimeParityReport(errors);
 const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
@@ -3230,10 +3117,19 @@ for (const f of contractDriftResult.findings) {
   }
 }
 
+// Contract <-> poodle-specs drift: every documented Public Prop must also reach
+// the shared spec surface, or neither native target can render it.
+const specDriftResult = contractSpecDrift();
+for (const f of specDriftResult.findings) {
+  errors.push(
+    `contract/spec drift: ${f.slug}.md documents prop(s) absent from its poodle-specs Spec: ${f.missing.join(", ")}`,
+  );
+}
+
 if (errors.length > 0) {
   throw new Error(errors.join("\n"));
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiWorkstationCounts.gpuiWorkstationExportCount} GPUI workstation exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, and ${contractDriftResult.checked} contract<->Svelte prop surfaces.`,
+  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
 );

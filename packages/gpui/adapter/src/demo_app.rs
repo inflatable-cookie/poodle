@@ -14,7 +14,9 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    AccordionSpec, BadgeSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
+    AccordionSpec, ActionDiscoveryPanelSpec, AppHeaderSpec, BadgeSpec, BoxSpec, BreadcrumbsSpec,
+    ButtonSpec, CheckboxSpec, CommandPaletteSpec, DockEdge, DockRegionSpec, ShellStatusBarSpec,
+    SplitOrientation, SplitViewSpec,
     FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SelectSpec, SeparatorSpec,
     SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
     ToolbarSpec,
@@ -27,11 +29,6 @@ use poodle_specs::{
     ValidationSummarySpec,
 };
 use poodle_style::StyleDescriptor;
-use poodle_workstation::{
-    AppHeaderSpec, CommandPaletteShellSpec, CommandPaletteSpec, DockEdge, DockRegionSpec,
-    PanelHeaderSpec, PanelSurfaceSpec, ProjectHeaderSpec, ShellStatusBarSpec, SplitOrientation,
-    SplitViewSpec, WorkspaceShellSpec,
-};
 
 use crate::{GpuiAdapter, GpuiElementHandle};
 
@@ -199,16 +196,15 @@ fn render_command_and_workspace(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoS
     let s = StyleDescriptor::new();
     let mut screen = DemoScreen::new("command-and-workspace", "Command & Workspace");
 
-    screen.push(a.render(&WorkspaceShellSpec::new(), &s, t));
+    // The shell is assembled from real components; the retired workstation tier
+    // offered bespoke WorkspaceShell / ProjectHeader / PanelSurface specs that
+    // never drew anything and had no Svelte counterpart.
     screen.push(a.render(&AppHeaderSpec::new(), &s, t));
-    screen.push(a.render(&ProjectHeaderSpec::new("Demo Project"), &s, t));
-    screen.push(a.render(&CommandPaletteShellSpec::new(), &s, t));
     screen.push(a.render(&CommandPaletteSpec::new(vec![]), &s, t));
+    screen.push(a.render(&ActionDiscoveryPanelSpec::new(vec![]), &s, t));
     screen.push(a.render(&DockRegionSpec::new(DockEdge::Left, vec![]), &s, t));
     screen.push(a.render(&DockRegionSpec::new(DockEdge::Right, vec![]), &s, t));
     screen.push(a.render(&SplitViewSpec::new(SplitOrientation::Horizontal), &s, t));
-    screen.push(a.render(&PanelSurfaceSpec::new(), &s, t));
-    screen.push(a.render(&PanelHeaderSpec::new(), &s, t));
     screen.push(a.render(&ShellStatusBarSpec::new(), &s, t));
 
     screen
@@ -290,11 +286,11 @@ mod tests {
     fn workspace_screen_covers_shell_and_docks() {
         let screen = render_command_and_workspace(&adapter(), adapter().theme());
         let types = screen.spec_types();
-        assert!(types.contains(&"WorkspaceShellSpec"));
+        assert!(types.contains(&"AppHeaderSpec"));
         assert!(types.contains(&"CommandPaletteSpec"));
         assert!(types.contains(&"DockRegionSpec"));
         assert!(types.contains(&"SplitViewSpec"));
-        assert!(screen.component_count() >= 8);
+        assert!(screen.component_count() >= 7);
     }
 
     #[test]

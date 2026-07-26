@@ -43,7 +43,14 @@ pub fn js_embed_input(spec: &EmbedInputSpec, theme: &JetstreamThemeProvider) -> 
             .with_rows(3)
             .with_value(spec.value.clone())
             .with_placeholder(placeholder)
-            .with_disabled(spec.is_disabled),
+            .with_disabled(spec.is_disabled)
+            // The nested field inherits the composite's axes; without this it
+            // always rendered at the default size whatever the host asked for.
+            .with_size(poodle_specs::resolve_semantic_control_size(
+                spec.size,
+                spec.size_role,
+            ))
+            .with_density(spec.density),
         theme,
     );
 

@@ -13,7 +13,8 @@ pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThem
     let effective_size = resolve_semantic_size(ControlSize::default(), SemanticControlSizeRole::default());
     let font_size = rem_to_px(size_font_rem(effective_size));
 
-    let text = format!("Showing {} – {} of {}", spec.start_index(), spec.end_index(), spec.total_items);
+    // Built in the spec so all three targets say the same thing (contract §7).
+    let text = spec.summary_text();
 
     ui_element::label(&text).text_color(text_color).text_size(font_size)
 }

@@ -164,6 +164,36 @@ impl Default for SemanticControlSizeRole {
     }
 }
 
+/// Resolve a concrete control size from the inherited size scale and a
+/// semantic role.
+///
+/// `Chrome` resolves one stop smaller (clamped at the minimum), `Prominent` one
+/// stop larger (clamped at the maximum), `Control` is the identity mapping.
+/// Mirrors the Svelte `resolveSemanticControlSize`.
+///
+/// This lived in five places — three specs and both native presentation
+/// modules — each a private copy of a rule that has to match Svelte exactly.
+pub fn resolve_semantic_control_size(
+    size: ControlSize,
+    role: SemanticControlSizeRole,
+) -> ControlSize {
+    match (size, role) {
+        (_, SemanticControlSizeRole::Control) => size,
+
+        (ControlSize::Xs, SemanticControlSizeRole::Chrome) => ControlSize::Xs,
+        (ControlSize::Sm, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
+        (ControlSize::Md, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
+        (ControlSize::Lg, SemanticControlSizeRole::Chrome) => ControlSize::Md,
+        (ControlSize::Xl, SemanticControlSizeRole::Chrome) => ControlSize::Lg,
+
+        (ControlSize::Xs, SemanticControlSizeRole::Prominent) => ControlSize::Sm,
+        (ControlSize::Sm, SemanticControlSizeRole::Prominent) => ControlSize::Md,
+        (ControlSize::Md, SemanticControlSizeRole::Prominent) => ControlSize::Lg,
+        (ControlSize::Lg, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
+        (ControlSize::Xl, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
+    }
+}
+
 /// Density mode controlling container padding and sibling gaps.
 /// See docs/contracts/components/size-and-density.md for the global rules.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -993,5 +1023,59 @@ impl TabStripItem {
     pub fn with_closable(mut self, is_closable: bool) -> Self {
         self.is_closable = is_closable;
         self
+    }
+}
+
+#[cfg(test)]
+mod semantic_size_tests {
+    use super::*;
+
+    /// The full table, transcribed from the Svelte `resolveSemanticControlSize`.
+    /// Pinning every cell is the point: this rule had five private copies, and
+    /// a spot check would not have caught one of them drifting.
+    #[test]
+    fn matches_the_svelte_size_role_table() {
+        use ControlSize::*;
+        use SemanticControlSizeRole::*;
+
+        let cases = [
+            (Xs, Chrome, Xs),
+            (Sm, Chrome, Sm),
+            (Md, Chrome, Sm),
+            (Lg, Chrome, Md),
+            (Xl, Chrome, Lg),
+            (Xs, Control, Xs),
+            (Sm, Control, Sm),
+            (Md, Control, Md),
+            (Lg, Control, Lg),
+            (Xl, Control, Xl),
+            (Xs, Prominent, Sm),
+            (Sm, Prominent, Md),
+            (Md, Prominent, Lg),
+            (Lg, Prominent, Xl),
+            (Xl, Prominent, Xl),
+        ];
+
+        for (size, role, expected) in cases {
+            assert_eq!(
+                resolve_semantic_control_size(size, role),
+                expected,
+                "{size:?} + {role:?}",
+            );
+        }
+    }
+
+    /// Chrome clamps at the bottom and Prominent at the top, so a role can
+    /// never walk a size off either end of the scale.
+    #[test]
+    fn roles_clamp_at_both_ends() {
+        assert_eq!(
+            resolve_semantic_control_size(ControlSize::Xs, SemanticControlSizeRole::Chrome),
+            ControlSize::Xs,
+        );
+        assert_eq!(
+            resolve_semantic_control_size(ControlSize::Xl, SemanticControlSizeRole::Prominent),
+            ControlSize::Xl,
+        );
     }
 }

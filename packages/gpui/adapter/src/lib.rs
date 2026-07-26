@@ -13,7 +13,7 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (poodle-components, poodle-workstation)
+//! Shared Contract Layer (poodle-specs)
 //!     │
 //!     ▼
 //! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
@@ -34,7 +34,7 @@ mod render_informational;
 mod render_overlay;
 mod render_selection;
 mod render_structural;
-mod render_workstation;
+mod render_shell;
 mod style_map;
 mod theme;
 
@@ -211,25 +211,19 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "EmptyStateSpec",
 ];
 
-/// Workstation spec type names supported by the GPUI adapter.
+/// Shell and layout spec type names supported by the GPUI adapter.
 ///
-/// Populated in g07.010.
+/// Was `SUPPORTED_WORKSTATION` against the retired `poodle-workstation` crate;
+/// the seven specs that existed only there had no component, contract or Svelte
+/// counterpart and are gone with it.
 #[allow(dead_code)]
-const SUPPORTED_WORKSTATION: &[&str] = &[
-    // g07.010 — workstation shell and layout
+const SUPPORTED_SHELL: &[&str] = &[
     "ActionDiscoveryPanelSpec",
     "AppHeaderSpec",
     "CommandPaletteSpec",
-    "CommandPaletteShellSpec",
     "DockRegionSpec",
-    "PanelHeaderSpec",
-    "PanelSurfaceSpec",
-    "PanelTabsSpec",
-    "ProjectHeaderSpec",
     "ShellStatusBarSpec",
     "SplitViewSpec",
-    "SurfaceTabsSpec",
-    "WorkspaceShellSpec",
 ];
 
 /// Components intentionally unsupported in GPUI (with reasons).

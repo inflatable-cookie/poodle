@@ -3,6 +3,14 @@ use poodle_tokens::semantic;
 use crate::composite_types::{EmptyStateVariant, RemediationAction};
 use crate::types::ControlDensity;
 
+/// Visual and copy sizing of an empty state, orthogonal to its variant.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum EmptyStateSize {
+    #[default]
+    Default,
+    Compact,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EmptyStateSpec {
     pub title: String,
@@ -17,6 +25,8 @@ pub struct EmptyStateSpec {
     /// Density override for root gap + vertical padding (contract §8 density
     /// adjustments). Orthogonal to `compact` (which is the size axis).
     pub density: ControlDensity,
+    /// Visual and copy sizing, orthogonal to `variant`'s semantic posture.
+    pub size: EmptyStateSize,
 }
 
 impl EmptyStateSpec {
@@ -29,6 +39,7 @@ impl EmptyStateSpec {
             actions: Vec::new(),
             compact: false,
             density: ControlDensity::Default,
+            size: EmptyStateSize::Default,
         }
     }
 

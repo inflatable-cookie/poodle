@@ -66,9 +66,16 @@ pub struct ToastStackSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
 }
 
 impl ToastStackSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self {
             toasts: Vec::new(),
@@ -76,6 +83,7 @@ impl ToastStackSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            aria_label: None,
         }
     }
 

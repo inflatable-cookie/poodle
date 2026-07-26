@@ -91,6 +91,8 @@ pub struct BulkActionBarSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Copy for the select-all control.
+    pub select_all_label: String,
 }
 
 impl Default for BulkActionBarSpec {
@@ -106,11 +108,17 @@ impl Default for BulkActionBarSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            select_all_label: "Select all".to_string(),
         }
     }
 }
 
 impl BulkActionBarSpec {
+    pub fn with_select_all_label(mut self, value: impl Into<String>) -> Self {
+        self.select_all_label = value.into();
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

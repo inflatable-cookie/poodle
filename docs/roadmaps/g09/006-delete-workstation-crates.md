@@ -18,9 +18,5 @@ Jetstream adapters still reference it for render stub functions.
 
 ## Remaining
 
-- `packages/contracts/workstation/` still exists — referenced by:
-  - `packages/gpui/adapter/` (render_workstation.rs)
-  - `packages/jetstream/adapter/` (render_workstation.rs)
-  - These are adapter-layer render stubs, not component implementations.
-  - Will be cleaned up when adapter render stubs are replaced with real
-    component rendering in the adapter layer.
+None. The last piece — `packages/contracts/workstation/` itself — was removed in
+`g12/012-workstation-tier-removal.md`, along with both adapters' render stubs.

@@ -101,7 +101,10 @@ impl IntoElement for Pill {
         // Tuple: (min_w, min_h, pad_x, pad_y, font) in rem. pad-x matches the
         // Svelte-rendered scale (md 0.625rem, +0.125rem wider than the old contract
         // 0.5rem); min-w is the per-size floor; inherit font uses the corrected em table.
-        let (min_w, min_h, pad_x, pad_y, font_size) = match (spec.typography, spec.size) {
+        // `resolved_size` applies the semantic role; reading `spec.size` here
+        // would carry `size_role` and never honour it.
+        let (min_w, min_h, pad_x, pad_y, font_size) =
+            match (spec.typography, spec.resolved_size()) {
             (InlineTypographyMode::Inherit, PillSize::Xs) => (px(rem_to_px(2.4444)), px(rem_to_px(1.5556)), px(rem_to_px(0.7778)), px(rem_to_px(0.1111)), px(rem_to_px(0.5786))),
             (InlineTypographyMode::Inherit, PillSize::Sm) => (px(rem_to_px(2.8571)), px(rem_to_px(1.6)),    px(rem_to_px(0.8)),    px(rem_to_px(0.2)),    px(rem_to_px(0.6429))),
             (InlineTypographyMode::Inherit, PillSize::Md) => (px(rem_to_px(3.2727)), px(rem_to_px(1.8182)), px(rem_to_px(0.9091)), px(rem_to_px(0.2727)), px(rem_to_px(0.7071))),

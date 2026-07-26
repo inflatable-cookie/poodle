@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::composite_types::ParsedEmbed;
 
@@ -11,9 +12,29 @@ pub struct EmbedInputSpec {
     pub providers: Vec<String>,
     pub is_disabled: bool,
     pub error: Option<String>,
+    /// Presentation axes (contract §3): size is intrinsic, density is sibling
+    /// spacing, size_role resolves size from the inherited presentation.
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl EmbedInputSpec {
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
     pub fn new() -> Self {
         Self {
             value: String::new(),
@@ -23,6 +44,9 @@ impl EmbedInputSpec {
             providers: Vec::new(),
             is_disabled: false,
             error: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 

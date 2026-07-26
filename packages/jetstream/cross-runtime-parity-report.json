@@ -6,7 +6,6 @@
     "componentExports": 117,
     "primitiveSpecs": 63,
     "compositeSpecs": 41,
-    "workstationSpecs": 13,
     "specimenFiles": 125,
     "demoScreens": 6,
     "tokenInspector": true,
@@ -39,7 +38,7 @@
   },
   "parityWithGpui": {
     "primitiveSlugs": "identical (79 entries)",
-    "compositeSlugs": "superset (+19 entries: 13 workstation surfaces + 6 additional composites)",
+    "compositeSlugs": "superset (+6 additional composites)",
     "demoScreens": "identical (6 screens)",
     "tokenInspector": "equivalent (same semantic tokens displayed)",
     "displayControls": "equivalent minus AppearanceTreatment toggle"

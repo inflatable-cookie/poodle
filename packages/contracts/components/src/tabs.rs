@@ -44,6 +44,12 @@ pub struct TabsSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Whether hovering a tab shows its label as a tooltip.
+    pub shows_tooltips: bool,
+    /// Whether the strip collapses into a menu when it overflows.
+    pub collapse_when_overflow: bool,
+    /// Label for the overflow-collapse control.
+    pub collapse_label: Option<String>,
 }
 
 impl Default for TabsSpec {
@@ -65,6 +71,9 @@ impl Default for TabsSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
+            shows_tooltips: false,
+            collapse_when_overflow: false,
+            collapse_label: None,
         }
     }
 }

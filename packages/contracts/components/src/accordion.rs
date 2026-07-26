@@ -5,6 +5,14 @@ use crate::types::{
     SemanticControlSizeRole,
 };
 
+/// Whether one panel opens at a time or several.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum AccordionSelectionMode {
+    #[default]
+    Single,
+    Multiple,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccordionSpec {
     pub items: Vec<AccordionItemSpec>,
@@ -16,6 +24,8 @@ pub struct AccordionSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Whether one panel opens at a time or several (contract §3).
+    pub selection_mode: AccordionSelectionMode,
 }
 
 impl Default for AccordionSpec {
@@ -30,11 +40,17 @@ impl Default for AccordionSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            selection_mode: AccordionSelectionMode::Single,
         }
     }
 }
 
 impl AccordionSpec {
+    pub fn with_selection_mode(mut self, value: AccordionSelectionMode) -> Self {
+        self.selection_mode = value;
+        self
+    }
+
     pub fn new(items: Vec<AccordionItemSpec>) -> Self {
         Self {
             items,

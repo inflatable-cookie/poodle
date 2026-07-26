@@ -10,9 +10,16 @@ pub struct CardRadioGroupSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Grid column count for the card layout.
+    pub columns: u8,
 }
 
 impl CardRadioGroupSpec {
+    pub fn with_columns(mut self, value: u8) -> Self {
+        self.columns = value;
+        self
+    }
+
     pub fn new(options: Vec<ChoiceOption>) -> Self {
         Self {
             options,
@@ -22,6 +29,7 @@ impl CardRadioGroupSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            columns: 2,
         }
     }
 

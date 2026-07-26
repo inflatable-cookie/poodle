@@ -85,15 +85,11 @@ impl IntoElement for PaginationSummary {
         let body_size = resolve_px(theme, "typography.body.size");
         let _text_primary = resolve_color(theme, "color.text.primary");
 
-        let start = spec.start_index();
-        let end = spec.end_index();
-        let total = spec.total_items;
-
-        let summary_text = if total == 0 {
-            String::from("No items")
-        } else {
-            format!("Showing {}\u{2013}{} of {}", start, end, total)
-        };
+        // The three targets had drifted to three different strings: an en dash
+        // here, a spaced en dash in Jetstream, a hyphen in Svelte — plus a
+        // "No items" empty case Svelte does not have. The contract's string is
+        // built once in the spec now.
+        let summary_text = spec.summary_text();
 
         let mut container = div().flex().items_center().gap(gap);
 

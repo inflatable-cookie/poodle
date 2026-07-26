@@ -105,7 +105,9 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
 }
 
 pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.size, spec.typography);
+    // `resolved_size` applies the semantic role; reading `spec.size` here would
+    // carry `size_role` and never honour it.
+    let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.resolved_size(), spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
     // `font="mono"` now resolves through the JsEl font-family channel to
     // `--poodle-pill-mono` → code-family (contract §8 `.pill[data-font="mono"]`,

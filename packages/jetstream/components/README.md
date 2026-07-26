@@ -175,7 +175,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 | `toast_stack` | `js_toast_stack` | `ToastStackSpec` |
 | `video_player` | `js_video_player` | `VideoPlayerSpec` |
 
-### Workstation (13)
+### Workstation (3)
 
 | Module | Render Function | Spec |
 |---|---|---|
@@ -183,7 +183,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 | `dock_region` | `js_dock_region` | `DockRegionSpec` |
 | `split_view` | `js_split_view` | `SplitViewSpec` |
 
-(Full workstation surface in `poodle-workstation` crate.)
+Workstation is a preview category, not a separate spec tier: these are ordinary
+`poodle-specs` components. The bespoke `poodle-workstation` crate is retired —
+shell surfaces are assembled from existing components.
 
 ## Parity
 

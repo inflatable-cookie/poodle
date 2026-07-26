@@ -1,0 +1,304 @@
+// Contract <-> poodle-specs prop-surface drift check.
+//
+// The sibling `contract-prop-drift.ts` guards the web side: every documented
+// public prop exists on the Svelte component. Nothing guarded the native side,
+// and both native targets read their props from one place — the `poodle-specs`
+// crate. A prop that lands in the contract and in Svelte but never reaches the
+// Spec struct is invisible to GPUI and Jetstream, and no gate could see it.
+//
+// This compares the contract's "### Public Props" table against the fields of
+// the matching `<Name>Spec` struct.
+//
+// Normalisation, because Rust and TS spell the same prop differently:
+//   - camelCase -> snake_case
+//   - booleans take an `is_` / `has_` prefix in Rust (`disabled` -> `is_disabled`)
+//   - `on*` callbacks are excluded on both sides (contracts document them under
+//     Events; specs are data, not behaviour)
+
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+
+import { allComponents } from "../src/component-registry.ts";
+
+const repoRoot = path.resolve(import.meta.dir, "../../../..");
+const contractsDir = path.join(repoRoot, "docs/contracts/components");
+const specsDir = path.join(repoRoot, "packages/contracts/components/src");
+
+/**
+ * Props that never reach a Spec by design — they are web-platform plumbing, not
+ * component semantics, and a native target has no use for them:
+ *
+ *   - escape hatches into the host's styling: `className`, `class`, `style`,
+ *     `contentClassName`, `contentStyle`, `overlayClassName`
+ *   - raw HTML attributes: `type`, `form*`, `list`, `id`, `name`, `spellcheck`,
+ *     `autocapitalize`, `autocorrect`, `enterKeyHint`
+ *   - ARIA wiring by DOM id: `describedBy` (natives label by object, not id)
+ *   - the rendered element / role: `as`, `asRole`
+ *   - JS callbacks and timings: `validate*`, `debounce`, `parseDebounce`,
+ *     `resolveParseState`, `controller`, `compressionOptions`
+ *   - DOM-node scroll targets: `scrollTarget`, `scrollOffset`
+ *   - snippet slots typed as props: `leading`, `trailing`
+ */
+const WEB_ONLY_PROPS = new Set([
+  "as",
+  "asRole",
+  "autocapitalize",
+  "autocorrect",
+  "class",
+  "className",
+  "compressionOptions",
+  "contentClassName",
+  "contentStyle",
+  "controller",
+  "debounce",
+  "describedBy",
+  "enterKeyHint",
+  "form",
+  "formaction",
+  "formenctype",
+  "formmethod",
+  "formnovalidate",
+  "formtarget",
+  "id",
+  "leading",
+  "list",
+  "name",
+  "overlayClassName",
+  "parseDebounce",
+  "resolveParseState",
+  "scrollOffset",
+  "scrollTarget",
+  "spellcheck",
+  "style",
+  "trailing",
+  "type",
+  "validate",
+  "validateOnBlur",
+  "validationContext",
+  "validationDebounce",
+  "validationKey",
+]);
+
+/**
+ * Real gaps: props the contract documents, Svelte implements, and the Spec does
+ * not carry — so neither native target can render them. Tracked as debt in
+ * `docs/roadmaps/g12/013-native-spec-surface-parity.md`, burned down there.
+ *
+ * This is a baseline, not an allowlist. Closing a gap means deleting its entry;
+ * adding one means a prop shipped to the web without reaching the shared spec
+ * surface, which is the thing this gate exists to stop.
+ */
+const OPEN_GAPS: Record<string, string[]> = {
+  "button": ["fit", "maxWidth", "truncate"],
+  "detail-section": ["itemMinColumnWidth", "maxAutoColumns"],
+  "filter-toolbar": ["minItemWidth"],
+  "popover": ["surfaceMaxWidth", "surfaceMinWidth"],
+  "select": ["loadOptions", "native"],
+  "split-view": ["collapsePrimaryBelowSize", "collapseSecondaryBelowSize", "primaryCollapsedSize", "secondaryCollapsedSize"],
+  "stack": ["height", "minHeight", "minWidth", "overflow", "width"],
+};
+
+/**
+ * Contract prop -> Spec field, where the two deliberately differ. The prop IS
+ * carried; only the spelling moved.
+ */
+const ALIASES: Record<string, Record<string, string>> = {
+  // The contract renamed `name` to `icon` and deprecated the old spelling; the
+  // Spec still stores it as `name`, which 229 native call sites construct by.
+  icon: { icon: "name" },
+  // Collections keep a domain name on the Spec rather than the generic `items`.
+  "card-radio-group": { items: "options" },
+  tabs: { items: "tabs" },
+  "toast-stack": { items: "toasts" },
+  // The ternary state is one field, not a value/label pair.
+  // The pair is stored as two scalars, which is what a thumb renderer wants.
+  "range-slider": { value: "low" },
+  // The pager stores the page it is on and the size of a page; `total` is the
+  // item count, `limit` the page size.
+  pagination: { page: "current_page", total: "total_items", limit: "page_size" },
+  "pagination-summary": { currentPage: "page" },
+  // The spec's only placeholder is the add-input's, which is what the contract
+  // names; a second field would be two names for one thing.
+  "editable-list": { addPlaceholder: "placeholder" },
+  // `kind` is the contract's deprecated name for the dialog's role.
+  dialog: { kind: "role" },
+  // The contract calls the code text `source`; the Spec calls it `content`.
+  code: { source: "content" },
+  // A custom accent is a colour string.
+  pill: { accent: "accent_color" },
+  // The contract's `options` record is decomposed into one field per state.
+  "tri-state-switch": { value: "state", options: "excluded_label" },
+  // The Spec names the instant it renders, not the HTML attribute that carries it.
+  "time-ago": { datetime: "timestamp" },
+  "block-editor": { blockTypeItems: "block_types" },
+};
+
+/** Components with no Spec struct at all, with the reason. */
+const NO_SPEC: Record<string, string> = {
+  "error-boundary": "framework error boundary — no native equivalent",
+  "icon-provider": "context provider — renders no element",
+  "ui-presentation-provider": "context provider — renders no element",
+  "toast-host": "imperative host, driven by the toast machine rather than a spec",
+};
+
+function snake(name: string): string {
+  return name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+}
+
+function contractProps(md: string): string[] {
+  const start = md.indexOf("### Public Props");
+  if (start < 0) return [];
+  const rest = md.slice(start + "### Public Props".length);
+  const end = rest.search(/\n#{2,4} /);
+  const table = end < 0 ? rest : rest.slice(0, end);
+  const props: string[] = [];
+  for (const line of table.split("\n")) {
+    const m = line.match(/^\|\s*`([a-zA-Z_$][\w$]*)`\s*\|/);
+    if (m && !/^on[A-Z]/.test(m[1])) props.push(m[1]);
+  }
+  return props;
+}
+
+/** Every `pub struct` in the crate: name -> [field, resolvedTypeName][]. */
+function collectStructs(): Map<string, Array<[string, string]>> {
+  const structs = new Map<string, Array<[string, string]>>();
+  const files = new Bun.Glob("**/*.rs").scanSync({ cwd: specsDir, absolute: true });
+  const re = /pub struct\s+(\w+)\s*\{([\s\S]*?)\n\}/g;
+
+  for (const file of files) {
+    const src = readFileSync(file, "utf8");
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src)) !== null) {
+      const fields: Array<[string, string]> = [];
+      for (const line of m[2].split("\n")) {
+        const f = line.match(/^\s*pub\s+([a-z_][a-z0-9_]*)\s*:\s*(.+?),?\s*$/);
+        if (f) fields.push([f[1], bareType(f[2])]);
+      }
+      structs.set(m[1], fields);
+    }
+  }
+  return structs;
+}
+
+/** `Option<Vec<MenuEntry>>` -> `MenuEntry`. */
+function bareType(ty: string): string {
+  let t = ty.trim().replace(/,$/, "");
+  for (;;) {
+    const m = t.match(/^(?:Option|Vec|Box|Arc|Rc)<(.+)>$/);
+    if (!m) break;
+    t = m[1].trim();
+  }
+  return t;
+}
+
+/**
+ * Field names reachable from a struct, following composition.
+ *
+ * Specs delegate: `ContextMenuSpec` holds a `MenuSpec`, so the contract's
+ * `items` prop is carried one level down. A checker that only looked at the
+ * top level would report a gap that is not there.
+ */
+function reachableFields(root: string, structs: Map<string, Array<[string, string]>>): Set<string> {
+  const fields = new Set<string>();
+  const seen = new Set<string>();
+  const queue = [root];
+
+  while (queue.length > 0) {
+    const name = queue.pop()!;
+    if (seen.has(name)) continue;
+    seen.add(name);
+    for (const [field, ty] of structs.get(name) ?? []) {
+      fields.add(field);
+      if (structs.has(ty)) queue.push(ty);
+    }
+  }
+  return fields;
+}
+
+/** True when the Spec carries this contract prop under any accepted spelling. */
+function covered(prop: string, fields: Set<string>): boolean {
+  const s = snake(prop);
+  const variants = [
+    s,
+    `is_${s}`,
+    `has_${s}`,
+    // Only a prop that already reads as a "show" toggle may match the Rust
+    // `show_` spelling. Without this guard `seconds` matched `show_seconds`,
+    // reporting a scalar value prop as covered by an unrelated boolean.
+    //
+    // There were plural/singular variants here too (`items` <-> `item`). They
+    // matched nothing once the real gaps closed, and a rule that covers no
+    // case but can still fire is only a way to hide the next one.
+    ...(s.startsWith("show_") ? [s.replace(/^show_/, ""), s.replace(/^show_/, "shows_")] : []),
+  ];
+  return variants.some((v) => fields.has(v));
+}
+
+export type SpecDriftFinding = { slug: string; missing: string[] };
+
+export function contractSpecDrift(): {
+  checked: number;
+  skipped: number;
+  findings: SpecDriftFinding[];
+} {
+  const findings: SpecDriftFinding[] = [];
+  const structs = collectStructs();
+  let checked = 0;
+  let skipped = 0;
+
+  for (const entry of allComponents) {
+    if (entry.slug in NO_SPEC) {
+      skipped++;
+      continue;
+    }
+    const contractPath = path.join(contractsDir, `${entry.slug}.md`);
+    const specPath = path.join(specsDir, `${snake(entry.displayName)}.rs`);
+    if (!existsSync(contractPath) || !existsSync(specPath)) {
+      skipped++;
+      continue;
+    }
+    const props = contractProps(readFileSync(contractPath, "utf8"));
+    if (props.length === 0) {
+      skipped++;
+      continue;
+    }
+    checked++;
+
+    const fields = reachableFields(`${entry.displayName}Spec`, structs);
+    const allow = OPEN_GAPS[entry.slug] ?? [];
+    const aliases = ALIASES[entry.slug] ?? {};
+    const missing = props
+      .filter(
+        (p) =>
+          !WEB_ONLY_PROPS.has(p) &&
+          !covered(p, fields) &&
+          !(aliases[p] && fields.has(aliases[p])) &&
+          !allow.includes(p),
+      )
+      .sort();
+    if (missing.length > 0) findings.push({ slug: entry.slug, missing });
+  }
+
+  return { checked, skipped, findings };
+}
+
+export function contractSpecDriftErrors(): string[] {
+  return contractSpecDrift().findings.map(
+    (f) =>
+      `contract/spec drift: ${f.slug}.md documents prop(s) absent from its poodle-specs Spec: ${f.missing.join(", ")}`,
+  );
+}
+
+if (import.meta.main) {
+  const { checked, skipped, findings } = contractSpecDrift();
+  console.log(`contract-spec-drift: checked ${checked}, skipped ${skipped} (no contract/spec/props)\n`);
+  if (findings.length > 0) {
+    const n = findings.reduce((a, f) => a + f.missing.length, 0);
+    console.log(`${n} documented prop(s) missing from poodle-specs across ${findings.length} component(s):`);
+    for (const f of findings) console.log(`  [${f.slug}] ${f.missing.join(", ")}`);
+    console.log("");
+  } else {
+    console.log("OK — every documented public prop reaches poodle-specs.");
+  }
+  if (findings.length > 0 && process.env.DRIFT_REPORT !== "1") process.exit(1);
+}

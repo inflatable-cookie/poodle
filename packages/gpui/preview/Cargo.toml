@@ -19,7 +19,6 @@ poodle-gpui = { path = "../adapter" }
 poodle-gpui-components = { path = "../components" }
 poodle-adapter = { path = "../../contracts/adapter" }
 poodle-specs = { path = "../../contracts/components" }
-poodle-workstation = { path = "../../contracts/workstation" }
 poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"

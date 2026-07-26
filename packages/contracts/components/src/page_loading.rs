@@ -38,9 +38,16 @@ pub struct PageLoadingSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
 }
 
 impl PageLoadingSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self {
             is_visible: true,
@@ -52,6 +59,7 @@ impl PageLoadingSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            aria_label: None,
         }
     }
 

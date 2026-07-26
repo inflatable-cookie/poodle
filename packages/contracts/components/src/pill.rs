@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlSize, SemanticControlSizeRole};
 
 use crate::InlineTypographyMode;
 
@@ -56,6 +57,17 @@ pub struct PillSpec {
     pub density: crate::types::ControlDensity,
     /// Optional CSS hex string for a custom accent color (overrides tone fill).
     pub accent_color: Option<String>,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
+    /// Presentation axes (contract §3): size is intrinsic, density is sibling
+    /// spacing, size_role resolves size from the inherited presentation.
+    pub size_role: SemanticControlSizeRole,
+    /// Whether the pill grows to fit its label instead of holding a floor width.
+    pub has_adaptive_width: bool,
+    /// Whether a tone-coloured status dot renders before the label.
+    pub has_dot: bool,
+    /// Native tooltip text.
+    pub title: Option<String>,
 }
 
 impl Default for PillSpec {
@@ -73,11 +85,45 @@ impl Default for PillSpec {
             is_disabled: false,
             density: crate::types::ControlDensity::default(),
             accent_color: None,
+            aria_label: None,
+            size_role: SemanticControlSizeRole::Control,
+            has_adaptive_width: false,
+            has_dot: false,
+            title: None,
         }
     }
 }
 
 impl PillSpec {
+    /// Size after the semantic role is applied. Pill shares the five-stop
+    /// control scale, so it reuses the shared shift rather than its own copy.
+    pub fn resolved_size(&self) -> PillSize {
+        let control = match self.size {
+            PillSize::Xs => ControlSize::Xs,
+            PillSize::Sm => ControlSize::Sm,
+            PillSize::Md => ControlSize::Md,
+            PillSize::Lg => ControlSize::Lg,
+            PillSize::Xl => ControlSize::Xl,
+        };
+        match crate::types::resolve_semantic_control_size(control, self.size_role) {
+            ControlSize::Xs => PillSize::Xs,
+            ControlSize::Sm => PillSize::Sm,
+            ControlSize::Md => PillSize::Md,
+            ControlSize::Lg => PillSize::Lg,
+            ControlSize::Xl => PillSize::Xl,
+        }
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

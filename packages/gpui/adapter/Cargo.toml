@@ -13,7 +13,6 @@ poodle-headless = { path = "../../contracts/headless" }
 poodle-events = { path = "../../contracts/events" }
 poodle-layout = { path = "../../contracts/layout" }
 poodle-specs = { path = "../../contracts/components" }
-poodle-workstation = { path = "../../contracts/workstation" }
 poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 

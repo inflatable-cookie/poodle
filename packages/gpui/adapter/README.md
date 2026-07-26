@@ -24,7 +24,7 @@ renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
 - Component structs and their `IntoElement` implementations — owned by
   `poodle-gpui-components`
 - Token definitions and values — owned by `poodle-tokens`
-- Component spec structs — owned by `poodle-specs` and `poodle-workstation`
+- Component spec structs — owned by `poodle-specs`
 
 ## Component Pipeline
 
@@ -164,14 +164,14 @@ Additional mapping functions:
 ## Supported Components
 
 Current support matrix (g09.018): 96 components across primitives, composites,
-and workstation shells. Full parity status in:
+and shell surfaces. Full parity status in:
 
 ```
 packages/gpui/cross-runtime-parity-report.json
 ```
 
 5 documented intentional native deltas (table narration, overlay focus scope,
-media renderer, announcement timing, workstation dock) with approved rationale.
+media renderer, announcement timing, shell dock) with approved rationale.
 
 ## Dependencies
 
@@ -179,7 +179,6 @@ media renderer, announcement timing, workstation dock) with approved rationale.
 [dependencies]
 poodle-adapter     = { path = "../../contracts/adapter" }
 poodle-specs       = { path = "../../contracts/components" }
-poodle-workstation = { path = "../../contracts/workstation" }
 poodle-tokens      = { path = "../../contracts/tokens" }
 poodle-layout      = { path = "../../contracts/layout" }
 poodle-style       = { path = "../../contracts/style" }

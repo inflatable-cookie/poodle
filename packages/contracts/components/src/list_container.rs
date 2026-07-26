@@ -3,6 +3,8 @@
 /// Composes PageHeader + EmptyState + Callout + Pagination + PaginationSummary
 /// into a single orchestrated browse surface.
 
+use crate::composite_types::EmptyStateVariant;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ListContainerState {
     Ready,
@@ -44,9 +46,18 @@ pub struct ListContainerSpec {
     /// Accessible label for the pagination nav region. When None,
     /// renderers should use a sensible default (e.g. "Pagination").
     pub pagination_aria_label: Option<String>,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
+    /// Posture of the empty state this container falls back to.
+    pub empty_variant: EmptyStateVariant,
 }
 
 impl ListContainerSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new(title: impl Into<String>) -> Self {
         Self {
             title: title.into(),

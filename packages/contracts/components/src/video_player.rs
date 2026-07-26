@@ -16,9 +16,20 @@ pub struct VideoPlayerSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
+    /// Caption track URL.
+    pub captions_src: Option<String>,
+    /// Whether captions render by default.
+    pub shows_captions: bool,
 }
 
 impl VideoPlayerSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new(src: impl Into<String>) -> Self {
         Self {
             src: src.into(),
@@ -32,6 +43,9 @@ impl VideoPlayerSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            aria_label: None,
+            captions_src: None,
+            shows_captions: false,
         }
     }
 

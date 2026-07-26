@@ -12,23 +12,7 @@ use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 ///
 /// This exactly matches the Svelte `resolveSemanticControlSize` function.
 pub fn resolve_semantic_size(size: ControlSize, role: SemanticControlSizeRole) -> ControlSize {
-    match (size, role) {
-        (_, SemanticControlSizeRole::Control) => size,
-
-        // Chrome: one stop smaller, clamped at the bottom of the scale
-        (ControlSize::Xs, SemanticControlSizeRole::Chrome) => ControlSize::Xs,
-        (ControlSize::Sm, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
-        (ControlSize::Md, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
-        (ControlSize::Lg, SemanticControlSizeRole::Chrome) => ControlSize::Md,
-        (ControlSize::Xl, SemanticControlSizeRole::Chrome) => ControlSize::Lg,
-
-        // Prominent: one stop larger, clamped at the top of the scale
-        (ControlSize::Xs, SemanticControlSizeRole::Prominent) => ControlSize::Sm,
-        (ControlSize::Sm, SemanticControlSizeRole::Prominent) => ControlSize::Md,
-        (ControlSize::Md, SemanticControlSizeRole::Prominent) => ControlSize::Lg,
-        (ControlSize::Lg, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
-        (ControlSize::Xl, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
-    }
+    poodle_specs::resolve_semantic_control_size(size, role)
 }
 
 /// Get the absolute control height in rem for a given size.

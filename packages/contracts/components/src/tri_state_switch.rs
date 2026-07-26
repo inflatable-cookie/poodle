@@ -18,6 +18,8 @@ pub struct TriStateSwitchSpec {
     pub is_disabled: bool,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
 }
 
 impl Default for TriStateSwitchSpec {
@@ -35,11 +37,17 @@ impl Default for TriStateSwitchSpec {
             is_disabled: false,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            aria_label: None,
         }
     }
 }
 
 impl TriStateSwitchSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

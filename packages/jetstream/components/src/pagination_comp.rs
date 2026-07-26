@@ -72,8 +72,9 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     let mut root = ui_element::div().flex_col().gap(resolve_px(theme, "space.inline.sm"));
 
     // Chrome root treatment: padding + top border + elevated 92% background.
-    // Mirrors the GPUI convention: chrome renders when not standalone.
-    if !spec.standalone {
+    // `resolved_chrome` applies the contract's precedence — `standalone` only
+    // overrides when the host set it, otherwise `chrome` decides.
+    if spec.resolved_chrome() {
         let elevated = resolve_color(theme, "color.background.elevated");
         root = root
             .bg(tint(elevated, 0.92))

@@ -144,7 +144,7 @@ impl Pagination {
         self
     }
     pub fn standalone(mut self, v: bool) -> Self {
-        self.spec.standalone = v;
+        self.spec.standalone = Some(v);
         self
     }
     pub fn info_text(mut self, v: impl Into<String>) -> Self {
@@ -258,7 +258,7 @@ impl IntoElement for Pagination {
         }
 
         // Standalone mode strips the panel chrome.
-        if !self.spec.standalone {
+        if self.spec.resolved_chrome() {
             let pad_x = if self.spec.is_compact {
                 resolve_px(theme, "space.inline.sm")
             } else {

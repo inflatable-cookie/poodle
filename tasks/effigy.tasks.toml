@@ -80,6 +80,9 @@
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
+# Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
+# for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
+"docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -88,7 +91,6 @@
   { run = "cargo test --manifest-path packages/contracts/layout/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/style/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/events/Cargo.toml" },
-  { run = "cargo test --manifest-path packages/contracts/workstation/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/adapter/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
 ]

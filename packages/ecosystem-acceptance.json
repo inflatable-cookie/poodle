@@ -106,7 +106,6 @@
       "status": "matrix-only",
       "coveredPackages": [
         "poodle-specs",
-        "poodle-workstation",
         "poodle-gpui",
         "poodle-gpui-components",
         "poodle-gpui-preview"

@@ -12,7 +12,6 @@
     "status": "matrix-only",
     "coveredPackages": [
       "poodle-specs",
-      "poodle-workstation",
       "poodle-gpui",
       "poodle-gpui-components",
       "poodle-gpui-preview"
@@ -47,7 +46,6 @@
     "componentExports": 96,
     "primitiveSpecs": 64,
     "compositeSpecs": 17,
-    "workstationSpecs": 15,
     "specimenFiles": 73,
     "registryEntries": 113,
     "cratesBuildClean": true
@@ -231,7 +229,6 @@
         "command-suite-eclipse"
       ],
       "gpuiEvidenceArtifacts": [
-        "packages/gpui/workstation-shell-command-layout-baseline.json",
         "packages/gpui/native-accessibility-proof.json"
       ],
       "gpuiStatuses": {
@@ -256,7 +253,6 @@
         "workspace-suite-eclipse"
       ],
       "gpuiEvidenceArtifacts": [
-        "packages/gpui/workstation-shell-command-layout-baseline.json",
         "packages/gpui/native-accessibility-proof.json"
       ],
       "gpuiStatuses": {
@@ -301,7 +297,6 @@
       "followUp": "Reduce this delta after the mounted GPUI preview app can exercise close recovery, initial focus, outside dismissal, and command or picker active-item traversal.",
       "evidenceArtifacts": [
         "packages/gpui/overlay-navigation-menu-baseline.json",
-        "packages/gpui/workstation-shell-command-layout-baseline.json",
         "packages/gpui/native-accessibility-proof.json"
       ]
     },
@@ -330,8 +325,7 @@
       "runtimeReason": "Browser live-region timing and focus side effects do part of the work automatically, while GPUI will need native announcement sequencing.",
       "followUp": "Reduce this delta after mounted GPUI notification and command surfaces can be exercised with real announcement traces.",
       "evidenceArtifacts": [
-        "packages/gpui/native-accessibility-proof.json",
-        "packages/gpui/workstation-shell-command-layout-baseline.json"
+        "packages/gpui/native-accessibility-proof.json"
       ]
     },
     {
@@ -344,7 +338,6 @@
       "runtimeReason": "Dock transfer, named region traversal, menu ownership, and multi-window movement are native shell concerns that Svelte can only model indirectly.",
       "followUp": "Reduce this delta after GPUI workstation shells have mounted native review routes and downstream GPUI adoption proof.",
       "evidenceArtifacts": [
-        "packages/gpui/workstation-shell-command-layout-baseline.json",
         "packages/gpui/native-accessibility-proof.json"
       ]
     }

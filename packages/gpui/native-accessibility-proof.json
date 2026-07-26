@@ -173,31 +173,17 @@
         "action-discovery-panel",
         "app-header",
         "command-palette",
-        "command-palette-shell",
         "dock-region",
-        "panel-header",
-        "panel-surface",
-        "panel-tabs",
-        "project-header",
-        "shell-status-bar",
         "split-view",
-        "surface-tabs",
-        "workspace-shell"
+        "status-bar"
       ],
       "exportNames": [
         "ActionDiscoveryPanelSpec",
         "AppHeaderSpec",
-        "CommandPaletteShellSpec",
         "CommandPaletteSpec",
         "DockRegionSpec",
-        "PanelHeaderSpec",
-        "PanelSurfaceSpec",
-        "PanelTabsSpec",
-        "ProjectHeaderSpec",
         "ShellStatusBarSpec",
-        "SplitViewSpec",
-        "SurfaceTabsSpec",
-        "WorkspaceShellSpec"
+        "SplitViewSpec"
       ],
       "focusEntryStatus": "hybrid",
       "focusRecoveryStatus": "hybrid",

@@ -265,19 +265,7 @@ impl Default for MarkdownEditorSpec {
 /// Resolve a semantic size role against a base size (chrome → one stop smaller,
 /// prominent → one stop larger). Mirrors `presentation::resolve_semantic_size`.
 fn resolve_semantic_size(size: ControlSize, role: SemanticControlSizeRole) -> ControlSize {
-    match (size, role) {
-        (_, SemanticControlSizeRole::Control) => size,
-        (ControlSize::Xs, SemanticControlSizeRole::Chrome) => ControlSize::Xs,
-        (ControlSize::Sm, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
-        (ControlSize::Md, SemanticControlSizeRole::Chrome) => ControlSize::Sm,
-        (ControlSize::Lg, SemanticControlSizeRole::Chrome) => ControlSize::Md,
-        (ControlSize::Xl, SemanticControlSizeRole::Chrome) => ControlSize::Lg,
-        (ControlSize::Xs, SemanticControlSizeRole::Prominent) => ControlSize::Sm,
-        (ControlSize::Sm, SemanticControlSizeRole::Prominent) => ControlSize::Md,
-        (ControlSize::Md, SemanticControlSizeRole::Prominent) => ControlSize::Lg,
-        (ControlSize::Lg, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
-        (ControlSize::Xl, SemanticControlSizeRole::Prominent) => ControlSize::Xl,
-    }
+    crate::types::resolve_semantic_control_size(size, role)
 }
 
 #[cfg(test)]

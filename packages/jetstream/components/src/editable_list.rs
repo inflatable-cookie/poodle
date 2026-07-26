@@ -160,10 +160,18 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     }
 
     // ── Item rows ──
-    if spec.item_count > 0 {
+    // Row count comes from the items when the host supplied them; `item_count`
+    // remains the fallback for a host that only tells us how many rows to draw.
+    let row_count = if spec.items.is_empty() {
+        spec.item_count
+    } else {
+        spec.items.len()
+    };
+
+    if row_count > 0 {
         let mut item_list = ui_element::div().flex_col().gap(list_gap);
 
-        for i in 0..spec.item_count {
+        for i in 0..row_count {
             let mut row = ui_element::div()
                 .flex_row()
                 .items_center()
@@ -180,7 +188,9 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
 
             // Drag handle: 6-dot grip (`grip-vertical`), sized to the contract
             // handle-size square. Decorative; shown only when reorderable.
-            if spec.is_reorderable {
+            // `embedded_handle` means the host draws its own grip inside the row,
+            // so the component must not add a second one.
+            if spec.is_reorderable && !spec.has_embedded_handle {
                 let handle = ui_element::div()
                     .flex_row()
                     .items_center()
@@ -200,7 +210,15 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
             // Content area: flex-grow, ellipsis overflow.
             row = row.child(
                 ui_element::div().grow().min_w_0().child(
-                    ui_element::label(&format!("Item {}", i + 1))
+                    // The spec used to carry only a count, so this drew
+                    // "Item 1", "Item 2" — placeholder text standing in for
+                    // content it had no way to reach.
+                    ui_element::label(
+                        spec.items
+                            .get(i)
+                            .and_then(|item| item.label.as_deref())
+                            .unwrap_or(&format!("Item {}", i + 1)),
+                    )
                         .text_color(text_primary)
                         .text_size(item_font),
                 ),
@@ -231,7 +249,7 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     // ── Add row (real TextInput + primary Button primitives) ──
     // Svelte: canAdd = editable && !disabled && under max.
     let can_add =
-        spec.is_editable && !is_unavailable && spec.max_items.map_or(true, |max| spec.item_count < max);
+        spec.is_editable && !is_unavailable && spec.max_items.map_or(true, |max| row_count < max);
 
     if can_add {
         let input = js_text_input(

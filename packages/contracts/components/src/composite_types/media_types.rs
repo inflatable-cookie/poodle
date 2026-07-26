@@ -27,8 +27,9 @@ pub enum AspectRatio {
     Video,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum EmptyStateVariant {
+    #[default]
     Neutral,
     Search,
     FirstRun,

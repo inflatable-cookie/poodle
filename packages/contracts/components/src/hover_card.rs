@@ -15,6 +15,8 @@ pub struct HoverCardSpec {
     /// Hover-out delay in milliseconds before the card dismisses.
     /// Matches Svelte/contract `closeDelayMs` (default 120).
     pub close_delay_ms: u32,
+    /// Accessible name (contract §7). `None` falls back to the visible label.
+    pub aria_label: Option<String>,
 }
 
 impl Default for HoverCardSpec {
@@ -27,11 +29,17 @@ impl Default for HoverCardSpec {
             placement: OverlayPlacement::Top,
             open_delay_ms: 180,
             close_delay_ms: 120,
+            aria_label: None,
         }
     }
 }
 
 impl HoverCardSpec {
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

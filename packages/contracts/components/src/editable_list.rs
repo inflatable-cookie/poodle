@@ -1,6 +1,28 @@
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
+/// One editable row. `label` is optional so a host can key rows it renders
+/// entirely through its own item slot.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct EditableListItem {
+    pub id: String,
+    pub label: Option<String>,
+}
+
+impl EditableListItem {
+    pub fn new(id: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            label: None,
+        }
+    }
+
+    pub fn with_label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+}
+
 /// EditableList -- an add/remove/reorder list with inline text entry.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EditableListSpec {
@@ -44,9 +66,35 @@ pub struct EditableListSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// The rows themselves. The spec used to carry only `item_count`, which is
+    /// enough to size a list and not enough to draw one — a native target had
+    /// no way to reach the labels.
+    pub items: Vec<EditableListItem>,
+    /// The host renders the grip inside its own item slot, so the component
+    /// drops its padding and omits the standalone handle.
+    pub has_embedded_handle: bool,
+    /// Gate for the workflow header; chrome shows only when this is true and a
+    /// submit or cancel handler exists.
+    pub shows_workflow_chrome: bool,
 }
 
 impl EditableListSpec {
+    pub fn with_items(mut self, items: Vec<EditableListItem>) -> Self {
+        self.item_count = items.len();
+        self.items = items;
+        self
+    }
+
+    pub fn with_embedded_handle(mut self, embedded: bool) -> Self {
+        self.has_embedded_handle = embedded;
+        self
+    }
+
+    pub fn with_workflow_chrome(mut self, shown: bool) -> Self {
+        self.shows_workflow_chrome = shown;
+        self
+    }
+
     pub fn new() -> Self {
         Self {
             item_count: 0,
@@ -70,6 +118,9 @@ impl EditableListSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            items: Vec::new(),
+            has_embedded_handle: false,
+            shows_workflow_chrome: true,
         }
     }
 
@@ -237,5 +288,44 @@ impl EditableListSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod item_tests {
+    use super::*;
+
+    /// The spec used to carry only `item_count`, so a renderer had no way to
+    /// reach the labels and drew "Item 1", "Item 2" instead. Both native
+    /// targets read the rows from here now.
+    #[test]
+    fn items_carry_their_labels() {
+        let spec = EditableListSpec::new().with_items(vec![
+            EditableListItem::new("a").with_label("Alpha"),
+            EditableListItem::new("b").with_label("Beta"),
+        ]);
+
+        assert_eq!(spec.items.len(), 2);
+        assert_eq!(spec.items[0].label.as_deref(), Some("Alpha"));
+        assert_eq!(spec.items[1].id, "b");
+    }
+
+    /// `with_items` keeps `item_count` in step, so a host that only reads the
+    /// count still sees the right number of rows.
+    #[test]
+    fn item_count_tracks_the_items() {
+        let spec = EditableListSpec::new().with_items(vec![
+            EditableListItem::new("a"),
+            EditableListItem::new("b"),
+            EditableListItem::new("c"),
+        ]);
+        assert_eq!(spec.item_count, 3);
+    }
+
+    /// A row a host renders entirely through its own slot needs no label.
+    #[test]
+    fn a_label_is_optional() {
+        let item = EditableListItem::new("only-an-id");
+        assert_eq!(item.label, None);
     }
 }

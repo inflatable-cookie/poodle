@@ -8,6 +8,14 @@ pub enum PageHeaderAlign {
     Between,
 }
 
+/// Layout posture of a page header.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum PageHeaderPosture {
+    #[default]
+    Default,
+    EntityDetail,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PageHeaderSpec {
     pub title: String,
@@ -45,6 +53,10 @@ pub struct PageHeaderSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Layout posture — an entity detail header sits tighter than a page one.
+    pub posture: PageHeaderPosture,
+    /// Whether the subtitle stays visible when breadcrumbs are present.
+    pub shows_subtitle_with_breadcrumbs: bool,
 }
 
 impl PageHeaderSpec {
@@ -67,6 +79,8 @@ impl PageHeaderSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            posture: PageHeaderPosture::Default,
+            shows_subtitle_with_breadcrumbs: false,
         }
     }
 
