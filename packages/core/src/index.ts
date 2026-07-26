@@ -75,6 +75,7 @@ export {
   collectScrollParents,
   intersectClip,
   isAnchorClipped,
+  isPointAnchorClipped,
   observeAnchorMovement,
   pointAnchor,
   resolveClipRect,

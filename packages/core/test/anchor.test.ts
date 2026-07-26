@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   intersectClip,
   isAnchorClipped,
+  isPointAnchorClipped,
   viewportClipRect,
   type ClipRect,
 } from "../src/dom/anchor";
@@ -60,5 +61,19 @@ describe("isAnchorClipped", () => {
 
   test("horizontal clipping counts too", () => {
     expect(isAnchorClipped(rect(200, -10, 230, -120), scroller)).toBe(true);
+  });
+});
+
+describe("isPointAnchorClipped", () => {
+  const clip = rect(100, 300, 400, 50);
+
+  test("keeps a zero-size point visible inside its clip box", () => {
+    expect(isPointAnchorClipped(rect(200, 200, 200, 200), clip)).toBe(false);
+  });
+
+  test("clips points outside or touching the clip box", () => {
+    expect(isPointAnchorClipped(rect(40, 200, 40, 200), clip)).toBe(true);
+    expect(isPointAnchorClipped(rect(200, 50, 200, 50), clip)).toBe(true);
+    expect(isPointAnchorClipped(rect(400, 200, 400, 200), clip)).toBe(true);
   });
 });

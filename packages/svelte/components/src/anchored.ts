@@ -2,6 +2,7 @@ import "@poodle/styles/anchored-surface.css";
 import {
   anchorElement,
   isAnchorClipped,
+  isPointAnchorClipped,
   observeAnchorMovement,
   resolveClipRect,
   resolveOverlayPosition,
@@ -73,7 +74,12 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     const anchorRect = anchor.getBoundingClientRect();
     const viewport = { width: window.innerWidth, height: window.innerHeight };
 
-    if (isAnchorClipped(anchorRect, resolveClipRect(anchorElement(anchor), viewport))) {
+    const clipRect = resolveClipRect(anchorElement(anchor), viewport);
+    const clipped =
+      "nodeType" in anchor
+        ? isAnchorClipped(anchorRect, clipRect)
+        : isPointAnchorClipped(anchorRect, clipRect);
+    if (clipped) {
       node.dataset.anchorHidden = "true";
       return;
     }

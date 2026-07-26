@@ -108,6 +108,23 @@ export function isAnchorClipped(anchor: ClipRect, clip: ClipRect): boolean {
   return visible.right <= visible.left || visible.bottom <= visible.top;
 }
 
+/**
+ * True when a virtual point anchor sits outside its clip box.
+ *
+ * Point anchors intentionally have no area, so the rectangle-intersection
+ * rule above would classify every context-menu anchor as clipped. Edges are
+ * excluded: an overlay anchored exactly outside a viewport/scroller boundary
+ * should hide rather than detach from its invocation point.
+ */
+export function isPointAnchorClipped(anchor: ClipRect, clip: ClipRect): boolean {
+  return (
+    anchor.left <= clip.left ||
+    anchor.left >= clip.right ||
+    anchor.top <= clip.top ||
+    anchor.top >= clip.bottom
+  );
+}
+
 function isElement(node: Node | null): node is HTMLElement {
   return node !== null && node.nodeType === 1;
 }
