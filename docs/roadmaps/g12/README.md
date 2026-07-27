@@ -109,25 +109,24 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
-- **11 real contract role gaps**, surfaced by the gate auditing its own
-  exemptions. `effigy drift:roles` reached zero and gated, then found its own
-  `OVERLAY_ONLY` list was wrong — written by *reasoning* about which roles need
-  an overlay open rather than by checking.
+- **Contract ARIA roles: zero gaps, gated in `ci:native`.** `effigy
+  drift:roles` extracts every `role="…"` a contract names, maps it onto
+  `accesskit::Role`, and checks it appears in the tree that component renders.
+  124 requirements: all met, bar 26 genuinely observable only with an overlay
+  open and 4 exempt with a recorded reason.
 
-  `select` disproved it: its specimen has had an "Open state" group all along,
-  so a missing `listbox` was a component defect wearing an exemption. The
-  general fix is that an exemption is now **checked against the specimen
-  source** — if the specimen opens the thing, the excuse does not apply. That
-  invalidated 20 exemptions across nine components; nine are closed.
+  It gated once before on a **false zero**. The `OVERLAY_ONLY` list had been
+  written by *reasoning* about which roles need an overlay open, and `select`
+  disproved it — its specimen has had an "Open state" group all along, so a
+  missing `listbox` was a component defect wearing an exemption. The list is
+  now **verified against the specimen sources**: a component whose specimen
+  opens the overlay cannot claim the excuse. That exposed 20 more real gaps,
+  all since closed.
 
-  Remaining: `split-button` (menu, menuitem, separator), `color-picker`
-  (slider, listbox, option), `order-by` (list, listitem), `ref-select`
-  (status), and `dialog` on two date pickers whose panels are built
-  differently again.
-
-  **Reporting, not gating**, until those are closed — a gate that cannot pass
-  teaches people to skip it. 26 requirements remain genuinely overlay-only and
-  4 are exempt with a recorded reason.
+  The naming gate caught three regressions introduced by this role work —
+  `tabs`, and twice in `color-picker` — because a role that requires a name
+  makes previously-ignorable elements answerable. The two gates check each
+  other.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for

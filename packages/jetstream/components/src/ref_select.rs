@@ -206,6 +206,10 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
         if spec.show_empty() {
             panel = panel.child(
                 ui_element::label(&spec.empty_label)
+                    // Contract: the empty and loading lines are `status`, so a
+                    // screen reader is told the list is empty rather than
+                    // finding nothing and being left to infer why.
+                    .aria_role(jetstream_ui::accesskit::Role::Status)
                     .text_color(text_secondary)
                     .text_size(rem_to_px(0.75)),
             );
@@ -214,6 +218,7 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
         if spec.is_loading {
             panel = panel.child(
                 ui_element::label(&spec.loading_label)
+                    .aria_role(jetstream_ui::accesskit::Role::Status)
                     .text_color(text_secondary)
                     .text_size(rem_to_px(0.75)),
             );

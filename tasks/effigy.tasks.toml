@@ -90,10 +90,10 @@
 # Contract ARIA roles vs the roles Jetstream actually projects — the
 # accessibility counterpart of contract-spec-drift.
 #
-# Reporting, not gating. It gated briefly, until it started checking its own
-# exemptions against the specimens and found 20 of them stale — roles excused as
-# "needs an overlay open" whose specimen opens the overlay. Those are real gaps,
-# so the gate cannot pass, and a gate that cannot pass teaches people to skip it.
+# Gating. It gated once before on a false zero: the exemption list was written
+# by reasoning rather than checking, and hid 20 real gaps behind "needs an
+# overlay open". The list is now verified against the specimen sources, so a
+# component whose specimen opens the overlay cannot claim the excuse.
 "drift:roles" = "bun --cwd packages/svelte/preview scripts/contract-role-drift.ts"
 
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
@@ -156,6 +156,7 @@
   { task = "check:gpui" },
   { task = "check:jetstream" },
   { task = "test:jetstream-a11y" },
+  { task = "drift:roles" },
 ]
 
 # Documentation

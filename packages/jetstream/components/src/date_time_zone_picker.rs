@@ -174,7 +174,9 @@ pub fn js_date_time_zone_picker(
             .child(tz_field_group);
 
         // Body — vertical stack of Calendar + Fields; contract gap 0.875rem.
+        // Contract: the open picker surface is a `dialog`.
         let body = ui_element::div()
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .flex_col()
             .gap(rem_to_px(0.875))
             .child(js_calendar(&cal_spec, theme))

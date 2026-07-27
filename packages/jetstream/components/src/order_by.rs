@@ -209,7 +209,11 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
                     .text_size(rem_to_px(0.75)),
             );
         } else {
-            let mut list = ui_element::div().flex_col().gap(list_gap);
+            // Contract: the active sort clauses are a `list` of `listitem`s.
+            let mut list = ui_element::div()
+                .flex_col()
+                .gap(list_gap)
+                .aria_role(jetstream_ui::accesskit::Role::List);
             for item in current_value.iter() {
                 let field_label = spec.active_label(&item.key);
                 let (dir_icon, dir_tooltip, dir_word) = match item.direction {
@@ -218,6 +222,7 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
                 };
 
                 let row = ui_element::div()
+                    .aria_role(jetstream_ui::accesskit::Role::ListItem)
                     .flex_row()
                     .items_center()
                     .gap(item_gap)

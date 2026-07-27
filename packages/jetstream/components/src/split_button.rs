@@ -251,7 +251,9 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
         // Contract §8 Menu separator: color-mix(border-subtle 72%, transparent).
         let menu_sep_color = sep_color.with_alpha(sep_color.a * 0.72);
 
+        // Contract: the dropdown is a `menu` of `menuitem`s.
         let mut menu = ui_element::div()
+            .aria_role(jetstream_ui::accesskit::Role::Menu)
             .flex_col()
             .min_w(menu_min_w)
             .p(menu_pad)
@@ -269,6 +271,7 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
                     ..
                 } => {
                     let mut item_el = ui_element::button(label)
+                        .aria_role(jetstream_ui::accesskit::Role::MenuItem)
                         .min_h(item_min_h)
                         .pl(item_pad_x)
                         .pr(item_pad_x)
@@ -292,6 +295,10 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
                 SplitMenuItem::Separator => {
                     menu = menu.child(
                         ui_element::div()
+                            // Contract §6: menu separators are announced, so a
+                            // screen reader hears the grouping the divider
+                            // draws rather than one undifferentiated list.
+                            .aria_role(jetstream_ui::accesskit::Role::Splitter)
                             .w_full()
                             .h(rem_to_px(0.0625))
                             .my(menu_pad)

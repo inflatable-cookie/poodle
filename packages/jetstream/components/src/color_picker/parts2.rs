@@ -30,7 +30,9 @@ pub(super) fn build_swatch_grid(
     let text_primary: Color = text_primary.into();
     let _ = theme;
 
+    // Contract: the preset swatches are a `listbox` of `option`s.
     let mut grid = ui_element::div()
+        .aria_role(jetstream_ui::accesskit::Role::ListBox)
         .id("color-picker-swatches")
         .flex_row()
         .flex_wrap()
@@ -56,6 +58,8 @@ pub(super) fn build_swatch_grid(
         };
 
         let swatch = ui_element::div()
+            .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
+            .aria_label(hex.clone())
             .id(format!("color-picker-swatch-{idx}"))
             .w(swatch_size)
             .h(swatch_size)

@@ -174,7 +174,7 @@ pub(super) fn build_hue_strip(theme: &JetstreamThemeProvider, hue: f32) -> JsEl 
         track = track.child(seg);
     }
 
-    slider_wrap(track, thumb_d, track_h, (hue / 360.0).clamp(0.0, 1.0), elevated, border)
+    slider_wrap("Hue", track, thumb_d, track_h, (hue / 360.0).clamp(0.0, 1.0), elevated, border)
 }
 
 /// Alpha slider. CSS layers a transparent→color gradient over a checkerboard;
@@ -211,11 +211,14 @@ pub(super) fn build_alpha_strip(
         .bg(surface_bg)
         .child(overlay);
 
-    slider_wrap(track, thumb_d, track_h, alpha.clamp(0.0, 1.0), elevated, border)
+    slider_wrap("Opacity", track, thumb_d, track_h, alpha.clamp(0.0, 1.0), elevated, border)
 }
 
 /// Wrap a slider track in a relative container with a thumb at `progress`.
 pub(super) fn slider_wrap(
+    // What this channel controls. A slider announced as "slider, 40%" says
+    // nothing about which quantity moved, and this picker has several.
+    channel: &str,
     track: JsEl,
     thumb_d: f32,
     track_h: f32,
@@ -238,7 +241,16 @@ pub(super) fn slider_wrap(
         .border(1.0)
         .border_color(thumb_border);
 
-    ui_element::div().relative().w_full().child(track).child(thumb)
+    // Contract: each channel track is a `slider` reporting its own value, not
+    // a decorative bar with a dot on it.
+    ui_element::div()
+        .aria_role(jetstream_ui::accesskit::Role::Slider)
+        .aria_label(channel)
+        .aria_value(progress as f64, 0.0, 1.0)
+        .relative()
+        .w_full()
+        .child(track)
+        .child(thumb)
 }
 
 /// Channel inputs row for the current mode (hex / RGB / HSL). Each is a
