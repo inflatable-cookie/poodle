@@ -304,6 +304,11 @@ pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -
                     for option in axis.options.iter() {
                         let is_selected = option.value == selected;
                         let mut row = ui_element::div()
+                            // Contract: axis options are mutually exclusive, so
+                            // each is a `radio` with its own checked state.
+                            .aria_role(jetstream_ui::accesskit::Role::RadioButton)
+                            .aria_label(option.label.clone())
+                            .aria_checked(crate::aria::toggled(Some(is_selected)))
                             .flex_row()
                             .items_center()
                             .gap(rem_to_px(0.5))

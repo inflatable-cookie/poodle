@@ -148,10 +148,36 @@ function isOverlayOnly(slug: string, aria: string): boolean {
   return (OVERLAY_ONLY[slug] ?? []).includes(aria);
 }
 
+/**
+ * Roles a component genuinely does not emit, with the reason it is not a
+ * defect. Each needs a justification, not just an entry.
+ *
+ * These are the residue after the real gaps were closed, and they are
+ * qualitatively different from `OVERLAY_ONLY`: those are observable with a
+ * better specimen, these are not observable at all in this implementation.
+ */
+const NOT_APPLICABLE: Record<string, Record<string, string>> = {
+  "editable-list": {
+    alert: "validation message; only rendered when a row is invalid",
+    status: "status line; only rendered while saving or empty",
+  },
+  rating: {
+    slider: "the contract lists radio *or* slider by variant; this renders the radio group",
+  },
+  tabs: {
+    tabpanel: "TabDefinition carries no content in this API, so no panel exists to label",
+  },
+};
+
+function notApplicable(slug: string, aria: string): string | undefined {
+  return NOT_APPLICABLE[slug]?.[aria];
+}
+
 type Gap = { slug: string; aria: string; expected: string[] };
 const gaps: Gap[] = [];
 let checked = 0;
 let overlayOnly = 0;
+const exempt: string[] = [];
 
 for (const [slug, projected] of Object.entries(census)) {
   if (!known.has(slug)) continue;
@@ -171,6 +197,11 @@ for (const [slug, projected] of Object.entries(census)) {
         overlayOnly += 1;
         continue;
       }
+      const reason = notApplicable(slug, aria);
+      if (reason) {
+        exempt.push(`${slug} ${aria} — ${reason}`);
+        continue;
+      }
       gaps.push({ slug, aria, expected: accepted });
     }
   }
@@ -178,6 +209,10 @@ for (const [slug, projected] of Object.entries(census)) {
 
 console.log(`\nchecked ${checked} contract role requirements across ${Object.keys(census).length} specimens`);
 console.log(`${overlayOnly} need an open overlay to observe and are set aside — see OVERLAY_ONLY`);
+if (exempt.length > 0) {
+  console.log(`${exempt.length} exempt with a recorded reason:`);
+  for (const line of exempt) console.log(`  ${line}`);
+}
 
 if (gaps.length === 0) {
   console.log("every ARIA role a contract names is projected by its component.");

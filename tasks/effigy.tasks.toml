@@ -88,8 +88,9 @@
 "test:jetstream-a11y" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
 "jetstream-a11y:roles" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
 # Contract ARIA roles vs the roles Jetstream actually projects — the
-# accessibility counterpart of contract-spec-drift. Not gating yet: 73 of 124
-# requirements are unmet, and some are overlay states no specimen renders.
+# accessibility counterpart of contract-spec-drift. Gating: every requirement is
+# either met, set aside as observable only with an overlay open, or exempt with
+# a recorded reason.
 "drift:roles" = "bun --cwd packages/svelte/preview scripts/contract-role-drift.ts"
 
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
@@ -152,6 +153,7 @@
   { task = "check:gpui" },
   { task = "check:jetstream" },
   { task = "test:jetstream-a11y" },
+  { task = "drift:roles" },
 ]
 
 # Documentation

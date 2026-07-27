@@ -169,10 +169,17 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     };
 
     if row_count > 0 {
-        let mut item_list = ui_element::div().flex_col().gap(list_gap);
+        // Contract: the rows are a `listbox` of `option`s, not anonymous
+        // structure that happens to be vertical.
+        let mut item_list = ui_element::div()
+            .flex_col()
+            .gap(list_gap)
+            .aria_role(jetstream_ui::accesskit::Role::ListBox);
 
         for i in 0..row_count {
             let mut row = ui_element::div()
+                // Each row is an `option` of the listbox above it.
+                .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
                 .flex_row()
                 .items_center()
                 .gap(item_gap)

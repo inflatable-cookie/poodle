@@ -59,6 +59,11 @@ pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
         // Glyph wrapper: relative base + absolute clipped fill overlay.
         let mut glyph = ui_element::div()
+            // Contract: the stars are mutually exclusive choices, so each is a
+            // `radio` naming the value it sets — "3 stars", not "star".
+            .aria_role(jetstream_ui::accesskit::Role::RadioButton)
+            .aria_label(format!("{} of {}", i + 1, spec.max))
+            .aria_checked(crate::aria::toggled(Some(spec.fill_ratio(i) > 0.0)))
             .relative()
             .w(glyph_px)
             .h(glyph_px)

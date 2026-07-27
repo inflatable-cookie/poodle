@@ -193,7 +193,11 @@ pub fn js_action_discovery_panel(
         }
 
         // List of action items.
-        let mut list = ui_element::div().flex_col().gap(list_gap);
+        // Contract: the actions in a section are a `listbox` of `option`s.
+        let mut list = ui_element::div()
+            .flex_col()
+            .gap(list_gap)
+            .aria_role(jetstream_ui::accesskit::Role::ListBox);
 
         for action in &section.actions {
             let is_active = spec.active_id.as_deref() == Some(action.id.as_str());
@@ -216,6 +220,9 @@ pub fn js_action_discovery_panel(
             }
 
             let mut row = ui_element::div()
+                // Each action is an `option` of the section's listbox.
+                .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
+                .aria_selected(is_active)
                 .id(action.id.clone())
                 .flex_row()
                 .items_center()
