@@ -152,6 +152,8 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
             // GPUI's mapping).
             let mut overlay = elevation_overlay(
                 ui_element::div()
+                    // Contract: the open dropdown is the `menu` owning the items.
+                    .aria_role(jetstream_ui::accesskit::Role::Menu)
                     .flex_col()
                     .min_w(overlay_min_w)
                     .pt(overlay_pad)
@@ -173,6 +175,7 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
                     MenuItemKind::Separator => {
                         overlay = overlay.child(
                             ui_element::div()
+                                .aria_role(jetstream_ui::accesskit::Role::Splitter)
                                 .h(separator_h)
                                 .bg(separator_color)
                                 .mt(separator_my)
@@ -184,6 +187,14 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
                     // padding (contract §8 Item).
                     _ => {
                         let mut row = ui_element::div()
+                            // Checkbox and radio items are distinct roles from a
+                            // plain menu item: one toggles, the other picks one
+                            // of a set.
+                            .aria_role(match item.kind {
+                                MenuItemKind::Checkbox => jetstream_ui::accesskit::Role::MenuItemCheckBox,
+                                MenuItemKind::Radio => jetstream_ui::accesskit::Role::MenuItemRadio,
+                                _ => jetstream_ui::accesskit::Role::MenuItem,
+                            })
                             .flex_row()
                             .items_center()
                             .gap(item_gap)

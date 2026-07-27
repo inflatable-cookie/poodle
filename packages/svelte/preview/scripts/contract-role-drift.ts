@@ -120,7 +120,6 @@ const known = new Set(readdirSync(CONTRACTS).filter((f) => f.endsWith(".md")).ma
 const OVERLAY_ONLY: Record<string, string[]> = {
   "color-picker": ["dialog", "listbox", "option", "slider"],
   "command-palette": ["dialog", "status"],
-  "context-menu": ["menu", "menuitem", "menuitemcheckbox", "menuitemradio"],
   "data-table": ["menu"],
   "date-picker": ["dialog"],
   "date-range-picker": ["dialog"],
@@ -132,7 +131,6 @@ const OVERLAY_ONLY: Record<string, string[]> = {
   "filter-builder": ["dialog"],
   "hover-card": ["button", "dialog"],
   "icon-button": ["tooltip"],
-  menubar: ["menu", "menuitem", "menuitemcheckbox", "menuitemradio", "separator"],
   "media-picker": ["listbox", "option"],
   "model-picker": ["dialog"],
   "order-by": ["dialog", "list", "listitem"],

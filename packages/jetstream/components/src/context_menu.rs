@@ -69,6 +69,8 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
     // runtime shadow builder (single layer, spread 0; matches GPUI's mapping).
     let mut el = elevation_overlay(
         ui_element::div()
+            // Contract: the surface is the `menu` that owns the items.
+            .aria_role(jetstream_ui::accesskit::Role::Menu)
             .bg(fill)
             .border(1.0)
             .border_color(border)
@@ -88,6 +90,7 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
             MenuItemKind::Separator => {
                 el = el.child(
                     ui_element::div()
+                        .aria_role(jetstream_ui::accesskit::Role::Splitter)
                         .h(1.0)
                         .bg(separator_bg)
                         .mt(separator_my)
@@ -108,6 +111,11 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
                 };
 
                 let mut item = ui_element::div()
+                    .aria_role(match entry.kind {
+                        MenuItemKind::Radio => jetstream_ui::accesskit::Role::MenuItemRadio,
+                        _ => jetstream_ui::accesskit::Role::MenuItemCheckBox,
+                    })
+                    .aria_checked(crate::aria::toggled(Some(entry.is_checked)))
                     .flex_row()
                     .items_center()
                     .gap(item_gap)
@@ -150,6 +158,7 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
                 let label_color = if entry.is_destructive { danger_color } else { text_color };
 
                 let mut item = ui_element::div()
+                    .aria_role(jetstream_ui::accesskit::Role::MenuItem)
                     .flex_row()
                     .items_center()
                     .gap(item_gap)
