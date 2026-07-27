@@ -128,6 +128,8 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        // Contract: the group is a `radiogroup` when selection is single.
+        .aria_role(jetstream_ui::accesskit::Role::RadioGroup)
 }
 
 #[cfg(test)]

@@ -206,6 +206,11 @@ fn render_row(
     };
 
     let mut row = ui_element::div()
+        // Contract: rows are `role="treeitem"`, carrying their depth so a
+        // screen reader can announce "level 3" rather than leaving the shape
+        // of the tree to be inferred from indentation nobody can see.
+        .aria_role(jetstream_ui::accesskit::Role::TreeItem)
+        .aria_level(depth + 1)
         .id(format!("tree:{}", node.value))
         .flex_row()
         .items_center()

@@ -60,6 +60,16 @@ pub(super) fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) 
         let text_color = if is_active { text_primary } else { text_secondary };
 
         let mut tab_el = ui_element::div()
+            // Contract: each tab is `role="tab"` with `aria-selected`. The
+            // element is a div rather than a Button widget (see below), so
+            // both have to be stated.
+            .aria_role(jetstream_ui::accesskit::Role::Tab)
+            // Naming it from the spec rather than relying on name-from-content:
+            // the caption is several levels down and an icon-only tab has no
+            // text at all, which the naming gate caught the moment this element
+            // started claiming a role that requires a name.
+            .aria_label(tab.label.clone())
+            .aria_selected(is_active)
             .focusable()
             // Contract (tabs.css): tab fill defaults to transparent — a bare
             // Button widget would pick up the engine's default button fill.

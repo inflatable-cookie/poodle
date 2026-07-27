@@ -123,7 +123,15 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
         el = el.child(child);
     }
 
-    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+    let el = crate::aria::with_aria_label(el, spec.aria_label.as_deref());
+    // Contract: an interactive card is `role="button"`. A non-interactive one
+    // is structure and must stay structure, or every card in a list announces
+    // itself as pressable.
+    if spec.is_interactive {
+        el.aria_role(jetstream_ui::accesskit::Role::Button)
+    } else {
+        el
+    }
 }
 
 #[cfg(test)]

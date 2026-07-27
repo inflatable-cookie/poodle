@@ -109,19 +109,26 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
-- **73 of 124 contract ARIA roles are never projected**, across 37 components.
-  `effigy drift:roles` is the accessibility counterpart of
-  `contract-spec-drift`: it extracts every `role="…"` a contract names, maps it
-  onto `accesskit::Role`, and checks it appears in the tree that component
-  actually renders. Not gating yet, because the number is not zero and because
-  some entries are overlay states no specimen renders — a date picker's
-  `dialog` only exists once opened — so the count is an upper bound on real
-  defects, not a defect list.
+- **19 real contract role gaps, across 11 components.** `effigy drift:roles`
+  extracts every `role="…"` a contract names, maps it onto `accesskit::Role`,
+  and checks it appears in the tree that component renders. 124 requirements
+  checked; **48 are set aside as observable only with an overlay open** — a
+  date picker's `dialog` exists once opened, a menu's `menuitem`s once the menu
+  is — leaving 19 that are genuinely never emitted.
 
-  It compares sets, not placement: a contract asking for `role="option"` is
-  satisfied by a `ListBoxOption` anywhere in that component's tree. Checking
-  placement needs an anatomy model the contracts do not have, and the
-  never-emitted-at-all case is the one worth catching first.
+  That split is the point. A role never emitted is a component defect; a role
+  needing an open overlay is a *specimen* coverage gap. Conflating them gives a
+  number nobody trusts, which is why the raw 73 was triaged rather than
+  reported.
+
+  Remaining: `editable-list` (alert, status, listbox, option), `calendar`
+  (grid, row, gridcell), `rating` (radio, slider), `card-radio-group`
+  (radiogroup, radio), `action-discovery-panel` (listbox, option), and single
+  roles on `toggle-group`, `tri-state-switch`, `tabs`, `accordion`,
+  `card-toggle-group`, `model-picker`, `toast-stack`.
+
+  Not gating while it is non-zero: gating a number that cannot pass trains
+  people to ignore the gate.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for

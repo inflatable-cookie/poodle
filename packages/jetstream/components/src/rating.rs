@@ -101,6 +101,8 @@ pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        // Contract: a rating is a `radiogroup` of stars.
+        .aria_role(jetstream_ui::accesskit::Role::RadioGroup)
 }
 
 #[cfg(test)]

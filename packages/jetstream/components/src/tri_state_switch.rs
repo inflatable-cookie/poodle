@@ -198,6 +198,8 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        // Contract: three mutually exclusive options — a `radiogroup`.
+        .aria_role(jetstream_ui::accesskit::Role::RadioGroup)
 }
 
 /// Resolve a per-state color, preferring an instance hex override.
