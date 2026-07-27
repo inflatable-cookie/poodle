@@ -41,7 +41,8 @@ and would fail on the first run for reasons no one could act on. So this is a
 **baseline** gate: capture, commit, diff on the next change. It answers "did
 this edit move native rendering?" rather than "do two targets agree?".
 
-**Determinism took five wrong answers to pin down.** Recorded in order, because
+**Determinism took six wrong answers, and is still not pinned down.** The sixth
+is below, under "The Settled-Frame Wait". Recorded in order, because
 the sequence is the lesson:
 
 1. *"Captures are bit-identical."* One component launched twice gave zero
@@ -58,14 +59,18 @@ the sequence is the lesson:
    testing then showed cursor position makes **no** difference to the render —
    and bisection showed the warp itself was causing two *other* components to
    differ. A regression shipped inside a fix. Removed.
-5. **The actual cause.** The preview waits a fixed 1.5s for its first render and
+5. *"The actual cause."* The preview waits a fixed 1.5s for its first render and
    captures whatever is on screen — sometimes an incomplete frame. The
    `segmented-control` baseline proved it: its selected segment is barely
    painted there and fully filled in a fresh capture, same code, same flags.
    That one bad frame had been the reference image since the first sweep.
+6. *"So wait for a settled frame instead."* Built, measured, and the flake did
+   not move — 2 in 90 against 3 in 150 before. Detailed below.
 
-One mechanism explains every symptom: rotating failures, ratios that drift for
-the same component, and bad frames frozen into baselines.
+One mechanism *appeared* to explain every symptom — rotating failures, ratios
+that drift for the same component, bad frames frozen into baselines — and
+removing that mechanism left the symptoms in place. The incomplete frames were
+real; they were not the whole story.
 
 **The fix is self-verifying rather than something to be right about.** A capture
 is accepted only when two consecutive attempts produce identical bytes
@@ -190,13 +195,61 @@ gate stays because GPUI is a separate renderer that can regress independently,
 but it is a developer convenience: a green run means something, a single red
 component means re-run it.
 
+## The Settled-Frame Wait — Attempt Six, And It Did Not Work
+
+The section above named the real fix: stop guessing, wait for the renderer to
+report. That is now implemented, and **it did not reduce the flake.**
+
+`packages/gpui/preview/src/main.rs` no longer sleeps 1.5s. It chains
+`Window::on_next_frame` three deep (`schedule_frames_drawn`), sets an atomic,
+and the capture thread polls that with a 20s deadline fallback.
+
+Two things were learned building it, both by testing rather than reasoning:
+
+- **Frames-drawn is not readiness.** Three frames land in about 50ms, and a
+  capture that early comes back 1348x1478 instead of 2696x2396 — painted, but
+  not yet on the Retina backing store. So a `MIN_SETTLE` floor of 900ms is kept
+  *alongside* the frame signal, and both must hold. The old fixed sleep was
+  masking window **setup**, not only paint, which is not what attempt five
+  claimed.
+- **Sixth diagnosis, same result.** Measured over three passes of the same 30
+  components: 2, 0, 0 failures — **2 in 90**. The five passes before the change
+  gave 0, 0, 1, 1, 1 — **3 in 150**. Those are the same number. And of the two
+  failures, one (`confirm-action`) was `could not create image from window`,
+  a window-server refusal that no amount of frame-waiting addresses; the other
+  (`context-menu`, 1.34% of pixels) passed three consecutive re-runs.
+
+**Kept anyway, for a reason that is not flake.** Captures went from ~15s to
+~5.3s per component (30 components in 2m40s), and waiting on a signal the
+renderer actually emits is defensible in a way that a tuned magic number is not
+— attempt five had real evidence that the 1.5s sleep froze an incomplete
+`segmented-control` frame into a baseline. It is a better mechanism that does
+not solve the stated problem.
+
+The conclusion the table above already reached is now also the empirical one:
+**reading pixels off a live compositor cannot be made deterministic from the
+outside.** Six attempts, three of which reduced the flake and none of which
+removed it. Offscreen rendering is the answer, and Jetstream has it.
+
+## GPUI Baselines Are Display-Dependent
+
+Every GPUI baseline failed on size after the machine's display setup changed:
+`1348x1478` against a `2696x2396` baseline — a 1x capture where the baseline was
+2x. Confirmed as environmental by building the **unmodified HEAD binary** and
+getting the identical size, which is the only reason it was not misread as a
+seventh regression in the wait work.
+
+There is nothing to fix: the capture is whatever the window server hands over on
+whichever display the window opened. Since the baselines are gitignored and each
+machine compares against its own last capture, this is a rebaseline, not a
+defect. It is one more failure mode the offscreen Jetstream gate does not have,
+and it is worth knowing before assuming a wall of size mismatches means someone
+broke layout.
+
 ## Not Done
 
-- **GPUI's 3% flake is unfixed and probably unfixable from outside.** Three
-  rounds of mitigation each reduced it without reaching zero. The real fix is
-  the preview waiting for a settled frame rather than a fixed 1.5s, in
-  `packages/gpui/preview/src/main.rs`. Whether that is worth doing now that a
-  reliable gate exists is a judgement call.
+- **GPUI's ~2% flake is unfixed, and now demonstrated to be unfixable from
+  outside.** See above — six attempts.
 - **One axis** on both gates: `eclipse-compact-sm`.
 - **Five of GPUI's six skips are unproven** — only `progress` was skipped on
   evidence. Jetstream needs no skip list at all, which is its own signal.

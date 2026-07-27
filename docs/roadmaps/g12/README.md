@@ -65,6 +65,13 @@ Runway:
   here all along; the "build-only" note was wrong. Then Jetstream's headless
   offscreen render landed and settled the question: 90s and zero flake, against
   20min and ~3% for window capture. **Complete.**
+- `015-native-accessibility-options.md` — `003-native-accessibility.md`
+  recorded that neither runtime exposes an accessibility API; this costs the
+  way out per engine. The two are not in the same position: gpui 0.2.2 is the
+  latest published version and has nothing, while Jetstream runs winit 0.30
+  against a version-compatible `accesskit_winit`, over a `UiTree` that already
+  carries bounds, roles and parent/child links. GPUI waits on upstream;
+  Jetstream is an unmade decision. **Assessed, not built.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -73,9 +80,14 @@ Runway:
 
 ## Next Task
 
-`g12.014` is complete: both native targets have pixel gates, and Jetstream's
-headless one is the reliable half. Remaining for this
-generation — extend it to Jetstream (its headless `snap` binary needs routing by
-component slug, and being windowless would make it CI-safe), then native
-accessibility: `aria_label` is on 101 specs and reaches no accessibility API in
-either target.
+`g12.015` assessed native accessibility and stopped there deliberately: the
+Jetstream half is a proposal to make to the engine repo, not a change to land
+here. Open for this generation:
+
+- **Decide the Jetstream accessibility question.** `015` says what it costs.
+- **Both visual gates cover one axis only** (`eclipse-compact-sm`).
+- **GPUI baselines are display-dependent.** A capture taken on a 1x display is
+  1348x1478 where the 2x baseline is 2696x2396, so every baseline fails on size
+  after the machine's display setup changes. The gate compares against the
+  machine's own last capture, so this is a rebaseline rather than a defect —
+  but it is one more thing the offscreen Jetstream gate does not have.

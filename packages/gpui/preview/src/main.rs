@@ -1411,8 +1411,48 @@ fn parse_cli_args() -> CliArgs {
     }
 }
 
+
+/// Set once the window has drawn `FRAMES_BEFORE_CAPTURE` frames.
+///
+/// Screenshot mode used to sleep a fixed 1.5s and capture whatever was on
+/// screen. Usually enough; sometimes not, and a half-painted frame is
+/// indistinguishable from a real rendering change once it is written into a
+/// baseline. `Window::on_next_frame` is the renderer actually reporting, so
+/// the capture waits on that instead of on a guess.
+static FRAMES_DRAWN: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// How many drawn frames to wait for.
+///
+/// One is not enough: the first frame can land before layout has settled, so
+/// this waits for the render to repeat itself a few times.
+const FRAMES_BEFORE_CAPTURE: u32 = 3;
+
+/// Floor on how soon a capture may be taken, regardless of frames drawn.
+///
+/// Frames-drawn alone is not readiness. Three frames land in about 50ms, and a
+/// capture that early comes back at 1348x1478 instead of 2696x2396 — the window
+/// has painted but has not yet been placed on the Retina backing store. The old
+/// fixed 1.5s sleep was masking window *setup*, not just paint, which is why
+/// replacing it wholesale halved the image.
+///
+/// So both conditions must hold: the renderer has drawn, and the window has had
+/// time to settle.
+const MIN_SETTLE: std::time::Duration = std::time::Duration::from_millis(900);
+
+/// Chain `on_next_frame` `remaining` times, then flag the capture thread.
+fn schedule_frames_drawn(window: &mut Window, remaining: u32) {
+    if remaining == 0 {
+        FRAMES_DRAWN.store(true, std::sync::atomic::Ordering::Release);
+        return;
+    }
+    window.on_next_frame(move |window, _cx| {
+        schedule_frames_drawn(window, remaining - 1);
+    });
+}
+
 fn main() {
     let cli = parse_cli_args();
+    let screenshot_mode = cli.screenshot.is_some();
 
     let assets = PreviewAssets {
         base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
@@ -1456,7 +1496,16 @@ fn main() {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 ..Default::default()
             },
-            move |_window, cx| {
+            move |window, cx| {
+                // Screenshot mode waits on this rather than on a fixed delay:
+                // it flips once the window reports several frames actually
+                // drawn. A guessed 1.5s sometimes captured a half-painted
+                // frame, which is what put a `segmented-control` baseline into
+                // the repo with its selected segment barely visible.
+                if screenshot_mode {
+                    schedule_frames_drawn(window, FRAMES_BEFORE_CAPTURE);
+                }
+
                 cx.new(move |_| {
                     let mut root = PreviewRoot::new();
 
@@ -1511,8 +1560,22 @@ fn main() {
         if let Some(ref output_path) = cli.screenshot {
             let path = output_path.clone();
             std::thread::spawn(move || {
-                // Wait for initial render
-                std::thread::sleep(std::time::Duration::from_millis(1500));
+                // Wait for the renderer to say it has drawn, rather than
+                // guessing how long that takes. Falls back to a deadline so a
+                // window that never draws cannot hang the run forever.
+                let started = std::time::Instant::now();
+                let deadline = started + std::time::Duration::from_secs(20);
+                loop {
+                    let drawn = FRAMES_DRAWN.load(std::sync::atomic::Ordering::Acquire);
+                    if drawn && started.elapsed() >= MIN_SETTLE {
+                        break;
+                    }
+                    if std::time::Instant::now() > deadline {
+                        eprintln!("timed out waiting for a settled frame");
+                        break;
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(25));
+                }
 
                 // Find our own window by PID
                 let pid = std::process::id();

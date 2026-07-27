@@ -36,10 +36,15 @@ What must not happen is treating it as *done*. A native component with
 
 ## Consequences For Planning
 
-- **Do not schedule native accessibility work.** There is no API to build
-  against. Effort spent on accessible naming, roles, live regions or focus
-  announcement in GPUI or Jetstream is effort spent on nothing until the
-  runtime moves first.
+- **Do not schedule GPUI accessibility work.** There is no API to build
+  against, and gpui 0.2.2 is the latest published version. Effort spent on
+  accessible naming, roles, live regions or focus announcement there is effort
+  spent on nothing until the runtime moves first.
+- **Jetstream is not in the same position.** It runs on winit 0.30, and
+  `accesskit_winit` is version-compatible with that *today*; its retained
+  `UiTree` already carries the parent/child links, `computed_rect` bounds and
+  `WidgetKind` roles that AccessKit wants. Nothing is blocked upstream — it is
+  an unmade decision. Costed in `roadmaps/g12/015-native-accessibility-options.md`.
 - **Do not read the accessibility artifacts as runtime proof.**
   `packages/gpui/native-accessibility-proof.json` is explicit about this in its
   own non-goals — it forbids claiming "mounted assistive-technology proof for
@@ -53,10 +58,15 @@ What must not happen is treating it as *done*. A native component with
 
 gpui shipping accesskit support is the single upstream event that unblocks the
 GPUI half — Zed has the same need, so it is plausible rather than theoretical.
-Jetstream is a first-party engine, so its half is a decision rather than a wait.
+Re-check on every gpui release.
 
-Revisit when either happens. Until then this is a **forced acceptance**, in the
-sense the Tree contract already uses: not a debt anyone can pay down.
+Jetstream is a first-party engine, so its half is a decision rather than a wait
+— and the assessment in `roadmaps/g12/015-native-accessibility-options.md` found
+the parts already in place, so the decision is a real one and not a euphemism.
+
+So this is a **forced acceptance** for GPUI, in the sense the Tree contract
+already uses: not a debt anyone can pay down. For Jetstream it is an ordinary
+unstarted piece of work.
 
 ## The 48 Contracts This Governs
 
