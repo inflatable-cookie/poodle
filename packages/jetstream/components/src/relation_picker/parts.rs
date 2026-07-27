@@ -244,6 +244,10 @@ pub(super) fn candidate_row(
     if selection_mode == SelectionMode::Multiple {
         row = row.child(js_checkbox(
             &CheckboxSpec::new()
+                // A selection checkbox has no caption of its own — the row's
+                // label sits beside it, not inside it — so without this it is
+                // announced as an unnamed checkbox in a list of identical ones.
+                .with_aria_label(format!("Select {}", item.label))
                 .with_checked(is_selected)
                 .with_size(size)
                 .with_size_role(size_role)

@@ -57,7 +57,21 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
 
     // ── Transport icon button helper (real Icon glyph + square wrapper) ─────
     let transport = |name: &'static str| -> JsEl {
+        // Icon-only, so nothing in the subtree carries text to be named from —
+        // an icon is a glyph, not a caption. Named after what the control does.
+        let action = match name {
+            "play" => "Play",
+            "pause" => "Pause",
+            "skip-back" => "Skip back",
+            "skip-forward" => "Skip forward",
+            "volume-2" => "Mute",
+            "volume-x" => "Unmute",
+            "maximize" => "Full screen",
+            "minimize" => "Exit full screen",
+            other => other,
+        };
         ui_element::button("")
+            .aria_label(action)
             .w(btn_size)
             .h(btn_size)
             .flex_row()
@@ -93,6 +107,7 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
     if !spec.is_playing && spec.current_time <= 0.0 {
         video_area = video_area.child(
             ui_element::button("")
+                .aria_label("Play")
                 .w(big_play_size)
                 .h(big_play_size)
                 .rounded(pill)

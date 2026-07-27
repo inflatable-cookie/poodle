@@ -23,8 +23,8 @@
 //! Preview-loop / accepted limits:
 //! - Per-action / clear / select-all click wiring lives in the preview event
 //!   loop, not the component (`js_icon_button` exposes `.focusable()` only here).
-//! - No ARIA channel: `role="region"` / `aria-label="Bulk actions"` are not
-//!   emitted (tracked repo-wide for Jetstream).
+//! - `role="region"` is emitted, and each action button is named from the
+//!   action's own `label` — icon-only buttons have no text to be named from.
 //!
 //! Token gap: the contract root background is
 //! `color-mix(panel 93%, text-primary)`; resolved here via `theme_ext::color_mix`
@@ -89,6 +89,9 @@ fn toned_icon_button(
     let hover_bg = surface.mix_srgb(elevated, 0.84);
 
     let mut el = ui_element::button("")
+        // Same reason as the default-tone branch: icon-only, and the action
+        // already carries the words.
+        .aria_label(action.label.clone())
         .h(height)
         .w(height)
         .rounded(radius)
@@ -201,6 +204,10 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
             BulkActionTone::Default => {
                 // Default tone uses the shared js_icon_button (text-primary icon).
                 let mut a_spec = IconButtonSpec::new()
+                    // The action already carries the words for this control;
+                    // rendering it icon-only threw them away, leaving a bar of
+                    // identical unnamed buttons.
+                    .with_aria_label(action.label.clone())
                     .with_icon(action.resolved_icon())
                     .with_size(spec.size)
                     .with_size_role(spec.size_role);
@@ -214,6 +221,7 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
 
     // Clear-selection (`x`) ghost IconButton — contract §2 (always present).
     let mut clear_spec = IconButtonSpec::new()
+        .with_aria_label("Clear selection")
         .with_icon("x")
         .with_size(spec.size)
         .with_size_role(spec.size_role);

@@ -41,6 +41,12 @@ const STRUCTURAL: &[Role] = &[
 ///
 /// A button announced as "button" tells the user there is something to press
 /// and nothing about what it does. These are the ones worth failing on.
+///
+/// `TabList` is deliberately absent. A name on it is good practice — the
+/// preview's own nav got one — but the tabs inside carry the meaning, so an
+/// unnamed tab list is imperfect rather than unusable. Failing on it would put
+/// 28 findings from one specimen ahead of controls a user genuinely cannot
+/// identify.
 fn needs_name(role: Role) -> bool {
     matches!(
         role,
@@ -52,7 +58,6 @@ fn needs_name(role: Role) -> bool {
             | Role::Slider
             | Role::ComboBox
             | Role::Tab
-            | Role::TabList
             | Role::MenuItem
             | Role::Link
             | Role::SpinButton
