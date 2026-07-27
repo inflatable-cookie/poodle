@@ -87,6 +87,10 @@
 # tree reaches macOS but only for the screen the preview is showing.
 "test:jetstream-a11y" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
 "jetstream-a11y:roles" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
+# Contract ARIA roles vs the roles Jetstream actually projects — the
+# accessibility counterpart of contract-spec-drift. Not gating yet: 73 of 124
+# requirements are unmet, and some are overlay states no specimen renders.
+"drift:roles" = "bun --cwd packages/svelte/preview scripts/contract-role-drift.ts"
 
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks

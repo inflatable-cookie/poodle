@@ -246,6 +246,8 @@ pub fn js_dock_region(
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        // Contract: dock tabs are a `role="tablist"`.
+        .aria_role(jetstream_ui::accesskit::Role::TabList)
 }
 
 #[cfg(test)]

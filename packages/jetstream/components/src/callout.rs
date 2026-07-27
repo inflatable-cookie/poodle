@@ -173,6 +173,8 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        // Contract §Accessibility: `role="alert"`.
+        .aria_role(jetstream_ui::accesskit::Role::Alert)
 }
 
 #[cfg(test)]

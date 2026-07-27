@@ -109,6 +109,20 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
+- **73 of 124 contract ARIA roles are never projected**, across 37 components.
+  `effigy drift:roles` is the accessibility counterpart of
+  `contract-spec-drift`: it extracts every `role="…"` a contract names, maps it
+  onto `accesskit::Role`, and checks it appears in the tree that component
+  actually renders. Not gating yet, because the number is not zero and because
+  some entries are overlay states no specimen renders — a date picker's
+  `dialog` only exists once opened — so the count is an upper bound on real
+  defects, not a defect list.
+
+  It compares sets, not placement: a contract asking for `role="option"` is
+  satisfied by a `ListBoxOption` anywhere in that component's tree. Checking
+  placement needs an anatomy model the contracts do not have, and the
+  never-emitted-at-all case is the one worth catching first.
+
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
   whatever the preview is showing. Per-slug is the same shape as the visual

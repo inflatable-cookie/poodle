@@ -159,7 +159,12 @@ pub fn js_alert_dialog_working(
         dialog_spec = dialog_spec.with_aria_label(aria.clone());
     }
 
+    // Contract: an alert dialog is `role="alertdialog"`, not a plain dialog —
+    // it interrupts, and assistive technology treats the two differently. The
+    // shared `js_dialog` cannot know which it is building, so the role is
+    // overridden here on the way out.
     js_dialog(&dialog_spec, theme, children, Some(actions))
+        .aria_role(jetstream_ui::accesskit::Role::AlertDialog)
 }
 
 #[cfg(test)]

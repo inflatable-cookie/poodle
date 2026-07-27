@@ -186,6 +186,8 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+
+        // Contract: the stack is a list of toasts.
         .aria_role(jetstream_ui::accesskit::Role::List)
 }
 

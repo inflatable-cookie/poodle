@@ -74,6 +74,9 @@ struct Finding {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let show_roles = args.iter().any(|a| a == "--roles");
+    // Machine-readable role census, consumed by the contract-role-drift gate.
+    let as_json = args.iter().any(|a| a == "--json");
+    let mut census: Vec<String> = Vec::new();
     let only: Option<String> = args
         .iter()
         .find_map(|a| a.strip_prefix("--slug=").map(str::to_owned));
@@ -133,10 +136,25 @@ fn main() {
             role_less.push(entry.slug);
         }
 
-        if show_roles {
+        if show_roles || as_json {
             let mut roles: std::collections::HashMap<Role, usize> = Default::default();
             for (_, node) in &update.nodes {
                 *roles.entry(node.role()).or_default() += 1;
+            }
+            if as_json {
+                let mut names: Vec<String> =
+                    roles.keys().map(|r| format!("{r:?}")).collect();
+                names.sort();
+                let quoted: Vec<String> =
+                    names.iter().map(|n| format!("\"{n}\"")).collect();
+                census.push(format!(
+                    "  \"{}\": [{}]",
+                    entry.slug,
+                    quoted.join(", ")
+                ));
+            }
+            if !show_roles {
+                continue;
             }
             let mut listed: Vec<_> = roles.into_iter().collect();
             listed.sort_by_key(|(_, n)| std::cmp::Reverse(*n));
@@ -155,6 +173,11 @@ fn main() {
                 count,
             });
         }
+    }
+
+    if as_json {
+        println!("{{\n{}\n}}", census.join(",\n"));
+        return;
     }
 
     println!("\naudited {audited} specimens, {total_nodes} nodes");
