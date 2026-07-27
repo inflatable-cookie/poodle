@@ -119,22 +119,18 @@ const known = new Set(readdirSync(CONTRACTS).filter((f) => f.endsWith(".md")).ma
  */
 const OVERLAY_ONLY: Record<string, string[]> = {
   "color-picker": ["dialog", "listbox", "option", "slider"],
-  "command-palette": ["dialog", "status"],
   "data-table": ["menu"],
   "date-picker": ["dialog"],
   "date-range-picker": ["dialog"],
   "date-time-picker": ["dialog"],
   "date-time-range-picker": ["dialog"],
   "date-time-zone-picker": ["dialog"],
-  drawer: ["dialog"],
   field: ["dialog"],
   "filter-builder": ["dialog"],
-  "hover-card": ["button", "dialog"],
   "icon-button": ["tooltip"],
   "media-picker": ["listbox", "option"],
   "model-picker": ["dialog"],
   "order-by": ["dialog", "list", "listitem"],
-  popover: ["dialog"],
   "ref-select": ["dialog", "listbox", "option", "status"],
   "split-button": ["menu", "menuitem", "separator"],
   tooltip: ["button"],
@@ -180,6 +176,9 @@ function specimenRendersOpen(slug: string): boolean {
 const NOT_APPLICABLE: Record<string, Record<string, string>> = {
   menu: {
     button: "js_menu renders only the panel; the trigger is composed by the consumer",
+  },
+  "hover-card": {
+    button: "js_hover_card takes only spec, theme and content; the trigger is the consumer's",
   },
   "editable-list": {
     alert: "validation message; only rendered when a row is invalid",

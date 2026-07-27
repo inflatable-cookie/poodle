@@ -36,7 +36,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
                 "Open popover",
                 js_popover(
-                    &PopoverSpec::new().with_aria_label("Quick settings"),
+                    &PopoverSpec::new().with_aria_label("Quick settings").with_open(true),
                     theme,
                     Some(div().flex_col().gap(4.0)
                         .child(heading("Quick settings"))

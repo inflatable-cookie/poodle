@@ -96,6 +96,8 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
     // (single layer, spread 0; matches GPUI's mapping).
     let mut modal = elevation_dialog(
         ui_element::div()
+            // Contract: the palette modal is a `dialog`.
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .flex_col()
             .gap(stack_md)
             .w(rem_to_px(45.0))
@@ -212,6 +214,9 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
     modal = modal.child(
         // Contract §9 status: 0.75rem font, text-secondary.
         ui_element::label(status_text)
+            // Contract: the result-count line is a `status`, so a search that
+            // narrows to nothing is announced rather than silently emptying.
+            .aria_role(jetstream_ui::accesskit::Role::Status)
             .text_size(rem_to_px(0.75))
             .text_color(text_secondary),
     );

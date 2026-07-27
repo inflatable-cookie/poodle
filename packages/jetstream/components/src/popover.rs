@@ -44,6 +44,9 @@ pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: O
     // layered on top via `shadow_layers` (rendered alongside the primary shadow).
     let mut el = elevation_overlay(
         ui_element::div()
+            // Contract: the popover surface is a `dialog`, so reaching it
+            // announces entering a surface rather than arriving in a box.
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .bg(fill)
             .border(border_width)
             .border_color(border)

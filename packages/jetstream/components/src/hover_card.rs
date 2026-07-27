@@ -42,6 +42,8 @@ pub fn js_hover_card(
     // 0; matches GPUI's mapping).
     let mut el = elevation_overlay(
         ui_element::div()
+            // Contract: the hover card surface is a `dialog`.
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .bg(fill)
             .border(1.0)
             .border_color(border)

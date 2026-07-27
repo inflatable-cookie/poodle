@@ -17,7 +17,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // With title and content
         .child(group("With title and content", secondary,
             js_drawer(
-                &DrawerSpec::new().with_title("Drawer Title"),
+                &DrawerSpec::new().with_open(true).with_title("Drawer Title"),
                 theme,
                 Some(
                     div().flex_col().gap(8.0)

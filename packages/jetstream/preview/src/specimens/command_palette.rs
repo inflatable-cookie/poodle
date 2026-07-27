@@ -55,6 +55,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         secondary,
         js_command_palette(
             &CommandPaletteSpec::new(actions.clone())
+                .with_open(true)
                 .with_title("Command palette")
                 .with_invocation_hint("\u{2318}K"),
             theme,

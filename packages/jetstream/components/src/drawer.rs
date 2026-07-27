@@ -74,6 +74,8 @@ pub fn js_drawer_with_actions(
         // matches GPUI's mapping).
         let mut p = elevation_dialog(
             ui_element::div()
+                // Contract: the drawer panel is a `dialog`.
+                .aria_role(jetstream_ui::accesskit::Role::Dialog)
                 .bg(fill)
                 .flex_col()
                 .gap(panel_gap)

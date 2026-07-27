@@ -16,7 +16,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     div().flex_col().gap(24.0)
         // With user profile content
         .child(group("With content", secondary,
-            js_hover_card(&HoverCardSpec::new(), theme, Some(
+            js_hover_card(&HoverCardSpec::new().with_open(true), theme, Some(
                 div().flex_col().gap(8.0).p(rem_to_px(0.75))
                     .child(label("Jane Doe").text_color(text_primary).text_size(body_font))
                     .child(label("Software Engineer").text_color(secondary).text_size(body_font))

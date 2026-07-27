@@ -112,21 +112,20 @@ for this generation:
 - **Contract ARIA roles: zero gaps, gated in `ci:native`.** `effigy
   drift:roles` extracts every `role="…"` a contract names, maps it onto
   `accesskit::Role`, and checks it appears in the tree that component renders.
-  124 requirements: all met, bar 26 genuinely observable only with an overlay
-  open and 4 exempt with a recorded reason.
+  124 requirements: all met, bar **7** genuinely observable only with an
+  overlay open and 6 exempt with a recorded reason.
 
   It gated once before on a **false zero**. The `OVERLAY_ONLY` list had been
-  written by *reasoning* about which roles need an overlay open, and `select`
-  disproved it — its specimen has had an "Open state" group all along, so a
-  missing `listbox` was a component defect wearing an exemption. The list is
-  now **verified against the specimen sources**: a component whose specimen
-  opens the overlay cannot claim the excuse. That exposed 20 more real gaps,
-  all since closed.
+  written by *reasoning* about which roles need an overlay open, and it was
+  wrong repeatedly — `select`, `menubar` and `context-menu` were all already
+  rendering open, and `popover`, `drawer`, `hover-card` and `command-palette`
+  render their surfaces whether or not the flag is set. **Every one of those
+  exemptions was hiding a component that simply never claimed the role.** The
+  list is now verified against the specimen sources, and it started at 48.
 
-  The naming gate caught three regressions introduced by this role work —
-  `tabs`, and twice in `color-picker` — because a role that requires a name
-  makes previously-ignorable elements answerable. The two gates check each
-  other.
+  The two gates check each other: the naming gate caught three regressions
+  introduced by role work, because giving an element a role that requires a
+  name makes it answerable where it was previously ignorable.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
