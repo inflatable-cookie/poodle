@@ -317,6 +317,7 @@
     "Native assistive-technology traces should capture real focus movement, announcement timing, and shell-region naming rather than relying on browser inference."
   ],
   "deltaRegister": [
+    "gpui 0.2.2 exposes no accessibility API at all \u2014 no accesskit dependency, no accessible node type, no role or label surface. Verified by source search 2026-07-27. The GPUI accessibility deltas below are therefore forced acceptances rather than outstanding work: there is nothing to build against until the runtime ships support. See docs/contracts/003-native-accessibility.md.",
     "Browser live-region and semantic HTML behavior still does work automatically in Svelte that GPUI must reproduce with native accessible-tree and announcement plumbing.",
     "Overlay, menu, command palette, and picker focus containment remain the highest-risk cross-runtime delta because browser focus-scope behavior does not transfer automatically to GPUI.",
     "Structured table, media preview, and workstation shell narration remain more runtime-specific than direct-parity visual comparison alone can prove."

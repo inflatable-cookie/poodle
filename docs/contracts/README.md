@@ -38,6 +38,8 @@ contract references the rule rather than restating it:
 - `001-working-rules.md` — roadmap/spec/log authority chain
 - `002-anchored-overlays.md` — every anchored surface portals to the theme root
   and is positioned in viewport coordinates
+- `003-native-accessibility.md` — neither native runtime exposes an
+  accessibility API, so `aria_label` is carried but inert there
 
 ## Current Contracts
 
