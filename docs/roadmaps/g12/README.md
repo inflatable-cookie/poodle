@@ -92,8 +92,12 @@ for this generation:
   component sets them explicitly, so a checkbox built from panels still reports
   `GenericContainer`. The capability is there — this is per-component work
   against each contract.
-- **Nobody has run a screen reader against it.** The tree is proven by test up
-  to the AccessKit boundary and no further.
+- **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
+  macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
+  whatever the preview is showing. Per-slug is the same shape as the visual
+  gate's sweep.
+- **Nobody has listened to it.** The tree is correct and named; whether
+  VoiceOver's announcements read sensibly is a judgement a machine cannot make.
 - **Both visual gates cover one axis only** (`eclipse-compact-sm`).
 - **GPUI baselines are display-dependent.** A capture taken on a 1x display is
   1348x1478 where the 2x baseline is 2696x2396, so every baseline fails on size

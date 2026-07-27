@@ -157,14 +157,78 @@ The preview publishes its tree every frame rather than only when the shell is
 dirty — focus and hover move the tree without a rebuild, and a screen reader
 attaching mid-session needs the current screen.
 
+## Verified Through macOS, Not Just Through Our Own Tests
+
+The Rust tests prove `tree_update` builds the right AccessKit nodes — which is
+our code agreeing with our code. `test/native-visual/ax-probe.swift` goes out
+through `AXUIElement`, the same API a screen reader uses, so the answer comes
+from the operating system.
+
+| | GPUI preview | Jetstream preview |
+|-|--------------|-------------------|
+| AX elements | **7** | **571** |
+| of our own UI | 0 | **471** |
+| named | 1 | **467** |
+
+GPUI's seven are `AXApplication`, `AXWindow`, the three traffic lights and the
+title — AppKit's window chrome, present whether or not an app implements
+anything. That is what "no accessibility API" looks like from outside, and it is
+also how the audit knows which elements are not ours.
+
+**Two things had to be found rather than assumed**, and both looked exactly like
+a broken adapter at first:
+
+- **The app must be activated.** An unactivated process exposes *nothing*, not
+  even `AXApplication`. The first probe returned one empty element and read as
+  "the adapter never attached". It had attached; AccessKit builds its tree
+  lazily, and the app becoming frontmost is what asks for it. The audit retries
+  rather than sleeping on a guess — the mistake `014` made five times.
+- **The system menu bar dominates the count.** ~86 `AXMenuItem`s belong to
+  macOS, and its separators are legitimately unnamed. Auditing raw totals would
+  have reported a permanent, meaningless failure.
+
+**The audit found three real defects on its first green run**, all in the
+preview shell: an unnamed contrast slider, an unnamed search field, and a
+decorative search icon that was being announced alongside the field it
+duplicates. All three are fixed — the icon with `aria_hidden`, which is the
+first real use of that escape hatch. A gate that finds nothing on its first run
+has usually not been pointed at anything.
+
+A third thing was found the hard way, after the numbers above were taken:
+**a locked screen is indistinguishable from a broken adapter.** No window is
+composited, so macOS builds no content tree and the probe returns the system
+menu bar and nothing else. That is the same machine state that defeats
+`screencapture` in `014`, defeating a different API, and it was mistaken for a
+regression for a while. The audit now checks `CGSSessionScreenIsLocked` first
+and says which it is.
+
+`effigy test:jetstream-ax` runs it; `jetstream-ax:dump` prints the tree.
+Local-only: it needs a window server, an unlocked display, and Accessibility
+permission, and it names whichever is missing rather than reporting an empty
+tree.
+
+**One thing is unconfirmed.** The probe originally guarded against runaway
+recursion by depth alone, which hangs: the pre-activation tree really is cyclic
+(the application element is its own child), and a depth cap still branches at
+every level. It now tracks the current path and compares with `CFEqual` — the
+obvious global visited-set is wrong here, because sibling elements are not
+always distinct under `CFEqual` and a global set prunes real subtrees. The
+display locked before that fix could be run against a live content tree, so the
+measurements above predate it and it needs one green run to confirm.
+
 ## Not Done
 
 - **Breadth, not capability.** The sweep attaches accessible *names*
   everywhere. Roles, checked/expanded state and values are attached only where a
   component sets them explicitly, so a checkbox drawn out of panels still
-  reports `GenericContainer` unless it says otherwise. Everything needed to fix
-  that is in place; it is per-component work against each contract.
-- **Not verified with a real screen reader.** The tree is proven by test up to
-  the AccessKit boundary. Whether VoiceOver announces it sensibly is a different
-  question and has not been checked.
+  reports `GenericContainer` unless it says otherwise. The audit shows the shape
+  of it: 154 `AXButton` and 311 `AXStaticText` against one `AXSlider`, one
+  `AXTextField`, and no `AXCheckBox` at all. Everything needed to fix that is in
+  place; it is per-component work against each contract.
+- **The audit sees one screen.** It reads whatever the preview happens to be
+  showing, not every component's specimen. Extending it per-slug is the same
+  shape as the visual gate's sweep.
+- **Nobody has listened to it.** The tree is correct and named; whether
+  VoiceOver's *announcements* are sensible in order and phrasing is a judgement
+  a machine cannot make.
 - **GPUI is untouched**, per the recommendation above.

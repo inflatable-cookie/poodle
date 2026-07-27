@@ -148,6 +148,9 @@ fn build_controls_bar(
                 .id("contrast")
                 .w(140.0).h(14.0)
                 .rounded(999.0)
+                // The "CONTRAST" caption beside it is a sibling, not a label,
+                // so a screen reader reaches the slider with nothing to say.
+                .aria_label("Contrast")
                 .focusable(),
         );
     bar = bar.child(contrast_group);
@@ -163,10 +166,19 @@ fn build_controls_bar(
                 .bg(bg_canvas)
                 .border_1().border_color(border)
                 .rounded(8.0)
-                .child(icon("search").w(13.0).h(13.0).text_color(text_secondary))
+                // Decorative: the field beside it is already named "Search",
+                // so announcing this too would just repeat the word.
+                .child(
+                    icon("search")
+                        .w(13.0)
+                        .h(13.0)
+                        .text_color(text_secondary)
+                        .aria_hidden(true),
+                )
                 .child(
                     text_input(state.search.clone(), "Find component...")
                         .id("search")
+                        .aria_label("Search components")
                         .w(160.0)
                         .h(24.0)
                         .bg(Color::TRANSPARENT)

@@ -78,6 +78,10 @@
 # sibling jetstream repo — nothing about it requires a display.
 "test:jetstream-visual" = "bun test/native-visual/jetstream.ts"
 "jetstream-visual:update" = "bun test/native-visual/jetstream.ts --update"
+# Reads the preview's real macOS accessibility tree through AXUIElement.
+# Local-only: needs a window server and Accessibility permission.
+"test:jetstream-ax" = "bun test/native-visual/ax-audit.ts"
+"jetstream-ax:dump" = "bun test/native-visual/ax-audit.ts --dump"
 
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks

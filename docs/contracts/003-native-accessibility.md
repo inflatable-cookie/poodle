@@ -12,8 +12,11 @@ from outside without a cost that outlives the wait.
 
 | Runtime | State | Evidence |
 |---------|-------|----------|
-| gpui 0.2.2 | **Nothing to call.** No `accesskit` dependency in its `Cargo.toml`, no accessibility node type, no role or label API anywhere in `src/`. The only matches for "accessible" are doc-comment prose about unrelated things. 0.2.2 is the latest published version. | verified by source search 2026-07-27 |
-| Jetstream | **AccessKit, live.** `jetstream-ui::accessibility` projects the retained `UiTree` into an `accesskit::TreeUpdate`; `jetstream-platform` owns an `accesskit_winit` adapter and routes action requests back through the same handlers pointer input uses. | `jetstream` commit `7e997892` |
+| gpui 0.2.2 | **Nothing to call.** No `accesskit` dependency in its `Cargo.toml`, no accessibility node type, no role or label API anywhere in `src/`. 0.2.2 is the latest published version. | source search, and measured: its preview exposes **7 AX elements, 1 named** — `AXApplication`, `AXWindow`, three traffic lights and the title. That is AppKit's window chrome. None of GPUI's content is in it. |
+| Jetstream | **AccessKit, live.** `jetstream-ui::accessibility` projects the retained `UiTree` into an `accesskit::TreeUpdate`; `jetstream-platform` owns an `accesskit_winit` adapter and routes action requests back through the same handlers pointer input uses. | `jetstream` commit `7e997892`, and measured: its preview exposes **471 elements of our own UI, 467 named**, read out of macOS through `AXUIElement`. |
+
+Those two numbers on the same machine, through the same probe, are the whole
+argument. This is no longer a claim about source code.
 
 The earlier version of this document said neither runtime had an API and
 recommended not scheduling the work at all. That was right about GPUI and wrong
@@ -68,7 +71,14 @@ labelling; an icon-only control is the case that needs it.
   its contract's ARIA section is a bug, not an accepted platform limit. What is
   still missing is breadth, not capability: accessible *names* are swept across
   every component, while roles, checked/expanded state and value are attached
-  only where a component sets them explicitly.
+  only where a component sets them explicitly. The audit shows the shape of
+  that gap plainly — 154 `AXButton` and 311 `AXStaticText` against one
+  `AXSlider` and one `AXTextField`, and no `AXCheckBox` at all.
+- **`effigy test:jetstream-ax` is the check.** It launches the preview, reads
+  its tree through `AXUIElement`, and fails on any non-structural element
+  without an accessible name. It found three real defects on its first run
+  (an unnamed contrast slider, an unnamed search field, and a decorative search
+  icon that was being announced), which is the argument for having it.
 
 ## What Would Change The GPUI Half
 
