@@ -89,6 +89,11 @@ and async validation orchestration stay adapter-side.
 
 - root input: `role="spinbutton"`, `aria-valuenow`, `aria-valuemin`,
   `aria-valuemax`
+- root input: an accessible name is **required** — `aria-label` from
+  `ariaLabel`, or an associated `<label>`. The component has no caption of its
+  own, so without one the control is announced as "spin button" and its value,
+  with nothing to say which quantity it holds. A `NumberInput` with no
+  accessible name is invalid usage, not a permitted default.
 - stepper buttons: `aria-label="Increment"` / `aria-label="Decrement"`
 - disabled state: `aria-disabled="true"` on root input
 - validation: `aria-invalid="true"` when validation state is error,

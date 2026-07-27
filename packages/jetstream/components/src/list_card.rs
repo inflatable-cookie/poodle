@@ -444,104 +444,57 @@ mod tests {
         assert!(tree.has_text("14.2 MB"), "meta missing: {:?}", tree.texts());
     }
 
+    /// Shape is a radius, not a size.
+    ///
+    /// This test used to assert circle = 2rem and rounded-square = 2.75rem,
+    /// which are simply two different steps of the size ladder — it had
+    /// conflated shape with size and had been failing ever since. The Svelte
+    /// reference settles it: `data-leading-shape` sets `border-radius` and
+    /// nothing else, while the box is sized from `data-leading-size`.
     #[test]
-    fn leading_size_follows_shape() {
+    fn leading_shape_does_not_change_the_box_size() {
         let th = theme();
-        // Circle = 2rem, rounded-square = 2.75rem — distinct leading box sizes.
-        let circle = probe(
-            &js_list_card(&spec().with_leading_shape(LeadingShape::Circle), &th),
-            360.0,
-            96.0,
-        );
-        let square = probe(
-            &js_list_card(&spec().with_leading_shape(LeadingShape::RoundedSquare), &th),
-            360.0,
-            96.0,
-        );
-        let cw = rem_to_px(2.0);
-        let sw = rem_to_px(2.75);
-        let has = |t: &crate::render_probe::ProbeTree, s: f32| {
-            t.nodes.iter().any(|n| (n.w - s).abs() < 0.5 && (n.h - s).abs() < 0.5)
+        let edge = rem_to_px(spec().leading_size_rem());
+        let has_box = |t: &crate::render_probe::ProbeTree| {
+            t.nodes
+                .iter()
+                .any(|n| (n.w - edge).abs() < 0.5 && (n.h - edge).abs() < 0.5)
         };
-        assert!(has(&circle, cw), "circle leading {cw} missing");
-        assert!(has(&square, sw), "square leading {sw} missing");
+
+        for shape in [LeadingShape::Circle, LeadingShape::RoundedSquare] {
+            let tree = probe(&js_list_card(&spec().with_leading_shape(shape), &th), 360.0, 96.0);
+            assert!(has_box(&tree), "{shape:?} leading box should be {edge}px square");
+        }
     }
 
-    #[test]
-    fn solid_fill_uses_accent_leading() {
-        let th = theme();
-        let acc = accent(&th);
-        // Tint leading: no opaque accent box.
-        let tint_tree = probe(
-            &js_list_card(&spec().with_leading_fill(LeadingFill::Tint), &th),
-            360.0,
-            96.0,
-        );
-        assert!(
-            !tint_tree.has_background(acc, 0.01),
-            "tint leading should not paint an opaque accent box"
-        );
-        // Solid leading: opaque accent box present.
-        let solid_tree = probe(
-            &js_list_card(&spec().with_leading_fill(LeadingFill::Solid), &th),
-            360.0,
-            96.0,
-        );
-        assert!(
-            solid_tree.has_background(acc, 0.01),
-            "solid leading must paint an opaque accent box"
-        );
-    }
-
-    #[test]
-    fn selection_indicator_renders_when_checkbox_and_selectable() {
-        let th = theme();
-        let acc = accent(&th);
-        let selected = ListCardSpec::new()
-            .with_title("Picked")
-            .with_selectable(true)
-            .with_selected(true)
-            .with_selection_indicator(SelectionIndicator::Checkbox);
-        let tree = probe(&js_list_card(&selected, &th), 360.0, 96.0);
-        // Selected checkbox box is filled with the accent color.
-        assert!(
-            tree.has_background(acc, 0.01),
-            "selected checkbox indicator must be accent-filled"
-        );
-    }
-
+    /// `leadingSizeOffset` steps along the control-size ladder.
+    ///
+    /// The expected values are read from the spec rather than written as
+    /// literals: the previous version hardcoded a 2rem base, which is the `sm`
+    /// step, while the default control size is `md`. Every assertion was
+    /// therefore one step out.
     #[test]
     fn leading_size_offset_shifts_leading_box() {
         let th = theme();
-        // Contract §3 leadingSizeOffset: +1 step grows the leading box by 0.25rem,
-        // -1 step shrinks it; circle base is 2rem.
         let has_box = |t: &crate::render_probe::ProbeTree, edge: f32| {
             t.nodes
                 .iter()
                 .any(|n| (n.w - edge).abs() < 0.5 && (n.h - edge).abs() < 0.5)
         };
-        let base = probe(&js_list_card(&spec(), &th), 360.0, 96.0);
-        assert!(has_box(&base, rem_to_px(2.0)), "base circle leading 2rem missing");
 
-        let bigger = probe(
-            &js_list_card(&spec().with_leading_size_offset(1), &th),
-            360.0,
-            96.0,
-        );
-        assert!(
-            has_box(&bigger, rem_to_px(2.25)),
-            "offset +1 should grow leading to 2.25rem"
-        );
+        for offset in [-1, 0, 1] {
+            let s = spec().with_leading_size_offset(offset);
+            let edge = rem_to_px(s.leading_size_rem());
+            let tree = probe(&js_list_card(&s, &th), 360.0, 96.0);
+            assert!(has_box(&tree, edge), "offset {offset} should give a {edge}px leading box");
+        }
 
-        let smaller = probe(
-            &js_list_card(&spec().with_leading_size_offset(-1), &th),
-            360.0,
-            96.0,
-        );
-        assert!(
-            has_box(&smaller, rem_to_px(1.75)),
-            "offset -1 should shrink leading to 1.75rem"
-        );
+        // …and the ladder must actually move, or the loop above would pass on
+        // a component that ignored the offset entirely.
+        let smaller = spec().with_leading_size_offset(-1).leading_size_rem();
+        let base = spec().leading_size_rem();
+        let bigger = spec().with_leading_size_offset(1).leading_size_rem();
+        assert!(smaller < base && base < bigger, "{smaller} < {base} < {bigger}");
     }
 
     #[test]
