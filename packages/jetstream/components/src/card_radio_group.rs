@@ -115,7 +115,13 @@ pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProv
             .unwrap_or_else(|| option.label.clone());
         card_spec = card_spec.with_aria_label(aria);
 
-        let mut card = js_card(&card_spec, theme, vec![body]).grow();
+        // `js_card` reports `button` for an interactive card, which is right in
+        // general and wrong here: these are mutually exclusive choices, so each
+        // is a `radio` carrying its own checked state.
+        let mut card = js_card(&card_spec, theme, vec![body])
+            .aria_role(jetstream_ui::accesskit::Role::RadioButton)
+            .aria_checked(crate::aria::toggled(Some(is_selected)))
+            .grow();
 
         if is_item_disabled {
             card = card.opacity(resolve_opacity(theme, "state.opacity.disabled"));
@@ -128,7 +134,8 @@ pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProv
         root = root.opacity(resolve_opacity(theme, "state.opacity.disabled"));
     }
 
-    root
+    // Contract: the group of cards is a `radiogroup`.
+    root.aria_role(jetstream_ui::accesskit::Role::RadioGroup)
 }
 
 #[cfg(test)]

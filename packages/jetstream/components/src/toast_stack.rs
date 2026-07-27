@@ -146,6 +146,9 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
         // readable; the contract's multi-layer stack is the residual.
         let ov = &poodle_tokens::typed::semantic::ELEVATION_OVERLAY;
         let toast_el = ui_element::div()
+            // Contract: the stack is a list, so each toast is a `listitem` —
+            // otherwise the list reports a count with nothing in it.
+            .aria_role(jetstream_ui::accesskit::Role::ListItem)
             .relative()
             .bg(bg_tinted)
             .bg_gradient_linear(

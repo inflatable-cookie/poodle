@@ -148,6 +148,10 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
         };
 
         let mut segment = ui_element::button(label_text)
+            // Contract: the three states are mutually exclusive, so each is a
+            // `radio` rather than a button that happens to look selected.
+            .aria_role(jetstream_ui::accesskit::Role::RadioButton)
+            .aria_checked(crate::aria::toggled(Some(is_active)))
             .min_h(segment_height)
             .min_w(min_segment_width)
             .pl(x)

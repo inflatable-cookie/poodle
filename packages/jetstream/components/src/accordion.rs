@@ -173,6 +173,10 @@ fn render_item(
     // snippet (the per-item description lives in the trigger summary, not here).
     if is_expanded {
         let panel = ui_element::div()
+            // Contract: the disclosure panel is `role="region"`, so it can be
+            // navigated to as a landmark rather than being anonymous structure
+            // that happens to appear when a header is pressed.
+            .aria_role(jetstream_ui::accesskit::Role::Region)
             .flex_col()
             .min_w_0()
             .self_stretch();

@@ -79,6 +79,10 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
         .items_center();
 
     // ── Build items ──
+    let is_single = matches!(
+        spec.selection_mode,
+        poodle_specs::ToggleGroupSelectionMode::Single
+    );
     for option in &spec.options {
         let is_selected = spec.is_selected(&option.value);
         let is_item_disabled = spec.is_disabled || option.is_disabled;
@@ -90,6 +94,16 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
         };
 
         let mut item = ui_element::button(&option.label)
+            // Contract: selection mode decides. Single-select is a radio
+            // group, so each option is a `radio`; multi-select options stay
+            // buttons that toggle. Announcing a multi-select option as a radio
+            // would tell the user picking one clears the others.
+            .aria_role(if is_single {
+                jetstream_ui::accesskit::Role::RadioButton
+            } else {
+                jetstream_ui::accesskit::Role::Button
+            })
+            .aria_checked(crate::aria::toggled(Some(is_selected)))
             // Hit-test id so a host can route option activation
             // (matches the tree/tabs `prefix:<value>` convention).
             .id(format!("toggle:{}", option.value))
@@ -129,7 +143,11 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
         // Contract: the group is a `radiogroup` when selection is single.
-        .aria_role(jetstream_ui::accesskit::Role::RadioGroup)
+        .aria_role(if is_single {
+            jetstream_ui::accesskit::Role::RadioGroup
+        } else {
+            jetstream_ui::accesskit::Role::Group
+        })
 }
 
 #[cfg(test)]
