@@ -81,6 +81,9 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
             MenuItemKind::Separator => {
                 el = el.child(
                     ui_element::div()
+                        // Contract §6: separators are announced, so the menu's
+                        // grouping survives for someone who cannot see the rule.
+                        .aria_role(jetstream_ui::accesskit::Role::Splitter)
                         .h(rem_to_px(0.0625))
                         .bg(separator_color)
                         .mt(separator_my)
@@ -104,6 +107,14 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 };
 
                 let mut item = ui_element::div()
+                    // Checkbox and radio menu items are distinct roles: one
+                    // toggles, the other selects one of a set, and announcing
+                    // both as plain menu items loses that.
+                    .aria_role(match entry.kind {
+                        MenuItemKind::Radio => jetstream_ui::accesskit::Role::MenuItemRadio,
+                        _ => jetstream_ui::accesskit::Role::MenuItemCheckBox,
+                    })
+                    .aria_checked(crate::aria::toggled(Some(entry.is_checked)))
                     .id(format!("menu-item:{}", entry.value))
                     .flex_row()
                     .items_center()
@@ -148,6 +159,7 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 let label_color = if entry.is_destructive { danger_color } else { text_color };
 
                 let mut item = ui_element::div()
+                    .aria_role(jetstream_ui::accesskit::Role::MenuItem)
                     .id(format!("menu-item:{}", entry.value))
                     .flex_row()
                     .items_center()

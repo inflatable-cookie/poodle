@@ -132,7 +132,6 @@ const OVERLAY_ONLY: Record<string, string[]> = {
   "filter-builder": ["dialog"],
   "hover-card": ["button", "dialog"],
   "icon-button": ["tooltip"],
-  menu: ["button", "menuitem", "menuitemcheckbox", "menuitemradio"],
   menubar: ["menu", "menuitem", "menuitemcheckbox", "menuitemradio", "separator"],
   "media-picker": ["listbox", "option"],
   "model-picker": ["dialog"],
@@ -181,6 +180,9 @@ function specimenRendersOpen(slug: string): boolean {
  * better specimen, these are not observable at all in this implementation.
  */
 const NOT_APPLICABLE: Record<string, Record<string, string>> = {
+  menu: {
+    button: "js_menu renders only the panel; the trigger is composed by the consumer",
+  },
   "editable-list": {
     alert: "validation message; only rendered when a row is invalid",
     status: "status line; only rendered while saving or empty",
