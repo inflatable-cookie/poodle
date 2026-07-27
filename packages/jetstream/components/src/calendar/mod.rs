@@ -366,10 +366,21 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
     // ── Day grid (exact week count) ───────────────────────────────────────────
 
+    // Contract §2: the day cells are a `grid` of `row`s of `gridcell`s. Without
+    // it the month is a flat run of buttons, and grid navigation — the reason a
+    // date picker is usable by keyboard at all — has nothing to navigate. The
+    // wrapper carries the same `flex_col` and gap the rows already sat in, so
+    // the layout is unchanged; the visual gate confirms that.
+    let mut day_grid = ui_element::div()
+        .flex_col()
+        .gap(root_gap_px)
+        .aria_role(jetstream_ui::accesskit::Role::Grid);
+
     for row in 0..rows {
         let mut day_row = ui_element::div()
             .flex_row()
-            .gap(gap_sm_px);
+            .gap(gap_sm_px)
+            .aria_role(jetstream_ui::accesskit::Role::Row);
 
         for col in 0..7u32 {
             let cell_idx = row * 7 + col;
@@ -470,8 +481,9 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
             day_row = day_row.child(cell);
         }
 
-        root = root.child(day_row);
+        day_grid = day_grid.child(day_row);
     }
+    root = root.child(day_grid);
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }

@@ -17,6 +17,7 @@ pub(super) fn outside_cell(
     day: u32,
 ) -> JsEl {
     ui_element::div()
+        .aria_role(jetstream_ui::accesskit::Role::Cell)
         .w(cell_size_px)
         .h(cell_size_px)
         .items_center()

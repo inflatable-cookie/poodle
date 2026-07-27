@@ -109,22 +109,21 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
-- **13 real contract role gaps, across 6 components.** `effigy drift:roles`
+- **10 real contract role gaps, across 5 components.** `effigy drift:roles`
   extracts every `role="…"` a contract names, maps it onto `accesskit::Role`,
   and checks it appears in the tree that component renders. 124 requirements
   checked; **48 are set aside as observable only with an overlay open** — a
   date picker's `dialog` exists once opened, a menu's `menuitem`s once the menu
-  is — leaving 13 genuinely never emitted.
+  is — leaving 10 genuinely never emitted.
 
   That split is the point. A role never emitted is a component defect; a role
   needing an open overlay is a *specimen* coverage gap. Conflating them gives a
   number nobody trusts, which is why the raw 73 was triaged rather than
   reported.
 
-  Remaining: `editable-list` (alert, status, listbox, option), `calendar`
-  (grid, row, gridcell), `rating` (radio, slider), `action-discovery-panel`
-  (listbox, option), `tabs` (tabpanel), `model-picker` (radio). All are
-  per-element roles inside a component rather than roles on its root.
+  Remaining: `editable-list` (alert, status, listbox, option), `rating`
+  (radio, slider), `action-discovery-panel` (listbox, option), `tabs`
+  (tabpanel), `model-picker` (radio).
 
   Not gating while it is non-zero: gating a number that cannot pass trains
   people to ignore the gate.
