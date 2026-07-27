@@ -109,29 +109,27 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
-- **20 real contract role gaps, surfaced by the gate auditing its own
-  exemptions.** `effigy drift:roles` reached zero, gated in `ci:native`, and
-  then found that its own `OVERLAY_ONLY` list was wrong.
+- **15 real contract role gaps**, surfaced by the gate auditing its own
+  exemptions. `effigy drift:roles` reached zero and gated, then found its own
+  `OVERLAY_ONLY` list was wrong — written by *reasoning* about which roles need
+  an overlay open rather than by checking.
 
-  That list was written by *reasoning* about which roles need an overlay open.
   `select` disproved it: its specimen has had an "Open state" group all along,
-  so a missing `listbox` was a component defect wearing an exemption. Fixed —
-  the open panel is now a `listbox` of `option`s with selection state.
+  so a missing `listbox` was a component defect wearing an exemption. The
+  general fix is that an exemption is now **checked against the specimen
+  source** — if the specimen opens the thing, the excuse does not apply. That
+  invalidated 20 exemptions across nine components; five are closed (`select`
+  options, and the open panels of `ref-select`, `order-by`, `filter-builder`,
+  `color-picker` and `model-picker` are now `dialog`s).
 
-  The general fix is that the exemption is now **checked against the specimen
-  source**. If the specimen opens the thing, the roles are observable and the
-  excuse does not apply. That immediately invalidated 20 more exemptions across
-  9 components: `color-picker`, `ref-select`, `split-button`, `order-by`,
-  `media-picker`, `filter-builder`, `model-picker` and two date pickers.
+  Remaining: `split-button` (menu, menuitem, separator), `color-picker`
+  (slider, listbox, option), `ref-select` (listbox, option, status),
+  `order-by` (list, listitem), `media-picker` (listbox, option), and `dialog`
+  on two date pickers.
 
-  **Back to reporting, not gating**, one commit after it started gating. The
-  gaps are real, so it cannot pass, and a gate that cannot pass teaches people
-  to skip it. It returns to `ci:native` when the 20 are closed.
-
-  26 remain genuinely overlay-only, and 4 are exempt with a recorded reason
-  (rating renders the radio variant not the slider; `tabs` has no panel because
-  `TabDefinition` carries no content; `editable-list`'s alert and status exist
-  only in those states).
+  **Reporting, not gating**, until those are closed — a gate that cannot pass
+  teaches people to skip it. 26 requirements remain genuinely overlay-only and
+  4 are exempt with a recorded reason.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for

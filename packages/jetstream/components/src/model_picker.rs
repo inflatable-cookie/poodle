@@ -373,7 +373,12 @@ pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -
 
         // Stretch (the flex default), not items_start: the rail's left rule must
         // run the panel's full height.
-        let mut panel = ui_element::div().flex_row().gap(rem_to_px(0.75)).child(models);
+        // Contract: the open picker panel is a `dialog`.
+        let mut panel = ui_element::div()
+            .flex_row()
+            .gap(rem_to_px(0.75))
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
+            .child(models);
         if is_split {
             panel = panel.child(axes_column);
         }

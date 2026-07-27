@@ -148,6 +148,8 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
         // border-subtle, radius-surface, elevated bg.
         let surface_pad = rem_to_px(0.75);
         let mut surface = ui_element::div()
+            // Contract: the open surface popover is a `dialog`.
+            .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .id("color-picker-surface")
             .w(rem_to_px(24.0))
             .rounded(surface_radius)

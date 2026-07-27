@@ -329,7 +329,9 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
 
     // ── Dialog surface (rendered inline when open) ────────────────────────────
     if spec.is_open {
-        let mut panel = ui_element::div().flex_col().gap(panel_gap);
+        // Contract: the open overlay panel is a `dialog`.
+        let mut panel = ui_element::div().flex_col().gap(panel_gap)
+            .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         // Combinator (2+ clauses) — static two-option indicator.
         if spec.combinator_visible() {

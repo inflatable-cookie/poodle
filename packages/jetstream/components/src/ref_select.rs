@@ -110,7 +110,9 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
 
     // ── Dialog surface (rendered inline when open) ────────────────────────────
     if spec.is_open {
-        let mut panel = ui_element::div().flex_col().gap(rem_to_px(0.5));
+        // Contract: the open overlay panel is a `dialog`.
+        let mut panel = ui_element::div().flex_col().gap(rem_to_px(0.5))
+            .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         if spec.is_searchable {
             let mut search = TextInputSpec::new()

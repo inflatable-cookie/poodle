@@ -170,7 +170,9 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
     // ── Dialog surface (rendered inline when open) ───────────────────────────
     if spec.is_open {
         let current_value = spec.current_value();
-        let mut panel = ui_element::div().flex_col().gap(panel_gap);
+        // Contract: the open overlay panel is a `dialog`.
+        let mut panel = ui_element::div().flex_col().gap(panel_gap)
+            .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         if matches!(spec.trigger_variant, OrderByTriggerVariant::Icon) {
             let mut header = ui_element::div()
