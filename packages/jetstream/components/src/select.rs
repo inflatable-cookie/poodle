@@ -255,6 +255,8 @@ fn build_panel(
     // (single layer, spread 0; matches GPUI's mapping).
     let mut panel = elevation_overlay(
         ui_element::div()
+            // Contract: the open panel is the `listbox` that owns the options.
+            .aria_role(jetstream_ui::accesskit::Role::ListBox)
             .absolute()
             .top(panel_top)
             .left(0.0)
@@ -375,6 +377,14 @@ fn build_panel(
                 };
 
                 let mut row = ui_element::div()
+                    // Contract: each option in the open panel is `role="option"`
+                    // with its selection state. The specimen has rendered an
+                    // open select all along; the roles were simply never
+                    // emitted, which is why this looked like an overlay-only
+                    // gap rather than a defect.
+                    .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
+                    .aria_label(opt.label.clone())
+                    .aria_selected(is_selected)
                     .flex_row()
                     .items_center()
                     .gap(item_gap)

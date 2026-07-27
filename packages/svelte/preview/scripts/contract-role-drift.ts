@@ -139,13 +139,37 @@ const OVERLAY_ONLY: Record<string, string[]> = {
   "order-by": ["dialog", "list", "listitem"],
   popover: ["dialog"],
   "ref-select": ["dialog", "listbox", "option", "status"],
-  select: ["listbox", "option"],
   "split-button": ["menu", "menuitem", "separator"],
   tooltip: ["button"],
 };
 
 function isOverlayOnly(slug: string, aria: string): boolean {
   return (OVERLAY_ONLY[slug] ?? []).includes(aria);
+}
+
+/**
+ * Whether a slug's specimen renders an open state.
+ *
+ * `OVERLAY_ONLY` was written by reasoning about which roles need an overlay
+ * open, and it was wrong: `select`'s specimen has an "Open state" group and had
+ * all along, so its missing `listbox` was a component defect wearing an
+ * exemption. Reasoning about coverage is exactly the thing to stop doing.
+ *
+ * So the exemption is now checked against the specimen source. If the specimen
+ * opens the thing, the roles are observable and the excuse does not apply.
+ */
+function specimenRendersOpen(slug: string): boolean {
+  const stem = slug.replace(/-/g, "_");
+  for (const candidate of [`${stem}.rs`, `${stem}/mod.rs`]) {
+    const file = path.join(repoRoot, "packages/jetstream/preview/src/specimens", candidate);
+    try {
+      const source = readFileSync(file, "utf8");
+      return /with_open\(true\)|with_is_open\(true\)/.test(source);
+    } catch {
+      // try the next shape
+    }
+  }
+  return false;
 }
 
 /**
@@ -178,6 +202,7 @@ const gaps: Gap[] = [];
 let checked = 0;
 let overlayOnly = 0;
 const exempt: string[] = [];
+const staleExemption: string[] = [];
 
 for (const [slug, projected] of Object.entries(census)) {
   if (!known.has(slug)) continue;
@@ -194,8 +219,12 @@ for (const [slug, projected] of Object.entries(census)) {
     checked += 1;
     if (!accepted.some((role) => present.has(role))) {
       if (isOverlayOnly(slug, aria)) {
-        overlayOnly += 1;
-        continue;
+        if (specimenRendersOpen(slug)) {
+          staleExemption.push(`${slug} ${aria}`);
+        } else {
+          overlayOnly += 1;
+          continue;
+        }
       }
       const reason = notApplicable(slug, aria);
       if (reason) {
@@ -212,6 +241,14 @@ console.log(`${overlayOnly} need an open overlay to observe and are set aside â€
 if (exempt.length > 0) {
   console.log(`${exempt.length} exempt with a recorded reason:`);
   for (const line of exempt) console.log(`  ${line}`);
+}
+
+if (staleExemption.length > 0) {
+  console.log(
+    `\n${staleExemption.length} role(s) are exempted as overlay-only, but their specimen\n` +
+      `renders an open state â€” so the role is observable and the exemption is stale:`,
+  );
+  for (const line of new Set(staleExemption)) console.log(`  ${line}`);
 }
 
 if (gaps.length === 0) {
