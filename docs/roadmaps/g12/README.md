@@ -57,8 +57,14 @@ Runway:
   **Complete.**
 - `013-native-spec-surface-parity.md` — nothing measured whether a documented
   prop reached `poodle-specs`, so nothing could tell whether GPUI and Jetstream
-  had tracked the web. New `contract-spec-drift` gate found 93 real gaps;
-  42 closed, 51 held as baselined debt. **Active.**
+  had tracked the web. New `contract-spec-drift` gate found 93 real gaps; all
+  93 closed, plus a renderer pass so both targets draw what they can now
+  reach. **Complete.**
+- `014-native-visual-gate.md` — pixel baselines for the GPUI preview, closing
+  the hole `g12.009` left on the native side. Found that GPUI *was* runnable
+  here all along; the "build-only" note was wrong. Captures are bit-identical
+  across launches, so the tolerance is zero. **Active** — Jetstream still
+  needs the same treatment.
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -67,6 +73,8 @@ Runway:
 
 ## Next Task
 
-`g12.013` is active: the spec-surface half is measured and half closed. Next
-is either the rest of its baseline (51 props) or its second half — teaching the
-GPUI and Jetstream renderers to draw the props now reachable.
+`g12.014` is active: GPUI now has a pixel baseline gate. Remaining for this
+generation — extend it to Jetstream (its headless `snap` binary needs routing by
+component slug, and being windowless would make it CI-safe), then native
+accessibility: `aria_label` is on 101 specs and reaches no accessibility API in
+either target.

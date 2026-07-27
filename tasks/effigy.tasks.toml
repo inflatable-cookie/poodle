@@ -65,6 +65,13 @@
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
 "ci:visual" = [{ task = "test:visual" }]
 
+# Native visual gate (g12.014). Baseline-based rather than cross-target: GPUI is
+# a different renderer, so a diff against Svelte would be all noise. LOCAL-ONLY —
+# the GPUI preview screenshots its own window, so it needs a live macOS window
+# server, same constraint as check:jetstream.
+"test:native-visual" = "bun test/native-visual/run.ts"
+"native-visual:update" = "bun test/native-visual/run.ts --update"
+
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks
 # the WHOLE linked component package, not just what the smoke app imports

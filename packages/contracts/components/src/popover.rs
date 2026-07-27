@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
+use crate::types::{Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
 
 /// Default surface min-width in rem (contract §7 / §8 `14rem`).
 pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
@@ -31,6 +31,7 @@ pub struct PopoverSpec {
     /// Overrides the default `24rem` surface max-width, in rem
     /// (contract §3 `surfaceMaxWidth`). `None` → default.
     pub surface_max_width_rem: Option<f32>,
+
 }
 
 impl Default for PopoverSpec {

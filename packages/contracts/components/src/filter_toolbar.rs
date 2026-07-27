@@ -1,3 +1,4 @@
+use crate::types::{Dimension};
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
@@ -33,6 +34,8 @@ pub struct FilterToolbarSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Minimum width of a filter control before the row wraps.
+    pub min_item_width: Option<Dimension>,
 }
 
 impl Default for FilterToolbarSpec {
@@ -49,11 +52,17 @@ impl Default for FilterToolbarSpec {
             // Svelte FilterToolbar defaults to "chrome" role.
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
+            min_item_width: None,
         }
     }
 }
 
 impl FilterToolbarSpec {
+    pub fn with_min_item_width(mut self, width: impl Into<Dimension>) -> Self {
+        self.min_item_width = Some(width.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

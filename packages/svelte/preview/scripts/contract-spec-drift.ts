@@ -77,6 +77,12 @@ const WEB_ONLY_PROPS = new Set([
   "validationContext",
   "validationDebounce",
   "validationKey",
+  // Decided in g12.013: an async options loader is behaviour, not data — a
+  // native target drives the same flow through `is_loading` plus `options`.
+  "loadOptions",
+  // Renders the platform `<select>` instead of the custom listbox. There is no
+  // native equivalent to defer to, so the flag has nothing to mean off the web.
+  "native",
 ]);
 
 /**
@@ -88,15 +94,7 @@ const WEB_ONLY_PROPS = new Set([
  * adding one means a prop shipped to the web without reaching the shared spec
  * surface, which is the thing this gate exists to stop.
  */
-const OPEN_GAPS: Record<string, string[]> = {
-  "button": ["fit", "maxWidth", "truncate"],
-  "detail-section": ["itemMinColumnWidth", "maxAutoColumns"],
-  "filter-toolbar": ["minItemWidth"],
-  "popover": ["surfaceMaxWidth", "surfaceMinWidth"],
-  "select": ["loadOptions", "native"],
-  "split-view": ["collapsePrimaryBelowSize", "collapseSecondaryBelowSize", "primaryCollapsedSize", "secondaryCollapsedSize"],
-  "stack": ["height", "minHeight", "minWidth", "overflow", "width"],
-};
+const OPEN_GAPS: Record<string, string[]> = {}
 
 /**
  * Contract prop -> Spec field, where the two deliberately differ. The prop IS
@@ -131,6 +129,9 @@ const ALIASES: Record<string, Record<string, string>> = {
   // The Spec names the instant it renders, not the HTML attribute that carries it.
   "time-ago": { datetime: "timestamp" },
   "block-editor": { blockTypeItems: "block_types" },
+  // The Spec stores the bounds as resolved rem, which is what a renderer wants;
+  // the contract states them as CSS strings.
+  popover: { surfaceMinWidth: "surface_min_width_rem", surfaceMaxWidth: "surface_max_width_rem" },
 };
 
 /** Components with no Spec struct at all, with the reason. */

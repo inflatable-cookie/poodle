@@ -155,7 +155,7 @@ pub use breadcrumbs::{
     BreadcrumbItem, BreadcrumbsSpec, ELLIPSIS_VALUE as BREADCRUMBS_ELLIPSIS_VALUE,
 };
 pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
-pub use button::ButtonSpec;
+pub use button::{ButtonFit, ButtonSpec};
 pub use calendar::{CalendarMode, CalendarSpec};
 pub use call_out::{CallOutSpec, CalloutAnnounceMode};
 pub use card::{CardLayout, CardSpec, CardVariant};

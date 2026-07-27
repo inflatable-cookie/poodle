@@ -1,4 +1,4 @@
-use crate::types::ControlDensity;
+use crate::types::{ControlDensity, Dimension};
 use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -11,6 +11,10 @@ pub struct DetailSectionSpec {
     pub columns: u8,
     /// Density override for section spacing (gaps, separated top padding).
     pub density: ControlDensity,
+    /// Minimum column width before the auto grid drops a column.
+    pub item_min_column_width: Option<Dimension>,
+    /// Column ceiling for the auto grid.
+    pub max_auto_columns: u8,
 }
 
 impl Default for DetailSectionSpec {
@@ -22,11 +26,23 @@ impl Default for DetailSectionSpec {
             aria_label: None,
             columns: 1,
             density: ControlDensity::Default,
+            item_min_column_width: None,
+            max_auto_columns: 3,
         }
     }
 }
 
 impl DetailSectionSpec {
+    pub fn with_item_min_column_width(mut self, width: impl Into<Dimension>) -> Self {
+        self.item_min_column_width = Some(width.into());
+        self
+    }
+
+    pub fn with_max_auto_columns(mut self, columns: u8) -> Self {
+        self.max_auto_columns = columns;
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

@@ -1,8 +1,14 @@
 use poodle_tokens::semantic;
 
-use crate::types::{
-    ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole,
-};
+use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, Dimension, SemanticControlSizeRole};
+
+/// Whether a button holds its default minimum width or shrinks to its content.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ButtonFit {
+    #[default]
+    Default,
+    Content,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ButtonSpec {
@@ -27,6 +33,12 @@ pub struct ButtonSpec {
     pub pressed: Option<bool>,
     /// Initial pressed state for uncontrolled toggle mode.
     pub default_pressed: bool,
+    /// Whether the button holds its default minimum width or shrinks to its
+    /// content.
+    pub fit: ButtonFit,
+    /// Whether an overlong label ellipsises instead of growing the button.
+    pub truncate: bool,
+    pub max_width: Option<Dimension>,
 }
 
 impl Default for ButtonSpec {
@@ -48,11 +60,29 @@ impl Default for ButtonSpec {
             density: ControlDensity::Default,
             pressed: None,
             default_pressed: false,
+            fit: ButtonFit::Default,
+            truncate: false,
+            max_width: None,
         }
     }
 }
 
 impl ButtonSpec {
+    pub fn with_fit(mut self, fit: ButtonFit) -> Self {
+        self.fit = fit;
+        self
+    }
+
+    pub fn with_truncate(mut self, truncates: bool) -> Self {
+        self.truncate = truncates;
+        self
+    }
+
+    pub fn with_max_width(mut self, width: impl Into<Dimension>) -> Self {
+        self.max_width = Some(width.into());
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

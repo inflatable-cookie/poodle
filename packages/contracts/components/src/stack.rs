@@ -1,4 +1,4 @@
-use crate::types::{Alignment, Inset, PaddingScale};
+use crate::types::{Alignment, Dimension, Inset, Overflow, PaddingScale};
 
 /// Stack layout direction.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
@@ -28,6 +28,13 @@ pub struct StackSpec {
     pub padding: PaddingScale,
     pub role: Option<String>,
     pub aria_label: Option<String>,
+    /// The element's own box, as CSS length strings. Distinct from `gap` /
+    /// `padding`, which describe how it arranges children.
+    pub width: Option<Dimension>,
+    pub height: Option<Dimension>,
+    pub min_width: Option<Dimension>,
+    pub min_height: Option<Dimension>,
+    pub overflow: Option<Overflow>,
 }
 
 impl Default for StackSpec {
@@ -41,11 +48,43 @@ impl Default for StackSpec {
             padding: PaddingScale::None,
             role: None,
             aria_label: None,
+            width: None,
+            height: None,
+            min_width: None,
+            min_height: None,
+            overflow: None,
         }
     }
 }
 
 impl StackSpec {
+    /// The element's own box. Distinct from `gap` / `padding`, which describe
+    /// how it arranges its children.
+    pub fn with_box(
+        mut self,
+        width: Option<Dimension>,
+        height: Option<Dimension>,
+    ) -> Self {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    pub fn with_min_box(
+        mut self,
+        min_width: Option<Dimension>,
+        min_height: Option<Dimension>,
+    ) -> Self {
+        self.min_width = min_width;
+        self.min_height = min_height;
+        self
+    }
+
+    pub fn with_overflow(mut self, overflow: Overflow) -> Self {
+        self.overflow = Some(overflow);
+        self
+    }
+
     pub fn new() -> Self {
         Self::default()
     }

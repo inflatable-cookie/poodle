@@ -1,7 +1,7 @@
 # g12.013 — Native Spec-Surface Parity
 
-**Status: active.** Gate landed; mechanical burn-down finished (93 → 19).
-The 19 that remain need a contract decision, not a field — see below.
+**Status: complete.** 93 real gaps found, 93 closed. The gate's `OPEN_GAPS`
+baseline is empty: every documented public prop reaches `poodle-specs`.
 
 ## Problem
 
@@ -110,10 +110,22 @@ before.
 closed, so they are gone: a rule that covers no case but can still fire is only
 a way to hide the next `seconds`.
 
-Remaining: **19 props across 7 components**, held in the gate's `OPEN_GAPS`
-baseline. That is debt, not an allowlist — adding an entry means a prop shipped
-to the web without reaching the shared spec surface, which is the thing the gate
-exists to stop.
+Fifth slice — the last 19, which were held back for a decision rather than
+effort. Resolved toward **closest feature parity**: a native target should be
+able to render everything Svelte can, so a prop only stays off the spec when it
+has no native meaning at all.
+
+| Group | Decision |
+|-------|----------|
+| Layout — `stack` box (5), `split-view` collapse (4) | **On the component spec**, using the `Dimension` and `Overflow` types that already existed. Not `poodle-layout`: `LayoutIntent` describes how a container arranges its children, whereas these describe the element's own box, which sits beside `gap` / `padding` |
+| CSS lengths — `detail-section.itemMinColumnWidth`, `filter-toolbar.minItemWidth`, `button.maxWidth` | **`Dimension`**, the newtype the crate already had for exactly this |
+| `popover.surfaceMinWidth` / `surfaceMaxWidth` | **Already carried** as `surface_*_width_rem`, resolved rem rather than CSS strings — which is what a renderer wants. Recorded as an alias; a second string-typed pair would have been two fields for one prop |
+| `button.fit` / `truncate` | **On the spec.** Both are intrinsic sizing a native can honour: shrink-to-content, and ellipsis instead of growth |
+| `select.loadOptions` / `native` | **Web-only, by decision.** An async options loader is behaviour, not data — a native drives the same flow through `is_loading` plus `options`. `native` renders the platform `<select>`, and there is no native equivalent to defer to |
+
+The gate's baseline is now empty. It stays a baseline rather than an allowlist:
+an entry appearing means a prop shipped to the web without reaching the shared
+spec surface.
 
 ## Shared Rule De-duplication
 

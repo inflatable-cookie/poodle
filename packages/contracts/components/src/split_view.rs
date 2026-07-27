@@ -35,9 +35,28 @@ pub struct SplitViewSpec {
     pub density: ControlDensity,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
+    /// Below this pane size (px) the primary pane collapses.
+    pub collapse_primary_below_size: Option<f32>,
+    pub collapse_secondary_below_size: Option<f32>,
+    /// Size (px) the primary pane holds while collapsed.
+    pub primary_collapsed_size: Option<f32>,
+    pub secondary_collapsed_size: Option<f32>,
 }
 
 impl SplitViewSpec {
+    /// Below `below_size` px the pane collapses to `collapsed_size` px.
+    pub fn with_primary_collapse(mut self, below_size: f32, collapsed_size: f32) -> Self {
+        self.collapse_primary_below_size = Some(below_size);
+        self.primary_collapsed_size = Some(collapsed_size);
+        self
+    }
+
+    pub fn with_secondary_collapse(mut self, below_size: f32, collapsed_size: f32) -> Self {
+        self.collapse_secondary_below_size = Some(below_size);
+        self.secondary_collapsed_size = Some(collapsed_size);
+        self
+    }
+
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
         self
@@ -61,6 +80,10 @@ impl SplitViewSpec {
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
             aria_label: None,
+            collapse_primary_below_size: None,
+            collapse_secondary_below_size: None,
+            primary_collapsed_size: None,
+            secondary_collapsed_size: None,
         }
     }
 
