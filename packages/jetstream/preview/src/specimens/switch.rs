@@ -54,6 +54,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 ))
                 .child(js_switch(
                     &SwitchSpec::new()
+                        .with_aria_label("Setting 1")
                         .with_checked(true)
                         .with_left_label("Manual")
                         .with_right_label("Auto")
@@ -65,11 +66,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // Sizes.
         .child(group("Sizes", secondary,
             div().flex_row().gap(16.0).items_center()
-                .child(js_switch(&SwitchSpec::new().with_checked(true).with_size(ControlSize::Xs), theme))
-                .child(js_switch(&SwitchSpec::new().with_checked(true).with_size(ControlSize::Sm), theme))
-                .child(js_switch(&SwitchSpec::new().with_checked(true).with_size(ControlSize::Md), theme))
-                .child(js_switch(&SwitchSpec::new().with_checked(true).with_size(ControlSize::Lg), theme))
-                .child(js_switch(&SwitchSpec::new().with_checked(true).with_size(ControlSize::Xl), theme))
+                .child(js_switch(&SwitchSpec::new().with_checked(true).with_aria_label("Size Xs").with_size(ControlSize::Xs), theme))
+                .child(js_switch(&SwitchSpec::new().with_checked(true).with_aria_label("Size Sm").with_size(ControlSize::Sm), theme))
+                .child(js_switch(&SwitchSpec::new().with_checked(true).with_aria_label("Size Md").with_size(ControlSize::Md), theme))
+                .child(js_switch(&SwitchSpec::new().with_checked(true).with_aria_label("Size Lg").with_size(ControlSize::Lg), theme))
+                .child(js_switch(&SwitchSpec::new().with_checked(true).with_aria_label("Size Xl").with_size(ControlSize::Xl), theme))
         ))
         // Densities.
         .child(group("Densities", secondary,

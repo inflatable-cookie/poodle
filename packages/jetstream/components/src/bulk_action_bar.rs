@@ -174,6 +174,7 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
     // Select-all: ghost `check-check` IconButton, chrome size-role.
     if spec.show_select_all && !spec.all_selected {
         let mut select_spec = IconButtonSpec::new()
+            .with_aria_label("Select all")
             .with_icon("check-check")
             .with_size(spec.size)
             .with_size_role(SemanticControlSizeRole::Chrome);

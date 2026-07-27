@@ -87,29 +87,27 @@ Runway:
 `g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
 for this generation:
 
-- **19 unnamed controls on Jetstream, measured not estimated.**
-  `effigy test:jetstream-a11y` projects every specimen's accessibility tree
-  headlessly. It found 629; 610 are closed.
+- **Accessible names: zero unnamed controls, and gated.** `test:jetstream-a11y`
+  projects every specimen's tree headlessly and now runs in `ci:native`. It
+  found 629 and all 629 are closed. It lives in `ci:native` rather than
+  `ci:rust` because it renders specimens, so it needs the sibling jetstream
+  repo — the same constraint that already makes that group local-only.
 
-  Almost none were missing information. Components held the words and
-  discarded them — `bulk-action-bar` dropped the `label` its own action struct
-  carried, `markdown-editor` bound tool captions as `_label`, `dialog` never
-  used the `close_label` that had been on its spec all along, defaulted to
-  "Close dialog". One engine bug accounted for 186 alone (a caption living in
-  a child left its button unnamed — now ARIA name-from-content).
+  Almost none of the 629 were missing information. Components held the words
+  and discarded them: `bulk-action-bar` dropped the `label` its own action
+  struct carried, `markdown-editor` bound tool captions as `_label`, `dialog`
+  never read the `close_label` that had sat on its spec defaulting to "Close
+  dialog". One engine bug accounted for 186 alone — a caption living in a
+  child left its button unnamed, now ARIA name-from-content.
 
-  **The method that worked was checking Svelte rather than reasoning about
-  it.** Every remaining cluster turned out to be a naming default the
-  reference already had and the native side had not ported: `switch` composes
-  a name from `leftLabel`/`rightLabel`, `app-header` falls back to `title`,
-  `markdown-editor` defaults to "Markdown editor", `editable-label` to "Edit
-  label", `file-upload` names each remove button after its file. Assuming the
-  residue was caller error would have missed all of them.
-
-  The 19 left are genuinely caller-supplied and match Svelte, where the
-  corresponding props also default to null: unlabelled `switch` and `select`
-  instances, and a short tail. Getting them to zero is a specimen exercise,
-  after which the audit belongs in `ci:rust`.
+  **The method was checking Svelte, not reasoning about the residue.** Twice
+  the remainder looked like caller error and twice it was a default the
+  reference already had: `switch` composing a name from
+  `leftLabel`/`rightLabel`, `app-header` falling back to `title`,
+  `markdown-editor` defaulting to "Markdown editor", `file-upload` naming each
+  remove button after its file, `text-input` naming its clear button "Clear
+  search query". `SelectSpec` turned out to have an `aria_label` field with no
+  builder to set it.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for

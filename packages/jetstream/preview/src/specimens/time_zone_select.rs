@@ -19,7 +19,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Default", secondary,
             div().w(280.0)
                 .child(js_time_zone_select(
-                    &TimeZoneSelectSpec::new().with_placeholder("Select time zone…"),
+                    &TimeZoneSelectSpec::new().with_aria_label("Time zone 1").with_placeholder("Select time zone…"),
                     theme,
                 ))
         ))
@@ -27,7 +27,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("With pre-selected zone", secondary,
             div().w(280.0)
                 .child(js_time_zone_select(
-                    &TimeZoneSelectSpec::new().with_value("America/New_York"),
+                    &TimeZoneSelectSpec::new().with_aria_label("Time zone 2").with_value("America/New_York"),
                     theme,
                 ))
         ))
@@ -38,7 +38,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Open (searchable, selected)", secondary,
             div().w(280.0)
                 .child(js_time_zone_select(
-                    &TimeZoneSelectSpec::new()
+                    &TimeZoneSelectSpec::new().with_aria_label("Time zone 3")
                         .with_value("America/New_York")
                         .with_open(true)
                         .with_search_query("amer"),
@@ -49,7 +49,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Disabled", secondary,
             div().w(280.0)
                 .child(js_time_zone_select(
-                    &TimeZoneSelectSpec::new().with_value("Europe/London").with_disabled(true),
+                    &TimeZoneSelectSpec::new().with_aria_label("Time zone 4").with_value("Europe/London").with_disabled(true),
                     theme,
                 ))
         ))
@@ -71,7 +71,7 @@ fn size_row(
     div().flex_row().gap(12.0).items_center()
         .child(label(size_label).text_color(text_secondary).text_size(11.0).w(24.0))
         .child(div().w(280.0).child(js_time_zone_select(
-            &TimeZoneSelectSpec::new().with_value("America/New_York").with_size(size),
+            &TimeZoneSelectSpec::new().with_aria_label("Time zone 5").with_value("America/New_York").with_size(size),
             theme,
         )))
 }

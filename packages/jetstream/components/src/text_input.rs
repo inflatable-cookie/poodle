@@ -166,6 +166,9 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
     if spec.input_type == "search" && spec.show_clear_button && !current_value.is_empty() {
         input_row = input_row.child(
             ui_element::button("")
+                // Svelte's exact wording. Icon-only, inside a field that has
+                // its own name, so it needs one of its own.
+                .aria_label("Clear search query")
                 .cursor_pointer()
                 .child(
                     ui_element::icon("x")

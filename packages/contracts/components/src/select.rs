@@ -153,6 +153,15 @@ impl SelectSpec {
         self
     }
 
+    /// Accessible name for the trigger.
+    ///
+    /// A select has no caption of its own, so without one it is announced as
+    /// "combo box" and its current value, with nothing to say what it chooses.
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn with_open(mut self, open: bool) -> Self {
         self.open = Some(open);
         self

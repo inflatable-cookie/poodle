@@ -98,6 +98,8 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
                 .mt(rem_to_px(0.25))
                 .child(
                     ui_element::text_input("", "Search media...")
+                        // A placeholder is not an accessible name.
+                        .aria_label("Search media")
                         .self_stretch()
                         .border(1.0)
                         .border_color(border)

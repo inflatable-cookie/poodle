@@ -140,9 +140,14 @@
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
 ]
 "check:jetstream" = "cargo check -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
+# The a11y audit belongs here rather than in ci:rust: it renders specimens, so
+# it needs the sibling jetstream repo — the same constraint that already makes
+# this group local-only. It is a real gate now that the count is zero; before
+# that it would only have reported a number.
 "ci:native" = [
   { task = "check:gpui" },
   { task = "check:jetstream" },
+  { task = "test:jetstream-a11y" },
 ]
 
 # Documentation

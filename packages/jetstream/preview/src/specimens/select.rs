@@ -33,44 +33,44 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // Default (with placeholder)
         .child(group("Default", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_placeholder("Choose fruit..."), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 1").with_placeholder("Choose fruit..."), theme))
         ))
         // With value
         .child(group("With value", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_value("banana"), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 2").with_value("banana"), theme))
         ))
         // Disabled
         .child(group("Disabled", secondary, {
-            let mut spec = SelectSpec::new(options.clone()).with_value("apple");
+            let mut spec = SelectSpec::new(options.clone()).with_aria_label("Fruit 3").with_value("apple");
             spec.is_disabled = true;
             div().w(240.0).child(js_select(&spec, theme))
         }))
         // Open state
         .child(group("Open state", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_placeholder("Choose fruit...").with_open(true), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 4").with_placeholder("Choose fruit...").with_open(true), theme))
         ))
         // Searchable
         .child(group("Searchable", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_placeholder("Search...").with_searchable(true), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 5").with_placeholder("Search...").with_searchable(true), theme))
         ))
         // Invalid validation
         .child(group("Invalid validation", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_validation_state(ValidationState::Invalid).with_placeholder("Choose..."), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 6").with_validation_state(ValidationState::Invalid).with_placeholder("Choose..."), theme))
         ))
         // Ghost variant
         .child(group("Ghost variant", secondary,
             div().w(240.0)
-                .child(js_select(&SelectSpec::new(options.clone()).with_variant(SelectVariant::Ghost).with_value("cherry"), theme))
+                .child(js_select(&SelectSpec::new(options.clone()).with_aria_label("Fruit 7").with_variant(SelectVariant::Ghost).with_value("cherry"), theme))
         ))
         // Grouped options (open — shows section headers + disabled option)
         .child(group("Grouped (open: headers + disabled option)", secondary,
             div().w(240.0)
                 .child(js_select(
-                    &SelectSpec::new(grouped_options.clone())
+                    &SelectSpec::new(grouped_options.clone()).with_aria_label("Fruit 8")
                         .with_placeholder("Choose an item")
                         .with_open(true),
                     theme,
@@ -80,7 +80,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Clearable (value selected → clear x)", secondary,
             div().w(240.0)
                 .child(js_select(
-                    &SelectSpec::new(options.clone())
+                    &SelectSpec::new(options.clone()).with_aria_label("Fruit 9")
                         .with_placeholder("All fruits")
                         .with_clearable(true)
                         .with_value("banana"),
@@ -91,7 +91,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Selected + open (checkmark indicator)", secondary,
             div().w(240.0)
                 .child(js_select(
-                    &SelectSpec::new(options.clone())
+                    &SelectSpec::new(options.clone()).with_aria_label("Fruit 10")
                         .with_value("banana")
                         .with_open(true),
                     theme,
@@ -109,7 +109,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 fn size_spec(options: &[ChoiceOption], size: ControlSize) -> SelectSpec {
-    SelectSpec::new(options.to_vec())
+    SelectSpec::new(options.to_vec()).with_aria_label("Fruit 11")
         .with_placeholder("Select...")
         .with_size(size)
 }

@@ -106,11 +106,14 @@ fn build_tab_label(
 /// Contract Close button: 1.25rem square, icon-only `x`, `text-secondary`
 /// color, radius `calc(radius-control - 0.125rem)`, margin-right `0.25rem`.
 /// Interaction (click / Delete) lives in the preview event loop.
-fn build_close_button(theme: &JetstreamThemeProvider, font_size: f32) -> JsEl {
+fn build_close_button(theme: &JetstreamThemeProvider, font_size: f32, tab_label: &str) -> JsEl {
     let icon_color = resolve_color(theme, "color.text.secondary");
     let radius = (resolve_radius(theme, "radius.control") - rem_to_px(0.125)).max(0.0);
     let box_sz = rem_to_px(1.25);
     ui_element::button("")
+        // A row of tabs yields a row of identical close glyphs, so the name
+        // has to say which tab this one closes.
+        .aria_label(format!("Close {tab_label}"))
         .w(box_sz)
         .h(box_sz)
         .mr(rem_to_px(0.25))

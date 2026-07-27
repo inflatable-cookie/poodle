@@ -190,7 +190,7 @@ pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
         // Contract Close button: rendered when the tab is closable.
         if tab.is_closable {
-            tab_el = tab_el.child(build_close_button(theme, font_size));
+            tab_el = tab_el.child(build_close_button(theme, font_size, &tab.label));
         }
 
         if is_disabled {

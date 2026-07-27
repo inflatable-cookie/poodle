@@ -155,6 +155,11 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
     // with an `x` icon. Click wiring is preview-event-loop bound.
     meta = meta.child(
         ui_element::div()
+            // Svelte renders this as a real `<button aria-label="Close command
+            // palette">`; here it is a div, so the role and the name both have
+            // to be stated or it is announced as anonymous structure.
+            .aria_role(jetstream_ui::accesskit::Role::Button)
+            .aria_label("Close command palette")
             .id(format!("{}-close", "poodle-cmd-palette"))
             .flex_row()
             .items_center()

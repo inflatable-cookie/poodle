@@ -352,6 +352,9 @@ pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -
                 }
                 ModelAxisKind::Toggle => {
                     let mut control = SwitchSpec::new()
+                        // The axis names itself; the switch renders bare, so
+                        // without this it is one of several unnamed toggles.
+                        .with_aria_label(axis.label.clone())
                         .with_checked(matches!(current, ModelAxisValue::Flag(true)))
                         .with_size(effective_size)
                         .with_density(spec.density);
