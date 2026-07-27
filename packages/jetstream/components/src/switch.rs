@@ -208,7 +208,10 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         root = root.cursor_pointer();
     }
 
-    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+    // The visible label is the accessible name unless something
+    // overrides it — the caption sits beside the control, not inside,
+    // so name-from-content cannot reach it.
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref().or(spec.label.as_deref()))
         .aria_role(jetstream_ui::accesskit::Role::Switch).aria_checked(crate::aria::toggled(spec.checked))
 }
 

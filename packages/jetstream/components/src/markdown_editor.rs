@@ -92,8 +92,11 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
 
     // Tools container — real Icon glyphs in contract order.
     let mut tools_row = ui_element::div().flex_row().gap(tool_gap);
-    for (icon_name, _label) in &TOOLS {
+    for (icon_name, label) in &TOOLS {
         let mut btn = ui_element::button("")
+            // TOOLS already pairs each glyph with its name; rendering the tool
+            // icon-only discarded it and left a row of unnamed buttons.
+            .aria_label(*label)
             .w(tool_size)
             .h(tool_size)
             .flex_row()

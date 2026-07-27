@@ -257,6 +257,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // ── Nav header ────────────────────────────────────────────────────────────
 
     let prev_btn = ui_element::button("")
+        .aria_label("Previous month")
         .id("poodle-cal-prev")
         .w(nav_btn_size_px)
         .h(nav_btn_size_px)
@@ -275,6 +276,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
         );
 
     let next_btn = ui_element::button("")
+        .aria_label("Next month")
         .id("poodle-cal-next")
         .w(nav_btn_size_px)
         .h(nav_btn_size_px)

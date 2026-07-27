@@ -139,6 +139,9 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
     // ── Primary half ──
     // Spinner + label live as children so Taffy lays them out with the gap.
     let mut primary = ui_element::button("")
+        // The caption is a child so Taffy can lay it out beside the spinner,
+        // which leaves this button's own label empty. Name it from the spec.
+        .aria_label(spec.label.clone().unwrap_or_default())
         .h(height)
         .min_w(rem_to_px(4.0)) // contract §7: min-width 4rem flat
         .pl(pad_x)
@@ -191,6 +194,8 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
 
     // ── Toggle half (fixed per-size width, zero padding) ──
     let mut toggle = ui_element::button("")
+        // Chevron-only: nothing in its subtree carries text.
+        .aria_label("More actions")
         .h(height)
         .w(toggle_w)
         .rounded_r(radius)
@@ -300,7 +305,10 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
         root = ui_element::div().flex_col().child(root).child(menu);
     }
 
-    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+    // The visible label is the accessible name unless something
+    // overrides it — the caption sits beside the control, not inside,
+    // so name-from-content cannot reach it.
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref().or(spec.label.as_deref()))
 }
 
 #[cfg(test)]

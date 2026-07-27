@@ -87,21 +87,26 @@ Runway:
 `g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
 for this generation:
 
-- **218 unnamed controls on Jetstream, measured not estimated.**
+- **75 unnamed controls on Jetstream, measured not estimated.**
   `effigy test:jetstream-a11y` projects every specimen's accessibility tree
-  headlessly; it found 629 and 411 have been closed. 186 were one engine bug
-  (a button's caption living in a child left the button unnamed — now ARIA
-  name-from-content), 28 were `TabList`, reclassified as advisory rather than a
-  defect, and the rest were components discarding names they already held:
-  `bulk-action-bar` rendered each action icon-only and dropped the action's own
-  `label`; `relation-picker`'s row checkboxes had no caption of their own;
-  `pagination` and `video-player` build icon-only controls with no text
-  anywhere to name them from.
+  headlessly. It found 629; 554 are closed.
 
-  Remaining, in order: `markdown-editor` 35, `calendar` 28, `split-button` 21,
-  `collapse-toggle` 18, `switch` 17, `number-input` 16, `app-header` 14, and a
-  tail. Same two shapes — icon-only controls needing an explicit name, and
-  controls whose label is a sibling rather than a child.
+  Most were not missing information — components held the words and discarded
+  them. `bulk-action-bar` rendered each action icon-only and dropped the
+  action's own `label`; `markdown-editor` bound its tool captions as `_label`
+  and threw them away; `switch` and `split-button` never used their visible
+  `label` as the accessible name. One engine bug accounted for 186 on its own
+  (a button's caption living in a child left the button unnamed — now ARIA
+  name-from-content). The rest were controls with no text anywhere in reach:
+  icon-only transport, chevrons and steppers, and selection checkboxes whose
+  label is a sibling rather than a child.
+
+  What remains is mostly *callers not supplying a name where only a caller
+  can*: `number-input` 16 and `switch` 7 have no label in the specimen at all,
+  `app-header` 14 and `form-dialog` 5 are icon-only actions. Those are specimen
+  and contract questions rather than component defects, which is a different
+  kind of work from the 554.
+
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
   whatever the preview is showing. Per-slug is the same shape as the visual

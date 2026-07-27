@@ -70,6 +70,7 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     // ── Decrement button (only when steppers enabled) ──────────────────────
     if spec.show_steppers {
         let mut dec_btn = ui_element::button("")
+            .aria_label("Decrease")
             .id("poodle-number-input-dec")
             .pl(pad_x)
             .pr(btn_gap)
@@ -120,6 +121,7 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     // ── Increment button (only when steppers enabled) ──────────────────────
     if spec.show_steppers {
         let mut inc_btn = ui_element::button("")
+            .aria_label("Increase")
             .id("poodle-number-input-inc")
             .pl(btn_gap)
             .pr(pad_x)

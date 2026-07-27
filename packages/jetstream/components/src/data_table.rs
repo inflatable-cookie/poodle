@@ -123,7 +123,9 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
             CheckState::Checked => CheckboxSpec::new().with_checked(true),
             CheckState::Mixed => CheckboxSpec::new().with_mixed(true),
             CheckState::Unchecked => CheckboxSpec::new(),
-        };
+        }
+        // Header checkbox: selects every row, and has no caption of its own.
+        .with_aria_label("Select all rows");
         header = header.child(
             ui_element::div().w(selection_width).flex_row().items_center()
                 .child(js_checkbox(&cb_spec, theme)),
@@ -250,7 +252,11 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
 
             // Row-selection checkbox
             if spec.selectable {
-                let cb_spec = CheckboxSpec::new().with_checked(is_selected);
+                // Per-row selection: the row's cells are siblings, not
+                // children, so there is nothing to name it from.
+                let cb_spec = CheckboxSpec::new()
+                    .with_checked(is_selected)
+                    .with_aria_label("Select row");
                 row_el = row_el.child(
                     ui_element::div().w(selection_width).flex_row().items_center()
                         .child(js_checkbox(&cb_spec, theme)),

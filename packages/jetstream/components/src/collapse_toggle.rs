@@ -38,6 +38,9 @@ pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvi
     let chevron_icon = spec.effective_icon_name();
 
     let mut el = ui_element::button("")
+        // A bare chevron. Which way it points is visual, not announced, so the
+        // name says what pressing it does and `aria_expanded` says the state.
+        .aria_label("Toggle section")
         .rounded(radius)
         .px(pad_x)
         .py(pad_y)

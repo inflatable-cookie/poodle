@@ -253,6 +253,9 @@ fn render_row(
         let cs = spec.check_state(node);
         let checkbox = js_checkbox(
             &CheckboxSpec::new()
+                // A selection checkbox has no caption of its own; the row's
+                // label is a sibling, so name it after what it selects.
+                .with_aria_label(format!("Select {}", node.label))
                 .with_checked(matches!(cs, CheckState::Checked))
                 .with_mixed(matches!(cs, CheckState::Mixed))
                 .with_disabled(node.is_disabled)
