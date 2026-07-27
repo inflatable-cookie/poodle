@@ -275,7 +275,19 @@ fn arrow_button(
     disabled_opacity: f32,
     pad_x: f32,
 ) -> JsEl {
+    // Icon-only, so there is no text anywhere for a screen reader to name it
+    // from — not on the button and not in its children, since an icon carries
+    // no text. Without this it is announced as an unnamed "button".
+    let action_label = match icon {
+        "chevron-left" => "Previous page",
+        "chevron-right" => "Next page",
+        "chevrons-left" => "First page",
+        "chevrons-right" => "Last page",
+        other => other,
+    };
+
     let mut btn = ui_element::button("")
+        .aria_label(action_label)
         .min_w(height)
         .h(height)
         .px(pad_x)

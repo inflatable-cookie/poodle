@@ -82,6 +82,11 @@
 # Local-only: needs a window server and Accessibility permission.
 "test:jetstream-ax" = "bun test/native-visual/ax-audit.ts"
 "jetstream-ax:dump" = "bun test/native-visual/ax-audit.ts --dump"
+# Projects every specimen's accessibility tree headlessly — no window, no
+# display, all 132 specimens. Complements test:jetstream-ax, which proves the
+# tree reaches macOS but only for the screen the preview is showing.
+"test:jetstream-a11y" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
+"jetstream-a11y:roles" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
 
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks

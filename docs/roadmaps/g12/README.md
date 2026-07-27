@@ -87,11 +87,14 @@ Runway:
 `g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
 for this generation:
 
-- **Accessibility breadth on Jetstream.** Names are swept across every
-  component; roles, checked/expanded state and values are attached only where a
-  component sets them explicitly, so a checkbox built from panels still reports
-  `GenericContainer`. The capability is there — this is per-component work
-  against each contract.
+- **403 unnamed controls on Jetstream, measured not estimated.**
+  `effigy test:jetstream-a11y` projects every specimen's accessibility tree
+  headlessly and found 629 elements whose role needs a name and lacks one. 186
+  were one engine bug (a button's caption living in a child left the button
+  unnamed — now ARIA name-from-content) and 36 were `pagination`, fixed as the
+  representative case. The rest are icon-only controls and checkboxes whose
+  label is a sibling: `bulk-action-bar` 58, `relation-picker` 55,
+  `video-player` 46, `markdown-editor` 35, `calendar` 28, `tabs` 28.
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
   whatever the preview is showing. Per-slug is the same shape as the visual

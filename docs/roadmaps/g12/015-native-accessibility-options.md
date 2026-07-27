@@ -233,16 +233,35 @@ single-element difference is noise and anything larger is a change.
   roles inside a component (a `menuitem` within a menu, a `tab` within a tab
   list, an `option` within a listbox) are not attached at all — only the
   component root. That is the bulk of what is left.
-- **The audit sees one screen**, and this is now the binding limitation. It
-  reads whatever the preview happens to be showing — the shell — so of the 31
-  roles just attached, only `AXTabGroup` appears in it. The checkbox role is
-  proven by a Rust test against the projected tree, not by macOS. Extending the
-  audit per-slug is the same shape as the visual gate's sweep and is what would
-  make the rest of this verifiable end to end.
+- **Coverage is now two gates, not one.** The AX probe reads the *real* macOS
+  tree but only for the screen the preview is showing — one out of 135. So
+  `cargo run --bin a11y` (`effigy test:jetstream-a11y`) projects every
+  specimen's tree headlessly, in one process, in seconds: no window, no
+  display, no activation. The same trade that made the offscreen visual gate
+  beat the window-capture one. They are complements — the headless one proves
+  *what the tree says* for every component, the AX probe proves *that macOS
+  receives it*.
 
-  It still earned its keep on the shell: attaching `TabList` immediately made
-  the audit fail on an unnamed tab group, which is announced as "tab group" and
-  nothing else. Named, and green again at 468.
+  It found a great deal on its first run: **629 elements whose role needs a
+  name and does not have one**, across 132 specimens and 20,281 nodes. The
+  shell audit had reported everything named, because the shell's buttons carry
+  their own text.
+
+  **186 of those were one engine-level bug.** A button that puts an icon beside
+  its caption holds the caption in a *child*, leaving the button's own label
+  empty — captioned on screen, silent to a screen reader. That is ARIA's
+  name-from-content case, so the projection now implements it (jetstream
+  `26d79953`), stopping at named descendants and skipping `aria-hidden` ones so
+  decoration cannot leak into a control's name.
+
+  Another 36 were `pagination`, fixed as the representative case: its chevrons
+  are `button("")` with an icon child, so there is no text *anywhere* to name
+  them from and they need explicit labels. **403 remain**, concentrated in
+  `bulk-action-bar` (58), `relation-picker` (55), `video-player` (46),
+  `markdown-editor` (35), `calendar` (28) and `tabs` (28) — icon-only controls
+  and checkboxes whose label is a sibling rather than a child. That is
+  per-component work against each contract, and it is now measured rather than
+  estimated.
 - **Nobody has listened to it.** The tree is correct and named; whether
   VoiceOver's *announcements* are sensible in order and phrasing is a judgement
   a machine cannot make.
