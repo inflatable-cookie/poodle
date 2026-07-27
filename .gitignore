@@ -75,3 +75,13 @@ docs/screenshots/
 # BEGIN EFFIGY LOCAL STATE
 .effigy/
 # END EFFIGY LOCAL STATE
+
+# Native visual gate baselines (g12.014).
+#
+# Deliberately NOT committed. They are transient reference images regenerated
+# on demand, and the GPUI set alone is 103MB of full-window screenshots — git
+# storage that grows with every rebaseline and is never reclaimed. Both gates
+# write a missing baseline on first run and say so, so a fresh clone
+# self-populates.
+packages/gpui/preview/baselines/
+packages/jetstream/preview/baselines/

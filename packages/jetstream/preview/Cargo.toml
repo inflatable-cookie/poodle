@@ -28,7 +28,10 @@ jetstream-input = { path = "../../../../jetstream/crates/jetstream-input" }
 jetstream-text = { path = "../../../../jetstream/crates/jetstream-text" }
 
 glam = "0.29"
-wgpu = "29"
+# Must track the sibling jetstream workspace exactly. Two wgpu versions in one
+# graph do not conflict at resolve time — they fail at the call site, with every
+# argument reported as "expected wgpu::Device, found wgpu::Device".
+wgpu = "30"
 pollster = "0.4"
 bytemuck = "1"
 image = { version = "0.25", default-features = false, features = ["png"] }

@@ -31,6 +31,8 @@ fn headless_device() -> (wgpu::Device, wgpu::Queue) {
         power_preference: wgpu::PowerPreference::HighPerformance,
         compatible_surface: None,
         force_fallback_adapter: false,
+        // wgpu 30 added this; the default keeps the adapter's own limits.
+        apply_limit_buckets: false,
     }))
     .expect("no GPU adapter");
     pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
@@ -316,7 +318,8 @@ fn snapshot_opts(
     let _ = device.poll(wgpu::PollType::wait_indefinitely());
     rx.recv().unwrap().unwrap();
 
-    let data = slice.get_mapped_range();
+    // wgpu 30 made this fallible.
+    let data = slice.get_mapped_range().expect("map readback buffer");
     let mut img = image::RgbaImage::new(w, h);
     for y in 0..h {
         let row = &data[(y * padded) as usize..(y * padded + w * bpp) as usize];

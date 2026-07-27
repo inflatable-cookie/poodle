@@ -72,6 +72,13 @@
 "test:native-visual" = "bun test/native-visual/run.ts"
 "native-visual:update" = "bun test/native-visual/run.ts --update"
 
+# Jetstream native visual gate — headless offscreen render, no window server.
+# 135 specimens in ~90s with zero flake, where the GPUI gate takes ~20min with
+# ~3%. This is the one to trust. Still local-only, but only because it needs the
+# sibling jetstream repo — nothing about it requires a display.
+"test:jetstream-visual" = "bun test/native-visual/jetstream.ts"
+"jetstream-visual:update" = "bun test/native-visual/jetstream.ts --update"
+
 # Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks
 # the WHOLE linked component package, not just what the smoke app imports

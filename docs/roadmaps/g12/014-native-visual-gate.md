@@ -1,10 +1,8 @@
 # g12.014 — Native Visual Gate
 
-**Status: active.** GPUI gate built, proven non-vacuous, and fully baselined
-from verified captures — with a measured ~3% per-run flake that re-running
-clears. See Baseline State. The better approach, Jetstream's
-offscreen render, is blocked on the sibling repo's wgpu 30 upgrade; see Not
-Done.
+**Status: complete.** Two native visual gates, and the comparison between them
+is the finding: Jetstream's headless offscreen render does in 90 seconds with
+zero flake what GPUI's window capture does in 20 minutes with 3%.
 
 ## Problem
 
@@ -133,38 +131,72 @@ The capture needs a live macOS window-server session, so this is not in
 the sibling runtime repo. Run it before and after any change to `poodle-specs`
 accessors or the GPUI component crate.
 
+## The Jetstream Gate — And Why It Wins
+
+Once the sibling repo's wgpu 30 upgrade landed, `snap.rs` needed three small
+things, none of them the API rewrite the error count suggested:
+
+- **`wgpu = "29"` → `"30"`** in `packages/jetstream/preview/Cargo.toml`. Thirteen
+  of the sixteen errors were a *duplicate wgpu in the graph*, not changed APIs —
+  they report as `expected wgpu::Device, found wgpu::Device`, which reads as
+  nonsense until you notice the two versions.
+- `RequestAdapterOptions` gained `apply_limit_buckets`
+- `get_mapped_range()` became fallible
+
+Then it worked, and the measurements are not close:
+
+| | GPUI (window capture) | Jetstream (offscreen) |
+|-|-----------------------|-----------------------|
+| full sweep | ~20 min | **90 s** |
+| flake | ~3% per run | **0** |
+| determinism | 2 agreeing captures needed | 135/135 bit-identical across two sweeps |
+| tolerance | 0.002%, a measured noise floor | **true zero** |
+| requires | awake, unlocked display | nothing |
+
+Every failure mode the GPUI gate fought is *structurally absent*: no compositor
+means no antialiasing jitter, no window means no hover or activation state, and
+reading back a texture you rendered means no guessed moment and no incomplete
+frames. The five wrong answers above were all consequences of one decision —
+reading pixels off a live desktop — and none of them can occur here.
+
+**Confirmed non-vacuous.** Widening the Jetstream pill by 4px failed 9 specimens,
+`pill` itself at 3.46% and `token-input` at 1.37% — the latter because it
+composes pills, which is exactly the cross-component reach a visual gate exists
+to catch. Reverted; 135/135 green again.
+
+`effigy test:jetstream-visual` / `effigy jetstream-visual:update`. Local-only,
+but only because it needs the sibling `jetstream` repo — nothing about it wants
+a display, so it would be CI-safe wherever that repo is available.
+
+## Baselines Are Not Committed
+
+Both baseline directories are gitignored. The GPUI set is 103MB — 2696x2396
+full-window screenshots including the sidebar and theme picker in every frame —
+against 7.9MB for Jetstream's 900x640 component renders. Committing them meant
+paying that on every clone forever, and paying it again on every rebaseline,
+for the *less* trustworthy of the two gates.
+
+Both runners write a missing baseline on first run and say so, so a clone
+self-populates. The trade is that a gate now compares against the machine's own
+last capture rather than a shared reference — it answers "did my change move the
+render?" and not "does this branch match main". Given both gates are local-only
+regardless (a display for GPUI, the sibling repo for Jetstream), that is the
+question they were already answering.
+
+## Which Gate To Trust
+
+**Jetstream.** It is faster, deterministic, and needs no environment. The GPUI
+gate stays because GPUI is a separate renderer that can regress independently,
+but it is a developer convenience: a green run means something, a single red
+component means re-run it.
+
 ## Not Done
 
-- **Jetstream should be the primary native gate, and is blocked.** Offscreen
-  rendering is not a marginally different approach here, it is a categorically
-  better one: every failure mode above is *structurally absent*. No fixed render
-  delay (you control the readback), no compositor (no antialiasing jitter), no
-  pointer, no window activation, no display to fall asleep, no relaunch. It is
-  also one process rendering every component instead of 133 launches waiting
-  1.5s each — twice over, for the stability check.
-
-  `packages/jetstream/preview/src/bin/snap.rs` already does this and already
-  routes by slug: `snap specimens` walks the component registry writing one PNG
-  per slug on a headless wgpu device (`compatible_surface: None`). Adding
-  baselines and diffing to it is this card's `run.ts` pointed at a different
-  capture backend, and it would be CI-safe, unlike the GPUI one.
-
-  **Blocked:** `snap.rs` does not currently compile — 15 errors, all wgpu API
-  drift (`UiPass::new`, `upload_quad_geometry`, `set_bind_group` bounds). The
-  sibling `jetstream` repo is mid-upgrade to wgpu 30; `snap` should build again
-  once that lands, and repairing it against a moving API in the meantime would
-  only conflict. Its doc comment is also stale — it claims no glyph pass, but
-  text has been rendering since the pass was added.
-- **One axis.** `eclipse-compact-sm` only. The web gate sweeps axes to catch
-  Svelte/React divergence; here a second axis costs a full capture run and
-  catches little the first would not.
-- **Five of the six skips are still unproven.** Only `progress` was skipped on
-  evidence. The other five are reasoned, and the two-agreeing-captures rule now
-  makes checking them trivial: if a component settles, it does not belong in the
-  list.
-- **The 1.5s render wait is the underlying flaw.** The double capture works
-  around it at 2x cost. Fixing it properly means the preview waiting for a
-  settled frame rather than a fixed delay, which is a change to
-  `packages/gpui/preview/src/main.rs`.
-- **Cost.** Every capture now launches the preview twice, so a full sweep is
-  roughly 20 minutes.
+- **GPUI's 3% flake is unfixed and probably unfixable from outside.** Three
+  rounds of mitigation each reduced it without reaching zero. The real fix is
+  the preview waiting for a settled frame rather than a fixed 1.5s, in
+  `packages/gpui/preview/src/main.rs`. Whether that is worth doing now that a
+  reliable gate exists is a judgement call.
+- **One axis** on both gates: `eclipse-compact-sm`.
+- **Five of GPUI's six skips are unproven** — only `progress` was skipped on
+  evidence. Jetstream needs no skip list at all, which is its own signal.

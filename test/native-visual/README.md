@@ -29,6 +29,21 @@ them.
 If a component never settles, it is genuinely non-deterministic and belongs in
 the skip list. `progress` was caught exactly that way.
 
+## Baselines are local, not committed
+
+Both `baselines/` directories are gitignored. They are transient reference
+images, and committing them was costing real storage — the GPUI set alone is
+103MB of full-window screenshots, and every rebaseline would add another
+copy that git never reclaims.
+
+A missing baseline is written on first run and reported as
+`+ <slug> — baseline written (was missing)`, so a fresh clone self-populates.
+The consequence to be aware of: **these gates compare against your machine's
+last capture, not against a shared reference.** They answer "did my change move
+the render?", which is what they were built for, and not "does this branch match
+main". Both are local-only for other reasons anyway — GPUI needs a display,
+Jetstream needs the sibling repo.
+
 ## Running
 
 ```sh
