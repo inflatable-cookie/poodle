@@ -127,7 +127,11 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
         }
 
         let rows = spec.rows();
-        let mut list = ui_element::div().flex_col().gap(rem_to_px(0.125));
+        // Contract: the results are a `listbox` of `option`s.
+        let mut list = ui_element::div()
+            .flex_col()
+            .gap(rem_to_px(0.125))
+            .aria_role(jetstream_ui::accesskit::Role::ListBox);
         for (index, option) in rows.iter().enumerate() {
             if let Some(heading) = spec.group_heading_for(&rows, index) {
                 list = list.child(
@@ -145,6 +149,8 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
 
             let is_selected = option.value == spec.value;
             let mut row = ui_element::div()
+                // Each result row is an `option` of the listbox above it.
+                .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
                 .flex_none()
                 .flex_row()
                 .items_start()

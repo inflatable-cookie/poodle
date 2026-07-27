@@ -109,7 +109,7 @@ for this generation:
   search query". `SelectSpec` turned out to have an `aria_label` field with no
   builder to set it.
 
-- **15 real contract role gaps**, surfaced by the gate auditing its own
+- **11 real contract role gaps**, surfaced by the gate auditing its own
   exemptions. `effigy drift:roles` reached zero and gated, then found its own
   `OVERLAY_ONLY` list was wrong — written by *reasoning* about which roles need
   an overlay open rather than by checking.
@@ -118,14 +118,12 @@ for this generation:
   so a missing `listbox` was a component defect wearing an exemption. The
   general fix is that an exemption is now **checked against the specimen
   source** — if the specimen opens the thing, the excuse does not apply. That
-  invalidated 20 exemptions across nine components; five are closed (`select`
-  options, and the open panels of `ref-select`, `order-by`, `filter-builder`,
-  `color-picker` and `model-picker` are now `dialog`s).
+  invalidated 20 exemptions across nine components; nine are closed.
 
   Remaining: `split-button` (menu, menuitem, separator), `color-picker`
-  (slider, listbox, option), `ref-select` (listbox, option, status),
-  `order-by` (list, listitem), `media-picker` (listbox, option), and `dialog`
-  on two date pickers.
+  (slider, listbox, option), `order-by` (list, listitem), `ref-select`
+  (status), and `dialog` on two date pickers whose panels are built
+  differently again.
 
   **Reporting, not gating**, until those are closed — a gate that cannot pass
   teaches people to skip it. 26 requirements remain genuinely overlay-only and

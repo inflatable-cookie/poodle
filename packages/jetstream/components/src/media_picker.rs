@@ -115,7 +115,9 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
         if spec.has_items() {
             let (grid_gap, item_pad) = grid_gap_and_pad_rem(spec.density);
             let thumb_size = rem_to_px(thumb_size_rem(effective_size));
+            // Contract: the media grid is a `listbox` of selectable `option`s.
             let mut grid = ui_element::div()
+                .aria_role(jetstream_ui::accesskit::Role::ListBox)
                 .flex_row()
                 .flex_wrap()
                 .gap(rem_to_px(grid_gap))
@@ -190,6 +192,8 @@ fn grid_item(
     // centered placeholder image glyph.
     let thumb = if item.has_thumbnail {
         ui_element::div()
+            // Each tile is a selectable `option` of the media listbox.
+            .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
             .w(thumb_size)
             .h(thumb_size)
             .rounded(rem_to_px(0.25))
