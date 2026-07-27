@@ -211,7 +211,21 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // The visible label is the accessible name unless something
     // overrides it — the caption sits beside the control, not inside,
     // so name-from-content cannot reach it.
-    crate::aria::with_aria_label(root, spec.aria_label.as_deref().or(spec.label.as_deref()))
+    // Contract: the accessible name comes from `ariaLabel`, else `label`, else
+    // a composition of the two end labels — a switch captioned only
+    // "Off"/"On" still has to say what it switches.
+    let composed = match (&spec.left_label, &spec.right_label) {
+        (Some(left), Some(right)) => Some(format!("{left} / {right}")),
+        (Some(only), None) | (None, Some(only)) => Some(only.clone()),
+        (None, None) => None,
+    };
+    let name = spec
+        .aria_label
+        .as_deref()
+        .or(spec.label.as_deref())
+        .map(str::to_owned)
+        .or(composed);
+    crate::aria::with_aria_label(root, name.as_deref())
         .aria_role(jetstream_ui::accesskit::Role::Switch).aria_checked(crate::aria::toggled(spec.checked))
 }
 

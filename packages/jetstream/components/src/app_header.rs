@@ -155,7 +155,8 @@ pub fn js_app_header_with_slots(
         );
     }
 
-    crate::aria::with_aria_label(header, spec.aria_label.as_deref())
+    // Contract: `aria-label` falls back to `title`.
+    crate::aria::with_aria_label(header, spec.aria_label.as_deref().or(spec.title.as_deref()))
 }
 
 #[cfg(test)]

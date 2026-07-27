@@ -37,7 +37,14 @@ fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSi
     let mut row = div().flex_row().items_center().gap(4.0);
     for ic in icons {
         row = row.child(js_icon_button(
-            &IconButtonSpec::new().with_icon(*ic).with_size(size),
+            // A specimen is an integration test, so it has to model correct
+            // usage: an icon button with no accessible name is a defect
+            // wherever it is built. The glyph name is the nearest true
+            // description available here.
+            &IconButtonSpec::new()
+                .with_icon(*ic)
+                .with_aria_label(*ic)
+                .with_size(size),
             theme,
         ));
     }
