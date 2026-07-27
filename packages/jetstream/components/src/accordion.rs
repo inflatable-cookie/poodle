@@ -53,6 +53,7 @@ pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsE
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Group)
 }
 
 fn render_item(

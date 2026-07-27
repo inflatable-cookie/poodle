@@ -154,7 +154,7 @@ pub fn js_password_requirements(
         );
     }
 
-    root
+    root.aria_role(jetstream_ui::accesskit::Role::Alert)
 }
 
 /// Build a single requirement row with pass/fail indicator.

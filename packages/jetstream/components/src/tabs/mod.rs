@@ -206,6 +206,7 @@ pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .flex_col()
         .child(tab_bar);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::TabList)
 }
 
 #[cfg(test)]

@@ -138,6 +138,7 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
             .child(card)
     };
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Status)
 }
 
 #[cfg(test)]

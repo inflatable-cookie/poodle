@@ -106,6 +106,7 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
     // component (Jetstream architecture). This renders selected state from
     // `current_value()` only.
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::RadioGroup)
 }
 
 #[cfg(test)]

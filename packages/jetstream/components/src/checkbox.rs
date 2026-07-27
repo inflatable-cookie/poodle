@@ -182,6 +182,7 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Jetstream has no cursor token, so we omit cursor styling (platform default).
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::CheckBox).aria_checked(crate::aria::toggled(spec.checked))
 }
 
 #[cfg(test)]

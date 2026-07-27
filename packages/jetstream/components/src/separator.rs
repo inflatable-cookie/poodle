@@ -43,7 +43,7 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
     let _is_semantic = !spec.decorative;
 
     // Contract: flex 0 0 auto — separator doesn't grow or shrink
-    match spec.orientation {
+    let root = match spec.orientation {
         SeparatorOrientation::Horizontal => {
             ui_element::div()
                 .min_h(stroke)
@@ -58,7 +58,8 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
                 .bg(color)
                 .flex_none() // flex: 0 0 auto
         }
-    }
+    };
+    root.aria_role(jetstream_ui::accesskit::Role::Splitter)
 }
 
 #[cfg(test)]

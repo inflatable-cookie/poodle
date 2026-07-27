@@ -86,6 +86,7 @@ pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> JsEl {
         );
     bubble.style.shadow = Some(overlay_shadow);
     crate::aria::with_aria_label(bubble, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Tooltip)
 }
 
 #[cfg(test)]

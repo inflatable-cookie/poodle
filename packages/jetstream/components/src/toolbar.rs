@@ -71,6 +71,7 @@ pub fn js_toolbar(spec: &ToolbarSpec, theme: &JetstreamThemeProvider, children: 
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Toolbar)
 }
 
 #[cfg(test)]

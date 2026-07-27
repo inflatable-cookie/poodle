@@ -207,27 +207,42 @@ Local-only: it needs a window server, an unlocked display, and Accessibility
 permission, and it names whichever is missing rather than reporting an empty
 tree.
 
-**One thing is unconfirmed.** The probe originally guarded against runaway
-recursion by depth alone, which hangs: the pre-activation tree really is cyclic
-(the application element is its own child), and a depth cap still branches at
-every level. It now tracks the current path and compares with `CFEqual` — the
-obvious global visited-set is wrong here, because sibling elements are not
-always distinct under `CFEqual` and a global set prunes real subtrees. The
-display locked before that fix could be run against a live content tree, so the
-measurements above predate it and it needs one green run to confirm.
+**The cycle guard took two attempts.** Guarding by depth alone hangs: the
+pre-activation tree really is cyclic (the application element is its own child),
+and a depth cap still branches at every level. The obvious fix — a global
+visited-set — is also wrong, because sibling elements are not always distinct
+under `CFEqual`, so it prunes real subtrees and reports an almost-empty UI. What
+works is tracking the current *path*: only an element that is its own ancestor
+is a cycle. Re-measured after that fix: **570 / 470 / 467**, and 466-467 named
+across three runs. The one-element drift is an `AXGroup` appearing or not, so a
+single-element difference is noise and anything larger is a change.
 
 ## Not Done
 
-- **Breadth, not capability.** The sweep attaches accessible *names*
-  everywhere. Roles, checked/expanded state and values are attached only where a
-  component sets them explicitly, so a checkbox drawn out of panels still
-  reports `GenericContainer` unless it says otherwise. The audit shows the shape
-  of it: 154 `AXButton` and 311 `AXStaticText` against one `AXSlider`, one
-  `AXTextField`, and no `AXCheckBox` at all. Everything needed to fix that is in
-  place; it is per-component work against each contract.
-- **The audit sees one screen.** It reads whatever the preview happens to be
-  showing, not every component's specimen. Extending it per-slug is the same
-  shape as the visual gate's sweep.
+- **Roles: a first pass, not a sweep.** 31 components now carry the role their
+  contract specifies, taken from the contracts rather than guessed — the ARIA
+  roles were extracted from every `docs/contracts/components/*.md` and mapped
+  onto `accesskit::Role`. Checkbox and switch also carry checked state, and
+  collapsible and select carry expanded state. The tri-state mapping is named
+  once in `aria::toggled`, because the contracts say `aria-checked="mixed"`,
+  the specs say `checked: None`, and AccessKit says `Toggled::Mixed` — three
+  spellings of one idea, and rendering `None` as unchecked would be a specific
+  and untrue claim about the control.
+
+  The remaining components still report `GenericContainer`, and per-element
+  roles inside a component (a `menuitem` within a menu, a `tab` within a tab
+  list, an `option` within a listbox) are not attached at all — only the
+  component root. That is the bulk of what is left.
+- **The audit sees one screen**, and this is now the binding limitation. It
+  reads whatever the preview happens to be showing — the shell — so of the 31
+  roles just attached, only `AXTabGroup` appears in it. The checkbox role is
+  proven by a Rust test against the projected tree, not by macOS. Extending the
+  audit per-slug is the same shape as the visual gate's sweep and is what would
+  make the rest of this verifiable end to end.
+
+  It still earned its keep on the shell: attaching `TabList` immediately made
+  the audit fail on an unnamed tab group, which is announced as "tab group" and
+  nothing else. Named, and green again at 468.
 - **Nobody has listened to it.** The tree is correct and named; whether
   VoiceOver's *announcements* are sensible in order and phrasing is a judgement
   a machine cannot make.

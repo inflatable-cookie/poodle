@@ -67,10 +67,11 @@ pub fn js_scroll_shell(
     viewport = viewport.child(content);
 
     // ── Root (.scroll-shell) — clip boundary ──
-    ui_element::div()
+    let root = ui_element::div()
         .grow()
         .rounded(resolve_radius(theme, "radius.surface"))
-        .child(viewport)
+        .child(viewport);
+    root.aria_role(jetstream_ui::accesskit::Role::Region)
 }
 
 #[cfg(test)]

@@ -186,6 +186,7 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::List)
 }
 
 /// One-shot enter animation: fade in + rise 0.5rem, ease-out. Mirrors the

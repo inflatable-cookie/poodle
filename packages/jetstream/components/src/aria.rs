@@ -25,6 +25,23 @@ pub fn with_aria_label(el: JsEl, label: Option<&str>) -> JsEl {
     }
 }
 
+/// Map a contract tri-state onto AccessKit's checked state.
+///
+/// Poodle specs spell the third state as `None` — `checked: Option<bool>` on
+/// checkbox, switch and their kin — which reads as "unset" and means
+/// "indeterminate". AccessKit spells it `Toggled::Mixed`, and the contracts
+/// spell it `aria-checked="mixed"`. Naming the mapping once keeps the three
+/// spellings from drifting, and stops `None` being quietly rendered as
+/// unchecked, which is a different and wrong claim about the control.
+pub fn toggled(checked: Option<bool>) -> jetstream_ui::accesskit::Toggled {
+    use jetstream_ui::accesskit::Toggled;
+    match checked {
+        Some(true) => Toggled::True,
+        Some(false) => Toggled::False,
+        None => Toggled::Mixed,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,6 +76,40 @@ mod tests {
             labels.iter().any(|l| &**l == "Delete project"),
             "aria_label never reached the accessibility tree; found {labels:?}"
         );
+    }
+
+    /// `None` is the contract's indeterminate state, not "unchecked". Rendering
+    /// it as `False` would tell a screen reader something specific and untrue.
+    #[test]
+    fn an_unset_tri_state_is_mixed_not_false() {
+        use jetstream_ui::accesskit::Toggled;
+        assert_eq!(toggled(Some(true)), Toggled::True);
+        assert_eq!(toggled(Some(false)), Toggled::False);
+        assert_eq!(toggled(None), Toggled::Mixed);
+    }
+
+    /// A checkbox that reports `GenericContainer` is announced as nothing in
+    /// particular. Its contract requires the role *and* `aria-checked="mixed"`
+    /// for the indeterminate state, so both are asserted through the real tree.
+    #[test]
+    fn a_checkbox_reports_its_role_and_mixed_state() {
+        use jetstream_ui::accesskit::{Role, Toggled};
+        use jetstream_ui::GameUi;
+        use poodle_specs::CheckboxSpec;
+
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let mut ui = GameUi::new(400.0, 200.0);
+        // `checked: None` is the contract's indeterminate state.
+        ui.render_immediate(&crate::checkbox::js_checkbox(&CheckboxSpec::new(), &theme));
+
+        let update = ui.accessibility_update().expect("a rendered tree projects");
+        let checkbox = update
+            .nodes
+            .iter()
+            .find(|(_, node)| node.role() == Role::CheckBox)
+            .expect("a node reports Role::CheckBox");
+        assert_eq!(checkbox.1.toggled(), Some(Toggled::Mixed));
     }
 
     #[test]

@@ -246,7 +246,7 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
         root = root.opacity(opacity);
     }
 
-    root
+    root.aria_role(jetstream_ui::accesskit::Role::Region)
 }
 
 #[cfg(test)]

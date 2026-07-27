@@ -141,6 +141,7 @@ pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> JsEl
     }
 
     crate::aria::with_aria_label(strip, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::TabList)
 }
 
 #[cfg(test)]

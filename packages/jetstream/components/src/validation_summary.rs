@@ -124,7 +124,7 @@ pub fn js_validation_summary(spec: &ValidationSummarySpec, theme: &JetstreamThem
     }
     el = el.child(list);
 
-    el
+    el.aria_role(jetstream_ui::accesskit::Role::Alert)
 }
 
 #[cfg(test)]

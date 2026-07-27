@@ -165,6 +165,7 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
     }
 
     crate::aria::with_aria_label(outer, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Region).aria_expanded(spec.open.unwrap_or(false))
 }
 
 #[cfg(test)]

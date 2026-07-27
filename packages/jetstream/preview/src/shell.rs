@@ -79,7 +79,10 @@ fn build_tab_bar(
             Section::Components => "components",
             Section::Demo => "demo",
             Section::Tokens => "tokens",
-        }),
+        })
+        // A tab list is announced as a group of tabs, so without a name it is
+        // "tab group" and nothing else — and this preview has more than one.
+        .with_aria_label("Preview sections"),
         theme,
     );
 

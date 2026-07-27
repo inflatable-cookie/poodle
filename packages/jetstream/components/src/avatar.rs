@@ -60,6 +60,7 @@ pub fn js_avatar(spec: &AvatarSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Image)
 }
 
 #[cfg(test)]

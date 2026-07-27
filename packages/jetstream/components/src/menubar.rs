@@ -236,6 +236,7 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::MenuBar)
 }
 
 #[cfg(test)]

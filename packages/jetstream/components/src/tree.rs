@@ -130,6 +130,7 @@ pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .pr(rem_to_px(0.25))
         .children(rows);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Tree)
 }
 
 /// Append the visible rows for `nodes` at `depth`, recursing into expanded branches.

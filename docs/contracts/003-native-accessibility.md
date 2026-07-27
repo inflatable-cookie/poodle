@@ -71,9 +71,12 @@ labelling; an icon-only control is the case that needs it.
   its contract's ARIA section is a bug, not an accepted platform limit. What is
   still missing is breadth, not capability: accessible *names* are swept across
   every component, while roles, checked/expanded state and value are attached
-  only where a component sets them explicitly. The audit shows the shape of
-  that gap plainly — 154 `AXButton` and 311 `AXStaticText` against one
-  `AXSlider` and one `AXTextField`, and no `AXCheckBox` at all.
+  only where a component sets them explicitly. **31 components now carry the
+  role their contract specifies**, with checked state on checkbox and switch and
+  expanded state on collapsible and select. What is left is the remaining
+  component roots, and per-element roles *inside* a component — a `menuitem`
+  within a menu, a `tab` within a tab list, an `option` within a listbox — which
+  are not attached at all.
 - **`effigy test:jetstream-ax` is the check.** It launches the preview, reads
   its tree through `AXUIElement`, and fails on any non-structural element
   without an accessible name. It found three real defects on its first run

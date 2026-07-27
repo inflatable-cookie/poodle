@@ -209,6 +209,7 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Switch).aria_checked(crate::aria::toggled(spec.checked))
 }
 
 #[cfg(test)]

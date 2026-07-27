@@ -141,6 +141,7 @@ pub fn js_filter_toolbar(
     }
 
     crate::aria::with_aria_label(toolbar, Some(spec.aria_label.as_str()))
+        .aria_role(jetstream_ui::accesskit::Role::Toolbar)
 }
 
 #[cfg(test)]

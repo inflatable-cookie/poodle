@@ -57,6 +57,7 @@ pub fn js_toast_host(
     container = container.child(inner);
 
     crate::aria::with_aria_label(container, Some(spec.aria_label.as_str()))
+        .aria_role(jetstream_ui::accesskit::Role::List)
 }
 
 #[cfg(test)]

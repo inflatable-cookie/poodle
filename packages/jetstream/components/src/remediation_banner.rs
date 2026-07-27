@@ -134,7 +134,7 @@ pub fn js_remediation_banner(spec: &RemediationBannerSpec, theme: &JetstreamThem
         );
     }
 
-    el
+    el.aria_role(jetstream_ui::accesskit::Role::Alert)
 }
 
 /// Build a real `js_button` for a `RemediationAction`, honoring its variant and

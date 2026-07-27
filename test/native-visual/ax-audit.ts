@@ -30,11 +30,11 @@ import { repoRoot } from "./config";
  * real defects — an unnamed contrast slider, an unnamed search field, and a
  * decorative search icon being announced — all since fixed.
  *
- * **Caveat on that measurement:** it predates the cycle-detection fix in
- * `ax-probe.swift`, and the display locked before the fixed probe could be run
- * against a real content tree. The numbers above are real; the current probe
- * needs one green run on an unlocked display to confirm the fix did not change
- * them. For contrast, the GPUI preview on the same machine exposes
+ * Re-measured after the cycle-detection fix in `ax-probe.swift`: **570 / 470 /
+ * 467**, and 466-467 named across repeat runs. The one-element drift is an
+ * `AXGroup` appearing or not; the named count varies by one for the same
+ * reason. Treat single-element differences as noise and anything larger as a
+ * change. For contrast, the GPUI preview on the same machine exposes
  * **7 elements, 1 named** — `AXApplication`, `AXWindow`, the three traffic
  * lights and the title. That is AppKit's window chrome; none of GPUI's content
  * is in it, which is what "no accessibility API" looks like from the outside.

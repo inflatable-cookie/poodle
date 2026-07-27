@@ -81,6 +81,7 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Splitter)
 }
 
 #[cfg(test)]

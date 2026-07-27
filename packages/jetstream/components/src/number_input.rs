@@ -142,6 +142,7 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::SpinButton)
 }
 
 /// A boxed prefix/suffix affix — Svelte `.poodle-number-input__prefix`:

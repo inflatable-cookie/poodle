@@ -318,5 +318,5 @@ pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> JsEl {
         );
     }
 
-    el
+    el.aria_role(jetstream_ui::accesskit::Role::Log)
 }

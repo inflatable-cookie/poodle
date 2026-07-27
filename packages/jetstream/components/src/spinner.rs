@@ -36,6 +36,7 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> JsEl {
         SpinnerVariant::Grid => build_grid(spec, tone_color),
     };
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Status)
 }
 
 /// Ring variant: circular spinner with rotating border.

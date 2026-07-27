@@ -195,6 +195,7 @@ pub fn js_dialog(
         .justify_center()
         .child(panel);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .aria_role(jetstream_ui::accesskit::Role::Dialog)
 }
 
 #[cfg(test)]
