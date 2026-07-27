@@ -319,6 +319,9 @@ fn file_item(spec: &FileUploadSpec, item: &FileUploadItem, theme: &JetstreamThem
 
     // ── Remove button (1.75rem pill) ──
     let remove = ui_element::button("")
+        // Svelte names each remove button after the file it removes, so a list
+        // of them is not a row of identical "remove" buttons.
+        .aria_label(format!("Remove {}", item.name))
         .w(rem_to_px(1.75))
         .h(rem_to_px(1.75))
         .rounded(rem_to_px(999.0))

@@ -140,6 +140,11 @@ pub fn js_dialog(
             let icon_size = rem_to_px(size_font_rem(chrome_size));
             header_row = header_row.child(
                 ui_element::button("")
+                    // `close_label` has been on the spec all along, defaulting
+                    // to "Close dialog" as Svelte does; this component simply
+                    // never used it, so the glyph announced as an unnamed
+                    // button.
+                    .aria_label(spec.close_label.clone())
                     .id("poodle-dialog-close")
                     .w(close_dim)
                     .h(close_dim)

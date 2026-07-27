@@ -109,6 +109,9 @@ pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvide
         let placeholder = spec.placeholder.clone().unwrap_or_default();
 
         let mut input = ui_element::text_input(value, placeholder)
+            // Svelte's default; see MarkdownEditor for why a placeholder is
+            // not a substitute.
+            .aria_label(spec.aria_label.as_deref().unwrap_or("Edit label"))
             .w_full()
             .text_color(text_color)
             .text_size(font_size);

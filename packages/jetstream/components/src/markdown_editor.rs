@@ -148,6 +148,10 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
             .child(
                 // Textarea is monospace (contract §8 `.md-editor__textarea`).
                 ui_element::text_input(spec.value.clone(), placeholder)
+                    // Svelte defaults `ariaLabel` to this rather than leaving
+                    // the editing surface nameless; a placeholder is not a
+                    // name, so without it the textarea announces as untitled.
+                    .aria_label(if spec.aria_label.is_empty() { "Markdown editor" } else { spec.aria_label.as_str() })
                     .w_full()
                     .text_size(textarea_font)
                     .font_family(FontFamily::Mono)

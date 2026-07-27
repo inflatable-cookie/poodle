@@ -87,29 +87,29 @@ Runway:
 `g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
 for this generation:
 
-- **59 unnamed controls on Jetstream, measured not estimated.**
+- **19 unnamed controls on Jetstream, measured not estimated.**
   `effigy test:jetstream-a11y` projects every specimen's accessibility tree
-  headlessly. It found 629; 570 are closed.
+  headlessly. It found 629; 610 are closed.
 
-  Most were not missing information — components held the words and discarded
-  them. `bulk-action-bar` dropped the `label` its own action struct carried;
-  `markdown-editor` bound its tool captions as `_label` and threw them away;
-  `switch` and `split-button` never used their visible `label` as the
-  accessible name. One engine bug accounted for 186 alone (a button's caption
-  living in a child left the button unnamed — now ARIA name-from-content).
+  Almost none were missing information. Components held the words and
+  discarded them — `bulk-action-bar` dropped the `label` its own action struct
+  carried, `markdown-editor` bound tool captions as `_label`, `dialog` never
+  used the `close_label` that had been on its spec all along, defaulted to
+  "Close dialog". One engine bug accounted for 186 alone (a caption living in
+  a child left its button unnamed — now ARIA name-from-content).
 
-  **Three were contract clauses nobody had implemented**, found by reading the
-  contracts rather than assuming the residue was caller error: `switch`
-  specifies a name composed from `leftLabel`/`rightLabel`, `app-header`
-  specifies `aria-label` falling back to `title`, and `number-input` spells its
-  steppers "Increment"/"Decrement" where the code had invented
-  "Increase"/"Decrease".
+  **The method that worked was checking Svelte rather than reasoning about
+  it.** Every remaining cluster turned out to be a naming default the
+  reference already had and the native side had not ported: `switch` composes
+  a name from `leftLabel`/`rightLabel`, `app-header` falls back to `title`,
+  `markdown-editor` defaults to "Markdown editor", `editable-label` to "Edit
+  label", `file-upload` names each remove button after its file. Assuming the
+  residue was caller error would have missed all of them.
 
-  What is left is genuinely caller-supplied: `number-input` 16 (its spec has no
-  label prop at all, so only a caller can name it), plus unlabelled switches,
-  icon-only dialog actions and raw text inputs. Deciding whether a labelless
-  `NumberInput` is valid usage is a contract question, and answering it is what
-  takes this to zero and makes the audit CI-able.
+  The 19 left are genuinely caller-supplied and match Svelte, where the
+  corresponding props also default to null: unlabelled `switch` and `select`
+  instances, and a short tail. Getting them to zero is a specimen exercise,
+  after which the audit belongs in `ci:rust`.
 
 - **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
   macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
