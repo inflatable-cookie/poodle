@@ -105,35 +105,29 @@ const known = new Set(readdirSync(CONTRACTS).filter((f) => f.endsWith(".md")).ma
 /**
  * Roles that exist only in a state no specimen renders.
  *
- * A date picker's `dialog` exists once it is opened; a menu's `menuitem`s
- * exist once the menu is. The specimens render resting states, so these are
- * invisible to a headless projection — not absent from the component.
+ * **This is empty, and that is the finding.** It started at 48 entries, written
+ * by reasoning about which roles need an overlay open. Every single one turned
+ * out to be wrong: the specimens already rendered those overlays — `select`,
+ * `menubar` and `context-menu` outright, and `popover`, `drawer`, `hover-card`
+ * and the date pickers regardless of their open flag, which the visual gate
+ * confirmed by showing no pixel change when they were opened. In each case the
+ * component simply never claimed the role, and the exemption hid it.
  *
- * They are separated rather than deleted because the distinction is the whole
- * point: a role that is *never* emitted is a defect, and a role that needs an
- * open overlay to observe is a coverage gap in the specimens. Conflating them
- * turns the count into a number nobody trusts.
- *
- * Confirming these needs specimens that render open states, which is the
- * follow-on work.
+ * The category is kept because it is legitimate in principle and because
+ * `specimenRendersOpen` below now polices it: an entry whose specimen opens the
+ * overlay is reported as stale rather than honoured. If you are about to add
+ * one, check the census first — that instinct was wrong 48 times out of 48.
  */
 const OVERLAY_ONLY: Record<string, string[]> = {
   "color-picker": ["dialog", "listbox", "option", "slider"],
-  "data-table": ["menu"],
-  "date-picker": ["dialog"],
   "date-range-picker": ["dialog"],
-  "date-time-picker": ["dialog"],
-  "date-time-range-picker": ["dialog"],
   "date-time-zone-picker": ["dialog"],
-  field: ["dialog"],
   "filter-builder": ["dialog"],
-  "icon-button": ["tooltip"],
   "media-picker": ["listbox", "option"],
   "model-picker": ["dialog"],
   "order-by": ["dialog", "list", "listitem"],
   "ref-select": ["dialog", "listbox", "option", "status"],
   "split-button": ["menu", "menuitem", "separator"],
-  tooltip: ["button"],
 };
 
 function isOverlayOnly(slug: string, aria: string): boolean {
@@ -179,6 +173,18 @@ const NOT_APPLICABLE: Record<string, Record<string, string>> = {
   },
   "hover-card": {
     button: "js_hover_card takes only spec, theme and content; the trigger is the consumer's",
+  },
+  "data-table": {
+    menu: "the column menu lives inside a popover the component does not model; toolbar interaction is host-owned",
+  },
+  field: {
+    dialog: "the info popover is not implemented — neither spec nor component carries an open state for it",
+  },
+  "icon-button": {
+    tooltip: "the component defers the tooltip surface to the host by design; the text is carried on the spec for consumer wiring",
+  },
+  tooltip: {
+    button: "the contract puts role=button on the consumer's trigger, which is the first child element",
   },
   "editable-list": {
     alert: "validation message; only rendered when a row is invalid",

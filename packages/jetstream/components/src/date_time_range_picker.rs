@@ -183,6 +183,8 @@ pub fn js_date_time_range_picker(
         // the runtime shadow builder (single layer, spread 0; matches GPUI).
         let surface = elevation_overlay(
             ui_element::div()
+                // Contract: the open picker surface is a `dialog`.
+                .aria_role(jetstream_ui::accesskit::Role::Dialog)
                 .rounded(surface_radius)
                 .bg(surface_bg)
                 .border(1.0)
