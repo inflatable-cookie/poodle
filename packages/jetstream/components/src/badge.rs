@@ -54,7 +54,7 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Contract dimensions (rem → px via presentation helpers):
     // min-height: 1.25rem, padding: 0.125rem 0.4375rem
     // font-size: 0.6875rem, border-radius: 999px (pill)
-    ui_element::label(&content)
+    let root = ui_element::label(&content)
         .min_h(rem_to_px(1.25))
         .px(rem_to_px(0.4375))
         .py(rem_to_px(0.125))
@@ -64,7 +64,8 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .text_size(rem_to_px(0.6875))
         .letter_spacing_em(0.04) // contract: letter-spacing 0.04em
         .items_center()
-        .justify_center()
+        .justify_center();
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
     // Note: text-transform: uppercase is a CSS-only property not yet expressible
     // in the JsEl API; content should be pre-uppercased. font-weight: 700 also
     // requires runtime text support.

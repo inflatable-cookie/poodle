@@ -164,7 +164,7 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
         outer = outer.opacity(opacity);
     }
 
-    outer
+    crate::aria::with_aria_label(outer, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

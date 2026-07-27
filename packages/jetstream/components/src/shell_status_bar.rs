@@ -79,7 +79,7 @@ pub fn js_shell_status_bar(
         el = el.child(trailing_row);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -181,7 +181,7 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // No opacity reduction; the component remains visible but reverts changes.
     // Jetstream has no cursor token, so we omit cursor styling (platform default).
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

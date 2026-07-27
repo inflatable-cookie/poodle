@@ -196,7 +196,7 @@ pub fn js_picker_shell(
         );
     }
 
-    shell
+    crate::aria::with_aria_label(shell, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

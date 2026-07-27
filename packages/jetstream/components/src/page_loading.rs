@@ -117,7 +117,7 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
 
     // Branch on presentation. Inline: in-flow, centered, no backdrop, padding
     // 3rem 1rem (contract §8 inline root). Overlay: full-viewport scrim.
-    if is_inline {
+    let root = if is_inline {
         ui_element::div()
             .self_stretch()
             .flex_col()
@@ -136,7 +136,8 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
             .items_center()
             .justify_center()
             .child(card)
-    }
+    };
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -122,7 +122,7 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
         el = el.child(actions_el);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

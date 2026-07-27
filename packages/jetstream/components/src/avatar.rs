@@ -59,7 +59,7 @@ pub fn js_avatar(spec: &AvatarSpec, theme: &JetstreamThemeProvider) -> JsEl {
         );
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

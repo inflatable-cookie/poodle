@@ -195,7 +195,7 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

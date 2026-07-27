@@ -197,7 +197,7 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
         root = root.opacity(opacity).disabled(true);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Resolve a per-state color, preferring an instance hex override.

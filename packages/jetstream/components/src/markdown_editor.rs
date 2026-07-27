@@ -188,7 +188,7 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
     }
 
     el = el.child(body);
-    el
+    crate::aria::with_aria_label(el, Some(spec.aria_label.as_str()))
 }
 
 fn mode_button(

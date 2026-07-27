@@ -471,7 +471,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
         root = root.child(day_row);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 mod parts;

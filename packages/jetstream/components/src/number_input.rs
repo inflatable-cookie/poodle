@@ -141,7 +141,7 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
         el = el.opacity(disabled_opacity).disabled(true);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 /// A boxed prefix/suffix affix — Svelte `.poodle-number-input__prefix`:

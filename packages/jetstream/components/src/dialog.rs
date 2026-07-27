@@ -188,12 +188,13 @@ pub fn js_dialog(
     }
 
     // ── Overlay wrapper ───────────────────────────────────────────────────────
-    ui_element::div()
+    let root = ui_element::div()
         .bg(backdrop_fill)
         .overlay()
         .items_center()
         .justify_center()
-        .child(panel)
+        .child(panel);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

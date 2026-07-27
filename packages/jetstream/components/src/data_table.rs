@@ -388,7 +388,7 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
         );
     }
 
-    el
+    crate::aria::with_aria_label(el, Some(spec.aria_label.as_str()))
 }
 
 /// Render a loading skeleton for the data table body (used when data is in-flight).
@@ -423,7 +423,7 @@ pub fn js_data_table_loading(
         el = el.child(row_el);
     }
 
-    el
+    crate::aria::with_aria_label(el, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

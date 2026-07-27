@@ -202,9 +202,10 @@ pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // Wrap tab bar in a flex-col container. Content is rendered by the caller
     // below the tab bar — TabDefinition carries no content field in this API.
-    ui_element::div()
+    let root = ui_element::div()
         .flex_col()
-        .child(tab_bar)
+        .child(tab_bar);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

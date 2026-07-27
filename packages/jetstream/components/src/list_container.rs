@@ -194,7 +194,7 @@ pub fn js_list_container_with_slots(
         }
     }
 
-    container
+    crate::aria::with_aria_label(container, spec.aria_label.as_deref())
 }
 
 /// Resolve the EmptyState variant for the container. ListContainerSpec carries

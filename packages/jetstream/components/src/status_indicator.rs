@@ -68,7 +68,7 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
         );
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -191,7 +191,7 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
         root = root.opacity(disabled_opacity).disabled(true);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 mod parts;

@@ -64,7 +64,7 @@ pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvi
             .hover(move |s| s.bg(hover_fill).text_color(hover_text));
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

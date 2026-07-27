@@ -281,7 +281,7 @@ pub fn js_page_header_with_slots(
         }
     }
 
-    outer
+    crate::aria::with_aria_label(outer, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

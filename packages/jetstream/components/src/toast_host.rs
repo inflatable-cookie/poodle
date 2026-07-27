@@ -56,7 +56,7 @@ pub fn js_toast_host(
     let inner = js_toast_stack(stack_spec, theme);
     container = container.child(inner);
 
-    container
+    crate::aria::with_aria_label(container, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

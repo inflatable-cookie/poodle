@@ -18,10 +18,11 @@ pub fn js_icon(spec: &IconSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Use the engine's SVG icon constructor. The icon name maps to
     // `{icon_base_path}/{name}.svg` and is rasterized at the requested size.
     // `text_color` from the parent is inherited for tinting.
-    ui_element::icon(&spec.name)
+    let root = ui_element::icon(&spec.name)
         .w(size)
         .h(size)
         .flex_row()
         .items_center()
-        .justify_center()
+        .justify_center();
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }

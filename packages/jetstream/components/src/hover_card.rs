@@ -59,7 +59,7 @@ pub fn js_hover_card(
         el = el.child(c);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

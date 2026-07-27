@@ -70,7 +70,7 @@ pub fn js_toolbar(spec: &ToolbarSpec, theme: &JetstreamThemeProvider, children: 
         el = el.child(child);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

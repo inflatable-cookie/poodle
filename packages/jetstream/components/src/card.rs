@@ -123,7 +123,7 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
         el = el.child(child);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

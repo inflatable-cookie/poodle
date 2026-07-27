@@ -233,7 +233,7 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     root = root.child(scroll);
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

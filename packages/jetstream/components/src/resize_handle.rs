@@ -80,7 +80,7 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
         el = el.opacity(opacity).cursor_default();
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

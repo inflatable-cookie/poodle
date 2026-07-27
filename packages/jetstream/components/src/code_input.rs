@@ -151,7 +151,7 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
         root = root.opacity(opacity).disabled(true);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

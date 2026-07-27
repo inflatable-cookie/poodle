@@ -155,7 +155,7 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.opacity(opacity);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

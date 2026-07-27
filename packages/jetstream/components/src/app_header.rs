@@ -155,7 +155,7 @@ pub fn js_app_header_with_slots(
         );
     }
 
-    header
+    crate::aria::with_aria_label(header, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

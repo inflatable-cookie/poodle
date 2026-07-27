@@ -121,14 +121,15 @@ pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let mut rows: Vec<JsEl> = Vec::new();
     push_rows(&mut rows, spec, &m, theme, &spec.nodes, 0);
 
-    ui_element::div()
+    let root = ui_element::div()
         .flex_col()
         .min_w_0()
         .pt(pad_y)
         .pb(pad_y)
         .pl(rem_to_px(0.25))
         .pr(rem_to_px(0.25))
-        .children(rows)
+        .children(rows);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Append the visible rows for `nodes` at `depth`, recursing into expanded branches.

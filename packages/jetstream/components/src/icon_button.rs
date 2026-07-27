@@ -179,7 +179,7 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
             .active(move |s| s.bg(active_fill));
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

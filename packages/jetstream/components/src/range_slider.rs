@@ -192,7 +192,7 @@ pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -
         el = el.opacity(opacity).disabled(true);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

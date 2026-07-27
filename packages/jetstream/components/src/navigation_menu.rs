@@ -198,7 +198,7 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
         root = root.child(viewport);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

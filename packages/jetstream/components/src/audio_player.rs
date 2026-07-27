@@ -156,7 +156,7 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
         );
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

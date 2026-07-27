@@ -235,7 +235,7 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

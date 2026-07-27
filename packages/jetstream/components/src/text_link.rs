@@ -28,7 +28,7 @@ pub fn js_text_link(spec: &TextLinkSpec, theme: &JetstreamThemeProvider) -> JsEl
         el = el.opacity(opacity);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

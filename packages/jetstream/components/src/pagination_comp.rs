@@ -255,7 +255,8 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     }
 
     wrapper = wrapper.child(controls);
-    root.child(wrapper)
+    let root = root.child(wrapper);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────────

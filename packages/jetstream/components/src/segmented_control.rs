@@ -105,7 +105,7 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
     // NOTE: click + arrow-key selection live in the preview event loop, not the
     // component (Jetstream architecture). This renders selected state from
     // `current_value()` only.
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

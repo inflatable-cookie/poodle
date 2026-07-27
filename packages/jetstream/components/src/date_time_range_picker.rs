@@ -202,7 +202,7 @@ pub fn js_date_time_range_picker(
         root = root.opacity(opacity).disabled(true);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

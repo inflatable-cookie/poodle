@@ -145,7 +145,7 @@ pub fn js_detail_shell(
         shell = shell.child(region);
     }
 
-    shell
+    crate::aria::with_aria_label(shell, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

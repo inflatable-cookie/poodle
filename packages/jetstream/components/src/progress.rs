@@ -50,7 +50,7 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
     let track_height = rem_to_px(ProgressSpec::min_height_rem(effective_size));
 
     // Contract: indicator fills from left based on progress.
-    match spec.normalized_progress() {
+    let root = match spec.normalized_progress() {
         Some(frac) => {
             // Determinate: the runtime ProgressBar widget fills `frac` of the
             // track proportionally (JsEl has no percentage child sizing). `bg`
@@ -91,7 +91,8 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
                 .child(bar)
                 .child(spacer)
         }
-    }
+    };
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Indeterminate bar width as a fraction of the track. Contract §8

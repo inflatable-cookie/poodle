@@ -127,7 +127,7 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
         root = root.opacity(opacity);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

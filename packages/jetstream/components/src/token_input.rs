@@ -137,7 +137,7 @@ pub fn js_token_input(spec: &TokenInputSpec, theme: &JetstreamThemeProvider) -> 
     if spec.disabled {
         el = el.opacity(resolve_opacity(theme, "state.opacity.disabled"));
     }
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 /// Token pills track the field size so they remain visually secondary.

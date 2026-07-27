@@ -148,7 +148,7 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.focusable();
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

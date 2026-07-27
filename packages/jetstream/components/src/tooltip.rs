@@ -85,7 +85,7 @@ pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 .text_size(font_size),
         );
     bubble.style.shadow = Some(overlay_shadow);
-    bubble
+    crate::aria::with_aria_label(bubble, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

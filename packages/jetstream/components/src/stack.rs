@@ -54,7 +54,7 @@ pub fn js_stack(spec: &StackSpec, theme: &JetstreamThemeProvider, children: Vec<
         el = el.child(child);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

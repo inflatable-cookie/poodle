@@ -231,7 +231,7 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
         root = root.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
     }
 
-    root
+    crate::aria::with_aria_label(root, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

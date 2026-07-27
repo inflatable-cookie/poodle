@@ -52,12 +52,13 @@ pub fn js_meter(spec: &MeterSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // The ProgressBar widget draws a proportional fill of `fraction` over a
     // parent-owned (stretched) track. Width is owned by the parent (contract
     // §7: width 100%), not a hardcoded absolute.
-    ui_element::progress(fraction)
+    let root = ui_element::progress(fraction)
         .w_full()
         .min_h(track_height)
         .self_stretch()
         .rounded(radius)
-        .bg(track_bg)
+        .bg(track_bg);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Ring shape. Contract §12 accepted delta: Jetstream has no conic gradient or

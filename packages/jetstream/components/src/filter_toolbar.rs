@@ -140,7 +140,7 @@ pub fn js_filter_toolbar(
         toolbar = toolbar.child(secondary_el);
     }
 
-    toolbar
+    crate::aria::with_aria_label(toolbar, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

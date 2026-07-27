@@ -34,6 +34,7 @@
 //! let el = js_button(&ButtonSpec::new().with_label("Save"), &theme);
 //! ```
 
+pub mod aria;
 pub mod presentation;
 pub mod render_probe;
 pub mod theme_ext;

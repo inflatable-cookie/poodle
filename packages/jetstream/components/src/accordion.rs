@@ -52,7 +52,7 @@ pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsE
         root = root.child(render_item(spec, item, is_expanded, effective_size, spec.density, theme));
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 fn render_item(

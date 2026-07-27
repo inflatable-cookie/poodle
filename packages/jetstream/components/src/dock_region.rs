@@ -245,7 +245,7 @@ pub fn js_dock_region(
         el = el.child(drop_zone());
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

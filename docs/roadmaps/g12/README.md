@@ -66,12 +66,16 @@ Runway:
   offscreen render landed and settled the question: 90s and zero flake, against
   20min and ~3% for window capture. **Complete.**
 - `015-native-accessibility-options.md` — `003-native-accessibility.md`
-  recorded that neither runtime exposes an accessibility API; this costs the
-  way out per engine. The two are not in the same position: gpui 0.2.2 is the
-  latest published version and has nothing, while Jetstream runs winit 0.30
-  against a version-compatible `accesskit_winit`, over a `UiTree` that already
-  carries bounds, roles and parent/child links. GPUI waits on upstream;
-  Jetstream is an unmade decision. **Assessed, not built.**
+  recorded that neither runtime exposes an accessibility API; this costed the
+  way out per engine and then built the half that was tractable. The two were
+  never in the same position: gpui 0.2.2 is the latest published version and
+  has nothing, while Jetstream ran winit 0.30 against a version-compatible
+  `accesskit_winit`, over a `UiTree` that already carried bounds, roles and
+  parent/child links. **Jetstream now has a live AccessKit surface** — tree
+  projection, adapter, and actions routed through the same handlers as pointer
+  input — with 108 Poodle components attaching their `aria_label` to it. GPUI
+  still waits on upstream, because the work it needs is the work upstream would
+  obsolete. **Complete for Jetstream; GPUI held deliberately.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -80,11 +84,16 @@ Runway:
 
 ## Next Task
 
-`g12.015` assessed native accessibility and stopped there deliberately: the
-Jetstream half is a proposal to make to the engine repo, not a change to land
-here. Open for this generation:
+`g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
+for this generation:
 
-- **Decide the Jetstream accessibility question.** `015` says what it costs.
+- **Accessibility breadth on Jetstream.** Names are swept across every
+  component; roles, checked/expanded state and values are attached only where a
+  component sets them explicitly, so a checkbox built from panels still reports
+  `GenericContainer`. The capability is there — this is per-component work
+  against each contract.
+- **Nobody has run a screen reader against it.** The tree is proven by test up
+  to the AccessKit boundary and no further.
 - **Both visual gates cover one axis only** (`eclipse-compact-sm`).
 - **GPUI baselines are display-dependent.** A capture taken on a 1x display is
   1348x1478 where the 2x baseline is 2696x2396, so every baseline fails on size

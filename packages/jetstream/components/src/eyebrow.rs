@@ -31,7 +31,7 @@ pub fn js_eyebrow(spec: &EyebrowSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.mb(rem_to_px(mb));
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

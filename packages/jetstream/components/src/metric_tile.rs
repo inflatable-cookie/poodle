@@ -147,7 +147,7 @@ pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> 
         el = el.child(trend_row);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -230,7 +230,7 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
             .child(char_count_row);
     }
 
-    input_row
+    crate::aria::with_aria_label(input_row, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

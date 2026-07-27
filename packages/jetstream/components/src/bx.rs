@@ -91,7 +91,7 @@ pub fn js_box(spec: &BoxSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl
         el = el.child(child);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

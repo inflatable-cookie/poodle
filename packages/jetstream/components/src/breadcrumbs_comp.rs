@@ -64,7 +64,7 @@ pub fn js_breadcrumbs(spec: &BreadcrumbsSpec, theme: &JetstreamThemeProvider) ->
         );
     }
 
-    el
+    crate::aria::with_aria_label(el, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

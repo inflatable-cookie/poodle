@@ -157,7 +157,7 @@ pub fn js_table(spec: &TableSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
     }
 
-    shell
+    crate::aria::with_aria_label(shell, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

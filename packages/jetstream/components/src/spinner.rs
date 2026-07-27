@@ -31,10 +31,11 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> JsEl {
         SpinnerTone::Muted => resolve_color(theme, "color.text.secondary").into(),
     };
 
-    match spec.variant {
+    let root = match spec.variant {
         SpinnerVariant::Ring => build_ring(spec, tone_color),
         SpinnerVariant::Grid => build_grid(spec, tone_color),
-    }
+    };
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Ring variant: circular spinner with rotating border.

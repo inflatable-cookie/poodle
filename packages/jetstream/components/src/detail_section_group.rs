@@ -21,7 +21,7 @@ pub fn js_detail_section_group(
 ) -> JsEl {
     let gap = rem_to_px(spec.gap_rem());
 
-    match spec.layout {
+    let root = match spec.layout {
         DetailSectionGroupLayout::Stack => {
             // Single vertical column regardless of available width.
             let mut root = ui_element::div().flex_col().gap(gap);
@@ -47,7 +47,8 @@ pub fn js_detail_section_group(
             }
             root
         }
-    }
+    };
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -159,7 +159,7 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
         el = el.opacity(disabled_opacity);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

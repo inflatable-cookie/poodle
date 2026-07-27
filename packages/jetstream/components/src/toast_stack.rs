@@ -185,7 +185,7 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
         el = el.child(toast_el);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 /// One-shot enter animation: fade in + rise 0.5rem, ease-out. Mirrors the

@@ -178,7 +178,7 @@ pub fn js_theme_select(spec: &ThemeSelectSpec, theme: &JetstreamThemeProvider) -
         root = root.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
     }
 
-    root
+    crate::aria::with_aria_label(root, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

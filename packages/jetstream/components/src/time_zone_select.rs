@@ -21,7 +21,8 @@ pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProv
     // (searchable always on, timezone empty message, mapped option list,
     // placeholder + value + size/density forwarded) and delegate.
     let select_spec = spec.to_select_spec();
-    js_select(&select_spec, theme)
+    let root = js_select(&select_spec, theme);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

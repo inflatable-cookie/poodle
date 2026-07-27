@@ -667,6 +667,18 @@ impl PreviewState {
             self.scroll_suppress_frames -= 1;
         }
 
+        // Requests from assistive technology run through the same handlers as
+        // pointer input, so activating a button by screen reader does exactly
+        // what clicking it does.
+        for event in &frame.events {
+            if let jetstream_platform::PlatformEvent::AccessibilityAction(request) = event {
+                let mut ui_events = Vec::new();
+                if self.game_ui.handle_accessibility_action(request, &mut ui_events) {
+                    self.app.dirty = true;
+                }
+            }
+        }
+
         // Rebuild if state changed
         if self.app.dirty {
             self.rebuild_shell();
@@ -694,6 +706,16 @@ impl PreviewState {
         if self.text_cache_dirty {
             self.rebuild_text_cache();
             self.text_cache_dirty = false;
+        }
+
+        // ── Accessibility ──
+        //
+        // Published every frame rather than only on `dirty`: focus and hover
+        // move the tree without rebuilding the shell, and a screen reader that
+        // attaches mid-session needs the current screen, not the one that was
+        // showing when something last changed.
+        if let Some(update) = self.game_ui.accessibility_update() {
+            frame.update_accessibility(update);
         }
 
         // ── Render ──
@@ -1456,7 +1478,10 @@ impl PreviewState {
 
         match receiver.recv() {
             Ok(Ok(())) => {
-                let data = slice.get_mapped_range();
+                // wgpu 30 made this fallible; `snap.rs` was updated at the
+                // version bump and this call site was missed, so the preview
+                // binary has not compiled since.
+                let data = slice.get_mapped_range().expect("map readback buffer");
                 let mut rgba_data = Vec::with_capacity((width * height * 4) as usize);
 
                 let is_bgra = matches!(

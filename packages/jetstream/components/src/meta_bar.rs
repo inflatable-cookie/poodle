@@ -32,11 +32,12 @@ const SEPARATOR_DOT_MIX: f32 = 0.72;
 ///   └── [Dot]   0.25rem pill-radius dot (when show_separators, idx > 0, opt-in)
 /// ```
 pub fn js_meta_bar(spec: &MetaBarSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
-    js_meta_bar_sep(
+    let root = js_meta_bar_sep(
         spec,
         theme,
         children.into_iter().map(|c| (c, true)).collect(),
-    )
+    );
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Build a MetaBar from children paired with their `data-separator` intent.
@@ -86,7 +87,8 @@ pub fn js_meta_bar_sep(
         );
     }
 
-    row
+    let root = row;
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

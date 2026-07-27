@@ -408,7 +408,7 @@ pub fn js_list_card_with_slots(
         let _ = focus_ring; // surfaced for the preview focus layer; see NOTE.
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

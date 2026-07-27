@@ -375,7 +375,7 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
         root = root.opacity(resolve_opacity(theme, "state.opacity.disabled"));
     }
 
-    root
+    crate::aria::with_aria_label(root, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

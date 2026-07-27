@@ -27,12 +27,13 @@ pub fn js_time_ago(spec: &TimeAgoSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let label = ui_element::label(display).text_color(text_color);
 
-    if spec.inherits_typography() {
+    let root = if spec.inherits_typography() {
         label
     } else {
         // Contract §8: font-size = typography.body.size. Token-resolved.
         label.text_size(resolve_px(theme, spec.font_size_token()))
-    }
+    };
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 // ── Relative-time computation ─────────────────────────────────────────

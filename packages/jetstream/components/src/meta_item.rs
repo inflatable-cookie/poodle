@@ -66,7 +66,7 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
             .child(value_el)
     );
 
-    row
+    crate::aria::with_aria_label(row, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

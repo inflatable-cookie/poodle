@@ -124,11 +124,12 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     );
 
     // Relative wrapper so the absolute panel is positioned relative to the trigger
-    ui_element::div()
+    let root = ui_element::div()
         .flex_col()
         .relative()
         .child(trigger)
-        .child(panel)
+        .child(panel);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 // ── Trigger builder ──────────────────────────────────────────────────────────

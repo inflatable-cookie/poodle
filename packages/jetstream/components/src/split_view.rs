@@ -179,7 +179,7 @@ pub fn js_split_view(
     el = el.child(divider);
     el = el.child(secondary_pane);
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

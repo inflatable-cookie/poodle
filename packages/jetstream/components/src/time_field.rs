@@ -95,7 +95,7 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> Js
         el = el.opacity(opacity).disabled(true);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

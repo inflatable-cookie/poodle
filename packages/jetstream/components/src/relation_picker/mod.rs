@@ -193,7 +193,7 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
         None
     };
 
-    js_picker_shell(
+    let root = js_picker_shell(
         &spec.as_picker_shell(),
         theme,
         Some(search),
@@ -201,7 +201,8 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
         body,
         None,
         footer,
-    )
+    );
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[allow(clippy::too_many_arguments)]

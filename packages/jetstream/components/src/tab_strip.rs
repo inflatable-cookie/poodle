@@ -140,7 +140,7 @@ pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> JsEl
         strip = strip.child(tab);
     }
 
-    strip
+    crate::aria::with_aria_label(strip, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

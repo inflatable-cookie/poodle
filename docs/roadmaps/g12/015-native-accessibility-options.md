@@ -1,8 +1,9 @@
-# g12.015 — Native Accessibility: Options Assessment
+# g12.015 — Native Accessibility: Options, Then The Jetstream Build
 
-**Status: assessed, not built.** `003-native-accessibility.md` recorded the
-fact — neither native runtime exposes an accessibility API. This card answers
-the next question: *what would it take, per engine?*
+**Status: assessed, and the Jetstream half built.** `003-native-accessibility.md`
+recorded the fact — neither native runtime exposed an accessibility API. This
+card answered the next question, *what would it take, per engine?*, and then
+acted on the answer: Jetstream now has one.
 
 The previous document's advice was "do not schedule native accessibility work."
 That was right for GPUI and **too broad for Jetstream**. The difference is now
@@ -89,22 +90,81 @@ Options, ranked:
 but because the work it requires is precisely the work upstream would obsolete,
 and it would be macOS-only in the meantime.
 
-## Recommendation
+## The Decision
 
-- **Jetstream: propose it to the engine.** Roles, bounds and the tree are
-  already there; the adapter is compatible now. The Poodle-side half is adding
-  an accessible-name field to `JsEl` and populating it — worth doing *when* the
-  engine side is agreed, and not before, since a field with no sink is the
-  inert-`aria_label` situation moved one layer down.
-- **GPUI: hold, and watch the dependency.** Re-check on every gpui release.
-  This is the one upstream event that changes the answer.
-- **`003-native-accessibility.md` stands**, with its planning advice narrowed:
-  the blanket "do not schedule native accessibility work" applies to GPUI. For
-  Jetstream the blocker is a decision no one has taken yet.
+Put to the user with the costs above; the answer was to build it. So the
+recommendation that stood at assessment time — *propose it, do the Poodle half
+only once the engine half is agreed* — was overtaken in the same sitting, and
+both halves landed together. That ordering was the point of the caveat rather
+than a change of mind: a `JsEl` field with no sink would have been the inert
+`aria_label` moved one layer down.
+
+**GPUI: hold, and watch the dependency.** Re-check on every gpui release. That
+is the one upstream event that changes the answer.
+
+## What Shipped For Jetstream
+
+The assessment said the parts were already there. They were, and the estimate
+held: the engine work is one module per crate.
+
+**`jetstream-ui/src/accessibility.rs`** (sibling repo, commit `7e997892`) —
+`Accessibility` on `NodeStyle` (label, role override, description, toggled,
+expanded, selected, level, required, numeric value, hidden) plus `tree_update`,
+which walks the live `UiTree` into an `accesskit::TreeUpdate`. Pure: no window,
+no adapter, so it is tested headlessly.
+
+Three things there were easy to get quietly wrong, and each has a test:
+
+- **Recycled slots.** `UiNodeId` is `{index, generation}` and both go into the
+  AccessKit id. Index alone would alias a reused slot onto the node that used to
+  live there, and AccessKit caches by id.
+- **Hidden nodes.** A node dropped from the tree must also leave its parent's
+  child list, or AccessKit rejects the update for referencing a node that is not
+  in it.
+- **Dangling focus.** The focused node must be reported with *every* update and
+  must exist; one that has since been hidden falls back to the window.
+
+A synthetic `WINDOW_ID` node parents the UI root, because AccessKit wants the
+root to be the window and making the UI's own root `Role::Window` would let a
+role override break the tree.
+
+**`jetstream-platform/src/accessibility.rs`** — owns the `accesskit_winit`
+adapter. Two constraints shaped it. The adapter must be attached *before* the
+window is first shown, so the window is now created hidden and shown once the
+adapter exists. And AccessKit calls back on threads and at times of its own
+choosing, including asking for a full tree before the first frame — so the most
+recent update is retained and handed straight back, rather than made to wait for
+a frame boundary.
+
+Actions go the other way and are **queued, not handled inline**: a request
+arriving on an arbitrary thread must not reach into the tree while the frame
+callback owns it. They drain into the normal event stream as
+`PlatformEvent::AccessibilityAction`, and `GameUi::handle_accessibility_action`
+routes them through the same paths as pointer input — so a screen reader
+activating a button runs that button's `on_click`. That is a test, not a claim.
+
+**Poodle side** — `packages/jetstream/components/src/aria.rs` and a sweep of
+**108 component files**, each attaching its spec's `aria_label` to its root. The
+rule is one place per component: a component that composes another forwards the
+spec instead, or the name is announced twice.
+
+The end-to-end test is the one that matters, because every link in the chain
+existed before except the last two: `ButtonSpec::with_aria_label` → `js_button`
+→ materialized `UiTree` → the AccessKit tree, asserting the label is in the
+nodes a screen reader would read.
+
+The preview publishes its tree every frame rather than only when the shell is
+dirty — focus and hover move the tree without a rebuild, and a screen reader
+attaching mid-session needs the current screen.
 
 ## Not Done
 
-Nothing was built. No `JsEl` field was added, no adapter wired, no engine
-proposal filed. This card is the assessment that was asked for, and the point of
-writing it down is that the next person does not have to re-derive which of the
-two engines is actually blocked.
+- **Breadth, not capability.** The sweep attaches accessible *names*
+  everywhere. Roles, checked/expanded state and values are attached only where a
+  component sets them explicitly, so a checkbox drawn out of panels still
+  reports `GenericContainer` unless it says otherwise. Everything needed to fix
+  that is in place; it is per-component work against each contract.
+- **Not verified with a real screen reader.** The tree is proven by test up to
+  the AccessKit boundary. Whether VoiceOver announces it sensibly is a different
+  question and has not been checked.
+- **GPUI is untouched**, per the recommendation above.

@@ -300,7 +300,7 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
         root = ui_element::div().flex_col().child(root).child(menu);
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

@@ -219,7 +219,7 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
         root = root.hover(move |s| s.bg(bg));
     }
 
-    root
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 /// Parse a duration string "HH:MM:SS" or "HH:MM" into display strings.

@@ -199,7 +199,7 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
     controls = controls.child(bar);
     el = el.child(controls);
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

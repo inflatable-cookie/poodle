@@ -161,7 +161,7 @@ pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
         let _ = focus_ring;
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

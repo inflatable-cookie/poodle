@@ -147,7 +147,8 @@ pub fn js_drawer_with_actions(
         DrawerEdge::Top => ui_element::div().bg(backdrop).overlay().flex_col().justify_start(),
     };
 
-    overlay.child(panel)
+    let root = overlay.child(panel);
+    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

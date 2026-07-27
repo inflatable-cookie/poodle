@@ -300,7 +300,7 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
         root = root.opacity(disabled_opacity);
     }
 
-    root
+    crate::aria::with_aria_label(root, Some(spec.aria_label.as_str()))
 }
 
 #[cfg(test)]

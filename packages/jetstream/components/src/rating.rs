@@ -100,7 +100,7 @@ pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.opacity(opacity);
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]

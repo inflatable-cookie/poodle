@@ -145,7 +145,7 @@ pub fn js_detail_item_with_slots(
         );
     }
 
-    el
+    crate::aria::with_aria_label(el, spec.aria_label.as_deref())
 }
 
 #[cfg(test)]
