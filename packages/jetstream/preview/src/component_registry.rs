@@ -65,6 +65,7 @@ pub static ALL_COMPONENTS: &[ComponentEntry] = &[
     ComponentEntry { slug: "radio-group", display_name: "RadioGroup", description: "Single-selection option group.", tag: ComponentTag::Control, has_specimen: true },
     ComponentEntry { slug: "segmented-control", display_name: "SegmentedControl", description: "Inline toggle between mutually exclusive options.", tag: ComponentTag::Control, has_specimen: true },
     ComponentEntry { slug: "split-button", display_name: "SplitButton", description: "Button with primary action and dropdown menu.", tag: ComponentTag::Control, has_specimen: true },
+    ComponentEntry { slug: "stepper", display_name: "Stepper", description: "Route through a multi-step process, with per-step status.", tag: ComponentTag::Navigation, has_specimen: true },
     ComponentEntry { slug: "switch", display_name: "Switch", description: "Toggle switch for on/off states.", tag: ComponentTag::Control, has_specimen: true },
     ComponentEntry { slug: "toggle-group", display_name: "ToggleGroup", description: "Group of mutually exclusive toggle buttons.", tag: ComponentTag::Control, has_specimen: true },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch for on/off/indeterminate.", tag: ComponentTag::Control, has_specimen: true },

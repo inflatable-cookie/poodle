@@ -127,6 +127,7 @@ pub mod stack;
 pub mod state_tile;
 pub mod status_indicator;
 pub mod surface;
+pub mod stepper;
 pub mod switch;
 pub mod tab_strip;
 pub mod table;
@@ -445,6 +446,7 @@ pub fn render_specimen(
         "state-tile" => Some(state_tile::render(theme)),
         "status-indicator" => Some(status_indicator::render(theme)),
         "surface" => Some(surface::render(theme)),
+        "stepper" => Some(stepper::render(theme)),
         "switch" => Some(switch::render(theme)),
         "tab-strip" => Some(tab_strip::render(theme)),
         "table" => Some(table::render(theme)),

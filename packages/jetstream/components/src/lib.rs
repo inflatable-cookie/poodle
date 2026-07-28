@@ -49,6 +49,7 @@ pub mod progress;
 pub mod separator;
 pub mod spinner;
 pub mod status_indicator;
+pub mod stepper;
 pub mod switch;
 
 // Structural primitives (g10.003)
