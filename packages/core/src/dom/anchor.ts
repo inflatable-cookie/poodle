@@ -260,6 +260,42 @@ export function observeAnchorMovement(
  * token inheritance intact — an overlay under a bare `<body>` would resolve
  * against whatever theme the document root happens to carry.
  */
+/**
+ * The z-index an anchored surface needs to clear whatever it was opened from.
+ *
+ * Portalling to the theme root fixes clipping but creates a layering problem:
+ * the surface leaves the subtree it belongs to, so a popover opened *inside* a
+ * dialog is no longer a descendant of it and has only its own token to argue
+ * with. `overlay.z.menu` is 400 and `overlay.z.dialog` is 800, so the popover
+ * renders behind the dialog it came from — useless, and exactly the report.
+ *
+ * Raising the menu token above the dialog token would only move the bug: a
+ * page-level menu would then float over an unrelated modal.
+ *
+ * So the layer is read from the DOM at the moment of opening. The trigger is
+ * still inside the dialog, so walking its ancestors finds the dialog's stacking
+ * context and its z-index; the surface takes one above the highest it finds.
+ * That composes to any depth — a popover in a dialog in a drawer — without any
+ * context plumbing, and leaves a surface opened from ordinary page content on
+ * its own token.
+ */
+export function resolveLayerZIndex(origin: Element | null, ownZIndex: number): number {
+  let highest = 0;
+  let node: Element | null = origin;
+
+  while (node && node !== document.body) {
+    const value = Number.parseInt(getComputedStyle(node).zIndex, 10);
+    // `auto` parses to NaN, which is the common case and means the element
+    // creates no stacking context of its own.
+    if (Number.isFinite(value) && value > highest) {
+      highest = value;
+    }
+    node = node.parentElement;
+  }
+
+  return highest >= ownZIndex ? highest + 1 : ownZIndex;
+}
+
 export function resolvePortalTarget(origin: Element | null): HTMLElement {
   const parent = origin?.parentElement ?? null;
   const explicit = parent?.closest("[data-poodle-theme-root]") as HTMLElement | null;

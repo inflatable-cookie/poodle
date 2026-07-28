@@ -79,6 +79,7 @@ export {
   observeAnchorMovement,
   pointAnchor,
   resolveClipRect,
+  resolveLayerZIndex,
   resolvePortalTarget,
   viewportClipRect,
   type AnchorObservation,

@@ -17,6 +17,7 @@ import {
   observeAnchorMovement,
   resolveClipRect,
   resolveOverlayPosition,
+  resolveLayerZIndex,
   resolvePortalTarget,
   type AnchorTarget,
 } from "@poodle/headless";
@@ -97,6 +98,19 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
       },
       [forwardedRef],
     );
+
+    // Read the layer from the trigger, which is still inside whatever opened
+    // this surface. Portalling to the theme root escapes clipping ancestors but
+    // also leaves the dialog's stacking context, so a popover opened from a
+    // modal would otherwise argue its own token (menu, 400) against the
+    // dialog's (800) and lose. See resolveLayerZIndex.
+    useLayoutEffect(() => {
+      if (!anchor || !surface) return;
+      const own = Number.parseInt(getComputedStyle(surface).zIndex, 10);
+      surface.style.zIndex = String(
+        resolveLayerZIndex(anchorElement(anchor), Number.isFinite(own) ? own : 0),
+      );
+    }, [anchor, surface]);
 
     useLayoutEffect(() => {
       if (!anchor || !surface) return;

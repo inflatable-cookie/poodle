@@ -6,6 +6,7 @@ import {
   observeAnchorMovement,
   resolveClipRect,
   resolveOverlayPosition,
+  resolveLayerZIndex,
   resolvePortalTarget,
   type AnchorTarget,
 } from "@poodle/headless";
@@ -133,8 +134,17 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
       return;
     }
 
-    target = resolvePortalTarget(anchorElement(current.anchor) ?? node);
+    const origin = anchorElement(current.anchor) ?? node;
+    target = resolvePortalTarget(origin);
     node.dataset.poodleAnchored = "true";
+
+    // Read the layer *before* moving the node: the trigger is still inside
+    // whatever opened it, so its ancestors carry the stacking context this
+    // surface has to clear. Once portalled, that information is gone.
+    const own = Number.parseInt(getComputedStyle(node).zIndex, 10);
+    const layered = resolveLayerZIndex(origin, Number.isFinite(own) ? own : 0);
+    node.style.zIndex = String(layered);
+
     target.appendChild(node);
 
     reposition();

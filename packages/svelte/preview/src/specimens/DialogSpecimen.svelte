@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface } from "@poodle/svelte";
+  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface, Popover } from "@poodle/svelte";
 
   let basicOpen = false;
   let formOpen = false;
@@ -9,10 +9,20 @@
   let wideOpen = false;
   let scrollableOpen = false;
   let widthOpenMap: Record<string, boolean> = {};
+  let overlayInDialogOpen = $state(false);
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
   <div class="poodle-specimen">
+    <div class="poodle-specimen__row">
+      <!-- The combination nothing covered: an anchored surface opened from
+           inside a modal. The popover portals to the theme root, leaving the
+           dialog's stacking context, so it has to be lifted above it or it
+           renders behind the thing that opened it. -->
+      <Eyebrow>Popover inside a dialog</Eyebrow>
+      <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
+    </div>
+
     <div class="poodle-specimen__row">
       <Eyebrow>Informational</Eyebrow>
       <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
@@ -282,3 +292,17 @@
   .poodle-log-entry__time { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.75rem; min-width: 3rem; }
   .poodle-log-entry__message { font-size: 0.8125rem; }
 </style>
+
+<Dialog bind:open={overlayInDialogOpen} title="Settings" showCloseButton>
+  <Field label="Model">
+    <Popover ariaLabel="Model settings">
+      {#snippet trigger()}
+        <Button variant="secondary">Opus 5 · Medium</Button>
+      {/snippet}
+      <div style="display:flex;flex-direction:column;gap:0.25rem;min-width:14rem;">
+        <strong>Opus 5</strong>
+        <span>Reasoning depth. Higher costs more time and tokens.</span>
+      </div>
+    </Popover>
+  </Field>
+</Dialog>

@@ -100,3 +100,31 @@ A component with an anchored surface asserts, in both frameworks:
 Because the surface leaves the container, tests reach it through the trigger's
 `aria-controls` rather than a container query — which also keeps concurrently
 rendered instances apart.
+
+## Layering: Escaping A Clipping Ancestor Costs You The Stacking Context
+
+Portalling to the theme root is what stops a scrolling or transformed ancestor
+clipping a surface. It also takes the surface *out of* whatever opened it, and
+that has a price nobody paid until a popover was opened from inside a dialog:
+
+- `overlay.z.menu` is **400**, `overlay.z.dialog` is **800**
+- portalled to the same root, the popover is no longer a descendant of the
+  dialog, so nothing lifts it — it renders *behind* the modal that opened it,
+  visible through the scrim and impossible to click
+
+Raising the menu token above the dialog token only moves the bug: a page-level
+menu would then float over an unrelated modal.
+
+**So the layer is read from the DOM when the surface opens.** The trigger is
+still inside the dialog at that moment, so walking its ancestors finds the
+dialog's stacking context; `resolveLayerZIndex` returns one above the highest it
+finds, and the surface keeps its own token when nothing outranks it. That
+composes to any depth — a popover in a dialog in a drawer — with no context
+plumbing.
+
+Measured in a browser, on the shipped stylesheet: dialog `800`, popover `801`.
+With the lift removed, the popover reports `400`, which is the reported bug.
+
+**Every anchored surface must go through the primitive for this to hold.** A
+component that portals itself and sets its own `z-index` from a token will
+reproduce the bug exactly.
