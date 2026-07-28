@@ -133,6 +133,7 @@ impl IntoElement for Stepper {
 
         for (index, step) in self.spec.steps.iter().enumerate() {
             let is_current = current_value.as_deref() == Some(step.value.as_str());
+            let has_rerun = self.spec.show_rerun && step.status == StepStatus::Complete;
             let is_disabled = is_control_disabled || step.is_disabled;
 
             // Failed wins over current: a step that is both the one you are on
@@ -181,7 +182,8 @@ impl IntoElement for Stepper {
                 .items_center()
                 .gap(gap)
                 .min_h(row_height)
-                .px(pad_x)
+                .pl(pad_x)
+                .pr(if has_rerun { px(0.0) } else { pad_x })
                 .py(pad_y)
                 .text_color(text_color)
                 .text_size(font_size)
@@ -205,7 +207,7 @@ impl IntoElement for Stepper {
             let mut cell = div().flex().flex_1().min_w_0().child(trigger);
 
             // A separate control, outside the trigger — see the `on_rerun` note.
-            if self.spec.show_rerun && step.status == StepStatus::Complete {
+            if has_rerun {
                 let mut rerun = div()
                     .flex()
                     .items_center()
@@ -213,9 +215,14 @@ impl IntoElement for Stepper {
                     .flex_shrink_0()
                     .w(marker_size)
                     .h(marker_size)
+                    // Room on both sides — see the Jetstream note.
+                    .ml(gap)
                     .mr(pad_x)
                     .text_color(label_color)
-                    .text_size(marker_font_size)
+                    // The label size, not the marker size: marker glyphs sit
+                    // inside a bordered circle that gives them presence, and
+                    // this one does not.
+                    .text_size(font_size)
                     .child("⟳");
                 if is_disabled {
                     rerun = rerun.opacity(disabled_opacity);

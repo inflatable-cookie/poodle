@@ -8,7 +8,7 @@ use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::stepper::js_stepper;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, StepStatus, StepperSpec, StepperStep};
+use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -74,6 +74,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                         .with_value("categories")
                         .with_size(size)
                         .with_aria_label("Size ladder"),
+                    theme,
+                ));
+            }
+            column
+        }))
+        .child(group("Densities", secondary, {
+            let mut column = div().flex_col().gap(8.0);
+            for density in [ControlDensity::Compact, ControlDensity::Default, ControlDensity::Comfortable] {
+                column = column.child(js_stepper(
+                    &StepperSpec::new(wizard.clone())
+                        .with_value("categories")
+                        .with_density(density)
+                        .with_aria_label("Density ladder"),
                     theme,
                 ));
             }

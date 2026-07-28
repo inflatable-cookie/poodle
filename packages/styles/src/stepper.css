@@ -194,11 +194,22 @@
 
 /* Deliberately outside the trigger. Re-running a step spends whatever the step
    costs, so it cannot be something you do by clicking to look at it. */
+/* With a rerun beside it, the trigger's right padding and the rerun's left
+   margin would stack into an odd double gap. The trigger yields. */
+.poodle-stepper__step:has(.poodle-stepper__rerun) .poodle-stepper__trigger {
+  padding-right: 0;
+}
+
 .poodle-stepper__rerun {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   align-self: center;
+  /* Both sides: with only a right margin the icon sat hard against the
+     trigger's tinted edge, reading as part of it rather than as its own
+     control — which is the opposite of what a deliberate action should look
+     like. */
+  margin-left: var(--poodle-stepper-gap);
   margin-right: var(--poodle-stepper-pad-x);
   padding: 0.25rem;
   border: 0;

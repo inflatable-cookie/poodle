@@ -55,6 +55,7 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     for (index, step) in spec.steps.iter().enumerate() {
         let is_current = current.as_deref() == Some(step.value.as_str());
+        let has_rerun = spec.show_rerun && step.status == StepStatus::Complete;
         let is_disabled = spec.is_disabled || step.is_disabled;
 
         let marker_color = match step.status {
@@ -127,7 +128,7 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .min_w_0()
             .min_h(row_height)
             .pl(pad_x)
-            .pr(pad_x)
+            .pr(if has_rerun { 0.0 } else { pad_x })
             .pt(pad_y)
             .pb(pad_y)
             .bg(Color::TRANSPARENT)
@@ -162,12 +163,17 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
         // Deliberately outside the trigger: re-running spends whatever the step
         // costs, so it cannot be reachable by clicking to look at a finished
         // step. See `stepper.md` §2.
-        if spec.show_rerun && step.status == StepStatus::Complete {
+        if has_rerun {
             let mut rerun = ui_element::button("")
                 .aria_label(format!("{}: {}", spec.rerun_label, step.label))
                 .aria_role(jetstream_ui::accesskit::Role::Button)
                 .w(marker_size)
                 .h(marker_size)
+                // Room on both sides. With a right margin only, the icon sat
+                // hard against the trigger's tinted edge and read as part of
+                // it — the opposite of what a deliberate action should look
+                // like.
+                .ml(gap)
                 .mr(pad_x)
                 .flex_row()
                 .items_center()

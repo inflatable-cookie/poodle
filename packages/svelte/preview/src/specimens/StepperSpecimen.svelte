@@ -59,13 +59,15 @@
     <p>Last re-run: <strong>{lastRerun || "none"}</strong></p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    {#each ["xs", "sm", "md", "lg", "xl"] as const as size}
-      <Stepper steps={wizardSteps} {size} defaultValue="categories" ariaLabel={`Size ${size}`} />
-    {/each}
-  </SpecimenGroup>
-
   <SpecimenGroup label="Disabled">
     <Stepper steps={wizardSteps} disabled defaultValue="categories" ariaLabel="Disabled steps" />
   </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <Stepper steps={wizardSteps} {size} defaultValue="categories" ariaLabel={`${size} steps`} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <Stepper steps={wizardSteps} {density} defaultValue="categories" ariaLabel={`${density} steps`} />
+  {/snippet}
 </SpecimenLayout>
