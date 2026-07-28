@@ -407,7 +407,11 @@ impl IntoElement for Tree {
         let m = TreeMetrics {
             row_height: px(row_height),
             row_font: px(row_font),
-            twisty_size: px(row_font * 1.5),
+            // Zeroed on a flat tree so the gutter collapses at every render
+            // site from one decision. Contract §7: the twisty aligns leaf
+            // labels with branch labels, and where nothing can expand it
+            // aligns them with nothing.
+            twisty_size: px(if spec.is_flat() { 0.0 } else { row_font * 1.5 }),
             chevron_font: px(row_font * 0.85),
             icon_font: row_font,
             indent: px(indent),

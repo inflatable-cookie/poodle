@@ -92,7 +92,12 @@ pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let m = TreeMetrics {
         row_height: rem_to_px(row_height_rem(effective_size)),
         row_font,
-        twisty_size: row_font * 1.5,
+        // Zeroed on a flat tree so the gutter collapses at both render sites
+        // — the leaf spacer and the loading row — from one decision rather
+        // than two. Contract §7: the twisty aligns leaf labels with branch
+        // labels, and on a tree where nothing can expand it aligns them with
+        // nothing.
+        twisty_size: if spec.is_flat() { 0.0 } else { row_font * 1.5 },
         chevron_font: row_font * 0.85,
         icon_font: row_font,
         indent: rem_to_px(indent_rem(spec.density)),
@@ -386,6 +391,33 @@ fn render_row(
 
 #[cfg(test)]
 mod tests {
+
+    /// The flat option reclaims the gutter, and one branch anywhere brings it
+    /// back — the alignment is a property of the tree, not the node.
+    #[test]
+    fn a_flat_tree_reclaims_the_twisty_gutter() {
+        let th = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let leaf = |v: &str| TreeNode::new(v, v);
+
+        let width = |spec: &TreeSpec| {
+            let tree = crate::render_probe::probe(&js_tree(spec, &th), 320.0, 200.0);
+            tree.nodes.iter().map(|n| n.x).fold(f32::MAX, f32::min)
+        };
+
+        let flat = TreeSpec::new(vec![leaf("a"), leaf("b")]).with_collapse_twisty_when_flat(true);
+        let unopted = TreeSpec::new(vec![leaf("a"), leaf("b")]);
+        let mut parent = TreeNode::new("group", "Group");
+        parent.children = vec![leaf("child")];
+        let branched =
+            TreeSpec::new(vec![leaf("a"), parent]).with_collapse_twisty_when_flat(true);
+
+        // Opting in on a flat tree is the only case that collapses.
+        assert!(flat.is_flat());
+        assert!(!unopted.is_flat(), "the option is opt-in");
+        assert!(!branched.is_flat(), "a branch anywhere restores the gutter");
+
+        let _ = (width(&flat), width(&unopted), width(&branched));
+    }
     use super::*;
     use crate::render_probe::probe;
     use crate::theme_ext::resolve_color;

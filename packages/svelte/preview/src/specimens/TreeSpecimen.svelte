@@ -58,6 +58,22 @@
   let lazyExpanded = $state<string[]>([]);
   let lazyLoading = $state<string[]>([]);
 
+  // Figmatic's case: a Tree used to render a flat list, where the twisty
+  // gutter aligns labels with nothing.
+  const flatNodes: TreeNode[] = [
+    { value: "beige", label: "BeigeButtonShadow", icon: "monitor" },
+    { value: "c28", label: "Component28", icon: "monitor" },
+    { value: "home", label: "Home", icon: "monitor" },
+    { value: "line129", label: "Line129", icon: "monitor" },
+  ];
+
+  // The same list with one branch, which is what brings the gutter back.
+  const nearlyFlatNodes: TreeNode[] = [
+    ...flatNodes.slice(0, 2),
+    { value: "group", label: "A group", icon: "folder", children: [{ value: "child", label: "Nested", icon: "monitor" }] },
+    ...flatNodes.slice(2),
+  ];
+
   function findNode(list: TreeNode[], value: string): TreeNode | null {
     for (const node of list) {
       if (node.value === value) return node;
@@ -211,6 +227,14 @@
           bind:expandedValues={multiExpanded}
         />
       </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Flat list (collapseTwistyWhenFlat)">
+      <!-- Left: the gutter reclaimed, because nothing can expand.
+           Right: one branch added, so the spacer returns and labels line up
+           with the branch label again. Same prop on both. -->
+      <Tree nodes={flatNodes} collapseTwistyWhenFlat ariaLabel="Flat list" />
+      <Tree nodes={nearlyFlatNodes} collapseTwistyWhenFlat ariaLabel="Same list with a branch" />
     </SpecimenGroup>
 
     <SpecimenGroup label="No guides, no icons">

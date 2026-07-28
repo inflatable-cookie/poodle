@@ -42,6 +42,14 @@ export interface TreeProps {
   editingValue?: string | null;
   ariaLabel?: string | null;
   showGuides?: boolean;
+  /**
+   * Reclaim the twisty gutter when nothing in the tree can expand.
+   *
+   * Leaves render a twisty-sized spacer so their labels align with branch
+   * labels; in a genuinely flat tree that aligns them with nothing. Opt in and
+   * it collapses, returning the moment any node becomes a branch. tree.md §7.
+   */
+  collapseTwistyWhenFlat?: boolean;
   showIcons?: boolean;
   showCheckboxes?: boolean;
   reorderable?: boolean;
@@ -76,6 +84,7 @@ export function Tree({
   editingValue: editingValueProp,
   ariaLabel = null,
   showGuides = true,
+  collapseTwistyWhenFlat = false,
   showIcons = true,
   showCheckboxes = false,
   reorderable = false,
@@ -133,6 +142,12 @@ export function Tree({
       : (selectedValues.find((v) => visibleRows.some((r) => r.node.value === v)) ?? visibleRows[0]?.node.value ?? null);
 
   const virtualWindow = treeVirtualWindow(visibleRows.length, rowHeightPx, scrollTop, virtualHeight);
+
+  /** Whether any node in the whole tree can expand. */
+  const hasAnyBranch = (list: TreeNode[]): boolean =>
+    list.some((node) => isTreeBranch(node) || hasAnyBranch(node.children ?? []));
+  const isFlat = collapseTwistyWhenFlat && !hasAnyBranch(nodes);
+
   const windowRows = visibleRows.slice(virtualWindow.startIndex, virtualWindow.endIndex);
 
   // Seed rename draft + focus input whenever rename starts.
@@ -481,6 +496,7 @@ export function Tree({
       data-size={size ?? undefined}
       data-density={density ?? undefined}
       data-size-role={sizeRole}
+      data-flat={isFlat ? "true" : undefined}
       data-virtualized={virtualized ? "true" : undefined}
       style={virtualized ? { height: `${virtualHeight}px`, overflowY: "auto" } : undefined}
       onScroll={virtualized ? (event: UIEvent<HTMLDivElement>) => setScrollTop(event.currentTarget.scrollTop) : undefined}

@@ -96,6 +96,14 @@
     border-left-color: color-mix(in srgb, var(--poodle-color-border-subtle) 54%, transparent);
   }
 
+  /* Flat tree: nothing can expand, so the twisty gutter aligns leaf labels with
+     nothing and just leaves an empty column down the left. Reclaimed only when
+     the consumer opts in, and only while the tree really is flat — the moment a
+     node becomes a branch the spacer returns and alignment is right again. */
+  .poodle-tree[data-flat="true"] .poodle-tree__twisty {
+    display: none;
+  }
+
   .poodle-tree__twisty {
     flex: 0 0 auto;
     display: flex;

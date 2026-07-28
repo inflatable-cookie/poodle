@@ -100,6 +100,7 @@ Updated: 2026-07-25
 | `editingValue` | `string \| null` | `null` | no | Value of the node in inline-rename mode (swaps label for a text input) |
 | `ariaLabel` | `string \| null` | `null` | no | Accessible name for the tree region |
 | `showGuides` | `boolean` | `true` | no | Render vertical indentation guide lines |
+| `collapseTwistyWhenFlat` | `boolean` | `false` | no | Reclaim the twisty gutter while no node in the tree can expand; the spacer returns as soon as one can |
 | `showIcons` | `boolean` | `true` | no | Reserve and render the leading icon slot |
 | `showCheckboxes` | `boolean` | `false` | no | Render a leading cascade checkbox per row |
 | `reorderable` | `boolean` | `false` | no | Allow drag-and-drop + Alt+↑/↓ row reordering |
@@ -156,6 +157,7 @@ None.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | leaf | Node has no children and `isBranch` false | No chevron; twisty-sized spacer keeps labels aligned |
+| flat | `collapseTwistyWhenFlat` and no node anywhere is a branch | Twisty omitted entirely; labels align to the leading edge |
 | collapsed | Branch not in expanded set | Chevron points right; children not rendered; `aria-expanded="false"` |
 | expanded | Branch in expanded set | Chevron points down; child `group` rendered; `aria-expanded="true"` |
 | selected | `value` in `selectedValues` | Row shows accent fill, inset accent ring, text primary; `aria-selected="true"`, `data-selected` |
@@ -227,6 +229,22 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
   public accessibility API (no role/level/selected/checked tree), so the GPUI
   Tree conveys state visually only. This is a runtime limitation, not a design
   choice — see Known Deltas. Svelte emits the full ARIA tree.
+
+### The Twisty Gutter On A Flat Tree
+
+A leaf renders a twisty-sized spacer so its label lines up with branch labels.
+That is right whenever something in the tree can expand, and pointless when
+nothing can: a Tree used to present a flat list gets an empty column down its
+left, aligning labels with a chevron that will never appear.
+
+`collapseTwistyWhenFlat` reclaims it, and the condition is **the whole tree, not
+the node** — a single branch anywhere restores the spacer for every row, because
+the moment one label needs the gutter they all need it to stay aligned.
+
+It is opt-in rather than automatic. A tree whose nodes load asynchronously would
+otherwise shift its rows sideways the first time a branch arrives, and a caller
+that knows its data is flat is better placed to accept that than the component
+is to guess.
 
 ## 7. Layout
 

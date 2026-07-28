@@ -32,6 +32,16 @@
     editingValue?: string | null;
     ariaLabel?: string | null;
     showGuides?: boolean;
+    /**
+     * Reclaim the twisty gutter when nothing in the tree can expand.
+     *
+     * Leaves render a twisty-sized spacer so their labels align with branch
+     * labels. In a tree that is genuinely flat that spacer aligns them with
+     * nothing, leaving an empty column down the left. Opt in and it collapses —
+     * and comes back the moment any node becomes a branch, so the alignment is
+     * never wrong, only absent when it buys nothing. See tree.md §7.
+     */
+    collapseTwistyWhenFlat?: boolean;
     showIcons?: boolean;
     showCheckboxes?: boolean;
     reorderable?: boolean;
@@ -63,6 +73,7 @@
     editingValue = $bindable<string | null>(null),
     ariaLabel = null,
     showGuides = true,
+    collapseTwistyWhenFlat = false,
     showIcons = true,
     showCheckboxes = false,
     reorderable = false,
@@ -98,6 +109,12 @@
   function isSelected(value: string): boolean {
     return selectedValues.includes(value);
   }
+  /** Whether any node in the whole tree can expand. */
+  function hasAnyBranch(list: TreeNode[]): boolean {
+    return list.some((node) => isTreeBranch(node) || hasAnyBranch(node.children ?? []));
+  }
+  const isFlat = $derived(collapseTwistyWhenFlat && !hasAnyBranch(nodes));
+
   function isBranch(node: TreeNode): boolean {
     return isTreeBranch(node);
   }
@@ -417,6 +434,7 @@
   data-density={density ?? undefined}
   data-size-role={sizeRole}
   data-virtualized={virtualized ? "true" : undefined}
+  data-flat={isFlat ? "true" : undefined}
   style={virtualized ? `height:${virtualHeight}px;overflow-y:auto;` : undefined}
   onscroll={virtualized ? handleScroll : undefined}
 >

@@ -41,6 +41,11 @@ const specsDir = path.join(repoRoot, "packages/contracts/components/src");
  */
 const WEB_ONLY_PROPS = new Set([
   "as",
+  // Tree virtual scroll: the contract marks both **Svelte only** in its own
+  // props table. Surfaced the moment the gate learned to resolve module specs
+  // — `TreeSpec` lives in `tree/mod.rs` and had never been checked.
+  "virtualized",
+  "virtualHeight",
   "asRole",
   "autocapitalize",
   "autocorrect",
@@ -253,8 +258,16 @@ export function contractSpecDrift(): {
       continue;
     }
     const contractPath = path.join(contractsDir, `${entry.slug}.md`);
-    const specPath = path.join(specsDir, `${snake(entry.displayName)}.rs`);
-    if (!existsSync(contractPath) || !existsSync(specPath)) {
+    // A spec may be a single file or a module directory. Resolving only the
+    // flat form meant `TreeSpec` — which lives in `tree/mod.rs` — was skipped
+    // silently for as long as it has existed, so a Tree prop could be
+    // documented without ever reaching the spec and nothing would say so.
+    const specName = snake(entry.displayName);
+    const specPath = [
+      path.join(specsDir, `${specName}.rs`),
+      path.join(specsDir, specName, "mod.rs"),
+    ].find(existsSync);
+    if (!existsSync(contractPath) || specPath === undefined) {
       skipped++;
       continue;
     }

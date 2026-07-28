@@ -331,6 +331,14 @@ pub struct TreeSpec {
     /// Where the dragged node would land relative to the drop target.
     pub drop_position: DropPosition,
     pub aria_label: Option<String>,
+    /// Reclaim the twisty gutter while nothing in the tree can expand.
+    ///
+    /// A leaf renders a twisty-sized spacer so its label lines up with branch
+    /// labels; on a genuinely flat tree that aligns labels with a chevron that
+    /// will never appear, leaving an empty column down the left. Opt-in rather
+    /// than automatic, because a tree whose nodes arrive asynchronously would
+    /// otherwise shift every row sideways the first time a branch loads.
+    pub collapse_twisty_when_flat: bool,
     pub show_guides: bool,
     pub show_icons: bool,
     /// Render a leading checkbox per row (cascade selection).
@@ -357,6 +365,7 @@ impl Default for TreeSpec {
             drop_target_value: None,
             drop_position: DropPosition::After,
             aria_label: None,
+            collapse_twisty_when_flat: false,
             show_guides: true,
             show_icons: true,
             show_checkboxes: false,
@@ -368,6 +377,25 @@ impl Default for TreeSpec {
 }
 
 impl TreeSpec {
+    /// Whether the twisty gutter should be reclaimed for this render.
+    ///
+    /// The condition is the **whole tree, not the node**: one branch anywhere
+    /// restores the spacer for every row, because the moment one label needs
+    /// the gutter they all need it to stay aligned.
+    pub fn is_flat(&self) -> bool {
+        fn any_branch(nodes: &[TreeNode]) -> bool {
+            nodes
+                .iter()
+                .any(|node| node.is_branch || !node.children.is_empty() || any_branch(&node.children))
+        }
+        self.collapse_twisty_when_flat && !any_branch(&self.nodes)
+    }
+
+    pub fn with_collapse_twisty_when_flat(mut self, value: bool) -> Self {
+        self.collapse_twisty_when_flat = value;
+        self
+    }
+
     pub fn new(nodes: Vec<TreeNode>) -> Self {
         Self {
             nodes,
@@ -481,3 +509,33 @@ mod nav;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod flat_tests {
+    use super::*;
+
+    fn leaf(v: &str) -> TreeNode {
+        TreeNode::new(v, v)
+    }
+
+    /// One branch anywhere restores the gutter for every row — the alignment is
+    /// a property of the tree, not of the node.
+    #[test]
+    fn a_single_branch_anywhere_un_flattens_the_tree() {
+        let flat = TreeSpec::new(vec![leaf("a"), leaf("b")]).with_collapse_twisty_when_flat(true);
+        assert!(flat.is_flat());
+
+        let mut parent = TreeNode::new("group", "Group");
+        parent.children = vec![leaf("child")];
+        let nested = TreeSpec::new(vec![leaf("a"), parent]).with_collapse_twisty_when_flat(true);
+        assert!(!nested.is_flat(), "a branch anywhere brings the gutter back");
+    }
+
+    /// Opt-in: flatness alone does not collapse the gutter, because a tree
+    /// loading nodes asynchronously would otherwise shift every row sideways
+    /// the first time a branch arrives.
+    #[test]
+    fn flatness_alone_does_not_collapse_the_gutter() {
+        assert!(!TreeSpec::new(vec![leaf("a")]).is_flat());
+    }
+}
