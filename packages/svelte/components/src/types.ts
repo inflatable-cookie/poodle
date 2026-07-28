@@ -102,6 +102,22 @@ export interface AccordionItem {
   disabled?: boolean;
 }
 
+/** One step in a `Stepper`. */
+export interface StepperStep {
+  value: string;
+  label: string;
+  /**
+   * Given, never derived from position.
+   *
+   * A step that ran and was rejected has to read as `failed`; deriving state
+   * from `index < current` would render it as "not yet reached", which is
+   * misleading rather than merely imprecise. See stepper.md §1.
+   */
+  status: "pending" | "running" | "complete" | "failed";
+  isDisabled?: boolean;
+  description?: string | null;
+}
+
 export interface SegmentedControlOption {
   value: string;
   label: string;

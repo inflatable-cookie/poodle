@@ -143,6 +143,7 @@ export { Switch, type SwitchProps, type SwitchTone } from "./Switch";
 export { RangeSlider, type RangeSliderProps } from "./RangeSlider";
 export { Rating, type RatingProps } from "./Rating";
 export { SegmentedControl, type SegmentedControlProps } from "./SegmentedControl";
+export { Stepper, type StepperProps } from "./Stepper";
 export { Slider, type SliderProps } from "./Slider";
 export { ToggleGroup, type ToggleGroupProps } from "./ToggleGroup";
 export { Tree, type TreeProps } from "./Tree";

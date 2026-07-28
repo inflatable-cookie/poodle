@@ -3062,6 +3062,33 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </ScrollShell>`,
   },
 
+  stepper: {
+    props: [
+      { name: "steps", type: "StepperStep[]", default: "[]", description: "Ordered step list. Each step carries its own status; status is never derived from position." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable current step value. Leave undefined for uncontrolled mode." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial current step for uncontrolled mode; falls back to the first step." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override for horizontal spacing." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether every step is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible name for the navigation landmark." },
+      { name: "rerunLabel", type: "string", default: '"Re-run step"', description: "Accessible name for the re-run control, suffixed with the step label." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a step is selected." },
+      { name: "onRerun", type: "((value: string) => void) | undefined", default: "undefined", description: "When supplied, completed steps render a re-run control. Re-running is deliberate and separate from navigation." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<Stepper
+  steps={[
+    { value: "read", label: "Read source", status: "complete" },
+    { value: "gate", label: "Quality gate", status: "failed" },
+    { value: "apply", label: "Apply changes", status: "pending" },
+  ]}
+  ariaLabel="Pipeline steps"
+  onRerun={(value) => rerun(value)}
+/>`,
+  },
+
   "segmented-control": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },

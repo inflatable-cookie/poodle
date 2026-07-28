@@ -51,6 +51,19 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Select: { options: opts, ariaLabel: "Choose" },
   SidebarNav: { groups: [{ id: "g1", label: "Group", items: [] }] },
   SplitButton: { items: menuItems, ariaLabel: "Split action" },
+  // Exercises all four statuses, because the failed case is the one this
+  // component exists to express and an all-pending fixture would never render
+  // its danger treatment.
+  Stepper: {
+    ariaLabel: "Setup steps",
+    steps: [
+      { value: "one", label: "Current state", status: "complete" },
+      { value: "two", label: "Recovery", status: "failed" },
+      { value: "three", label: "Categories", status: "running" },
+      { value: "four", label: "Apply and verify", status: "pending" },
+    ],
+    defaultValue: "three",
+  },
   Table: { columns: [{ id: "name", label: "Name" }] },
   Tabs: { items: opts },
   TextInput: { id: "t1", ariaLabel: "Search" },

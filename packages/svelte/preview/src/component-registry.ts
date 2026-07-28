@@ -93,6 +93,7 @@ export const allComponents: ComponentEntry[] = [
     true,
   ),
   entry("Stack", "layout", "Vertical flex layout container.", true),
+  entry("Stepper", "navigation", "Route through a multi-step process, with per-step status.", true),
   entry("Spacer", "layout", "Flexible space for pushing layout elements apart.", true),
   entry("Separator", "layout", "Visual divider between content sections.", true),
   entry("Surface", "layout", "Themed container with background, border, and padding variants.", true),

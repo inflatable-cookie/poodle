@@ -79,6 +79,7 @@ export { default as Slider } from "./Slider.svelte";
 export { default as Spinner } from "./Spinner.svelte";
 export { default as Spacer } from "./Spacer.svelte";
 export { default as Stack } from "./Stack.svelte";
+export { default as Stepper } from "./Stepper.svelte";
 export { default as StatusBar } from "./StatusBar.svelte";
 export { default as StatusIndicator } from "./StatusIndicator.svelte";
 export { default as Surface } from "./Surface.svelte";
@@ -232,6 +233,7 @@ export type {
   PasswordRequirementsPolicy,
   ScrollDirection,
   SegmentedControlOption,
+  StepperStep,
   SelectItems,
   SelectOption,
   SelectOptionGroup,

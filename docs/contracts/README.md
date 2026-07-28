@@ -167,6 +167,7 @@ contract references the rule rather than restating it:
 - `components/state-tile.md`
 - `components/status-bar.md`
 - `components/status-indicator.md`
+- `components/stepper.md`
 - `components/surface-elevation.md`
 - `components/surface.md`
 - `components/switch.md`

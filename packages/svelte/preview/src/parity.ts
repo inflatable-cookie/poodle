@@ -473,7 +473,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     status: "previewed",
     sectionIds: ["catalog-hub"],
     note: "Additional workflow and overlay primitives previewed in catalogue specimens.",
-    exportNames: ["Drawer", "Popover", "SegmentedControl", "Table"],
+    exportNames: ["Drawer", "Popover", "SegmentedControl", "Stepper", "Table"],
   },
   {
     packageName: "@poodle/svelte",

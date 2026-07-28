@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T15:05:00.598Z",
+  "generatedAt": "2026-07-28T14:42:55.361Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -176,18 +176,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 173,
-        "componentCount": 136,
+        "exportCount": 174,
+        "componentCount": 137,
         "helperCount": 37,
-        "previewedCount": 173,
+        "previewedCount": 174,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 173,
-        "componentCount": 136,
+        "exportCount": 174,
+        "componentCount": 137,
         "helperCount": 37,
-        "previewedCount": 173,
+        "previewedCount": 174,
         "contractOnlyCount": 0
       }
     ],
@@ -2094,6 +2094,19 @@
         ],
         "sectionTitles": [
           "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Stepper",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {

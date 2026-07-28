@@ -1,0 +1,226 @@
+/*
+ * Stepper — the route through a wizard process.
+ *
+ * Visual design carried over from Soundcheck's Sync wizard, which built a
+ * bespoke stepper before this component existed: a shared bordered track of
+ * equal columns, dividers drawn inside it, and a circular status marker.
+ *
+ * The one structural note worth reading: `status` is a property of the step,
+ * never derived from its index. A step that ran and failed has to read as
+ * failed, not as "not yet reached" — see stepper.md §1.
+ */
+
+.poodle-stepper {
+  --poodle-stepper-row-height: 3.25rem;
+  --poodle-stepper-marker-size: 1.35rem;
+  --poodle-stepper-font-size: 0.75rem;
+  --poodle-stepper-marker-font-size: 0.625rem;
+  --poodle-stepper-pad-y: 0.7rem;
+  --poodle-stepper-pad-x: 0.8rem;
+  --poodle-stepper-gap: 0.55rem;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent);
+  overflow: hidden;
+}
+
+/* ── Size: intrinsic dimensions only ─────────────────────────────────────── */
+
+.poodle-stepper[data-size="xs"] {
+  --poodle-stepper-row-height: 2.5rem;
+  --poodle-stepper-marker-size: 1.125rem;
+  --poodle-stepper-font-size: 0.625rem;
+  --poodle-stepper-marker-font-size: 0.5625rem;
+  --poodle-stepper-pad-y: 0.5rem;
+}
+
+.poodle-stepper[data-size="sm"] {
+  --poodle-stepper-row-height: 2.875rem;
+  --poodle-stepper-marker-size: 1.25rem;
+  --poodle-stepper-font-size: 0.6875rem;
+  --poodle-stepper-marker-font-size: 0.5625rem;
+  --poodle-stepper-pad-y: 0.625rem;
+}
+
+.poodle-stepper[data-size="md"] {
+  --poodle-stepper-row-height: 3.25rem;
+  --poodle-stepper-marker-size: 1.35rem;
+  --poodle-stepper-font-size: 0.75rem;
+  --poodle-stepper-marker-font-size: 0.625rem;
+  --poodle-stepper-pad-y: 0.7rem;
+}
+
+.poodle-stepper[data-size="lg"] {
+  --poodle-stepper-row-height: 3.625rem;
+  --poodle-stepper-marker-size: 1.5rem;
+  --poodle-stepper-font-size: 0.8125rem;
+  --poodle-stepper-marker-font-size: 0.6875rem;
+  --poodle-stepper-pad-y: 0.8rem;
+}
+
+.poodle-stepper[data-size="xl"] {
+  --poodle-stepper-row-height: 4rem;
+  --poodle-stepper-marker-size: 1.75rem;
+  --poodle-stepper-font-size: 0.875rem;
+  --poodle-stepper-marker-font-size: 0.75rem;
+  --poodle-stepper-pad-y: 0.9rem;
+}
+
+/* ── Density: horizontal spacing only, never height ──────────────────────── */
+
+.poodle-stepper[data-density="compact"] {
+  --poodle-stepper-pad-x: 0.625rem;
+  --poodle-stepper-gap: 0.4375rem;
+}
+
+.poodle-stepper[data-density="comfortable"] {
+  --poodle-stepper-pad-x: 0.8rem;
+  --poodle-stepper-gap: 0.55rem;
+}
+
+.poodle-stepper[data-density="spacious"] {
+  --poodle-stepper-pad-x: 1rem;
+  --poodle-stepper-gap: 0.6875rem;
+}
+
+/* ── Steps ───────────────────────────────────────────────────────────────── */
+
+.poodle-stepper__list {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poodle-stepper__step {
+  display: flex;
+  min-width: 0;
+  align-items: stretch;
+  border-right: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-stepper__step:last-child {
+  border-right: 0;
+}
+
+.poodle-stepper__trigger {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: var(--poodle-stepper-gap);
+  min-height: var(--poodle-stepper-row-height);
+  padding: var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x);
+  border: 0;
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
+  font: inherit;
+  font-size: var(--poodle-stepper-font-size);
+  text-align: left;
+}
+
+.poodle-stepper__trigger:not(:disabled) {
+  cursor: pointer;
+}
+
+.poodle-stepper__trigger:disabled {
+  opacity: var(--poodle-state-opacity-disabled);
+}
+
+.poodle-stepper__trigger:not(:disabled):hover {
+  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
+}
+
+.poodle-stepper__trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-focus-ring);
+}
+
+/* Current is composed with status, not exclusive of it: a step can be both the
+   one you are on and the one that failed, and you need to see both. */
+.poodle-stepper__trigger[aria-current="step"] {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-stepper__step[data-status="complete"] .poodle-stepper__trigger,
+.poodle-stepper__step[data-status="running"] .poodle-stepper__trigger {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-stepper__step[data-status="failed"] .poodle-stepper__trigger {
+  color: var(--poodle-color-status-danger);
+}
+
+/* ── Marker ──────────────────────────────────────────────────────────────── */
+
+.poodle-stepper__marker {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--poodle-stepper-marker-size);
+  height: var(--poodle-stepper-marker-size);
+  border: 0.0625rem solid currentColor;
+  border-radius: 999px;
+  font-size: var(--poodle-stepper-marker-font-size);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.poodle-stepper__step[data-status="complete"] .poodle-stepper__marker,
+.poodle-stepper__step[data-status="running"] .poodle-stepper__marker,
+.poodle-stepper__trigger[aria-current="step"] .poodle-stepper__marker {
+  border-color: var(--poodle-color-accent-base);
+  color: var(--poodle-color-accent-base);
+}
+
+.poodle-stepper__step[data-status="failed"] .poodle-stepper__marker {
+  border-color: var(--poodle-color-status-danger);
+  color: var(--poodle-color-status-danger);
+}
+
+.poodle-stepper__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Rerun ───────────────────────────────────────────────────────────────── */
+
+/* Deliberately outside the trigger. Re-running a step spends whatever the step
+   costs, so it cannot be something you do by clicking to look at it. */
+.poodle-stepper__rerun {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  align-self: center;
+  margin-right: var(--poodle-stepper-pad-x);
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-stepper__rerun:not(:disabled) {
+  cursor: pointer;
+}
+
+.poodle-stepper__rerun:not(:disabled):hover {
+  background: color-mix(in srgb, var(--poodle-color-text-primary) 8%, transparent);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-stepper__rerun:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-focus-ring);
+}
+
+.poodle-stepper__rerun:disabled {
+  opacity: var(--poodle-state-opacity-disabled);
+}

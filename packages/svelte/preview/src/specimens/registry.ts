@@ -88,6 +88,7 @@ import RegionSpecimen from "./RegionSpecimen.svelte";
 import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
+import StepperSpecimen from "./StepperSpecimen.svelte";
 import SelectSpecimen from "./SelectSpecimen.svelte";
 import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
 import SidebarNavSpecimen from "./SidebarNavSpecimen.svelte";
@@ -233,6 +234,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "relation-picker": RelationPickerSpecimen,
   "scroll-shell": ScrollShellSpecimen,
   "segmented-control": SegmentedControlSpecimen,
+  stepper: StepperSpecimen,
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
   "sidebar-nav": SidebarNavSpecimen,

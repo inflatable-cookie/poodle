@@ -68,6 +68,16 @@ export interface RadioGroupOption {
   disabled?: boolean;
 }
 
+/** One step in a `Stepper`. */
+export interface StepperStep {
+  value: string;
+  label: string;
+  /** Given, never derived from position — see stepper.md §1. */
+  status: "pending" | "running" | "complete" | "failed";
+  isDisabled?: boolean;
+  description?: string | null;
+}
+
 export interface SegmentedControlOption {
   value: string;
   label: string;

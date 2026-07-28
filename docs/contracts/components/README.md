@@ -130,6 +130,7 @@ primitives and layout surfaces through higher-order application components.
 - `state-tile.md`
 - `status-bar.md`
 - `status-indicator.md`
+- `stepper.md`
 - `surface-elevation.md`
 - `surface.md`
 - `switch.md`
