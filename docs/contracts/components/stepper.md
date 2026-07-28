@@ -280,6 +280,8 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 |--------|-------|--------|
 | GPUI | no accessibility surface | runtime limit — `003-native-accessibility.md` |
 | GPUI, Jetstream | selection and rerun wiring live in the preview event loop | components render from spec state |
+| GPUI | marker glyphs are text characters (`✓ ✕ ◌ ⟳`) rather than icon assets | matches the surrounding GPUI components, which draw glyphs the same way |
+| GPUI | the `running` marker is a static glyph, not an animated spinner | GPUI components render from spec state with no frame loop of their own |
 
 ## 13. Specimen Definitions
 

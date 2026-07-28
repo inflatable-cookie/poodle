@@ -41,6 +41,7 @@ mod checkbox;
 mod radio_group;
 mod range_slider;
 mod segmented_control;
+mod stepper;
 mod select;
 mod slider;
 mod switch;
@@ -315,6 +316,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             segmented_control::render(state, cx),
         ),
+        "stepper" => specimen_card("Stepper", theme, stepper::render(state, cx)),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(state, cx)),
 

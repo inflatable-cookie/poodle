@@ -379,6 +379,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Inline toggle between mutually exclusive options.",
     },
     ComponentEntry {
+        slug: "stepper",
+        display_name: "Stepper",
+        description: "Route through a multi-step process, with per-step status.",
+    },
+    ComponentEntry {
         slug: "select",
         display_name: "Select",
         description: "Dropdown selection from a list of options.",
@@ -770,6 +775,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
     match slug {
         "button" | "icon-button" | "split-button" | "checkbox" | "switch" | "tri-state-switch"
         | "radio-group" | "segmented-control" | "toggle-group" => ComponentTag::Control,
+        "stepper" => ComponentTag::Navigation,
         "text-input"
         | "number-input"
         | "select"

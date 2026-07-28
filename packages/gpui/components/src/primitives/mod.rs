@@ -64,6 +64,7 @@ mod region;
 mod resize_handle;
 mod scroll_shell;
 mod segmented_control;
+mod stepper;
 mod select;
 mod separator;
 mod skeleton;
@@ -158,6 +159,7 @@ pub type SearchInput = TextInput;
 /// Deprecated: use `TextInput` with search type instead.
 pub type SearchField = TextInput;
 pub use segmented_control::SegmentedControl;
+pub use stepper::Stepper;
 pub use select::Select;
 pub use separator::Separator;
 pub use skeleton::Skeleton;
