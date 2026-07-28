@@ -141,6 +141,13 @@
       } else if (effect.type === "emitOpenChange") {
         if (!isControlled) {
           uncontrolledOpen = effect.open;
+        } else {
+          // Write back through the binding before notifying, so `bind:open`
+          // works as it does on every other bindable Poodle component. A host
+          // that wants to refuse the close re-asserts the value inside
+          // `onOpenChange`, which lands last and renders no intermediate
+          // state — covered by DialogControlled.svelte.test.ts.
+          open = effect.open;
         }
 
         onOpenChange?.(effect.open);

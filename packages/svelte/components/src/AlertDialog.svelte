@@ -82,6 +82,12 @@
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
+    } else {
+      // Write back through the binding before notifying, so `bind:open` works
+      // as it does on every other bindable Poodle component. A host that wants
+      // to refuse the close re-asserts the value inside `onOpenChange`, which
+      // lands last and renders no intermediate state.
+      open = nextOpen;
     }
 
     onOpenChange?.(nextOpen);

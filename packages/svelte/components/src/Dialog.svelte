@@ -145,6 +145,11 @@
       } else if (effect.type === "emitOpenChange") {
         if (!isControlled) {
           uncontrolledOpen = effect.open;
+        } else {
+          // Write back through the binding before notifying, so a host that
+          // vetoes inside `onOpenChange` sets the final value last and no
+          // intermediate state is ever rendered.
+          open = effect.open;
         }
 
         onOpenChange?.(effect.open);

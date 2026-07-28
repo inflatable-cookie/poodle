@@ -57,7 +57,7 @@ Updated: 2026-07-10
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null \| undefined` | `undefined` | no | dialog visibility; when supplied, the host owns updates through `onOpenChange`; omit the prop for uncontrolled mode |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | dialog visibility; bindable, and also reported through `onOpenChange`; omit the prop for uncontrolled mode |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
 | `title` | `string \| null` | `null` | no | visible title text; ignored when `header` snippet is used |
 | `description` | `string \| null` | `null` | no | visible supporting description; ignored when `header` snippet is used |
@@ -101,16 +101,13 @@ Updated: 2026-07-10
 - controlled: supplying `open` makes it host-owned through `onOpenChange`
 - uncontrolled: omit `open` and use `defaultOpen`
 
-> **`bind:open` is not enough on its own.** In controlled mode the Dialog never
-> writes `open` — it reports the request and waits. A host that passes `open`
-> and expects the close button to work must update its own state from
-> `onOpenChange`; binding alone leaves the dialog up and the button looking
-> broken.
+> **`bind:open` works.** The Dialog writes the new value back through the
+> binding and then calls `onOpenChange`, matching every other bindable Poodle
+> component.
 >
-> This is deliberate: it is what lets a host *refuse* a close, for unsaved
-> changes or a job in flight. It is also the opposite of what Poodle's ten
-> other `$bindable` components do, which is a trap worth knowing about.
-- close requests may be observed separately through `onRequestClose` callback
+> A host that wants to *refuse* a close — unsaved changes, a job in flight —
+> re-asserts `open` inside `onOpenChange`. That assignment lands after the
+> write-back, so the dialog stays up and no intermediate state is rendered.
 
 ## 4. States
 
@@ -137,8 +134,9 @@ and Drawer.
 
 - States: `closed` | `open`
 - Context: `dismissOnEscape`, `dismissOnBackdrop`; open state is
-  controllable (controlled mode never writes `open`; the parent owns it and
-  reacts to `emitOpenChange`)
+  controllable (controlled mode writes `open` back through the binding, then
+  emits `emitOpenChange`; a host refuses a close by re-asserting `open` in the
+  handler)
 - Events: `OPEN` / `CLOSE` (programmatic), `REQUEST_CLOSE` (close button or
   caller), `ESCAPE` (dismissable-layer stack), `BACKDROP_CLICK`
 - Transitions: user-initiated close paths (`REQUEST_CLOSE`, guarded
