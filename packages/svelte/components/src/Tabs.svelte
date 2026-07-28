@@ -61,6 +61,8 @@
     onValueChange?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
+    onDragStart?: ((value: string, event: DragEvent) => void) | undefined;
+    onDragEnd?: ((value: string, event: DragEvent) => void) | undefined;
     children?: Snippet<[string]>;
     actions?: Snippet<[]>;
   }
@@ -86,6 +88,8 @@
     onValueChange = undefined,
     onReorder = undefined,
     onClose = undefined,
+    onDragStart = undefined,
+    onDragEnd = undefined,
     children,
     actions,
   }: Props = $props();
@@ -105,6 +109,7 @@
   let tooltipIndex = $state<number | null>(null);
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let dragSourceIndex = $state<number | null>(null);
+  let dragSourceValue = $state<string | null>(null);
   let dropTargetIndex = $state<number | null>(null);
   let collapsedByOverflow = $state(false);
   let historyReady = $state(false);
@@ -368,12 +373,20 @@
     void evaluateCollapsedOverflow();
   });
 
-  // ── Reorder (drag-and-drop DOM plumbing; final reorder routes through the machine) ──
+  // ── Reorder (native drag session also powers cross-region/window moves) ──
+
+  function resetDrag(): void {
+    dragSourceIndex = null;
+    dragSourceValue = null;
+    dropTargetIndex = null;
+  }
 
   function handleDragStart(event: DragEvent, index: number): void {
     const result = startDrag(event, index, reorderable);
     if (result.dragSourceIndex !== null) {
       dragSourceIndex = result.dragSourceIndex;
+      dragSourceValue = renderedItems[index].value;
+      onDragStart?.(dragSourceValue, event);
     }
   }
 
@@ -393,13 +406,13 @@
     if (result.fromIndex !== null && result.toIndex !== null) {
       send({ type: "REORDER", fromIndex: result.fromIndex, toIndex: result.toIndex });
     }
-    dragSourceIndex = null;
-    dropTargetIndex = null;
   }
 
-  function handleDragEnd(): void {
-    dragSourceIndex = null;
-    dropTargetIndex = null;
+  function handleDragEnd(event: DragEvent): void {
+    if (dragSourceValue) {
+      onDragEnd?.(dragSourceValue, event);
+    }
+    resetDrag();
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
@@ -521,10 +534,10 @@
           data-drag-source={dragSourceIndex === index || undefined}
           data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
           draggable={reorderable && !item.disabled}
-          ondragstart={(e) => handleDragStart(e, index)}
-          ondragover={(e) => handleDragOver(e, index)}
+          ondragstart={(event) => handleDragStart(event, index)}
+          ondragover={(event) => handleDragOver(event, index)}
           ondragleave={handleDragLeave}
-          ondrop={(e) => handleDrop(e, index)}
+          ondrop={(event) => handleDrop(event, index)}
           ondragend={handleDragEnd}
           onmouseenter={() => hasTooltips && scheduleTooltip(index)}
           onmouseleave={() => hasTooltips && dismissTooltip()}
@@ -534,7 +547,6 @@
             type="button"
             class="poodle-tabs__tab"
             disabled={item.disabled === true}
-            draggable={reorderable && !item.disabled}
             id={`poodle-tab-${tabsId}-${item.value}`}
             role="tab"
             tabindex={focusIndex === index ? 0 : -1}

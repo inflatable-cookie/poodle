@@ -260,10 +260,6 @@
     cursor: grab;
   }
 
-  .poodle-tabs__tab[draggable="true"] {
-    cursor: grab;
-  }
-
   .poodle-tabs__item[data-drag-source] {
     opacity: 0.4;
   }

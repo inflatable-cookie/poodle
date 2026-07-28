@@ -3616,6 +3616,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the active tab changes." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when tabs are reordered." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a tab close button is requested." },
+      { name: "onDragStart", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab starts dragging." },
+      { name: "onDragEnd", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab drag ends." },
     ],
     slots: [
       { name: "children", description: "Snippet for tab panel content. Receives the active tab value." },

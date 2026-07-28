@@ -161,19 +161,11 @@
     }
   }
 
-  function handleStripDragStart(event: DragEvent): void {
+  function handleTabDragStart(panelId: string, event: DragEvent): void {
     if (!event.dataTransfer) return;
-
-    const target = event.target as HTMLElement;
-    const tab = target.querySelector?.("[role='tab']") ?? target.closest?.("[role='tab']");
-    if (!tab) return;
-
-    const tabId = tab.getAttribute("id") ?? "";
-    const item = items.find((entry) => tabId.endsWith(`-${entry.value}`));
-    if (!item) return;
-
-    const data: PanelDragData = { panelId: item.value, sourceEdge: edge };
+    const data: PanelDragData = { panelId, sourceEdge: edge };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
+    event.dataTransfer.effectAllowed = "move";
   }
 
   function handleRegionDragOver(event: DragEvent): void {
@@ -335,15 +327,14 @@
         onValueChange={handleValueChange}
         onReorder={handleReorder}
         onClose={handleClose}
+        onDragStart={handleTabDragStart}
       />
     </div>
   {:else if showIconStrip}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
-      ondragstart={handleStripDragStart}
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
@@ -360,6 +351,7 @@
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
+          onDragStart={handleTabDragStart}
         />
       </div>
       {#if collapsible}
@@ -372,12 +364,10 @@
       {/if}
     </div>
   {:else}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
-      ondragstart={handleStripDragStart}
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
@@ -394,6 +384,7 @@
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
+          onDragStart={handleTabDragStart}
         />
       </div>
       {#if collapsible}
