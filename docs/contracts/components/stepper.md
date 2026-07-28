@@ -49,7 +49,7 @@ belongs to them, because only they know whether a step not yet reached is
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | bordered track owning the shared border and radius | border, radius, background |
-| Step | yes | one column of the track; carries the divider to its right | border-right |
+| Step | yes | one column of the track; carries the divider to its right and the current-step fill | border-right, background |
 | Trigger | yes | selects this step; the whole row is the hit target | min-height, padding, gap, typography, color, background |
 | Marker | yes | circular status glyph or 1-based index | size, border, radius, typography, status color |
 | Label | yes | the step's name | typography, truncation |
@@ -239,8 +239,8 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 
 | State | Property | Value |
 |-------|----------|-------|
-| Current | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
-| Current | `color` | `var(--poodle-color-text-primary)` |
+| Current | Step `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` — on the **Step**, not the Trigger, so the fill spans the whole column even when a Rerun control sits beside the trigger |
+| Current | Trigger `color` | `var(--poodle-color-text-primary)` |
 | Current, Complete, Running | marker `border-color`, `color` | `var(--poodle-color-accent-base)` |
 | Failed | marker `border-color`, `color` | `var(--poodle-color-status-danger)` |
 | Failed | label `color` | `var(--poodle-color-status-danger)` |

@@ -143,15 +143,17 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
                     .min_w_0(),
             );
 
-        if is_current {
-            trigger = trigger.bg(accent.with_alpha(accent.a * 0.10));
-        }
+
         if is_disabled {
             trigger = trigger.opacity(disabled_opacity).disabled(true);
         } else {
             trigger = trigger.cursor_pointer();
         }
 
+        // The tint belongs to the whole column. On the trigger it stopped
+        // wherever the trigger stopped, so a step with a rerun beside it had
+        // the fill end in open space with a hard edge halfway across the cell.
+        // The hit target is unchanged.
         let mut cell = ui_element::div()
             .flex_row()
             .items_stretch()
@@ -159,6 +161,10 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .grow()
             .aria_role(jetstream_ui::accesskit::Role::ListItem)
             .child(trigger);
+
+        if is_current {
+            cell = cell.bg(accent.with_alpha(accent.a * 0.10));
+        }
 
         // Deliberately outside the trigger: re-running spends whatever the step
         // costs, so it cannot be reachable by clicking to look at a finished

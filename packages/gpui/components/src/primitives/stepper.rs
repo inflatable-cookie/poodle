@@ -190,12 +190,6 @@ impl IntoElement for Stepper {
                 .child(marker)
                 .child(div().min_w_0().child(step.label.clone()));
 
-            if is_current {
-                trigger = trigger.bg(Hsla {
-                    a: accent.a * 0.10,
-                    ..accent
-                });
-            }
             if is_disabled {
                 trigger = trigger
                     .opacity(disabled_opacity)
@@ -204,7 +198,14 @@ impl IntoElement for Stepper {
                 trigger = trigger.cursor(CursorStyle::PointingHand);
             }
 
+            // The tint belongs to the whole column — see the Jetstream note.
             let mut cell = div().flex().flex_1().min_w_0().child(trigger);
+            if is_current {
+                cell = cell.bg(Hsla {
+                    a: accent.a * 0.10,
+                    ..accent
+                });
+            }
 
             // A separate control, outside the trigger — see the `on_rerun` note.
             if has_rerun {

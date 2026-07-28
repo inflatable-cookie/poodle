@@ -142,8 +142,17 @@
 
 /* Current is composed with status, not exclusive of it: a step can be both the
    one you are on and the one that failed, and you need to see both. */
-.poodle-stepper__trigger[aria-current="step"] {
+
+/* The tint belongs to the whole column, not to the button.
+   Painting it on the trigger made it stop wherever the trigger stopped, so a
+   step with a rerun beside it had the fill end in open space with a hard edge
+   halfway across the cell. The hit target is unchanged — the trigger is still
+   the only thing you can click. */
+.poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]) {
   background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+}
+
+.poodle-stepper__trigger[aria-current="step"] {
   color: var(--poodle-color-text-primary);
 }
 
