@@ -110,7 +110,7 @@ The trigger navigates. The Rerun button, and only the Rerun button, re-runs.
 | Failed | `status: "failed"` | primary text, danger marker with failure glyph, danger label |
 | Pending | `status: "pending"` | secondary text, neutral marker showing the 1-based index |
 | Disabled | `isDisabled`, or root `disabled` | `disabled-opacity`, no pointer events |
-| Hover | pointer over an enabled trigger | subtle fill |
+| Hover | pointer over an enabled trigger | subtle fill across the whole step, not just the trigger; hovering the Rerun control does not raise it, since that control does something other than select |
 | Focus | keyboard focus on trigger or rerun | focus ring |
 
 **Current and status are composed, not exclusive.** A step that is both current
@@ -246,7 +246,8 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 | Failed | label `color` | `var(--poodle-color-status-danger)` |
 | Complete | `color` | `var(--poodle-color-text-primary)` |
 | Disabled | `opacity` | `var(--poodle-state-opacity-disabled)` |
-| Hover (enabled) | `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` |
+| Hover (enabled) | Step `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` — on the **Step**, for the same reason as the current fill |
+| Hover on current | Step `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` — deepens the accent rather than replacing it with the neutral hover |
 
 ## 9. Svelte Notes
 

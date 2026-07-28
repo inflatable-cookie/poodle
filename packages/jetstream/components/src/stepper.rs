@@ -162,8 +162,20 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .aria_role(jetstream_ui::accesskit::Role::ListItem)
             .child(trigger);
 
+        // Both the current tint and hover live on the cell, not the trigger, so
+        // they span the whole column including the rerun control. Hovering the
+        // current step deepens its own colour rather than swapping to a
+        // neutral fill.
         if is_current {
             cell = cell.bg(accent.with_alpha(accent.a * 0.10));
+        }
+        if !is_disabled {
+            let hover_fill = if is_current {
+                accent.with_alpha(accent.a * 0.16)
+            } else {
+                active_label.with_alpha(active_label.a * 0.06)
+            };
+            cell = cell.hover(move |s| s.bg(hover_fill));
         }
 
         // Deliberately outside the trigger: re-running spends whatever the step

@@ -131,10 +131,6 @@
   opacity: var(--poodle-state-opacity-disabled);
 }
 
-.poodle-stepper__trigger:not(:disabled):hover {
-  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
-}
-
 .poodle-stepper__trigger:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-focus-ring);
@@ -148,8 +144,27 @@
    step with a rerun beside it had the fill end in open space with a hard edge
    halfway across the cell. The hit target is unchanged — the trigger is still
    the only thing you can click. */
+/* Hover is the same story as the current tint: painted on the trigger it
+   stopped where the trigger stopped, leaving the rerun sitting outside the
+   highlight of the row it belongs to. It is the step that lights up.
+   Hovering the rerun itself does not — that control has its own hover, and it
+   does something different from selecting the step. */
+.poodle-stepper__step:has(.poodle-stepper__trigger:not(:disabled):hover) {
+  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
+}
+
+/* Declared after hover so the current step keeps its accent rather than
+   flattening to the neutral hover fill. */
 .poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]) {
   background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+}
+
+/* …and hovering the current step deepens its own colour instead of swapping
+   to a different one. */
+.poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]):has(
+    .poodle-stepper__trigger:not(:disabled):hover
+  ) {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
 }
 
 .poodle-stepper__trigger[aria-current="step"] {
