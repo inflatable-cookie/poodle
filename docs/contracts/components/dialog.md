@@ -100,6 +100,16 @@ Updated: 2026-07-10
 
 - controlled: supplying `open` makes it host-owned through `onOpenChange`
 - uncontrolled: omit `open` and use `defaultOpen`
+
+> **`bind:open` is not enough on its own.** In controlled mode the Dialog never
+> writes `open` — it reports the request and waits. A host that passes `open`
+> and expects the close button to work must update its own state from
+> `onOpenChange`; binding alone leaves the dialog up and the button looking
+> broken.
+>
+> This is deliberate: it is what lets a host *refuse* a close, for unsaved
+> changes or a job in flight. It is also the opposite of what Poodle's ten
+> other `$bindable` components do, which is a trap worth knowing about.
 - close requests may be observed separately through `onRequestClose` callback
 
 ## 4. States
