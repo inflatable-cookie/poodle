@@ -120,6 +120,28 @@
       </div>
     </SpecimenGroup>
 
+    <SpecimenGroup label="Highlighted card">
+    <div class="poodle-specimen__stack">
+      <!-- `highlighted` is a documented state that had no specimen at all, so
+           nothing rendered its gradient or inset ring and no gate could see it.
+           It is orthogonal to both selection and active. -->
+      <ListCard title="Highlighted row" subtitle="Accent gradient and inset ring" interactive highlighted />
+      <ListCard title="Highlighted and selected" subtitle="Both at once" interactive selectable selected highlighted />
+      <ListCard title="Ordinary row" subtitle="For comparison" interactive />
+    </div>
+  </SpecimenGroup>
+
+    <SpecimenGroup label="Active card">
+    <div class="poodle-specimen__stack">
+      <!-- Active is deliberately quieter than Selected: it is always on for one
+           card in a list, where selection's full border and fill would shout
+           permanently. The third card carries both, since they are orthogonal. -->
+      <ListCard title="Acowtancy Build Test" subtitle="Registered 28/07/2026 16:35" interactive active />
+      <ListCard title="Acowtancy Build Test" subtitle="Registered 28/07/2026 16:35" interactive />
+      <ListCard title="Active and selected" subtitle="Both states at once" interactive selectable selected active />
+    </div>
+  </SpecimenGroup>
+
     <SpecimenGroup label="Selectable cards">
     <div class="poodle-specimen__stack">
       <ListCard

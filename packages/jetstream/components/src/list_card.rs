@@ -358,6 +358,31 @@ pub fn js_list_card_with_slots(
     if let Some(sel) = selection_el {
         el = el.child(sel);
     }
+    // Active — the card you are currently on. A bar down the leading edge and
+    // nothing else: `is_selected` already owns the loud treatment, and this
+    // state is always on for one card in a list, so at that weight it would
+    // shout permanently. Contract §4.
+    //
+    // An inset shadow, not a child element. A child rectangle cannot follow the
+    // card's corner radius and juts out squarely top and bottom left; an inset
+    // shadow is clipped by the radius, so the bar curves with the card the way
+    // a real border does.
+    if spec.is_active {
+        let bar = BoxShadow {
+            offset_x: rem_to_px(spec.active_bar_width_rem()),
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: 0.0,
+            color: accent,
+            inset: true,
+        };
+        // Preserve whatever `selected` or `highlighted` already put there;
+        // replacing the list would drop their rings.
+        let mut layers = el.style.shadow_layers.clone();
+        layers.push(bar);
+        el = el.shadow_layers(layers);
+    }
+
     el = el.child(leading_el).child(body);
 
     // Right edge: meta + actions, OR the exclusive trailing lane (contract §7).
@@ -413,6 +438,45 @@ pub fn js_list_card_with_slots(
 
 #[cfg(test)]
 mod tests {
+
+    /// The active bar is an inset shadow so the card's radius clips it. A child
+    /// rectangle cannot follow the corners and juts out squarely, which is what
+    /// the first attempt did.
+    #[test]
+    fn active_draws_an_inset_bar_that_the_radius_can_clip() {
+        let th = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let plain = js_list_card(&ListCardSpec::new().with_title("Row"), &th);
+        let active = js_list_card(&ListCardSpec::new().with_title("Row").with_active(true), &th);
+
+        assert!(
+            active.style.shadow_layers.len() > plain.style.shadow_layers.len(),
+            "active should add a shadow layer"
+        );
+        let bar = active.style.shadow_layers.last().unwrap();
+        assert!(bar.inset, "the bar must be inset, or the radius cannot clip it");
+        assert!(bar.offset_x > 0.0, "the bar is offset from the leading edge");
+        assert_eq!(bar.blur, 0.0, "a bar, not a glow");
+    }
+
+    /// Active and selected are orthogonal, so marking a selected card active
+    /// must not drop the ring selection already painted.
+    #[test]
+    fn active_preserves_the_selected_ring() {
+        let th = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let selected = js_list_card(
+            &ListCardSpec::new().with_title("Row").with_selectable(true).with_selected(true),
+            &th,
+        );
+        let both = js_list_card(
+            &ListCardSpec::new()
+                .with_title("Row")
+                .with_selectable(true)
+                .with_selected(true)
+                .with_active(true),
+            &th,
+        );
+        assert!(both.style.shadow_layers.len() > selected.style.shadow_layers.len());
+    }
     use super::*;
     use crate::render_probe::{probe, ProbeColor};
     use poodle_specs::{LeadingFill, LeadingShape, SelectionIndicator};

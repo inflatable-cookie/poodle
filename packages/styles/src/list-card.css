@@ -57,6 +57,35 @@
     border-color: var(--poodle-recipe-list-card-hover-border, color-mix(in srgb, var(--poodle-color-border-default) 52%, transparent));
   }
 
+  /* Active — the card you are currently on.
+   *
+   * Deliberately quieter than `selected`, which paints a full accent border, a
+   * 16% fill and a ring because it marks a card picked out for an action.
+   * Active is always on for exactly one card in a list, so at that weight it
+   * would shout permanently. A bar down the leading edge reads as "you are
+   * here" without competing with anything.
+   *
+   * An inset box-shadow, not a pseudo-element. A positioned rectangle cannot
+   * follow the card's corner radius and juts out squarely at the top and
+   * bottom left; an inset shadow is clipped by the border radius, so the bar
+   * curves with the card the way a real border does. It also costs no layout,
+   * where thickening `border-left` would shift the content sideways.
+   *
+   * `selected` and `highlighted` own the box-shadow property too, so the
+   * combinations are spelled out below rather than left to cascade order —
+   * otherwise marking a selected card active would silently drop its ring.
+   */
+  .poodle-list-card[data-active="true"] {
+    box-shadow: inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
+      var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base));
+  }
+
+  /* The title takes primary weight so the state survives for anyone who cannot
+     separate the bar from the border by colour alone. */
+  .poodle-list-card[data-active="true"] .poodle-list-card__title {
+    color: var(--poodle-color-text-primary);
+  }
+
   .poodle-list-card[data-selected="true"] {
     border-color: var(--poodle-recipe-list-card-selected-border, var(--poodle-color-accent-base));
     background: color-mix(in srgb, var(--poodle-list-card-fill) 84%, var(--poodle-color-accent-base) 16%);
@@ -86,6 +115,27 @@
         var(--list-card-accent, var(--poodle-color-accent-base)) 12%,
         transparent
       ));
+  }
+
+  /* Active composed with the two states that also paint a box-shadow. Declared
+     after both so the bar survives, and repeating their rings so they do too. */
+  .poodle-list-card[data-active="true"][data-selected="true"] {
+    box-shadow:
+      inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
+        var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base)),
+      0 0 0 0.0625rem var(--poodle-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+  }
+
+  .poodle-list-card[data-active="true"][data-highlighted="true"] {
+    box-shadow:
+      inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
+        var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base)),
+      inset 0 0 0 0.0625rem color-mix(
+        in srgb,
+        var(--list-card-accent, var(--poodle-color-accent-base)) 12%,
+        transparent
+      );
   }
 
   .poodle-list-card:focus-visible {

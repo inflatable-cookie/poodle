@@ -81,6 +81,7 @@ Updated: 2026-07-10
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `selectable` | `boolean` | `false` | no | toggles selected state through the root interaction contract |
 | `selected` | `boolean` | `false` | no | selected visual state |
+| `active` | `boolean` | `false` | no | the card the user is currently on; quieter than `selected` and orthogonal to it |
 | `highlighted` | `boolean` | `false` | no | accent emphasis state; tints border, paints an accent-to-transparent gradient over the fill, and adds an inset accent ring (independent of selection) |
 | `selectionIndicator` | `"none" \| "checkbox"` | `"none"` | no | when `"checkbox"` and the card is selectable, renders a checkbox selection indicator; overlays the leading area when a leading snippet is present, otherwise renders inline |
 | `showReorderHandle` | `boolean` | `false` | no | visual reorder affordance; does not implement drag/drop behavior |
@@ -130,10 +131,26 @@ Updated: 2026-07-10
 | focus | keyboard focus (when interactive) | accent focus ring |
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
 | selected | `selected=true` | accent border and focus-style outline |
+| active | `active=true` | accent bar down the leading edge, primary-weight title; no border or fill change |
 | highlighted | `highlighted=true` | accent-tinted border, accent-to-transparent fill gradient, and inset accent ring; orthogonal to selection |
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
 | stacked | `layout="stacked"` | vertical layout with top leading area, body column, and bottom utility rail |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
+
+### Active Versus Selected
+
+Both mark a card out, and they mean different things.
+
+**`selected` marks a card the user has picked for an action** — the multi-select
+case, where several cards may be selected and the next click is "delete these".
+Its full accent border, 16% fill and ring are proportionate to that.
+
+**`active` marks the card the user is currently on** — one per list, always on
+while the list is shown. At `selected`'s weight it would shout permanently, so
+it is a bar down the leading edge and nothing else.
+
+They are orthogonal: a card can be both the one you are on and one of several
+you have ticked, and it shows both.
 
 ### Behavior Machine
 
@@ -161,6 +178,8 @@ props.
 - When not interactive: no role (generic container)
 - When disabled: `aria-disabled="true"`
 - When selectable: `aria-pressed` reflects `selected`
+- When `active`: `aria-current="true"` — the current item, which is a different
+  claim from `aria-selected` and must not be conflated with it
 
 ### Keyboard
 
@@ -501,6 +520,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
+| GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web and Jetstream | allowed | revisit if gpui gains inset shadows |
 | ListCardCounter helper | Svelte-specific helper, GPUI may inline | allowed | match API if feasible |
 
 ## 14. Specimen Definitions

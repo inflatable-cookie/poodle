@@ -94,6 +94,14 @@ pub struct ListCardSpec {
     pub is_selectable: bool,
     /// Current selection state when `is_selectable` is true.
     pub is_selected: bool,
+    /// The card the user is currently on — one per list, always on while the
+    /// list is shown.
+    ///
+    /// Distinct from `is_selected`, which marks a card picked out for an
+    /// action. At selection's weight — full accent border, 16% fill, ring —
+    /// an always-on state would shout permanently, so this is a bar down the
+    /// leading edge and nothing else. Contract §4.
+    pub is_active: bool,
     /// When true the card renders a trailing drag handle used to
     /// reorder items in a list.
     pub show_reorder_handle: bool,
@@ -137,6 +145,7 @@ impl Default for ListCardSpec {
             href: None,
             is_selectable: false,
             is_selected: false,
+            is_active: false,
             show_reorder_handle: false,
             layout: ListCardLayout::Default,
             is_highlighted: false,
@@ -329,6 +338,24 @@ impl ListCardSpec {
 
     pub fn leading_tint_bg_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
+    }
+
+    /// Colour of the active card's leading bar.
+    pub fn active_bar_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    /// Width of the active card's leading bar, in rem.
+    ///
+    /// Drawn inside the card rather than as a thicker border, so marking a card
+    /// active does not shift its content sideways.
+    pub fn active_bar_width_rem(&self) -> f32 {
+        0.1875
+    }
+
+    pub fn with_active(mut self, is_active: bool) -> Self {
+        self.is_active = is_active;
+        self
     }
 
     pub fn leading_solid_bg_token(&self) -> &'static str {

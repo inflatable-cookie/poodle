@@ -386,6 +386,27 @@ impl IntoElement for ListCard {
             );
         }
 
+        // Active — the card you are currently on. A bar down the leading edge
+        // and nothing else: `is_selected` already owns the loud treatment, and
+        // this state is always on for one card in a list, so at that weight it
+        // would shout permanently. Contract §4.
+        //
+        // The web and Jetstream draw this as an inset box-shadow, which the
+        // border radius clips so the bar curves with the card. GPUI's BoxShadow
+        // has no inset flag, so the bar is a child rectangle with its left
+        // corners rounded to the card's radius — close, and the nearest this
+        // renderer gets. Recorded as a delta in the contract.
+        if spec.is_active {
+            root = root.child(
+                div()
+                    .w(px(rem_to_px(spec.active_bar_width_rem())))
+                    .flex_shrink_0()
+                    .h_full()
+                    .rounded_l(radius)
+                    .bg(accent),
+            );
+        }
+
         root = root.child(leading_el).child(body);
 
         if has_sash {

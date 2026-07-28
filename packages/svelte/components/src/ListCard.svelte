@@ -26,6 +26,13 @@
     disabled?: boolean;
     selectable?: boolean;
     selected?: boolean;
+    /**
+     * The card you are currently on — always on for one card in a list.
+     *
+     * Distinct from `selected`, which marks a card picked out for an action
+     * and is styled loudly to match. See list-card.md §4.
+     */
+    active?: boolean;
     highlighted?: boolean;
     selectionIndicator?: "none" | "checkbox";
     showReorderHandle?: boolean;
@@ -68,6 +75,7 @@
     disabled = false,
     selectable = false,
     selected = false,
+    active = false,
     highlighted = false,
     selectionIndicator = "none",
     showReorderHandle = false,
@@ -268,6 +276,7 @@
     data-leading-size={resolvedLeadingSize}
     data-layout={layout}
     data-selected={selected}
+    data-active={active}
     data-highlighted={highlighted}
     data-reorder={showReorderHandle}
     aria-label={ariaLabel ?? title}
@@ -474,10 +483,12 @@
     data-leading-size={resolvedLeadingSize}
     data-layout={layout}
     data-selected={selected}
+    data-active={active}
     data-highlighted={highlighted}
     data-reorder={showReorderHandle}
     role={isInteractive ? (selectable ? "button" : "button") : undefined}
     aria-pressed={selectable ? selected : undefined}
+    aria-current={active ? "true" : undefined}
     tabindex={isInteractive && !disabled ? 0 : -1}
     aria-label={ariaLabel ?? title}
     class:poodle-list-card--has-sash={!!sash}

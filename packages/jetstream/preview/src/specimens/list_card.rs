@@ -478,6 +478,38 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     theme,
                 )),
         ))
+        // -- Active: the card you are currently on --
+        .child(group("Active card", secondary,
+            div()
+                .flex_col()
+                .gap(8.0)
+                .child(js_list_card(
+                    &ListCardSpec::new()
+                        .with_title("Acowtancy Build Test")
+                        .with_subtitle("Registered 28/07/2026 16:35")
+                        .with_interactive(true)
+                        .with_active(true),
+                    theme,
+                ))
+                .child(js_list_card(
+                    &ListCardSpec::new()
+                        .with_title("Acowtancy Build Test")
+                        .with_subtitle("Registered 28/07/2026 16:35")
+                        .with_interactive(true),
+                    theme,
+                ))
+                // Orthogonal to selection, so both can be true at once.
+                .child(js_list_card(
+                    &ListCardSpec::new()
+                        .with_title("Active and selected")
+                        .with_subtitle("Both states at once")
+                        .with_interactive(true)
+                        .with_selectable(true)
+                        .with_selected(true)
+                        .with_active(true),
+                    theme,
+                )),
+        ))
         // -- Selection indicator (checkbox) --
         .child(group("Selection indicator (checkbox)", secondary,
             div().flex_col().gap(6.0)

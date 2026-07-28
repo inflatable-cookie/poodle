@@ -945,6 +945,49 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
+        // -- Active: the card you are currently on --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Active card"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(ListCard::from_spec(
+                            ListCardSpec::new()
+                                .with_title("Acowtancy Build Test")
+                                .with_subtitle("Registered 28/07/2026 16:35")
+                                .with_interactive(true)
+                                .with_active(true),
+                            theme,
+                        ))
+                        .child(ListCard::from_spec(
+                            ListCardSpec::new()
+                                .with_title("Acowtancy Build Test")
+                                .with_subtitle("Registered 28/07/2026 16:35")
+                                .with_interactive(true),
+                            theme,
+                        ))
+                        // Orthogonal to selection, so both can be true at once.
+                        .child(ListCard::from_spec(
+                            ListCardSpec::new()
+                                .with_title("Active and selected")
+                                .with_subtitle("Both states at once")
+                                .with_interactive(true)
+                                .with_selectable(true)
+                                .with_selected(true)
+                                .with_active(true),
+                            theme,
+                        )),
+                ),
+        )
         // -- Selection indicator (checkbox) --
         .child(
             div()
