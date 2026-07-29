@@ -132,7 +132,6 @@
           class="poodle-stepper__trigger"
           disabled={isStepDisabled(step)}
           aria-current={currentValue === step.value ? "step" : undefined}
-          aria-invalid={step.status === "failed" ? "true" : undefined}
           aria-label={`${step.label}${statusSuffix(step.status)}${step.description ? `. ${step.description}` : ""}`}
           onclick={() => selectStep(step)}
           onkeydown={(event) => moveFocus(event, index)}

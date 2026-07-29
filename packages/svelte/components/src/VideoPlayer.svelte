@@ -110,15 +110,6 @@
     }
   }
 
-  function handleWrapperKeydown(event: KeyboardEvent): void {
-    if (event.target !== wrapperEl) return;
-
-    if (event.key === " " || event.key === "Enter") {
-      event.preventDefault();
-      togglePlay();
-    }
-  }
-
   function handlePlay(): void {
     isPlaying = true;
     updateTime();
@@ -156,13 +147,17 @@
   });
 </script>
 
+<!-- Keyboard playback is exposed by the nested Play button; the composite
+     container's pointer handlers provide video-canvas convenience only. -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
   class="poodle-video-player"
   bind:this={wrapperEl}
   style="aspect-ratio: {aspectRatio}"
   onmousemove={resetControlsTimer}
   onclick={togglePlay}
-  onkeydown={handleWrapperKeydown}
+  role="group"
   aria-label={ariaLabel}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -302,4 +297,3 @@
     </div>
   </div>
 </div>
-

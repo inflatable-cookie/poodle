@@ -230,9 +230,17 @@
 </script>
 
 <div class="poodle-file-upload" class:poodle-file-upload--disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
+  <!-- The focusable dropzone is a composite around the native file input, not
+       a second control; Enter and Space delegate activation to that input. -->
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
     class="poodle-file-upload__dropzone"
     class:poodle-file-upload__dropzone--active={dragActive}
+    role="group"
+    tabindex={disabled ? -1 : 0}
+    aria-disabled={disabled}
+    aria-label="File upload dropzone"
     ondrop={handleDrop}
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}
@@ -324,4 +332,3 @@
     </ul>
   {/if}
 </div>
-

@@ -75,8 +75,13 @@
            (CollapseToggle, action buttons), so it must not be a <button> itself.
            CollapseToggle owns the accessible name and aria-expanded; the click
            handler here is a pointer convenience for the whole row. -->
+      <!-- Keyboard users receive the same action from the nested CollapseToggle;
+           assigning this container an interactive role would create nested controls. -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div
         class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
+        role="group"
         onclick={handleHeaderClick}
       >
         <CollapseToggle
@@ -102,8 +107,13 @@
     {:else}
       {#if collapsible}
         <!-- See the collapsed branch: header is a container, not a control. -->
+        <!-- Keyboard users receive the same action from the nested CollapseToggle;
+             assigning this container an interactive role would create nested controls. -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <div
           class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
+          role="group"
           onclick={handleHeaderClick}
         >
           <CollapseToggle
@@ -162,4 +172,3 @@
     {/if}
   </UiPresentationProvider>
 </div>
-
