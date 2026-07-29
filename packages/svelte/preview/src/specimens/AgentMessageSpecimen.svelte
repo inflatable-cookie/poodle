@@ -61,15 +61,13 @@
     <AgentMessage markdown={long} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Size">
-    {#each ["xs", "sm", "md", "lg", "xl"] as size}
-      <AgentMessage markdown={`Size ${size}: prose measure and type scale move together.`} size={size as never} />
-    {/each}
-  </SpecimenGroup>
 
-  <SpecimenGroup title="Density" description="Density moves block spacing and list indent. It must not touch line height.">
-    {#each ["compact", "comfortable", "spacious"] as density}
-      <AgentMessage markdown={`Density ${density}\n\n- one\n- two`} density={density as never} />
-    {/each}
-  </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <AgentMessage markdown={`Size ${size}: prose measure and type scale move together.`} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <AgentMessage markdown={`Density ${density}\n\n- one\n- two`} {density} />
+  {/snippet}
 </SpecimenLayout>

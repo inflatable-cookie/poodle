@@ -331,7 +331,7 @@ block's own height.
 | Attribute | Values | On |
 |-----------|--------|-----|
 | `data-size` | `xs`…`xl` | root |
-| `data-density` | `compact`/`comfortable`/`spacious` | root |
+| `data-density` | `compact`/`default`/`comfortable` | root |
 | `data-empty` | `true` | root, when there are no items |
 | `data-pinned` | `true`/`false` | root |
 | `data-virtualized` | `true`/`false` | root |

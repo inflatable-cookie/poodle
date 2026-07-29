@@ -101,19 +101,17 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Size">
-    {#each ["xs", "md", "xl"] as size}
-      <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-        <AgentTranscript items={withFailure} virtualized={false} size={size as never} />
-      </div>
-    {/each}
-  </SpecimenGroup>
 
-  <SpecimenGroup title="Density">
-    {#each ["compact", "comfortable", "spacious"] as density}
-      <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-        <AgentTranscript items={withFailure} virtualized={false} density={density as never} />
-      </div>
-    {/each}
-  </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={withFailure} virtualized={false} {size} />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={withFailure} virtualized={false} {density} />
+    </div>
+  {/snippet}
 </SpecimenLayout>

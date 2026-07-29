@@ -238,7 +238,7 @@ Density drives block spacing and list indent only, never line height.
 | `data-role` | `user`/`assistant` | root |
 | `data-streaming` | `true` | root, while streaming |
 | `data-size` | `xs`…`xl` | root |
-| `data-density` | `compact`/`comfortable`/`spacious` | root |
+| `data-density` | `compact`/`default`/`comfortable` | root |
 | `data-language` | fence language | code blocks |
 
 ## 9. Svelte Notes

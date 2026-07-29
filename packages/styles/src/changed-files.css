@@ -26,8 +26,7 @@
 .poodle-changed-files[data-size="xl"] { --poodle-changed-files-font-size: 0.9375rem; --poodle-changed-files-icon-size: 1.125rem; }
 
 .poodle-changed-files[data-density="compact"] { --poodle-changed-files-inset: 0.5rem; --poodle-changed-files-gap: 0.5rem; }
-.poodle-changed-files[data-density="comfortable"] { --poodle-changed-files-inset: 0.75rem; --poodle-changed-files-gap: 0.75rem; }
-.poodle-changed-files[data-density="spacious"] { --poodle-changed-files-inset: 1rem; --poodle-changed-files-gap: 1rem; }
+.poodle-changed-files[data-density="comfortable"] { --poodle-changed-files-inset: 1rem; --poodle-changed-files-gap: 1rem; }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 

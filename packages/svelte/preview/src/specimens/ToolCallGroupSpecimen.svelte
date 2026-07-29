@@ -43,15 +43,13 @@
     <ToolCallGroup id="running" calls={running} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Size">
-    {#each ["xs", "sm", "md", "lg", "xl"] as size}
-      <ToolCallGroup id={`s-${size}`} calls={three} size={size as never} />
-    {/each}
-  </SpecimenGroup>
 
-  <SpecimenGroup title="Density">
-    {#each ["compact", "comfortable", "spacious"] as density}
-      <ToolCallGroup id={`d-${density}`} calls={three} density={density as never} />
-    {/each}
-  </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <ToolCallGroup id={`sz-${size}`} calls={three} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <ToolCallGroup id={`dn-${density}`} calls={three} {density} />
+  {/snippet}
 </SpecimenLayout>

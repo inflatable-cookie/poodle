@@ -32,15 +32,13 @@
       <ToolCall id="with-output" label="Ran command" detail="bun test" output={"272 pass\n0 fail"} expanded />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Size" description="Size sets the row height floor, glyph size and type scale.">
-      {#each ["xs", "sm", "md", "lg", "xl"] as size}
-        <ToolCall id={`s-${size}`} label="Ran command" detail={`size ${size}`} size={size as never} />
-      {/each}
-  </SpecimenGroup>
 
-  <SpecimenGroup title="Density" description="Density moves the gaps and inset. It never changes row height.">
-      {#each ["compact", "comfortable", "spacious"] as density}
-        <ToolCall id={`d-${density}`} label="Ran command" detail={`density ${density}`} density={density as never} />
-      {/each}
-  </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <ToolCall id={`sz-${size}`} label="Ran command" detail={`size ${size}`} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <ToolCall id={`dn-${density}`} label="Ran command" detail={`density ${density}`} {density} />
+  {/snippet}
 </SpecimenLayout>

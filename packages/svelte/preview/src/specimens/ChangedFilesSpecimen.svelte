@@ -65,15 +65,13 @@
     <ChangedFiles id="empty" files={[]} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Size">
-    {#each ["xs", "sm", "md", "lg", "xl"] as size}
-      <ChangedFiles id={`s-${size}`} files={single} size={size as never} />
-    {/each}
-  </SpecimenGroup>
 
-  <SpecimenGroup title="Density">
-    {#each ["compact", "comfortable", "spacious"] as density}
-      <ChangedFiles id={`d-${density}`} files={single} density={density as never} />
-    {/each}
-  </SpecimenGroup>
+
+  {#snippet sizes(size)}
+    <ChangedFiles id={`sz-${size}`} files={worked} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <ChangedFiles id={`dn-${density}`} files={worked} {density} />
+  {/snippet}
 </SpecimenLayout>

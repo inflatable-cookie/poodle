@@ -32,8 +32,7 @@
 .poodle-agent-transcript[data-size="xl"] { --poodle-agent-transcript-font-size: 0.9375rem; }
 
 .poodle-agent-transcript[data-density="compact"] { --poodle-agent-transcript-inset: 0.75rem; --poodle-agent-transcript-block-gap: 0.875rem; }
-.poodle-agent-transcript[data-density="comfortable"] { --poodle-agent-transcript-inset: 1rem; --poodle-agent-transcript-block-gap: 1.25rem; }
-.poodle-agent-transcript[data-density="spacious"] { --poodle-agent-transcript-inset: 1.5rem; --poodle-agent-transcript-block-gap: 1.75rem; }
+.poodle-agent-transcript[data-density="comfortable"] { --poodle-agent-transcript-inset: 1.5rem; --poodle-agent-transcript-block-gap: 1.75rem; }
 
 .poodle-agent-transcript__viewport {
   flex: 1 1 auto;

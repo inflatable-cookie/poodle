@@ -232,8 +232,8 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 | Density | pad-x | gap |
 |---------|-------|-----|
 | `compact` | 0.625rem | 0.4375rem |
-| `comfortable` | 0.8rem | 0.55rem |
-| `spacious` | 1rem | 0.6875rem |
+| `default` | 0.8rem | 0.55rem |
+| `comfortable` | 1rem | 0.6875rem |
 
 ### State Treatments
 

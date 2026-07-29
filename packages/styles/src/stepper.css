@@ -77,12 +77,8 @@
   --poodle-stepper-gap: 0.4375rem;
 }
 
-.poodle-stepper[data-density="comfortable"] {
-  --poodle-stepper-pad-x: 0.8rem;
-  --poodle-stepper-gap: 0.55rem;
-}
 
-.poodle-stepper[data-density="spacious"] {
+.poodle-stepper[data-density="comfortable"] {
   --poodle-stepper-pad-x: 1rem;
   --poodle-stepper-gap: 0.6875rem;
 }

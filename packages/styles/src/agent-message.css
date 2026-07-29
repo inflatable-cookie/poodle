@@ -31,8 +31,7 @@
    line height — that belongs to size, and compressing it is what makes dense
    prose unreadable rather than merely tight. */
 .poodle-agent-message[data-density="compact"] { --poodle-agent-message-block-gap: 0.625rem; --poodle-agent-message-list-indent: 1rem; --poodle-agent-message-inset: 0.625rem; }
-.poodle-agent-message[data-density="comfortable"] { --poodle-agent-message-block-gap: 0.875rem; --poodle-agent-message-list-indent: 1.25rem; --poodle-agent-message-inset: 0.75rem; }
-.poodle-agent-message[data-density="spacious"] { --poodle-agent-message-block-gap: 1.125rem; --poodle-agent-message-list-indent: 1.5rem; --poodle-agent-message-inset: 1rem; }
+.poodle-agent-message[data-density="comfortable"] { --poodle-agent-message-block-gap: 1.125rem; --poodle-agent-message-list-indent: 1.5rem; --poodle-agent-message-inset: 1rem; }
 
 .poodle-agent-message[data-role="user"] {
   padding: var(--poodle-agent-message-inset);
