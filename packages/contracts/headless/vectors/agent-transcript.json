@@ -1,0 +1,854 @@
+{
+  "grouping": [
+    {
+      "name": "empty transcript",
+      "items": [],
+      "blocks": []
+    },
+    {
+      "name": "single message",
+      "items": [
+        {
+          "kind": "message",
+          "id": "m1",
+          "role": "assistant",
+          "markdown": "x"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "message",
+          "id": "m1"
+        }
+      ]
+    },
+    {
+      "name": "one run of three calls",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "c",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a",
+            "b",
+            "c"
+          ],
+          "leadCallId": "c",
+          "hiddenCount": 2,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "name": "message splits two runs",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "message",
+          "id": "m",
+          "role": "assistant",
+          "markdown": "x"
+        },
+        {
+          "kind": "tool-call",
+          "id": "c",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a",
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 1,
+          "status": "success"
+        },
+        {
+          "kind": "message",
+          "id": "m"
+        },
+        {
+          "kind": "tool-run",
+          "id": "c",
+          "callIds": [
+            "c"
+          ],
+          "leadCallId": "c",
+          "hiddenCount": 0,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "name": "changed files splits a run",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "changed-files",
+          "id": "d",
+          "files": []
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a"
+          ],
+          "leadCallId": "a",
+          "hiddenCount": 0,
+          "status": "success"
+        },
+        {
+          "kind": "changed-files",
+          "id": "d",
+          "totals": {
+            "fileCount": 0,
+            "additions": 0,
+            "deletions": 0
+          }
+        },
+        {
+          "kind": "tool-run",
+          "id": "b",
+          "callIds": [
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 0,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "name": "the screenshot turn",
+      "items": [
+        {
+          "kind": "message",
+          "id": "m1",
+          "role": "assistant",
+          "markdown": "x"
+        },
+        {
+          "kind": "tool-call",
+          "id": "t1",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "t2",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "t3",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "message",
+          "id": "m2",
+          "role": "assistant",
+          "markdown": "x"
+        },
+        {
+          "kind": "tool-call",
+          "id": "t4",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "t5",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "changed-files",
+          "id": "diff",
+          "files": [
+            {
+              "path": "cp-api/Cargo.toml",
+              "additions": 361,
+              "deletions": 11
+            },
+            {
+              "path": "cp-docs/x.md",
+              "additions": 15,
+              "deletions": 5
+            }
+          ]
+        },
+        {
+          "kind": "tool-call",
+          "id": "t6",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "activity",
+          "id": "a1",
+          "label": "Working for 1h 1m"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "message",
+          "id": "m1"
+        },
+        {
+          "kind": "tool-run",
+          "id": "t1",
+          "callIds": [
+            "t1",
+            "t2",
+            "t3"
+          ],
+          "leadCallId": "t3",
+          "hiddenCount": 2,
+          "status": "success"
+        },
+        {
+          "kind": "message",
+          "id": "m2"
+        },
+        {
+          "kind": "tool-run",
+          "id": "t4",
+          "callIds": [
+            "t4",
+            "t5"
+          ],
+          "leadCallId": "t5",
+          "hiddenCount": 1,
+          "status": "success"
+        },
+        {
+          "kind": "changed-files",
+          "id": "diff",
+          "totals": {
+            "fileCount": 2,
+            "additions": 376,
+            "deletions": 16
+          }
+        },
+        {
+          "kind": "tool-run",
+          "id": "t6",
+          "callIds": [
+            "t6"
+          ],
+          "leadCallId": "t6",
+          "hiddenCount": 0,
+          "status": "success"
+        },
+        {
+          "kind": "activity",
+          "id": "a1"
+        }
+      ]
+    },
+    {
+      "name": "failure inside a run",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "error"
+        },
+        {
+          "kind": "tool-call",
+          "id": "c",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a",
+            "b",
+            "c"
+          ],
+          "leadCallId": "c",
+          "hiddenCount": 2,
+          "status": "error"
+        }
+      ]
+    },
+    {
+      "name": "running tail",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "running"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a",
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 1,
+          "status": "running"
+        }
+      ]
+    },
+    {
+      "name": "error outranks running",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "running"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "error"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a",
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 1,
+          "status": "error"
+        }
+      ]
+    },
+    {
+      "name": "activity only",
+      "items": [
+        {
+          "kind": "activity",
+          "id": "a1",
+          "label": "Working for 1h 1m"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "activity",
+          "id": "a1"
+        }
+      ]
+    }
+  ],
+  "windowing": [
+    {
+      "name": "uniform rows mid-scroll",
+      "heights": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "estimated": 100,
+      "scrollTop": 1000,
+      "viewport": 300,
+      "overscan": 0,
+      "window": {
+        "startIndex": 10,
+        "endIndex": 13,
+        "offsetY": 1000,
+        "totalHeight": 10000
+      }
+    },
+    {
+      "name": "uniform rows with overscan",
+      "heights": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "estimated": 100,
+      "scrollTop": 1000,
+      "viewport": 300,
+      "overscan": 3,
+      "window": {
+        "startIndex": 7,
+        "endIndex": 16,
+        "offsetY": 700,
+        "totalHeight": 10000
+      }
+    },
+    {
+      "name": "variable rows",
+      "heights": [
+        50,
+        150,
+        80,
+        200,
+        120,
+        90,
+        300,
+        40
+      ],
+      "estimated": 100,
+      "scrollTop": 300,
+      "viewport": 100,
+      "overscan": 2,
+      "window": {
+        "startIndex": 1,
+        "endIndex": 6,
+        "offsetY": 50,
+        "totalHeight": 1030
+      }
+    },
+    {
+      "name": "one giant row",
+      "heights": [
+        1000,
+        20,
+        20,
+        20
+      ],
+      "estimated": 100,
+      "scrollTop": 0,
+      "viewport": 100,
+      "overscan": 0,
+      "window": {
+        "startIndex": 0,
+        "endIndex": 1,
+        "offsetY": 0,
+        "totalHeight": 1060
+      }
+    },
+    {
+      "name": "unmeasured rows fall back to estimate",
+      "heights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "estimated": 200,
+      "scrollTop": 0,
+      "viewport": 400,
+      "overscan": 0,
+      "window": {
+        "startIndex": 0,
+        "endIndex": 2,
+        "offsetY": 0,
+        "totalHeight": 800
+      }
+    },
+    {
+      "name": "scrolled past the end",
+      "heights": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "estimated": 100,
+      "scrollTop": 100000,
+      "viewport": 300,
+      "overscan": 3,
+      "window": {
+        "startIndex": 7,
+        "endIndex": 10,
+        "offsetY": 700,
+        "totalHeight": 1000
+      }
+    },
+    {
+      "name": "empty",
+      "heights": [],
+      "estimated": 100,
+      "scrollTop": 0,
+      "viewport": 500,
+      "overscan": 3,
+      "window": {
+        "startIndex": 0,
+        "endIndex": 0,
+        "offsetY": 0,
+        "totalHeight": 0
+      }
+    },
+    {
+      "name": "top of a long list",
+      "heights": [
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40,
+        70,
+        100,
+        130,
+        160,
+        190,
+        220,
+        40
+      ],
+      "estimated": 100,
+      "scrollTop": 0,
+      "viewport": 600,
+      "overscan": 4,
+      "window": {
+        "startIndex": 0,
+        "endIndex": 10,
+        "offsetY": 0,
+        "totalHeight": 6410
+      }
+    }
+  ],
+  "pinned": [
+    {
+      "name": "exactly at bottom",
+      "scrollTop": 700,
+      "scrollHeight": 1000,
+      "clientHeight": 300,
+      "threshold": 32,
+      "pinned": true
+    },
+    {
+      "name": "within slack",
+      "scrollTop": 670,
+      "scrollHeight": 1000,
+      "clientHeight": 300,
+      "threshold": 32,
+      "pinned": true
+    },
+    {
+      "name": "just outside slack",
+      "scrollTop": 667,
+      "scrollHeight": 1000,
+      "clientHeight": 300,
+      "threshold": 32,
+      "pinned": false
+    },
+    {
+      "name": "scrolled up",
+      "scrollTop": 200,
+      "scrollHeight": 1000,
+      "clientHeight": 300,
+      "threshold": 32,
+      "pinned": false
+    },
+    {
+      "name": "overscrolled",
+      "scrollTop": 760,
+      "scrollHeight": 1000,
+      "clientHeight": 300,
+      "threshold": 32,
+      "pinned": true
+    }
+  ]
+}

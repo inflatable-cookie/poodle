@@ -118,6 +118,7 @@
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
   { run = "cargo test --manifest-path packages/contracts/headless/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/markdown/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/components/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/layout/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/style/Cargo.toml" },

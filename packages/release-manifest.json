@@ -96,6 +96,14 @@
       "channel": "preview"
     },
     {
+      "name": "poodle-markdown",
+      "path": "packages/contracts/markdown",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
       "name": "poodle-specs",
       "path": "packages/contracts/components",
       "kind": "contract-crate",

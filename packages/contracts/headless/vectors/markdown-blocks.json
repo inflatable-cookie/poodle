@@ -1,0 +1,499 @@
+[
+  {
+    "name": "paragraph with inline code, emphasis and a link",
+    "markdown": "The `lexer` is **strict** but *forgiving*, see [the docs](https://example.com/md).",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The "
+          },
+          {
+            "type": "code",
+            "value": "lexer"
+          },
+          {
+            "type": "text",
+            "value": " is "
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "strict"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " but "
+          },
+          {
+            "type": "em",
+            "children": [
+              {
+                "type": "text",
+                "value": "forgiving"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": ", see "
+          },
+          {
+            "type": "link",
+            "href": "https://example.com/md",
+            "children": [
+              {
+                "type": "text",
+                "value": "the docs"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "headings at several levels",
+    "markdown": "# One\n\n### Three\n\n###### Six",
+    "blocks": [
+      {
+        "type": "heading",
+        "level": 1,
+        "children": [
+          {
+            "type": "text",
+            "value": "One"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "children": [
+          {
+            "type": "text",
+            "value": "Three"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 6,
+        "children": [
+          {
+            "type": "text",
+            "value": "Six"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "fenced code with a language",
+    "markdown": "```rust\nfn main() {\n    println!(\"hi\");\n}\n```",
+    "blocks": [
+      {
+        "type": "code",
+        "lang": "rust",
+        "value": "fn main() {\n    println!(\"hi\");\n}"
+      }
+    ]
+  },
+  {
+    "name": "fenced code without a language",
+    "markdown": "```\nplain text\n```",
+    "blocks": [
+      {
+        "type": "code",
+        "lang": null,
+        "value": "plain text"
+      }
+    ]
+  },
+  {
+    "name": "tight unordered list",
+    "markdown": "- alpha\n- beta\n- gamma",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": false,
+        "start": 1,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "alpha"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "beta"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "gamma"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "loose unordered list",
+    "markdown": "- alpha\n\n- beta",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": false,
+        "start": 1,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "alpha"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "beta"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ordered list with a start offset",
+    "markdown": "3. three\n4. four",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": true,
+        "start": 3,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "three"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "four"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "nested list",
+    "markdown": "- outer\n  - inner one\n  - inner two\n- second",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": false,
+        "start": 1,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "outer"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": 1,
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "inner one"
+                      }
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "inner two"
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "second"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "list item containing a code fence",
+    "markdown": "1. run this:\n\n   ```sh\n   bun test\n   ```",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": true,
+        "start": 1,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "run this:"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "lang": "sh",
+              "value": "bun test"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "blockquote wrapping prose",
+    "markdown": "> quoted **line**\n> continued",
+    "blocks": [
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "quoted "
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "line"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "\ncontinued"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "thematic break between paragraphs",
+    "markdown": "before\n\n---\n\nafter",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "before"
+          }
+        ]
+      },
+      {
+        "type": "rule"
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "after"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "hard line break inside a paragraph",
+    "markdown": "first line  \nsecond line",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "first line"
+          },
+          {
+            "type": "break"
+          },
+          {
+            "type": "text",
+            "value": "second line"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "strikethrough",
+    "markdown": "~~gone~~ kept",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "del",
+            "children": [
+              {
+                "type": "text",
+                "value": "gone"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " kept"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "code span containing markdown characters",
+    "markdown": "use `**not bold**` literally",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "use "
+          },
+          {
+            "type": "code",
+            "value": "**not bold**"
+          },
+          {
+            "type": "text",
+            "value": " literally"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "multiple paragraphs",
+    "markdown": "one\n\ntwo\n\nthree",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "one"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "two"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "three"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "empty document",
+    "markdown": "",
+    "blocks": []
+  }
+]

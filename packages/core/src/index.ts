@@ -178,6 +178,38 @@ export {
 } from "./resize";
 
 export {
+  groupTranscriptItems,
+  toolRunLeadCall,
+  toolRunHiddenCount,
+  toolRunStatus,
+  changedFilesTotals,
+  transcriptWindow,
+  isPinnedToBottom,
+  type TranscriptRole,
+  type ToolCallStatus,
+  type TranscriptMessage,
+  type TranscriptToolCall,
+  type ChangedFile,
+  type ChangedFileStatus,
+  type TranscriptChangedFiles,
+  type TranscriptActivity,
+  type TranscriptItem,
+  type TranscriptToolRun,
+  type TranscriptBlock,
+  type ChangedFilesTotals,
+  type TranscriptWindow,
+} from "./agent-transcript";
+
+export {
+  blocksFromMarked,
+  inlineFromMarked,
+  markdownPlainText,
+  type MdBlock,
+  type MdInline,
+  type MarkedToken,
+} from "./markdown-blocks";
+
+export {
   flattenVisibleTreeRows,
   findTreeNode,
   isTreeBranch,

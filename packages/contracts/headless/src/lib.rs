@@ -7,6 +7,7 @@
 //! vectors in `vectors/`, executed by both runtimes.
 //! See docs/architecture/006-headless-core-and-machine-model.md.
 
+pub mod agent_transcript;
 pub mod checkbox;
 pub mod color;
 pub mod date;
