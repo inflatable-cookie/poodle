@@ -165,7 +165,7 @@
           {#each scopes as scope (scope.name)}
             <span>
               <span class="poodle-changed-files__scope-name">{scope.name}</span>
-              {scope.fileCount} files
+              {scope.fileCount} {scope.fileCount === 1 ? "file" : "files"}
             </span>
           {/each}
         </div>

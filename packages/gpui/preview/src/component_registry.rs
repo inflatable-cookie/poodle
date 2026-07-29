@@ -384,6 +384,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Route through a multi-step process, with per-step status.",
     },
     ComponentEntry {
+        slug: "agent-transcript",
+        display_name: "AgentTranscript",
+        description: "The output surface of an agent conversation: grouped tool runs, messages and changed files.",
+    },
+    ComponentEntry {
         slug: "select",
         display_name: "Select",
         description: "Dropdown selection from a list of options.",
@@ -776,6 +781,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         "button" | "icon-button" | "split-button" | "checkbox" | "switch" | "tri-state-switch"
         | "radio-group" | "segmented-control" | "toggle-group" => ComponentTag::Control,
         "stepper" => ComponentTag::Navigation,
+        "agent-transcript" => ComponentTag::Display,
         "text-input"
         | "number-input"
         | "select"

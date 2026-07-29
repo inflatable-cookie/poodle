@@ -164,7 +164,8 @@ export function ChangedFiles({
           <div className="poodle-changed-files__scopes">
             {scopes.map((scope) => (
               <span key={scope.name}>
-                <span className="poodle-changed-files__scope-name">{scope.name}</span> {scope.fileCount} files
+                <span className="poodle-changed-files__scope-name">{scope.name}</span> {scope.fileCount}{" "}
+                {scope.fileCount === 1 ? "file" : "files"}
               </span>
             ))}
           </div>
