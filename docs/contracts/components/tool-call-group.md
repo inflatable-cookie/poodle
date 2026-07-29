@@ -208,6 +208,7 @@ Density never changes row height.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Natives render the state the spec describes, with no toggle interaction | shared render-only posture | accepted | host drives expansion |
+| `moreLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 
 ## 13. Approval And Adoption Notes
 

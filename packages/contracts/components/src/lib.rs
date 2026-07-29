@@ -98,6 +98,11 @@ mod ui_presentation_provider;
 // Composite modules
 mod action_discovery_panel;
 mod agent_chat_input;
+mod agent_message;
+mod agent_transcript;
+mod changed_files;
+mod tool_call;
+mod tool_call_group;
 mod app_header;
 mod audio_player;
 mod block_editor;
@@ -148,6 +153,11 @@ mod validation_summary;
 mod video_player;
 
 pub use accordion::{AccordionSelectionMode, AccordionSpec};
+pub use agent_message::AgentMessageSpec;
+pub use agent_transcript::AgentTranscriptSpec;
+pub use changed_files::ChangedFilesSpec;
+pub use tool_call::ToolCallSpec;
+pub use tool_call_group::ToolCallGroupSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
