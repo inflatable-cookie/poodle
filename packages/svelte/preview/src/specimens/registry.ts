@@ -89,6 +89,11 @@ import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import StepperSpecimen from "./StepperSpecimen.svelte";
+import AgentMessageSpecimen from "./AgentMessageSpecimen.svelte";
+import AgentTranscriptSpecimen from "./AgentTranscriptSpecimen.svelte";
+import ChangedFilesSpecimen from "./ChangedFilesSpecimen.svelte";
+import ToolCallSpecimen from "./ToolCallSpecimen.svelte";
+import ToolCallGroupSpecimen from "./ToolCallGroupSpecimen.svelte";
 import SelectSpecimen from "./SelectSpecimen.svelte";
 import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
 import SidebarNavSpecimen from "./SidebarNavSpecimen.svelte";
@@ -235,6 +240,11 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "scroll-shell": ScrollShellSpecimen,
   "segmented-control": SegmentedControlSpecimen,
   stepper: StepperSpecimen,
+  "agent-message": AgentMessageSpecimen,
+  "agent-transcript": AgentTranscriptSpecimen,
+  "changed-files": ChangedFilesSpecimen,
+  "tool-call": ToolCallSpecimen,
+  "tool-call-group": ToolCallGroupSpecimen,
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
   "sidebar-nav": SidebarNavSpecimen,

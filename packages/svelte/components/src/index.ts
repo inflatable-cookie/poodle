@@ -80,6 +80,11 @@ export { default as Spinner } from "./Spinner.svelte";
 export { default as Spacer } from "./Spacer.svelte";
 export { default as Stack } from "./Stack.svelte";
 export { default as Stepper } from "./Stepper.svelte";
+export { default as AgentMessage } from "./AgentMessage.svelte";
+export { default as AgentTranscript } from "./AgentTranscript.svelte";
+export { default as ChangedFiles } from "./ChangedFiles.svelte";
+export { default as ToolCall } from "./ToolCall.svelte";
+export { default as ToolCallGroup } from "./ToolCallGroup.svelte";
 export { default as StatusBar } from "./StatusBar.svelte";
 export { default as StatusIndicator } from "./StatusIndicator.svelte";
 export { default as Surface } from "./Surface.svelte";
@@ -234,6 +239,17 @@ export type {
   ScrollDirection,
   SegmentedControlOption,
   StepperStep,
+  ChangedFile,
+  ChangedFileStatus,
+  ToolCallStatus,
+  TranscriptActivity,
+  TranscriptBlock,
+  TranscriptChangedFiles,
+  TranscriptItem,
+  TranscriptMessage,
+  TranscriptRole,
+  TranscriptToolCall,
+  TranscriptToolRun,
   SelectItems,
   SelectOption,
   SelectOptionGroup,

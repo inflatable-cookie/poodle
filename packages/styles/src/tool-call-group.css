@@ -1,0 +1,85 @@
+/*
+ * ToolCallGroup — a contiguous run of tool calls as one unit.
+ *
+ * Contract: docs/contracts/components/tool-call-group.md.
+ *
+ * A turn can contain dozens of tool calls, and a transcript that lists all of
+ * them is unreadable. A run compresses to one row plus a count — enough to skim
+ * past, or to notice that something in it failed.
+ */
+
+.poodle-tool-call-group {
+  --poodle-tool-call-group-gap: 0.5rem;
+  --poodle-tool-call-group-row-gap: 0.125rem;
+  --poodle-tool-call-group-font-size: 0.8125rem;
+  --poodle-tool-call-group-icon-size: 0.875rem;
+  --poodle-tool-call-group-inset-x: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-tool-call-group-row-gap);
+}
+
+.poodle-tool-call-group[data-size="xs"] { --poodle-tool-call-group-font-size: 0.6875rem; --poodle-tool-call-group-icon-size: 0.75rem; }
+.poodle-tool-call-group[data-size="sm"] { --poodle-tool-call-group-font-size: 0.75rem; --poodle-tool-call-group-icon-size: 0.8125rem; }
+.poodle-tool-call-group[data-size="md"] { --poodle-tool-call-group-font-size: 0.8125rem; --poodle-tool-call-group-icon-size: 0.875rem; }
+.poodle-tool-call-group[data-size="lg"] { --poodle-tool-call-group-font-size: 0.875rem; --poodle-tool-call-group-icon-size: 1rem; }
+.poodle-tool-call-group[data-size="xl"] { --poodle-tool-call-group-font-size: 0.9375rem; --poodle-tool-call-group-icon-size: 1.125rem; }
+
+.poodle-tool-call-group[data-density="compact"] { --poodle-tool-call-group-row-gap: 0; --poodle-tool-call-group-inset-x: 0.375rem; --poodle-tool-call-group-gap: 0.375rem; }
+.poodle-tool-call-group[data-density="comfortable"] { --poodle-tool-call-group-row-gap: 0.125rem; --poodle-tool-call-group-inset-x: 0.5rem; --poodle-tool-call-group-gap: 0.5rem; }
+.poodle-tool-call-group[data-density="spacious"] { --poodle-tool-call-group-row-gap: 0.25rem; --poodle-tool-call-group-inset-x: 0.75rem; --poodle-tool-call-group-gap: 0.6875rem; }
+
+.poodle-tool-call-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-tool-call-group-row-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poodle-tool-call-group__list > li {
+  display: block;
+}
+
+/* The toggle aligns to the rows' icon column so the count reads as a
+   continuation of the list rather than a separate control floating beside it. */
+.poodle-tool-call-group__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-tool-call-group-gap);
+  padding: 0.25rem var(--poodle-tool-call-group-inset-x);
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
+  font: inherit;
+  font-size: var(--poodle-tool-call-group-font-size);
+  cursor: pointer;
+}
+
+.poodle-tool-call-group__toggle:hover {
+  background: var(--poodle-color-background-elevated);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-tool-call-group__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+}
+
+.poodle-tool-call-group__toggle-icon {
+  flex: 0 0 auto;
+  transition: transform 120ms ease;
+}
+
+.poodle-tool-call-group[data-expanded="true"] .poodle-tool-call-group__toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* A collapsed run whose failure is not its newest call is the whole reason run
+   status exists: without this the failure is invisible until someone expands. */
+.poodle-tool-call-group[data-status="error"] .poodle-tool-call-group__toggle {
+  color: var(--poodle-color-status-danger);
+}

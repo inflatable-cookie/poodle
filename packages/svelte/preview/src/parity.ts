@@ -480,6 +480,20 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
+    note: "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+    exportNames: [
+      "AgentMessage",
+      "AgentTranscript",
+      "ChangedFiles",
+      "ToolCall",
+      "ToolCallGroup",
+    ],
+  },
+  {
+    packageName: "@poodle/svelte",
+    kind: "component",
+    status: "previewed",
+    sectionIds: ["catalog-hub"],
     note: "Every public primitive export is directly reviewable from the catalogue.",
     exportNames: [
       "AgentChatInput",

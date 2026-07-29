@@ -962,3 +962,24 @@ export type RefOption = {
   group?: string;
   disabled?: boolean;
 };
+
+/**
+ * Agent transcript types.
+ *
+ * Re-exported from `@poodle/headless` rather than redeclared: grouping,
+ * windowing and the Rust mirror all key off these shapes, and a second
+ * declaration here would be a second thing to keep in step.
+ */
+export type {
+  ChangedFile,
+  ChangedFileStatus,
+  ToolCallStatus,
+  TranscriptActivity,
+  TranscriptBlock,
+  TranscriptChangedFiles,
+  TranscriptItem,
+  TranscriptMessage,
+  TranscriptRole,
+  TranscriptToolCall,
+  TranscriptToolRun,
+} from "@poodle/headless";

@@ -16,6 +16,29 @@ const menuItems = [
 
 export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Accordion: { items: [{ value: "a", label: "Alpha" }] },
+  // Agent transcript set. AgentMessage and ChangedFiles both render nothing
+  // when empty — by contract, since a turn with no prose and a turn that
+  // changed no files should not reserve space — so they need real content to
+  // have any anatomy to assert.
+  AgentMessage: { markdown: "Ran the sweep. `41` tests pass." },
+  AgentTranscript: {
+    items: [
+      { kind: "message", id: "m1", role: "assistant", markdown: "Checking the parser." },
+      { kind: "tool-call", id: "t1", label: "Ran command", detail: "bun test", status: "success" },
+    ],
+  },
+  ChangedFiles: {
+    id: "changed",
+    files: [{ path: "src/lexer.rs", additions: 12, deletions: 3 }],
+  },
+  ToolCall: { id: "call", label: "Ran command", detail: "bun test", status: "success" },
+  ToolCallGroup: {
+    id: "run",
+    calls: [
+      { kind: "tool-call", id: "c1", label: "Ran command", detail: "cargo check", status: "success" },
+      { kind: "tool-call", id: "c2", label: "Ran command", detail: "bun test", status: "success" },
+    ],
+  },
   // Overlays render nothing while closed — open them so anatomy is assertable.
   AlertDialog: { title: "Heads up", open: true },
   AudioPlayer: { src: "/audio.mp3" },

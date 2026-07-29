@@ -1,0 +1,188 @@
+/*
+ * ChangedFiles — what a turn touched.
+ *
+ * Contract: docs/contracts/components/changed-files.md.
+ *
+ * Collapsed it answers "how much changed, and roughly where". Expanded it is a
+ * directory tree with counts rolled up from the files beneath each node.
+ */
+
+.poodle-changed-files {
+  --poodle-changed-files-inset: 0.75rem;
+  --poodle-changed-files-gap: 0.75rem;
+  --poodle-changed-files-font-size: 0.8125rem;
+  --poodle-changed-files-icon-size: 0.875rem;
+
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-color-background-elevated);
+  font-size: var(--poodle-changed-files-font-size);
+}
+
+.poodle-changed-files[data-size="xs"] { --poodle-changed-files-font-size: 0.6875rem; --poodle-changed-files-icon-size: 0.75rem; }
+.poodle-changed-files[data-size="sm"] { --poodle-changed-files-font-size: 0.75rem; --poodle-changed-files-icon-size: 0.8125rem; }
+.poodle-changed-files[data-size="md"] { --poodle-changed-files-font-size: 0.8125rem; --poodle-changed-files-icon-size: 0.875rem; }
+.poodle-changed-files[data-size="lg"] { --poodle-changed-files-font-size: 0.875rem; --poodle-changed-files-icon-size: 1rem; }
+.poodle-changed-files[data-size="xl"] { --poodle-changed-files-font-size: 0.9375rem; --poodle-changed-files-icon-size: 1.125rem; }
+
+.poodle-changed-files[data-density="compact"] { --poodle-changed-files-inset: 0.5rem; --poodle-changed-files-gap: 0.5rem; }
+.poodle-changed-files[data-density="comfortable"] { --poodle-changed-files-inset: 0.75rem; --poodle-changed-files-gap: 0.75rem; }
+.poodle-changed-files[data-density="spacious"] { --poodle-changed-files-inset: 1rem; --poodle-changed-files-gap: 1rem; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.poodle-changed-files__header {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-changed-files-gap);
+  padding: var(--poodle-changed-files-inset);
+}
+
+.poodle-changed-files__toggle {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.poodle-changed-files__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+}
+
+.poodle-changed-files__toggle-icon {
+  flex: 0 0 auto;
+  color: var(--poodle-color-text-tertiary);
+  transition: transform 120ms ease;
+}
+
+.poodle-changed-files[data-expanded="true"] .poodle-changed-files__toggle-icon {
+  transform: rotate(90deg);
+}
+
+.poodle-changed-files__count {
+  color: var(--poodle-color-text-primary);
+  font-weight: var(--poodle-typography-label-weight);
+}
+
+/* Tabular figures so the two count columns line up down the tree instead of
+   jittering per row as digit widths change. */
+.poodle-changed-files__additions,
+.poodle-changed-files__deletions {
+  font-family: var(--poodle-typography-code-family);
+  font-variant-numeric: tabular-nums;
+}
+
+.poodle-changed-files__additions {
+  color: var(--poodle-color-status-success);
+}
+
+.poodle-changed-files__deletions {
+  color: var(--poodle-color-status-danger);
+}
+
+.poodle-changed-files__files-toggle {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.poodle-changed-files__files-toggle:hover {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-changed-files__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* ── Collapsed summary ───────────────────────────────────────────────────── */
+
+.poodle-changed-files__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 var(--poodle-changed-files-inset) var(--poodle-changed-files-inset);
+}
+
+.poodle-changed-files__scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-changed-files__scope-name {
+  color: var(--poodle-color-text-primary);
+  font-family: var(--poodle-typography-code-family);
+}
+
+.poodle-changed-files__chip {
+  display: flex;
+  min-width: 0;
+  max-width: 14rem;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-background-subtle);
+  color: var(--poodle-color-text-secondary);
+  font: inherit;
+  font-family: var(--poodle-typography-code-family);
+  cursor: pointer;
+}
+
+.poodle-changed-files__chip:hover {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-changed-files__chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-changed-files__more {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.poodle-changed-files__more:hover {
+  color: var(--poodle-color-text-primary);
+}
+
+/* ── Expanded tree ───────────────────────────────────────────────────────── */
+
+.poodle-changed-files__tree {
+  padding: 0 var(--poodle-changed-files-inset) var(--poodle-changed-files-inset);
+}
+
+.poodle-changed-files__node-counts {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+  font-family: var(--poodle-typography-code-family);
+  font-variant-numeric: tabular-nums;
+}

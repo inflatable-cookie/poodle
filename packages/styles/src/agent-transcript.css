@@ -1,0 +1,108 @@
+/*
+ * AgentTranscript — the output surface of an agent conversation.
+ *
+ * Contract: docs/contracts/components/agent-transcript.md.
+ *
+ * `AgentChatInput` owns the composer and scopes out the transcript; this is the
+ * other side of that boundary. The two compose into a chat surface and neither
+ * knows about the other.
+ */
+
+.poodle-agent-transcript {
+  --poodle-agent-transcript-inset: 1rem;
+  --poodle-agent-transcript-block-gap: 1.25rem;
+  --poodle-agent-transcript-font-size: 0.8125rem;
+
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.poodle-agent-transcript[data-size="xs"] { --poodle-agent-transcript-font-size: 0.6875rem; }
+.poodle-agent-transcript[data-size="sm"] { --poodle-agent-transcript-font-size: 0.75rem; }
+.poodle-agent-transcript[data-size="md"] { --poodle-agent-transcript-font-size: 0.8125rem; }
+.poodle-agent-transcript[data-size="lg"] { --poodle-agent-transcript-font-size: 0.875rem; }
+.poodle-agent-transcript[data-size="xl"] { --poodle-agent-transcript-font-size: 0.9375rem; }
+
+.poodle-agent-transcript[data-density="compact"] { --poodle-agent-transcript-inset: 0.75rem; --poodle-agent-transcript-block-gap: 0.875rem; }
+.poodle-agent-transcript[data-density="comfortable"] { --poodle-agent-transcript-inset: 1rem; --poodle-agent-transcript-block-gap: 1.25rem; }
+.poodle-agent-transcript[data-density="spacious"] { --poodle-agent-transcript-inset: 1.5rem; --poodle-agent-transcript-block-gap: 1.75rem; }
+
+.poodle-agent-transcript__viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--poodle-agent-transcript-inset);
+}
+
+/* Unwindowed, blocks are children of the viewport directly — the runway and
+   slice would change nothing and their absence keeps the DOM honest about what
+   is happening. */
+.poodle-agent-transcript__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-agent-transcript-block-gap);
+}
+
+/* The runway holds the full scroll height while only a window of blocks exists,
+   so the scrollbar describes the whole transcript rather than the rendered
+   slice. */
+.poodle-agent-transcript__runway {
+  position: relative;
+  width: 100%;
+}
+
+.poodle-agent-transcript__slice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--poodle-agent-transcript-block-gap);
+}
+
+/* ── Activity footer ─────────────────────────────────────────────────────── */
+
+.poodle-agent-transcript__activity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--poodle-agent-transcript-block-gap);
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-agent-transcript-font-size);
+}
+
+/* ── Jump to latest ──────────────────────────────────────────────────────── */
+
+.poodle-agent-transcript__jump {
+  position: absolute;
+  bottom: var(--poodle-agent-transcript-inset);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-pill);
+  background: var(--poodle-color-background-elevated);
+  box-shadow: var(--poodle-elevation-overlay);
+  color: var(--poodle-color-text-primary);
+  font: inherit;
+  font-size: var(--poodle-agent-transcript-font-size);
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.poodle-agent-transcript__jump:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+}
+
+.poodle-agent-transcript__empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}

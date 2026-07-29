@@ -1,0 +1,120 @@
+/*
+ * AgentMessage — one turn of prose in an agent conversation.
+ *
+ * Contract: docs/contracts/components/agent-message.md.
+ *
+ * Markdown renders through the shared block model, so what appears here is the
+ * same document the natives render from `poodle-markdown`. Anything outside the
+ * supported subset degrades to text rather than vanishing.
+ */
+
+.poodle-agent-message {
+  --poodle-agent-message-measure: 46rem;
+  --poodle-agent-message-font-size: 0.9375rem;
+  --poodle-agent-message-block-gap: 0.875rem;
+  --poodle-agent-message-list-indent: 1.25rem;
+  --poodle-agent-message-inset: 0.75rem;
+
+  max-width: var(--poodle-agent-message-measure);
+  color: var(--poodle-color-text-primary);
+  font-size: var(--poodle-agent-message-font-size);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+.poodle-agent-message[data-size="xs"] { --poodle-agent-message-font-size: 0.75rem; --poodle-agent-message-measure: 38rem; }
+.poodle-agent-message[data-size="sm"] { --poodle-agent-message-font-size: 0.875rem; --poodle-agent-message-measure: 42rem; }
+.poodle-agent-message[data-size="md"] { --poodle-agent-message-font-size: 0.9375rem; --poodle-agent-message-measure: 46rem; }
+.poodle-agent-message[data-size="lg"] { --poodle-agent-message-font-size: 1rem; --poodle-agent-message-measure: 50rem; }
+.poodle-agent-message[data-size="xl"] { --poodle-agent-message-font-size: 1.125rem; --poodle-agent-message-measure: 54rem; }
+
+/* Density moves the space between blocks and the list indent. It must not touch
+   line height — that belongs to size, and compressing it is what makes dense
+   prose unreadable rather than merely tight. */
+.poodle-agent-message[data-density="compact"] { --poodle-agent-message-block-gap: 0.625rem; --poodle-agent-message-list-indent: 1rem; --poodle-agent-message-inset: 0.625rem; }
+.poodle-agent-message[data-density="comfortable"] { --poodle-agent-message-block-gap: 0.875rem; --poodle-agent-message-list-indent: 1.25rem; --poodle-agent-message-inset: 0.75rem; }
+.poodle-agent-message[data-density="spacious"] { --poodle-agent-message-block-gap: 1.125rem; --poodle-agent-message-list-indent: 1.5rem; --poodle-agent-message-inset: 1rem; }
+
+.poodle-agent-message[data-role="user"] {
+  padding: var(--poodle-agent-message-inset);
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-color-background-subtle);
+}
+
+.poodle-agent-message__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-agent-message-block-gap);
+}
+
+.poodle-agent-message__paragraph {
+  margin: 0;
+}
+
+.poodle-agent-message__heading {
+  margin: 0;
+  font-family: var(--poodle-typography-heading-family);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: 1.3;
+}
+
+.poodle-agent-message__heading[data-level="1"] { font-size: 1.5em; }
+.poodle-agent-message__heading[data-level="2"] { font-size: 1.3em; }
+.poodle-agent-message__heading[data-level="3"] { font-size: 1.15em; }
+.poodle-agent-message__heading[data-level="4"] { font-size: 1.05em; }
+.poodle-agent-message__heading[data-level="5"] { font-size: 1em; }
+.poodle-agent-message__heading[data-level="6"] { font-size: 0.9em; }
+
+.poodle-agent-message__list {
+  margin: 0;
+  padding-left: var(--poodle-agent-message-list-indent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.poodle-agent-message__list-item > .poodle-agent-message__body {
+  gap: 0.375rem;
+}
+
+.poodle-agent-message__quote {
+  margin: 0;
+  padding-left: var(--poodle-agent-message-list-indent);
+  border-left: 0.125rem solid var(--poodle-color-border-subtle);
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-agent-message__code-span {
+  padding: 0.0625rem 0.25rem;
+  border-radius: var(--poodle-radius-sm);
+  background: var(--poodle-color-background-elevated);
+  font-family: var(--poodle-typography-code-family);
+  /* Mono faces run large at the same nominal size; the ratio token is what
+     keeps inline code from towering over the prose around it. */
+  font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio, 0.9));
+}
+
+/* The caret is a progress hint, not content — `aria-hidden` in the markup, and
+   it must not affect layout either, so it sits inline with zero width impact
+   beyond its own box. */
+.poodle-agent-message__caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.125rem;
+  border-radius: 0.0625rem;
+  background: var(--poodle-color-accent-base);
+  vertical-align: text-bottom;
+  animation: poodle-agent-message-blink 1s steps(2, start) infinite;
+}
+
+@keyframes poodle-agent-message-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poodle-agent-message__caret {
+    animation: none;
+  }
+}

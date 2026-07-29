@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-29T11:40:06.954Z",
+  "generatedAt": "2026-07-29T12:40:19.545Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -176,18 +176,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 174,
-        "componentCount": 137,
+        "exportCount": 179,
+        "componentCount": 142,
         "helperCount": 37,
-        "previewedCount": 174,
+        "previewedCount": 179,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 174,
-        "componentCount": 137,
+        "exportCount": 179,
+        "componentCount": 142,
         "helperCount": 37,
-        "previewedCount": 174,
+        "previewedCount": 179,
         "contractOnlyCount": 0
       }
     ],
@@ -224,6 +224,32 @@
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "AgentMessage",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "AgentTranscript",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -419,6 +445,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "ChangedFiles",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2315,6 +2354,32 @@
         ],
         "sectionTitles": [
           "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "ToolCall",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "ToolCallGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {

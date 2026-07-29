@@ -15,7 +15,7 @@ const parse = (src: string): MdBlock[] =>
 
 /**
  * The vector file is the contract between the two parsers. This side proves
- * `marked` still normalises to what is pinned; `poodle-specs` proves
+ * `marked` still normalises to what is pinned; `poodle-markdown` proves
  * `pulldown-cmark` reaches the same blocks from the same source.
  *
  * A `marked` upgrade that changes tokenisation fails here rather than silently

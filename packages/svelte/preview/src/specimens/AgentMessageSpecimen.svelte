@@ -1,0 +1,75 @@
+<script lang="ts">
+  import { AgentMessage } from "@poodle/svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  const inline = "The `lexer` is **strict** but *forgiving*, see [the docs](https://example.com/md). Also ~~gone~~ kept.";
+  const headings = "# One\n\n### Three\n\n###### Six";
+  const fenced = "```rust\nfn main() {\n    println!(\"hi\");\n}\n```";
+  const unfenced = "```\nno language given\n```";
+  const tight = "- alpha\n- beta\n- gamma";
+  const loose = "- alpha\n\n- beta";
+  const ordered = "3. three\n4. four";
+  const nested = "- outer\n  - inner one\n  - inner two\n- second";
+  const itemWithFence = "1. run this:\n\n   ```sh\n   bun test\n   ```";
+  const quote = "> quoted **line**\n> continued";
+  const rule = "before\n\n---\n\nafter";
+  // Outside the supported subset. It must degrade to text, not vanish — an
+  // agent explaining HTML has to keep the explanation.
+  const unsupported = "A table:\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\nAnd raw <div>markup</div>.";
+  const long =
+    "The latest fixes hold: 41 parser tests pass. AO415 now matches in text and structure; its only remaining delta is an extra CSS class on `<sup>`. RO418 is down to one space inserted after inline math at a source line break. Both are narrow compatibility rules, not parsing failures.";
+</script>
+
+<SpecimenLayout>
+  <SpecimenGroup title="Inline markup" description="Structure, not text: code spans, emphasis, links and strikethrough all survive the block model.">
+    <AgentMessage markdown={inline} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Headings" description="Real heading elements, so the message is navigable by heading.">
+    <AgentMessage markdown={headings} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Code blocks" description="An unannotated fence reports no language rather than an empty one.">
+    <AgentMessage markdown={fenced} />
+    <AgentMessage markdown={unfenced} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Lists" description="Tight and loose both normalise to paragraph-wrapped items — that is what removes tight-vs-loose as a source of native divergence.">
+    <AgentMessage markdown={tight} />
+    <AgentMessage markdown={loose} />
+    <AgentMessage markdown={ordered} />
+    <AgentMessage markdown={nested} />
+    <AgentMessage markdown={itemWithFence} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Quotes and rules">
+    <AgentMessage markdown={quote} />
+    <AgentMessage markdown={rule} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Outside the subset" description="Tables and raw HTML degrade to text. Silently losing content is the worst available failure for a transcript.">
+    <AgentMessage markdown={unsupported} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Streaming" description="The caret is aria-hidden: it is a progress hint, not content.">
+    <AgentMessage markdown="Regenerating the corpus against the cached oracle" isStreaming />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Roles" description="A user turn sits on the subtle surface; an assistant turn has no container chrome.">
+    <AgentMessage markdown="Can you run the parity sweep again?" role="user" />
+    <AgentMessage markdown={long} />
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Size">
+    {#each ["xs", "sm", "md", "lg", "xl"] as size}
+      <AgentMessage markdown={`Size ${size}: prose measure and type scale move together.`} size={size as never} />
+    {/each}
+  </SpecimenGroup>
+
+  <SpecimenGroup title="Density" description="Density moves block spacing and list indent. It must not touch line height.">
+    {#each ["compact", "comfortable", "spacious"] as density}
+      <AgentMessage markdown={`Density ${density}\n\n- one\n- two`} density={density as never} />
+    {/each}
+  </SpecimenGroup>
+</SpecimenLayout>

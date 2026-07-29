@@ -1,0 +1,165 @@
+/*
+ * ToolCall — one row of agent work.
+ *
+ * Contract: docs/contracts/components/tool-call.md.
+ *
+ * The row's job is to be skimmable at a glance and openable when it matters.
+ * Most tool calls are never read; the ones that are, are read because something
+ * went wrong.
+ */
+
+.poodle-tool-call {
+  --poodle-tool-call-row-height: 1.75rem;
+  --poodle-tool-call-font-size: 0.8125rem;
+  --poodle-tool-call-icon-size: 0.875rem;
+  --poodle-tool-call-gap: 0.5rem;
+  --poodle-tool-call-inset-x: 0.5rem;
+  --poodle-tool-call-inset-y: 0.25rem;
+
+  display: block;
+}
+
+/* ── Size: intrinsic dimensions only ─────────────────────────────────────── */
+
+.poodle-tool-call[data-size="xs"] {
+  --poodle-tool-call-row-height: 1.375rem;
+  --poodle-tool-call-font-size: 0.6875rem;
+  --poodle-tool-call-icon-size: 0.75rem;
+  --poodle-tool-call-inset-y: 0.125rem;
+}
+
+.poodle-tool-call[data-size="sm"] {
+  --poodle-tool-call-row-height: 1.5rem;
+  --poodle-tool-call-font-size: 0.75rem;
+  --poodle-tool-call-icon-size: 0.8125rem;
+  --poodle-tool-call-inset-y: 0.1875rem;
+}
+
+.poodle-tool-call[data-size="md"] {
+  --poodle-tool-call-row-height: 1.75rem;
+  --poodle-tool-call-font-size: 0.8125rem;
+  --poodle-tool-call-icon-size: 0.875rem;
+  --poodle-tool-call-inset-y: 0.25rem;
+}
+
+.poodle-tool-call[data-size="lg"] {
+  --poodle-tool-call-row-height: 2rem;
+  --poodle-tool-call-font-size: 0.875rem;
+  --poodle-tool-call-icon-size: 1rem;
+  --poodle-tool-call-inset-y: 0.3125rem;
+}
+
+.poodle-tool-call[data-size="xl"] {
+  --poodle-tool-call-row-height: 2.25rem;
+  --poodle-tool-call-font-size: 0.9375rem;
+  --poodle-tool-call-icon-size: 1.125rem;
+  --poodle-tool-call-inset-y: 0.375rem;
+}
+
+/* ── Density: horizontal spacing only, never height ──────────────────────── */
+
+.poodle-tool-call[data-density="compact"] {
+  --poodle-tool-call-gap: 0.375rem;
+  --poodle-tool-call-inset-x: 0.375rem;
+}
+
+.poodle-tool-call[data-density="comfortable"] {
+  --poodle-tool-call-gap: 0.5rem;
+  --poodle-tool-call-inset-x: 0.5rem;
+}
+
+.poodle-tool-call[data-density="spacious"] {
+  --poodle-tool-call-gap: 0.6875rem;
+  --poodle-tool-call-inset-x: 0.75rem;
+}
+
+/* ── Row ─────────────────────────────────────────────────────────────────── */
+
+.poodle-tool-call__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--poodle-tool-call-gap);
+  min-height: var(--poodle-tool-call-row-height);
+  padding: var(--poodle-tool-call-inset-y) var(--poodle-tool-call-inset-x);
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: var(--poodle-color-text-primary);
+  font: inherit;
+  font-size: var(--poodle-tool-call-font-size);
+  text-align: left;
+}
+
+/* Hover fills the whole row rather than the chevron: the entire row is the hit
+   target, and a highlight that covers only part of it misreports where you can
+   click. */
+.poodle-tool-call[data-interactive="true"] .poodle-tool-call__trigger {
+  cursor: pointer;
+}
+
+.poodle-tool-call[data-interactive="true"] .poodle-tool-call__trigger:hover {
+  background: var(--poodle-color-background-elevated);
+}
+
+.poodle-tool-call__trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+}
+
+.poodle-tool-call__icon {
+  flex: 0 0 auto;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-tool-call__label {
+  flex: 0 0 auto;
+  color: var(--poodle-color-text-primary);
+}
+
+/* `min-width: 0` is load-bearing. Without it the flex item refuses to shrink
+   below its content width, and a long command pushes the status indicator out
+   of the row entirely instead of ellipsising. */
+.poodle-tool-call__detail {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--poodle-color-text-tertiary);
+  font-family: var(--poodle-typography-code-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-tool-call__disclosure {
+  flex: 0 0 auto;
+  color: var(--poodle-color-text-tertiary);
+  transition: transform 120ms ease;
+}
+
+.poodle-tool-call[data-expanded="true"] .poodle-tool-call__disclosure {
+  transform: rotate(180deg);
+}
+
+.poodle-tool-call__status {
+  flex: 0 0 auto;
+}
+
+.poodle-tool-call[data-status="success"] .poodle-tool-call__status {
+  color: var(--poodle-color-status-success);
+}
+
+.poodle-tool-call[data-status="error"] .poodle-tool-call__status {
+  color: var(--poodle-color-status-danger);
+}
+
+/* Only the label takes the danger colour, never the detail. The detail is
+   already the dimmest thing in the row, and colouring it red as well makes a
+   failed row read as a solid block of alarm rather than a line you can scan. */
+.poodle-tool-call[data-status="error"] .poodle-tool-call__label {
+  color: var(--poodle-color-status-danger);
+}
+
+.poodle-tool-call__output {
+  margin-top: var(--poodle-space-stack-xs);
+  margin-left: calc(var(--poodle-tool-call-inset-x) + var(--poodle-tool-call-icon-size) + var(--poodle-tool-call-gap));
+}

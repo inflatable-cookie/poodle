@@ -11,6 +11,8 @@ primitives and layout surfaces through higher-order application components.
 - `accordion.md`
 - `action-discovery-panel.md`
 - `agent-chat-input.md`
+- `agent-message.md`
+- `agent-transcript.md`
 - `alert-dialog.md`
 - `app-header.md`
 - `audio-player.md`
@@ -25,6 +27,7 @@ primitives and layout surfaces through higher-order application components.
 - `card-radio-group.md`
 - `card-toggle-group.md`
 - `card.md`
+- `changed-files.md`
 - `checkbox.md`
 - `code-input.md`
 - `code.md`
@@ -148,6 +151,8 @@ primitives and layout surfaces through higher-order application components.
 - `toast-host.md`
 - `toast-stack.md`
 - `toggle-group.md`
+- `tool-call-group.md`
+- `tool-call.md`
 - `toolbar.md`
 - `token-input.md`
 - `tooltip.md`

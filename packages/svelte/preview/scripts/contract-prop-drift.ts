@@ -69,9 +69,15 @@ function svelteProps(src: string): Set<string> {
   let d = 0;
   let cur = "";
   const parts: string[] = [];
-  for (const ch of body) {
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    // The `>` of an arrow function is not a closing bracket. Counting it as one
+    // drives depth negative, after which no comma reads as top-level and every
+    // prop declared after the first arrow-function default is silently dropped
+    // — the drift gate then reports them as contract-only.
+    const isArrow = ch === ">" && body[i - 1] === "=";
     if ("{([<".includes(ch)) d++;
-    else if ("})]>".includes(ch)) d--;
+    else if (!isArrow && "})]>".includes(ch)) d--;
     if (ch === "," && d === 0) {
       parts.push(cur);
       cur = "";

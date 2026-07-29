@@ -48,6 +48,8 @@ contract references the rule rather than restating it:
 - `components/accordion.md`
 - `components/action-discovery-panel.md`
 - `components/agent-chat-input.md`
+- `components/agent-message.md`
+- `components/agent-transcript.md`
 - `components/alert-dialog.md`
 - `components/app-header.md`
 - `components/audio-player.md`
@@ -62,6 +64,7 @@ contract references the rule rather than restating it:
 - `components/card-radio-group.md`
 - `components/card-toggle-group.md`
 - `components/card.md`
+- `components/changed-files.md`
 - `components/checkbox.md`
 - `components/code-input.md`
 - `components/code.md`
@@ -185,6 +188,8 @@ contract references the rule rather than restating it:
 - `components/toast-host.md`
 - `components/toast-stack.md`
 - `components/toggle-group.md`
+- `components/tool-call-group.md`
+- `components/tool-call.md`
 - `components/toolbar.md`
 - `components/tooltip.md`
 - `components/treatment-tokens.md`

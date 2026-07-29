@@ -183,6 +183,8 @@ export {
   toolRunHiddenCount,
   toolRunStatus,
   changedFilesTotals,
+  buildChangedFileTree,
+  changedFileScopes,
   transcriptWindow,
   isPinnedToBottom,
   type TranscriptRole,
@@ -197,6 +199,7 @@ export {
   type TranscriptToolRun,
   type TranscriptBlock,
   type ChangedFilesTotals,
+  type ChangedFileNode,
   type TranscriptWindow,
 } from "./agent-transcript";
 
