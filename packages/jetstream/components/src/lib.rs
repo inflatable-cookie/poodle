@@ -49,7 +49,12 @@ pub mod progress;
 pub mod separator;
 pub mod spinner;
 pub mod status_indicator;
+pub mod agent_message;
+pub mod agent_transcript;
+pub mod changed_files;
 pub mod stepper;
+pub mod tool_call;
+pub mod tool_call_group;
 pub mod switch;
 
 // Structural primitives (g10.003)

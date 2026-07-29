@@ -1,0 +1,129 @@
+//! AgentTranscript specimen — contract §14.
+//!
+//! The failing group is the one that matters: a failure that is *not* the run's
+//! newest call is invisible in the visible row, so the collapsed toggle is the
+//! only thing that can carry it.
+
+use jetstream_ui::ui_element::*;
+use poodle_headless::agent_transcript::{
+    ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
+    TranscriptMessage, TranscriptToolCall,
+};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::agent_transcript::js_agent_transcript;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_specs::AgentTranscriptSpec;
+
+fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
+    TranscriptItem::ToolCall(TranscriptToolCall {
+        id: id.to_string(),
+        label: "Ran command".to_string(),
+        detail: Some(detail.to_string()),
+        status,
+        ..Default::default()
+    })
+}
+
+fn message(id: &str, markdown: &str) -> TranscriptItem {
+    TranscriptItem::Message(TranscriptMessage {
+        id: id.to_string(),
+        markdown: markdown.to_string(),
+        ..Default::default()
+    })
+}
+
+pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+    let secondary = resolve_color(theme, "color.text.secondary");
+
+    // The changed-files card splits the commands either side of it into two
+    // runs rather than being absorbed into one.
+    let turn = vec![
+        message("m1", "The latest fixes hold: 41 parser tests pass."),
+        call("t1", "effigy cp-api/test:latex", ToolCallStatus::Success),
+        call("t2", "nl -ba src/lexer.rs", ToolCallStatus::Success),
+        message("m2", "AO415 and RO418 now both reach full semantic parity."),
+        TranscriptItem::ChangedFiles(TranscriptChangedFiles {
+            id: "diff".to_string(),
+            files: vec![
+                ChangedFile { path: "cp-api/crates/latex/src/lexer.rs".into(), additions: 271, deletions: 10, status: None },
+                ChangedFile { path: "cp-api/tools/export_fixture.rs".into(), additions: 89, deletions: 1, status: None },
+                ChangedFile { path: "cp-docs/book-port.md".into(), additions: 15, deletions: 5, status: None },
+            ],
+        }),
+        call("t6", "jq -r .body_html /tmp/g0216.json", ToolCallStatus::Success),
+        TranscriptItem::Activity(TranscriptActivity {
+            id: "act".to_string(),
+            label: "Working for 1h 1m".to_string(),
+        }),
+    ];
+
+    let failing = vec![
+        message("f0", "Running the gate."),
+        call("f1", "cargo check", ToolCallStatus::Success),
+        call("f2", "effigy check:gpui", ToolCallStatus::Error),
+        call("f3", "bun test", ToolCallStatus::Success),
+    ];
+
+    let markdown = vec![message(
+        "md",
+        "Supported subset:\n\n- `inline code` and **strong**\n- nested\n  - items\n\n```rust\nfn main() {}\n```\n\n> a quoted line",
+    )];
+
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "A worked turn",
+            secondary,
+            js_agent_transcript(&AgentTranscriptSpec::new(turn), theme),
+        ))
+        .child(group(
+            "A run containing a failure",
+            secondary,
+            js_agent_transcript(&AgentTranscriptSpec::new(failing.clone()), theme),
+        ))
+        .child(group(
+            "Expanded run",
+            secondary,
+            js_agent_transcript(
+                &AgentTranscriptSpec::new(failing).with_expanded_tool_runs(vec!["f1".to_string()]),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Expanded changed files",
+            secondary,
+            js_agent_transcript(
+                &AgentTranscriptSpec::new(vec![TranscriptItem::ChangedFiles(
+                    TranscriptChangedFiles {
+                        id: "tree".to_string(),
+                        files: vec![
+                            ChangedFile { path: "app/src/lib/editor/machine.ts".into(), additions: 12, deletions: 3, status: None },
+                            ChangedFile { path: "app/src/lib/editor/view.ts".into(), additions: 4, deletions: 0, status: None },
+                            ChangedFile { path: "docs/notes.md".into(), additions: 1, deletions: 1, status: None },
+                        ],
+                    },
+                )])
+                .with_expanded_changed_files(vec!["tree".to_string()]),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Markdown subset",
+            secondary,
+            js_agent_transcript(&AgentTranscriptSpec::new(markdown), theme),
+        ))
+        .child(group(
+            "Empty",
+            secondary,
+            js_agent_transcript(&AgentTranscriptSpec::new(Vec::new()), theme),
+        ))
+}
+
+fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(label(title).text_color(text_secondary).text_size(11.0))
+        .child(content)
+}
