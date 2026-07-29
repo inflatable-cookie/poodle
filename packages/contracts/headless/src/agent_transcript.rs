@@ -363,3 +363,122 @@ pub fn is_pinned_to_bottom(
 ) -> bool {
     scroll_height - (scroll_top + client_height) <= threshold_px
 }
+
+// ── Changed-file tree ──
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct ChangedFileNode {
+    /// Full path from the root, used as the tree node's value.
+    pub path: String,
+    /// What this row displays — a collapsed chain shows `crates/latex`.
+    pub label: String,
+    pub is_directory: bool,
+    pub additions: u32,
+    pub deletions: u32,
+    pub children: Vec<ChangedFileNode>,
+}
+
+/// Fold flat paths into a directory tree with counts rolled up from descendants.
+///
+/// Single-child directory chains collapse into one row. A path like
+/// `cp-api/crates/latex/src/parser.rs` would otherwise cost four rows to say one
+/// thing; the chain collapses exactly as long as no node in it has a sibling.
+/// That is the difference between a tree you can read and an indentation
+/// staircase.
+///
+/// Mirror of core `buildChangedFileTree`, driven by the shared vectors in
+/// `vectors/changed-file-tree.json`.
+pub fn build_changed_file_tree(files: &[ChangedFile]) -> Vec<ChangedFileNode> {
+    fn insert(nodes: &mut Vec<ChangedFileNode>, segments: &[&str], prefix: &str, file: &ChangedFile) {
+        let Some((head, rest)) = segments.split_first() else {
+            return;
+        };
+        let path = if prefix.is_empty() {
+            (*head).to_string()
+        } else {
+            format!("{prefix}/{head}")
+        };
+
+        let index = match nodes.iter().position(|n| n.path == path) {
+            Some(i) => i,
+            None => {
+                nodes.push(ChangedFileNode {
+                    path: path.clone(),
+                    label: (*head).to_string(),
+                    is_directory: !rest.is_empty(),
+                    ..Default::default()
+                });
+                nodes.len() - 1
+            }
+        };
+
+        nodes[index].additions += file.additions;
+        nodes[index].deletions += file.deletions;
+        insert(&mut nodes[index].children, rest, &path, file);
+    }
+
+    fn collapse(nodes: Vec<ChangedFileNode>) -> Vec<ChangedFileNode> {
+        nodes
+            .into_iter()
+            .map(|node| {
+                let mut current = node;
+                let mut label = current.label.clone();
+
+                // Only directories collapse, and only through single children —
+                // a directory with two entries is a real fork and has to render
+                // as one.
+                while current.is_directory
+                    && current.children.len() == 1
+                    && current.children[0].is_directory
+                {
+                    let child = current.children.into_iter().next().expect("single child");
+                    label = format!("{label}/{}", child.label);
+                    current = child;
+                }
+
+                ChangedFileNode {
+                    label,
+                    children: collapse(current.children),
+                    ..current
+                }
+            })
+            .collect()
+    }
+
+    let mut roots: Vec<ChangedFileNode> = Vec::new();
+    for file in files {
+        let segments: Vec<&str> = file.path.split('/').filter(|s| !s.is_empty()).collect();
+        insert(&mut roots, &segments, "", file);
+    }
+
+    collapse(roots)
+}
+
+/// Top-level directories with their file counts, for the collapsed summary.
+pub fn changed_file_scopes(files: &[ChangedFile]) -> Vec<(String, usize)> {
+    let mut order: Vec<String> = Vec::new();
+    let mut counts: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+
+    for file in files {
+        let name = file
+            .path
+            .split('/')
+            .find(|s| !s.is_empty())
+            .unwrap_or(file.path.as_str())
+            .to_string();
+
+        if !counts.contains_key(&name) {
+            order.push(name.clone());
+        }
+        *counts.entry(name).or_insert(0) += 1;
+    }
+
+    // Insertion order, matching the JS `Map` the TS side iterates.
+    order
+        .into_iter()
+        .map(|name| {
+            let count = counts[&name];
+            (name, count)
+        })
+        .collect()
+}

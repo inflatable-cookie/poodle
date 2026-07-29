@@ -149,6 +149,7 @@ new rows appear above it, focus does not move on screen either.
 | toggle colour | `--poodle-color-text-secondary` |
 | toggle colour, failed run | `--poodle-color-status-danger` |
 | toggle font size | `--poodle-typography-label-size` |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | row gap | `--poodle-space-stack-xs` |
 | group gap | `--poodle-space-stack-sm` |
 

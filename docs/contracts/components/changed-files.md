@@ -49,7 +49,7 @@ and hands off to the host for anything deeper.
 | Files Toggle | no | the text affordance mirroring the chevron | `--poodle-color-text-secondary` |
 | Open Diff | no | hands off to the host | (Button contract) |
 | Summary | no | scope counts plus a few file chips, collapsed only | `--poodle-space-inline-sm` |
-| Chip | no | one file, icon plus truncated name | `--poodle-radius-control`, `--poodle-color-background-subtle` |
+| Chip | no | one file, icon plus truncated name | `--poodle-radius-control`, `--poodle-color-background-surface` |
 | Tree | no | the directory tree, expanded only | (Tree contract) |
 
 ## 3. Props And Inputs
@@ -166,8 +166,9 @@ expanded view, with a trailing slot for the per-node counts.
 | additions | `--poodle-color-status-success` |
 | deletions | `--poodle-color-status-danger` |
 | scope text | `--poodle-color-text-secondary` |
-| chip background | `--poodle-color-background-subtle` |
+| chip background | `--poodle-color-background-surface` |
 | chip radius | `--poodle-radius-control` |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | numeric font | `--poodle-typography-code-family`, `font-variant-numeric: tabular-nums` |
 
 Counts use tabular figures so the additions and deletions columns line up down

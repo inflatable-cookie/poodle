@@ -1,0 +1,510 @@
+[
+  {
+    "name": "empty",
+    "files": [],
+    "tree": [],
+    "scopes": []
+  },
+  {
+    "name": "single file at root",
+    "files": [
+      {
+        "path": "README.md",
+        "additions": 4,
+        "deletions": 1
+      }
+    ],
+    "tree": [
+      {
+        "path": "README.md",
+        "label": "README.md",
+        "isDirectory": false,
+        "additions": 4,
+        "deletions": 1,
+        "children": []
+      }
+    ],
+    "scopes": [
+      {
+        "name": "README.md",
+        "fileCount": 1
+      }
+    ]
+  },
+  {
+    "name": "two scopes",
+    "files": [
+      {
+        "path": "cp-api/Cargo.toml",
+        "additions": 1,
+        "deletions": 0
+      },
+      {
+        "path": "cp-docs/notes.md",
+        "additions": 15,
+        "deletions": 5
+      }
+    ],
+    "tree": [
+      {
+        "path": "cp-api",
+        "label": "cp-api",
+        "isDirectory": true,
+        "additions": 1,
+        "deletions": 0,
+        "children": [
+          {
+            "path": "cp-api/Cargo.toml",
+            "label": "Cargo.toml",
+            "isDirectory": false,
+            "additions": 1,
+            "deletions": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "cp-docs",
+        "label": "cp-docs",
+        "isDirectory": true,
+        "additions": 15,
+        "deletions": 5,
+        "children": [
+          {
+            "path": "cp-docs/notes.md",
+            "label": "notes.md",
+            "isDirectory": false,
+            "additions": 15,
+            "deletions": 5,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "cp-api",
+        "fileCount": 1
+      },
+      {
+        "name": "cp-docs",
+        "fileCount": 1
+      }
+    ]
+  },
+  {
+    "name": "chain with no forks collapses",
+    "files": [
+      {
+        "path": "app/src/lib/features/editor/machine.ts",
+        "additions": 12,
+        "deletions": 3
+      }
+    ],
+    "tree": [
+      {
+        "path": "app/src/lib/features/editor",
+        "label": "app/src/lib/features/editor",
+        "isDirectory": true,
+        "additions": 12,
+        "deletions": 3,
+        "children": [
+          {
+            "path": "app/src/lib/features/editor/machine.ts",
+            "label": "machine.ts",
+            "isDirectory": false,
+            "additions": 12,
+            "deletions": 3,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "app",
+        "fileCount": 1
+      }
+    ]
+  },
+  {
+    "name": "chain stops collapsing at a fork",
+    "files": [
+      {
+        "path": "a/b/c/one.ts",
+        "additions": 1,
+        "deletions": 0
+      },
+      {
+        "path": "a/b/d/two.ts",
+        "additions": 2,
+        "deletions": 0
+      }
+    ],
+    "tree": [
+      {
+        "path": "a/b",
+        "label": "a/b",
+        "isDirectory": true,
+        "additions": 3,
+        "deletions": 0,
+        "children": [
+          {
+            "path": "a/b/c",
+            "label": "c",
+            "isDirectory": true,
+            "additions": 1,
+            "deletions": 0,
+            "children": [
+              {
+                "path": "a/b/c/one.ts",
+                "label": "one.ts",
+                "isDirectory": false,
+                "additions": 1,
+                "deletions": 0,
+                "children": []
+              }
+            ]
+          },
+          {
+            "path": "a/b/d",
+            "label": "d",
+            "isDirectory": true,
+            "additions": 2,
+            "deletions": 0,
+            "children": [
+              {
+                "path": "a/b/d/two.ts",
+                "label": "two.ts",
+                "isDirectory": false,
+                "additions": 2,
+                "deletions": 0,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "a",
+        "fileCount": 2
+      }
+    ]
+  },
+  {
+    "name": "counts roll up from descendants",
+    "files": [
+      {
+        "path": "src/lexer.rs",
+        "additions": 140,
+        "deletions": 6
+      },
+      {
+        "path": "src/parser.rs",
+        "additions": 131,
+        "deletions": 4
+      },
+      {
+        "path": "tools/build.rs",
+        "additions": 29,
+        "deletions": 0
+      }
+    ],
+    "tree": [
+      {
+        "path": "src",
+        "label": "src",
+        "isDirectory": true,
+        "additions": 271,
+        "deletions": 10,
+        "children": [
+          {
+            "path": "src/lexer.rs",
+            "label": "lexer.rs",
+            "isDirectory": false,
+            "additions": 140,
+            "deletions": 6,
+            "children": []
+          },
+          {
+            "path": "src/parser.rs",
+            "label": "parser.rs",
+            "isDirectory": false,
+            "additions": 131,
+            "deletions": 4,
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "tools",
+        "label": "tools",
+        "isDirectory": true,
+        "additions": 29,
+        "deletions": 0,
+        "children": [
+          {
+            "path": "tools/build.rs",
+            "label": "build.rs",
+            "isDirectory": false,
+            "additions": 29,
+            "deletions": 0,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "src",
+        "fileCount": 2
+      },
+      {
+        "name": "tools",
+        "fileCount": 1
+      }
+    ]
+  },
+  {
+    "name": "the worked example",
+    "files": [
+      {
+        "path": "cp-api/Cargo.toml",
+        "additions": 1,
+        "deletions": 0
+      },
+      {
+        "path": "cp-api/crates/latex/src/lexer.rs",
+        "additions": 140,
+        "deletions": 6
+      },
+      {
+        "path": "cp-api/crates/latex/src/parser.rs",
+        "additions": 131,
+        "deletions": 4
+      },
+      {
+        "path": "cp-api/tools/export_fixture.rs",
+        "additions": 60,
+        "deletions": 1
+      },
+      {
+        "path": "cp-api/tools/build.rs",
+        "additions": 29,
+        "deletions": 0
+      },
+      {
+        "path": "cp-api/effigy.toml",
+        "additions": 1,
+        "deletions": 0
+      },
+      {
+        "path": "cp-docs/book-port.md",
+        "additions": 14,
+        "deletions": 5
+      },
+      {
+        "path": "cp-docs/notes.md",
+        "additions": 1,
+        "deletions": 0
+      }
+    ],
+    "tree": [
+      {
+        "path": "cp-api",
+        "label": "cp-api",
+        "isDirectory": true,
+        "additions": 362,
+        "deletions": 11,
+        "children": [
+          {
+            "path": "cp-api/Cargo.toml",
+            "label": "Cargo.toml",
+            "isDirectory": false,
+            "additions": 1,
+            "deletions": 0,
+            "children": []
+          },
+          {
+            "path": "cp-api/crates/latex/src",
+            "label": "crates/latex/src",
+            "isDirectory": true,
+            "additions": 271,
+            "deletions": 10,
+            "children": [
+              {
+                "path": "cp-api/crates/latex/src/lexer.rs",
+                "label": "lexer.rs",
+                "isDirectory": false,
+                "additions": 140,
+                "deletions": 6,
+                "children": []
+              },
+              {
+                "path": "cp-api/crates/latex/src/parser.rs",
+                "label": "parser.rs",
+                "isDirectory": false,
+                "additions": 131,
+                "deletions": 4,
+                "children": []
+              }
+            ]
+          },
+          {
+            "path": "cp-api/tools",
+            "label": "tools",
+            "isDirectory": true,
+            "additions": 89,
+            "deletions": 1,
+            "children": [
+              {
+                "path": "cp-api/tools/export_fixture.rs",
+                "label": "export_fixture.rs",
+                "isDirectory": false,
+                "additions": 60,
+                "deletions": 1,
+                "children": []
+              },
+              {
+                "path": "cp-api/tools/build.rs",
+                "label": "build.rs",
+                "isDirectory": false,
+                "additions": 29,
+                "deletions": 0,
+                "children": []
+              }
+            ]
+          },
+          {
+            "path": "cp-api/effigy.toml",
+            "label": "effigy.toml",
+            "isDirectory": false,
+            "additions": 1,
+            "deletions": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "cp-docs",
+        "label": "cp-docs",
+        "isDirectory": true,
+        "additions": 15,
+        "deletions": 5,
+        "children": [
+          {
+            "path": "cp-docs/book-port.md",
+            "label": "book-port.md",
+            "isDirectory": false,
+            "additions": 14,
+            "deletions": 5,
+            "children": []
+          },
+          {
+            "path": "cp-docs/notes.md",
+            "label": "notes.md",
+            "isDirectory": false,
+            "additions": 1,
+            "deletions": 0,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "cp-api",
+        "fileCount": 6
+      },
+      {
+        "name": "cp-docs",
+        "fileCount": 2
+      }
+    ]
+  },
+  {
+    "name": "leading slash is ignored",
+    "files": [
+      {
+        "path": "/a/b.ts",
+        "additions": 3,
+        "deletions": 1
+      }
+    ],
+    "tree": [
+      {
+        "path": "a",
+        "label": "a",
+        "isDirectory": true,
+        "additions": 3,
+        "deletions": 1,
+        "children": [
+          {
+            "path": "a/b.ts",
+            "label": "b.ts",
+            "isDirectory": false,
+            "additions": 3,
+            "deletions": 1,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "a",
+        "fileCount": 1
+      }
+    ]
+  },
+  {
+    "name": "duplicate directory across files",
+    "files": [
+      {
+        "path": "pkg/a.ts",
+        "additions": 5,
+        "deletions": 2
+      },
+      {
+        "path": "pkg/b.ts",
+        "additions": 7,
+        "deletions": 1
+      }
+    ],
+    "tree": [
+      {
+        "path": "pkg",
+        "label": "pkg",
+        "isDirectory": true,
+        "additions": 12,
+        "deletions": 3,
+        "children": [
+          {
+            "path": "pkg/a.ts",
+            "label": "a.ts",
+            "isDirectory": false,
+            "additions": 5,
+            "deletions": 2,
+            "children": []
+          },
+          {
+            "path": "pkg/b.ts",
+            "label": "b.ts",
+            "isDirectory": false,
+            "additions": 7,
+            "deletions": 1,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "name": "pkg",
+        "fileCount": 2
+      }
+    ]
+  }
+]

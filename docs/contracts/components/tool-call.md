@@ -149,6 +149,7 @@ indicator out of the row.
 | success | `--poodle-color-status-success` |
 | danger | `--poodle-color-status-danger` |
 | hover fill | `--poodle-color-background-elevated` |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | row radius | `--poodle-radius-control` |
 | row gap | `--poodle-space-inline-sm` |
 | row inset | `--poodle-space-inline-sm` |

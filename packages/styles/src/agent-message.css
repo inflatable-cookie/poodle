@@ -36,7 +36,7 @@
 .poodle-agent-message[data-role="user"] {
   padding: var(--poodle-agent-message-inset);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-color-background-subtle);
+  background: var(--poodle-color-background-surface);
 }
 
 .poodle-agent-message__body {

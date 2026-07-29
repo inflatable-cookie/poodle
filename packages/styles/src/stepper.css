@@ -128,8 +128,8 @@
 }
 
 .poodle-stepper__trigger:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-focus-ring);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
 }
 
 /* Current is composed with status, not exclusive of it: a step can be both the
@@ -248,8 +248,8 @@
 }
 
 .poodle-stepper__rerun:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-focus-ring);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
 }
 
 .poodle-stepper__rerun:disabled {

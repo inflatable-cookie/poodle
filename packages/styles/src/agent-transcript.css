@@ -114,8 +114,8 @@
 }
 
 .poodle-agent-transcript__jump:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
 }
 
 .poodle-agent-transcript__empty {

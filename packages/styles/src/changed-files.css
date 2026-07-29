@@ -53,8 +53,8 @@
 }
 
 .poodle-changed-files__toggle:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
 }
 
 .poodle-changed-files__toggle-icon {
@@ -142,7 +142,7 @@
   padding: 0.1875rem 0.5rem;
   border: 0.0625rem solid var(--poodle-color-border-subtle);
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-subtle);
+  background: var(--poodle-color-background-surface);
   color: var(--poodle-color-text-secondary);
   font: inherit;
   font-family: var(--poodle-typography-code-family);

@@ -99,8 +99,8 @@
 }
 
 .poodle-tool-call__trigger:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--poodle-focus-ring-width) var(--poodle-color-border-focus);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
 }
 
 .poodle-tool-call__icon {
@@ -156,6 +156,6 @@
 }
 
 .poodle-tool-call__output {
-  margin-top: var(--poodle-space-stack-xs);
+  margin-top: var(--poodle-space-stack-sm);
   margin-left: calc(var(--poodle-tool-call-inset-x) + var(--poodle-tool-call-icon-size) + var(--poodle-tool-call-gap));
 }

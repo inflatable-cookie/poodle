@@ -201,3 +201,56 @@ fn bottom_anchoring_matches_the_shared_vectors() {
         );
     }
 }
+
+fn tree_vectors() -> Value {
+    let raw = include_str!("../vectors/changed-file-tree.json");
+    serde_json::from_str(raw).expect("tree vectors parse")
+}
+
+fn node_value(node: &ChangedFileNode) -> Value {
+    serde_json::json!({
+        "path": node.path,
+        "label": node.label,
+        "isDirectory": node.is_directory,
+        "additions": node.additions,
+        "deletions": node.deletions,
+        "children": node.children.iter().map(node_value).collect::<Vec<_>>(),
+    })
+}
+
+/// Folding decides what the expanded card looks like, and a divergence would
+/// show as the desktop build drawing an indentation staircase where the web one
+/// draws a single collapsed row.
+#[test]
+fn changed_file_tree_matches_the_shared_vectors() {
+    for case in tree_vectors().as_array().expect("tree cases") {
+        let name = s(case, "name");
+        let files: Vec<ChangedFile> = case["files"]
+            .as_array()
+            .expect("files")
+            .iter()
+            .map(|f| ChangedFile {
+                path: s(f, "path").to_string(),
+                additions: u(f, "additions"),
+                deletions: u(f, "deletions"),
+                status: None,
+            })
+            .collect();
+
+        let got = Value::Array(
+            build_changed_file_tree(&files)
+                .iter()
+                .map(node_value)
+                .collect(),
+        );
+        assert_eq!(got, case["tree"], "{name}: tree folding diverged");
+
+        let scopes = Value::Array(
+            changed_file_scopes(&files)
+                .into_iter()
+                .map(|(name, count)| serde_json::json!({ "name": name, "fileCount": count }))
+                .collect(),
+        );
+        assert_eq!(scopes, case["scopes"], "{name}: scopes diverged");
+    }
+}

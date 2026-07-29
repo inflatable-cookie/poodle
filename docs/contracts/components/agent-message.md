@@ -222,7 +222,7 @@ surface that shows agent prose.
 | inline code font | `--poodle-typography-code-family`, `--poodle-typography-label-size` |
 | blockquote rule | `--poodle-color-border-subtle` |
 | blockquote text | `--poodle-color-text-secondary` |
-| user surface | `--poodle-color-background-subtle` |
+| user surface | `--poodle-color-background-surface` |
 | user radius | `--poodle-radius-surface` |
 | caret | `--poodle-color-accent-base` |
 

@@ -318,6 +318,7 @@ its own scrolling; the composer never scrolls with it.
 | jump background | `--poodle-color-background-elevated` |
 | jump border | `--poodle-color-border-subtle` |
 | jump radius | `--poodle-radius-pill` |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | jump shadow | `--poodle-elevation-overlay` |
 
 ### Size Variants
