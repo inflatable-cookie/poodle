@@ -51,6 +51,7 @@ import { FieldSetSpecimen } from "./specimens/FieldSetSpecimen";
 import { FieldSpecimen } from "./specimens/FieldSpecimen";
 import { FileUploadSpecimen } from "./specimens/FileUploadSpecimen";
 import { AgentChatInputSpecimen } from "./specimens/AgentChatInputSpecimen";
+import { AgentTranscriptSpecimen } from "./specimens/AgentTranscriptSpecimen";
 import { FilterBuilderSpecimen } from "./specimens/FilterBuilderSpecimen";
 import { FilterToolbarSpecimen } from "./specimens/FilterToolbarSpecimen";
 import { FormActionsSpecimen } from "./specimens/FormActionsSpecimen";
@@ -191,6 +192,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
   "agent-chat-input": AgentChatInputSpecimen,
+  "agent-transcript": AgentTranscriptSpecimen,
   "filter-builder": FilterBuilderSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,

@@ -170,3 +170,8 @@ export { TextLink, type TextLinkProps } from "./TextLink";
 export { UiPresentationProvider, useUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize, type UiPresentationContextValue } from "./presentation";
 export { resolveIconNodes } from "./icon-registry";
 export * from "./types";
+export { AgentMessage, type AgentMessageProps } from "./AgentMessage";
+export { AgentTranscript, type AgentTranscriptProps } from "./AgentTranscript";
+export { ChangedFiles, type ChangedFilesProps } from "./ChangedFiles";
+export { ToolCall, iconForToolCallLabel, type ToolCallProps } from "./ToolCall";
+export { ToolCallGroup, type ToolCallGroupProps } from "./ToolCallGroup";
