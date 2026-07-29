@@ -15,6 +15,12 @@
 
   position: relative;
   display: flex;
+  /* The transcript fills its container and scrolls *internally* (contract §7).
+     Without a definite height the root grows to its content, the viewport never
+     becomes a scroller, and the absolutely-positioned slice is laid out against
+     a container that is not the thing being scrolled — which is what put blocks
+     on top of each other. */
+  height: 100%;
   min-height: 0;
   flex-direction: column;
 }
@@ -42,7 +48,6 @@
 .poodle-agent-transcript__blocks {
   display: flex;
   flex-direction: column;
-  gap: var(--poodle-agent-transcript-block-gap);
 }
 
 /* The runway holds the full scroll height while only a window of blocks exists,
@@ -60,7 +65,21 @@
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: var(--poodle-agent-transcript-block-gap);
+}
+
+/* Block spacing is padding, deliberately, not a flex `gap`.
+ *
+ * Windowing sums measured block heights to place every later block. A `gap`
+ * contributes to layout but to no block's measured height, so the sum came out
+ * short by one gap per block — with 120 blocks and a 1.25rem gap the slice sat
+ * hundreds of pixels above where its content actually was, and blocks rendered
+ * on top of each other. Padding is inside the border box, so what is measured
+ * is exactly what the next block advances by.
+ *
+ * Applied uniformly, including the last block, so no block is a special case in
+ * the measurement. */
+.poodle-agent-transcript__block {
+  padding-bottom: var(--poodle-agent-transcript-block-gap);
 }
 
 /* ── Activity footer ─────────────────────────────────────────────────────── */

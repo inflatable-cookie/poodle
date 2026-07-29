@@ -92,7 +92,17 @@
   let pinned = $state(true);
   let scrollTop = $state(0);
   let viewportHeight = $state(0);
-  let heights = $state<number[]>([]);
+
+  /**
+   * Measured heights keyed by block id, not by position.
+   *
+   * Keying by index is wrong as soon as the window moves: the index a block had
+   * when its observer was created is not the index it has now, so heights get
+   * written against whichever block currently occupies that slot. Ids are
+   * stable for the life of a block, so a measurement can only ever land on the
+   * block it came from.
+   */
+  let heightById = $state<Record<string, number>>({});
 
   const isEmpty = $derived(items.length === 0);
   const showsJump = $derived(!pinned && !isEmpty);
@@ -100,7 +110,7 @@
   const windowRange = $derived(
     virtualized
       ? transcriptWindow(
-          renderedBlocks.map((_, index) => heights[index] ?? 0),
+          renderedBlocks.map((block) => heightById[block.id] ?? 0),
           estimatedBlockHeight,
           scrollTop,
           viewportHeight,
@@ -158,36 +168,83 @@
   /**
    * Block measurement.
    *
-   * The observer watches the rendered blocks, and choosing a window changes
-   * which blocks are rendered — so a pass must not re-enter itself. The guard
-   * is released a frame later rather than synchronously, because the observer
-   * fires asynchronously and a synchronous release lets the resulting
-   * notification straight back in. `Tabs` hit exactly this shape in its shed
-   * ladder.
+   * Measurements are coalesced into one frame, never dropped. An earlier
+   * version held a re-entrancy guard borrowed from the Tabs shed ladder and
+   * discarded anything that arrived while it was up — but a `ResizeObserver`
+   * does not fire again for a block whose size has not changed, so those
+   * heights were lost for good. The window then sized itself from stale
+   * estimates and stopped short of filling the viewport, leaving dead space
+   * below the last block.
+   *
+   * No guard is needed here, unlike in Tabs. There, measuring changed the thing
+   * being measured. Here a block's height depends on its content and width,
+   * never on which window is rendered, so heights → window → more blocks →
+   * heights converges: each block measures once and then stays put.
    */
-  let measuring = false;
+  let pendingHeights = new Map<string, number>();
+  let flushQueued = false;
 
-  function measureBlock(element: HTMLElement, index: number) {
+  function queueHeight(id: string, height: number): void {
+    pendingHeights.set(id, height);
+    if (flushQueued) return;
+
+    flushQueued = true;
+    requestAnimationFrame(() => {
+      flushQueued = false;
+      const next = { ...heightById };
+      let changed = false;
+
+      for (const [key, value] of pendingHeights) {
+        if (next[key] !== value) {
+          next[key] = value;
+          changed = true;
+        }
+      }
+      pendingHeights.clear();
+
+      if (changed) heightById = next;
+    });
+  }
+
+  function measureBlock(element: HTMLElement, id: string) {
     if (typeof ResizeObserver === "undefined") return;
 
-    const observer = new ResizeObserver(() => {
-      if (measuring) return;
+    const record = () => {
       const height = element.getBoundingClientRect().height;
-      const absoluteIndex = (windowRange?.startIndex ?? 0) + index;
-      if (heights[absoluteIndex] === height) return;
+      if (height > 0) queueHeight(id, height);
+    };
 
-      measuring = true;
-      const next = [...heights];
-      next[absoluteIndex] = height;
-      heights = next;
-      requestAnimationFrame(() => {
-        measuring = false;
-      });
-    });
+    // Measure immediately as well as on resize: a block that never changes size
+    // after mount produces no further observer callbacks, and without a first
+    // reading it would keep its estimate forever.
+    record();
 
+    const observer = new ResizeObserver(record);
     observer.observe(element);
     return { destroy: () => observer.disconnect() };
   }
+
+  /**
+   * The viewport's own size.
+   *
+   * Without this the height stays 0 until the first scroll event, so the very
+   * first window is one overscan tall and a transcript that opens without being
+   * scrolled renders almost nothing.
+   */
+  $effect(() => {
+    const element = viewportElement;
+    if (!element || typeof ResizeObserver === "undefined") return;
+
+    const sync = () => {
+      viewportHeight = element.clientHeight;
+      scrollTop = element.scrollTop;
+    };
+
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(element);
+    return () => observer.disconnect();
+  });
 
   function toggleIn(list: string[], id: string): string[] {
     return list.includes(id) ? list.filter((value) => value !== id) : [...list, id];
@@ -222,8 +279,8 @@
           class="poodle-agent-transcript__slice"
           style={`transform: translateY(${windowRange.offsetY}px)`}
         >
-          {#each visibleBlocks as block, index (block.id)}
-            <div class="poodle-agent-transcript__block" data-kind={block.kind} use:measureBlock={index}>
+          {#each visibleBlocks as block (block.id)}
+            <div class="poodle-agent-transcript__block" data-kind={block.kind} use:measureBlock={block.id}>
               {@render blockContent(block)}
             </div>
           {/each}
