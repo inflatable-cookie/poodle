@@ -46,10 +46,33 @@
   let lastClosed = "";
   let lastReorder = "";
   let panelCollapsed = false;
+
+  // Four tabs with icons and counts — the shape that collapsed far too early.
+  const shedItems = [
+    { value: "screens", label: "Screens", icon: "monitor", count: 12 },
+    { value: "components", label: "Components", icon: "box", count: 12 },
+    { value: "assets", label: "Assets", icon: "image", count: 375 },
+    { value: "info", label: "Info", icon: "info" },
+  ];
 </script>
 
 <SpecimenLayout>
   <div class="poodle-specimen">
+    <SpecimenGroup label="Graded overflow (drag the handle)">
+      <!-- Figmatic's case: a pane whose width the operator drags. Rather than
+           one threshold into a menu, the strip gives up icons, then counts,
+           then collapses — each at the width where it actually stops fitting,
+           so label length and count magnitude move the points on their own. -->
+      <div style="resize:horizontal;overflow:auto;min-width:12rem;max-width:48rem;width:34rem;border:1px dashed var(--poodle-color-border-subtle);padding:0.5rem;">
+        <Tabs
+          items={shedItems}
+          overflowStrategy="shed"
+          collapseWhenOverflow
+          ariaLabel="Graded overflow"
+        />
+      </div>
+    </SpecimenGroup>
+
     <SpecimenGroup label="Text variant (default, with indicator line)">
       <Tabs
         items={basicTabs}

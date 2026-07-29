@@ -534,3 +534,30 @@
     border-radius: 0;
     background: var(--poodle-recipe-tabs-text-panel-fill, transparent);
   }
+
+/* ── Graded overflow: shed decoration before collapsing ──────────────────────
+ *
+ * Between "everything fits" and "nothing fits" there is a wide band where a tab
+ * can keep its label by giving up its icon, and then its count. The level is
+ * chosen by measurement in the component; these rules just apply it.
+ *
+ * Scoped to the strip. The overflow menu has room even when the strip does not,
+ * so parts come back there rather than inheriting the shed state — and the
+ * measure list carries the same attribute transiently while the level is being
+ * decided.
+ */
+/* The `:not(--measure)` is load-bearing. Without it the root's shed state also
+   hides parts of the measure list, so the width being measured depends on the
+   level already chosen — the strip then reports that everything fits again and
+   flaps between full and collapsed as the pane narrows. Observed at 300px:
+   full decoration sitting between "shed both" at 350 and "collapsed" at 250.
+   The measure list only ever sheds from its own transient attribute. */
+.poodle-tabs[data-shed~="icon"] .poodle-tabs__list:not(.poodle-tabs__list--measure) .poodle-icon,
+.poodle-tabs__list--measure[data-shed~="icon"] .poodle-icon {
+  display: none;
+}
+
+.poodle-tabs[data-shed~="count"] .poodle-tabs__list:not(.poodle-tabs__list--measure) .poodle-pill,
+.poodle-tabs__list--measure[data-shed~="count"] .poodle-pill {
+  display: none;
+}

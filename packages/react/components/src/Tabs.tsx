@@ -59,6 +59,17 @@ export interface TabsProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   collapseWhenOverflow?: boolean;
+  /**
+   * What to do as the strip stops fitting. `"collapse"` is today's single
+   * threshold into a menu; `"shed"` gives up decoration first — see `shed`.
+   */
+  overflowStrategy?: "collapse" | "shed";
+  /**
+   * Which parts to give up, in order, before collapsing. Icons first by
+   * default: an icon usually repeats the label, where a count does not. Labels
+   * are never shed.
+   */
+  shed?: ("icon" | "count")[];
   fullWidth?: boolean;
   collapseLabel?: string | null;
   reorderable?: boolean;
@@ -98,6 +109,8 @@ export function Tabs({
   sizeRole = "chrome",
   density = null,
   collapseWhenOverflow = false,
+  overflowStrategy = "collapse",
+  shed = ["icon", "count"],
   fullWidth = false,
   collapseLabel = null,
   reorderable = false,
@@ -136,6 +149,18 @@ export function Tabs({
   const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
+  /** How many entries of `shed` are currently given up. */
+  const [shedCount, setShedCount] = useState(0);
+  /**
+   * Re-entrancy guard for the measurement pass.
+   *
+   * The ResizeObserver watches the measure list, and deciding a level changes
+   * that list's width twice — once to shed, once to restore. Without this the
+   * observer re-enters mid-measurement and the transient states reach the
+   * screen: narrowing past the icon threshold flashed the collapsed menu
+   * before settling.
+   */
+  const measuringRef = useRef(false);
 
   // Prop items replace rendered (possibly machine-reordered) items only when
   // their content actually changes — mirrors the Svelte signature sync. The
@@ -253,20 +278,65 @@ export function Tabs({
 
   // ── Overflow collapse ──
 
+  const isShedding = overflowStrategy === "shed" && !isVertical;
+
   useEffect(() => {
-    if (!canCollapse) {
+    if (!canCollapse && !isShedding) {
       setCollapsedByOverflow(false);
+      setShedCount(0);
       return;
     }
 
+    /**
+     * Walk the ladder: full → shed the first part → shed the second → collapse.
+     *
+     * Measurements come from the hidden measure list, which stays at full
+     * fidelity at rest; the shed attribute is set and removed inside this
+     * function so no paint sees it. Measuring the real strip instead would
+     * oscillate — shedding icons narrows it, which says icons fit, which puts
+     * them back.
+     */
     function evaluate(): void {
       const root = rootRef.current;
       const measureList = measureListRef.current;
       if (!root || !measureList) return;
 
-      const naturalWidth = measureList.getBoundingClientRect().width;
+      if (measuringRef.current) return;
+      measuringRef.current = true;
+
       const availableWidth = root.getBoundingClientRect().width;
-      setCollapsedByOverflow(naturalWidth > availableWidth + 1);
+      const fits = (level: number): boolean => {
+        measureList.dataset.shed = shed.slice(0, level).join(" ");
+        return measureList.getBoundingClientRect().width <= availableWidth + 1;
+      };
+
+      try {
+        if (!isShedding) {
+          setCollapsedByOverflow(!fits(0));
+          setShedCount(0);
+          return;
+        }
+
+        for (let level = 0; level <= shed.length; level += 1) {
+          if (fits(level)) {
+            setShedCount(level);
+            setCollapsedByOverflow(false);
+            return;
+          }
+        }
+
+        setCollapsedByOverflow(canCollapse);
+        // Once collapsed there is no strip to shed, and leaving the state set
+        // hides the icon on the menu's own trigger. Parts return with the menu.
+        setShedCount(canCollapse ? 0 : shed.length);
+      } finally {
+        delete measureList.dataset.shed;
+        // Released after a frame: the observer fires asynchronously, so
+        // clearing synchronously would let the restore notification re-enter.
+        requestAnimationFrame(() => {
+          measuringRef.current = false;
+        });
+      }
     }
 
     evaluate();
@@ -282,7 +352,9 @@ export function Tabs({
       resizeObserver?.disconnect();
       window.removeEventListener("resize", evaluate);
     };
-  }, [canCollapse, itemsSignature, resolvedSize, resolvedDensity, resolvedVariant, actions]);
+    // `isShedding` and `shed` belong here: a strategy or order change has to
+    // re-run the ladder, not wait for the next resize.
+  }, [canCollapse, isShedding, shed, itemsSignature, resolvedSize, resolvedDensity, resolvedVariant, actions]);
 
   // ── URL history sync ──
 
@@ -429,6 +501,7 @@ export function Tabs({
       data-size={resolvedSize}
       data-density={resolvedDensity}
       data-collapsed={collapsedByOverflow || undefined}
+      data-shed={shedCount > 0 ? shed.slice(0, shedCount).join(" ") : undefined}
       data-full-width={fullWidth || undefined}
     >
       {canCollapse ? (

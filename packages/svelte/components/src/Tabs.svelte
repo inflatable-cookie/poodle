@@ -52,6 +52,21 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     collapseWhenOverflow?: boolean;
+    /**
+     * What to do as the strip stops fitting.
+     *
+     * `"collapse"` is today's behaviour: one threshold, then the whole strip
+     * becomes a menu. `"shed"` gives up decoration first — see `shed`.
+     */
+    overflowStrategy?: "collapse" | "shed";
+    /**
+     * Which parts to give up, in order, before collapsing.
+     *
+     * Icons first by default: an icon usually repeats what the label already
+     * says, where a count carries information the label does not. Labels are
+     * never shed, so no tab becomes an unnamed glyph.
+     */
+    shed?: ("icon" | "count")[];
     fullWidth?: boolean;
     collapseLabel?: string | null;
     reorderable?: boolean;
@@ -79,6 +94,8 @@
     sizeRole = "chrome",
     density = null,
     collapseWhenOverflow = false,
+    overflowStrategy = "collapse",
+    shed = ["icon", "count"],
     fullWidth = false,
     collapseLabel = null,
     reorderable = false,
@@ -100,6 +117,18 @@
   let tabElements = $state<Array<HTMLButtonElement | null>>([]);
   let rootElement = $state<HTMLDivElement | null>(null);
   let measureListElement = $state<HTMLDivElement | null>(null);
+  /** How many entries of `shed` are currently given up. */
+  let shedCount = $state(0);
+  /**
+   * Re-entrancy guard for the measurement pass.
+   *
+   * The ResizeObserver watches the measure list, and deciding a level means
+   * changing that list's width twice — once to shed, once to restore. Without
+   * this the observer fires mid-measurement and re-enters, and the transient
+   * states leak to the screen: narrowing past the icon threshold flashed the
+   * collapsed menu before settling on shed icons.
+   */
+  let measuring = false;
   let uncontrolledValue = $state<string | null>(null);
   let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
@@ -178,9 +207,26 @@
     }
   });
 
+  /**
+   * Walk the ladder: full → shed the first part → shed the second → collapse.
+   *
+   * Every measurement is taken from the hidden measure list, which stays at
+   * full fidelity at rest. The shed attribute is set on it and removed inside
+   * this function, so no paint sees it and — more importantly — the input to
+   * the calculation never depends on its own output. Measuring the *real*
+   * strip instead would oscillate at every boundary: shedding icons makes it
+   * narrower, which says icons fit, which puts them back.
+   */
   async function evaluateCollapsedOverflow(): Promise<void> {
-    if (!canCollapse) {
+    const isShedding = overflowStrategy === "shed" && !isVertical;
+
+    if (!canCollapse && !isShedding) {
       collapsedByOverflow = false;
+      shedCount = 0;
+      return;
+    }
+
+    if (measuring) {
       return;
     }
 
@@ -190,9 +236,46 @@
       return;
     }
 
-    const naturalWidth = measureListElement.getBoundingClientRect().width;
+    measuring = true;
     const availableWidth = rootElement.getBoundingClientRect().width;
-    collapsedByOverflow = naturalWidth > availableWidth + 1;
+    const fits = (level: number): boolean => {
+      measureListElement!.dataset.shed = shed.slice(0, level).join(" ");
+      const width = measureListElement!.getBoundingClientRect().width;
+      return width <= availableWidth + 1;
+    };
+
+    try {
+      if (!isShedding) {
+        collapsedByOverflow = !fits(0);
+        shedCount = 0;
+        return;
+      }
+
+      // The richest level that fits wins; the loop starts at 0 so a strip that
+      // fits keeps everything and nothing changes by default.
+      for (let level = 0; level <= shed.length; level += 1) {
+        if (fits(level)) {
+          shedCount = level;
+          collapsedByOverflow = false;
+          return;
+        }
+      }
+
+      // Nothing fit even stripped bare. Collapse if the consumer allowed it;
+      // otherwise stay fully shed and overflow as the strip does today.
+      collapsedByOverflow = canCollapse;
+      // Once collapsed there is no strip to shed, and leaving the state set
+      // hides the icon on the menu's own trigger. Parts return with the menu.
+      shedCount = canCollapse ? 0 : shed.length;
+    } finally {
+      delete measureListElement.dataset.shed;
+      // Released after a frame: the observer fires asynchronously, so clearing
+      // it synchronously would let the restore-width notification through and
+      // re-enter anyway.
+      requestAnimationFrame(() => {
+        measuring = false;
+      });
+    }
   }
 
   function handleViewportChange(): void {
@@ -448,6 +531,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-collapsed={collapsedByOverflow || undefined}
+  data-shed={shedCount > 0 ? shed.slice(0, shedCount).join(" ") : undefined}
   data-full-width={fullWidth || undefined}
 >
   {#if canCollapse}

@@ -5,6 +5,26 @@ use crate::types::{
     TabDefinition, TabVariant,
 };
 
+/// How a `Tabs` strip responds to running out of width.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TabsOverflowStrategy {
+    /// One threshold: the whole strip becomes a menu. The historical behaviour.
+    #[default]
+    Collapse,
+    /// Give up decoration before collapsing — see `TabsShedPart`.
+    Shed,
+}
+
+/// A part a `Tabs` strip may give up to keep its labels.
+///
+/// Labels are deliberately absent: shedding one would leave a tab as an unnamed
+/// glyph, and any level that did drop them would need forced tooltips.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TabsShedPart {
+    Icon,
+    Count,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TabsSpec {
     pub tabs: Vec<TabDefinition>,
@@ -48,6 +68,17 @@ pub struct TabsSpec {
     pub shows_tooltips: bool,
     /// Whether the strip collapses into a menu when it overflows.
     pub collapse_when_overflow: bool,
+    /// What to do as the strip stops fitting.
+    ///
+    /// `Collapse` is the single threshold into a menu. `Shed` gives up
+    /// decoration first — full, then without icons, then without counts —
+    /// keeping labels at every level. Contract §3.
+    pub overflow_strategy: TabsOverflowStrategy,
+    /// Which parts to give up, in order, under `Shed`.
+    ///
+    /// Icons first by default: an icon usually repeats what the label already
+    /// says, where a count carries information the label does not.
+    pub shed: Vec<TabsShedPart>,
     /// Label for the overflow-collapse control.
     pub collapse_label: Option<String>,
 }
@@ -73,6 +104,8 @@ impl Default for TabsSpec {
             density: ControlDensity::Default,
             shows_tooltips: false,
             collapse_when_overflow: false,
+            overflow_strategy: TabsOverflowStrategy::Collapse,
+            shed: vec![TabsShedPart::Icon, TabsShedPart::Count],
             collapse_label: None,
         }
     }

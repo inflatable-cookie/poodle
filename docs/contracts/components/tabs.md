@@ -62,6 +62,8 @@ Updated: 2026-07-10
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
 | `collapseWhenOverflow` | `boolean` | `false` | no | when the tablist overflows its container, collapse the tabs into a `Menu` affordance |
+| `overflowStrategy` | `"collapse" \| "shed"` | `"collapse"` | no | `collapse` is the single threshold into a `Menu`; `shed` gives up decoration first |
+| `shed` | `("icon" \| "count")[]` | `["icon", "count"]` | no | which parts to give up, in order, when `overflowStrategy` is `shed` |
 | `fullWidth` | `boolean` | `false` | no | tabs flex to fill the row (sets `data-full-width`) |
 | `collapseLabel` | `string \| null` | `null` | no | label for the collapsed-overflow trigger; falls back to the active tab label when null |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
@@ -91,6 +93,70 @@ Updated: 2026-07-10
 - fallback: first non-disabled tab is selected when neither value nor defaultValue is set
 - `activationMode` changes whether focus movement commits selection
 - `historyKey` mirrors the current tab into `?{historyKey}=...` and restores it on back/forward navigation
+
+### Graded Overflow
+
+`collapse` has one response to not fitting: the whole strip becomes a menu.
+Between "everything fits" and "nothing fits" there is a wide band where a tab
+can keep its label by giving up its icon, and then its count — the labels
+themselves fit long after the decoration stops being affordable.
+
+`shed` walks that ladder: **full → without icons → without counts → collapsed**,
+choosing the richest level that fits. The final collapse happens only if
+`collapseWhenOverflow` is also set; otherwise the strip stays fully shed and
+overflows as it does today.
+
+- **Icons before counts**, because an icon usually repeats what the label
+  already says where a count carries information the label does not. `shed` is
+  a list so a consumer who disagrees can reorder it.
+- **Labels are never shed**, so no tab becomes an unnamed glyph and no level
+  needs forced tooltips.
+- **The whole strip sheds together.** One tab keeping its icon while its
+  neighbour lost one would read as a bug.
+- **The overflow menu does not inherit the shed state.** It has room even when
+  the strip does not, and it already carries each count in its item label.
+- **Measured, not guessed.** The level is chosen from the real strip, so label
+  length and count magnitude move the shed points on their own — no consumer
+  has numbers to tune.
+
+#### The Menu Never Inherits The Shed State
+
+When the strip does collapse, `shed` resets. There is no strip left to shed, and
+leaving it set hides the icon on the menu's *own trigger* — a collapsed Tabs
+showing a bare chevron. The menu already carries each count in its item label,
+so both parts return with it.
+
+#### Why The Measure List Must Stay At Full Fidelity
+
+Every level is measured on the hidden measure list, with the shed attribute set
+and removed inside the calculation so no paint sees it. Measuring the *visible*
+strip would feed the calculation its own output: shedding icons makes the strip
+narrower, which says icons fit, which puts them back.
+
+That is not hypothetical — during implementation the root's shed state also
+matched the measure list through a CSS rule that forgot to exclude it, and the
+strip flapped to full decoration at 300px while showing "shed both" at 350px and
+"collapsed" at 250px. The `:not(.poodle-tabs__list--measure)` in `tabs.css` is
+what prevents it.
+
+There is a second feedback path, through the observer rather than the cascade.
+The `ResizeObserver` watches the measure list, and deciding a level changes that
+list's width twice — once to shed, once to restore — so the observer re-enters
+mid-measurement and the transient states reach the screen. Narrowing past the
+icon threshold flashed the collapsed menu before settling on shed icons. A
+re-entrancy guard, released a frame after the pass, is what stops it; the
+observer fires asynchronously, so clearing it synchronously lets the restore
+notification straight back in.
+
+#### Out Of Scope
+
+Vertical orientation does not shed. It overflows by height, which these
+width measurements say nothing about.
+
+Neither native target sheds. Shedding is a measured-layout behaviour and GPUI
+and Jetstream render from spec state without a measurement loop; they carry the
+props for parity and ignore them, as they already do for `collapseWhenOverflow`.
+
 
 ## 4. States
 
