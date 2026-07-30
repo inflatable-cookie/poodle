@@ -80,6 +80,13 @@ Runway:
   async pre-drag/source lifecycle and external-drop target seam needed by
   desktop hosts, then prove the exact packed Svelte preview artifact outside
   sibling source resolution. **Complete.**
+- `017-native-interaction-parity.md` — the "render-only natives" claim in eleven
+  contracts was false: GPUI wires clicks in 71 of ~97 components, and 35 of them
+  accepted a handler they never read. The agent chat set is now interactive on
+  GPUI and `drift:handlers` gates the dead-handler class. Jetstream needs no
+  engine work — its runtime dispatches clicks and the preview already feeds
+  pointer state — only a decision about handler shape.
+  **GPUI done and gated; Jetstream scoped.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and

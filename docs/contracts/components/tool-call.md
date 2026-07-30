@@ -224,9 +224,11 @@ not chrome.
 ### Interaction Per Target
 
 GPUI is interactive: the row carries a real click handler and opens its output.
-Jetstream renders the state the spec describes and does not yet drive it — no
-Poodle Jetstream component wires a click, though `JsEl::on_click` exists, so
-that is unbuilt rather than inherent.
+Jetstream renders the state the spec describes and does not yet drive it. No
+Poodle Jetstream component wires a click, and no engine work is needed to change
+that: the runtime dispatches clicks and the preview already feeds pointer state
+every frame. What is undecided is where a handler hangs, given `on_click` needs
+`Send + Sync + 'static` and the components are plain functions. See g12.017.
 
 ## 12. Known Deltas
 

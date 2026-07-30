@@ -331,7 +331,7 @@ composer owns the editor, the toolbar and the submit control; see
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Natives do not handle digit shortcuts | key handling is host-event-loop work, as with every native control | accepted | host wires keys |
-| Jetstream renders selection state without driving it | no Poodle Jetstream component wires a click yet, though `JsEl::on_click` exists — unbuilt, not inherent | accepted, tracked | wire Jetstream interaction |
+| Jetstream renders selection state without driving it | no Poodle Jetstream component wires a click yet. No engine work is needed — the runtime dispatches clicks and the preview already feeds pointer state; only the handler shape is undecided | accepted, tracked | g12.017 |
 | `override` is `override_text` on the native spec | `override` is a reserved word in Rust; a raw identifier would make every call site read `r#override`. Carried as a drift-gate alias, so the prop is still checked | accepted | none |
 | `progressLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 | Progress is a dot row rather than `Stepper` | `Stepper` is an interactive full-width wizard track; only its status vocabulary transfers | accepted (by design) | revisit if a second consumer needs richer batch progress |
