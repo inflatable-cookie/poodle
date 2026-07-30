@@ -29,6 +29,7 @@ region takes any Poodle control.
 ```text
 [Root .agent-chat-input] <div>  (carries data-size/data-density/data-status/data-disabled)
   ├── [Field .agent-chat-input__field] <div>  (the bordered, rounded composer block)
+  │   ├── [Question .agent-chat-input__question] AgentQuestion (conditional: status="questioning")
   │   ├── [Attachments .agent-chat-input__attachments] <ul> (conditional: attachments non-empty)
   │   │   └── [Attachment .agent-chat-input__attachment] <li> (repeated; data-variant="chip"|"thumbnail")
   │   │       ├── [Attachment Thumb .agent-chat-input__attachment-thumb] <img>  (thumbnail variant)
@@ -71,7 +72,7 @@ every other interactive part reuses a Poodle primitive.
 |------|------|---------|----------|-------|
 | `value` | `string` | `""` | no | message text; controlled when bound, otherwise component-owned |
 | `placeholder` | `string` | `"Send a message"` | no | editor placeholder |
-| `status` | `"idle" \| "busy"` | `"idle"` | no | `busy` flips the action button to stop |
+| `status` | `"idle" \| "busy" \| "questioning"` | `"idle"` | no | `busy` flips the action button to stop; `questioning` renders the question region and blocks ordinary sending |
 | `disabled` | `boolean` | `false` | no | disables the editor, action button and attachment removal |
 | `readOnly` | `boolean` | `false` | no | editor is not editable; the action button still works (submit stays possible) |
 | `ariaLabel` | `string` | `"Message"` | no | accessible name for the editor |
@@ -119,7 +120,7 @@ Defined in `@poodle/svelte` `types.ts`, re-exported from the package root,
 redefined identically in `@poodle/react`, mirrored in `poodle-specs` (snake_case).
 
 ```typescript
-type AgentChatStatus = "idle" | "busy";
+type AgentChatStatus = "idle" | "busy" | "questioning";
 
 type AgentChatAttachment = {
   id: string;
@@ -285,6 +286,29 @@ while busy is also dropped (stop is deliberate, not accidental).
   slot; `Meter` (ring) and `IconButton` are internal
 - resizing rules: the composer fills its parent's width; height is content-driven
   between the row floor and ceiling
+
+### Question Region
+
+While `status="questioning"` the field carries an `AgentQuestion` above the
+attachments, and the composer's own parts change role:
+
+| Part | While questioning |
+|------|-------------------|
+| Editor | the free-text override; placeholder becomes `questionPlaceholder` |
+| Action | submits the answer rather than a message |
+| `canSubmit` | `hasText \|\| questionHasSelection` — an empty editor is submittable when an option is chosen |
+| `onSubmit` | suppressed; the question's own `onSubmit` fires instead |
+
+The composer keeps its editor, toolbar and submit control; `AgentQuestion`
+supplies only the prompt and the options. That division is the reason the
+question lives here at all — the override *is* this editor, and rendering the
+question anywhere else would put a second text input on screen with different
+submit semantics.
+
+A pending question blocks the turn, not the UI: no scrim, no focus trap, and
+the transcript stays scrollable so the reader can check something before
+answering. What blocks is this component refusing to send anything but an
+answer. See `agent-question.md` §2.
 
 ## 8. Token Usage
 

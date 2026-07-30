@@ -49,6 +49,7 @@ contract references the rule rather than restating it:
 - `components/action-discovery-panel.md`
 - `components/agent-chat-input.md`
 - `components/agent-message.md`
+- `components/agent-question.md`
 - `components/agent-transcript.md`
 - `components/alert-dialog.md`
 - `components/app-header.md`
