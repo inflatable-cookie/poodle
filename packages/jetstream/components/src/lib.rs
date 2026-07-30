@@ -50,6 +50,7 @@ pub mod separator;
 pub mod spinner;
 pub mod status_indicator;
 pub mod agent_message;
+pub mod agent_question_record;
 pub mod agent_transcript;
 pub mod changed_files;
 pub mod stepper;

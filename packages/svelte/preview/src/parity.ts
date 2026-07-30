@@ -484,6 +484,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: [
       "AgentMessage",
       "AgentQuestion",
+      "AgentQuestionRecord",
       "AgentTranscript",
       "ChangedFiles",
       "ToolCall",

@@ -11,11 +11,13 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_transcript::TranscriptBlock;
 use poodle_specs::{
-    AgentMessageSpec, AgentTranscriptSpec, ChangedFilesSpec, ToolCallGroupSpec,
+    AgentMessageSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ChangedFilesSpec,
+    ToolCallGroupSpec,
 };
 
 use crate::presentation::rem_to_px;
 use crate::primitives::agent_message::AgentMessage;
+use crate::primitives::agent_question_record::AgentQuestionRecord;
 use crate::primitives::changed_files::ChangedFiles;
 use crate::primitives::tool_call_group::ToolCallGroup;
 use crate::theme_ext::resolve_color;
@@ -91,6 +93,14 @@ impl IntoElement for AgentTranscript {
                         .with_size(spec.size)
                         .with_density(spec.density);
                     root = root.child(ChangedFiles::from_spec(card, theme));
+                }
+                TranscriptBlock::AnsweredQuestion(record) => {
+                    if let Some(answer) = record.answer.clone() {
+                        let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
+                            .with_size(spec.size)
+                            .with_density(spec.density);
+                        root = root.child(AgentQuestionRecord::from_spec(card, theme));
+                    }
                 }
                 TranscriptBlock::Activity(_) => {}
             }

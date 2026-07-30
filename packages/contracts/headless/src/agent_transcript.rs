@@ -106,6 +106,19 @@ pub struct TranscriptChangedFiles {
     pub files: Vec<ChangedFile>,
 }
 
+/// The record an answered question leaves behind.
+///
+/// The pending question lives in the composer, because its free-text override
+/// is the composer's editor. This is what it leaves in the conversation once
+/// answered — read-only by construction, so there is never a second input on
+/// screen.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TranscriptAnsweredQuestion {
+    pub id: String,
+    pub question: crate::agent_question::AgentQuestionItem,
+    pub answer: Option<crate::agent_question::AgentQuestionAnswer>,
+}
+
 /// The live footer — "Working for 1h 1m". Present only while the turn runs.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TranscriptActivity {
@@ -118,6 +131,7 @@ pub enum TranscriptItem {
     Message(TranscriptMessage),
     ToolCall(TranscriptToolCall),
     ChangedFiles(TranscriptChangedFiles),
+    AnsweredQuestion(TranscriptAnsweredQuestion),
     Activity(TranscriptActivity),
 }
 
@@ -127,6 +141,7 @@ impl TranscriptItem {
             TranscriptItem::Message(item) => &item.id,
             TranscriptItem::ToolCall(item) => &item.id,
             TranscriptItem::ChangedFiles(item) => &item.id,
+            TranscriptItem::AnsweredQuestion(item) => &item.id,
             TranscriptItem::Activity(item) => &item.id,
         }
     }
@@ -136,6 +151,7 @@ impl TranscriptItem {
             TranscriptItem::Message(_) => "message",
             TranscriptItem::ToolCall(_) => "tool-call",
             TranscriptItem::ChangedFiles(_) => "changed-files",
+            TranscriptItem::AnsweredQuestion(_) => "answered-question",
             TranscriptItem::Activity(_) => "activity",
         }
     }
@@ -189,6 +205,7 @@ pub enum TranscriptBlock {
     Message(TranscriptMessage),
     ToolRun(TranscriptToolRun),
     ChangedFiles(TranscriptChangedFiles),
+    AnsweredQuestion(TranscriptAnsweredQuestion),
     Activity(TranscriptActivity),
 }
 
@@ -198,6 +215,7 @@ impl TranscriptBlock {
             TranscriptBlock::Message(_) => "message",
             TranscriptBlock::ToolRun(_) => "tool-run",
             TranscriptBlock::ChangedFiles(_) => "changed-files",
+            TranscriptBlock::AnsweredQuestion(_) => "answered-question",
             TranscriptBlock::Activity(_) => "activity",
         }
     }
@@ -207,6 +225,7 @@ impl TranscriptBlock {
             TranscriptBlock::Message(item) => &item.id,
             TranscriptBlock::ToolRun(item) => &item.id,
             TranscriptBlock::ChangedFiles(item) => &item.id,
+            TranscriptBlock::AnsweredQuestion(item) => &item.id,
             TranscriptBlock::Activity(item) => &item.id,
         }
     }
@@ -247,6 +266,10 @@ pub fn group_transcript_items(items: &[TranscriptItem]) -> Vec<TranscriptBlock> 
             TranscriptItem::ChangedFiles(item) => {
                 in_run = false;
                 blocks.push(TranscriptBlock::ChangedFiles(item.clone()));
+            }
+            TranscriptItem::AnsweredQuestion(item) => {
+                in_run = false;
+                blocks.push(TranscriptBlock::AnsweredQuestion(item.clone()));
             }
             TranscriptItem::Activity(item) => {
                 in_run = false;

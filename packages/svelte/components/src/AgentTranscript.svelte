@@ -10,6 +10,7 @@
   } from "@poodle/headless";
 
   import AgentMessage from "./AgentMessage.svelte";
+  import AgentQuestionRecord from "./AgentQuestionRecord.svelte";
   import ChangedFiles from "./ChangedFiles.svelte";
   import EmptyState from "./EmptyState.svelte";
   import Icon from "./Icon.svelte";
@@ -337,6 +338,13 @@
         expandedToolCalls = toggleIn(expandedToolCalls, id);
         onToolCallToggle?.(id);
       }}
+    />
+  {:else if block.kind === "answered-question"}
+    <AgentQuestionRecord
+      question={block.question}
+      answer={block.answer}
+      size={resolvedSize}
+      density={resolvedDensity}
     />
   {:else if block.kind === "changed-files"}
     <ChangedFiles

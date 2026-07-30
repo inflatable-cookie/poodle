@@ -15,6 +15,8 @@
  * cannot drift between the web targets and the natives.
  */
 
+import type { AgentQuestionAnswer, AgentQuestionItem } from "./agent-question";
+
 export type TranscriptRole = "user" | "assistant";
 
 /** How a tool call ended. `running` is the live case — no result yet. */
@@ -59,6 +61,22 @@ export interface TranscriptChangedFiles {
   files: ChangedFile[];
 }
 
+/**
+ * The record an answered question leaves behind.
+ *
+ * The pending question lives in the composer, because its free-text override is
+ * the composer's editor. This is what it leaves in the conversation once
+ * answered — read-only by construction, so there is never a second input on
+ * screen. Without it the transcript would have a hole where a decision was
+ * made.
+ */
+export interface TranscriptAnsweredQuestion {
+  kind: "answered-question";
+  id: string;
+  question: AgentQuestionItem;
+  answer: AgentQuestionAnswer;
+}
+
 /** The live footer — "Working for 1h 1m". Present only while the turn runs. */
 export interface TranscriptActivity {
   kind: "activity";
@@ -70,6 +88,7 @@ export type TranscriptItem =
   | TranscriptMessage
   | TranscriptToolCall
   | TranscriptChangedFiles
+  | TranscriptAnsweredQuestion
   | TranscriptActivity;
 
 // ── Contiguous-run grouping ──
@@ -94,6 +113,7 @@ export type TranscriptBlock =
   | TranscriptMessage
   | TranscriptToolRun
   | TranscriptChangedFiles
+  | TranscriptAnsweredQuestion
   | TranscriptActivity;
 
 /**

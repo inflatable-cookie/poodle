@@ -5,9 +5,12 @@
 //! only thing that can carry it.
 
 use jetstream_ui::ui_element::*;
+use poodle_headless::agent_question::{
+    AgentQuestionAnswer, AgentQuestionItem, AgentQuestionOption, AgentQuestionOutcome,
+};
 use poodle_headless::agent_transcript::{
-    ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
-    TranscriptMessage, TranscriptToolCall,
+    ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptAnsweredQuestion,
+    TranscriptChangedFiles, TranscriptItem, TranscriptMessage, TranscriptToolCall,
 };
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::agent_transcript::js_agent_transcript;
@@ -64,6 +67,33 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         call("f3", "bun test", ToolCallStatus::Success),
     ];
 
+    // The record an answered question leaves: read-only, with every option kept
+    // so the reader can see what was not chosen.
+    let answered = vec![
+        message("aq0", "I need a decision before continuing."),
+        TranscriptItem::AnsweredQuestion(TranscriptAnsweredQuestion {
+            id: "aq".to_string(),
+            question: AgentQuestionItem {
+                id: "placement".to_string(),
+                header: Some("Placement".to_string()),
+                prompt: "Where should the question surface appear?".to_string(),
+                options: vec![
+                    AgentQuestionOption { value: "inline".into(), label: "Inline in the transcript".into(), description: None },
+                    AgentQuestionOption { value: "composer".into(), label: "Anchored above the composer".into(), description: None },
+                    AgentQuestionOption { value: "modal".into(), label: "Modal dialog".into(), description: None },
+                ],
+                allow_multiple: false,
+            },
+            answer: Some(AgentQuestionAnswer {
+                question_id: "placement".to_string(),
+                outcome: AgentQuestionOutcome::Selected,
+                values: vec!["composer".to_string()],
+                text: String::new(),
+            }),
+        }),
+        message("aq1", "Taking the composer route."),
+    ];
+
     let markdown = vec![message(
         "md",
         "Supported subset:\n\n- `inline code` and **strong**\n- nested\n  - items\n\n```rust\nfn main() {}\n```\n\n> a quoted line",
@@ -72,6 +102,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     div()
         .flex_col()
         .gap(24.0)
+        .child(group(
+            "An answered question",
+            secondary,
+            js_agent_transcript(&AgentTranscriptSpec::new(answered), theme),
+        ))
         .child(group(
             "A worked turn",
             secondary,

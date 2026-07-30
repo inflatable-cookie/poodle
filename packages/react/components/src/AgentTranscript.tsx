@@ -10,6 +10,7 @@ import {
 } from "@poodle/headless";
 
 import { AgentMessage } from "./AgentMessage";
+import { AgentQuestionRecord } from "./AgentQuestionRecord";
 import { ChangedFiles } from "./ChangedFiles";
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
@@ -280,6 +281,16 @@ export function AgentTranscript({
             if (expandedToolCalls === undefined) setUncontrolledCalls((list) => toggleIn(list, id));
             onToolCallToggle?.(id);
           }}
+        />
+      );
+    }
+    if (block.kind === "answered-question") {
+      return (
+        <AgentQuestionRecord
+          question={block.question}
+          answer={block.answer}
+          size={resolvedSize}
+          density={resolvedDensity}
         />
       );
     }

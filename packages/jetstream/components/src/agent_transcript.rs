@@ -10,9 +10,13 @@
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_headless::agent_transcript::TranscriptBlock;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{AgentMessageSpec, AgentTranscriptSpec, ChangedFilesSpec, ToolCallGroupSpec};
+use poodle_specs::{
+    AgentMessageSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ChangedFilesSpec,
+    ToolCallGroupSpec,
+};
 
 use crate::agent_message::js_agent_message;
+use crate::agent_question_record::js_agent_question_record;
 use crate::changed_files::js_changed_files;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
@@ -67,6 +71,14 @@ pub fn js_agent_transcript(spec: &AgentTranscriptSpec, theme: &JetstreamThemePro
                     .with_size(spec.size)
                     .with_density(spec.density);
                 root = root.child(js_changed_files(&card, theme));
+            }
+            TranscriptBlock::AnsweredQuestion(record) => {
+                if let Some(answer) = record.answer.clone() {
+                    let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
+                        .with_size(spec.size)
+                        .with_density(spec.density);
+                    root = root.child(js_agent_question_record(&card, theme));
+                }
             }
             TranscriptBlock::Activity(_) => {}
         }

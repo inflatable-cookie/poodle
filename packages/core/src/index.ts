@@ -216,6 +216,7 @@ export {
   type ChangedFileStatus,
   type TranscriptChangedFiles,
   type TranscriptActivity,
+  type TranscriptAnsweredQuestion,
   type TranscriptItem,
   type TranscriptToolRun,
   type TranscriptBlock,

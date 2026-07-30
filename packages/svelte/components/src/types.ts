@@ -1051,6 +1051,7 @@ export type {
   ChangedFileStatus,
   ToolCallStatus,
   TranscriptActivity,
+  TranscriptAnsweredQuestion,
   TranscriptBlock,
   TranscriptChangedFiles,
   TranscriptItem,

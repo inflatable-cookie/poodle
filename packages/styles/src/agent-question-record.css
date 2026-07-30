@@ -1,0 +1,78 @@
+/*
+ * AgentQuestionRecord — the read-only record an answered question leaves.
+ *
+ * Contract: docs/contracts/components/agent-question-record.md.
+ *
+ * No interactive parts at all, which is what makes hosting the live question in
+ * the composer safe: a re-answer affordance here would let the reader change an
+ * answer the agent has already acted on.
+ */
+
+.poodle-agent-question-record {
+  --poodle-agent-question-record-gap: 0.375rem;
+  --poodle-agent-question-record-inset: 0.75rem;
+  --poodle-agent-question-record-font-size: 0.8125rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-agent-question-record-gap);
+  padding: var(--poodle-agent-question-record-inset);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-background-surface);
+  font-size: var(--poodle-agent-question-record-font-size);
+}
+
+.poodle-agent-question-record[data-size="xs"] { --poodle-agent-question-record-font-size: 0.6875rem; }
+.poodle-agent-question-record[data-size="sm"] { --poodle-agent-question-record-font-size: 0.75rem; }
+.poodle-agent-question-record[data-size="md"] { --poodle-agent-question-record-font-size: 0.8125rem; }
+.poodle-agent-question-record[data-size="lg"] { --poodle-agent-question-record-font-size: 0.875rem; }
+.poodle-agent-question-record[data-size="xl"] { --poodle-agent-question-record-font-size: 0.9375rem; }
+
+.poodle-agent-question-record[data-density="compact"] { --poodle-agent-question-record-gap: 0.25rem; --poodle-agent-question-record-inset: 0.5rem; }
+.poodle-agent-question-record[data-density="comfortable"] { --poodle-agent-question-record-gap: 0.5rem; --poodle-agent-question-record-inset: 1rem; }
+
+/* One step down from live prose: this is history, not the current subject. */
+.poodle-agent-question-record__prompt {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-agent-question-record__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-space-stack-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Unchosen options are dimmed rather than dropped. "Why did the agent do that"
+   is usually answered by what it did *not* do, and a record showing only the
+   chosen option cannot tell you whether the choice was between three reasonable
+   things or the only one on offer. */
+.poodle-agent-question-record__option {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  color: var(--poodle-color-text-tertiary);
+}
+
+.poodle-agent-question-record__option[data-chosen="true"] {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-agent-question-record__option-mark {
+  flex: 0 0 auto;
+  color: var(--poodle-color-accent-base);
+}
+
+/* Keeps the labels aligned whether or not a row has a tick. */
+.poodle-agent-question-record__option[data-chosen="false"] .poodle-agent-question-record__option-mark {
+  visibility: hidden;
+}
+
+.poodle-agent-question-record__answer {
+  margin: 0;
+  color: var(--poodle-color-text-primary);
+}

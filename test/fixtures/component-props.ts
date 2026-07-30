@@ -23,6 +23,17 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   AgentMessage: { markdown: "Ran the sweep. `41` tests pass." },
   // Renders nothing without a question, by contract — the composer only shows
   // the region while one is live.
+  AgentQuestionRecord: {
+    question: {
+      id: "placement",
+      prompt: "Where should the question surface appear?",
+      options: [
+        { value: "inline", label: "Inline in the transcript" },
+        { value: "composer", label: "Anchored above the composer" },
+      ],
+    },
+    answer: { questionId: "placement", outcome: "selected", values: ["composer"], text: "" },
+  },
   AgentQuestion: {
     questions: [
       {
