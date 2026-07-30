@@ -187,8 +187,17 @@ impl IntoElement for ChangedFiles {
 
             for file in spec.visible_chips() {
                 let leaf = file.path.rsplit('/').next().unwrap_or(&file.path).to_string();
+                let mut chip = div()
+                    .id(SharedString::from(format!("poodle-changed-file-chip-{}", file.path)))
+                    .cursor_pointer();
+                if let Some(handler) = &self.on_file_select {
+                    let handler = handler.clone();
+                    let path = file.path.clone();
+                    chip = chip.on_click(move |_event, window, cx| handler(&path, window, cx));
+                }
+
                 summary = summary.child(
-                    div()
+                    chip
                         .flex()
                         .items_center()
                         .gap(px(4.0))

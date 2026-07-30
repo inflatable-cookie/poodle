@@ -275,6 +275,15 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 - [ ] disabled steps are not selectable
 - [ ] accessible name includes the status word
 
+### GPUI Interaction
+
+`on_change` and `on_rerun` reach real click handlers on GPUI. They were stored
+and attached to nothing for a while: the builders type-checked, the
+pointing-hand cursor promised a click, and nothing happened when you made one.
+
+`effigy drift:handlers` exists because of that bug — it fails when a GPUI
+component accepts a handler it never reads.
+
 ## 12. Known Deltas
 
 | Target | Delta | Reason |

@@ -1284,6 +1284,11 @@ struct CliArgs {
     density: Option<Density>,
     control_size: Option<ControlSize>,
     screenshot: Option<String>,
+    /// Points to click, in window coordinates, before capturing.
+    clicks: Vec<Point<Pixels>>,
+    /// Print every specimen-state entry whose key starts with this, after the
+    /// clicks land. Turns "is this component interactive" into an assertion.
+    print_state: Option<String>,
 }
 
 fn parse_cli_args() -> CliArgs {
@@ -1297,6 +1302,8 @@ fn parse_cli_args() -> CliArgs {
     let mut density = None;
     let mut control_size = None;
     let mut screenshot = None;
+    let mut clicks: Vec<Point<Pixels>> = Vec::new();
+    let mut print_state = None;
 
     let mut i = 1;
     while i < args.len() {
@@ -1393,6 +1400,27 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            // Repeatable: `--click 120,340 --click 120,400` clicks in order.
+            "--click" => {
+                if let Some(val) = args.get(i + 1) {
+                    if let Some((x, y)) = val.split_once(',') {
+                        if let (Ok(x), Ok(y)) = (x.trim().parse::<f32>(), y.trim().parse::<f32>()) {
+                            clicks.push(point(px(x), px(y)));
+                        } else {
+                            eprintln!("--click expects X,Y in pixels, got {val:?}");
+                        }
+                    } else {
+                        eprintln!("--click expects X,Y in pixels, got {val:?}");
+                    }
+                    i += 1;
+                }
+            }
+            "--print-state" => {
+                if let Some(val) = args.get(i + 1) {
+                    print_state = Some(val.clone());
+                    i += 1;
+                }
+            }
             _ => {}
         }
         i += 1;
@@ -1408,6 +1436,8 @@ fn parse_cli_args() -> CliArgs {
         density,
         control_size,
         screenshot,
+        clicks,
+        print_state,
     }
 }
 
@@ -1439,6 +1469,153 @@ const FRAMES_BEFORE_CAPTURE: u32 = 3;
 /// time to settle.
 const MIN_SETTLE: std::time::Duration = std::time::Duration::from_millis(900);
 
+/// Post real clicks to our own process.
+///
+/// `Window::dispatch_event` is public but returns a private type, so it cannot
+/// be called from outside `gpui` — in-process synthesis is closed to us. This
+/// goes one level lower instead and posts platform events to our own PID, which
+/// needs no accessibility permission and exercises the entire path: hit
+/// testing, dispatch, handler. A handler that was never attached does not fire,
+/// which is the whole point — `Stepper` carried two of those for weeks.
+///
+/// Points are in window coordinates. Screenshots are captured at the display's
+/// scale factor, so a coordinate read off a 2x screenshot must be halved first.
+fn post_clicks(clicks: &[(f32, f32)]) {
+    if clicks.is_empty() {
+        return;
+    }
+
+    let pid = std::process::id();
+    let taps: String = clicks
+        .iter()
+        .map(|(x, y)| format!("  click(x: {x}, y: {y})\n"))
+        .collect();
+
+    let script = format!(
+        concat!(
+            "import CoreGraphics\n",
+            "import Foundation\n",
+            "import AppKit\n",
+            "let pid = pid_t({pid})\n",
+            // A background app does not receive posted events, and the capture
+            // path deliberately avoids stealing focus — so a click run has to
+            // bring the window forward itself.
+            "NSRunningApplication(processIdentifier: pid)?.activate(options: [.activateIgnoringOtherApps])\n",
+            "usleep(300000)\n",
+            // The window's own origin, so callers can think in window
+            // coordinates rather than screen ones.
+            "let wl = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as! [[String: Any]]\n",
+            "var ox = 0.0; var oy = 0.0; var bestArea = 0.0\n",
+            "for w in wl {{\n",
+            "  let p = w[\"kCGWindowOwnerPID\"] as? Int ?? 0\n",
+            "  if p == {pid} {{\n",
+            "    let b = w[\"kCGWindowBounds\"] as? [String: Any] ?? [:]\n",
+            "    let bw = b[\"Width\"] as? Double ?? 0\n",
+            "    let bh = b[\"Height\"] as? Double ?? 0\n",
+            "    if bw * bh > bestArea {{ bestArea = bw * bh\n",
+            "      ox = b[\"X\"] as? Double ?? 0; oy = b[\"Y\"] as? Double ?? 0 }}\n",
+            "  }}\n",
+            "}}\n",
+            "FileHandle.standardError.write(\"driver origin \\(ox),\\(oy) area \\(bestArea)\\n\".data(using: .utf8)!)\n",
+            "let src = CGEventSource(stateID: .hidSystemState)\n",
+            "func click(x: Double, y: Double) {{\n",
+            "  let pt = CGPoint(x: ox + x, y: oy + y)\n",
+            // Move first: hit testing keys off the last known pointer position,
+            // so a down with no preceding move lands on a window that thinks
+            // the pointer is somewhere else.
+            "  for t in [CGEventType.mouseMoved, .leftMouseDown, .leftMouseUp] {{\n",
+            "    if let e = CGEvent(mouseEventSource: src, mouseType: t,\n",
+            "                       mouseCursorPosition: pt, mouseButton: .left) {{\n",
+            "      e.postToPid(pid)\n",
+            "      usleep(40000)\n",
+            "    }}\n",
+            "  }}\n",
+            "}}\n",
+            "{taps}",
+        ),
+        pid = pid,
+        taps = taps,
+    );
+
+    match std::process::Command::new("swift").arg("-e").arg(&script).output() {
+        Ok(out) if out.status.success() => {
+            let err = String::from_utf8_lossy(&out.stderr);
+            if !err.trim().is_empty() {
+                eprintln!("{}", err.trim());
+            }
+        }
+        Ok(out) => eprintln!(
+            "click driver failed: {}",
+            String::from_utf8_lossy(&out.stderr).trim()
+        ),
+        Err(err) => eprintln!("click driver could not run swift: {err}"),
+    }
+}
+
+/// Print the specimen state a caller asked about, so a test can assert on it
+/// instead of diffing pixels.
+fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
+    let Some(Some(root)) = window.root::<PreviewRoot>() else {
+        eprintln!("state: no root view");
+        return;
+    };
+
+    let state = root.read(cx);
+    let mut lines: Vec<String> = Vec::new();
+
+    for (key, value) in &state.state.specimens.toggles {
+        if key.starts_with(prefix) {
+            lines.push(format!("{key}={value}"));
+        }
+    }
+    for (key, value) in &state.state.specimens.text {
+        if key.starts_with(prefix) {
+            lines.push(format!("{key}={value:?}"));
+        }
+    }
+    for (key, value) in &state.state.specimens.selections {
+        if key.starts_with(prefix) {
+            lines.push(format!("{key}={value}"));
+        }
+    }
+
+    // Sorted so the output is stable enough to assert on.
+    lines.sort();
+    println!("STATE {}", lines.join(" "));
+}
+
+/// Warm up, click, settle, report — then flag the capture thread.
+///
+/// The clicks land after the first frames rather than immediately, because a
+/// window that has not laid out yet has nothing to hit.
+fn schedule_interaction(
+    window: &mut Window,
+    warmup: u32,
+    clicks: Vec<Point<Pixels>>,
+    print_state: Option<String>,
+    settle: u32,
+) {
+    if warmup > 0 {
+        window.on_next_frame(move |window, _cx| {
+            schedule_interaction(window, warmup - 1, clicks, print_state, settle);
+        });
+        return;
+    }
+
+    window.on_next_frame(move |window, cx| {
+        // Clicks arrive from the platform, posted by the driver thread — see
+        // `post_clicks`. `Window::dispatch_event` is public but returns a
+        // private type, so in-process synthesis is not available to us.
+        let _ = &clicks;
+        if let Some(prefix) = print_state {
+            // After the click, before the capture: the state a click produced
+            // is the thing worth asserting.
+            print_specimen_state(window, cx, &prefix);
+        }
+        schedule_frames_drawn(window, settle);
+    });
+}
+
 /// Chain `on_next_frame` `remaining` times, then flag the capture thread.
 fn schedule_frames_drawn(window: &mut Window, remaining: u32) {
     if remaining == 0 {
@@ -1459,6 +1636,13 @@ fn main() {
     };
 
     Application::new().with_assets(assets).run(move |cx: &mut App| {
+        // Taken before the window closure consumes `cli`.
+        let driver_screenshot = cli.screenshot.clone();
+        let driver_clicks: Vec<(f32, f32)> = cli
+            .clicks
+            .iter()
+            .map(|p| (f32::from(p.x), f32::from(p.y)))
+            .collect();
         // Load Inter font family — static weights for reliable rendering
         // (GPUI doesn't support variable font weight axes)
         let font_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
@@ -1502,8 +1686,14 @@ fn main() {
                 // drawn. A guessed 1.5s sometimes captured a half-painted
                 // frame, which is what put a `segmented-control` baseline into
                 // the repo with its selected segment barely visible.
-                if screenshot_mode {
-                    schedule_frames_drawn(window, FRAMES_BEFORE_CAPTURE);
+                if screenshot_mode || !cli.clicks.is_empty() || cli.print_state.is_some() {
+                    schedule_interaction(
+                        window,
+                        FRAMES_BEFORE_CAPTURE,
+                        cli.clicks.clone(),
+                        cli.print_state.clone(),
+                        FRAMES_BEFORE_CAPTURE,
+                    );
                 }
 
                 cx.new(move |_| {
@@ -1557,8 +1747,9 @@ fn main() {
 
         // Screenshot mode: spawn a background thread that waits for render,
         // captures the window by PID (without stealing focus), saves, and exits.
-        if let Some(ref output_path) = cli.screenshot {
-            let path = output_path.clone();
+        if driver_screenshot.is_some() || !driver_clicks.is_empty() {
+            let path = driver_screenshot.clone();
+            let click_points = driver_clicks.clone();
             std::thread::spawn(move || {
                 // Wait for the renderer to say it has drawn, rather than
                 // guessing how long that takes. Falls back to a deadline so a
@@ -1576,6 +1767,19 @@ fn main() {
                     }
                     std::thread::sleep(std::time::Duration::from_millis(25));
                 }
+
+                // Clicks land after the window has settled — a window that
+                // has not laid out yet has nothing to hit.
+                if !click_points.is_empty() {
+                    post_clicks(&click_points);
+                    // Let the click's re-render finish before capturing.
+                    std::thread::sleep(std::time::Duration::from_millis(600));
+                }
+
+                let Some(path) = path else {
+                    // Clicks with no screenshot: the state print is the output.
+                    std::process::exit(0);
+                };
 
                 // Find our own window by PID
                 let pid = std::process::id();

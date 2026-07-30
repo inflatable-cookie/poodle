@@ -115,6 +115,10 @@
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
+# A GPUI component that accepts a handler must use it. `Stepper` stored two and
+# attached neither — the builders type-checked and nothing happened when you
+# clicked. Runs in ci:native.
+"drift:handlers" = "bun packages/gpui/preview/scripts/dead-handler-drift.ts"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -155,6 +159,7 @@
 # this group local-only. It is a real gate now that the count is zero; before
 # that it would only have reported a number.
 "ci:native" = [
+  { task = "drift:handlers" },
   { task = "check:gpui" },
   { task = "check:jetstream" },
   { task = "test:jetstream-a11y" },
