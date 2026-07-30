@@ -24,6 +24,12 @@
   interface Props {
     value?: string;
     placeholder?: string;
+    /** Editor placeholder while a question is live; the editor is the override. */
+    questionPlaceholder?: string;
+    /** The question region. Host composes an `AgentQuestion` into it. */
+    question?: Snippet;
+    /** Whether the live question could be answered from its own state alone. */
+    questionCanSubmit?: boolean;
     status?: AgentChatStatus;
     disabled?: boolean;
     readOnly?: boolean;
@@ -55,6 +61,9 @@
   let {
     value = $bindable(""),
     placeholder = "Send a message",
+    questionPlaceholder = "Type your own answer, or leave this blank to use the selected option",
+    question = undefined,
+    questionCanSubmit = false,
     status = "idle",
     disabled = false,
     readOnly = false,
@@ -91,9 +100,18 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isBusy = $derived(status === "busy");
+  const isQuestioning = $derived(status === "questioning");
+  /**
+   * While a question is live the editor is the override, so an empty editor is
+   * still submittable when an option is chosen — the question's own state
+   * decides. See agent-chat-input.md §Question Region.
+   */
   const actionEnabled = $derived(
-    canSubmitGate({ disabled, isBusy, value, allowEmptySubmit }),
+    isQuestioning
+      ? !disabled && (value.trim().length > 0 || questionCanSubmit)
+      : canSubmitGate({ disabled, isBusy, value, allowEmptySubmit }),
   );
+  const resolvedPlaceholder = $derived(isQuestioning ? questionPlaceholder : placeholder);
   const contextPercent = $derived(contextPercentage(contextUsed, contextLimit));
   const showContext = $derived(contextLimit !== null && contextLimit > 0);
   const contextHigh = $derived(contextLimit === null ? null : contextLimit * contextWarnAt);
@@ -191,6 +209,15 @@
   data-disabled={disabled}
 >
   <div class="poodle-agent-chat-input__field">
+    <!-- The question sits above the editor because that editor is its
+         free-text override. Rendering it anywhere else would put a second text
+         input on screen with different submit semantics. -->
+    {#if isQuestioning && question}
+      <div class="poodle-agent-chat-input__question">
+        {@render question()}
+      </div>
+    {/if}
+
     {#if attachments.length > 0}
       <ul class="poodle-agent-chat-input__attachments" aria-label="Attachments">
         {#each attachments as attachment (attachment.id)}
@@ -231,7 +258,7 @@
       bind:this={editorElement}
       class="poodle-agent-chat-input__editor"
       aria-label={ariaLabel}
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       rows={minRows}
       maxlength={maxLength ?? undefined}
       disabled={disabled}

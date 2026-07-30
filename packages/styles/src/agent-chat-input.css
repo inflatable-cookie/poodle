@@ -299,3 +299,9 @@
   .poodle-agent-chat-input[data-density="comfortable"] .poodle-agent-chat-input__attachments {
     gap: calc(var(--poodle-agent-chat-input-gap) * 1.25);
   }
+
+/* The question region: above the editor, inside the field, because the editor
+   is the question's free-text override. */
+.poodle-agent-chat-input__question {
+  padding-bottom: var(--poodle-space-stack-sm);
+}

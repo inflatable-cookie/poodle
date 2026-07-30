@@ -1000,7 +1000,7 @@ export type ModelSelection = { model: string; axes: Record<string, ModelAxisValu
 // AgentChatInput
 // ---------------------------------------------------------------------------
 
-export type AgentChatStatus = "idle" | "busy";
+export type AgentChatStatus = "idle" | "busy" | "questioning";
 
 export type AgentChatAttachment = {
   id: string;
@@ -1042,6 +1042,11 @@ export type RefOption = {
  * declaration here would be a second thing to keep in step.
  */
 export type {
+  AgentQuestionOption,
+  AgentQuestionItem,
+  AgentQuestionOutcome,
+  AgentQuestionAnswer,
+  AnsweredQuestion,
   ChangedFile,
   ChangedFileStatus,
   ToolCallStatus,

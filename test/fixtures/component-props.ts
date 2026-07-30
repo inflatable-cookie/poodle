@@ -21,6 +21,21 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   // changed no files should not reserve space — so they need real content to
   // have any anatomy to assert.
   AgentMessage: { markdown: "Ran the sweep. `41` tests pass." },
+  // Renders nothing without a question, by contract — the composer only shows
+  // the region while one is live.
+  AgentQuestion: {
+    questions: [
+      {
+        id: "placement",
+        header: "Placement",
+        prompt: "Where should the question surface appear?",
+        options: [
+          { value: "inline", label: "Inline in the transcript" },
+          { value: "composer", label: "Anchored above the composer" },
+        ],
+      },
+    ],
+  },
   AgentTranscript: {
     items: [
       { kind: "message", id: "m1", role: "assistant", markdown: "Checking the parser." },

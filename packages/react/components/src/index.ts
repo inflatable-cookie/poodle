@@ -171,6 +171,7 @@ export { UiPresentationProvider, useUiPresentation, resolveSemanticControlSize, 
 export { resolveIconNodes } from "./icon-registry";
 export * from "./types";
 export { AgentMessage, type AgentMessageProps } from "./AgentMessage";
+export { AgentQuestion, agentQuestionCanSubmit, type AgentQuestionProps } from "./AgentQuestion";
 export { AgentTranscript, type AgentTranscriptProps } from "./AgentTranscript";
 export { ChangedFiles, type ChangedFilesProps } from "./ChangedFiles";
 export { ToolCall, iconForToolCallLabel, type ToolCallProps } from "./ToolCall";

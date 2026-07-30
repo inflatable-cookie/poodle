@@ -297,13 +297,28 @@ attachments, and the composer's own parts change role:
 | Editor | the free-text override; placeholder becomes `questionPlaceholder` |
 | Action | submits the answer rather than a message |
 | `canSubmit` | `hasText \|\| questionHasSelection` — an empty editor is submittable when an option is chosen |
-| `onSubmit` | suppressed; the question's own `onSubmit` fires instead |
+| `onSubmit` | fires as the *request* to answer; the host routes it to the question's `submit()`, and the question's own `onSubmit` delivers the resolved answer |
 
 The composer keeps its editor, toolbar and submit control; `AgentQuestion`
 supplies only the prompt and the options. That division is the reason the
 question lives here at all — the override *is* this editor, and rendering the
 question anywhere else would put a second text input on screen with different
 submit semantics.
+
+The composer cannot resolve the answer itself — it holds the editor text but
+not the selection — so the two are joined by the host:
+
+```svelte
+<AgentChatInput status="questioning" onSubmit={() => question.submit()}>
+  {#snippet question()}
+    <AgentQuestion bind:this={question} {questions} bind:selections override={value} onSubmit={record} />
+  {/snippet}
+</AgentChatInput>
+```
+
+`AgentQuestion` exports `submit()` and `canSubmit()` for exactly this. Wiring
+the composer's action to clear the editor instead of answering is the easy
+mistake — the text vanishes and nothing is sent.
 
 A pending question blocks the turn, not the UI: no scrim, no focus trap, and
 the transcript stays scrollable so the reader can check something before

@@ -81,6 +81,7 @@ export { default as Spacer } from "./Spacer.svelte";
 export { default as Stack } from "./Stack.svelte";
 export { default as Stepper } from "./Stepper.svelte";
 export { default as AgentMessage } from "./AgentMessage.svelte";
+export { default as AgentQuestion } from "./AgentQuestion.svelte";
 export { default as AgentTranscript } from "./AgentTranscript.svelte";
 export { default as ChangedFiles } from "./ChangedFiles.svelte";
 export { default as ToolCall } from "./ToolCall.svelte";
@@ -250,6 +251,11 @@ export type {
   TranscriptRole,
   TranscriptToolCall,
   TranscriptToolRun,
+  AgentQuestionOption,
+  AgentQuestionItem,
+  AgentQuestionOutcome,
+  AgentQuestionAnswer,
+  AnsweredQuestion,
   SelectItems,
   SelectOption,
   SelectOptionGroup,

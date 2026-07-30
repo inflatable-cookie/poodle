@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-30T19:58:17.773Z",
+  "generatedAt": "2026-07-30T20:10:48.110Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -176,18 +176,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 179,
-        "componentCount": 142,
+        "exportCount": 180,
+        "componentCount": 143,
         "helperCount": 37,
-        "previewedCount": 179,
+        "previewedCount": 180,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 179,
-        "componentCount": 142,
+        "exportCount": 180,
+        "componentCount": 143,
         "helperCount": 37,
-        "previewedCount": 179,
+        "previewedCount": 180,
         "contractOnlyCount": 0
       }
     ],
@@ -234,6 +234,19 @@
       {
         "packageName": "@poodle/svelte",
         "exportName": "AgentMessage",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "AgentQuestion",
         "kind": "component",
         "status": "previewed",
         "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",

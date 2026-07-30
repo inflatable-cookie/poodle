@@ -96,6 +96,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Stepper", "navigation", "Route through a multi-step process, with per-step status.", true),
   entry("AgentTranscript", "display", "The output surface of an agent conversation: grouped tool runs, messages and changed files.", true),
   entry("AgentMessage", "display", "One turn of agent prose, rendered from the shared markdown block model.", true),
+  entry("AgentQuestion", "input", "The question an agent asks mid-turn, hosted by the composer.", true),
   entry("ToolCallGroup", "display", "A contiguous run of tool calls behind one collapsible summary.", true),
   entry("ToolCall", "display", "One row of agent work, with its output behind a disclosure.", true),
   entry("ChangedFiles", "display", "What a turn touched: counted summary expanding into a directory tree.", true),

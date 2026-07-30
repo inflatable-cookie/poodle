@@ -90,6 +90,7 @@ import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import StepperSpecimen from "./StepperSpecimen.svelte";
 import AgentMessageSpecimen from "./AgentMessageSpecimen.svelte";
+import AgentQuestionSpecimen from "./AgentQuestionSpecimen.svelte";
 import AgentTranscriptSpecimen from "./AgentTranscriptSpecimen.svelte";
 import ChangedFilesSpecimen from "./ChangedFilesSpecimen.svelte";
 import ToolCallSpecimen from "./ToolCallSpecimen.svelte";
@@ -241,6 +242,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "segmented-control": SegmentedControlSpecimen,
   stepper: StepperSpecimen,
   "agent-message": AgentMessageSpecimen,
+  "agent-question": AgentQuestionSpecimen,
   "agent-transcript": AgentTranscriptSpecimen,
   "changed-files": ChangedFilesSpecimen,
   "tool-call": ToolCallSpecimen,

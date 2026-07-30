@@ -796,6 +796,11 @@ export type RefOption = {
  * declaration here would be a second thing to keep in step.
  */
 export type {
+  AgentQuestionOption,
+  AgentQuestionItem,
+  AgentQuestionOutcome,
+  AgentQuestionAnswer,
+  AnsweredQuestion,
   ChangedFile,
   ChangedFileStatus,
   ToolCallStatus,
