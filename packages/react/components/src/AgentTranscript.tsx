@@ -367,7 +367,7 @@ export function AgentTranscript({
 
         {activity ? (
           <div className="poodle-agent-transcript__activity">
-            <Spinner variant="ring" size={glyphSize} tone="current" />
+            <Spinner variant="dots" size={glyphSize} tone="current" />
             <span className="poodle-agent-transcript__activity-label">{activity.label}</span>
           </div>
         ) : null}

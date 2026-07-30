@@ -252,8 +252,9 @@ Density drives block spacing and list indent only, never line height.
 ## 10. GPUI Notes
 
 - Parses with `poodle_markdown::parse_markdown`, then maps blocks to elements.
-- No streaming caret: the natives are render-only, so streaming is a host
-  concern there.
+- No streaming caret: neither native re-renders on a token, so streaming is a
+  host concern there. This is about the render loop, not about interaction —
+  GPUI components do handle clicks.
 
 ## 11. Parity Checklist
 
@@ -286,7 +287,7 @@ Density drives block spacing and list indent only, never line height.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Natives show no streaming caret | shared render-only posture across all native components | accepted | host drives re-render |
+| Natives show no streaming caret | neither native re-renders per token during spec resolution | accepted | host drives re-render |
 | Tables degrade to text on every target | out of the v1 subset; adding them means a table block model and four renderers | accepted | promote if a consumer needs them |
 | No syntax highlighting | `Code` does not highlight either; adding it is a `Code` decision, not a message one | accepted | tracked on the Code contract |
 

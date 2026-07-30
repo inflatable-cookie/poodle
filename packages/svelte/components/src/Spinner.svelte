@@ -56,6 +56,12 @@
 >
   {#if variant === "ring"}
     <span class="poodle-spinner__ring" aria-hidden="true"></span>
+  {:else if variant === "dots"}
+    <span class="poodle-spinner__dots" aria-hidden="true">
+      {#each [0, 1, 2] as phase (phase)}
+        <span class="poodle-spinner__dot" data-phase={phase}></span>
+      {/each}
+    </span>
   {:else}
     <span class="poodle-spinner__grid" aria-hidden="true">
       {#each gridCells as cell}

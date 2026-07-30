@@ -3,6 +3,10 @@
 //! Status is read from the step, never inferred from its index. A step that ran
 //! and was rejected has to render as failed wherever it sits in the sequence;
 //! `index < current` would draw it as "not yet reached". See `stepper.md` §1.
+//!
+//! `on_change` and `on_rerun` reach real `on_click` handlers. They were stored
+//! and never attached for a while: the builders type-checked, the pointing-hand
+//! cursor promised a click, and nothing happened when you made one.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -177,6 +181,9 @@ impl IntoElement for Stepper {
                 .child(marker_glyph);
 
             let mut trigger = div()
+                // `on_click` is only available on a stateful element, which in
+                // GPUI means one carrying an id.
+                .id(SharedString::from(format!("poodle-stepper-step-{}", step.value)))
                 .flex()
                 .flex_1()
                 .items_center()
@@ -196,6 +203,13 @@ impl IntoElement for Stepper {
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 trigger = trigger.cursor(CursorStyle::PointingHand);
+                if let Some(handler) = &self.on_change {
+                    let handler = handler.clone();
+                    let value = step.value.clone();
+                    trigger = trigger.on_click(move |_event, window, cx| {
+                        handler(&value, window, cx);
+                    });
+                }
             }
 
             // The tint belongs to the whole column — see the Jetstream note.
@@ -220,6 +234,7 @@ impl IntoElement for Stepper {
             // A separate control, outside the trigger — see the `on_rerun` note.
             if has_rerun {
                 let mut rerun = div()
+                    .id(SharedString::from(format!("poodle-stepper-rerun-{}", step.value)))
                     .flex()
                     .items_center()
                     .justify_center()
@@ -239,6 +254,13 @@ impl IntoElement for Stepper {
                     rerun = rerun.opacity(disabled_opacity);
                 } else {
                     rerun = rerun.cursor(CursorStyle::PointingHand);
+                    if let Some(handler) = &self.on_rerun {
+                        let handler = handler.clone();
+                        let value = step.value.clone();
+                        rerun = rerun.on_click(move |_event, window, cx| {
+                            handler(&value, window, cx);
+                        });
+                    }
                 }
                 cell = cell.child(div().flex().items_center().child(rerun));
             }

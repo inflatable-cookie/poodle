@@ -7,8 +7,8 @@ Updated: 2026-07-10
 
 - Component name: `Spinner`
 - Layer: `foundation`
-- Summary: a compact animated loading indicator with a standard ring variant
-  and a CLI-oriented six-cell grid variant
+- Summary: a compact animated loading indicator with a standard ring variant, a
+  CLI-oriented six-cell grid variant, and a quiet three-dot variant
 - In scope: loading animation, variant selection, size scaling, tone/color
   context, decorative or announced usage
 - Out of scope: progress percentages, skeleton placeholders, full loading
@@ -20,7 +20,8 @@ Updated: 2026-07-10
 [Root .spinner]
   └── [Visual]
       ├── ring variant: [Ring .spinner__ring]  single wrapper span (rotating ring)
-      └── grid variant: [Grid .spinner__grid]  single wrapper span
+      ├── grid variant: [Grid .spinner__grid]  single wrapper span
+      └── dots variant: [Dots .spinner__dots]  wrapper span of three [Dot .spinner__dot]
                           └── 6 [Cell .spinner__cell] span children in a 2x3 matrix
 ```
 
@@ -37,7 +38,7 @@ Updated: 2026-07-10
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `variant` | `"ring" \| "grid"` | `"ring"` | no | selects loader visual |
+| `variant` | `"ring" \| "grid" \| "dots"` | `"ring"` | no | selects loader visual |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -56,6 +57,7 @@ Updated: 2026-07-10
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | ring | `variant="ring"` | circular spinner rotates continuously |
+| dots | `variant="dots"` | three dots rise in sequence |
 | grid | `variant="grid"` | six squares fade in a repeating snake loop: top-left, top-right, mid-right, mid-left, bottom-left, bottom-right, then mid-right and mid-left before reset |
 | extra-small | `size="xs"` | compact chrome-sized indicator |
 | small | `size="sm"` | compact inline indicator suitable for buttons |
@@ -77,6 +79,17 @@ Behavior classification: styled-only (no machine)
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
 beyond plain props. Classified in the g11.004 long-tail sweep.
+
+### Why Three Variants
+
+`ring` is the default and reads as "this control is busy". `grid` is the
+CLI-flavoured one. `dots` is the quietest: it sits beside text as "still
+working" rather than as a control that is occupied, which is what an agent's
+activity footer wants — the transcript is not blocked, the agent is simply not
+finished.
+
+Its animation is a rise rather than a spin, for the same reason: nothing is
+rotating, so nothing suggests a wait with a definite end.
 
 ## 5. Events
 

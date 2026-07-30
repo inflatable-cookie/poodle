@@ -299,7 +299,7 @@
 
     {#if activity}
       <div class="poodle-agent-transcript__activity">
-        <Spinner variant="ring" size={glyphSize} tone="current" />
+        <Spinner variant="dots" size={glyphSize} tone="current" />
         <span class="poodle-agent-transcript__activity-label">{activity.label}</span>
       </div>
     {/if}

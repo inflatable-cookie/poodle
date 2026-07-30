@@ -17,6 +17,8 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 pub struct AgentQuestion {
     spec: AgentQuestionSpec,
     theme: GpuiThemeProvider,
+    on_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_dismiss: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl AgentQuestion {
@@ -24,7 +26,23 @@ impl AgentQuestion {
         Self {
             spec,
             theme: theme.clone(),
+            on_select: None,
+            on_dismiss: None,
         }
+    }
+
+    /// An option was chosen. In single-select this also resolves the question;
+    /// the host applies `toggle_question_selection` and decides, because
+    /// `submits_on_select` is shared logic rather than a rendering concern.
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_select = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// The question was declined.
+    pub fn on_dismiss(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_dismiss = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -140,6 +158,11 @@ impl IntoElement for AgentQuestion {
             }
 
             let mut row = div()
+                .id(SharedString::from(format!(
+                    "poodle-agent-question-option-{}-{}",
+                    question.id, option.value
+                )))
+                .cursor_pointer()
                 .flex()
                 .w_full()
                 .items_start()
@@ -174,18 +197,32 @@ impl IntoElement for AgentQuestion {
                 );
             }
 
+            if let Some(handler) = &self.on_select {
+                let handler = handler.clone();
+                let value = option.value.clone();
+                row = row.on_click(move |_event, window, cx| handler(&value, window, cx));
+            }
+
             options = options.child(row);
         }
 
         root = root.child(options);
 
         if spec.is_dismissible {
-            root = root.child(
-                div()
-                    .text_size(font_size)
-                    .text_color(dismiss_color)
-                    .child(spec.dismiss_label.clone()),
-            );
+            let mut dismiss = div()
+                .id(SharedString::from(format!("poodle-agent-question-dismiss-{}", question.id)))
+                .cursor_pointer()
+                .text_size(font_size)
+                .text_color(dismiss_color)
+                .child(spec.dismiss_label.clone());
+
+            if let Some(handler) = &self.on_dismiss {
+                let handler = handler.clone();
+                let id = question.id.clone();
+                dismiss = dismiss.on_click(move |_event, window, cx| handler(&id, window, cx));
+            }
+
+            root = root.child(dismiss);
         }
 
         root.into_any_element()

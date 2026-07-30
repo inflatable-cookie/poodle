@@ -94,6 +94,16 @@ impl IntoElement for Spinner {
                     )
                     .into_any_element()
             }
+            SpinnerVariant::Dots => {
+                // Three dots, the quietest variant. Static, as the other native
+                // spinner variants are.
+                let dot = px(rem_to_px(0.25));
+                let mut row = div().flex().items_center().gap(px(rem_to_px(0.1875)));
+                for _ in 0..3 {
+                    row = row.child(div().w(dot).h(dot).rounded_full().bg(color));
+                }
+                row.into_any_element()
+            }
             SpinnerVariant::Grid => {
                 // Cell and gap sizes derive from the spec's per-size rem values
                 // (contract §7 grid sizes + Svelte gap table). The grid wrapper

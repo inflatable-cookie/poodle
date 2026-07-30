@@ -221,11 +221,18 @@ not chrome.
 - [ ] chevron rotation and hover transitions are platform-owned
 - [ ] lazy output construction is platform-owned
 
+### Interaction Per Target
+
+GPUI is interactive: the row carries a real click handler and opens its output.
+Jetstream renders the state the spec describes and does not yet drive it — no
+Poodle Jetstream component wires a click, though `JsEl::on_click` exists, so
+that is unbuilt rather than inherent.
+
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Natives render a static glyph for `running` | no animation loop in the render-only native posture | accepted | none |
+| Natives render a static glyph for `running` | neither native runs an animation loop during spec resolution | accepted | none |
 | Output has no syntax highlighting | inherited from `Code` | accepted | tracked on the Code contract |
 
 ## 13. Approval And Adoption Notes

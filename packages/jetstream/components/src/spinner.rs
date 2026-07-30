@@ -34,9 +34,31 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let root = match spec.variant {
         SpinnerVariant::Ring => build_ring(spec, tone_color),
         SpinnerVariant::Grid => build_grid(spec, tone_color),
+        SpinnerVariant::Dots => build_dots(spec, tone_color),
     };
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
         .aria_role(jetstream_ui::accesskit::Role::Status)
+}
+
+/// Dots variant: three dots, the quietest of the three.
+///
+/// Static here, as every other native spinner variant is — the animation is the
+/// part neither native runs during spec resolution, not the shape.
+fn build_dots(spec: &SpinnerSpec, tone: jetstream_ui::Color) -> JsEl {
+    let dot = rem_to_px(0.25);
+    let gap = rem_to_px(0.1875);
+
+    let mut row = ui_element::div().flex_row().items_center().gap(gap);
+    for _ in 0..3 {
+        row = row.child(
+            ui_element::div()
+                .w(dot)
+                .h(dot)
+                .rounded(999.0)
+                .bg(tone),
+        );
+    }
+    row
 }
 
 /// Ring variant: circular spinner with rotating border.

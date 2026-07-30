@@ -15,6 +15,8 @@ use crate::theme_ext::resolve_color;
 pub struct ToolCallGroup {
     spec: ToolCallGroupSpec,
     theme: GpuiThemeProvider,
+    on_toggle: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_call_toggle: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl ToolCallGroup {
@@ -22,7 +24,21 @@ impl ToolCallGroup {
         Self {
             spec,
             theme: theme.clone(),
+            on_toggle: None,
+            on_call_toggle: None,
         }
+    }
+
+    /// The run was expanded or collapsed.
+    pub fn on_toggle(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_toggle = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// A call's output was opened or closed.
+    pub fn on_call_toggle(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_call_toggle = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -79,7 +95,12 @@ impl IntoElement for ToolCallGroup {
                 call_spec = call_spec.with_output(output.clone());
             }
 
-            root = root.child(ToolCall::from_spec(call_spec, theme));
+            let mut row = ToolCall::from_spec(call_spec, theme);
+            if let Some(handler) = &self.on_call_toggle {
+                let handler = handler.clone();
+                row = row.on_toggle(move |id, window, cx| handler(id, window, cx));
+            }
+            root = root.child(row);
         }
 
         // Omitted entirely rather than drawn disabled when there is nothing to
@@ -92,8 +113,17 @@ impl IntoElement for ToolCallGroup {
                 spec.resolved_more_label()
             };
 
+            let mut toggle = div()
+                .id(SharedString::from(format!("poodle-tool-run-toggle-{}", spec.id)))
+                .cursor_pointer();
+            if let Some(handler) = &self.on_toggle {
+                let handler = handler.clone();
+                let id = spec.id.clone();
+                toggle = toggle.on_click(move |_event, window, cx| handler(&id, window, cx));
+            }
+
             root = root.child(
-                div()
+                toggle
                     .flex()
                     .items_center()
                     .gap(gap)

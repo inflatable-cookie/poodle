@@ -42,8 +42,25 @@ fn targets() -> AgentQuestionItem {
     }
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+
+    // Single-select stores the chosen value; multi-select stores a flag per
+    // option. The preview owns this state, exactly as a host would.
+    let single_key = "agent-question-single";
+    let chosen = state
+        .specimens
+        .text
+        .get(single_key)
+        .cloned()
+        .unwrap_or_default();
+
+    let multi_selected: Vec<String> = targets()
+        .options
+        .iter()
+        .filter(|option| state.specimens.is_on(&format!("agent-question-multi-{}", option.value)))
+        .map(|option| option.value.clone())
+        .collect();
 
     fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
         div()
@@ -58,30 +75,40 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
+        // Live: clicking an option actually selects it.
         .child(group(
             theme,
             "Single select",
-            AgentQuestion::from_spec(AgentQuestionSpec::new(vec![placement()]), theme)
-                .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Selected",
             AgentQuestion::from_spec(
-                AgentQuestionSpec::new(vec![placement()])
-                    .with_selections(vec!["composer".to_string()]),
+                AgentQuestionSpec::new(vec![placement()]).with_selections(
+                    if chosen.is_empty() { Vec::new() } else { vec![chosen.clone()] },
+                ),
                 theme,
             )
+            .on_select(cx.listener(|this, value: &str, _w, cx| {
+                // Single-select replaces, which is what the shared model does.
+                this.state
+                    .specimens
+                    .text
+                    .insert("agent-question-single".to_string(), value.to_string());
+                cx.notify();
+            }))
             .into_any_element(),
         ))
         .child(group(
             theme,
             "Multi select",
             AgentQuestion::from_spec(
-                AgentQuestionSpec::new(vec![targets()])
-                    .with_selections(vec!["svelte".to_string(), "gpui".to_string()]),
+                AgentQuestionSpec::new(vec![targets()]).with_selections(multi_selected),
                 theme,
             )
+            .on_select(cx.listener(|this, value: &str, _w, cx| {
+                // Multi-select toggles.
+                this.state
+                    .specimens
+                    .toggle(&format!("agent-question-multi-{value}"));
+                cx.notify();
+            }))
             .into_any_element(),
         ))
         .child(group(

@@ -224,7 +224,7 @@ the container's block padding. Density never changes row height.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Natives render the state the spec describes, with no toggle interaction | shared render-only posture | accepted | host drives expansion |
+| Jetstream renders the expansion state without driving it | no Poodle Jetstream component wires a click yet, though `JsEl::on_click` exists — unbuilt, not inherent | accepted, tracked | wire Jetstream interaction |
 | `moreLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 
 ## 13. Approval And Adoption Notes

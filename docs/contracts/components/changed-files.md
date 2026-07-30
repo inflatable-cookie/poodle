@@ -226,7 +226,7 @@ the header and chip gaps. Density never changes the header's height.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Natives render the expansion state the spec describes | shared render-only posture | accepted | host drives expansion |
+| Jetstream renders the expansion state without driving it | no Poodle Jetstream component wires a click yet, though `JsEl::on_click` exists — unbuilt, not inherent | accepted, tracked | wire Jetstream interaction |
 | `countLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 | No diff rendering on any target | a diff viewer is a component in its own right, not a card detail | accepted (by design) | `onOpenDiff` hands off |
 

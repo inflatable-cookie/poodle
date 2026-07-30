@@ -14,6 +14,8 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub struct ChangedFiles {
     spec: ChangedFilesSpec,
     theme: GpuiThemeProvider,
+    on_toggle: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_file_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl ChangedFiles {
@@ -21,7 +23,21 @@ impl ChangedFiles {
         Self {
             spec,
             theme: theme.clone(),
+            on_toggle: None,
+            on_file_select: None,
         }
+    }
+
+    /// The card was opened or closed.
+    pub fn on_toggle(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_toggle = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// A file row or chip was chosen.
+    pub fn on_file_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_file_select = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -55,7 +71,9 @@ impl IntoElement for ChangedFiles {
 
         let totals = spec.totals();
 
-        let header = div()
+        let mut header = div()
+            .id(SharedString::from(format!("poodle-changed-files-{}", spec.id)))
+            .cursor_pointer()
             .flex()
             .items_center()
             .gap(gap)
@@ -86,6 +104,12 @@ impl IntoElement for ChangedFiles {
                     .text_color(deletions_color)
                     .child(format!("−{}", totals.deletions)),
             );
+
+        if let Some(handler) = &self.on_toggle {
+            let handler = handler.clone();
+            let id = spec.id.clone();
+            header = header.on_click(move |_event, window, cx| handler(&id, window, cx));
+        }
 
         let mut root = div()
             .flex()

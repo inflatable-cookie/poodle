@@ -5,6 +5,10 @@ use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 pub enum SpinnerVariant {
     Ring,
     Grid,
+    /// Three dots rising in sequence. The quietest of the three — it reads as
+    /// "still working" beside text rather than as a control that is busy, which
+    /// is what an agent's activity footer wants.
+    Dots,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

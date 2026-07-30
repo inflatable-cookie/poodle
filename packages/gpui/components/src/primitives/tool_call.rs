@@ -15,6 +15,7 @@ use crate::theme_ext::resolve_color;
 pub struct ToolCall {
     spec: ToolCallSpec,
     theme: GpuiThemeProvider,
+    on_toggle: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl ToolCall {
@@ -22,7 +23,15 @@ impl ToolCall {
         Self {
             spec,
             theme: theme.clone(),
+            on_toggle: None,
         }
+    }
+
+    /// Fires when the row is opened or closed. A row with no output is not
+    /// interactive at all, so nothing is attached to it.
+    pub fn on_toggle(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_toggle = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -61,6 +70,7 @@ impl IntoElement for ToolCall {
         };
 
         let mut row = div()
+            .id(SharedString::from(format!("poodle-tool-call-{}", spec.id)))
             .flex()
             .w_full()
             .items_center()
@@ -111,6 +121,16 @@ impl IntoElement for ToolCall {
                     .into_any_element(),
             ),
         );
+
+        // A row with no output is not interactive: no cursor, no handler.
+        if spec.has_output() {
+            row = row.cursor_pointer();
+            if let Some(handler) = &self.on_toggle {
+                let handler = handler.clone();
+                let id = spec.id.clone();
+                row = row.on_click(move |_event, window, cx| handler(&id, window, cx));
+            }
+        }
 
         let mut root = div().flex().flex_col().w_full().child(row);
 

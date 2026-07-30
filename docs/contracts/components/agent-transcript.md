@@ -38,7 +38,7 @@ the same adjacency scan.
   │   │           ├── ToolCallGroup     (data-kind="tool-run")
   │   │           └── ChangedFiles      (data-kind="changed-files")
   │   ├── [Activity .agent-transcript__activity] <div>  (conditional: an activity item is present)
-  │   │   ├── [Activity Spinner .agent-transcript__activity-spinner] Spinner (variant="ring")
+  │   │   ├── [Activity Spinner .agent-transcript__activity-spinner] Spinner (variant="dots")
   │   │   └── [Activity Label .agent-transcript__activity-label] <span>
   │   └── [Empty .agent-transcript__empty] EmptyState  (conditional: no items)
   └── [Jump .agent-transcript__jump] <button type="button">  (conditional: not pinned to bottom)
@@ -376,7 +376,7 @@ block's own height.
 ### Tier 2: Visual Parity
 
 - [ ] block gap, viewport inset and prose measure match per size and density
-- [ ] the activity row renders a spinner plus label in the secondary text colour
+- [ ] the activity row renders the dots spinner plus label in the secondary text colour
 - [ ] the jump button is a pill on the elevated surface with the overlay shadow
 - [ ] the empty state is centred in the viewport
 - [ ] density never changes a block's own height
@@ -395,8 +395,7 @@ block's own height.
 | Windowed blocks are absent from the accessibility tree | inherent to virtualization on every platform; `virtualized={false}` is the documented escape | accepted | revisit if a platform gains a virtualized-a11y API |
 | Jetstream renders unwindowed | `jetstream-ui` materializes every child of a scroll container; windowing needs engine support | accepted, tracked | engine work scoped separately |
 | GPUI uses its own list rather than `transcriptWindow` | GPUI owns its scroll container and already has variable-height list machinery | accepted (by design) | none |
-| Natives do not stream | shared render-only posture across all native components | accepted | host drives re-render |
-| Activity uses `Spinner variant="ring"`, not the three-dot indicator the reference design shows | Poodle's spinner vocabulary is `ring \| grid`; adding `dots` is a change to the Spinner contract and four implementations, not a detail of this one | accepted, tracked | promote `dots` on `spinner.md` if a second consumer wants it |
+| Natives do not stream | neither native re-renders per token during spec resolution; unrelated to interaction, which GPUI does support | accepted | host drives re-render |
 
 ## 13. Approval And Adoption Notes
 

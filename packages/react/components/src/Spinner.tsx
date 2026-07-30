@@ -47,6 +47,12 @@ export function Spinner({
     >
       {variant === "ring" ? (
         <span className="poodle-spinner__ring" aria-hidden="true" />
+      ) : variant === "dots" ? (
+        <span className="poodle-spinner__dots" aria-hidden="true">
+          {[0, 1, 2].map((phase) => (
+            <span key={phase} className="poodle-spinner__dot" data-phase={phase} />
+          ))}
+        </span>
       ) : (
         <span className="poodle-spinner__grid" aria-hidden="true">
           {GRID_PHASES.map((phase) => (

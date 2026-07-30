@@ -62,6 +62,31 @@
     animation: poodle-spinner-ring 0.8s linear infinite;
   }
 
+  /* Three dots rising in sequence. The quietest variant: it sits beside text
+     as "still working" rather than reading as a busy control. */
+  .poodle-spinner__dots {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--poodle-spinner-dots-gap, 0.1875rem);
+  }
+
+  .poodle-spinner__dot {
+    width: var(--poodle-spinner-dot-size, 0.25rem);
+    height: var(--poodle-spinner-dot-size, 0.25rem);
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.3;
+    animation: poodle-spinner-dot 1.05s ease-in-out infinite;
+  }
+
+  .poodle-spinner__dot[data-phase="1"] { animation-delay: 0.14s; }
+  .poodle-spinner__dot[data-phase="2"] { animation-delay: 0.28s; }
+
+  @keyframes poodle-spinner-dot {
+    0%, 70%, 100% { opacity: 0.3; transform: translateY(0); }
+    35% { opacity: 1; transform: translateY(-0.125rem); }
+  }
+
   .poodle-spinner__grid {
     display: inline-grid;
     grid-template-columns: repeat(2, 1fr);

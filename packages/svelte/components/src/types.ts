@@ -90,7 +90,7 @@ export type SkeletonPreset =
   | "list-item"
   | "detail-section"
   | "avatar-line";
-export type SpinnerVariant = "ring" | "grid";
+export type SpinnerVariant = "ring" | "grid" | "dots";
 export type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type SpinnerTone = "current" | "accent" | "muted";
 export type SwitchTone = "default" | "primary" | "success" | "warning" | "danger";
