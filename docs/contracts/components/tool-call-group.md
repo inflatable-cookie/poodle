@@ -32,7 +32,7 @@ skim past — or to notice that something in it failed.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | the run; carries expansion and run status | `--poodle-space-stack-sm` |
+| Root | yes | the run; carries expansion and run status. A bordered container on the *run*, so a thirty-call run is one box | `--poodle-color-background-surface`, `--poodle-color-border-subtle`, `--poodle-radius-control` |
 | List | yes | the rendered calls | — |
 | Toggle | no | present only when there is more than one call | `--poodle-color-text-secondary`, `--poodle-typography-label-size` |
 
@@ -146,6 +146,9 @@ new rows appear above it, focus does not move on screen either.
 
 | Property | Token |
 |----------|-------|
+| container fill | `--poodle-color-background-surface` |
+| container border | `--poodle-color-border-subtle` |
+| container radius | `--poodle-radius-control` |
 | toggle colour | `--poodle-color-text-secondary` |
 | toggle colour, failed run | `--poodle-color-status-danger` |
 | toggle font size | `--poodle-typography-label-size` |
@@ -153,10 +156,24 @@ new rows appear above it, focus does not move on screen either.
 | row gap | `--poodle-space-stack-xs` |
 | group gap | `--poodle-space-stack-sm` |
 
+#### The Container Is On The Run
+
+A contiguous run sits in its own bordered box. The container belongs to the run
+and not to each row: a thirty-call run has to read as one thing you can skim
+past, and thirty boxes is a cage.
+
+Together with the row's secondary label this is what separates the agent's work
+from its prose. The prose sits outside the boxes at full strength; the rows are
+walled off and dimmer. Without the container, a transcript of alternating
+messages and rows reads as one undifferentiated column.
+
+The container has block padding only. Inline inset is left to the rows, whose
+own padding already provides it.
+
 ### Size Variants
 
-Size sets the toggle's type scale, matching the rows. Density sets the gaps.
-Density never changes row height.
+Size sets the toggle's type scale, matching the rows. Density sets the gaps and
+the container's block padding. Density never changes row height.
 
 ### Data Attributes
 

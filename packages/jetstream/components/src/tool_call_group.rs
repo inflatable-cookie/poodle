@@ -51,7 +51,23 @@ pub fn js_tool_call_group(spec: &ToolCallGroupSpec, theme: &JetstreamThemeProvid
         list = list.child(js_tool_call(&call_spec, theme));
     }
 
-    let mut root = ui_element::div().flex_col().w_full().gap(row_gap).child(list);
+    // The container is on the run, not the row: a thirty-call run has to read as
+    // one box you can skim past, and thirty boxes is a cage.
+    let surface: Color = resolve_color(theme, spec.surface_token()).into();
+    let border: Color = resolve_color(theme, spec.border_token()).into();
+    let hairline = rem_to_px(0.0625);
+
+    let mut root = ui_element::div()
+        .flex_col()
+        .w_full()
+        .gap(row_gap)
+        .pt(rem_to_px(spec.padding_block_rem()))
+        .pb(rem_to_px(spec.padding_block_rem()))
+        .border(hairline)
+        .border_color(border)
+        .rounded(crate::theme_ext::resolve_radius(theme, spec.radius_token()))
+        .bg(surface)
+        .child(list);
 
     // Omitted entirely rather than drawn disabled when there is nothing to
     // reveal, and always last so expanding does not move the row you were

@@ -46,7 +46,22 @@ impl IntoElement for ToolCallGroup {
         let gap = px(rem_to_px(spec.gap_rem()));
         let pad_x = px(rem_to_px(spec.padding_inline_rem()));
 
-        let mut root = div().flex().flex_col().w_full().gap(row_gap);
+        // The container is on the run, not the row: a thirty-call run has to read
+        // as one box you can skim past, and thirty boxes is a cage.
+        let surface = resolve_color(theme, spec.surface_token());
+        let border = resolve_color(theme, spec.border_token());
+        let radius = crate::theme_ext::resolve_radius(theme, spec.radius_token());
+
+        let mut root = div()
+            .flex()
+            .flex_col()
+            .w_full()
+            .gap(row_gap)
+            .py(px(rem_to_px(spec.padding_block_rem())))
+            .border_1()
+            .border_color(border)
+            .rounded(radius)
+            .bg(surface);
 
         for call in spec.rendered_calls() {
             let mut call_spec = ToolCallSpec::new(call.id.clone(), call.label.clone())

@@ -39,8 +39,8 @@ control that cannot do anything should not be in the tab order at all.
 | Root | yes | the row; carries status and expansion | `--poodle-space-inline-sm` |
 | Trigger | yes | the whole row is the hit target, not just the chevron | `--poodle-radius-control`, `--poodle-color-background-elevated` (hover) |
 | Icon | yes | the kind glyph — terminal for a command, pencil for a file change | `--poodle-color-text-secondary`, `--poodle-size-icon-sm` |
-| Label | yes | the kind in words: "Ran command", "File change" | `--poodle-color-text-primary`, `--poodle-typography-label-size` |
-| Detail | no | the argument line, single-line and ellipsised | `--poodle-color-text-tertiary`, `--poodle-typography-code-family` |
+| Label | yes | the kind in words: "Ran command", "File change" | `--poodle-color-text-secondary`, `--poodle-typography-label-size` |
+| Detail | no | the argument line, single-line and ellipsised. The dimmest thing in the transcript | `--poodle-color-text-tertiary`, `--poodle-state-opacity-muted`, `--poodle-typography-code-family` |
 | Disclosure | no | chevron, rotated when expanded | `--poodle-color-text-tertiary` |
 | Status | yes | tick, cross, or spinner | `--poodle-color-status-success`, `--poodle-color-status-danger` |
 | Output | no | the `Code` component in block form | (Code contract) |
@@ -142,8 +142,10 @@ indicator out of the row.
 
 | Property | Token |
 |----------|-------|
-| label colour | `--poodle-color-text-primary` |
+| label colour | `--poodle-color-text-secondary` |
 | detail colour | `--poodle-color-text-tertiary` |
+| detail opacity | `--poodle-state-opacity-muted` |
+| label weight | `--poodle-typography-label-weight` |
 | detail font | `--poodle-typography-code-family`, `--poodle-typography-label-size` |
 | icon colour | `--poodle-color-text-secondary` |
 | success | `--poodle-color-status-success` |
@@ -167,6 +169,21 @@ inset and the gaps between parts. Density never changes row height.
 | `data-expanded` | `true`/`false` | root |
 | `data-interactive` | `true`/`false` | root |
 | `data-size` / `data-density` | the ladders | root |
+
+### Reading Order Within The Row
+
+Three steps, brightest to dimmest: the prose around the row, then the label,
+then the payload.
+
+The label carries weight but sits below the prose in brightness — it is what
+you scan down the column, so it has to be findable without competing with what
+the agent actually said. The payload is dimmer still: it is there to be
+recognised, not read, and you only look at an argument when something is wrong.
+The text ramp bottoms out at tertiary, so the last step down is the muted
+opacity rather than a fourth colour.
+
+The status indicator keeps its full-strength colour throughout. That is signal,
+not chrome.
 
 ## 9. Svelte Notes
 

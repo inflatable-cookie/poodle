@@ -141,11 +141,19 @@ impl ToolCallSpec {
     }
 
     // ── Tokens ────────────────────────────────────────────────
+    /// Secondary, not primary: a tool row is chrome next to the prose around
+    /// it, and at equal brightness the two compete.
     pub fn label_token(&self) -> &'static str {
-        semantic::COLOR_TEXT_PRIMARY
+        semantic::COLOR_TEXT_SECONDARY
     }
     pub fn detail_token(&self) -> &'static str {
         semantic::COLOR_TEXT_TERTIARY
+    }
+    /// The payload is the dimmest thing in the transcript — there to be
+    /// recognised, not read. The text ramp bottoms out at tertiary, so the last
+    /// step down is opacity rather than a fourth colour.
+    pub fn detail_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_MUTED
     }
     pub fn icon_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY

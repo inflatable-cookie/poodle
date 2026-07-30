@@ -108,19 +108,32 @@
   color: var(--poodle-color-text-secondary);
 }
 
+/* Secondary, not primary. A tool row is chrome: it says what the agent did,
+   while the prose around it says what the agent found. At the same brightness
+   as the message text the two compete, and a transcript of alternating
+   messages and rows reads as one undifferentiated wall. The status tick keeps
+   its full-strength colour — that is signal, not chrome. */
 .poodle-tool-call__label {
   flex: 0 0 auto;
-  color: var(--poodle-color-text-primary);
+  color: var(--poodle-color-text-secondary);
+  /* The label is the row's anchor: it is what you scan down the column, so it
+     carries weight even though it sits below the prose in brightness. */
+  font-weight: var(--poodle-typography-label-weight);
 }
 
 /* `min-width: 0` is load-bearing. Without it the flex item refuses to shrink
    below its content width, and a long command pushes the status indicator out
    of the row entirely instead of ellipsising. */
+/* The payload is the dimmest thing in the transcript. It is there to be
+   recognised, not read — you scan the labels and only look at an argument when
+   something is wrong. The text ramp bottoms out at tertiary, so the last step
+   down is the muted opacity rather than a fourth colour. */
 .poodle-tool-call__detail {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   color: var(--poodle-color-text-tertiary);
+  opacity: var(--poodle-state-opacity-muted);
   font-family: var(--poodle-typography-code-family);
   text-overflow: ellipsis;
   white-space: nowrap;

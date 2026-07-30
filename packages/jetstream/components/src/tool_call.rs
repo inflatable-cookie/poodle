@@ -72,6 +72,7 @@ pub fn js_tool_call(spec: &ToolCallSpec, theme: &JetstreamThemeProvider) -> JsEl
             ui_element::label(detail.clone())
                 .text_size(font_size)
                 .text_color(detail_color)
+                .opacity(crate::theme_ext::resolve_opacity(theme, spec.detail_opacity_token()))
                 .grow()
                 .min_w_0(),
         );

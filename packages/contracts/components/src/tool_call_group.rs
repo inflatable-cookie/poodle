@@ -136,6 +136,14 @@ impl ToolCallGroupSpec {
     pub fn radius_token(&self) -> &'static str {
         semantic::RADIUS_CONTROL
     }
+    /// The run's own container. On the run rather than the row: a thirty-call
+    /// run has to read as one box you can skim past, and thirty boxes is a cage.
+    pub fn surface_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+    pub fn border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
     pub fn focus_ring_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
@@ -180,6 +188,15 @@ impl ToolCallGroupSpec {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.75,
+        }
+    }
+    /// The container's own top / bottom inset. Inline inset is left to the rows,
+    /// whose own padding provides it.
+    pub fn padding_block_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.125,
+            ControlDensity::Default => 0.25,
+            ControlDensity::Comfortable => 0.375,
         }
     }
 }

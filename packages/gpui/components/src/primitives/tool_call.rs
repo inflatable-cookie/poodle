@@ -86,6 +86,7 @@ impl IntoElement for ToolCall {
                     .flex_1()
                     .min_w_0()
                     .overflow_hidden()
+                    .opacity(crate::theme_ext::resolve_opacity(theme, spec.detail_opacity_token()))
                     .text_color(detail_color)
                     .child(detail.clone()),
             );
