@@ -331,6 +331,8 @@ composer owns the editor, the toolbar and the submit control; see
 |-------|-------------|-----------------|-----------|
 | Natives do not handle digit shortcuts | key handling is host-event-loop work, as with every native control | accepted | host wires keys |
 | Natives render selection state without driving it | shared render-only posture | accepted | host drives selection |
+| `override` is `override_text` on the native spec | `override` is a reserved word in Rust; a raw identifier would make every call site read `r#override`. Carried as a drift-gate alias, so the prop is still checked | accepted | none |
+| `progressLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 | Progress is a dot row rather than `Stepper` | `Stepper` is an interactive full-width wizard track; only its status vocabulary transfers | accepted (by design) | revisit if a second consumer needs richer batch progress |
 
 ## 15. Approval And Adoption Notes

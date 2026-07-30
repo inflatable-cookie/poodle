@@ -126,6 +126,9 @@ const ALIASES: Record<string, Record<string, string>> = {
   // item count, `limit` the page size.
   pagination: { page: "current_page", total: "total_items", limit: "page_size" },
   "pagination-summary": { currentPage: "page" },
+  // `override` is a reserved word in Rust. A raw identifier would carry the
+  // spelling at the cost of `r#override` at every call site.
+  "agent-question": { override: "override_text" },
   // The spec's only placeholder is the add-input's, which is what the contract
   // names; a second field would be two names for one thing.
   "editable-list": { addPlaceholder: "placeholder" },

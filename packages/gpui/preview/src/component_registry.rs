@@ -384,6 +384,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Route through a multi-step process, with per-step status.",
     },
     ComponentEntry {
+        slug: "agent-question",
+        display_name: "AgentQuestion",
+        description: "The question an agent asks mid-turn, hosted by the composer.",
+    },
+    ComponentEntry {
         slug: "agent-transcript",
         display_name: "AgentTranscript",
         description: "The output surface of an agent conversation: grouped tool runs, messages and changed files.",
@@ -782,6 +787,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "radio-group" | "segmented-control" | "toggle-group" => ComponentTag::Control,
         "stepper" => ComponentTag::Navigation,
         "agent-transcript" => ComponentTag::Display,
+        "agent-question" => ComponentTag::Input,
         "text-input"
         | "number-input"
         | "select"

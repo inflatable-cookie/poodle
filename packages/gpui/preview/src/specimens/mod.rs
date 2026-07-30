@@ -41,6 +41,7 @@ mod checkbox;
 mod radio_group;
 mod range_slider;
 mod segmented_control;
+mod agent_question;
 mod agent_transcript;
 mod stepper;
 mod select;
@@ -318,6 +319,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             segmented_control::render(state, cx),
         ),
         "stepper" => specimen_card("Stepper", theme, stepper::render(state, cx)),
+        "agent-question" => specimen_card(
+            "AgentQuestion",
+            theme,
+            agent_question::render(state, cx),
+        ),
         "agent-transcript" => specimen_card(
             "AgentTranscript",
             theme,
