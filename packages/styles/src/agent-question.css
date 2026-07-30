@@ -11,6 +11,11 @@
 
 .poodle-agent-question {
   --poodle-agent-question-gap: 0.5rem;
+  /* The prompt-to-options step is its own variable, larger than the gap that
+     stacks progress, eyebrow and prompt. Those three are one unit — the thing
+     being asked — and the options are the answer to it. At a uniform gap the
+     boundary between question and answers disappears. */
+  --poodle-agent-question-prompt-gap: 1.125rem;
   --poodle-agent-question-option-gap: 0.25rem;
   --poodle-agent-question-option-pad-block: 0.5rem;
   --poodle-agent-question-option-pad-inline: 0.625rem;
@@ -28,8 +33,8 @@
 .poodle-agent-question[data-size="lg"] { --poodle-agent-question-font-size: 0.875rem; --poodle-agent-question-prompt-size: 1rem; --poodle-agent-question-option-pad-block: 0.5625rem; }
 .poodle-agent-question[data-size="xl"] { --poodle-agent-question-font-size: 0.9375rem; --poodle-agent-question-prompt-size: 1.125rem; --poodle-agent-question-option-pad-block: 0.625rem; }
 
-.poodle-agent-question[data-density="compact"] { --poodle-agent-question-gap: 0.375rem; --poodle-agent-question-option-gap: 0.125rem; --poodle-agent-question-option-pad-inline: 0.5rem; }
-.poodle-agent-question[data-density="comfortable"] { --poodle-agent-question-gap: 0.75rem; --poodle-agent-question-option-gap: 0.375rem; --poodle-agent-question-option-pad-inline: 0.875rem; }
+.poodle-agent-question[data-density="compact"] { --poodle-agent-question-gap: 0.375rem; --poodle-agent-question-prompt-gap: 0.875rem; --poodle-agent-question-option-gap: 0.125rem; --poodle-agent-question-option-pad-inline: 0.5rem; }
+.poodle-agent-question[data-density="comfortable"] { --poodle-agent-question-gap: 0.75rem; --poodle-agent-question-prompt-gap: 1.5rem; --poodle-agent-question-option-gap: 0.375rem; --poodle-agent-question-option-pad-inline: 0.875rem; }
 
 /* ── Batch progress ───────────────────────────────────────────────────────── */
 
@@ -80,6 +85,8 @@
 .poodle-agent-question__options {
   display: flex;
   flex-direction: column;
+  /* Tops up the root's flex gap to the full prompt-to-options step. */
+  margin-top: calc(var(--poodle-agent-question-prompt-gap) - var(--poodle-agent-question-gap));
   gap: var(--poodle-agent-question-option-gap);
 }
 

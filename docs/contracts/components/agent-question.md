@@ -251,7 +251,8 @@ silently discarding a question the turn is waiting on would strand the agent.
 |--------|------|
 | width | fills the composer's field |
 | option gap | `--poodle-space-stack-xs` |
-| block gap | `--poodle-space-stack-sm` between progress, header, prompt and options |
+| block gap | `--poodle-space-stack-sm` between progress, header and prompt |
+| prompt-to-options gap | its own step, larger than the block gap — progress, header and prompt are one unit and the options answer it, so a uniform gap loses the boundary |
 
 ### Composition
 
