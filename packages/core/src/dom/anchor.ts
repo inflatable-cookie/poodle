@@ -145,15 +145,89 @@ function scrollsOverflow(element: HTMLElement): boolean {
   return /(auto|scroll|overlay)/.test(`${style.overflowY} ${style.overflowX} ${style.overflow}`);
 }
 
-/** Every ancestor that clips the element, innermost first. */
+/**
+ * True when this element establishes a containing block for `position: fixed`
+ * descendants.
+ *
+ * This is the set named at the top of the module: the only ancestors that can
+ * trap — and therefore clip — a fixed descendant. Ordinary `overflow: hidden`
+ * is not among them.
+ */
+export function createsFixedContainingBlock(element: HTMLElement): boolean {
+  const style = getComputedStyle(element);
+  const set = (value: string | undefined): boolean =>
+    Boolean(value) && value !== "none";
+
+  return (
+    set(style.transform) ||
+    set(style.perspective) ||
+    set(style.filter) ||
+    set((style as unknown as { backdropFilter?: string }).backdropFilter) ||
+    /paint|layout|strict|content/.test(style.contain ?? "") ||
+    /transform|perspective|filter|contain/.test(style.willChange ?? "")
+  );
+}
+
+/** How a subtree escapes its ancestors' clipping. */
+type Escape = "static" | "absolute" | "fixed";
+
+/**
+ * Read a position, defaulting to `static`.
+ *
+ * An unset `position` computes to `""` in some DOM implementations rather than
+ * `"static"`, and comparing against `"static"` directly then reads every plain
+ * element as positioned.
+ */
+function positionOf(element: HTMLElement): string {
+  return getComputedStyle(element).position || "static";
+}
+
+function escapeOf(element: HTMLElement): Escape {
+  const position = positionOf(element);
+  if (position === "fixed") return "fixed";
+  if (position === "absolute") return "absolute";
+  return "static";
+}
+
+/**
+ * Every ancestor that clips the element, innermost first.
+ *
+ * Overflow alone does not make an ancestor a clipper: it also has to be an
+ * ancestor the element is *laid out inside*. A `position: fixed` element is
+ * clipped only by an ancestor that establishes a containing block for it, and a
+ * `position: absolute` element only by a positioned one. Treating every
+ * overflow ancestor as a clipper hid surfaces that were on screen — a pane that
+ * expands to `fixed; inset: 0` over the app reported its trigger as clipped by
+ * the smaller region its DOM ancestors occupy, so the popover opened invisibly.
+ *
+ * The escape is tracked while climbing rather than read once off the anchor,
+ * because the anchor is usually static and it is an *ancestor* pane that is
+ * fixed. Reading only the anchor's own position would miss exactly that case.
+ */
 export function collectClipAncestors(element: Element | null): HTMLElement[] {
   const ancestors: HTMLElement[] = [];
-  let node = element?.parentElement ?? null;
+  if (!isElement(element)) return ancestors;
+
+  let escape = escapeOf(element);
+  let node = element.parentElement;
 
   while (isElement(node) && node !== document.documentElement) {
-    if (clipsOverflow(node)) {
-      ancestors.push(node);
+    const positioned = positionOf(node) !== "static";
+    const holdsFixed = createsFixedContainingBlock(node);
+
+    // Whether this ancestor is one the element is laid out inside at all.
+    const contains =
+      escape === "fixed" ? holdsFixed : escape === "absolute" ? positioned || holdsFixed : true;
+
+    if (contains) {
+      if (clipsOverflow(node)) {
+        ancestors.push(node);
+      }
+      // The containing block is reached, so the escape is spent — and this
+      // element's own position governs how it escapes in turn.
+      escape = escapeOf(node);
     }
+
     node = node.parentElement;
   }
 

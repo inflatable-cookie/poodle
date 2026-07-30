@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-05-14
+Updated: 2026-07-29
 
 Roadmaps hold executable milestone work for Poodle.
 
@@ -22,13 +22,13 @@ Roadmaps hold executable milestone work for Poodle.
 
 ## Current Index State
 
-- highest on-disk generation folder: `g11`
-- current executable generation plan: `g11`
+- highest on-disk generation folder: `g12`
+- current executable generation plan: `g12`
 - `g09` is complete
 - `g10` is complete
-- `g11` is active; `g11.001` (systematic Svelte modernization and consumer
-  rollout) is complete, and the generation continues with the headless-core
-  dual-layer program (`g11.002`–`g11.007`, master spec `docs/specs/062`)
+- `g11` is complete
+- `g12.001`–`g12.016` are complete
+- `g12` is strict-paused with no implementation card ready
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -45,7 +45,9 @@ If a generation README conflicts with that file, treat the index as the source o
 - `g08` consolidated GPUI production-quality and compliance program
 - `g09` completed GPUI continuation and semantic sizing/density generation
 - `g10` completed Jetstream-feasibility / GPUI-production-hardening generation
-- `g11` active Svelte modernization and consumer rollout generation
+- `g11` completed Svelte modernization and consumer rollout generation
+- `g12` active but strict-paused after React parity, verification depth, native
+  hardening, and the bounded public-extension checkpoint
 
 ## Working Rule
 
@@ -68,6 +70,4 @@ Before rollover:
 
 ## Next Task
 
-Open `g12/README.md`, then `g12/009-visual-regression-gate.md`. The React
-parity program (`g12.001`–`g12.008`) is complete; `g12` stays the live queue
-while verification depth continues.
+Choose and promote the next bounded card through `g12/README.md`.

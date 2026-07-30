@@ -1,18 +1,19 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-07-10
+Updated: 2026-07-29
 
 ## 1. Purpose
 
 - Component name: `DockRegion`
-- Layer: `composite` (implemented in `@poodle/svelte-workstation`)
+- Layer: `composite` (implemented in `@poodle/svelte`)
 - Summary: a collapsible dock area that hosts panel tabs and one active panel
   body, or stacks multiple fixed panels, within a workstation layout
 - In scope: edge placement, static/flexible sizing modes, collapse/expand with
   icon-strip and hidden postures, active panel selection via Tabs primitive,
-  cross-region panel drag-and-drop with validation, auto-compact icon-only
-  mode when tabs overflow, click-to-expand from collapsed state
+  cross-region panel drag-and-drop with validation, an optional public
+  external-drag extension seam, auto-compact icon-only mode when tabs overflow,
+  click-to-expand from collapsed state
 - Out of scope: persistence backend, DAW-specific panel contents, resize
   handle (handled externally by SplitView)
 
@@ -93,6 +94,8 @@ Updated: 2026-07-10
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for Tabs |
 | `ariaLabel` | `string \| null` | `null` | no | region accessible label |
 | `canAcceptPanel` | `(panelId: string, sourceEdge: DockEdge) => boolean \| null` | `null` | no | cross-region drop validation |
+| `externalDragSource` | `DockExternalDragSource \| null` | `null` | no | prepares and writes a host-owned external payload without exposing host protocol types |
+| `externalDropTarget` | `DockExternalDropTarget \| null` | `null` | no | synchronously decides external eligibility and receives an accepted external drop |
 
 ### PanelTabItem
 
@@ -165,6 +168,19 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `onReorder` | tabs or stack items reordered | `string[]` | within-region reorder |
 | `onPanelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge }` | cross-region transfer |
 
+The `DockExternalDragSource` and `DockExternalDropTarget` methods are public
+extension hooks, not Poodle callbacks masquerading as app policy. Poodle owns
+their ordering:
+
+| Hook | When It Runs | Required Result |
+|------|--------------|-----------------|
+| `prepare` | primary pointer down on an enabled draggable panel | return a preparation now or later; `null` declines the external session |
+| preparation `start` | native `dragstart`, only when the matching preparation is ready | synchronously write the host's public payload |
+| preparation `cancel` | a ready preparation is superseded, released, cancelled, unready at dragstart, or unmounted before start | release host resources; reason is explicit |
+| preparation `end` | native `dragend`, only after `start` ran | finish or cancel the host session using its own policy |
+| `canDrop` | external `dragover` and again at `drop` | synchronous eligibility; only `DataTransfer.types` is portable during dragover |
+| `drop` | `drop`, only when the drop-time eligibility check passes | read and accept the public host payload |
+
 ### PanelDragData
 
 ```ts
@@ -173,6 +189,86 @@ type PanelDragData = {
   sourceEdge: DockEdge;
 };
 ```
+
+### External Drag Types
+
+```ts
+type DockExternalDragCancelReason =
+  | "superseded"
+  | "pointer-released"
+  | "pointer-cancelled"
+  | "not-ready"
+  | "unmounted";
+
+type DockExternalDragPrepareContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: PointerEvent;
+  signal: AbortSignal;
+};
+
+type DockExternalDragStartContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+type DockExternalDragEndContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: DragEvent;
+  dropEffect: DataTransfer["dropEffect"];
+};
+
+type DockExternalDragCancelContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  reason: DockExternalDragCancelReason;
+};
+
+type DockExternalDragPreparation = {
+  start(context: DockExternalDragStartContext): void;
+  end?(context: DockExternalDragEndContext): void | Promise<void>;
+  cancel?(context: DockExternalDragCancelContext): void | Promise<void>;
+};
+
+type DockExternalDragSource = {
+  prepare(
+    context: DockExternalDragPrepareContext,
+  ):
+    | DockExternalDragPreparation
+    | null
+    | Promise<DockExternalDragPreparation | null>;
+  onPrepareError?(
+    error: unknown,
+    context: DockExternalDragPrepareContext,
+  ): void;
+};
+
+type DockExternalDropEligibilityContext = {
+  phase: "over" | "drop";
+  targetEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+type DockExternalDropContext = {
+  targetEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+type DockExternalDropTarget = {
+  canDrop(context: DockExternalDropEligibilityContext): boolean;
+  drop(context: DockExternalDropContext): void | Promise<void>;
+};
+```
+
+The preparation object closes over any host-owned state. Poodle does not store,
+inspect, serialize, or type that state. `start` is the only place an extension
+writes `DataTransfer`; it runs synchronously inside the browser's native
+`dragstart` event.
 
 ## 6. Accessibility
 
@@ -230,18 +326,46 @@ type PanelDragData = {
 
 ### Cross-Region Transfer
 
-- Uses custom MIME type `application/x-poodle-panel-drag` on `dataTransfer`
-- DockRegion augments Tabs' `dragstart` with panel identity and source edge
-- Drop validation via `canAcceptPanel` callback (checked on `drop`, not `dragover`)
+- Without `externalDragSource`, uses Poodle's custom MIME type
+  `application/x-poodle-panel-drag` on `dataTransfer`
+- With `externalDragSource`, preparation begins on primary pointer down.
+  Poodle's cross-region payload is suppressed; the ready preparation's `start`
+  method owns the external payload write during native `dragstart`
+- If preparation is absent or pending at `dragstart`, no external payload is
+  written. Tabs' own same-region reorder payload and visual state remain active
+- Poodle-local drop validation uses `canAcceptPanel` (checked on `drop`)
+- External drop validation uses `externalDropTarget.canDrop` during `dragover`
+  and again during `drop`; its result drives the same drop-zone affordance
 - Visual feedback: dashed accent-colored border overlay during drag-over
 - Drop zone overlay: absolute-positioned, `pointer-events: none`
 
-### Drag Data Flow
+### Event Order
 
-1. Tab `dragstart` fires in source Tabs (sets `text/plain` for internal reorder)
-2. DockRegion's strip `dragstart` handler bubbles, adds `application/x-poodle-panel-drag`
-3. Target DockRegion's root `dragover` checks for custom type, shows overlay
-4. Target DockRegion's root `drop` reads panel data, validates, dispatches `panelDrop`
+| Order | Poodle Action | Extension Observation |
+|------:|---------------|-----------------------|
+| 1 | enabled tab or stack item receives primary `pointerdown` | `prepare(context)` starts with a fresh `AbortSignal` |
+| 2 | a later pointerdown supersedes an unfinished source | old signal aborts with `"superseded"`; a ready old result receives `cancel` |
+| 3 | native `dragstart` begins local Poodle reorder | a matching ready result receives `start`; a pending result aborts with `"not-ready"` |
+| 4 | target receives `dragover` | `canDrop({ phase: "over" })` drives preventDefault, drop effect, and affordance |
+| 5 | target receives `drop` | `canDrop({ phase: "drop" })` is rechecked, then `drop` runs |
+| 6 | source receives native `dragend` | a started result receives `end` exactly once |
+
+### Preparation Race And Cancellation Matrix
+
+| Condition | External Payload | Lifecycle |
+|-----------|------------------|-----------|
+| preparation resolves before matching `dragstart` | written by `start` | `end` on native `dragend` |
+| preparation still pending at matching `dragstart` | none | signal aborts with `"not-ready"`; a late result is cancelled |
+| pointer released before `dragstart` | none | signal aborts with `"pointer-released"`; ready result receives `cancel` |
+| pointer cancelled before `dragstart` | none | signal aborts with `"pointer-cancelled"`; ready result receives `cancel` |
+| another panel begins preparation | none from old preparation | old signal aborts with `"superseded"`; ready old result receives `cancel` |
+| component unmounts before `dragstart` | none | signal aborts with `"unmounted"`; ready result receives `cancel` |
+| `prepare` rejects | none | `onPrepareError` receives the rejection; no drag lifecycle starts |
+
+`cancel` and `end` are mutually exclusive for one preparation. Late resolutions
+after cancellation receive `cancel` exactly once. The extension must treat
+`AbortSignal.reason` as the same `DockExternalDragCancelReason` supplied to
+`cancel`.
 
 ## 9. Token Usage
 
@@ -517,6 +641,11 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 - Compact mode uses `ResizeObserver` with `scrollWidth > clientWidth` detection
 - Passes `showTooltips={isCompact}` to Tabs for horizontal icon-only tooltip support
 - `use:observeStrip` Svelte action binds ResizeObserver to the tabs container
+- Tabs exposes Poodle-owned `onDragPrepare`, `onDragStart`, and `onDragEnd`
+  callbacks so DockRegion can begin asynchronous work before the native
+  payload-write window without inspecting generated ids or CSS classes
+- the public extension receives native events directly; no selector, internal
+  Poodle MIME type, generated id, or Longhorn type is part of the contract
 
 ## 11. Parity Checklist
 
@@ -540,6 +669,10 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 ### Tier 3: Implementation Freedom
 
 - [x] cross-region drag-and-drop via native HTML Drag and Drop API
+- [x] asynchronous external preparation precedes the native payload-write window
+- [x] unready external preparation cannot advertise an external payload
+- [x] external eligibility drives the existing drop affordance
+- [x] same-region reorder remains Poodle-owned when the external seam is enabled
 - [x] compact mode detection via ResizeObserver
 - [ ] static mode stack reorder animation
 
@@ -548,6 +681,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Collapsed strip sizing differs by edge | side docks use vertical tabs, top/bottom keep horizontal | allowed | consistent behavior per edge type |
+| `externalDragSource` and `externalDropTarget` are Svelte/web-only | they expose native HTML `PointerEvent`, `DragEvent`, and `DataTransfer`; native hosts already own equivalent renderer event-loop integration | accepted | do not copy browser callbacks into `DockRegionSpec` |
 | No context menu event | not implemented in current iteration | deferred | add in future workspace milestone |
 
 ## 13. Specimen Definitions

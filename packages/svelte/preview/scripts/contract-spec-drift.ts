@@ -88,6 +88,12 @@ const WEB_ONLY_PROPS = new Set([
   // Renders the platform `<select>` instead of the custom listbox. There is no
   // native equivalent to defer to, so the flag has nothing to mean off the web.
   "native",
+  // DockRegion's external transfer seam is native HTML DataTransfer plumbing.
+  // Native renderers receive host drag/session events through their own event
+  // loops; copying browser callbacks into DockRegionSpec would make behavior
+  // look like renderer-neutral data.
+  "externalDragSource",
+  "externalDropTarget",
 ]);
 
 /**

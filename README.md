@@ -79,6 +79,5 @@ Historical `pug` and `flint` references should be treated as migration leftovers
 
 ## Next Task
 
-Recover the live `g10` queue from current evidence, then compile the next
-bounded Jetstream or component-overhaul milestone before more freeform work
-continues.
+Choose and promote the next bounded Poodle card through
+`docs/roadmaps/g12/README.md`. No implementation card is currently ready.

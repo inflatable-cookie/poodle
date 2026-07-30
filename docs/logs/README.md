@@ -1,7 +1,7 @@
 # Logs
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-07-29
 
 Logs record completed batches and decision evidence.
 
@@ -13,11 +13,8 @@ Logs record completed batches and decision evidence.
 
 ## Current Evidence Window
 
-- `2026-04/01-unified-select-handoff.md`
-- `2026-04/09-poodle-g10-recovery-open.md`
+- `2026-07/29-public-dock-drag-extension-and-preview-artifact.md`
 
 ## Next Task
 
-Keep the active evidence window aligned to `g10.002`, adding only the logs
-needed to reach the live next task without relying on handoff notes as the only
-queue authority.
+Add the next evidence log when a bounded Poodle card is promoted and completed.

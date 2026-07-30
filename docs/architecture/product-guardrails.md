@@ -18,5 +18,5 @@ Owner: Poodle core
 
 ## Next Task
 
-Use the strict planning gate to freeze the active `g10` owner before resuming
- another implementation batch.
+Use `docs/roadmaps/g12/README.md` to choose the next bounded owner. Keep host
+session policy outside Poodle.

@@ -3,13 +3,14 @@
 ## Active Execution Track
 
 - `g12`
-  - Status: active
-  - Range: `001` to `009` on disk
+  - Status: active, strict-paused
+  - Range: `001` to `016` on disk
   - Notes: React full parity (`001`–`008`) is complete — all 132 components
     ported to `@poodle/react` against a single shared stylesheet, with a
     full per-component preview gallery mirroring the Svelte preview's slugs.
-    The generation continues with web verification depth, starting at
-    `g12.009` (cross-framework visual regression gate).
+    Web verification and native hardening through `g12.015` are complete.
+    `g12.016` completed the public DockRegion drag extension and exact preview
+    artifact checkpoint requested by Longhorn. No implementation card is ready.
 
 - `g11`
   - Status: completed
@@ -110,7 +111,5 @@ closeout there first.
 
 ## Next Task
 
-Open `g12/README.md`. `g12.001`–`g12.009` are complete (React full parity
-plus the cross-framework visual regression gate, now green at 256/256
-sweep pairs). No seam is currently open — the next one is a maintainer
-choice; `g12/README.md` records the candidates.
+Choose and promote the next bounded Poodle card. Do not infer one from the
+candidate list in `g12/README.md`.

@@ -21,6 +21,17 @@ export default defineConfig({
         },
       },
       {
+        // Headless DOM geometry: the parts of @poodle/headless that read layout
+        // and computed style. The rest of the core suite is pure and runs under
+        // `bun test`, which has no DOM at all.
+        test: {
+          name: "headless-dom",
+          environment: "happy-dom",
+          globals: true,
+          include: ["test/headless-dom/**/*.test.ts"],
+        },
+      },
+      {
         esbuild: { jsx: "automatic" },
         test: {
           name: "react-components",

@@ -88,9 +88,9 @@ Operational note:
 
 ## Current Posture
 
-Poodle is in a strict-paused `g10` posture until the next active owner is
-chosen cleanly between the Jetstream lane and the GPUI follow-on queue.
+Poodle is strict-paused after completing `g12.016`. No implementation card is
+ready. The next owner must be chosen and promoted deliberately.
 
 ## Next Task
 
-Execute the strict planning gate in `docs/specs/062-g10-strict-posture-and-next-boundary-gate.md`.
+Use `docs/roadmaps/g12/README.md` as the planning gate.

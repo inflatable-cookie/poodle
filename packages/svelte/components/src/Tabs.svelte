@@ -76,6 +76,7 @@
     onValueChange?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
+    onDragPrepare?: ((value: string, event: PointerEvent) => void) | undefined;
     onDragStart?: ((value: string, event: DragEvent) => void) | undefined;
     onDragEnd?: ((value: string, event: DragEvent) => void) | undefined;
     children?: Snippet<[string]>;
@@ -105,6 +106,7 @@
     onValueChange = undefined,
     onReorder = undefined,
     onClose = undefined,
+    onDragPrepare = undefined,
     onDragStart = undefined,
     onDragEnd = undefined,
     children,
@@ -464,6 +466,18 @@
     dropTargetIndex = null;
   }
 
+  function handleDragPointerDown(
+    event: PointerEvent,
+    item: TabItem,
+  ): void {
+    if (!reorderable || event.button !== 0 || item.disabled === true) return;
+
+    if (currentValue !== item.value) {
+      send({ type: "SELECT", value: item.value });
+    }
+    onDragPrepare?.(item.value, event);
+  }
+
   function handleDragStart(event: DragEvent, index: number): void {
     const result = startDrag(event, index, reorderable);
     if (result.dragSourceIndex !== null) {
@@ -638,16 +652,7 @@
             aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
             onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
             onblur={() => hasTooltips && dismissTooltip()}
-            onpointerdown={(event) => {
-              if (
-                reorderable &&
-                event.button === 0 &&
-                item.disabled !== true &&
-                currentValue !== item.value
-              ) {
-                send({ type: "SELECT", value: item.value });
-              }
-            }}
+            onpointerdown={(event) => handleDragPointerDown(event, item)}
             onclick={() => send({ type: "SELECT", value: item.value })}
             onkeydown={(event) => {
               if (event.key === "Escape" && hasTooltips) dismissTooltip();

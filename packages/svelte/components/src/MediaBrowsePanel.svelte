@@ -45,7 +45,7 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
-  function toMediaKind(kind?: MediaKind): MediaKind {
+  function toMediaKind(kind: MediaKind | undefined): MediaKind {
     return kind ?? "image";
   }
 </script>
@@ -115,4 +115,3 @@
     {/if}
   </div>
 </UiPresentationProvider>
-

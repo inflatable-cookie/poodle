@@ -58,6 +58,5 @@ effigy health
 
 ## Next Task
 
-Use `roadmaps/g10/README.md` as the current entrypoint. Living GPUI vs Svelte
-runtime truth and deferred functional work: `roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
-The historical `g08/delta-register.md` is deprecated (pointer stub only).
+Use `roadmaps/g12/README.md` as the current planning gate.
+`roadmaps/generation-index.md` remains the top-level generation authority.

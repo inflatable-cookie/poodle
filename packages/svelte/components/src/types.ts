@@ -798,6 +798,77 @@ export type PanelTabItem = {
   closable?: boolean;
 };
 
+export type DockExternalDragCancelReason =
+  | "superseded"
+  | "pointer-released"
+  | "pointer-cancelled"
+  | "not-ready"
+  | "unmounted";
+
+export type DockExternalDragPrepareContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: PointerEvent;
+  signal: AbortSignal;
+};
+
+export type DockExternalDragStartContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDragEndContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  event: DragEvent;
+  dropEffect: DataTransfer["dropEffect"];
+};
+
+export type DockExternalDragCancelContext = {
+  panel: PanelTabItem;
+  sourceEdge: DockEdge;
+  reason: DockExternalDragCancelReason;
+};
+
+export type DockExternalDragPreparation = {
+  start: (context: DockExternalDragStartContext) => void;
+  end?: (context: DockExternalDragEndContext) => void | Promise<void>;
+  cancel?: (context: DockExternalDragCancelContext) => void | Promise<void>;
+};
+
+export type DockExternalDragSource = {
+  prepare: (
+    context: DockExternalDragPrepareContext,
+  ) =>
+    | DockExternalDragPreparation
+    | null
+    | Promise<DockExternalDragPreparation | null>;
+  onPrepareError?: (
+    error: unknown,
+    context: DockExternalDragPrepareContext,
+  ) => void;
+};
+
+export type DockExternalDropEligibilityContext = {
+  phase: "over" | "drop";
+  targetEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDropContext = {
+  targetEdge: DockEdge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDropTarget = {
+  canDrop: (context: DockExternalDropEligibilityContext) => boolean;
+  drop: (context: DockExternalDropContext) => void | Promise<void>;
+};
+
 // --- Snapshot types ---
 
 export type StripRegionSnapshot = {

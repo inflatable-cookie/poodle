@@ -2,6 +2,7 @@
   import "@poodle/styles/dock-region.css";
   import { onDestroy, tick, type Snippet } from "svelte";
 
+  import { createDockExternalDragController } from "./dock-external-drag";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as Tabs } from "./Tabs.svelte";
   import type {
@@ -10,6 +11,8 @@
     DockCollapsedPosture,
     DockEdge,
     DockEmphasis,
+    DockExternalDragSource,
+    DockExternalDropTarget,
     DockSizing,
     PanelDragData,
     PanelTabItem,
@@ -33,6 +36,8 @@
     value?: string | null;
     ariaLabel?: string | null;
     canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
+    externalDragSource?: DockExternalDragSource | null;
+    externalDropTarget?: DockExternalDropTarget | null;
     onValueChange?: ((value: string) => void) | undefined;
     onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
@@ -57,6 +62,8 @@
     value = null,
     ariaLabel = null,
     canAcceptPanel = null,
+    externalDragSource = null,
+    externalDropTarget = null,
     onValueChange = undefined,
     onCollapsedChange = undefined,
     onClose = undefined,
@@ -133,11 +140,20 @@
     };
   }
 
-  onDestroy(() => resizeObserver?.disconnect());
+  onDestroy(() => {
+    resizeObserver?.disconnect();
+    externalDrag.cancel("unmounted");
+  });
 
   let isDragOver = $state(false);
   let dropInsertIndex = $state(-1);
   let dragSourceIndex = $state(-1);
+
+  const externalDrag = createDockExternalDragController({
+    source: () => externalDragSource,
+    panel: (panelId) => items.find((item) => item.value === panelId),
+    edge: () => edge,
+  });
 
   function handleValueChange(nextValue: string): void {
     onValueChange?.(nextValue);
@@ -163,16 +179,45 @@
 
   function handleTabDragStart(panelId: string, event: DragEvent): void {
     if (!event.dataTransfer) return;
+    if (externalDragSource) {
+      externalDrag.start(panelId, event);
+      return;
+    }
+
     const data: PanelDragData = { panelId, sourceEdge: edge };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
   }
 
+  function handleTabDragEnd(panelId: string, event: DragEvent): void {
+    externalDrag.end(panelId, event);
+  }
+
+  function canAcceptExternalDrop(
+    phase: "over" | "drop",
+    event: DragEvent,
+  ): boolean {
+    if (!externalDropTarget || !event.dataTransfer) return false;
+    return externalDropTarget.canDrop({
+      phase,
+      targetEdge: edge,
+      event,
+      dataTransfer: event.dataTransfer,
+    });
+  }
+
   function handleRegionDragOver(event: DragEvent): void {
-    if (!event.dataTransfer?.types.includes(PANEL_DRAG_TYPE)) return;
+    const hasPoodlePanel =
+      event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
+    const acceptsExternal =
+      !hasPoodlePanel && canAcceptExternalDrop("over", event);
+    if (!hasPoodlePanel && !acceptsExternal) return;
+
     event.preventDefault();
     isDragOver = true;
-    event.dataTransfer.dropEffect = "move";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
   }
 
   function handleRegionDragLeave(event: DragEvent): void {
@@ -183,11 +228,22 @@
   }
 
   function handleRegionDrop(event: DragEvent): void {
-    event.preventDefault();
     isDragOver = false;
 
     const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
-    if (!raw) return;
+    if (!raw) {
+      if (!canAcceptExternalDrop("drop", event) || !event.dataTransfer) return;
+
+      event.preventDefault();
+      void externalDropTarget?.drop({
+        targetEdge: edge,
+        event,
+        dataTransfer: event.dataTransfer,
+      });
+      return;
+    }
+
+    event.preventDefault();
 
     let data: PanelDragData;
     try {
@@ -205,16 +261,27 @@
   function handleStackItemDragStart(event: DragEvent, index: number): void {
     if (!event.dataTransfer) return;
     dragSourceIndex = index;
+    if (externalDragSource) {
+      externalDrag.start(items[index].value, event);
+      return;
+    }
+
     const data: PanelDragData = { panelId: items[index].value, sourceEdge: edge };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
   }
 
   function handleStackItemDragOver(event: DragEvent, index: number): void {
-    if (!event.dataTransfer?.types.includes(PANEL_DRAG_TYPE)) return;
+    const isLocalReorder = dragSourceIndex >= 0;
+    const hasPoodlePanel =
+      event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
+    if (!isLocalReorder && !hasPoodlePanel) return;
+
     event.preventDefault();
     dropInsertIndex = index;
-    event.dataTransfer.dropEffect = "move";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
   }
 
   function handleStackItemDragLeave(): void {
@@ -222,22 +289,12 @@
   }
 
   function handleStackItemDrop(event: DragEvent, index: number): void {
-    event.preventDefault();
-    event.stopPropagation();
     isDragOver = false;
     dropInsertIndex = -1;
 
-    const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
-    if (!raw) return;
-
-    let data: PanelDragData;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      return;
-    }
-
-    if (data.sourceEdge === edge && dragSourceIndex >= 0) {
+    if (dragSourceIndex >= 0) {
+      event.preventDefault();
+      event.stopPropagation();
       const order = items.map((item) => item.value);
       const [moved] = order.splice(dragSourceIndex, 1);
       order.splice(index, 0, moved);
@@ -246,11 +303,28 @@
       return;
     }
 
+    const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
+    if (!raw) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    let data: PanelDragData;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return;
+    }
+
     if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
     onPanelDrop?.({ panel: data, targetEdge: edge });
   }
 
-  function handleStackDragEnd(): void {
+  function handleStackDragEnd(event: DragEvent): void {
+    const panelId = externalDrag.activePanelId();
+    if (panelId) {
+      externalDrag.end(panelId, event);
+    }
     isDragOver = false;
     dragSourceIndex = -1;
     dropInsertIndex = -1;
@@ -283,6 +357,8 @@
           draggable="true"
           role="group"
           aria-label={item.label ?? `Panel ${index + 1}`}
+          onpointerdown={(event) =>
+            externalDrag.prepare(item.value, event)}
           ondragstart={(event) => handleStackItemDragStart(event, index)}
           ondragover={(event) => handleStackItemDragOver(event, index)}
           ondragleave={handleStackItemDragLeave}
@@ -327,7 +403,9 @@
         onValueChange={handleValueChange}
         onReorder={handleReorder}
         onClose={handleClose}
+        onDragPrepare={externalDrag.prepare}
         onDragStart={handleTabDragStart}
+        onDragEnd={handleTabDragEnd}
       />
     </div>
   {:else if showIconStrip}
@@ -351,7 +429,9 @@
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
+          onDragPrepare={externalDrag.prepare}
           onDragStart={handleTabDragStart}
+          onDragEnd={handleTabDragEnd}
         />
       </div>
       {#if collapsible}
@@ -384,7 +464,9 @@
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
+          onDragPrepare={externalDrag.prepare}
           onDragStart={handleTabDragStart}
+          onDragEnd={handleTabDragEnd}
         />
       </div>
       {#if collapsible}

@@ -1,7 +1,7 @@
 # g12 — React Full Parity And Web Verification Depth
 
-**Status: active.** The React parity program (`001`–`008`) is complete;
-the generation continues with cross-framework verification depth.
+**Status: active, strict-paused.** The React parity program (`001`–`008`) and
+the bounded work through `016` are complete. No implementation card is ready.
 
 **React parity: COMPLETE.** All 132 components ported to `@poodle/react` and
 Playwright-verified against the Svelte preview. The React preview is a full
@@ -76,6 +76,10 @@ Runway:
   input — with 108 Poodle components attaching their `aria_label` to it. GPUI
   still waits on upstream, because the work it needs is the work upstream would
   obsolete. **Complete for Jetstream; GPUI held deliberately.**
+- `016-public-dock-drag-extension-and-preview-artifact.md` — add the public
+  async pre-drag/source lifecycle and external-drop target seam needed by
+  desktop hosts, then prove the exact packed Svelte preview artifact outside
+  sibling source resolution. **Complete.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -84,8 +88,8 @@ Runway:
 
 ## Next Task
 
-`g12.015` is done: Jetstream has accessibility, GPUI is held on purpose. Open
-for this generation:
+Choose and promote the next bounded owner before implementation resumes. The
+accessibility follow-up candidates below remain evidence, not ready work:
 
 - **Accessible names: zero unnamed controls, and gated.** `test:jetstream-a11y`
   projects every specimen's tree headlessly and now runs in `ci:native`. It

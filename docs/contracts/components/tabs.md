@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-07-29
 
 ## 1. Purpose
 
@@ -73,6 +73,9 @@ Updated: 2026-07-10
 | `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the active tab changes |
 | `onReorder` | `(items: string[]) => void` | `undefined` | no | callback fired when tabs are reordered |
 | `onClose` | `(value: string) => void` | `undefined` | no | callback fired when a tab close is requested |
+| `onDragPrepare` | `(value: string, event: PointerEvent) => void` | `undefined` | no | primary pointer-down seam for an owning composite that must prepare before native `dragstart` |
+| `onDragStart` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-start seam after Tabs has established local reorder state |
+| `onDragEnd` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-end seam before Tabs clears the dragged value |
 
 ### TabItem Type
 
@@ -305,6 +308,9 @@ not shared services.
 | `onValueChange` | active tab changes | `string` | called on click, or on focus when `activationMode="automatic"` |
 | `onReorder` | tab order changes | `string[]` | new value order array |
 | `onClose` | close button clicked or Delete key on closable tab | `string` | tab value being closed |
+| `onDragPrepare` | primary pointer down on an enabled reorderable tab | `string`, `PointerEvent` | lets an owning composite start asynchronous work before native `dragstart`; does not replace Tabs reorder |
+| `onDragStart` | native drag starts | `string`, `DragEvent` | runs after Tabs writes its private same-region reorder payload |
+| `onDragEnd` | native drag ends | `string`, `DragEvent` | runs once for the value captured at drag start |
 
 ## 6. Accessibility
 
