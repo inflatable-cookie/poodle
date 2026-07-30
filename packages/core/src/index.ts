@@ -178,6 +178,27 @@ export {
 } from "./resize";
 
 export {
+  submitsOnSelect,
+  toggleQuestionSelection,
+  resolveQuestionAnswer,
+  declineQuestion,
+  canSubmitQuestion,
+  questionProgress,
+  showsQuestionProgress,
+  nextQuestionIndex,
+  questionBatchComplete,
+  answeredQuestionSummary,
+  isChosenOption,
+  type AgentQuestionOption,
+  type AgentQuestionItem,
+  type AgentQuestionOutcome,
+  type AgentQuestionAnswer,
+  type QuestionProgressState,
+  type QuestionProgress,
+  type AnsweredQuestion,
+} from "./agent-question";
+
+export {
   groupTranscriptItems,
   toolRunLeadCall,
   toolRunHiddenCount,

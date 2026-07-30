@@ -1,0 +1,884 @@
+{
+  "resolve": [
+    {
+      "name": "nothing chosen resolves to nothing",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [],
+      "text": "",
+      "answer": null,
+      "canSubmit": false,
+      "submitsOnSelect": true
+    },
+    {
+      "name": "one option selected",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [
+        "composer"
+      ],
+      "text": "",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "selected",
+        "values": [
+          "composer"
+        ],
+        "text": ""
+      },
+      "canSubmit": true,
+      "submitsOnSelect": true
+    },
+    {
+      "name": "override wins over a selection",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [
+        "inline"
+      ],
+      "text": "somewhere else",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "override",
+        "values": [],
+        "text": "somewhere else"
+      },
+      "canSubmit": true,
+      "submitsOnSelect": true
+    },
+    {
+      "name": "whitespace is not an override",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [
+        "inline"
+      ],
+      "text": "   ",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "selected",
+        "values": [
+          "inline"
+        ],
+        "text": ""
+      },
+      "canSubmit": true,
+      "submitsOnSelect": true
+    },
+    {
+      "name": "override alone",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [],
+      "text": "a bespoke answer",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "override",
+        "values": [],
+        "text": "a bespoke answer"
+      },
+      "canSubmit": true,
+      "submitsOnSelect": true
+    },
+    {
+      "name": "multi-select keeps every value",
+      "q": {
+        "id": "targets",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ],
+        "allowMultiple": true
+      },
+      "sel": [
+        "modal",
+        "inline"
+      ],
+      "text": "",
+      "answer": {
+        "questionId": "targets",
+        "outcome": "selected",
+        "values": [
+          "inline",
+          "modal"
+        ],
+        "text": ""
+      },
+      "canSubmit": true,
+      "submitsOnSelect": false
+    },
+    {
+      "name": "multi-select values follow option order, not click order",
+      "q": {
+        "id": "targets",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ],
+        "allowMultiple": true
+      },
+      "sel": [
+        "modal",
+        "inline",
+        "composer"
+      ],
+      "text": "",
+      "answer": {
+        "questionId": "targets",
+        "outcome": "selected",
+        "values": [
+          "inline",
+          "composer",
+          "modal"
+        ],
+        "text": ""
+      },
+      "canSubmit": true,
+      "submitsOnSelect": false
+    },
+    {
+      "name": "override clears a multi selection",
+      "q": {
+        "id": "targets",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ],
+        "allowMultiple": true
+      },
+      "sel": [
+        "inline",
+        "modal"
+      ],
+      "text": "none of these",
+      "answer": {
+        "questionId": "targets",
+        "outcome": "override",
+        "values": [],
+        "text": "none of these"
+      },
+      "canSubmit": true,
+      "submitsOnSelect": false
+    }
+  ],
+  "toggle": [
+    {
+      "name": "single-select replaces",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [
+        "inline"
+      ],
+      "value": "modal",
+      "result": [
+        "modal"
+      ]
+    },
+    {
+      "name": "single-select re-click keeps it selected",
+      "q": {
+        "id": "placement",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ]
+      },
+      "sel": [
+        "inline"
+      ],
+      "value": "inline",
+      "result": [
+        "inline"
+      ]
+    },
+    {
+      "name": "multi-select adds",
+      "q": {
+        "id": "targets",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ],
+        "allowMultiple": true
+      },
+      "sel": [
+        "inline"
+      ],
+      "value": "modal",
+      "result": [
+        "inline",
+        "modal"
+      ]
+    },
+    {
+      "name": "multi-select removes on re-click",
+      "q": {
+        "id": "targets",
+        "header": "Placement",
+        "prompt": "Where should it appear?",
+        "options": [
+          {
+            "value": "inline",
+            "label": "Inline in the transcript"
+          },
+          {
+            "value": "composer",
+            "label": "Anchored above the composer"
+          },
+          {
+            "value": "modal",
+            "label": "Modal dialog"
+          }
+        ],
+        "allowMultiple": true
+      },
+      "sel": [
+        "inline",
+        "modal"
+      ],
+      "value": "inline",
+      "result": [
+        "modal"
+      ]
+    }
+  ],
+  "progress": [
+    {
+      "name": "single question",
+      "questions": [
+        {
+          "id": "placement",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        }
+      ],
+      "activeIndex": 0,
+      "progress": {
+        "states": [
+          "current"
+        ],
+        "current": 1,
+        "total": 1
+      },
+      "shows": false,
+      "next": 1,
+      "complete": false
+    },
+    {
+      "name": "batch at the first",
+      "questions": [
+        {
+          "id": "placement",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "b",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "c",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "d",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        }
+      ],
+      "activeIndex": 0,
+      "progress": {
+        "states": [
+          "current",
+          "pending",
+          "pending",
+          "pending"
+        ],
+        "current": 1,
+        "total": 4
+      },
+      "shows": true,
+      "next": 1,
+      "complete": false
+    },
+    {
+      "name": "batch at the third",
+      "questions": [
+        {
+          "id": "placement",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "b",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "c",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "d",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        }
+      ],
+      "activeIndex": 2,
+      "progress": {
+        "states": [
+          "answered",
+          "answered",
+          "current",
+          "pending"
+        ],
+        "current": 3,
+        "total": 4
+      },
+      "shows": true,
+      "next": 3,
+      "complete": false
+    },
+    {
+      "name": "batch at the last",
+      "questions": [
+        {
+          "id": "placement",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "b",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "c",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "d",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        }
+      ],
+      "activeIndex": 3,
+      "progress": {
+        "states": [
+          "answered",
+          "answered",
+          "answered",
+          "current"
+        ],
+        "current": 4,
+        "total": 4
+      },
+      "shows": true,
+      "next": 4,
+      "complete": false
+    },
+    {
+      "name": "batch complete",
+      "questions": [
+        {
+          "id": "placement",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "b",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "c",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        },
+        {
+          "id": "d",
+          "header": "Placement",
+          "prompt": "Where should it appear?",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Inline in the transcript"
+            },
+            {
+              "value": "composer",
+              "label": "Anchored above the composer"
+            },
+            {
+              "value": "modal",
+              "label": "Modal dialog"
+            }
+          ]
+        }
+      ],
+      "activeIndex": 4,
+      "progress": {
+        "states": [
+          "answered",
+          "answered",
+          "answered",
+          "current"
+        ],
+        "current": 4,
+        "total": 4
+      },
+      "shows": true,
+      "next": 4,
+      "complete": true
+    },
+    {
+      "name": "empty",
+      "questions": [],
+      "activeIndex": 0,
+      "progress": {
+        "states": [],
+        "current": 0,
+        "total": 0
+      },
+      "shows": false,
+      "next": 0,
+      "complete": true
+    }
+  ],
+  "summary": [
+    {
+      "name": "selected",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "selected",
+        "values": [
+          "composer"
+        ],
+        "text": ""
+      },
+      "summary": "Anchored above the composer"
+    },
+    {
+      "name": "override",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "override",
+        "values": [],
+        "text": "elsewhere"
+      },
+      "summary": "elsewhere"
+    },
+    {
+      "name": "declined",
+      "answer": {
+        "questionId": "placement",
+        "outcome": "declined",
+        "values": [],
+        "text": ""
+      },
+      "summary": "Declined"
+    },
+    {
+      "name": "multiple selected",
+      "answer": {
+        "questionId": "targets",
+        "outcome": "selected",
+        "values": [
+          "inline",
+          "modal"
+        ],
+        "text": ""
+      },
+      "summary": "Inline in the transcript, Modal dialog"
+    }
+  ]
+}
