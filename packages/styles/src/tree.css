@@ -10,10 +10,20 @@
     --poodle-tree-indent: 1rem;
     --poodle-tree-row-gap: 0.25rem;
     --poodle-tree-row-pad-inline: 0.375rem;
+    /* The tree's own edge inset, addressable per instance.
+       Neither axis used to be: the inline value was a literal, and the block
+       value read `--poodle-space-panel-y` directly, so overriding it on the
+       tree leaked into anything inside that reads the same token. The inset is
+       right when the tree sits in a bordered box and wrong when the tree *is*
+       the column — there the inline offset breaks alignment with the rest of
+       the column and the block offset pushes the first row off whatever sits
+       above it. Same defaults; a consumer can now zero them. */
+    --poodle-tree-pad-block: var(--poodle-space-panel-y);
+    --poodle-tree-pad-inline: 0.25rem;
     display: flex;
     flex-direction: column;
     min-width: 0;
-    padding: var(--poodle-space-panel-y) 0.25rem;
+    padding: var(--poodle-tree-pad-block) var(--poodle-tree-pad-inline);
   }
 
   /* ── Size variants (row height + font; never touched by density) ── */

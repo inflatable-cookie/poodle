@@ -286,6 +286,8 @@ is to guess.
 | `--poodle-tree-indent` | `1rem` | Width of one depth indent cell (density-driven) |
 | `--poodle-tree-row-gap` | `0.25rem` | Gap between twisty, icon, label (density-driven) |
 | `--poodle-tree-row-pad-inline` | `0.375rem` | Row leading / trailing inline padding (density-driven) |
+| `--poodle-tree-pad-block` | `var(--poodle-space-panel-y)` | The tree's own top / bottom inset |
+| `--poodle-tree-pad-inline` | `0.25rem` | The tree's own leading / trailing inset |
 
 ### `.tree` (Root)
 
@@ -294,7 +296,28 @@ is to guess.
 | `display` | `flex` |
 | `flex-direction` | `column` |
 | `min-width` | `0` |
-| `padding` | `var(--poodle-space-panel-y) 0.25rem` |
+| `padding` | `var(--poodle-tree-pad-block) var(--poodle-tree-pad-inline)` |
+
+#### The Root Inset Is Addressable
+
+Both axes of the root padding are their own variables rather than a literal and
+a bare token read. The inset is right when the tree sits inside a bordered box
+and wrong when the tree *is* the column: there the inline offset breaks
+alignment with everything else in the column, and the block offset pushes the
+first row away from whatever sits above it.
+
+A consumer zeroes them per instance:
+
+```css
+.pane :global(.poodle-tree) {
+  --poodle-tree-pad-block: 0;
+  --poodle-tree-pad-inline: 0;
+}
+```
+
+Reading `--poodle-space-panel-y` directly would have made the block axis look
+overridable, but setting that token on the tree leaks into anything inside it
+that reads the same token. The defaults are unchanged.
 
 ### Size Variants
 
