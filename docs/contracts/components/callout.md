@@ -354,6 +354,11 @@ font-size is the `.callout__content` size.
 - GPUI still has separate BannerSpec and CallOutSpec — consolidation
   can follow in a future pass
 
+## 10a. Jetstream Notes
+
+- `Callout::from_spec(spec, theme).on_dismiss(...)`. The control renders only
+  for a dismissible callout, so there is nothing to fire otherwise.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

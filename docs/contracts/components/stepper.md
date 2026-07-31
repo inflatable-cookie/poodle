@@ -263,6 +263,15 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
 - GPUI has no accessibility API — see `003-native-accessibility.md`. The status
   suffix in the accessible name is carried on the spec and is inert there.
 
+## 10a. Jetstream Notes
+
+- `Stepper::from_spec(spec, theme).on_change(...).on_rerun(...)`, each carrying
+  the step's value. This is the component whose GPUI handlers were stored and
+  never attached — the defect that started g12.017 — so these tests are the
+  reference for what "actually wired" means.
+- The rerun sits inside a clickable step, so it takes its own handler, inert
+  when unwired: rerunning a step must not also select it.
+
 ## 11. Parity Checklist
 
 - [ ] equal-column layout with dividers between steps

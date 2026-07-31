@@ -52,7 +52,51 @@ fn density_pad_scale(density: ControlDensity) -> f32 {
     }
 }
 
+/// ToastStack — transient notices.
+///
+/// Mirrors the GPUI target's names: `on_dismiss` and `on_action`, each carrying
+/// the toast's id.
+pub struct ToastStack {
+    spec: ToastStackSpec,
+    theme: JetstreamThemeProvider,
+    on_dismiss: Option<crate::element::Handler>,
+    on_action: Option<crate::element::Handler>,
+}
+
+impl ToastStack {
+    pub fn from_spec(spec: ToastStackSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_dismiss: None, on_action: None }
+    }
+
+    /// Fires with the dismissed toast's id.
+    pub fn on_dismiss(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_dismiss = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the toast's id when its action chip is pressed.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ToastStack {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_dismiss, self.on_action)
+    }
+}
+
 pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &ToastStackSpec,
+    theme: &JetstreamThemeProvider,
+    on_dismiss: Option<crate::element::Handler>,
+    on_action: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let title_px = rem_to_px(title_font_rem(effective_size));
     let message_px = rem_to_px(message_font_rem(effective_size));
@@ -117,26 +161,38 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
         // immediate JsEl pass) — approximated as a bordered, tone-neutral chip;
         // click handling lives in the preview loop. (note)
         if let Some(action) = &toast.action_label {
-            content = content.child(
-                ui_element::label(action.as_str())
-                    .text_color(title_color)
-                    .text_size(message_px)
-                    .text_weight(600)
-                    .border_1()
-                    .border_color(toast_border)
-                    .rounded(radius)
-                    .px(rem_to_px(0.5))
-                    .py(rem_to_px(0.25)),
-            );
+            let mut chip = ui_element::label(action.as_str())
+                .text_color(title_color)
+                .text_size(message_px)
+                .text_weight(600)
+                .border_1()
+                .border_color(toast_border)
+                .rounded(radius)
+                .px(rem_to_px(0.5))
+                .py(rem_to_px(0.25));
+
+            if let Some(handler) = &on_action {
+                let handler = std::sync::Arc::clone(handler);
+                let id = toast.id.clone();
+                chip = chip.cursor_pointer().on_click(move |_event| handler(&id));
+            }
+
+            content = content.child(chip);
         }
 
         // Dismiss affordance — × glyph in a sized square; click in preview loop.
-        let dismiss = ui_element::label("\u{00d7}")
+        let mut dismiss = ui_element::label("\u{00d7}")
             .text_color(dismiss_color)
             .text_size(dismiss_px)
             .w(dismiss_px)
             .h(dismiss_px)
             .text_align_center();
+
+        if let Some(handler) = &on_dismiss {
+            let handler = std::sync::Arc::clone(handler);
+            let id = toast.id.clone();
+            dismiss = dismiss.cursor_pointer().on_click(move |_event| handler(&id));
+        }
 
         // Toast box: tinted gradient bg, tone border, elevation shadow, clipped.
         // Contract §8 background is a linear gradient (90deg) of the tone tint
@@ -306,4 +362,29 @@ mod tests {
         assert!(tree.has_text("Title only"), "title missing");
         assert!(tree.has_text("\u{00d7}"), "dismiss missing");
     }
+
+    #[test]
+    fn dismiss_and_action_report_the_toast() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let dismisses = Arc::clone(&seen);
+        let actions = Arc::clone(&seen);
+
+        let spec = ToastStackSpec::new().with_toasts(vec![
+            Toast::new("t1", "Saved").with_action_label("Undo"),
+        ]);
+
+        let el = ToastStack::from_spec(spec, &theme())
+            .on_dismiss(move |id| dismisses.lock().unwrap().push(format!("dismiss:{id}")))
+            .on_action(move |id| actions.lock().unwrap().push(format!("action:{id}")))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 240.0, "Undo");
+        crate::element::click_probe::click_text(&el, 480.0, 240.0, "\u{00d7}");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["action:t1", "dismiss:t1"]);
+    }
+
 }

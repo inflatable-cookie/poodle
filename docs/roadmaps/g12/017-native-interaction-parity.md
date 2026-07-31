@@ -188,6 +188,7 @@ Batches land with the gate holding each one to a click test.
 | Date variants and groups | 7 | 45 → 38 |
 | Composite panels | 5 | 38 → 33 |
 | List surfaces | 4 | 33 → 29 |
+| Chrome | 7 | 29 → 22 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -360,7 +361,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 29 components left in the `drift:clicks` baseline. The remainder
+1. Sweep the 22 components left in the `drift:clicks` baseline. The remainder
    is list surfaces, chrome/shells, and typed inputs whose events are mostly
    unreachable without key or drop events — expect more deltas than wiring. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing

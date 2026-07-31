@@ -97,7 +97,66 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) 
     }
 }
 
+/// SplitButton — a primary action with a menu of alternates.
+///
+/// Mirrors the GPUI target's names: `on_click` for the primary half,
+/// `on_dropdown` for the chevron, and `on_action` for a menu item's value.
+pub struct SplitButton {
+    spec: SplitButtonSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+    on_dropdown: Option<crate::element::ActionHandler>,
+    on_action: Option<crate::element::Handler>,
+}
+
+impl SplitButton {
+    pub fn from_spec(spec: SplitButtonSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+            on_dropdown: None,
+            on_action: None,
+        }
+    }
+
+    /// Fires when the primary half is pressed.
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the chevron half is pressed.
+    pub fn on_dropdown(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_dropdown = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the chosen menu item's value. Separators and disabled items
+    /// never fire.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for SplitButton {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_click, self.on_dropdown, self.on_action)
+    }
+}
+
 pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &SplitButtonSpec,
+    theme: &JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+    on_dropdown: Option<crate::element::ActionHandler>,
+    on_action: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -164,6 +223,11 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
             .hover(|s| s.bg(hover_fill))
             .active(|s| s.bg(active_fill))
             .cursor_pointer();
+
+        if let Some(handler) = &on_click {
+            let handler = std::sync::Arc::clone(handler);
+            primary = primary.on_click(move |_event| handler());
+        }
     }
 
     // Contract §4/§8: loading shows the shared ring spinner in the primary half,
@@ -218,6 +282,11 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
             .hover(|s| s.bg(hover_fill))
             .active(|s| s.bg(active_fill))
             .cursor_pointer();
+
+        if let Some(handler) = &on_dropdown {
+            let handler = std::sync::Arc::clone(handler);
+            toggle = toggle.on_click(move |_event| handler());
+        }
     }
 
     root = root.child(toggle);
@@ -266,9 +335,9 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
         for item in &spec.items {
             match item {
                 SplitMenuItem::Action {
+                    value,
                     label,
                     is_disabled,
-                    ..
                 } => {
                     let mut item_el = ui_element::button(label)
                         .aria_role(jetstream_ui::accesskit::Role::MenuItem)
@@ -289,6 +358,12 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
                             .disabled(true);
                     } else {
                         item_el = item_el.hover(|s| s.bg(item_hover)).cursor_pointer();
+
+                        if let Some(handler) = &on_action {
+                            let handler = std::sync::Arc::clone(handler);
+                            let value = value.clone();
+                            item_el = item_el.on_click(move |_event| handler(&value));
+                        }
                     }
                     menu = menu.child(item_el);
                 }
@@ -517,4 +592,38 @@ mod tests {
             "density must not change control height"
         );
     }
+
+    /// Three targets, three events: the primary half, the chevron, and a menu
+    /// item by value.
+    #[test]
+    fn each_half_reports_its_own_event() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let clicks = Arc::clone(&seen);
+        let drops = Arc::clone(&seen);
+        let acts = Arc::clone(&seen);
+
+        let spec = SplitButtonSpec::new()
+            .with_label("Save")
+            .with_items(menu_items())
+            .with_open(true);
+
+        let el = SplitButton::from_spec(spec, &theme())
+            .on_click(move || clicks.lock().unwrap().push("primary".to_string()))
+            .on_dropdown(move || drops.lock().unwrap().push("dropdown".to_string()))
+            .on_action(move |value| acts.lock().unwrap().push(format!("action:{value}")))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "Save");
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "chevron-down");
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "Save as template");
+
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["primary", "dropdown", "action:template"]
+        );
+    }
+
 }

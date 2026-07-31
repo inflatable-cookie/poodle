@@ -362,6 +362,12 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 - Variant CSS var system maps to Rust enum with computed color values
 - Divider height percentage (60%) must be calculated from actual control height
 
+## 10a. Jetstream Notes
+
+- `SplitButton::from_spec(spec, theme).on_click(...).on_dropdown(...).on_action(...)`.
+  Three targets, three events: the primary half, the chevron, and a menu item by
+  value. Separators and disabled items never fire.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

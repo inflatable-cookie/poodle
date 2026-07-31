@@ -271,6 +271,12 @@ None.
 - Preserve heading hierarchy, state region semantics, and pagination
   affordances
 
+## 10a. Jetstream Notes
+
+- `ListContainer::from_spec(spec, theme).content(...).on_page_change(...)`,
+  forwarded to the composed `Pagination` rather than re-implemented, with the
+  destination-page payload that implies.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

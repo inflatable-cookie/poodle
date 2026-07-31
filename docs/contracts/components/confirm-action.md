@@ -207,6 +207,13 @@ None.
 - compose AlertDialog and Button primitives
 - internal open state managed by the composite
 
+## 10a. Jetstream Notes
+
+- `ConfirmAction::from_spec(spec, theme).on_trigger(...).on_confirm(...).on_cancel(...)`.
+  All three forward to the composed `Button` and `AlertDialog` rather than being
+  re-implemented, so `on_cancel` covers the cancel button and every dismissal
+  route, as `AlertDialog` does.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

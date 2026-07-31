@@ -337,6 +337,11 @@ None.
 - tone-based accent bar may use platform-specific drawing
 - assertive announcement for danger tone must be preserved
 
+## 10a. Jetstream Notes
+
+- `ToastStack::from_spec(spec, theme).on_dismiss(...).on_action(...)`, each
+  carrying the toast's id.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

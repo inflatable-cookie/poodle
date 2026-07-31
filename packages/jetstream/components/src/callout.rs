@@ -30,7 +30,43 @@ fn tone_icon(tone: StatusTone) -> &'static str {
     }
 }
 
+/// Callout — an inline notice.
+///
+/// Mirrors the GPUI target's `on_dismiss`.
+pub struct Callout {
+    spec: CallOutSpec,
+    theme: JetstreamThemeProvider,
+    on_dismiss: Option<crate::element::ActionHandler>,
+}
+
+impl Callout {
+    pub fn from_spec(spec: CallOutSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_dismiss: None }
+    }
+
+    /// Fires when the dismiss control is pressed. It renders only for a
+    /// dismissible callout, so there is nothing to fire otherwise.
+    pub fn on_dismiss(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_dismiss = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Callout {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_dismiss)
+    }
+}
+
 pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &CallOutSpec,
+    theme: &JetstreamThemeProvider,
+    on_dismiss: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Supporting (icon) visual size — used for the glyph inside the badge.
@@ -153,23 +189,28 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
         let control_radius = resolve_radius(theme, "radius.control");
         // Contract: border-radius = control - 0.0625rem (border-width token).
         let dismiss_radius = (control_radius - border_width).max(0.0);
-        el = el.child(
-            ui_element::div()
-                .id("poodle-callout-dismiss")
-                .w(dismiss_size)
-                .h(dismiss_size)
-                .rounded(dismiss_radius)
-                .flex_row()
-                .items_center()
-                .justify_center()
-                .cursor_pointer()
-                .child(
-                    ui_element::icon("x")
-                        .w(icon_glyph)
-                        .h(icon_glyph)
-                        .text_color(text_secondary),
-                ),
-        );
+        let mut dismiss = ui_element::div()
+            .id("poodle-callout-dismiss")
+            .w(dismiss_size)
+            .h(dismiss_size)
+            .rounded(dismiss_radius)
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .cursor_pointer()
+            .child(
+                ui_element::icon("x")
+                    .w(icon_glyph)
+                    .h(icon_glyph)
+                    .text_color(text_secondary),
+            );
+
+        if let Some(handler) = &on_dismiss {
+            let handler = std::sync::Arc::clone(handler);
+            dismiss = dismiss.on_click(move |_event| handler());
+        }
+
+        el = el.child(dismiss);
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
@@ -269,4 +310,28 @@ mod tests {
         assert!(c_body < d_body, "compact padding not tighter than default");
         assert!(d_body < cmf_body, "comfortable padding not looser than default");
     }
+
+    #[test]
+    fn the_dismiss_control_reports_a_dismiss() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = CallOutSpec::new()
+            .with_tone(StatusTone::Info)
+            .with_title("Heads up")
+            .dismissible(true);
+
+        let el = Callout::from_spec(spec, &theme())
+            .on_dismiss(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 160.0, "x");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_dismiss fired exactly once");
+    }
+
 }

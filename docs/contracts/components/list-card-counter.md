@@ -150,6 +150,11 @@ None.
   `em` scaling with ratio-preserving metrics from a 1rem baseline until
   parent-relative inline layout exists
 
+## 10a. Jetstream Notes
+
+- `ListCardCounter::from_spec(spec, theme).on_link_click(...)`. Only a linked
+  counter fires — an unlinked counter is a statistic, not a control.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

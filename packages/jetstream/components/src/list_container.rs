@@ -27,6 +27,68 @@ use crate::theme_ext::resolve_px;
 /// Render a list container with no header host slots (no breadcrumbs / actions).
 /// Back-compat entry — existing 5-arg callers are unchanged; delegates to
 /// [`js_list_container_with_slots`] with empty header slots.
+/// ListContainer — a page-level list shell.
+///
+/// Mirrors the GPUI target's `on_page_change`, forwarded to the composed
+/// `Pagination` rather than re-implemented.
+pub struct ListContainer {
+    spec: ListContainerSpec,
+    theme: JetstreamThemeProvider,
+    content: Option<JsEl>,
+    filters: Option<JsEl>,
+    batch: Option<JsEl>,
+    on_page_change: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
+}
+
+impl ListContainer {
+    pub fn from_spec(spec: ListContainerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            content: None,
+            filters: None,
+            batch: None,
+            on_page_change: None,
+        }
+    }
+
+    pub fn content(mut self, content: impl crate::element::IntoJsEl) -> Self {
+        self.content = Some(content.into_js_el());
+        self
+    }
+
+    pub fn filters(mut self, filters: impl crate::element::IntoJsEl) -> Self {
+        self.filters = Some(filters.into_js_el());
+        self
+    }
+
+    pub fn batch(mut self, batch: impl crate::element::IntoJsEl) -> Self {
+        self.batch = Some(batch.into_js_el());
+        self
+    }
+
+    /// Fires with the destination page, from the composed `Pagination`.
+    pub fn on_page_change(mut self, handler: impl Fn(usize) + Send + Sync + 'static) -> Self {
+        self.on_page_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ListContainer {
+    fn into_js_el(self) -> JsEl {
+        build_with_slots(
+            &self.spec,
+            &self.theme,
+            self.content,
+            self.filters,
+            self.batch,
+            None,
+            None,
+            self.on_page_change,
+        )
+    }
+}
+
 pub fn js_list_container(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
@@ -55,6 +117,20 @@ pub fn js_list_container_with_slots(
     batch: Option<JsEl>,
     breadcrumbs: Option<JsEl>,
     actions: Option<JsEl>,
+) -> JsEl {
+    build_with_slots(spec, theme, content, filters, batch, breadcrumbs, actions, None)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn build_with_slots(
+    spec: &ListContainerSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+    filters: Option<JsEl>,
+    batch: Option<JsEl>,
+    breadcrumbs: Option<JsEl>,
+    actions: Option<JsEl>,
+    on_page_change: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> JsEl {
     // Contract §8: root gap = space.stack.lg (between major regions);
     // region gap = space.stack.md (inside filters/batch/content/state).
@@ -132,7 +208,12 @@ pub fn js_list_container_with_slots(
                         .clone()
                         .unwrap_or_else(|| "List pagination".to_string()),
                 );
-                pager_region = pager_region.child(js_pagination(&pagination_spec, theme));
+                let mut pager = crate::pagination_comp::Pagination::from_spec(pagination_spec, theme);
+                if let Some(handler) = &on_page_change {
+                    let handler = std::sync::Arc::clone(handler);
+                    pager = pager.on_page_change(move |page| handler(page));
+                }
+                pager_region = pager_region.child(crate::element::IntoJsEl::into_js_el(pager));
 
                 container = container.child(pager_region);
             }
@@ -360,4 +441,26 @@ mod tests {
             tree.texts()
         );
     }
+
+    /// The pager is the composed Pagination, so the event forwards rather than
+    /// being re-derived.
+    #[test]
+    fn a_page_press_reaches_the_container_handler() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+        let pages = Arc::clone(&seen);
+
+        let spec = ready_spec();
+
+        let el = ListContainer::from_spec(spec, &theme())
+            .on_page_change(move |page| pages.lock().unwrap().push(page))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 700.0, "3");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [3]);
+    }
+
 }

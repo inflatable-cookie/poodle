@@ -15,7 +15,53 @@ use poodle_specs::{StepStatus, StepperSpec};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
+/// Stepper — steps with status and re-run.
+///
+/// Mirrors the GPUI target's names: `on_change` and `on_rerun`, each carrying
+/// the step's value. This is the component whose GPUI handlers were stored and
+/// never attached — the defect that started g12.017 — so its Jetstream tests
+/// are the reference for what "actually wired" means.
+pub struct Stepper {
+    spec: StepperSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+    on_rerun: Option<crate::element::Handler>,
+}
+
+impl Stepper {
+    pub fn from_spec(spec: StepperSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None, on_rerun: None }
+    }
+
+    /// Fires with the chosen step's value. Disabled steps never fire.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the step whose re-run control was pressed.
+    pub fn on_rerun(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_rerun = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Stepper {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change, self.on_rerun)
+    }
+}
+
 pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &StepperSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+    on_rerun: Option<crate::element::Handler>,
+) -> JsEl {
     let row_height = rem_to_px(spec.row_height_rem());
     let marker_size = rem_to_px(spec.marker_size_rem());
     let font_size = rem_to_px(spec.font_size_rem());
@@ -148,6 +194,12 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
             trigger = trigger.opacity(disabled_opacity).disabled(true);
         } else {
             trigger = trigger.cursor_pointer();
+
+            if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let value = step.value.clone();
+                trigger = trigger.on_click(move |_event| handler(&value));
+            }
         }
 
         // The tint belongs to the whole column. On the trigger it stopped
@@ -208,6 +260,17 @@ pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 rerun = rerun.opacity(disabled_opacity).disabled(true);
             } else {
                 rerun = rerun.cursor_pointer();
+
+                // Its own handler, inert when unwired: the rerun sits beside a
+                // clickable trigger, and clicks bubble to the nearest handler,
+                // so an unwired rerun would select the step it was re-running.
+                if let Some(handler) = &on_rerun {
+                    let handler = std::sync::Arc::clone(handler);
+                    let value = step.value.clone();
+                    rerun = rerun.on_click(move |_event| handler(&value));
+                } else {
+                    rerun = rerun.on_click(|_event| {});
+                }
             }
             cell = cell.child(rerun);
         }
@@ -278,4 +341,55 @@ mod tests {
         let compact = StepperSpec::new(steps).with_density(poodle_specs::ControlDensity::Compact);
         assert_eq!(base.row_height_rem(), compact.row_height_rem());
     }
+
+    /// This is the component whose GPUI handlers were stored and never
+    /// attached — the defect that started g12.017.
+    #[test]
+    fn choosing_a_step_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = StepperSpec::new(vec![
+            StepperStep::new("a", "Read source").with_status(StepStatus::Complete),
+            StepperStep::new("b", "Quality gate").with_status(StepStatus::Running),
+        ]);
+
+        let el = Stepper::from_spec(spec, &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 120.0, "Quality gate");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
+    }
+
+    /// The rerun sits inside a clickable step, so it takes its own handler —
+    /// and rerunning a step must not also select it.
+    #[test]
+    fn the_rerun_control_reruns_without_selecting() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let reruns = Arc::clone(&seen);
+        let changes = Arc::clone(&seen);
+
+        let spec = StepperSpec::new(vec![
+            StepperStep::new("a", "Read source").with_status(StepStatus::Complete),
+        ])
+        .with_show_rerun(true);
+
+        let el = Stepper::from_spec(spec, &theme())
+            .on_rerun(move |value| reruns.lock().unwrap().push(format!("rerun:{value}")))
+            .on_change(move |value| changes.lock().unwrap().push(format!("change:{value}")))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 120.0, "refresh-cw");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["rerun:a"]);
+    }
+
 }

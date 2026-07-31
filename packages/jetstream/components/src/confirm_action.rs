@@ -52,7 +52,66 @@ fn alert_tone(spec: &ConfirmActionSpec) -> AlertDialogTone {
     }
 }
 
+/// ConfirmAction — a trigger that opens a confirm dialog.
+///
+/// Mirrors the GPUI target's names: `on_confirm` and `on_cancel`, plus
+/// `on_trigger` for the closed-state button. All three forward to the composed
+/// `Button` and `AlertDialog` rather than being re-implemented.
+pub struct ConfirmAction {
+    spec: ConfirmActionSpec,
+    theme: JetstreamThemeProvider,
+    on_trigger: Option<crate::element::ActionHandler>,
+    on_confirm: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl ConfirmAction {
+    pub fn from_spec(spec: ConfirmActionSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_trigger: None,
+            on_confirm: None,
+            on_cancel: None,
+        }
+    }
+
+    /// Fires when the closed-state trigger is pressed.
+    pub fn on_trigger(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_trigger = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    pub fn on_confirm(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_confirm = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Covers the cancel button and every dismissal route, as `AlertDialog`
+    /// does.
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ConfirmAction {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_trigger, self.on_confirm, self.on_cancel)
+    }
+}
+
 pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &ConfirmActionSpec,
+    theme: &JetstreamThemeProvider,
+    on_trigger: Option<crate::element::ActionHandler>,
+    on_confirm: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+) -> JsEl {
     if !spec.is_open {
         // Closed: render the default trigger — a composed secondary Button with
         // the derived tone (contract §2 DefaultTrigger). All Button visuals
@@ -64,7 +123,11 @@ pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvide
             .with_size_role(spec.size_role)
             .with_density(spec.density)
             .with_label(spec.trigger_label.clone());
-        return js_button(&trigger_spec, theme);
+        let mut trigger = crate::button::Button::from_spec(trigger_spec, theme);
+        if let Some(handler) = on_trigger {
+            trigger = trigger.on_click(move || handler());
+        }
+        return crate::element::IntoJsEl::into_js_el(trigger);
     }
 
     // Open: delegate to the composed AlertDialog primitive (Dialog + Buttons).
@@ -78,7 +141,14 @@ pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvide
         .with_size_role(spec.size_role)
         .with_density(spec.density);
 
-    js_alert_dialog(&alert_spec, theme)
+    let mut dialog = crate::alert_dialog::AlertDialog::from_spec(alert_spec, theme);
+    if let Some(handler) = on_confirm {
+        dialog = dialog.on_confirm(move || handler());
+    }
+    if let Some(handler) = on_cancel {
+        dialog = dialog.on_cancel(move || handler());
+    }
+    crate::element::IntoJsEl::into_js_el(dialog)
 }
 
 #[cfg(test)]
@@ -190,4 +260,46 @@ mod tests {
         let tree = probe(&js_confirm_action(&spec, &th), 720.0, 540.0);
         assert!(tree.has_text("Delete this record?"));
     }
+
+    /// Closed, the trigger fires; open, confirm and cancel forward through the
+    /// composed AlertDialog.
+    #[test]
+    fn the_three_routes_forward() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+
+        let closed_spec = ConfirmActionSpec::new(
+            "Archive this project?",
+            "It will be archived.",
+            "Archive",
+            "Cancel",
+        );
+
+        let triggers = Arc::clone(&seen);
+        let el = ConfirmAction::from_spec(closed_spec.clone(), &theme())
+            .on_trigger(move || triggers.lock().unwrap().push("trigger"))
+            .into_js_el();
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, &closed_spec.trigger_label);
+
+        let confirms = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+        let open = ConfirmActionSpec::new(
+            "Archive this project?",
+            "It will be archived.",
+            "Archive",
+            "Cancel",
+        )
+        .with_open(true);
+        let el = ConfirmAction::from_spec(open, &theme())
+            .on_confirm(move || confirms.lock().unwrap().push("confirm"))
+            .on_cancel(move || cancels.lock().unwrap().push("cancel"))
+            .into_js_el();
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "Archive");
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "Cancel");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["trigger", "confirm", "cancel"]);
+    }
+
 }
