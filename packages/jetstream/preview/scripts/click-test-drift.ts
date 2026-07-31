@@ -12,7 +12,8 @@
  * Two rules:
  *
  *   1. Every `pub fn on_x` builder method needs a test in the same file that
- *      passes a handler to it *and* drives a click through `click_probe`.
+ *      passes a handler to it *and* drives a real pointer gesture through
+ *      `click_probe` — a click, or a drag for the components that need one.
  *      Attaching a handler and never testing it is how `Stepper` on GPUI kept
  *      two dead builders for weeks.
  *   2. A component whose contract has events but which has no builder yet is
@@ -105,14 +106,12 @@ const BASELINE = new Set([
   "PageLoading",
   "Pagination",
   "RadioGroup",
-  "RangeSlider",
   "RefSelect",
   "RelationPicker",
   "ResizeHandle",
   "ScrollShell",
   "Select",
   "SelectionSummary",
-  "Slider",
   "SplitButton",
   "SplitView",
   "Stepper",
@@ -190,7 +189,7 @@ for (const entry of allComponents) {
   for (const method of new Set(methods)) {
     handlers++;
     const passed = tests.includes(`.${method}(`);
-    const clicked = /click_probe::click/.test(tests);
+    const clicked = /click_probe::(click|drag)/.test(tests);
 
     if (!passed || !clicked) {
       untested.push(

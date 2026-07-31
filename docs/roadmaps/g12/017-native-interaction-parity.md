@@ -182,6 +182,7 @@ Batches land with the gate holding each one to a click test.
 | Navigation and disclosure | 8 | 71 → 63 |
 | Tree and DataTable | 2 | 63 → 61 |
 | Form inputs | 5 | 61 → 56 |
+| Sliders (drag) | 2 | 56 → 54 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -242,11 +243,35 @@ search field's clear button, a number field's steppers, a token's remove
 control, a rating's stars, the click that starts an edit. Five components, ten
 tests.
 
-`Slider`, `RangeSlider`, `CodeInput` and `DurationInput` stay in the baseline
-rather than being exempted. A slider *could* be wired — the runtime raises drag
-events — but `click_probe` drives press-and-release at a point and cannot drag,
-so a handler would be untestable and the gate would rightly reject it. That is
-work to do, not a design limit, and the baseline is where work-to-do belongs.
+`CodeInput` and `DurationInput` stay in the baseline: both are typed, and there
+is no pointer route to their value.
+
+### Teaching the probe to drag
+
+`Slider` and `RangeSlider` were baselined for one round because `click_probe`
+could only press and release at a point. `click_probe::drag` fixes that: it
+presses at the source, walks to the target in steps, and releases. The walk
+matters — the runtime starts a drag only past a threshold and reports deltas
+*between frames*, so a single jump to the far end would deliver the whole
+distance as one delta, which is not what a pointer does.
+
+Two things about this runtime came out of it, neither obvious from the API:
+
+- **Drags do not bubble.** A click walks up to the nearest handler; a drag
+  starts only if the node directly under the pointer has one. The first slider
+  attempt put the handler on the track and reported nothing, because the pointer
+  was over a fill segment inside it. Every segment carries the handler now.
+- **A drag handler cannot know where it is.** `DragEvent` carries a global
+  pointer position, and the handler is built before layout runs. The per-frame
+  delta is the usable part: pixels over a known track width give a value delta,
+  which also stays correct when the track is scrolled or offset.
+
+Both sliders drive `slider_transition` / `range_slider_transition` from the
+shared headless core rather than re-deriving snapping and clamping. That was not
+the first version: the first one hand-rolled the maths, decided a thumb dragged
+past its partner should *swap*, and collapsed both onto a single value. The
+shared machine clamps. Driving it is what makes the natives and the web agree by
+construction instead of by inspection.
 
 ### A parity defect the click tests found
 
@@ -273,7 +298,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 56 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 54 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

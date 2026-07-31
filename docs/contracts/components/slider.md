@@ -353,6 +353,20 @@ machine owns value normalization and the change/commit split.
   value snapping and commit semantics
 - vertical orientation must be implemented natively rather than via CSS rotation
 
+## 10a. Jetstream Notes
+
+- `Slider::from_spec(spec, theme).on_change(...).on_value_commit(...)`, driven
+  by a real drag.
+- The value comes from the drag's per-frame **delta**, not its position. A
+  handler is built before layout runs, so it cannot know where its track ended
+  up; a pixel delta over a known track width is a value delta, and that stays
+  correct when the track is nested inside something scrolled or offset.
+- Snapping and clamping come from `slider_transition` in the shared headless
+  core — the same machine the web target drives — rather than being re-derived.
+- Every segment of the track carries the handler, not just their container:
+  unlike clicks, drags do **not** bubble to the nearest handler above, so the
+  gesture would be lost on whichever segment the pointer happened to land on.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

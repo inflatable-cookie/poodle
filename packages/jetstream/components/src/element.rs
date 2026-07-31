@@ -103,6 +103,49 @@ pub(crate) mod click_probe {
         click_at(el, width, height, node.x + node.w / 2.0, node.y + node.h / 2.0);
     }
 
+    /// Press at `from`, move to `to`, release — driving a real drag.
+    ///
+    /// The runtime only starts a drag once the pointer has travelled past its
+    /// threshold, and only reports `Move` deltas between successive frames, so
+    /// this walks the distance in steps rather than teleporting: one frame at
+    /// the far end would exceed the threshold and deliver the whole distance as
+    /// a single delta, which is not what a real pointer does.
+    ///
+    /// A completed drag suppresses the click, so a component with both a drag
+    /// and a click handler gets exactly one of them — same as under a real
+    /// pointer.
+    pub fn drag(el: &JsEl, width: f32, height: f32, from: (f32, f32), to: (f32, f32)) {
+        const STEPS: usize = 8;
+
+        let mut ui = GameUi::new(width, height);
+        ui.active = true;
+        ui.render_immediate(el);
+
+        let mut input = InputSystem::new();
+        let button = |input: &mut InputSystem, down: bool| {
+            input.process_events(&[PlatformEvent::MouseButton {
+                button: MouseButton::Left,
+                pressed: down,
+            }]);
+        };
+
+        // Down on the source, then walk to the target one step at a time.
+        button(&mut input, true);
+        ui.process_input(&input, from.0, from.1);
+
+        for step in 1..=STEPS {
+            let t = step as f32 / STEPS as f32;
+            ui.process_input(
+                &input,
+                from.0 + (to.0 - from.0) * t,
+                from.1 + (to.1 - from.1) * t,
+            );
+        }
+
+        button(&mut input, false);
+        ui.process_input(&input, to.0, to.1);
+    }
+
     /// Render `el`, click at `(x, y)`, and let the handlers run.
     pub fn click_at(el: &JsEl, width: f32, height: f32, x: f32, y: f32) {
         let mut ui = GameUi::new(width, height);

@@ -62,7 +62,64 @@ fn snap_fraction(frac: f32, min: f64, max: f64, step: f64) -> f32 {
     (((snapped - min) / (max - min)) as f32).clamp(0.0, 1.0)
 }
 
+/// RangeSlider — a low and a high value along one track.
+///
+/// Mirrors the GPUI target's `on_change` / `on_value_commit`, reporting both
+/// values together: the pair is the value, and a host told about one alone
+/// would have to remember the other.
+///
+/// Each thumb is dragged separately. Only the thumbs are draggable here, not
+/// the segments between them: dragging the middle of a range on the web moves
+/// the whole window, which needs both values to travel together and is a
+/// different gesture from moving one end.
+///
+/// Snapping, clamping and the no-crossing rule come from
+/// `poodle_headless::slider::range_slider_transition` — the same machine the
+/// web target drives — rather than being re-derived here. A first attempt did
+/// re-derive them, chose to *swap* a thumb dragged past its partner, and
+/// collapsed both onto one value; the shared machine clamps instead.
+pub struct RangeSlider {
+    spec: RangeSliderSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>,
+    on_value_commit: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>,
+}
+
+impl RangeSlider {
+    pub fn from_spec(spec: RangeSliderSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None, on_value_commit: None }
+    }
+
+    /// Fires continuously while dragging, with `(low, high)`. A thumb cannot
+    /// cross its sibling; it stops against it.
+    pub fn on_change(mut self, handler: impl Fn(f64, f64) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires once when the drag ends, with the settled pair.
+    pub fn on_value_commit(mut self, handler: impl Fn(f64, f64) + Send + Sync + 'static) -> Self {
+        self.on_value_commit = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for RangeSlider {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change, self.on_value_commit)
+    }
+}
+
 pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &RangeSliderSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>,
+    on_value_commit: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // Contract §7/§8: thumb diameter + min-height from the size table,
@@ -166,6 +223,95 @@ pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -
         .border_color(border_default)
         .cursor_pointer();
     thumb_hi.style.shadow = Some(thumb_shadow);
+
+    // One shared pair of values, so dragging either thumb reports both.
+    let (thumb_lo, thumb_hi) = {
+        use poodle_headless::slider::{
+            range_slider_transition, RangeSliderContext, RangeSliderEffect, RangeSliderEvent,
+            RangeThumb,
+        };
+        use std::sync::atomic::{AtomicU64, Ordering};
+
+        if spec.is_disabled || (on_change.is_none() && on_value_commit.is_none()) {
+            (thumb_lo, thumb_hi)
+        } else {
+            let low = std::sync::Arc::new(AtomicU64::new(spec.low.to_bits()));
+            let high = std::sync::Arc::new(AtomicU64::new(spec.high.to_bits()));
+            let context = RangeSliderContext {
+                value: (spec.low, spec.high),
+                min: spec.min,
+                max: spec.max,
+                step: spec.step,
+                disabled: false,
+            };
+            let units_per_px = (spec.max - spec.min) / tw.max(1.0) as f64;
+
+            let arm = |thumb: RangeThumb,
+                       el: JsEl,
+                       low: std::sync::Arc<AtomicU64>,
+                       high: std::sync::Arc<AtomicU64>,
+                       on_change: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>,
+                       on_value_commit: Option<std::sync::Arc<dyn Fn(f64, f64) + Send + Sync>>| {
+                el.on_drag(move |event| {
+                    let live = (
+                        f64::from_bits(low.load(Ordering::SeqCst)),
+                        f64::from_bits(high.load(Ordering::SeqCst)),
+                    );
+                    let context = RangeSliderContext { value: live, ..context };
+
+                    let (raw, machine_event): (f64, fn(RangeThumb, f64) -> RangeSliderEvent) =
+                        match event.phase {
+                            jetstream_ui::DragPhase::Start => return,
+                            jetstream_ui::DragPhase::Move => (
+                                match thumb {
+                                    RangeThumb::Lower => live.0,
+                                    RangeThumb::Upper => live.1,
+                                } + event.delta_x as f64 * units_per_px,
+                                |thumb, raw| RangeSliderEvent::Input { thumb, raw },
+                            ),
+                            jetstream_ui::DragPhase::End => (
+                                match thumb {
+                                    RangeThumb::Lower => live.0,
+                                    RangeThumb::Upper => live.1,
+                                },
+                                |thumb, raw| RangeSliderEvent::Commit { thumb, raw },
+                            ),
+                        };
+
+                    let (next, effects) = range_slider_transition(context, machine_event(thumb, raw));
+                    low.store(next.value.0.to_bits(), Ordering::SeqCst);
+                    high.store(next.value.1.to_bits(), Ordering::SeqCst);
+
+                    for effect in effects {
+                        match effect {
+                            RangeSliderEffect::EmitValueChange { value } => {
+                                if let Some(handler) = &on_change {
+                                    handler(value.0, value.1);
+                                }
+                            }
+                            RangeSliderEffect::EmitValueCommit { value } => {
+                                if let Some(handler) = &on_value_commit {
+                                    handler(value.0, value.1);
+                                }
+                            }
+                        }
+                    }
+                })
+            };
+
+            (
+                arm(
+                    RangeThumb::Lower,
+                    thumb_lo,
+                    std::sync::Arc::clone(&low),
+                    std::sync::Arc::clone(&high),
+                    on_change.clone(),
+                    on_value_commit.clone(),
+                ),
+                arm(RangeThumb::Upper, thumb_hi, low, high, on_change, on_value_commit),
+            )
+        }
+    };
 
     // Track row: relative container holding the three segments and both thumbs.
     let track = ui_element::div()
@@ -359,4 +505,134 @@ mod tests {
             "disabled range slider should apply state.opacity.disabled"
         );
     }
+
+    /// Both values travel together: the pair *is* the value, and a host told
+    /// about one alone would have to remember the other.
+    #[test]
+    fn dragging_a_thumb_reports_both_values() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
+        let changes = Arc::clone(&seen);
+
+        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let el = RangeSlider::from_spec(spec, &theme())
+            .on_change(move |low, high| changes.lock().unwrap().push((low, high)))
+            .into_js_el();
+
+        // The low thumb sits at 20% of a 10rem track.
+        let tree = crate::render_probe::probe(&el, 400.0, 80.0);
+        let thumb = tree
+            .nodes
+            .iter()
+            .filter(|n| n.w == n.h && n.w > 8.0)
+            .min_by(|a, b| a.x.total_cmp(&b.x))
+            .expect("a thumb");
+        let y = thumb.y + thumb.h / 2.0;
+        crate::element::click_probe::drag(&el, 400.0, 80.0, (thumb.x + thumb.w / 2.0, y), (thumb.x + 40.0, y));
+
+        let values = seen.lock().unwrap();
+        let (low, high) = *values.last().expect("a drag reported nothing");
+        assert!(low > 20.0, "the low thumb did not move: {values:?}");
+        assert_eq!(high, 80.0, "the untouched thumb moved");
+    }
+
+    /// A thumb stops against its partner rather than crossing it, which is
+    /// what `range_slider_transition` does for the web target too. An earlier
+    /// hand-rolled version swapped instead, and collapsed both onto one value.
+    #[test]
+    fn a_thumb_stops_against_its_partner() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
+        let changes = Arc::clone(&seen);
+
+        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let el = RangeSlider::from_spec(spec, &theme())
+            .on_change(move |low, high| changes.lock().unwrap().push((low, high)))
+            .into_js_el();
+
+        let tree = crate::render_probe::probe(&el, 400.0, 80.0);
+        let thumb = tree
+            .nodes
+            .iter()
+            .filter(|n| n.w == n.h && n.w > 8.0)
+            .min_by(|a, b| a.x.total_cmp(&b.x))
+            .expect("a thumb");
+        let y = thumb.y + thumb.h / 2.0;
+        crate::element::click_probe::drag(&el, 400.0, 80.0, (thumb.x + thumb.w / 2.0, y), (thumb.x + 200.0, y));
+
+        let values = seen.lock().unwrap();
+        // Assert the drag happened before asserting anything about it: `all`
+        // over an empty list is true, so without this the test passes when the
+        // wiring is removed entirely.
+        assert!(!values.is_empty(), "the drag reported nothing");
+        assert!(
+            values.iter().all(|(low, high)| low <= high),
+            "the pair inverted: {values:?}"
+        );
+        let (low, high) = *values.last().unwrap();
+        assert_eq!(high, 80.0, "the partner moved");
+        assert_eq!(low, 80.0, "the dragged thumb did not stop against its partner: {low}");
+    }
+
+    #[test]
+    fn a_disabled_range_slider_ignores_drags() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = RangeSliderSpec::new(20.0, 80.0).with_disabled(true);
+        let el = RangeSlider::from_spec(spec, &theme())
+            .on_change(move |_, _| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::drag(&el, 400.0, 80.0, (40.0, 40.0), (120.0, 40.0));
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled range slider moved");
+    }
+
+    /// Commit fires once per drag, with the settled pair.
+    #[test]
+    fn commit_fires_once_with_the_settled_pair() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let changes: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
+        let c1 = Arc::clone(&changes);
+        let c2 = Arc::clone(&commits);
+
+        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let el = RangeSlider::from_spec(spec, &theme())
+            .on_change(move |low, high| c1.lock().unwrap().push((low, high)))
+            .on_value_commit(move |low, high| c2.lock().unwrap().push((low, high)))
+            .into_js_el();
+
+        let tree = crate::render_probe::probe(&el, 400.0, 80.0);
+        let thumb = tree
+            .nodes
+            .iter()
+            .filter(|n| n.w == n.h && n.w > 8.0)
+            .min_by(|a, b| a.x.total_cmp(&b.x))
+            .expect("a thumb");
+        let y = thumb.y + thumb.h / 2.0;
+        crate::element::click_probe::drag(
+            &el,
+            400.0,
+            80.0,
+            (thumb.x + thumb.w / 2.0, y),
+            (thumb.x + 40.0, y),
+        );
+
+        let commits = commits.lock().unwrap();
+        assert_eq!(commits.len(), 1, "commit fired {} times", commits.len());
+        assert_eq!(commits[0], *changes.lock().unwrap().last().unwrap());
+    }
+
 }

@@ -384,6 +384,19 @@ so the control geometry is unchanged — only the grabbable margin grows.
 - pointer overlap handling (determining which thumb to grab when thumbs are at
   the same position) is implementation-specific but must produce a usable result
 
+## 10a. Jetstream Notes
+
+- `RangeSlider::from_spec(spec, theme).on_change(...).on_value_commit(...)`,
+  reporting `(low, high)` together: the pair is the value, and a host told about
+  one alone would have to remember the other.
+- A thumb stops against its sibling rather than crossing it, because
+  `range_slider_transition` says so. A first attempt re-derived the rule, chose
+  to swap instead, and collapsed both thumbs onto one value — driving the shared
+  machine is what makes the natives and the web agree.
+- Only the thumbs are draggable. Dragging the filled span moves the whole window
+  on the web, which is a different gesture and needs both values to travel
+  together.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
