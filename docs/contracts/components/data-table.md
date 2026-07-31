@@ -501,6 +501,25 @@ density), so density owns `th`/`td` `padding-block` here by design.
 | `.selected` | `tbody tr` | selected row highlight |
 | `.end-align` | `th`, `td` | right-aligned columns |
 
+## 11a. Jetstream Notes
+
+- `DataTable::from_spec(spec, theme)` then `.on_row_click(...)`, `.on_sort(...)`,
+  `.on_row_select(...)`, `.on_select_all(...)` — the GPUI target's names.
+- `on_sort` carries the column id, not a direction. Cycling asc → desc → none is
+  the host's policy, and the spec it passes back says which way the arrow
+  points.
+- The per-row checkbox takes its own handler, inert when unwired, so ticking a
+  box never also opens the row.
+- `on_select_all` takes no payload: "all" is not an id.
+
+## 11b. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| Jetstream raises no toolbar, filter or pagination events | `onExportCsv`, `onFilterChange`, `onColumnVisibilityChange`, `onPageChange` and `onLimitChange` belong to controls the table composes rather than draws itself; those components carry their own events as they convert | accepted, tracked | g12.017 |
+| Jetstream has no `onRowAction` / `onRowActionSelect` | the row-action menu lives in a popover the component does not model | accepted, tracked | g12.017 |
+| Jetstream has no `onRowToggle` | row expansion renders from the spec; no disclosure control is drawn to click | accepted, tracked | g12.017 |
+
 ## 12. Specimen Definitions
 
 ### With Sorting, Column Visibility, And Export

@@ -180,6 +180,7 @@ Batches land with the gate holding each one to a click test.
 | Core controls | 8 | 87 → 79 |
 | Overlays | 5 converted, 3 exempt | 79 → 71 |
 | Navigation and disclosure | 8 | 71 → 63 |
+| Tree and DataTable | 2 | 63 → 61 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -194,6 +195,14 @@ decide whether a click adds or removes.
 the buttons, read-only on `Checkbox` and `Switch`. Read-only is the interesting
 one — not disabled, still focusable and full strength, but it cannot change, so
 it must not report a change.
+
+**Nested targets are the recurring hazard.** Four components now hit the same
+shape: the dialog backdrop, the drawer backdrop, a closable tab's X, and a tree
+row's twisty and checkbox. Clicks bubble to the nearest clickable ancestor, so
+any control drawn *inside* a clickable region needs a handler of its own — an
+inert one when the host wires nothing, or an unwired chevron selects the row it
+was expanding. Each case has a test that fails when the inert handler is
+removed. Treat it as the standing rule for the rest of the sweep.
 
 **Bubbling needs handling twice more.** `Tabs` hit the same shape as the dialog
 backdrop, in a nastier form: a closable tab's X sits *inside* the tab, so
@@ -240,7 +249,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 63 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 61 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

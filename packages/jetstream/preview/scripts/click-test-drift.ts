@@ -79,7 +79,6 @@ const BASELINE = new Set([
   "ColorPicker",
   "CommandPalette",
   "ConfirmAction",
-  "DataTable",
   "DatePicker",
   "DateRangePicker",
   "DateTimePicker",
@@ -127,7 +126,6 @@ const BASELINE = new Set([
   "ToastHost",
   "ToastStack",
   "TokenInput",
-  "Tree",
   "VideoPlayer",
 ]);
 

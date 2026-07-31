@@ -27,7 +27,91 @@ use crate::presentation::{
 use crate::skeleton::js_skeleton;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, tint};
 
+/// DataTable — rows, columns, sorting and selection.
+///
+/// Mirrors the GPUI target's handler names: `on_row_click`, `on_sort`,
+/// `on_row_select`, `on_select_all`.
+///
+/// The per-row checkbox is a separate event from the row itself. Clicks bubble
+/// to the nearest clickable ancestor, so it takes its own handler — inert when
+/// unwired — or ticking a box would also open the row.
+pub struct DataTable {
+    spec: DataTableSpec,
+    theme: JetstreamThemeProvider,
+    on_row_click: Option<crate::element::Handler>,
+    on_sort: Option<crate::element::Handler>,
+    on_row_select: Option<crate::element::Handler>,
+    on_select_all: Option<crate::element::ActionHandler>,
+}
+
+impl DataTable {
+    pub fn from_spec(spec: DataTableSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_row_click: None,
+            on_sort: None,
+            on_row_select: None,
+            on_select_all: None,
+        }
+    }
+
+    /// Fires with the row's id.
+    pub fn on_row_click(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_row_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the column's id when a sortable header is pressed.
+    ///
+    /// The column, not a direction: cycling asc → desc → none is the host's
+    /// policy, and the spec it passes back in says which way the arrow points.
+    pub fn on_sort(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_sort = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the row's id when its selection checkbox is pressed.
+    pub fn on_row_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_row_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the header checkbox is pressed.
+    pub fn on_select_all(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_select_all = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for DataTable {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            Handlers {
+                row_click: self.on_row_click,
+                sort: self.on_sort,
+                row_select: self.on_row_select,
+                select_all: self.on_select_all,
+            },
+        )
+    }
+}
+
+#[derive(Default)]
+struct Handlers {
+    row_click: Option<crate::element::Handler>,
+    sort: Option<crate::element::Handler>,
+    row_select: Option<crate::element::Handler>,
+    select_all: Option<crate::element::ActionHandler>,
+}
+
 pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, Handlers::default())
+}
+
+fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handlers) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let header_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
     let body_font = rem_to_px(size_font_rem(effective_size));
@@ -127,8 +211,15 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
         // Header checkbox: selects every row, and has no caption of its own.
         .with_aria_label("Select all rows");
         header = header.child(
-            ui_element::div().w(selection_width).flex_row().items_center()
-                .child(js_checkbox(&cb_spec, theme)),
+            {
+                let mut cell = ui_element::div().w(selection_width).flex_row().items_center()
+                    .child(js_checkbox(&cb_spec, theme));
+                if let Some(handler) = &handlers.select_all {
+                    let handler = std::sync::Arc::clone(handler);
+                    cell = cell.cursor_pointer().on_click(move |_event| handler());
+                }
+                cell
+            },
         );
     }
 
@@ -169,6 +260,12 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
                 .cursor_pointer()
                 .focusable()
                 .hover(|s| s.bg(header_hover));
+
+            if let Some(handler) = &handlers.sort {
+                let handler = std::sync::Arc::clone(handler);
+                let id = col.id.clone();
+                col_cell = col_cell.on_click(move |_event| handler(&id));
+            }
         }
 
         header = header.child(col_cell);
@@ -257,10 +354,21 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
                 let cb_spec = CheckboxSpec::new()
                     .with_checked(is_selected)
                     .with_aria_label("Select row");
-                row_el = row_el.child(
-                    ui_element::div().w(selection_width).flex_row().items_center()
-                        .child(js_checkbox(&cb_spec, theme)),
-                );
+                let mut cell = ui_element::div().w(selection_width).flex_row().items_center()
+                    .child(js_checkbox(&cb_spec, theme));
+
+                // Its own handler, always: selecting a row and opening it are
+                // different intents, and an unwired checkbox that bubbled would
+                // open the row you were only ticking.
+                if let Some(handler) = &handlers.row_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = row.id.clone();
+                    cell = cell.cursor_pointer().on_click(move |_event| handler(&id));
+                } else {
+                    cell = cell.on_click(|_event| {});
+                }
+
+                row_el = row_el.child(cell);
             }
 
             for col in &visible_cols {
@@ -320,6 +428,12 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
                                 .focusable(),
                         ),
                 );
+            }
+
+            if let Some(handler) = &handlers.row_click {
+                let handler = std::sync::Arc::clone(handler);
+                let id = row.id.clone();
+                row_el = row_el.cursor_pointer().on_click(move |_event| handler(&id));
             }
 
             el = el.child(row_el);
@@ -585,4 +699,118 @@ mod tests {
             tree.texts()
         );
     }
+
+    #[test]
+    fn clicking_a_row_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = DataTable::from_spec(DataTableSpec::new(columns(), rows()), &theme())
+            .on_row_click(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 400.0, "Beta");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["r2"]);
+    }
+
+    /// The column, not a direction: cycling asc → desc → none is host policy,
+    /// and the spec passed back in says which way the arrow points.
+    #[test]
+    fn a_sortable_header_reports_its_column() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = DataTable::from_spec(DataTableSpec::new(columns(), rows()), &theme())
+            .on_sort(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 400.0, "Owner");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["owner"]);
+    }
+
+    /// An unsortable column is not a sort route.
+    #[test]
+    fn an_unsortable_header_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = DataTable::from_spec(DataTableSpec::new(columns(), rows()), &theme())
+            .on_sort(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 400.0, "Status");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "an unsortable column sorted");
+    }
+
+    /// Ticking a row's box must not also open the row: the checkbox is inside
+    /// the row, and clicks bubble to the nearest clickable ancestor.
+    #[test]
+    fn the_row_checkbox_selects_without_opening() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let selects = Arc::clone(&seen);
+        let clicks = Arc::clone(&seen);
+
+        let spec = DataTableSpec::new(columns(), rows()).with_selectable(true);
+        let el = DataTable::from_spec(spec, &theme())
+            .on_row_select(move |id| selects.lock().unwrap().push(format!("select:{id}")))
+            .on_row_click(move |id| clicks.lock().unwrap().push(format!("click:{id}")))
+            .into_js_el();
+
+        // The selection cell is the row's first child, ahead of every value.
+        let tree = crate::render_probe::probe(&el, 800.0, 400.0);
+        let first_value = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Alpha"))
+            .expect("the first row");
+        crate::element::click_probe::click_at(&el, 800.0, 400.0, 12.0, first_value.y + first_value.h / 2.0);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["select:r1"]);
+    }
+
+    /// The header checkbox is a different event from a row's: it takes no
+    /// payload, because "all" is not an id.
+    #[test]
+    fn the_header_checkbox_reports_select_all() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let all = Arc::clone(&seen);
+        let rows_selected = Arc::clone(&seen);
+
+        let spec = DataTableSpec::new(columns(), rows()).with_selectable(true);
+        let el = DataTable::from_spec(spec, &theme())
+            .on_select_all(move || all.lock().unwrap().push("all".to_string()))
+            .on_row_select(move |id| rows_selected.lock().unwrap().push(format!("row:{id}")))
+            .into_js_el();
+
+        // The header's selection cell sits above the first row's.
+        let tree = crate::render_probe::probe(&el, 800.0, 400.0);
+        let header = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Name"))
+            .expect("the header row");
+        crate::element::click_probe::click_at(&el, 800.0, 400.0, 12.0, header.y + header.h / 2.0);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["all"]);
+    }
+
 }

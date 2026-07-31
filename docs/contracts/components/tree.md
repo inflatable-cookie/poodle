@@ -527,6 +527,18 @@ None.
 - known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
   no virtual scrolling; transition timing is platform-owned
 
+## 10a. Jetstream Notes
+
+- `Tree::from_spec(spec, theme).on_select(...).on_toggle_expand(...).on_check(...)`,
+  matching the GPUI target's handler names, each carrying the node's value.
+- A row has three click targets and they are three events. The twisty and the
+  checkbox sit *inside* the row, so each takes a handler of its own — inert when
+  unwired — because clicks bubble to the nearest clickable ancestor and an
+  unwired chevron would otherwise select the row it was expanding.
+- `on_check` names the node rather than asserting a next state: the host holds
+  the check state and the cascade rules, and a component that guessed would be
+  wrong for any tree where checking a parent checks its children.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -563,6 +575,9 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream has no `onActivate` | activation is a double-click or Enter on the web; the runtime reports single clicks with no click count, and raises no key events | accepted, tracked | g12.017 |
+| Jetstream has no rename, reorder or context-menu events | inline rename needs a text field and key handling, reorder needs drag, and the context menu needs a right-click — none of which this target raises yet | accepted, tracked | g12.017 |
+| Jetstream has no `onLoadChildren` | lazy loading is driven by expansion, which the host already hears through `on_toggle_expand` | accepted (by design) | none |
 | GPUI exposes no accessibility | gpui 0.2.2 has no public a11y API (no role/level/selected tree) | accepted (forced) | revisit when gpui ships accesskit support |
 | Jetstream exposes no ARIA | immediate-mode runtime has no a11y tree | accepted (forced) | — |
 | Virtual scroll is Svelte-only | GPUI/Jetstream have no row-windowing primitive; they render all visible rows | accepted | revisit if a Rust runtime gains windowing |

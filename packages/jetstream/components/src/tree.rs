@@ -83,7 +83,80 @@ struct TreeMetrics {
     drop_position: DropPosition,
 }
 
+/// Tree — a hierarchy of rows.
+///
+/// Mirrors the GPUI target's shape and its handler names: `on_select`,
+/// `on_toggle_expand`, `on_check`, each carrying the node's value.
+///
+/// The three targets in a row are distinct events, and each takes its own
+/// handler so a click on one is never reported as another: the twisty expands,
+/// the checkbox checks, and the rest of the row selects.
+pub struct Tree {
+    spec: TreeSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_toggle_expand: Option<crate::element::Handler>,
+    on_check: Option<crate::element::Handler>,
+}
+
+impl Tree {
+    pub fn from_spec(spec: TreeSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+            on_toggle_expand: None,
+            on_check: None,
+        }
+    }
+
+    /// Fires with the value of the row that was chosen.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the branch's value when its twisty is pressed.
+    pub fn on_toggle_expand(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_toggle_expand = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the node's value when its checkbox is pressed. The host holds
+    /// the check state and the cascade rules, so the event names the node
+    /// rather than asserting a next state.
+    pub fn on_check(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_check = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Tree {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            Handlers {
+                select: self.on_select,
+                toggle_expand: self.on_toggle_expand,
+                check: self.on_check,
+            },
+        )
+    }
+}
+
+#[derive(Default)]
+struct Handlers {
+    select: Option<crate::element::Handler>,
+    toggle_expand: Option<crate::element::Handler>,
+    check: Option<crate::element::Handler>,
+}
+
 pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, Handlers::default())
+}
+
+fn build(spec: &TreeSpec, theme: &JetstreamThemeProvider, handlers: Handlers) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     let row_font = rem_to_px(size_font_rem(effective_size));
@@ -124,7 +197,7 @@ pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let pad_y = resolve_px(theme, "space.panel.y");
 
     let mut rows: Vec<JsEl> = Vec::new();
-    push_rows(&mut rows, spec, &m, theme, &spec.nodes, 0);
+    push_rows(&mut rows, spec, &m, theme, &spec.nodes, 0, &handlers);
 
     let root = ui_element::div()
         .flex_col()
@@ -146,9 +219,10 @@ fn push_rows(
     theme: &JetstreamThemeProvider,
     nodes: &[TreeNode],
     depth: usize,
+    handlers: &Handlers,
 ) {
     for node in nodes {
-        out.push(render_row(spec, m, theme, node, depth));
+        out.push(render_row(spec, m, theme, node, depth, handlers));
         if spec.is_branch(node) && spec.is_expanded(&node.value) {
             if node.children.is_empty() {
                 // Lazy branch: show a loading row while its children load.
@@ -156,7 +230,7 @@ fn push_rows(
                     out.push(render_loading_row(m, theme, depth + 1));
                 }
             } else {
-                push_rows(out, spec, m, theme, &node.children, depth + 1);
+                push_rows(out, spec, m, theme, &node.children, depth + 1, handlers);
             }
         }
     }
@@ -196,6 +270,7 @@ fn render_row(
     theme: &JetstreamThemeProvider,
     node: &TreeNode,
     depth: usize,
+    handlers: &Handlers,
 ) -> JsEl {
     let is_branch = spec.is_branch(node);
     let is_expanded = is_branch && spec.is_expanded(&node.value);
@@ -229,6 +304,12 @@ fn render_row(
         .border(1.0)
         .border_color(ring_color);
 
+    if let (false, Some(handler)) = (node.is_disabled, &handlers.select) {
+        let handler = std::sync::Arc::clone(handler);
+        let value = node.value.clone();
+        row = row.cursor_pointer().on_click(move |_event| handler(&value));
+    }
+
     // Indent cells (left border draws the ancestor guide line).
     for _ in 0..depth {
         let mut cell = ui_element::div().w(m.indent).self_stretch().flex_none();
@@ -254,6 +335,16 @@ fn render_row(
                     .text_color(m.twisty_color)
                     .text_size(m.chevron_font),
             );
+
+        // Its own handler, always — clicks bubble to the nearest clickable
+        // ancestor, so an unwired twisty would select the row it was expanding.
+        if let (false, Some(handler)) = (node.is_disabled, &handlers.toggle_expand) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = node.value.clone();
+            twisty = twisty.cursor_pointer().on_click(move |_event| handler(&value));
+        } else {
+            twisty = twisty.on_click(|_event| {});
+        }
     }
     row = row.child(twisty);
 
@@ -272,14 +363,22 @@ fn render_row(
                 .with_size(ControlSize::Xs),
             theme,
         );
-        row = row.child(
-            ui_element::div()
-                .id(format!("tree-check:{}", node.value))
-                .flex_none()
-                .flex_row()
-                .items_center()
-                .child(checkbox),
-        );
+        let mut cell = ui_element::div()
+            .id(format!("tree-check:{}", node.value))
+            .flex_none()
+            .flex_row()
+            .items_center()
+            .child(checkbox);
+
+        if let (false, Some(handler)) = (node.is_disabled, &handlers.check) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = node.value.clone();
+            cell = cell.cursor_pointer().on_click(move |_event| handler(&value));
+        } else {
+            cell = cell.on_click(|_event| {});
+        }
+
+        row = row.child(cell);
     }
 
     // Optional leading icon (reserve the slot even when the node has no icon).
@@ -560,4 +659,98 @@ mod tests {
         let bg = row.style.background.expect("inside drop fill present");
         assert!((bg.a - accent.w * 0.12).abs() < 0.02, "inside fill not ~12% accent");
     }
+
+    #[test]
+    fn choosing_a_row_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = Tree::from_spec(sample(), &theme())
+            .on_select(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "index.ts");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["src/index.ts"]);
+    }
+
+    /// The three targets in a row are distinct events. The twisty sits inside
+    /// the row, so without a handler of its own it would bubble and report an
+    /// expand as a selection — the same defect as the tab close button.
+    #[test]
+    fn the_twisty_expands_without_selecting() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let expands = Arc::clone(&seen);
+        let selects = Arc::clone(&seen);
+
+        let el = Tree::from_spec(sample(), &theme())
+            .on_toggle_expand(move |value| expands.lock().unwrap().push(format!("expand:{value}")))
+            .on_select(move |value| selects.lock().unwrap().push(format!("select:{value}")))
+            .into_js_el();
+
+        // The first row's twisty: "src" is expanded, so it draws the open glyph.
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "▾");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["expand:src"]);
+    }
+
+    /// And with no `on_toggle_expand` wired, the twisty must still not select —
+    /// otherwise a host that only wants selection gets a chevron that silently
+    /// selects the row.
+    #[test]
+    fn an_unwired_twisty_selects_nothing() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Tree::from_spec(sample(), &theme())
+            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "▾");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the twisty selected the row");
+    }
+
+    #[test]
+    fn the_checkbox_checks_without_selecting() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let checks = Arc::clone(&seen);
+        let selects = Arc::clone(&seen);
+
+        let el = Tree::from_spec(sample().with_show_checkboxes(true), &theme())
+            .on_check(move |value| checks.lock().unwrap().push(format!("check:{value}")))
+            .on_select(move |value| selects.lock().unwrap().push(format!("select:{value}")))
+            .into_js_el();
+
+        // The checkbox cell sits between the twisty and the label of row one.
+        let tree = crate::render_probe::probe(&el, 400.0, 400.0);
+        let cell = tree
+            .nodes
+            .iter()
+            .find(|n| n.token_key.as_deref() == Some("tree-check:src"))
+            .expect("a checkbox cell");
+        crate::element::click_probe::click_at(
+            &el,
+            400.0,
+            400.0,
+            cell.x + cell.w / 2.0,
+            cell.y + cell.h / 2.0,
+        );
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["check:src"]);
+    }
+
 }
