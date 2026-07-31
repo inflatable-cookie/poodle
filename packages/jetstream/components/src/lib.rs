@@ -49,6 +49,7 @@ pub mod progress;
 pub mod separator;
 pub mod spinner;
 pub mod status_indicator;
+pub mod element;
 pub mod agent_message;
 pub mod agent_question;
 pub mod agent_question_record;

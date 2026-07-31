@@ -65,44 +65,67 @@ Driving a real GPUI click appears to need a change in `gpui` itself. Until then
 "this component is interactive" is verified by the handler gate and by running
 the preview, not by an automated click.
 
-### Jetstream interaction
+### Jetstream interaction — decided
 
-**No engine work is needed.** That was the initial assumption and it is wrong:
+**Decision: builder structs mirroring GPUI.** `Component::from_spec(spec, theme)`
+then `.on_x(handler)`, with an `IntoJsEl` trait standing in for GPUI's
+`IntoElement`. Same names, same verbs, same order as the GPUI target, so a
+developer moving between the two native targets learns one vocabulary.
 
-- `jetstream-ui` dispatches clicks and has tests for it.
-- The preview already feeds pointer state every frame —
-  `set_pointer_state(x, y, down)` followed by `game_ui.process_input(...)`.
+Nothing depends on the current shape yet, so this replaces it rather than
+sitting alongside it. The three options were weighed and two rejected:
 
-So a handler attached today would fire. The gap is purely that no Poodle
-Jetstream component ever calls `.on_click`.
+- **Handlers on the spec** — rejected. Specs derive `Clone`, `Debug` and
+  `PartialEq`; closures satisfy none of them, and specs are the thing the
+  contract-drift gate compares against a prop table. Putting behaviour in them
+  would corrupt the one artifact that is pure data.
+- **Sibling `*_interactive` functions** — rejected. Additive and non-breaking,
+  but it doubles a 151-component surface and leaves two ways to render
+  everything, one of which silently drops interaction.
+- **Builder structs** — chosen. Handlers become additive: a component gains an
+  event without any existing caller changing, which is exactly what the free
+  functions could not do.
 
-What makes it more than a sweep is the signature:
+`on_click` requires `Send + Sync + 'static`, so a handler cannot borrow host
+state the way GPUI's `cx.listener` closures can. Hosts capture an `Arc` — a
+channel sender, a `Mutex`ed model, an atomic. That is the ordinary shape for an
+immediate-mode UI where the tree is rebuilt every frame and nothing outlives it,
+and it is not a workaround.
 
-```rust
-pub fn on_click(mut self, handler: impl Fn(&ClickEvent) + Send + Sync + 'static) -> Self
-```
+**The decisive argument is testability.** `GameUi` dispatches clicks with no
+window, so a Jetstream component's interaction is provable in an ordinary unit
+test — `element::click_probe::click_at` renders a tree, drives a real press and
+release at a point, and lets the handlers run. GPUI cannot do this, which is
+precisely how `Stepper` carried two handlers attached to nothing for weeks.
 
-`Send + Sync + 'static` means a handler cannot borrow app state the way GPUI's
-`cx.listener` closures do. Poodle's Jetstream components are also plain
-functions — `js_button(spec, theme)` — not builders, so there is nowhere to hang
-a handler without changing every call site.
+`ToolCall` is the reference implementation, with two tests: a click reaches the
+handler with the right id, and a row with no output ignores clicks. Both were
+checked for vacuity by removing the wiring — the positive test fails with
+`on_toggle fired exactly once`.
 
-Three shapes, none obviously right, which is why this is written down rather
-than guessed at:
+### The migration
 
-1. **Handlers on the spec.** Cleanest at the call site, but specs derive
-   `Clone`, `Debug` and `PartialEq`, and closures break all three.
-2. **Sibling functions** — `js_tool_call_interactive(spec, theme, handlers)`.
-   Additive and non-breaking, but doubles the surface of a 151-component set.
-3. **A handler bundle parameter** on the existing functions. One consistent
-   shape, but it is a breaking change to every call site and every specimen.
+Free functions stay during the sweep: `IntoJsEl` wraps them, so each component
+converts on its own rather than in one breaking commit. They go once the last
+one is done.
 
-The decision should be made once, for the whole target, before anything is
-wired — the cost of this list is 151 components either way.
+Per component that is a struct with `from_spec`, an `IntoJsEl` impl delegating
+to the existing render, and handler methods only where the contract has events —
+mechanical, but 151 of them.
 
 ## Next
 
-1. Pick the Jetstream handler shape, deliberately.
-2. Wire the agent chat set as the proof, then sweep.
-3. Burn down the 34 baselined GPUI handlers.
-4. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+1. Convert the rest of the agent chat set to the builder shape, with a click
+   test each.
+2. Sweep the remaining components. Mechanical, but 151 of them: each becomes a
+   struct with `from_spec`, an `IntoJsEl` impl wrapping the existing render
+   function, and handler methods only where the contract has events.
+3. Add a gate that fails when a Jetstream component with contract events has no
+   click test — the Jetstream equivalent of `drift:handlers`, and stronger,
+   because here it can assert the click actually lands.
+4. Burn down the 34 baselined GPUI handlers.
+5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+
+The free functions stay for now: `IntoJsEl` wraps them, so conversion is
+component-by-component rather than a single breaking commit. They go once the
+sweep is done.

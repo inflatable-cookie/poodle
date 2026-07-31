@@ -10,8 +10,54 @@ use poodle_headless::agent_transcript::ToolCallStatus;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ToolCallSpec;
 
+use std::sync::Arc;
+
+use crate::element::IntoJsEl;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};
+
+/// ToolCall — one row of agent work.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`. See
+/// `element.rs` for why components are builders rather than free functions.
+pub struct ToolCall {
+    spec: ToolCallSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+impl ToolCall {
+    pub fn from_spec(spec: ToolCallSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+        }
+    }
+
+    /// Fires when the row is opened or closed. A row with no output is not
+    /// interactive at all, so nothing is attached to it.
+    pub fn on_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for ToolCall {
+    fn into_js_el(self) -> JsEl {
+        let row = js_tool_call(&self.spec, &self.theme);
+
+        // Only a row with output can be opened, so only that row is clickable.
+        match (self.spec.has_output(), self.on_toggle) {
+            (true, Some(handler)) => {
+                let id = self.spec.id.clone();
+                row.cursor_pointer()
+                    .on_click(move |_event| handler(&id))
+            }
+            _ => row,
+        }
+    }
+}
 
 pub fn js_tool_call(spec: &ToolCallSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let label_color: Color = resolve_color(theme, spec.label_token()).into();
@@ -100,6 +146,7 @@ pub fn js_tool_call(spec: &ToolCallSpec, theme: &JetstreamThemeProvider) -> JsEl
     // Status reaches assistive technology through the name; colour and glyph do
     // not.
     let mut root = ui_element::div()
+        .id(spec.id.clone())
         .flex_col()
         .w_full()
         .aria_role(jetstream_ui::accesskit::Role::ListItem)
@@ -126,6 +173,55 @@ mod tests {
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    /// The reason the builder shape exists: a click can be driven and asserted.
+    ///
+    /// GPUI cannot do this — a real click there needs a live window — which is
+    /// how `Stepper` carried two handlers attached to nothing for weeks.
+    #[test]
+    fn a_click_reaches_the_handler() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = ToolCallSpec::new("call-1", "Ran command")
+            .with_detail("bun test")
+            .with_output("272 pass");
+
+        let el = crate::element::IntoJsEl::into_js_el(
+            ToolCall::from_spec(spec, &theme()).on_toggle(move |id| {
+                assert_eq!(id, "call-1", "the handler is told which row was opened");
+                counter.fetch_add(1, Ordering::SeqCst);
+            }),
+        );
+
+        crate::element::click_probe::click_at(&el, 720.0, 200.0, 40.0, 12.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    /// A row with nothing to open must not be clickable, so the absence has to
+    /// be provable too.
+    #[test]
+    fn a_row_without_output_ignores_clicks() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = ToolCallSpec::new("call-2", "Ran command").with_detail("no output");
+        let el = crate::element::IntoJsEl::into_js_el(
+            ToolCall::from_spec(spec, &theme())
+                .on_toggle(move |_| { counter.fetch_add(1, Ordering::SeqCst); }),
+        );
+
+        crate::element::click_probe::click_at(&el, 720.0, 200.0, 40.0, 12.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a row with no output is not interactive");
     }
 
     #[test]

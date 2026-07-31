@@ -15,6 +15,12 @@ jetstream-ui = { path = "../../../../jetstream/crates/jetstream-ui" }
 glam = "0.29"
 taffy = "0.9"
 
+# Interaction is provable here, unlike on GPUI: `GameUi` dispatches clicks with
+# no window, so a component's handlers can be driven from an ordinary test.
+[dev-dependencies]
+jetstream-input = { path = "../../../../jetstream/crates/jetstream-input" }
+jetstream-platform = { path = "../../../../jetstream/crates/jetstream-platform" }
+
 [package.metadata.poodle]
 public-intent = true
 channel = "preview"
