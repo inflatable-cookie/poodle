@@ -530,19 +530,19 @@ characters string. It also inserts a bare KeyUp after each action:
 `dispatch_key_event` is the only path that redraws an occluded window, so
 without it a second click would hit-test the scene from before the first.
 
-Proofs: `--click <input> --type x` → `text-input-name="x"`;
+Proofs, all three: `--click <input> --type x` → `text-input-name="x"`;
 `--click <label> --type hello` → `editable-label-live="My project
-titlehello"`. The palette's own end-to-end proof is deferred: its specimen
-opens the interactive palette as a centred overlay whose geometry cannot be
-aimed at blind (the screen was locked, so captures were unavailable) — the
-forwarding is five lines into the same proven `TextInput.on_change`, and the
-handler gate holds it as read. Worth a driver pass when captures work.
+titlehello"`; and the palette end to end —
+`--click <opener> --click <query> --type save` →
+`cmd-palette-query="save"`. The palette one needed a specimen fix first:
+the always-open demo palettes paint after the live overlay and stack over
+the same region, burying the input under a lookalike with no handler. While
+the interactive palette is open the demo groups stand down now — which is
+what a real palette does to the page behind it anyway.
 
 ## Next
 
-1. Run the palette query proof once screenshots are available again (open
-   the palette, read the modal position off a capture, click + `--type`).
-2. Full IME, selection, and caret movement for native text editing — gpui's
+1. Full IME, selection, and caret movement for native text editing — gpui's
    `EntityInputHandler` path. Caret-at-end editing is the honest current
    scope, noted in the contracts.
 

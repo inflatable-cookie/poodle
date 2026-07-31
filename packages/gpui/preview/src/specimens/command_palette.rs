@@ -219,7 +219,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "cmd-state-error",
             theme,
         ));
-    root = root.child(state_groups);
+    // The always-open demo palettes stack over the same region the live
+    // palette's overlay uses, and they paint later — which buries the live
+    // palette and makes its input unreachable. A real palette hides the
+    // page behind it anyway, so while the interactive one is open the demo
+    // groups stand down.
+    if !is_open {
+        root = root.child(state_groups);
+    }
 
     // ── Sizes (xs–xl): one open palette per intrinsic size ────────
     let mut sizes_row = div()
@@ -262,7 +269,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ),
         );
     }
-    root = root.child(sizes_row);
+    if !is_open {
+        root = root.child(sizes_row);
+    }
 
     // ── Densities: one open palette per density ───────────────────
     let mut densities_row = div()
@@ -303,7 +312,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ),
         );
     }
-    root = root.child(densities_row);
+    if !is_open {
+        root = root.child(densities_row);
+    }
 
     root
 }
