@@ -312,35 +312,59 @@ mod tests {
         assert_eq!(seen.lock().unwrap().as_slice(), ["call:b"]);
     }
 
+    fn one_changed_file() -> AgentTranscriptSpec {
+        use poodle_headless::agent_transcript::{ChangedFile, TranscriptChangedFiles};
+
+        AgentTranscriptSpec::new(vec![TranscriptItem::ChangedFiles(TranscriptChangedFiles {
+            id: "changed".to_string(),
+            files: vec![ChangedFile {
+                path: "pkg/src/main.rs".to_string(),
+                additions: 3,
+                deletions: 1,
+                status: None,
+            }],
+        })])
+    }
+
     /// Changed-files events forward too, and a file reports its path rather
     /// than the leaf the chip displays.
     #[test]
     fn a_file_chip_reaches_the_transcript_handler() {
-        use poodle_headless::agent_transcript::{ChangedFile, TranscriptChangedFiles};
         use std::sync::{Arc, Mutex};
 
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let paths = Arc::clone(&seen);
 
-        let spec = AgentTranscriptSpec::new(vec![TranscriptItem::ChangedFiles(
-            TranscriptChangedFiles {
-                id: "changed".to_string(),
-                files: vec![ChangedFile {
-                    path: "pkg/src/main.rs".to_string(),
-                    additions: 3,
-                    deletions: 1,
-                    status: None,
-                }],
-            },
-        )]);
-
-        let el = AgentTranscript::from_spec(spec, &theme())
+        let el = AgentTranscript::from_spec(one_changed_file(), &theme())
             .on_file_select(move |path| paths.lock().unwrap().push(path.to_string()))
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 720.0, 256.0, "main.rs");
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["pkg/src/main.rs"]);
+    }
+
+    /// The card's own id, not a file path: expanding the card and choosing a
+    /// file inside it are separate events, and a host holds separate state for
+    /// each.
+    #[test]
+    fn the_changed_files_header_reaches_the_transcript_handler() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = AgentTranscript::from_spec(one_changed_file(), &theme())
+            .on_changed_files_toggle(move |id| {
+                assert_eq!(id, "changed");
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 256.0, "1 changed files");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_changed_files_toggle fired exactly once");
     }
 
     #[test]

@@ -119,6 +119,11 @@
 # attached neither — the builders type-checked and nothing happened when you
 # clicked. Runs in ci:native.
 "drift:handlers" = "bun packages/gpui/preview/scripts/dead-handler-drift.ts"
+# The Jetstream sibling, and stronger: GPUI can only check that a handler field
+# is read, because a real click there needs a live window. Jetstream dispatches
+# clicks with no window, so this demands a test that actually drives one. Also
+# tracks the conversion sweep — see docs/roadmaps/g12/017.
+"drift:clicks" = "bun packages/jetstream/preview/scripts/click-test-drift.ts"
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -145,23 +150,29 @@
   { task = "ci:rust" },
 ]
 
-# Native compile-rot check (macOS: gpui pulls metal). The native component crates
-# have no unit tests yet, so `cargo check` is the gate — it catches build rot from
-# contract/spec changes. jetstream/components needs the sibling jetstream-runtime
-# repo, so it is LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
+# Native compile-rot check (macOS: gpui pulls metal). GPUI has no unit tests —
+# its components need a live window — so `cargo check` is the only gate there.
+# Jetstream renders and dispatches clicks headlessly, so it has real tests and
+# they run below. jetstream/components needs the sibling jetstream-runtime repo,
+# so it is LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
 "check:gpui" = [
   { run = "cargo check -p poodle-gpui-components --manifest-path packages/gpui/components/Cargo.toml" },
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
 ]
 "check:jetstream" = "cargo check -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
+# Render probes and click probes: layout, token resolution and interaction, all
+# CPU-only. These existed and nothing ran them in CI.
+"test:jetstream" = "cargo test -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
 # The a11y audit belongs here rather than in ci:rust: it renders specimens, so
 # it needs the sibling jetstream repo — the same constraint that already makes
 # this group local-only. It is a real gate now that the count is zero; before
 # that it would only have reported a number.
 "ci:native" = [
   { task = "drift:handlers" },
+  { task = "drift:clicks" },
   { task = "check:gpui" },
   { task = "check:jetstream" },
+  { task = "test:jetstream" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
 ]

@@ -41,6 +41,8 @@ from someone who assumed it worked.
   `ToolCallGroup` expansion and per-call toggles, `ChangedFiles` expansion and
   file selection, `AgentQuestion` selection and dismissal, `Stepper` selection
   and re-run.
+- The agent chat set is interactive on Jetstream, with a click test per handler
+  and `effigy drift:clicks` holding the rest of the sweep to the same bar.
 - `effigy drift:handlers` fails when a GPUI component accepts a handler it never
   reads, and runs in `ci:native`. The existing 34 are a baseline, not an
   allowlist: a new one fails immediately, and the gate also fails when a
@@ -139,6 +141,35 @@ the only level that sees every block and the host holds all the expansion state,
 so that is where a host attaches — and it is one level further than the GPUI
 transcript goes today, which forwards nothing.
 
+### The gate
+
+`effigy drift:clicks` — the Jetstream sibling of `drift:handlers`, and stronger
+for the same reason the shape was chosen: GPUI can only check that a handler
+field is *read* somewhere, while here a test can drive the click and assert what
+happened.
+
+Three rules:
+
+1. Every `pub fn on_x` needs a test in its own file that passes a handler to it
+   **and** drives a click through `click_probe`.
+2. A component whose contract names events but which takes no handler is
+   unconverted, and must sit in the baseline — 87 of them, the sweep's worklist.
+3. A converted component still listed in the baseline fails, so a conversion
+   cannot leave the gate believing there is work outstanding.
+
+It found a real gap on its first run: `AgentTranscript::on_changed_files_toggle`
+was wired and forwarded correctly, and nothing clicked it. Three of the four
+transcript events had tests and the fourth did not, which is exactly the kind of
+gap that survives review — the file plainly had click tests in it.
+
+All three rules were checked by breaking them: a converted component added to
+the baseline reports stale, a baselined one removed reports unconverted, and the
+untested-handler rule had already proved itself by finding the transcript gap.
+
+`ci:native` also never ran the Jetstream component tests — 819 of them, on a
+task list whose comment still claimed the native crates had none. `test:jetstream`
+runs them now.
+
 ### The migration
 
 Free functions stay during the sweep: `IntoJsEl` wraps them, so each component
@@ -151,18 +182,16 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the remaining ~144 components. Mechanical: each becomes a struct with
-   `from_spec`, an `IntoJsEl` impl wrapping the existing render function, and
-   handler methods only where the contract has events.
-2. Add a gate that fails when a Jetstream component with contract events has no
-   click test — the Jetstream equivalent of `drift:handlers`, and stronger,
-   because here it can assert the click actually lands. Worth landing early in
-   the sweep rather than after it, so each conversion is held to it.
-3. Forward the transcript's events on GPUI too. The blocks are interactive
+1. Sweep the 87 components in the `drift:clicks` baseline. Mechanical: each
+   becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
+   render function, and handler methods only where the contract has events. The
+   gate holds each one to a click test as it lands, and the baseline count is
+   the progress bar.
+2. Forward the transcript's events on GPUI too. The blocks are interactive
    there, but `AgentTranscript` passes nothing down, so a GPUI host has to
    attach to the block components itself.
-4. Burn down the 34 baselined GPUI handlers.
-5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+3. Burn down the 34 baselined GPUI handlers.
+4. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither
