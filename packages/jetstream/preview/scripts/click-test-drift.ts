@@ -21,8 +21,10 @@
  *      its entry — a stale entry fails, so a conversion cannot leave the gate
  *      believing there is still work to do.
  *
- * The baseline shrinks as the sweep in `docs/roadmaps/g12/017` proceeds. When
- * it is empty, delete it and this comment with it.
+ * The sweep in `docs/roadmaps/g12/017` is complete: the baseline is empty.
+ * It stays as machinery rather than being deleted — a future component that
+ * ships with contract events and no handler fails rule 2 immediately, which is
+ * the regression this gate now exists to prevent.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
@@ -57,6 +59,17 @@ const EXEMPT: Record<string, string> = {
     "renders the bubble only; it is summoned by hover on a trigger the consumer owns",
   HoverCard:
     "as Tooltip — the card is the panel, and the hover that opens it belongs to the trigger",
+  AudioPlayer:
+    "the only contract events are web lifecycle hooks (onMount/onDestroy); there is no interaction event to wire",
+  VideoPlayer: "as AudioPlayer — lifecycle hooks only",
+  ScrollShell:
+    "onScroll needs the runtime's scroll events, which are not surfaced through the builder",
+  CodeInput: "onValueChange/onComplete are typed; the runtime raises no key events",
+  DurationInput: "onChange is typed; the runtime raises no key events",
+  TimeInput: "onValueChange is typed; the runtime raises no key events",
+  EmbedInput: "onValueChange/onParse are typed; the runtime raises no key events",
+  MarkdownEditor: "onValueChange is typed; the runtime raises no key events",
+  BlockEditor: "onChange is typed; the runtime raises no key events",
 };
 
 /**
@@ -66,23 +79,7 @@ const EXEMPT: Record<string, string> = {
  * shipped without a way to receive them; removing one is what converting it
  * looks like.
  */
-const BASELINE = new Set([
-  "AgentChatInput",
-  "AudioPlayer",
-  "BlockEditor",
-  "CodeInput",
-  "DurationInput",
-  "EditableList",
-  "EmbedInput",
-  "FileUpload",
-  "LogList",
-  "MarkdownEditor",
-  "ResizeHandle",
-  "ScrollShell",
-  "SplitView",
-  "TimeInput",
-  "VideoPlayer",
-]);
+const BASELINE = new Set<string>([]);
 
 function snake(name: string): string {
   return name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();

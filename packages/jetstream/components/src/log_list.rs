@@ -24,7 +24,45 @@ use crate::presentation::{
 use crate::spinner::js_spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
+/// LogList — filterable log rows.
+///
+/// `on_clear_filters` is the one pointer-reachable event: the refresh, export
+/// and paging affordances are not drawn by this component, and the filters
+/// themselves are typed or open Select panels.
+pub struct LogList {
+    spec: LogListSpec,
+    theme: JetstreamThemeProvider,
+    on_clear_filters: Option<crate::element::ActionHandler>,
+}
+
+impl LogList {
+    pub fn from_spec(spec: LogListSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_clear_filters: None }
+    }
+
+    /// Fires when the clear affordance is pressed. It renders only while a
+    /// filter is active, so there is nothing to fire otherwise.
+    pub fn on_clear_filters(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_clear_filters = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for LogList {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_clear_filters)
+    }
+}
+
 pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &LogListSpec,
+    theme: &JetstreamThemeProvider,
+    on_clear_filters: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let label_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
@@ -130,12 +168,17 @@ pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
             // Clear affordance — only when a value is active.
             if spec.has_active_filters() {
-                toolbar = toolbar.child(
-                    ui_element::button("Clear")
-                        .text_color(text_secondary)
-                        .text_size(label_token_size)
-                        .focusable(),
-                );
+                let mut clear = ui_element::button("Clear")
+                    .text_color(text_secondary)
+                    .text_size(label_token_size)
+                    .focusable();
+
+                if let Some(handler) = &on_clear_filters {
+                    let handler = std::sync::Arc::clone(handler);
+                    clear = clear.cursor_pointer().on_click(move |_event| handler());
+                }
+
+                toolbar = toolbar.child(clear);
             }
 
             el = el.child(toolbar);
@@ -319,4 +362,39 @@ pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     el.aria_role(jetstream_ui::accesskit::Role::Log)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{LogFilter, LogListSpec};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn the_clear_affordance_reports_a_clear() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        // The Clear affordance lives in the audit toolbar, which needs a
+        // filter definition and an active value.
+        let el = LogList::from_spec(
+            LogListSpec::new()
+                .with_filter(LogFilter::select("level", "Level"))
+                .with_filter_value("level", "error"),
+            &theme(),
+        )
+        .on_clear_filters(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 480.0, "Clear");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear_filters fired exactly once");
+    }
 }

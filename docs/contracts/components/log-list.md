@@ -162,6 +162,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Pagination, refresh, and export actions must remain keyboard accessible.
 - Actor and resource links are optional; when absent, plain text is rendered instead.
 
+## 6a. Jetstream Notes
+
+- `LogList::from_spec(spec, theme).on_clear_filters(...)` — the one
+  pointer-reachable event. The refresh, export and paging affordances are not
+  drawn by this component, and the filters themselves are typed or open
+  `Select` panels.
+
 ## 7. Usage
 
 ### Audit list

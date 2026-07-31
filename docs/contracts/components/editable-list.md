@@ -490,6 +490,16 @@ Layout-only wrapper; the composed primary `Button` (disabled when the input is e
 
 A GPUI composite exists (`poodle_gpui::composites::editable_list`). It is currently presentational: it renders rows, handle, remove, add row, and workflow chrome, but does not yet implement callbacks, drag-and-drop, keyboard grab/move, the live region, or `<ul>`/`role` semantics. Reordering may use a simplified drag or move-up/move-down approach. Text input and add button compose from primitives.
 
+## 10a. Jetstream Notes
+
+- `EditableList::from_spec(spec, theme).on_remove(...).on_submit(...).on_cancel(...)`.
+- `on_remove` carries the row's index, matching the contract's own index-based
+  `onRemove`.
+- No `on_add`: the add button renders disabled, because the draft field is typed
+  and this runtime cannot know it has content — a handler on a control that can
+  never be pressed would be dead by construction.
+- No `on_reorder` (drag-with-payload) or `on_change` (typed).
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

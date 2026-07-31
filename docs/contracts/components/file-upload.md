@@ -510,6 +510,12 @@ interface ImageCompressionOptions {
 - [ ] file reading and preview generation internals stay platform-owned
 - [ ] file size formatting internals stay implementation-owned
 
+## 11a. Jetstream Notes
+
+- `FileUpload::from_spec(spec, theme).on_remove(...)`, carrying the removed
+  file's name — the identity the list itself displays.
+- `onUpload` and `onChange` need file drops, which the runtime does not raise.
+
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |

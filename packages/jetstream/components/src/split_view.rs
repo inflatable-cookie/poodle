@@ -25,11 +25,87 @@ use crate::collapse_toggle::js_collapse_toggle;
 use crate::presentation::resolve_semantic_size;
 use crate::resize_handle::js_resize_handle;
 
+/// SplitView — two panes with collapse toggles.
+///
+/// Mirrors the GPUI target's names: `on_primary_collapse` and
+/// `on_secondary_collapse`, forwarded to the composed `CollapseToggle`s.
+///
+/// `on_ratio_change` waits on the divider carrying a drag handler; the
+/// composed `ResizeHandle` has one now, so this is wiring work, not a
+/// capability gap — tracked in g12.017.
+pub struct SplitView {
+    spec: SplitViewSpec,
+    theme: JetstreamThemeProvider,
+    primary: Option<JsEl>,
+    secondary: Option<JsEl>,
+    on_primary_collapse: Option<crate::element::ToggleHandler>,
+    on_secondary_collapse: Option<crate::element::ToggleHandler>,
+}
+
+impl SplitView {
+    pub fn from_spec(spec: SplitViewSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            primary: None,
+            secondary: None,
+            on_primary_collapse: None,
+            on_secondary_collapse: None,
+        }
+    }
+
+    pub fn primary(mut self, primary: impl crate::element::IntoJsEl) -> Self {
+        self.primary = Some(primary.into_js_el());
+        self
+    }
+
+    pub fn secondary(mut self, secondary: impl crate::element::IntoJsEl) -> Self {
+        self.secondary = Some(secondary.into_js_el());
+        self
+    }
+
+    /// Fires with the collapsed state the primary pane is moving **to**.
+    pub fn on_primary_collapse(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_primary_collapse = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the collapsed state the secondary pane is moving **to**.
+    pub fn on_secondary_collapse(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_secondary_collapse = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for SplitView {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.primary,
+            self.secondary,
+            self.on_primary_collapse,
+            self.on_secondary_collapse,
+        )
+    }
+}
+
 pub fn js_split_view(
     spec: &SplitViewSpec,
     theme: &JetstreamThemeProvider,
     primary: Option<JsEl>,
     secondary: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, primary, secondary, None, None)
+}
+
+fn build(
+    spec: &SplitViewSpec,
+    theme: &JetstreamThemeProvider,
+    primary: Option<JsEl>,
+    secondary: Option<JsEl>,
+    on_primary_collapse: Option<crate::element::ToggleHandler>,
+    on_secondary_collapse: Option<crate::element::ToggleHandler>,
 ) -> JsEl {
     let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -149,14 +225,24 @@ pub fn js_split_view(
                 .with_direction(primary_dir)
                 .with_collapsed(spec.is_primary_collapsed)
                 .with_disabled(spec.is_disabled);
-            cluster = cluster.child(js_collapse_toggle(&toggle_spec, theme));
+            let mut toggle = crate::collapse_toggle::CollapseToggle::from_spec(toggle_spec, theme);
+            if let Some(handler) = &on_primary_collapse {
+                let handler = std::sync::Arc::clone(handler);
+                toggle = toggle.on_toggle(move |next| handler(next));
+            }
+            cluster = cluster.child(crate::element::IntoJsEl::into_js_el(toggle));
         }
         if show_secondary_toggle {
             let toggle_spec = CollapseToggleSpec::new()
                 .with_direction(secondary_dir)
                 .with_collapsed(spec.is_secondary_collapsed)
                 .with_disabled(spec.is_disabled);
-            cluster = cluster.child(js_collapse_toggle(&toggle_spec, theme));
+            let mut toggle = crate::collapse_toggle::CollapseToggle::from_spec(toggle_spec, theme);
+            if let Some(handler) = &on_secondary_collapse {
+                let handler = std::sync::Arc::clone(handler);
+                toggle = toggle.on_toggle(move |next| handler(next));
+            }
+            cluster = cluster.child(crate::element::IntoJsEl::into_js_el(toggle));
         }
 
         let divider_container = if is_horizontal {
@@ -284,4 +370,43 @@ mod tests {
             top.x, top.y, top.w, top.h
         );
     }
+
+    #[test]
+    fn the_collapse_toggles_report_their_pane() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let primaries = Arc::clone(&seen);
+        let secondaries = Arc::clone(&seen);
+
+        let spec = SplitViewSpec::new(SplitOrientation::Horizontal)
+            .with_show_collapse_primary(true)
+            .with_show_collapse_secondary(true);
+
+        let el = SplitView::from_spec(spec, &theme())
+            .primary(ui_element::label("Primary pane"))
+            .secondary(ui_element::label("Secondary pane"))
+            .on_primary_collapse(move |next| primaries.lock().unwrap().push(format!("primary:{next}")))
+            .on_secondary_collapse(move |next| secondaries.lock().unwrap().push(format!("secondary:{next}")))
+            .into_js_el();
+
+        // Two chevron toggles in the divider cluster, in pane order.
+        let tree = crate::render_probe::probe(&el, 640.0, 400.0);
+        let toggles: Vec<_> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.text.as_deref().map(|t| t.starts_with("chevron")).unwrap_or(false))
+            .map(|n| (n.x + n.w / 2.0, n.y + n.h / 2.0))
+            .collect();
+        assert_eq!(toggles.len(), 2, "two collapse toggles: {:?}", tree.texts());
+        crate::element::click_probe::click_at(&el, 640.0, 400.0, toggles[0].0, toggles[0].1);
+        crate::element::click_probe::click_at(&el, 640.0, 400.0, toggles[1].0, toggles[1].1);
+
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["primary:true", "secondary:true"]
+        );
+    }
+
 }

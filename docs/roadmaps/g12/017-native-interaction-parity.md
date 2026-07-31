@@ -1,8 +1,9 @@
 # g12.017 — Native Interaction Parity
 
-**Status: in progress.** GPUI is interactive and now gated. Jetstream's shape is
-decided and the agent chat set is converted; the remaining ~144 components are
-a mechanical sweep.
+**Status: Jetstream sweep complete.** Every component whose contract names an
+event either takes the handler — proved by a driven pointer gesture — or is
+exempt with a stated reason. 80 components, 134 handlers, zero baselined.
+Remaining work is on the GPUI side and in the follow-ups below.
 
 ## Problem
 
@@ -191,6 +192,7 @@ Batches land with the gate holding each one to a click test.
 | Chrome | 7 | 29 → 22 |
 | Deep panels | 2 | 22 → 20 |
 | Shells and hosts | 5 | 20 → 15 |
+| The tail | 6 wired, 9 exempt | 15 → 0 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -331,6 +333,17 @@ The alternative was an `on_change` taking a rebuilt ordering, which would have
 put the host's state inside the component and made the event a lie about what
 the user did.
 
+### The sweep's last riddle: a handler that can never fire
+
+`EditableList`'s add button renders permanently disabled on this target — the
+draft field is typed, so the component can never know it has content. Declaring
+`on_add` would therefore have shipped a handler that is dead *by construction*,
+not by omission: wired correctly, tested green against nothing, and impossible
+to fire. It is not declared, and the contract records why. That distinction —
+between an event with no route and an event whose only control cannot be
+enabled — closes the taxonomy this sweep has been building: wired and proved,
+exempt with a reason, or absent because declaring it would lie.
+
 ### CI did not run the adapter's tests
 
 `full_parity_component_counts` had been failing since the workstation category
@@ -363,21 +376,22 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Close out the 15 components left in the `drift:clicks` baseline — the typed
-   and media tail, where most events have no pointer route and the honest
-   outcome is a delta. ResizeHandle and the players have real wiring (drag,
-   transport clicks); the rest is mostly contract prose. The remainder
+1. Wire `SplitView::on_ratio_change` through a composed `ResizeHandle` on its
+   divider — the handle carries a drag handler now, so this is wiring, not a
+   capability gap.
+2. Forward `Select` option selection through `TimeZoneSelect` composition
+   inside `DateTimeZonePicker`, and clause editing through `FilterBuilder`. The remainder
    is list surfaces, chrome/shells, and typed inputs whose events are mostly
    unreachable without key or drop events — expect more deltas than wiring. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is
    the progress bar.
-2. Forward the transcript's events on GPUI too. The blocks are interactive
+3. Forward the transcript's events on GPUI too. The blocks are interactive
    there, but `AgentTranscript` passes nothing down, so a GPUI host has to
    attach to the block components itself.
-3. Burn down the 34 baselined GPUI handlers.
-4. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+4. Burn down the 34 baselined GPUI handlers.
+5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither

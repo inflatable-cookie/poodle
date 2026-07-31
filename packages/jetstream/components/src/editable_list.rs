@@ -40,7 +40,75 @@ use crate::presentation::{
 use crate::text_input::js_text_input;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
+/// EditableList — rows with remove, an add row, and edit actions.
+///
+/// `on_remove` carries the row's index: unlike a token input the rows have no
+/// stable ids, and the contract's own `onRemove` is index-based.
+///
+/// No `on_add`: the add button renders disabled, because the draft field is
+/// typed and this runtime cannot know it has content — a handler on a control
+/// that can never be pressed would be dead by construction.
+/// No `on_reorder`: reorder is drag-with-payload the runtime does not carry.
+/// No `on_change`: the row editors are typed.
+pub struct EditableList {
+    spec: EditableListSpec,
+    theme: JetstreamThemeProvider,
+    on_remove: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
+    on_submit: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl EditableList {
+    pub fn from_spec(spec: EditableListSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_remove: None,
+            on_submit: None,
+            on_cancel: None,
+        }
+    }
+
+    /// Fires with the removed row's index.
+    pub fn on_remove(mut self, handler: impl Fn(usize) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    pub fn on_submit(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_submit = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for EditableList {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_remove,
+            self.on_submit,
+            self.on_cancel,
+        )
+    }
+}
+
 pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &EditableListSpec,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
+    on_submit: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let density = spec.density;
     let is_unavailable = spec.is_disabled || spec.is_submitting;
@@ -77,31 +145,45 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     // Svelte gates on `onSubmit || onCancel`; no callbacks here, so we surface
     // chrome when the list advertises pending work (dirty or submitting).
     if spec.is_dirty || spec.is_submitting {
-        let cancel_btn = js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Secondary)
-                .with_size(effective_size)
-                .with_density(density)
-                .with_label(spec.cancel_label.clone())
-                .with_disabled(is_unavailable),
-            theme,
-        );
+        let cancel_btn = {
+            let mut button = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_label(spec.cancel_label.clone())
+                    .with_disabled(is_unavailable),
+                theme,
+            );
+            if let Some(handler) = &on_cancel {
+                let handler = std::sync::Arc::clone(handler);
+                button = button.on_click(move || handler());
+            }
+            crate::element::IntoJsEl::into_js_el(button)
+        };
 
         let submit_label = if spec.is_submitting {
             String::from("Saving\u{2026}")
         } else {
             spec.submit_label.clone()
         };
-        let submit_btn = js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Primary)
-                .with_size(effective_size)
-                .with_density(density)
-                .with_label(submit_label)
-                // Svelte: disabled unless dirty (or while submitting).
-                .with_disabled(is_unavailable || !spec.is_dirty),
-            theme,
-        );
+        let submit_btn = {
+            let mut button = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_label(submit_label)
+                    // Svelte: disabled unless dirty (or while submitting).
+                    .with_disabled(is_unavailable || !spec.is_dirty),
+                theme,
+            );
+            if let Some(handler) = &on_submit {
+                let handler = std::sync::Arc::clone(handler);
+                button = button.on_click(move || handler());
+            }
+            crate::element::IntoJsEl::into_js_el(button)
+        };
 
         let header = ui_element::div()
             .flex_row()
@@ -234,8 +316,8 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
             // Remove control: real ghost IconButton (icon `x`, chrome size role).
             // Shown only when editable || removable.
             if show_remove {
-                let remove_btn = js_icon_button(
-                    &IconButtonSpec::new()
+                let mut remove_btn = crate::icon_button::IconButton::from_spec(
+                    IconButtonSpec::new()
                         .with_icon("x")
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(effective_size)
@@ -245,7 +327,13 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
                         .with_aria_label("Remove item"),
                     theme,
                 );
-                row = row.child(ui_element::div().flex_shrink_0().child(remove_btn));
+                if let Some(handler) = &on_remove {
+                    let handler = std::sync::Arc::clone(handler);
+                    remove_btn = remove_btn.on_click(move || handler(i));
+                }
+                row = row.child(ui_element::div().flex_shrink_0().child(
+                    crate::element::IntoJsEl::into_js_el(remove_btn),
+                ));
             }
 
             item_list = item_list.child(row);
@@ -578,4 +666,50 @@ mod tests {
         let xl_row_h = xl_tree.nodes.iter().find(|n| n.depth == 2).map(|n| n.h).unwrap_or(0.0);
         assert!(xl_row_h > sm_row_h, "xl row taller than sm ({xl_row_h} vs {sm_row_h})");
     }
+
+    /// The row's index, matching the contract's own index-based onRemove.
+    #[test]
+    fn removing_a_row_reports_its_index() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+        let indices = Arc::clone(&seen);
+
+        let spec = EditableListSpec::new().with_item_count(3).with_editable(true);
+        let el = EditableList::from_spec(spec, &theme())
+            .on_remove(move |i| indices.lock().unwrap().push(i))
+            .into_js_el();
+
+        crate::element::click_probe::click_text_nth(&el, 480.0, 400.0, "x", 1);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [1]);
+    }
+
+    #[test]
+    fn the_edit_actions_report_submit_and_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let submits = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+
+        let spec = EditableListSpec::new()
+            .with_item_count(2)
+            .with_editable(true)
+            .with_dirty(true);
+        let (submit_label, cancel_label) = (spec.submit_label.clone(), spec.cancel_label.clone());
+
+        let el = EditableList::from_spec(spec, &theme())
+            .on_submit(move || submits.lock().unwrap().push("submit"))
+            .on_cancel(move || cancels.lock().unwrap().push("cancel"))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 400.0, &submit_label);
+        crate::element::click_probe::click_text(&el, 480.0, 400.0, &cancel_label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["submit", "cancel"]);
+    }
+
 }

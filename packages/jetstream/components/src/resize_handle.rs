@@ -7,7 +7,55 @@ use poodle_specs::{Orientation, ResizeHandleSpec};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
+/// ResizeHandle — a draggable divider.
+///
+/// `on_resize` carries the drag's per-frame delta along the handle's axis —
+/// pixels, signed. The handle cannot know the panes' sizes, so an absolute
+/// position would be a guess; a delta is a fact, and the host applies it to the
+/// ratio it already holds. Start and end mark the gesture's bounds for hosts
+/// that commit on release.
+pub struct ResizeHandle {
+    spec: ResizeHandleSpec,
+    theme: JetstreamThemeProvider,
+    on_resize: Option<std::sync::Arc<dyn Fn(ResizePhase, f32) + Send + Sync>>,
+}
+
+/// Where in the gesture a resize event sits.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ResizePhase {
+    Start,
+    Move,
+    End,
+}
+
+impl ResizeHandle {
+    pub fn from_spec(spec: ResizeHandleSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_resize: None }
+    }
+
+    /// Fires through the gesture: `Start` with `0.0`, `Move` with each frame's
+    /// axis delta, `End` with `0.0`.
+    pub fn on_resize(mut self, handler: impl Fn(ResizePhase, f32) + Send + Sync + 'static) -> Self {
+        self.on_resize = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ResizeHandle {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_resize)
+    }
+}
+
 pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ResizeHandleSpec,
+    theme: &JetstreamThemeProvider,
+    on_resize: Option<std::sync::Arc<dyn Fn(ResizePhase, f32) + Send + Sync>>,
+) -> JsEl {
     let handle_color = resolve_color(theme, spec.border_color_token());
     // Contract §8 hover/dragging: line recolors to accent-base.
     let hover_color = resolve_color(theme, spec.hover_color_token());
@@ -34,6 +82,41 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
         }
     };
 
+    // Drags do not bubble: the gesture starts only if the node under the
+    // pointer carries the handler, and the pointer lands on the grab overlay or
+    // the line, never the root. Same lesson the sliders taught — every hit
+    // target gets the handler.
+    let drag_handler: Option<std::sync::Arc<dyn Fn(&jetstream_ui::DragEvent) + Send + Sync>> =
+        if spec.is_disabled {
+            None
+        } else if let Some(handler) = &on_resize {
+            let handler = std::sync::Arc::clone(handler);
+            let horizontal = matches!(spec.orientation, Orientation::Horizontal);
+            Some(std::sync::Arc::new(move |event: &jetstream_ui::DragEvent| {
+                match event.phase {
+                    jetstream_ui::DragPhase::Start => handler(ResizePhase::Start, 0.0),
+                    jetstream_ui::DragPhase::Move => {
+                        // A horizontal handle is a vertical line: it moves along x.
+                        let delta = if horizontal { event.delta_x } else { event.delta_y };
+                        handler(ResizePhase::Move, delta);
+                    }
+                    jetstream_ui::DragPhase::End => handler(ResizePhase::End, 0.0),
+                }
+            }))
+        } else {
+            None
+        };
+
+    let arm = |el: JsEl| -> JsEl {
+        match &drag_handler {
+            Some(handler) => {
+                let handler = std::sync::Arc::clone(handler);
+                el.on_drag(move |event| handler(event))
+            }
+            None => el,
+        }
+    };
+
     let mut el = match spec.orientation {
         Orientation::Horizontal => {
             // Contract §7: horizontal orientation = vertical line.
@@ -50,9 +133,9 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
                         .absolute().left(hit_offset).top(0.0)
                         .w(hit_size).h_full(),
                 )
-                .child(build_line(
+                .child(arm(build_line(
                     ui_element::div().w_full().h_full().rounded(999.0),
-                ))
+                )))
         }
         Orientation::Vertical => {
             // Contract §7: vertical orientation = horizontal line.
@@ -63,14 +146,14 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
                 .h(visual_size).self_stretch().flex_shrink_0()
                 .flex_row().items_center().justify_center()
                 .cursor_row_resize()
-                .child(
+                .child(arm(
                     ui_element::div()
                         .absolute().top(hit_offset).left(0.0)
                         .h(hit_size).w_full(),
-                )
-                .child(build_line(
-                    ui_element::div().h_full().w_full().rounded(999.0),
                 ))
+                .child(arm(build_line(
+                    ui_element::div().h_full().w_full().rounded(999.0),
+                )))
         }
     };
 
@@ -79,6 +162,8 @@ pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider)
         // Contract §8 disabled: default cursor + 0.4 opacity, no interaction.
         el = el.opacity(opacity).cursor_default();
     }
+
+    el = arm(el);
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
         .aria_role(jetstream_ui::accesskit::Role::Splitter)
@@ -213,4 +298,60 @@ mod tests {
         let expected = resolve_opacity(&th, ResizeHandleSpec::new().disabled_opacity_token());
         assert_eq!(el.style.opacity, expected);
     }
+
+    /// The handle reports axis deltas through the gesture, bracketed by start
+    /// and end — the same contract the sliders follow.
+    #[test]
+    fn a_drag_reports_the_gesture() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<(ResizePhase, f32)>>> = Arc::new(Mutex::new(Vec::new()));
+        let events = Arc::clone(&seen);
+
+        let handle = ResizeHandle::from_spec(
+            ResizeHandleSpec::new().with_orientation(Orientation::Horizontal),
+            &theme(),
+        )
+        .on_resize(move |phase, delta| events.lock().unwrap().push((phase, delta)))
+        .into_js_el();
+        let row = ui_element::div().flex_row().w(200.0).h(100.0).child(handle);
+
+        crate::element::click_probe::drag(&row, 200.0, 100.0, (1.0, 50.0), (40.0, 50.0));
+
+        let events = seen.lock().unwrap();
+        assert_eq!(events.first().map(|e| e.0), Some(ResizePhase::Start));
+        assert_eq!(events.last().map(|e| e.0), Some(ResizePhase::End));
+        let moved: f32 = events
+            .iter()
+            .filter(|(p, _)| *p == ResizePhase::Move)
+            .map(|(_, d)| d)
+            .sum();
+        assert!(moved > 30.0, "the deltas did not sum to the distance: {moved}");
+    }
+
+    #[test]
+    fn a_disabled_handle_ignores_drags() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let handle = ResizeHandle::from_spec(
+            ResizeHandleSpec::new()
+                .with_orientation(Orientation::Horizontal)
+                .with_disabled(true),
+            &theme(),
+        )
+        .on_resize(move |_, _| { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+        let row = ui_element::div().flex_row().w(200.0).h(100.0).child(handle);
+
+        crate::element::click_probe::drag(&row, 200.0, 100.0, (1.0, 50.0), (40.0, 50.0));
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled handle resized");
+    }
+
 }

@@ -101,7 +101,44 @@ fn item_padding_rem(density: ControlDensity) -> f32 {
 ///               ├── [Remove]  <button>
 ///               └── [Progress] → [Progress Bar] (uploading only)
 /// ```
+/// FileUpload — a drop zone and its file list.
+///
+/// `on_remove` carries the removed file's name — the identity the list itself
+/// displays. `onUpload` and `onChange` need file drops, which the runtime does
+/// not raise; recorded as a delta.
+pub struct FileUpload {
+    spec: FileUploadSpec,
+    theme: JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+}
+
+impl FileUpload {
+    pub fn from_spec(spec: FileUploadSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_remove: None }
+    }
+
+    /// Fires with the removed file's name.
+    pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for FileUpload {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_remove)
+    }
+}
+
 pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &FileUploadSpec,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
@@ -215,7 +252,7 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
     if spec.has_files() {
         let mut list = ui_element::div().flex_col().gap(rem_to_px(0.5));
         for item in &spec.files {
-            list = list.child(file_item(spec, item, theme));
+            list = list.child(file_item(spec, item, theme, on_remove.as_ref()));
         }
         root = root.child(list);
     }
@@ -230,7 +267,12 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
 }
 
 /// Build a single file-list row (File Item anatomy).
-fn file_item(spec: &FileUploadSpec, item: &FileUploadItem, theme: &JetstreamThemeProvider) -> JsEl {
+fn file_item(
+    spec: &FileUploadSpec,
+    item: &FileUploadItem,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<&crate::element::Handler>,
+) -> JsEl {
     let item_radius = resolve_radius(theme, spec.item_radius_token());
     let panel = resolve_color(theme, spec.item_fill_token());
     let surface = resolve_color(theme, spec.item_surface_token());
@@ -318,7 +360,7 @@ fn file_item(spec: &FileUploadSpec, item: &FileUploadItem, theme: &JetstreamThem
     }
 
     // ── Remove button (1.75rem pill) ──
-    let remove = ui_element::button("")
+    let mut remove = ui_element::button("")
         // Svelte names each remove button after the file it removes, so a list
         // of them is not a row of identical "remove" buttons.
         .aria_label(format!("Remove {}", item.name))
@@ -338,6 +380,12 @@ fn file_item(spec: &FileUploadSpec, item: &FileUploadItem, theme: &JetstreamThem
                 .h(rem_to_px(0.875))
                 .text_color(icon_color),
         );
+
+    if let Some(handler) = on_remove {
+        let handler = std::sync::Arc::clone(handler);
+        let name = item.name.clone();
+        remove = remove.on_click(move |_event| handler(&name));
+    }
 
     ui_element::div()
         .flex_row()
@@ -532,4 +580,28 @@ mod tests {
             tree.texts()
         );
     }
+
+    /// The file's name — the identity the list itself displays.
+    #[test]
+    fn removing_a_file_reports_its_name() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let names = Arc::clone(&seen);
+
+        let spec = FileUploadSpec::new()
+            .with_file(FileUploadItem::new("a", "photo.png", 2048))
+            .with_file(FileUploadItem::new("b", "report.pdf", 4096));
+
+        let el = FileUpload::from_spec(spec, &theme())
+            .on_remove(move |name| names.lock().unwrap().push(name.to_string()))
+            .into_js_el();
+
+        // Two identical remove pills; index 1 belongs to the second file.
+        crate::element::click_probe::click_text_nth(&el, 560.0, 400.0, "x", 1);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["report.pdf"]);
+    }
+
 }

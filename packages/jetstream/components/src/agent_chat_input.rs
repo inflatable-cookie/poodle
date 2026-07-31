@@ -19,11 +19,90 @@ use crate::meter::js_meter;
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, tint};
 
+/// AgentChatInput — the composer.
+///
+/// One action control serves submit and stop, so one press event serves both:
+/// `on_action` fires when the control is pressed, and the host reads the spec
+/// it already holds to know which intent that was — the same derivation the
+/// control itself uses to pick its icon.
+///
+/// `on_remove_attachment` carries the attachment's id. `on_value_change` is
+/// typed; no route.
+pub struct AgentChatInput {
+    spec: AgentChatInputSpec,
+    theme: JetstreamThemeProvider,
+    toolbar_children: Vec<JsEl>,
+    footer_children: Vec<JsEl>,
+    on_action: Option<crate::element::ActionHandler>,
+    on_remove_attachment: Option<crate::element::Handler>,
+}
+
+impl AgentChatInput {
+    pub fn from_spec(spec: AgentChatInputSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            toolbar_children: Vec::new(),
+            footer_children: Vec::new(),
+            on_action: None,
+            on_remove_attachment: None,
+        }
+    }
+
+    pub fn toolbar_child(mut self, child: impl crate::element::IntoJsEl) -> Self {
+        self.toolbar_children.push(child.into_js_el());
+        self
+    }
+
+    pub fn footer_child(mut self, child: impl crate::element::IntoJsEl) -> Self {
+        self.footer_children.push(child.into_js_el());
+        self
+    }
+
+    /// Fires when the action control is pressed — submit or stop, per the spec.
+    /// Never fires when the control is inert (`can_submit` false and nothing
+    /// streaming to stop).
+    pub fn on_action(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the removed attachment's id.
+    pub fn on_remove_attachment(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove_attachment = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for AgentChatInput {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.toolbar_children,
+            self.footer_children,
+            self.on_action,
+            self.on_remove_attachment,
+        )
+    }
+}
+
 pub fn js_agent_chat_input(
     spec: &AgentChatInputSpec,
     theme: &JetstreamThemeProvider,
     toolbar_children: Vec<JsEl>,
     footer_children: Vec<JsEl>,
+) -> JsEl {
+    build(spec, theme, toolbar_children, footer_children, None, None)
+}
+
+fn build(
+    spec: &AgentChatInputSpec,
+    theme: &JetstreamThemeProvider,
+    toolbar_children: Vec<JsEl>,
+    footer_children: Vec<JsEl>,
+    on_action: Option<crate::element::ActionHandler>,
+    on_remove_attachment: Option<crate::element::Handler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -139,6 +218,10 @@ pub fn js_agent_chat_input(
             // matching the web, where the remove IconButton carries the state.
             if attachment.is_disabled {
                 chip = chip.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+            } else if let Some(handler) = &on_remove_attachment {
+                let handler = std::sync::Arc::clone(handler);
+                let id = attachment.id.clone();
+                chip = chip.cursor_pointer().on_click(move |_event| handler(&id));
             }
             chips = chips.child(chip);
         }
@@ -213,6 +296,9 @@ pub fn js_agent_chat_input(
         );
     if !spec.can_submit() {
         action = action.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+    } else if let Some(handler) = &on_action {
+        let handler = std::sync::Arc::clone(handler);
+        action = action.cursor_pointer().on_click(move |_event| handler());
     }
     trailing = trailing.child(action);
 
@@ -392,4 +478,72 @@ mod tests {
         // Second child + one divider.
         assert_eq!(two_nodes, one_nodes + 2);
     }
+
+    /// One control serves submit and stop, so one event serves both; the host
+    /// derives the intent from the spec, exactly as the control picks its icon.
+    #[test]
+    fn the_action_control_reports_a_press() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = AgentChatInput::from_spec(
+            AgentChatInputSpec::new().with_value("hi"),
+            &theme(),
+        )
+        .on_action(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        let spec = AgentChatInputSpec::new().with_value("hi");
+        crate::element::click_probe::click_text(&el, 640.0, 300.0, spec.action_icon());
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_action fired exactly once");
+    }
+
+    /// Empty composer, nothing streaming: the control is inert and must not
+    /// report a press it cannot honour.
+    #[test]
+    fn an_inert_action_control_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = AgentChatInput::from_spec(AgentChatInputSpec::new(), &theme())
+            .on_action(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        let spec = AgentChatInputSpec::new();
+        crate::element::click_probe::click_text(&el, 640.0, 300.0, spec.action_icon());
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "an inert action control fired");
+    }
+
+    #[test]
+    fn removing_an_attachment_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let spec = AgentChatInputSpec::new().with_attachments(vec![
+            AgentChatAttachment::new("a1", "design.fig"),
+            AgentChatAttachment::new("a2", "notes.md"),
+        ]);
+
+        let el = AgentChatInput::from_spec(spec, &theme())
+            .on_remove_attachment(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 300.0, "notes.md");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["a2"]);
+    }
+
 }

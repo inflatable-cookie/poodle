@@ -362,6 +362,15 @@ None.
 - GPUI may use native splitter support or custom layout code, but keyboard
   resizing, orientation semantics, and collapse state remain required
 
+## 10a. Jetstream Notes
+
+- `SplitView::from_spec(spec, theme).primary(...).secondary(...)` then
+  `.on_primary_collapse(...)` / `.on_secondary_collapse(...)`, forwarded to the
+  composed `CollapseToggle`s.
+- `onRatioChange` waits on the divider carrying a drag handler; the composed
+  `ResizeHandle` has one now, so this is wiring work rather than a capability
+  gap — tracked in g12.017.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

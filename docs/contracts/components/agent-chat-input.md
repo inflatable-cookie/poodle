@@ -439,6 +439,15 @@ spacing — never the field's vertical padding or the action box.
 - [ ] IME handling is platform-owned
 - [ ] transition timing is platform-owned
 
+## 11a. Jetstream Notes
+
+- `AgentChatInput::from_spec(spec, theme).on_action(...).on_remove_attachment(...)`.
+- One control serves submit and stop, so one press event serves both: the host
+  reads the spec it already holds to know which intent a press was — the same
+  derivation the control uses to pick its icon. It never fires while inert.
+- `on_remove_attachment` carries the attachment's id. `onValueChange` is typed;
+  no route.
+
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
