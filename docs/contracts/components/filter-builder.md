@@ -372,6 +372,15 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
   platform-owned (surface renders inline)
 - no ARIA API — accessible-name intent documented as an accepted delta
 
+## 10a. Jetstream Notes
+
+- `FilterBuilder::from_spec(spec, theme).on_remove(...).on_reset(...)`.
+- The contract's `onChange` carries a whole clause list, and a pointer produces
+  one intent on one pill — so, as with `OrderBy`, the events name the intent
+  and the host rebuilds the expression it already holds.
+- Clause editing is the open panel's Selects and text fields; those stay unwired
+  until the composed `Select` forwards through this component.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

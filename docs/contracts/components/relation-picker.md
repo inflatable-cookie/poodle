@@ -548,6 +548,16 @@ skipped (the item cannot be selected or deselected).
 - Expected crate/module surface: `poodle_gpui::composites::relation_picker`
 - Drill-down navigation must preserve breadcrumb and back semantics
 
+## 10a. Jetstream Notes
+
+- `RelationPicker::from_spec(spec, theme)` then `.on_select(...)`,
+  `.on_drill_enter(...)`, `.on_confirm(...)`, `.on_cancel(...)`.
+- `on_select` carries the candidate's id; the host resolves the click into the
+  next selection, since single- and multi-select are its policy.
+- Confirm and cancel forward to the composed footer `Button`s.
+- No `onQueryChange` / `onFilterChange`: both are typed, and this runtime raises
+  no key events.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

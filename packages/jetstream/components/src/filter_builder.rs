@@ -146,7 +146,57 @@ fn operand_editor(
     }
 }
 
+/// FilterBuilder — filter clauses behind a trigger.
+///
+/// The contract's `onChange` carries the whole clause list, and a pointer
+/// produces one intent on one pill — so, as with `OrderBy`, the events name the
+/// intent: `on_remove` with the clause's id, and `on_reset` for clear-all
+/// (mirroring GPUI's name). The host applies the intent to the clauses it
+/// already holds.
+///
+/// Clause *editing* is the open panel's Selects and text fields; those stay
+/// unwired until the composed Select forwards through this component.
+pub struct FilterBuilder {
+    spec: FilterBuilderSpec,
+    theme: JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+    on_reset: Option<crate::element::ActionHandler>,
+}
+
+impl FilterBuilder {
+    pub fn from_spec(spec: FilterBuilderSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_remove: None, on_reset: None }
+    }
+
+    /// Fires with the clause's id when its pill's remove glyph is pressed.
+    pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the clear-all control is pressed.
+    pub fn on_reset(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_reset = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for FilterBuilder {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_remove, self.on_reset)
+    }
+}
+
 pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &FilterBuilderSpec,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+    on_reset: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
@@ -255,31 +305,37 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
     if spec.show_pills && spec.has_value() {
         for clause in spec.value.clauses.iter() {
             let label = spec.clause_label(clause);
-            field = field.child(
-                ui_element::div()
-                    .flex_row()
-                    .items_center()
-                    .gap(rem_to_px(0.375))
-                    .pl(rem_to_px(0.5))
-                    .pr(rem_to_px(0.375))
-                    .min_h(rem_to_px(1.5))
-                    .rounded(radius)
-                    .border_1()
-                    .border_color(item_border)
-                    .bg(item_bg)
-                    .child(
-                        ui_element::label(&label)
-                            .text_color(text_primary)
-                            .text_size(rem_to_px(0.75)),
-                    )
-                    // Compact remove glyph (not a full 1.5rem IconButton).
-                    .child(
-                        ui_element::icon("x")
-                            .w(rem_to_px(0.75))
-                            .h(rem_to_px(0.75))
-                            .text_color(muted),
-                    ),
-            );
+            let mut pill = ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(rem_to_px(0.375))
+                .pl(rem_to_px(0.5))
+                .pr(rem_to_px(0.375))
+                .min_h(rem_to_px(1.5))
+                .rounded(radius)
+                .border_1()
+                .border_color(item_border)
+                .bg(item_bg)
+                .child(
+                    ui_element::label(&label)
+                        .text_color(text_primary)
+                        .text_size(rem_to_px(0.75)),
+                )
+                // Compact remove glyph (not a full 1.5rem IconButton).
+                .child(
+                    ui_element::icon("x")
+                        .w(rem_to_px(0.75))
+                        .h(rem_to_px(0.75))
+                        .text_color(muted),
+                );
+
+            if let (false, Some(handler)) = (spec.is_disabled, &on_remove) {
+                let handler = std::sync::Arc::clone(handler);
+                let id = clause.id.clone();
+                pill = pill.cursor_pointer().on_click(move |_event| handler(&id));
+            }
+
+            field = field.child(pill);
         }
     }
 
@@ -311,15 +367,20 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
         }
 
         if spec.show_clear_button {
-            trailing = trailing.child(js_icon_button(
-                &IconButtonSpec::new()
+            let mut reset = crate::icon_button::IconButton::from_spec(
+                IconButtonSpec::new()
                     .with_icon("x")
                     .with_aria_label("Clear filters")
                     .with_variant(ButtonVariant::Ghost)
                     .with_size(effective_size)
                     .with_disabled(spec.is_disabled),
                 theme,
-            ));
+            );
+            if let Some(handler) = &on_reset {
+                let handler = std::sync::Arc::clone(handler);
+                reset = reset.on_click(move || handler());
+            }
+            trailing = trailing.child(crate::element::IntoJsEl::into_js_el(reset));
         }
 
         field = field.child(trailing);
@@ -571,4 +632,68 @@ mod tests {
         assert!(!tree.has_text("Match all"), "combinator must hide with <2 clauses: {:?}", tree.texts());
         assert!(tree.has_text("Hidden is true"), "single clause pill missing: {:?}", tree.texts());
     }
+
+    /// As OrderBy: a pointer produces an intent on one pill, not a clause list,
+    /// so the event names the clause and the host rebuilds the expression.
+    #[test]
+    fn removing_a_pill_reports_its_clause() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let spec = FilterBuilderSpec::new().with_fields(fields()).with_value(FilterExpression {
+            combinator: FilterCombinator::And,
+            clauses: vec![FilterClause::new(
+                "c1",
+                "hidden",
+                "is",
+                FilterOperand::Boolean(true),
+            )],
+        });
+
+        let el = FilterBuilder::from_spec(spec, &theme())
+            .on_remove(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        // Two "x" glyphs even here — the pill's remove and the always-drawn
+        // clear-all. Index 0 is the pill's.
+        crate::element::click_probe::click_text_nth(&el, 640.0, 240.0, "x", 0);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["c1"]);
+    }
+
+    #[test]
+    fn the_reset_control_reports_a_reset() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = FilterBuilderSpec::new()
+            .with_fields(fields())
+            .with_show_clear_button(true)
+            .with_value(FilterExpression {
+                combinator: FilterCombinator::And,
+                clauses: vec![FilterClause::new(
+                    "c1",
+                    "hidden",
+                    "is",
+                    FilterOperand::Boolean(true),
+                )],
+            });
+
+        let el = FilterBuilder::from_spec(spec, &theme())
+            .on_reset(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        // Two "x" glyphs: the pill's remove and the reset. Index 1 is reset.
+        crate::element::click_probe::click_text_nth(&el, 640.0, 240.0, "x", 1);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_reset fired exactly once");
+    }
+
 }

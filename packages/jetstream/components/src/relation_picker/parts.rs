@@ -501,5 +501,83 @@ mod tests {
             "selection summary should be hidden when show_selection_summary=false"
         );
     }
+
+    /// The candidate's id, not a resolved selection: single- vs multi-select is
+    /// the host's policy.
+    #[test]
+    fn choosing_a_candidate_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = crate::relation_picker::RelationPicker::from_spec(
+            RelationPickerSpec::new(sample_items()),
+            &theme(),
+        )
+        .on_select(move |id| ids.lock().unwrap().push(id.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 520.0, "Card");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["card"]);
+    }
+
+    #[test]
+    fn entering_a_drill_row_reports_its_context() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let config = DrillDownConfig::new(
+            vec![DrillDownLevel::new(
+                "cat",
+                "Category",
+                vec![
+                    DrillDownItem::new("forms", "Forms").with_count(4),
+                    DrillDownItem::new("layout", "Layout").with_count(2),
+                ],
+            )],
+            vec![],
+        );
+
+        let el = crate::relation_picker::RelationPicker::from_spec(
+            RelationPickerSpec::new(sample_items()).with_drill_down(config),
+            &theme(),
+        )
+        .on_drill_enter(move |id| ids.lock().unwrap().push(id.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 520.0, "Layout");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["layout"]);
+    }
+
+    #[test]
+    fn the_footer_reports_confirm_and_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let confirms = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+
+        let spec = RelationPickerSpec::new(sample_items());
+        let (confirm_label, cancel_label) = (spec.confirm_label.clone(), spec.cancel_label.clone());
+
+        let el = crate::relation_picker::RelationPicker::from_spec(spec, &theme())
+            .on_confirm(move || confirms.lock().unwrap().push("confirm"))
+            .on_cancel(move || cancels.lock().unwrap().push("cancel"))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 560.0, &confirm_label);
+        crate::element::click_probe::click_text(&el, 480.0, 560.0, &cancel_label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["confirm", "cancel"]);
+    }
+
 }
 

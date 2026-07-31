@@ -30,7 +30,91 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 /// Candidate / drill copy strong label weight (Svelte `strong { font-weight: 500 }`).
 const LABEL_WEIGHT: u16 = 500;
 
+/// RelationPicker — pick related records, with drill-down.
+///
+/// Mirrors the GPUI target's names: `on_select`, `on_drill_enter`, plus
+/// `on_confirm` and `on_cancel` forwarded to the composed footer buttons.
+///
+/// The rows are the clickable units, so the handlers attach at the call sites
+/// rather than being threaded through the row helpers' already-long parameter
+/// lists — the row composes no interactive children, which is what makes that
+/// safe.
+///
+/// No `on_query_change` / `on_filter_change`: both are typed, and this runtime
+/// raises no key events.
+pub struct RelationPicker {
+    spec: RelationPickerSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_drill_enter: Option<crate::element::Handler>,
+    on_confirm: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl RelationPicker {
+    pub fn from_spec(spec: RelationPickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+            on_drill_enter: None,
+            on_confirm: None,
+            on_cancel: None,
+        }
+    }
+
+    /// Fires with the candidate's id. The host resolves the click into the
+    /// next selection — single- and multi-select are its policy.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the drill context's id when a drill row is entered.
+    pub fn on_drill_enter(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_drill_enter = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    pub fn on_confirm(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_confirm = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for RelationPicker {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            Handlers {
+                select: self.on_select,
+                drill_enter: self.on_drill_enter,
+                confirm: self.on_confirm,
+                cancel: self.on_cancel,
+            },
+        )
+    }
+}
+
+#[derive(Default)]
+struct Handlers {
+    select: Option<crate::element::Handler>,
+    drill_enter: Option<crate::element::Handler>,
+    confirm: Option<crate::element::ActionHandler>,
+    cancel: Option<crate::element::ActionHandler>,
+}
+
 pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, Handlers::default())
+}
+
+fn build(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider, handlers: Handlers) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     let text_primary = resolve_color(theme, "color.text.primary");
@@ -99,7 +183,7 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
             } else {
                 let mut list = ui_element::div().flex_col().gap(list_gap);
                 for item in drill_items {
-                    list = list.child(drill_row(
+                    let mut row = drill_row(
                         &item,
                         text_primary,
                         text_secondary,
@@ -110,7 +194,13 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
                         item_y,
                         title_font,
                         label_size,
-                    ));
+                    );
+                    if let Some(handler) = &handlers.drill_enter {
+                        let handler = std::sync::Arc::clone(handler);
+                        let id = item.id.clone();
+                        row = row.cursor_pointer().on_click(move |_event| handler(&id));
+                    }
+                    list = list.child(row);
                 }
                 body = Some(list);
             }
@@ -118,7 +208,7 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
             let mut list = ui_element::div().flex_col().gap(list_gap);
             for item in spec.current_items() {
                 let is_selected = spec.selected_ids.iter().any(|selected| selected == &item.id);
-                list = list.child(candidate_row(
+                let mut row = candidate_row(
                     &item,
                     is_selected,
                     spec.selection_mode,
@@ -137,7 +227,13 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
                     spec.size,
                     spec.size_role,
                     spec.density,
-                ));
+                );
+                if let Some(handler) = &handlers.select {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = item.id.clone();
+                    row = row.cursor_pointer().on_click(move |_event| handler(&id));
+                }
+                list = list.child(row);
             }
             body = Some(list);
         }
@@ -152,20 +248,34 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
             .flex_wrap()
             .gap(inline_gap)
             .justify_end()
-            .child(js_button(
-                &ButtonSpec::new()
-                    .with_variant(ButtonVariant::Ghost)
-                    .with_size(ControlSize::Sm)
-                    .with_label(&spec.cancel_label),
-                theme,
-            ))
-            .child(js_button(
-                &ButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_size(ControlSize::Sm)
-                    .with_label(&spec.confirm_label),
-                theme,
-            ));
+            .child({
+                let mut cancel = crate::button::Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Sm)
+                        .with_label(&spec.cancel_label),
+                    theme,
+                );
+                if let Some(handler) = &handlers.cancel {
+                    let handler = std::sync::Arc::clone(handler);
+                    cancel = cancel.on_click(move || handler());
+                }
+                crate::element::IntoJsEl::into_js_el(cancel)
+            })
+            .child({
+                let mut confirm = crate::button::Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_size(ControlSize::Sm)
+                        .with_label(&spec.confirm_label),
+                    theme,
+                );
+                if let Some(handler) = &handlers.confirm {
+                    let handler = std::sync::Arc::clone(handler);
+                    confirm = confirm.on_click(move || handler());
+                }
+                crate::element::IntoJsEl::into_js_el(confirm)
+            });
 
         if let Some(ref note) = spec.footer_note {
             // Note grows to fill, actions pinned to the trailing edge
