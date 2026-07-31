@@ -22,9 +22,15 @@ use crate::primitives::changed_files::ChangedFiles;
 use crate::primitives::tool_call_group::ToolCallGroup;
 use crate::theme_ext::resolve_color;
 
+type BlockHandler = std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>;
+
 pub struct AgentTranscript {
     spec: AgentTranscriptSpec,
     theme: GpuiThemeProvider,
+    on_tool_run_toggle: Option<BlockHandler>,
+    on_tool_call_toggle: Option<BlockHandler>,
+    on_changed_files_toggle: Option<BlockHandler>,
+    on_file_select: Option<BlockHandler>,
 }
 
 impl AgentTranscript {
@@ -32,7 +38,52 @@ impl AgentTranscript {
         Self {
             spec,
             theme: theme.clone(),
+            on_tool_run_toggle: None,
+            on_tool_call_toggle: None,
+            on_changed_files_toggle: None,
+            on_file_select: None,
         }
+    }
+
+    /// Fires with the run id when a run is expanded or collapsed.
+    ///
+    /// The transcript forwards into whichever block raises the event, matching
+    /// the Jetstream target: it is the only level that sees every block, and
+    /// the host holds all the expansion state, so this is where a host
+    /// attaches rather than at each block.
+    pub fn on_tool_run_toggle(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_tool_run_toggle = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Fires with the call id when one call's output is opened or closed.
+    pub fn on_tool_call_toggle(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_tool_call_toggle = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Fires with the changed-files id when that card is opened or closed.
+    pub fn on_changed_files_toggle(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_changed_files_toggle = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Fires with a file's path when one is chosen in a changed-files card.
+    pub fn on_file_select(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_file_select = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -85,14 +136,34 @@ impl IntoElement for AgentTranscript {
                         .with_expanded_calls(spec.expanded_tool_calls.clone())
                         .with_size(spec.size)
                         .with_density(spec.density);
-                    root = root.child(ToolCallGroup::from_spec(group, theme));
+                    let mut element = ToolCallGroup::from_spec(group, theme);
+                    if let Some(handler) = &self.on_tool_run_toggle {
+                        let handler = handler.clone();
+                        element = element.on_toggle(move |id, window, cx| handler(id, window, cx));
+                    }
+                    if let Some(handler) = &self.on_tool_call_toggle {
+                        let handler = handler.clone();
+                        element =
+                            element.on_call_toggle(move |id, window, cx| handler(id, window, cx));
+                    }
+                    root = root.child(element);
                 }
                 TranscriptBlock::ChangedFiles(changed) => {
                     let card = ChangedFilesSpec::new(changed.id.clone(), changed.files.clone())
                         .with_expanded(spec.expanded_changed_files.contains(&changed.id))
                         .with_size(spec.size)
                         .with_density(spec.density);
-                    root = root.child(ChangedFiles::from_spec(card, theme));
+                    let mut element = ChangedFiles::from_spec(card, theme);
+                    if let Some(handler) = &self.on_changed_files_toggle {
+                        let handler = handler.clone();
+                        element = element.on_toggle(move |id, window, cx| handler(id, window, cx));
+                    }
+                    if let Some(handler) = &self.on_file_select {
+                        let handler = handler.clone();
+                        element =
+                            element.on_file_select(move |path, window, cx| handler(path, window, cx));
+                    }
+                    root = root.child(element);
                 }
                 TranscriptBlock::AnsweredQuestion(record) => {
                     if let Some(answer) = record.answer.clone() {

@@ -23,6 +23,19 @@ poodle-headless = { path = "../../contracts/headless" }
 poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
+
+# The click driver builds NSEvents in-process and sends them to our own
+# NSWindow — Window::dispatch_event returns a crate-private type, so gpui's
+# own event entry point cannot be called from here.
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-app-kit = { version = "0.3", features = [
+    "NSEvent",
+    "NSGraphicsContext",
+    "NSApplication",
+    "NSWindow",
+    "NSResponder",
+] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

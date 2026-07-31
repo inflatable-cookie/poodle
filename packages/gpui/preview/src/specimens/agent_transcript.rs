@@ -27,7 +27,7 @@ fn message(id: &str, markdown: &str) -> TranscriptItem {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
@@ -82,10 +82,61 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         "Supported subset:\n\n- `inline code` and **strong**\n- nested\n  - items\n\n```rust\nfn main() {}\n```\n\n> a quoted line",
     )];
 
+    // Every block in the worked turn expands and collapses through the
+    // transcript-level handlers; the specimen holds the state the host would.
+    let expanded_for = |prefix: &str, ids: &[&str]| -> Vec<String> {
+        ids.iter()
+            .filter(|id| state.specimens.is_on(&format!("transcript.{prefix}.{id}")))
+            .map(|id| id.to_string())
+            .collect()
+    };
+    let toggle = |prefix: &'static str| {
+        cx.listener(move |this: &mut PreviewRoot, id: &str, _w: &mut Window, cx| {
+            this.state
+                .specimens
+                .toggle(&format!("transcript.{prefix}.{id}"));
+            cx.notify();
+        })
+    };
+    let file_clicks = state.specimens.count("transcript.files");
+    // The first call gets an output: a call row without one renders inert by
+    // design, and the interactive group exists to prove every forwarded event.
+    let interactive_items: Vec<TranscriptItem> = turn
+        .iter()
+        .cloned()
+        .map(|item| match item {
+            TranscriptItem::ToolCall(mut call) if call.id == "t3" => {
+                call.output = Some("41 parser tests passed".to_string());
+                TranscriptItem::ToolCall(call)
+            }
+            other => other,
+        })
+        .collect();
+    let interactive = AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(interactive_items)
+            .with_expanded_tool_runs(expanded_for("run", &["t1", "t6"]))
+            .with_expanded_tool_calls(expanded_for("call", &["t1", "t2", "t3", "t6"]))
+            .with_expanded_changed_files(expanded_for("diff", &["diff"])),
+        theme,
+    )
+    .on_tool_run_toggle(toggle("run"))
+    .on_tool_call_toggle(toggle("call"))
+    .on_changed_files_toggle(toggle("diff"))
+    .on_file_select(cx.listener(|this: &mut PreviewRoot, _id: &str, _w: &mut Window, cx| {
+        this.state.specimens.increment("transcript.files");
+        cx.notify();
+    }))
+    .into_any_element();
+
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
+        .child(group(
+            theme,
+            &format!("Interactive (files clicked: {file_clicks})"),
+            interactive,
+        ))
         .child(group(
             theme,
             "A worked turn",

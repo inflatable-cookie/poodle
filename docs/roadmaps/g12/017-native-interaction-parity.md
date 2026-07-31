@@ -394,25 +394,59 @@ Per component that is a struct with `from_spec`, an `IntoJsEl` impl delegating
 to the existing render, and handler methods only where the contract has events —
 mechanical, but 151 of them.
 
+### The GPUI transcript forwards now
+
+`AgentTranscript` on GPUI carries the same four events as Jetstream —
+`on_tool_run_toggle`, `on_tool_call_toggle`, `on_changed_files_toggle`,
+`on_file_select` — forwarded into whichever block raises them. This was the
+last place the two natives differed in *shape* rather than capability: the
+blocks were already interactive, but a GPUI host had to attach to them
+individually. The preview's first transcript group is now stateful — every
+run, call and diff card expands through the transcript-level handlers, and a
+counter proves `on_file_select` fires. Verified with the preview's click
+driver: `--click` on a call row, the run's reveal toggle, the diff card header
+and a file chip, then `--print-state transcript.` printing all four —
+`call.t3=true diff.diff=true files=1 run.t1=true`.
+
+### The click driver actually clicks now
+
+Verifying that surfaced that the driver had never worked from a script. It
+posted CGEvents to its own PID from a swift child, which needs the window to
+become key — and macOS focus-stealing prevention keeps a script-launched app
+inactive, so every posted click was silently dropped. The Stepper-era runs
+that motivated it must have run from a foreground session.
+
+The rebuilt driver stays in-process. `Window::dispatch_event` is public but
+returns a crate-private type, and Rust rejects even a discarded call — so the
+driver builds the NSEvents a real click produces and `postEvent:atStart:`s
+them to its own app. The run loop dequeues and routes them like real input:
+hit testing, dispatch, handler — no focus, no accessibility permission, and it
+works with the screen locked. Three things it has to handle:
+
+- gpui stops a window's display link when macOS reports the window occluded,
+  so nothing frame-chained can be trusted: the interaction sequence runs on
+  timers, and clicks dispatch against the last drawn scene. A click that
+  expands content does not re-render when occluded — aim multi-click runs at
+  the initial scene, bottom-up.
+- On displays running a scaled resolution the posted coordinate arrives
+  affinely distorted (2× backing at a non-integer UI scale). The driver
+  calibrates at runtime: two probe moves through the same path, read back via
+  `Window::mouse_position()`, solve, pre-distort. Callers think in window
+  content coordinates and that is what arrives.
+- `--print-state` now prints after the clicks (it raced them before, printing
+  the pre-click state), and counters print alongside toggles, text and
+  selections.
+
 ## Next
 
 1. Wire `SplitView::on_ratio_change` through a composed `ResizeHandle` on its
    divider — the handle carries a drag handler now, so this is wiring, not a
    capability gap.
 2. Forward `Select` option selection through `TimeZoneSelect` composition
-   inside `DateTimeZonePicker`, and clause editing through `FilterBuilder`. The remainder
-   is list surfaces, chrome/shells, and typed inputs whose events are mostly
-   unreachable without key or drop events — expect more deltas than wiring. Mechanical: each
-   becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
-   render function, and handler methods only where the contract has events. The
-   gate holds each one to a click test as it lands, and the baseline count is
-   the progress bar.
-3. Forward the transcript's events on GPUI too. The blocks are interactive
-   there, but `AgentTranscript` passes nothing down, so a GPUI host has to
-   attach to the block components itself.
-4. Burn down the last 4 baselined GPUI handlers (divider drag + live text
-   editing — GPUI input work, not wiring).
-5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+   inside `DateTimeZonePicker`, and clause editing through `FilterBuilder`.
+3. Burn down the last 4 baselined GPUI handlers (divider drag + live text
+   editing — GPUI input work, not wiring). The click driver can now prove
+   them when they land.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither

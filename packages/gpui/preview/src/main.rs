@@ -1469,86 +1469,132 @@ const FRAMES_BEFORE_CAPTURE: u32 = 3;
 /// time to settle.
 const MIN_SETTLE: std::time::Duration = std::time::Duration::from_millis(900);
 
-/// Post real clicks to our own process.
+/// Post one synthetic mouse event into our own app's event queue.
 ///
-/// `Window::dispatch_event` is public but returns a private type, so it cannot
-/// be called from outside `gpui` — in-process synthesis is closed to us. This
-/// goes one level lower instead and posts platform events to our own PID, which
-/// needs no accessibility permission and exercises the entire path: hit
-/// testing, dispatch, handler. A handler that was never attached does not fire,
-/// which is the whole point — `Stepper` carried two of those for weeks.
+/// `Window::dispatch_event` returns a crate-private type, so gpui's event
+/// entry point cannot be called from outside the crate — Rust rejects even a
+/// discarded call. This goes through AppKit instead: build the NSEvent a real
+/// click produces and `postEvent:atStart:` it to ourselves. The run loop
+/// dequeues it and routes by window number exactly like a real click —
+/// hit testing, dispatch, handler — without the window ever being key, which
+/// posted CGEvents needed and could not get: macOS focus-stealing prevention
+/// keeps a script-launched app inactive, and its posted clicks are dropped
+/// before they reach the app. Direct responder calls
+/// (`[view mouseDown:]`) do not work either; only the queued route delivers.
 ///
-/// Points are in window coordinates. Screenshots are captured at the display's
-/// scale factor, so a coordinate read off a 2x screenshot must be halved first.
-fn post_clicks(clicks: &[(f32, f32)]) {
-    if clicks.is_empty() {
+/// `position` is in the same coordinate space the events are observed in —
+/// see `calibrate` for how callers translate window-content coordinates into
+/// it.
+fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType, position: Point<Pixels>) {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
+    use objc2_foundation::NSPoint;
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        eprintln!("click driver: not on the main thread");
         return;
+    };
+    let app = NSApplication::sharedApplication(mtm);
+    let ns_windows = app.windows();
+    let Some(ns_window) = ns_windows.iter().next() else {
+        eprintln!("click driver: no NSWindow to send to");
+        return;
+    };
+
+    let location = NSPoint {
+        x: f64::from(f32::from(position.x)),
+        y: f64::from(f32::from(window.viewport_size().height - position.y)),
+    };
+    let pressure = if event_type == NSEventType::LeftMouseDown {
+        1.0
+    } else {
+        0.0
+    };
+    let event = unsafe {
+        NSEvent::mouseEventWithType_location_modifierFlags_timestamp_windowNumber_context_eventNumber_clickCount_pressure(
+            event_type,
+            location,
+            NSEventModifierFlags::empty(),
+            0.0,
+            ns_window.windowNumber(),
+            None,
+            0,
+            1,
+            pressure,
+        )
+    };
+    let Some(event) = event else {
+        eprintln!("click driver: NSEvent construction failed for {:?}", event_type);
+        return;
+    };
+    unsafe { app.postEvent_atStart(&event, false) };
+}
+
+/// Dispatch a synthetic click: move, down, up.
+///
+/// The move comes first: hit testing keys off the last known pointer
+/// position, so a down with no preceding move lands on a window that thinks
+/// the pointer is somewhere else.
+fn dispatch_click(window: &mut Window, position: Point<Pixels>) {
+    use objc2_app_kit::NSEventType;
+    post_mouse_event(window, NSEventType::MouseMoved, position);
+    post_mouse_event(window, NSEventType::LeftMouseDown, position);
+    post_mouse_event(window, NSEventType::LeftMouseUp, position);
+}
+
+/// How a posted coordinate maps to the position gpui observes.
+///
+/// On displays running a scaled resolution, the position that arrives at the
+/// view differs from the one posted by a per-axis affine transform (a 2×
+/// backing store presented at a non-integer UI scale). Rather than model
+/// AppKit's conversion, measure it: post two probe moves through the exact
+/// same path the clicks take, read back `Window::mouse_position()`, and
+/// solve. `apply` then pre-distorts click targets so they arrive at the
+/// window-content coordinates the caller asked for — the space screenshots
+/// are read in.
+#[derive(Clone, Copy)]
+struct ClickCalibration {
+    scale_x: f32,
+    scale_y: f32,
+    offset_x: f32,
+    offset_y: f32,
+}
+
+impl ClickCalibration {
+    fn identity() -> Self {
+        Self {
+            scale_x: 1.0,
+            scale_y: 1.0,
+            offset_x: 0.0,
+            offset_y: 0.0,
+        }
     }
 
-    let pid = std::process::id();
-    let taps: String = clicks
-        .iter()
-        .map(|(x, y)| format!("  click(x: {x}, y: {y})\n"))
-        .collect();
-
-    let script = format!(
-        concat!(
-            "import CoreGraphics\n",
-            "import Foundation\n",
-            "import AppKit\n",
-            "let pid = pid_t({pid})\n",
-            // A background app does not receive posted events, and the capture
-            // path deliberately avoids stealing focus — so a click run has to
-            // bring the window forward itself.
-            "NSRunningApplication(processIdentifier: pid)?.activate(options: [.activateIgnoringOtherApps])\n",
-            "usleep(300000)\n",
-            // The window's own origin, so callers can think in window
-            // coordinates rather than screen ones.
-            "let wl = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as! [[String: Any]]\n",
-            "var ox = 0.0; var oy = 0.0; var bestArea = 0.0\n",
-            "for w in wl {{\n",
-            "  let p = w[\"kCGWindowOwnerPID\"] as? Int ?? 0\n",
-            "  if p == {pid} {{\n",
-            "    let b = w[\"kCGWindowBounds\"] as? [String: Any] ?? [:]\n",
-            "    let bw = b[\"Width\"] as? Double ?? 0\n",
-            "    let bh = b[\"Height\"] as? Double ?? 0\n",
-            "    if bw * bh > bestArea {{ bestArea = bw * bh\n",
-            "      ox = b[\"X\"] as? Double ?? 0; oy = b[\"Y\"] as? Double ?? 0 }}\n",
-            "  }}\n",
-            "}}\n",
-            "FileHandle.standardError.write(\"driver origin \\(ox),\\(oy) area \\(bestArea)\\n\".data(using: .utf8)!)\n",
-            "let src = CGEventSource(stateID: .hidSystemState)\n",
-            "func click(x: Double, y: Double) {{\n",
-            "  let pt = CGPoint(x: ox + x, y: oy + y)\n",
-            // Move first: hit testing keys off the last known pointer position,
-            // so a down with no preceding move lands on a window that thinks
-            // the pointer is somewhere else.
-            "  for t in [CGEventType.mouseMoved, .leftMouseDown, .leftMouseUp] {{\n",
-            "    if let e = CGEvent(mouseEventSource: src, mouseType: t,\n",
-            "                       mouseCursorPosition: pt, mouseButton: .left) {{\n",
-            "      e.postToPid(pid)\n",
-            "      usleep(40000)\n",
-            "    }}\n",
-            "  }}\n",
-            "}}\n",
-            "{taps}",
-        ),
-        pid = pid,
-        taps = taps,
-    );
-
-    match std::process::Command::new("swift").arg("-e").arg(&script).output() {
-        Ok(out) if out.status.success() => {
-            let err = String::from_utf8_lossy(&out.stderr);
-            if !err.trim().is_empty() {
-                eprintln!("{}", err.trim());
-            }
+    /// Solve `observed = posted * scale + offset` from two probe pairs.
+    fn solve(p1_posted: Point<Pixels>, p1_seen: Point<Pixels>, p2_posted: Point<Pixels>, p2_seen: Point<Pixels>) -> Option<Self> {
+        let dx_posted = f32::from(p2_posted.x - p1_posted.x);
+        let dy_posted = f32::from(p2_posted.y - p1_posted.y);
+        let dx_seen = f32::from(p2_seen.x - p1_seen.x);
+        let dy_seen = f32::from(p2_seen.y - p1_seen.y);
+        if dx_posted == 0.0 || dy_posted == 0.0 || dx_seen == 0.0 || dy_seen == 0.0 {
+            return None;
         }
-        Ok(out) => eprintln!(
-            "click driver failed: {}",
-            String::from_utf8_lossy(&out.stderr).trim()
-        ),
-        Err(err) => eprintln!("click driver could not run swift: {err}"),
+        let scale_x = dx_seen / dx_posted;
+        let scale_y = dy_seen / dy_posted;
+        Some(Self {
+            scale_x,
+            scale_y,
+            offset_x: f32::from(p1_seen.x) - f32::from(p1_posted.x) * scale_x,
+            offset_y: f32::from(p1_seen.y) - f32::from(p1_posted.y) * scale_y,
+        })
+    }
+
+    /// The posted coordinate that will be observed at `target`.
+    fn apply(&self, target: Point<Pixels>) -> Point<Pixels> {
+        point(
+            px((f32::from(target.x) - self.offset_x) / self.scale_x),
+            px((f32::from(target.y) - self.offset_y) / self.scale_y),
+        )
     }
 }
 
@@ -1578,45 +1624,112 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
             lines.push(format!("{key}={value}"));
         }
     }
+    for (key, value) in &state.state.specimens.counters {
+        if key.starts_with(prefix) {
+            lines.push(format!("{key}={value}"));
+        }
+    }
 
     // Sorted so the output is stable enough to assert on.
     lines.sort();
     println!("STATE {}", lines.join(" "));
 }
 
-/// Warm up, click, settle, report — then flag the capture thread.
+/// Drive the interaction: warm up, click, report, then flag the capture
+/// thread.
 ///
-/// The clicks land after the first frames rather than immediately, because a
-/// window that has not laid out yet has nothing to hit.
+/// This runs on timers, not frame callbacks. gpui stops a window's display
+/// link the moment macOS reports it occluded — behind other windows, or on a
+/// locked screen — and a script-launched preview usually is. A frame-chained
+/// driver deadlocks there: the next callback waits on a frame that will never
+/// be drawn. Clicks do not need frames — `sendEvent` dispatches against the
+/// scene from the last draw — so the sequence only needs the initial paints,
+/// which land before macOS decides the window is occluded.
+///
+/// Two consequences worth knowing:
+/// - Between clicks the scene may be stale when no redraw can happen, so a
+///   click that expands content shifts what a *later* click at a lower point
+///   would hit. Order multi-click runs bottom-up, or from the scene each
+///   click actually sees.
+/// - A `--screenshot` taken with the display link stopped shows the last
+///   drawn frame, not the post-click one. The `--print-state` line is the
+///   assertion; the screenshot is best-effort. (Each click still calls
+///   `refresh()`, so a visible window captures correctly.)
 fn schedule_interaction(
     window: &mut Window,
-    warmup: u32,
+    cx: &mut App,
     clicks: Vec<Point<Pixels>>,
     print_state: Option<String>,
-    settle: u32,
 ) {
-    if warmup > 0 {
-        window.on_next_frame(move |window, _cx| {
-            schedule_interaction(window, warmup - 1, clicks, print_state, settle);
-        });
-        return;
-    }
+    window
+        .spawn(cx, async move |cx| {
+            // Let the initial paints land so there is a scene to hit.
+            cx.background_executor()
+                .timer(std::time::Duration::from_millis(400))
+                .await;
 
-    window.on_next_frame(move |window, cx| {
-        // Clicks arrive from the platform, posted by the driver thread — see
-        // `post_clicks`. `Window::dispatch_event` is public but returns a
-        // private type, so in-process synthesis is not available to us.
-        let _ = &clicks;
-        if let Some(prefix) = print_state {
-            // After the click, before the capture: the state a click produced
-            // is the thing worth asserting.
-            print_specimen_state(window, cx, &prefix);
-        }
-        schedule_frames_drawn(window, settle);
-    });
+            // Calibrate: two probe moves through the click path, read back
+            // where gpui observed them, and solve the affine transform.
+            let mut calibration = ClickCalibration::identity();
+            if !clicks.is_empty() {
+                use objc2_app_kit::NSEventType;
+                let p1_posted = point(px(100.0), px(100.0));
+                let p2_posted = point(px(500.0), px(400.0));
+                let mut seen = [point(px(0.0), px(0.0)); 2];
+                for (i, probe) in [p1_posted, p2_posted].into_iter().enumerate() {
+                    cx.update(|window, _cx| {
+                        post_mouse_event(window, NSEventType::MouseMoved, probe);
+                    })
+                    .ok();
+                    cx.background_executor()
+                        .timer(std::time::Duration::from_millis(80))
+                        .await;
+                    if let Ok(observed) = cx.update(|window, _cx| window.mouse_position()) {
+                        seen[i] = observed;
+                    }
+                }
+                match ClickCalibration::solve(p1_posted, seen[0], p2_posted, seen[1]) {
+                    Some(solved) => calibration = solved,
+                    None => eprintln!(
+                        "click driver: calibration probes were not observed; posting uncorrected coordinates"
+                    ),
+                }
+            }
+
+            for point in clicks {
+                let point = calibration.apply(point);
+                cx.update(|window, _cx| {
+                    dispatch_click(window, point);
+                    window.refresh();
+                })
+                .ok();
+                // A beat between clicks: handlers may defer work, and a
+                // visible window gets a redraw in for the next hit test.
+                cx.background_executor()
+                    .timer(std::time::Duration::from_millis(150))
+                    .await;
+            }
+            cx.update(|window, cx| {
+                if let Some(prefix) = print_state {
+                    // After the clicks, before the capture: the state the
+                    // clicks produced is the thing worth asserting.
+                    print_specimen_state(window, cx, &prefix);
+                }
+                window.refresh();
+            })
+            .ok();
+            // One more beat so an alive display link can draw the result
+            // before the capture thread fires.
+            cx.background_executor()
+                .timer(std::time::Duration::from_millis(250))
+                .await;
+            FRAMES_DRAWN.store(true, std::sync::atomic::Ordering::Release);
+        })
+        .detach();
 }
 
 /// Chain `on_next_frame` `remaining` times, then flag the capture thread.
+/// Used by pure screenshot runs, whose frames are the initial paints.
 fn schedule_frames_drawn(window: &mut Window, remaining: u32) {
     if remaining == 0 {
         FRAMES_DRAWN.store(true, std::sync::atomic::Ordering::Release);
@@ -1686,14 +1799,10 @@ fn main() {
                 // drawn. A guessed 1.5s sometimes captured a half-painted
                 // frame, which is what put a `segmented-control` baseline into
                 // the repo with its selected segment barely visible.
-                if screenshot_mode || !cli.clicks.is_empty() || cli.print_state.is_some() {
-                    schedule_interaction(
-                        window,
-                        FRAMES_BEFORE_CAPTURE,
-                        cli.clicks.clone(),
-                        cli.print_state.clone(),
-                        FRAMES_BEFORE_CAPTURE,
-                    );
+                if !cli.clicks.is_empty() || cli.print_state.is_some() {
+                    schedule_interaction(window, cx, cli.clicks.clone(), cli.print_state.clone());
+                } else if screenshot_mode {
+                    schedule_frames_drawn(window, FRAMES_BEFORE_CAPTURE);
                 }
 
                 cx.new(move |_| {
@@ -1745,11 +1854,28 @@ fn main() {
         )
         .unwrap();
 
+        // A click run needs frames to keep flowing: macOS pauses drawing for
+        // occluded windows, and a script-launched window usually opens behind
+        // whatever the user is doing. Order it front without taking focus —
+        // `orderFrontRegardless` works from an inactive app, where activate
+        // is blocked by focus-stealing prevention.
+        if !driver_clicks.is_empty() {
+            cx.defer(move |_cx| {
+                use objc2::MainThreadMarker;
+                use objc2_app_kit::NSApplication;
+                if let Some(mtm) = MainThreadMarker::new() {
+                    let app = NSApplication::sharedApplication(mtm);
+                    if let Some(ns_window) = app.windows().iter().next() {
+                        ns_window.orderFrontRegardless();
+                    }
+                }
+            });
+        }
+
         // Screenshot mode: spawn a background thread that waits for render,
         // captures the window by PID (without stealing focus), saves, and exits.
         if driver_screenshot.is_some() || !driver_clicks.is_empty() {
             let path = driver_screenshot.clone();
-            let click_points = driver_clicks.clone();
             std::thread::spawn(move || {
                 // Wait for the renderer to say it has drawn, rather than
                 // guessing how long that takes. Falls back to a deadline so a
@@ -1770,12 +1896,6 @@ fn main() {
 
                 // Clicks land after the window has settled — a window that
                 // has not laid out yet has nothing to hit.
-                if !click_points.is_empty() {
-                    post_clicks(&click_points);
-                    // Let the click's re-render finish before capturing.
-                    std::thread::sleep(std::time::Duration::from_millis(600));
-                }
-
                 let Some(path) = path else {
                     // Clicks with no screenshot: the state print is the output.
                     std::process::exit(0);
