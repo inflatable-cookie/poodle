@@ -338,6 +338,11 @@ Track padding is `0.125rem` at every size.
 - color-mix formulas for track background and border must achieve the same
   visual result by any means available in the rendering engine
 
+## 10a. Jetstream Notes
+
+- `Switch::from_spec(spec, theme).on_change(...)`, with the same
+  next-state payload as `Checkbox`.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -374,6 +379,7 @@ Track padding is `0.125rem` at every size.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Read-only fires no change on the natives | as Checkbox: read-only stays focusable and full strength but cannot change | accepted (by design) | none |
 | thumb animation details may differ | motion internals are runtime-specific | allowed | keep on/off semantics strict |
 | color-mix formulas for track tints | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI uses state-driven rendering |

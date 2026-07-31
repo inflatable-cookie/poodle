@@ -451,6 +451,14 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 - Active translateY(0.03125rem) — half a pixel press-down — may be omitted in GPUI (known delta)
 - GPUI uses the shared `Spinner` primitive rather than a button-owned loader treatment
 
+## 10a. Jetstream Notes
+
+- `Button::from_spec(spec, theme).on_click(...)`. The handler takes no payload:
+  a press is the whole event, and the engine's `ClickEvent` carries pointer
+  coordinates that are the runtime's business, not a component's.
+- Loading is treated as disabled for interaction, matching the visual state the
+  contract already specifies.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -483,6 +491,8 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream has no `onFocus` / `onBlur` | the runtime raises pointer events, not focus ones; a handler for an event that is never delivered is worse than a missing one | accepted, tracked | arrives with focus plumbing |
+| Jetstream has no `onPressedChange` | `pressed` is a spec input there; a host that owns the state derives the change from `on_click` | accepted | none |
 | active translateY(0.03125rem) may be omitted in GPUI | sub-pixel transform, GPUI limitation | allowed | revisit if GPUI gains sub-pixel transforms |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |

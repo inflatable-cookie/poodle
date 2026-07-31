@@ -296,6 +296,15 @@ var(--poodle-space-control-x)`, `--poodle-tri-state-track-inset: 0.125rem`, and
   color override inputs as the Svelte implementation, even if the transport
   shape differs from Svelte's `options` record
 
+## 10a. Jetstream Notes
+
+- `TriStateSwitch::from_spec(spec, theme).on_change(...)`.
+- The payload is `TriStateValue`, not a bool. Three states have no toggle
+  semantics, so there is no "next" to report — the event says which segment was
+  chosen.
+- The active segment stays clickable: re-picking the current state is still a
+  click the host asked to hear about.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -330,6 +330,15 @@ current implementation gets association free from the wrapping `<label>`.
 - readonly behavior: reject toggle attempts while maintaining focusability
 - keyboard toggle via Space must be explicitly handled
 
+## 10a. Jetstream Notes
+
+- `Checkbox::from_spec(spec, theme).on_change(...)`.
+- The payload is the state being moved **to**, matching GPUI's `Fn(&bool, …)`.
+  Hosts are stateless here — the spec they passed in *is* the current state — so
+  reporting the old value would make every caller re-derive the new one.
+- Mixed resolves to checked: the point of clicking a partial selection is to
+  complete it.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -362,6 +371,7 @@ current implementation gets association free from the wrapping `<label>`.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Read-only fires no change on the natives | read-only is not disabled — it stays full strength and focusable — but it cannot change, so it must not report one | accepted (by design) | none |
 | indeterminate set via JS property vs GPUI state | DOM property vs native state model | allowed | same visual and a11y result required |
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI achieves same visual result through state-driven rendering |
 

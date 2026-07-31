@@ -205,6 +205,11 @@ button.
 - Icon rotation via transform or icon name swap matching Svelte logic
 - `aria-expanded` must be mapped to GPUI accessibility API
 
+## 10a. Jetstream Notes
+
+- `CollapseToggle::from_spec(spec, theme).on_toggle(...)`, carrying the
+  collapsed state the region is moving to.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -16,6 +16,41 @@ use crate::presentation::{
 };
 use crate::theme_ext::{hex_to_rgb255, resolve_color, resolve_opacity, resolve_px, rgb255_to_vec4};
 
+/// Switch — an on/off toggle.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct Switch {
+    spec: SwitchSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::ToggleHandler>,
+}
+
+impl Switch {
+    pub fn from_spec(spec: SwitchSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the state the switch is moving **to**.
+    pub fn on_change(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Switch {
+    fn into_js_el(self) -> JsEl {
+        let el = js_switch(&self.spec, &self.theme);
+
+        match (self.spec.is_disabled || self.spec.is_read_only, self.on_change) {
+            (false, Some(handler)) => {
+                let next = !self.spec.current_checked();
+                el.on_click(move |_event| handler(next))
+            }
+            _ => el,
+        }
+    }
+}
+
 /// Build a switch element from a SwitchSpec.
 ///
 /// Contract anatomy:
@@ -327,4 +362,50 @@ mod tests {
             tree.texts(),
         );
     }
+
+    #[test]
+    fn a_click_reports_the_next_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        for (checked, expected) in [(false, true), (true, false)] {
+            let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let el = Switch::from_spec(
+                SwitchSpec::new().with_label("Notify me").with_checked(checked),
+                &theme(),
+            )
+            .on_change(move |next| values.lock().unwrap().push(next))
+            .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 320.0, 80.0, "Notify me");
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
+        }
+    }
+
+    #[test]
+    fn a_disabled_or_read_only_switch_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        for spec in [
+            SwitchSpec::new().with_label("Notify me").with_disabled(true),
+            SwitchSpec::new().with_label("Notify me").with_read_only(true),
+        ] {
+            let hits = Arc::new(AtomicUsize::new(0));
+            let counter = Arc::clone(&hits);
+
+            let el = Switch::from_spec(spec, &theme())
+                .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+                .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 320.0, 80.0, "Notify me");
+
+            assert_eq!(hits.load(Ordering::SeqCst), 0, "an unchangeable switch fired");
+        }
+    }
+
 }

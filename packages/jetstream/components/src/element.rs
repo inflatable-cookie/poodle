@@ -36,12 +36,25 @@
 use jetstream_ui::ui_element::JsEl;
 use std::sync::Arc;
 
-/// A handler taking the id of the thing that was acted on.
+/// A handler taking the id or value of the thing that was acted on.
 ///
 /// Nearly every Poodle event is "this one, by id" — a row opened, a file
 /// chosen, an option selected — so the components share one alias rather than
 /// spelling the same `Arc<dyn Fn>` out per field.
 pub type Handler = Arc<dyn Fn(&str) + Send + Sync>;
+
+/// A handler for an event with nothing to say beyond "it happened".
+///
+/// A button press is the whole payload. The engine's `ClickEvent` carries
+/// pointer coordinates, which are the runtime's business and not a component's.
+pub type ActionHandler = Arc<dyn Fn() + Send + Sync>;
+
+/// A handler taking the state a control is moving **to**, not the one it left.
+///
+/// Matches the GPUI target's `Fn(&bool, …)`. Hosts are stateless here — the
+/// spec they pass in is the current state — so a handler that reported the old
+/// value would make every caller re-derive the new one.
+pub type ToggleHandler = Arc<dyn Fn(bool) + Send + Sync>;
 
 /// Anything that can become an element tree.
 ///

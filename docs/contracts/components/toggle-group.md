@@ -228,6 +228,13 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
   the base fill mix and the accent tint over it, not accent over transparent
 - Flex-wrap layout requires GPUI equivalent for multi-row wrapping
 
+## 10a. Jetstream Notes
+
+- `ToggleGroup::from_spec(spec, theme).on_change(...)`.
+- The payload is the option that was activated, not the resulting selection. In
+  multi-select the host owns the set, and returning a whole set would make the
+  component the thing that decides whether a click adds or removes.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

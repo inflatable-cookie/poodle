@@ -39,6 +39,38 @@ fn icon_button_size_delta_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// IconButton — a button whose whole label is its glyph.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+pub struct IconButton {
+    spec: IconButtonSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+}
+
+impl IconButton {
+    pub fn from_spec(spec: IconButtonSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
+    }
+
+    /// Fires when the button is pressed.
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for IconButton {
+    fn into_js_el(self) -> JsEl {
+        let el = js_icon_button(&self.spec, &self.theme);
+
+        match (self.spec.is_disabled || self.spec.is_loading, self.on_click) {
+            (false, Some(handler)) => el.on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
+
 pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tone = spec.tone;
@@ -372,4 +404,44 @@ mod tests {
         assert!(tree.has_text("settings"), "icon glyph renders: {:?}", tree.texts());
         assert_eq!(tree.count_kind("Icon"), 1, "exactly one glyph");
     }
+
+    #[test]
+    fn a_click_reaches_the_handler() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = IconButton::from_spec(IconButtonSpec::new().with_icon("check"), &theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 120.0, 80.0, "check");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+    }
+
+    #[test]
+    fn a_disabled_icon_button_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = IconButton::from_spec(
+            IconButtonSpec::new().with_icon("check").with_disabled(true),
+            &theme(),
+        )
+        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 120.0, 80.0, "check");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled icon button fired");
+    }
+
 }

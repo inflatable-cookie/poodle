@@ -4,10 +4,48 @@ use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SegmentedControlSpec;
 
+use std::sync::Arc;
+
+use crate::element::{Handler, IntoJsEl};
 use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
+/// SegmentedControl — an inline choice between exclusive options.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct SegmentedControl {
+    spec: SegmentedControlSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<Handler>,
+}
+
+impl SegmentedControl {
+    pub fn from_spec(spec: SegmentedControlSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the newly chosen option's value.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for SegmentedControl {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &SegmentedControlSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     // Contract §8 Label: font-size fixed at 0.75rem for ALL sizes (not size-scaled).
@@ -92,6 +130,16 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
         // Per-option aria_label / title (contract §6): Jetstream has no
         // accessibility channel, so these cannot be emitted (accepted delta).
         let _aria_label = option.aria_label.as_deref();
+
+        // Neither a disabled option nor a disabled control selects. Re-picking
+        // the current segment still fires: the host asked to be told about
+        // clicks, and swallowing one here would hide it from a consumer that
+        // treats re-selection as "confirm".
+        if let (false, false, Some(handler)) = (spec.is_disabled, option.is_disabled, &on_change) {
+            let handler = Arc::clone(handler);
+            let value = option.value.clone();
+            seg = seg.cursor_pointer().on_click(move |_event| handler(&value));
+        }
 
         el = el.child(seg);
     }
@@ -201,4 +249,43 @@ mod tests {
         let tree = probe(&js_segmented_control(&spec, &th), 400.0, 80.0);
         assert_eq!(tree.count_kind("Button"), 3);
     }
+
+    #[test]
+    fn choosing_a_segment_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = SegmentedControl::from_spec(SegmentedControlSpec::new(opts()), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 80.0, "List");
+
+        assert_eq!(seen.lock().unwrap().len(), 1, "one segment, one event");
+    }
+
+    #[test]
+    fn a_disabled_control_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = SegmentedControl::from_spec(
+            SegmentedControlSpec { is_disabled: true, ..SegmentedControlSpec::new(opts()) },
+            &theme(),
+        )
+        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 80.0, "List");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled control fired");
+    }
+
 }

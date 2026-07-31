@@ -264,6 +264,13 @@ Native radio inputs provide keyboard and focus behavior.
   semantics through its accessibility tree directly
 - Equal-width segment layout should use GPUI's flex or grid equivalent
 
+## 10a. Jetstream Notes
+
+- `SegmentedControl::from_spec(spec, theme).on_change(...)`, carrying the chosen
+  option's value.
+- Re-picking the selected segment still fires. Swallowing it here would hide the
+  click from a consumer that treats re-selection as "confirm".
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

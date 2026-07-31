@@ -38,6 +38,36 @@ fn tri_state_min_content_width_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// TriStateSwitch — exclude / default / include.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+///
+/// The payload is `TriStateValue`, not a bool: this control has three states
+/// and no toggle semantics, so there is no "next" to report.
+pub struct TriStateSwitch {
+    spec: TriStateSwitchSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+}
+
+impl TriStateSwitch {
+    pub fn from_spec(spec: TriStateSwitchSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the segment that was chosen.
+    pub fn on_change(mut self, handler: impl Fn(TriStateValue) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for TriStateSwitch {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 /// Build a Jetstream tri-state switch element from a TriStateSwitchSpec.
 ///
 /// Anatomy (from contract):
@@ -54,6 +84,14 @@ fn tri_state_min_content_width_rem(size: ControlSize) -> f32 {
 /// segment's own fill + border + drop shadow (contract §8 selection shadow).
 /// Segment click + arrow-key selection lives in the preview event loop.
 pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &TriStateSwitchSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Semantic color tokens ──
@@ -192,6 +230,15 @@ pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProv
             ]);
         }
 
+        // The active segment stays clickable: re-picking the current state is
+        // still a click a host asked to hear about.
+        if let (false, Some(handler)) = (spec.is_disabled, &on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            segment = segment
+                .cursor_pointer()
+                .on_click(move |_event| handler(state));
+        }
+
         root = root.child(segment);
     }
 
@@ -290,4 +337,54 @@ mod tests {
         let inactive = el.children[0].style.background;
         assert!(inactive.is_none() || inactive.unwrap().a == 0.0);
     }
+
+    /// Three states, so the payload is the segment chosen — there is no "next"
+    /// to report the way a two-state toggle has one.
+    #[test]
+    fn choosing_a_segment_reports_that_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let spec = TriStateSwitchSpec::new();
+        let labels = [
+            (spec.excluded_label().to_string(), TriStateValue::Excluded),
+            (spec.default_label().to_string(), TriStateValue::Default),
+            (spec.included_label().to_string(), TriStateValue::Included),
+        ];
+
+        for (label, expected) in labels {
+            let seen: Arc<Mutex<Vec<TriStateValue>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let el = TriStateSwitch::from_spec(TriStateSwitchSpec::new(), &theme())
+                .on_change(move |value| values.lock().unwrap().push(value))
+                .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 480.0, 80.0, &label);
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected], "clicking {label:?}");
+        }
+    }
+
+    #[test]
+    fn a_disabled_tri_state_switch_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = TriStateSwitchSpec::new().with_disabled(true);
+        let label = spec.included_label().to_string();
+
+        let el = TriStateSwitch::from_spec(spec, &theme())
+            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 80.0, &label);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled switch fired");
+    }
+
 }

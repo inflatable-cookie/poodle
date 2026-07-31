@@ -16,6 +16,37 @@ use crate::presentation::{
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
+/// ToggleGroup — a row of options, single- or multi-select.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct ToggleGroup {
+    spec: ToggleGroupSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl ToggleGroup {
+    pub fn from_spec(spec: ToggleGroupSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the value of the option that was activated.
+    ///
+    /// The option, not the resulting selection: in multi-select the host owns
+    /// the set, and reporting a whole set would make the component the thing
+    /// that decides whether a click adds or removes.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ToggleGroup {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 /// Build a Jetstream toggle group element from a ToggleGroupSpec.
 ///
 /// Anatomy (from contract):
@@ -24,6 +55,14 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 ///   └── [Item .toggle-group__item...]  <button role="radio"|role="button">
 /// ```
 pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ToggleGroupSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
@@ -127,6 +166,12 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
             item = item
                 .hover(|s| s.bg(hover_fill))
                 .cursor_pointer();
+
+            if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let value = option.value.clone();
+                item = item.on_click(move |_event| handler(&value));
+            }
         } else {
             let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
             item = item.opacity(opacity).disabled(true);
@@ -300,4 +345,48 @@ mod tests {
             assert_eq!(btn.text_size, Some(expected), "size {size:?} font drifted from label-size");
         }
     }
+
+    /// The option's value, not the resulting set: in multi-select the host owns
+    /// the set, and returning one would make the component decide whether a
+    /// click adds or removes.
+    #[test]
+    fn activating_an_option_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = ToggleGroup::from_spec(ToggleGroupSpec::new(sample_options()), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        let first = sample_options()[0].clone();
+        crate::element::click_probe::click_text(&el, 480.0, 80.0, &first.label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
+    }
+
+    #[test]
+    fn a_disabled_group_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = ToggleGroup::from_spec(
+            ToggleGroupSpec::new(sample_options()).with_disabled(true),
+            &theme(),
+        )
+        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        let first = sample_options()[0].clone();
+        crate::element::click_probe::click_text(&el, 480.0, 80.0, &first.label);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled group fired");
+    }
+
 }

@@ -22,6 +22,41 @@ use poodle_specs::CollapseToggleSpec;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
+/// CollapseToggle — the chevron that collapses a region.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_toggle(handler)`.
+pub struct CollapseToggle {
+    spec: CollapseToggleSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ToggleHandler>,
+}
+
+impl CollapseToggle {
+    pub fn from_spec(spec: CollapseToggleSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_toggle: None }
+    }
+
+    /// Fires with the collapsed state the region is moving **to**.
+    pub fn on_toggle(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for CollapseToggle {
+    fn into_js_el(self) -> JsEl {
+        let el = js_collapse_toggle(&self.spec, &self.theme);
+
+        match (self.spec.is_disabled, self.on_toggle) {
+            (false, Some(handler)) => {
+                let next = !self.spec.is_collapsed;
+                el.on_click(move |_event| handler(next))
+            }
+            _ => el,
+        }
+    }
+}
+
 pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Icon scales with the effective control size (Svelte `<Icon size={resolvedSize}>`).
     let icon_size = resolve_px(theme, spec.icon_size_token());
@@ -183,4 +218,48 @@ mod tests {
         let tree = probe(&el, 200.0, 200.0);
         assert!(tree.count_kind("Icon") >= 1, "disabled toggle must still render the chevron");
     }
+
+    #[test]
+    fn a_click_reports_the_next_collapsed_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        for (collapsed, expected) in [(false, true), (true, false)] {
+            let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let el = CollapseToggle::from_spec(
+                CollapseToggleSpec::new().with_collapsed(collapsed),
+                &theme(),
+            )
+            .on_toggle(move |next| values.lock().unwrap().push(next))
+            .into_js_el();
+
+            crate::element::click_probe::click_at(&el, 80.0, 80.0, 12.0, 12.0);
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
+        }
+    }
+
+    #[test]
+    fn a_disabled_collapse_toggle_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = CollapseToggle::from_spec(
+            CollapseToggleSpec::new().with_disabled(true),
+            &theme(),
+        )
+        .on_toggle(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 80.0, 80.0, 12.0, 12.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled toggle fired");
+    }
+
 }

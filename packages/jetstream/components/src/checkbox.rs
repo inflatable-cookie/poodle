@@ -71,6 +71,46 @@ fn root_gap_px(density: ControlDensity, theme: &JetstreamThemeProvider) -> f32 {
     }
 }
 
+/// Checkbox — a boolean toggle with a label.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct Checkbox {
+    spec: CheckboxSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::ToggleHandler>,
+}
+
+impl Checkbox {
+    pub fn from_spec(spec: CheckboxSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the state the checkbox is moving **to**.
+    ///
+    /// A mixed checkbox resolves to checked, matching the web target: the point
+    /// of clicking a partial selection is to complete it.
+    pub fn on_change(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Checkbox {
+    fn into_js_el(self) -> JsEl {
+        let el = js_checkbox(&self.spec, &self.theme);
+
+        // Read-only is not disabled — it stays focusable and full strength —
+        // but it does not change, so it must not report a change either.
+        match (self.spec.is_disabled || self.spec.is_read_only, self.on_change) {
+            (false, Some(handler)) => {
+                let next = !matches!(self.spec.current_state(), CheckState::Checked);
+                el.on_click(move |_event| handler(next))
+            }
+            _ => el,
+        }
+    }
+}
+
 /// Build a checkbox element from a CheckboxSpec.
 ///
 /// Contract anatomy:
@@ -298,4 +338,75 @@ mod tests {
         // read_only must not set disabled(true) or reduce opacity.
         assert!(!el.style.disabled);
     }
+
+    /// The handler is told the state being moved *to*, so a host never has to
+    /// re-derive it from the spec it just passed in.
+    #[test]
+    fn a_click_reports_the_next_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        for (checked, expected) in [(false, true), (true, false)] {
+            let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let el = Checkbox::from_spec(
+                CheckboxSpec::new().with_label("Ship it").with_checked(checked),
+                &theme(),
+            )
+            .on_change(move |next| values.lock().unwrap().push(next))
+            .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 320.0, 80.0, "Ship it");
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
+        }
+    }
+
+    /// Mixed resolves to checked: clicking a partial selection completes it.
+    #[test]
+    fn a_mixed_checkbox_moves_to_checked() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = Checkbox::from_spec(
+            CheckboxSpec::new().with_label("Ship it").with_mixed(true),
+            &theme(),
+        )
+        .on_change(move |next| values.lock().unwrap().push(next))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 80.0, "Ship it");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [true]);
+    }
+
+    /// Read-only is not disabled — it stays full strength and focusable — but
+    /// it cannot change, so it must not report a change.
+    #[test]
+    fn a_disabled_or_read_only_checkbox_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        for spec in [
+            CheckboxSpec::new().with_label("Ship it").with_disabled(true),
+            CheckboxSpec::new().with_label("Ship it").with_read_only(true),
+        ] {
+            let hits = Arc::new(AtomicUsize::new(0));
+            let counter = Arc::clone(&hits);
+
+            let el = Checkbox::from_spec(spec, &theme())
+                .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+                .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 320.0, 80.0, "Ship it");
+
+            assert_eq!(hits.load(Ordering::SeqCst), 0, "an unchangeable checkbox fired");
+        }
+    }
+
 }

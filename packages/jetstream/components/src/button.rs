@@ -18,11 +18,51 @@ use poodle_specs::ButtonVariant;
 
 use jetstream_ui::ui_element::BoxShadow;
 
+use std::sync::Arc;
+
+use crate::element::{ActionHandler, IntoJsEl};
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
     size_font_rem, size_min_width_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+
+/// Button — the primary interactive control.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+///
+/// No `on_focus` / `on_blur`: the runtime raises pointer events, not focus
+/// ones. Recorded as a delta on the contract rather than accepted and dropped.
+pub struct Button {
+    spec: ButtonSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<ActionHandler>,
+}
+
+impl Button {
+    pub fn from_spec(spec: ButtonSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
+    }
+
+    /// Fires when the button is pressed.
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for Button {
+    fn into_js_el(self) -> JsEl {
+        let el = js_button(&self.spec, &self.theme);
+
+        // Loading counts as disabled: the contract dims it, drops the pointer
+        // cursor and takes it out of the tab order, so it must not fire either.
+        match (self.spec.is_disabled || self.spec.is_loading, self.on_click) {
+            (false, Some(handler)) => el.on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
 
 /// Build a Jetstream button element from a ButtonSpec.
 ///
@@ -241,6 +281,46 @@ mod tests {
 
     fn test_theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn a_click_reaches_the_handler() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Button::from_spec(ButtonSpec::new().with_label("Save"), &test_theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 80.0, "Save");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+    }
+
+    /// Disabled and loading both take the button out of the tab order and drop
+    /// the pointer cursor. A control that looks inert and still fires is worse
+    /// than one that never promised anything.
+    #[test]
+    fn a_disabled_or_loading_button_ignores_clicks() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+
+        for spec in [
+            ButtonSpec::new().with_label("Save").with_disabled(true),
+            ButtonSpec::new().with_label("Save").with_loading(true),
+        ] {
+            let hits = Arc::new(AtomicUsize::new(0));
+            let counter = Arc::clone(&hits);
+
+            let el = Button::from_spec(spec, &test_theme())
+                .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+                .into_js_el();
+
+            crate::element::click_probe::click_text(&el, 320.0, 80.0, "Save");
+
+            assert_eq!(hits.load(Ordering::SeqCst), 0, "an inert button fired");
+        }
     }
 
     #[test]
