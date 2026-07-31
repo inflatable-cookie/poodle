@@ -306,6 +306,23 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("size.list.grid.minItemWidth") => {
             Some(typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.0)
         },
+        // Overlay dimensions. These were missing, and a token this function does
+        // not know resolves to 0 — so `Select`'s panel got `max-height: 0`,
+        // collapsed to its padding, and painted rows it could not hit-test. The
+        // exhaustiveness test below is what stops that recurring.
+        t if t.contains("size.menu.maxHeight") => Some(typed::semantic::SIZE_MENU_MAX_HEIGHT.0),
+        t if t.contains("size.menu.minWidth") => Some(typed::semantic::SIZE_MENU_MIN_WIDTH.0),
+        t if t.contains("size.popover.maxWidth") => Some(typed::semantic::SIZE_POPOVER_MAX_WIDTH.0),
+        t if t.contains("size.hoverCard.maxWidth") => {
+            Some(typed::semantic::SIZE_HOVER_CARD_MAX_WIDTH.0)
+        },
+        t if t.contains("size.select.minWidth") => Some(typed::semantic::SIZE_SELECT_MIN_WIDTH.0),
+        t if t.contains("size.dateTimeRangePicker.minWidth") => {
+            Some(typed::semantic::SIZE_DATE_TIME_RANGE_PICKER_MIN_WIDTH.0)
+        },
+        t if t.contains("size.fileUpload.dropZoneMinHeight") => {
+            Some(typed::semantic::SIZE_FILE_UPLOAD_DROP_ZONE_MIN_HEIGHT.0)
+        },
         // Space tokens
         t if t.contains("space.stack.sm") => Some(typed::semantic::SPACE_STACK_SM.0),
         t if t.contains("space.stack.md") => Some(typed::semantic::SPACE_STACK_MD.0),
@@ -533,4 +550,61 @@ mod contrast_tests {
         let accent_full = full.resolve_color("color.accent.base");
         assert_eq!(accent.0, accent_full.0, "accent untouched");
     }
+    /// Every semantic size and space token has to resolve to something.
+    ///
+    /// `resolve_space` returns `0.0` for a token it does not recognise, which
+    /// is silent and produces a plausible-looking layout: `Select`'s panel had
+    /// `max-height: 0` for months, collapsed to its 8px of padding, and painted
+    /// option rows outside its own rect — visible, correctly labelled for
+    /// assistive technology, and impossible to click, because hit-testing
+    /// requires every ancestor to contain the point.
+    ///
+    /// Seven tokens were missing when this test was written. It exists so the
+    /// next one added to `poodle-tokens` cannot reach a component as a zero.
+    #[test]
+    fn every_semantic_size_and_space_token_resolves() {
+        let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+
+        let tokens = [
+            poodle_tokens::semantic::SIZE_CONTROL_HEIGHT,
+            poodle_tokens::semantic::SIZE_CONTROL_MIN_WIDTH,
+            poodle_tokens::semantic::SIZE_ICON_XS,
+            poodle_tokens::semantic::SIZE_ICON_SM,
+            poodle_tokens::semantic::SIZE_ICON_MD,
+            poodle_tokens::semantic::SIZE_ICON_LG,
+            poodle_tokens::semantic::SIZE_ICON_XL,
+            poodle_tokens::semantic::SIZE_PANEL_HEADER,
+            poodle_tokens::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH,
+            poodle_tokens::semantic::SIZE_MENU_MAX_HEIGHT,
+            poodle_tokens::semantic::SIZE_MENU_MIN_WIDTH,
+            poodle_tokens::semantic::SIZE_POPOVER_MAX_WIDTH,
+            poodle_tokens::semantic::SIZE_HOVER_CARD_MAX_WIDTH,
+            poodle_tokens::semantic::SIZE_SELECT_MIN_WIDTH,
+            poodle_tokens::semantic::SIZE_DATE_TIME_RANGE_PICKER_MIN_WIDTH,
+            poodle_tokens::semantic::SIZE_FILE_UPLOAD_DROP_ZONE_MIN_HEIGHT,
+            poodle_tokens::semantic::SPACE_STACK_SM,
+            poodle_tokens::semantic::SPACE_STACK_MD,
+            poodle_tokens::semantic::SPACE_STACK_LG,
+            poodle_tokens::semantic::SPACE_INLINE_XS,
+            poodle_tokens::semantic::SPACE_INLINE_SM,
+            poodle_tokens::semantic::SPACE_INLINE_MD,
+            poodle_tokens::semantic::SPACE_INLINE_LG,
+            poodle_tokens::semantic::SPACE_PANEL_X,
+            poodle_tokens::semantic::SPACE_PANEL_Y,
+            poodle_tokens::semantic::SPACE_CONTROL_X,
+            poodle_tokens::semantic::SPACE_CONTROL_Y,
+        ];
+
+        let dead: Vec<&str> = tokens
+            .iter()
+            .copied()
+            .filter(|token| theme.resolve_space(token) <= 0.0)
+            .collect();
+
+        assert!(
+            dead.is_empty(),
+            "these tokens resolve to 0 — a component asking for one gets a silent zero: {dead:?}"
+        );
+    }
+
 }

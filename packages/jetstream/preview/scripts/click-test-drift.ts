@@ -100,12 +100,10 @@ const BASELINE = new Set([
   "MediaBrowsePanel",
   "MediaPicker",
   "Menubar",
-  "ModelPicker",
   "OrderBy",
   "PageLoading",
   "Pagination",
   "RadioGroup",
-  "RefSelect",
   "RelationPicker",
   "ResizeHandle",
   "ScrollShell",
@@ -203,7 +201,7 @@ for (const entry of allComponents) {
   for (const method of new Set(methods)) {
     handlers++;
     const passed = tests.includes(`.${method}(`);
-    const clicked = /click_probe::(click|drag)/.test(tests);
+    const clicked = /click_probe::(click|click_text_nth|drag)/.test(tests);
 
     if (!passed || !clicked) {
       untested.push(

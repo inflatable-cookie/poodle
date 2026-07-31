@@ -24,21 +24,13 @@ use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolv
 /// Mirrors the GPUI target's names: `on_toggle`, plus an `on_clear` for the
 /// clear pill the contract puts in the trigger.
 ///
-/// **No `on_change` yet.** The option rows cannot be clicked: the open panel is
-/// absolutely positioned, its containing block is only the trigger's height,
-/// and the runtime's `min_size: 0` lets it resolve to zero height. It paints
-/// its rows anyway — the painter ignores the parent rect — but hit-testing
-/// requires every ancestor to contain the point, so a click on an option lands
-/// on nothing. Declaring `on_change` would ship a handler that never fires,
-/// which is the exact defect this whole roadmap item exists to prevent. See
-/// g12.017.
-///
-/// No `on_query_change` either: the search row is a text field and this runtime
-/// raises no key events.
+/// No `on_query_change`: the search row is a text field and this runtime raises
+/// no key events.
 pub struct Select {
     spec: SelectSpec,
     theme: JetstreamThemeProvider,
     on_toggle: Option<crate::element::ActionHandler>,
+    on_change: Option<crate::element::Handler>,
     on_clear: Option<crate::element::ActionHandler>,
 }
 
@@ -48,6 +40,7 @@ impl Select {
             spec,
             theme: theme.clone(),
             on_toggle: None,
+            on_change: None,
             on_clear: None,
         }
     }
@@ -57,6 +50,12 @@ impl Select {
     /// press and the host decides.
     pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
         self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the chosen option's value.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
         self
     }
 
@@ -72,6 +71,7 @@ impl crate::element::IntoJsEl for Select {
     fn into_js_el(self) -> JsEl {
         build(&self.spec, &self.theme, Handlers {
             toggle: self.on_toggle,
+            change: self.on_change,
             clear: self.on_clear,
         })
     }
@@ -80,6 +80,7 @@ impl crate::element::IntoJsEl for Select {
 #[derive(Default)]
 struct Handlers {
     toggle: Option<crate::element::ActionHandler>,
+    change: Option<crate::element::Handler>,
     clear: Option<crate::element::ActionHandler>,
 }
 
@@ -528,6 +529,12 @@ fn build_panel(
                     row = row.opacity(opacity).disabled(true);
                 }
 
+                if let (false, Some(handler)) = (opt.is_disabled, &handlers.change) {
+                    let handler = std::sync::Arc::clone(handler);
+                    let value = opt.value.clone();
+                    row = row.on_click(move |_event| handler(&value));
+                }
+
                 panel = panel.child(row);
             }
         }
@@ -740,5 +747,27 @@ mod tests {
     }
 
 
+
+
+    /// The option rows were unclickable until `size.menu.maxHeight` resolved:
+    /// the panel had `max-height: 0`, collapsed to its padding, and painted
+    /// rows outside its own rect, which hit-testing will not enter.
+    #[test]
+    fn choosing_an_option_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = SelectSpec::new(fruit_options()).with_open(true);
+        let el = Select::from_spec(spec, &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 400.0, "Banana");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["banana"]);
+    }
 
 }

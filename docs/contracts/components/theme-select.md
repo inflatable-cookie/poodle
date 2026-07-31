@@ -176,8 +176,7 @@ Anatomy token-target column.
 
 - `ThemeSelect::from_spec(spec, theme).on_change(...)`, carrying the theme's
   value.
-- The swatch grid is laid out in flow rather than in an absolute panel, which is
-  why its tiles are clickable where `Select`'s option rows are not.
+- The swatch grid is laid out in flow rather than in an absolute panel.
 
 ## 11. Parity Checklist
 

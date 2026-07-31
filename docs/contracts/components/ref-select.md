@@ -254,6 +254,13 @@ hidden), so a keyboard user can type immediately.
 - no ARIA API, and the preview does not drive clicks — the shared render-only
   posture
 
+## 10a. Jetstream Notes
+
+- `RefSelect::from_spec(spec, theme).on_change(...)`, carrying the chosen ref's
+  value.
+- No `on_search_change`: the filter is a text field and this runtime raises no
+  key events.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

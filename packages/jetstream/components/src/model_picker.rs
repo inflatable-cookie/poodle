@@ -23,7 +23,42 @@ use crate::segmented_control::js_segmented_control;
 use crate::switch::js_switch;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius, tint};
 
+/// ModelPicker — a model list with axis options.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct ModelPicker {
+    spec: ModelPickerSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl ModelPicker {
+    pub fn from_spec(spec: ModelPickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ModelPicker {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ModelPickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
@@ -252,6 +287,10 @@ pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -
 
             if model.is_disabled {
                 row = row.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+            } else if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let id = model.value.clone();
+                row = row.cursor_pointer().on_click(move |_event| handler(&id));
             }
 
             models = models.child(row);
@@ -526,6 +565,30 @@ mod tests {
         let spec = sample().with_value(ModelSelection::default());
         let tree = crate::render_probe::probe(&js_model_picker(&spec, &theme()), 360.0, 80.0);
         assert!(tree.has_text("Select model"), "placeholder missing: {:?}", tree.texts());
+    }
+
+
+
+    #[test]
+    fn choosing_a_model_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = sample().with_open(true);
+        let first = spec.models.first().cloned().expect("a model");
+
+        let el = ModelPicker::from_spec(spec, &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        // The trigger shows the selected model's label too, so index 1 is the
+        // panel row rather than the trigger.
+        crate::element::click_probe::click_text_nth(&el, 480.0, 600.0, &first.label, 1);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
     }
 
 

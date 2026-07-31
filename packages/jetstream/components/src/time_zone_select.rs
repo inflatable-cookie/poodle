@@ -21,18 +21,18 @@ use crate::select::js_select;
 /// Mirrors the GPUI target's `on_toggle`, forwarded to the composed `Select`
 /// rather than re-implemented.
 ///
-/// No `on_change`: the zone list is `Select`'s panel, and its rows are not
-/// hit-testable — see the note on `Select`. No `on_search_change` either: the
-/// search row is a text field and this runtime raises no key events.
+/// No `on_search_change`: the search row is a text field and this runtime
+/// raises no key events.
 pub struct TimeZoneSelect {
     spec: TimeZoneSelectSpec,
     theme: JetstreamThemeProvider,
     on_toggle: Option<crate::element::ActionHandler>,
+    on_change: Option<crate::element::Handler>,
 }
 
 impl TimeZoneSelect {
     pub fn from_spec(spec: TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_toggle: None }
+        Self { spec, theme: theme.clone(), on_toggle: None, on_change: None }
     }
 
     /// Fires when the trigger is pressed.
@@ -41,6 +41,11 @@ impl TimeZoneSelect {
         self
     }
 
+    /// Fires with the chosen zone's id.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
 }
 
 impl crate::element::IntoJsEl for TimeZoneSelect {
@@ -48,6 +53,9 @@ impl crate::element::IntoJsEl for TimeZoneSelect {
         let mut select = crate::select::Select::from_spec(self.spec.to_select_spec(), &self.theme);
         if let Some(handler) = self.on_toggle {
             select = select.on_toggle(move || handler());
+        }
+        if let Some(handler) = self.on_change {
+            select = select.on_change(move |value| handler(value));
         }
 
         let root = crate::element::IntoJsEl::into_js_el(select);
@@ -156,5 +164,22 @@ mod tests {
         assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
     }
 
+
+    #[test]
+    fn choosing_a_zone_reports_it() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = TimeZoneSelect::from_spec(TimeZoneSelectSpec::new().with_open(true), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 600.0, "UTC");
+
+        assert_eq!(seen.lock().unwrap().len(), 1, "one zone, one event");
+    }
 
 }

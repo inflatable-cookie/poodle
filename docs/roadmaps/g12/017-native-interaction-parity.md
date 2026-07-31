@@ -183,7 +183,7 @@ Batches land with the gate holding each one to a click test.
 | Tree and DataTable | 2 | 63 → 61 |
 | Form inputs | 5 | 61 → 56 |
 | Sliders (drag) | 2 | 56 → 54 |
-| Pickers | 4 | 54 → 50 |
+| Pickers | 6 | 54 → 48 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -274,33 +274,50 @@ past its partner should *swap*, and collapsed both onto a single value. The
 shared machine clamps. Driving it is what makes the natives and the web agree by
 construction instead of by inspection.
 
-### An engine defect the click tests found
+### A token defect the click tests found
 
-**Overlay panels paint rows they cannot hit-test.** `Select`'s open panel is
-absolutely positioned below its trigger; its containing block is the wrapper,
-which is only the trigger's height. With `min_size: 0` the panel resolves to
-zero height — 8px of padding and nothing else — while the painter draws its
-rows regardless, because painting ignores the parent rect. Hit-testing does not:
-it requires *every* ancestor to contain the point. So the options are visible,
-carry the right ARIA roles, pass the visual gate, and cannot be clicked.
+**`Select`'s option rows were unclickable, and the cause was a token that
+resolved to zero.**
 
-Nothing in the repo could have caught this before. The visual gate compares
-pixels and the pixels are right. The a11y audit walks the tree and the tree is
-right. Only driving a click finds it.
+The panel sets `max-height` from `size.menu.maxHeight`. The Jetstream adapter's
+`match_semantic_space` had no arm for that token, and an unrecognised token
+returns `0.0` — silently. So the panel got `max-height: 0`, collapsed to its 8px
+of padding, and painted its option rows outside its own rect. Painting ignores
+the parent rect; hit-testing does not, because it requires every ancestor to
+contain the point. The options were visible, correctly labelled for assistive
+technology, and impossible to click.
 
-Scope: `Select`, `TimeZoneSelect` (which composes it), `ModelPicker` and
-`RefSelect` all use the same absolute-panel shape. `ThemeSelect`'s swatch grid
-is laid out in flow, which is exactly why its tiles *are* clickable — the same
-component set, split by a layout decision nobody made deliberately.
+Seven semantic size tokens were missing the same way:
 
-The fix belongs in the sibling engine's `JsEl`→taffy mapping, not here, so this
-round wires only what is reachable: `Select` gets `on_toggle` and `on_clear`,
-`TimeZoneSelect` gets `on_toggle`, and `on_change` is left undeclared rather
-than shipped dead. `ModelPicker` and `RefSelect` go back to the baseline with
-nothing wired at all.
+    size.menu.maxHeight            size.menu.minWidth
+    size.select.minWidth           size.popover.maxWidth
+    size.hoverCard.maxWidth        size.dateTimeRangePicker.minWidth
+    size.fileUpload.dropZoneMinHeight
 
-Declaring a handler that cannot fire would have been the easy path and would
-have reproduced, exactly, the GPUI defect this roadmap item exists to fix.
+All seven are defined in `poodle-tokens` with real values — `15rem`, `8rem` and
+so on — and all seven reached components as `0`. `Select`'s panel was also
+missing its `min-width: 8rem` for the same reason, which is why it rendered
+71px wide.
+
+My first diagnosis was wrong and worth recording as such: I read the collapse as
+taffy behaviour in the sibling engine and wrote it up as an engine defect,
+scoping four components down on that basis. It was ours, in an adapter this repo
+owns, and a one-line lookup per token.
+
+`every_semantic_size_and_space_token_resolves` now asserts every `SIZE_*` and
+`SPACE_*` constant resolves above zero, so the next token added to
+`poodle-tokens` cannot reach a component as a silent zero.
+
+Nothing else in the repo could have caught this. The visual gate compares pixels
+against baselines that were themselves rendered with the bug. The a11y audit
+walks the tree and the tree was right. Only driving a click found it.
+
+### CI did not run the adapter's tests
+
+`full_parity_component_counts` had been failing since the workstation category
+was retired into composites — the count went to 48 and the assertion still said
+46. `ci:native` ran the components crate and the contract crates; the Jetstream
+*adapter* crate was in neither. It runs now.
 
 ### A parity defect the click tests found
 
@@ -327,19 +344,16 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Fix overlay-panel hit-testing in the engine, then wire `Select`,
-   `TimeZoneSelect`, `ModelPicker` and `RefSelect` option selection. Until then
-   every menu-shaped component converts only as far as its trigger.
-2. Sweep the 50 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 48 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is
    the progress bar.
-3. Forward the transcript's events on GPUI too. The blocks are interactive
+2. Forward the transcript's events on GPUI too. The blocks are interactive
    there, but `AgentTranscript` passes nothing down, so a GPUI host has to
    attach to the block components itself.
-4. Burn down the 34 baselined GPUI handlers.
-5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+3. Burn down the 34 baselined GPUI handlers.
+4. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither

@@ -18,7 +18,42 @@ use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::text_input::js_text_input;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, tint};
 
+/// RefSelect — a picker for a git ref.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct RefSelect {
+    spec: RefSelectSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl RefSelect {
+    pub fn from_spec(spec: RefSelectSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for RefSelect {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &RefSelectSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
@@ -197,6 +232,10 @@ pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> Js
 
             if option.is_disabled {
                 row = row.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+            } else if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let id = option.value.clone();
+                row = row.cursor_pointer().on_click(move |_event| handler(&id));
             }
 
             list = list.child(row);
@@ -307,5 +346,27 @@ mod tests {
         assert!(tree.has_text("Loading more refs…"), "loading text missing: {:?}", tree.texts());
     }
 
+
+
+    #[test]
+    fn choosing_a_ref_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = sample().with_open(true);
+        let first = spec.refs.first().cloned().expect("a ref");
+
+        let el = RefSelect::from_spec(spec, &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        // The trigger repeats the current ref's label; index 1 is the list row.
+        crate::element::click_probe::click_text_nth(&el, 480.0, 600.0, &first.label, 1);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
+    }
 
 }

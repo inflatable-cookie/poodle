@@ -85,19 +85,45 @@ pub(crate) mod click_probe {
     use jetstream_input::InputSystem;
     use jetstream_platform::{MouseButton, PlatformEvent};
 
-    /// Click the centre of the first node whose text is `text`.
+    /// Click the centre of the one node whose text is `text`.
     ///
     /// Preferred over `click_at`: a test that says "click the toggle" keeps
     /// meaning that when a padding token changes, where one that says "click at
     /// y=52" quietly starts hitting the row above.
+    ///
+    /// **Ambiguity is an error.** A picker shows its selected model's label in
+    /// the trigger *and* in the panel; taking the first match clicked the
+    /// trigger, which has no handler, and the test read as "the wiring is
+    /// broken" when the wiring was fine. Use `click_text_nth` where a repeat is
+    /// deliberate.
     pub fn click_text(el: &JsEl, width: f32, height: f32, text: &str) {
+        let tree = crate::render_probe::probe(el, width, height);
+        let matches = tree
+            .nodes
+            .iter()
+            .filter(|node| node.text.as_deref() == Some(text))
+            .count();
+
+        assert!(matches > 0, "no node with text {text:?} to click. present: {:?}", tree.texts());
+        assert_eq!(
+            matches, 1,
+            "{matches} nodes carry the text {text:?}, so this click is ambiguous — \
+             use click_text_nth to say which one"
+        );
+
+        click_text_nth(el, width, height, text, 0);
+    }
+
+    /// Click the centre of the `index`-th node whose text is `text`.
+    pub fn click_text_nth(el: &JsEl, width: f32, height: f32, text: &str, index: usize) {
         let tree = crate::render_probe::probe(el, width, height);
         let node = tree
             .nodes
             .iter()
-            .find(|node| node.text.as_deref() == Some(text))
+            .filter(|node| node.text.as_deref() == Some(text))
+            .nth(index)
             .unwrap_or_else(|| {
-                panic!("no node with text {text:?} to click. present: {:?}", tree.texts())
+                panic!("no node {index} with text {text:?}. present: {:?}", tree.texts())
             });
 
         click_at(el, width, height, node.x + node.w / 2.0, node.y + node.h / 2.0);

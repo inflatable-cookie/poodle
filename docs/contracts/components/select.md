@@ -466,8 +466,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - `Select::from_spec(spec, theme).on_toggle(...).on_clear(...)`.
 - The clear pill takes a handler of its own, inert when unwired, so clearing
   never also opens the panel it was clearing.
-- **No `on_change`.** The open panel's rows cannot be hit-tested — see the delta
-  below — so the handler would never fire.
+- `on_change` carries the chosen option's value.
 
 ## 11. Parity Checklist
 
@@ -499,7 +498,6 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream cannot select from the open panel | the panel is absolutely positioned, its containing block is the trigger's height, and the runtime resolves it to zero height; it paints its rows regardless, but hit-testing requires every ancestor to contain the point, so an option click lands on nothing. Declaring the handler anyway would ship one that never fires | accepted, tracked | g12.017 |
 | native select dropdown appearance differs per platform | native `<select>` renders platform-native dropdowns | allowed | keep value/selection semantics strict |
 | GPUI may use custom overlay instead of native select | GPUI has no native `<select>` equivalent | allowed | must preserve option group support and keyboard navigation |
 | treatment token fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |

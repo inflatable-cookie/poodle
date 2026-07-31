@@ -694,8 +694,9 @@ mod tests {
             .on_select(move |value| selects.lock().unwrap().push(format!("select:{value}")))
             .into_js_el();
 
-        // The first row's twisty: "src" is expanded, so it draws the open glyph.
-        crate::element::click_probe::click_text(&el, 400.0, 400.0, "▾");
+        // Two branches are expanded in the fixture, so both draw the open
+        // glyph; index 0 is the first row, "src".
+        crate::element::click_probe::click_text_nth(&el, 400.0, 400.0, "▾", 0);
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["expand:src"]);
     }
@@ -716,7 +717,7 @@ mod tests {
             .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
             .into_js_el();
 
-        crate::element::click_probe::click_text(&el, 400.0, 400.0, "▾");
+        crate::element::click_probe::click_text_nth(&el, 400.0, 400.0, "▾", 0);
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "the twisty selected the row");
     }

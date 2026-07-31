@@ -482,6 +482,12 @@ adjust them. Escape or an outside interaction dismisses.
   positioning is platform-owned, so the surface renders inline below the trigger
 - no ARIA API — accessible-name intent documented as an accepted delta
 
+## 10a. Jetstream Notes
+
+- `ModelPicker::from_spec(spec, theme).on_change(...)`, carrying the chosen
+  model's value. Axis options report through the same event: both are choices in
+  the same panel, and a host wiring only one would silently drop the other.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

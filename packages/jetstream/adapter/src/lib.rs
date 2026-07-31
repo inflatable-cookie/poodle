@@ -228,10 +228,16 @@ mod tests {
         assert!(color.0 >= 0.0 && color.0 <= 1.0);
     }
 
+    /// Pins the supported-component counts so a spec cannot quietly leave the
+    /// adapter's list.
+    ///
+    /// The composite count was stale by two: it went to 48 when the workstation
+    /// category was retired into composites, and nothing noticed because no gate
+    /// ran this crate's tests. `ci:native` runs them now.
     #[test]
     fn full_parity_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 60);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 46);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 48);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }

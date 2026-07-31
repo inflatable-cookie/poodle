@@ -260,7 +260,7 @@ mod tests {
             .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
             .into_js_el();
 
-        crate::element::click_probe::click_text(&el, 240.0, 60.0, "star");
+        crate::element::click_probe::click_text_nth(&el, 240.0, 60.0, "star", 0);
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a read-only rating fired");
     }

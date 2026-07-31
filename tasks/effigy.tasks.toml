@@ -163,6 +163,10 @@
 # Render probes and click probes: layout, token resolution and interaction, all
 # CPU-only. These existed and nothing ran them in CI.
 "test:jetstream" = "cargo test -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
+# The adapter crate: theme/token resolution and the layout mapping. Nothing ran
+# these, and `full_parity_component_counts` had been failing since the
+# workstation category was folded into composites.
+"test:jetstream-adapter" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
 # The a11y audit belongs here rather than in ci:rust: it renders specimens, so
 # it needs the sibling jetstream repo — the same constraint that already makes
 # this group local-only. It is a real gate now that the count is zero; before
@@ -173,6 +177,7 @@
   { task = "check:gpui" },
   { task = "check:jetstream" },
   { task = "test:jetstream" },
+  { task = "test:jetstream-adapter" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
 ]
