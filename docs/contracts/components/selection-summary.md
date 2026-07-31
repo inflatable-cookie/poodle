@@ -280,6 +280,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Render as section with header row and chip container
 - Size/density scaling must match CSS variant tables
 
+## 10a. Jetstream Notes
+
+- `SelectionSummary::from_spec(spec, theme).on_remove(...).on_clear(...)`.
+  `on_remove` carries the removed item's id.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -272,6 +272,11 @@ padding (a flat `0.5rem`), icon button sizes, or summary font-size.
 - Danger tone maps to status-danger color tokens
 - Actions rendered as icon buttons, not labeled text buttons
 
+## 10a. Jetstream Notes
+
+- `BulkActionBar::from_spec(spec, theme).on_action(...).on_select_all(...).on_clear(...)`.
+  `on_action` carries the pressed action's id; disabled actions never fire.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -485,6 +485,12 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Text truncation uses GPUI's text ellipsis support
 - `tabular-nums` may require GPUI font feature flag
 
+## 10a. Jetstream Notes
+
+- `ListCard::from_spec(spec, theme).on_click(...)`, with the whole card as the
+  hit target. Only an interactive card fires — `isInteractive` or an `href` —
+  which is exactly the condition that already draws the pointer cursor.
+
 ## 12. Parity Checklist
 
 ### Tier 1: Strict Parity

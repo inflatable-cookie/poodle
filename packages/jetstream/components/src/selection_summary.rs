@@ -6,7 +6,50 @@ use poodle_specs::SelectionSummarySpec;
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
+/// SelectionSummary — the chips a selection leaves behind.
+///
+/// Mirrors the GPUI target's names: `on_remove` and `on_clear`.
+pub struct SelectionSummary {
+    spec: SelectionSummarySpec,
+    theme: JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+    on_clear: Option<crate::element::ActionHandler>,
+}
+
+impl SelectionSummary {
+    pub fn from_spec(spec: SelectionSummarySpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_remove: None, on_clear: None }
+    }
+
+    /// Fires with the removed item's id.
+    pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the clear control is pressed.
+    pub fn on_clear(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_clear = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for SelectionSummary {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_remove, self.on_clear)
+    }
+}
+
 pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &SelectionSummarySpec,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+    on_clear: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let chip_font = rem_to_px(SelectionSummarySpec::chip_font_rem(effective_size));
@@ -93,6 +136,12 @@ pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeP
                 .text_size(chip_font),
         );
 
+        if let Some(handler) = &on_remove {
+            let handler = std::sync::Arc::clone(handler);
+            let id = item.id.clone();
+            chip = chip.cursor_pointer().on_click(move |_event| handler(&id));
+        }
+
         el = el.child(chip);
     }
 
@@ -120,13 +169,17 @@ pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeP
         .as_ref()
         .map(|c| c.label.clone())
         .unwrap_or_else(|| "Clear".to_string());
+    let mut clear = ui_element::button(&clear_label)
+        .text_color(accent)
+        .text_size(font_size)
+        .focusable();
+
+    if let Some(handler) = on_clear {
+        clear = clear.cursor_pointer().on_click(move |_event| handler());
+    }
+
     el = el.child(
-        ui_element::div().flex_grow().flex_row().justify_end().child(
-            ui_element::button(&clear_label)
-                .text_color(accent)
-                .text_size(font_size)
-                .focusable(),
-        ),
+        ui_element::div().flex_grow().flex_row().justify_end().child(clear),
     );
 
     el
@@ -230,4 +283,46 @@ mod tests {
             "chip fill resolved from surface/elevated tokens, not a literal"
         );
     }
+
+    #[test]
+    fn removing_a_chip_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = SelectionSummary::from_spec(
+            SelectionSummarySpec::new(items(3)),
+            &theme(),
+        )
+        .on_remove(move |id| ids.lock().unwrap().push(id.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 160.0, "Item 1");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["id-1"]);
+    }
+
+    #[test]
+    fn the_clear_control_reports_a_clear() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = SelectionSummary::from_spec(
+            SelectionSummarySpec::new(items(3)),
+            &theme(),
+        )
+        .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 160.0, "Clear");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear fired exactly once");
+    }
+
 }

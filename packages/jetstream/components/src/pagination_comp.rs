@@ -39,7 +39,49 @@ fn density_gap_px(density: ControlDensity) -> f32 {
     }
 }
 
+/// Pagination — pages, arrows and bounds.
+///
+/// Mirrors the GPUI target's `on_page_change`, carrying the page number the
+/// press asks for. Prev and next resolve to a number here rather than being
+/// separate events: the host wants a destination, not a direction it would
+/// have to apply itself.
+///
+/// No `on_limit_change`: the page-size control opens a Select panel this
+/// component renders closed.
+pub struct Pagination {
+    spec: PaginationSpec,
+    theme: JetstreamThemeProvider,
+    on_page_change: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
+}
+
+impl Pagination {
+    pub fn from_spec(spec: PaginationSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_page_change: None }
+    }
+
+    /// Fires with the destination page. The current page, a disabled arrow and
+    /// the ellipsis never fire.
+    pub fn on_page_change(mut self, handler: impl Fn(usize) + Send + Sync + 'static) -> Self {
+        self.on_page_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Pagination {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_page_change)
+    }
+}
+
 pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &PaginationSpec,
+    theme: &JetstreamThemeProvider,
+    on_page_change: Option<std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     let height = rem_to_px(control_height_rem(effective_size));
@@ -116,7 +158,7 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     let mut controls = ui_element::div().flex_row().items_center().gap(gap);
 
     // Helper: build a page-item / nav button (square-min-width, content-driven width).
-    let make_button = |label: &str, is_current: bool, is_disabled: bool| {
+    let make_button = |label: &str, is_current: bool, is_disabled: bool, goto: Option<usize>| {
         let bg: Color = if is_current {
             current_bg.into()
         } else {
@@ -149,6 +191,12 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
 
         if is_disabled || spec.is_loading {
             btn = btn.opacity(disabled_opacity).disabled(true);
+        } else if !is_current {
+            // The current page is where you already are, so it is not a route.
+            if let (Some(page), Some(handler)) = (goto, &on_page_change) {
+                let handler = std::sync::Arc::clone(handler);
+                btn = btn.on_click(move |_event| handler(page));
+            }
         }
 
         btn
@@ -160,16 +208,18 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
 
     // First button (`««`) — full variant only.
     if is_full {
-        controls = controls.child(make_button("««", false, prev_disabled));
+        controls = controls.child(make_button("««", false, prev_disabled, Some(1)));
     }
 
     // Previous button — text "Prev" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button("Prev", false, prev_disabled));
+        controls = controls.child(make_button("Prev", false, prev_disabled, Some(spec.current_page.saturating_sub(1).max(1))));
     } else {
         controls = controls.child(arrow_button(
             "chevron-left",
             prev_disabled || spec.is_loading,
+            Some(spec.current_page.saturating_sub(1).max(1)),
+            on_page_change.as_ref(),
             height,
             font_size,
             radius,
@@ -189,7 +239,7 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
                 match item {
                     PageItem::Page(n) => {
                         let is_current = n == spec.current_page;
-                        pages_row = pages_row.child(make_button(&n.to_string(), is_current, false));
+                        pages_row = pages_row.child(make_button(&n.to_string(), is_current, false, Some(n)));
                     }
                     PageItem::Ellipsis => {
                         // Non-interactive ellipsis; contract min-width 1.5rem.
@@ -233,11 +283,13 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
 
     // Next button — text "Next" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button("Next", false, next_disabled));
+        controls = controls.child(make_button("Next", false, next_disabled, Some((spec.current_page + 1).min(spec.total_pages))));
     } else {
         controls = controls.child(arrow_button(
             "chevron-right",
             next_disabled || spec.is_loading,
+            Some((spec.current_page + 1).min(spec.total_pages)),
+            on_page_change.as_ref(),
             height,
             font_size,
             radius,
@@ -251,7 +303,7 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
 
     // Last button (`»»`) — full variant only.
     if is_full {
-        controls = controls.child(make_button("»»", false, next_disabled));
+        controls = controls.child(make_button("»»", false, next_disabled, Some(spec.total_pages)));
     }
 
     wrapper = wrapper.child(controls);
@@ -266,6 +318,8 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
 fn arrow_button(
     icon: &str,
     is_disabled: bool,
+    goto: Option<usize>,
+    on_page_change: Option<&std::sync::Arc<dyn Fn(usize) + Send + Sync>>,
     height: f32,
     font_size: f32,
     radius: f32,
@@ -308,6 +362,9 @@ fn arrow_button(
         );
     if is_disabled {
         btn = btn.opacity(disabled_opacity).disabled(true);
+    } else if let (Some(page), Some(handler)) = (goto, on_page_change) {
+        let handler = std::sync::Arc::clone(handler);
+        btn = btn.on_click(move |_event| handler(page));
     }
     btn
 }
@@ -507,4 +564,47 @@ mod tests {
         assert!(tree.has_text("per page"), "missing limit suffix");
         assert!(tree.has_text("25"), "missing selected page size");
     }
+
+    /// Prev and next resolve to a destination page rather than a direction —
+    /// the host wants somewhere to go, not an instruction to apply.
+    #[test]
+    fn page_buttons_report_their_destination() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+        let pages = Arc::clone(&seen);
+
+        let spec = PaginationSpec::new().with_current_page(5).with_total_pages(20);
+        let el = Pagination::from_spec(spec, &theme())
+            .on_page_change(move |page| pages.lock().unwrap().push(page))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 120.0, "6");
+        crate::element::click_probe::click_text(&el, 800.0, 120.0, "chevron-left");
+        crate::element::click_probe::click_text(&el, 800.0, 120.0, "chevron-right");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [6, 4, 6]);
+    }
+
+    /// The current page is where you already are; it is not a route.
+    #[test]
+    fn the_current_page_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = PaginationSpec::new().with_current_page(5).with_total_pages(20);
+        let el = Pagination::from_spec(spec, &theme())
+            .on_page_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 120.0, "5");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the current page navigated");
+    }
+
 }

@@ -116,7 +116,64 @@ fn toned_icon_button(
     el
 }
 
+/// BulkActionBar — actions over a selection.
+///
+/// Mirrors the GPUI target's names: `on_action`, `on_select_all`, `on_clear`.
+pub struct BulkActionBar {
+    spec: BulkActionBarSpec,
+    theme: JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+    on_select_all: Option<crate::element::ActionHandler>,
+    on_clear: Option<crate::element::ActionHandler>,
+}
+
+impl BulkActionBar {
+    pub fn from_spec(spec: BulkActionBarSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_action: None,
+            on_select_all: None,
+            on_clear: None,
+        }
+    }
+
+    /// Fires with the pressed action's id. Disabled actions never fire.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when select-all is pressed.
+    pub fn on_select_all(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_select_all = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the clear control is pressed.
+    pub fn on_clear(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_clear = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for BulkActionBar {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_action, self.on_select_all, self.on_clear)
+    }
+}
+
 pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &BulkActionBarSpec,
+    theme: &JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+    on_select_all: Option<crate::element::ActionHandler>,
+    on_clear: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let summary_font = rem_to_px(summary_font_rem(effective_size));
 
@@ -181,7 +238,12 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
         if is_unavailable {
             select_spec = select_spec.with_disabled(true);
         }
-        summary = summary.child(js_icon_button(&select_spec, theme));
+        let mut button = crate::icon_button::IconButton::from_spec(select_spec, theme);
+        if let Some(handler) = &on_select_all {
+            let handler = std::sync::Arc::clone(handler);
+            button = button.on_click(move || handler());
+        }
+        summary = summary.child(crate::element::IntoJsEl::into_js_el(button));
     }
 
     // ── Actions (right): ghost IconButtons + clear "x" ──────────
@@ -195,12 +257,22 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
         let disabled = actions_disabled || action.is_disabled;
         match action.tone {
             BulkActionTone::Danger => {
-                actions = actions
-                    .child(toned_icon_button(action, spec.size, danger_color, disabled, theme));
+                let mut el = toned_icon_button(action, spec.size, danger_color, disabled, theme);
+                if let (false, Some(handler)) = (disabled, &on_action) {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = action.id.clone();
+                    el = el.on_click(move |_event| handler(&id));
+                }
+                actions = actions.child(el);
             }
             BulkActionTone::Warning => {
-                actions = actions
-                    .child(toned_icon_button(action, spec.size, warning_color, disabled, theme));
+                let mut el = toned_icon_button(action, spec.size, warning_color, disabled, theme);
+                if let (false, Some(handler)) = (disabled, &on_action) {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = action.id.clone();
+                    el = el.on_click(move |_event| handler(&id));
+                }
+                actions = actions.child(el);
             }
             BulkActionTone::Default => {
                 // Default tone uses the shared js_icon_button (text-primary icon).
@@ -215,7 +287,13 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
                 if disabled {
                     a_spec = a_spec.with_disabled(true);
                 }
-                actions = actions.child(js_icon_button(&a_spec, theme));
+                let mut button = crate::icon_button::IconButton::from_spec(a_spec, theme);
+                if let (false, Some(handler)) = (disabled, &on_action) {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = action.id.clone();
+                    button = button.on_click(move || handler(&id));
+                }
+                actions = actions.child(crate::element::IntoJsEl::into_js_el(button));
             }
         }
     }
@@ -229,7 +307,12 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
     if is_unavailable {
         clear_spec = clear_spec.with_disabled(true);
     }
-    actions = actions.child(js_icon_button(&clear_spec, theme));
+    let mut clear_button = crate::icon_button::IconButton::from_spec(clear_spec, theme);
+    if let Some(handler) = &on_clear {
+        let handler = std::sync::Arc::clone(handler);
+        clear_button = clear_button.on_click(move || handler());
+    }
+    actions = actions.child(crate::element::IntoJsEl::into_js_el(clear_button));
 
     // ── Root ────────────────────────────────────────────────────
     let mut root = ui_element::div()
@@ -334,4 +417,32 @@ mod tests {
             tree.texts()
         );
     }
+
+    #[test]
+    fn the_bar_reports_each_intent() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let acts = Arc::clone(&seen);
+        let alls = Arc::clone(&seen);
+        let clears = Arc::clone(&seen);
+
+        let el = BulkActionBar::from_spec(spec(), &theme())
+            .on_action(move |id| acts.lock().unwrap().push(format!("action:{id}")))
+            .on_select_all(move || alls.lock().unwrap().push("all".to_string()))
+            .on_clear(move || clears.lock().unwrap().push("clear".to_string()))
+            .into_js_el();
+
+        // The danger-toned Delete, the select-all check-check, and the clear x.
+        crate::element::click_probe::click_text(&el, 720.0, 140.0, "trash-2");
+        crate::element::click_probe::click_text(&el, 720.0, 140.0, "check-check");
+        crate::element::click_probe::click_text(&el, 720.0, 140.0, "x");
+
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["action:delete", "all", "clear"]
+        );
+    }
+
 }

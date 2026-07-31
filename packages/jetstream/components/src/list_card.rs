@@ -25,6 +25,41 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, re
 /// Render a list card with no host slots (derived leading glyph, no
 /// badges/footer/actions/trailing). Back-compat entry — existing callers are
 /// unchanged.
+/// ListCard — one row-card in a list.
+///
+/// Mirrors the GPUI target's `on_click`. The whole card is the hit target, and
+/// only an interactive card fires — `is_interactive` or an `href` is what makes
+/// it one, exactly the condition that already draws the pointer cursor.
+pub struct ListCard {
+    spec: ListCardSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+}
+
+impl ListCard {
+    pub fn from_spec(spec: ListCardSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
+    }
+
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ListCard {
+    fn into_js_el(self) -> JsEl {
+        let interactive = (self.spec.is_interactive || self.spec.href.is_some())
+            && !self.spec.is_disabled;
+        let el = js_list_card(&self.spec, &self.theme);
+
+        match (interactive, self.on_click) {
+            (true, Some(handler)) => el.on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
+
 pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
     js_list_card_with_slots(spec, theme, None, Vec::new(), None, None, None, None)
 }
@@ -761,4 +796,46 @@ mod tests {
         assert!(tree.has_text("New"), "badge missing: {:?}", tree.texts());
         assert!(tree.has_text("v2.1"), "corner missing: {:?}", tree.texts());
     }
+
+    #[test]
+    fn an_interactive_card_reports_a_click() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = ListCard::from_spec(spec(), &theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 120.0, "design-system-v2.figma");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+    }
+
+    /// A card that is not interactive draws no pointer cursor, and must not
+    /// fire either — the same condition governs both.
+    #[test]
+    fn a_static_card_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = ListCard::from_spec(
+            ListCardSpec::new().with_title("design-system-v2.figma"),
+            &theme(),
+        )
+        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 120.0, "design-system-v2.figma");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a static card fired");
+    }
+
 }

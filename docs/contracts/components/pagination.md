@@ -508,6 +508,15 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 - Controller integration pattern should use an equivalent trait or callback struct
 - The scroll-targeting behavior is web-specific and may not apply to GPUI
 
+## 10a. Jetstream Notes
+
+- `Pagination::from_spec(spec, theme).on_page_change(...)`, carrying the
+  destination page. Prev and next resolve to a number rather than being
+  directions: the host wants somewhere to go, not an instruction to apply.
+- The current page, a disabled arrow and the ellipsis never fire.
+- No `onLimitChange`: the page-size control opens a `Select` panel this
+  component renders closed.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
