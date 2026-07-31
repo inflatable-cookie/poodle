@@ -288,6 +288,7 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream raises no events | as Tooltip: the card is the panel, and the hover that opens it belongs to the trigger | accepted (by design) | none |
 | exact delay timing may differ slightly | runtime timer behavior differs | allowed | keep open and dismiss meaning strict |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 | GPUI timer cancellation uses async tasks instead of clearTimeout | platform capability | allowed | delay behavior must match |

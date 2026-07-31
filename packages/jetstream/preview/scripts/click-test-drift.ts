@@ -50,6 +50,12 @@ const EXEMPT: Record<string, string> = {
   AgentMessage:
     "inline nodes flatten to text, so there is no link element for onLinkClick to attach to",
   Radio: "no standalone Jetstream component; RadioGroup renders the options",
+  Popover:
+    "renders the panel only — the trigger and the open state are the consumer's, so nothing here can raise onOpenChange",
+  Tooltip:
+    "renders the bubble only; it is summoned by hover on a trigger the consumer owns",
+  HoverCard:
+    "as Tooltip — the card is the panel, and the hover that opens it belongs to the trigger",
 };
 
 /**
@@ -63,7 +69,6 @@ const BASELINE = new Set([
   "Accordion",
   "ActionDiscoveryPanel",
   "AgentChatInput",
-  "AlertDialog",
   "AudioPlayer",
   "BlockEditor",
   "Breadcrumbs",
@@ -77,16 +82,13 @@ const BASELINE = new Set([
   "ColorPicker",
   "CommandPalette",
   "ConfirmAction",
-  "ContextMenu",
   "DataTable",
   "DatePicker",
   "DateRangePicker",
   "DateTimePicker",
   "DateTimeRangePicker",
   "DateTimeZonePicker",
-  "Dialog",
   "DockRegion",
-  "Drawer",
   "DurationInput",
   "EditableLabel",
   "EditableList",
@@ -95,7 +97,6 @@ const BASELINE = new Set([
   "FilterBuilder",
   "FilterToolbar",
   "FormDialog",
-  "HoverCard",
   "ListCard",
   "ListCardCounter",
   "ListContainer",
@@ -103,7 +104,6 @@ const BASELINE = new Set([
   "MarkdownEditor",
   "MediaBrowsePanel",
   "MediaPicker",
-  "Menu",
   "Menubar",
   "ModelPicker",
   "NavCard",
@@ -112,7 +112,6 @@ const BASELINE = new Set([
   "OrderBy",
   "PageLoading",
   "Pagination",
-  "Popover",
   "RadioGroup",
   "RangeSlider",
   "Rating",
@@ -136,7 +135,6 @@ const BASELINE = new Set([
   "ToastHost",
   "ToastStack",
   "TokenInput",
-  "Tooltip",
   "Tree",
   "VideoPlayer",
 ]);

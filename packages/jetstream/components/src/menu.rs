@@ -16,7 +16,47 @@ use crate::presentation::{
 };
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
+/// Menu — the panel of a dropdown menu.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_action(handler)`.
+///
+/// No `on_open_change`: this renders the panel only — the trigger belongs to
+/// the consumer — so nothing here knows the menu opened. Whether activating an
+/// item also closes the menu is the host's policy, not the panel's.
+pub struct Menu {
+    spec: MenuSpec,
+    theme: JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+}
+
+impl Menu {
+    pub fn from_spec(spec: MenuSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_action: None }
+    }
+
+    /// Fires with the activated item's value. Separators and disabled items
+    /// never fire.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Menu {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_action)
+    }
+}
+
 pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &MenuSpec,
+    theme: &JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Contract §8 Meta: fixed 0.6875rem (== typography.caption.size, which now
@@ -149,6 +189,12 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 } else {
                     let hover = if entry.is_destructive { danger_hover_tint } else { hover_tint };
                     item = item.cursor_pointer().hover(move |s| s.bg(hover));
+
+                    if let Some(handler) = &on_action {
+                        let handler = std::sync::Arc::clone(handler);
+                        let value = entry.value.clone();
+                        item = item.on_click(move |_event| handler(&value));
+                    }
                 }
 
                 el = el.child(item);
@@ -200,6 +246,12 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 } else {
                     let hover = if entry.is_destructive { danger_hover_tint } else { hover_tint };
                     item = item.cursor_pointer().hover(move |s| s.bg(hover));
+
+                    if let Some(handler) = &on_action {
+                        let handler = std::sync::Arc::clone(handler);
+                        let value = entry.value.clone();
+                        item = item.on_click(move |_event| handler(&value));
+                    }
                 }
 
                 el = el.child(item);
@@ -286,4 +338,73 @@ mod tests {
             root.w
         );
     }
+
+    #[test]
+    fn activating_an_item_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = MenuSpec::new(vec![
+            MenuEntry::new("rename", "Rename"),
+            MenuEntry::new("", "").with_kind(MenuItemKind::Separator),
+            MenuEntry::new("delete", "Delete").with_destructive(true),
+        ]);
+
+        let el = Menu::from_spec(spec, &theme())
+            .on_action(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 300.0, "Delete");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["delete"]);
+    }
+
+    #[test]
+    fn a_disabled_item_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = MenuSpec::new(vec![
+            MenuEntry::new("rename", "Rename").with_disabled(true),
+        ]);
+
+        let el = Menu::from_spec(spec, &theme())
+            .on_action(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 300.0, "Rename");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled item fired");
+    }
+
+    /// Checkbox and radio items carry values too, and a host that only wired
+    /// action items would silently drop them.
+    #[test]
+    fn a_checkbox_item_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = MenuSpec::new(vec![
+            MenuEntry::new("notify", "Notifications").with_kind(MenuItemKind::Checkbox),
+        ]);
+
+        let el = Menu::from_spec(spec, &theme())
+            .on_action(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 300.0, "Notifications");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["notify"]);
+    }
+
 }

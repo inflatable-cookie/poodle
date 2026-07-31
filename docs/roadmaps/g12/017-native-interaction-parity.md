@@ -170,6 +170,55 @@ untested-handler rule had already proved itself by finding the transcript gap.
 task list whose comment still claimed the native crates had none. `test:jetstream`
 runs them now.
 
+### The sweep
+
+Batches land with the gate holding each one to a click test.
+
+| Batch | Components | Baseline |
+|-------|------------|----------|
+| Agent chat | 7 | 94 → 87 |
+| Core controls | 8 | 87 → 79 |
+| Overlays | 5 converted, 3 exempt | 79 → 71 |
+
+**Payload shapes.** The rule that fell out of the controls batch: report what
+leaves the host with nothing to re-derive. Buttons take no payload — a press is
+the whole event. Two-state controls report the state being moved *to*, matching
+GPUI's `Fn(&bool)`, because a stateless host would otherwise recompute it.
+`TriStateSwitch` reports the segment chosen, since three states have no "next".
+`ToggleGroup` reports the option activated rather than the resulting set — in
+multi-select the host owns the set, and returning one would make the component
+decide whether a click adds or removes.
+
+**Inert controls stay inert, and it is tested**: disabled everywhere, loading on
+the buttons, read-only on `Checkbox` and `Switch`. Read-only is the interesting
+one — not disabled, still focusable and full strength, but it cannot change, so
+it must not report a change.
+
+**Overlays needed a rule the web gets for free.** Clicks bubble to the nearest
+clickable ancestor, so a backdrop handler fires for clicks *inside* the dialog
+too — pressing "Save" would dismiss the dialog it was saving. The panel takes an
+inert handler of its own, which makes it the nearest clickable and ends the
+click there. Removing it fails `a_click_inside_the_panel_does_not_dismiss`, so
+the arrangement is pinned.
+
+`Popover`, `Tooltip` and `HoverCard` are exempt rather than baselined: each
+renders a panel whose trigger and open state belong to the consumer, so there is
+nothing in them to click. The gate distinguishes the two — "not done yet" goes
+in the baseline, "nothing to draw" needs a stated reason.
+
+### A parity defect the click tests found
+
+`DialogSpec::effective_dismiss_on_backdrop` read
+`dismiss_on_backdrop && !is_alert_dialog()`, so **every native alert dialog was
+undismissable by backdrop**. `AlertDialog.svelte` passes
+`dismissOnBackdrop={!working}` — the role has nothing to do with it, and only
+the in-flight confirm suppresses dismissal. A unit test asserting the backdrop
+reports cancel is what surfaced it; the spec helper had a test of its own that
+asserted the wrong behaviour and passed.
+
+Svelte is the parity authority, so the carve-out is gone and its test now
+asserts the opposite.
+
 ### The migration
 
 Free functions stay during the sweep: `IntoJsEl` wraps them, so each component
@@ -182,7 +231,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 87 components in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 71 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

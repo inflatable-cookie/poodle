@@ -148,8 +148,17 @@ impl DialogSpec {
         self.role == DialogKind::AlertDialog
     }
 
+    /// Whether a backdrop click should dismiss.
+    ///
+    /// The role does **not** enter into it. This used to read
+    /// `dismiss_on_backdrop && !is_alert_dialog()`, which contradicted the
+    /// Svelte reference: `AlertDialog.svelte` passes
+    /// `dismissOnBackdrop={!working}`, so an alert dialog dismisses on backdrop
+    /// exactly like any other dialog and stops only while its confirm is in
+    /// flight. The carve-out made every native alert dialog undismissable —
+    /// found by a Jetstream click test, not by inspection.
     pub fn effective_dismiss_on_backdrop(&self) -> bool {
-        self.dismiss_on_backdrop && !self.is_alert_dialog()
+        self.dismiss_on_backdrop
     }
 
     pub fn requires_accessible_name(&self) -> bool {

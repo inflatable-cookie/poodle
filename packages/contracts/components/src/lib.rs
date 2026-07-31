@@ -873,7 +873,13 @@ mod tests {
 
         assert!(dialog.current_open());
         assert!(dialog.is_alert_dialog());
-        assert!(!dialog.effective_dismiss_on_backdrop());
+        // The role does not suppress backdrop dismissal — `AlertDialog.svelte`
+        // passes `dismissOnBackdrop={!working}`, so only the working state does.
+        assert!(dialog.effective_dismiss_on_backdrop());
+        assert!(!dialog
+            .clone()
+            .with_dismiss_on_backdrop(false)
+            .effective_dismiss_on_backdrop());
         assert_eq!(
             dialog.backdrop_fill_token(),
             semantic::COLOR_BACKGROUND_OVERLAY

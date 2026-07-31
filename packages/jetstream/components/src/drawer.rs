@@ -29,6 +29,62 @@ use crate::theme_ext::{elevation_dialog, resolve_color, resolve_px};
 ///
 /// `content` is the body region (`children` snippet); `actions` is the optional
 /// footer action row (`actions` snippet). Both are caller-owned.
+/// Drawer — a panel anchored to a viewport edge.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+///
+/// The only dismissal route the component draws is the backdrop: the contract
+/// anatomy has no close affordance, and escape is host-event-loop work.
+pub struct Drawer {
+    spec: DrawerSpec,
+    theme: JetstreamThemeProvider,
+    content: Option<JsEl>,
+    actions: Option<JsEl>,
+    on_request_close: Option<crate::element::ActionHandler>,
+}
+
+impl Drawer {
+    pub fn from_spec(spec: DrawerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            content: None,
+            actions: None,
+            on_request_close: None,
+        }
+    }
+
+    pub fn content(mut self, content: impl crate::element::IntoJsEl) -> Self {
+        self.content = Some(content.into_js_el());
+        self
+    }
+
+    pub fn actions(mut self, actions: impl crate::element::IntoJsEl) -> Self {
+        self.actions = Some(actions.into_js_el());
+        self
+    }
+
+    /// Fires when the backdrop is clicked, if the drawer is modal and
+    /// `dismiss_on_backdrop` allows it. A non-modal drawer draws no backdrop,
+    /// so it has no dismissal route at all.
+    pub fn on_request_close(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_request_close = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Drawer {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.content,
+            self.actions,
+            self.on_request_close,
+        )
+    }
+}
+
 pub fn js_drawer(spec: &DrawerSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
     js_drawer_with_actions(spec, theme, content, None)
 }
@@ -39,6 +95,16 @@ pub fn js_drawer_with_actions(
     theme: &JetstreamThemeProvider,
     content: Option<JsEl>,
     actions: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, content, actions, None)
+}
+
+fn build(
+    spec: &DrawerSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+    actions: Option<JsEl>,
+    on_request_close: Option<crate::element::ActionHandler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     // Contract §8 size table: header title font-size per size (md == 1rem).
@@ -149,6 +215,17 @@ pub fn js_drawer_with_actions(
         DrawerEdge::Top => ui_element::div().bg(backdrop).overlay().flex_col().justify_start(),
     };
 
+    // Clicks bubble to the nearest clickable ancestor, so the panel takes an
+    // inert handler of its own — without it, every click inside the drawer
+    // would reach the backdrop and dismiss it.
+    let mut overlay = overlay;
+    let mut panel = panel;
+    if let (true, true, Some(handler)) = (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close) {
+        let handler = std::sync::Arc::clone(handler);
+        overlay = overlay.on_click(move |_event| handler());
+        panel = panel.on_click(|_event| {});
+    }
+
     let root = overlay.child(panel);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
 }
@@ -251,4 +328,43 @@ mod tests {
         let tree = probe(&el, 800.0, 600.0);
         assert_eq!(tree.count_kind("Icon"), 0, "drawer must not render any icon");
     }
+
+    #[test]
+    fn the_backdrop_requests_close() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Drawer::from_spec(spec(), &theme())
+            .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 300.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "a backdrop click did not dismiss");
+    }
+
+    /// A non-modal drawer draws no backdrop at all, so it has no dismissal
+    /// route — and the surface behind it stays usable, which is the point.
+    #[test]
+    fn a_non_modal_drawer_has_no_dismissal_route() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Drawer::from_spec(spec().with_modal(false), &theme())
+            .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 300.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a non-modal drawer dismissed");
+    }
+
 }

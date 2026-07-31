@@ -282,6 +282,7 @@ and exposes the resolved value via `data-placement`.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream raises no events | the bubble is summoned by hover on a trigger the consumer owns | accepted (by design) | none |
 | precise hover timing may vary slightly | platform event timing differs | allowed | keep descriptive semantics and dismissal strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 

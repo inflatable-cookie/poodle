@@ -356,6 +356,7 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream raises no events | the component renders the panel; the trigger and the open state belong to the consumer, so there is nothing here to click | accepted (by design) | none |
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 

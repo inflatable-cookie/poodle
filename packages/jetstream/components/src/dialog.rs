@@ -15,11 +15,77 @@ use crate::presentation::{
 use crate::theme_ext::{elevation_dialog, resolve_color, resolve_px, resolve_radius};
 use poodle_specs::SemanticControlSizeRole;
 
+/// Dialog — a modal surface over a backdrop.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+///
+/// The event is `on_request_close`, not `on_open_change`: the component does
+/// not own the open state and cannot close itself. It reports that a dismissal
+/// route was taken and the host decides.
+pub struct Dialog {
+    spec: DialogSpec,
+    theme: JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    actions: Option<JsEl>,
+    on_request_close: Option<crate::element::ActionHandler>,
+}
+
+impl Dialog {
+    pub fn from_spec(spec: DialogSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            children: Vec::new(),
+            actions: None,
+            on_request_close: None,
+        }
+    }
+
+    pub fn child(mut self, child: impl crate::element::IntoJsEl) -> Self {
+        self.children.push(child.into_js_el());
+        self
+    }
+
+    pub fn actions(mut self, actions: impl crate::element::IntoJsEl) -> Self {
+        self.actions = Some(actions.into_js_el());
+        self
+    }
+
+    /// Fires when a dismissal route is taken — the close button, or the
+    /// backdrop when `dismiss_on_backdrop` allows it.
+    pub fn on_request_close(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_request_close = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Dialog {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.children,
+            self.actions,
+            self.on_request_close,
+        )
+    }
+}
+
 pub fn js_dialog(
     spec: &DialogSpec,
     theme: &JetstreamThemeProvider,
     children: Vec<JsEl>,
     actions: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, children, actions, None)
+}
+
+fn build(
+    spec: &DialogSpec,
+    theme: &JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    actions: Option<JsEl>,
+    on_request_close: Option<crate::element::ActionHandler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     // Title is 1rem at Md; body follows the size scale.
@@ -86,12 +152,7 @@ pub fn js_dialog(
             panel = panel.child(child);
         }
 
-        return ui_element::div()
-            .bg(backdrop_fill)
-            .overlay()
-            .items_center()
-            .justify_center()
-            .child(panel);
+        return backdrop(theme, backdrop_fill, spec, panel, on_request_close);
     }
 
     // ── Non-bare: apply padding and build chrome ─────────────────────────────
@@ -138,8 +199,7 @@ pub fn js_dialog(
             // IconButton at chrome size (one step down from the dialog size),
             // square per the control-height token; glyph follows the size scale.
             let icon_size = rem_to_px(size_font_rem(chrome_size));
-            header_row = header_row.child(
-                ui_element::button("")
+            let mut close = ui_element::button("")
                     // `close_label` has been on the spec all along, defaulting
                     // to "Close dialog" as Svelte does; this component simply
                     // never used it, so the glyph announced as an unnamed
@@ -159,8 +219,16 @@ pub fn js_dialog(
                             .w(icon_size)
                             .h(icon_size)
                             .text_color(muted_color),
-                    ),
-            );
+                    );
+
+            // The close button dismisses whatever `dismiss_on_backdrop` says:
+            // it is the explicit route, not the incidental one.
+            if let Some(handler) = &on_request_close {
+                let handler = std::sync::Arc::clone(handler);
+                close = close.on_click(move |_event| handler());
+            }
+
+            header_row = header_row.child(close);
         }
 
         panel = panel.child(header_row);
@@ -193,13 +261,36 @@ pub fn js_dialog(
     }
 
     // ── Overlay wrapper ───────────────────────────────────────────────────────
-    let root = ui_element::div()
+    backdrop(theme, backdrop_fill, spec, panel, on_request_close)
+}
+
+/// The scrim, and the panel sitting on it.
+///
+/// Clicks bubble to the nearest clickable ancestor, so a backdrop handler would
+/// otherwise fire for every click *inside* the dialog — pressing "Save" would
+/// dismiss it. The panel takes an inert handler of its own to stop that: it
+/// becomes the nearest clickable, and the click ends there.
+fn backdrop(
+    _theme: &JetstreamThemeProvider,
+    backdrop_fill: Color,
+    spec: &DialogSpec,
+    panel: JsEl,
+    on_request_close: Option<crate::element::ActionHandler>,
+) -> JsEl {
+    let mut panel = panel;
+    let mut root = ui_element::div()
         .bg(backdrop_fill)
         .overlay()
         .items_center()
-        .justify_center()
-        .child(panel);
-    crate::aria::with_aria_label(root, spec.aria_label.as_deref())
+        .justify_center();
+
+    if let (true, Some(handler)) = (spec.effective_dismiss_on_backdrop(), &on_request_close) {
+        let handler = std::sync::Arc::clone(handler);
+        root = root.on_click(move |_event| handler());
+        panel = panel.on_click(|_event| {});
+    }
+
+    crate::aria::with_aria_label(root.child(panel), spec.aria_label.as_deref())
         .aria_role(jetstream_ui::accesskit::Role::Dialog)
 }
 
@@ -310,4 +401,101 @@ mod tests {
         let full_surface = &full_tree.nodes[1];
         assert!(full_surface.w > 384.0, "Full width did not grow: {}", full_surface.w);
     }
+    /// The close button is the explicit dismissal route.
+    #[test]
+    fn the_close_button_requests_close() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Dialog::from_spec(
+            DialogSpec::new().with_title("Delete?").with_show_close_button(true),
+            &theme(),
+        )
+        .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "x");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_request_close fired exactly once");
+    }
+
+    #[test]
+    fn the_backdrop_requests_close() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Dialog::from_spec(DialogSpec::new().with_title("Delete?"), &theme())
+            .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        // Top-left: outside the centred panel.
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "a backdrop click did not dismiss");
+    }
+
+    /// The defect this arrangement exists to prevent.
+    ///
+    /// Clicks bubble to the nearest clickable ancestor, so without an inert
+    /// handler on the panel every click *inside* the dialog would reach the
+    /// backdrop — pressing "Save" would dismiss the dialog it was saving.
+    #[test]
+    fn a_click_inside_the_panel_does_not_dismiss() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Dialog::from_spec(
+            DialogSpec::new().with_title("Delete everything?"),
+            &theme(),
+        )
+        .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "Delete everything?");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "clicking the dialog dismissed it");
+    }
+
+    /// `dismissOnBackdrop` is a contract prop, so it has to actually guard the
+    /// route rather than only the styling.
+    #[test]
+    fn dismiss_on_backdrop_false_keeps_the_dialog() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+        let closes = Arc::clone(&hits);
+
+        let el = Dialog::from_spec(
+            DialogSpec::new()
+                .with_title("Delete?")
+                .with_show_close_button(true)
+                .with_dismiss_on_backdrop(false),
+            &theme(),
+        )
+        .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the backdrop dismissed despite the guard");
+
+        // The close button still works — the guard is about the backdrop only.
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "x");
+        assert_eq!(closes.load(Ordering::SeqCst), 1, "the close button stopped working");
+    }
+
 }

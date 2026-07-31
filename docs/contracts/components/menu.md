@@ -351,6 +351,16 @@ behavior (the Svelte implementation is the parity authority).
 - The two-column grid layout for label + shortcut can be modeled as a fixed
   layout with right-aligned shortcut text
 
+## 10a. Jetstream Notes
+
+- `Menu::from_spec(spec, theme).on_action(...)`, carrying the activated item's
+  value. Separators and disabled items never fire.
+- Checkbox and radio items report through the same event as action items. A host
+  that had to wire them separately would silently drop them.
+- No `on_open_change`: this renders the panel only — the trigger is the
+  consumer's — so nothing here knows the menu opened. Whether activating an item
+  closes the menu is host policy.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -386,6 +396,7 @@ behavior (the Svelte implementation is the parity authority).
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Neither native raises `onOpenChange` | both render the panel only; the trigger that opens it is the consumer's element | accepted (by design) | none |
 | exact placement collision strategy may differ | overlay engine internals vary by runtime | allowed | keep invocation, dismissal, and item semantics strict |
 | GPUI may use native window overlay instead of CSS absolute | desktop runtime differs from web | allowed | visual density and token usage must match |
 

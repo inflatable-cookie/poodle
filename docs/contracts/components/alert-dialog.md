@@ -231,6 +231,16 @@ Size is delegated to the composed Dialog and Button components. The `size` and `
 - Confirm and cancel are callback props
 - Tone enum maps to button variant selection
 
+## 12a. Jetstream Notes
+
+- `AlertDialog::from_spec(spec, theme).on_confirm(...).on_cancel(...)`, with
+  `.working(true, "Deleting…")` for the in-flight state.
+- `on_cancel` covers the cancel button *and* every dismissal route, matching the
+  contract's "invoked by built-in cancel and dismissal paths". Splitting them
+  would make hosts write the same line twice.
+- Working suppresses all three routes — confirm, cancel and backdrop — which is
+  the point: a second confirm must not land while the first is in flight.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

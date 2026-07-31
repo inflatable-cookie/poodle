@@ -27,7 +27,46 @@ fn item_metrics_rem(size: ControlSize) -> (f32, f32, f32, f32) {
     }
 }
 
+/// ContextMenu — the panel of a right-click menu.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_action(handler)`.
+///
+/// As with `Menu`, no `on_open_change`: the panel does not know what opened it,
+/// and the right-click that summons it is the consumer's event.
+pub struct ContextMenu {
+    spec: ContextMenuSpec,
+    theme: JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+}
+
+impl ContextMenu {
+    pub fn from_spec(spec: ContextMenuSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_action: None }
+    }
+
+    /// Fires with the activated item's value. Separators and disabled items
+    /// never fire.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ContextMenu {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_action)
+    }
+}
+
 pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ContextMenuSpec,
+    theme: &JetstreamThemeProvider,
+    on_action: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let (item_min_h_rem, item_py_rem, item_px_rem, font_rem) = item_metrics_rem(effective_size);
 
@@ -148,6 +187,12 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
                     item = item.opacity(disabled_opacity);
                 } else {
                     item = item.cursor_pointer().hover(|s| s.bg(hover_tint));
+
+                    if let Some(handler) = &on_action {
+                        let handler = std::sync::Arc::clone(handler);
+                        let value = entry.value.clone();
+                        item = item.on_click(move |_event| handler(&value));
+                    }
                 }
 
                 el = el.child(item);
@@ -198,6 +243,12 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
                     item = item.opacity(disabled_opacity);
                 } else {
                     item = item.cursor_pointer().hover(|s| s.bg(hover_tint));
+
+                    if let Some(handler) = &on_action {
+                        let handler = std::sync::Arc::clone(handler);
+                        let value = entry.value.clone();
+                        item = item.on_click(move |_event| handler(&value));
+                    }
                 }
 
                 el = el.child(item);
@@ -317,4 +368,26 @@ mod tests {
 
         assert!(xl_font > xs_font, "xl font {xl_font} should exceed xs font {xs_font}");
     }
+
+    #[test]
+    fn activating_an_item_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = ContextMenu::from_spec(ContextMenuSpec::new(sample_items()), &theme())
+            .on_action(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        let first = sample_items()
+            .into_iter()
+            .find(|e| !matches!(e.kind, MenuItemKind::Separator) && !e.is_disabled)
+            .expect("a clickable item");
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, &first.label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
+    }
+
 }

@@ -51,6 +51,66 @@ fn confirm_button_tone(tone: AlertDialogTone) -> ButtonTone {
 }
 
 /// Render an AlertDialog at its default (non-working) state.
+/// AlertDialog — a modal that interrupts to confirm or cancel.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+pub struct AlertDialog {
+    spec: AlertDialogSpec,
+    theme: JetstreamThemeProvider,
+    working: bool,
+    working_label: String,
+    on_confirm: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl AlertDialog {
+    pub fn from_spec(spec: AlertDialogSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            working: false,
+            working_label: DEFAULT_WORKING_LABEL.to_string(),
+            on_confirm: None,
+            on_cancel: None,
+        }
+    }
+
+    /// The working state: the confirm label swaps, both buttons disable, and
+    /// every dismissal route closes (contract §4).
+    pub fn working(mut self, working: bool, label: impl Into<String>) -> Self {
+        self.working = working;
+        self.working_label = label.into();
+        self
+    }
+
+    pub fn on_confirm(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_confirm = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires for the cancel button **and** for every dismissal route, matching
+    /// the contract: "invoked by built-in cancel and dismissal paths". A host
+    /// that had to distinguish them would need two handlers to write the same
+    /// line twice.
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for AlertDialog {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.working,
+            &self.working_label,
+            self.on_confirm,
+            self.on_cancel,
+        )
+    }
+}
+
 pub fn js_alert_dialog(spec: &AlertDialogSpec, theme: &JetstreamThemeProvider) -> JsEl {
     js_alert_dialog_working(spec, theme, false, DEFAULT_WORKING_LABEL)
 }
@@ -66,6 +126,17 @@ pub fn js_alert_dialog_working(
     working: bool,
     working_label: &str,
 ) -> JsEl {
+    build(spec, theme, working, working_label, None, None)
+}
+
+fn build(
+    spec: &AlertDialogSpec,
+    theme: &JetstreamThemeProvider,
+    working: bool,
+    working_label: &str,
+    on_confirm: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let size = spec.size;
     let size_role = spec.size_role;
     let density = spec.density;
@@ -78,7 +149,12 @@ pub fn js_alert_dialog_working(
         .with_density(density)
         .with_label(spec.cancel_label.clone())
         .with_disabled(working);
-    let cancel_btn = js_button(&cancel_spec, theme);
+    let mut cancel = crate::button::Button::from_spec(cancel_spec, theme);
+    if let Some(handler) = &on_cancel {
+        let handler = std::sync::Arc::clone(handler);
+        cancel = cancel.on_click(move || handler());
+    }
+    let cancel_btn = crate::element::IntoJsEl::into_js_el(cancel);
 
     // ── Confirm button (primary, tone-driven) ──
     // Working swaps the label for `working_label` (contract §4).
@@ -95,7 +171,12 @@ pub fn js_alert_dialog_working(
         .with_density(density)
         .with_label(confirm_text)
         .with_disabled(working);
-    let confirm_btn = js_button(&confirm_spec, theme);
+    let mut confirm = crate::button::Button::from_spec(confirm_spec, theme);
+    if let Some(handler) = &on_confirm {
+        let handler = std::sync::Arc::clone(handler);
+        confirm = confirm.on_click(move || handler());
+    }
+    let confirm_btn = crate::element::IntoJsEl::into_js_el(confirm);
 
     // ── Actions row: cancel left, confirm right (delegated gap via Dialog) ──
     let actions_gap = crate::theme_ext::resolve_px(theme, spec.actions_gap_token());
@@ -163,7 +244,15 @@ pub fn js_alert_dialog_working(
     // it interrupts, and assistive technology treats the two differently. The
     // shared `js_dialog` cannot know which it is building, so the role is
     // overridden here on the way out.
-    js_dialog(&dialog_spec, theme, children, Some(actions))
+    let mut dialog = crate::dialog::Dialog::from_spec(dialog_spec, theme).actions(actions);
+    for child in children {
+        dialog = dialog.child(child);
+    }
+    if let Some(handler) = on_cancel {
+        dialog = dialog.on_request_close(move || handler());
+    }
+
+    crate::element::IntoJsEl::into_js_el(dialog)
         .aria_role(jetstream_ui::accesskit::Role::AlertDialog)
 }
 
@@ -246,4 +335,73 @@ mod tests {
             tree.texts()
         );
     }
+
+    #[test]
+    fn the_action_buttons_report_confirm_and_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let confirms = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+
+        let el = AlertDialog::from_spec(spec(), &theme())
+            .on_confirm(move || confirms.lock().unwrap().push("confirm"))
+            .on_cancel(move || cancels.lock().unwrap().push("cancel"))
+            .into_js_el();
+
+        let s = spec();
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, &s.confirm_label);
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, &s.cancel_label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["confirm", "cancel"]);
+    }
+
+    /// Contract §4: while working, the dialog cannot be dismissed and both
+    /// buttons are disabled — the point is to stop a second confirm landing
+    /// while the first is still in flight.
+    #[test]
+    fn working_suppresses_every_route() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let confirms = Arc::clone(&hits);
+        let cancels = Arc::clone(&hits);
+
+        let el = AlertDialog::from_spec(spec(), &theme())
+            .working(true, "Deleting…")
+            .on_confirm(move || { confirms.fetch_add(1, Ordering::SeqCst); })
+            .on_cancel(move || { cancels.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "Deleting…");
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, &spec().cancel_label);
+        // The backdrop too.
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a working alert dialog still fired");
+    }
+
+    /// The contract has `onCancel` cover "built-in cancel and dismissal paths",
+    /// so the backdrop reports cancel rather than needing its own handler.
+    #[test]
+    fn the_backdrop_reports_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = AlertDialog::from_spec(spec(), &theme())
+            .on_cancel(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "the backdrop did not report cancel");
+    }
+
 }
