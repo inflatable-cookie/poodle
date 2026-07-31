@@ -22,6 +22,7 @@ pub(super) fn build_swatch_grid(
     current: &str,
     text_primary: Vec4,
     border_subtle: Vec4,
+    on_change: Option<&crate::element::Handler>,
 ) -> JsEl {
     let swatch_size = rem_to_px(1.25);
     let swatch_radius = rem_to_px(0.1875);
@@ -57,7 +58,7 @@ pub(super) fn build_swatch_grid(
             Color::TRANSPARENT
         };
 
-        let swatch = ui_element::div()
+        let mut swatch = ui_element::div()
             .aria_role(jetstream_ui::accesskit::Role::ListBoxOption)
             .aria_label(hex.clone())
             .id(format!("color-picker-swatch-{idx}"))
@@ -69,6 +70,12 @@ pub(super) fn build_swatch_grid(
             .bg(swatch_color)
             .cursor_pointer()
             .focusable();
+
+        if let Some(handler) = on_change {
+            let handler = std::sync::Arc::clone(handler);
+            let hex = hex.clone();
+            swatch = swatch.on_click(move |_event| handler(&hex));
+        }
 
         grid = grid.child(swatch);
     }
@@ -273,6 +280,77 @@ mod tests {
         let fallback = expected_color("#6366f1");
         assert!(tree.has_background(fallback, 0.01));
     }
+
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = crate::color_picker::ColorPicker::from_spec(
+            ColorPickerSpec::new().with_value("#3b82f6"),
+            &theme(),
+        )
+        .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        // The trigger is the only element; click its centre.
+        let tree = crate::render_probe::probe(&el, 200.0, 120.0);
+        let trigger = tree
+            .nodes
+            .iter()
+            .find(|n| n.token_key.as_deref() == Some("color-picker-trigger"))
+            .expect("the trigger swatch");
+        crate::element::click_probe::click_at(
+            &el,
+            200.0,
+            120.0,
+            trigger.x + trigger.w / 2.0,
+            trigger.y + trigger.h / 2.0,
+        );
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    /// Only the presets can report a colour: the gradient area would need
+    /// drag-with-position to compute one, so it stays inert rather than lying.
+    #[test]
+    fn choosing_a_preset_reports_its_hex() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let hexes = Arc::clone(&seen);
+
+        let spec = ColorPickerSpec::new()
+            .with_value("#3b82f6")
+            .with_open(true)
+            .with_swatches(vec!["#ff0000".into(), "#00ff00".into()]);
+
+        let el = crate::color_picker::ColorPicker::from_spec(spec, &theme())
+            .on_change(move |hex| hexes.lock().unwrap().push(hex.to_string()))
+            .into_js_el();
+
+        let tree = crate::render_probe::probe(&el, 480.0, 640.0);
+        let swatch = tree
+            .nodes
+            .iter()
+            .find(|n| n.token_key.as_deref() == Some("color-picker-swatch-1"))
+            .expect("the second preset");
+        crate::element::click_probe::click_at(
+            &el,
+            480.0,
+            640.0,
+            swatch.x + swatch.w / 2.0,
+            swatch.y + swatch.h / 2.0,
+        );
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["#00ff00"]);
+    }
+
 }
 
 

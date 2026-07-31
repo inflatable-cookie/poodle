@@ -291,6 +291,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 Not yet implemented.
 
+## 10a. Jetstream Notes
+
+- `MediaBrowsePanel::from_spec(spec, theme).on_select(...)`, carrying the item's
+  id.
+- No `onLoadMore`: paging is scroll-driven on the web, and this runtime's scroll
+  events are not yet surfaced through the builder.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

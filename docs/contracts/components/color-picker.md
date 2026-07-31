@@ -395,6 +395,14 @@ stay adapter-side.
 - `color-mix` values: GPUI computes equivalent alpha blending
 - Swatch scale transform: GPUI applies 1.15x scale on hover
 
+## 10a. Jetstream Notes
+
+- `ColorPicker::from_spec(spec, theme).on_toggle(...).on_change(...)`.
+- Only the preset swatches raise `on_change`, carrying the preset's hex. The
+  gradient area and the channel sliders need drag-with-position to compute a
+  colour, which the drag events do not carry usefully yet, so a press there
+  stays inert rather than reporting a colour it cannot compute.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -287,6 +287,11 @@ Padding values are `padding-block padding-inline`. Density altering vertical pad
 - Expected crate/module surface: `poodle_gpui::composites::filter_toolbar`
 - GPUI may realize sticky behavior with native layout containers, but must preserve labeled-group semantics and control order
 
+## 10a. Jetstream Notes
+
+- `FilterToolbar::from_spec(spec, theme).child(...).actions(...).on_toggle(...)`,
+  carrying the expanded state the toolbar is moving **to**.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

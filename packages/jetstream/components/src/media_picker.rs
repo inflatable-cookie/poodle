@@ -38,7 +38,53 @@ fn grid_gap_and_pad_rem(density: ControlDensity) -> (f32, f32) {
     }
 }
 
+/// MediaPicker — a media grid behind tabs.
+///
+/// Mirrors the GPUI target's names: `on_select` and `on_tab_change`.
+///
+/// No `on_upload`: the upload tab composes `FileUpload`, whose drop zone needs
+/// file drops the runtime does not raise.
+pub struct MediaPicker {
+    spec: MediaPickerSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_tab_change: Option<crate::element::Handler>,
+}
+
+impl MediaPicker {
+    pub fn from_spec(spec: MediaPickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_select: None, on_tab_change: None }
+    }
+
+    /// Fires with the chosen item's id.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the tab's value when one is pressed.
+    pub fn on_tab_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_tab_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for MediaPicker {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select, self.on_tab_change)
+    }
+}
+
 pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &MediaPickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_tab_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let label_size = resolve_px(theme, "typography.label.size");
@@ -70,7 +116,7 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
 
     // ── Tabs: Browse | Upload (active reflects spec.active_tab) ──
     let browsing = spec.is_browsing();
-    let tab = |text: &str, active: bool| -> JsEl {
+    let tab = |text: &str, value: &'static str, active: bool| -> JsEl {
         let mut el = ui_element::button(text)
             .text_size(font_size)
             .focusable()
@@ -81,14 +127,20 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
         } else {
             el = el.text_color(text_secondary);
         }
+
+        if let Some(handler) = &on_tab_change {
+            let handler = std::sync::Arc::clone(handler);
+            el = el.cursor_pointer().on_click(move |_event| handler(value));
+        }
+
         el
     };
     root = root.child(
         ui_element::div()
             .flex_row()
             .gap(rem_to_px(0.5))
-            .child(tab("Browse", browsing))
-            .child(tab("Upload", !browsing)),
+            .child(tab("Browse", "browse", browsing))
+            .child(tab("Upload", "upload", !browsing)),
     );
 
     if browsing {
@@ -124,7 +176,13 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
                 .max_h(rem_to_px(20.0))
                 .overflow_scroll();
             for item in &spec.items {
-                grid = grid.child(grid_item(item, spec, theme, thumb_size, item_pad, label_size));
+                let mut cell = grid_item(item, spec, theme, thumb_size, item_pad, label_size);
+                if let Some(handler) = &on_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = item.id.clone();
+                    cell = cell.on_click(move |_event| handler(&id));
+                }
+                grid = grid.child(cell);
             }
             root = root.child(grid);
         } else {
@@ -340,4 +398,46 @@ mod tests {
             tree.texts()
         );
     }
+
+    #[test]
+    fn choosing_an_item_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let spec = MediaPickerSpec::new("Select an asset")
+            .with_open(true)
+            .with_items(sample_items());
+
+        let el = MediaPicker::from_spec(spec, &theme())
+            .on_select(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        // The label appears in the grid tile and again in the thumbnail's
+        // accessible label; index 0 is the tile.
+        crate::element::click_probe::click_text_nth(&el, 560.0, 480.0, "Profile photo", 0);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["img-2"]);
+    }
+
+    #[test]
+    fn pressing_a_tab_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let tabs = Arc::clone(&seen);
+
+        let spec = MediaPickerSpec::new("Select an asset").with_open(true);
+        let el = MediaPicker::from_spec(spec, &theme())
+            .on_tab_change(move |value| tabs.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 560.0, 480.0, "Upload");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["upload"]);
+    }
+
 }

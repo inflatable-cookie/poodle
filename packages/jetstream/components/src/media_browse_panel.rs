@@ -12,7 +12,45 @@ use crate::media_thumbnail::js_media_thumbnail;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius, tint};
 
+/// MediaBrowsePanel — a grid of media items.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_select(handler)`.
+///
+/// No `on_load_more`: paging is scroll-driven on the web, and this runtime's
+/// scroll events are not yet surfaced through the builder.
+pub struct MediaBrowsePanel {
+    spec: MediaBrowsePanelSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+}
+
+impl MediaBrowsePanel {
+    pub fn from_spec(spec: MediaBrowsePanelSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_select: None }
+    }
+
+    /// Fires with the chosen item's id.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for MediaBrowsePanel {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select)
+    }
+}
+
 pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &MediaBrowsePanelSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let body_font = rem_to_px(size_font_rem(effective_size));
     // Contract §8 Meta / State `p` font-size = 0.8125rem (13px) — resolved from
@@ -144,6 +182,12 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
                 .text_color(text_secondary)
                 .text_size(label_font),
         );
+
+        if let Some(handler) = &on_select {
+            let handler = std::sync::Arc::clone(handler);
+            let id = item.id.clone();
+            card = card.on_click(move |_event| handler(&id));
+        }
 
         grid = grid.child(card);
     }
@@ -296,4 +340,25 @@ mod tests {
             "no item should sit at the stale 12.5rem ({stale}px) min-column; widths: {widths:?}"
         );
     }
+
+    #[test]
+    fn choosing_an_item_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let spec = MediaBrowsePanelSpec::new().with_items(items());
+        let first = items().first().cloned().expect("an item");
+
+        let el = MediaBrowsePanel::from_spec(spec, &theme())
+            .on_select(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, &first.label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [first.id]);
+    }
+
 }

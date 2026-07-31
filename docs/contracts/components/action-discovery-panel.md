@@ -276,6 +276,11 @@ their `EmptyState` directly under the root with no `__state` wrapper.
 - Items are filtered internally to derive `enabledItems` (items where `disabled` is falsy)
 - Loading contract: both runtimes should render 5 skeleton rows rather than plain loading text
 
+## 10a. Jetstream Notes
+
+- `ActionDiscoveryPanel::from_spec(spec, theme).on_select(...)`, carrying the
+  chosen action's id. Disabled actions never fire.
+
 ## 11. Specimen Definitions
 
 ### Grouped Actions

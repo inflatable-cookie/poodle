@@ -64,9 +64,44 @@ fn row_pad_rem(size: ControlSize) -> (f32, f32) {
     }
 }
 
+/// ActionDiscoveryPanel — grouped actions with shortcuts.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_select(handler)`.
+pub struct ActionDiscoveryPanel {
+    spec: ActionDiscoveryPanelSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+}
+
+impl ActionDiscoveryPanel {
+    pub fn from_spec(spec: ActionDiscoveryPanelSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_select: None }
+    }
+
+    /// Fires with the chosen action's id. Disabled actions never fire.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ActionDiscoveryPanel {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select)
+    }
+}
+
 pub fn js_action_discovery_panel(
     spec: &ActionDiscoveryPanelSpec,
     theme: &JetstreamThemeProvider,
+) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ActionDiscoveryPanelSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -311,6 +346,12 @@ pub fn js_action_discovery_panel(
                 row = row.opacity(disabled_opacity);
             } else {
                 row = row.cursor_pointer().focusable();
+
+                if let Some(handler) = &on_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    let id = action.id.clone();
+                    row = row.on_click(move |_event| handler(&id));
+                }
             }
 
             list = list.child(row);
@@ -466,4 +507,25 @@ mod tests {
             tree.texts()
         );
     }
+
+    #[test]
+    fn choosing_an_action_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = ActionDiscoveryPanel::from_spec(
+            ActionDiscoveryPanelSpec::new(sample_sections()),
+            &theme(),
+        )
+        .on_select(move |id| ids.lock().unwrap().push(id.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 600.0, "Open File");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["open"]);
+    }
+
 }

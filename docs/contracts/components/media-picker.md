@@ -306,6 +306,12 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 
 Not yet implemented.
 
+## 10a. Jetstream Notes
+
+- `MediaPicker::from_spec(spec, theme).on_select(...).on_tab_change(...)`.
+- No `onUpload`: the upload tab composes `FileUpload`, whose drop zone needs
+  file drops the runtime does not raise.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

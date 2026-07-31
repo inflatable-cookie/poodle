@@ -16,12 +16,83 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 /// - `children`: filter controls laid out in a responsive grid
 /// - `actions`: optional element rendered in the header row
 /// - `secondary`: optional element rendered below the grid
+/// FilterToolbar — a collapsible filter header.
+///
+/// Mirrors the GPUI target's `on_toggle`, carrying the expanded state the
+/// toolbar is moving **to**.
+pub struct FilterToolbar {
+    spec: FilterToolbarSpec,
+    theme: JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    actions: Option<JsEl>,
+    secondary: Option<JsEl>,
+    on_toggle: Option<crate::element::ToggleHandler>,
+}
+
+impl FilterToolbar {
+    pub fn from_spec(spec: FilterToolbarSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            children: Vec::new(),
+            actions: None,
+            secondary: None,
+            on_toggle: None,
+        }
+    }
+
+    pub fn child(mut self, child: impl crate::element::IntoJsEl) -> Self {
+        self.children.push(child.into_js_el());
+        self
+    }
+
+    pub fn actions(mut self, actions: impl crate::element::IntoJsEl) -> Self {
+        self.actions = Some(actions.into_js_el());
+        self
+    }
+
+    pub fn secondary(mut self, secondary: impl crate::element::IntoJsEl) -> Self {
+        self.secondary = Some(secondary.into_js_el());
+        self
+    }
+
+    /// Fires with the expanded state the toolbar is moving to.
+    pub fn on_toggle(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for FilterToolbar {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.children,
+            self.actions,
+            self.secondary,
+            self.on_toggle,
+        )
+    }
+}
+
 pub fn js_filter_toolbar(
     spec: &FilterToolbarSpec,
     theme: &JetstreamThemeProvider,
     children: Vec<JsEl>,
     actions: Option<JsEl>,
     secondary: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, children, actions, secondary, None)
+}
+
+fn build(
+    spec: &FilterToolbarSpec,
+    theme: &JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    actions: Option<JsEl>,
+    secondary: Option<JsEl>,
+    on_toggle: Option<crate::element::ToggleHandler>,
 ) -> JsEl {
     // Contract §8 summary size table (size-scaled label-size).
     let font_size = rem_to_px(spec.summary_font_size_rem());
@@ -76,21 +147,27 @@ pub fn js_filter_toolbar(
             } else {
                 "chevron-right"
             };
-            header = header.child(
-                ui_element::div()
-                    .w(toggle_size)
-                    .h(toggle_size)
-                    .flex_row()
-                    .items_center()
-                    .justify_center()
-                    .rounded(toggle_radius)
-                    .child(
-                        ui_element::icon(chevron)
-                            .w(toggle_size)
-                            .h(toggle_size)
-                            .text_color(icon_muted),
-                    ),
-            );
+            let mut toggle = ui_element::div()
+                .w(toggle_size)
+                .h(toggle_size)
+                .flex_row()
+                .items_center()
+                .justify_center()
+                .rounded(toggle_radius)
+                .child(
+                    ui_element::icon(chevron)
+                        .w(toggle_size)
+                        .h(toggle_size)
+                        .text_color(icon_muted),
+                );
+
+            if let Some(handler) = &on_toggle {
+                let handler = std::sync::Arc::clone(handler);
+                let next = !is_expanded;
+                toggle = toggle.cursor_pointer().on_click(move |_event| handler(next));
+            }
+
+            header = header.child(toggle);
         }
 
         // Summary text — grows so the actions slot anchors right (Svelte
@@ -259,4 +336,31 @@ mod tests {
         );
         assert!(compact.padding_inline_rem() < comfortable.padding_inline_rem());
     }
+
+    #[test]
+    fn the_chevron_reports_the_next_expanded_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        for (collapsed, expected) in [(false, false), (true, true)] {
+            let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let spec = FilterToolbarSpec::new()
+                .with_summary_text("Showing 24 of 156 items")
+                .with_collapsible(true)
+                .with_collapsed(collapsed);
+
+            let el = FilterToolbar::from_spec(spec, &theme())
+                .child(ui_element::label("Status: Active"))
+                .on_toggle(move |next| values.lock().unwrap().push(next))
+                .into_js_el();
+
+            let chevron = if collapsed { "chevron-right" } else { "chevron-down" };
+            crate::element::click_probe::click_text(&el, 640.0, 240.0, chevron);
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
+        }
+    }
+
 }

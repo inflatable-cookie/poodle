@@ -53,7 +53,55 @@ const FALLBACK_RGB: Rgb255 = Rgb255 {
 };
 
 /// Build the ColorPicker element (trigger + optional surface) for a spec.
+/// ColorPicker — a swatch trigger and a picker surface.
+///
+/// Mirrors the GPUI target's names: `on_toggle` and `on_change`.
+///
+/// Only the preset swatches raise `on_change`: the gradient area and the
+/// channel sliders need drag-with-position, which the drag events do not carry
+/// usefully yet, so a press there stays inert rather than reporting a colour it
+/// cannot compute.
+pub struct ColorPicker {
+    spec: ColorPickerSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl ColorPicker {
+    pub fn from_spec(spec: ColorPickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_toggle: None, on_change: None }
+    }
+
+    /// Fires when the trigger swatch is pressed.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the chosen preset's hex.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ColorPicker {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_toggle, self.on_change)
+    }
+}
+
 pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &ColorPickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let trigger_size = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -91,7 +139,7 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
         .rounded((trigger_radius - 1.0).max(0.0))
         .bg(current_color);
 
-    let trigger = ui_element::div()
+    let mut trigger = ui_element::div()
         .id("color-picker-trigger")
         .w(trigger_size)
         .h(trigger_size)
@@ -102,6 +150,11 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
         .cursor_pointer()
         .focusable()
         .child(preview);
+
+    if let (false, Some(handler)) = (spec.is_disabled, &on_toggle) {
+        let handler = std::sync::Arc::clone(handler);
+        trigger = trigger.on_click(move |_event| handler());
+    }
 
     // ── Controls row: trigger + optional inline hex input ─────────
     let mut controls_row = ui_element::div()
@@ -182,6 +235,7 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
                 &current,
                 text_primary,
                 border_subtle,
+                on_change.as_ref(),
             ));
         }
 
