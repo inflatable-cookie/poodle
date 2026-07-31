@@ -237,6 +237,13 @@ Density controls list and item gap only. It does NOT affect font-size.
   and current location must be explicitly mapped
 - Truncation behavior must match: first item + ellipsis + last N-1 items
 
+## 10a. Jetstream Notes
+
+- `Breadcrumbs::from_spec(spec, theme).on_navigate(...)`, carrying the crumb's
+  `href`.
+- The current crumb never fires — you are already there — and neither does a
+  crumb with no `href`, which has nowhere to send you.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -18,6 +18,39 @@ use crate::theme_ext::{resolve_color, resolve_opacity};
 /// matching GPUI which lets the link take the surrounding text size. Disabled
 /// links dim via the disabled-opacity token. Underline + focus ring are CSS
 /// affordances with no JsEl equivalent (runtime gap, noted in the parity doc).
+/// TextLink — inline navigation.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_click(handler)`.
+pub struct TextLink {
+    spec: TextLinkSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+}
+
+impl TextLink {
+    pub fn from_spec(spec: TextLinkSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
+    }
+
+    /// Fires when the link is activated. The `href` is on the spec the caller
+    /// already holds, so there is nothing for the payload to add.
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for TextLink {
+    fn into_js_el(self) -> JsEl {
+        let el = js_text_link(&self.spec, &self.theme);
+
+        match (self.spec.disabled, self.on_click) {
+            (false, Some(handler)) => el.cursor_pointer().on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
+
 pub fn js_text_link(spec: &TextLinkSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let color = resolve_color(theme, spec.color_token());
 
@@ -69,4 +102,41 @@ mod tests {
         let el = js_text_link(&TextLinkSpec::new("x").with_disabled(true), &theme());
         assert!(el.style.opacity < 1.0, "disabled link should be dimmed");
     }
+
+    #[test]
+    fn a_click_reaches_the_handler() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = TextLink::from_spec(TextLinkSpec::new("Open docs"), &theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 200.0, 40.0, "Open docs");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+    }
+
+    #[test]
+    fn a_disabled_link_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = TextLink::from_spec(TextLinkSpec::new("Open docs").with_disabled(true), &theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 200.0, 40.0, "Open docs");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled link fired");
+    }
+
 }

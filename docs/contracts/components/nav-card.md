@@ -276,6 +276,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Arrow opacity animation may use GPUI's animation system
 - Badge pill styling matches standalone Pill component patterns
 
+## 10a. Jetstream Notes
+
+- `NavCard::from_spec(spec, theme).on_click(...)`, with the whole card as the
+  hit target.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

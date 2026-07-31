@@ -15,6 +15,37 @@ use poodle_specs::NavCardSpec;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
+/// NavCard — a card that navigates.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_click(handler)`.
+pub struct NavCard {
+    spec: NavCardSpec,
+    theme: JetstreamThemeProvider,
+    on_click: Option<crate::element::ActionHandler>,
+}
+
+impl NavCard {
+    pub fn from_spec(spec: NavCardSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
+    }
+
+    pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for NavCard {
+    fn into_js_el(self) -> JsEl {
+        let el = js_nav_card(&self.spec, &self.theme);
+
+        match (self.spec.is_disabled, self.on_click) {
+            (false, Some(handler)) => el.on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
+
 pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
@@ -252,4 +283,44 @@ mod tests {
         // Still renders the title; disabled is an opacity/flag treatment.
         assert!(tree.has_text("API Reference"), "title missing while disabled");
     }
+
+    #[test]
+    fn a_click_reaches_the_handler() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = NavCard::from_spec(NavCardSpec::new().with_title("Components"), &theme())
+            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 120.0, "Components");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+    }
+
+    #[test]
+    fn a_disabled_card_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = NavCard::from_spec(
+            NavCardSpec::new().with_title("Components").with_disabled(true),
+            &theme(),
+        )
+        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 120.0, "Components");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled card fired");
+    }
+
 }

@@ -21,7 +21,42 @@ const ACTIVE_RING_ALPHA: f32 = 0.20; // inset ring accent-base @ 20%
 const HOVER_BG_ALPHA: f32 = 0.60; // elevated @ 60%
 const SEPARATOR_ALPHA: f32 = 0.54; // border-subtle @ 54%
 
+/// SidebarNav — a grouped navigation rail.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct SidebarNav {
+    spec: SidebarNavSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl SidebarNav {
+    pub fn from_spec(spec: SidebarNavSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the value of the item that was chosen.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for SidebarNav {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &SidebarNavSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     // ── Size / density geometry (contract §8 tables, token-resolved rem) ──
     let item_height = rem_to_px(spec.item_height_rem());
     let item_font = rem_to_px(spec.item_font_rem());
@@ -140,6 +175,12 @@ pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> 
             if item.is_disabled {
                 item_el = item_el.opacity(disabled_opacity);
             } else {
+                if let Some(handler) = &on_change {
+                    let handler = std::sync::Arc::clone(handler);
+                    let value = item.value.clone();
+                    item_el = item_el.on_click(move |_event| handler(&value));
+                }
+
                 let hb = hover_bg;
                 let hc = item_active_color;
                 let fr = focus_ring;
@@ -269,4 +310,42 @@ mod tests {
         let tree = probe(&js_sidebar_nav(&spec, &theme()), 240.0, 320.0);
         assert!(tree.has_text("Team"));
     }
+
+    #[test]
+    fn choosing_an_item_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = SidebarNav::from_spec(sample(), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 600.0, "Projects");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["projects"]);
+    }
+
+    /// The fixture's "Team" item is disabled, so this also proves the disabled
+    /// flag survives into the rendered tree rather than only into the styling.
+    #[test]
+    fn a_disabled_item_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = SidebarNav::from_spec(sample(), &theme())
+            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 600.0, "Team");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the disabled item fired");
+    }
+
 }

@@ -179,6 +179,7 @@ Batches land with the gate holding each one to a click test.
 | Agent chat | 7 | 94 → 87 |
 | Core controls | 8 | 87 → 79 |
 | Overlays | 5 converted, 3 exempt | 79 → 71 |
+| Navigation and disclosure | 8 | 71 → 63 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -193,6 +194,14 @@ decide whether a click adds or removes.
 the buttons, read-only on `Checkbox` and `Switch`. Read-only is the interesting
 one — not disabled, still focusable and full strength, but it cannot change, so
 it must not report a change.
+
+**Bubbling needs handling twice more.** `Tabs` hit the same shape as the dialog
+backdrop, in a nastier form: a closable tab's X sits *inside* the tab, so
+without a handler of its own it bubbles to the tab and selects what it was
+closing. The close button therefore takes an inert handler even when no
+`on_close` is wired — otherwise a host that only wants selection ships a close
+button that silently switches tabs. Both cases are pinned by tests that fail
+when the inert handler is removed.
 
 **Overlays needed a rule the web gets for free.** Clicks bubble to the nearest
 clickable ancestor, so a backdrop handler fires for clicks *inside* the dialog
@@ -231,7 +240,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 71 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 63 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

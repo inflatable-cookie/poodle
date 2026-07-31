@@ -310,6 +310,11 @@ Behavior classification: machine-backed (`disclosureTransition` in
   `slide` transition)
 - Gap collapse (0.5rem to 0) when closed must be replicated
 
+## 10a. Jetstream Notes
+
+- `Collapsible::from_spec(spec, theme).content(...).on_open_change(...)`,
+  carrying the open state the region is moving **to**.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -34,7 +34,45 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, re
 /// - border-radius: var(--poodle-radius-surface)
 /// - background: color-mix(surface 50%, elevated)
 /// - box-shadow: inset 0 0.0625rem 0 color-mix(text-inverse 8%, transparent)
+/// Accordion — a stack of disclosure items.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct Accordion {
+    spec: AccordionSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl Accordion {
+    pub fn from_spec(spec: AccordionSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the value of the item whose trigger was pressed.
+    ///
+    /// The item, not the resulting expanded set: single- and multi-expand are
+    /// the host's policy, and returning a set would put that decision here.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Accordion {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &AccordionSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     // Contract §8 Root gap between items = space.stack.md.
     let root_gap = resolve_px(theme, spec.root_gap_token());
@@ -49,7 +87,15 @@ pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsE
 
     for item in &spec.items {
         let is_expanded = expanded.iter().any(|v| *v == item.value);
-        root = root.child(render_item(spec, item, is_expanded, effective_size, spec.density, theme));
+        root = root.child(render_item(
+            spec,
+            item,
+            is_expanded,
+            effective_size,
+            spec.density,
+            theme,
+            on_change.as_ref(),
+        ));
     }
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
@@ -63,6 +109,7 @@ fn render_item(
     effective_size: ControlSize,
     density: ControlDensity,
     theme: &JetstreamThemeProvider,
+    on_change: Option<&crate::element::Handler>,
 ) -> JsEl {
     // ── Token resolution ──
     let border_subtle = resolve_color(theme, "color.border.subtle");
@@ -134,7 +181,7 @@ fn render_item(
         .text_color(text_secondary);
 
     // Contract §8 Trigger: full-width 1fr-auto grid (summary grows, indicator trailing).
-    let trigger = ui_element::div()
+    let mut trigger = ui_element::div()
         .flex_row()
         .self_stretch()
         .gap(trigger_gap)
@@ -142,6 +189,13 @@ fn render_item(
         .focusable()
         .child(summary)
         .child(indicator);
+
+    // The trigger is the whole header row, not just the chevron.
+    if let (false, Some(handler)) = (item.is_disabled, on_change) {
+        let handler = std::sync::Arc::clone(handler);
+        let value = item.value.clone();
+        trigger = trigger.cursor_pointer().on_click(move |_event| handler(&value));
+    }
 
     // Contract §8 Item box-shadow: `inset 0 0.0625rem 0 color-mix(text-inverse
     // 8%, transparent)` — a top highlight in the inverse text color at 8% alpha.
@@ -307,4 +361,46 @@ mod tests {
             );
         }
     }
+
+    /// The item's value, not the resulting expanded set: single- and
+    /// multi-expand are host policy, and returning a set would put that
+    /// decision in the component.
+    #[test]
+    fn a_trigger_reports_its_item() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = Accordion::from_spec(AccordionSpec::new(sample_items()), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 400.0, "Section B");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
+    }
+
+    #[test]
+    fn a_disabled_item_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let mut items = sample_items();
+        items[0].is_disabled = true;
+
+        let el = Accordion::from_spec(AccordionSpec::new(items), &theme())
+            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 400.0, "Section A");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled item fired");
+    }
+
 }

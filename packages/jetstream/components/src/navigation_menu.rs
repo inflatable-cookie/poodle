@@ -37,7 +37,42 @@ fn nav_trigger_pad_x_rem(density: ControlDensity) -> f32 {
     }
 }
 
+/// NavigationMenu — a horizontal menu bar.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct NavigationMenu {
+    spec: NavigationMenuSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl NavigationMenu {
+    pub fn from_spec(spec: NavigationMenuSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the value of the entry that was chosen.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for NavigationMenu {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &NavigationMenuSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(nav_trigger_pad_x_rem(spec.density));
@@ -140,6 +175,12 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
         if entry.is_disabled {
             btn = btn.opacity(disabled_opacity).disabled(true);
         } else {
+            if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let value = entry.value.clone();
+                btn = btn.on_click(move |_event| handler(&value));
+            }
+
             // Hover (contract §8 Hover/Focus): accent-12% fill. Active triggers
             // keep their accent-16% open fill on hover (no override needed).
             btn = btn.hover(move |s| s.bg(hover_bg));
@@ -402,4 +443,22 @@ mod tests {
             "no viewport should render when no item is active"
         );
     }
+
+    #[test]
+    fn choosing_an_entry_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = NavigationMenu::from_spec(spec(), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 120.0, "Home");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["home"]);
+    }
+
 }

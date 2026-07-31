@@ -320,6 +320,11 @@ no height change):
   Both Rust targets (GPUI + Jetstream) render it; the Svelte reference still
   under-implements (see §9 Svelte gap).
 
+## 10a. Jetstream Notes
+
+- `NavigationMenu::from_spec(spec, theme).on_change(...)`, carrying the chosen
+  entry's value. Disabled entries never fire.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

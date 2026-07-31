@@ -308,6 +308,11 @@ None.
 - Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
 
+## 10a. Jetstream Notes
+
+- `SidebarNav::from_spec(spec, theme).on_change(...)`, carrying the chosen
+  item's value. Disabled items never fire.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

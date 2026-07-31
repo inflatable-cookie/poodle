@@ -770,6 +770,17 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Card selected: accent 32% mix + border-subtle (not simple opacity), accent 14% mix + background-surface
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
 
+## 10a. Jetstream Notes
+
+- `Tabs::from_spec(spec, theme).on_change(...).on_close(...)`, carrying the
+  tab's value in both cases.
+- The close button takes a handler of its own — an inert one when no `on_close`
+  is wired. Clicks bubble to the nearest clickable ancestor, so without it the X
+  would select the tab it was closing, which is the worst available outcome for
+  that gesture.
+- A disabled tab is not a selection route, and neither is the close button on
+  one.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -803,6 +814,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream has no reorder or drag events | `onReorder` and the `onDrag*` trio are keyboard- and drag-driven on the web; neither route exists on this target yet | accepted, tracked | g12.017 |
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 

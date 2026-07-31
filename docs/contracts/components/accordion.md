@@ -310,6 +310,15 @@ collapsible). Disabled items are inert. Every accepted toggle emits
 - Panel expand/collapse must animate height over ~180ms (equivalent to Svelte
   `slide` transition)
 
+## 10a. Jetstream Notes
+
+- `Accordion::from_spec(spec, theme).on_change(...)`, carrying the value of the
+  item whose trigger was pressed.
+- The item, not the resulting expanded set: single- and multi-expand are the
+  host's policy, and returning a set would move that decision into the
+  component.
+- The whole header row is the trigger, not just the chevron.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

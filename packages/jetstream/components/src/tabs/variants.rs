@@ -14,7 +14,12 @@ use super::*;
 
 // ── Underline variant ───────────────────────────────────────────────────────
 
-pub(super) fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub(super) fn render_underline(
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<&crate::element::Handler>,
+    on_close: Option<&crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
@@ -107,6 +112,14 @@ pub(super) fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) 
 
         tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
 
+        // A disabled tab is not a selection route, and neither is the close
+        // button on one.
+        if let (false, Some(handler)) = (is_disabled, on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = tab.value.clone();
+            tab_el = tab_el.on_click(move |_event| handler(&value));
+        }
+
         tab_bar = tab_bar.child(tab_el);
     }
 
@@ -115,7 +128,12 @@ pub(super) fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) 
 
 // ── Card variant ────────────────────────────────────────────────────────────
 
-pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub(super) fn render_card(
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<&crate::element::Handler>,
+    on_close: Option<&crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Svelte card tab: padding `0 var(--poodle-tabs-control-x)` (density-based);
@@ -200,7 +218,17 @@ pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
         // Contract Close button: rendered when the tab is closable.
         if tab.is_closable {
-            tab_el = tab_el.child(build_close_button(theme, font_size, &tab.label));
+            let mut close = build_close_button(theme, font_size, &tab.label);
+            if let (false, Some(handler)) = (is_disabled, on_close) {
+                let handler = std::sync::Arc::clone(handler);
+                let value = tab.value.clone();
+                close = close.on_click(move |_event| handler(&value));
+            } else {
+                // Inert, but still the nearest clickable: without this the X
+                // would bubble to the tab and select what it was closing.
+                close = close.on_click(|_event| {});
+            }
+            tab_el = tab_el.child(close);
         }
 
         if is_disabled {
@@ -208,6 +236,14 @@ pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
         }
 
         tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
+
+        // A disabled tab is not a selection route, and neither is the close
+        // button on one.
+        if let (false, Some(handler)) = (is_disabled, on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = tab.value.clone();
+            tab_el = tab_el.on_click(move |_event| handler(&value));
+        }
 
         tab_bar = tab_bar.child(tab_el);
     }
@@ -217,7 +253,12 @@ pub(super) fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
 // ── Pill variant ────────────────────────────────────────────────────────────
 
-pub(super) fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub(super) fn render_pill(
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<&crate::element::Handler>,
+    on_close: Option<&crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
@@ -282,6 +323,14 @@ pub(super) fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
         tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
 
+        // A disabled tab is not a selection route, and neither is the close
+        // button on one.
+        if let (false, Some(handler)) = (is_disabled, on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = tab.value.clone();
+            tab_el = tab_el.on_click(move |_event| handler(&value));
+        }
+
         container = container.child(tab_el);
     }
 
@@ -290,7 +339,12 @@ pub(super) fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> Js
 
 // ── Block variant ───────────────────────────────────────────────────────────
 
-pub(super) fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub(super) fn render_block(
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<&crate::element::Handler>,
+    on_close: Option<&crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
@@ -377,6 +431,14 @@ pub(super) fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> J
         }
 
         tab_el = apply_drag_state(tab_el, tab.value.as_str(), spec, theme);
+
+        // A disabled tab is not a selection route, and neither is the close
+        // button on one.
+        if let (false, Some(handler)) = (is_disabled, on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = tab.value.clone();
+            tab_el = tab_el.on_click(move |_event| handler(&value));
+        }
 
         tab_bar = tab_bar.child(tab_el);
     }

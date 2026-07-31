@@ -195,12 +195,60 @@ fn blend(over: glam::Vec4, base: glam::Vec4, fraction: f32) -> glam::Vec4 {
 ///   └── [TabBar]  — flex-row of tab buttons (variant-specific)
 /// ```
 /// Content for the active tab is rendered by the caller below this element.
+/// Tabs — a tab bar in four variants.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+///
+/// No reorder or drag events: `onReorder`/`onDrag*` are keyboard- and
+/// drag-driven on the web, and neither route exists here yet. Recorded as a
+/// delta rather than accepted and dropped.
+pub struct Tabs {
+    spec: TabsSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+    on_close: Option<crate::element::Handler>,
+}
+
+impl Tabs {
+    pub fn from_spec(spec: TabsSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None, on_close: None }
+    }
+
+    /// Fires with the value of the tab that was selected.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the value of the tab whose close button was pressed.
+    pub fn on_close(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_close = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Tabs {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change, self.on_close)
+    }
+}
+
 pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &TabsSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+    on_close: Option<crate::element::Handler>,
+) -> JsEl {
+    let (on_change, on_close) = (on_change.as_ref(), on_close.as_ref());
     let tab_bar = match spec.variant {
-        TabVariant::Underline => render_underline(spec, theme),
-        TabVariant::Card => render_card(spec, theme),
-        TabVariant::Pill => render_pill(spec, theme),
-        TabVariant::Block => render_block(spec, theme),
+        TabVariant::Underline => render_underline(spec, theme, on_change, on_close),
+        TabVariant::Card => render_card(spec, theme, on_change, on_close),
+        TabVariant::Pill => render_pill(spec, theme, on_change, on_close),
+        TabVariant::Block => render_block(spec, theme, on_change, on_close),
     };
 
     // Wrap tab bar in a flex-col container. Content is rendered by the caller
@@ -456,5 +504,105 @@ mod tests {
             "vertical block tabs should stack with increasing y: {ys:?}"
         );
     }
+
+    #[test]
+    fn selecting_a_tab_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = Tabs::from_spec(TabsSpec::new(three_tabs()).with_value("a"), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "Pricing");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["c"]);
+    }
+
+    /// The defect the inert close handler exists to prevent: clicks bubble to
+    /// the nearest clickable ancestor, so without one the X would select the
+    /// tab it was closing — the worst possible outcome for that gesture.
+    #[test]
+    fn closing_a_tab_does_not_also_select_it() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let closes = Arc::clone(&seen);
+        let changes = Arc::clone(&seen);
+
+        let tabs = vec![
+            TabDefinition::new("a", "Overview"),
+            TabDefinition::new("b", "Features").with_closable(true),
+        ];
+
+        let el = Tabs::from_spec(
+            TabsSpec::new(tabs).with_value("a").with_variant(TabVariant::Card),
+            &theme(),
+        )
+        .on_close(move |value| closes.lock().unwrap().push(format!("close:{value}")))
+        .on_change(move |value| changes.lock().unwrap().push(format!("change:{value}")))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "x");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["close:b"]);
+    }
+
+    /// And with no `on_close` wired, the X must still not select the tab —
+    /// otherwise a host that only wants selection gets a close button that
+    /// silently switches tabs.
+    #[test]
+    fn an_unwired_close_button_selects_nothing() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let tabs = vec![
+            TabDefinition::new("a", "Overview"),
+            TabDefinition::new("b", "Features").with_closable(true),
+        ];
+
+        let el = Tabs::from_spec(
+            TabsSpec::new(tabs).with_value("a").with_variant(TabVariant::Card),
+            &theme(),
+        )
+        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "x");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the close button selected the tab");
+    }
+
+    #[test]
+    fn a_disabled_tab_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let tabs = vec![
+            TabDefinition::new("a", "Overview"),
+            TabDefinition::new("b", "Features").with_disabled(true),
+        ];
+
+        let el = Tabs::from_spec(TabsSpec::new(tabs).with_value("a"), &theme())
+            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "Features");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled tab fired");
+    }
+
 }
 

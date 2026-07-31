@@ -17,7 +17,49 @@ use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
+/// Collapsible — one disclosure region.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_open_change(handler)`.
+pub struct Collapsible {
+    spec: CollapsibleSpec,
+    theme: JetstreamThemeProvider,
+    content: Option<JsEl>,
+    on_open_change: Option<crate::element::ToggleHandler>,
+}
+
+impl Collapsible {
+    pub fn from_spec(spec: CollapsibleSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), content: None, on_open_change: None }
+    }
+
+    pub fn content(mut self, content: impl crate::element::IntoJsEl) -> Self {
+        self.content = Some(content.into_js_el());
+        self
+    }
+
+    /// Fires with the open state the region is moving **to**.
+    pub fn on_open_change(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_open_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Collapsible {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.content, self.on_open_change)
+    }
+}
+
 pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
+    build(spec, theme, content, None)
+}
+
+fn build(
+    spec: &CollapsibleSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+    on_open_change: Option<crate::element::ToggleHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let is_open = spec.current_open();
 
@@ -132,7 +174,7 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
         .flex_shrink_0()
         .text_color(text_secondary);
 
-    let trigger = ui_element::div()
+    let mut trigger = ui_element::div()
         .flex_row()
         .items_center()
         .gap(trigger_gap)
@@ -141,6 +183,12 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
         .cursor_pointer()
         .child(heading)
         .child(indicator);
+
+    if let (false, Some(handler)) = (spec.is_disabled, &on_open_change) {
+        let handler = std::sync::Arc::clone(handler);
+        let next = !is_open;
+        trigger = trigger.on_click(move |_event| handler(next));
+    }
 
     outer = outer.child(trigger);
 
@@ -248,4 +296,44 @@ mod tests {
             expected
         );
     }
+
+    #[test]
+    fn the_trigger_reports_the_next_open_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        for (open, expected) in [(false, true), (true, false)] {
+            let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+            let values = Arc::clone(&seen);
+
+            let el = Collapsible::from_spec(spec().with_open(open), &theme())
+                .on_open_change(move |next| values.lock().unwrap().push(next))
+                .into_js_el();
+
+            let heading = spec().title.clone().unwrap_or_default();
+            crate::element::click_probe::click_text(&el, 600.0, 300.0, &heading);
+
+            assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
+        }
+    }
+
+    #[test]
+    fn a_disabled_collapsible_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Collapsible::from_spec(spec().with_disabled(true), &theme())
+            .on_open_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        let heading = spec().title.clone().unwrap_or_default();
+        crate::element::click_probe::click_text(&el, 600.0, 300.0, &heading);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled collapsible fired");
+    }
+
 }

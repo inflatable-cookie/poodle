@@ -20,7 +20,45 @@ use crate::presentation::{
 };
 use crate::theme_ext::resolve_color;
 
+/// Breadcrumbs — the trail back up.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_navigate(handler)`.
+pub struct Breadcrumbs {
+    spec: BreadcrumbsSpec,
+    theme: JetstreamThemeProvider,
+    on_navigate: Option<crate::element::Handler>,
+}
+
+impl Breadcrumbs {
+    pub fn from_spec(spec: BreadcrumbsSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_navigate: None }
+    }
+
+    /// Fires with the crumb's `href` when one is chosen.
+    ///
+    /// The current crumb is not a navigation route — you are already there —
+    /// so it never fires.
+    pub fn on_navigate(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_navigate = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Breadcrumbs {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_navigate)
+    }
+}
+
 pub fn js_breadcrumbs(spec: &BreadcrumbsSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &BreadcrumbsSpec,
+    theme: &JetstreamThemeProvider,
+    on_navigate: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(breadcrumbs_font_rem(effective_size));
     // Contract §8: gap is size-driven, overridden by density when not default.
@@ -57,11 +95,19 @@ pub fn js_breadcrumbs(spec: &BreadcrumbsSpec, theme: &JetstreamThemeProvider) ->
         let color = if is_current { current_color } else { text_color };
 
         // Contract §8: current is color-only, no weight bump.
-        el = el.child(
-            ui_element::label(&item.label)
-                .text_color(color)
-                .text_size(font_size),
-        );
+        let mut crumb = ui_element::label(&item.label)
+            .text_color(color)
+            .text_size(font_size);
+
+        // Only a crumb you can go *to* is a route: the current one is where you
+        // already are, and a crumb with no href has nowhere to send you.
+        if let (false, Some(href), Some(handler)) = (is_current, item.href.as_ref(), &on_navigate) {
+            let handler = std::sync::Arc::clone(handler);
+            let href = href.clone();
+            crumb = crumb.cursor_pointer().on_click(move |_event| handler(&href));
+        }
+
+        el = el.child(crumb);
     }
 
     crate::aria::with_aria_label(el, Some(spec.aria_label.as_str()))
@@ -190,4 +236,52 @@ mod tests {
             "xl font should exceed xs font"
         );
     }
+
+    /// The payload is the href, and the current crumb never fires — you are
+    /// already there, so it is not a route.
+    #[test]
+    fn a_crumb_navigates_by_href_and_the_current_one_does_not() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let hrefs = Arc::clone(&seen);
+
+        let spec = BreadcrumbsSpec::new(vec![
+            BreadcrumbItem::new("home", "Home").with_href("/"),
+            BreadcrumbItem::new("projects", "Projects").with_href("/projects"),
+            BreadcrumbItem::new("poodle", "Poodle").with_href("/projects/poodle"),
+        ]);
+
+        let el = Breadcrumbs::from_spec(spec, &theme())
+            .on_navigate(move |href| hrefs.lock().unwrap().push(href.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "Projects");
+        assert_eq!(seen.lock().unwrap().as_slice(), ["/projects"]);
+
+        // The last crumb is the current page.
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "Poodle");
+        assert_eq!(seen.lock().unwrap().len(), 1, "the current crumb navigated");
+    }
+
+    /// A crumb with no href has nowhere to send you.
+    #[test]
+    fn a_crumb_without_an_href_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Breadcrumbs::from_spec(BreadcrumbsSpec::new(trail()), &theme())
+            .on_navigate(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 600.0, 80.0, "Home");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a crumb with no href navigated");
+    }
+
 }
