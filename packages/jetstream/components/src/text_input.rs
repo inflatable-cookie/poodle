@@ -19,7 +19,46 @@ use crate::presentation::{
 use crate::spinner::js_spinner;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
+/// TextInput — a text field.
+///
+/// Mirrors the GPUI target's shape. Only `on_clear` exists here: `on_change`,
+/// `on_submit` and `on_cancel` are all typing events, and this runtime raises
+/// no key events at all. The clear button is the one part of the field a
+/// pointer can reach.
+pub struct TextInput {
+    spec: TextInputSpec,
+    theme: JetstreamThemeProvider,
+    on_clear: Option<crate::element::ActionHandler>,
+}
+
+impl TextInput {
+    pub fn from_spec(spec: TextInputSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_clear: None }
+    }
+
+    /// Fires when the search clear button is pressed. It renders only for a
+    /// `search` field with a value, so there is nothing to fire otherwise.
+    pub fn on_clear(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_clear = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for TextInput {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_clear)
+    }
+}
+
 pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &TextInputSpec,
+    theme: &JetstreamThemeProvider,
+    on_clear: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -164,18 +203,23 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
 
     // Clear button (search type, non-empty value)
     if spec.input_type == "search" && spec.show_clear_button && !current_value.is_empty() {
-        input_row = input_row.child(
-            ui_element::button("")
-                // Svelte's exact wording. Icon-only, inside a field that has
-                // its own name, so it needs one of its own.
-                .aria_label("Clear search query")
-                .cursor_pointer()
-                .child(
-                    ui_element::icon("x")
-                        .w(icon_sz).h(icon_sz)
-                        .text_color(icon_color),
-                ),
-        );
+        let mut clear = ui_element::button("")
+            // Svelte's exact wording. Icon-only, inside a field that has
+            // its own name, so it needs one of its own.
+            .aria_label("Clear search query")
+            .cursor_pointer()
+            .child(
+                ui_element::icon("x")
+                    .w(icon_sz).h(icon_sz)
+                    .text_color(icon_color),
+            );
+
+        if let (false, false, Some(handler)) = (spec.is_disabled, spec.is_read_only, &on_clear) {
+            let handler = std::sync::Arc::clone(handler);
+            clear = clear.on_click(move |_event| handler());
+        }
+
+        input_row = input_row.child(clear);
     }
 
     // Suffix affix (right edge, with left divider)
@@ -347,4 +391,52 @@ mod tests {
         let tree = probe(&js_text_input(&spec, &th), 400.0, 80.0);
         assert!(!tree.is_empty(), "disabled input produced no nodes");
     }
+
+    #[test]
+    fn the_clear_button_reports_a_clear() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = TextInputSpec::new()
+            .with_input_type("search")
+            .with_show_clear_button(true)
+            .with_value("poodle");
+
+        let el = TextInput::from_spec(spec, &theme())
+            .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 80.0, "x");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear fired exactly once");
+    }
+
+    #[test]
+    fn a_read_only_field_does_not_clear() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = TextInputSpec::new()
+            .with_input_type("search")
+            .with_show_clear_button(true)
+            .with_value("poodle")
+            .with_read_only(true);
+
+        let el = TextInput::from_spec(spec, &theme())
+            .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 80.0, "x");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a read-only field cleared");
+    }
+
 }

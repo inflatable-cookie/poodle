@@ -181,6 +181,7 @@ Batches land with the gate holding each one to a click test.
 | Overlays | 5 converted, 3 exempt | 79 → 71 |
 | Navigation and disclosure | 8 | 71 → 63 |
 | Tree and DataTable | 2 | 63 → 61 |
+| Form inputs | 5 | 61 → 56 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -224,6 +225,29 @@ renders a panel whose trigger and open state belong to the consumer, so there is
 nothing in them to click. The gate distinguishes the two — "not done yet" goes
 in the baseline, "nothing to draw" needs a stated reason.
 
+### Where the target runs out of routes
+
+The form inputs are the first batch where most contract events have no route at
+all. The runtime delivers pointer events only — no keys, no focus, no click
+count — so `onValueChange` on a text field, `onSubmit`, `onKeyDown`, commit and
+cancel on an editable label, and activation on a tree row are all unreachable.
+
+Each is recorded as a delta on its contract rather than stubbed, and the wording
+is the same everywhere so a reader meeting the third one recognises it: *the
+runtime delivers pointer events only; the host owns the editor and feeds the
+value back through the spec.*
+
+What is left is the pointer-reachable part, and it is more than it sounds: a
+search field's clear button, a number field's steppers, a token's remove
+control, a rating's stars, the click that starts an edit. Five components, ten
+tests.
+
+`Slider`, `RangeSlider`, `CodeInput` and `DurationInput` stay in the baseline
+rather than being exempted. A slider *could* be wired — the runtime raises drag
+events — but `click_probe` drives press-and-release at a point and cannot drag,
+so a handler would be untestable and the gate would rightly reject it. That is
+work to do, not a design limit, and the baseline is where work-to-do belongs.
+
 ### A parity defect the click tests found
 
 `DialogSpec::effective_dismiss_on_backdrop` read
@@ -249,7 +273,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 61 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 56 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

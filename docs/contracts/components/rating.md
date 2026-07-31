@@ -308,8 +308,16 @@ and DOM geometry reads stay adapter-side.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream has no half-star precision by click | a click reports the star it lands on; sub-star precision needs pointer position within the glyph | accepted, tracked | g12.017 |
 | glyph style may differ | shape rendering is implementation-specific | allowed | keep ordinal meaning strict |
 | `color-mix` implementation | GPUI may pre-compute blended colors | allowed | ensure visual equivalence across themes |
+
+## 12a. Jetstream Notes
+
+- `Rating::from_spec(spec, theme).on_change(...)`, carrying the rating the
+  pressed star sets — 1-based, so the third star reports `3` rather than an
+  index.
+- Read-only and disabled ratings ignore clicks.
 
 ## 13. Specimen Definitions
 

@@ -28,7 +28,43 @@ fn item_gap_rem(density: ControlDensity) -> f32 {
     }
 }
 
+/// Rating — a row of stars.
+///
+/// Mirrors the GPUI target's `on_change`.
+pub struct Rating {
+    spec: RatingSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(u32) + Send + Sync>>,
+}
+
+impl Rating {
+    pub fn from_spec(spec: RatingSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the rating the pressed star sets — 1-based, so clicking the
+    /// third star reports `3` rather than an index.
+    pub fn on_change(mut self, handler: impl Fn(u32) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Rating {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &RatingSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<std::sync::Arc<dyn Fn(u32) + Send + Sync>>,
+) -> JsEl {
     let active = resolve_color(theme, spec.active_color_token());
     // Contract §8: unfilled color = color-mix(text-secondary 48%, transparent).
     let inactive = tint(
@@ -89,15 +125,21 @@ pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
 
         // Touch-target wrapper: fixed square hit area per effective size.
-        el = el.child(
-            ui_element::div()
-                .w(item_px)
-                .h(item_px)
-                .flex_row()
-                .items_center()
-                .justify_center()
-                .child(glyph),
-        );
+        let mut target = ui_element::div()
+            .w(item_px)
+            .h(item_px)
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .child(glyph);
+
+        if let (false, false, Some(handler)) = (spec.is_disabled, spec.is_readonly, &on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = (i + 1) as u32;
+            target = target.cursor_pointer().on_click(move |_event| handler(value));
+        }
+
+        el = el.child(target);
     }
 
     if spec.is_disabled {
@@ -173,4 +215,54 @@ mod tests {
             "active vs inactive must differ: active={active:?} inactive={inactive:?}"
         );
     }
+
+    /// 1-based: clicking the third star reports `3`, not an index.
+    #[test]
+    fn clicking_a_star_reports_the_rating_it_sets() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<u32>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = Rating::from_spec(RatingSpec::new().with_max(5), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value))
+            .into_js_el();
+
+        let tree = crate::render_probe::probe(&el, 240.0, 60.0);
+        let stars: Vec<_> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.text.as_deref() == Some("star"))
+            .collect();
+        let third = stars.get(2).expect("five stars");
+        crate::element::click_probe::click_at(
+            &el,
+            240.0,
+            60.0,
+            third.x + third.w / 2.0,
+            third.y + third.h / 2.0,
+        );
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [3]);
+    }
+
+    #[test]
+    fn a_readonly_rating_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = Rating::from_spec(RatingSpec::new().with_max(5).with_readonly(true), &theme())
+            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 240.0, 60.0, "star");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a read-only rating fired");
+    }
+
 }

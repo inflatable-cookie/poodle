@@ -101,6 +101,15 @@ and async validation orchestration stay adapter-side.
 - keyboard: `ArrowUp` / `ArrowDown` to step, `Home` / `End` for min / max
   when supported
 
+## Jetstream Notes
+
+- `NumberInput::from_spec(spec, theme).on_increment(...).on_decrement(...)`.
+- Neither stepper fires at its bound: the contract disables the button there,
+  and a control that looks inert while still reporting is the defect this whole
+  roadmap item started from.
+- No typing events — the runtime delivers pointer events only, so the host owns
+  the editor and feeds the value back through the spec.
+
 ## Next Task
 
 Keep all public docs, preview registry entries, and examples aligned to

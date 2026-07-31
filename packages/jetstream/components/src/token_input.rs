@@ -22,7 +22,46 @@ use crate::text_input::js_text_input;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Build a token-input element from its spec.
+/// TokenInput — committed tokens plus a draft field.
+///
+/// Mirrors the GPUI target's `on_remove`. Entry is typing, which this runtime
+/// does not raise, so removal is the only wired route.
+pub struct TokenInput {
+    spec: TokenInputSpec,
+    theme: JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+}
+
+impl TokenInput {
+    pub fn from_spec(spec: TokenInputSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_remove: None }
+    }
+
+    /// Fires with the token's text when its `×` is pressed.
+    ///
+    /// The value, not the index: a host that removed by index would delete the
+    /// wrong token whenever two removals arrive between renders.
+    pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for TokenInput {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_remove)
+    }
+}
+
 pub fn js_token_input(spec: &TokenInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &TokenInputSpec,
+    theme: &JetstreamThemeProvider,
+    on_remove: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     let surface = resolve_color(theme, "color.background.surface");
@@ -80,13 +119,19 @@ pub fn js_token_input(spec: &TokenInputSpec, theme: &JetstreamThemeProvider) -> 
             .gap(rem_to_px(0.125))
             .child(pill);
         if can_edit {
-            chip = chip.child(
-                ui_element::button("×")
-                    .id(format!("poodle-token-remove-{index}"))
-                    .text_color(text_secondary)
-                    .text_size(token_font)
-                    .focusable(),
-            );
+            let mut remove = ui_element::button("×")
+                .id(format!("poodle-token-remove-{index}"))
+                .text_color(text_secondary)
+                .text_size(token_font)
+                .focusable();
+
+            if let Some(handler) = &on_remove {
+                let handler = std::sync::Arc::clone(handler);
+                let value = token.clone();
+                remove = remove.cursor_pointer().on_click(move |_event| handler(&value));
+            }
+
+            chip = chip.child(remove);
         }
         row = row.child(chip);
     }
@@ -241,4 +286,57 @@ mod tests {
         let el = js_token_input(&TokenInputSpec::new().with_disabled(true), &theme());
         assert!(el.style.opacity < 1.0, "disabled token-input should be dimmed");
     }
+
+    /// The token's text, not its index: a host removing by index would delete
+    /// the wrong token whenever two removals arrive between renders.
+    #[test]
+    fn removing_a_token_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = TokenInputSpec::new().with_values(vec!["rust".into(), "svelte".into()]);
+        let el = TokenInput::from_spec(spec, &theme())
+            .on_remove(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        // Two identical × glyphs, so target the second by its rendered rect.
+        let tree = crate::render_probe::probe(&el, 480.0, 120.0);
+        let crosses: Vec<_> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.text.as_deref() == Some("×"))
+            .collect();
+        assert_eq!(crosses.len(), 2, "one remove control per token");
+        let second = crosses[1];
+        crate::element::click_probe::click_at(
+            &el,
+            480.0,
+            120.0,
+            second.x + second.w / 2.0,
+            second.y + second.h / 2.0,
+        );
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["svelte"]);
+    }
+
+    #[test]
+    fn a_read_only_token_input_draws_no_remove_control() {
+        let el = js_token_input(
+            &TokenInputSpec::new()
+                .with_values(vec!["rust".into()])
+                .with_read_only(true),
+            &theme(),
+        );
+        let tree = crate::render_probe::probe(&el, 480.0, 120.0);
+
+        assert!(
+            !tree.texts().iter().any(|t| *t == "×"),
+            "a read-only field offered a remove control: {:?}",
+            tree.texts()
+        );
+    }
+
 }

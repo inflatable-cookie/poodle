@@ -76,6 +76,44 @@ fn density_pad_x_offset_rem(density: ControlDensity) -> f32 {
     }
 }
 
+/// EditableLabel — a label that becomes a field.
+///
+/// Mirrors the GPUI target's `on_edit_start`. Commit and cancel are keyboard
+/// events (Enter, Escape) and blur, none of which this runtime raises, so the
+/// click into edit mode is the one route it has.
+pub struct EditableLabel {
+    spec: EditableLabelSpec,
+    theme: JetstreamThemeProvider,
+    on_edit_start: Option<crate::element::ActionHandler>,
+}
+
+impl EditableLabel {
+    pub fn from_spec(spec: EditableLabelSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_edit_start: None }
+    }
+
+    /// Fires when the display-mode label is pressed. Already editing, disabled
+    /// or read-only, there is nothing to start.
+    pub fn on_edit_start(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_edit_start = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for EditableLabel {
+    fn into_js_el(self) -> JsEl {
+        let el = js_editable_label(&self.spec, &self.theme);
+
+        match (
+            self.spec.is_editing || self.spec.is_disabled,
+            self.on_edit_start,
+        ) {
+            (false, Some(handler)) => el.on_click(move |_event| handler()),
+            _ => el,
+        }
+    }
+}
+
 pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -323,4 +361,44 @@ mod tests {
         assert!(el.style.disabled, "disabled spec should mark node disabled");
         assert!(el.style.opacity < 1.0, "disabled should reduce opacity");
     }
+
+    #[test]
+    fn clicking_the_label_starts_an_edit() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = EditableLabel::from_spec(EditableLabelSpec::new().with_value("Untitled"), &test_theme())
+            .on_edit_start(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 60.0, "Untitled");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_edit_start fired exactly once");
+    }
+
+    /// Already editing, there is nothing to start — and re-reporting it would
+    /// make a host that resets its draft on edit-start lose what was typed.
+    #[test]
+    fn a_field_already_editing_does_not_restart() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = EditableLabelSpec::new().with_value("Untitled").with_editing(true);
+        let el = EditableLabel::from_spec(spec, &test_theme())
+            .on_edit_start(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_at(&el, 320.0, 60.0, 40.0, 20.0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "an editing field restarted the edit");
+    }
+
 }

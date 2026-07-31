@@ -21,7 +21,53 @@ use crate::presentation::{
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
+/// NumberInput — a numeric field with steppers.
+///
+/// Mirrors the GPUI target's names. `on_change` is a typing event and this
+/// runtime raises no key events, so only the steppers are wired.
+pub struct NumberInput {
+    spec: NumberInputSpec,
+    theme: JetstreamThemeProvider,
+    on_increment: Option<crate::element::ActionHandler>,
+    on_decrement: Option<crate::element::ActionHandler>,
+}
+
+impl NumberInput {
+    pub fn from_spec(spec: NumberInputSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_increment: None, on_decrement: None }
+    }
+
+    /// Fires when the `+` stepper is pressed. Never fires at the maximum: the
+    /// contract disables the button there, and a disabled control that still
+    /// reports is worse than one that is missing.
+    pub fn on_increment(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_increment = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the `−` stepper is pressed. Never fires at the minimum.
+    pub fn on_decrement(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_decrement = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for NumberInput {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_increment, self.on_decrement)
+    }
+}
+
 pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &NumberInputSpec,
+    theme: &JetstreamThemeProvider,
+    on_increment: Option<crate::element::ActionHandler>,
+    on_decrement: Option<crate::element::ActionHandler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -84,6 +130,9 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
             );
         if at_min || spec.is_disabled || spec.is_read_only {
             dec_btn = dec_btn.opacity(disabled_opacity).disabled(true);
+        } else if let Some(handler) = &on_decrement {
+            let handler = std::sync::Arc::clone(handler);
+            dec_btn = dec_btn.on_click(move |_event| handler());
         }
         el = el.child(dec_btn);
     }
@@ -135,6 +184,9 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
             );
         if at_max || spec.is_disabled || spec.is_read_only {
             inc_btn = inc_btn.opacity(disabled_opacity).disabled(true);
+        } else if let Some(handler) = &on_increment {
+            let handler = std::sync::Arc::clone(handler);
+            inc_btn = inc_btn.on_click(move |_event| handler());
         }
         el = el.child(inc_btn);
     }
@@ -276,4 +328,48 @@ mod tests {
         let el = js_number_input(&spec, &theme());
         assert!(el.style.opacity < 1.0);
     }
+
+    #[test]
+    fn the_steppers_report_their_direction() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let ups = Arc::clone(&seen);
+        let downs = Arc::clone(&seen);
+
+        let spec = NumberInputSpec::new(5.0).with_steppers(true);
+        let el = NumberInput::from_spec(spec, &theme())
+            .on_increment(move || ups.lock().unwrap().push("inc"))
+            .on_decrement(move || downs.lock().unwrap().push("dec"))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 240.0, 80.0, "plus");
+        crate::element::click_probe::click_text(&el, 240.0, 80.0, "minus");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["inc", "dec"]);
+    }
+
+    /// The contract disables the stepper at the bound, and a disabled control
+    /// that still reports is worse than one that is missing.
+    #[test]
+    fn a_stepper_at_its_bound_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = NumberInputSpec::new(10.0).with_max(10.0).with_steppers(true);
+
+        let el = NumberInput::from_spec(spec, &theme())
+            .on_increment(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 240.0, 80.0, "plus");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "the stepper fired at its maximum");
+    }
+
 }
