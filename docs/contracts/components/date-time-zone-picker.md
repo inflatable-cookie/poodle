@@ -345,9 +345,16 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
 
 ## 10a. Jetstream Notes
 
-- `DateTimeZonePicker::from_spec(spec, theme).on_toggle(...).on_select(...).on_navigate(...)`.
-- The time half is typed and the zone list is a composed `Select` whose
-  selection is not forwarded yet, so neither carries a handler.
+- `DateTimeZonePicker::from_spec(spec, theme).on_toggle(...).on_select(...)
+  .on_navigate(...).on_zone_toggle(...).on_zone_change(...)`.
+- The zone list is the composed `TimeZoneSelect`, forwarded whole: the trigger
+  press comes back as `on_zone_toggle` and the pressed option's id as
+  `on_zone_change`. `DateTimeZonePickerSpec.zone_open` renders the zone
+  option list open — native-only state that the web's Select keeps internal;
+  the host flips it from `on_zone_toggle` and merges the picked zone into the
+  value it holds.
+- Known Delta: the time half is typed, which stays host-side — the runtime
+  raises no key events.
 
 ## 11. Parity Checklist
 

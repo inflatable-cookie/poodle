@@ -333,7 +333,8 @@ pub use embed_preview::EmbedPreviewSpec;
 pub use empty_state::{EmptyStateSize, EmptyStateSpec};
 pub use error_boundary::ErrorBoundarySpec;
 pub use filter_builder::{
-    default_operators_for_kind, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
+    default_operators_for_kind, FilterBuilderPicker, FilterBuilderSpec, FilterClause,
+    FilterCombinator, FilterDraft,
     FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOperandKind,
     FilterOperatorDefinition, FilterOption,
 };

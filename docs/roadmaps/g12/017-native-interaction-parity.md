@@ -458,11 +458,34 @@ the gesture reported nothing because there was no divider to hit.
 GPUI's `on_ratio_change` stays baselined — its `ResizeHandle` has no drag
 yet (the input work below).
 
+### The nested Selects forward, and the panel state moves to the spec
+
+The last two composition gaps closed the same way. `DateTimeZonePicker`
+forwards its zone list whole — `on_zone_toggle` for the trigger,
+`on_zone_change` with the pressed option's id — and `FilterBuilder` grew the
+full clause-editing intent surface: `on_toggle`, `on_picker_toggle`,
+`on_field_pick`, `on_operator_change`, `on_operand_change`,
+`on_combinator_change`, `on_commit`, `on_cancel`. Ten new handlers, ten click
+tests, and a bundle-severed vacuity pass (10 of 13 tests fail with the
+handlers cut).
+
+Both needed the same new kind of spec state: on the web each nested `Select`
+owns its popup, but the native hosts hold everything — so the specs now carry
+it. `DateTimeZonePickerSpec.zone_open` and
+`FilterBuilderSpec.open_picker: Option<FilterBuilderPicker>` (at most one of
+add-field / operator / operand open at a time, which the `Option` models).
+The contract<->spec drift gate is one-directional — contract props must reach
+the spec, native-only fields are legitimate — and both are called out in the
+contracts' Jetstream Notes.
+
+`on_operand_change` follows the payload rule: it reports the option pressed
+(`"true"`/`"false"` for boolean segments, the option value for enum and
+multi-enum checkboxes) and the host flips membership itself. Typed operands
+(text, number, range) stay host-side deltas — no key events.
+
 ## Next
 
-1. Forward `Select` option selection through `TimeZoneSelect` composition
-   inside `DateTimeZonePicker`, and clause editing through `FilterBuilder`.
-2. Burn down the last 4 baselined GPUI handlers (divider drag + live text
+1. Burn down the last 4 baselined GPUI handlers (divider drag + live text
    editing — GPUI input work, not wiring). The click driver can now prove
    them when they land.
 

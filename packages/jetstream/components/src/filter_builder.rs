@@ -15,7 +15,8 @@ use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
-    FilterBuilderSpec, FilterCombinator, FilterFieldDefinition, FilterFieldKind, FilterOperand,
+    FilterBuilderPicker, FilterBuilderSpec, FilterCombinator, FilterFieldDefinition,
+    FilterFieldKind, FilterOperand,
     FilterOperandKind, IconButtonSpec, NumberInputSpec, SegmentedControlSpec, SelectSpec,
     TextInputSpec,
 };
@@ -31,7 +32,11 @@ use crate::text_input::js_text_input;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// Operand editor for a draft clause, chosen by the operator's operand kind —
-/// mirrors the Svelte/React `FilterOperandEditor`. Render-only.
+/// mirrors the Svelte/React `FilterOperandEditor`. The pointer-reachable
+/// operands (boolean segments, enum options, multi-enum checkboxes) forward
+/// the pressed option through `on_operand_change`; the typed ones (text,
+/// number, range) stay host-side.
+#[allow(clippy::too_many_arguments)]
 fn operand_editor(
     theme: &JetstreamThemeProvider,
     field: &FilterFieldDefinition,
@@ -40,6 +45,8 @@ fn operand_editor(
     size: ControlSize,
     density: ControlDensity,
     disabled: bool,
+    operand_picker_open: bool,
+    handlers: &Handlers,
 ) -> JsEl {
     match operand_kind {
         FilterOperandKind::Boolean => {
@@ -52,7 +59,12 @@ fn operand_editor(
             .with_density(density);
             s.value = Some(if on { "true" } else { "false" }.to_string());
             s.is_disabled = disabled;
-            js_segmented_control(&s, theme)
+            let mut segmented = crate::segmented_control::SegmentedControl::from_spec(s, theme);
+            if let Some(handler) = &handlers.on_operand_change {
+                let handler = std::sync::Arc::clone(handler);
+                segmented = segmented.on_change(move |value| handler(value));
+            }
+            crate::element::IntoJsEl::into_js_el(segmented)
         }
         FilterOperandKind::Text => {
             let value = match operand {
@@ -100,18 +112,34 @@ fn operand_editor(
                     s = s.with_value(v.clone());
                 }
                 s.is_disabled = disabled;
-                js_select(&s, theme)
+                s = s.with_open(operand_picker_open);
+                let mut select = crate::select::Select::from_spec(s, theme);
+                if let Some(handler) = &handlers.on_picker_toggle {
+                    let handler = std::sync::Arc::clone(handler);
+                    select = select.on_toggle(move || handler("operand"));
+                }
+                if let Some(handler) = &handlers.on_operand_change {
+                    let handler = std::sync::Arc::clone(handler);
+                    select = select.on_change(move |value| handler(value));
+                }
+                crate::element::IntoJsEl::into_js_el(select)
             } else {
                 let mut list = ui_element::div().flex_col().gap(rem_to_px(0.25));
                 for option in field.options.iter() {
-                    list = list.child(js_checkbox(
-                        &CheckboxSpec::new()
+                    let mut checkbox = crate::checkbox::Checkbox::from_spec(
+                        CheckboxSpec::new()
                             .with_label(option.label.clone())
                             .with_checked(selected.contains(&option.value))
                             .with_size(size)
                             .with_disabled(disabled || option.is_disabled),
                         theme,
-                    ));
+                    );
+                    if let Some(handler) = &handlers.on_operand_change {
+                        let handler = std::sync::Arc::clone(handler);
+                        let value = option.value.clone();
+                        checkbox = checkbox.on_change(move |_next| handler(&value));
+                    }
+                    list = list.child(crate::element::IntoJsEl::into_js_el(checkbox));
                 }
                 list
             }
@@ -154,48 +182,121 @@ fn operand_editor(
 /// (mirroring GPUI's name). The host applies the intent to the clauses it
 /// already holds.
 ///
-/// Clause *editing* is the open panel's Selects and text fields; those stay
-/// unwired until the composed Select forwards through this component.
+/// Clause *editing* is forwarded from the open panel's composed controls,
+/// each event naming the intent so the host can apply it to the draft it
+/// holds: `on_field_pick` (add-field option), `on_operator_change`,
+/// `on_operand_change` (the operand option pressed — segmented boolean, enum
+/// option or multi-enum checkbox; the host flips membership itself),
+/// `on_combinator_change`, `on_commit` / `on_cancel`, and `on_picker_toggle`
+/// with the nested Select whose trigger was pressed (the host flips
+/// `open_picker`). Typed operands (text, number, range) stay host-side — the
+/// runtime raises no key events.
 pub struct FilterBuilder {
     spec: FilterBuilderSpec,
     theme: JetstreamThemeProvider,
+    handlers: Handlers,
+}
+
+/// The full intent surface, threaded through `build` as one bundle.
+#[derive(Default, Clone)]
+struct Handlers {
     on_remove: Option<crate::element::Handler>,
     on_reset: Option<crate::element::ActionHandler>,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_picker_toggle: Option<crate::element::Handler>,
+    on_field_pick: Option<crate::element::Handler>,
+    on_operator_change: Option<crate::element::Handler>,
+    on_operand_change: Option<crate::element::Handler>,
+    on_combinator_change: Option<crate::element::Handler>,
+    on_commit: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
 }
 
 impl FilterBuilder {
     pub fn from_spec(spec: FilterBuilderSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_remove: None, on_reset: None }
+        Self { spec, theme: theme.clone(), handlers: Handlers::default() }
     }
 
     /// Fires with the clause's id when its pill's remove glyph is pressed.
     pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
-        self.on_remove = Some(std::sync::Arc::new(handler));
+        self.handlers.on_remove = Some(std::sync::Arc::new(handler));
         self
     }
 
     /// Fires when the clear-all control is pressed.
     pub fn on_reset(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
-        self.on_reset = Some(std::sync::Arc::new(handler));
+        self.handlers.on_reset = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the opener is pressed — the host flips `is_open`.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.handlers.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"add-field"`, `"operator"` or `"operand"` when that nested
+    /// Select's trigger is pressed — the host flips `open_picker`.
+    pub fn on_picker_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.handlers.on_picker_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the field key picked in the add-field Select — the host
+    /// seeds a draft (`FilterDraft::adding`).
+    pub fn on_field_pick(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.handlers.on_field_pick = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the operator key picked in the draft's operator Select.
+    pub fn on_operator_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.handlers.on_operator_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the operand option pressed: `"true"`/`"false"` for boolean
+    /// operands, the option's value for enum and multi-enum operands. The
+    /// host applies it to the draft operand it holds (for multi-enum,
+    /// toggling membership).
+    pub fn on_operand_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.handlers.on_operand_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"and"` or `"or"` when a combinator segment is pressed.
+    pub fn on_combinator_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.handlers.on_combinator_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the draft's Add/Update button is pressed.
+    pub fn on_commit(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.handlers.on_commit = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the draft's Cancel button is pressed.
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.handlers.on_cancel = Some(std::sync::Arc::new(handler));
         self
     }
 }
 
 impl crate::element::IntoJsEl for FilterBuilder {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_remove, self.on_reset)
+        build(&self.spec, &self.theme, &self.handlers)
     }
 }
 
 pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    build(spec, theme, None, None)
+    build(spec, theme, &Handlers::default())
 }
 
 fn build(
     spec: &FilterBuilderSpec,
     theme: &JetstreamThemeProvider,
-    on_remove: Option<crate::element::Handler>,
-    on_reset: Option<crate::element::ActionHandler>,
+    handlers: &Handlers,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -299,6 +400,10 @@ fn build(
             .h(summary_font)
             .text_color(text_secondary),
     );
+    if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_toggle) {
+        let handler = std::sync::Arc::clone(handler);
+        opener = opener.cursor_pointer().on_click(move |_event| handler());
+    }
     field = field.child(opener);
 
     // Inline clause pills.
@@ -329,7 +434,7 @@ fn build(
                         .text_color(muted),
                 );
 
-            if let (false, Some(handler)) = (spec.is_disabled, &on_remove) {
+            if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_remove) {
                 let handler = std::sync::Arc::clone(handler);
                 let id = clause.id.clone();
                 pill = pill.cursor_pointer().on_click(move |_event| handler(&id));
@@ -376,7 +481,7 @@ fn build(
                     .with_disabled(spec.is_disabled),
                 theme,
             );
-            if let Some(handler) = &on_reset {
+            if let Some(handler) = &handlers.on_reset {
                 let handler = std::sync::Arc::clone(handler);
                 reset = reset.on_click(move || handler());
             }
@@ -397,8 +502,8 @@ fn build(
         // Combinator (2+ clauses) — static two-option indicator.
         if spec.combinator_visible() {
             let is_and = spec.value.combinator == FilterCombinator::And;
-            let mk = |text: &str, selected: bool| {
-                ui_element::label(text)
+            let mk = |text: &str, selected: bool, combinator: &'static str| {
+                let mut segment = ui_element::label(text)
                     .grow()
                     .pl(rem_to_px(0.5))
                     .pr(rem_to_px(0.5))
@@ -407,14 +512,21 @@ fn build(
                     .rounded(radius)
                     .bg(if selected { accent } else { surface })
                     .text_color(if selected { accent_text } else { text_secondary })
-                    .text_size(rem_to_px(0.75))
+                    .text_size(rem_to_px(0.75));
+                if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_combinator_change) {
+                    let handler = std::sync::Arc::clone(handler);
+                    segment = segment
+                        .cursor_pointer()
+                        .on_click(move |_event| handler(combinator));
+                }
+                segment
             };
             panel = panel.child(
                 ui_element::div()
                     .flex_row()
                     .gap(rem_to_px(0.25))
-                    .child(mk("Match all", is_and))
-                    .child(mk("Match any", !is_and)),
+                    .child(mk("Match all", is_and, "and"))
+                    .child(mk("Match any", !is_and, "or")),
             );
         }
 
@@ -448,7 +560,18 @@ fn build(
                     .with_size(effective_size)
                     .with_density(spec.density);
                 op_spec.is_disabled = spec.is_disabled;
-                editor = editor.child(js_select(&op_spec, theme));
+                op_spec =
+                    op_spec.with_open(spec.open_picker == Some(FilterBuilderPicker::Operator));
+                let mut op_select = crate::select::Select::from_spec(op_spec, theme);
+                if let Some(handler) = &handlers.on_picker_toggle {
+                    let handler = std::sync::Arc::clone(handler);
+                    op_select = op_select.on_toggle(move || handler("operator"));
+                }
+                if let Some(handler) = &handlers.on_operator_change {
+                    let handler = std::sync::Arc::clone(handler);
+                    op_select = op_select.on_change(move |key| handler(key));
+                }
+                editor = editor.child(crate::element::IntoJsEl::into_js_el(op_select));
             }
 
             if let Some(op) = field.find_operator(&draft.operator) {
@@ -460,31 +583,43 @@ fn build(
                     effective_size,
                     spec.density,
                     spec.is_disabled,
+                    spec.open_picker == Some(FilterBuilderPicker::Operand),
+                    handlers,
                 ));
             }
 
             let commit_label = if draft.editing_id.is_some() { "Update" } else { "Add" };
+            let mut commit = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_label(commit_label)
+                    .with_size(effective_size)
+                    .with_disabled(spec.is_disabled || !spec.is_draft_valid()),
+                theme,
+            );
+            if let Some(handler) = &handlers.on_commit {
+                let handler = std::sync::Arc::clone(handler);
+                commit = commit.on_click(move || handler());
+            }
+            let mut cancel = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_label("Cancel")
+                    .with_size(effective_size)
+                    .with_disabled(spec.is_disabled),
+                theme,
+            );
+            if let Some(handler) = &handlers.on_cancel {
+                let handler = std::sync::Arc::clone(handler);
+                cancel = cancel.on_click(move || handler());
+            }
             editor = editor.child(
                 ui_element::div()
                     .flex_row()
                     .items_center()
                     .gap(rem_to_px(0.375))
-                    .child(js_button(
-                        &ButtonSpec::new()
-                            .with_variant(ButtonVariant::Primary)
-                            .with_label(commit_label)
-                            .with_size(effective_size)
-                            .with_disabled(spec.is_disabled || !spec.is_draft_valid()),
-                        theme,
-                    ))
-                    .child(js_button(
-                        &ButtonSpec::new()
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_label("Cancel")
-                            .with_size(effective_size)
-                            .with_disabled(spec.is_disabled),
-                        theme,
-                    )),
+                    .child(crate::element::IntoJsEl::into_js_el(commit))
+                    .child(crate::element::IntoJsEl::into_js_el(cancel)),
             );
             panel = panel.child(editor);
         }
@@ -502,11 +637,22 @@ fn build(
                 .with_density(spec.density);
             select_spec.aria_label = Some("Add filter field".to_string());
             select_spec.is_disabled = spec.is_disabled;
+            select_spec =
+                select_spec.with_open(spec.open_picker == Some(FilterBuilderPicker::AddField));
+            let mut add_select = crate::select::Select::from_spec(select_spec, theme);
+            if let Some(handler) = &handlers.on_picker_toggle {
+                let handler = std::sync::Arc::clone(handler);
+                add_select = add_select.on_toggle(move || handler("add-field"));
+            }
+            if let Some(handler) = &handlers.on_field_pick {
+                let handler = std::sync::Arc::clone(handler);
+                add_select = add_select.on_change(move |key| handler(key));
+            }
             panel = panel.child(
                 ui_element::div()
                     .flex_row()
                     .items_center()
-                    .child(js_select(&select_spec, theme)),
+                    .child(crate::element::IntoJsEl::into_js_el(add_select)),
             );
         }
 
@@ -696,4 +842,194 @@ mod tests {
         assert_eq!(hits.load(Ordering::SeqCst), 1, "on_reset fired exactly once");
     }
 
+
+    #[test]
+    fn the_opener_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new().with_fields(fields()),
+            &theme(),
+        )
+        .on_toggle(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
+        .into_js_el();
+
+        crate::element::click_probe::click_text_nth(&el, 640.0, 240.0, "Filter", 0);
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    #[test]
+    fn the_add_field_trigger_reports_its_picker() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let pickers = Arc::clone(&seen);
+
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new().with_fields(fields()).with_open(true),
+            &theme(),
+        )
+        .on_picker_toggle(move |picker| pickers.lock().unwrap().push(picker.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "+ Add filter");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["add-field"]);
+    }
+
+    #[test]
+    fn an_add_field_option_reports_its_key() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let picks = Arc::clone(&seen);
+
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true)
+                .with_open_picker(FilterBuilderPicker::AddField),
+            &theme(),
+        )
+        .on_field_pick(move |key| picks.lock().unwrap().push(key.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "Hidden");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["hidden"]);
+    }
+
+    #[test]
+    fn an_operator_option_reports_its_key() {
+        use crate::element::IntoJsEl;
+        use poodle_specs::FilterDraft;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let operators = Arc::clone(&seen);
+
+        let format = fields().remove(0);
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true)
+                .with_draft(FilterDraft::adding(&format))
+                .with_open_picker(FilterBuilderPicker::Operator),
+            &theme(),
+        )
+        .on_operator_change(move |key| operators.lock().unwrap().push(key.to_string()))
+        .into_js_el();
+
+        // MultiEnum's standard operators include "is none of".
+        crate::element::click_probe::click_text(&el, 640.0, 720.0, "is none of");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["none_of"]);
+    }
+
+    #[test]
+    fn a_boolean_operand_segment_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use poodle_specs::FilterDraft;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let operands = Arc::clone(&seen);
+
+        let hidden = fields().remove(1);
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true)
+                .with_draft(FilterDraft::adding(&hidden)),
+            &theme(),
+        )
+        .on_operand_change(move |value| operands.lock().unwrap().push(value.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "False");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["false"]);
+    }
+
+    #[test]
+    fn a_multi_enum_operand_checkbox_reports_its_option() {
+        use crate::element::IntoJsEl;
+        use poodle_specs::FilterDraft;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let operands = Arc::clone(&seen);
+
+        let format = fields().remove(0);
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true)
+                .with_draft(FilterDraft::adding(&format)),
+            &theme(),
+        )
+        .on_operand_change(move |value| operands.lock().unwrap().push(value.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 720.0, "VST3");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["vst3"]);
+    }
+
+    #[test]
+    fn the_combinator_segments_report_the_pressed_mode() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let modes = Arc::clone(&seen);
+
+        let el = FilterBuilder::from_spec(populated(), &theme())
+            .on_combinator_change(move |mode| modes.lock().unwrap().push(mode.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "Match any");
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "Match all");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["or", "and"]);
+    }
+
+    #[test]
+    fn the_draft_buttons_commit_and_cancel() {
+        use crate::element::IntoJsEl;
+        use poodle_specs::FilterDraft;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+
+        // A boolean draft is valid from the start, so Add renders enabled.
+        let hidden = fields().remove(1);
+        let el = FilterBuilder::from_spec(
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true)
+                .with_draft(FilterDraft::adding(&hidden)),
+            &theme(),
+        )
+        .on_commit(move || commits.lock().unwrap().push("commit".to_string()))
+        .on_cancel(move || cancels.lock().unwrap().push("cancel".to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "Add");
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "Cancel");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["commit", "cancel"]);
+    }
 }

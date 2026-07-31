@@ -374,12 +374,25 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 
 ## 10a. Jetstream Notes
 
-- `FilterBuilder::from_spec(spec, theme).on_remove(...).on_reset(...)`.
+- `FilterBuilder::from_spec(spec, theme)` then the intent surface:
+  `.on_remove(id)`, `.on_reset()`, `.on_toggle()` (opener pressed),
+  `.on_picker_toggle("add-field" | "operator" | "operand")`,
+  `.on_field_pick(key)`, `.on_operator_change(key)`,
+  `.on_operand_change(option)`, `.on_combinator_change("and" | "or")`,
+  `.on_commit()`, `.on_cancel()`.
 - The contract's `onChange` carries a whole clause list, and a pointer produces
-  one intent on one pill — so, as with `OrderBy`, the events name the intent
-  and the host rebuilds the expression it already holds.
-- Clause editing is the open panel's Selects and text fields; those stay unwired
-  until the composed `Select` forwards through this component.
+  one intent on one control — so, as with `OrderBy`, the events name the intent
+  and the host rebuilds the expression and draft it already holds.
+  `on_operand_change` reports the option pressed (`"true"`/`"false"` for
+  boolean operands, the option value for enum and multi-enum); the host flips
+  membership itself.
+- `FilterBuilderSpec.open_picker: Option<FilterBuilderPicker>` says which
+  nested Select inside the panel shows its option list — native-only state
+  that the web's Selects keep internal. The host flips it from
+  `on_picker_toggle`.
+- Known Deltas: the typed operands (text, number, range) stay host-side — the
+  runtime raises no key events — and drag-to-collapse has no drag surface
+  here.
 
 ## 11. Parity Checklist
 

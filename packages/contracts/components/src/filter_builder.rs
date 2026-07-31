@@ -349,6 +349,23 @@ pub struct FilterBuilderSpec {
     pub is_open: bool,
     /// Active draft in the open popover, if any.
     pub draft: Option<FilterDraft>,
+    /// Which nested Select inside the open panel shows its option list.
+    ///
+    /// Native-only: on the web each Select owns its popup, but the native
+    /// hosts hold every piece of state, including this nested one. At most
+    /// one picker is open at a time, which is what the `Option` models.
+    pub open_picker: Option<FilterBuilderPicker>,
+}
+
+/// The nested Selects inside the open filter panel.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FilterBuilderPicker {
+    /// The "+ Add filter" field Select.
+    AddField,
+    /// The draft clause's operator Select.
+    Operator,
+    /// The draft clause's operand Select (enum fields only).
+    Operand,
 }
 
 impl FilterBuilderSpec {
@@ -368,6 +385,7 @@ impl FilterBuilderSpec {
             show_combinator: false,
             is_open: false,
             draft: None,
+            open_picker: None,
         }
     }
 
@@ -433,6 +451,11 @@ impl FilterBuilderSpec {
 
     pub fn with_draft(mut self, draft: FilterDraft) -> Self {
         self.draft = Some(draft);
+        self
+    }
+
+    pub fn with_open_picker(mut self, picker: FilterBuilderPicker) -> Self {
+        self.open_picker = Some(picker);
         self
     }
 

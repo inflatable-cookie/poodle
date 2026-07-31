@@ -15,6 +15,11 @@ pub struct DateTimeZonePickerSpec {
     pub locale: String,
     pub time_zone_options: Vec<TimeZoneOption>,
     pub is_disabled: bool,
+    /// Whether the composed time-zone Select's option list is open.
+    ///
+    /// Native-only: on the web the Select owns its popup, but the native
+    /// hosts hold every piece of state, including this nested one.
+    pub zone_open: bool,
     pub aria_label: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
@@ -33,6 +38,7 @@ impl Default for DateTimeZonePickerSpec {
             locale: String::from("en-US"),
             time_zone_options: Vec::new(),
             is_disabled: false,
+            zone_open: false,
             aria_label: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
@@ -112,6 +118,11 @@ impl DateTimeZonePickerSpec {
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_zone_open(mut self, zone_open: bool) -> Self {
+        self.zone_open = zone_open;
         self
     }
 

@@ -41,14 +41,19 @@ use crate::time_zone_select::js_time_zone_select;
 /// calendar is the composed `Calendar`, so day and month events forward to it
 /// rather than being re-derived.
 ///
-/// The time half is typed and the zone list is a composed `Select` panel whose
-/// selection is not forwarded yet, so neither carries a handler.
+/// The zone list is the composed `TimeZoneSelect`, forwarded whole: the
+/// trigger press comes back as `on_zone_toggle` and the option press as
+/// `on_zone_change` with the zone id — the host flips `zone_open` and merges
+/// the zone into the value it holds. The time half stays typed, which the
+/// runtime cannot reach (no key events).
 pub struct DateTimeZonePicker {
     spec: DateTimeZonePickerSpec,
     theme: JetstreamThemeProvider,
     on_toggle: Option<crate::element::ActionHandler>,
     on_select: Option<crate::element::Handler>,
     on_navigate: Option<crate::element::Handler>,
+    on_zone_toggle: Option<crate::element::ActionHandler>,
+    on_zone_change: Option<crate::element::Handler>,
 }
 
 impl DateTimeZonePicker {
@@ -59,6 +64,8 @@ impl DateTimeZonePicker {
             on_toggle: None,
             on_select: None,
             on_navigate: None,
+            on_zone_toggle: None,
+            on_zone_change: None,
         }
     }
 
@@ -79,6 +86,19 @@ impl DateTimeZonePicker {
         self.on_navigate = Some(std::sync::Arc::new(handler));
         self
     }
+
+    /// Fires when the zone Select's trigger is pressed — the host flips
+    /// `zone_open`.
+    pub fn on_zone_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_zone_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the pressed zone option's id.
+    pub fn on_zone_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_zone_change = Some(std::sync::Arc::new(handler));
+        self
+    }
 }
 
 impl crate::element::IntoJsEl for DateTimeZonePicker {
@@ -89,6 +109,8 @@ impl crate::element::IntoJsEl for DateTimeZonePicker {
             self.on_toggle,
             self.on_select,
             self.on_navigate,
+            self.on_zone_toggle,
+            self.on_zone_change,
         )
     }
 }
@@ -97,7 +119,7 @@ pub fn js_date_time_zone_picker(
     spec: &DateTimeZonePickerSpec,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
-    build(spec, theme, None, None, None)
+    build(spec, theme, None, None, None, None, None)
 }
 
 fn build(
@@ -106,6 +128,8 @@ fn build(
     on_toggle: Option<crate::element::ActionHandler>,
     on_select: Option<crate::element::Handler>,
     on_navigate: Option<crate::element::Handler>,
+    on_zone_toggle: Option<crate::element::ActionHandler>,
+    on_zone_change: Option<crate::element::Handler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
@@ -209,6 +233,7 @@ fn build(
         let mut tz_spec = TimeZoneSelectSpec::new();
         tz_spec.value = value.time_zone.clone();
         tz_spec.is_disabled = spec.is_disabled;
+        tz_spec.is_open = spec.zone_open;
         if !spec.time_zone_options.is_empty() {
             tz_spec.options = spec.time_zone_options.clone();
         }
@@ -237,7 +262,18 @@ fn build(
             .flex_col()
             .gap(rem_to_px(0.375))
             .child(field_label("TIME ZONE"))
-            .child(js_time_zone_select(&tz_spec, theme));
+            .child({
+                let mut tz = crate::time_zone_select::TimeZoneSelect::from_spec(tz_spec, theme);
+                if let Some(handler) = &on_zone_toggle {
+                    let handler = std::sync::Arc::clone(handler);
+                    tz = tz.on_toggle(move || handler());
+                }
+                if let Some(handler) = &on_zone_change {
+                    let handler = std::sync::Arc::clone(handler);
+                    tz = tz.on_change(move |zone| handler(zone));
+                }
+                crate::element::IntoJsEl::into_js_el(tz)
+            });
 
         // Fields — vertical stack of Time + Time zone fields; contract gap 0.75rem.
         let fields = ui_element::div()
@@ -503,6 +539,71 @@ mod tests {
         crate::element::click_probe::click_text(&el, 520.0, 820.0, "17");
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["2026-03-17"]);
+    }
+
+    #[test]
+    fn the_zone_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = DateTimeZonePicker::from_spec(
+            DateTimeZonePickerSpec::new()
+                .with_open(true)
+                .with_default_value(ZonedDateTimeValue::new(
+                    Some("2026-03-01".to_string()),
+                    Some("09:00".to_string()),
+                    Some("UTC".to_string()),
+                )),
+            &theme(),
+        )
+        .on_zone_toggle(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
+        .into_js_el();
+
+        // The zone Select's trigger shows the selected zone's label.
+        crate::element::click_probe::click_text(&el, 520.0, 820.0, "UTC");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_zone_toggle fired exactly once");
+    }
+
+    #[test]
+    fn a_zone_option_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use poodle_specs::TimeZoneOption;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let zones = Arc::clone(&seen);
+
+        let el = DateTimeZonePicker::from_spec(
+            DateTimeZonePickerSpec::new()
+                .with_open(true)
+                .with_zone_open(true)
+                .with_time_zone_options(vec![
+                    TimeZoneOption { value: "UTC".to_string(), label: "UTC".to_string() },
+                    TimeZoneOption {
+                        value: "Europe/London".to_string(),
+                        label: "London".to_string(),
+                    },
+                ])
+                .with_default_value(ZonedDateTimeValue::new(
+                    Some("2026-03-01".to_string()),
+                    Some("09:00".to_string()),
+                    Some("UTC".to_string()),
+                )),
+            &theme(),
+        )
+        .on_zone_change(move |zone| zones.lock().unwrap().push(zone.to_string()))
+        .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 520.0, 900.0, "London");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["Europe/London"]);
     }
 
     #[test]
