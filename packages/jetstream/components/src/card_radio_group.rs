@@ -20,7 +20,42 @@ use crate::card::js_card;
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
+/// CardRadioGroup — one choice, rendered as cards.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct CardRadioGroup {
+    spec: CardRadioGroupSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl CardRadioGroup {
+    pub fn from_spec(spec: CardRadioGroupSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value. Disabled options never fire.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for CardRadioGroup {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &CardRadioGroupSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // Contract §7/§8 size scale — resolved through the spec helpers, not literals.
@@ -125,6 +160,10 @@ pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProv
 
         if is_item_disabled {
             card = card.opacity(resolve_opacity(theme, "state.opacity.disabled"));
+        } else if let Some(handler) = &on_change {
+            let handler = std::sync::Arc::clone(handler);
+            let value = option.value.clone();
+            card = card.cursor_pointer().on_click(move |_event| handler(&value));
         }
 
         root = root.child(card);
@@ -238,4 +277,22 @@ mod tests {
         assert!(has_w(&xl_tree, xl_w), "xl indicator width {xl_w} not found");
         assert!(has_w(&xs_tree, xs_w), "xs indicator width {xs_w} not found");
     }
+
+    #[test]
+    fn choosing_a_card_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = CardRadioGroup::from_spec(CardRadioGroupSpec::new(options()), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 240.0, "Pro");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["pro"]);
+    }
+
 }

@@ -302,6 +302,11 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
   accessibility tree via `aria-orientation`
 - disabled options must be skipped during keyboard navigation
 
+## 10a. Jetstream Notes
+
+- `RadioGroup::from_spec(spec, theme).on_change(...)`, carrying the chosen
+  option's value. A disabled option — or a disabled group — never fires.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

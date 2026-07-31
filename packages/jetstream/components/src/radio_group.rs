@@ -55,7 +55,42 @@ fn dot_size_px(size: ControlSize, icon_md_px: f32) -> f32 {
     }
 }
 
+/// RadioGroup — one choice from a list.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct RadioGroup {
+    spec: RadioGroupSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl RadioGroup {
+    pub fn from_spec(spec: RadioGroupSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value. Disabled options never fire.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for RadioGroup {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &RadioGroupSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // icon-default = size.icon.md token (GPUI: resolve_px(theme, "size.icon.md")).
@@ -149,6 +184,12 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
         // even though the group-level pass below dims the container too).
         if option.is_disabled {
             row = row.opacity(disabled_opacity);
+        }
+
+        if let (false, Some(handler)) = (option_disabled, &on_change) {
+            let handler = std::sync::Arc::clone(handler);
+            let value = option.value.clone();
+            row = row.cursor_pointer().on_click(move |_event| handler(&value));
         }
 
         el = el.child(row);
@@ -361,4 +402,22 @@ mod tests {
         let dim = resolve_opacity(&th, "state.opacity.disabled");
         assert!((el.style.opacity - dim).abs() < 0.001, "group-disabled dims container");
     }
+
+    #[test]
+    fn choosing_an_option_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = RadioGroup::from_spec(spec_with_color(None), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 160.0, "Pro");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
+    }
+
 }

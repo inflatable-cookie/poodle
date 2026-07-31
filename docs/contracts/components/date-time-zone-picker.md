@@ -343,6 +343,12 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
 - Timezone option ordering may differ due to platform timezone registries;
   keep committed timezone value semantics strict
 
+## 10a. Jetstream Notes
+
+- `DateTimeZonePicker::from_spec(spec, theme).on_toggle(...).on_select(...).on_navigate(...)`.
+- The time half is typed and the zone list is a composed `Select` whose
+  selection is not forwarded yet, so neither carries a handler.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

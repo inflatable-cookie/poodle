@@ -317,6 +317,12 @@ Density owns trigger horizontal padding only (no height/font change).
 - Time label typography must match: label-family, 0.6875rem, weight 600,
   0.04em tracking, uppercase
 
+## 10a. Jetstream Notes
+
+- `DateTimePicker::from_spec(spec, theme).on_toggle(...).on_select(...).on_navigate(...)`.
+- The time field is typed and this runtime raises no key events, so the time
+  half carries no handler.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

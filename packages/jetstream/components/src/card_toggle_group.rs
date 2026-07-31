@@ -20,7 +20,46 @@ use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size}
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// Build a card-toggle-group from its spec.
+/// CardToggleGroup — several choices, rendered as cards.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+///
+/// Multi-select, so the event carries the option that was pressed rather than
+/// the resulting set — the host owns the set and decides whether a press adds
+/// or removes.
+pub struct CardToggleGroup {
+    spec: CardToggleGroupSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl CardToggleGroup {
+    pub fn from_spec(spec: CardToggleGroupSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value. Disabled options never fire.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for CardToggleGroup {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &CardToggleGroupSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // Contract §7 size scale — resolved through the spec helpers, not literals.
@@ -70,6 +109,10 @@ pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemePr
         let mut option_el = ui_element::div().flex_1().min_w_0().child(card);
         if is_option_disabled {
             option_el = option_el.opacity(disabled_opacity);
+        } else if let Some(handler) = &on_change {
+            let handler = std::sync::Arc::clone(handler);
+            let value = option.value.clone();
+            option_el = option_el.cursor_pointer().on_click(move |_event| handler(&value));
         }
 
         cells.push(option_el);
@@ -186,4 +229,24 @@ mod tests {
             tree.texts()
         );
     }
+
+    /// Multi-select, so the event names the option pressed rather than the
+    /// resulting set: the host owns the set and decides add or remove.
+    #[test]
+    fn pressing_a_card_reports_that_option() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = CardToggleGroup::from_spec(CardToggleGroupSpec::new(options()), &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 240.0, "Option B");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
+    }
+
 }

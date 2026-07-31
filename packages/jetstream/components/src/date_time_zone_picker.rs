@@ -35,9 +35,77 @@ use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolv
 use crate::time_field::js_time_field;
 use crate::time_zone_select::js_time_zone_select;
 
+/// DateTimeZonePicker — a date popover with time and zone.
+///
+/// Mirrors the GPUI target's names: `on_toggle` and `on_select`. The popover's
+/// calendar is the composed `Calendar`, so day and month events forward to it
+/// rather than being re-derived.
+///
+/// The time half is typed and the zone list is a composed `Select` panel whose
+/// selection is not forwarded yet, so neither carries a handler.
+pub struct DateTimeZonePicker {
+    spec: DateTimeZonePickerSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+}
+
+impl DateTimeZonePicker {
+    pub fn from_spec(spec: DateTimeZonePickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_select: None,
+            on_navigate: None,
+        }
+    }
+
+    /// Fires when the trigger is pressed.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the pressed day as an ISO date.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"prev"` or `"next"` when a month arrow is pressed.
+    pub fn on_navigate(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_navigate = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for DateTimeZonePicker {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_toggle,
+            self.on_select,
+            self.on_navigate,
+        )
+    }
+}
+
 pub fn js_date_time_zone_picker(
     spec: &DateTimeZonePickerSpec,
     theme: &JetstreamThemeProvider,
+) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &DateTimeZonePickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
@@ -111,6 +179,11 @@ pub fn js_date_time_zone_picker(
 
     if !spec.is_disabled {
         trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
+
+        if let Some(handler) = &on_toggle {
+            let handler = std::sync::Arc::clone(handler);
+            trigger = trigger.on_click(move |_event| handler());
+        }
     }
 
     // ── Root wrapper: contract §7/§8 min-width 18rem ──
@@ -179,7 +252,18 @@ pub fn js_date_time_zone_picker(
             .aria_role(jetstream_ui::accesskit::Role::Dialog)
             .flex_col()
             .gap(rem_to_px(0.875))
-            .child(js_calendar(&cal_spec, theme))
+            .child({
+            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
+            if let Some(handler) = &on_select {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_select(move |iso| handler(iso));
+            }
+            if let Some(handler) = &on_navigate {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_navigate(move |dir| handler(dir));
+            }
+            crate::element::IntoJsEl::into_js_el(calendar)
+        })
             .child(fields);
 
         // Surface — established sibling overlay treatment (date_time_picker.rs):
@@ -378,4 +462,70 @@ mod tests {
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
     }
+
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new(), &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 420.0, 80.0, "Select date, time, and zone");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+
+    #[test]
+    fn a_day_in_the_popover_reports_its_iso_date() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let days = Arc::clone(&seen);
+
+        let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new()
+                .with_open(true)
+                .with_default_value(ZonedDateTimeValue::new(
+                    Some("2026-03-01".to_string()),
+                    Some("09:00".to_string()),
+                    Some("UTC".to_string()),
+                )), &theme())
+            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 520.0, 820.0, "17");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["2026-03-17"]);
+    }
+
+    #[test]
+    fn the_month_arrows_forward() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let moves = Arc::clone(&seen);
+
+        let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new()
+                .with_open(true)
+                .with_default_value(ZonedDateTimeValue::new(
+                    Some("2026-03-01".to_string()),
+                    Some("09:00".to_string()),
+                    Some("UTC".to_string()),
+                )), &theme())
+            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 520.0, 820.0, "chevron-right");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
+    }
+
 }

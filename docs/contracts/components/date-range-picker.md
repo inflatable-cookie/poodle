@@ -282,6 +282,13 @@ Density owns trigger horizontal padding only (no height/font change).
 - Auto-close on range completion must match Svelte behavior
 - Calendar composition: GPUI delegates to its own calendar primitive in range mode
 
+## 10a. Jetstream Notes
+
+- `DateRangePicker::from_spec(spec, theme).on_toggle(...).on_select(...).on_navigate(...)`.
+- The popover's calendar is the composed `Calendar`, so day and month events
+  forward to it. A range is two day presses: `on_select` reports each, and the
+  host holds which end it is filling.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

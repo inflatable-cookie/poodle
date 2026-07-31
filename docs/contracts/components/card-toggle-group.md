@@ -230,6 +230,12 @@ padding.
 | `data-size` | root | Drives size variant CSS |
 | `data-density` | root | Drives density variant CSS |
 
+## 7a. Jetstream Notes
+
+- `CardToggleGroup::from_spec(spec, theme).on_change(...)`.
+- Multi-select, so the event names the option pressed rather than the resulting
+  set: the host owns the set and decides whether a press adds or removes.
+
 ## 8. Use With CardRadioGroup
 
 Use `CardRadioGroup` when the user must make one radio-style choice.

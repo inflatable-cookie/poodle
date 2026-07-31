@@ -31,7 +31,75 @@ use crate::presentation::{
 };
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 
+/// DateRangePicker — a trigger and a range calendar.
+///
+/// Mirrors the GPUI target's names: `on_toggle` and `on_select`. The popover's
+/// calendar is the composed `Calendar`, so day and month events forward to it
+/// rather than being re-derived.
+///
+/// A range is two day presses; `on_select` reports each one and the host holds
+/// which end it is filling.
+pub struct DateRangePicker {
+    spec: DateRangePickerSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+}
+
+impl DateRangePicker {
+    pub fn from_spec(spec: DateRangePickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_select: None,
+            on_navigate: None,
+        }
+    }
+
+    /// Fires when the trigger is pressed.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the pressed day as an ISO date.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"prev"` or `"next"` when a month arrow is pressed.
+    pub fn on_navigate(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_navigate = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for DateRangePicker {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_toggle,
+            self.on_select,
+            self.on_navigate,
+        )
+    }
+}
+
 pub fn js_date_range_picker(spec: &DateRangePickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &DateRangePickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -96,6 +164,11 @@ pub fn js_date_range_picker(spec: &DateRangePickerSpec, theme: &JetstreamThemePr
 
     if !spec.is_disabled {
         trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
+
+        if let Some(handler) = &on_toggle {
+            let handler = std::sync::Arc::clone(handler);
+            trigger = trigger.on_click(move |_event| handler());
+        }
     }
 
     // ── Root wrapper: contract §7/§8 min-width 16rem ──
@@ -137,7 +210,18 @@ pub fn js_date_range_picker(spec: &DateRangePickerSpec, theme: &JetstreamThemePr
         )
         .py(rem_to_px(panel_space_y_rem(spec.density)))
         .px(rem_to_px(panel_space_x_rem(spec.density)))
-        .child(js_calendar(&cal_spec, theme));
+        .child({
+            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
+            if let Some(handler) = &on_select {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_select(move |iso| handler(iso));
+            }
+            if let Some(handler) = &on_navigate {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_navigate(move |dir| handler(dir));
+            }
+            crate::element::IntoJsEl::into_js_el(calendar)
+        });
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
         // platform delta; rendered as a flow column with the contract gap).
@@ -287,4 +371,73 @@ mod tests {
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
     }
+
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = DateRangePicker::from_spec(DateRangePickerSpec::new(), &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 360.0, 80.0, "Select date range");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    /// A range is two day presses; the component reports each one and the host
+    /// holds which end it is filling.
+    #[test]
+    fn a_day_in_the_popover_reports_its_iso_date() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let days = Arc::clone(&seen);
+
+        let spec = DateRangePickerSpec::new()
+            .with_open(true)
+            .with_default_value(DateRangeValue::new(
+                Some("2026-03-01".to_string()),
+                Some("2026-03-05".to_string()),
+            ));
+
+        let el = DateRangePicker::from_spec(spec, &theme())
+            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 420.0, 640.0, "17");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["2026-03-17"]);
+    }
+
+    #[test]
+    fn the_month_arrows_forward() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let moves = Arc::clone(&seen);
+
+        let spec = DateRangePickerSpec::new()
+            .with_open(true)
+            .with_default_value(DateRangeValue::new(
+                Some("2026-03-01".to_string()),
+                Some("2026-03-05".to_string()),
+            ));
+
+        let el = DateRangePicker::from_spec(spec, &theme())
+            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 420.0, 640.0, "chevron-right");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
+    }
+
 }

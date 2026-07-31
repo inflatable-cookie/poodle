@@ -291,6 +291,11 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 - Render as a flex grid with Card children
 - Arrow key navigation needs custom key event handling
 
+## 10a. Jetstream Notes
+
+- `CardRadioGroup::from_spec(spec, theme).on_change(...)`, with the whole card
+  as the hit target.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
