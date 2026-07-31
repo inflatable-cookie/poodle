@@ -8,10 +8,65 @@ use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastStackSpec};
 use crate::presentation::rem_to_px;
 use crate::toast_stack::js_toast_stack;
 
+/// ToastHost — positions a ToastStack over the viewport.
+///
+/// Mirrors the GPUI target's names, forwarded to the composed `ToastStack`.
+pub struct ToastHost {
+    spec: ToastHostSpec,
+    theme: JetstreamThemeProvider,
+    stack_spec: ToastStackSpec,
+    on_dismiss: Option<crate::element::Handler>,
+    on_action: Option<crate::element::Handler>,
+}
+
+impl ToastHost {
+    pub fn from_spec(
+        spec: ToastHostSpec,
+        stack_spec: ToastStackSpec,
+        theme: &JetstreamThemeProvider,
+    ) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            stack_spec,
+            on_dismiss: None,
+            on_action: None,
+        }
+    }
+
+    /// Fires with the dismissed toast's id, from the composed stack.
+    pub fn on_dismiss(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_dismiss = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the toast's id when its action chip is pressed.
+    pub fn on_action(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_action = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ToastHost {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, &self.stack_spec, self.on_dismiss, self.on_action)
+    }
+}
+
 pub fn js_toast_host(
     spec: &ToastHostSpec,
     theme: &JetstreamThemeProvider,
     stack_spec: &ToastStackSpec,
+) -> JsEl {
+    build(spec, theme, stack_spec, None, None)
+}
+
+fn build(
+    spec: &ToastHostSpec,
+    theme: &JetstreamThemeProvider,
+    stack_spec: &ToastStackSpec,
+    on_dismiss: Option<crate::element::Handler>,
+    on_action: Option<crate::element::Handler>,
 ) -> JsEl {
     // Empty toasts — render nothing
     if stack_spec.toasts.is_empty() {
@@ -53,8 +108,16 @@ pub fn js_toast_host(
     }
 
     // Render inner toast stack
-    let inner = js_toast_stack(stack_spec, theme);
-    container = container.child(inner);
+    let mut stack = crate::toast_stack::ToastStack::from_spec(stack_spec.clone(), theme);
+    if let Some(handler) = &on_dismiss {
+        let handler = std::sync::Arc::clone(handler);
+        stack = stack.on_dismiss(move |id| handler(id));
+    }
+    if let Some(handler) = &on_action {
+        let handler = std::sync::Arc::clone(handler);
+        stack = stack.on_action(move |id| handler(id));
+    }
+    container = container.child(crate::element::IntoJsEl::into_js_el(stack));
 
     crate::aria::with_aria_label(container, Some(spec.aria_label.as_str()))
         .aria_role(jetstream_ui::accesskit::Role::List)
@@ -130,4 +193,44 @@ mod tests {
         let tree = probe(&js_toast_host(&host, &theme(), &stack), 600.0, 400.0);
         assert!(tree.has_text("Heads up"), "top-start host should render its toast");
     }
+
+    /// The host positions; the stack owns the events. Forwarding is the thing
+    /// under test.
+    #[test]
+    fn stack_events_reach_the_host_handler() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let dismisses = Arc::clone(&seen);
+
+        let stack = ToastStackSpec::new().with_toasts(vec![Toast::new("t1", "Saved")]);
+        let el = ToastHost::from_spec(ToastHostSpec::new(), stack, &theme())
+            .on_dismiss(move |id| dismisses.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "\u{00d7}");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["t1"]);
+    }
+
+    #[test]
+    fn action_chips_forward_too() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let actions = Arc::clone(&seen);
+
+        let stack = ToastStackSpec::new()
+            .with_toasts(vec![Toast::new("t1", "Saved").with_action_label("Undo")]);
+        let el = ToastHost::from_spec(ToastHostSpec::new(), stack, &theme())
+            .on_action(move |id| actions.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "Undo");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["t1"]);
+    }
+
 }

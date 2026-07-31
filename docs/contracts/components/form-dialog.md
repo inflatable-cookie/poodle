@@ -262,6 +262,14 @@ None.
 - compose Dialog, FormLayout, and Button from their respective crates
 - submitting state must prevent dismiss and disable buttons
 
+## 10a. Jetstream Notes
+
+- `FormDialog::from_spec(spec, theme).child(...).on_submit(...).on_cancel(...)`,
+  forwarded to the composed default action `Button`s.
+- Submitting suppresses both routes: a second submit must not land while the
+  first is in flight.
+- With `custom_actions` the host owns the buttons; wire those directly.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

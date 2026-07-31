@@ -379,6 +379,11 @@ trigger `var(--poodle-typography-label-size)`, item `var(--poodle-typography-bod
 - Trigger typography (label-family, 0.75rem, weight 600) must match
 - Outside click maps to GPUI mouse-down-outside event handling
 
+## 10a. Jetstream Notes
+
+- `Menubar::from_spec(spec, theme).on_trigger(...).on_select(...)`. A top-level
+  trigger and a menu item are different events with different payloads.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

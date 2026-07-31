@@ -40,7 +40,51 @@ use crate::theme_ext::{
 /// `typography.label.weight` (600), following the `form_shell.rs` convention.
 const LABEL_WEIGHT: u16 = 600;
 
+/// Menubar — top-level triggers with dropdown menus.
+///
+/// Mirrors the GPUI target's names: `on_trigger` for a top-level entry and
+/// `on_select` for a menu item's value.
+pub struct Menubar {
+    spec: MenubarSpec,
+    theme: JetstreamThemeProvider,
+    on_trigger: Option<crate::element::Handler>,
+    on_select: Option<crate::element::Handler>,
+}
+
+impl Menubar {
+    pub fn from_spec(spec: MenubarSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_trigger: None, on_select: None }
+    }
+
+    /// Fires with a top-level entry's value when its trigger is pressed.
+    pub fn on_trigger(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_trigger = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the chosen menu item's value.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Menubar {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_trigger, self.on_select)
+    }
+}
+
 pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &MenubarSpec,
+    theme: &JetstreamThemeProvider,
+    on_trigger: Option<crate::element::Handler>,
+    on_select: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Item body font (contract item base `typography.body.size`); meta is smaller.
@@ -132,6 +176,12 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
         if entry.is_disabled {
             btn = btn.opacity(disabled_opacity).disabled(true);
         } else {
+            if let Some(handler) = &on_trigger {
+                let handler = std::sync::Arc::clone(handler);
+                let value = entry.value.clone();
+                btn = btn.on_click(move |_event| handler(&value));
+            }
+
             // Hover/focus shares the open treatment (accent 14%).
             btn = btn.hover(move |s| s.bg(open_bg));
         }
@@ -235,6 +285,12 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
                             row = row.opacity(disabled_opacity);
                         } else {
                             row = row.cursor_pointer().hover(move |s| s.bg(item_hover));
+
+                            if let Some(handler) = &on_select {
+                                let handler = std::sync::Arc::clone(handler);
+                                let value = item.value.clone();
+                                row = row.on_click(move |_event| handler(&value));
+                            }
                         }
 
                         overlay = overlay.child(row);
@@ -410,4 +466,31 @@ mod tests {
             "no overlay should render when the open menu has no items"
         );
     }
+
+    /// A trigger and a menu item are different events with different payloads.
+    #[test]
+    fn triggers_and_items_report_separately() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let triggers = Arc::clone(&seen);
+        let selects = Arc::clone(&seen);
+
+        let el = Menubar::from_spec(spec(), &theme())
+            .on_trigger(move |value| triggers.lock().unwrap().push(format!("trigger:{value}")))
+            .on_select(move |value| selects.lock().unwrap().push(format!("select:{value}")))
+            .into_js_el();
+
+        // "Edit" is a closed trigger; "Undo" would be inside its closed menu,
+        // so click the open "file" menu's first item instead.
+        crate::element::click_probe::click_text(&el, 640.0, 400.0, "Edit");
+        let first = spec().items[0].items[0].label.clone();
+        crate::element::click_probe::click_text(&el, 640.0, 400.0, &first);
+
+        let got = seen.lock().unwrap();
+        assert_eq!(got[0], "trigger:edit");
+        assert!(got[1].starts_with("select:"), "{got:?}");
+    }
+
 }

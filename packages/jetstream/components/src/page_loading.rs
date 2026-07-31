@@ -17,7 +17,42 @@ use crate::progress::js_progress;
 use crate::spinner::js_spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
+/// PageLoading — a blocking progress surface.
+///
+/// Mirrors the GPUI target's `on_cancel`. The control renders only when
+/// `can_cancel`, so there is nothing to fire otherwise.
+pub struct PageLoading {
+    spec: PageLoadingSpec,
+    theme: JetstreamThemeProvider,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl PageLoading {
+    pub fn from_spec(spec: PageLoadingSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_cancel: None }
+    }
+
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for PageLoading {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_cancel)
+    }
+}
+
 pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &PageLoadingSpec,
+    theme: &JetstreamThemeProvider,
+    on_cancel: Option<crate::element::ActionHandler>,
+) -> JsEl {
     if !spec.is_visible {
         return ui_element::div();
     }
@@ -101,17 +136,24 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
     // the preview event loop (accepted runtime delta — note).
     if spec.can_cancel {
         card = card.child(
-            ui_element::label("Cancel")
-                .text_color(text_secondary)
-                .text_size(font_size)
-                .border(border_width)
-                .border_color(border)
-                .rounded(control_radius)
-                .pl(rem_to_px(0.875))
-                .pr(rem_to_px(0.875))
-                .pt(rem_to_px(0.375))
-                .pb(rem_to_px(0.375))
-                .cursor_pointer(),
+            {
+                let mut cancel = ui_element::label("Cancel")
+                    .text_color(text_secondary)
+                    .text_size(font_size)
+                    .border(border_width)
+                    .border_color(border)
+                    .rounded(control_radius)
+                    .pl(rem_to_px(0.875))
+                    .pr(rem_to_px(0.875))
+                    .pt(rem_to_px(0.375))
+                    .pb(rem_to_px(0.375))
+                    .cursor_pointer();
+                if let Some(handler) = &on_cancel {
+                    let handler = std::sync::Arc::clone(handler);
+                    cancel = cancel.on_click(move |_event| handler());
+                }
+                cancel
+            },
         );
     }
 
@@ -232,4 +274,27 @@ mod tests {
         assert!(!tree.has_text("Cancel"));
         assert_eq!(tree.count_kind("ProgressBar"), 0);
     }
+
+    #[test]
+    fn the_cancel_control_reports_a_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = PageLoadingSpec::new()
+            .with_message("Loading data...")
+            .with_can_cancel(true);
+
+        let el = PageLoading::from_spec(spec, &theme())
+            .on_cancel(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 480.0, "Cancel");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_cancel fired exactly once");
+    }
+
 }

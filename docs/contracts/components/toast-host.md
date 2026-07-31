@@ -269,6 +269,12 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 - Fixed-position viewport anchoring requires platform-specific overlay management
 - Timer management should use platform async primitives
 
+## 10a. Jetstream Notes
+
+- `ToastHost::from_spec(spec, stack_spec, theme).on_dismiss(...).on_action(...)`,
+  forwarded to the composed `ToastStack` — the host positions, the stack owns
+  the events.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

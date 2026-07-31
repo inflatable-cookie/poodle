@@ -263,6 +263,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - GPUI backdrop blur differs from Svelte (GPUI backdrop effects do not map directly to CSS `backdrop-filter`)
 - GPUI cancel focus treatment uses component-level approximations rather than CSS outline + offset
 
+## 10a. Jetstream Notes
+
+- `PageLoading::from_spec(spec, theme).on_cancel(...)`. The control renders only
+  when `canCancel`, so there is nothing to fire otherwise.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

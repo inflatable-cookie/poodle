@@ -8,10 +8,69 @@ use crate::presentation::{
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, tint};
 
+/// DockRegion — a dockable panel with tabs.
+///
+/// Mirrors the GPUI target's names: `on_tab_change` and `on_collapse_toggle`.
+///
+/// The drag events (`onDragStart`, reorder, panel drop) are drag-with-payload
+/// gestures the runtime does not carry; recorded as a delta.
+pub struct DockRegion {
+    spec: DockRegionSpec,
+    theme: JetstreamThemeProvider,
+    content: Option<JsEl>,
+    on_tab_change: Option<crate::element::Handler>,
+    on_collapse_toggle: Option<crate::element::ToggleHandler>,
+}
+
+impl DockRegion {
+    pub fn from_spec(spec: DockRegionSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            content: None,
+            on_tab_change: None,
+            on_collapse_toggle: None,
+        }
+    }
+
+    pub fn content(mut self, content: impl crate::element::IntoJsEl) -> Self {
+        self.content = Some(content.into_js_el());
+        self
+    }
+
+    /// Fires with the tab's value when one is pressed.
+    pub fn on_tab_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_tab_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the collapsed state the region is moving **to**.
+    pub fn on_collapse_toggle(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_collapse_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for DockRegion {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.content, self.on_tab_change, self.on_collapse_toggle)
+    }
+}
+
 pub fn js_dock_region(
     spec: &DockRegionSpec,
     theme: &JetstreamThemeProvider,
     content: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, content, None, None)
+}
+
+fn build(
+    spec: &DockRegionSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+    on_tab_change: Option<crate::element::Handler>,
+    on_collapse_toggle: Option<crate::element::ToggleHandler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tab_font = rem_to_px(size_font_rem(effective_size));
@@ -88,6 +147,12 @@ pub fn js_dock_region(
                 .border_b_2()
                 .border_color_bottom(accent);
         }
+        if let Some(handler) = &on_tab_change {
+            let handler = std::sync::Arc::clone(handler);
+            let value = value.to_string();
+            tab_btn = tab_btn.on_click(move |_event| handler(&value));
+        }
+
         tab_btn
     };
 
@@ -108,6 +173,12 @@ pub fn js_dock_region(
         } else {
             t = t.pl(space_x * 0.5).pr(space_x * 0.5).pt(space_y * 0.5).pb(space_y * 0.5);
         }
+        if let Some(handler) = &on_collapse_toggle {
+            let handler = std::sync::Arc::clone(handler);
+            let next = !spec.is_collapsed;
+            t = t.on_click(move |_event| handler(next));
+        }
+
         t
     };
 
@@ -407,4 +478,47 @@ mod tests {
         assert!(tree.find_token("dock-stack-explorer").is_some(), "stack item id missing");
         assert!(tree.find_token("dock-collapse").is_none(), "static mode must not render collapse toggle");
     }
+
+    #[test]
+    fn a_tab_press_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let tabs = Arc::clone(&seen);
+
+        let el = DockRegion::from_spec(spec(), &theme())
+            .content(ui_element::label("Panel body"))
+            .on_tab_change(move |value| tabs.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        // The tab's button text is "<icon> <label>" when it carries an icon.
+        let second = spec().items[1].clone();
+        let button_text = match &second.icon {
+            Some(icon) => format!("{icon} {}", second.label),
+            None => second.label.clone(),
+        };
+        crate::element::click_probe::click_text(&el, 480.0, 320.0, &button_text);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [second.value]);
+    }
+
+    #[test]
+    fn the_collapse_toggle_reports_the_next_state() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let el = DockRegion::from_spec(spec().with_collapsible(true), &theme())
+            .content(ui_element::label("Panel body"))
+            .on_collapse_toggle(move |next| values.lock().unwrap().push(next))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 320.0, "‹");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), [true]);
+    }
+
 }

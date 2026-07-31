@@ -32,11 +32,88 @@ use crate::theme_ext::resolve_color;
 ///   ├── [Body]     FormLayout (or bare content) + optional error/success callouts
 ///   └── [Actions]  custom slot OR default submit/cancel row (js_button)
 /// ```
+/// FormDialog — a dialog wrapping a form.
+///
+/// Mirrors the GPUI target's names: `on_submit` and `on_cancel`, forwarded to
+/// the composed default action `Button`s. As elsewhere, `on_cancel` also covers
+/// the dialog's dismissal routes.
+///
+/// With `custom_actions` the host owns the buttons, so the default handlers
+/// have nothing to attach to — wire the custom actions directly.
+pub struct FormDialog {
+    spec: FormDialogSpec,
+    theme: JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    custom_actions: Option<JsEl>,
+    on_submit: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
+}
+
+impl FormDialog {
+    pub fn from_spec(spec: FormDialogSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            children: Vec::new(),
+            custom_actions: None,
+            on_submit: None,
+            on_cancel: None,
+        }
+    }
+
+    pub fn child(mut self, child: impl crate::element::IntoJsEl) -> Self {
+        self.children.push(child.into_js_el());
+        self
+    }
+
+    pub fn custom_actions(mut self, actions: impl crate::element::IntoJsEl) -> Self {
+        self.custom_actions = Some(actions.into_js_el());
+        self
+    }
+
+    /// Fires when the default submit button is pressed. Never fires while
+    /// submitting or disabled.
+    pub fn on_submit(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_submit = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires for the cancel button and the dialog's dismissal routes.
+    pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_cancel = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for FormDialog {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.children,
+            self.custom_actions,
+            self.on_submit,
+            self.on_cancel,
+        )
+    }
+}
+
 pub fn js_form_dialog(
     spec: &FormDialogSpec,
     theme: &JetstreamThemeProvider,
     children: Vec<JsEl>,
     custom_actions: Option<JsEl>,
+) -> JsEl {
+    build(spec, theme, children, custom_actions, None, None)
+}
+
+fn build(
+    spec: &FormDialogSpec,
+    theme: &JetstreamThemeProvider,
+    children: Vec<JsEl>,
+    custom_actions: Option<JsEl>,
+    on_submit: Option<crate::element::ActionHandler>,
+    on_cancel: Option<crate::element::ActionHandler>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -98,16 +175,23 @@ pub fn js_form_dialog(
         let submit_disabled = spec.is_submitting || spec.is_disabled;
 
         // Cancel — ghost Button, disabled during submitting (Svelte parity).
-        let cancel = js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_label(spec.cancel_label.clone())
-                .with_size(spec.size)
-                .with_size_role(spec.size_role)
-                .with_density(spec.density)
-                .with_disabled(spec.is_submitting),
-            theme,
-        );
+        let cancel = {
+            let mut button = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_label(spec.cancel_label.clone())
+                    .with_size(spec.size)
+                    .with_size_role(spec.size_role)
+                    .with_density(spec.density)
+                    .with_disabled(spec.is_submitting),
+                theme,
+            );
+            if let Some(handler) = &on_cancel {
+                let handler = std::sync::Arc::clone(handler);
+                button = button.on_click(move || handler());
+            }
+            crate::element::IntoJsEl::into_js_el(button)
+        };
 
         // Submit — primary Button. Label flips to "Submitting…" and the button
         // is disabled while submitting or explicitly disabled.
@@ -116,16 +200,23 @@ pub fn js_form_dialog(
         } else {
             spec.submit_label.clone()
         };
-        let submit = js_button(
-            &ButtonSpec::new()
-                .with_variant(ButtonVariant::Primary)
-                .with_label(submit_label)
-                .with_size(spec.size)
-                .with_size_role(spec.size_role)
-                .with_density(spec.density)
-                .with_disabled(submit_disabled),
-            theme,
-        );
+        let submit = {
+            let mut button = crate::button::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_label(submit_label)
+                    .with_size(spec.size)
+                    .with_size_role(spec.size_role)
+                    .with_density(spec.density)
+                    .with_disabled(submit_disabled),
+                theme,
+            );
+            if let Some(handler) = &on_submit {
+                let handler = std::sync::Arc::clone(handler);
+                button = button.on_click(move || handler());
+            }
+            crate::element::IntoJsEl::into_js_el(button)
+        };
 
         let row_spec = FormActionsSpec::new()
             .with_align(FormActionAlign::End)
@@ -287,4 +378,49 @@ mod tests {
         // so just assert the dialog built without panicking and shows the title.
         assert!(tree.has_text("Bare"), "title missing in bare mode: {:?}", tree.texts());
     }
+
+    #[test]
+    fn the_default_actions_report_submit_and_cancel() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let submits = Arc::clone(&seen);
+        let cancels = Arc::clone(&seen);
+
+        let spec = FormDialogSpec::new("Add new user");
+        let (submit_label, cancel_label) = (spec.submit_label.clone(), spec.cancel_label.clone());
+
+        let el = FormDialog::from_spec(spec, &theme())
+            .on_submit(move || submits.lock().unwrap().push("submit"))
+            .on_cancel(move || cancels.lock().unwrap().push("cancel"))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, &submit_label);
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, &cancel_label);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["submit", "cancel"]);
+    }
+
+    /// Submitting disables both routes: a second submit must not land while the
+    /// first is in flight.
+    #[test]
+    fn submitting_suppresses_the_actions() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = FormDialogSpec::new("Add new user").with_submitting(true);
+        let el = FormDialog::from_spec(spec, &theme())
+            .on_submit(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 800.0, 600.0, "Submitting\u{2026}");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a submitting dialog resubmitted");
+    }
+
 }

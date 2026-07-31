@@ -647,6 +647,12 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 - the public extension receives native events directly; no selector, internal
   Poodle MIME type, generated id, or Longhorn type is part of the contract
 
+## 10a. Jetstream Notes
+
+- `DockRegion::from_spec(spec, theme).content(...).on_tab_change(...).on_collapse_toggle(...)`.
+- The drag set — `onDragStart`, reorder, panel drop — are drag-with-payload
+  gestures the runtime does not carry; recorded below as a delta.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
