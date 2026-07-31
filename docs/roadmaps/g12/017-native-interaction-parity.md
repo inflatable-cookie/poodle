@@ -184,6 +184,7 @@ Batches land with the gate holding each one to a click test.
 | Form inputs | 5 | 61 → 56 |
 | Sliders (drag) | 2 | 56 → 54 |
 | Pickers | 6 | 54 → 48 |
+| Dates and panels | 3 | 48 → 45 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -312,6 +313,18 @@ Nothing else in the repo could have caught this. The visual gate compares pixels
 against baselines that were themselves rendered with the bug. The a11y audit
 walks the tree and the tree was right. Only driving a click found it.
 
+### When a contract event has no pointer shape
+
+`OrderBy`'s contract has one `onChange` carrying the whole ordering. A pointer
+cannot produce an ordering — it produces one intent on one row — so the
+Jetstream events are `on_direction_toggle` and `on_remove`, each naming the
+field, and the host applies the intent to the ordering it already holds. That is
+the same split the web target makes internally before it emits `onChange`.
+
+The alternative was an `on_change` taking a rebuilt ordering, which would have
+put the host's state inside the component and made the event a lie about what
+the user did.
+
 ### CI did not run the adapter's tests
 
 `full_parity_component_counts` had been failing since the workstation category
@@ -344,7 +357,7 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 48 components left in the `drift:clicks` baseline. Mechanical: each
+1. Sweep the 45 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is

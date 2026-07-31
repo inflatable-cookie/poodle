@@ -303,6 +303,13 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 - if a command must show extra scope, prefer concise supporting copy in the
   discovery panel rather than breadcrumb-style label composition
 
+## 10a. Jetstream Notes
+
+- `CommandPalette::from_spec(spec, theme).on_select(...)`, carrying the chosen
+  action's id. Disabled actions never fire.
+- No `on_query_change`: the query box is a text field and this runtime raises no
+  key events, so the host filters and feeds the result back through the spec.
+
 ## 11. Specimen Definitions
 
 ### Command Palette

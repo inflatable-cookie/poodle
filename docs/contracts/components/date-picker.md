@@ -305,6 +305,13 @@ Density owns trigger horizontal padding only (no height/font change).
 - Overlay positioning may differ from CSS absolute positioning but must appear
   anchored below the trigger
 
+## 10a. Jetstream Notes
+
+- `DatePicker::from_spec(spec, theme).on_toggle(...).on_select(...).on_navigate(...)`.
+- The popover's calendar is the composed `Calendar`, so `on_select` and
+  `on_navigate` are forwarded to it rather than re-derived — a day pressed in
+  the popover is the same event, with the same ISO payload.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

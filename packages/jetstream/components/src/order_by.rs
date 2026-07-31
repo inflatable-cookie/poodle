@@ -25,7 +25,62 @@ use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offse
 use crate::select::js_select;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
+/// OrderBy — an ordered list of sort fields.
+///
+/// The contract has a single `onChange` carrying the whole ordering. A pointer
+/// cannot produce an ordering; it produces one of two intents on one row, so
+/// that is what the events say: `on_direction_toggle` and `on_remove`, each
+/// carrying the field. The host applies the intent to the ordering it already
+/// holds and passes the result back through the spec — the same split the web
+/// target makes internally before it emits `onChange`.
+///
+/// Reordering is a drag, and the rows carry a drag handle with no handler yet.
+pub struct OrderBy {
+    spec: OrderBySpec,
+    theme: JetstreamThemeProvider,
+    on_direction_toggle: Option<crate::element::Handler>,
+    on_remove: Option<crate::element::Handler>,
+}
+
+impl OrderBy {
+    pub fn from_spec(spec: OrderBySpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_direction_toggle: None,
+            on_remove: None,
+        }
+    }
+
+    /// Fires with the field whose direction arrow was pressed.
+    pub fn on_direction_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_direction_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the field that was removed.
+    pub fn on_remove(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_remove = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for OrderBy {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_direction_toggle, self.on_remove)
+    }
+}
+
 pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &OrderBySpec,
+    theme: &JetstreamThemeProvider,
+    on_direction_toggle: Option<crate::element::Handler>,
+    on_remove: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Size table (matches corrected contract §8) ────────────────────────────
@@ -257,27 +312,45 @@ pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {
                             .text_size(item_label_font),
                     )
                     // Direction toggle (xs ghost IconButton).
-                    .child(js_icon_button(
-                        &IconButtonSpec::new()
-                            .with_icon(dir_icon)
-                            .with_aria_label(format!("{field_label}: {dir_word}. Click to toggle."))
-                            .with_tooltip(dir_tooltip)
-                            .with_variant(poodle_specs::ButtonVariant::Ghost)
-                            .with_size(ControlSize::Xs)
-                            .with_disabled(spec.is_disabled),
-                        theme,
-                    ))
+                    .child({
+                        let mut button = crate::icon_button::IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon(dir_icon)
+                                .with_aria_label(format!(
+                                    "{field_label}: {dir_word}. Click to toggle."
+                                ))
+                                .with_tooltip(dir_tooltip)
+                                .with_variant(poodle_specs::ButtonVariant::Ghost)
+                                .with_size(ControlSize::Xs)
+                                .with_disabled(spec.is_disabled),
+                            theme,
+                        );
+                        if let Some(handler) = &on_direction_toggle {
+                            let handler = std::sync::Arc::clone(handler);
+                            let field = item.key.clone();
+                            button = button.on_click(move || handler(&field));
+                        }
+                        crate::element::IntoJsEl::into_js_el(button)
+                    })
                     // Remove (xs ghost IconButton, no danger tone).
-                    .child(js_icon_button(
-                        &IconButtonSpec::new()
-                            .with_icon("x")
-                            .with_aria_label(format!("Remove {field_label}"))
-                            .with_tooltip("Remove")
-                            .with_variant(poodle_specs::ButtonVariant::Ghost)
-                            .with_size(ControlSize::Xs)
-                            .with_disabled(spec.is_disabled),
-                        theme,
-                    ));
+                    .child({
+                        let mut button = crate::icon_button::IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon("x")
+                                .with_aria_label(format!("Remove {field_label}"))
+                                .with_tooltip("Remove")
+                                .with_variant(poodle_specs::ButtonVariant::Ghost)
+                                .with_size(ControlSize::Xs)
+                                .with_disabled(spec.is_disabled),
+                            theme,
+                        );
+                        if let Some(handler) = &on_remove {
+                            let handler = std::sync::Arc::clone(handler);
+                            let field = item.key.clone();
+                            button = button.on_click(move || handler(&field));
+                        }
+                        crate::element::IntoJsEl::into_js_el(button)
+                    });
 
                 list = list.child(row);
             }
@@ -466,4 +539,35 @@ mod tests {
             "summary trigger must be hidden in icon mode"
         );
     }
+
+    /// A pointer cannot produce an ordering, only an intent on one row, so the
+    /// events name the field and the host applies the change.
+    #[test]
+    fn the_row_controls_report_their_field() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let toggles = Arc::clone(&seen);
+        let removes = Arc::clone(&seen);
+
+        let spec = OrderBySpec::new()
+            .with_fields(fields())
+            .with_open(true)
+            .with_value(vec![OrderByField::new("title", SortDirection::Asc)]);
+
+        let el = OrderBy::from_spec(spec, &theme())
+            .on_direction_toggle(move |field| toggles.lock().unwrap().push(format!("dir:{field}")))
+            .on_remove(move |field| removes.lock().unwrap().push(format!("remove:{field}")))
+            .into_js_el();
+
+        // Ascending renders an up arrow; the remove control is the ghost "x".
+        crate::element::click_probe::click_text(&el, 360.0, 320.0, "arrow-up");
+        // Two "x" glyphs: the trigger's reset and the row's remove. Index 1 is
+        // the row, and the payload below is what proves it.
+        crate::element::click_probe::click_text_nth(&el, 360.0, 320.0, "x", 1);
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["dir:title", "remove:title"]);
+    }
+
 }

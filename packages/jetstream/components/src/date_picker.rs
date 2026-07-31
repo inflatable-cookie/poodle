@@ -27,7 +27,74 @@ use crate::presentation::{
 };
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 
+/// DatePicker — a trigger and a calendar popover.
+///
+/// Mirrors the GPUI target's names: `on_toggle` and `on_select`. The calendar
+/// is composed rather than reimplemented, so `on_select` and `on_navigate` are
+/// forwarded to it — a day pressed in the popover is the same event `Calendar`
+/// already raises.
+pub struct DatePicker {
+    spec: DatePickerSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+}
+
+impl DatePicker {
+    pub fn from_spec(spec: DatePickerSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_select: None,
+            on_navigate: None,
+        }
+    }
+
+    /// Fires when the trigger is pressed. The component does not own the open
+    /// state; the spec says whether the popover is drawn.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with the pressed day as an ISO date.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"prev"` or `"next"` when a month arrow is pressed.
+    pub fn on_navigate(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_navigate = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for DatePicker {
+    fn into_js_el(self) -> JsEl {
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_toggle,
+            self.on_select,
+            self.on_navigate,
+        )
+    }
+}
+
 pub fn js_date_picker(spec: &DatePickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None, None)
+}
+
+fn build(
+    spec: &DatePickerSpec,
+    theme: &JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
@@ -90,6 +157,11 @@ pub fn js_date_picker(spec: &DatePickerSpec, theme: &JetstreamThemeProvider) -> 
 
     if !spec.is_disabled {
         trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
+
+        if let Some(handler) = &on_toggle {
+            let handler = std::sync::Arc::clone(handler);
+            trigger = trigger.on_click(move |_event| handler());
+        }
     }
 
     // ── Root wrapper: contract §7/§8 min-width 14rem ──
@@ -126,7 +198,18 @@ pub fn js_date_picker(spec: &DatePickerSpec, theme: &JetstreamThemeProvider) -> 
         )
         .py(rem_to_px(panel_space_y_rem(spec.density)))
         .px(rem_to_px(panel_space_x_rem(spec.density)))
-        .child(js_calendar(&cal_spec, theme));
+        .child({
+            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec, theme);
+            if let Some(handler) = &on_select {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_select(move |iso| handler(iso));
+            }
+            if let Some(handler) = &on_navigate {
+                let handler = std::sync::Arc::clone(handler);
+                calendar = calendar.on_navigate(move |dir| handler(dir));
+            }
+            crate::element::IntoJsEl::into_js_el(calendar)
+        });
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
         // platform delta; rendered as a flow column with the contract gap).
@@ -236,4 +319,66 @@ mod tests {
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
     }
+
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = DatePicker::from_spec(DatePickerSpec::new(), &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 360.0, "Select date");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    /// The popover's calendar is composed, not reimplemented, so a day pressed
+    /// there is the same event `Calendar` already raises — forwarded, with the
+    /// same ISO payload.
+    #[test]
+    fn a_day_in_the_popover_reports_its_iso_date() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let days = Arc::clone(&seen);
+
+        // The popover's calendar takes its visible month from the value.
+        let spec = DatePickerSpec::new()
+            .with_default_open(true)
+            .with_default_value("2026-03-01");
+
+        let el = DatePicker::from_spec(spec, &theme())
+            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 600.0, "17");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["2026-03-17"]);
+    }
+
+    #[test]
+    fn the_month_arrows_forward_too() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let moves = Arc::clone(&seen);
+
+        let spec = DatePickerSpec::new().with_default_open(true).with_default_value("2026-03-01");
+        let el = DatePicker::from_spec(spec, &theme())
+            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 600.0, "chevron-right");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
+    }
+
 }

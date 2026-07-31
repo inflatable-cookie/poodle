@@ -34,7 +34,44 @@ use crate::theme_ext::{
     color_mix, elevation_dialog, resolve_color, resolve_opacity, resolve_px, resolve_radius,
 };
 
+/// CommandPalette — a query box over a list of actions.
+///
+/// Mirrors the GPUI target's `on_select`. No `on_query_change`: the query box
+/// is a text field and this runtime raises no key events, so the host filters
+/// and feeds the result back through the spec.
+pub struct CommandPalette {
+    spec: CommandPaletteSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+}
+
+impl CommandPalette {
+    pub fn from_spec(spec: CommandPaletteSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_select: None }
+    }
+
+    /// Fires with the chosen action's id. Disabled actions never fire.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for CommandPalette {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select)
+    }
+}
+
 pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &CommandPaletteSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+) -> JsEl {
     // Closed: render nothing. Consumers that never touched `is_open` still
     // render because the spec default is `true`.
     if !spec.is_open {
@@ -293,6 +330,12 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
                     row = row.opacity(disabled_opacity);
                 } else {
                     row = row.cursor_pointer();
+
+                    if let Some(handler) = &on_select {
+                        let handler = std::sync::Arc::clone(handler);
+                        let id = action.id.clone();
+                        row = row.on_click(move |_event| handler(&id));
+                    }
                 }
 
                 // Left: title + optional badge.
@@ -524,4 +567,42 @@ mod tests {
             .with_open(true);
         assert_eq!(palette_status(&single), "1 command available.");
     }
+
+    #[test]
+    fn choosing_an_action_reports_its_id() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let ids = Arc::clone(&seen);
+
+        let el = CommandPalette::from_spec(open_spec(), &theme())
+            .on_select(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "Open File");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["open"]);
+    }
+
+    /// The fixture's last action is disabled, so this proves the flag reaches
+    /// the rendered tree rather than only the styling.
+    #[test]
+    fn a_disabled_action_never_fires() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = CommandPalette::from_spec(open_spec(), &theme())
+            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 640.0, 640.0, "Legacy Action");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled action fired");
+    }
+
 }

@@ -590,6 +590,16 @@ The panel uses the following internal component instances:
 - The reset `×` IconButton handler uses `stopPropagation` and `preventDefault` to avoid toggling the dropdown
 - The surface is a `role="dialog"` element with `tabindex="-1"`; on open the component auto-focuses the first focusable control, and closes on outside-click or Escape
 
+## 10a. Jetstream Notes
+
+- `OrderBy::from_spec(spec, theme).on_direction_toggle(...).on_remove(...)`,
+  each carrying the field's key.
+- The contract's `onChange` carries a whole ordering, and a pointer cannot
+  produce one — it produces an intent on one row. So the events name the intent,
+  and the host applies it to the ordering it already holds. That is the same
+  split the web target makes internally before it emits `onChange`.
+- Reordering is a drag; the rows draw a handle and it carries no handler yet.
+
 ## 13. Parity Checklist
 
 ### Tier 1: Strict Parity
