@@ -501,13 +501,50 @@ what its drag machinery keys off). Proof, via the now-interactive specimen
 holding its ratio in specimen state:
 `--drag 906,436,806,436 --print-state split-view` → `split-view-ratio=42`.
 
+### The baseline is empty — the text trio needed no new input route
+
+The original 34-handler backlog is gone. The final three were sold as "needs
+focus and key routing this pass did not build" — but the route existed all
+along: `TextInput` already did caret-at-end key editing (characters append,
+backspace deletes). `command_palette` just forwards the composed input's
+`on_change` as `on_query_change`; `editable_label` grew the same handling in
+its own key handler (with `max_length` enforced in-component, since the host
+never sees the keystroke); and `pagination`'s `on_goto_input_change` was for
+a "go to page" field that left the contract long ago — the builder rendered
+nothing and was deleted, not wired.
+
+Proving it found the best bug of the batch: **every TextInput shared one
+element id** (`"poodle-input"` unless the rarely-used component-level id was
+set — the spec-level id was ignored). gpui keys element state, including the
+implicit focus handle, by the element id *stack*, and plain ancestor divs
+contribute nothing to it — so every input on a page shared a single focus
+handle. Clicking any input visually focused all of them, and key dispatch
+resolved the focus id to whichever input painted last, usually one with no
+key listener. Clicks focused, rings drew, keys vanished. The element id now
+derives from the spec id, and typing reaches the input that was clicked.
+
+The driver grew `--type text` — keyDown/keyUp pairs posted through the same
+app-queue route as clicks, with an ANSI-US keycode map because gpui derives
+the typed character from the event's keyCode via the layout, ignoring the
+characters string. It also inserts a bare KeyUp after each action:
+`dispatch_key_event` is the only path that redraws an occluded window, so
+without it a second click would hit-test the scene from before the first.
+
+Proofs: `--click <input> --type x` → `text-input-name="x"`;
+`--click <label> --type hello` → `editable-label-live="My project
+titlehello"`. The palette's own end-to-end proof is deferred: its specimen
+opens the interactive palette as a centred overlay whose geometry cannot be
+aimed at blind (the screen was locked, so captures were unavailable) — the
+forwarding is five lines into the same proven `TextInput.on_change`, and the
+handler gate holds it as read. Worth a driver pass when captures work.
+
 ## Next
 
-1. Burn down the last 3 baselined GPUI handlers (`command_palette
-   on_query_change`, `editable_label on_change`, `pagination
-   on_goto_input_change`) — live text editing, which needs focus and key
-   routing. The driver can prove them once a `--type` exists (posting
-   NSEvent key events through the same route should work).
+1. Run the palette query proof once screenshots are available again (open
+   the palette, read the modal position off a capture, click + `--type`).
+2. Full IME, selection, and caret movement for native text editing — gpui's
+   `EntityInputHandler` path. Caret-at-end editing is the honest current
+   scope, noted in the contracts.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither

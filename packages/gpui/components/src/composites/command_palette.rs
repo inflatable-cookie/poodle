@@ -145,6 +145,7 @@ impl IntoElement for CommandPalette {
             return div().into_any_element();
         }
 
+
         // Rc so every result-row closure can hold a clone.
         let on_select_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_select.map(|h| std::rc::Rc::from(h));
@@ -305,11 +306,12 @@ impl IntoElement for CommandPalette {
         modal = modal.child(header);
 
         // ── Query: real TextInput type="search" ───────────────────
-        // Renders current query value + leading search icon. Editing is
-        // preview-event-loop bound (see parity note); the structure and
-        // current value render here.
+        // Renders current query value + leading search icon and forwards the
+        // composed input's live editing (character/backspace key handling is
+        // TextInput's) as on_query_change. Caret-at-end editing only — full
+        // IME/selection still waits on gpui's EntityInputHandler path.
         let placeholder = "Search commands, panels, and actions".to_string();
-        let query_input = TextInput::new(theme)
+        let mut query_input = TextInput::new(theme)
             .with_id(format!("{}-query", self.id_prefix))
             .input_type("search")
             .leading_icon("search")
@@ -318,6 +320,11 @@ impl IntoElement for CommandPalette {
             .aria_label("Search commands")
             .size(effective_size)
             .density(spec.density);
+        if let Some(handler) = self.on_query_change {
+            query_input = query_input.on_change(move |value, window, cx| {
+                handler(value, window, cx);
+            });
+        }
         modal = modal.child(div().min_w_0().child(query_input));
 
         // ── Status region (contract §3 / §7) ──────────────────────

@@ -303,6 +303,10 @@ now state-guarded, so a blur after Escape cannot double-emit.
 - GPUI must preserve mode-switching semantics, focus transfer, and suppression of global shortcuts while inline text editor is active
 - Display-to-input swap is an entity-state transition rather than DOM swap
 - Focus restoration after commit/cancel must return to the display element
+- Live editing is real: `on_change` streams caret-at-end edits (single
+  characters append, backspace deletes, `max_length` enforced in-component
+  because the host never sees the keystroke). Full IME/selection/caret
+  movement waits on gpui's `EntityInputHandler` path.
 
 ## 11. Parity Checklist
 

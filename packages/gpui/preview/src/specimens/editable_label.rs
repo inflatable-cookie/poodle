@@ -63,24 +63,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("display-icon"),
                 ),
         )
-        // --- Editing mode (composed input shown) ---
+        // --- Editing mode (composed input shown, live) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Editing mode (input shown)"),
+                    EyebrowSpec::new().with_content("Editing mode (input shown, live)"),
                     theme,
                 ))
                 .child(
                     EditableLabel::from_spec(
                         EditableLabelSpec::new()
-                            .with_value("My project title")
+                            .with_value(
+                                state
+                                    .specimens
+                                    .text
+                                    .get("editable-label-live")
+                                    .cloned()
+                                    .unwrap_or_else(|| "My project title".to_string()),
+                            )
                             .with_editing(true),
                         theme,
                     )
-                    .with_id("editing"),
+                    .with_id("editing")
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state
+                            .specimens
+                            .text
+                            .insert("editable-label-live".to_string(), val.to_string());
+                        cx.notify();
+                    })),
                 ),
         )
         // --- Double-click to edit (default, interactive) ---

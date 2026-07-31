@@ -262,8 +262,16 @@ impl IntoElement for TextInput {
             text_primary
         };
 
+        // The element id must be unique per input: gpui keys element state —
+        // including the implicit focus handle — by the id *stack*, and plain
+        // ancestor divs contribute nothing to it. With every input sharing
+        // "poodle-input", all of them shared one focus handle: clicking any
+        // input focused all of them, and key dispatch resolved the focus id
+        // to whichever input painted last — usually one with no key handler.
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-input-{}", suffix)
+        } else if let Some(ref spec_id) = spec.id {
+            format!("poodle-input-{}", spec_id)
         } else {
             "poodle-input".to_string()
         };

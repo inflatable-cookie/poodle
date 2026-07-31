@@ -45,13 +45,6 @@ pub struct Pagination {
     button_padding: Pixels,
     // Callback
     on_page_change: Option<std::rc::Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
-    /// Retained for the preview builder API only. The Full variant no longer
-    /// renders a "go to page" field (it is not in the Svelte/contract surface —
-    /// Full shows prev / "Page X of Y" / next + first/last); these are inert.
-    #[allow(dead_code)]
-    goto_page_input: String,
-    #[allow(dead_code)]
-    on_goto_input_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     limit_selector_open: bool,
     on_limit_open_change:
         Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
@@ -114,8 +107,6 @@ impl Pagination {
             button_padding,
             spec,
             on_page_change: None,
-            goto_page_input: String::new(),
-            on_goto_input_change: None,
             limit_selector_open: false,
             on_limit_open_change: None,
             on_page_size_change: None,
@@ -173,20 +164,6 @@ impl Pagination {
         handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_page_change = Some(std::rc::Rc::new(handler));
-        self
-    }
-
-    /// Controlled value for the Full variant page jump field (digits only in normal use).
-    pub fn with_goto_page_input(mut self, v: impl Into<String>) -> Self {
-        self.goto_page_input = v.into();
-        self
-    }
-
-    pub fn on_goto_input_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
-        self.on_goto_input_change = Some(std::rc::Rc::new(handler));
         self
     }
 

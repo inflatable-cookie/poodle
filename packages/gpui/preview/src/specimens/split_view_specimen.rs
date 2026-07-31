@@ -3,7 +3,6 @@ use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, SplitView};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{SplitOrientation, SplitViewSpec};

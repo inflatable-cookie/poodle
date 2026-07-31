@@ -179,14 +179,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .insert("pagination-full-goto".to_string(), page.to_string());
                         cx.notify();
                     }))
-                    .with_goto_page_input(full_goto.clone())
-                    .on_goto_input_change(cx.listener(|this, s: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("pagination-full-goto".to_string(), s.to_string());
-                        cx.notify();
-                    }))
                     .limit_selector_open(full_limit_open)
                     .on_limit_open_change(cx.listener(|this, open: &bool, _w, cx| {
                         this.state

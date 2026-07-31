@@ -331,15 +331,20 @@ impl IntoElement for EditableLabel {
                     .cursor(CursorStyle::OperationNotAllowed);
             }
 
-            // Commit / cancel are host-driven. We forward the keys to the
-            // provided callbacks (commit on Enter/Tab, cancel on Escape) so a
-            // host that owns the text buffer can react. No character synthesis.
+            // Commit on Enter/Tab, cancel on Escape, and live edits through
+            // on_change: single characters append, backspace deletes — the
+            // same caret-at-end editing the composed TextInput does. The host
+            // owns the buffer and re-renders with the new value; max_length
+            // is enforced here because the host cannot see the keystroke.
             if !spec.is_disabled {
                 let current_value = draft;
+                let max_length = spec.max_length;
                 let on_commit = self.on_commit;
                 let on_cancel = self.on_cancel;
+                let on_change = self.on_change;
                 input = input.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                    match event.keystroke.key.as_str() {
+                    let keystroke = &event.keystroke;
+                    match keystroke.key.as_str() {
                         "enter" | "tab" => {
                             if let Some(ref handler) = on_commit {
                                 handler(&current_value, window, cx);
@@ -348,6 +353,29 @@ impl IntoElement for EditableLabel {
                         "escape" => {
                             if let Some(ref handler) = on_cancel {
                                 handler(window, cx);
+                            }
+                        }
+                        "backspace" => {
+                            if let (Some(handler), false) = (&on_change, current_value.is_empty())
+                            {
+                                let mut chars: Vec<char> = current_value.chars().collect();
+                                chars.pop();
+                                let next: String = chars.into_iter().collect();
+                                handler(&next, window, cx);
+                            }
+                        }
+                        key if key.len() == 1
+                            && !keystroke.modifiers.platform
+                            && !keystroke.modifiers.control =>
+                        {
+                            if let Some(ref handler) = on_change {
+                                let within_limit = max_length
+                                    .map(|limit| current_value.chars().count() < limit)
+                                    .unwrap_or(true);
+                                if within_limit {
+                                    let next = format!("{current_value}{key}");
+                                    handler(&next, window, cx);
+                                }
                             }
                         }
                         _ => {}

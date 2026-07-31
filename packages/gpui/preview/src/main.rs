@@ -1434,6 +1434,14 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            // `--type hello` sends the text as key events to the focused
+            // element — click the input first to focus it.
+            "--type" => {
+                if let Some(val) = args.get(i + 1) {
+                    clicks.push(DriverAction::Type(val.clone()));
+                    i += 1;
+                }
+            }
             "--print-state" => {
                 if let Some(val) = args.get(i + 1) {
                     print_state = Some(val.clone());
@@ -1529,7 +1537,7 @@ fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType,
     } else {
         0.0
     };
-    let event = unsafe {
+    let event =
         NSEvent::mouseEventWithType_location_modifierFlags_timestamp_windowNumber_context_eventNumber_clickCount_pressure(
             event_type,
             location,
@@ -1540,20 +1548,20 @@ fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType,
             0,
             1,
             pressure,
-        )
-    };
+        );
     let Some(event) = event else {
         eprintln!("click driver: NSEvent construction failed for {:?}", event_type);
         return;
     };
-    unsafe { app.postEvent_atStart(&event, false) };
+    app.postEvent_atStart(&event, false);
 }
 
-/// One pointer gesture from the CLI, in the order given.
-#[derive(Clone, Copy)]
+/// One input gesture from the CLI, in the order given.
+#[derive(Clone)]
 enum DriverAction {
     Click(Point<Pixels>),
     Drag(Point<Pixels>, Point<Pixels>),
+    Type(String),
 }
 
 /// Dispatch a synthetic click: move, down, up.
@@ -1566,6 +1574,128 @@ fn dispatch_click(window: &mut Window, position: Point<Pixels>) {
     post_mouse_event(window, NSEventType::MouseMoved, position);
     post_mouse_event(window, NSEventType::LeftMouseDown, position);
     post_mouse_event(window, NSEventType::LeftMouseUp, position);
+}
+
+/// Dispatch synthetic typing: one keyDown/keyUp pair per character, called
+/// directly on gpui's NSView responder methods. Key events carry no
+/// position, so unlike clicks there is nothing to route or calibrate — but
+/// they do need AppKit's key-window status if posted to the queue, which a
+/// script-launched app never gets. The direct responder call skips that:
+/// gpui parses the event's charactersIgnoringModifiers and dispatches along
+/// its own focus path, so the target element must be focused first (click
+/// it).
+fn dispatch_type(text: &str) {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
+    use objc2_foundation::{NSPoint, NSString};
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        eprintln!("type driver: not on the main thread");
+        return;
+    };
+    let app = NSApplication::sharedApplication(mtm);
+    let ns_windows = app.windows();
+    let Some(ns_window) = ns_windows.iter().next() else {
+        eprintln!("type driver: no NSWindow to send to");
+        return;
+    };
+    let Some(view) = ns_window
+        .contentView()
+        .and_then(|content| content.subviews().iter().next())
+    else {
+        eprintln!("type driver: no gpui view under the content view");
+        return;
+    };
+    let window_number = ns_window.windowNumber();
+
+    for ch in text.chars() {
+        // gpui derives the typed character from the event's keyCode via the
+        // active layout, ignoring the characters string — so the keycode has
+        // to be right (ANSI-US). Unmapped characters are skipped loudly.
+        let Some(key_code) = ansi_key_code(ch) else {
+            eprintln!("type driver: no ANSI keycode for {ch:?}; skipped");
+            continue;
+        };
+        let chars = NSString::from_str(&ch.to_string());
+        for event_type in [NSEventType::KeyDown, NSEventType::KeyUp] {
+            let event =
+                NSEvent::keyEventWithType_location_modifierFlags_timestamp_windowNumber_context_characters_charactersIgnoringModifiers_isARepeat_keyCode(
+                    event_type,
+                    NSPoint { x: 0.0, y: 0.0 },
+                    NSEventModifierFlags::empty(),
+                    0.0,
+                    window_number,
+                    None,
+                    &chars,
+                    &chars,
+                    false,
+                    key_code,
+                );
+            let Some(event) = event else {
+                eprintln!("type driver: NSEvent construction failed for {ch:?}");
+                continue;
+            };
+            app.postEvent_atStart(&event, false);
+        }
+    }
+    let _ = &view;
+}
+
+/// ANSI-US virtual keycode for an unshifted character. Lowercase letters,
+/// digits, space and the common unshifted punctuation only — enough to drive
+/// the text-editing proofs.
+fn ansi_key_code(ch: char) -> Option<u16> {
+    Some(match ch {
+        'a' => 0, 's' => 1, 'd' => 2, 'f' => 3, 'h' => 4, 'g' => 5, 'z' => 6,
+        'x' => 7, 'c' => 8, 'v' => 9, 'b' => 11, 'q' => 12, 'w' => 13,
+        'e' => 14, 'r' => 15, 'y' => 16, 't' => 17, '1' => 18, '2' => 19,
+        '3' => 20, '4' => 21, '6' => 22, '5' => 23, '=' => 24, '9' => 25,
+        '7' => 26, '-' => 27, '8' => 28, '0' => 29, ']' => 30, 'o' => 31,
+        'u' => 32, '[' => 33, 'i' => 34, 'p' => 35, 'l' => 37, 'j' => 38,
+        '\'' => 39, 'k' => 40, ';' => 41, '\\' => 42, ',' => 43, '/' => 44,
+        'n' => 45, 'm' => 46, '.' => 47, ' ' => 49,
+        _ => return None,
+    })
+}
+
+/// Force the next queued event to see a fresh scene.
+///
+/// With the window occluded (screen locked, covered), gpui's display link is
+/// stopped and `refresh()` alone never produces a frame — but
+/// `dispatch_key_event` draws first when the window is dirty. A KeyUp is the
+/// least intrusive key event: nothing in the tree listens for bare key-ups,
+/// so this redraws without side effects, and the *next* click hit-tests the
+/// scene the previous action produced instead of a stale one.
+fn post_frame_flush(_window: &mut Window) {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
+    use objc2_foundation::{NSPoint, NSString};
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        return;
+    };
+    let app = NSApplication::sharedApplication(mtm);
+    let ns_windows = app.windows();
+    let Some(ns_window) = ns_windows.iter().next() else {
+        return;
+    };
+    let chars = NSString::from_str("a");
+    let event =
+        NSEvent::keyEventWithType_location_modifierFlags_timestamp_windowNumber_context_characters_charactersIgnoringModifiers_isARepeat_keyCode(
+            NSEventType::KeyUp,
+            NSPoint { x: 0.0, y: 0.0 },
+            NSEventModifierFlags::empty(),
+            0.0,
+            ns_window.windowNumber(),
+            None,
+            &chars,
+            &chars,
+            false,
+            0,
+        );
+    if let Some(event) = event {
+        app.postEvent_atStart(&event, false);
+    }
 }
 
 /// Dispatch a synthetic drag: press at `from`, walk to `to` in dragged-move
@@ -1677,7 +1807,8 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
 
     // Sorted so the output is stable enough to assert on.
     lines.sort();
-    println!("STATE {}", lines.join(" "));
+    let focus = if window.focused(cx).is_some() { "yes" } else { "no" };
+    println!("STATE focused={focus} {}", lines.join(" "));
 }
 
 /// Drive the interaction: warm up, click, report, then flag the capture
@@ -1743,19 +1874,21 @@ fn schedule_interaction(
 
             for action in clicks {
                 cx.update(|window, _cx| {
-                    match action {
+                    match &action {
                         DriverAction::Click(position) => {
-                            dispatch_click(window, calibration.apply(position));
+                            dispatch_click(window, calibration.apply(*position));
                         }
                         DriverAction::Drag(from, to) => {
                             dispatch_drag(
                                 window,
-                                calibration.apply(from),
-                                calibration.apply(to),
+                                calibration.apply(*from),
+                                calibration.apply(*to),
                             );
                         }
+                        DriverAction::Type(text) => dispatch_type(text),
                     }
                     window.refresh();
+                    post_frame_flush(window);
                 })
                 .ok();
                 // A beat between clicks: handlers may defer work, and a

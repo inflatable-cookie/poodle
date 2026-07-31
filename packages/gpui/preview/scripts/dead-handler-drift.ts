@@ -33,14 +33,13 @@ function walk(dir: string): string[] {
  * fixed, and it is why the gate exists.
  */
 const BASELINE: Record<string, string[]> = {
-  // 23 of the original 34 entries were never dead: their handlers were wired
-  // in sibling files of the same module, and the gate only read the declaring
-  // file. Of the true 11, seven were wired mirroring their Jetstream siblings
-  // and the split_view divider drag followed via gpui's drag events. These
-  // three need live text editing, which needs focus + key routing.
-  "composites/command_palette.rs": ["on_query_change"],
-  "primitives/editable_label.rs": ["on_change"],
-  "primitives/pagination/mod.rs": ["on_goto_input_change"],
+  // Empty, and staying that way. The original 34 shrank to nothing in three
+  // moves: 23 were phantom (handlers wired in sibling module files the gate
+  // did not read), seven wired mirroring their Jetstream siblings, the
+  // split_view divider drag landed on gpui's drag events, the text trio
+  // rode TextInput's existing key editing (command_palette forwards it,
+  // editable_label grew the same caret-at-end handling), and pagination's
+  // goto builder — for a field no longer in the contract — was deleted.
 };
 
 const dead: string[] = [];
