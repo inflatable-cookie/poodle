@@ -437,14 +437,32 @@ works with the screen locked. Three things it has to handle:
   the pre-click state), and counters print alongside toggles, text and
   selections.
 
+### The SplitView divider resizes
+
+Jetstream `SplitView` forwards the composed `ResizeHandle`'s gesture as
+`.on_resize(phase, axis_delta)`, drag-tested through the divider. Not the
+contract's `onRatioChange(ratio)`, deliberately: a ratio needs the rendered
+axis extent, which the immediate-mode build never sees and the host — who
+laid the split out — already has. An honest delta beats a ratio computed from
+a guessed extent; recorded as a Known Delta in the contract.
+
+Wiring it exposed a render bug the visual gate had baselined as truth: the
+split passed the *inverted* orientation to its handle, but the handle's own
+contract already does that inversion (horizontal orientation = vertical
+line). Double-flipped, a horizontal split drew its divider as a zero-width
+horizontal hairline — invisible and undraggable. Svelte and GPUI both pass
+the orientation straight through; Jetstream now does too, and the divider
+draws as a real line for the first time. The drag test caught it immediately:
+the gesture reported nothing because there was no divider to hit.
+
+GPUI's `on_ratio_change` stays baselined — its `ResizeHandle` has no drag
+yet (the input work below).
+
 ## Next
 
-1. Wire `SplitView::on_ratio_change` through a composed `ResizeHandle` on its
-   divider — the handle carries a drag handler now, so this is wiring, not a
-   capability gap.
-2. Forward `Select` option selection through `TimeZoneSelect` composition
+1. Forward `Select` option selection through `TimeZoneSelect` composition
    inside `DateTimeZonePicker`, and clause editing through `FilterBuilder`.
-3. Burn down the last 4 baselined GPUI handlers (divider drag + live text
+2. Burn down the last 4 baselined GPUI handlers (divider drag + live text
    editing — GPUI input work, not wiring). The click driver can now prove
    them when they land.
 

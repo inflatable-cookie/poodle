@@ -367,9 +367,14 @@ None.
 - `SplitView::from_spec(spec, theme).primary(...).secondary(...)` then
   `.on_primary_collapse(...)` / `.on_secondary_collapse(...)`, forwarded to the
   composed `CollapseToggle`s.
-- `onRatioChange` waits on the divider carrying a drag handler; the composed
-  `ResizeHandle` has one now, so this is wiring work rather than a capability
-  gap — tracked in g12.017.
+- The divider forwards its drag as `.on_resize(phase, axis_delta)` — the
+  composed `ResizeHandle`'s gesture verbatim: `Start`/`End` bracket it, `Move`
+  carries the delta in logical px along the split axis.
+- Known Delta: this is a pixel delta, not the contract's
+  `onRatioChange(ratio)`. Converting needs the rendered axis extent, which
+  the immediate-mode build never sees and the host (who laid the split out)
+  already has — it applies `ratio += delta / extent` and clamps. Emitting a
+  ratio from a guessed extent would be worse than an honest delta.
 
 ## 11. Parity Checklist
 

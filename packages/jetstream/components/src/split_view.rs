@@ -3,17 +3,19 @@
 //! Contract: `docs/contracts/components/split-view.md`
 //! Reference: `packages/svelte/components/src/SplitView.svelte`
 //!
-//! Composes the real `js_resize_handle` divider and (when enabled) the real
-//! `js_collapse_toggle` buttons. Orientation maps the split axis to the
-//! handle's line axis (Horizontal split → Vertical line). Fixed/collapsed
-//! pane sizing is applied on the correct axis per orientation. Min-size
-//! constraints are applied inline when set and the pane is not collapsed.
+//! Composes the real `ResizeHandle` divider and (when enabled) the real
+//! `js_collapse_toggle` buttons. The handle takes the split orientation
+//! unchanged — its own contract maps horizontal orientation to a vertical
+//! line. Fixed/collapsed pane sizing is applied on the correct axis per
+//! orientation. Min-size constraints are applied inline when set and the
+//! pane is not collapsed.
 //!
-//! Interaction (drag-to-resize, keyboard resize, drag-to-collapse, rail
-//! collapse) lives in the preview event loop — the handle and toggles render
-//! the affordances but emit no callbacks here. Rail-collapse (`*CollapsedSize`,
-//! `collapse*BelowSize`) is not in `SplitViewSpec`; legacy collapse hides the
-//! pane (`0`-size), matching the contract's non-railed collapse state.
+//! The collapse toggles forward `on_primary_collapse`/`on_secondary_collapse`
+//! and the divider forwards its drag as `on_resize(phase, axis_delta)`.
+//! Keyboard resize stays host-side (the runtime raises no key events).
+//! Rail-collapse (`*CollapsedSize`, `collapse*BelowSize`) is not in
+//! `SplitViewSpec`; legacy collapse hides the pane (`0`-size), matching the
+//! contract's non-railed collapse state.
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
@@ -23,16 +25,18 @@ use poodle_specs::{
 
 use crate::collapse_toggle::js_collapse_toggle;
 use crate::presentation::resolve_semantic_size;
-use crate::resize_handle::js_resize_handle;
 
 /// SplitView — two panes with collapse toggles.
 ///
 /// Mirrors the GPUI target's names: `on_primary_collapse` and
 /// `on_secondary_collapse`, forwarded to the composed `CollapseToggle`s.
 ///
-/// `on_ratio_change` waits on the divider carrying a drag handler; the
-/// composed `ResizeHandle` has one now, so this is wiring work, not a
-/// capability gap — tracked in g12.017.
+/// The divider forwards the composed `ResizeHandle`'s gesture as
+/// `on_resize(phase, axis_delta)` rather than the contract's
+/// `onRatioChange(ratio)`: converting a pixel delta into a ratio needs the
+/// rendered axis extent, which the host owns and this immediate-mode build
+/// never sees. The host applies `delta / extent` to the ratio it holds —
+/// recorded as a Known Delta in the contract.
 pub struct SplitView {
     spec: SplitViewSpec,
     theme: JetstreamThemeProvider,
@@ -40,6 +44,7 @@ pub struct SplitView {
     secondary: Option<JsEl>,
     on_primary_collapse: Option<crate::element::ToggleHandler>,
     on_secondary_collapse: Option<crate::element::ToggleHandler>,
+    on_resize: Option<std::sync::Arc<dyn Fn(crate::resize_handle::ResizePhase, f32) + Send + Sync>>,
 }
 
 impl SplitView {
@@ -51,6 +56,7 @@ impl SplitView {
             secondary: None,
             on_primary_collapse: None,
             on_secondary_collapse: None,
+            on_resize: None,
         }
     }
 
@@ -75,6 +81,19 @@ impl SplitView {
         self.on_secondary_collapse = Some(std::sync::Arc::new(handler));
         self
     }
+
+    /// The divider's drag gesture, forwarded from the composed `ResizeHandle`:
+    /// `Start`/`End` bracket the gesture, `Move` carries the axis delta in
+    /// logical px (x for a horizontal split, y for a vertical one). The host
+    /// turns the delta into a ratio with the axis extent it laid the split
+    /// out at.
+    pub fn on_resize(
+        mut self,
+        handler: impl Fn(crate::resize_handle::ResizePhase, f32) + Send + Sync + 'static,
+    ) -> Self {
+        self.on_resize = Some(std::sync::Arc::new(handler));
+        self
+    }
 }
 
 impl crate::element::IntoJsEl for SplitView {
@@ -86,6 +105,7 @@ impl crate::element::IntoJsEl for SplitView {
             self.secondary,
             self.on_primary_collapse,
             self.on_secondary_collapse,
+            self.on_resize,
         )
     }
 }
@@ -96,7 +116,7 @@ pub fn js_split_view(
     primary: Option<JsEl>,
     secondary: Option<JsEl>,
 ) -> JsEl {
-    build(spec, theme, primary, secondary, None, None)
+    build(spec, theme, primary, secondary, None, None, None)
 }
 
 fn build(
@@ -106,6 +126,7 @@ fn build(
     secondary: Option<JsEl>,
     on_primary_collapse: Option<crate::element::ToggleHandler>,
     on_secondary_collapse: Option<crate::element::ToggleHandler>,
+    on_resize: Option<std::sync::Arc<dyn Fn(crate::resize_handle::ResizePhase, f32) + Send + Sync>>,
 ) -> JsEl {
     let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -181,17 +202,26 @@ fn build(
     };
 
     // ── Divider — ResizeHandle + optional CollapseToggles ─────────────────────
-    // The resize handle's line axis is the inverse of the split axis:
-    // Horizontal split (side-by-side panes) → vertical divider line;
-    // Vertical split (stacked panes) → horizontal divider line.
+    // The handle takes the SPLIT orientation unchanged — its own contract (§7)
+    // does the inversion: horizontal orientation = left/right resize = a
+    // vertical line. Svelte and GPUI both pass it straight through. This used
+    // to map to the opposite orientation, which drew the divider as a
+    // zero-width horizontal hairline inside a horizontal split.
     let handle_orientation = match spec.orientation {
-        SplitOrientation::Horizontal => Orientation::Vertical,
-        SplitOrientation::Vertical => Orientation::Horizontal,
+        SplitOrientation::Horizontal => Orientation::Horizontal,
+        SplitOrientation::Vertical => Orientation::Vertical,
     };
     let handle_spec = ResizeHandleSpec::new()
         .with_orientation(handle_orientation)
         .with_disabled(spec.is_disabled);
-    let handle = js_resize_handle(&handle_spec, theme);
+    let handle = {
+        let mut handle = crate::resize_handle::ResizeHandle::from_spec(handle_spec, theme);
+        if let Some(handler) = &on_resize {
+            let handler = std::sync::Arc::clone(handler);
+            handle = handle.on_resize(move |phase, delta| handler(phase, delta));
+        }
+        crate::element::IntoJsEl::into_js_el(handle)
+    };
 
     // Contract toggle visibility: primary toggle shows when secondary is not
     // collapsed; secondary toggle shows when primary is not collapsed.
@@ -407,6 +437,47 @@ mod tests {
             seen.lock().unwrap().as_slice(),
             ["primary:true", "secondary:true"]
         );
+    }
+
+    /// Dragging the divider forwards the handle's gesture — Start/End
+    /// bracketing Move deltas that sum to the distance travelled.
+    #[test]
+    fn dragging_the_divider_reports_the_gesture() {
+        use crate::element::IntoJsEl;
+        use crate::resize_handle::ResizePhase;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<(ResizePhase, f32)>>> = Arc::new(Mutex::new(Vec::new()));
+        let events = Arc::clone(&seen);
+
+        let el = SplitView::from_spec(SplitViewSpec::new(SplitOrientation::Horizontal), &theme())
+            .primary(ui_element::label("Primary pane"))
+            .secondary(ui_element::label("Secondary pane"))
+            .on_resize(move |phase, delta| events.lock().unwrap().push((phase, delta)))
+            .into_js_el();
+
+        // The divider sits between the panes at the ratio point — find the
+        // narrow panel between the pane rects and drag from its center.
+        let tree = crate::render_probe::probe(&el, 640.0, 400.0);
+        let divider = tree
+            .nodes
+            .iter()
+            .filter(|n| n.kind == "Panel" && n.w < 20.0)
+            .min_by(|a, b| a.w.partial_cmp(&b.w).unwrap())
+            .expect("no divider panel found");
+        let (cx_, cy_) = (divider.x + divider.w / 2.0, divider.y + divider.h / 2.0);
+        crate::element::click_probe::drag(&el, 640.0, 400.0, (cx_, cy_), (cx_ + 48.0, cy_));
+
+        let events = seen.lock().unwrap();
+        assert!(!events.is_empty(), "the divider drag reported nothing");
+        assert_eq!(events.first().map(|e| e.0), Some(ResizePhase::Start));
+        assert_eq!(events.last().map(|e| e.0), Some(ResizePhase::End));
+        let moved: f32 = events
+            .iter()
+            .filter(|(p, _)| *p == ResizePhase::Move)
+            .map(|(_, d)| d)
+            .sum();
+        assert!(moved > 30.0, "the deltas did not sum to the distance: {moved}");
     }
 
 }
