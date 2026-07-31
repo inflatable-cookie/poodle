@@ -197,6 +197,15 @@ the header and chip gaps. Density never changes the header's height.
 - Reuses the GPUI `Tree` implementation and its flat-mode metrics.
 - Expansion is host-driven through the spec.
 
+## 10a. Jetstream Notes
+
+- `ChangedFiles::from_spec(spec, theme).on_toggle(...).on_file_select(...)`.
+- `onFileSelect` carries the file's **full path**, from a chip and from a tree
+  row alike. The chip shows the leaf and a collapsed chain shows `crates/latex`,
+  so neither label identifies the file on its own.
+- Directory rows are not clickable. A directory expands; reporting one as a file
+  selection would make every host filter directories back out.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -226,8 +235,8 @@ the header and chip gaps. Density never changes the header's height.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream renders the expansion state without driving it | no Poodle Jetstream component wires a click yet. No engine work is needed — the runtime dispatches clicks and the preview already feeds pointer state; only the handler shape is undecided | accepted, tracked | g12.017 |
 | `countLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
+| Neither native renders the "Open diff" action | the action hands off to the host, and no native host asks for it yet; `onOpenDiff` exists on the web target only | accepted, tracked | g12.017 |
 | No diff rendering on any target | a diff viewer is a component in its own right, not a card detail | accepted (by design) | `onOpenDiff` hands off |
 
 ## 13. Approval And Adoption Notes

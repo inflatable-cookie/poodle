@@ -196,6 +196,16 @@ the container's block padding. Density never changes row height.
 - Expansion is host-driven through the spec; the group renders whichever state
   the spec describes.
 
+## 10a. Jetstream Notes
+
+- `ToolCallGroup::from_spec(spec, theme).on_toggle(...).on_call_toggle(...)`.
+  The two events stay distinct all the way down: the run toggle reports the run
+  id, and a row's disclosure reports the call id, so a host never has to
+  disambiguate by position.
+- The group builds its rows through `ToolCall`, forwarding `on_call_toggle` into
+  each. A row with no output stays non-interactive even when the group has a
+  handler, because that decision belongs to the row.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -224,7 +234,6 @@ the container's block padding. Density never changes row height.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream renders the expansion state without driving it | no Poodle Jetstream component wires a click yet. No engine work is needed — the runtime dispatches clicks and the preview already feeds pointer state; only the handler shape is undecided | accepted, tracked | g12.017 |
 | `moreLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 
 ## 13. Approval And Adoption Notes

@@ -1,7 +1,8 @@
 # g12.017 — Native Interaction Parity
 
-**Status: in progress.** GPUI is interactive and now gated. Jetstream is not
-wired at all, and the reason is smaller than it looked.
+**Status: in progress.** GPUI is interactive and now gated. Jetstream's shape is
+decided and the agent chat set is converted; the remaining ~144 components are
+a mechanical sweep.
 
 ## Problem
 
@@ -103,6 +104,41 @@ handler with the right id, and a row with no output ignores clicks. Both were
 checked for vacuity by removing the wiring — the positive test fails with
 `on_toggle fired exactly once`.
 
+### The agent chat set — converted
+
+All seven are builders, and every event a contract names is wired and tested:
+
+| Component | Handlers |
+|-----------|----------|
+| `ToolCall` | `on_toggle` |
+| `ToolCallGroup` | `on_toggle`, `on_call_toggle` |
+| `ChangedFiles` | `on_toggle`, `on_file_select` |
+| `AgentQuestion` | `on_select`, `on_dismiss` |
+| `AgentTranscript` | `on_tool_run_toggle`, `on_tool_call_toggle`, `on_changed_files_toggle`, `on_file_select` |
+| `AgentMessage` | none — inline nodes flatten to text, so there is no link to click |
+| `AgentQuestionRecord` | none — an answer the agent already has cannot be changed |
+
+The last two are the point of the shape as much as the first five. A builder
+with no handlers says the component has no events; a builder with a handler
+that nothing reads is the GPUI defect this whole roadmap item started from.
+
+Ten click tests, each driving a real press and release. All ten were checked for
+vacuity in two passes — first stripping the leaf wiring, then stripping only the
+forwarding — because the two failure modes are distinct: a leaf that ignores
+clicks, and a parent that never passes the handler down. Six tests failed on the
+first pass and the remaining three on the second, which is what tells you the
+forwarding tests were measuring forwarding rather than riding on the leaf.
+
+Tests click **by text** (`click_probe::click_text`) rather than by coordinate.
+The first version of the group test hard-coded `y=52`, missed the toggle, and
+would have silently started hitting the row above the first time a padding token
+moved.
+
+`AgentTranscript` forwards handlers into whichever block raises the event. It is
+the only level that sees every block and the host holds all the expansion state,
+so that is where a host attaches — and it is one level further than the GPUI
+transcript goes today, which forwards nothing.
+
 ### The migration
 
 Free functions stay during the sweep: `IntoJsEl` wraps them, so each component
@@ -115,16 +151,22 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Convert the rest of the agent chat set to the builder shape, with a click
-   test each.
-2. Sweep the remaining components. Mechanical, but 151 of them: each becomes a
-   struct with `from_spec`, an `IntoJsEl` impl wrapping the existing render
-   function, and handler methods only where the contract has events.
-3. Add a gate that fails when a Jetstream component with contract events has no
+1. Sweep the remaining ~144 components. Mechanical: each becomes a struct with
+   `from_spec`, an `IntoJsEl` impl wrapping the existing render function, and
+   handler methods only where the contract has events.
+2. Add a gate that fails when a Jetstream component with contract events has no
    click test — the Jetstream equivalent of `drift:handlers`, and stronger,
-   because here it can assert the click actually lands.
+   because here it can assert the click actually lands. Worth landing early in
+   the sweep rather than after it, so each conversion is held to it.
+3. Forward the transcript's events on GPUI too. The blocks are interactive
+   there, but `AgentTranscript` passes nothing down, so a GPUI host has to
+   attach to the block components itself.
 4. Burn down the 34 baselined GPUI handlers.
 5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+
+Two contract gaps found while converting, both recorded as deltas rather than
+quietly implemented: neither native draws the "Open diff" action, and neither
+has `onLinkClick` because inline nodes flatten to text.
 
 The free functions stay for now: `IntoJsEl` wraps them, so conversion is
 component-by-component rather than a single breaking commit. They go once the

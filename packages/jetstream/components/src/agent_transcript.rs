@@ -15,14 +15,99 @@ use poodle_specs::{
     ToolCallGroupSpec,
 };
 
-use crate::agent_message::js_agent_message;
-use crate::agent_question_record::js_agent_question_record;
-use crate::changed_files::js_changed_files;
+use std::sync::Arc;
+
+use crate::agent_message::AgentMessage;
+use crate::agent_question_record::AgentQuestionRecord;
+use crate::changed_files::ChangedFiles;
+use crate::element::{Handler, IntoJsEl};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
-use crate::tool_call_group::js_tool_call_group;
+use crate::tool_call_group::ToolCallGroup;
+
+/// AgentTranscript — the output surface of an agent conversation.
+///
+/// The transcript owns the events its blocks raise, because the host holds the
+/// expansion state and the transcript is the only place that knows which block
+/// a click came from. Handlers are forwarded down to the block that raises
+/// them, not re-implemented here.
+pub struct AgentTranscript {
+    spec: AgentTranscriptSpec,
+    theme: JetstreamThemeProvider,
+    on_tool_run_toggle: Option<Handler>,
+    on_tool_call_toggle: Option<Handler>,
+    on_changed_files_toggle: Option<Handler>,
+    on_file_select: Option<Handler>,
+}
+
+impl AgentTranscript {
+    pub fn from_spec(spec: AgentTranscriptSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_tool_run_toggle: None,
+            on_tool_call_toggle: None,
+            on_changed_files_toggle: None,
+            on_file_select: None,
+        }
+    }
+
+    /// Fires with the run id when a run is expanded or collapsed.
+    pub fn on_tool_run_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_tool_run_toggle = Some(Arc::new(handler));
+        self
+    }
+
+    /// Fires with the call id when one call's output is opened or closed.
+    pub fn on_tool_call_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_tool_call_toggle = Some(Arc::new(handler));
+        self
+    }
+
+    /// Fires with the changed-files id when that card is opened or closed.
+    pub fn on_changed_files_toggle(
+        mut self,
+        handler: impl Fn(&str) + Send + Sync + 'static,
+    ) -> Self {
+        self.on_changed_files_toggle = Some(Arc::new(handler));
+        self
+    }
+
+    /// Fires with a file's path when one is chosen in a changed-files card.
+    pub fn on_file_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_file_select = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for AgentTranscript {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, Handlers {
+            tool_run_toggle: self.on_tool_run_toggle,
+            tool_call_toggle: self.on_tool_call_toggle,
+            changed_files_toggle: self.on_changed_files_toggle,
+            file_select: self.on_file_select,
+        })
+    }
+}
+
+#[derive(Default)]
+struct Handlers {
+    tool_run_toggle: Option<Handler>,
+    tool_call_toggle: Option<Handler>,
+    changed_files_toggle: Option<Handler>,
+    file_select: Option<Handler>,
+}
 
 pub fn js_agent_transcript(spec: &AgentTranscriptSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, Handlers::default())
+}
+
+fn build(
+    spec: &AgentTranscriptSpec,
+    theme: &JetstreamThemeProvider,
+    handlers: Handlers,
+) -> JsEl {
     let activity_color: jetstream_ui::Color = resolve_color(theme, spec.activity_token()).into();
     let font_size = rem_to_px(spec.font_size_rem());
     let inset = rem_to_px(spec.padding_inset_rem());
@@ -55,7 +140,7 @@ pub fn js_agent_transcript(spec: &AgentTranscriptSpec, theme: &JetstreamThemePro
                 if let Some(role) = message.role {
                     message_spec = message_spec.with_role(role);
                 }
-                root = root.child(js_agent_message(&message_spec, theme));
+                root = root.child(AgentMessage::from_spec(message_spec, theme).into_js_el());
             }
             TranscriptBlock::ToolRun(run) => {
                 let group = ToolCallGroupSpec::new(run.id.clone(), run.calls.clone())
@@ -63,21 +148,41 @@ pub fn js_agent_transcript(spec: &AgentTranscriptSpec, theme: &JetstreamThemePro
                     .with_expanded_calls(spec.expanded_tool_calls.clone())
                     .with_size(spec.size)
                     .with_density(spec.density);
-                root = root.child(js_tool_call_group(&group, theme));
+
+                let mut element = ToolCallGroup::from_spec(group, theme);
+                if let Some(handler) = &handlers.tool_run_toggle {
+                    let handler = Arc::clone(handler);
+                    element = element.on_toggle(move |id| handler(id));
+                }
+                if let Some(handler) = &handlers.tool_call_toggle {
+                    let handler = Arc::clone(handler);
+                    element = element.on_call_toggle(move |id| handler(id));
+                }
+                root = root.child(element.into_js_el());
             }
             TranscriptBlock::ChangedFiles(changed) => {
                 let card = ChangedFilesSpec::new(changed.id.clone(), changed.files.clone())
                     .with_expanded(spec.expanded_changed_files.contains(&changed.id))
                     .with_size(spec.size)
                     .with_density(spec.density);
-                root = root.child(js_changed_files(&card, theme));
+
+                let mut element = ChangedFiles::from_spec(card, theme);
+                if let Some(handler) = &handlers.changed_files_toggle {
+                    let handler = Arc::clone(handler);
+                    element = element.on_toggle(move |id| handler(id));
+                }
+                if let Some(handler) = &handlers.file_select {
+                    let handler = Arc::clone(handler);
+                    element = element.on_file_select(move |path| handler(path));
+                }
+                root = root.child(element.into_js_el());
             }
             TranscriptBlock::AnsweredQuestion(record) => {
                 if let Some(answer) = record.answer.clone() {
                     let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
                         .with_size(spec.size)
                         .with_density(spec.density);
-                    root = root.child(js_agent_question_record(&card, theme));
+                    root = root.child(AgentQuestionRecord::from_spec(card, theme).into_js_el());
                 }
             }
             TranscriptBlock::Activity(_) => {}
@@ -167,6 +272,75 @@ mod tests {
         let tree = crate::render_probe::probe(&js_agent_transcript(&spec, &theme()), 720.0, 200.0);
 
         assert!(tree.has_text("Working for 1h 1m"), "{:?}", tree.texts());
+    }
+
+    /// A click three levels down — transcript, run, row — reaches the host with
+    /// the right payload, and the run's own event does not fire alongside it.
+    ///
+    /// The transcript is where the host actually attaches handlers, so
+    /// forwarding is the thing that has to be true; the leaf components being
+    /// individually clickable is not enough on its own.
+    #[test]
+    fn a_click_on_a_nested_row_reaches_the_transcript_handler() {
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let calls = Arc::clone(&seen);
+        let runs = Arc::clone(&seen);
+
+        let mut lead = TranscriptToolCall {
+            id: "b".to_string(),
+            label: "Ran command".to_string(),
+            detail: Some("bun test".to_string()),
+            status: ToolCallStatus::Success,
+            ..Default::default()
+        };
+        lead.output = Some("272 pass".to_string());
+
+        let spec = AgentTranscriptSpec::new(vec![
+            call("a", "cargo check", ToolCallStatus::Success),
+            TranscriptItem::ToolCall(lead),
+        ]);
+
+        let el = AgentTranscript::from_spec(spec, &theme())
+            .on_tool_call_toggle(move |id| calls.lock().unwrap().push(format!("call:{id}")))
+            .on_tool_run_toggle(move |id| runs.lock().unwrap().push(format!("run:{id}")))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 256.0, "bun test");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["call:b"]);
+    }
+
+    /// Changed-files events forward too, and a file reports its path rather
+    /// than the leaf the chip displays.
+    #[test]
+    fn a_file_chip_reaches_the_transcript_handler() {
+        use poodle_headless::agent_transcript::{ChangedFile, TranscriptChangedFiles};
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let paths = Arc::clone(&seen);
+
+        let spec = AgentTranscriptSpec::new(vec![TranscriptItem::ChangedFiles(
+            TranscriptChangedFiles {
+                id: "changed".to_string(),
+                files: vec![ChangedFile {
+                    path: "pkg/src/main.rs".to_string(),
+                    additions: 3,
+                    deletions: 1,
+                    status: None,
+                }],
+            },
+        )]);
+
+        let el = AgentTranscript::from_spec(spec, &theme())
+            .on_file_select(move |path| paths.lock().unwrap().push(path.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 256.0, "main.rs");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["pkg/src/main.rs"]);
     }
 
     #[test]

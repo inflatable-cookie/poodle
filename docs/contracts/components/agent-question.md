@@ -294,9 +294,14 @@ composer owns the editor, the toolbar and the submit control; see
 
 ## 12. GPUI And Jetstream Notes
 
-- Render the state the spec describes; selection and submission are host-driven,
-  on GPUI this is wired to real click handlers; Jetstream renders the state
-  and does not yet drive it.
+- Both natives wire real click handlers. GPUI takes `.on_select`/`.on_dismiss`
+  through `cx.listener`; Jetstream is
+  `AgentQuestion::from_spec(spec, theme).on_select(...).on_dismiss(...)`.
+- `onSelect` carries the option's **value**, not its label: the label is what
+  the reader sees and hosts localise it.
+- Selection state is the host's. A click is reported as a click; turning it into
+  the next selection is `toggleQuestionSelection` from the shared headless core,
+  which is what keeps single- and multi-select identical across targets.
 - No digit shortcuts: key handling is host-event-loop work on both natives.
 
 ## 13. Parity Checklist
@@ -331,7 +336,6 @@ composer owns the editor, the toolbar and the submit control; see
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Natives do not handle digit shortcuts | key handling is host-event-loop work, as with every native control | accepted | host wires keys |
-| Jetstream renders selection state without driving it | no Poodle Jetstream component wires a click yet. No engine work is needed — the runtime dispatches clicks and the preview already feeds pointer state; only the handler shape is undecided | accepted, tracked | g12.017 |
 | `override` is `override_text` on the native spec | `override` is a reserved word in Rust; a raw identifier would make every call site read `r#override`. Carried as a drift-gate alias, so the prop is still checked | accepted | none |
 | `progressLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
 | Progress is a dot row rather than `Stepper` | `Stepper` is an interactive full-width wizard track; only its status vocabulary transfers | accepted (by design) | revisit if a second consumer needs richer batch progress |

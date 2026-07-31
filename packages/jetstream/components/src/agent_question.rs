@@ -2,19 +2,74 @@
 //!
 //! Contract: `docs/contracts/components/agent-question.md`.
 //!
-//! Renders a question and its selection state. It does not drive selection —
-//! the render-only posture every native component here shares — so a question
-//! shown in the preview cannot be answered there. See the contract's §14.
+//! Selection state lives with the host — the spec says which options are
+//! chosen, and `on_select` reports a click. Resolving a click into the next
+//! selection is `poodle_headless::agent_question::toggle_question_selection`,
+//! shared with the web target so single- and multi-select behave identically.
 
 use jetstream_ui::ui_element::{self, JsEl};
 use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AgentQuestionSpec;
 
+use std::sync::Arc;
+
+use crate::element::{Handler, IntoJsEl};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
+/// AgentQuestion — the question an agent asks mid-turn.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+pub struct AgentQuestion {
+    spec: AgentQuestionSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<Handler>,
+    on_dismiss: Option<Handler>,
+}
+
+impl AgentQuestion {
+    pub fn from_spec(spec: AgentQuestionSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+            on_dismiss: None,
+        }
+    }
+
+    /// Fires with the option's `value` when an option is clicked.
+    ///
+    /// The value, not the label: the label is what the reader sees and the
+    /// value is what the agent asked about, and hosts localise the first.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(Arc::new(handler));
+        self
+    }
+
+    /// Fires with the question's id when the dismiss control is used.
+    pub fn on_dismiss(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_dismiss = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for AgentQuestion {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select, self.on_dismiss)
+    }
+}
+
 pub fn js_agent_question(spec: &AgentQuestionSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &AgentQuestionSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<Handler>,
+    on_dismiss: Option<Handler>,
+) -> JsEl {
     let Some(question) = spec.active_question() else {
         return ui_element::div();
     };
@@ -178,24 +233,35 @@ pub fn js_agent_question(spec: &AgentQuestionSpec, theme: &JetstreamThemeProvide
             );
         }
 
+        if let Some(handler) = &on_select {
+            let handler = Arc::clone(handler);
+            let value = option.value.clone();
+            row = row.cursor_pointer().on_click(move |_event| handler(&value));
+        }
+
         options = options.child(row);
     }
 
     root = root.child(options);
 
     if spec.is_dismissible {
-        root = root.child(
-            ui_element::button("")
-                .aria_label(spec.dismiss_label.clone())
-                .aria_role(jetstream_ui::accesskit::Role::Button)
-                .bg(Color::TRANSPARENT)
-                .focusable()
-                .child(
-                    ui_element::label(spec.dismiss_label.clone())
-                        .text_size(font_size)
-                        .text_color(dismiss_color),
-                ),
-        );
+        let mut dismiss = ui_element::button("")
+            .aria_label(spec.dismiss_label.clone())
+            .aria_role(jetstream_ui::accesskit::Role::Button)
+            .bg(Color::TRANSPARENT)
+            .focusable()
+            .child(
+                ui_element::label(spec.dismiss_label.clone())
+                    .text_size(font_size)
+                    .text_color(dismiss_color),
+            );
+
+        if let Some(handler) = on_dismiss {
+            let id = question.id.clone();
+            dismiss = dismiss.cursor_pointer().on_click(move |_event| handler(&id));
+        }
+
+        root = root.child(dismiss);
     }
 
     root
@@ -247,6 +313,68 @@ mod tests {
             .with_active_index(1);
         let tree = crate::render_probe::probe(&js_agent_question(&spec, &theme()), 720.0, 320.0);
         assert!(tree.has_text("2 of 3"), "{:?}", tree.texts());
+    }
+
+    /// The payload is the option's value, not its label. The label is what the
+    /// reader sees and hosts localise it; the value is what the agent asked
+    /// about.
+    #[test]
+    fn selecting_an_option_reports_its_value() {
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = AgentQuestionSpec::new(vec![question(false)]);
+        let el = AgentQuestion::from_spec(spec, &theme())
+            .on_select(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 320.0, "Composer");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["composer"]);
+    }
+
+    /// Multi-select reports each click the same way. Turning clicks into the
+    /// next selection is the host's, using the shared headless toggle, so the
+    /// component never has to know which mode resolves the question.
+    #[test]
+    fn multi_select_reports_every_click() {
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = AgentQuestionSpec::new(vec![question(true)]);
+        let el = AgentQuestion::from_spec(spec, &theme())
+            .on_select(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 320.0, "Inline");
+        crate::element::click_probe::click_text(&el, 720.0, 320.0, "Composer");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["inline", "composer"]);
+    }
+
+    #[test]
+    fn dismissing_reports_the_question() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = AgentQuestionSpec::new(vec![question(false)]).with_dismissible(true);
+        let el = AgentQuestion::from_spec(spec, &theme())
+            .on_dismiss(move |id| {
+                assert_eq!(id, "placement");
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 360.0, "Skip this question");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_dismiss fired exactly once");
     }
 
     #[test]

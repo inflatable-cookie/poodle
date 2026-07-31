@@ -7,8 +7,33 @@ use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AgentQuestionRecordSpec;
 
+use crate::element::IntoJsEl;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};
+
+/// AgentQuestionRecord — the read-only record an answered question leaves.
+///
+/// No handlers, and that is the component: an answer the agent already has
+/// cannot be changed from the transcript, so there is nothing to click.
+pub struct AgentQuestionRecord {
+    spec: AgentQuestionRecordSpec,
+    theme: JetstreamThemeProvider,
+}
+
+impl AgentQuestionRecord {
+    pub fn from_spec(spec: AgentQuestionRecordSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoJsEl for AgentQuestionRecord {
+    fn into_js_el(self) -> JsEl {
+        js_agent_question_record(&self.spec, &self.theme)
+    }
+}
 
 pub fn js_agent_question_record(
     spec: &AgentQuestionRecordSpec,

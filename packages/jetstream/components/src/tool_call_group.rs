@@ -8,11 +8,62 @@ use poodle_headless::agent_transcript::ToolCallStatus;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ToolCallGroupSpec, ToolCallSpec};
 
+use std::sync::Arc;
+
+use crate::element::{Handler, IntoJsEl};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
-use crate::tool_call::js_tool_call;
+use crate::tool_call::ToolCall;
+
+/// ToolCallGroup — a contiguous run of tool calls.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_x(handler)`.
+pub struct ToolCallGroup {
+    spec: ToolCallGroupSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<Handler>,
+    on_call_toggle: Option<Handler>,
+}
+
+impl ToolCallGroup {
+    pub fn from_spec(spec: ToolCallGroupSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_call_toggle: None,
+        }
+    }
+
+    /// Fires with the run id when the run is expanded or collapsed.
+    pub fn on_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(Arc::new(handler));
+        self
+    }
+
+    /// Fires with the call id when one call's output is opened or closed.
+    pub fn on_call_toggle(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_call_toggle = Some(Arc::new(handler));
+        self
+    }
+}
+
+impl IntoJsEl for ToolCallGroup {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_toggle, self.on_call_toggle)
+    }
+}
 
 pub fn js_tool_call_group(spec: &ToolCallGroupSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &ToolCallGroupSpec,
+    theme: &JetstreamThemeProvider,
+    on_toggle: Option<Handler>,
+    on_call_toggle: Option<Handler>,
+) -> JsEl {
     // A collapsed run whose failure is not its newest call is the whole reason
     // run status exists: without this the failure is invisible until someone
     // expands.
@@ -48,7 +99,13 @@ pub fn js_tool_call_group(spec: &ToolCallGroupSpec, theme: &JetstreamThemeProvid
         if let Some(output) = &call.output {
             call_spec = call_spec.with_output(output.clone());
         }
-        list = list.child(js_tool_call(&call_spec, theme));
+
+        let mut row = ToolCall::from_spec(call_spec, theme);
+        if let Some(handler) = &on_call_toggle {
+            let handler = Arc::clone(handler);
+            row = row.on_toggle(move |id| handler(id));
+        }
+        list = list.child(row.into_js_el());
     }
 
     // The container is on the run, not the row: a thirty-call run has to read as
@@ -79,30 +136,35 @@ pub fn js_tool_call_group(spec: &ToolCallGroupSpec, theme: &JetstreamThemeProvid
             spec.resolved_more_label()
         };
 
-        root = root.child(
-            ui_element::button("")
-                .aria_label(spec.toggle_accessible_name())
-                .aria_role(jetstream_ui::accesskit::Role::Button)
-                .aria_expanded(spec.is_expanded)
-                .flex_row()
-                .items_center()
-                .gap(gap)
-                .pl(pad_x)
-                .pr(pad_x)
-                .bg(Color::TRANSPARENT)
-                .focusable()
-                .child(
-                    ui_element::icon("chevron-down")
-                        .w(icon_size)
-                        .h(icon_size)
-                        .text_color(toggle_color),
-                )
-                .child(
-                    ui_element::label(label)
-                        .text_size(font_size)
-                        .text_color(toggle_color),
-                ),
-        );
+        let mut toggle = ui_element::button("")
+            .aria_label(spec.toggle_accessible_name())
+            .aria_role(jetstream_ui::accesskit::Role::Button)
+            .aria_expanded(spec.is_expanded)
+            .flex_row()
+            .items_center()
+            .gap(gap)
+            .pl(pad_x)
+            .pr(pad_x)
+            .bg(Color::TRANSPARENT)
+            .focusable()
+            .child(
+                ui_element::icon("chevron-down")
+                    .w(icon_size)
+                    .h(icon_size)
+                    .text_color(toggle_color),
+            )
+            .child(
+                ui_element::label(label)
+                    .text_size(font_size)
+                    .text_color(toggle_color),
+            );
+
+        if let Some(handler) = on_toggle {
+            let id = spec.id.clone();
+            toggle = toggle.cursor_pointer().on_click(move |_event| handler(&id));
+        }
+
+        root = root.child(toggle);
     }
 
     root
@@ -141,6 +203,67 @@ mod tests {
         assert!(tree.has_text("bun test"), "{:?}", tree.texts());
         assert!(!tree.has_text("cargo check"), "{:?}", tree.texts());
         assert!(tree.has_text("+1 previous tool calls"), "{:?}", tree.texts());
+    }
+
+    /// The run toggle carries the run id, not a call id — expanding a run and
+    /// opening a row's output are different events with different payloads, and
+    /// the collapsed row sits directly above the toggle.
+    #[test]
+    fn the_toggle_reports_the_run() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = ToolCallGroupSpec::new(
+            "run-7",
+            vec![
+                call("a", "cargo check", ToolCallStatus::Success),
+                call("b", "bun test", ToolCallStatus::Success),
+            ],
+        );
+
+        let el = ToolCallGroup::from_spec(spec, &theme())
+            .on_toggle(move |id| {
+                assert_eq!(id, "run-7", "the handler is told which run was expanded");
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 720.0, 200.0, "+1 previous tool calls");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+    /// A run forwards to its rows, so opening one call's output does not read as
+    /// expanding the run.
+    #[test]
+    fn a_row_click_reaches_the_call_handler() {
+        use std::sync::Arc;
+        use std::sync::Mutex;
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let calls = Arc::clone(&seen);
+        let runs = Arc::clone(&seen);
+
+        let mut lead = call("b", "bun test", ToolCallStatus::Success);
+        lead.output = Some("272 pass".to_string());
+
+        let spec = ToolCallGroupSpec::new(
+            "run-7",
+            vec![call("a", "cargo check", ToolCallStatus::Success), lead],
+        );
+
+        let el = ToolCallGroup::from_spec(spec, &theme())
+            .on_call_toggle(move |id| calls.lock().unwrap().push(format!("call:{id}")))
+            .on_toggle(move |id| runs.lock().unwrap().push(format!("run:{id}")))
+            .into_js_el();
+
+        // The collapsed run's only row is the newest call.
+        crate::element::click_probe::click_text(&el, 720.0, 200.0, "bun test");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["call:b"], "the row's own event fired, not the run's");
     }
 
     #[test]

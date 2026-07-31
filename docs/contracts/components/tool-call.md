@@ -223,12 +223,14 @@ not chrome.
 
 ### Interaction Per Target
 
-GPUI is interactive: the row carries a real click handler and opens its output.
-Jetstream renders the state the spec describes and does not yet drive it. No
-Poodle Jetstream component wires a click, and no engine work is needed to change
-that: the runtime dispatches clicks and the preview already feeds pointer state
-every frame. What is undecided is where a handler hangs, given `on_click` needs
-`Send + Sync + 'static` and the components are plain functions. See g12.017.
+Both natives are interactive. GPUI's row carries a real click handler through
+`cx.listener`; Jetstream's is `ToolCall::from_spec(spec, theme).on_toggle(...)`,
+whose handler is `Send + Sync + 'static` and so captures an `Arc` rather than
+borrowing host state.
+
+A row with no output is not clickable on either target, and on Jetstream both
+halves of that are proved by a test that drives a real click — see
+`packages/jetstream/components/src/element.rs`.
 
 ## 12. Known Deltas
 

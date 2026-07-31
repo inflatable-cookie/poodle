@@ -34,6 +34,14 @@
 //! is the reason this design puts handlers somewhere a test can reach them.
 
 use jetstream_ui::ui_element::JsEl;
+use std::sync::Arc;
+
+/// A handler taking the id of the thing that was acted on.
+///
+/// Nearly every Poodle event is "this one, by id" — a row opened, a file
+/// chosen, an option selected — so the components share one alias rather than
+/// spelling the same `Arc<dyn Fn>` out per field.
+pub type Handler = Arc<dyn Fn(&str) + Send + Sync>;
 
 /// Anything that can become an element tree.
 ///
@@ -63,6 +71,24 @@ pub(crate) mod click_probe {
     use jetstream_ui::GameUi;
     use jetstream_input::InputSystem;
     use jetstream_platform::{MouseButton, PlatformEvent};
+
+    /// Click the centre of the first node whose text is `text`.
+    ///
+    /// Preferred over `click_at`: a test that says "click the toggle" keeps
+    /// meaning that when a padding token changes, where one that says "click at
+    /// y=52" quietly starts hitting the row above.
+    pub fn click_text(el: &JsEl, width: f32, height: f32, text: &str) {
+        let tree = crate::render_probe::probe(el, width, height);
+        let node = tree
+            .nodes
+            .iter()
+            .find(|node| node.text.as_deref() == Some(text))
+            .unwrap_or_else(|| {
+                panic!("no node with text {text:?} to click. present: {:?}", tree.texts())
+            });
+
+        click_at(el, width, height, node.x + node.w / 2.0, node.y + node.h / 2.0);
+    }
 
     /// Render `el`, click at `(x, y)`, and let the handlers run.
     pub fn click_at(el: &JsEl, width: f32, height: f32, x: f32, y: f32) {

@@ -12,7 +12,7 @@ use poodle_specs::ToolCallSpec;
 
 use std::sync::Arc;
 
-use crate::element::IntoJsEl;
+use crate::element::{Handler, IntoJsEl};
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
@@ -23,7 +23,7 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub struct ToolCall {
     spec: ToolCallSpec,
     theme: JetstreamThemeProvider,
-    on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_toggle: Option<Handler>,
 }
 
 impl ToolCall {

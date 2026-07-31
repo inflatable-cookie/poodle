@@ -11,8 +11,35 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_markdown::{parse_markdown, MdBlock, MdInline};
 use poodle_specs::AgentMessageSpec;
 
+use crate::element::IntoJsEl;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};
+
+/// AgentMessage — agent prose.
+///
+/// No `on_link_click` yet, unlike the web target: inline nodes flatten to text
+/// here, so there is no link element to hang one on. It arrives with rich
+/// inline runs, not before — a handler for a link that is not drawn is exactly
+/// the dead-handler pattern this shape exists to prevent.
+pub struct AgentMessage {
+    spec: AgentMessageSpec,
+    theme: JetstreamThemeProvider,
+}
+
+impl AgentMessage {
+    pub fn from_spec(spec: AgentMessageSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoJsEl for AgentMessage {
+    fn into_js_el(self) -> JsEl {
+        js_agent_message(&self.spec, &self.theme)
+    }
+}
 
 /// Flatten inline nodes to text.
 ///

@@ -358,6 +358,21 @@ block's own height.
   `transcriptWindow`, which assumes a scroll container the component owns. The
   grouping and status logic are shared unchanged.
 - Markdown renders from `poodle-markdown` blocks, not from HTML.
+- The blocks are interactive, but the transcript itself forwards no handlers
+  yet: a GPUI host attaches to the block components directly.
+
+## 10a. Jetstream Notes
+
+- `AgentTranscript::from_spec(spec, theme)` then `.on_tool_run_toggle(...)`,
+  `.on_tool_call_toggle(...)`, `.on_changed_files_toggle(...)`,
+  `.on_file_select(...)`.
+- The transcript forwards handlers into the block that raises each event rather
+  than re-deriving which block was clicked. It is the only level that sees every
+  block, and the host holds all the expansion state, so this is where a host
+  attaches.
+- `onScrollStateChange` and `onOpenDiff` are web-only. The first belongs to a
+  scroll container the component does not own here; the second has no native
+  affordance to fire it.
 
 ## 11. Parity Checklist
 
