@@ -1,4 +1,6 @@
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -6,7 +8,8 @@ use poodle_gpui_components::{Eyebrow, SplitView};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{SplitOrientation, SplitViewSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let border_subtle = theme.resolve_color("color.border.subtle");
     let panel_bg = theme.resolve_color("color.background.panel");
@@ -50,10 +53,46 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .overflow_hidden()
     };
 
+    // Drag-to-resize: the ratio lives in specimen state (as a percentage,
+    // seeded at 50) and streams back through on_ratio_change.
+    let ratio_key = "split-view-ratio";
+    let ratio_pct = match state.specimens.selected(ratio_key) {
+        0 => 50,
+        pct => pct,
+    };
+    let interactive = SplitView::from_spec(
+        SplitViewSpec::new(SplitOrientation::Horizontal).with_ratio(ratio_pct as f32 / 100.0),
+        theme,
+    )
+    .with_primary(region("Sidebar", 220.0))
+    .with_secondary(region("Main content", 140.0))
+    .on_ratio_change({
+        let listener = cx.listener(move |this: &mut PreviewRoot, ratio: &f32, _window, cx| {
+            this.state
+                .specimens
+                .select(ratio_key, (ratio * 100.0).round().max(1.0) as usize);
+            cx.notify();
+        });
+        move |ratio, window, cx| listener(&ratio, window, cx)
+    });
+
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
+        // --- Drag to resize ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content(format!("Drag to resize (ratio: {ratio_pct}%)")),
+                    theme,
+                ))
+                .child(frame(160.0).child(interactive)),
+        )
         // --- Basic horizontal layout ---
         .child(
             div()

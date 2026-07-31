@@ -359,8 +359,14 @@ None.
 - expected crate/module surface: `poodle_gpui::composites::split_view`
 - spec struct: `SplitViewSpec` with orientation, ratio, collapse states,
   fixed sizes, min sizes, disabled, size, density
-- GPUI may use native splitter support or custom layout code, but keyboard
-  resizing, orientation semantics, and collapse state remain required
+- `on_ratio_change(ratio)` streams during a divider drag, clamped to
+  [0.05, 0.95]: the divider starts a gpui drag and the split root listens
+  for its moves, whose bounds give the axis extent a ratio needs. The drag
+  state lives in gpui, not the component, so mid-drag re-renders (each
+  ratio emission causes one) do not drop the gesture. Hosts composing more
+  than one resizable split give each a distinct `with_id`.
+- keyboard resizing is not implemented (no focus/key routing yet); collapse
+  state and orientation semantics are.
 
 ## 10a. Jetstream Notes
 

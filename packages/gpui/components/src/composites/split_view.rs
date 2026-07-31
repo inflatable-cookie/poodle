@@ -11,6 +11,28 @@ use poodle_specs::{SplitOrientation, SplitViewSpec};
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::primitives::{CollapseToggle, ResizeHandle};
 
+/// The active divider drag. Carried as gpui's drag value so the gesture's
+/// state lives in the framework, not in this stateless component — a re-render
+/// mid-drag (every `on_ratio_change` causes one) would lose any local state.
+///
+/// `id` discriminates between split views when several are on screen: the
+/// root's `on_drag_move` listener fires for *any* active drag of this type,
+/// so each listener checks the id against its own. Hosts composing more than
+/// one resizable split should give each a distinct `with_id`.
+struct DividerDrag {
+    id: Option<ElementId>,
+}
+
+/// gpui requires a drag to render a preview entity; a divider drag shows
+/// nothing — the divider itself moves.
+struct DividerDragPreview;
+
+impl Render for DividerDragPreview {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        Empty
+    }
+}
+
 /// A real GPUI split view backed by `SplitViewSpec`.
 ///
 /// Renders two panes separated by a draggable divider, either
@@ -19,6 +41,7 @@ use crate::primitives::{CollapseToggle, ResizeHandle};
 pub struct SplitView {
     spec: SplitViewSpec,
     theme: GpuiThemeProvider,
+    id: Option<ElementId>,
     /// Primary (first) pane content.
     primary: Option<AnyElement>,
     /// Secondary (second) pane content.
@@ -43,6 +66,7 @@ impl SplitView {
         Self {
             spec: SplitViewSpec::new(orientation),
             theme: theme.clone(),
+            id: None,
             primary: None,
             secondary: None,
             on_ratio_change: None,
@@ -55,12 +79,20 @@ impl SplitView {
         Self {
             spec,
             theme: theme.clone(),
+            id: None,
             primary: None,
             secondary: None,
             on_ratio_change: None,
             on_primary_collapse: None,
             on_secondary_collapse: None,
         }
+    }
+
+    /// A stable identity for the divider drag. Only needed when a host
+    /// composes more than one resizable split view at once.
+    pub fn with_id(mut self, id: impl Into<ElementId>) -> Self {
+        self.id = Some(id.into());
+        self
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -376,7 +408,37 @@ impl IntoElement for SplitView {
                 divider = divider.child(cluster);
             }
 
-            container = container.child(divider);
+            // Drag-to-resize. The divider starts a gpui drag (empty preview);
+            // the container listens for its moves, which arrive with the
+            // container's own bounds — exactly the axis extent a ratio needs.
+            // Ratio streams on every move, clamped to the contract's
+            // [0.05, 0.95]; the host decides persistence cadence.
+            if let (false, Some(handler)) = (spec.is_disabled, self.on_ratio_change) {
+                let drag_id = self.id.clone();
+                let listener_id = self.id.clone();
+                container = container
+                    .on_drag_move::<DividerDrag>(move |event, window, cx| {
+                        if event.drag(cx).id != listener_id {
+                            return;
+                        }
+                        let bounds = event.bounds;
+                        let position = event.event.position;
+                        let ratio = if is_horizontal {
+                            f32::from(position.x - bounds.origin.x) / f32::from(bounds.size.width)
+                        } else {
+                            f32::from(position.y - bounds.origin.y) / f32::from(bounds.size.height)
+                        };
+                        handler(ratio.clamp(0.05, 0.95), window, cx);
+                    });
+                let divider = divider
+                    .id("split-view-divider")
+                    .on_drag(DividerDrag { id: drag_id }, |_, _, _window, cx| {
+                        cx.new(|_| DividerDragPreview)
+                    });
+                container = container.child(divider);
+            } else {
+                container = container.child(divider);
+            }
         }
 
         // Secondary pane

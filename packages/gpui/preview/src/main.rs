@@ -1285,7 +1285,7 @@ struct CliArgs {
     control_size: Option<ControlSize>,
     screenshot: Option<String>,
     /// Points to click, in window coordinates, before capturing.
-    clicks: Vec<Point<Pixels>>,
+    clicks: Vec<DriverAction>,
     /// Print every specimen-state entry whose key starts with this, after the
     /// clicks land. Turns "is this component interactive" into an assertion.
     print_state: Option<String>,
@@ -1302,7 +1302,7 @@ fn parse_cli_args() -> CliArgs {
     let mut density = None;
     let mut control_size = None;
     let mut screenshot = None;
-    let mut clicks: Vec<Point<Pixels>> = Vec::new();
+    let mut clicks: Vec<DriverAction> = Vec::new();
     let mut print_state = None;
 
     let mut i = 1;
@@ -1405,12 +1405,31 @@ fn parse_cli_args() -> CliArgs {
                 if let Some(val) = args.get(i + 1) {
                     if let Some((x, y)) = val.split_once(',') {
                         if let (Ok(x), Ok(y)) = (x.trim().parse::<f32>(), y.trim().parse::<f32>()) {
-                            clicks.push(point(px(x), px(y)));
+                            clicks.push(DriverAction::Click(point(px(x), px(y))));
                         } else {
                             eprintln!("--click expects X,Y in pixels, got {val:?}");
                         }
                     } else {
                         eprintln!("--click expects X,Y in pixels, got {val:?}");
+                    }
+                    i += 1;
+                }
+            }
+            // Repeatable: `--drag 100,50,200,50` presses at the first point,
+            // walks to the second in steps, and releases.
+            "--drag" => {
+                if let Some(val) = args.get(i + 1) {
+                    let parts: Vec<f32> = val
+                        .split(',')
+                        .filter_map(|part| part.trim().parse::<f32>().ok())
+                        .collect();
+                    if let [x1, y1, x2, y2] = parts[..] {
+                        clicks.push(DriverAction::Drag(
+                            point(px(x1), px(y1)),
+                            point(px(x2), px(y2)),
+                        ));
+                    } else {
+                        eprintln!("--drag expects X1,Y1,X2,Y2 in pixels, got {val:?}");
                     }
                     i += 1;
                 }
@@ -1530,6 +1549,13 @@ fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType,
     unsafe { app.postEvent_atStart(&event, false) };
 }
 
+/// One pointer gesture from the CLI, in the order given.
+#[derive(Clone, Copy)]
+enum DriverAction {
+    Click(Point<Pixels>),
+    Drag(Point<Pixels>, Point<Pixels>),
+}
+
 /// Dispatch a synthetic click: move, down, up.
 ///
 /// The move comes first: hit testing keys off the last known pointer
@@ -1540,6 +1566,25 @@ fn dispatch_click(window: &mut Window, position: Point<Pixels>) {
     post_mouse_event(window, NSEventType::MouseMoved, position);
     post_mouse_event(window, NSEventType::LeftMouseDown, position);
     post_mouse_event(window, NSEventType::LeftMouseUp, position);
+}
+
+/// Dispatch a synthetic drag: press at `from`, walk to `to` in dragged-move
+/// steps, release. gpui reads `LeftMouseDragged` as a mouse move with the
+/// left button pressed, which is what its drag machinery keys off.
+fn dispatch_drag(window: &mut Window, from: Point<Pixels>, to: Point<Pixels>) {
+    use objc2_app_kit::NSEventType;
+    post_mouse_event(window, NSEventType::MouseMoved, from);
+    post_mouse_event(window, NSEventType::LeftMouseDown, from);
+    const STEPS: i32 = 8;
+    for step in 1..=STEPS {
+        let t = step as f32 / STEPS as f32;
+        let position = point(
+            px(f32::from(from.x) + (f32::from(to.x) - f32::from(from.x)) * t),
+            px(f32::from(from.y) + (f32::from(to.y) - f32::from(from.y)) * t),
+        );
+        post_mouse_event(window, NSEventType::LeftMouseDragged, position);
+    }
+    post_mouse_event(window, NSEventType::LeftMouseUp, to);
 }
 
 /// How a posted coordinate maps to the position gpui observes.
@@ -1658,7 +1703,7 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
 fn schedule_interaction(
     window: &mut Window,
     cx: &mut App,
-    clicks: Vec<Point<Pixels>>,
+    clicks: Vec<DriverAction>,
     print_state: Option<String>,
 ) {
     window
@@ -1696,10 +1741,20 @@ fn schedule_interaction(
                 }
             }
 
-            for point in clicks {
-                let point = calibration.apply(point);
+            for action in clicks {
                 cx.update(|window, _cx| {
-                    dispatch_click(window, point);
+                    match action {
+                        DriverAction::Click(position) => {
+                            dispatch_click(window, calibration.apply(position));
+                        }
+                        DriverAction::Drag(from, to) => {
+                            dispatch_drag(
+                                window,
+                                calibration.apply(from),
+                                calibration.apply(to),
+                            );
+                        }
+                    }
                     window.refresh();
                 })
                 .ok();
@@ -1751,11 +1806,7 @@ fn main() {
     Application::new().with_assets(assets).run(move |cx: &mut App| {
         // Taken before the window closure consumes `cli`.
         let driver_screenshot = cli.screenshot.clone();
-        let driver_clicks: Vec<(f32, f32)> = cli
-            .clicks
-            .iter()
-            .map(|p| (f32::from(p.x), f32::from(p.y)))
-            .collect();
+        let has_driver_actions = !cli.clicks.is_empty();
         // Load Inter font family — static weights for reliable rendering
         // (GPUI doesn't support variable font weight axes)
         let font_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
@@ -1859,7 +1910,7 @@ fn main() {
         // whatever the user is doing. Order it front without taking focus —
         // `orderFrontRegardless` works from an inactive app, where activate
         // is blocked by focus-stealing prevention.
-        if !driver_clicks.is_empty() {
+        if has_driver_actions {
             cx.defer(move |_cx| {
                 use objc2::MainThreadMarker;
                 use objc2_app_kit::NSApplication;
@@ -1874,7 +1925,7 @@ fn main() {
 
         // Screenshot mode: spawn a background thread that waits for render,
         // captures the window by PID (without stealing focus), saves, and exits.
-        if driver_screenshot.is_some() || !driver_clicks.is_empty() {
+        if driver_screenshot.is_some() || has_driver_actions {
             let path = driver_screenshot.clone();
             std::thread::spawn(move || {
                 // Wait for the renderer to say it has drawn, rather than

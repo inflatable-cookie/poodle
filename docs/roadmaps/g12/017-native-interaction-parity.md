@@ -483,11 +483,31 @@ contracts' Jetstream Notes.
 multi-enum checkboxes) and the host flips membership itself. Typed operands
 (text, number, range) stay host-side deltas — no key events.
 
+### The GPUI divider drags, and the driver can prove drags
+
+GPUI `SplitView::on_ratio_change` is live — the first of the four baselined
+handlers down, and the only one that needed a drag rather than text input.
+The shape: the divider starts a gpui drag (`on_drag`, empty preview) and the
+split root listens with `on_drag_move`, whose events carry the root's own
+bounds — exactly the axis extent a ratio needs, which is what Jetstream's
+immediate-mode build could never see. The gesture's state lives in gpui's
+active-drag, not the component, so the re-render each ratio emission causes
+does not drop the drag. Clamped [0.05, 0.95], streams on every move.
+`with_id` discriminates when a host composes several resizable splits.
+
+The preview driver grew `--drag X1,Y1,X2,Y2` (press, eight dragged-move
+steps, release — gpui reads `LeftMouseDragged` as move-with-button, which is
+what its drag machinery keys off). Proof, via the now-interactive specimen
+holding its ratio in specimen state:
+`--drag 906,436,806,436 --print-state split-view` → `split-view-ratio=42`.
+
 ## Next
 
-1. Burn down the last 4 baselined GPUI handlers (divider drag + live text
-   editing — GPUI input work, not wiring). The click driver can now prove
-   them when they land.
+1. Burn down the last 3 baselined GPUI handlers (`command_palette
+   on_query_change`, `editable_label on_change`, `pagination
+   on_goto_input_change`) — live text editing, which needs focus and key
+   routing. The driver can prove them once a `--type` exists (posting
+   NSEvent key events through the same route should work).
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither
