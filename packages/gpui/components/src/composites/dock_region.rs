@@ -192,6 +192,14 @@ impl IntoElement for DockRegion {
         };
 
         // Helper to render a single horizontal/edge tab.
+        // Rc so the closures below can each hold a clone. Mirrors the wired
+        // Jetstream DockRegion.
+        let on_tab_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_tab_change.map(|h| std::rc::Rc::from(h));
+        let on_collapse_toggle: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App)>> =
+            self.on_collapse_toggle.map(|h| std::rc::Rc::from(h));
+        let next_collapsed = !spec.is_collapsed;
+
         let render_tab = |item: &PanelTabItem, is_active: bool, on_edge: bool, compact: bool| -> Stateful<Div> {
             let tab_id = SharedString::from(format!("{}-tab-{}", self.id_prefix, item.value));
             let mut tab = div()
@@ -226,6 +234,15 @@ impl IntoElement for DockRegion {
             if !compact {
                 tab = tab.child(item.label.clone());
             }
+
+            if let Some(handler) = &on_tab_change {
+                let handler = handler.clone();
+                let value = item.value.clone();
+                tab = tab.on_click(move |_event, window, cx| {
+                    handler(&value, window, cx);
+                });
+            }
+
             tab
         };
 
@@ -254,6 +271,14 @@ impl IntoElement for DockRegion {
             } else {
                 t = t.px(px(space_x * 0.5)).py(px(space_y * 0.5));
             }
+
+            if let Some(handler) = &on_collapse_toggle {
+                let handler = handler.clone();
+                t = t.on_click(move |_event, window, cx| {
+                    handler(next_collapsed, window, cx);
+                });
+            }
+
             t
         };
 

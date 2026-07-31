@@ -180,6 +180,12 @@ impl IntoElement for NumberInput {
             self.on_increment.map(|h| std::rc::Rc::from(h));
         let on_dec_rc: Option<std::rc::Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>> =
             self.on_decrement.map(|h| std::rc::Rc::from(h));
+        // on_change fires alongside the steppers with the value the press
+        // produces, clamped — the payload the host would otherwise re-derive.
+        let on_change_rc: Option<std::rc::Rc<dyn Fn(&f64, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+        let inc_value = (spec.value + spec.step).min(spec.max);
+        let dec_value = (spec.value - spec.step).max(spec.min);
 
         // Increment button (top) — Svelte uses Icon component
         let mut inc_btn = div()
@@ -199,10 +205,16 @@ impl IntoElement for NumberInput {
             );
 
         if !spec.is_disabled {
-            if let Some(ref handler) = on_inc_rc {
-                let handler = handler.clone();
+            if on_inc_rc.is_some() || on_change_rc.is_some() {
+                let handler = on_inc_rc.clone();
+                let change = on_change_rc.clone();
                 inc_btn = inc_btn.on_click(move |event, window, cx| {
-                    handler(event, window, cx);
+                    if let Some(handler) = &handler {
+                        handler(event, window, cx);
+                    }
+                    if let Some(change) = &change {
+                        change(&inc_value, window, cx);
+                    }
                 });
             }
         }
@@ -225,10 +237,16 @@ impl IntoElement for NumberInput {
             );
 
         if !spec.is_disabled {
-            if let Some(ref handler) = on_dec_rc {
-                let handler = handler.clone();
+            if on_dec_rc.is_some() || on_change_rc.is_some() {
+                let handler = on_dec_rc.clone();
+                let change = on_change_rc.clone();
                 dec_btn = dec_btn.on_click(move |event, window, cx| {
-                    handler(event, window, cx);
+                    if let Some(handler) = &handler {
+                        handler(event, window, cx);
+                    }
+                    if let Some(change) = &change {
+                        change(&dec_value, window, cx);
+                    }
                 });
             }
         }

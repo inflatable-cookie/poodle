@@ -251,7 +251,19 @@ impl IntoElement for DatePicker {
                 .border_color(Hsla { a: panel_border.a * 0.72, ..panel_border })
                 .shadow(crate::theme_ext::elevation_overlay_shadow())
                 .p(resolve_px(theme, "space.inline.md"))
-                .child(Calendar::from_spec(cal_spec, theme));
+                .child({
+                    // Forward the day event to the composed Calendar rather
+                    // than re-deriving it — same ISO payload, same shape as
+                    // the Jetstream DatePicker.
+                    let mut calendar = Calendar::from_spec(cal_spec, theme);
+                    if let Some(handler) = self.on_select {
+                        let handler = std::rc::Rc::new(handler);
+                        calendar = calendar.on_select(move |iso, window, cx| {
+                            handler(iso, window, cx);
+                        });
+                    }
+                    calendar
+                });
             wrapper = wrapper.child(cal_surface);
         }
 

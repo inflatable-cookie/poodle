@@ -464,6 +464,15 @@ impl IntoElement for ListCard {
             root = root
                 .cursor_pointer()
                 .hover(|style| style.bg(hover_fill).border_color(hover_border));
+
+            // Same condition that draws the pointer cursor gates the handler,
+            // so a static-looking card is static. Mirrors the Jetstream
+            // ListCard, where this is proved by a click test.
+            if let Some(handler) = self.on_click {
+                root = root.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
+                });
+            }
         }
 
         // ── Not-live state: reduced opacity (contract §8: 0.72) ──────

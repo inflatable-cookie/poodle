@@ -106,6 +106,9 @@ impl IntoElement for ActionDiscoveryPanel {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        // Rc so every row closure can hold a clone.
+        let on_select_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_select.map(|h| std::rc::Rc::from(h));
 
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let font_size = rem_to_px(size_font_rem(effective_size));
@@ -283,10 +286,20 @@ impl IntoElement for ActionDiscoveryPanel {
                     row = row
                         .opacity(disabled_opacity)
                         .cursor(CursorStyle::OperationNotAllowed);
-                } else if !is_active {
-                    row = row.cursor_pointer().hover(|s| s.bg(hover_bg));
                 } else {
-                    row = row.cursor_pointer();
+                    if !is_active {
+                        row = row.cursor_pointer().hover(|s| s.bg(hover_bg));
+                    } else {
+                        row = row.cursor_pointer();
+                    }
+
+                    if let Some(handler) = &on_select_rc {
+                        let handler = handler.clone();
+                        let id = action.id.clone();
+                        row = row.on_click(move |_event, window, cx| {
+                            handler(&id, window, cx);
+                        });
+                    }
                 }
 
                 // Left: title + subtitle (description)

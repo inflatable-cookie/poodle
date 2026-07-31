@@ -12,7 +12,7 @@
  * how a component chooses to use one, and loud about never using it at all.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 const ROOT = new URL("../../components/src", import.meta.url).pathname;
 
@@ -33,34 +33,47 @@ function walk(dir: string): string[] {
  * fixed, and it is why the gate exists.
  */
 const BASELINE: Record<string, string[]> = {
-  "composites/action_discovery_panel.rs": ["on_select"],
-  "composites/command_palette.rs": ["on_query_change", "on_select"],
-  "composites/data_table/mod.rs": ["on_page_change", "on_row_click", "on_row_expand", "on_row_select", "on_select_all", "on_sort"],
-  "composites/dock_region.rs": ["on_collapse_toggle", "on_tab_change"],
-  "composites/log_list/mod.rs": ["on_filter_change", "on_search"],
+  // 23 of the original 34 entries were never dead: their handlers were wired
+  // in sibling files of the same module, and the gate only read the declaring
+  // file. Of the true 11, seven are wired now. These four need input routes
+  // this pass did not build: a divider drag (split_view) and live text editing
+  // (the other three).
+  "composites/command_palette.rs": ["on_query_change"],
   "composites/split_view.rs": ["on_ratio_change"],
-  "composites/tree/mod.rs": ["on_check", "on_context_menu", "on_drag_over", "on_rename_cancel", "on_rename_change", "on_rename_commit", "on_rename_start", "on_select"],
-  "primitives/calendar/mod.rs": ["on_navigate", "on_range_select", "on_select"],
-  "primitives/date_picker.rs": ["on_select"],
   "primitives/editable_label.rs": ["on_change"],
-  "primitives/list_card.rs": ["on_click"],
-  "primitives/number_input.rs": ["on_change"],
   "primitives/pagination/mod.rs": ["on_goto_input_change"],
-  "primitives/select/mod.rs": ["on_change", "on_search_change", "on_toggle"],
-  "primitives/tabs/mod.rs": ["on_change"],
 };
 
 const dead: string[] = [];
 const fixed: string[] = [];
 
+/**
+ * The whole module's source, not one file's.
+ *
+ * A component split across a directory declares its handlers in `mod.rs` and
+ * uses them wherever the render lives — `calendar/` reads all three of its
+ * handlers in `render.rs`. Counting reads only in the declaring file reported
+ * them dead when they were wired all along, and the baseline preserved that
+ * false accusation for weeks. Same blind spot the Jetstream gate had; same fix.
+ */
+function moduleSource(file: string): string {
+  if (!file.endsWith("/mod.rs")) return readFileSync(file, "utf8");
+  const dir = dirname(file);
+  return readdirSync(dir)
+    .filter((entry) => entry.endsWith(".rs"))
+    .map((entry) => readFileSync(join(dir, entry), "utf8"))
+    .join("\n");
+}
+
 for (const file of walk(ROOT)) {
   const source = readFileSync(file, "utf8");
   const fields = [...source.matchAll(/^\s+(on_[a-z_]+):\s*Option</gm)].map((m) => m[1]);
+  const scope = moduleSource(file);
 
   for (const field of new Set(fields)) {
     // Every read of the field, minus the assignment inside its own builder.
-    const reads = [...source.matchAll(new RegExp(`self\\.${field}\\b`, "g"))].length;
-    const writes = [...source.matchAll(new RegExp(`self\\.${field}\\s*=`, "g"))].length;
+    const reads = [...scope.matchAll(new RegExp(`self\\.${field}\\b`, "g"))].length;
+    const writes = [...scope.matchAll(new RegExp(`self\\.${field}\\s*=`, "g"))].length;
 
     const relative = file.replace(`${ROOT}/`, "");
     const known = BASELINE[relative]?.includes(field) ?? false;

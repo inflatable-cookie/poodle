@@ -333,6 +333,26 @@ The alternative was an `on_change` taking a rebuilt ordering, which would have
 put the host's state inside the component and made the event a lie about what
 the user did.
 
+### The GPUI dead-handler backlog was two-thirds phantom
+
+`drift:handlers` counted `self.on_x` reads only in the file declaring the field.
+A component split across a directory declares its handlers in `mod.rs` and uses
+them where the render lives — `calendar/render.rs` reads all three of
+Calendar's — so **23 of the 34 baselined "dead" handlers were wired all along**:
+the whole Tree, DataTable, LogList, Select, Tabs and Calendar sets. The same
+module blind spot the Jetstream gate had, found the same way, fixed the same
+way: the read scope is now the module, not the file.
+
+Of the true eleven, seven are wired now, each mirroring its tested Jetstream
+sibling: `ListCard::on_click`, `DatePicker::on_select` (forwarded to the
+composed Calendar), `NumberInput::on_change` (fired beside the steppers with
+the clamped next value), `DockRegion`'s tab and collapse events, and the
+`on_select` rows of ActionDiscoveryPanel and CommandPalette.
+
+Four remain, honestly: `SplitView::on_ratio_change` needs a divider drag, and
+`on_query_change` / `EditableLabel::on_change` / `Pagination::on_goto_input_change`
+need live text editing. Both are GPUI input work, not handler wiring.
+
 ### The sweep's last riddle: a handler that can never fire
 
 `EditableList`'s add button renders permanently disabled on this target — the
@@ -390,7 +410,8 @@ mechanical, but 151 of them.
 3. Forward the transcript's events on GPUI too. The blocks are interactive
    there, but `AgentTranscript` passes nothing down, so a GPUI host has to
    attach to the block components itself.
-4. Burn down the 34 baselined GPUI handlers.
+4. Burn down the last 4 baselined GPUI handlers (divider drag + live text
+   editing — GPUI input work, not wiring).
 5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
 
 Two contract gaps found while converting, both recorded as deltas rather than
