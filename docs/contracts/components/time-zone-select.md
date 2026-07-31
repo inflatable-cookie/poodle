@@ -155,6 +155,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - GPUI must preserve `Select` semantics while using the same default timezone option source
 - `defaultTimeZoneOptions()` equivalent must be available in Rust
 
+## 10a. Jetstream Notes
+
+- `TimeZoneSelect::from_spec(spec, theme).on_toggle(...)`, forwarded to the
+  composed `Select` rather than re-implemented.
+- No `on_change`, for the same reason `Select` has none: the zone list is that
+  panel.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -183,6 +190,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| Jetstream cannot select from the open panel | the panel is absolutely positioned, its containing block is the trigger's height, and the runtime resolves it to zero height; it paints its rows regardless, but hit-testing requires every ancestor to contain the point, so an option click lands on nothing. Declaring the handler anyway would ship one that never fires | accepted, tracked | g12.017 |
 | underlying select implementation differs per runtime | wrapper delegates to runtime-specific `Select` implementation | allowed | keep `Select` semantics and timezone option meaning strict |
 | default timezone list ordering may differ | platform timezone registries vary | allowed | keep public timezone value meaning strict |
 

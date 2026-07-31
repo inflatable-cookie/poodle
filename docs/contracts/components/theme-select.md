@@ -172,6 +172,13 @@ Anatomy token-target column.
   (native apps switch their own `GpuiThemeProvider`); render-only build-verified
 - no ARIA API — accessible-name intent documented only
 
+## 10a. Jetstream Notes
+
+- `ThemeSelect::from_spec(spec, theme).on_change(...)`, carrying the theme's
+  value.
+- The swatch grid is laid out in flow rather than in an absolute panel, which is
+  why its tiles are clickable where `Select`'s option rows are not.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

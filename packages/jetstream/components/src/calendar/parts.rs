@@ -244,5 +244,69 @@ mod tests {
             day_rows.len()
         );
     }
+
+    /// The payload is an ISO date, which is what the spec already speaks:
+    /// a day number would leave the host resolving it against a month it
+    /// would have to track separately.
+    #[test]
+    fn pressing_a_day_reports_its_iso_date() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let days = Arc::clone(&seen);
+
+        let spec = CalendarSpec::new().with_visible_month("2026-03");
+        let el = crate::calendar::Calendar::from_spec(spec, &theme())
+            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "17");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["2026-03-17"]);
+    }
+
+    #[test]
+    fn the_month_arrows_report_a_direction() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let moves = Arc::clone(&seen);
+
+        let spec = CalendarSpec::new().with_visible_month("2026-03");
+        let el = crate::calendar::Calendar::from_spec(spec, &theme())
+            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "chevron-right");
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "chevron-left");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["next", "prev"]);
+    }
+
+    #[test]
+    fn a_disabled_calendar_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = CalendarSpec {
+            is_disabled: true,
+            ..CalendarSpec::new().with_visible_month("2026-03")
+        };
+
+        let el = crate::calendar::Calendar::from_spec(spec, &theme())
+            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 400.0, 400.0, "17");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled calendar selected a day");
+    }
+
 }
 

@@ -72,7 +72,6 @@ const BASELINE = new Set([
   "AudioPlayer",
   "BlockEditor",
   "BulkActionBar",
-  "Calendar",
   "Callout",
   "CardRadioGroup",
   "CardToggleGroup",
@@ -110,14 +109,11 @@ const BASELINE = new Set([
   "RelationPicker",
   "ResizeHandle",
   "ScrollShell",
-  "Select",
   "SelectionSummary",
   "SplitButton",
   "SplitView",
   "Stepper",
-  "ThemeSelect",
   "TimeInput",
-  "TimeZoneSelect",
   "ToastHost",
   "ToastStack",
   "VideoPlayer",
@@ -141,6 +137,24 @@ const sources = walk(componentsDir);
 function testModule(source: string): string {
   const start = source.indexOf("#[cfg(test)]");
   return start === -1 ? "" : source.slice(start);
+}
+
+/**
+ * Every test module belonging to a component.
+ *
+ * A component split across a directory keeps its tests wherever they fit —
+ * `calendar/` has the builder in `mod.rs` and its tests in `parts.rs` — so the
+ * unit is the module, not the file. Reading only `mod.rs` reported Calendar's
+ * two handlers as untested when both had tests one file over.
+ */
+function componentTests(file: string): string {
+  if (!file.endsWith("/mod.rs")) return testModule(readFileSync(file, "utf8"));
+
+  const dir = path.dirname(file);
+  return readdirSync(dir)
+    .filter((entry) => entry.endsWith(".rs"))
+    .map((entry) => testModule(readFileSync(path.join(dir, entry), "utf8")))
+    .join("\n");
 }
 
 const untested: string[] = [];
@@ -182,7 +196,7 @@ for (const entry of allComponents) {
     stale.push(`${entry.displayName}`);
   }
 
-  const tests = testModule(source);
+  const tests = componentTests(file!);
   const relative = file!.replace(`${componentsDir}/`, "");
   checked++;
 

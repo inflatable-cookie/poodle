@@ -16,6 +16,45 @@ use poodle_specs::TimeZoneSelectSpec;
 
 use crate::select::js_select;
 
+/// TimeZoneSelect — a searchable list of zones.
+///
+/// Mirrors the GPUI target's `on_toggle`, forwarded to the composed `Select`
+/// rather than re-implemented.
+///
+/// No `on_change`: the zone list is `Select`'s panel, and its rows are not
+/// hit-testable — see the note on `Select`. No `on_search_change` either: the
+/// search row is a text field and this runtime raises no key events.
+pub struct TimeZoneSelect {
+    spec: TimeZoneSelectSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+}
+
+impl TimeZoneSelect {
+    pub fn from_spec(spec: TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_toggle: None }
+    }
+
+    /// Fires when the trigger is pressed.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+}
+
+impl crate::element::IntoJsEl for TimeZoneSelect {
+    fn into_js_el(self) -> JsEl {
+        let mut select = crate::select::Select::from_spec(self.spec.to_select_spec(), &self.theme);
+        if let Some(handler) = self.on_toggle {
+            select = select.on_toggle(move || handler());
+        }
+
+        let root = crate::element::IntoJsEl::into_js_el(select);
+        crate::aria::with_aria_label(root, self.spec.aria_label.as_deref())
+    }
+}
+
 pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Build the searchable `SelectSpec` exactly as the Svelte wrapper does
     // (searchable always on, timezone empty message, mapped option list,
@@ -96,4 +135,26 @@ mod tests {
             tree.texts()
         );
     }
+
+    /// The zone list is a composed `Select`, so this also proves the wrapper
+    /// forwards rather than re-implementing.
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let el = TimeZoneSelect::from_spec(TimeZoneSelectSpec::new(), &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 200.0, "Search time zones...");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+
 }

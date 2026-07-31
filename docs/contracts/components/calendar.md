@@ -459,6 +459,18 @@ md and scales per size: xs `1.75rem`, sm `2rem`, lg `2.5rem`, xl `2.75rem`.
 - Roving tabindex equivalent: only one day should be focusable at a time within
   the grid
 
+## 10a. Jetstream Notes
+
+- `Calendar::from_spec(spec, theme).on_select(...).on_navigate(...)`, matching
+  the GPUI target's names.
+- `on_select` carries an ISO date (`2026-03-17`), which is what the spec already
+  speaks. A day number would leave the host resolving it against a month it
+  would have to track separately.
+- `on_navigate` carries `"prev"` or `"next"`.
+- No separate range event: a range is two day presses, and the host holds which
+  end it is filling. GPUI's `on_range_select` has no analogue here because the
+  component never sees a range gesture, only a day.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

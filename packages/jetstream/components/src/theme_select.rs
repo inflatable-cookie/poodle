@@ -82,7 +82,42 @@ fn swatch(option: &ThemeOption, theme: &JetstreamThemeProvider, w: f32, h: f32, 
         )
 }
 
+/// ThemeSelect — a grid of theme swatches.
+///
+/// Mirrors the GPUI target's shape: `from_spec` then `.on_change(handler)`.
+pub struct ThemeSelect {
+    spec: ThemeSelectSpec,
+    theme: JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+}
+
+impl ThemeSelect {
+    pub fn from_spec(spec: ThemeSelectSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    /// Fires with the chosen option's value.
+    pub fn on_change(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_change = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for ThemeSelect {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_change)
+    }
+}
+
 pub fn js_theme_select(spec: &ThemeSelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None)
+}
+
+fn build(
+    spec: &ThemeSelectSpec,
+    theme: &JetstreamThemeProvider,
+    on_change: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let trigger_h = rem_to_px(match effective_size {
         ControlSize::Xs => 1.5,
@@ -138,8 +173,7 @@ pub fn js_theme_select(spec: &ThemeSelectSpec, theme: &JetstreamThemeProvider) -
             .max_w(rem_to_px(22.0));
         for option in spec.themes.iter() {
             let selected = spec.is_selected(option);
-            grid = grid.child(
-                ui_element::div()
+            let mut tile = ui_element::div()
                     .flex_col()
                     .items_center()
                     .gap(rem_to_px(0.375))
@@ -156,8 +190,15 @@ pub fn js_theme_select(spec: &ThemeSelectSpec, theme: &JetstreamThemeProvider) -
                         ui_element::label(&option.label)
                             .text_color(text_primary)
                             .text_size(rem_to_px(0.71875)),
-                    ),
-            );
+                    );
+
+            if let Some(handler) = &on_change {
+                let handler = std::sync::Arc::clone(handler);
+                let id = option.value.clone();
+                tile = tile.cursor_pointer().on_click(move |_event| handler(&id));
+            }
+
+            grid = grid.child(tile);
         }
 
         root = root.child(
@@ -216,4 +257,27 @@ mod tests {
         let tree = crate::render_probe::probe(&el, 360.0, 240.0);
         assert!(tree.has_text("Eclipse") && tree.has_text("Nord"), "tiles missing: {:?}", tree.texts());
     }
+
+    #[test]
+    fn choosing_a_swatch_reports_its_value() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let values = Arc::clone(&seen);
+
+        let spec = ThemeSelectSpec::new()
+            .with_themes(themes())
+            .with_value("eclipse")
+            .with_open(true);
+
+        let el = ThemeSelect::from_spec(spec, &theme())
+            .on_change(move |value| values.lock().unwrap().push(value.to_string()))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 480.0, 400.0, "Nord");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["nord"]);
+    }
+
 }

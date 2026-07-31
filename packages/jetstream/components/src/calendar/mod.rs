@@ -107,7 +107,59 @@ fn parse_day(s: &str) -> Option<u32> {
 ///   └── [Day Grid]    — exact week count × 7 columns
 ///         └── [Day Cell] — square, per-state treatment
 /// ```
+/// Calendar — a month grid with navigation.
+///
+/// Mirrors the GPUI target's names: `on_select` and `on_navigate`. Both are
+/// among the handlers GPUI accepts and never reads, so this is the tested
+/// reference for fixing that side.
+///
+/// Range selection is not a separate event here: a range is built from two
+/// day presses, and the host holds which end it is filling. GPUI's
+/// `on_range_select` has no analogue because the component never sees a range
+/// gesture, only a day.
+pub struct Calendar {
+    spec: CalendarSpec,
+    theme: JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+}
+
+impl Calendar {
+    pub fn from_spec(spec: CalendarSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_select: None, on_navigate: None }
+    }
+
+    /// Fires with the pressed day as an ISO date (`2026-07-31`), which is what
+    /// the spec already speaks: reporting a day number would leave the host
+    /// resolving it against a month it would have to track separately.
+    pub fn on_select(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_select = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires with `"prev"` or `"next"` when a month arrow is pressed.
+    pub fn on_navigate(mut self, handler: impl Fn(&str) + Send + Sync + 'static) -> Self {
+        self.on_navigate = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Calendar {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, self.on_select, self.on_navigate)
+    }
+}
+
 pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, None, None)
+}
+
+fn build(
+    spec: &CalendarSpec,
+    theme: &JetstreamThemeProvider,
+    on_select: Option<crate::element::Handler>,
+    on_navigate: Option<crate::element::Handler>,
+) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // Per-size calendar metrics — all from the contract §8 size table.
@@ -256,7 +308,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
     // ── Nav header ────────────────────────────────────────────────────────────
 
-    let prev_btn = ui_element::button("")
+    let mut prev_btn = ui_element::button("")
         .aria_label("Previous month")
         .id("poodle-cal-prev")
         .w(nav_btn_size_px)
@@ -275,7 +327,12 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
                 .text_color(icon_muted),
         );
 
-    let next_btn = ui_element::button("")
+    if let (false, Some(handler)) = (spec.is_disabled, &on_navigate) {
+        let handler = std::sync::Arc::clone(handler);
+        prev_btn = prev_btn.on_click(move |_event| handler("prev"));
+    }
+
+    let mut next_btn = ui_element::button("")
         .aria_label("Next month")
         .id("poodle-cal-next")
         .w(nav_btn_size_px)
@@ -293,6 +350,11 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
                 .size(day_font_px)
                 .text_color(icon_muted),
         );
+
+    if let (false, Some(handler)) = (spec.is_disabled, &on_navigate) {
+        let handler = std::sync::Arc::clone(handler);
+        next_btn = next_btn.on_click(move |_event| handler("next"));
+    }
 
     // Month Label = composed Month Trigger + Year Trigger (contract §2). Each
     // is a control with a dashed-underline edit affordance (Svelte
@@ -472,6 +534,12 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
                 if !spec.is_disabled {
                     cell = cell.cursor_pointer();
+                }
+
+                if let (false, Some(handler)) = (spec.is_disabled, &on_select) {
+                    let handler = std::sync::Arc::clone(handler);
+                    let iso = date_iso.clone();
+                    cell = cell.on_click(move |_event| handler(&iso));
                 }
 
                 cell = cell.child(ui_element::label(day_num.to_string()));

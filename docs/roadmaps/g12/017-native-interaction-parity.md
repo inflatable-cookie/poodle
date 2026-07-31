@@ -183,6 +183,7 @@ Batches land with the gate holding each one to a click test.
 | Tree and DataTable | 2 | 63 → 61 |
 | Form inputs | 5 | 61 → 56 |
 | Sliders (drag) | 2 | 56 → 54 |
+| Pickers | 4 | 54 → 50 |
 
 **Payload shapes.** The rule that fell out of the controls batch: report what
 leaves the host with nothing to re-derive. Buttons take no payload — a press is
@@ -273,6 +274,34 @@ past its partner should *swap*, and collapsed both onto a single value. The
 shared machine clamps. Driving it is what makes the natives and the web agree by
 construction instead of by inspection.
 
+### An engine defect the click tests found
+
+**Overlay panels paint rows they cannot hit-test.** `Select`'s open panel is
+absolutely positioned below its trigger; its containing block is the wrapper,
+which is only the trigger's height. With `min_size: 0` the panel resolves to
+zero height — 8px of padding and nothing else — while the painter draws its
+rows regardless, because painting ignores the parent rect. Hit-testing does not:
+it requires *every* ancestor to contain the point. So the options are visible,
+carry the right ARIA roles, pass the visual gate, and cannot be clicked.
+
+Nothing in the repo could have caught this before. The visual gate compares
+pixels and the pixels are right. The a11y audit walks the tree and the tree is
+right. Only driving a click finds it.
+
+Scope: `Select`, `TimeZoneSelect` (which composes it), `ModelPicker` and
+`RefSelect` all use the same absolute-panel shape. `ThemeSelect`'s swatch grid
+is laid out in flow, which is exactly why its tiles *are* clickable — the same
+component set, split by a layout decision nobody made deliberately.
+
+The fix belongs in the sibling engine's `JsEl`→taffy mapping, not here, so this
+round wires only what is reachable: `Select` gets `on_toggle` and `on_clear`,
+`TimeZoneSelect` gets `on_toggle`, and `on_change` is left undeclared rather
+than shipped dead. `ModelPicker` and `RefSelect` go back to the baseline with
+nothing wired at all.
+
+Declaring a handler that cannot fire would have been the easy path and would
+have reproduced, exactly, the GPUI defect this roadmap item exists to fix.
+
 ### A parity defect the click tests found
 
 `DialogSpec::effective_dismiss_on_backdrop` read
@@ -298,16 +327,19 @@ mechanical, but 151 of them.
 
 ## Next
 
-1. Sweep the 54 components left in the `drift:clicks` baseline. Mechanical: each
+1. Fix overlay-panel hit-testing in the engine, then wire `Select`,
+   `TimeZoneSelect`, `ModelPicker` and `RefSelect` option selection. Until then
+   every menu-shaped component converts only as far as its trigger.
+2. Sweep the 50 components left in the `drift:clicks` baseline. Mechanical: each
    becomes a struct with `from_spec`, an `IntoJsEl` impl wrapping the existing
    render function, and handler methods only where the contract has events. The
    gate holds each one to a click test as it lands, and the baseline count is
    the progress bar.
-2. Forward the transcript's events on GPUI too. The blocks are interactive
+3. Forward the transcript's events on GPUI too. The blocks are interactive
    there, but `AgentTranscript` passes nothing down, so a GPUI host has to
    attach to the block components itself.
-3. Burn down the 34 baselined GPUI handlers.
-4. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
+4. Burn down the 34 baselined GPUI handlers.
+5. Revisit the GPUI click driver if `gpui` opens `DispatchEventResult`.
 
 Two contract gaps found while converting, both recorded as deltas rather than
 quietly implemented: neither native draws the "Open diff" action, and neither

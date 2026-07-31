@@ -527,4 +527,6 @@ mod tests {
         let tree = crate::render_probe::probe(&js_model_picker(&spec, &theme()), 360.0, 80.0);
         assert!(tree.has_text("Select model"), "placeholder missing: {:?}", tree.texts());
     }
+
+
 }

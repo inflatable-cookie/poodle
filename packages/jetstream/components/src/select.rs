@@ -19,7 +19,75 @@ use crate::presentation::{
 };
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 
+/// Select — a trigger and a panel of options.
+///
+/// Mirrors the GPUI target's names: `on_toggle`, plus an `on_clear` for the
+/// clear pill the contract puts in the trigger.
+///
+/// **No `on_change` yet.** The option rows cannot be clicked: the open panel is
+/// absolutely positioned, its containing block is only the trigger's height,
+/// and the runtime's `min_size: 0` lets it resolve to zero height. It paints
+/// its rows anyway — the painter ignores the parent rect — but hit-testing
+/// requires every ancestor to contain the point, so a click on an option lands
+/// on nothing. Declaring `on_change` would ship a handler that never fires,
+/// which is the exact defect this whole roadmap item exists to prevent. See
+/// g12.017.
+///
+/// No `on_query_change` either: the search row is a text field and this runtime
+/// raises no key events.
+pub struct Select {
+    spec: SelectSpec,
+    theme: JetstreamThemeProvider,
+    on_toggle: Option<crate::element::ActionHandler>,
+    on_clear: Option<crate::element::ActionHandler>,
+}
+
+impl Select {
+    pub fn from_spec(spec: SelectSpec, theme: &JetstreamThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_clear: None,
+        }
+    }
+
+    /// Fires when the trigger is pressed. The component does not own the open
+    /// state — the spec says whether the panel is drawn — so this reports the
+    /// press and the host decides.
+    pub fn on_toggle(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_toggle = Some(std::sync::Arc::new(handler));
+        self
+    }
+
+    /// Fires when the clear pill is pressed. It renders only for a clearable
+    /// select with a value.
+    pub fn on_clear(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_clear = Some(std::sync::Arc::new(handler));
+        self
+    }
+}
+
+impl crate::element::IntoJsEl for Select {
+    fn into_js_el(self) -> JsEl {
+        build(&self.spec, &self.theme, Handlers {
+            toggle: self.on_toggle,
+            clear: self.on_clear,
+        })
+    }
+}
+
+#[derive(Default)]
+struct Handlers {
+    toggle: Option<crate::element::ActionHandler>,
+    clear: Option<crate::element::ActionHandler>,
+}
+
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    build(spec, theme, Handlers::default())
+}
+
+fn build(spec: &SelectSpec, theme: &JetstreamThemeProvider, handlers: Handlers) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -91,6 +159,7 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
         show_clear,
         spec.is_disabled,
         theme,
+        &handlers,
     );
 
     // Closed state — return trigger only
@@ -121,6 +190,7 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
         text_secondary,
         text_placeholder,
         icon_muted,
+        &handlers,
     );
 
     // Relative wrapper so the absolute panel is positioned relative to the trigger
@@ -154,6 +224,7 @@ fn build_trigger(
     show_clear: bool,
     is_disabled: bool,
     theme: &JetstreamThemeProvider,
+    handlers: &Handlers,
 ) -> JsEl {
     // Hover shifts both border (toward text) and background (toward elevated),
     // matching the contract focus-within treatment direction.
@@ -174,6 +245,11 @@ fn build_trigger(
         .cursor_pointer()
         .hover(move |s| s.border_color(hover_border).bg(hover_fill));
 
+    if let (false, Some(handler)) = (is_disabled, &handlers.toggle) {
+        let handler = std::sync::Arc::clone(handler);
+        el = el.on_click(move |_event| handler());
+    }
+
     el = el.child(
         ui_element::label(display_text)
             .text_color(display_color)
@@ -187,8 +263,7 @@ fn build_trigger(
     if show_clear {
         let radius_pill = resolve_radius(theme, "radius.pill");
         let clear_pill: Color = Color::from(text_secondary).with_alpha(0.18);
-        el = el.child(
-            ui_element::div()
+        let mut clear = ui_element::div()
                 .bg(clear_pill)
                 .rounded(radius_pill)
                 .flex_row()
@@ -199,8 +274,19 @@ fn build_trigger(
                     ui_element::icon("x")
                         .size(icon_size)
                         .text_color(text_secondary),
-                ),
-        );
+                );
+
+        // Its own handler, always: the pill sits inside the trigger, and
+        // clicks bubble to the nearest clickable ancestor, so an unwired clear
+        // would open the panel it was clearing.
+        if let Some(handler) = &handlers.clear {
+            let handler = std::sync::Arc::clone(handler);
+            clear = clear.on_click(move |_event| handler());
+        } else {
+            clear = clear.on_click(|_event| {});
+        }
+
+        el = el.child(clear);
     }
 
     el = el.child(
@@ -237,6 +323,7 @@ fn build_panel(
     text_secondary: glam::Vec4,
     text_placeholder: glam::Vec4,
     icon_muted: glam::Vec4,
+    handlers: &Handlers,
 ) -> JsEl {
     let panel_py = rem_to_px(0.25);
     // Panel dimensions resolve from tokens (GPUI parity). `menu_min_width`
@@ -583,4 +670,75 @@ mod tests {
             "validation state did not recolor the trigger border"
         );
     }
+
+    #[test]
+    fn the_trigger_reports_a_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
+        let el = Select::from_spec(spec, &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 200.0, "Choose a fruit");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+    }
+
+
+    /// The clear pill sits inside the trigger, so without a handler of its own
+    /// clearing would also open the panel it was clearing.
+    #[test]
+    fn clearing_does_not_also_toggle() {
+        use crate::element::IntoJsEl;
+        use std::sync::{Arc, Mutex};
+
+        let seen: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+        let clears = Arc::clone(&seen);
+        let toggles = Arc::clone(&seen);
+
+        let spec = SelectSpec::new(fruit_options())
+            .with_value("apple")
+            .with_clearable(true);
+
+        let el = Select::from_spec(spec, &theme())
+            .on_clear(move || clears.lock().unwrap().push("clear"))
+            .on_toggle(move || toggles.lock().unwrap().push("toggle"))
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 200.0, "x");
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["clear"]);
+    }
+
+    #[test]
+    fn a_disabled_select_ignores_clicks() {
+        use crate::element::IntoJsEl;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let hits = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&hits);
+
+        let spec = SelectSpec {
+            is_disabled: true,
+            ..SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit")
+        };
+
+        let el = Select::from_spec(spec, &theme())
+            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .into_js_el();
+
+        crate::element::click_probe::click_text(&el, 320.0, 200.0, "Choose a fruit");
+
+        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled select toggled");
+    }
+
+
+
 }

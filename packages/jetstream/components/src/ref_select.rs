@@ -306,4 +306,6 @@ mod tests {
         );
         assert!(tree.has_text("Loading more refs…"), "loading text missing: {:?}", tree.texts());
     }
+
+
 }
