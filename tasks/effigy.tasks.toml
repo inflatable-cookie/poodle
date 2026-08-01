@@ -1,7 +1,10 @@
 [tasks]
+# No root Cargo.toml on purpose: the crates are independent (the jetstream
+# tree path-depends on the sibling engine repo), so Rust deps are fetched
+# per manifest by the script rather than assuming a workspace at the root.
 "bootstrap:deps" = [
   "bun install",
-  "cargo fetch",
+  "bun scripts/bootstrap-rust.ts",
 ]
 
 # Token system
