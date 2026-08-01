@@ -16,13 +16,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     div()
         .flex_col()
         .gap(24.0)
-        // Default — current month, no selection, today border treatment.
+        // Default — no selection. The month is pinned: the visual gate
+        // diffs this against a stored baseline, and a specimen that renders
+        // the *current* month fails on the first render of every new month.
         .child(group(
             "Default",
             secondary,
             js_calendar(
                 &{
                     let mut spec = CalendarSpec::new();
+                    spec.visible_month = Some("2026-08".to_string());
                     spec.aria_label = Some("Select a date".to_string());
                     spec
                 },
