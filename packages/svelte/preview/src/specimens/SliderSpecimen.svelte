@@ -3,8 +3,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let volume = 65;
-  let opacity = 100;
+  let volume = $state(65);
+  let opacity = $state(100);
 </script>
 
 <div class="poodle-slider-specimen">

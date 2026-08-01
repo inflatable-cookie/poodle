@@ -3,10 +3,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let title = "My project title";
-  let emptyValue = "";
-  let flushValue = "Inline heading";
-  let lastEvent = "";
+  let title = $state("My project title");
+  let emptyValue = $state("");
+  let flushValue = $state("Inline heading");
+  let lastEvent = $state("");
 </script>
 
 <SpecimenLayout>

@@ -3,15 +3,15 @@
   import type { InputValidationStatus, ValidationState } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let name = "";
-  let email = "invalid-email";
-  let validationState: ValidationState = "invalid";
+  let name = $state("");
+  let email = $state("invalid-email");
+  let validationState: ValidationState = $state("invalid");
   let workspace = "acme-admin";
   let workspaceStatus: InputValidationStatus = "idle";
   let workspaceError: string | null = null;
-  let slug = "";
-  let slugStatus: InputValidationStatus = "idle";
-  let searchQuery = "";
+  let slug = $state("");
+  let slugStatus: InputValidationStatus = $state("idle");
+  let searchQuery = $state("");
 
   async function validateSlug(value: string) {
     await new Promise((resolve) => setTimeout(resolve, 250));

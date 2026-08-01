@@ -5,8 +5,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let open = false;
-  let selected = "";
+  let open = $state(false);
+  let selected = $state("");
   let sizeOpenMap: Record<string, boolean> = {};
   let densityOpenMap: Record<string, boolean> = {};
   let sizeSelectedMap: Record<string, string> = {};

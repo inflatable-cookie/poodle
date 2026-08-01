@@ -4,8 +4,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let planValue: string | null = "pro";
-  let sizeValue: string | null = null;
+  let planValue: string | null = $state("pro");
+  let sizeValue: string | null = $state(null);
 
   const planItems: CardRadioItem[] = [
     { value: "free", label: "Free", description: "Basic features for personal use. Up to 3 projects." },

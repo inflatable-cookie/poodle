@@ -9,7 +9,7 @@
   const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
   const iconSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
-  let copiedName = "";
+  let copiedName = $state("");
 
   function copyName(name: string) {
     navigator.clipboard.writeText(name);

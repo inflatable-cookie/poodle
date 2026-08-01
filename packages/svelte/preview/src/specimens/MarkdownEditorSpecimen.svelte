@@ -2,7 +2,7 @@
   import { MarkdownEditor, Eyebrow } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let content = `# Hello World
+  let content = $state(`# Hello World
 
 This is a **markdown editor** with *formatting* support.
 
@@ -14,9 +14,9 @@ This is a **markdown editor** with *formatting* support.
 
 > This is a blockquote
 
-Check out [Poodle](https://example.com) for more.`;
+Check out [Poodle](https://example.com) for more.`);
 
-  let emptyContent = "";
+  let emptyContent = $state("");
   let compactContent = "## Compact workspace\n\nToolbar and pane spacing should tighten with density while controls still scale semantically.";
 </script>
 

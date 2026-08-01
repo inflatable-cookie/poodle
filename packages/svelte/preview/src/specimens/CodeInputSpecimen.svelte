@@ -3,8 +3,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let code = "";
-  let completed = false;
+  let code = $state("");
+  let completed = $state(false);
 </script>
 
 <SpecimenLayout>

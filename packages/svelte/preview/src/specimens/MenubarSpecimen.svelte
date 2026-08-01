@@ -39,7 +39,7 @@
     },
   ];
 
-  let lastAction = "";
+  let lastAction = $state("");
 </script>
 
 <SpecimenLayout>

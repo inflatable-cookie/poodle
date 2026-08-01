@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let dismissed = false;
+  let dismissed = $state(false);
 </script>
 
 <SpecimenLayout>

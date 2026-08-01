@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let lastClick = "";
+  let lastClick = $state("");
 </script>
 
 <SpecimenLayout showSizes={false}>

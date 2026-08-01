@@ -1,15 +1,24 @@
 <script lang="ts">
   import { Eyebrow, Grid, Stack, TextInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte";
-
-  export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
-  export let keySemanticTokens: Array<{ path: string; value: string }> = [];
-  export let filteredTokens: Array<{ path: string; value: string }> = [];
-  export let matchingTokenCount = 0;
-  export let inspectorQuery = "";
-  export let onSelectPanel: (panelId: "token-summary-section" | "token-inspector") => void = () => {};
-  export let onQueryChange: (value: string) => void = () => {};
-  export let onQueryClear: () => void = () => {};
-
+  let {
+    activePanelId = "token-summary-section",
+    matchingTokenCount = 0,
+    inspectorQuery = "",
+    onSelectPanel = () => {},
+    onQueryChange = () => {},
+    onQueryClear = () => {},
+    keySemanticTokens = [],
+    filteredTokens = [],
+  }: {
+    activePanelId?: "token-summary-section" | "token-inspector";
+    matchingTokenCount?: number;
+    inspectorQuery?: string;
+    onSelectPanel?: (panelId: "token-summary-section" | "token-inspector") => void;
+    onQueryChange?: (value: string) => void;
+    onQueryClear?: () => void;
+    keySemanticTokens?: Array<{ path: string; value: string }>;
+    filteredTokens?: Array<{ path: string; value: string }>;
+  } = $props();
   const tabItems: TabItem[] = [
     { value: "token-summary-section", label: "Runtime values" },
     { value: "token-inspector", label: "Inspector" },
@@ -20,10 +29,12 @@
     { id: "value", label: "Value" },
   ];
 
-  $: inspectorRows = filteredTokens.map((token, i): TableRow => ({
-    id: `token-${i}`,
-    cells: { path: token.path, value: token.value },
-  }));
+  let inspectorRows = $derived(
+    filteredTokens.map((token, i): TableRow => ({
+      id: `token-${i}`,
+      cells: { path: token.path, value: token.value },
+    })),
+  );
 
   function isColorToken(path: string): boolean {
     return path.includes(".color.");

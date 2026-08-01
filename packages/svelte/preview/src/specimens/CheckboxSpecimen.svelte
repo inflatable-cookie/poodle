@@ -3,9 +3,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let notifications = true;
-  let marketing = false;
-  let terms = false;
+  let notifications = $state(true);
+  let marketing = $state(false);
+  let terms = $state(false);
 </script>
 
 <SpecimenLayout>

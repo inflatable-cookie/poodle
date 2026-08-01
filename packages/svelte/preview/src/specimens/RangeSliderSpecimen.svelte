@@ -3,8 +3,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let priceRange: [number, number] = [20, 80];
-  let ageRange: [number, number] = [23, 43];
+  let priceRange: [number, number] = $state([20, 80]);
+  let ageRange: [number, number] = $state([23, 43]);
 </script>
 
 <div class="poodle-range-slider-specimen">

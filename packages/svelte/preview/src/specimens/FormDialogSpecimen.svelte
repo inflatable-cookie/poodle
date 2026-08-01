@@ -3,15 +3,15 @@
   import { Button, TextInput, Field, Select, FormActions } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let basicOpen: boolean | null = null;
-  let errorOpen: boolean | null = null;
-  let shellOpen: boolean | null = null;
-  let submitting = false;
-  let error: string | null = null;
-  let success: string | null = null;
-  let name = "";
-  let role = "";
-  let lastAction = "";
+  let basicOpen: boolean | null = $state(null);
+  let errorOpen: boolean | null = $state(null);
+  let shellOpen: boolean | null = $state(null);
+  let submitting = $state(false);
+  let error: string | null = $state(null);
+  let success: string | null = $state(null);
+  let name = $state("");
+  let role = $state("");
+  let lastAction = $state("");
 
   const roleOptions = [
     { value: "admin", label: "Admin" },

@@ -3,9 +3,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let quantity: number | null = 1;
-  let price: number | null = 29.99;
-  let ticketCode = "12";
+  let quantity: number | null = $state(1);
+  let price: number | null = $state(29.99);
+  let ticketCode = $state("12");
 </script>
 
 <SpecimenLayout>

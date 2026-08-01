@@ -22,8 +22,8 @@
     { value: "docs", label: "Docs" },
   ];
 
-  let view = "grid";
-  let tags: string[] = ["design", "docs"];
+  let view = $state("grid");
+  let tags: string[] = $state(["design", "docs"]);
 </script>
 
 <SpecimenLayout>

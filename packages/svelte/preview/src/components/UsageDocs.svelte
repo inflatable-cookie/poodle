@@ -1,9 +1,7 @@
 <script lang="ts">
   import { Eyebrow, Separator } from "@poodle/svelte";
   import type { ComponentDocs } from "../component-docs";
-
-  export let docs: ComponentDocs;
-
+let { docs }: { docs: ComponentDocs } = $props();
   function formatDefault(val: string | undefined): string {
     if (val === undefined) return "—";
     return val;

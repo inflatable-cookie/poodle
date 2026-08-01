@@ -12,10 +12,10 @@
     { id: "form", label: "FormActions", description: "Action row for form controls", meta: "Primitive" },
   ];
 
-  let selected: string[] = ["btn", "card"];
-  let drillSelected: string[] = [];
-  let sizeSelected: string[] = ["btn"];
-  let densitySelected: string[] = ["btn"];
+  let selected: string[] = $state(["btn", "card"]);
+  let drillSelected: string[] = $state([]);
+  let sizeSelected: string[] = $state(["btn"]);
+  let densitySelected: string[] = $state(["btn"]);
 
   const categories: DrillDownItem[] = [
     { id: "primitives", label: "Primitives", description: "Foundation-level building blocks", count: 4 },

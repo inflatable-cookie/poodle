@@ -43,9 +43,9 @@
     { value: "versions", label: "Versions", count: 3 },
   ];
 
-  let lastClosed = "";
-  let lastReorder = "";
-  let panelCollapsed = false;
+  let lastClosed = $state("");
+  let lastReorder = $state("");
+  let panelCollapsed = $state(false);
 
   // Four tabs with icons and counts — the shape that collapsed far too early.
   const shedItems = [

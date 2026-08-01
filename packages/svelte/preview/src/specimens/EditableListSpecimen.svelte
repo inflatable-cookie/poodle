@@ -4,11 +4,11 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let tags: EditableListItem[] = [
+  let tags: EditableListItem[] = $state([
     { id: "1", label: "svelte" },
     { id: "2", label: "typescript" },
     { id: "3", label: "design-system" },
-  ];
+  ]);
 
   const specimenItems: EditableListItem[] = [
     { id: "1", label: "svelte" },

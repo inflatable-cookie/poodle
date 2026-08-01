@@ -1,10 +1,10 @@
 <script lang="ts">
   import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/svelte";
 
-  let dangerOpen = false;
-  let warningOpen = false;
-  let asyncOpen = false;
-  let lastAction = "";
+  let dangerOpen = $state(false);
+  let warningOpen = $state(false);
+  let asyncOpen = $state(false);
+  let lastAction = $state("");
 
   async function simulateAsync(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 1500));

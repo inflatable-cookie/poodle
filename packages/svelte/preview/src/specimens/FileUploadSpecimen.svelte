@@ -4,10 +4,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let imageFiles: FileUploadItem[] = [];
-  let docFiles: FileUploadItem[] = [];
-  let compressedFiles: FileUploadItem[] = [];
-  let errorMsg = "";
+  let imageFiles: FileUploadItem[] = $state([]);
+  let docFiles: FileUploadItem[] = $state([]);
+  let compressedFiles: FileUploadItem[] = $state([]);
+  let errorMsg = $state("");
 </script>
 
 <SpecimenLayout>

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Drawer, Button, Eyebrow, Surface } from "@poodle/svelte";
 
-  let rightOpen = false;
-  let leftOpen = false;
+  let rightOpen = $state(false);
+  let leftOpen = $state(false);
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">

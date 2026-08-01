@@ -3,7 +3,7 @@
   import { Button, IconButton } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let lastAction = "";
+  let lastAction = $state("");
 </script>
 
 <div class="poodle-specimen">

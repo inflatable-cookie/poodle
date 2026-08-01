@@ -3,10 +3,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let hours = 1;
-  let minutes = 30;
-  let seconds = 0;
-  let lastChange = "";
+  let hours = $state(1);
+  let minutes = $state(30);
+  let seconds = $state(0);
+  let lastChange = $state("");
 </script>
 
 <SpecimenLayout>

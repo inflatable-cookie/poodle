@@ -32,7 +32,7 @@
     { path: "d.rs", additions: 1, deletions: 0 },
   ];
 
-  let workedExpanded = false;
+  let workedExpanded = $state(false);
 </script>
 
 <SpecimenLayout>

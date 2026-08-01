@@ -24,8 +24,8 @@
     { value: "team", label: "My team" },
   ];
 
-  let collapsed1 = true;
-  let collapsed2 = true;
+  let collapsed1 = $state(true);
+  let collapsed2 = $state(true);
 </script>
 
 <SpecimenLayout bareVariants>

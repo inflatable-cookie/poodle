@@ -13,7 +13,7 @@
     { value: "delete", label: "Delete", disabled: true },
   ];
 
-  let lastAction = "";
+  let lastAction = $state("");
 </script>
 
 <SpecimenLayout>

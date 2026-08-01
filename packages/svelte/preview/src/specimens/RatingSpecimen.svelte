@@ -3,8 +3,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let rating = 3;
-  let fractionalRating = 3.5;
+  let rating = $state(3);
+  let fractionalRating = $state(3.5);
 </script>
 
 <SpecimenLayout>

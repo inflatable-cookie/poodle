@@ -2,7 +2,7 @@
   import { TimeZoneSelect, Eyebrow, Surface } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let zone = "";
+  let zone = $state("");
 </script>
 
 <SpecimenLayout>

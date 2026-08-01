@@ -3,7 +3,7 @@
   import type { MenuItem } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let lastAction = "";
+  let lastAction = $state("");
 
   const saveItems: MenuItem[] = [
     { value: "save-draft", label: "Save as draft" },

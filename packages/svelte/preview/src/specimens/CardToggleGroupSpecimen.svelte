@@ -4,8 +4,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let statusValue: string | null = "pending";
-  let optionalValue: string | null = "marked";
+  let statusValue: string | null = $state("pending");
+  let optionalValue: string | null = $state("marked");
 
   const statusItems: CardToggleItem[] = [
     { value: "pending", label: "Pending", description: "Waiting for review.", count: 42 },

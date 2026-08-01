@@ -3,9 +3,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let darkMode = true;
-  let autoSave = false;
-  let compactView = true;
+  let darkMode = $state(true);
+  let autoSave = $state(false);
+  let compactView = $state(true);
 </script>
 
 <SpecimenLayout>

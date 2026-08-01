@@ -11,16 +11,16 @@
     { type: "divider", label: "Divider", icon: "minus" },
   ];
 
-  let blocks: EditorBlock[] = [
+  let blocks: EditorBlock[] = $state([
     { id: "1", type: "heading", version: 3, hash: "a1", data: { text: "Block Editor Shell" }, content: "Block Editor Shell" },
     { id: "2", type: "paragraph", version: 3, hash: "a2", data: { text: "Block types and rendering are provided by the consumer. The shell handles ordering, type selection, add/remove, and drag-drop." }, content: "Block types and rendering are provided by the consumer. The shell handles ordering, type selection, add/remove, and drag-drop." },
     { id: "3", type: "quote", version: 3, hash: "a3", data: { text: "The best way to predict the future is to invent it." }, content: "The best way to predict the future is to invent it." },
     { id: "4", type: "code", version: 3, hash: "a4", data: { text: 'console.log("Hello, world!");' }, content: 'console.log("Hello, world!");' },
     { id: "5", type: "divider", version: 3, hash: "a5", data: {}, content: "" },
     { id: "6", type: "paragraph", version: 3, hash: "a6", data: { text: "Use the type dropdown to change a block, or the + dropdown to add a new one after." }, content: "Use the type dropdown to change a block, or the + dropdown to add a new one after." },
-  ];
+  ]);
 
-  let singleBlocks: EditorBlock[] = [
+  let singleBlocks: EditorBlock[] = $state([
     {
       id: "hero-1",
       type: "heading",
@@ -29,7 +29,7 @@
       data: { text: "Single-block Nightfire posture" },
       content: "Single-block Nightfire posture",
     },
-  ];
+  ]);
 
   const groupedTypeOptions: BlockTypeGroup[] = [
     {

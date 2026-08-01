@@ -5,8 +5,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let parsed: ParsedEmbed | null = null;
-  let value = "";
+  let parsed: ParsedEmbed | null = $state(null);
+  let value = $state("");
 
   const detectionSamples = [
     {

@@ -26,8 +26,8 @@
     { value: "apply", label: "Apply changes", status: "pending" },
   ];
 
-  let current = "categories";
-  let lastRerun = "";
+  let current = $state("categories");
+  let lastRerun = $state("");
 </script>
 
 <SpecimenLayout>

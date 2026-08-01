@@ -18,8 +18,8 @@
   const buriedFailure = [call("f1", "cargo check"), call("f2", "effigy check:gpui", "error"), call("f3", "bun test")];
   const running = [call("r1", "cargo build"), call("r2", "cargo test", "running")];
 
-  let expandedThree = false;
-  let expandedMany = false;
+  let expandedThree = $state(false);
+  let expandedMany = $state(false);
 </script>
 
 <SpecimenLayout>

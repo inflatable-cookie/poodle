@@ -25,7 +25,7 @@
     { value: "delete", label: "Delete", tone: "danger" },
   ];
 
-  let lastAction = "";
+  let lastAction = $state("");
 </script>
 
 <SpecimenLayout>

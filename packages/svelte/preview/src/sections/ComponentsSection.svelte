@@ -4,36 +4,38 @@
   import CatalogueLanding from "../pages/CatalogueLanding.svelte";
   import ComponentPage from "../pages/ComponentPage.svelte";
   import { specimenMap } from "../specimens/registry";
+  let { activeComponent = undefined, search = "" }: { activeComponent?: string | undefined; search?: string } = $props();
+  let contentElement: HTMLDivElement | undefined = $state();
 
-  export let activeComponent: string | undefined = undefined;
-  export let search: string = "";
+  let entry = $derived(activeComponent ? findComponent(activeComponent) : undefined);
+  $effect(() => {
+    if (activeComponent && contentElement) {
+      contentElement.scrollTop = 0;
+    }
+  });
+  let specimen = $derived(entry?.slug ? specimenMap[entry.slug] ?? null : null);
+  let searchLower = $derived(search.trim().toLowerCase());
+  let filteredComponents = $derived(
+    searchLower
+      ? allComponents.filter((c) => c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
+      : allComponents,
+  );
 
-  let contentElement: HTMLDivElement;
-
-  $: entry = activeComponent ? findComponent(activeComponent) : undefined;
-  $: if (activeComponent && contentElement) {
-    contentElement.scrollTop = 0;
-  }
-  $: specimen = entry?.slug ? specimenMap[entry.slug] ?? null : null;
-
-  $: searchLower = search.trim().toLowerCase();
-  $: filteredComponents = searchLower
-    ? allComponents.filter((c) => c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
-    : allComponents;
-
-  $: navGroups = componentsByTag()
-    .map((group) => ({
-      id: group.tag,
-      label: group.label,
-      items: group.items
-        .filter((c) => !searchLower || c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
-        .map((component) => ({
-          value: component.slug,
-          label: component.displayName,
-          href: `#components/${component.slug}`,
-        })),
-    }))
-    .filter((group) => group.items.length > 0);
+  let navGroups = $derived(
+    componentsByTag()
+      .map((group) => ({
+        id: group.tag,
+        label: group.label,
+        items: group.items
+          .filter((c) => !searchLower || c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
+          .map((component) => ({
+            value: component.slug,
+            label: component.displayName,
+            href: `#components/${component.slug}`,
+          })),
+      }))
+      .filter((group) => group.items.length > 0),
+  );
 </script>
 
 <div class="poodle-catalogue-layout">

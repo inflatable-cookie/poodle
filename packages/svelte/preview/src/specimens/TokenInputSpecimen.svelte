@@ -2,12 +2,12 @@
   import { Code, Eyebrow, Field, Surface, TokenInput } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let tags = ["ifrs", "tax", "audit"];
-  let workflowTags = ["draft", "review"];
-  let longTags = [
+  let tags = $state(["ifrs", "tax", "audit"]);
+  let workflowTags = $state(["draft", "review"]);
+  let longTags = $state([
     "legacy-migration",
     "a-very-long-tag-that-should-wrap-inside-the-token-without-breaking-the-field",
-  ];
+  ]);
 </script>
 
 <SpecimenLayout>

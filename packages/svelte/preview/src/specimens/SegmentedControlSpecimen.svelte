@@ -16,7 +16,7 @@
     { value: "draft", label: "Draft", disabled: true },
   ];
 
-  let view = "grid";
+  let view = $state("grid");
 </script>
 
 <SpecimenLayout>

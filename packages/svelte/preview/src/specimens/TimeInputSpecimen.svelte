@@ -2,7 +2,7 @@
   import { TimeInput, Eyebrow, Surface } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let time = "";
+  let time = $state("");
 </script>
 
 <SpecimenLayout>

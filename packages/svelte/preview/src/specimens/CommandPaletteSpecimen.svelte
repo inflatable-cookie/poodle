@@ -4,10 +4,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let open = false;
-  let compactOpen = false;
-  let query = "";
-  let compactQuery = "";
+  let open = $state(false);
+  let compactOpen = $state(false);
+  let query = $state("");
+  let compactQuery = $state("");
   let sizeOpenMap: Record<string, boolean> = {};
   let densityOpenMap: Record<string, boolean> = {};
   let sizeQueryMap: Record<string, string> = {};

@@ -4,8 +4,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let selected = "";
-  let range: DateRangeValue = { start: "", end: "" };
+  let selected = $state("");
+  let range: DateRangeValue = $state({ start: "", end: "" });
 </script>
 
 <SpecimenLayout>

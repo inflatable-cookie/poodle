@@ -1,21 +1,23 @@
 <script lang="ts">
   import { Eyebrow, Surface } from "@poodle/svelte";
-
-  export let label: string;
-  /** When true, renders without Surface wrapper — for components that are surfaces themselves. */
-  export let bare = false;
+  let {
+    label,
+    /** When true, renders without Surface wrapper — for components that are surfaces themselves. */
+    bare = false,
+    children,
+  }: { label: string; bare?: boolean; children?: import("svelte").Snippet } = $props();
 </script>
 
 <div class="poodle-specimen-group">
   <Eyebrow>{label}</Eyebrow>
   {#if bare}
     <div class="poodle-specimen-group__content">
-      <slot />
+      {@render children?.()}
     </div>
   {:else}
     <Surface tone="panel" border="subtle" padding="md">
       <div class="poodle-specimen-group__content">
-        <slot />
+        {@render children?.()}
       </div>
     </Surface>
   {/if}

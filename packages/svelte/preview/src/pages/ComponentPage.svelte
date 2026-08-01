@@ -3,12 +3,8 @@
   import UsageDocs from "../components/UsageDocs.svelte";
   import type { ComponentEntry } from "../component-registry";
   import { componentDocsMap } from "../component-docs";
-
-  export let entry: ComponentEntry;
-  export let specimenComponent: any = null;
-
-  $: docs = componentDocsMap[entry.slug] ?? null;
-</script>
+let { entry, specimenComponent = null }: { entry: ComponentEntry; specimenComponent?: any } = $props();
+  let docs = $derived(componentDocsMap[entry.slug] ?? null);</script>
 
 <article class="poodle-component-page">
   <header class="poodle-component-page__hero">
@@ -20,8 +16,9 @@
   </header>
 
   {#if specimenComponent}
+    {@const Specimen = specimenComponent}
     <section class="poodle-component-page__section">
-      <svelte:component this={specimenComponent} />
+      <Specimen />
     </section>
   {:else}
     <section class="poodle-component-page__section">

@@ -2,7 +2,7 @@
   import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let filter: TriStateValue = "default";
+  let filter: TriStateValue = $state("default");
 </script>
 
 <SpecimenLayout>

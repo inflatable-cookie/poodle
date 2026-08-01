@@ -3,19 +3,25 @@
   import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill } from "@poodle/svelte";
 
   import type { DocsFamilyEntry, DocsSectionEntry } from "../catalog";
-
-  export let docsFamilies: DocsFamilyEntry[] = [];
-  export let docsAdoptionChecklist: string[] = [];
-  export let catalogEntries: DocsSectionEntry[] = [];
-  export let brandProofCards: Array<{
-    id: string;
-    eyebrow: string;
-    title: string;
-    summary: string;
-    variant: "elevated" | "outlined";
-  }> = [];
-  export let onSelectSection: (sectionId: string) => void = () => {};
-
+  let {
+    docsFamilies = [],
+    docsAdoptionChecklist = [],
+    catalogEntries = [],
+    onSelectSection = () => {},
+    brandProofCards = [],
+  }: {
+    docsFamilies?: DocsFamilyEntry[];
+    docsAdoptionChecklist?: string[];
+    catalogEntries?: DocsSectionEntry[];
+    onSelectSection?: (sectionId: string) => void;
+    brandProofCards?: Array<{
+      id: string;
+      eyebrow: string;
+      title: string;
+      summary: string;
+      variant: "elevated" | "outlined";
+    }>;
+  } = $props();
   const catalogEntryMap = Object.fromEntries(catalogEntries.map((entry) => [entry.id, entry]));
 </script>
 

@@ -3,8 +3,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let color = "#6366f1";
-  let alphaColor = "#3b82f6";
+  let color = $state("#6366f1");
+  let alphaColor = $state("#3b82f6");
 
   const brandSwatches = [
     "#ef4444", "#f97316", "#eab308", "#22c55e",

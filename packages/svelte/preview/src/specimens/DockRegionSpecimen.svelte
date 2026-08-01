@@ -7,20 +7,20 @@
 
   // ── Static dock state ──────────────────────────────────────────────
 
-  let staticItems: PanelTabItem[] = [
+  let staticItems: PanelTabItem[] = $state([
     { value: "meter", label: "Meter Strip" },
     { value: "transport", label: "Transport" },
     { value: "mixer", label: "Mixer" },
-  ];
+  ]);
 
   function handleStaticReorder(order: string[]): void {
     staticItems = order.map((id) => staticItems.find((i) => i.value === id)!);
   }
 
-  let staticVerticalItems: PanelTabItem[] = [
+  let staticVerticalItems: PanelTabItem[] = $state([
     { value: "toolbar", label: "Toolbar" },
     { value: "inspector", label: "Inspector" },
-  ];
+  ]);
 
   function handleStaticVerticalReorder(order: string[]): void {
     staticVerticalItems = order.map((id) => staticVerticalItems.find((i) => i.value === id)!);
@@ -28,7 +28,7 @@
 
   // ── Flexible dock state ────────────────────────────────────────────
 
-  let flexActivePanel = "explorer";
+  let flexActivePanel = $state("explorer");
   let flexCollapsed = false;
 
   const flexItems: PanelTabItem[] = [
@@ -39,8 +39,8 @@
 
   // ── Interactive collapse state ─────────────────────────────────────
 
-  let interactiveCollapsed = false;
-  let interactiveActive = "files";
+  let interactiveCollapsed = $state(false);
+  let interactiveActive = $state("files");
 
   const interactiveItems: PanelTabItem[] = [
     { value: "files", label: "Files", icon: folder, closable: true },
@@ -50,8 +50,8 @@
 
   // ── Bottom dock state ───────────────────────────────────────────────
 
-  let bottomCollapsed = false;
-  let bottomActive = "terminal";
+  let bottomCollapsed = $state(false);
+  let bottomActive = $state("terminal");
 
   const bottomItems: PanelTabItem[] = [
     { value: "terminal", label: "Terminal", icon: terminal, closable: true },
@@ -61,16 +61,16 @@
 
   // ── Cross-region drag-and-drop state ───────────────────────────────
 
-  let leftItems: PanelTabItem[] = [
+  let leftItems: PanelTabItem[] = $state([
     { value: "explorer", label: "Explorer", icon: folder, closable: true },
     { value: "search", label: "Search", icon: "search", closable: true },
     { value: "git", label: "Source Control", icon: code, closable: true },
-  ];
-  let rightItems: PanelTabItem[] = [
+  ]);
+  let rightItems: PanelTabItem[] = $state([
     { value: "outline", label: "Outline", icon: listIcon, closable: true },
-  ];
-  let leftActive = "explorer";
-  let rightActive = "outline";
+  ]);
+  let leftActive = $state("explorer");
+  let rightActive = $state("outline");
 
   function canAcceptPanel(panelId: string, _sourceEdge: DockEdge): boolean {
     return true;

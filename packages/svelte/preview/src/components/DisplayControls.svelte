@@ -12,18 +12,29 @@
     controlSizes,
     themeOptions,
   } from "@poodle/svelte-tokens";
-
-  export let theme: string;
-  export let density: string;
-  export let controlSize: string;
-  export let search: string = "";
-  export let onThemeChange: (value: string) => void = () => {};
-  export let onDensityChange: (value: string) => void = () => {};
-  export let onControlSizeChange: (value: string) => void = () => {};
-  export let onSearchChange: (value: string) => void = () => {};
-  export let contrast: number = 1;
-  export let onContrastChange: (value: number) => void = () => {};
-
+  let {
+    theme,
+    density,
+    controlSize,
+    search = "",
+    onThemeChange = () => {},
+    onDensityChange = () => {},
+    onControlSizeChange = () => {},
+    onSearchChange = () => {},
+    contrast = 1,
+    onContrastChange = () => {},
+  }: {
+    theme: string;
+    density: string;
+    controlSize: string;
+    search?: string;
+    onThemeChange?: (value: string) => void;
+    onDensityChange?: (value: string) => void;
+    onControlSizeChange?: (value: string) => void;
+    onSearchChange?: (value: string) => void;
+    contrast?: number;
+    onContrastChange?: (value: number) => void;
+  } = $props();
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
 

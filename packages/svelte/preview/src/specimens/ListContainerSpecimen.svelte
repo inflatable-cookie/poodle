@@ -31,14 +31,13 @@
     }
   ];
 
-  let page = 2;
-  let state: "ready" | "loading" | "empty" | "error" = "ready";
-  let filtersCollapsed = false;
+  let page = $state(2);
+  let state: "ready" | "loading" | "empty" | "error" = $state("ready");
+  let filtersCollapsed = $state(false);
 
-  $: visibleFrom = items.length === 0 ? 0 : ((page - 1) * 3) + 1;
-  $: visibleTo = Math.min(page * 3, 24);
-  $: filterSummaryText = `Showing ${visibleFrom}-${visibleTo} of 24`;
-
+  let visibleFrom = $derived(items.length === 0 ? 0 : ((page - 1) * 3) + 1);
+  let visibleTo = $derived(Math.min(page * 3, 24));
+  let filterSummaryText = $derived(`Showing ${visibleFrom}-${visibleTo} of 24`);
   function toneFor(status: QueueItem["status"]): "success" | "neutral" | "danger" {
     if (status === "healthy") return "success";
     if (status === "error") return "danger";

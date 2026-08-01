@@ -46,11 +46,11 @@
     { value: "astro", label: "Astro" },
   ];
 
-  let selectedFruit: string | null = null;
-  let selectedCountry: string | null = null;
-  let selectedFramework: string | null = null;
-  let freeformValue: string | null = null;
-  let customCountry: string | null = null;
+  let selectedFruit: string | null = $state(null);
+  let selectedCountry: string | null = $state(null);
+  let selectedFramework: string | null = $state(null);
+  let freeformValue: string | null = $state(null);
+  let customCountry: string | null = $state(null);
 </script>
 
 <SpecimenLayout>

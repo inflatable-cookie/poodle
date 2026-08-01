@@ -4,11 +4,11 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let bold = false;
-  let italic = false;
-  let underline = true;
-  let pinned = false;
-  let starred = false;
+  let bold = $state(false);
+  let italic = $state(false);
+  let underline = $state(true);
+  let pinned = $state(false);
+  let starred = $state(false);
 </script>
 
 <SpecimenLayout showDensities={false}>

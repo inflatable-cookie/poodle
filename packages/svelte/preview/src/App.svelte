@@ -36,20 +36,18 @@
 
   // ── State ───────────────────────────────────────────────────────────
 
-  let appShell: HTMLElement | null = null;
-  let theme: ThemeName = "eclipse";
-  let density: DensityName = "compact";
-  let controlSize: ControlSizeName = "sm";
-  let contrast = 0.5;
-  let componentSearch = "";
-  let route: Route = { section: "components" };
-  let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = {};
-  let previewModeKey = "";
+  let appShell: HTMLElement | null = $state(null);
+  let theme: ThemeName = $state("eclipse");
+  let density: DensityName = $state("compact");
+  let controlSize: ControlSizeName = $state("sm");
+  let contrast = $state(0.5);
+  let componentSearch = $state("");
+  let route: Route = $state({ section: "components" });
+  let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = $state({});
   let appliedPreviewModeKey = "";
   let hasMounted = false;
 
-  $: activeSection = route.section;
-
+  let activeSection = $derived(route.section);
   // ── Theme application ───────────────────────────────────────────────
 
   function readSemanticTokenValues(element: HTMLElement): Partial<Record<SemanticTokenPath, string>> {
@@ -70,11 +68,12 @@
     appliedPreviewModeKey = previewModeKey;
   }
 
-  $: previewModeKey = `${theme}:${density}:${controlSize}`;
-
-  $: if (appShell && previewModeKey && previewModeKey !== appliedPreviewModeKey) {
-    refreshPreviewSurface();
-  }
+  let previewModeKey = $derived(`${theme}:${density}:${controlSize}`);
+  $effect(() => {
+    if (appShell && previewModeKey && previewModeKey !== appliedPreviewModeKey) {
+      refreshPreviewSurface();
+    }
+  });
 
   // ── Routing ─────────────────────────────────────────────────────────
 
@@ -101,19 +100,21 @@
     }
   }
 
-  $: if (hasMounted && typeof window !== "undefined") {
-    const searchParams = new URLSearchParams({
-      theme,
-      density,
-      controlSize,
-    });
-    const hash = window.location.hash || "#components";
-    const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
-    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    if (nextUrl !== currentUrl) {
-      window.history.replaceState(null, "", nextUrl);
+  $effect(() => {
+    if (hasMounted && typeof window !== "undefined") {
+      const searchParams = new URLSearchParams({
+        theme,
+        density,
+        controlSize,
+      });
+      const hash = window.location.hash || "#components";
+      const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
+      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (nextUrl !== currentUrl) {
+        window.history.replaceState(null, "", nextUrl);
+      }
     }
-  }
+  });
 
   onMount(() => {
     syncCurrentLocation();

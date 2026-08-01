@@ -3,10 +3,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let clickLog = "No button clicked yet.";
-  let intent = "save";
+  let clickLog = $state("No button clicked yet.");
+  let intent = $state("save");
 
-  let bookmarked = false;
+  let bookmarked = $state(false);
 
   function log(label: string): void {
     clickLog = `Clicked: ${label}`;

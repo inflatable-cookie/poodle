@@ -2,9 +2,7 @@
   import { cssVars } from "@poodle/svelte-tokens";
   import { Surface } from "@poodle/svelte";
   import TokenToolsPanel from "../components/TokenToolsPanel.svelte";
-
-  export let liveTokenValues: Partial<Record<string, string>> = {};
-
+  let { liveTokenValues = {} }: { liveTokenValues?: Partial<Record<string, string>> } = $props();
   type SemanticTokenPath = keyof typeof cssVars;
 
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
@@ -22,20 +20,23 @@
     "space.control.y",
   ];
 
-  let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
-  let inspectorQuery = "";
+  let activePanelId: "token-summary-section" | "token-inspector" = $state("token-summary-section");
+  let inspectorQuery = $state("");
 
-  $: filteredTokens = semanticPaths
-    .filter((path) => path.toLowerCase().includes(inspectorQuery.trim().toLowerCase()))
-    .map((path) => ({ path, value: (liveTokenValues as Record<string, string>)[path] ?? "" }));
+  let filteredTokens = $derived(
+    semanticPaths
+      .filter((path) => path.toLowerCase().includes(inspectorQuery.trim().toLowerCase()))
+      .map((path) => ({ path, value: (liveTokenValues as Record<string, string>)[path] ?? "" })),
+  );
 
-  $: keySemanticTokens = keySemanticPaths.map((path) => ({
-    path,
-    value: (liveTokenValues as Record<string, string>)[path] ?? "",
-  }));
+  let keySemanticTokens = $derived(
+    keySemanticPaths.map((path) => ({
+      path,
+      value: (liveTokenValues as Record<string, string>)[path] ?? "",
+    })),
+  );
 
-  $: matchingTokenCount = filteredTokens.length;
-
+  let matchingTokenCount = $derived(filteredTokens.length);
   function handleQueryChange(value: string): void {
     inspectorQuery = value;
   }

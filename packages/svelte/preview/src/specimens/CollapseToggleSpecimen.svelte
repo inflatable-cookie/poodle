@@ -3,10 +3,10 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let collapsedLeft = false;
-  let collapsedRight = false;
-  let collapsedUp = false;
-  let collapsedDown = false;
+  let collapsedLeft = $state(false);
+  let collapsedRight = $state(false);
+  let collapsedUp = $state(false);
+  let collapsedDown = $state(false);
 </script>
 
 <SpecimenLayout>

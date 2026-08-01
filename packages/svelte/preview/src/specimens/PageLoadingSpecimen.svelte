@@ -3,11 +3,11 @@
   import { Button } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let showIndeterminate = false;
-  let showDeterminate = false;
-  let showWithCancel = false;
-  let showInline = true;
-  let demoProgress = 0;
+  let showIndeterminate = $state(false);
+  let showDeterminate = $state(false);
+  let showWithCancel = $state(false);
+  let showInline = $state(true);
+  let demoProgress = $state(0);
   let progressTimer: ReturnType<typeof setInterval> | null = null;
 
   function startDeterminate() {

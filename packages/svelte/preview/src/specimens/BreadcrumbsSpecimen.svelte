@@ -18,7 +18,7 @@
     { value: "button", label: "Button", current: true },
   ];
 
-  let lastNav = "";
+  let lastNav = $state("");
 </script>
 
 <SpecimenLayout>

@@ -4,8 +4,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let lastClick = "";
-  let selectedCard = false;
+  let lastClick = $state("");
+  let selectedCard = $state(false);
 </script>
 
 <SpecimenLayout>

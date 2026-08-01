@@ -11,7 +11,7 @@
     { value: "changelog", label: "Changelog", disabled: true },
   ];
 
-  let active = "components";
+  let active = $state("components");
 </script>
 
 <SpecimenLayout>

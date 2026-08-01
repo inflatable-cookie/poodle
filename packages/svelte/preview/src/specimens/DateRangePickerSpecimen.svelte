@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let range = { start: "", end: "" };
+  let range = $state({ start: "", end: "" });
 </script>
 
 <SpecimenLayout>

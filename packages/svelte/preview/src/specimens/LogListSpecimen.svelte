@@ -6,7 +6,7 @@
 
   const now = Date.now();
 
-  let entries: LogEntry[] = [
+  let entries: LogEntry[] = $state([
     { id: "1", timestamp: new Date(now - 60000), level: "info", message: "Application started" },
     { id: "2", timestamp: new Date(now - 55000), level: "info", message: "Connecting to database..." },
     { id: "3", timestamp: new Date(now - 54000), level: "info", message: "Database connected (pool: 5)" },
@@ -17,7 +17,7 @@
     { id: "8", timestamp: new Date(now - 14000), level: "info", message: "Analytics endpoint recovered" },
     { id: "9", timestamp: new Date(now - 5000), level: "warn", message: "Memory usage at 78% (threshold: 80%)" },
     { id: "10", timestamp: new Date(now), level: "info", message: "Health check passed" },
-  ];
+  ]);
 
   let counter = 10;
   const auditFilters: LogFilter[] = [
@@ -70,7 +70,7 @@
       resourceLabel: "Legacy operator",
     },
   ];
-  let auditFilterValues: Record<string, string> = {};
+  let auditFilterValues: Record<string, string> = $state({});
 
   function addEntry() {
     counter += 1;

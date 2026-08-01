@@ -1,11 +1,8 @@
 <script lang="ts">
   import { Eyebrow } from "@poodle/svelte";
   import { componentsByTag, type ComponentEntry } from "../component-registry";
-
-  export let components: ComponentEntry[] = [];
-
-  $: groups = componentsByTag();
-</script>
+let { components = [] }: { components?: ComponentEntry[] } = $props();
+  let groups = $derived(componentsByTag());</script>
 
 <div class="poodle-catalogue-landing">
   <div class="poodle-catalogue-landing__header">

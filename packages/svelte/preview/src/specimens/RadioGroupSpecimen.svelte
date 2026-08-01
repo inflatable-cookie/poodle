@@ -16,8 +16,8 @@
     { value: "xl", label: "Extra large" },
   ];
 
-  let selectedPlan = "pro";
-  let selectedSize = "md";
+  let selectedPlan = $state("pro");
+  let selectedSize = $state("md");
 </script>
 
 <SpecimenLayout>

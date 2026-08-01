@@ -20,21 +20,21 @@
     { id: "5", cells: { name: "Eve Nakamura", email: "eve@example.com", role: "Designer", status: "Active" }, summary: "Visual designer" },
   ];
 
-  let selectedRowIds: string[] = [];
-  let sortColumnId: string | null = null;
-  let sortDirection: "asc" | "desc" = "asc";
-  let hiddenColumnIds: string[] = [];
-  let lastAction = "";
-  let expandedIncidentId: string | null = null;
-  let filters: TableFilters = {
+  let selectedRowIds: string[] = $state([]);
+  let sortColumnId: string | null = $state(null);
+  let sortDirection: "asc" | "desc" = $state("asc");
+  let hiddenColumnIds: string[] = $state([]);
+  let lastAction = $state("");
+  let expandedIncidentId: string | null = $state(null);
+  let filters: TableFilters = $state({
     name: "",
     role: "",
-  };
-  let pagination: TablePagination = {
+  });
+  let pagination: TablePagination = $state({
     page: 1,
     limit: 10,
     total: 42,
-  };
+  });
 
   type Incident = {
     status: "open" | "resolved";

@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let shipping = "standard";
+  let shipping = $state("standard");
 </script>
 
 <SpecimenLayout>

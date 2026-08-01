@@ -4,8 +4,8 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let catalogueValue = "dock-region";
-  let harnessValue = "pulse-runtime-foundation";
+  let catalogueValue = $state("dock-region");
+  let harnessValue = $state("pulse-runtime-foundation");
 
   const catalogueGroups: SidebarNavGroup[] = [
     {
