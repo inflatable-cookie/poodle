@@ -7,7 +7,7 @@
       },
       "surface": {
         "$type": "color",
-        "$value": "#073642"
+        "$value": "#04303a"
       },
       "panel": {
         "$type": "color",
@@ -39,15 +39,15 @@
     "border": {
       "subtle": {
         "$type": "color",
-        "$value": "rgba(147,161,161,0.16)"
+        "$value": "rgba(147,161,161,0.24)"
       },
       "default": {
         "$type": "color",
-        "$value": "rgba(147,161,161,0.28)"
+        "$value": "rgba(147,161,161,0.38)"
       },
       "strong": {
         "$type": "color",
-        "$value": "rgba(147,161,161,0.48)"
+        "$value": "rgba(147,161,161,0.58)"
       }
     },
     "accent": {
