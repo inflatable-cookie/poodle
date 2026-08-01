@@ -6,11 +6,13 @@
     menuListNavigate,
     menuNavigableItems,
     type AnchorTarget,
+    type OverlaySurfaceGeometryChangeHandler,
   } from "@poodle/headless";
   import { tick } from "svelte";
 
   import MenuSurface from "./MenuSurface.svelte";
   import { anchored } from "./anchored";
+  import { surfaceGeometry } from "./surface-geometry";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
@@ -30,6 +32,7 @@
     /** Nested flyout that ran out of room on the right and opens leftward. */
     flipped?: boolean;
     onAction?: ((value: string) => void) | undefined;
+    onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
     /** Nested surfaces: request the parent to close this flyout (ArrowLeft). */
     onRequestClose?: (() => void) | undefined;
   }
@@ -46,6 +49,7 @@
     nested = false,
     flipped = false,
     onAction = undefined,
+    onSurfaceGeometryChange = undefined,
     onRequestClose = undefined,
   }: Props = $props();
 
@@ -180,6 +184,11 @@
     placement: placement ?? "bottom-start",
     offset,
     onPlacement: (next) => (resolvedPlacement = next),
+    onSurfaceGeometryChange: nested ? undefined : onSurfaceGeometryChange,
+  }}
+  use:surfaceGeometry={{
+    onSurfaceGeometryChange: nested ? onSurfaceGeometryChange : undefined,
+    placement: displayPlacement,
   }}
   class="poodle-menu-surface"
   class:poodle-menu-surface--submenu={nested}
@@ -276,6 +285,7 @@
             density={density}
             nested={true}
             flipped={submenuFlippedValue === item.value}
+            {onSurfaceGeometryChange}
             onAction={onAction}
             onRequestClose={() => closeSubmenu(true)}
           />

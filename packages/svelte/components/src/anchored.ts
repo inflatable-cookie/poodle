@@ -1,14 +1,17 @@
 import "@poodle/styles/anchored-surface.css";
 import {
   anchorElement,
+  createInstanceId,
   isAnchorClipped,
   isPointAnchorClipped,
   observeAnchorMovement,
+  observeOverlaySurfaceGeometry,
   resolveClipRect,
   resolveOverlayPosition,
   resolveLayerZIndex,
   resolvePortalTarget,
   type AnchorTarget,
+  type OverlaySurfaceGeometryChangeHandler,
 } from "@poodle/headless";
 
 import type { OverlayPlacement } from "./types";
@@ -32,6 +35,8 @@ export interface AnchoredOptions {
    * resolver's, and two writers on one attribute would fight.
    */
   onPlacement?: ((placement: OverlayPlacement) => void) | null;
+  /** Immutable viewport geometry for hosts coordinating an independent layer. */
+  onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | null;
 }
 
 /**
@@ -64,6 +69,15 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
   let reportedPlacement: OverlayPlacement | null = null;
   let target: HTMLElement | null = null;
   let stopObserving: (() => void) | null = null;
+  const geometry = observeOverlaySurfaceGeometry(
+    node,
+    createInstanceId("overlay-surface"),
+    {
+      onChange: current.onSurfaceGeometryChange,
+      placement: null,
+      reportInitial: false,
+    },
+  );
 
   function reposition(): void {
     const anchor = current.anchor;
@@ -82,6 +96,12 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
         : isPointAnchorClipped(anchorRect, clipRect);
     if (clipped) {
       node.dataset.anchorHidden = "true";
+      geometry.update({
+        onChange: current.onSurfaceGeometryChange,
+        placement: reportedPlacement,
+        reportInitial: false,
+      });
+      geometry.report();
       return;
     }
 
@@ -105,6 +125,13 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     // phase rasterises its text blurrier than the same content in flow.
     node.style.top = `${Math.round(position.top)}px`;
     node.style.left = `${Math.round(position.left)}px`;
+
+    geometry.update({
+      onChange: current.onSurfaceGeometryChange,
+      placement: position.placement,
+      reportInitial: false,
+    });
+    geometry.report();
 
     if (position.placement === reportedPlacement) {
       return;
@@ -157,6 +184,11 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     update(next: AnchoredOptions) {
       const anchorChanged = next.anchor !== current.anchor;
       current = next;
+      geometry.update({
+        onChange: current.onSurfaceGeometryChange,
+        placement: reportedPlacement,
+        reportInitial: false,
+      });
 
       if (!target) {
         attach();
@@ -172,6 +204,7 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     },
     destroy() {
       stopObserving?.();
+      geometry.destroy();
 
       if (target && node.parentNode === target) {
         target.removeChild(node);

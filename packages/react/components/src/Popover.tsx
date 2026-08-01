@@ -8,6 +8,7 @@ import {
   registerDismissLayer,
   type PopoverContext,
   type PopoverEvent,
+  type OverlaySurfaceGeometryChangeHandler,
 } from "@poodle/headless";
 
 import "@poodle/styles/popover.css";
@@ -30,6 +31,7 @@ export interface PopoverProps {
   surfaceMinWidth?: string | null;
   surfaceMaxWidth?: string | null;
   onOpenChange?: (open: boolean) => void;
+  onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
   trigger?: ReactNode;
   children?: ReactNode;
 }
@@ -48,6 +50,7 @@ export function Popover({
   surfaceMinWidth = null,
   surfaceMaxWidth = null,
   onOpenChange,
+  onSurfaceGeometryChange,
   trigger,
   children,
 }: PopoverProps) {
@@ -154,6 +157,7 @@ export function Popover({
           offset={offset}
           matchWidth={surfaceWidth === "trigger"}
           onPlacement={setResolvedPlacement}
+          onSurfaceGeometryChange={onSurfaceGeometryChange}
           {...reactifyPart(parts.surface)}
           className="poodle-popover__surface"
           style={surfaceStyle}

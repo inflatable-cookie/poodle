@@ -4,6 +4,7 @@ import {
   menuListNavigate,
   menuNavigableItems,
   type AnchorTarget,
+  type OverlaySurfaceGeometryChangeHandler,
 } from "@poodle/headless";
 
 import "@poodle/styles/menu-surface.css";
@@ -30,6 +31,7 @@ export interface MenuSurfaceProps {
   offset?: number;
   placement?: OverlayPlacement | null;
   onAction?: (value: string) => void;
+  onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
 }
 
 export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurface(
@@ -43,6 +45,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
     offset = 6,
     placement = null,
     onAction,
+    onSurfaceGeometryChange,
   },
   ref,
 ) {
@@ -169,6 +172,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
       placement={placement ?? "bottom-start"}
       offset={offset}
       onPlacement={setResolvedPlacement}
+      onSurfaceGeometryChange={onSurfaceGeometryChange}
       {...shell}
     >
       {rows}

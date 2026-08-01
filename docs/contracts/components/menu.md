@@ -59,6 +59,7 @@ Updated: 2026-07-10
 | `triggerAriaLabel` | `string \| null` | `null` | no | accessible label for the trigger wrapper, useful for icon-only triggers |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the menu opens or closes |
 | `onAction` | `(value: string) => void` | `undefined` | no | called when an actionable item commits |
+| `onSurfaceGeometryChange` | `(change: OverlaySurfaceGeometryChange) => void` | `undefined` | no | web-only, host-neutral viewport snapshot stream for every private surface owned by this Menu |
 
 ### Type Definitions
 
@@ -131,6 +132,7 @@ behavior (the Svelte implementation is the parity authority).
 |-------|---------------|---------|-------|
 | `onOpenChange` | menu opens or closes | `boolean` | trigger and dismissal driven |
 | `onAction` | actionable item commits | `string` | disabled and separator rows never fire |
+| `onSurfaceGeometryChange` | a root or submenu surface is positioned, moves, changes visibility, or unmounts | `OverlaySurfaceGeometryChange` | each mounted surface has an independent opaque id |
 
 ## 6. Accessibility
 
@@ -341,6 +343,8 @@ behavior (the Svelte implementation is the parity authority).
   (shortcut label) is auto-sized in the second column
 - Separator items are rendered as non-interactive dividers outside the grid
   item pattern
+- `onSurfaceGeometryChange` relays the root and every recursively owned submenu
+  surface; close or destruction removes every reported id
 
 ## 10. GPUI Notes
 
@@ -399,6 +403,7 @@ behavior (the Svelte implementation is the parity authority).
 | Neither native raises `onOpenChange` | both render the panel only; the trigger that opens it is the consumer's element | accepted (by design) | none |
 | exact placement collision strategy may differ | overlay engine internals vary by runtime | allowed | keep invocation, dismissal, and item semantics strict |
 | GPUI may use native window overlay instead of CSS absolute | desktop runtime differs from web | allowed | visual density and token usage must match |
+| `onSurfaceGeometryChange` is Svelte/React-only | it reports CSS viewport geometry for web surfaces; native hosts own their renderer geometry | accepted | do not copy browser geometry callbacks into native specs |
 
 ## 13. Specimen Definitions
 

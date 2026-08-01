@@ -28,6 +28,8 @@ Roadmaps hold executable milestone work for Poodle.
 - `g10` is complete
 - `g11` is complete
 - `g12.001`–`g12.016` are complete
+- `g12.017` remains interaction evidence with an unpromoted IME follow-up
+- `g12.018` is complete
 - `g12` is strict-paused with no implementation card ready
 
 The canonical summary of roadmap status is `generation-index.md`.
@@ -47,7 +49,7 @@ If a generation README conflicts with that file, treat the index as the source o
 - `g10` completed Jetstream-feasibility / GPUI-production-hardening generation
 - `g11` completed Svelte modernization and consumer rollout generation
 - `g12` active but strict-paused after React parity, verification depth, native
-  hardening, and the bounded public-extension checkpoint
+  hardening, DockRegion extension, and public overlay geometry observation
 
 ## Working Rule
 

@@ -9,7 +9,13 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { menuTransition, registerDismissLayer, type MenuEvent as MenuMachineEvent, layerContains } from "@poodle/headless";
+import {
+  layerContains,
+  menuTransition,
+  registerDismissLayer,
+  type MenuEvent as MenuMachineEvent,
+  type OverlaySurfaceGeometryChangeHandler,
+} from "@poodle/headless";
 
 import "@poodle/styles/menu.css";
 
@@ -29,6 +35,7 @@ export interface MenuProps {
   density?: ControlDensity | null;
   onOpenChange?: (open: boolean) => void;
   onAction?: (value: string) => void;
+  onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
   trigger?: ReactNode;
 }
 
@@ -44,6 +51,7 @@ export function Menu({
   density = null,
   onOpenChange,
   onAction,
+  onSurfaceGeometryChange,
   trigger,
 }: MenuProps) {
   const uiPresentation = useUiPresentation();
@@ -128,6 +136,7 @@ export function Menu({
           density={resolvedDensity}
           anchor={triggerElement}
           placement={placement}
+          onSurfaceGeometryChange={onSurfaceGeometryChange}
           onAction={(value) => sendRef.current({ type: "ACTION", value })}
         />
       ) : null}

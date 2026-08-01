@@ -3,6 +3,13 @@ import type { Readable } from "svelte/store";
 
 import type { IconNodes } from "./icon-registry";
 
+export type {
+  OverlaySurfaceGeometry,
+  OverlaySurfaceGeometryChange,
+  OverlaySurfaceGeometryChangeHandler,
+  OverlayViewportRect,
+} from "@poodle/headless";
+
 export type IconProp = IconNodes | string;
 
 export type ValidationState = "none" | "invalid" | "valid" | "pending";

@@ -11,7 +11,7 @@ import { join, resolve } from "node:path";
 const repoRoot = resolve(import.meta.dir, "../..");
 const artifactRoot = join(repoRoot, ".artifacts");
 mkdirSync(artifactRoot, { recursive: true });
-const runRoot = mkdtempSync(join(artifactRoot, "g12.016-"));
+const runRoot = mkdtempSync(join(artifactRoot, "svelte-pack-install-"));
 const packRoot = join(runRoot, "packs");
 const consumerRoot = join(runRoot, "consumer");
 mkdirSync(packRoot);
@@ -141,7 +141,7 @@ for (const packageEntry of packages) {
   }
 }
 
-await run(["bunx", "vitest", "run", "DockRegion.test.ts"], consumerRoot);
+await run(["bunx", "vitest", "run"], consumerRoot);
 
 const artifacts = await Promise.all(
   packages.map(async (packageEntry) => {
@@ -183,6 +183,7 @@ const evidence = {
     externalPayload: true,
     sameRegionReorder: true,
     accessibleRegionName: true,
+    overlayGeometry: true,
   },
   artifacts,
 };

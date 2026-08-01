@@ -4,13 +4,16 @@
 
 - `g12`
   - Status: active, strict-paused
-  - Range: `001` to `016` on disk
+  - Range: `001` to `018` on disk
   - Notes: React full parity (`001`–`008`) is complete — all 132 components
     ported to `@poodle/react` against a single shared stylesheet, with a
     full per-component preview gallery mirroring the Svelte preview's slugs.
     Web verification and native hardening through `g12.015` are complete.
     `g12.016` completed the public DockRegion drag extension and exact preview
-    artifact checkpoint requested by Longhorn. No implementation card is ready.
+    artifact checkpoint requested by Longhorn. `g12.017` remains interaction
+    evidence with its IME follow-up unpromoted. `g12.018` completed public
+    built-in overlay geometry requested by Longhorn. No implementation card is
+    ready.
 
 - `g11`
   - Status: completed

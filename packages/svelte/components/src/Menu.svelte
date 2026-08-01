@@ -5,6 +5,7 @@
     menuTransition,
     registerDismissLayer,
     type MenuEvent as MenuMachineEvent,
+    type OverlaySurfaceGeometryChangeHandler,
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
@@ -31,6 +32,7 @@
     density?: ControlDensity | null;
     onOpenChange?: ((open: boolean) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
+    onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
     trigger?: Snippet<[]>;
   }
 
@@ -46,6 +48,7 @@
     density = null,
     onOpenChange = undefined,
     onAction = undefined,
+    onSurfaceGeometryChange = undefined,
     trigger,
   }: Props = $props();
 
@@ -158,8 +161,8 @@
       density={resolvedDensity}
       anchor={triggerElement}
       placement={placement}
+      {onSurfaceGeometryChange}
       onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}
 </div>
-

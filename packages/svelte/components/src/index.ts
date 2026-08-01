@@ -134,6 +134,12 @@ export {
 // same portalling and placement the library uses (002-anchored-overlays.md).
 export { anchored, type AnchoredOptions } from "./anchored";
 export { portal } from "./portal";
+export type {
+  OverlaySurfaceGeometry,
+  OverlaySurfaceGeometryChange,
+  OverlaySurfaceGeometryChangeHandler,
+  OverlayViewportRect,
+} from "@poodle/headless";
 
 // --- Composites ---
 export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";

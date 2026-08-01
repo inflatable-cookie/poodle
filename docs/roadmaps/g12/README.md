@@ -1,7 +1,9 @@
 # g12 — React Full Parity And Web Verification Depth
 
 **Status: active, strict-paused.** The React parity program (`001`–`008`) and
-the bounded work through `016` are complete. No implementation card is ready.
+the bounded work through `018` are complete. `017` remains
+native-interaction evidence with its IME follow-up unpromoted. No
+implementation card is ready.
 
 **React parity: COMPLETE.** All 132 components ported to `@poodle/react` and
 Playwright-verified against the Svelte preview. The React preview is a full
@@ -87,6 +89,9 @@ Runway:
   engine work — its runtime dispatches clicks and the preview already feeds
   pointer state — only a decision about handler shape.
   **GPUI done and gated; Jetstream scoped.**
+- `018-public-overlay-geometry-observation.md` — explicit immutable viewport
+  snapshots for built-in Popover/Menu surfaces across Svelte and React, without
+  public DOM or host-runtime coupling. **Complete; requested by Longhorn.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and

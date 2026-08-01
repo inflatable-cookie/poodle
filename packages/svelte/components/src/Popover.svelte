@@ -9,6 +9,7 @@
     registerDismissLayer,
     type PopoverContext,
     type PopoverEvent,
+    type OverlaySurfaceGeometryChangeHandler,
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
@@ -29,6 +30,7 @@
     surfaceMinWidth?: string | null;
     surfaceMaxWidth?: string | null;
     onOpenChange?: ((open: boolean) => void) | undefined;
+    onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
     trigger?: Snippet<[]>;
     children?: Snippet<[]>;
   }
@@ -47,6 +49,7 @@
     surfaceMinWidth = null,
     surfaceMaxWidth = null,
     onOpenChange = undefined,
+    onSurfaceGeometryChange = undefined,
     trigger,
     children,
   }: Props = $props();
@@ -184,6 +187,7 @@
         offset,
         matchWidth: surfaceWidth === "trigger",
         onPlacement: (next) => (placementFromAnchor = next),
+        onSurfaceGeometryChange,
       }}
       {...parts.surface}
       class="poodle-popover__surface"
@@ -196,4 +200,3 @@
     </div>
   {/if}
 </div>
-

@@ -13,13 +13,17 @@ import { createPortal } from "react-dom";
 import "@poodle/styles/anchored-surface.css";
 import {
   anchorElement,
+  createInstanceId,
   isAnchorClipped,
   observeAnchorMovement,
+  observeOverlaySurfaceGeometry,
   resolveClipRect,
   resolveOverlayPosition,
   resolveLayerZIndex,
   resolvePortalTarget,
   type AnchorTarget,
+  type OverlaySurfaceGeometryChangeHandler,
+  type OverlaySurfaceGeometryObserver,
 } from "@poodle/headless";
 
 import type { OverlayPlacement } from "./types";
@@ -43,6 +47,8 @@ export interface AnchoredSurfaceProps extends HTMLAttributes<HTMLElement> {
    * resolver's, and two writers on one attribute would fight.
    */
   onPlacement?: ((placement: OverlayPlacement) => void) | null;
+  /** Immutable viewport geometry for hosts coordinating an independent layer. */
+  onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | null;
   /** Element to render. Tooltips are inline spans; everything else is a div. */
   tag?: "div" | "span";
 }
@@ -68,6 +74,7 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
       matchWidth = false,
       minWidth = false,
       onPlacement = null,
+      onSurfaceGeometryChange = null,
       tag = "div",
       style,
       children,
@@ -77,6 +84,11 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
   ) {
     const [surface, setSurface] = useState<HTMLElement | null>(null);
     const reported = useRef<OverlayPlacement | null>(null);
+    const geometrySurfaceId = useRef<string | null>(null);
+    const geometryObserver = useRef<OverlaySurfaceGeometryObserver | null>(null);
+    if (geometrySurfaceId.current === null) {
+      geometrySurfaceId.current = createInstanceId("overlay-surface");
+    }
 
     const target = useMemo(
       () =>
@@ -113,6 +125,33 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
     }, [anchor, surface]);
 
     useLayoutEffect(() => {
+      if (!surface) return;
+
+      geometryObserver.current = observeOverlaySurfaceGeometry(
+        surface,
+        geometrySurfaceId.current!,
+        {
+          onChange: onSurfaceGeometryChange,
+          placement: reported.current,
+          reportInitial: false,
+        },
+      );
+
+      return () => {
+        geometryObserver.current?.destroy();
+        geometryObserver.current = null;
+      };
+    }, [surface]);
+
+    useLayoutEffect(() => {
+      geometryObserver.current?.update({
+        onChange: onSurfaceGeometryChange,
+        placement: reported.current,
+        reportInitial: false,
+      });
+    }, [onSurfaceGeometryChange]);
+
+    useLayoutEffect(() => {
       if (!anchor || !surface) return;
 
       const reposition = (): void => {
@@ -121,6 +160,12 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
 
         if (isAnchorClipped(anchorRect, resolveClipRect(anchorElement(anchor), viewport))) {
           surface.dataset.anchorHidden = "true";
+          geometryObserver.current?.update({
+            onChange: onSurfaceGeometryChange,
+            placement: reported.current,
+            reportInitial: false,
+          });
+          geometryObserver.current?.report();
           return;
         }
 
@@ -145,6 +190,13 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
         surface.style.top = `${Math.round(position.top)}px`;
         surface.style.left = `${Math.round(position.left)}px`;
 
+        geometryObserver.current?.update({
+          onChange: onSurfaceGeometryChange,
+          placement: position.placement,
+          reportInitial: false,
+        });
+        geometryObserver.current?.report();
+
         if (position.placement === reported.current) {
           return;
         }
@@ -160,7 +212,7 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
 
       reposition();
       return observeAnchorMovement(anchor, surface, reposition);
-    }, [anchor, surface, placement, offset, matchWidth, minWidth, onPlacement]);
+    }, [anchor, surface, placement, offset, matchWidth, minWidth, onPlacement, onSurfaceGeometryChange]);
 
     if (!target) {
       return null;

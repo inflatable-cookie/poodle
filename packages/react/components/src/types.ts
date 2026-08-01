@@ -6,6 +6,13 @@
 
 import type { ReactNode } from "react";
 
+export type {
+  OverlaySurfaceGeometry,
+  OverlaySurfaceGeometryChange,
+  OverlaySurfaceGeometryChangeHandler,
+  OverlayViewportRect,
+} from "@poodle/headless";
+
 export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
 export type SemanticControlSizeRole = "control" | "chrome" | "prominent";

@@ -69,6 +69,56 @@ behaviour once:
   Supplying it hands the consumer ownership of `data-placement`, for components
   that publish a coarser value there (`top` / `above`) than the resolver's
 
+## Public Geometry Observation
+
+Built-in surface elements remain private. A consumer that coordinates an
+independent viewport may opt into immutable geometry changes through the
+owning component. It must not query Poodle classes, roles, ids, portal targets,
+or elements.
+
+```ts
+interface OverlayViewportRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+interface OverlaySurfaceGeometry {
+  surfaceId: string;
+  rect: OverlayViewportRect;
+  placement: OverlayPlacement | null;
+  visible: boolean;
+}
+
+type OverlaySurfaceGeometryChange =
+  | { type: "upsert"; surface: OverlaySurfaceGeometry }
+  | { type: "remove"; surfaceId: string };
+```
+
+- Bounds use viewport CSS pixels and copied numbers, never `DOMRect`.
+- `surfaceId` is opaque and stable for one mounted surface lifetime only.
+- `upsert` follows initial positioning and every bounds, placement, or
+  visibility change. Placement deduplication must not swallow geometry moves.
+- `visible` is false when the anchor is hidden or the surface has zero area.
+- `remove` fires once before unmount or destruction.
+- One owning-component callback relays every surface it owns. A Menu includes
+  nested submenu surfaces under independent ids.
+- Server rendering emits no changes.
+
+`Popover` and `Menu` expose this as `onSurfaceGeometryChange`. Svelte and React
+use the same payload. This is an explicit per-component subscription, not a
+global registry: opening an unrelated Tooltip, Select, or picker must not
+silently enter a consumer's coordination policy.
+
+The callback is web-only but host-neutral. Native renderers do not expose CSS
+viewport geometry; browser elements, selectors, Tauri types, and consumer
+policy do not enter the contract.
+
 ## Data Attributes
 
 | Attribute | On | Meaning |
@@ -96,6 +146,8 @@ A component with an anchored surface asserts, in both frameworks:
   `surface.closest('.poodle-<component>')` is null
 - `data-poodle-anchored` is `"true"`
 - a pointer interaction inside the surface does not dismiss the layer
+- an opted-in observer receives copied viewport geometry after positioning,
+  movement, visibility changes, and teardown
 
 Because the surface leaves the container, tests reach it through the trigger's
 `aria-controls` rather than a container query — which also keeps concurrently

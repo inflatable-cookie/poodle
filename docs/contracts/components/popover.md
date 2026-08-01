@@ -49,6 +49,7 @@ Updated: 2026-07-10
 | `surfaceMinWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-min-width` (default `14rem`) |
 | `surfaceMaxWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-max-width` (default `min(24rem, 90vw)`) |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the open state changes |
+| `onSurfaceGeometryChange` | `(change: OverlaySurfaceGeometryChange) => void` | `undefined` | no | web-only, host-neutral viewport snapshot stream for the private built-in surface |
 
 ### Type Definitions
 
@@ -177,6 +178,7 @@ wiring, presence (if open/close animation is added later).
 | Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `onOpenChange` | popover opens or closes | `boolean` | trigger, outside interact, or escape driven |
+| `onSurfaceGeometryChange` | surface is positioned, moves, changes visibility, or unmounts | `OverlaySurfaceGeometryChange` | immutable CSS-viewport numbers; no element or selector exposure |
 
 ## 6. Accessibility
 
@@ -316,6 +318,8 @@ in viewport coordinates. See `002-anchored-overlays.md`.
   `transform` or stacking context can clip it
 - `surfaceWidth="trigger"` is honoured by measuring the trigger, not by
   `width: 100%`
+- `onSurfaceGeometryChange` reports the portalled surface after positioning,
+  then removes its opaque surface id on close or destruction
 
 ## 10. GPUI Notes
 
@@ -357,6 +361,7 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Jetstream raises no events | the component renders the panel; the trigger and the open state belong to the consumer, so there is nothing here to click | accepted (by design) | none |
+| `onSurfaceGeometryChange` is Svelte/React-only | it reports CSS viewport geometry for a web surface; native hosts own their renderer geometry | accepted | do not copy browser geometry callbacks into native specs |
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 

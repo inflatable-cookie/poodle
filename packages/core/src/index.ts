@@ -69,6 +69,17 @@ export {
 } from "./dom/dismiss";
 export { createInstanceId } from "./dom/id";
 export {
+  copyOverlayViewportRect,
+  equalOverlaySurfaceGeometry,
+  observeOverlaySurfaceGeometry,
+  type OverlaySurfaceGeometry,
+  type OverlaySurfaceGeometryChange,
+  type OverlaySurfaceGeometryChangeHandler,
+  type OverlaySurfaceGeometryObserver,
+  type OverlaySurfaceGeometryObserverOptions,
+  type OverlayViewportRect,
+} from "./dom/overlay-geometry";
+export {
   anchorElement,
   clipsOverflow,
   collectClipAncestors,

@@ -34,6 +34,9 @@ docs/logs/*
 !docs/logs/2026-07/
 docs/logs/2026-07/*
 !docs/logs/2026-07/29-public-dock-drag-extension-and-preview-artifact.md
+!docs/logs/2026-08/
+docs/logs/2026-08/*
+!docs/logs/2026-08/01-public-overlay-geometry-observation.md
 *.log
 npm-debug.log*
 yarn-debug.log*
