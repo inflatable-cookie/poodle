@@ -1,14 +1,17 @@
 <script lang="ts">
   import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface, Popover } from "@poodle/svelte";
 
-  let basicOpen = false;
-  let formOpen = false;
-  let contentOnlyOpen = false;
-  let customFooterOpen = false;
-  let bareOpen = false;
-  let wideOpen = false;
-  let scrollableOpen = false;
-  let widthOpenMap: Record<string, boolean> = {};
+  // One $state rune puts the whole file in runes mode, where plain `let`
+  // stops being reactive — every flag here must be $state or its dialog
+  // never opens.
+  let basicOpen = $state(false);
+  let formOpen = $state(false);
+  let contentOnlyOpen = $state(false);
+  let customFooterOpen = $state(false);
+  let bareOpen = $state(false);
+  let wideOpen = $state(false);
+  let scrollableOpen = $state(false);
+  let widthOpenMap: Record<string, boolean> = $state({});
   let overlayInDialogOpen = $state(false);
 </script>
 
