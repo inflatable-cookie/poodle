@@ -1,6 +1,12 @@
 [catalog]
 alias = "poodle"
 
+# Mounted into consumer workspace containers; keep install state
+# container-owned so host and container bun installs stop clobbering each
+# other's node_modules (effigy guide 069).
+[isolation]
+paths = ["node_modules", "packages/core/node_modules"]
+
 [manifest]
 minimum_effigy_version = "0.7.0"
 include = [
