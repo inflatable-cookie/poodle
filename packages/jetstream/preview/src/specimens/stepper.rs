@@ -8,7 +8,7 @@ use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::stepper::js_stepper;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep};
+use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep, Orientation};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -47,6 +47,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 .with_aria_label("DAW sync steps"),
             theme,
         )))
+        .child(group("Vertical", secondary, {
+            let mut el = js_stepper(
+                &StepperSpec::new(wizard.clone())
+                    .with_orientation(Orientation::Vertical)
+                    .with_value("categories")
+                    .with_aria_label("DAW sync steps, vertical"),
+                theme,
+            );
+            el = el.w(320.0);
+            el
+        }))
         .child(group("Working", secondary, js_stepper(
             &StepperSpec::new(working)
                 .with_value("extract")

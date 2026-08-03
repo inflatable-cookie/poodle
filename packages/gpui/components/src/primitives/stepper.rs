@@ -8,9 +8,10 @@
 //! and never attached for a while: the builders type-checked, the pointing-hand
 //! cursor promised a click, and nothing happened when you made one.
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{StepStatus, StepperSpec, StepperStep};
+use poodle_specs::{StepStatus, StepperSpec, StepperStep, Orientation};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
@@ -125,10 +126,11 @@ impl IntoElement for Stepper {
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_control_disabled = self.spec.is_disabled;
         let last = self.spec.steps.len().saturating_sub(1);
+        let is_vertical = self.spec.orientation == Orientation::Vertical;
 
         let mut root = div()
             .flex()
-            
+            .when(is_vertical, |el| el.flex_col())
             .rounded(radius)
             .border_1()
             .border_color(border)
@@ -266,9 +268,14 @@ impl IntoElement for Stepper {
             }
 
             // Dividers live inside the shared track, so the outer border stays a
-            // single rectangle rather than a box per step.
+            // single rectangle rather than a box per step. Vertical flows the
+            // same track as rows, so the divider moves to the bottom edge.
             if index < last {
-                cell = cell.border_r_1().border_color(border);
+                cell = if is_vertical {
+                    cell.border_b_1().border_color(border)
+                } else {
+                    cell.border_r_1().border_color(border)
+                };
             }
 
             root = root.child(cell);

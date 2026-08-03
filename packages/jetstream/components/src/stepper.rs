@@ -10,7 +10,7 @@
 use jetstream_ui::ui_element::{self, JsEl};
 use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{StepStatus, StepperSpec};
+use poodle_specs::{StepStatus, StepperSpec, Orientation};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
@@ -30,7 +30,12 @@ pub struct Stepper {
 
 impl Stepper {
     pub fn from_spec(spec: StepperSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None, on_rerun: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+            on_rerun: None,
+        }
     }
 
     /// Fires with the chosen step's value. Disabled steps never fire.
@@ -84,8 +89,11 @@ fn build(
 
     let current = spec.current_value().map(str::to_owned);
 
-    let mut root = ui_element::div()
-        .flex_row()
+    let mut root = if spec.orientation == Orientation::Vertical {
+        ui_element::div().flex_col()
+    } else {
+        ui_element::div().flex_row()
+    }
         .border(hairline)
         .border_color(border)
         .rounded(radius)
@@ -189,7 +197,6 @@ fn build(
                     .min_w_0(),
             );
 
-
         if is_disabled {
             trigger = trigger.opacity(disabled_opacity).disabled(true);
         } else {
@@ -276,9 +283,14 @@ fn build(
         }
 
         // Dividers are drawn inside the shared track rather than around each
-        // cell, so the outer border stays a single rectangle.
+        // cell, so the outer border stays a single rectangle. Vertical flows
+        // the same track as rows, so the divider moves to the bottom edge.
         if index < last {
-            cell = cell.border_r_1().border_color(border);
+            cell = if spec.orientation == Orientation::Vertical {
+                cell.border_b_1().border_color(border)
+            } else {
+                cell.border_r_1().border_color(border)
+            };
         }
 
         root = root.child(cell);
@@ -315,8 +327,16 @@ mod tests {
         assert!(tree.has_text("Quality gate"), "{:?}", tree.texts());
         // Pending steps number themselves; a failed one must not, or it reads
         // as simply unvisited.
-        assert!(!tree.has_text("2"), "failed step numbered itself: {:?}", tree.texts());
-        assert!(tree.has_text("3"), "pending step should show its index: {:?}", tree.texts());
+        assert!(
+            !tree.has_text("2"),
+            "failed step numbered itself: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("3"),
+            "pending step should show its index: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -378,7 +398,7 @@ mod tests {
         let changes = Arc::clone(&seen);
 
         let spec = StepperSpec::new(vec![
-            StepperStep::new("a", "Read source").with_status(StepStatus::Complete),
+            StepperStep::new("a", "Read source").with_status(StepStatus::Complete)
         ])
         .with_show_rerun(true);
 
@@ -391,5 +411,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["rerun:a"]);
     }
-
 }

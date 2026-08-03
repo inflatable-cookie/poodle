@@ -12,6 +12,7 @@
   import type {
     ControlDensity,
     ControlSize,
+    Orientation,
     SemanticControlSizeRole,
     StepperStep,
   } from "./types";
@@ -23,6 +24,7 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    orientation?: Orientation;
     disabled?: boolean;
     ariaLabel?: string | null;
     rerunLabel?: string;
@@ -37,6 +39,7 @@
     size = null,
     sizeRole = "control",
     density = null,
+    orientation = "horizontal",
     disabled = false,
     ariaLabel = null,
     rerunLabel = "Re-run step",
@@ -107,8 +110,11 @@
     const position = enabled.findIndex(({ i }) => i === index);
     let target: number | undefined;
 
-    if (event.key === "ArrowRight") target = enabled[Math.min(position + 1, enabled.length - 1)]?.i;
-    else if (event.key === "ArrowLeft") target = enabled[Math.max(position - 1, 0)]?.i;
+    // Arrows follow the axis the steps flow along (stepper.md §6).
+    const nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+    const prevKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+    if (event.key === nextKey) target = enabled[Math.min(position + 1, enabled.length - 1)]?.i;
+    else if (event.key === prevKey) target = enabled[Math.max(position - 1, 0)]?.i;
     else if (event.key === "Home") target = enabled[0]?.i;
     else if (event.key === "End") target = enabled[enabled.length - 1]?.i;
     else return;
@@ -123,7 +129,13 @@
   }
 </script>
 
-<nav class="poodle-stepper" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
+<nav
+  class="poodle-stepper"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-orientation={orientation}
+  aria-label={ariaLabel ?? undefined}
+>
   <ol class="poodle-stepper__list">
     {#each steps as step, index (step.value)}
       <li class="poodle-stepper__step" data-status={step.status}>

@@ -4,7 +4,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, Stepper};
-use poodle_specs::{EyebrowSpec, StepStatus, StepperSpec, StepperStep};
+use poodle_specs::{EyebrowSpec, StepStatus, StepperSpec, StepperStep, Orientation};
 
 /// The Soundcheck arrangement this design came from.
 fn wizard_steps() -> Vec<StepperStep> {
@@ -64,6 +64,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .into_any_element(),
+        ))
+        .child(group(
+            theme,
+            "Vertical",
+            div()
+                .max_w(px(320.0))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(wizard_steps())
+                        .with_orientation(Orientation::Vertical)
+                        .with_value("categories")
+                        .with_aria_label("DAW sync steps, vertical"),
+                    theme,
+                ))
+                .into_any_element(),
         ))
         .child(group(
             theme,

@@ -9,13 +9,15 @@ Updated: 2026-07-28
 
 - Component name: `Stepper`
 - Layer: `foundation`
-- Summary: a horizontal route through a multi-step process, showing where the
-  user is, which steps are done, and — where steps do real work — whether each
-  one is running or has failed
+- Summary: a route through a multi-step process — horizontal by default,
+  vertical where the process reads as a checklist — showing where the user is,
+  which steps are done, and — where steps do real work — whether each one is
+  running or has failed
 - In scope: per-step status, current-step selection, per-step re-run action,
-  keyboard navigation between steps
-- Out of scope: vertical orientation, step content panels (the consumer renders
-  those), branching or optional-step logic, progress percentages (see Progress)
+  keyboard navigation between steps, horizontal and vertical orientation
+- Out of scope: step content panels (the consumer renders those; a vertical
+  stepper does not become an accordion), branching or optional-step logic,
+  progress percentages (see Progress)
 
 ### Status Is A Property, Not A Position
 
@@ -77,6 +79,7 @@ The trigger navigates. The Rerun button, and only the Rerun button, re-runs.
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for horizontal spacing |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | axis the steps flow along; vertical stacks steps as rows in the same shared track |
 | `disabled` | `boolean` | `false` | no | disables every step |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the nav landmark; required, since "navigation" alone does not say which process |
 | `rerunLabel` | `string` | `"Re-run step"` | no | accessible name for the Rerun control, suffixed with the step label |
@@ -147,7 +150,8 @@ to know both where they are and that it broke.
 | Key | Action |
 |-----|--------|
 | `Tab` | moves into the stepper, then between trigger and its rerun control |
-| `ArrowRight` / `ArrowLeft` | moves focus between step triggers, skipping disabled steps |
+| `ArrowRight` / `ArrowLeft` | horizontal orientation: moves focus between step triggers, skipping disabled steps |
+| `ArrowDown` / `ArrowUp` | vertical orientation: the same movement along the vertical axis |
 | `Home` / `End` | first / last enabled step |
 | `Enter` / `Space` | activates the focused control |
 
@@ -155,6 +159,8 @@ Focus moves without selecting; selection is explicit. A wizard step can be
 expensive to open, so arrow keys must not commit to one.
 
 ## 7. Layout
+
+### Horizontal (default)
 
 - Root is a grid of equal columns — `grid-auto-flow: column`,
   `grid-auto-columns: minmax(0, 1fr)` — so steps share the width evenly
@@ -164,6 +170,19 @@ expensive to open, so arrow keys must not commit to one.
 - Trigger fills its column and left-aligns; the Marker is fixed-size and the
   Label truncates
 - Rerun sits at the trailing edge of the step, outside the Label's truncation
+
+### Vertical
+
+- The same shared bordered track, flowed as rows: `grid-auto-flow: row`,
+  single column, each row sized by its content
+- Dividers move to the bottom edge — each Step carries a bottom border except
+  the last; no right borders
+- Step anatomy is unchanged: same Trigger, Marker, Label and Rerun, same
+  left-alignment. A vertical stepper is the horizontal one rotated at the
+  track level, not a different component
+- Size still owns row height and marker/font sizes; density still owns only
+  horizontal padding and gap — rows are contiguous, so there is no vertical
+  spacing for density to touch
 
 ## 8. Token Usage — Exact Values
 
@@ -262,6 +281,10 @@ Size controls intrinsic dimensions only; density controls horizontal spacing.
   colours in the component
 - GPUI has no accessibility API — see `003-native-accessibility.md`. The status
   suffix in the accessible name is carried on the spec and is inert there.
+- Orientation maps to the flex axis: vertical flows the same steps as a column
+  with bottom dividers.
+- Keyboard navigation between triggers does not exist on the natives (no key
+  routing), so the per-orientation arrow keys are web-only.
 
 ## 10a. Jetstream Notes
 

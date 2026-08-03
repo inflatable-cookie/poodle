@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
 
 /// What a step is doing, independent of where it sits.
 ///
@@ -70,6 +70,8 @@ pub struct StepperSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Axis the steps flow along; vertical stacks the same steps as rows.
+    pub orientation: Orientation,
 }
 
 impl Default for StepperSpec {
@@ -85,6 +87,7 @@ impl Default for StepperSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            orientation: Orientation::Horizontal,
         }
     }
 }
@@ -134,6 +137,11 @@ impl StepperSpec {
 
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
         self.size_role = size_role;
+        self
+    }
+
+    pub fn with_orientation(mut self, orientation: Orientation) -> Self {
+        self.orientation = orientation;
         self
     }
 

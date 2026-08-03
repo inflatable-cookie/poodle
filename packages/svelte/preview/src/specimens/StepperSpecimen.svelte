@@ -41,6 +41,18 @@
     <p>Current: <strong>{current}</strong></p>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Vertical">
+    <div style="max-width: 20rem;">
+      <Stepper
+        steps={wizardSteps}
+        orientation="vertical"
+        value={current}
+        ariaLabel="DAW sync steps, vertical"
+        onValueChange={(value) => (current = value)}
+      />
+    </div>
+  </SpecimenGroup>
+
   <SpecimenGroup label="Working">
     <Stepper steps={workingSteps} defaultValue="extract" ariaLabel="Import progress" />
   </SpecimenGroup>
