@@ -14,8 +14,8 @@
 //! text caret are runtime/engine concerns. This builder renders the slot grid,
 //! the distributed value, the active-slot highlight, and the error label.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInputSpec, ValidationState};
 
@@ -61,8 +61,8 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
     let slot_size = rem_to_px(code_input_slot_size_rem(effective_size));
     let font_size = rem_to_px(code_input_slot_font_rem(effective_size));
     let border_width = rem_to_px(0.0625); // 1px = 0.0625rem, contract border width
-    // Inter-slot gap: compact space.inline.xs, default space.inline.sm,
-    // comfortable space.inline.md.
+                                          // Inter-slot gap: compact space.inline.xs, default space.inline.sm,
+                                          // comfortable space.inline.md.
     let gap = match spec.density {
         poodle_specs::ControlDensity::Compact => resolve_px(theme, "space.inline.xs"),
         poodle_specs::ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
@@ -95,7 +95,11 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
             text_secondary
         };
 
-        let slot_bc = if is_active { active_border } else { slot_border };
+        let slot_bc = if is_active {
+            active_border
+        } else {
+            slot_border
+        };
 
         let mut slot = ui_element::div()
             .w(slot_size)
@@ -236,7 +240,10 @@ mod tests {
         // Slots render the danger border color somewhere in the tree fill/border;
         // assert the danger color is resolvable and the tree built.
         let _danger = probe_color("color.status.danger");
-        assert!(tree.count_kind("Panel") >= 6, "expected at least 6 slot panels");
+        assert!(
+            tree.count_kind("Panel") >= 6,
+            "expected at least 6 slot panels"
+        );
     }
 
     #[test]
@@ -258,7 +265,9 @@ mod tests {
 
     #[test]
     fn alphanumeric_allows_letters() {
-        let spec = CodeInputSpec::new().with_numbers_only(false).with_value("A1b");
+        let spec = CodeInputSpec::new()
+            .with_numbers_only(false)
+            .with_value("A1b");
         let tree = probe(&js_code_input(&spec, &theme()), 400.0, 80.0);
         assert!(tree.has_text("A"), "letter A missing in alphanumeric mode");
         assert!(tree.has_text("b"), "letter b missing in alphanumeric mode");

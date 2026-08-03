@@ -7,8 +7,8 @@
 //! padding, gap, and footer spacing. Renders the optional overflow-clipped
 //! media region with inset radius.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
 
@@ -80,18 +80,60 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
         let inv = resolve_color(theme, "color.text.inverse");
         let bd = resolve_color(theme, "color.border.default");
         vec![
-            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(1.125), blur: rem_to_px(2.5), spread: 0.0, color: black(0.38), inset: false },
-            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(0.375), blur: rem_to_px(0.875), spread: 0.0, color: black(0.24), inset: false },
-            BoxShadow { offset_x: 0.0, offset_y: rem_to_px(0.0625), blur: 0.0, spread: 0.0, color: with_a(inv, 0.10), inset: true },
-            BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(bd, 0.12), inset: false },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(1.125),
+                blur: rem_to_px(2.5),
+                spread: 0.0,
+                color: black(0.38),
+                inset: false,
+            },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.375),
+                blur: rem_to_px(0.875),
+                spread: 0.0,
+                color: black(0.24),
+                inset: false,
+            },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.0625),
+                blur: 0.0,
+                spread: 0.0,
+                color: with_a(inv, 0.10),
+                inset: true,
+            },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: 0.0,
+                blur: 0.0,
+                spread: rem_to_px(0.0625),
+                color: with_a(bd, 0.12),
+                inset: false,
+            },
         ]
     } else {
         let bs = resolve_color(theme, "color.border.subtle");
-        vec![BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(bs, 0.18), inset: true }]
+        vec![BoxShadow {
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: rem_to_px(0.0625),
+            color: with_a(bs, 0.18),
+            inset: true,
+        }]
     };
     if spec.selected_border_token().is_some() {
         let accent = resolve_color(theme, "color.accent.base");
-        shadows.push(BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: rem_to_px(0.0625), color: with_a(accent, 0.5), inset: true });
+        shadows.push(BoxShadow {
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: rem_to_px(0.0625),
+            color: with_a(accent, 0.5),
+            inset: true,
+        });
     }
     el = el.shadow_layers(shadows);
 
@@ -198,7 +240,10 @@ mod tests {
         let compact = probe_gap_y(ControlDensity::Compact);
         let default = probe_gap_y(ControlDensity::Default);
         let comfortable = probe_gap_y(ControlDensity::Comfortable);
-        assert!(compact < default, "compact gap ({compact}) not < default ({default})");
+        assert!(
+            compact < default,
+            "compact gap ({compact}) not < default ({default})"
+        );
         assert!(
             default < comfortable,
             "default gap ({default}) not < comfortable ({comfortable})"
@@ -223,8 +268,15 @@ mod tests {
         let media = ui_element::label("IMG");
         let spec = CardSpec::new().with_media(true);
         let tree = probe(&js_card(&spec, &theme(), vec![media]), 400.0, 200.0);
-        assert!(tree.has_text("IMG"), "media content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("IMG"),
+            "media content missing: {:?}",
+            tree.texts()
+        );
         // Media wrapper adds an extra Panel node above the content depth.
-        assert!(tree.count_kind("Panel") >= 2, "media region wrapper missing");
+        assert!(
+            tree.count_kind("Panel") >= 2,
+            "media region wrapper missing"
+        );
     }
 }

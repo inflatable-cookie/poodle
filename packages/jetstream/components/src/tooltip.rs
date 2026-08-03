@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/components/tooltip.md`
 //! Uses overlay() for the tooltip panel. Triggered by on_pointer_enter/leave.
 
-use jetstream_ui::{BoxShadow, Color};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{BoxShadow, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::TooltipSpec;
 
@@ -75,7 +75,10 @@ pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .rounded(radius)
         .border(border_width)
         .border_color(border_color)
-        .pl(pad_x).pr(pad_x).pt(pad_y).pb(pad_y)
+        .pl(pad_x)
+        .pr(pad_x)
+        .pt(pad_y)
+        .pb(pad_y)
         .max_w(max_w)
         .whitespace_nowrap()
         .overlay()
@@ -101,7 +104,10 @@ mod tests {
 
     #[test]
     fn renders_content_text() {
-        let el = js_tooltip(&TooltipSpec::new().with_content("Save your changes"), &theme());
+        let el = js_tooltip(
+            &TooltipSpec::new().with_content("Save your changes"),
+            &theme(),
+        );
         let tree = probe(&el, 320.0, 80.0);
         assert!(
             tree.has_text("Save your changes"),
@@ -117,9 +123,16 @@ mod tests {
         let el = js_tooltip(&TooltipSpec::new().with_content("OK"), &theme());
         let tree = probe(&el, 600.0, 80.0);
         let bubble = &tree.nodes[0];
-        assert!(bubble.w <= 256.0 + 0.5, "bubble exceeds max-width: {}", bubble.w);
+        assert!(
+            bubble.w <= 256.0 + 0.5,
+            "bubble exceeds max-width: {}",
+            bubble.w
+        );
         // padding(0.5rem each side = 16px) means the bubble is wider than its text.
-        assert!(bubble.w > 0.0 && bubble.h > 0.0, "bubble not laid out: {bubble:?}");
+        assert!(
+            bubble.w > 0.0 && bubble.h > 0.0,
+            "bubble not laid out: {bubble:?}"
+        );
     }
 
     #[test]
@@ -135,7 +148,12 @@ mod tests {
         let bubble_bg = tree.nodes[0].bg.expect("bubble has no fill");
         assert!(
             bubble_bg.approx(
-                ProbeColor { r: mixed.r, g: mixed.g, b: mixed.b, a: mixed.a },
+                ProbeColor {
+                    r: mixed.r,
+                    g: mixed.g,
+                    b: mixed.b,
+                    a: mixed.a
+                },
                 0.01,
             ),
             "bubble fill not the elevated/panel mix: {bubble_bg:?} vs {mixed:?}",
@@ -147,11 +165,15 @@ mod tests {
         // Placement is positioning-only (runtime/preview loop); the rendered
         // bubble surface is identical across placements.
         let top = js_tooltip(
-            &TooltipSpec::new().with_content("X").with_placement(OverlayPlacement::Top),
+            &TooltipSpec::new()
+                .with_content("X")
+                .with_placement(OverlayPlacement::Top),
             &theme(),
         );
         let bottom = js_tooltip(
-            &TooltipSpec::new().with_content("X").with_placement(OverlayPlacement::Bottom),
+            &TooltipSpec::new()
+                .with_content("X")
+                .with_placement(OverlayPlacement::Bottom),
             &theme(),
         );
         let t_top = probe(&top, 320.0, 80.0);

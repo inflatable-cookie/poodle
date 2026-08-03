@@ -32,7 +32,10 @@ pub enum MenuEffect {
 fn open() -> (MenuState, Vec<MenuEffect>) {
     (
         MenuState::Open,
-        vec![MenuEffect::EmitOpenChange { open: true }, MenuEffect::FocusFirstItem],
+        vec![
+            MenuEffect::EmitOpenChange { open: true },
+            MenuEffect::FocusFirstItem,
+        ],
     )
 }
 
@@ -43,17 +46,24 @@ fn close(extra: Vec<MenuEffect>) -> (MenuState, Vec<MenuEffect>) {
     (MenuState::Closed, effects)
 }
 
-pub fn menu_transition(state: MenuState, context: MenuContext, event: MenuEvent) -> (MenuState, Vec<MenuEffect>) {
+pub fn menu_transition(
+    state: MenuState,
+    context: MenuContext,
+    event: MenuEvent,
+) -> (MenuState, Vec<MenuEffect>) {
     if context.disabled {
         return (state, vec![]);
     }
 
     match (state, event) {
         (MenuState::Closed, MenuEvent::Toggle | MenuEvent::Open) => open(),
-        (MenuState::Open, MenuEvent::Toggle | MenuEvent::Close | MenuEvent::Escape | MenuEvent::OutsideInteract) => {
-            close(vec![])
+        (
+            MenuState::Open,
+            MenuEvent::Toggle | MenuEvent::Close | MenuEvent::Escape | MenuEvent::OutsideInteract,
+        ) => close(vec![]),
+        (MenuState::Open, MenuEvent::Action { value }) => {
+            close(vec![MenuEffect::EmitAction { value }])
         }
-        (MenuState::Open, MenuEvent::Action { value }) => close(vec![MenuEffect::EmitAction { value }]),
         _ => (state, vec![]),
     }
 }
@@ -80,7 +90,10 @@ pub fn menu_list_navigate(disabled: &[bool], highlight_index: usize, mv: MenuLis
     match mv {
         MenuListMove::Next => wrap_navigate(disabled, highlight_index, 1),
         MenuListMove::Prev => wrap_navigate(disabled, highlight_index, -1),
-        MenuListMove::First => disabled.iter().position(|is_disabled| !is_disabled).unwrap_or(0),
+        MenuListMove::First => disabled
+            .iter()
+            .position(|is_disabled| !is_disabled)
+            .unwrap_or(0),
         MenuListMove::Last => disabled
             .iter()
             .rposition(|is_disabled| !is_disabled)

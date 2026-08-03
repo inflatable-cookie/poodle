@@ -72,9 +72,14 @@ fn light_theme_values() {
 #[test]
 fn translucent_borders_scale_alpha_with_floor() {
     let out = apply_neutral_contrast(227.0 / 255.0, 232.0 / 255.0, 238.0 / 255.0, 0.22, 0.17, 0.5);
-    assert_close(out, (227.0 / 255.0, 232.0 / 255.0, 238.0 / 255.0, 0.11), "alpha x0.5");
+    assert_close(
+        out,
+        (227.0 / 255.0, 232.0 / 255.0, 238.0 / 255.0, 0.11),
+        "alpha x0.5",
+    );
     // floor at 0.4
-    let floored = apply_neutral_contrast(227.0 / 255.0, 232.0 / 255.0, 238.0 / 255.0, 0.22, 0.17, 0.1);
+    let floored =
+        apply_neutral_contrast(227.0 / 255.0, 232.0 / 255.0, 238.0 / 255.0, 0.22, 0.17, 0.1);
     assert!((floored.3 - 0.22 * 0.4).abs() < 1e-9, "alpha floor");
 }
 

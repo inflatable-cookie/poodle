@@ -104,10 +104,14 @@ fn build(
         .bg(Color::TRANSPARENT)
         .focusable()
         .child(
-            ui_element::icon(if spec.is_expanded { "chevron-down" } else { "chevron-right" })
-                .w(icon_size)
-                .h(icon_size)
-                .text_color(scope_color),
+            ui_element::icon(if spec.is_expanded {
+                "chevron-down"
+            } else {
+                "chevron-right"
+            })
+            .w(icon_size)
+            .h(icon_size)
+            .text_color(scope_color),
         )
         .child(
             ui_element::label(spec.resolved_count_label())
@@ -143,7 +147,11 @@ fn build(
     if spec.is_expanded {
         // Rows are indented by depth rather than nested, because the fold has
         // already collapsed the chains that would have needed nesting to read.
-        fn flatten(nodes: &[ChangedFileNode], depth: usize, out: &mut Vec<(usize, ChangedFileNode)>) {
+        fn flatten(
+            nodes: &[ChangedFileNode],
+            depth: usize,
+            out: &mut Vec<(usize, ChangedFileNode)>,
+        ) {
             for node in nodes {
                 out.push((depth, node.clone()));
                 flatten(&node.children, depth + 1, out);
@@ -225,7 +233,12 @@ fn build(
         }
 
         for file in spec.visible_chips() {
-            let leaf = file.path.rsplit('/').next().unwrap_or(&file.path).to_string();
+            let leaf = file
+                .path
+                .rsplit('/')
+                .next()
+                .unwrap_or(&file.path)
+                .to_string();
             let mut chip = ui_element::div()
                 .flex_row()
                 .items_center()
@@ -277,7 +290,12 @@ mod tests {
     }
 
     fn file(path: &str, a: u32, d: u32) -> ChangedFile {
-        ChangedFile { path: path.into(), additions: a, deletions: d, status: None }
+        ChangedFile {
+            path: path.into(),
+            additions: a,
+            deletions: d,
+            status: None,
+        }
     }
 
     #[test]
@@ -316,7 +334,11 @@ mod tests {
 
         crate::element::click_probe::click_text(&el, 720.0, 128.0, "1 changed files");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// A chip shows the leaf and reports the path — the whole point of the
@@ -358,10 +380,18 @@ mod tests {
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 720.0, 256.0, "pkg");
-        assert!(seen.lock().unwrap().is_empty(), "a directory row selected a file: {:?}", seen.lock().unwrap());
+        assert!(
+            seen.lock().unwrap().is_empty(),
+            "a directory row selected a file: {:?}",
+            seen.lock().unwrap()
+        );
 
         crate::element::click_probe::click_text(&el, 720.0, 256.0, "a.rs");
-        assert_eq!(seen.lock().unwrap().as_slice(), ["pkg/a.rs"], "the file row still selects");
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["pkg/a.rs"],
+            "the file row still selects"
+        );
     }
 
     #[test]

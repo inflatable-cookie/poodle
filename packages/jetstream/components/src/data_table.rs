@@ -17,7 +17,7 @@
 //! - No ARIA channel (`<table>` semantics / `aria-sort` / `aria-selected`).
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{CheckboxSpec, CheckState, DataTableSpec, StatusTone, TableSortDirection};
+use poodle_specs::{CheckState, CheckboxSpec, DataTableSpec, StatusTone, TableSortDirection};
 
 use crate::checkbox::js_checkbox;
 use crate::presentation::{
@@ -150,7 +150,8 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
 
     let mut el = ui_element::div()
         .bg(fill)
-        .border(1.0).border_color(border)
+        .border(1.0)
+        .border_color(border)
         .rounded(radius)
         .flex_col()
         .overflow_hidden();
@@ -162,14 +163,22 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
     if spec.show_export || spec.show_column_visibility {
         let toolbar_btn = |icon_name: &str, text: &str| -> JsEl {
             ui_element::div()
-                .flex_row().items_center().gap(gap_sm)
-                .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
-                .border(1.0).border_color(border_default)
+                .flex_row()
+                .items_center()
+                .gap(gap_sm)
+                .pl(cell_px)
+                .pr(cell_px)
+                .pt(row_py)
+                .pb(row_py)
+                .border(1.0)
+                .border_color(border_default)
                 .rounded(radius_control)
-                .cursor_pointer().focusable()
+                .cursor_pointer()
+                .focusable()
                 .child(
                     ui_element::icon(icon_name)
-                        .w(icon_sm).h(icon_sm)
+                        .w(icon_sm)
+                        .h(icon_sm)
                         .text_color(text_secondary),
                 )
                 .child(
@@ -181,9 +190,16 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
 
         let mut toolbar = ui_element::div()
             .bg(header_fill)
-            .flex_row().items_center().justify_end().gap(gap_md)
-            .pl(cell_px).pr(cell_px).pt(header_py).pb(header_py)
-            .border_b_1().border_color(border);
+            .flex_row()
+            .items_center()
+            .justify_end()
+            .gap(gap_md)
+            .pl(cell_px)
+            .pr(cell_px)
+            .pt(header_py)
+            .pb(header_py)
+            .border_b_1()
+            .border_color(border);
 
         if spec.show_export {
             toolbar = toolbar.child(toolbar_btn("download", "Export"));
@@ -197,8 +213,12 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
     // ── Header row ────────────────────────────────────────────────
     let mut header = ui_element::div()
         .bg(header_fill)
-        .flex_row().gap(cell_gap)
-        .pl(cell_px).pr(cell_px).pt(header_py).pb(header_py);
+        .flex_row()
+        .gap(cell_gap)
+        .pl(cell_px)
+        .pr(cell_px)
+        .pt(header_py)
+        .pb(header_py);
 
     // Selectable: "select all" checkbox column header
     if spec.selectable {
@@ -210,24 +230,27 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
         }
         // Header checkbox: selects every row, and has no caption of its own.
         .with_aria_label("Select all rows");
-        header = header.child(
-            {
-                let mut cell = ui_element::div().w(selection_width).flex_row().items_center()
-                    .child(js_checkbox(&cb_spec, theme));
-                if let Some(handler) = &handlers.select_all {
-                    let handler = std::sync::Arc::clone(handler);
-                    cell = cell.cursor_pointer().on_click(move |_event| handler());
-                }
-                cell
-            },
-        );
+        header = header.child({
+            let mut cell = ui_element::div()
+                .w(selection_width)
+                .flex_row()
+                .items_center()
+                .child(js_checkbox(&cb_spec, theme));
+            if let Some(handler) = &handlers.select_all {
+                let handler = std::sync::Arc::clone(handler);
+                cell = cell.cursor_pointer().on_click(move |_event| handler());
+            }
+            cell
+        });
     }
 
     for col in spec.visible_columns() {
         let is_sorted = spec.sort_column_id.as_deref() == Some(&*col.id);
 
         let mut col_cell = ui_element::div()
-            .flex_row().items_center().gap(rem_to_px(0.25))
+            .flex_row()
+            .items_center()
+            .gap(rem_to_px(0.25))
             .grow();
         if col.align_end {
             col_cell = col_cell.justify_end();
@@ -237,7 +260,7 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
             ui_element::label(&col.label)
                 .text_color(text_secondary)
                 .text_size(header_font)
-                .text_weight(600)
+                .text_weight(600),
         );
 
         // Active sort column shows an arrow icon (size from size.icon.sm).
@@ -252,7 +275,7 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
                     ui_element::icon(icon_name)
                         .w(icon_sm)
                         .h(icon_sm)
-                        .text_color(accent)
+                        .text_color(accent),
                 );
             }
             // Sortable columns show a pointer cursor and accent tint on hover.
@@ -274,7 +297,10 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
     // Actions column header (fixed 3.5rem) when row actions are shown.
     if spec.show_row_actions {
         header = header.child(
-            ui_element::div().w(actions_width).flex_row().justify_end()
+            ui_element::div()
+                .w(actions_width)
+                .flex_row()
+                .justify_end()
                 .child(
                     ui_element::label("Actions")
                         .text_color(text_secondary)
@@ -292,9 +318,15 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
     if spec.has_filters() {
         let mut filter_row = ui_element::div()
             .bg(header_fill)
-            .flex_row().flex_wrap().gap(gap_sm)
-            .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
-            .border_b_1().border_color(border);
+            .flex_row()
+            .flex_wrap()
+            .gap(gap_sm)
+            .pl(cell_px)
+            .pr(cell_px)
+            .pt(row_py)
+            .pb(row_py)
+            .border_b_1()
+            .border_color(border);
         for filter in &spec.filters {
             filter_row = filter_row.child(
                 ui_element::label(&format!("{}: {}", filter.column_id, filter.value))
@@ -302,7 +334,10 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
                     .text_size(label_size)
                     .bg(tint(accent, 0.12))
                     .rounded(radius_pill)
-                    .pl(gap_sm).pr(gap_sm).pt(rem_to_px(0.1875)).pb(rem_to_px(0.1875)),
+                    .pl(gap_sm)
+                    .pr(gap_sm)
+                    .pt(rem_to_px(0.1875))
+                    .pb(rem_to_px(0.1875)),
             );
         }
         el = el.child(filter_row);
@@ -311,19 +346,21 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
     // ── Body ──────────────────────────────────────────────────────
     if spec.rows.is_empty() {
         // Empty state
-        let empty_msg = spec
-            .empty_message
-            .as_deref()
-            .unwrap_or("No results");
+        let empty_msg = spec.empty_message.as_deref().unwrap_or("No results");
         el = el.child(
             ui_element::div()
-                .flex_row().items_center().justify_center()
-                .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
+                .flex_row()
+                .items_center()
+                .justify_center()
+                .pl(cell_px)
+                .pr(cell_px)
+                .pt(row_py)
+                .pb(row_py)
                 .child(
                     ui_element::label(empty_msg)
                         .text_color(text_secondary)
-                        .text_size(body_font)
-                )
+                        .text_size(body_font),
+                ),
         );
     } else {
         let visible_cols: Vec<_> = spec.visible_columns().collect();
@@ -342,9 +379,15 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
             };
 
             let mut row_el = ui_element::div()
-                .flex_row().items_center().gap(cell_gap)
-                .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
-                .border(1.0).border_color(border)
+                .flex_row()
+                .items_center()
+                .gap(cell_gap)
+                .pl(cell_px)
+                .pr(cell_px)
+                .pt(row_py)
+                .pb(row_py)
+                .border(1.0)
+                .border_color(border)
                 .bg(row_bg);
 
             // Row-selection checkbox
@@ -354,7 +397,10 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
                 let cb_spec = CheckboxSpec::new()
                     .with_checked(is_selected)
                     .with_aria_label("Select row");
-                let mut cell = ui_element::div().w(selection_width).flex_row().items_center()
+                let mut cell = ui_element::div()
+                    .w(selection_width)
+                    .flex_row()
+                    .items_center()
                     .child(js_checkbox(&cb_spec, theme));
 
                 // Its own handler, always: selecting a row and opening it are
@@ -401,7 +447,10 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
                                 .text_weight(600)
                                 .bg(pill_bg)
                                 .rounded(radius_pill)
-                                .pl(gap_sm).pr(gap_sm).pt(rem_to_px(0.125)).pb(rem_to_px(0.125)),
+                                .pl(gap_sm)
+                                .pr(gap_sm)
+                                .pt(rem_to_px(0.125))
+                                .pb(rem_to_px(0.125)),
                         ),
                     );
                 } else {
@@ -419,7 +468,10 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
             // Row-actions cell (fixed 3.5rem) — legacy single action label.
             if spec.show_row_actions {
                 row_el = row_el.child(
-                    ui_element::div().w(actions_width).flex_row().justify_end()
+                    ui_element::div()
+                        .w(actions_width)
+                        .flex_row()
+                        .justify_end()
                         .child(
                             ui_element::label(&spec.row_action_label)
                                 .text_color(accent)
@@ -443,13 +495,17 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
                 if let Some(ref summary) = row.summary {
                     el = el.child(
                         ui_element::div()
-                            .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
-                            .border(1.0).border_color(border)
+                            .pl(cell_px)
+                            .pr(cell_px)
+                            .pt(row_py)
+                            .pb(row_py)
+                            .border(1.0)
+                            .border_color(border)
                             .child(
                                 ui_element::label(summary)
                                     .text_color(text_secondary)
-                                    .text_size(body_font)
-                            )
+                                    .text_size(body_font),
+                            ),
                     );
                 }
             }
@@ -470,13 +526,21 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
         let page_label = format!("Page {} of {}", pagination.page, total_pages);
 
         let pager_btn = |text: &str, enabled: bool| -> JsEl {
-            let color = if enabled { accent } else { tint(text_secondary, 0.4) };
+            let color = if enabled {
+                accent
+            } else {
+                tint(text_secondary, 0.4)
+            };
             let mut b = ui_element::label(text)
                 .text_color(color)
                 .text_size(label_size)
-                .border(1.0).border_color(border_default)
+                .border(1.0)
+                .border_color(border_default)
                 .rounded(radius_control)
-                .pl(gap_sm).pr(gap_sm).pt(rem_to_px(0.25)).pb(rem_to_px(0.25));
+                .pl(gap_sm)
+                .pr(gap_sm)
+                .pt(rem_to_px(0.25))
+                .pb(rem_to_px(0.25));
             if enabled {
                 b = b.cursor_pointer().focusable();
             }
@@ -484,7 +548,9 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
         };
 
         let controls = ui_element::div()
-            .flex_row().items_center().gap(gap_md)
+            .flex_row()
+            .items_center()
+            .gap(gap_md)
             .child(pager_btn("Prev", pagination.page > 1))
             .child(
                 ui_element::label(&page_label)
@@ -496,9 +562,15 @@ fn build(spec: &DataTableSpec, theme: &JetstreamThemeProvider, handlers: Handler
         el = el.child(
             ui_element::div()
                 .bg(header_fill)
-                .flex_row().items_center().justify_between()
-                .pl(cell_px).pr(cell_px).pt(header_py).pb(header_py)
-                .border_t_1().border_color(border)
+                .flex_row()
+                .items_center()
+                .justify_between()
+                .pl(cell_px)
+                .pr(cell_px)
+                .pt(header_py)
+                .pb(header_py)
+                .border_t_1()
+                .border_color(border)
                 .child(
                     ui_element::label(&summary)
                         .text_color(text_secondary)
@@ -530,9 +602,15 @@ pub fn js_data_table_loading(
 
     for _ in 0..row_count {
         let mut row_el = ui_element::div()
-            .flex_row().gap(cell_gap).items_center()
-            .pl(cell_px).pr(cell_px).pt(row_py).pb(row_py)
-            .border(1.0).border_color(border);
+            .flex_row()
+            .gap(cell_gap)
+            .items_center()
+            .pl(cell_px)
+            .pr(cell_px)
+            .pt(row_py)
+            .pb(row_py)
+            .border(1.0)
+            .border_color(border);
 
         if spec.selectable {
             row_el = row_el.child(js_skeleton(&skel_spec, theme));
@@ -593,25 +671,40 @@ mod tests {
 
         assert!(!tree.is_empty(), "probe produced no nodes");
         for label in ["Name", "Owner", "Status"] {
-            assert!(tree.has_text(label), "header label {label} missing: {:?}", tree.texts());
+            assert!(
+                tree.has_text(label),
+                "header label {label} missing: {:?}",
+                tree.texts()
+            );
         }
         for value in ["Alpha", "Ada", "Active", "Beta", "Linus", "Paused"] {
-            assert!(tree.has_text(value), "cell {value} missing: {:?}", tree.texts());
+            assert!(
+                tree.has_text(value),
+                "cell {value} missing: {:?}",
+                tree.texts()
+            );
         }
     }
 
     #[test]
     fn active_sort_column_renders_an_arrow_icon() {
         let th = theme();
-        let spec = DataTableSpec::new(columns(), rows())
-            .with_sort("name", TableSortDirection::Desc);
+        let spec =
+            DataTableSpec::new(columns(), rows()).with_sort("name", TableSortDirection::Desc);
         let tree = probe(&js_data_table(&spec, &th), 700.0, 400.0);
 
         // Active sort column renders the arrow icon; unsorted ones do not.
-        assert!(tree.has_text("arrow-down"), "active sort icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("arrow-down"),
+            "active sort icon missing: {:?}",
+            tree.texts()
+        );
         assert_eq!(tree.count_kind("Icon"), 1, "exactly one sort icon expected");
         // No neutral ⇅ glyph (removed to match Svelte).
-        assert!(!tree.has_text("\u{21c5}"), "neutral sort glyph should be gone");
+        assert!(
+            !tree.has_text("\u{21c5}"),
+            "neutral sort glyph should be gone"
+        );
     }
 
     #[test]
@@ -628,9 +721,15 @@ mod tests {
         // Selected-row accent tint is present somewhere in the tree.
         let selected = tint(resolve_color(&th, "color.accent.base"), 0.08);
         let expect = crate::render_probe::ProbeColor {
-            r: selected.x, g: selected.y, b: selected.z, a: selected.w,
+            r: selected.x,
+            g: selected.y,
+            b: selected.z,
+            a: selected.w,
         };
-        assert!(tree.has_background(expect, 0.02), "selected-row tint missing");
+        assert!(
+            tree.has_background(expect, 0.02),
+            "selected-row tint missing"
+        );
     }
 
     #[test]
@@ -641,8 +740,16 @@ mod tests {
             .with_show_column_visibility(true);
         let tree = probe(&js_data_table(&spec, &th), 700.0, 400.0);
 
-        assert!(tree.has_text("Export"), "export button missing: {:?}", tree.texts());
-        assert!(tree.has_text("Columns"), "columns button missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Export"),
+            "export button missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Columns"),
+            "columns button missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -662,12 +769,20 @@ mod tests {
     #[test]
     fn pagination_footer_renders_summary_and_controls() {
         let th = theme();
-        let spec = DataTableSpec::new(columns(), rows())
-            .with_pagination(TablePagination::new(2, 10, 35));
+        let spec =
+            DataTableSpec::new(columns(), rows()).with_pagination(TablePagination::new(2, 10, 35));
         let tree = probe(&js_data_table(&spec, &th), 700.0, 400.0);
 
-        assert!(tree.has_text("11\u{2013}20 of 35"), "summary missing: {:?}", tree.texts());
-        assert!(tree.has_text("Page 2 of 4"), "page label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("11\u{2013}20 of 35"),
+            "summary missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Page 2 of 4"),
+            "page label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Prev"), "prev control missing");
         assert!(tree.has_text("Next"), "next control missing");
     }
@@ -680,7 +795,11 @@ mod tests {
             .with_row_action_label("Open");
         let tree = probe(&js_data_table(&spec, &th), 700.0, 400.0);
 
-        assert!(tree.has_text("Actions"), "actions header missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Actions"),
+            "actions header missing: {:?}",
+            tree.texts()
+        );
         // One "Open" label per row.
         let opens = tree.texts().iter().filter(|t| **t == "Open").count();
         assert_eq!(opens, 2, "expected one action label per row");
@@ -747,12 +866,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DataTable::from_spec(DataTableSpec::new(columns(), rows()), &theme())
-            .on_sort(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_sort(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 800.0, 400.0, "Status");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "an unsortable column sorted");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "an unsortable column sorted"
+        );
     }
 
     /// Ticking a row's box must not also open the row: the checkbox is inside
@@ -779,7 +904,13 @@ mod tests {
             .iter()
             .find(|n| n.text.as_deref() == Some("Alpha"))
             .expect("the first row");
-        crate::element::click_probe::click_at(&el, 800.0, 400.0, 12.0, first_value.y + first_value.h / 2.0);
+        crate::element::click_probe::click_at(
+            &el,
+            800.0,
+            400.0,
+            12.0,
+            first_value.y + first_value.h / 2.0,
+        );
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["select:r1"]);
     }
@@ -812,5 +943,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["all"]);
     }
-
 }

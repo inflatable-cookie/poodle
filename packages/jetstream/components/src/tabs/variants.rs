@@ -62,7 +62,11 @@ pub(super) fn render_underline(
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
 
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         let mut tab_el = ui_element::div()
             // Contract: each tab is `role="tab"` with `aria-selected`. The
@@ -78,7 +82,6 @@ pub(super) fn render_underline(
             .focusable()
             // Contract (tabs.css): tab fill defaults to transparent — a bare
             // Button widget would pick up the engine's default button fill.
-            
             .flex_row()
             .items_center()
             .min_h(min_h)
@@ -179,7 +182,11 @@ pub(super) fn render_card(
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
 
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
         let (bg, bc) = if is_active {
             (card_selected_bg, card_selected_border)
         } else {
@@ -192,7 +199,6 @@ pub(super) fn render_card(
             .focusable()
             // Contract (tabs.css): tab fill defaults to transparent — a bare
             // Button widget would pick up the engine's default button fill.
-            
             .flex_row()
             .items_center()
             .gap(resolve_px(theme, "space.inline.sm"))
@@ -293,13 +299,16 @@ pub(super) fn render_pill(
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
 
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         let mut tab_el = ui_element::div()
             .focusable()
             // Contract (tabs.css): tab fill defaults to transparent — a bare
             // Button widget would pick up the engine's default button fill.
-            
             .flex_row()
             .items_center()
             .px(pad_x)
@@ -390,14 +399,17 @@ pub(super) fn render_block(
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
 
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         // Block tabs fill equal space via flex_grow.
         let mut tab_el = ui_element::div()
             .focusable()
             // Contract (tabs.css): tab fill defaults to transparent — a bare
             // Button widget would pick up the engine's default button fill.
-            
             .flex_grow()
             .flex_row()
             .items_center()
@@ -445,4 +457,3 @@ pub(super) fn render_block(
 
     tab_bar
 }
-

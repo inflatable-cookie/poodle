@@ -1,10 +1,8 @@
 //! calendar — helper builders. Split out of `calendar/mod.rs` (god-file
 //! decomposition); unchanged.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
-
-
+use jetstream_ui::Color;
 
 /// Build an outside-month (adjacent-month) day cell. Contract §8 outside-month:
 /// `color: text-secondary`, `opacity: 0.72` (the muted opacity token).
@@ -33,9 +31,9 @@ pub(super) fn outside_cell(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::render_probe::probe;
     use crate::calendar::js_calendar;
     use crate::presentation::rem_to_px;
+    use crate::render_probe::probe;
     use crate::theme_ext::{resolve_color, resolve_opacity};
     use poodle_jetstream::JetstreamThemeProvider;
     use poodle_specs::{CalendarMode, CalendarSpec};
@@ -79,7 +77,9 @@ mod tests {
         );
         // Both triggers exist as distinct ids in the JsEl tree.
         assert!(
-            find(&el, &|e| e.id.as_deref() == Some("poodle-cal-month-trigger")).is_some(),
+            find(&el, &|e| e.id.as_deref()
+                == Some("poodle-cal-month-trigger"))
+            .is_some(),
             "month-trigger id missing"
         );
         assert!(
@@ -92,8 +92,10 @@ mod tests {
     fn month_trigger_has_dashed_underline_affordance() {
         // Edit affordance = bottom border (border_b_1) on the month trigger.
         let el = js_calendar(&spec_with_month("2026-03"), &theme());
-        let month_trigger = find(&el, &|e| e.id.as_deref() == Some("poodle-cal-month-trigger"))
-            .expect("month-trigger present");
+        let month_trigger = find(&el, &|e| {
+            e.id.as_deref() == Some("poodle-cal-month-trigger")
+        })
+        .expect("month-trigger present");
         assert!(
             month_trigger.style.border_widths[2] > 0.0,
             "month trigger should carry a bottom-border underline affordance"
@@ -112,9 +114,7 @@ mod tests {
         // March 2026 (Monday-start) leads with several outside cells; find a
         // dimmed (opacity < 1.0) leaf carrying the secondary text color.
         let outside = find(&el, &|e| {
-            e.style.opacity < 1.0
-                && e.style.opacity > 0.0
-                && e.style.text_color == Some(secondary)
+            e.style.opacity < 1.0 && e.style.opacity > 0.0 && e.style.text_color == Some(secondary)
         })
         .expect("an outside-month day cell with reduced opacity");
 
@@ -205,11 +205,15 @@ mod tests {
         // Day-cell font follows the calendar day-font scale, distinct per size.
         let th = theme();
         let xs = js_calendar(
-            &CalendarSpec::new().with_visible_month("2026-03").with_size(ControlSize::Xs),
+            &CalendarSpec::new()
+                .with_visible_month("2026-03")
+                .with_size(ControlSize::Xs),
             &th,
         );
         let xl = js_calendar(
-            &CalendarSpec::new().with_visible_month("2026-03").with_size(ControlSize::Xl),
+            &CalendarSpec::new()
+                .with_visible_month("2026-03")
+                .with_size(ControlSize::Xl),
             &th,
         );
         let xs_day = find(&xs, &|e| e.id.as_deref() == Some("poodle-cal-day-1")).unwrap();
@@ -300,13 +304,17 @@ mod tests {
         };
 
         let el = crate::calendar::Calendar::from_spec(spec, &theme())
-            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_select(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 400.0, 400.0, "17");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled calendar selected a day");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a disabled calendar selected a day"
+        );
     }
-
 }
-

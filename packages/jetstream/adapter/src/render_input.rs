@@ -5,8 +5,7 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec,
-    TextInputSpec, TimeFieldSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -15,7 +14,12 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 
 impl RenderComponent<TextInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &TextInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &TextInputSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve fill (background) color
@@ -57,7 +61,12 @@ impl RenderComponent<TextInputSpec> for JetstreamAdapter {
 
 impl RenderComponent<FieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &FieldSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &FieldSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve label typography size (used as space value for proof)
@@ -75,7 +84,10 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
 
         // Resolve row gap (vertical spacing between label, input, description)
         let gap = theme.resolve_space(spec.row_gap_token());
-        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+        mapped.layout.gap = taffy::Size {
+            width: taffy::LengthPercentage::length(gap),
+            height: taffy::LengthPercentage::length(gap),
+        };
 
         // Resolve header gap (spacing between label and optional indicator)
         let _header_gap = theme.resolve_space(spec.header_gap_token());
@@ -87,7 +99,12 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
 
 impl RenderComponent<NumberInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &NumberInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &NumberInputSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color (varies by validation state)
@@ -99,13 +116,23 @@ impl RenderComponent<NumberInputSpec> for JetstreamAdapter {
             mapped.visuals.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        JetstreamNodeHandle::new("number-input", "NumberInputSpec", WidgetKind::TextInput, mapped)
+        JetstreamNodeHandle::new(
+            "number-input",
+            "NumberInputSpec",
+            WidgetKind::TextInput,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<CodeInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &CodeInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &CodeInputSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -123,7 +150,12 @@ impl RenderComponent<CodeInputSpec> for JetstreamAdapter {
 
 impl RenderComponent<EditableLabelSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &EditableLabelSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &EditableLabelSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve text color
@@ -145,7 +177,12 @@ impl RenderComponent<EditableLabelSpec> for JetstreamAdapter {
 
 impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &TimeFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &TimeFieldSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         // TimeFieldSpec has no specific token methods — apply base style mapping
         let mapped = map_style(style);
 
@@ -155,14 +192,20 @@ impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
+    use crate::{theme::JetstreamThemeProvider, JetstreamAdapter, WidgetKind};
     use poodle_adapter::RenderComponent;
     use poodle_specs::*;
     use poodle_style::StyleDescriptor;
-    use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
-    fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
-    fn s() -> StyleDescriptor { StyleDescriptor::new() }
-    fn t() -> JetstreamThemeProvider { JetstreamThemeProvider::default() }
+    fn a() -> JetstreamAdapter {
+        JetstreamAdapter::new(JetstreamThemeProvider::default())
+    }
+    fn s() -> StyleDescriptor {
+        StyleDescriptor::new()
+    }
+    fn t() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::default()
+    }
 
     #[test]
     fn text_input_with_id_uses_id_in_node_id() {

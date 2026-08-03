@@ -11,8 +11,8 @@
 //! Drag/keyboard interaction is preview-event-loop bound; this renders the
 //! track + fill + thumb at the spec's current value only.
 
-use jetstream_ui::{BoxShadow, Color};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{BoxShadow, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, SliderSpec};
 
@@ -70,7 +70,12 @@ pub struct Slider {
 
 impl Slider {
     pub fn from_spec(spec: SliderSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None, on_value_commit: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+            on_value_commit: None,
+        }
     }
 
     /// Fires continuously while dragging, with the value under the pointer,
@@ -90,14 +95,18 @@ impl Slider {
 
 impl crate::element::IntoJsEl for Slider {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_change, self.on_value_commit)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_change,
+            self.on_value_commit,
+        )
     }
 }
 
 pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     build(spec, theme, None, None)
 }
-
 
 fn build(
     spec: &SliderSpec,
@@ -161,20 +170,26 @@ fn build(
             let on_change = on_change.clone();
             let on_value_commit = on_value_commit.clone();
 
-            Some(std::sync::Arc::new(move |event: &jetstream_ui::DragEvent| {
-                match event.phase {
+            Some(std::sync::Arc::new(
+                move |event: &jetstream_ui::DragEvent| match event.phase {
                     jetstream_ui::DragPhase::Start => {}
                     jetstream_ui::DragPhase::Move => {
                         let current = f64::from_bits(live.load(Ordering::SeqCst));
                         let (next, effects) = poodle_headless::slider::slider_transition(
-                            poodle_headless::slider::SliderContext { value: current, ..context },
+                            poodle_headless::slider::SliderContext {
+                                value: current,
+                                ..context
+                            },
                             poodle_headless::slider::SliderEvent::Input {
                                 raw: current + event.delta_x as f64 * units_per_px,
                             },
                         );
                         live.store(next.value.to_bits(), Ordering::SeqCst);
                         for effect in effects {
-                            if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect {
+                            if let poodle_headless::slider::SliderEffect::EmitValueChange {
+                                value,
+                            } = effect
+                            {
                                 if let Some(handler) = &on_change {
                                     handler(value);
                                 }
@@ -184,19 +199,25 @@ fn build(
                     jetstream_ui::DragPhase::End => {
                         let current = f64::from_bits(live.load(Ordering::SeqCst));
                         let (_, effects) = poodle_headless::slider::slider_transition(
-                            poodle_headless::slider::SliderContext { value: current, ..context },
+                            poodle_headless::slider::SliderContext {
+                                value: current,
+                                ..context
+                            },
                             poodle_headless::slider::SliderEvent::Commit { raw: current },
                         );
                         for effect in effects {
-                            if let poodle_headless::slider::SliderEffect::EmitValueCommit { value } = effect {
+                            if let poodle_headless::slider::SliderEffect::EmitValueCommit {
+                                value,
+                            } = effect
+                            {
                                 if let Some(handler) = &on_value_commit {
                                     handler(value);
                                 }
                             }
                         }
                     }
-                }
-            }))
+                },
+            ))
         };
 
     let draggable = |el: JsEl| match &drag_handler {
@@ -264,7 +285,6 @@ fn build(
         .child(fill)
         .child(remainder)
         .child(thumb);
-
 
     let mut el = ui_element::div()
         .h(container_h)
@@ -364,11 +384,13 @@ mod tests {
         let shadow = found
             .iter()
             .find(|s| {
-                (s.offset_y - rem_to_px(0.125)).abs() < 0.5
-                    && (s.blur - rem_to_px(0.5)).abs() < 0.5
+                (s.offset_y - rem_to_px(0.125)).abs() < 0.5 && (s.blur - rem_to_px(0.5)).abs() < 0.5
             })
             .expect("thumb should carry the contract drop shadow");
-        assert!((shadow.offset_x).abs() < 0.001, "shadow has no horizontal offset");
+        assert!(
+            (shadow.offset_x).abs() < 0.001,
+            "shadow has no horizontal offset"
+        );
         assert!((shadow.spread).abs() < 0.001, "shadow has no spread");
         assert!(
             (shadow.color.w - 0.18).abs() < 0.001,
@@ -435,7 +457,10 @@ mod tests {
         let last = *values.last().unwrap();
         assert!(last > 50.0, "dragging right lowered the value: {values:?}");
         assert!(last <= 100.0, "the value escaped its maximum: {last}");
-        assert!(values.iter().all(|v| (v - v.round()).abs() < f64::EPSILON), "unsnapped: {values:?}");
+        assert!(
+            values.iter().all(|v| (v - v.round()).abs() < f64::EPSILON),
+            "unsnapped: {values:?}"
+        );
     }
 
     /// Commit fires once, at the end, with the settled value — a host that
@@ -491,15 +516,18 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let spec = SliderSpec { is_disabled: true, ..SliderSpec::new(50.0) };
+        let spec = SliderSpec {
+            is_disabled: true,
+            ..SliderSpec::new(50.0)
+        };
         let el = Slider::from_spec(spec, &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::drag(&el, 400.0, 80.0, (40.0, 40.0), (80.0, 40.0));
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled slider moved");
     }
-
-
 }

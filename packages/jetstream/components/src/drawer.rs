@@ -14,8 +14,8 @@
 //! - No ARIA channel (`role="dialog"` / `aria-modal`) — carried on the spec but
 //!   not emitted.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{DrawerEdge, DrawerSpec};
 
@@ -209,10 +209,26 @@ fn build(
 
     // Backdrop + panel as overlay — edge controls panel anchor position.
     let overlay = match spec.edge {
-        DrawerEdge::Right => ui_element::div().bg(backdrop).overlay().flex_row().justify_end(),
-        DrawerEdge::Left => ui_element::div().bg(backdrop).overlay().flex_row().justify_start(),
-        DrawerEdge::Bottom => ui_element::div().bg(backdrop).overlay().flex_col().justify_end(),
-        DrawerEdge::Top => ui_element::div().bg(backdrop).overlay().flex_col().justify_start(),
+        DrawerEdge::Right => ui_element::div()
+            .bg(backdrop)
+            .overlay()
+            .flex_row()
+            .justify_end(),
+        DrawerEdge::Left => ui_element::div()
+            .bg(backdrop)
+            .overlay()
+            .flex_row()
+            .justify_start(),
+        DrawerEdge::Bottom => ui_element::div()
+            .bg(backdrop)
+            .overlay()
+            .flex_col()
+            .justify_end(),
+        DrawerEdge::Top => ui_element::div()
+            .bg(backdrop)
+            .overlay()
+            .flex_col()
+            .justify_start(),
     };
 
     // Clicks bubble to the nearest clickable ancestor, so the panel takes an
@@ -220,7 +236,9 @@ fn build(
     // would reach the backdrop and dismiss it.
     let mut overlay = overlay;
     let mut panel = panel;
-    if let (true, true, Some(handler)) = (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close) {
+    if let (true, true, Some(handler)) =
+        (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close)
+    {
         let handler = std::sync::Arc::clone(handler);
         overlay = overlay.on_click(move |_event| handler());
         panel = panel.on_click(|_event| {});
@@ -255,7 +273,11 @@ mod tests {
         let tree = probe(&el, 800.0, 600.0);
 
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("Settings"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Settings"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Configure your preferences."),
             "description missing: {:?}",
@@ -326,7 +348,11 @@ mod tests {
         let th = theme();
         let el = js_drawer(&spec(), &th, Some(ui_element::label("Body")));
         let tree = probe(&el, 800.0, 600.0);
-        assert_eq!(tree.count_kind("Icon"), 0, "drawer must not render any icon");
+        assert_eq!(
+            tree.count_kind("Icon"),
+            0,
+            "drawer must not render any icon"
+        );
     }
 
     #[test]
@@ -339,12 +365,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Drawer::from_spec(spec(), &theme())
-            .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_request_close(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 300.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "a backdrop click did not dismiss");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "a backdrop click did not dismiss"
+        );
     }
 
     /// A non-modal drawer draws no backdrop at all, so it has no dismissal
@@ -359,12 +391,17 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Drawer::from_spec(spec().with_modal(false), &theme())
-            .on_request_close(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_request_close(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 300.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a non-modal drawer dismissed");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a non-modal drawer dismissed"
+        );
     }
-
 }

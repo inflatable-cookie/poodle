@@ -67,7 +67,12 @@ impl OrderBy {
 
 impl crate::element::IntoJsEl for OrderBy {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_direction_toggle, self.on_remove)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_direction_toggle,
+            self.on_remove,
+        )
     }
 }
 
@@ -226,7 +231,9 @@ fn build(
     if spec.is_open {
         let current_value = spec.current_value();
         // Contract: the open overlay panel is a `dialog`.
-        let mut panel = ui_element::div().flex_col().gap(panel_gap)
+        let mut panel = ui_element::div()
+            .flex_col()
+            .gap(panel_gap)
             .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         if matches!(spec.trigger_variant, OrderByTriggerVariant::Icon) {
@@ -567,7 +574,9 @@ mod tests {
         // the row, and the payload below is what proves it.
         crate::element::click_probe::click_text_nth(&el, 360.0, 320.0, "x", 1);
 
-        assert_eq!(seen.lock().unwrap().as_slice(), ["dir:title", "remove:title"]);
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["dir:title", "remove:title"]
+        );
     }
-
 }

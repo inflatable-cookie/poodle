@@ -225,8 +225,14 @@ pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
         flex_shrink,
         flex_basis: Dimension::auto(),
         size: taffy::Size { width, height },
-        min_size: taffy::Size { width: min_width, height: min_height },
-        max_size: taffy::Size { width: max_width, height: max_height },
+        min_size: taffy::Size {
+            width: min_width,
+            height: min_height,
+        },
+        max_size: taffy::Size {
+            width: max_width,
+            height: max_height,
+        },
         align_items,
         align_self,
         justify_content,
@@ -255,7 +261,15 @@ pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
 }
 
 /// Map a `LayoutSizing` to (dimension, min, max, flex_grow, flex_shrink).
-fn map_sizing(sizing: &LayoutSizing) -> (taffy::Dimension, taffy::Dimension, taffy::Dimension, f32, f32) {
+fn map_sizing(
+    sizing: &LayoutSizing,
+) -> (
+    taffy::Dimension,
+    taffy::Dimension,
+    taffy::Dimension,
+    f32,
+    f32,
+) {
     use taffy::Dimension;
 
     match sizing {
@@ -357,8 +371,8 @@ pub fn map_style(desc: &StyleDescriptor) -> JetstreamMappedStyle {
 
 #[cfg(test)]
 mod tests {
-    use poodle_layout::LayoutEdges;
     use super::*;
+    use poodle_layout::LayoutEdges;
 
     #[test]
     fn map_layout_produces_correct_direction() {
@@ -409,8 +423,10 @@ mod tests {
 
     #[test]
     fn map_layout_handles_constrained_sizing() {
-        let intent = LayoutIntent::default()
-            .with_width(LayoutSizing::Constrained { min: Some(100.0), max: Some(300.0) });
+        let intent = LayoutIntent::default().with_width(LayoutSizing::Constrained {
+            min: Some(100.0),
+            max: Some(300.0),
+        });
         let layout = map_layout(&intent);
         assert_eq!(layout.min_size.width, taffy::Dimension::length(100.0));
         assert_eq!(layout.max_size.width, taffy::Dimension::length(300.0));
@@ -436,8 +452,7 @@ mod tests {
 
     #[test]
     fn map_layout_maps_padding() {
-        let intent = LayoutIntent::default()
-            .with_padding(LayoutEdges::uniform(4.0));
+        let intent = LayoutIntent::default().with_padding(LayoutEdges::uniform(4.0));
         let layout = map_layout(&intent);
         assert_eq!(layout.padding.left, taffy::LengthPercentage::length(4.0));
         assert_eq!(layout.padding.top, taffy::LengthPercentage::length(4.0));
@@ -451,7 +466,10 @@ mod tests {
             .with_corner_radii(poodle_style::CornerRadii::uniform(4.0))
             .with_opacity(0.8);
         let mapped = map_style(&desc);
-        assert_eq!(mapped.visuals.background, Some(JetstreamColor(0.1, 0.2, 0.3, 1.0)));
+        assert_eq!(
+            mapped.visuals.background,
+            Some(JetstreamColor(0.1, 0.2, 0.3, 1.0))
+        );
         assert_eq!(mapped.visuals.border_width, 2.0);
         assert_eq!(mapped.visuals.corner_radii, [4.0; 4]);
         assert!((mapped.visuals.opacity - 0.8).abs() < 0.001);
@@ -459,13 +477,12 @@ mod tests {
 
     #[test]
     fn map_style_converts_shadow() {
-        let desc = StyleDescriptor::new()
-            .with_shadow(poodle_tokens::typed::ShadowValue {
-                offset_x: 0.0,
-                offset_y: 2.0,
-                blur: 4.0,
-                color: poodle_tokens::typed::ColorValue(0.0, 0.0, 0.0, 0.25),
-            });
+        let desc = StyleDescriptor::new().with_shadow(poodle_tokens::typed::ShadowValue {
+            offset_x: 0.0,
+            offset_y: 2.0,
+            blur: 4.0,
+            color: poodle_tokens::typed::ColorValue(0.0, 0.0, 0.0, 0.25),
+        });
         let mapped = map_style(&desc);
         assert!(mapped.visuals.shadow.is_some());
         let shadow = mapped.visuals.shadow.unwrap();
@@ -475,13 +492,12 @@ mod tests {
 
     #[test]
     fn map_style_converts_typography() {
-        let desc = StyleDescriptor::new()
-            .with_typography(poodle_style::TypographyDescriptor {
-                family: poodle_style::FontFamily::Sans,
-                size: 16.0,
-                line_height: 24.0,
-                weight: 600,
-            });
+        let desc = StyleDescriptor::new().with_typography(poodle_style::TypographyDescriptor {
+            family: poodle_style::FontFamily::Sans,
+            size: 16.0,
+            line_height: 24.0,
+            weight: 600,
+        });
         let mapped = map_style(&desc);
         assert_eq!(mapped.visuals.text_size, Some(16.0));
     }
@@ -499,8 +515,10 @@ mod tests {
 
     #[test]
     fn constrained_sizing_uses_min_max() {
-        let intent = LayoutIntent::default()
-            .with_width(LayoutSizing::Constrained { min: Some(50.0), max: None });
+        let intent = LayoutIntent::default().with_width(LayoutSizing::Constrained {
+            min: Some(50.0),
+            max: None,
+        });
         let layout = map_layout(&intent);
         assert_eq!(layout.min_size.width, taffy::Dimension::length(50.0));
         assert_eq!(layout.max_size.width, taffy::Dimension::auto());

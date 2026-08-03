@@ -41,7 +41,10 @@ pub fn toggle_group_transition(
 ) -> (ToggleGroupContext, Vec<ToggleGroupEffect>) {
     match event {
         ToggleGroupEvent::Toggle { value } => {
-            let option = context.options.iter().find(|candidate| candidate.value == value);
+            let option = context
+                .options
+                .iter()
+                .find(|candidate| candidate.value == value);
 
             let Some(option) = option else {
                 return (context, vec![]);
@@ -72,9 +75,17 @@ pub fn toggle_group_transition(
                 (_, SelectionMode::Single) => ToggleGroupValue::Single(Some(value)),
             };
 
-            let effects = vec![ToggleGroupEffect::EmitValueChange { value: next_value.clone() }];
+            let effects = vec![ToggleGroupEffect::EmitValueChange {
+                value: next_value.clone(),
+            }];
 
-            (ToggleGroupContext { value: next_value, ..context }, effects)
+            (
+                ToggleGroupContext {
+                    value: next_value,
+                    ..context
+                },
+                effects,
+            )
         }
         ToggleGroupEvent::SetValue { value } => (ToggleGroupContext { value, ..context }, vec![]),
     }

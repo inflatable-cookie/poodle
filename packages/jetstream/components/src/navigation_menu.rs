@@ -48,7 +48,11 @@ pub struct NavigationMenu {
 
 impl NavigationMenu {
     pub fn from_spec(spec: NavigationMenuSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the value of the entry that was chosen.
@@ -353,8 +357,7 @@ mod tests {
         // Active item carries a description → viewport content slot populated.
         let nav = NavigationMenuSpec::new(vec![
             NavigationMenuEntry::new("home", "Home"),
-            NavigationMenuEntry::new("components", "Components")
-                .with_description("Active section"),
+            NavigationMenuEntry::new("components", "Components").with_description("Active section"),
         ])
         .with_value("components");
 
@@ -433,7 +436,7 @@ mod tests {
         let th = theme();
         // All items disabled → current_value()/current_item() resolve to None.
         let nav = NavigationMenuSpec::new(vec![
-            NavigationMenuEntry::new("home", "Home").with_disabled(true),
+            NavigationMenuEntry::new("home", "Home").with_disabled(true)
         ]);
         let el = js_navigation_menu(&nav, &th);
         // Root holds only the list, no viewport.
@@ -460,5 +463,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["home"]);
     }
-
 }

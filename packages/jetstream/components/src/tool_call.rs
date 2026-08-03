@@ -51,8 +51,7 @@ impl IntoJsEl for ToolCall {
         match (self.spec.has_output(), self.on_toggle) {
             (true, Some(handler)) => {
                 let id = self.spec.id.clone();
-                row.cursor_pointer()
-                    .on_click(move |_event| handler(&id))
+                row.cursor_pointer().on_click(move |_event| handler(&id))
             }
             _ => row,
         }
@@ -118,7 +117,10 @@ pub fn js_tool_call(spec: &ToolCallSpec, theme: &JetstreamThemeProvider) -> JsEl
             ui_element::label(detail.clone())
                 .text_size(font_size)
                 .text_color(detail_color)
-                .opacity(crate::theme_ext::resolve_opacity(theme, spec.detail_opacity_token()))
+                .opacity(crate::theme_ext::resolve_opacity(
+                    theme,
+                    spec.detail_opacity_token(),
+                ))
                 .grow()
                 .min_w_0(),
         );
@@ -200,7 +202,11 @@ mod tests {
 
         crate::element::click_probe::click_at(&el, 720.0, 200.0, 40.0, 12.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// A row with nothing to open must not be clickable, so the absence has to
@@ -215,13 +221,18 @@ mod tests {
 
         let spec = ToolCallSpec::new("call-2", "Ran command").with_detail("no output");
         let el = crate::element::IntoJsEl::into_js_el(
-            ToolCall::from_spec(spec, &theme())
-                .on_toggle(move |_| { counter.fetch_add(1, Ordering::SeqCst); }),
+            ToolCall::from_spec(spec, &theme()).on_toggle(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            }),
         );
 
         crate::element::click_probe::click_at(&el, 720.0, 200.0, 40.0, 12.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a row with no output is not interactive");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a row with no output is not interactive"
+        );
     }
 
     #[test]

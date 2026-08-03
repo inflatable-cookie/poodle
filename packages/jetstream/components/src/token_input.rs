@@ -34,7 +34,11 @@ pub struct TokenInput {
 
 impl TokenInput {
     pub fn from_spec(spec: TokenInputSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_remove: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_remove: None,
+        }
     }
 
     /// Fires with the token's text when its `×` is pressed.
@@ -128,7 +132,9 @@ fn build(
             if let Some(handler) = &on_remove {
                 let handler = std::sync::Arc::clone(handler);
                 let value = token.clone();
-                remove = remove.cursor_pointer().on_click(move |_event| handler(&value));
+                remove = remove
+                    .cursor_pointer()
+                    .on_click(move |_event| handler(&value));
             }
 
             chip = chip.child(remove);
@@ -230,7 +236,11 @@ mod tests {
         // One id-tagged remove button per committed token.
         assert!(tree.find_token("poodle-token-remove-0").is_some());
         assert!(tree.find_token("poodle-token-remove-1").is_some());
-        assert!(tree.has_text("×"), "remove glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("×"),
+            "remove glyph missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -284,7 +294,10 @@ mod tests {
     #[test]
     fn disabled_dims() {
         let el = js_token_input(&TokenInputSpec::new().with_disabled(true), &theme());
-        assert!(el.style.opacity < 1.0, "disabled token-input should be dimmed");
+        assert!(
+            el.style.opacity < 1.0,
+            "disabled token-input should be dimmed"
+        );
     }
 
     /// The token's text, not its index: a host removing by index would delete
@@ -338,5 +351,4 @@ mod tests {
             tree.texts()
         );
     }
-
 }

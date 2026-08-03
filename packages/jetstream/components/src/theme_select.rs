@@ -37,7 +37,13 @@ fn hex_vec4(hex: &str, fallback: Vec4) -> Vec4 {
 }
 
 /// Mini theme preview: canvas fill + surface card + accent dot + text bar.
-fn swatch(option: &ThemeOption, theme: &JetstreamThemeProvider, w: f32, h: f32, selected: bool) -> JsEl {
+fn swatch(
+    option: &ThemeOption,
+    theme: &JetstreamThemeProvider,
+    w: f32,
+    h: f32,
+    selected: bool,
+) -> JsEl {
     let fallback = resolve_color(theme, "color.background.surface");
     let color = |hex: &str| hex_vec4(hex, fallback);
     let border = resolve_color(theme, "color.border.subtle");
@@ -93,7 +99,11 @@ pub struct ThemeSelect {
 
 impl ThemeSelect {
     pub fn from_spec(spec: ThemeSelectSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value.
@@ -162,7 +172,10 @@ fn build(
     }
     trigger = trigger.child(ui_element::label("▾").text_color(text_secondary));
 
-    let mut root = ui_element::div().flex_col().gap(rem_to_px(0.375)).child(trigger);
+    let mut root = ui_element::div()
+        .flex_col()
+        .gap(rem_to_px(0.375))
+        .child(trigger);
 
     // ── Popover grid (rendered inline when open) ──────────────────────────────
     if spec.is_open {
@@ -174,23 +187,27 @@ fn build(
         for option in spec.themes.iter() {
             let selected = spec.is_selected(option);
             let mut tile = ui_element::div()
-                    .flex_col()
-                    .items_center()
-                    .gap(rem_to_px(0.375))
-                    .w(rem_to_px(4.5))
-                    .pl(rem_to_px(0.375))
-                    .pr(rem_to_px(0.375))
-                    .pt(rem_to_px(0.375))
-                    .pb(rem_to_px(0.375))
-                    .rounded(radius)
-                    .border_1()
-                    .border_color(if selected { accent } else { Vec4::new(0.0, 0.0, 0.0, 0.0) })
-                    .child(swatch(option, theme, 2.75, 2.0, selected))
-                    .child(
-                        ui_element::label(&option.label)
-                            .text_color(text_primary)
-                            .text_size(rem_to_px(0.71875)),
-                    );
+                .flex_col()
+                .items_center()
+                .gap(rem_to_px(0.375))
+                .w(rem_to_px(4.5))
+                .pl(rem_to_px(0.375))
+                .pr(rem_to_px(0.375))
+                .pt(rem_to_px(0.375))
+                .pb(rem_to_px(0.375))
+                .rounded(radius)
+                .border_1()
+                .border_color(if selected {
+                    accent
+                } else {
+                    Vec4::new(0.0, 0.0, 0.0, 0.0)
+                })
+                .child(swatch(option, theme, 2.75, 2.0, selected))
+                .child(
+                    ui_element::label(&option.label)
+                        .text_color(text_primary)
+                        .text_size(rem_to_px(0.71875)),
+                );
 
             if let Some(handler) = &on_change {
                 let handler = std::sync::Arc::clone(handler);
@@ -233,29 +250,50 @@ mod tests {
 
     fn themes() -> Vec<ThemeOption> {
         vec![
-            ThemeOption::new("eclipse", "Eclipse", ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333")),
-            ThemeOption::new("nord", "Nord", ThemeSwatch::new("#2e3440", "#3b4252", "#88c0d0", "#eceff4", "#4c566a")),
+            ThemeOption::new(
+                "eclipse",
+                "Eclipse",
+                ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333"),
+            ),
+            ThemeOption::new(
+                "nord",
+                "Nord",
+                ThemeSwatch::new("#2e3440", "#3b4252", "#88c0d0", "#eceff4", "#4c566a"),
+            ),
         ]
     }
 
     #[test]
     fn trigger_shows_current_label() {
         let el = js_theme_select(
-            &ThemeSelectSpec::new().with_themes(themes()).with_value("nord"),
+            &ThemeSelectSpec::new()
+                .with_themes(themes())
+                .with_value("nord"),
             &theme(),
         );
         let tree = crate::render_probe::probe(&el, 320.0, 80.0);
-        assert!(tree.has_text("Nord"), "trigger label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Nord"),
+            "trigger label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn open_grid_lists_all_themes() {
         let el = js_theme_select(
-            &ThemeSelectSpec::new().with_themes(themes()).with_value("eclipse").with_open(true),
+            &ThemeSelectSpec::new()
+                .with_themes(themes())
+                .with_value("eclipse")
+                .with_open(true),
             &theme(),
         );
         let tree = crate::render_probe::probe(&el, 360.0, 240.0);
-        assert!(tree.has_text("Eclipse") && tree.has_text("Nord"), "tiles missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Eclipse") && tree.has_text("Nord"),
+            "tiles missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -279,5 +317,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["nord"]);
     }
-
 }

@@ -69,7 +69,11 @@ mod tests {
     fn renders_content_as_label() {
         let el = js_text(&TextSpec::new("Hello"), &theme());
         let tree = probe(&el, 200.0, 40.0);
-        assert!(tree.has_text("Hello"), "text content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Hello"),
+            "text content missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -114,12 +118,13 @@ mod tests {
         let plain_tree = probe(&plain, 200.0, 80.0);
         assert_eq!(plain_tree.nodes[0].kind, "Label", "default is a bare label");
 
-        let compact = js_text(
-            &TextSpec::new("p").with_spacing(TextSpacing::Compact),
-            &th,
-        );
+        let compact = js_text(&TextSpec::new("p").with_spacing(TextSpacing::Compact), &th);
         let tree = probe(&compact, 200.0, 80.0);
         assert_eq!(tree.nodes[0].kind, "Panel", "compact wraps in a container");
-        assert!(tree.has_text("p"), "label survives the wrap: {:?}", tree.texts());
+        assert!(
+            tree.has_text("p"),
+            "label survives the wrap: {:?}",
+            tree.texts()
+        );
     }
 }

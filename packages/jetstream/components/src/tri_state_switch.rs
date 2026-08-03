@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
@@ -52,7 +52,11 @@ pub struct TriStateSwitch {
 
 impl TriStateSwitch {
     pub fn from_spec(spec: TriStateSwitchSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the segment that was chosen.
@@ -170,7 +174,11 @@ fn build(
         let is_active = value == state;
 
         // Active uses per-state color; inactive uses text-secondary.
-        let seg_text_color = if is_active { state_color } else { text_secondary };
+        let seg_text_color = if is_active {
+            state_color
+        } else {
+            text_secondary
+        };
 
         // Active segment paints the selection fill/border + shadow;
         // inactive is transparent over the shared track.
@@ -254,7 +262,11 @@ fn build(
 }
 
 /// Resolve a per-state color, preferring an instance hex override.
-fn override_or(theme: &JetstreamThemeProvider, token: &str, override_hex: &Option<String>) -> Color {
+fn override_or(
+    theme: &JetstreamThemeProvider,
+    token: &str,
+    override_hex: &Option<String>,
+) -> Color {
     if let Some(hex) = override_hex {
         if let Some(rgb) = crate::theme_ext::hex_to_rgb255(hex) {
             return Color::from_u8(rgb.r, rgb.g, rgb.b, 255);
@@ -298,7 +310,10 @@ mod tests {
         let pos_de = texts.iter().position(|t| *t == "Default");
         let pos_in = texts.iter().position(|t| *t == "Include");
         assert!(pos_ex.is_some() && pos_de.is_some() && pos_in.is_some());
-        assert!(pos_ex < pos_de && pos_de < pos_in, "segment order wrong: {texts:?}");
+        assert!(
+            pos_ex < pos_de && pos_de < pos_in,
+            "segment order wrong: {texts:?}"
+        );
     }
 
     #[test]
@@ -362,7 +377,11 @@ mod tests {
 
             crate::element::click_probe::click_text(&el, 480.0, 80.0, &label);
 
-            assert_eq!(seen.lock().unwrap().as_slice(), [expected], "clicking {label:?}");
+            assert_eq!(
+                seen.lock().unwrap().as_slice(),
+                [expected],
+                "clicking {label:?}"
+            );
         }
     }
 
@@ -379,12 +398,13 @@ mod tests {
         let label = spec.included_label().to_string();
 
         let el = TriStateSwitch::from_spec(spec, &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 480.0, 80.0, &label);
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled switch fired");
     }
-
 }

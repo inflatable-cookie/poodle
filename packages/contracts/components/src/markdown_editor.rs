@@ -303,27 +303,48 @@ mod tests {
     fn mode_visibility_flags() {
         assert!(MarkdownEditorSpec::new().with_mode("edit").shows_editor());
         assert!(!MarkdownEditorSpec::new().with_mode("edit").shows_preview());
-        assert!(MarkdownEditorSpec::new().with_mode("preview").shows_preview());
-        assert!(!MarkdownEditorSpec::new().with_mode("preview").shows_editor());
+        assert!(MarkdownEditorSpec::new()
+            .with_mode("preview")
+            .shows_preview());
+        assert!(!MarkdownEditorSpec::new()
+            .with_mode("preview")
+            .shows_editor());
         let split = MarkdownEditorSpec::new().with_mode("split");
         assert!(split.shows_editor() && split.shows_preview());
     }
 
     #[test]
     fn tools_disabled_in_preview_or_when_disabled() {
-        assert!(MarkdownEditorSpec::new().with_mode("preview").tools_disabled());
-        assert!(MarkdownEditorSpec::new().with_disabled(true).tools_disabled());
+        assert!(MarkdownEditorSpec::new()
+            .with_mode("preview")
+            .tools_disabled());
+        assert!(MarkdownEditorSpec::new()
+            .with_disabled(true)
+            .tools_disabled());
         assert!(!MarkdownEditorSpec::new().with_mode("edit").tools_disabled());
     }
 
     #[test]
     fn min_height_parses_rem_and_px() {
-        assert_eq!(MarkdownEditorSpec::new().with_min_height("8rem").min_height_rem(), 8.0);
-        assert_eq!(MarkdownEditorSpec::new().with_min_height("160px").min_height_rem(), 10.0);
+        assert_eq!(
+            MarkdownEditorSpec::new()
+                .with_min_height("8rem")
+                .min_height_rem(),
+            8.0
+        );
+        assert_eq!(
+            MarkdownEditorSpec::new()
+                .with_min_height("160px")
+                .min_height_rem(),
+            10.0
+        );
     }
 
     #[test]
     fn char_count_counts_unicode_scalars() {
-        assert_eq!(MarkdownEditorSpec::new().with_value("héllo").char_count(), 5);
+        assert_eq!(
+            MarkdownEditorSpec::new().with_value("héllo").char_count(),
+            5
+        );
     }
 }

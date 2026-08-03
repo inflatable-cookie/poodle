@@ -242,10 +242,7 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
     let block_count = spec.blocks.len();
     for (i, block) in spec.blocks.iter().enumerate() {
         // ── Toolbar left: drag grip + TypeSelect ───────────────────────────
-        let mut toolbar_left = ui_element::div()
-            .flex_row()
-            .items_center()
-            .gap(toolbar_gap);
+        let mut toolbar_left = ui_element::div().flex_row().items_center().gap(toolbar_gap);
 
         if can_reorder {
             // `.block-editor__drag-grip` — control-size box, tertiary grip icon.
@@ -276,15 +273,16 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
                     type_wrap = type_wrap.ml(inset);
                 }
             }
-            toolbar_left = toolbar_left
-                .child(type_wrap.child(build_type_select(spec, Some(&block.block_type), disabled, theme)));
+            toolbar_left = toolbar_left.child(type_wrap.child(build_type_select(
+                spec,
+                Some(&block.block_type),
+                disabled,
+                theme,
+            )));
         }
 
         // ── Toolbar right: move up/down, AddSelect, remove ─────────────────
-        let mut toolbar_right = ui_element::div()
-            .flex_row()
-            .items_center()
-            .gap(toolbar_gap);
+        let mut toolbar_right = ui_element::div().flex_row().items_center().gap(toolbar_gap);
 
         if can_reorder {
             toolbar_right = toolbar_right
@@ -452,10 +450,26 @@ mod tests {
         let tree = probe(&el, 600.0, 600.0);
 
         // Each block's type label appears in its TypeSelect trigger.
-        assert!(tree.has_text("Heading"), "Heading type label missing: {:?}", tree.texts());
-        assert!(tree.has_text("Paragraph"), "Paragraph type label missing: {:?}", tree.texts());
-        assert!(tree.has_text("Quote"), "Quote type label missing: {:?}", tree.texts());
-        assert!(tree.has_text("Code"), "Code type label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Heading"),
+            "Heading type label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Paragraph"),
+            "Paragraph type label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Quote"),
+            "Quote type label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Code"),
+            "Code type label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -464,11 +478,31 @@ mod tests {
         let tree = probe(&el, 600.0, 600.0);
 
         // Real icon-registry icons present (Icon widgets carry their name as text).
-        assert!(tree.has_text("grip-vertical"), "grip icon missing: {:?}", tree.texts());
-        assert!(tree.has_text("arrow-up"), "move-up icon missing: {:?}", tree.texts());
-        assert!(tree.has_text("arrow-down"), "move-down icon missing: {:?}", tree.texts());
-        assert!(tree.has_text("plus"), "add icon missing: {:?}", tree.texts());
-        assert!(tree.has_text("x"), "remove icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("grip-vertical"),
+            "grip icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("arrow-up"),
+            "move-up icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("arrow-down"),
+            "move-down icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("plus"),
+            "add icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("x"),
+            "remove icon missing: {:?}",
+            tree.texts()
+        );
 
         // NO unicode-glyph fallback remains (old impl used ↑ ↓ + ×).
         for glyph in ["\u{2191}", "\u{2193}", "\u{00D7}"] {
@@ -487,15 +521,34 @@ mod tests {
         let multi = js_block_editor(&spec_with_blocks(), &theme());
         let multi_tree = probe(&multi, 600.0, 600.0);
         // 5 blocks → 5 up + 5 down arrows, 5 plus, 5 grip, remove on each.
-        assert_eq!(multi_tree.texts().iter().filter(|t| **t == "arrow-up").count(), 5);
-        assert_eq!(multi_tree.texts().iter().filter(|t| **t == "arrow-down").count(), 5);
-        assert!(multi_tree.has_text("x"), "remove should be present with >1 block");
+        assert_eq!(
+            multi_tree
+                .texts()
+                .iter()
+                .filter(|t| **t == "arrow-up")
+                .count(),
+            5
+        );
+        assert_eq!(
+            multi_tree
+                .texts()
+                .iter()
+                .filter(|t| **t == "arrow-down")
+                .count(),
+            5
+        );
+        assert!(
+            multi_tree.has_text("x"),
+            "remove should be present with >1 block"
+        );
 
         // Single block: remove hidden, move/add still render (gating is opacity,
         // not removal, so they remain in the tree).
         let single = BlockEditorSpec::new()
             .with_block_types(block_types())
-            .with_blocks(vec![EditorBlock::new("only", "paragraph").with_content("solo")]);
+            .with_blocks(vec![
+                EditorBlock::new("only", "paragraph").with_content("solo")
+            ]);
         let single_tree = probe(&js_block_editor(&single, &theme()), 600.0, 600.0);
         assert!(
             !single_tree.has_text("x"),
@@ -517,19 +570,35 @@ mod tests {
         let tree = probe(&js_block_editor(&single, &theme()), 600.0, 600.0);
 
         // No grip / move / add / remove chrome.
-        assert!(!tree.has_text("grip-vertical"), "single posture should hide grip");
-        assert!(!tree.has_text("arrow-up"), "single posture should hide move-up");
-        assert!(!tree.has_text("arrow-down"), "single posture should hide move-down");
+        assert!(
+            !tree.has_text("grip-vertical"),
+            "single posture should hide grip"
+        );
+        assert!(
+            !tree.has_text("arrow-up"),
+            "single posture should hide move-up"
+        );
+        assert!(
+            !tree.has_text("arrow-down"),
+            "single posture should hide move-down"
+        );
         assert!(!tree.has_text("plus"), "single posture should hide add");
         assert!(!tree.has_text("x"), "single posture should hide remove");
         // TypeSelect still present (type-change defaults on).
-        assert!(tree.has_text("Heading"), "type select should remain: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Heading"),
+            "type select should remain: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn empty_blocks_render_no_block_chrome() {
         // No blocks → empty surface, no toolbar/content nodes.
-        let el = js_block_editor(&BlockEditorSpec::new().with_block_types(block_types()), &theme());
+        let el = js_block_editor(
+            &BlockEditorSpec::new().with_block_types(block_types()),
+            &theme(),
+        );
         let tree = probe(&el, 600.0, 600.0);
         assert!(!tree.is_empty(), "root should still render");
         assert!(!tree.has_text("arrow-up"), "no blocks → no toolbar");

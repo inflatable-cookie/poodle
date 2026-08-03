@@ -1,7 +1,6 @@
 /// FormLayout — responsive form grid with error/success messaging.
 ///
 /// Matches docs/contracts/components/form-layout.md.
-
 use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -59,7 +58,11 @@ impl FormLayoutSpec {
     }
 
     /// Add a single field-error entry. Order is preserved.
-    pub fn with_field_error(mut self, field: impl Into<String>, message: impl Into<String>) -> Self {
+    pub fn with_field_error(
+        mut self,
+        field: impl Into<String>,
+        message: impl Into<String>,
+    ) -> Self {
         self.field_errors.push((field.into(), message.into()));
         self
     }

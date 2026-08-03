@@ -142,19 +142,23 @@ mod tests {
             None,
         );
         let tree = probe(&el, 320.0, 200.0);
-        assert!(tree.has_text("RECENT"), "uppercased title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("RECENT"),
+            "uppercased title missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn empty_shows_message() {
-        let el = js_inline_list_section(
-            &InlineListSectionSpec::new("Files"),
-            &theme(),
-            vec![],
-            None,
-        );
+        let el =
+            js_inline_list_section(&InlineListSectionSpec::new("Files"), &theme(), vec![], None);
         let tree = probe(&el, 320.0, 200.0);
-        assert!(tree.has_text("No items yet."), "empty message missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("No items yet."),
+            "empty message missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -166,7 +170,10 @@ mod tests {
             None,
         );
         let tree = probe(&el, 320.0, 200.0);
-        assert!(tree.has_text("alpha") && tree.has_text("beta"), "items missing");
+        assert!(
+            tree.has_text("alpha") && tree.has_text("beta"),
+            "items missing"
+        );
         assert!(tree.has_text("2"), "count pill missing");
     }
 }

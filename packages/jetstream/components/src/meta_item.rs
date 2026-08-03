@@ -20,7 +20,11 @@ use crate::theme_ext::resolve_color;
 ///   ├── [Label]  uppercase, text.secondary, 0.6875rem, semibold
 ///   └── [Value]  caller-supplied content or placeholder, text.primary, 0.875rem
 /// ```
-pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: Option<JsEl>) -> JsEl {
+pub fn js_meta_item(
+    spec: &MetaItemSpec,
+    theme: &JetstreamThemeProvider,
+    value: Option<JsEl>,
+) -> JsEl {
     let label_color = resolve_color(theme, spec.label_color_token());
     let value_color = resolve_color(theme, spec.value_color_token());
     let label_size = rem_to_px(spec.label_font_size_rem());
@@ -44,7 +48,7 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
                 .text_color(label_color)
                 .text_size(label_size)
                 .text_weight(label_weight)
-                .letter_spacing_em(0.08) // contract §8: letter-spacing 0.08em
+                .letter_spacing_em(0.08), // contract §8: letter-spacing 0.08em
         );
     }
 
@@ -63,7 +67,7 @@ pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: 
             .min_w(0.0)
             .text_size(value_size)
             .text_color(value_color)
-            .child(value_el)
+            .child(value_el),
     );
 
     crate::aria::with_aria_label(row, spec.aria_label.as_deref())
@@ -86,14 +90,23 @@ mod tests {
         let el = js_meta_item(&spec, &theme(), Some(ui_element::label("Published")));
         let tree = probe(&el, 400.0, 100.0);
 
-        assert!(tree.has_text("STATUS"), "label rendered uppercase: {:?}", tree.texts());
-        assert!(tree.has_text("Published"), "value rendered: {:?}", tree.texts());
+        assert!(
+            tree.has_text("STATUS"),
+            "label rendered uppercase: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Published"),
+            "value rendered: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn label_uses_label_secondary_tone() {
         // Label color resolves from the text-secondary token (muted tone).
-        let expected: Color = resolve_color(&theme(), MetaItemSpec::new().label_color_token()).into();
+        let expected: Color =
+            resolve_color(&theme(), MetaItemSpec::new().label_color_token()).into();
         let spec = MetaItemSpec::new().with_label("Type");
         let el = js_meta_item(&spec, &theme(), None);
         let tree = probe(&el, 400.0, 100.0);
@@ -102,7 +115,8 @@ mod tests {
         // label; confirm the token resolves and the uppercase label is present.
         assert!(tree.has_text("TYPE"), "label present: {:?}", tree.texts());
         // text-secondary differs from text-primary (the value tone) — sanity guard.
-        let primary: Color = resolve_color(&theme(), MetaItemSpec::new().value_color_token()).into();
+        let primary: Color =
+            resolve_color(&theme(), MetaItemSpec::new().value_color_token()).into();
         assert!(
             (expected.r - primary.r).abs() > 0.001
                 || (expected.g - primary.g).abs() > 0.001
@@ -146,18 +160,37 @@ mod tests {
         // Label size: 0.6875rem (body) vs 0.6875em→0.6875rem baseline (inherit) —
         // both resolve to the corrected ratio (no longer 0.7857).
         let body_label = body_tree.nodes.iter().find_map(|n| {
-            if n.text.as_deref() == Some("TEAM") { n.text_size } else { None }
+            if n.text.as_deref() == Some("TEAM") {
+                n.text_size
+            } else {
+                None
+            }
         });
         let inherit_label = inherit_tree.nodes.iter().find_map(|n| {
-            if n.text.as_deref() == Some("TEAM") { n.text_size } else { None }
+            if n.text.as_deref() == Some("TEAM") {
+                n.text_size
+            } else {
+                None
+            }
         });
-        assert!(body_label.is_some() && inherit_label.is_some(), "label sizes present");
+        assert!(
+            body_label.is_some() && inherit_label.is_some(),
+            "label sizes present"
+        );
         // Value font-size grows from 0.875rem (body) to 1.0rem (inherit baseline).
         let body_val = body_tree.nodes.iter().find_map(|n| {
-            if n.text.as_deref() == Some("Platform") { n.text_size } else { None }
+            if n.text.as_deref() == Some("Platform") {
+                n.text_size
+            } else {
+                None
+            }
         });
         let inherit_val = inherit_tree.nodes.iter().find_map(|n| {
-            if n.text.as_deref() == Some("Platform") { n.text_size } else { None }
+            if n.text.as_deref() == Some("Platform") {
+                n.text_size
+            } else {
+                None
+            }
         });
         if let (Some(b), Some(i)) = (body_val, inherit_val) {
             assert!(i > b, "inherit value size ({i}) should exceed body ({b})");

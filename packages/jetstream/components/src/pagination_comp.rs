@@ -18,8 +18,8 @@
 //! ```
 //! Click / navigation lives in the preview event loop; this builds the visual tree.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, PageItem, PaginationSpec, PaginationVariant};
 
@@ -56,7 +56,11 @@ pub struct Pagination {
 
 impl Pagination {
     pub fn from_spec(spec: PaginationSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_page_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_page_change: None,
+        }
     }
 
     /// Fires with the destination page. The current page, a disabled arrow and
@@ -111,7 +115,9 @@ fn build(
     let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
     // ── root: info row + controls-wrapper stacked. ─────────────────────────────
-    let mut root = ui_element::div().flex_col().gap(resolve_px(theme, "space.inline.sm"));
+    let mut root = ui_element::div()
+        .flex_col()
+        .gap(resolve_px(theme, "space.inline.sm"));
 
     // Chrome root treatment: padding + top border + elevated 92% background.
     // `resolved_chrome` applies the contract's precedence — `standalone` only
@@ -213,7 +219,12 @@ fn build(
 
     // Previous button — text "Prev" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button("Prev", false, prev_disabled, Some(spec.current_page.saturating_sub(1).max(1))));
+        controls = controls.child(make_button(
+            "Prev",
+            false,
+            prev_disabled,
+            Some(spec.current_page.saturating_sub(1).max(1)),
+        ));
     } else {
         controls = controls.child(arrow_button(
             "chevron-left",
@@ -239,7 +250,12 @@ fn build(
                 match item {
                     PageItem::Page(n) => {
                         let is_current = n == spec.current_page;
-                        pages_row = pages_row.child(make_button(&n.to_string(), is_current, false, Some(n)));
+                        pages_row = pages_row.child(make_button(
+                            &n.to_string(),
+                            is_current,
+                            false,
+                            Some(n),
+                        ));
                     }
                     PageItem::Ellipsis => {
                         // Non-interactive ellipsis; contract min-width 1.5rem.
@@ -283,7 +299,12 @@ fn build(
 
     // Next button — text "Next" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button("Next", false, next_disabled, Some((spec.current_page + 1).min(spec.total_pages))));
+        controls = controls.child(make_button(
+            "Next",
+            false,
+            next_disabled,
+            Some((spec.current_page + 1).min(spec.total_pages)),
+        ));
     } else {
         controls = controls.child(arrow_button(
             "chevron-right",
@@ -303,7 +324,12 @@ fn build(
 
     // Last button (`»»`) — full variant only.
     if is_full {
-        controls = controls.child(make_button("»»", false, next_disabled, Some(spec.total_pages)));
+        controls = controls.child(make_button(
+            "»»",
+            false,
+            next_disabled,
+            Some(spec.total_pages),
+        ));
     }
 
     wrapper = wrapper.child(controls);
@@ -477,7 +503,12 @@ mod tests {
 
         let accent = resolve_color(&th, spec.current_fill_token());
         let want = tint(accent, 0.18);
-        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        let want = ProbeColor {
+            r: want.x,
+            g: want.y,
+            b: want.z,
+            a: want.w,
+        };
         assert!(
             tree.has_background(want, 0.02),
             "current page button missing accent-18% fill; tree: {}",
@@ -497,7 +528,11 @@ mod tests {
             .with_variant(PaginationVariant::Full);
         let tree = probe(&js_pagination(&spec, &th), 700.0, 80.0);
 
-        assert!(tree.has_text("««"), "missing first button; texts: {:?}", tree.texts());
+        assert!(
+            tree.has_text("««"),
+            "missing first button; texts: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("»»"), "missing last button");
         assert!(
             tree.has_text("Page 1 of 7"),
@@ -520,7 +555,11 @@ mod tests {
             .with_variant(PaginationVariant::Simple);
         let tree = probe(&js_pagination(&spec, &th), 600.0, 80.0);
 
-        assert!(tree.has_text("Prev"), "missing Prev; texts: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Prev"),
+            "missing Prev; texts: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Next"), "missing Next");
         assert!(
             tree.has_text("51–75 of 248"),
@@ -560,7 +599,11 @@ mod tests {
             .with_limit_options(vec![10, 25, 50, 100])
             .with_variant(PaginationVariant::Numbered);
         let tree = probe(&js_pagination(&spec, &th), 700.0, 100.0);
-        assert!(tree.has_text("Show"), "missing limit label; texts: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Show"),
+            "missing limit label; texts: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("per page"), "missing limit suffix");
         assert!(tree.has_text("25"), "missing selected page size");
     }
@@ -575,7 +618,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
         let pages = Arc::clone(&seen);
 
-        let spec = PaginationSpec::new().with_current_page(5).with_total_pages(20);
+        let spec = PaginationSpec::new()
+            .with_current_page(5)
+            .with_total_pages(20);
         let el = Pagination::from_spec(spec, &theme())
             .on_page_change(move |page| pages.lock().unwrap().push(page))
             .into_js_el();
@@ -597,14 +642,17 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let spec = PaginationSpec::new().with_current_page(5).with_total_pages(20);
+        let spec = PaginationSpec::new()
+            .with_current_page(5)
+            .with_total_pages(20);
         let el = Pagination::from_spec(spec, &theme())
-            .on_page_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_page_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 800.0, 120.0, "5");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "the current page navigated");
     }
-
 }

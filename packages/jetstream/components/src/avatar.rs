@@ -78,7 +78,11 @@ mod tests {
         let el = js_avatar(&AvatarSpec::new().with_initials("tw"), &theme());
         let tree = probe(&el, 80.0, 80.0);
         // fallback_text upper-cases initials.
-        assert!(tree.has_text("TW"), "avatar initials missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("TW"),
+            "avatar initials missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -92,7 +96,10 @@ mod tests {
     fn size_drives_box_dimension() {
         let el = js_avatar(&AvatarSpec::new().with_size(AvatarSize::Xl), &theme());
         // xl = 6rem = 96px square.
-        assert_eq!(el.layout.size.width, taffy::Dimension::length(rem_to_px(6.0)));
+        assert_eq!(
+            el.layout.size.width,
+            taffy::Dimension::length(rem_to_px(6.0))
+        );
     }
 
     #[test]
@@ -119,7 +126,9 @@ mod tests {
     fn circle_radius_is_half_the_box() {
         // Circle = border-radius:50% → half the size, never a 999 sentinel.
         let el = js_avatar(
-            &AvatarSpec::new().with_size(AvatarSize::Md).with_shape(AvatarShape::Circle),
+            &AvatarSpec::new()
+                .with_size(AvatarSize::Md)
+                .with_shape(AvatarShape::Circle),
             &theme(),
         );
         assert_eq!(el.style.corner_radii[0], rem_to_px(2.75 / 2.0));
@@ -129,19 +138,27 @@ mod tests {
     fn rounded_uses_control_radius_token() {
         let th = theme();
         let el = js_avatar(&AvatarSpec::new().with_shape(AvatarShape::Rounded), &th);
-        assert_eq!(el.style.corner_radii[0], resolve_radius(&th, "radius.control"));
+        assert_eq!(
+            el.style.corner_radii[0],
+            resolve_radius(&th, "radius.control")
+        );
     }
 
     #[test]
     fn image_src_renders_image_node_not_initials() {
         let el = js_avatar(
-            &AvatarSpec::new().with_src("https://example.com/a.png").with_initials("tw"),
+            &AvatarSpec::new()
+                .with_src("https://example.com/a.png")
+                .with_initials("tw"),
             &theme(),
         );
         let tree = probe(&el, 80.0, 80.0);
         // src present → image node, no initials label.
         assert_eq!(tree.count_kind("Image"), 1, "expected one image node");
-        assert!(!tree.has_text("TW"), "initials should not render when src is set");
+        assert!(
+            !tree.has_text("TW"),
+            "initials should not render when src is set"
+        );
     }
 
     #[test]

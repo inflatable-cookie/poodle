@@ -12,17 +12,14 @@
 
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{
-    BrowseState, ButtonSpec, ButtonVariant, ControlSize,
-    RelationPickerSpec,
-};
+use poodle_specs::{BrowseState, ButtonSpec, ButtonVariant, ControlSize, RelationPickerSpec};
 
 use crate::button::js_button;
 use crate::picker_shell::js_picker_shell;
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
+    control_space_x_rem, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
-    relation_picker_title_size_rem, resolve_semantic_size,
+    relation_picker_title_size_rem, rem_to_px, resolve_semantic_size,
 };
 use crate::selection_summary::js_selection_summary;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -207,7 +204,10 @@ fn build(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider, handlers: Ha
         } else {
             let mut list = ui_element::div().flex_col().gap(list_gap);
             for item in spec.current_items() {
-                let is_selected = spec.selected_ids.iter().any(|selected| selected == &item.id);
+                let is_selected = spec
+                    .selected_ids
+                    .iter()
+                    .any(|selected| selected == &item.id);
                 let mut row = candidate_row(
                     &item,
                     is_selected,
@@ -316,6 +316,5 @@ fn build(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider, handlers: Ha
 }
 
 #[allow(clippy::too_many_arguments)]
-
 mod parts;
 use parts::{build_search, candidate_row, drill_row};

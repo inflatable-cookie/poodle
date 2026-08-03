@@ -49,7 +49,13 @@ impl ToastHost {
 
 impl crate::element::IntoJsEl for ToastHost {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, &self.stack_spec, self.on_dismiss, self.on_action)
+        build(
+            &self.spec,
+            &self.theme,
+            &self.stack_spec,
+            self.on_dismiss,
+            self.on_action,
+        )
     }
 }
 
@@ -86,24 +92,16 @@ fn build(
     // Position at chosen corner using absolute positioning
     match spec.placement {
         ToastHostPlacement::BottomEnd => {
-            container = container
-                .absolute()
-                .right(inset).bottom(inset);
+            container = container.absolute().right(inset).bottom(inset);
         }
         ToastHostPlacement::BottomStart => {
-            container = container
-                .absolute()
-                .left(inset).bottom(inset);
+            container = container.absolute().left(inset).bottom(inset);
         }
         ToastHostPlacement::TopEnd => {
-            container = container
-                .absolute()
-                .right(inset).top(inset);
+            container = container.absolute().right(inset).top(inset);
         }
         ToastHostPlacement::TopStart => {
-            container = container
-                .absolute()
-                .left(inset).top(inset);
+            container = container.absolute().left(inset).top(inset);
         }
     }
 
@@ -141,7 +139,12 @@ mod tests {
         let tree = probe(&js_toast_host(&host, &theme(), &stack), 600.0, 400.0);
         // Empty JsEl div → a single bare Panel node with no toast text.
         assert!(!tree.has_text("Saved"), "no toast text expected when empty");
-        assert_eq!(tree.count_kind("Label"), 0, "no labels when empty: {}", tree.to_json());
+        assert_eq!(
+            tree.count_kind("Label"),
+            0,
+            "no labels when empty: {}",
+            tree.to_json()
+        );
     }
 
     #[test]
@@ -150,22 +153,40 @@ mod tests {
         // below the first separated by the stack gap (contract §7).
         let host = ToastHostSpec::new();
         let stack = ToastStackSpec::new().with_toasts(vec![
-            Toast::new("t1", "Saved").with_message("Your changes were saved.").with_tone(ToastTone::Success),
+            Toast::new("t1", "Saved")
+                .with_message("Your changes were saved.")
+                .with_tone(ToastTone::Success),
             Toast::new("t2", "Publishing failed.").with_tone(ToastTone::Danger),
         ]);
         let tree = probe(&js_toast_host(&host, &theme(), &stack), 600.0, 400.0);
-        assert!(tree.has_text("Saved"), "first toast title missing: {:?}", tree.texts());
-        assert!(tree.has_text("Publishing failed."), "second toast title missing");
+        assert!(
+            tree.has_text("Saved"),
+            "first toast title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Publishing failed."),
+            "second toast title missing"
+        );
 
         // Find the two title labels and confirm vertical stacking (distinct y).
         let titles: Vec<&crate::render_probe::ProbeNode> = tree
             .nodes
             .iter()
-            .filter(|n| matches!(n.text.as_deref(), Some("Saved") | Some("Publishing failed.")))
+            .filter(|n| {
+                matches!(
+                    n.text.as_deref(),
+                    Some("Saved") | Some("Publishing failed.")
+                )
+            })
             .collect();
         assert_eq!(titles.len(), 2, "expected 2 title labels");
         let ys: Vec<f32> = titles.iter().map(|n| n.y).collect();
-        assert!((ys[0] - ys[1]).abs() > 1.0, "toasts should stack on distinct rows: {:?}", ys);
+        assert!(
+            (ys[0] - ys[1]).abs() > 1.0,
+            "toasts should stack on distinct rows: {:?}",
+            ys
+        );
     }
 
     #[test]
@@ -191,7 +212,10 @@ mod tests {
         let stack = ToastStackSpec::new()
             .with_toasts(vec![Toast::new("t1", "Heads up").with_tone(ToastTone::Info)]);
         let tree = probe(&js_toast_host(&host, &theme(), &stack), 600.0, 400.0);
-        assert!(tree.has_text("Heads up"), "top-start host should render its toast");
+        assert!(
+            tree.has_text("Heads up"),
+            "top-start host should render its toast"
+        );
     }
 
     /// The host positions; the stack owns the events. Forwarding is the thing
@@ -232,5 +256,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["t1"]);
     }
-
 }

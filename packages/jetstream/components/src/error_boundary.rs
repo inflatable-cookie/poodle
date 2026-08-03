@@ -24,7 +24,10 @@ pub fn js_error_boundary(
         return js_empty_state(
             &EmptyStateSpec::new(spec.title.as_str())
                 .with_message(message.as_str())
-                .with_actions(vec![RemediationAction::new("retry", spec.retry_label.as_str())]),
+                .with_actions(vec![RemediationAction::new(
+                    "retry",
+                    spec.retry_label.as_str(),
+                )]),
             theme,
         );
     }
@@ -63,6 +66,10 @@ mod tests {
             Some(ui_element::label("content")),
         );
         let tree = probe(&el, 320.0, 220.0);
-        assert!(tree.has_text("content"), "child not rendered: {:?}", tree.texts());
+        assert!(
+            tree.has_text("content"),
+            "child not rendered: {:?}",
+            tree.texts()
+        );
     }
 }

@@ -79,7 +79,11 @@ pub fn toggle_question_selection(
     }
 
     if selections.iter().any(|entry| entry == value) {
-        selections.iter().filter(|entry| *entry != value).cloned().collect()
+        selections
+            .iter()
+            .filter(|entry| *entry != value)
+            .cloned()
+            .collect()
     } else {
         let mut next = selections.to_vec();
         next.push(value.to_string());

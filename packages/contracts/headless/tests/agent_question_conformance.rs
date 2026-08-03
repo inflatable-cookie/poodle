@@ -35,7 +35,10 @@ fn strings(value: &Value) -> Vec<String> {
 fn question_from(value: &Value) -> AgentQuestionItem {
     AgentQuestionItem {
         id: s(value, "id").to_string(),
-        header: value.get("header").and_then(Value::as_str).map(str::to_string),
+        header: value
+            .get("header")
+            .and_then(Value::as_str)
+            .map(str::to_string),
         prompt: s(value, "prompt").to_string(),
         options: value["options"]
             .as_array()
@@ -217,6 +220,10 @@ fn answered_summaries_match_the_shared_vectors() {
             },
         };
 
-        assert_eq!(answered_question_summary(&record), s(case, "summary"), "{name}");
+        assert_eq!(
+            answered_question_summary(&record),
+            s(case, "summary"),
+            "{name}"
+        );
     }
 }

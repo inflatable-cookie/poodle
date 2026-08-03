@@ -18,7 +18,12 @@ pub struct SelectionSummary {
 
 impl SelectionSummary {
     pub fn from_spec(spec: SelectionSummarySpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_remove: None, on_clear: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_remove: None,
+            on_clear: None,
+        }
     }
 
     /// Fires with the removed item's id.
@@ -179,7 +184,11 @@ fn build(
     }
 
     el = el.child(
-        ui_element::div().flex_grow().flex_row().justify_end().child(clear),
+        ui_element::div()
+            .flex_grow()
+            .flex_row()
+            .justify_end()
+            .child(clear),
     );
 
     el
@@ -241,7 +250,10 @@ mod tests {
         let spec = SelectionSummarySpec::new(items(2))
             .with_clear_action(RemediationAction::new("clear", "Clear all"));
         let tree = probe(&js_selection_summary(&spec, &theme()), 360.0, 80.0);
-        assert!(tree.has_text("Clear all"), "clear_action label overrides default");
+        assert!(
+            tree.has_text("Clear all"),
+            "clear_action label overrides default"
+        );
     }
 
     #[test]
@@ -251,7 +263,10 @@ mod tests {
         let tree = probe(&js_selection_summary(&spec, &theme()), 480.0, 80.0);
         assert!(tree.has_text("Item 0") && tree.has_text("Item 2"));
         assert!(!tree.has_text("Item 3"), "items past the cap are not chips");
-        assert!(tree.has_text("+3 more"), "overflow badge shows hidden count");
+        assert!(
+            tree.has_text("+3 more"),
+            "overflow badge shows hidden count"
+        );
         assert!(tree.has_text("Clear"));
         // Overflow badge font-size resolves from its own per-size token, not the
         // chip font (md: overflow 0.8125rem vs chip 0.75rem).
@@ -292,12 +307,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let ids = Arc::clone(&seen);
 
-        let el = SelectionSummary::from_spec(
-            SelectionSummarySpec::new(items(3)),
-            &theme(),
-        )
-        .on_remove(move |id| ids.lock().unwrap().push(id.to_string()))
-        .into_js_el();
+        let el = SelectionSummary::from_spec(SelectionSummarySpec::new(items(3)), &theme())
+            .on_remove(move |id| ids.lock().unwrap().push(id.to_string()))
+            .into_js_el();
 
         crate::element::click_probe::click_text(&el, 640.0, 160.0, "Item 1");
 
@@ -313,16 +325,18 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = SelectionSummary::from_spec(
-            SelectionSummarySpec::new(items(3)),
-            &theme(),
-        )
-        .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
-        .into_js_el();
+        let el = SelectionSummary::from_spec(SelectionSummarySpec::new(items(3)), &theme())
+            .on_clear(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
 
         crate::element::click_probe::click_text(&el, 640.0, 160.0, "Clear");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_clear fired exactly once"
+        );
     }
-
 }

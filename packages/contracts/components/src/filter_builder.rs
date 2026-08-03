@@ -75,7 +75,10 @@ impl FilterOperand {
             FilterOperandKind::Number => FilterOperand::Number(f64::NAN),
             FilterOperandKind::Boolean => FilterOperand::Boolean(true),
             FilterOperandKind::Options => FilterOperand::Options(Vec::new()),
-            FilterOperandKind::Range => FilterOperand::Range { min: None, max: None },
+            FilterOperandKind::Range => FilterOperand::Range {
+                min: None,
+                max: None,
+            },
         }
     }
 
@@ -200,7 +203,10 @@ impl FilterFieldDefinition {
                 return key.clone();
             }
         }
-        operators.first().map(|op| op.key.clone()).unwrap_or_default()
+        operators
+            .first()
+            .map(|op| op.key.clone())
+            .unwrap_or_default()
     }
 
     pub fn find_operator(&self, operator_key: &str) -> Option<FilterOperatorDefinition> {
@@ -521,7 +527,11 @@ impl FilterBuilderSpec {
                 if field.allow_multiple {
                     return true;
                 }
-                !self.value.clauses.iter().any(|clause| clause.key == field.key)
+                !self
+                    .value
+                    .clauses
+                    .iter()
+                    .any(|clause| clause.key == field.key)
             })
             .collect()
     }
@@ -550,7 +560,9 @@ impl FilterBuilderSpec {
     /// Human-readable pill label for a committed clause.
     pub fn clause_label(&self, clause: &FilterClause) -> String {
         let Some(field) = self.field(&clause.key) else {
-            return format!("{} {}", clause.key, clause.operator).trim().to_string();
+            return format!("{} {}", clause.key, clause.operator)
+                .trim()
+                .to_string();
         };
         let operator_label = field
             .find_operator(&clause.operator)
@@ -582,7 +594,9 @@ impl FilterBuilderSpec {
                 .collect::<Vec<_>>()
                 .join(", "),
             FilterOperand::Range { min, max } => match (min, max) {
-                (Some(min), Some(max)) => format!("{} – {}", format_number(*min), format_number(*max)),
+                (Some(min), Some(max)) => {
+                    format!("{} – {}", format_number(*min), format_number(*max))
+                }
                 (Some(min), None) => format!("≥ {}", format_number(*min)),
                 (None, Some(max)) => format!("≤ {}", format_number(*max)),
                 (None, None) => String::new(),
@@ -703,12 +717,11 @@ mod tests {
 
     fn sample_spec() -> FilterBuilderSpec {
         FilterBuilderSpec::new().with_fields(vec![
-            FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(
-                vec![
+            FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum)
+                .with_options(vec![
                     FilterOption::new("clap", "CLAP"),
                     FilterOption::new("vst3", "VST3"),
-                ],
-            ),
+                ]),
             FilterFieldDefinition::new("hidden", "Hidden", FilterFieldKind::Boolean),
             FilterFieldDefinition::new("tag-count", "Tag count", FilterFieldKind::Number),
         ])
@@ -716,9 +729,15 @@ mod tests {
 
     #[test]
     fn default_operators_cover_all_kinds() {
-        assert_eq!(default_operators_for_kind(FilterFieldKind::Boolean).len(), 1);
+        assert_eq!(
+            default_operators_for_kind(FilterFieldKind::Boolean).len(),
+            1
+        );
         assert_eq!(default_operators_for_kind(FilterFieldKind::Enum).len(), 2);
-        assert_eq!(default_operators_for_kind(FilterFieldKind::MultiEnum).len(), 3);
+        assert_eq!(
+            default_operators_for_kind(FilterFieldKind::MultiEnum).len(),
+            3
+        );
         assert_eq!(default_operators_for_kind(FilterFieldKind::Text).len(), 5);
         assert_eq!(default_operators_for_kind(FilterFieldKind::Number).len(), 6);
         assert_eq!(default_operators_for_kind(FilterFieldKind::Range).len(), 2);
@@ -732,8 +751,16 @@ mod tests {
         assert!(FilterOperand::Number(0.0).is_valid());
         assert!(!FilterOperand::Options(vec![]).is_valid());
         assert!(FilterOperand::Boolean(false).is_valid());
-        assert!(!FilterOperand::Range { min: None, max: None }.is_valid());
-        assert!(FilterOperand::Range { min: Some(3.0), max: None }.is_valid());
+        assert!(!FilterOperand::Range {
+            min: None,
+            max: None
+        }
+        .is_valid());
+        assert!(FilterOperand::Range {
+            min: Some(3.0),
+            max: None
+        }
+        .is_valid());
     }
 
     #[test]
@@ -748,7 +775,11 @@ mod tests {
         // Wrong operand kind → incomplete.
         assert!(!spec.is_clause_complete("format", "any_of", &FilterOperand::Text("clap".into())));
         // Unknown operator → incomplete.
-        assert!(!spec.is_clause_complete("format", "nope", &FilterOperand::Options(vec!["clap".into()])));
+        assert!(!spec.is_clause_complete(
+            "format",
+            "nope",
+            &FilterOperand::Options(vec!["clap".into()])
+        ));
     }
 
     #[test]
@@ -765,7 +796,12 @@ mod tests {
         let boolean = FilterClause::new("hidden-1", "hidden", "is", FilterOperand::Boolean(false));
         assert_eq!(spec.clause_label(&boolean), "Hidden is false");
 
-        let number = FilterClause::new("tag-count-1", "tag-count", "gte", FilterOperand::Number(3.0));
+        let number = FilterClause::new(
+            "tag-count-1",
+            "tag-count",
+            "gte",
+            FilterOperand::Number(3.0),
+        );
         assert_eq!(spec.clause_label(&number), "Tag count at least 3");
     }
 
@@ -804,8 +840,18 @@ mod tests {
     #[test]
     fn draft_state_and_edit_scoped_combinator() {
         let mut spec = sample_spec().with_show_combinator(true);
-        spec.value.clauses.push(FilterClause::new("f1", "format", "any_of", FilterOperand::Options(vec!["clap".into()])));
-        spec.value.clauses.push(FilterClause::new("h1", "hidden", "is", FilterOperand::Boolean(false)));
+        spec.value.clauses.push(FilterClause::new(
+            "f1",
+            "format",
+            "any_of",
+            FilterOperand::Options(vec!["clap".into()]),
+        ));
+        spec.value.clauses.push(FilterClause::new(
+            "h1",
+            "hidden",
+            "is",
+            FilterOperand::Boolean(false),
+        ));
 
         // Overview: 2 clauses + opted in → combinator visible.
         assert!(!spec.is_drafting());
@@ -837,8 +883,18 @@ mod tests {
         // No combinator in effect → "Filter".
         assert_eq!(spec.opener_label(), "Filter");
         spec.show_combinator = true;
-        spec.value.clauses.push(FilterClause::new("a", "hidden", "is", FilterOperand::Boolean(true)));
-        spec.value.clauses.push(FilterClause::new("b", "tag-count", "gte", FilterOperand::Number(1.0)));
+        spec.value.clauses.push(FilterClause::new(
+            "a",
+            "hidden",
+            "is",
+            FilterOperand::Boolean(true),
+        ));
+        spec.value.clauses.push(FilterClause::new(
+            "b",
+            "tag-count",
+            "gte",
+            FilterOperand::Number(1.0),
+        ));
         // Opted in + 2 clauses → mode label.
         assert_eq!(spec.opener_label(), "All");
         spec.value.combinator = FilterCombinator::Or;
@@ -858,7 +914,11 @@ mod tests {
             "is",
             FilterOperand::Boolean(false),
         ));
-        let keys: Vec<_> = spec.available_fields().iter().map(|f| f.key.clone()).collect();
+        let keys: Vec<_> = spec
+            .available_fields()
+            .iter()
+            .map(|f| f.key.clone())
+            .collect();
         assert!(keys.contains(&"format".to_string()));
         assert!(keys.contains(&"tag-count".to_string()));
         assert!(!keys.contains(&"hidden".to_string()));

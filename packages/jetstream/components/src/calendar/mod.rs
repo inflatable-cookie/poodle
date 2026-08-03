@@ -13,8 +13,8 @@
 //! - ARIA is N/A: the Jetstream runtime has no accessibility channel
 //!   (no grid/row/gridcell roles, no aria-selected/aria-live).
 
-use jetstream_ui::{Color, color_mix};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart};
 
@@ -30,9 +30,18 @@ const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 /// Month names (1-indexed; index 0 unused).
 const MONTH_NAMES: [&str; 13] = [
     "",
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
 ];
 
 // ── Date math ────────────────────────────────────────────────────────────────
@@ -126,7 +135,12 @@ pub struct Calendar {
 
 impl Calendar {
     pub fn from_spec(spec: CalendarSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_select: None, on_navigate: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+            on_navigate: None,
+        }
     }
 
     /// Fires with the pressed day as an ISO date (`2026-07-31`), which is what
@@ -243,7 +257,11 @@ fn build(
             .unwrap_or_default()
             .as_secs();
         let (ty, tm, td) = days_to_ymd((now / 86400) as i64);
-        if ty == year && tm == month { Some(td) } else { None }
+        if ty == year && tm == month {
+            Some(td)
+        } else {
+            None
+        }
     };
 
     // ── Selection state ───────────────────────────────────────────────────────
@@ -283,7 +301,11 @@ fn build(
     let rows = total_cells.div_ceil(7);
 
     // Previous month (for leading outside-month cells)
-    let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1) };
+    let (prev_year, prev_month) = if month == 1 {
+        (year - 1, 12)
+    } else {
+        (year, month - 1)
+    };
     let prev_month_days = days_in_month(prev_year, prev_month);
 
     let month_name = MONTH_NAMES.get(month as usize).copied().unwrap_or("");
@@ -390,8 +412,16 @@ fn build(
         .items_center()
         .justify_center()
         .gap(trigger_gap_px)
-        .child(make_trigger("poodle-cal-month-trigger", month_name, spec.is_disabled))
-        .child(make_trigger("poodle-cal-year-trigger", &year_label, spec.is_disabled));
+        .child(make_trigger(
+            "poodle-cal-month-trigger",
+            month_name,
+            spec.is_disabled,
+        ))
+        .child(make_trigger(
+            "poodle-cal-year-trigger",
+            &year_label,
+            spec.is_disabled,
+        ));
 
     let nav_header = ui_element::div()
         .flex_row()
@@ -405,9 +435,7 @@ fn build(
 
     // ── Weekday header row ────────────────────────────────────────────────────
 
-    let mut header_row = ui_element::div()
-        .flex_row()
-        .gap(gap_sm_px);
+    let mut header_row = ui_element::div().flex_row().gap(gap_sm_px);
 
     for i in 0..7u32 {
         let idx = ((i + week_start_offset) % 7) as usize;
@@ -500,10 +528,7 @@ fn build(
 
                 if is_selected || is_range_edge {
                     // Selected / range endpoint: filled accent, inverse text.
-                    cell = cell
-                        .bg(accent)
-                        .text_color(text_inverse)
-                        .text_weight(600);
+                    cell = cell.bg(accent).text_color(text_inverse).text_weight(600);
                     // Selected / range-endpoint hover lightens the accent.
                     if !spec.is_disabled {
                         cell = cell.hover(move |s| s.bg(selected_hover_bg));
@@ -512,23 +537,15 @@ fn build(
                     // In-range: tinted accent fill.
                     cell = cell.bg(in_range_bg).text_color(text_primary);
                     if is_today {
-                        cell = cell
-                            .border_1()
-                            .border_color(today_border)
-                            .text_weight(600);
+                        cell = cell.border_1().border_color(today_border).text_weight(600);
                     }
                 } else {
                     cell = cell.text_color(text_primary);
                     if is_today {
-                        cell = cell
-                            .border_1()
-                            .border_color(today_border)
-                            .text_weight(600);
+                        cell = cell.border_1().border_color(today_border).text_weight(600);
                     }
                     if !spec.is_disabled {
-                        cell = cell.hover(move |s| {
-                            s.bg(hover_bg).border_color(hover_border)
-                        });
+                        cell = cell.hover(move |s| s.bg(hover_bg).border_color(hover_border));
                     }
                 }
 
@@ -557,4 +574,4 @@ fn build(
 }
 
 mod parts;
-use parts::{outside_cell};
+use parts::outside_cell;

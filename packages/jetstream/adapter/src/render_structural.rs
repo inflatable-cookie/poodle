@@ -17,8 +17,14 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 /// Resolve an `Inset` (horizontal/vertical token pair) into `JetstreamEdges`
 /// using the theme's `resolve_space` method.
 fn resolve_inset(inset: &poodle_specs::Inset, theme: &dyn ThemeProvider) -> JetstreamEdges {
-    let h = inset.horizontal.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
-    let v = inset.vertical.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
+    let h = inset
+        .horizontal
+        .map(|t| theme.resolve_space(t))
+        .unwrap_or(0.0);
+    let v = inset
+        .vertical
+        .map(|t| theme.resolve_space(t))
+        .unwrap_or(0.0);
     JetstreamEdges {
         top: v,
         right: h,
@@ -39,7 +45,12 @@ fn apply_inset_padding(layout: &mut taffy::Style, edges: &JetstreamEdges) {
 
 impl RenderComponent<BoxSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &BoxSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &BoxSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve padding tokens
@@ -54,13 +65,21 @@ impl RenderComponent<BoxSpec> for JetstreamAdapter {
 
 impl RenderComponent<StackSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &StackSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &StackSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve gap token
         if let Some(gap_token) = spec.resolved_gap() {
             let gap = theme.resolve_space(gap_token);
-            mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+            mapped.layout.gap = taffy::Size {
+                width: taffy::LengthPercentage::length(gap),
+                height: taffy::LengthPercentage::length(gap),
+            };
         }
 
         // Resolve padding tokens
@@ -75,14 +94,22 @@ impl RenderComponent<StackSpec> for JetstreamAdapter {
 
 impl RenderComponent<GridSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &GridSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &GridSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         // Jetstream has no grid layout -- emulated with nested row/column panels
         let mut mapped = map_style(style);
 
         // Resolve gap tokens (use column gap as primary gap value)
         if let Some(col_gap_token) = spec.resolved_column_gap() {
             let gap = theme.resolve_space(col_gap_token);
-            mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+            mapped.layout.gap = taffy::Size {
+                width: taffy::LengthPercentage::length(gap),
+                height: taffy::LengthPercentage::length(gap),
+            };
         }
         // Row gap resolved for proof but Jetstream single-gap model uses column gap
         if let Some(_row_gap_token) = spec.resolved_row_gap() {
@@ -101,7 +128,12 @@ impl RenderComponent<GridSpec> for JetstreamAdapter {
 
 impl RenderComponent<SurfaceSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SurfaceSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &SurfaceSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve background color
@@ -133,7 +165,12 @@ impl RenderComponent<SurfaceSpec> for JetstreamAdapter {
 
 impl RenderComponent<SeparatorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SeparatorSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &SeparatorSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve separator color
@@ -151,7 +188,12 @@ impl RenderComponent<SeparatorSpec> for JetstreamAdapter {
 
 impl RenderComponent<ScrollShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ScrollShellSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &ScrollShellSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve padding tokens
@@ -174,10 +216,14 @@ impl RenderComponent<ScrollShellSpec> for JetstreamAdapter {
     }
 }
 
-
 impl RenderComponent<CallOutSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &CallOutSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &CallOutSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve fill (background) color
@@ -197,14 +243,20 @@ impl RenderComponent<CallOutSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
+    use crate::{theme::JetstreamThemeProvider, JetstreamAdapter, WidgetKind};
     use poodle_adapter::RenderComponent;
     use poodle_specs::*;
     use poodle_style::StyleDescriptor;
-    use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
-    fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
-    fn s() -> StyleDescriptor { StyleDescriptor::new() }
-    fn t() -> JetstreamThemeProvider { JetstreamThemeProvider::default() }
+    fn a() -> JetstreamAdapter {
+        JetstreamAdapter::new(JetstreamThemeProvider::default())
+    }
+    fn s() -> StyleDescriptor {
+        StyleDescriptor::new()
+    }
+    fn t() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::default()
+    }
 
     #[test]
     fn box_spec_uses_role_as_id() {

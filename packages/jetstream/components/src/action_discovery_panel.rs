@@ -17,11 +17,11 @@ use poodle_specs::{
 
 use crate::empty_state::js_empty_state;
 use crate::eyebrow::js_eyebrow;
-use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::skeleton::js_skeleton;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// Per-size chip dimensions (`chip-height`, `chip-x`, `chip-font-size`) for the
 /// badge/kbd pills — contract §9 "Chip size table" (rem).
@@ -75,7 +75,11 @@ pub struct ActionDiscoveryPanel {
 
 impl ActionDiscoveryPanel {
     pub fn from_spec(spec: ActionDiscoveryPanelSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_select: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+        }
     }
 
     /// Fires with the chosen action's id. Disabled actions never fire.
@@ -273,14 +277,16 @@ fn build(
             // Active item (contract §9): accent-tinted bg + an inset accent ring (no
             // longer a border approximation — doesn't shift layout vs other rows).
             if is_active {
-                row = row.bg(active_bg).shadow_layers(vec![jetstream_ui::ui_element::BoxShadow {
-                    offset_x: 0.0,
-                    offset_y: 0.0,
-                    blur: 0.0,
-                    spread: rem_to_px(0.0625),
-                    color: active_ring,
-                    inset: true,
-                }]);
+                row = row
+                    .bg(active_bg)
+                    .shadow_layers(vec![jetstream_ui::ui_element::BoxShadow {
+                        offset_x: 0.0,
+                        offset_y: 0.0,
+                        blur: 0.0,
+                        spread: rem_to_px(0.0625),
+                        color: active_ring,
+                        inset: true,
+                    }]);
             }
 
             // Trailing snippet — badge chip + kbd chip.
@@ -527,5 +533,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["open"]);
     }
-
 }

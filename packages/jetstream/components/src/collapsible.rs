@@ -15,7 +15,9 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// Collapsible — one disclosure region.
 ///
@@ -29,7 +31,12 @@ pub struct Collapsible {
 
 impl Collapsible {
     pub fn from_spec(spec: CollapsibleSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), content: None, on_open_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            content: None,
+            on_open_change: None,
+        }
     }
 
     pub fn content(mut self, content: impl crate::element::IntoJsEl) -> Self {
@@ -50,7 +57,11 @@ impl crate::element::IntoJsEl for Collapsible {
     }
 }
 
-pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
+pub fn js_collapsible(
+    spec: &CollapsibleSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+) -> JsEl {
     build(spec, theme, content, None)
 }
 
@@ -167,7 +178,11 @@ fn build(
         );
     }
 
-    let chevron_icon = if is_open { "chevron-down" } else { "chevron-right" };
+    let chevron_icon = if is_open {
+        "chevron-down"
+    } else {
+        "chevron-right"
+    };
     let indicator = ui_element::icon(chevron_icon)
         .w(icon_size)
         .h(icon_size)
@@ -213,7 +228,8 @@ fn build(
     }
 
     crate::aria::with_aria_label(outer, spec.aria_label.as_deref())
-        .aria_role(jetstream_ui::accesskit::Role::Region).aria_expanded(spec.open.unwrap_or(false))
+        .aria_role(jetstream_ui::accesskit::Role::Region)
+        .aria_expanded(spec.open.unwrap_or(false))
 }
 
 #[cfg(test)]
@@ -236,7 +252,11 @@ mod tests {
     fn trigger_heading_and_chevron_render() {
         let el = js_collapsible(&spec(), &theme(), None);
         let tree = probe(&el, 400.0, 200.0);
-        assert!(tree.has_text("Project settings"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Project settings"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Configure build options and deploy targets."),
             "description missing (must render in heading even when closed): {:?}",
@@ -327,13 +347,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Collapsible::from_spec(spec().with_disabled(true), &theme())
-            .on_open_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_open_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         let heading = spec().title.clone().unwrap_or_default();
         crate::element::click_probe::click_text(&el, 600.0, 300.0, &heading);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled collapsible fired");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a disabled collapsible fired"
+        );
     }
-
 }

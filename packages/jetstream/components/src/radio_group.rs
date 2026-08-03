@@ -66,7 +66,11 @@ pub struct RadioGroup {
 
 impl RadioGroup {
     pub fn from_spec(spec: RadioGroupSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value. Disabled options never fire.
@@ -143,27 +147,28 @@ fn build(
 
         // Radio indicator: circle with inner dot when selected
         let mut indicator = ui_element::div()
-            .w(indicator_size).h(indicator_size)
+            .w(indicator_size)
+            .h(indicator_size)
             .rounded(indicator_size * 0.5)
             .bg(indicator_bg)
-            .border(border_width).border_color(indicator_color)
-            .items_center().justify_center();
+            .border(border_width)
+            .border_color(indicator_color)
+            .items_center()
+            .justify_center();
 
         if is_selected {
             indicator = indicator.child(
                 ui_element::div()
-                    .w(dot_size).h(dot_size)
+                    .w(dot_size)
+                    .h(dot_size)
                     .rounded(dot_size * 0.5)
-                    .bg(accent)
+                    .bg(accent),
             );
         }
 
         let option_disabled = spec.is_disabled || option.is_disabled;
 
-        let mut row = ui_element::div()
-            .flex_row()
-            .items_center()
-            .gap(item_gap);
+        let mut row = ui_element::div().flex_row().items_center().gap(item_gap);
         // Contract: enabled options are pointer + focusable (focus ring is driven
         // by the preview loop); disabled options revert to the default cursor —
         // JsEl has no `not-allowed` cursor (Svelte uses it; noted runtime limit).
@@ -176,7 +181,7 @@ fn build(
         row = row.child(
             ui_element::label(&option.label)
                 .text_color(text_color)
-                .text_size(font_size)
+                .text_size(font_size),
         );
 
         // Contract: per-option disabled applies opacity to that option row only.
@@ -311,10 +316,17 @@ mod tests {
         let el = js_radio_group(&three_opt_spec(), &theme());
         // "free" (idx 0) unselected → indicator has no dot child.
         let free_indicator = &el.children[0].children[0];
-        assert!(free_indicator.children.is_empty(), "unselected indicator has no dot");
+        assert!(
+            free_indicator.children.is_empty(),
+            "unselected indicator has no dot"
+        );
         // "pro" (idx 1) selected → indicator has a dot child.
         let pro_indicator = &el.children[1].children[0];
-        assert_eq!(pro_indicator.children.len(), 1, "selected indicator renders dot");
+        assert_eq!(
+            pro_indicator.children.len(),
+            1,
+            "selected indicator renders dot"
+        );
     }
 
     fn gap_px(el: &JsEl) -> taffy::LengthPercentage {
@@ -326,7 +338,11 @@ mod tests {
         let th = theme();
         let el = js_radio_group(&three_opt_spec(), &th);
         let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.stack.sm"));
-        assert_eq!(gap_px(&el), expected, "vertical default gap = space-stack-sm");
+        assert_eq!(
+            gap_px(&el),
+            expected,
+            "vertical default gap = space-stack-sm"
+        );
     }
 
     #[test]
@@ -337,7 +353,11 @@ mod tests {
             &th,
         );
         let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.inline.md"));
-        assert_eq!(gap_px(&el), expected, "horizontal default gap = space-inline-md");
+        assert_eq!(
+            gap_px(&el),
+            expected,
+            "horizontal default gap = space-inline-md"
+        );
     }
 
     #[test]
@@ -348,7 +368,11 @@ mod tests {
             &th,
         );
         let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.stack.lg"));
-        assert_eq!(gap_px(&el), expected, "comfortable density gap = space-stack-lg");
+        assert_eq!(
+            gap_px(&el),
+            expected,
+            "comfortable density gap = space-stack-lg"
+        );
         // And it must differ from the default vertical gap, proving density took effect.
         assert_ne!(
             resolve_px(&th, "space.stack.lg"),
@@ -365,13 +389,11 @@ mod tests {
         let md = &js_radio_group(&three_opt_spec(), &th).children[0].children[0];
         assert_eq!(md.layout.size.width, taffy::Dimension::length(18.0));
         // xs = icon-md − 0.125rem = 0.875rem = 14px (== Svelte icon-xs + 0.25rem).
-        let xs = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xs), &th)
-            .children[0]
+        let xs = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xs), &th).children[0]
             .children[0];
         assert_eq!(xs.layout.size.width, taffy::Dimension::length(14.0));
         // xl = icon-md + 0.625rem = 1.625rem = 26px (== Svelte icon-xl + 0.125rem).
-        let xl = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xl), &th)
-            .children[0]
+        let xl = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xl), &th).children[0]
             .children[0];
         assert_eq!(xl.layout.size.width, taffy::Dimension::length(26.0));
     }
@@ -386,7 +408,10 @@ mod tests {
         .with_value("a");
         let el = js_radio_group(&spec, &th);
         let dim = resolve_opacity(&th, "state.opacity.disabled");
-        assert_eq!(el.children[0].style.opacity, 1.0, "enabled row full opacity");
+        assert_eq!(
+            el.children[0].style.opacity, 1.0,
+            "enabled row full opacity"
+        );
         assert!(
             (el.children[1].style.opacity - dim).abs() < 0.001,
             "disabled row dimmed to state-opacity-disabled"
@@ -400,7 +425,10 @@ mod tests {
         spec.is_disabled = true;
         let el = js_radio_group(&spec, &th);
         let dim = resolve_opacity(&th, "state.opacity.disabled");
-        assert!((el.style.opacity - dim).abs() < 0.001, "group-disabled dims container");
+        assert!(
+            (el.style.opacity - dim).abs() < 0.001,
+            "group-disabled dims container"
+        );
     }
 
     #[test]
@@ -419,5 +447,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
     }
-
 }

@@ -7,7 +7,9 @@ use poodle_specs::SegmentedControlSpec;
 use std::sync::Arc;
 
 use crate::element::{Handler, IntoJsEl};
-use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// SegmentedControl — an inline choice between exclusive options.
@@ -21,7 +23,11 @@ pub struct SegmentedControl {
 
 impl SegmentedControl {
     pub fn from_spec(spec: SegmentedControlSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the newly chosen option's value.
@@ -78,9 +84,11 @@ fn build(
 
     let mut el = ui_element::div()
         .bg(root_bg)
-        .border(1.0).border_color(root_border)
+        .border(1.0)
+        .border_color(root_border)
         .rounded(control_radius)
-        .flex_row().items_center()
+        .flex_row()
+        .items_center()
         .p(inner)
         .gap(inner)
         .h(height);
@@ -96,12 +104,20 @@ fn build(
         // the whole control is not (the container handles the whole-control case).
         let is_option_disabled = !spec.is_disabled && option.is_disabled;
 
-        let text_color = if is_selected { text_inverse } else { text_muted };
+        let text_color = if is_selected {
+            text_inverse
+        } else {
+            text_muted
+        };
 
         let mut seg = ui_element::button(&option.label)
-            .text_size(font_size).text_weight(600)
+            .text_size(font_size)
+            .text_weight(600)
             .text_color(text_color)
-            .pl(seg_px).pr(seg_px).pt(seg_py).pb(seg_py)
+            .pl(seg_px)
+            .pr(seg_px)
+            .pt(seg_py)
+            .pb(seg_py)
             // Contract §8 Label inner radius (control − 0.125rem), not full control.
             .rounded(inner_radius)
             .focusable();
@@ -177,7 +193,12 @@ mod tests {
 
     fn accent(th: &JetstreamThemeProvider) -> ProbeColor {
         let c = resolve_color(th, SegmentedControlSpec::default().selected_fill_token());
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     #[test]
@@ -220,7 +241,11 @@ mod tests {
                 .iter()
                 .find(|n| n.kind == "Button" && n.text_size.is_some())
                 .expect("a sized segment");
-            assert_eq!(seg.text_size, Some(rem_to_px(0.75)), "size {size:?} font drifted");
+            assert_eq!(
+                seg.text_size,
+                Some(rem_to_px(0.75)),
+                "size {size:?} font drifted"
+            );
         }
     }
 
@@ -277,15 +302,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = SegmentedControl::from_spec(
-            SegmentedControlSpec { is_disabled: true, ..SegmentedControlSpec::new(opts()) },
+            SegmentedControlSpec {
+                is_disabled: true,
+                ..SegmentedControlSpec::new(opts())
+            },
             &theme(),
         )
-        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_change(move |_| {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 480.0, 80.0, "List");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled control fired");
     }
-
 }

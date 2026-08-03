@@ -26,7 +26,10 @@ pub struct TreeRow {
 }
 
 /// Depth-first flatten of the rows currently visible given the expansion set.
-pub fn flatten_visible_tree_rows<N: TreeNodeLike>(nodes: &[N], expanded: &[String]) -> Vec<TreeRow> {
+pub fn flatten_visible_tree_rows<N: TreeNodeLike>(
+    nodes: &[N],
+    expanded: &[String],
+) -> Vec<TreeRow> {
     fn walk<N: TreeNodeLike>(
         nodes: &[N],
         expanded: &[String],
@@ -48,7 +51,13 @@ pub fn flatten_visible_tree_rows<N: TreeNodeLike>(nodes: &[N], expanded: &[Strin
             });
 
             if branch && is_expanded && !node.children().is_empty() {
-                walk(node.children(), expanded, depth + 1, Some(node.value()), out);
+                walk(
+                    node.children(),
+                    expanded,
+                    depth + 1,
+                    Some(node.value()),
+                    out,
+                );
             }
         }
     }
@@ -80,7 +89,10 @@ pub fn tree_checkable_under<N: TreeNodeLike>(node: &N) -> Vec<String> {
         return vec![node.value().to_string()];
     }
 
-    node.children().iter().flat_map(tree_checkable_under).collect()
+    node.children()
+        .iter()
+        .flat_map(tree_checkable_under)
+        .collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -92,7 +104,10 @@ pub enum TreeCheckState {
 
 pub fn tree_check_state<N: TreeNodeLike>(node: &N, checked_values: &[String]) -> TreeCheckState {
     let leaves = tree_checkable_under(node);
-    let checked = leaves.iter().filter(|value| checked_values.contains(value)).count();
+    let checked = leaves
+        .iter()
+        .filter(|value| checked_values.contains(value))
+        .count();
 
     if checked == 0 {
         TreeCheckState::Unchecked
@@ -129,9 +144,15 @@ pub fn tree_toggle_check<N: TreeNodeLike>(node: &N, checked_values: &[String]) -
 
 // ── Shift-range selection over the visible order ──
 
-pub fn tree_range_selection(rows: &[TreeRow], anchor: Option<&str>, to_value: &str) -> Option<Vec<String>> {
+pub fn tree_range_selection(
+    rows: &[TreeRow],
+    anchor: Option<&str>,
+    to_value: &str,
+) -> Option<Vec<String>> {
     let order: Vec<&str> = rows.iter().map(|row| row.value.as_str()).collect();
-    let a = order.iter().position(|value| *value == anchor.unwrap_or(to_value))?;
+    let a = order
+        .iter()
+        .position(|value| *value == anchor.unwrap_or(to_value))?;
     let b = order.iter().position(|value| *value == to_value)?;
     let (lo, hi) = if a <= b { (a, b) } else { (b, a) };
 
@@ -152,23 +173,41 @@ pub struct TreeReorderMove {
     pub before: bool,
 }
 
-pub fn tree_sibling_reorder_target(siblings: &[String], value: &str, up: bool) -> Option<TreeReorderMove> {
+pub fn tree_sibling_reorder_target(
+    siblings: &[String],
+    value: &str,
+    up: bool,
+) -> Option<TreeReorderMove> {
     let index = siblings.iter().position(|candidate| candidate == value)?;
     let next_index = if up { index.checked_sub(1)? } else { index + 1 };
     let target = siblings.get(next_index)?;
 
-    Some(TreeReorderMove { target: target.clone(), before: up })
+    Some(TreeReorderMove {
+        target: target.clone(),
+        before: up,
+    })
 }
 
 // ── Keyboard intents ──
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TreeKeyIntent {
-    Focus { value: Option<String>, extend_selection: bool },
-    Expand { value: String },
-    Collapse { value: String },
-    FocusParent { parent: Option<String> },
-    MoveSibling { up: bool },
+    Focus {
+        value: Option<String>,
+        extend_selection: bool,
+    },
+    Expand {
+        value: String,
+    },
+    Collapse {
+        value: String,
+    },
+    FocusParent {
+        parent: Option<String>,
+    },
+    MoveSibling {
+        up: bool,
+    },
     Activate,
     ToggleSelection,
     StartRename,
@@ -223,7 +262,9 @@ pub fn tree_keydown_intent(
             }
 
             if !expanded.iter().any(|value| *value == row.value) {
-                return Some(TreeKeyIntent::Expand { value: row.value.clone() });
+                return Some(TreeKeyIntent::Expand {
+                    value: row.value.clone(),
+                });
             }
 
             Some(TreeKeyIntent::Focus {
@@ -233,10 +274,14 @@ pub fn tree_keydown_intent(
         }
         "ArrowLeft" => {
             if row.branch && expanded.iter().any(|value| *value == row.value) {
-                return Some(TreeKeyIntent::Collapse { value: row.value.clone() });
+                return Some(TreeKeyIntent::Collapse {
+                    value: row.value.clone(),
+                });
             }
 
-            Some(TreeKeyIntent::FocusParent { parent: row.parent.clone() })
+            Some(TreeKeyIntent::FocusParent {
+                parent: row.parent.clone(),
+            })
         }
         "Home" => Some(TreeKeyIntent::Focus {
             value: rows.first().map(|r| r.value.clone()),
@@ -282,8 +327,11 @@ pub fn tree_virtual_window(
     viewport_height_px: f64,
     overscan: usize,
 ) -> TreeVirtualWindow {
-    let start_index = ((scroll_top / row_height_px).floor() as i64 - overscan as i64).max(0) as usize;
-    let end_index = (((scroll_top + viewport_height_px) / row_height_px).ceil() as usize + overscan).min(row_count);
+    let start_index =
+        ((scroll_top / row_height_px).floor() as i64 - overscan as i64).max(0) as usize;
+    let end_index = (((scroll_top + viewport_height_px) / row_height_px).ceil() as usize
+        + overscan)
+        .min(row_count);
 
     TreeVirtualWindow {
         start_index,

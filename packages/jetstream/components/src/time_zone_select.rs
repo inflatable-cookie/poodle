@@ -32,7 +32,12 @@ pub struct TimeZoneSelect {
 
 impl TimeZoneSelect {
     pub fn from_spec(spec: TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_toggle: None, on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_change: None,
+        }
     }
 
     /// Fires when the trigger is pressed.
@@ -91,7 +96,11 @@ mod tests {
             "default placeholder missing: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("chevron-down"), "chevron missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("chevron-down"),
+            "chevron missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -111,9 +120,17 @@ mod tests {
         let spec = TimeZoneSelectSpec::new().with_open(true);
         let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 400.0);
         // Searchable always on → search input row present.
-        assert!(tree.has_text("search"), "search row missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("search"),
+            "search row missing: {:?}",
+            tree.texts()
+        );
         // Default option set surfaces (UTC + a formatted zone label).
-        assert!(tree.has_text("UTC"), "UTC option missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("UTC"),
+            "UTC option missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("America/New York"),
             "default zone option missing: {:?}",
@@ -127,8 +144,16 @@ mod tests {
             .with_open(true)
             .with_search_query("tokyo");
         let tree = probe(&js_time_zone_select(&spec, &theme()), 320.0, 400.0);
-        assert!(tree.has_text("Asia/Tokyo"), "matching zone missing: {:?}", tree.texts());
-        assert!(!tree.has_text("UTC"), "non-matching zone not filtered: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Asia/Tokyo"),
+            "matching zone missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("UTC"),
+            "non-matching zone not filtered: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -156,14 +181,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = TimeZoneSelect::from_spec(TimeZoneSelectSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 200.0, "Search time zones...");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
-
 
     #[test]
     fn choosing_a_zone_reports_it() {
@@ -181,5 +211,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().len(), 1, "one zone, one event");
     }
-
 }

@@ -33,17 +33,31 @@ pub enum HoverEffect {
 fn close_now() -> (HoverState, Vec<HoverEffect>) {
     (
         HoverState::Closed,
-        vec![HoverEffect::ClearTimer, HoverEffect::EmitOpenChange { open: false }],
+        vec![
+            HoverEffect::ClearTimer,
+            HoverEffect::EmitOpenChange { open: false },
+        ],
     )
 }
 
-pub fn hover_transition(state: HoverState, context: HoverContext, event: HoverEvent) -> (HoverState, Vec<HoverEffect>) {
+pub fn hover_transition(
+    state: HoverState,
+    context: HoverContext,
+    event: HoverEvent,
+) -> (HoverState, Vec<HoverEffect>) {
     match event {
         HoverEvent::Enter => match state {
-            HoverState::Open | HoverState::Closing => (HoverState::Open, vec![HoverEffect::ClearTimer]),
+            HoverState::Open | HoverState::Closing => {
+                (HoverState::Open, vec![HoverEffect::ClearTimer])
+            }
             _ => (
                 HoverState::Opening,
-                vec![HoverEffect::ClearTimer, HoverEffect::StartTimer { ms: context.open_delay_ms }],
+                vec![
+                    HoverEffect::ClearTimer,
+                    HoverEffect::StartTimer {
+                        ms: context.open_delay_ms,
+                    },
+                ],
             ),
         },
         HoverEvent::Leave => match state {
@@ -51,12 +65,23 @@ pub fn hover_transition(state: HoverState, context: HoverContext, event: HoverEv
             _ if context.close_delay_ms <= 0.0 => close_now(),
             _ => (
                 HoverState::Closing,
-                vec![HoverEffect::ClearTimer, HoverEffect::StartTimer { ms: context.close_delay_ms }],
+                vec![
+                    HoverEffect::ClearTimer,
+                    HoverEffect::StartTimer {
+                        ms: context.close_delay_ms,
+                    },
+                ],
             ),
         },
         HoverEvent::TimerFire => match state {
-            HoverState::Opening => (HoverState::Open, vec![HoverEffect::EmitOpenChange { open: true }]),
-            HoverState::Closing => (HoverState::Closed, vec![HoverEffect::EmitOpenChange { open: false }]),
+            HoverState::Opening => (
+                HoverState::Open,
+                vec![HoverEffect::EmitOpenChange { open: true }],
+            ),
+            HoverState::Closing => (
+                HoverState::Closed,
+                vec![HoverEffect::EmitOpenChange { open: false }],
+            ),
             _ => (state, vec![]),
         },
         HoverEvent::Dismiss => match state {
@@ -64,7 +89,11 @@ pub fn hover_transition(state: HoverState, context: HoverContext, event: HoverEv
             _ => close_now(),
         },
         HoverEvent::SetOpen { open } => (
-            if open { HoverState::Open } else { HoverState::Closed },
+            if open {
+                HoverState::Open
+            } else {
+                HoverState::Closed
+            },
             vec![HoverEffect::ClearTimer],
         ),
     }

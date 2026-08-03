@@ -40,8 +40,8 @@ use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::theme_ext::{
-    hex_to_rgb255, resolve_color, resolve_opacity, resolve_px,
-    resolve_radius, rgb255_to_vec4, rgb_to_hsv, tint, Hsv, Rgb255,
+    hex_to_rgb255, resolve_color, resolve_opacity, resolve_px, resolve_radius, rgb255_to_vec4,
+    rgb_to_hsv, tint, Hsv, Rgb255,
 };
 
 /// Default fallback color when the spec value is missing/malformed (#6366f1).
@@ -70,7 +70,12 @@ pub struct ColorPicker {
 
 impl ColorPicker {
     pub fn from_spec(spec: ColorPickerSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_toggle: None, on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+            on_change: None,
+        }
     }
 
     /// Fires when the trigger swatch is pressed.
@@ -193,7 +198,10 @@ fn build(
         );
     }
 
-    let mut root = ui_element::div().flex_col().gap(stack_gap).child(controls_row);
+    let mut root = ui_element::div()
+        .flex_col()
+        .gap(stack_gap)
+        .child(controls_row);
 
     // ── Surface popover ───────────────────────────────────────────
     if spec.current_open() && !spec.is_disabled {

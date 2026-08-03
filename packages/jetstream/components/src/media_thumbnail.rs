@@ -12,8 +12,8 @@
 //!   or the explicit pixel width.
 //! - The contract frame background is a radial+panel gradient; JsEl paints the
 //!   flat panel base layer here (gradient = preview-loop).
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MediaFrameWidth, MediaState, MediaThumbnailSpec};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
@@ -35,9 +35,9 @@ pub fn js_media_thumbnail(spec: &MediaThumbnailSpec, theme: &JetstreamThemeProvi
     let elevated = resolve_color(theme, "color.background.elevated");
 
     // Frame radius: calc(radius.surface − 0.125rem).
-    let frame_radius =
-        (resolve_radius(theme, spec.frame_radius_token()) - rem_to_px(spec.frame_radius_inset_rem()))
-            .max(0.0);
+    let frame_radius = (resolve_radius(theme, spec.frame_radius_token())
+        - rem_to_px(spec.frame_radius_inset_rem()))
+    .max(0.0);
     let badge_radius = resolve_radius(theme, spec.badge_radius_token());
     let play_radius = resolve_radius(theme, spec.play_radius_token());
 
@@ -259,7 +259,11 @@ mod tests {
             tree.texts()
         );
         // Caption title + meta render below the frame.
-        assert!(tree.has_text("Photo 1"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Photo 1"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("2.4 MB"), "meta missing: {:?}", tree.texts());
         assert!(tree.count_kind("Icon") >= 1);
     }

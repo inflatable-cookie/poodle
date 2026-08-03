@@ -21,8 +21,8 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_ui::{color_mix, Color};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarSpec, DateTimeZonePickerSpec, TimeFieldSpec, TimeZoneSelectSpec};
 
@@ -220,7 +220,9 @@ fn build(
         // Composed Calendar (single), seeded from the structured value's date.
         let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on.clone());
         if let Some(ref date) = value.date {
-            cal_spec = cal_spec.with_value(date.clone()).with_visible_month(date.clone());
+            cal_spec = cal_spec
+                .with_value(date.clone())
+                .with_visible_month(date.clone());
         }
         cal_spec.is_disabled = spec.is_disabled;
 
@@ -289,17 +291,17 @@ fn build(
             .flex_col()
             .gap(rem_to_px(0.875))
             .child({
-            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
-            if let Some(handler) = &on_select {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_select(move |iso| handler(iso));
-            }
-            if let Some(handler) = &on_navigate {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_navigate(move |dir| handler(dir));
-            }
-            crate::element::IntoJsEl::into_js_el(calendar)
-        })
+                let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
+                if let Some(handler) = &on_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_select(move |iso| handler(iso));
+                }
+                if let Some(handler) = &on_navigate {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_navigate(move |dir| handler(dir));
+                }
+                crate::element::IntoJsEl::into_js_el(calendar)
+            })
             .child(fields);
 
         // Surface — established sibling overlay treatment (date_time_picker.rs):
@@ -437,10 +439,22 @@ mod tests {
             tree.texts()
         );
         // Field labels (contract §2 anatomy).
-        assert!(tree.has_text("TIME"), "time field label missing: {:?}", tree.texts());
-        assert!(tree.has_text("TIME ZONE"), "tz field label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("TIME"),
+            "time field label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("TIME ZONE"),
+            "tz field label missing: {:?}",
+            tree.texts()
+        );
         // Composed TimeInput value.
-        assert!(tree.has_text("10:00"), "composed time value missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("10:00"),
+            "composed time value missing: {:?}",
+            tree.texts()
+        );
         // Composed TimeZoneSelect value label (`_`→space formatted, per Svelte).
         assert!(
             tree.has_text("America/Los Angeles"),
@@ -459,7 +473,11 @@ mod tests {
         // Contract §8: 0.6875rem, weight 600, text-secondary.
         let label = find(&el, &|e| e.style.text_size == Some(rem_to_px(0.6875)))
             .expect("field label present");
-        assert_eq!(label.style.text_weight, Some(600), "field label weight not 600");
+        assert_eq!(
+            label.style.text_weight,
+            Some(600),
+            "field label weight not 600"
+        );
         assert_eq!(
             label.style.text_color,
             Some(secondary.into()),
@@ -496,7 +514,10 @@ mod tests {
         );
         let sm_trigger_h = sm.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
-        assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
+        assert!(
+            lg_trigger_h > sm_trigger_h,
+            "sm {sm_trigger_h} !< lg {lg_trigger_h}"
+        );
     }
 
     #[test]
@@ -509,14 +530,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 420.0, 80.0, "Select date, time, and zone");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
-
 
     #[test]
     fn a_day_in_the_popover_reports_its_iso_date() {
@@ -526,15 +552,18 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let days = Arc::clone(&seen);
 
-        let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new()
+        let el = DateTimeZonePicker::from_spec(
+            DateTimeZonePickerSpec::new()
                 .with_open(true)
                 .with_default_value(ZonedDateTimeValue::new(
                     Some("2026-03-01".to_string()),
                     Some("09:00".to_string()),
                     Some("UTC".to_string()),
-                )), &theme())
-            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
-            .into_js_el();
+                )),
+            &theme(),
+        )
+        .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 520.0, 820.0, "17");
 
@@ -568,7 +597,11 @@ mod tests {
         // The zone Select's trigger shows the selected zone's label.
         crate::element::click_probe::click_text(&el, 520.0, 820.0, "UTC");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_zone_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_zone_toggle fired exactly once"
+        );
     }
 
     #[test]
@@ -585,7 +618,10 @@ mod tests {
                 .with_open(true)
                 .with_zone_open(true)
                 .with_time_zone_options(vec![
-                    TimeZoneOption { value: "UTC".to_string(), label: "UTC".to_string() },
+                    TimeZoneOption {
+                        value: "UTC".to_string(),
+                        label: "UTC".to_string(),
+                    },
                     TimeZoneOption {
                         value: "Europe/London".to_string(),
                         label: "London".to_string(),
@@ -614,19 +650,21 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let moves = Arc::clone(&seen);
 
-        let el = DateTimeZonePicker::from_spec(DateTimeZonePickerSpec::new()
+        let el = DateTimeZonePicker::from_spec(
+            DateTimeZonePickerSpec::new()
                 .with_open(true)
                 .with_default_value(ZonedDateTimeValue::new(
                     Some("2026-03-01".to_string()),
                     Some("09:00".to_string()),
                     Some("UTC".to_string()),
-                )), &theme())
-            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
-            .into_js_el();
+                )),
+            &theme(),
+        )
+        .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 520.0, 820.0, "chevron-right");
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
     }
-
 }

@@ -193,7 +193,11 @@ impl TranscriptToolRun {
         if self.calls.iter().any(|c| c.status == ToolCallStatus::Error) {
             return ToolCallStatus::Error;
         }
-        if self.calls.iter().any(|c| c.status == ToolCallStatus::Running) {
+        if self
+            .calls
+            .iter()
+            .any(|c| c.status == ToolCallStatus::Running)
+        {
             return ToolCallStatus::Running;
         }
         ToolCallStatus::Success
@@ -412,7 +416,12 @@ pub struct ChangedFileNode {
 /// Mirror of core `buildChangedFileTree`, driven by the shared vectors in
 /// `vectors/changed-file-tree.json`.
 pub fn build_changed_file_tree(files: &[ChangedFile]) -> Vec<ChangedFileNode> {
-    fn insert(nodes: &mut Vec<ChangedFileNode>, segments: &[&str], prefix: &str, file: &ChangedFile) {
+    fn insert(
+        nodes: &mut Vec<ChangedFileNode>,
+        segments: &[&str],
+        prefix: &str,
+        file: &ChangedFile,
+    ) {
         let Some((head, rest)) = segments.split_first() else {
             return;
         };

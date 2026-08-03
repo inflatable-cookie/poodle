@@ -2,7 +2,6 @@
 ///
 /// Composes PageHeader + EmptyState + Callout + Pagination + PaginationSummary
 /// into a single orchestrated browse surface.
-
 use crate::composite_types::EmptyStateVariant;
 
 #[derive(Clone, Debug, PartialEq, Eq)]

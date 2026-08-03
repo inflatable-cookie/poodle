@@ -3,7 +3,6 @@
 
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
-
 /// Resolve a semantic size role against a base size to get the effective control size.
 ///
 /// `Chrome` resolves one stop smaller (clamped at the minimum),
@@ -268,4 +267,3 @@ pub fn relation_picker_item_y_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 0.5,
     }
 }
-

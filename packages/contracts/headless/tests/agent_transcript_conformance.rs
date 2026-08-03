@@ -32,10 +32,19 @@ fn item_from(value: &Value) -> TranscriptItem {
         "tool-call" => TranscriptItem::ToolCall(TranscriptToolCall {
             id: s(value, "id").to_string(),
             label: s(value, "label").to_string(),
-            detail: value.get("detail").and_then(Value::as_str).map(str::to_string),
+            detail: value
+                .get("detail")
+                .and_then(Value::as_str)
+                .map(str::to_string),
             status: ToolCallStatus::from_str(s(value, "status")),
-            icon: value.get("icon").and_then(Value::as_str).map(str::to_string),
-            output: value.get("output").and_then(Value::as_str).map(str::to_string),
+            icon: value
+                .get("icon")
+                .and_then(Value::as_str)
+                .map(str::to_string),
+            output: value
+                .get("output")
+                .and_then(Value::as_str)
+                .map(str::to_string),
         }),
         "changed-files" => TranscriptItem::ChangedFiles(TranscriptChangedFiles {
             id: s(value, "id").to_string(),
@@ -136,8 +145,16 @@ fn grouping_matches_the_shared_vectors() {
                         want_totals["fileCount"].as_u64().unwrap_or(0),
                         "{name}: file count"
                     );
-                    assert_eq!(totals.additions, u(want_totals, "additions"), "{name}: additions");
-                    assert_eq!(totals.deletions, u(want_totals, "deletions"), "{name}: deletions");
+                    assert_eq!(
+                        totals.additions,
+                        u(want_totals, "additions"),
+                        "{name}: additions"
+                    );
+                    assert_eq!(
+                        totals.deletions,
+                        u(want_totals, "deletions"),
+                        "{name}: deletions"
+                    );
                 }
                 _ => {}
             }
@@ -178,7 +195,11 @@ fn windowing_matches_the_shared_vectors() {
             "{name}: endIndex"
         );
         assert_eq!(got.offset_y, f(want, "offsetY"), "{name}: offsetY");
-        assert_eq!(got.total_height, f(want, "totalHeight"), "{name}: totalHeight");
+        assert_eq!(
+            got.total_height,
+            f(want, "totalHeight"),
+            "{name}: totalHeight"
+        );
     }
 }
 

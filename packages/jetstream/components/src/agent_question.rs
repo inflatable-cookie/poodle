@@ -102,7 +102,10 @@ fn build(
 
     if spec.shows_progress() {
         let progress = spec.progress();
-        let mut dots = ui_element::div().flex_row().items_center().gap(rem_to_px(0.25));
+        let mut dots = ui_element::div()
+            .flex_row()
+            .items_center()
+            .gap(rem_to_px(0.25));
 
         for state in &progress.states {
             let answered = !matches!(
@@ -117,7 +120,11 @@ fn build(
                 ui_element::div()
                     // The live one reads as the focus of the row without a
                     // second colour.
-                    .w(if current { rem_to_px(0.875) } else { rem_to_px(0.375) })
+                    .w(if current {
+                        rem_to_px(0.875)
+                    } else {
+                        rem_to_px(0.375)
+                    })
                     .h(rem_to_px(0.375))
                     .rounded(999.0)
                     .bg(if answered { accent } else { border }),
@@ -258,7 +265,9 @@ fn build(
 
         if let Some(handler) = on_dismiss {
             let id = question.id.clone();
-            dismiss = dismiss.cursor_pointer().on_click(move |_event| handler(&id));
+            dismiss = dismiss
+                .cursor_pointer()
+                .on_click(move |_event| handler(&id));
         }
 
         root = root.child(dismiss);
@@ -282,8 +291,16 @@ mod tests {
             header: Some("Placement".into()),
             prompt: "Where should it appear?".into(),
             options: vec![
-                AgentQuestionOption { value: "inline".into(), label: "Inline".into(), description: Some("In the transcript".into()) },
-                AgentQuestionOption { value: "composer".into(), label: "Composer".into(), description: None },
+                AgentQuestionOption {
+                    value: "inline".into(),
+                    label: "Inline".into(),
+                    description: Some("In the transcript".into()),
+                },
+                AgentQuestionOption {
+                    value: "composer".into(),
+                    label: "Composer".into(),
+                    description: None,
+                },
             ],
             allow_multiple,
         }
@@ -294,7 +311,11 @@ mod tests {
         let spec = AgentQuestionSpec::new(vec![question(false)]);
         let tree = crate::render_probe::probe(&js_agent_question(&spec, &theme()), 720.0, 320.0);
 
-        assert!(tree.has_text("Where should it appear?"), "{:?}", tree.texts());
+        assert!(
+            tree.has_text("Where should it appear?"),
+            "{:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Inline"), "{:?}", tree.texts());
         assert!(tree.has_text("Composer"), "{:?}", tree.texts());
         assert!(tree.has_text("In the transcript"), "{:?}", tree.texts());
@@ -374,7 +395,11 @@ mod tests {
 
         crate::element::click_probe::click_text(&el, 720.0, 360.0, "Skip this question");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_dismiss fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_dismiss fired exactly once"
+        );
     }
 
     #[test]
@@ -392,6 +417,10 @@ mod tests {
         let tree = crate::render_probe::probe(&js_agent_question(&spec, &theme()), 720.0, 900.0);
 
         assert!(tree.has_text("9"), "{:?}", tree.texts());
-        assert!(!tree.has_text("10"), "a tenth shortcut was rendered: {:?}", tree.texts());
+        assert!(
+            !tree.has_text("10"),
+            "a tenth shortcut was rendered: {:?}",
+            tree.texts()
+        );
     }
 }

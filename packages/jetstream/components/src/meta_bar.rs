@@ -6,13 +6,13 @@
 //! Inserts dot separators between children when show_separators is true.
 //! Uses color.text.secondary (at 72% opacity) for dot color.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::MetaBarSpec;
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_radius, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// Separator-dot color mix: `color-mix(in srgb, text-secondary 72%, transparent)`
 /// (contract §7 separator-dot `background`). No token carries the 72% factor —
@@ -31,7 +31,11 @@ const SEPARATOR_DOT_MIX: f32 = 0.72;
 ///   ├── [Child]  each caller-provided item
 ///   └── [Dot]   0.25rem pill-radius dot (when show_separators, idx > 0, opt-in)
 /// ```
-pub fn js_meta_bar(spec: &MetaBarSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
+pub fn js_meta_bar(
+    spec: &MetaBarSpec,
+    theme: &JetstreamThemeProvider,
+    children: Vec<JsEl>,
+) -> JsEl {
     let root = js_meta_bar_sep(
         spec,
         theme,
@@ -77,14 +81,10 @@ pub fn js_meta_bar_sep(
                     .w(dot_size)
                     .h(dot_size)
                     .rounded(dot_radius)
-                    .bg(dot_color)
+                    .bg(dot_color),
             );
         }
-        row = row.child(
-            ui_element::div()
-                .min_w(0.0)
-                .child(child)
-        );
+        row = row.child(ui_element::div().min_w(0.0).child(child));
     }
 
     let root = row;
@@ -156,7 +156,10 @@ mod tests {
         );
         let tree = probe(&el, 600.0, 200.0);
 
-        assert!(tree.has_text("OWNER"), "items still render without separators");
+        assert!(
+            tree.has_text("OWNER"),
+            "items still render without separators"
+        );
         assert!(
             !tree.has_background(dot_probe_color(&theme), 0.02),
             "no separator dots when show_separators is false"

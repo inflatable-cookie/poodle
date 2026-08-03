@@ -29,7 +29,11 @@ pub struct PageLoading {
 
 impl PageLoading {
     pub fn from_spec(spec: PageLoadingSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_cancel: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_cancel: None,
+        }
     }
 
     pub fn on_cancel(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
@@ -135,26 +139,24 @@ fn build(
     // with radius-control and padding 0.375rem 0.875rem. Click wiring lives in
     // the preview event loop (accepted runtime delta — note).
     if spec.can_cancel {
-        card = card.child(
-            {
-                let mut cancel = ui_element::label("Cancel")
-                    .text_color(text_secondary)
-                    .text_size(font_size)
-                    .border(border_width)
-                    .border_color(border)
-                    .rounded(control_radius)
-                    .pl(rem_to_px(0.875))
-                    .pr(rem_to_px(0.875))
-                    .pt(rem_to_px(0.375))
-                    .pb(rem_to_px(0.375))
-                    .cursor_pointer();
-                if let Some(handler) = &on_cancel {
-                    let handler = std::sync::Arc::clone(handler);
-                    cancel = cancel.on_click(move |_event| handler());
-                }
-                cancel
-            },
-        );
+        card = card.child({
+            let mut cancel = ui_element::label("Cancel")
+                .text_color(text_secondary)
+                .text_size(font_size)
+                .border(border_width)
+                .border_color(border)
+                .rounded(control_radius)
+                .pl(rem_to_px(0.875))
+                .pr(rem_to_px(0.875))
+                .pt(rem_to_px(0.375))
+                .pb(rem_to_px(0.375))
+                .cursor_pointer();
+            if let Some(handler) = &on_cancel {
+                let handler = std::sync::Arc::clone(handler);
+                cancel = cancel.on_click(move |_event| handler());
+            }
+            cancel
+        });
     }
 
     // Branch on presentation. Inline: in-flow, centered, no backdrop, padding
@@ -263,7 +265,11 @@ mod tests {
     fn cancel_renders_when_can_cancel() {
         let spec = PageLoadingSpec::new().with_can_cancel(true);
         let tree = probe(&js_page_loading(&spec, &theme()), 600.0, 400.0);
-        assert!(tree.has_text("Cancel"), "cancel control missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Cancel"),
+            "cancel control missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -289,12 +295,17 @@ mod tests {
             .with_can_cancel(true);
 
         let el = PageLoading::from_spec(spec, &theme())
-            .on_cancel(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_cancel(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 640.0, 480.0, "Cancel");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_cancel fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_cancel fired exactly once"
+        );
     }
-
 }

@@ -367,4 +367,3 @@ impl PanelTabItem {
         self
     }
 }
-

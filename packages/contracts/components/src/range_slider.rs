@@ -44,11 +44,7 @@ impl Default for RangeSliderSpec {
 }
 
 impl RangeSliderSpec {
-    pub fn with_value_text(
-        mut self,
-        lower: impl Into<String>,
-        upper: impl Into<String>,
-    ) -> Self {
+    pub fn with_value_text(mut self, lower: impl Into<String>, upper: impl Into<String>) -> Self {
         self.lower_value_text = Some(lower.into());
         self.upper_value_text = Some(upper.into());
         self

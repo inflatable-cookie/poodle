@@ -27,10 +27,7 @@ pub fn js_floating_overlay(
 ) -> JsEl {
     let gap = OVERLAY_GAP_PX;
 
-    let mut wrapper = ui_element::div()
-        .relative()
-        .flex_shrink_0()
-        .child(anchor);
+    let mut wrapper = ui_element::div().relative().flex_shrink_0().child(anchor);
 
     if let Some(surface_el) = surface {
         let surface_container = match placement {

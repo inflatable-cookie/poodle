@@ -57,10 +57,7 @@ pub fn js_list_grid(
                 .gap(gap)
                 .self_stretch();
             for c in children {
-                let cell = ui_element::div()
-                    .min_w(min_w)
-                    .flex_1()
-                    .child(c);
+                let cell = ui_element::div().min_w(min_w).flex_1().child(c);
                 g = g.child(cell);
             }
             g

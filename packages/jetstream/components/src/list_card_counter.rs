@@ -29,7 +29,11 @@ pub struct ListCardCounter {
 
 impl ListCardCounter {
     pub fn from_spec(spec: ListCardCounterSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_link_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_link_click: None,
+        }
     }
 
     pub fn on_link_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
@@ -77,7 +81,11 @@ pub fn js_list_card_counter(spec: &ListCardCounterSpec, theme: &JetstreamThemePr
         .child(count);
 
     if spec.is_linked() {
-        let link_id = format!("poodle-lcc-{}-{}", spec.icon.replace(['/', '\\', ' '], "-"), spec.count);
+        let link_id = format!(
+            "poodle-lcc-{}-{}",
+            spec.icon.replace(['/', '\\', ' '], "-"),
+            spec.count
+        );
         row = row
             .id(link_id)
             .cursor_pointer()
@@ -107,12 +115,18 @@ mod tests {
 
         let spec = ListCardCounterSpec::new("message-square", 12).with_href("/comments");
         let el = ListCardCounter::from_spec(spec, &theme())
-            .on_link_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_link_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 200.0, 60.0, "12");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_link_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_link_click fired exactly once"
+        );
     }
 
     /// An unlinked counter is a statistic, not a control.
@@ -125,9 +139,12 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = ListCardCounter::from_spec(ListCardCounterSpec::new("message-square", 12), &theme())
-            .on_link_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
-            .into_js_el();
+        let el =
+            ListCardCounter::from_spec(ListCardCounterSpec::new("message-square", 12), &theme())
+                .on_link_click(move || {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                })
+                .into_js_el();
 
         crate::element::click_probe::click_text(&el, 200.0, 60.0, "12");
 

@@ -29,7 +29,11 @@ pub struct RefSelect {
 
 impl RefSelect {
     pub fn from_spec(spec: RefSelectSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value.
@@ -146,7 +150,9 @@ fn build(
     // ── Dialog surface (rendered inline when open) ────────────────────────────
     if spec.is_open {
         // Contract: the open overlay panel is a `dialog`.
-        let mut panel = ui_element::div().flex_col().gap(rem_to_px(0.5))
+        let mut panel = ui_element::div()
+            .flex_col()
+            .gap(rem_to_px(0.5))
             .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         if spec.is_searchable {
@@ -313,7 +319,11 @@ mod tests {
     #[test]
     fn trigger_shows_the_selected_ref() {
         let tree = crate::render_probe::probe(&js_ref_select(&sample(), &theme()), 320.0, 80.0);
-        assert!(tree.has_text("main"), "trigger label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("main"),
+            "trigger label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -323,18 +333,42 @@ mod tests {
             360.0,
             420.0,
         );
-        assert!(tree.has_text("Branches"), "group heading missing: {:?}", tree.texts());
-        assert!(tree.has_text("Tags"), "second group missing: {:?}", tree.texts());
-        assert!(tree.has_text("tree-component"), "row missing: {:?}", tree.texts());
-        assert!(tree.has_text("a1b2c3d"), "description missing: {:?}", tree.texts());
-        assert!(tree.has_text("current"), "current marker missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Branches"),
+            "group heading missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Tags"),
+            "second group missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("tree-component"),
+            "row missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("a1b2c3d"),
+            "description missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("current"),
+            "current marker missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn loading_replaces_the_empty_message() {
         let empty = RefSelectSpec::new().with_open(true);
         let tree = crate::render_probe::probe(&js_ref_select(&empty, &theme()), 320.0, 200.0);
-        assert!(tree.has_text("No refs found"), "empty text missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("No refs found"),
+            "empty text missing: {:?}",
+            tree.texts()
+        );
 
         let loading = empty.with_loading(true);
         let tree = crate::render_probe::probe(&js_ref_select(&loading, &theme()), 320.0, 200.0);
@@ -343,10 +377,12 @@ mod tests {
             "must not claim empty while loading: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Loading more refs…"), "loading text missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Loading more refs…"),
+            "loading text missing: {:?}",
+            tree.texts()
+        );
     }
-
-
 
     #[test]
     fn choosing_a_ref_reports_its_value() {
@@ -368,5 +404,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
     }
-
 }

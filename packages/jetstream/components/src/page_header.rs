@@ -73,7 +73,9 @@ pub fn js_page_header_with_slots(
     meta: Option<JsEl>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
 
     // ── Typography ────────────────────────────────────────────────────────────
     let heading_base = resolve_px(theme, spec.heading_size_token());
@@ -109,7 +111,11 @@ pub fn js_page_header_with_slots(
     let mut outer = ui_element::div().flex_col().gap(gap).pb(pad_y);
 
     // ── Top row: title block (left) + actions row (right) ─────────────────────
-    let mut left_col = ui_element::div().flex_col().gap(title_block_gap).grow().min_w(0.0);
+    let mut left_col = ui_element::div()
+        .flex_col()
+        .gap(title_block_gap)
+        .grow()
+        .min_w(0.0);
 
     // Eyebrow (category tag) — always rendered first when present.
     if let Some(ref eyebrow) = spec.eyebrow {
@@ -299,7 +305,11 @@ mod tests {
             &theme(),
         );
         let tree = crate::render_probe::probe(&el, 600.0, 200.0);
-        assert!(tree.has_text("Components"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Components"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Browse the library."),
             "subtitle missing: {:?}",
@@ -333,7 +343,11 @@ mod tests {
             .with_back("/library", "Back to Library");
         let tree = crate::render_probe::probe(&js_page_header(&spec, &theme()), 600.0, 200.0);
         // Count pill carries the number.
-        assert!(tree.has_text("128"), "count pill missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("128"),
+            "count pill missing: {:?}",
+            tree.texts()
+        );
         // Back-link uses arrow-left icon and the stripped display label.
         assert!(
             tree.has_text("arrow-left"),
@@ -358,7 +372,11 @@ mod tests {
             None,
         );
         let tree = crate::render_probe::probe(&el, 600.0, 160.0);
-        assert!(tree.has_text("Edit"), "actions slot missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Edit"),
+            "actions slot missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]

@@ -4,7 +4,11 @@
 /// Next enabled index in `direction` (+1/-1), wrapping modulo item count and
 /// skipping disabled items. Returns `start_index` when no other enabled item
 /// exists, and `None` for an empty list.
-pub fn find_next_enabled_index(disabled: &[bool], start_index: usize, direction: i32) -> Option<usize> {
+pub fn find_next_enabled_index(
+    disabled: &[bool],
+    start_index: usize,
+    direction: i32,
+) -> Option<usize> {
     let count = disabled.len();
 
     if count == 0 {

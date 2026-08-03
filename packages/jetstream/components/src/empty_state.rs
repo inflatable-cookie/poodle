@@ -19,12 +19,24 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
     let gap = resolve_px(theme, spec.layout_gap_token());
 
     // Effective size: compact uses Sm, default uses Md
-    let effective_size = if spec.compact { ControlSize::Sm } else { ControlSize::Md };
+    let effective_size = if spec.compact {
+        ControlSize::Sm
+    } else {
+        ControlSize::Md
+    };
 
     // Title font: 1.125rem default, 0.9375rem compact — match Svelte
-    let title_font = if spec.compact { rem_to_px(0.9375) } else { rem_to_px(1.125) };
+    let title_font = if spec.compact {
+        rem_to_px(0.9375)
+    } else {
+        rem_to_px(1.125)
+    };
     // Message font: 0.8125rem default, 0.75rem compact — match Svelte
-    let message_font = if spec.compact { rem_to_px(0.75) } else { rem_to_px(0.8125) };
+    let message_font = if spec.compact {
+        rem_to_px(0.75)
+    } else {
+        rem_to_px(0.8125)
+    };
 
     // Icon: name driven by variant (matches Svelte reference)
     let icon_name = match spec.variant {
@@ -33,9 +45,17 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
         EmptyStateVariant::Neutral => "inbox",
     };
     // Icon container size: 2.25rem default, 1.75rem compact — match Svelte
-    let icon_container = if spec.compact { rem_to_px(1.75) } else { rem_to_px(2.25) };
+    let icon_container = if spec.compact {
+        rem_to_px(1.75)
+    } else {
+        rem_to_px(2.25)
+    };
     // Icon font size inside container: 1.125rem default, 0.9375rem compact
-    let icon_font = if spec.compact { rem_to_px(0.9375) } else { rem_to_px(1.125) };
+    let icon_font = if spec.compact {
+        rem_to_px(0.9375)
+    } else {
+        rem_to_px(1.125)
+    };
 
     // Visual circle bg: background.panel @ 90% alpha (contract §8).
     let icon_bg = tint(resolve_color(theme, "color.background.panel"), 0.90);
@@ -63,21 +83,32 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
 
     // Visual affordance container (circular)
     let visual_el = ui_element::div()
-        .w(icon_container).h(icon_container)
+        .w(icon_container)
+        .h(icon_container)
         .rounded(999.0)
         .bg(icon_bg)
-        .flex_row().items_center().justify_center()
+        .flex_row()
+        .items_center()
+        .justify_center()
         .child(
             ui_element::icon(icon_name)
-                .w(icon_font).h(icon_font)
-                .text_color(text_secondary)
+                .w(icon_font)
+                .h(icon_font)
+                .text_color(text_secondary),
         );
 
     let mut el = ui_element::div()
-        .flex_col().items_center().justify_center().gap(gap)
-        .pt(vertical_padding).pb(vertical_padding)
-        .pl(horiz_padding).pr(horiz_padding)
-        .border(1.0).border_style(BorderStyle::Dashed).border_color(border_default)
+        .flex_col()
+        .items_center()
+        .justify_center()
+        .gap(gap)
+        .pt(vertical_padding)
+        .pb(vertical_padding)
+        .pl(horiz_padding)
+        .pr(horiz_padding)
+        .border(1.0)
+        .border_style(BorderStyle::Dashed)
+        .border_color(border_default)
         .rounded(root_radius)
         .bg(root_bg);
 
@@ -85,20 +116,22 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
 
     // Copy block
     let mut copy_el = ui_element::div()
-        .flex_col().items_center().gap(resolve_px(theme, "space.inline.sm"));
+        .flex_col()
+        .items_center()
+        .gap(resolve_px(theme, "space.inline.sm"));
 
     copy_el = copy_el.child(
         ui_element::label(&spec.title)
             .text_color(text_primary)
             .text_size(title_font)
-            .text_weight(600)
+            .text_weight(600),
     );
 
     if let Some(ref desc) = spec.message {
         copy_el = copy_el.child(
             ui_element::label(desc)
                 .text_color(text_secondary)
-                .text_size(message_font)
+                .text_size(message_font),
         );
     }
 
@@ -107,7 +140,9 @@ pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> 
     // Actions
     if spec.action_count() > 0 {
         let mut actions_el = ui_element::div()
-            .flex_row().items_center().gap(resolve_px(theme, "space.inline.sm"));
+            .flex_row()
+            .items_center()
+            .gap(resolve_px(theme, "space.inline.sm"));
 
         for action in &spec.actions {
             let btn_spec = ButtonSpec::new()
@@ -143,14 +178,22 @@ mod tests {
         let tree = probe(&js_empty_state(&spec, &th), 480.0, 320.0);
 
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("No projects yet"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("No projects yet"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Create your first project to get started."),
             "message missing: {:?}",
             tree.texts()
         );
         // Default variant → inbox icon.
-        assert!(tree.has_text("inbox"), "default variant icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("inbox"),
+            "default variant icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -159,7 +202,11 @@ mod tests {
         // search → search icon + accent-base @ 7% root tint.
         let search = EmptyStateSpec::new("No results").with_variant(EmptyStateVariant::Search);
         let tree = probe(&js_empty_state(&search, &th), 480.0, 320.0);
-        assert!(tree.has_text("search"), "search icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("search"),
+            "search icon missing: {:?}",
+            tree.texts()
+        );
 
         let accent = resolve_color(&th, "color.accent.base");
         let expected = crate::theme_ext::tint(accent, 0.07);
@@ -177,7 +224,11 @@ mod tests {
         // firstRun → plus icon.
         let first = EmptyStateSpec::new("Welcome").with_variant(EmptyStateVariant::FirstRun);
         let first_tree = probe(&js_empty_state(&first, &th), 480.0, 320.0);
-        assert!(first_tree.has_text("plus"), "firstRun icon missing: {:?}", first_tree.texts());
+        assert!(
+            first_tree.has_text("plus"),
+            "firstRun icon missing: {:?}",
+            first_tree.texts()
+        );
     }
 
     #[test]
@@ -196,7 +247,10 @@ mod tests {
             "action button label missing: {:?}",
             tree.texts()
         );
-        assert!(tree.count_kind("Button") >= 1, "expected a composed Button node");
+        assert!(
+            tree.count_kind("Button") >= 1,
+            "expected a composed Button node"
+        );
     }
 
     #[test]
@@ -221,6 +275,9 @@ mod tests {
             .and_then(|n| n.text_size)
             .expect("compact title font");
 
-        assert!(c_font < d_font, "compact title font {c_font} should be < default {d_font}");
+        assert!(
+            c_font < d_font,
+            "compact title font {c_font} should be < default {d_font}"
+        );
     }
 }

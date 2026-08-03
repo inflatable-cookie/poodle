@@ -25,16 +25,29 @@ pub enum MdInline {
     Strong(Vec<MdInline>),
     Em(Vec<MdInline>),
     Del(Vec<MdInline>),
-    Link { href: String, children: Vec<MdInline> },
+    Link {
+        href: String,
+        children: Vec<MdInline>,
+    },
     Break,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MdBlock {
     Paragraph(Vec<MdInline>),
-    Heading { level: u8, children: Vec<MdInline> },
-    Code { lang: Option<String>, value: String },
-    List { ordered: bool, start: u64, items: Vec<Vec<MdBlock>> },
+    Heading {
+        level: u8,
+        children: Vec<MdInline>,
+    },
+    Code {
+        lang: Option<String>,
+        value: String,
+    },
+    List {
+        ordered: bool,
+        start: u64,
+        items: Vec<Vec<MdBlock>>,
+    },
     Blockquote(Vec<MdBlock>),
     Rule,
 }
@@ -248,7 +261,11 @@ pub fn parse_markdown(source: &str) -> Vec<MdBlock> {
                 TagEnd::List(_) => {
                     let items = walker.list_items.pop().unwrap_or_default();
                     let (ordered, start) = walker.lists.pop().unwrap_or((false, 1));
-                    walker.push_block(MdBlock::List { ordered, start, items });
+                    walker.push_block(MdBlock::List {
+                        ordered,
+                        start,
+                        items,
+                    });
                 }
                 TagEnd::BlockQuote(_) => {
                     let blocks = walker.close_blocks();

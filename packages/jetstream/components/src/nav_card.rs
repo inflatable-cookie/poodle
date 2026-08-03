@@ -13,7 +13,9 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::NavCardSpec;
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// NavCard — a card that navigates.
 ///
@@ -26,7 +28,11 @@ pub struct NavCard {
 
 impl NavCard {
     pub fn from_spec(spec: NavCardSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+        }
     }
 
     pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
@@ -207,7 +213,12 @@ mod tests {
 
     fn accent(th: &JetstreamThemeProvider) -> ProbeColor {
         let c = resolve_color(th, "color.accent.base");
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     #[test]
@@ -222,17 +233,28 @@ mod tests {
         let tree = probe(&el, 320.0, 120.0);
         assert!(!tree.is_empty(), "probe produced no nodes");
         // Title + description text present.
-        assert!(tree.has_text("Getting Started"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Getting Started"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Set up your first project"),
             "description missing: {:?}",
             tree.texts()
         );
         // Arrow glyph present (contract §2 required arrow).
-        assert!(tree.has_text("\u{2192}"), "arrow glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("\u{2192}"),
+            "arrow glyph missing: {:?}",
+            tree.texts()
+        );
         // Icon slot present: an accent-tinted box (alpha-mixed accent fill).
         let acc = accent(&th);
-        let tinted = ProbeColor { a: acc.a * 0.12, ..acc };
+        let tinted = ProbeColor {
+            a: acc.a * 0.12,
+            ..acc
+        };
         assert!(
             tree.has_background(tinted, 0.02),
             "accent-tinted icon slot missing"
@@ -243,12 +265,22 @@ mod tests {
     fn badge_renders_inline() {
         let th = theme();
         let el = js_nav_card(
-            &NavCardSpec::new().with_title("Components").with_badge("New"),
+            &NavCardSpec::new()
+                .with_title("Components")
+                .with_badge("New"),
             &th,
         );
         let tree = probe(&el, 320.0, 120.0);
-        assert!(tree.has_text("New"), "badge text missing: {:?}", tree.texts());
-        assert!(tree.has_text("Components"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("New"),
+            "badge text missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Components"),
+            "title missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -256,32 +288,49 @@ mod tests {
         let th = theme();
         // Compact icon box is 1.75rem, comfortable is 2.25rem — distinct widths.
         let compact = js_nav_card(
-            &NavCardSpec::new().with_title("A").with_density(ControlDensity::Compact),
+            &NavCardSpec::new()
+                .with_title("A")
+                .with_density(ControlDensity::Compact),
             &th,
         );
         let comfy = js_nav_card(
-            &NavCardSpec::new().with_title("A").with_density(ControlDensity::Comfortable),
+            &NavCardSpec::new()
+                .with_title("A")
+                .with_density(ControlDensity::Comfortable),
             &th,
         );
         let cw = rem_to_px(1.75);
         let mw = rem_to_px(2.25);
         let has_box = |t: &crate::render_probe::ProbeTree, s: f32| {
-            t.nodes.iter().any(|n| (n.w - s).abs() < 0.5 && (n.h - s).abs() < 0.5)
+            t.nodes
+                .iter()
+                .any(|n| (n.w - s).abs() < 0.5 && (n.h - s).abs() < 0.5)
         };
-        assert!(has_box(&probe(&compact, 320.0, 120.0), cw), "compact icon {cw} missing");
-        assert!(has_box(&probe(&comfy, 320.0, 120.0), mw), "comfy icon {mw} missing");
+        assert!(
+            has_box(&probe(&compact, 320.0, 120.0), cw),
+            "compact icon {cw} missing"
+        );
+        assert!(
+            has_box(&probe(&comfy, 320.0, 120.0), mw),
+            "comfy icon {mw} missing"
+        );
     }
 
     #[test]
     fn disabled_reduces_opacity() {
         let th = theme();
         let el = js_nav_card(
-            &NavCardSpec::new().with_title("API Reference").with_disabled(true),
+            &NavCardSpec::new()
+                .with_title("API Reference")
+                .with_disabled(true),
             &th,
         );
         let tree = probe(&el, 320.0, 120.0);
         // Still renders the title; disabled is an opacity/flag treatment.
-        assert!(tree.has_text("API Reference"), "title missing while disabled");
+        assert!(
+            tree.has_text("API Reference"),
+            "title missing while disabled"
+        );
     }
 
     #[test]
@@ -294,12 +343,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = NavCard::from_spec(NavCardSpec::new().with_title("Components"), &theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 400.0, 120.0, "Components");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_click fired exactly once"
+        );
     }
 
     #[test]
@@ -312,15 +367,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = NavCard::from_spec(
-            NavCardSpec::new().with_title("Components").with_disabled(true),
+            NavCardSpec::new()
+                .with_title("Components")
+                .with_disabled(true),
             &theme(),
         )
-        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_click(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 400.0, 120.0, "Components");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled card fired");
     }
-
 }

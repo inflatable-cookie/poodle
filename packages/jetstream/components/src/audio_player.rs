@@ -135,7 +135,11 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
     );
 
     // Mute / unmute (icon).
-    el = el.child(icon_btn(if spec.is_muted { "volume-x" } else { "volume-2" }));
+    el = el.child(icon_btn(if spec.is_muted {
+        "volume-x"
+    } else {
+        "volume-2"
+    }));
 
     // Volume slider — proportional fill; base = accent-base tinted (contract).
     let vol_frac = if spec.is_muted { 0.0 } else { spec.volume };
@@ -171,24 +175,42 @@ mod tests {
     fn renders_icon_transport_not_text() {
         use crate::render_probe::probe;
         let el = js_audio_player(
-            &AudioPlayerSpec::new("a.mp3").with_duration(125.0).with_current_time(5.0),
+            &AudioPlayerSpec::new("a.mp3")
+                .with_duration(125.0)
+                .with_current_time(5.0),
             &theme(),
         );
         let tree = probe(&el, 400.0, 48.0);
         // m:ss times, no "Play"/"Mute" text labels, and a ProgressBar seek/volume.
-        assert!(tree.has_text("0:05") && tree.has_text("2:05"), "m:ss times missing: {:?}", tree.texts());
-        assert!(!tree.has_text("Play") && !tree.has_text("Mute"), "text-label transport leaked");
-        assert!(tree.count_kind("ProgressBar") >= 1, "seek/volume not ProgressBar widgets");
+        assert!(
+            tree.has_text("0:05") && tree.has_text("2:05"),
+            "m:ss times missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("Play") && !tree.has_text("Mute"),
+            "text-label transport leaked"
+        );
+        assert!(
+            tree.count_kind("ProgressBar") >= 1,
+            "seek/volume not ProgressBar widgets"
+        );
     }
 
     #[test]
     fn speed_select_shows_rate() {
         use crate::render_probe::probe;
         let el = js_audio_player(
-            &AudioPlayerSpec::new("a.mp3").with_show_speed_control(true).with_rate(1.5),
+            &AudioPlayerSpec::new("a.mp3")
+                .with_show_speed_control(true)
+                .with_rate(1.5),
             &theme(),
         );
         let tree = probe(&el, 400.0, 48.0);
-        assert!(tree.has_text("1.5x"), "rate label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("1.5x"),
+            "rate label missing: {:?}",
+            tree.texts()
+        );
     }
 }

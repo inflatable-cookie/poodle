@@ -7,8 +7,8 @@
 //! resolve from tokens or `SurfaceSpec` methods. The CSS color-mix percentages
 //! (96% / 98% / 74%) are centralized on the spec, not hardcoded here.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SurfaceSpec;
 
@@ -88,7 +88,9 @@ mod tests {
     fn fill_of(spec: &SurfaceSpec) -> ProbeColor {
         let el = js_surface(spec, &theme(), vec![]);
         let tree = probe(&el, 200.0, 120.0);
-        tree.nodes[0].bg.expect("surface root has a background fill")
+        tree.nodes[0]
+            .bg
+            .expect("surface root has a background fill")
     }
 
     /// Each elevation level resolves a distinct fill: canvas mixes the canvas
@@ -100,7 +102,10 @@ mod tests {
         let panel = fill_of(&SurfaceSpec::new().with_tone(SurfaceTone::Panel));
         let elevated = fill_of(&SurfaceSpec::new().with_tone(SurfaceTone::Elevated));
 
-        assert!(!canvas.approx(panel, 0.001), "canvas vs panel fill identical");
+        assert!(
+            !canvas.approx(panel, 0.001),
+            "canvas vs panel fill identical"
+        );
         assert!(
             !panel.approx(elevated, 0.001),
             "panel vs elevated fill identical"
@@ -136,7 +141,8 @@ mod tests {
         let spec = SurfaceSpec::new().with_border(SurfaceBorder::Subtle);
         let base: Color = resolve_color(
             &theme(),
-            spec.resolved_border_color().expect("subtle has a border token"),
+            spec.resolved_border_color()
+                .expect("subtle has a border token"),
         )
         .into();
         // border_mix_ratio for subtle is 0.74 (contract §8).
@@ -155,7 +161,9 @@ mod tests {
     #[test]
     fn border_width_resolves_from_token() {
         let spec = SurfaceSpec::new().with_border(SurfaceBorder::Subtle);
-        let token = spec.resolved_border_width().expect("subtle has a width token");
+        let token = spec
+            .resolved_border_width()
+            .expect("subtle has a width token");
         let width = resolve_px(&theme(), token);
         assert!(width > 0.0, "border width resolved from token");
         // 0.0625rem * 16 = 1.0px under the default root, but it is token-resolved,

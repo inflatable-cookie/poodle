@@ -9,10 +9,9 @@
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
     BadgeSpec, CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
-    DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
-    MeterSpec, PillSpec, ProgressSpec, RatingSpec, SkeletonSpec,
+    DateTimePickerSpec, DateTimeRangePickerSpec, DateTimeZonePickerSpec, DurationInputSpec,
+    EyebrowSpec, FileUploadSpec, MeterSpec, PillSpec, ProgressSpec, RatingSpec, SkeletonSpec,
     SpinnerSpec, SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
-    DateTimeZonePickerSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -21,7 +20,12 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 
 impl RenderComponent<ProgressSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ProgressSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &ProgressSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve indicator fill color
@@ -35,7 +39,12 @@ impl RenderComponent<ProgressSpec> for JetstreamAdapter {
 
 impl RenderComponent<BadgeSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &BadgeSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &BadgeSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve badge fill color
@@ -49,7 +58,12 @@ impl RenderComponent<BadgeSpec> for JetstreamAdapter {
 
 impl RenderComponent<SpinnerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SpinnerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &SpinnerSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         if let Some(color_token) = spec.tone_color_token() {
@@ -63,7 +77,12 @@ impl RenderComponent<SpinnerSpec> for JetstreamAdapter {
 
 impl RenderComponent<StatusIndicatorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &StatusIndicatorSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &StatusIndicatorSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve status color
@@ -79,7 +98,12 @@ impl RenderComponent<StatusIndicatorSpec> for JetstreamAdapter {
 
 impl RenderComponent<SkeletonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SkeletonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &SkeletonSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve skeleton fill color
@@ -98,7 +122,12 @@ impl RenderComponent<SkeletonSpec> for JetstreamAdapter {
 
 impl RenderComponent<MeterSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &MeterSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &MeterSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve meter fill color (indicator)
@@ -117,7 +146,12 @@ impl RenderComponent<MeterSpec> for JetstreamAdapter {
 
 impl RenderComponent<RatingSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &RatingSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &RatingSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve active (filled) star color
@@ -136,7 +170,12 @@ impl RenderComponent<RatingSpec> for JetstreamAdapter {
 
 impl RenderComponent<CodeSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &CodeSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &CodeSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve code block fill color
@@ -166,7 +205,12 @@ impl RenderComponent<CodeSpec> for JetstreamAdapter {
 
 impl RenderComponent<EyebrowSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &EyebrowSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &EyebrowSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve text color
@@ -183,7 +227,12 @@ impl RenderComponent<EyebrowSpec> for JetstreamAdapter {
 
 impl RenderComponent<PillSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &PillSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &PillSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve pill fill color
@@ -202,14 +251,23 @@ impl RenderComponent<PillSpec> for JetstreamAdapter {
         mapped.visuals.focus_ring_color = Some(JetstreamColor::from(rc));
 
         // Use pill label for node id
-        let node_id = if spec.label.is_empty() { "pill" } else { &spec.label };
+        let node_id = if spec.label.is_empty() {
+            "pill"
+        } else {
+            &spec.label
+        };
         JetstreamNodeHandle::new(node_id, "PillSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<TimeAgoSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &TimeAgoSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &TimeAgoSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve text color
@@ -226,7 +284,12 @@ impl RenderComponent<TimeAgoSpec> for JetstreamAdapter {
 
 impl RenderComponent<SplitButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SplitButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &SplitButtonSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve fill color
@@ -252,13 +315,23 @@ impl RenderComponent<SplitButtonSpec> for JetstreamAdapter {
         // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("split-button", "SplitButtonSpec", WidgetKind::Button, mapped)
+        JetstreamNodeHandle::new(
+            "split-button",
+            "SplitButtonSpec",
+            WidgetKind::Button,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<ColorPickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ColorPickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &ColorPickerSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -280,7 +353,12 @@ impl RenderComponent<ColorPickerSpec> for JetstreamAdapter {
 
 impl RenderComponent<FileUploadSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &FileUploadSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &FileUploadSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve fill color
@@ -304,7 +382,12 @@ impl RenderComponent<FileUploadSpec> for JetstreamAdapter {
 
 impl RenderComponent<DurationInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &DurationInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &DurationInputSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -317,13 +400,23 @@ impl RenderComponent<DurationInputSpec> for JetstreamAdapter {
         let rc = theme.resolve_color(ring_token);
         mapped.visuals.focus_ring_color = Some(JetstreamColor::from(rc));
 
-        JetstreamNodeHandle::new("duration-input", "DurationInputSpec", WidgetKind::TextInput, mapped)
+        JetstreamNodeHandle::new(
+            "duration-input",
+            "DurationInputSpec",
+            WidgetKind::TextInput,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<TimeZoneSelectSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &TimeZoneSelectSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &TimeZoneSelectSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -336,13 +429,23 @@ impl RenderComponent<TimeZoneSelectSpec> for JetstreamAdapter {
         let oc = theme.resolve_color(overlay_token);
         mapped.visuals.background = Some(JetstreamColor::from(oc));
 
-        JetstreamNodeHandle::new("time-zone-select", "TimeZoneSelectSpec", WidgetKind::Button, mapped)
+        JetstreamNodeHandle::new(
+            "time-zone-select",
+            "TimeZoneSelectSpec",
+            WidgetKind::Button,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<DateTimeZonePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &DateTimeZonePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &DateTimeZonePickerSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -358,13 +461,23 @@ impl RenderComponent<DateTimeZonePickerSpec> for JetstreamAdapter {
         // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("date-time-zone-picker", "DateTimeZonePickerSpec", WidgetKind::Panel, mapped)
+        JetstreamNodeHandle::new(
+            "date-time-zone-picker",
+            "DateTimeZonePickerSpec",
+            WidgetKind::Panel,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<CalendarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &CalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &CalendarSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("calendar", "CalendarSpec", WidgetKind::Panel, mapped)
     }
@@ -372,7 +485,12 @@ impl RenderComponent<CalendarSpec> for JetstreamAdapter {
 
 impl RenderComponent<DatePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &DatePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &DatePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("date-picker", "DatePickerSpec", WidgetKind::Panel, mapped)
     }
@@ -380,59 +498,231 @@ impl RenderComponent<DatePickerSpec> for JetstreamAdapter {
 
 impl RenderComponent<DateRangePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &DateRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &DateRangePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
-        JetstreamNodeHandle::new("date-range-picker", "DateRangePickerSpec", WidgetKind::Panel, mapped)
+        JetstreamNodeHandle::new(
+            "date-range-picker",
+            "DateRangePickerSpec",
+            WidgetKind::Panel,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<DateTimePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &DateTimePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &DateTimePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
-        JetstreamNodeHandle::new("date-time-picker", "DateTimePickerSpec", WidgetKind::Panel, mapped)
+        JetstreamNodeHandle::new(
+            "date-time-picker",
+            "DateTimePickerSpec",
+            WidgetKind::Panel,
+            mapped,
+        )
     }
 }
 
 impl RenderComponent<DateTimeRangePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, _spec: &DateTimeRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        _spec: &DateTimeRangePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
-        JetstreamNodeHandle::new("date-time-range-picker", "DateTimeRangePickerSpec", WidgetKind::Panel, mapped)
+        JetstreamNodeHandle::new(
+            "date-time-range-picker",
+            "DateTimeRangePickerSpec",
+            WidgetKind::Panel,
+            mapped,
+        )
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::{theme::JetstreamThemeProvider, JetstreamAdapter, WidgetKind};
     use poodle_adapter::RenderComponent;
     use poodle_specs::*;
     use poodle_style::StyleDescriptor;
-    use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
-    fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
-    fn s() -> StyleDescriptor { StyleDescriptor::new() }
-    fn t() -> JetstreamThemeProvider { JetstreamThemeProvider::default() }
+    fn a() -> JetstreamAdapter {
+        JetstreamAdapter::new(JetstreamThemeProvider::default())
+    }
+    fn s() -> StyleDescriptor {
+        StyleDescriptor::new()
+    }
+    fn t() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::default()
+    }
 
-    #[test] fn progress() { assert_eq!(a().render(&ProgressSpec::new(), &s(), &t()).widget_kind, WidgetKind::ProgressBar); }
-    #[test] fn badge() { assert_eq!(a().render(&BadgeSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
-    #[test] fn spinner() { assert_eq!(a().render(&SpinnerSpec::new(), &s(), &t()).spec_type, "SpinnerSpec"); }
-    #[test] fn status_indicator() { assert_eq!(a().render(&StatusIndicatorSpec::new(), &s(), &t()).widget_kind, WidgetKind::Panel); }
-    #[test] fn skeleton() { assert_eq!(a().render(&SkeletonSpec::new(), &s(), &t()).spec_type, "SkeletonSpec"); }
-    #[test] fn meter() { assert_eq!(a().render(&MeterSpec::new(), &s(), &t()).widget_kind, WidgetKind::ProgressBar); }
-    #[test] fn rating() { assert_eq!(a().render(&RatingSpec::new(), &s(), &t()).spec_type, "RatingSpec"); }
-    #[test] fn code() { assert_eq!(a().render(&CodeSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
-    #[test] fn eyebrow() { assert_eq!(a().render(&EyebrowSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
-    #[test] fn pill() { assert_eq!(a().render(&PillSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
-    #[test] fn time_ago() { assert_eq!(a().render(&TimeAgoSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
-    #[test] fn split_button() { assert_eq!(a().render(&SplitButtonSpec::new(), &s(), &t()).widget_kind, WidgetKind::Button); }
-    #[test] fn color_picker() { assert_eq!(a().render(&ColorPickerSpec::new(), &s(), &t()).spec_type, "ColorPickerSpec"); }
-    #[test] fn file_upload() { assert_eq!(a().render(&FileUploadSpec::new(), &s(), &t()).spec_type, "FileUploadSpec"); }
-    #[test] fn duration_input() { assert_eq!(a().render(&DurationInputSpec::new(), &s(), &t()).spec_type, "DurationInputSpec"); }
-    #[test] fn time_zone_select() { assert_eq!(a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type, "TimeZoneSelectSpec"); }
-    #[test] fn date_time_zone_picker() { assert_eq!(a().render(&DateTimeZonePickerSpec::new(), &s(), &t()).spec_type, "DateTimeZonePickerSpec"); }
-    #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
-    #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }
-    #[test] fn date_range_picker() { assert_eq!(a().render(&DateRangePickerSpec::new(), &s(), &t()).spec_type, "DateRangePickerSpec"); }
-    #[test] fn date_time_picker() { assert_eq!(a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type, "DateTimePickerSpec"); }
-    #[test] fn date_time_range_picker() { assert_eq!(a().render(&DateTimeRangePickerSpec::new(), &s(), &t()).spec_type, "DateTimeRangePickerSpec"); }
+    #[test]
+    fn progress() {
+        assert_eq!(
+            a().render(&ProgressSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::ProgressBar
+        );
+    }
+    #[test]
+    fn badge() {
+        assert_eq!(
+            a().render(&BadgeSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Label
+        );
+    }
+    #[test]
+    fn spinner() {
+        assert_eq!(
+            a().render(&SpinnerSpec::new(), &s(), &t()).spec_type,
+            "SpinnerSpec"
+        );
+    }
+    #[test]
+    fn status_indicator() {
+        assert_eq!(
+            a().render(&StatusIndicatorSpec::new(), &s(), &t())
+                .widget_kind,
+            WidgetKind::Panel
+        );
+    }
+    #[test]
+    fn skeleton() {
+        assert_eq!(
+            a().render(&SkeletonSpec::new(), &s(), &t()).spec_type,
+            "SkeletonSpec"
+        );
+    }
+    #[test]
+    fn meter() {
+        assert_eq!(
+            a().render(&MeterSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::ProgressBar
+        );
+    }
+    #[test]
+    fn rating() {
+        assert_eq!(
+            a().render(&RatingSpec::new(), &s(), &t()).spec_type,
+            "RatingSpec"
+        );
+    }
+    #[test]
+    fn code() {
+        assert_eq!(
+            a().render(&CodeSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Label
+        );
+    }
+    #[test]
+    fn eyebrow() {
+        assert_eq!(
+            a().render(&EyebrowSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Label
+        );
+    }
+    #[test]
+    fn pill() {
+        assert_eq!(
+            a().render(&PillSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Label
+        );
+    }
+    #[test]
+    fn time_ago() {
+        assert_eq!(
+            a().render(&TimeAgoSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Label
+        );
+    }
+    #[test]
+    fn split_button() {
+        assert_eq!(
+            a().render(&SplitButtonSpec::new(), &s(), &t()).widget_kind,
+            WidgetKind::Button
+        );
+    }
+    #[test]
+    fn color_picker() {
+        assert_eq!(
+            a().render(&ColorPickerSpec::new(), &s(), &t()).spec_type,
+            "ColorPickerSpec"
+        );
+    }
+    #[test]
+    fn file_upload() {
+        assert_eq!(
+            a().render(&FileUploadSpec::new(), &s(), &t()).spec_type,
+            "FileUploadSpec"
+        );
+    }
+    #[test]
+    fn duration_input() {
+        assert_eq!(
+            a().render(&DurationInputSpec::new(), &s(), &t()).spec_type,
+            "DurationInputSpec"
+        );
+    }
+    #[test]
+    fn time_zone_select() {
+        assert_eq!(
+            a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type,
+            "TimeZoneSelectSpec"
+        );
+    }
+    #[test]
+    fn date_time_zone_picker() {
+        assert_eq!(
+            a().render(&DateTimeZonePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateTimeZonePickerSpec"
+        );
+    }
+    #[test]
+    fn calendar() {
+        assert_eq!(
+            a().render(&CalendarSpec::new(), &s(), &t()).spec_type,
+            "CalendarSpec"
+        );
+    }
+    #[test]
+    fn date_picker() {
+        assert_eq!(
+            a().render(&DatePickerSpec::new(), &s(), &t()).spec_type,
+            "DatePickerSpec"
+        );
+    }
+    #[test]
+    fn date_range_picker() {
+        assert_eq!(
+            a().render(&DateRangePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateRangePickerSpec"
+        );
+    }
+    #[test]
+    fn date_time_picker() {
+        assert_eq!(
+            a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type,
+            "DateTimePickerSpec"
+        );
+    }
+    #[test]
+    fn date_time_range_picker() {
+        assert_eq!(
+            a().render(&DateTimeRangePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateTimeRangePickerSpec"
+        );
+    }
 }

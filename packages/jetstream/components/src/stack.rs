@@ -26,9 +26,15 @@ pub fn js_stack(spec: &StackSpec, theme: &JetstreamThemeProvider, children: Vec<
     // Cross-axis alignment (direction-aware default when unset:
     // column → stretch, row → center, per Svelte authority).
     match spec.resolved_align() {
-        Alignment::Start => { el = el.items_start(); }
-        Alignment::Center => { el = el.items_center(); }
-        Alignment::End => { el = el.items_end(); }
+        Alignment::Start => {
+            el = el.items_start();
+        }
+        Alignment::Center => {
+            el = el.items_center();
+        }
+        Alignment::End => {
+            el = el.items_end();
+        }
         Alignment::Stretch => {} // default flex behavior
     }
 
@@ -67,8 +73,14 @@ mod tests {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
-    fn pos<'a>(tree: &'a crate::render_probe::ProbeTree, text: &str) -> &'a crate::render_probe::ProbeNode {
-        tree.nodes.iter().find(|n| n.text.as_deref() == Some(text)).expect("node")
+    fn pos<'a>(
+        tree: &'a crate::render_probe::ProbeTree,
+        text: &str,
+    ) -> &'a crate::render_probe::ProbeNode {
+        tree.nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some(text))
+            .expect("node")
     }
 
     #[test]
@@ -117,7 +129,10 @@ mod tests {
             b.y >= a.y + a.h,
             "B must start at or below A's bottom edge (gap applied)"
         );
-        assert!(b.y - (a.y + a.h) > 0.0, "a non-zero gap must separate children");
+        assert!(
+            b.y - (a.y + a.h) > 0.0,
+            "a non-zero gap must separate children"
+        );
     }
 
     #[test]

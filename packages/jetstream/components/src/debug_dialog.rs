@@ -68,6 +68,10 @@ mod tests {
     fn empty_without_value() {
         let el = js_debug_dialog(&DebugDialogSpec::new(), &theme());
         let tree = probe(&el, 320.0, 220.0);
-        assert_eq!(tree.len(), 1, "no-value debug dialog should render only an empty root");
+        assert_eq!(
+            tree.len(),
+            1,
+            "no-value debug dialog should render only an empty root"
+        );
     }
 }

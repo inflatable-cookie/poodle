@@ -21,10 +21,12 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_ui::{color_mix, Color};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{CalendarMode, CalendarSpec, DateRangeValue, DateTimeRangePickerSpec, TimeFieldSpec};
+use poodle_specs::{
+    CalendarMode, CalendarSpec, DateRangeValue, DateTimeRangePickerSpec, TimeFieldSpec,
+};
 
 use crate::calendar::js_calendar;
 use crate::presentation::{
@@ -239,17 +241,17 @@ fn build(
             .flex_col()
             .gap(rem_to_px(0.875))
             .child({
-            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
-            if let Some(handler) = &on_select {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_select(move |iso| handler(iso));
-            }
-            if let Some(handler) = &on_navigate {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_navigate(move |dir| handler(dir));
-            }
-            crate::element::IntoJsEl::into_js_el(calendar)
-        })
+                let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
+                if let Some(handler) = &on_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_select(move |iso| handler(iso));
+                }
+                if let Some(handler) = &on_navigate {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_navigate(move |dir| handler(dir));
+                }
+                crate::element::IntoJsEl::into_js_el(calendar)
+            })
             .child(times_row);
 
         // Surface — established sibling overlay treatment (date_time_picker.rs):
@@ -378,8 +380,14 @@ mod tests {
             360.0,
             480.0,
         );
-        assert!(!tree.has_text("START TIME"), "start time section leaked while closed");
-        assert!(!tree.has_text("END TIME"), "end time section leaked while closed");
+        assert!(
+            !tree.has_text("START TIME"),
+            "start time section leaked while closed"
+        );
+        assert!(
+            !tree.has_text("END TIME"),
+            "end time section leaked while closed"
+        );
     }
 
     #[test]
@@ -406,10 +414,26 @@ mod tests {
             tree.texts()
         );
         // Paired Time Section labels + both composed TimeInput values.
-        assert!(tree.has_text("START TIME"), "start label missing: {:?}", tree.texts());
-        assert!(tree.has_text("END TIME"), "end label missing: {:?}", tree.texts());
-        assert!(tree.has_text("09:00"), "start time value missing: {:?}", tree.texts());
-        assert!(tree.has_text("17:00"), "end time value missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("START TIME"),
+            "start label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("END TIME"),
+            "end label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("09:00"),
+            "start time value missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("17:00"),
+            "end time value missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -422,7 +446,11 @@ mod tests {
         // Contract §8: 0.6875rem, weight 600, text-secondary.
         let label = find(&el, &|e| e.style.text_size == Some(rem_to_px(0.6875)))
             .expect("time label present");
-        assert_eq!(label.style.text_weight, Some(600), "time label weight not 600");
+        assert_eq!(
+            label.style.text_weight,
+            Some(600),
+            "time label weight not 600"
+        );
         assert_eq!(
             label.style.text_color,
             Some(secondary.into()),
@@ -459,7 +487,10 @@ mod tests {
         );
         let sm_trigger_h = sm.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
-        assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
+        assert!(
+            lg_trigger_h > sm_trigger_h,
+            "sm {sm_trigger_h} !< lg {lg_trigger_h}"
+        );
     }
 
     #[test]
@@ -472,14 +503,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DateTimeRangePicker::from_spec(DateTimeRangePickerSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 420.0, 80.0, "Select date and time range");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
-
 
     #[test]
     fn a_day_in_the_popover_reports_its_iso_date() {
@@ -489,15 +525,18 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let days = Arc::clone(&seen);
 
-        let el = DateTimeRangePicker::from_spec(DateTimeRangePickerSpec {
+        let el = DateTimeRangePicker::from_spec(
+            DateTimeRangePickerSpec {
                 open: Some(true),
                 ..DateTimeRangePickerSpec::new().with_default_value(DateTimeRangeValue::new(
                     DateTimeValue::new(Some("2026-03-01".to_string()), Some("09:00".to_string())),
                     DateTimeValue::new(Some("2026-03-05".to_string()), Some("17:00".to_string())),
                 ))
-            }, &theme())
-            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
-            .into_js_el();
+            },
+            &theme(),
+        )
+        .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 520.0, 760.0, "17");
 
@@ -512,19 +551,21 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let moves = Arc::clone(&seen);
 
-        let el = DateTimeRangePicker::from_spec(DateTimeRangePickerSpec {
+        let el = DateTimeRangePicker::from_spec(
+            DateTimeRangePickerSpec {
                 open: Some(true),
                 ..DateTimeRangePickerSpec::new().with_default_value(DateTimeRangeValue::new(
                     DateTimeValue::new(Some("2026-03-01".to_string()), Some("09:00".to_string())),
                     DateTimeValue::new(Some("2026-03-05".to_string()), Some("17:00".to_string())),
                 ))
-            }, &theme())
-            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
-            .into_js_el();
+            },
+            &theme(),
+        )
+        .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 520.0, 760.0, "chevron-right");
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
     }
-
 }

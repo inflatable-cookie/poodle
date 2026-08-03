@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use glam::Vec4;
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ProgressSpec;
 
@@ -43,8 +43,7 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Contract §8 Indicator gradient: leading stop = color-mix(accent 88%, white),
     // trailing stop = accent.
     let gradient_lead = color_mix(accent, Vec4::ONE, spec.indicator_gradient_accent_ratio());
-    let gradient_stops: Vec<(Color, f32)> =
-        vec![(gradient_lead.into(), 0.0), (accent.into(), 1.0)];
+    let gradient_stops: Vec<(Color, f32)> = vec![(gradient_lead.into(), 0.0), (accent.into(), 1.0)];
 
     // Contract §8 Size Variants — track min-height ladder owned by the spec.
     let track_height = rem_to_px(ProgressSpec::min_height_rem(effective_size));

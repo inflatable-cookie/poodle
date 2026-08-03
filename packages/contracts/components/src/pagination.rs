@@ -310,13 +310,17 @@ impl PaginationSpec {
 
         let current = self.current_page.clamp(1, self.total_pages);
 
-        poodle_headless::pagination::build_visible_pages(current, self.total_pages, self.sibling_count)
-            .into_iter()
-            .map(|item| match item {
-                poodle_headless::pagination::VisiblePage::Page(page) => PageItem::Page(page),
-                poodle_headless::pagination::VisiblePage::Ellipsis => PageItem::Ellipsis,
-            })
-            .collect()
+        poodle_headless::pagination::build_visible_pages(
+            current,
+            self.total_pages,
+            self.sibling_count,
+        )
+        .into_iter()
+        .map(|item| match item {
+            poodle_headless::pagination::VisiblePage::Page(page) => PageItem::Page(page),
+            poodle_headless::pagination::VisiblePage::Ellipsis => PageItem::Ellipsis,
+        })
+        .collect()
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
@@ -385,7 +389,10 @@ mod tests {
         assert_eq!(spec.showing_from(), 51);
         assert_eq!(spec.showing_to(), 75);
         assert_eq!(spec.simple_summary(), "51–75 of 248");
-        assert_eq!(spec.info_string().as_deref(), Some("Showing 51 to 75 of 248"));
+        assert_eq!(
+            spec.info_string().as_deref(),
+            Some("Showing 51 to 75 of 248")
+        );
     }
 
     #[test]
@@ -439,17 +446,13 @@ mod chrome_tests {
     /// which is the whole reason `standalone` is an `Option`.
     #[test]
     fn standalone_overrides_chrome_as_its_inverse() {
-        assert!(
-            !PaginationSpec::new()
-                .with_chrome(true)
-                .with_standalone(true)
-                .resolved_chrome(),
-        );
-        assert!(
-            PaginationSpec::new()
-                .with_chrome(false)
-                .with_standalone(false)
-                .resolved_chrome(),
-        );
+        assert!(!PaginationSpec::new()
+            .with_chrome(true)
+            .with_standalone(true)
+            .resolved_chrome(),);
+        assert!(PaginationSpec::new()
+            .with_chrome(false)
+            .with_standalone(false)
+            .resolved_chrome(),);
     }
 }

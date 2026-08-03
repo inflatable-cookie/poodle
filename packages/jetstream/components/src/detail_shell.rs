@@ -168,7 +168,11 @@ mod tests {
             None,
         );
         let tree = probe(&el, 400.0, 300.0);
-        assert!(tree.has_text("Account"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Account"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Body content"),
             "ready body slot missing: {:?}",
@@ -237,7 +241,11 @@ mod tests {
             None,
         );
         let tree = probe(&el, 400.0, 300.0);
-        assert!(tree.has_text("Loading"), "loading copy missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Loading"),
+            "loading copy missing: {:?}",
+            tree.texts()
+        );
         // The grid spinner is built from panels; the state region adds nodes
         // beyond just the title label, confirming the spinner was prepended.
         assert!(

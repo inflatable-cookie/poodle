@@ -56,10 +56,7 @@ fn build_tab_label(
 
     // Contract §8 Tab button: gap = space.inline.sm between icon and label.
     let gap = resolve_px(theme, "space.inline.sm");
-    let mut row = ui_element::div()
-        .flex_row()
-        .items_center()
-        .gap(gap);
+    let mut row = ui_element::div().flex_row().items_center().gap(gap);
 
     // Leading icon.
     if let Some(ref icon_name) = tab.icon {
@@ -168,7 +165,6 @@ fn apply_drag_state(
     tab_el
 }
 
-
 mod variants;
 use variants::{render_block, render_card, render_pill, render_underline};
 
@@ -211,7 +207,12 @@ pub struct Tabs {
 
 impl Tabs {
     pub fn from_spec(spec: TabsSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None, on_close: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+            on_close: None,
+        }
     }
 
     /// Fires with the value of the tab that was selected.
@@ -253,9 +254,7 @@ fn build(
 
     // Wrap tab bar in a flex-col container. Content is rendered by the caller
     // below the tab bar — TabDefinition carries no content field in this API.
-    let root = ui_element::div()
-        .flex_col()
-        .child(tab_bar);
+    let root = ui_element::div().flex_col().child(tab_bar);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
         .aria_role(jetstream_ui::accesskit::Role::TabList)
 }
@@ -294,7 +293,12 @@ mod tests {
 
         let accent = resolve_color(&th, spec.indicator_token());
         let want = tint(accent, 0.18);
-        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        let want = ProbeColor {
+            r: want.x,
+            g: want.y,
+            b: want.z,
+            a: want.w,
+        };
         assert!(
             tree.has_background(want, 0.02),
             "active underline tab missing accent-18% tint; bgs: {}",
@@ -314,7 +318,12 @@ mod tests {
 
         let accent = resolve_color(&th, spec.indicator_token());
         let want = tint(accent, spec.pill_active_bg_opacity());
-        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        let want = ProbeColor {
+            r: want.x,
+            g: want.y,
+            b: want.z,
+            a: want.w,
+        };
         assert!(
             tree.has_background(want, 0.02),
             "active pill tab missing accent fill; tree: {}",
@@ -334,7 +343,12 @@ mod tests {
         let accent = resolve_color(&th, spec.indicator_token());
         let surface = resolve_color(&th, "color.background.surface");
         let want = blend(accent, surface, spec.block_selected_accent_mix());
-        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        let want = ProbeColor {
+            r: want.x,
+            g: want.y,
+            b: want.z,
+            a: want.w,
+        };
         assert!(
             tree.has_background(want, 0.02),
             "active block tab missing selected fill; tree: {}",
@@ -540,7 +554,9 @@ mod tests {
         ];
 
         let el = Tabs::from_spec(
-            TabsSpec::new(tabs).with_value("a").with_variant(TabVariant::Card),
+            TabsSpec::new(tabs)
+                .with_value("a")
+                .with_variant(TabVariant::Card),
             &theme(),
         )
         .on_close(move |value| closes.lock().unwrap().push(format!("close:{value}")))
@@ -570,15 +586,23 @@ mod tests {
         ];
 
         let el = Tabs::from_spec(
-            TabsSpec::new(tabs).with_value("a").with_variant(TabVariant::Card),
+            TabsSpec::new(tabs)
+                .with_value("a")
+                .with_variant(TabVariant::Card),
             &theme(),
         )
-        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_change(move |_| {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 600.0, 80.0, "x");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "the close button selected the tab");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "the close button selected the tab"
+        );
     }
 
     #[test]
@@ -596,13 +620,13 @@ mod tests {
         ];
 
         let el = Tabs::from_spec(TabsSpec::new(tabs).with_value("a"), &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 600.0, 80.0, "Features");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled tab fired");
     }
-
 }
-

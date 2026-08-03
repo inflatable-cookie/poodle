@@ -63,8 +63,7 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
             ui_element::label(label_text)
                 .text_color(text_primary)
                 .text_size(label_size)
-                .text_weight(600)
-            // Note: line-height 1.3 still requires richer runtime text support.
+                .text_weight(600), // Note: line-height 1.3 still requires richer runtime text support.
         );
     }
 
@@ -111,8 +110,7 @@ mod tests {
         );
         // Neutral status resolves to text-secondary, not accent-base.
         let dot = &el.children[0];
-        let expected: jetstream_ui::Color =
-            resolve_color(&theme, "color.text.secondary").into();
+        let expected: jetstream_ui::Color = resolve_color(&theme, "color.text.secondary").into();
         assert_eq!(dot.style.background, Some(expected));
     }
 
@@ -164,7 +162,10 @@ mod tests {
                 .with_size(ControlSize::Xs),
             &theme(),
         );
-        assert_eq!(xs.children[0].layout.size.width, taffy::Dimension::length(6.0));
+        assert_eq!(
+            xs.children[0].layout.size.width,
+            taffy::Dimension::length(6.0)
+        );
 
         let xl = js_status_indicator(
             &StatusIndicatorSpec::new()
@@ -172,6 +173,9 @@ mod tests {
                 .with_size(ControlSize::Xl),
             &theme(),
         );
-        assert_eq!(xl.children[0].layout.size.width, taffy::Dimension::length(13.0));
+        assert_eq!(
+            xl.children[0].layout.size.width,
+            taffy::Dimension::length(13.0)
+        );
     }
 }

@@ -145,8 +145,16 @@ mod tests {
             id: "placement".to_string(),
             prompt: "Where?".to_string(),
             options: vec![
-                AgentQuestionOption { value: "inline".into(), label: "Inline".into(), description: None },
-                AgentQuestionOption { value: "composer".into(), label: "Composer".into(), description: None },
+                AgentQuestionOption {
+                    value: "inline".into(),
+                    label: "Inline".into(),
+                    description: None,
+                },
+                AgentQuestionOption {
+                    value: "composer".into(),
+                    label: "Composer".into(),
+                    description: None,
+                },
             ],
             ..Default::default()
         }
@@ -201,7 +209,10 @@ mod tests {
             question(),
             answer(AgentQuestionOutcome::Selected, vec!["composer"], ""),
         );
-        assert_eq!(spec.option_accessible_name("composer", "Composer"), "chosen: Composer");
+        assert_eq!(
+            spec.option_accessible_name("composer", "Composer"),
+            "chosen: Composer"
+        );
         assert_eq!(spec.option_accessible_name("inline", "Inline"), "Inline");
     }
 }

@@ -10,8 +10,8 @@
 //! host-owned — `FileUploadItem::has_preview` only drives which anatomy part
 //! (preview surface vs file icon) renders.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, BorderStyle, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 
@@ -114,7 +114,11 @@ pub struct FileUpload {
 
 impl FileUpload {
     pub fn from_spec(spec: FileUploadSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_remove: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_remove: None,
+        }
     }
 
     /// Fires with the removed file's name.
@@ -473,7 +477,11 @@ mod tests {
 
     #[test]
     fn dropzone_prompt_and_browse_render() {
-        let tree = probe(&js_file_upload(&FileUploadSpec::new(), &theme()), 400.0, 200.0);
+        let tree = probe(
+            &js_file_upload(&FileUploadSpec::new(), &theme()),
+            400.0,
+            200.0,
+        );
         assert!(
             tree.has_text("Drop files here or"),
             "dropzone prompt missing: {:?}",
@@ -530,8 +538,16 @@ mod tests {
         let tree = probe(&js_file_upload(&spec, &theme()), 480.0, 320.0);
 
         // File names render.
-        assert!(tree.has_text("photo.png"), "name 1 missing: {:?}", tree.texts());
-        assert!(tree.has_text("report.pdf"), "name 2 missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("photo.png"),
+            "name 1 missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("report.pdf"),
+            "name 2 missing: {:?}",
+            tree.texts()
+        );
         // Uploading row shows size + progress percent.
         assert!(
             tree.has_text("2.0 KB · 40%"),
@@ -539,19 +555,28 @@ mod tests {
             tree.texts()
         );
         // Non-image row renders the file-icon glyph; remove button "x" present.
-        assert!(tree.texts().contains(&"file"), "file icon missing: {:?}", tree.texts());
-        assert!(tree.texts().contains(&"x"), "remove glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.texts().contains(&"file"),
+            "file icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.texts().contains(&"x"),
+            "remove glyph missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn error_file_shows_error_text() {
         let spec = FileUploadSpec::new().with_file(
-            FileUploadItem::new("c", "huge.zip", 99 * 1024 * 1024)
-                .with_error("Exceeds size limit"),
+            FileUploadItem::new("c", "huge.zip", 99 * 1024 * 1024).with_error("Exceeds size limit"),
         );
         let tree = probe(&js_file_upload(&spec, &theme()), 480.0, 200.0);
         assert!(
-            tree.texts().iter().any(|t| t.contains("Exceeds size limit")),
+            tree.texts()
+                .iter()
+                .any(|t| t.contains("Exceeds size limit")),
             "error text missing: {:?}",
             tree.texts()
         );
@@ -603,5 +628,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["report.pdf"]);
     }
-
 }

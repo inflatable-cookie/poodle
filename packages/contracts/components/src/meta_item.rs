@@ -2,7 +2,6 @@
 ///
 /// Renders an uppercase compact label with inline value content.
 /// Matches docs/contracts/components/meta-item.md.
-
 use crate::InlineTypographyMode;
 use poodle_tokens::semantic;
 

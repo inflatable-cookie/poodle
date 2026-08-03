@@ -5,14 +5,13 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ToggleGroupSpec;
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    toggle_group_gap_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, toggle_group_gap_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -27,7 +26,11 @@ pub struct ToggleGroup {
 
 impl ToggleGroup {
     pub fn from_spec(spec: ToggleGroupSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the value of the option that was activated.
@@ -163,9 +166,7 @@ fn build(
 
         if !is_item_disabled {
             let hover_fill = bg.mix_srgb(elevated, 0.84);
-            item = item
-                .hover(|s| s.bg(hover_fill))
-                .cursor_pointer();
+            item = item.hover(|s| s.bg(hover_fill)).cursor_pointer();
 
             if let Some(handler) = &on_change {
                 let handler = std::sync::Arc::clone(handler);
@@ -222,12 +223,14 @@ mod tests {
 
     #[test]
     fn selected_item_has_different_background() {
-        let spec = ToggleGroupSpec::new(sample_options())
-            .with_value(vec![String::from("grid")]);
+        let spec = ToggleGroupSpec::new(sample_options()).with_value(vec![String::from("grid")]);
         let el = js_toggle_group(&spec, &theme());
         let first_bg = el.children[0].style.background;
         let second_bg = el.children[1].style.background;
-        assert_ne!(first_bg, second_bg, "Selected and unselected items should differ");
+        assert_ne!(
+            first_bg, second_bg,
+            "Selected and unselected items should differ"
+        );
     }
 
     #[test]
@@ -261,9 +264,17 @@ mod tests {
     #[test]
     fn renders_a_button_per_option_with_labels() {
         let th = theme();
-        let tree = probe(&js_toggle_group(&ToggleGroupSpec::new(sample_options()), &th), 400.0, 80.0);
+        let tree = probe(
+            &js_toggle_group(&ToggleGroupSpec::new(sample_options()), &th),
+            400.0,
+            80.0,
+        );
         assert!(tree.has_text("Grid") && tree.has_text("List") && tree.has_text("Board"));
-        assert_eq!(tree.count_kind("Button"), 3, "expected one button per option");
+        assert_eq!(
+            tree.count_kind("Button"),
+            3,
+            "expected one button per option"
+        );
         let root = &tree.nodes[0];
         assert!(root.w > 0.0 && root.h > 0.0, "root laid out");
     }
@@ -288,7 +299,15 @@ mod tests {
             80.0,
         );
         assert!(
-            tree.has_background(ProbeColor { r: selected.r, g: selected.g, b: selected.b, a: selected.a }, 0.02),
+            tree.has_background(
+                ProbeColor {
+                    r: selected.r,
+                    g: selected.g,
+                    b: selected.b,
+                    a: selected.a
+                },
+                0.02
+            ),
             "selected item should paint the accent-tinted fill"
         );
     }
@@ -309,7 +328,10 @@ mod tests {
         let design_bg = el.children[0].style.background.expect("design bg");
         let eng_bg = el.children[1].style.background.expect("eng bg");
         let docs_bg = el.children[2].style.background.expect("docs bg");
-        assert_eq!(design_bg, docs_bg, "both selected items share the selected fill");
+        assert_eq!(
+            design_bg, docs_bg,
+            "both selected items share the selected fill"
+        );
         assert_ne!(design_bg, eng_bg, "selected and unselected fills differ");
     }
 
@@ -320,7 +342,11 @@ mod tests {
         let item_h = |d: ControlDensity| {
             let spec = ToggleGroupSpec::new(sample_options()).with_density(d);
             let tree = probe(&js_toggle_group(&spec, &th), 400.0, 80.0);
-            tree.nodes.iter().find(|n| n.kind == "Button").map(|n| n.h).unwrap_or(0.0)
+            tree.nodes
+                .iter()
+                .find(|n| n.kind == "Button")
+                .map(|n| n.h)
+                .unwrap_or(0.0)
         };
         assert_eq!(
             item_h(ControlDensity::Compact),
@@ -342,7 +368,11 @@ mod tests {
                 .iter()
                 .find(|n| n.kind == "Button" && n.text_size.is_some())
                 .expect("a sized button");
-            assert_eq!(btn.text_size, Some(expected), "size {size:?} font drifted from label-size");
+            assert_eq!(
+                btn.text_size,
+                Some(expected),
+                "size {size:?} font drifted from label-size"
+            );
         }
     }
 
@@ -380,7 +410,9 @@ mod tests {
             ToggleGroupSpec::new(sample_options()).with_disabled(true),
             &theme(),
         )
-        .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_change(move |_| {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         let first = sample_options()[0].clone();
@@ -388,5 +420,4 @@ mod tests {
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled group fired");
     }
-
 }

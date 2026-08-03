@@ -19,8 +19,8 @@
 //! accessibility channel. Child-action click handling lives in the host
 //! preview event loop, not the component.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::AppHeaderSpec;
 
@@ -216,8 +216,18 @@ mod tests {
     fn size_ladder_changes_min_height() {
         use poodle_specs::ControlSize;
         let theme = test_theme();
-        let sm = js_app_header(&AppHeaderSpec::new().with_title("A").with_size(ControlSize::Sm), &theme);
-        let xl = js_app_header(&AppHeaderSpec::new().with_title("A").with_size(ControlSize::Xl), &theme);
+        let sm = js_app_header(
+            &AppHeaderSpec::new()
+                .with_title("A")
+                .with_size(ControlSize::Sm),
+            &theme,
+        );
+        let xl = js_app_header(
+            &AppHeaderSpec::new()
+                .with_title("A")
+                .with_size(ControlSize::Xl),
+            &theme,
+        );
         assert_ne!(
             sm.layout.min_size.height, xl.layout.min_size.height,
             "sm and xl should resolve different shell heights"

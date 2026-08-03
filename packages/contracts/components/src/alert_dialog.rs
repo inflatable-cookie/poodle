@@ -96,11 +96,7 @@ impl AlertDialogSpec {
 
     /// Highlighted detail-item row (`itemLabel`/`itemValue`) rendered ahead of
     /// the body content (contract §2/§8). Both halves are required to render.
-    pub fn with_item_detail(
-        mut self,
-        label: impl Into<String>,
-        value: impl Into<String>,
-    ) -> Self {
+    pub fn with_item_detail(mut self, label: impl Into<String>, value: impl Into<String>) -> Self {
         self.item_label = Some(label.into());
         self.item_value = Some(value.into());
         self

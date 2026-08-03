@@ -285,13 +285,32 @@ mod tests {
         let tree = probe(&el, 800.0, 600.0);
 
         // Title from the composed Dialog header.
-        assert!(tree.has_text("Add new user"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Add new user"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         // Body field slot made it through.
-        assert!(tree.has_text("Email"), "body field slot missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Email"),
+            "body field slot missing: {:?}",
+            tree.texts()
+        );
         // Default footer actions: ghost Cancel + primary Submit.
-        assert!(tree.has_text("Cancel"), "cancel action missing: {:?}", tree.texts());
-        assert!(tree.has_text("Add user"), "submit action missing: {:?}", tree.texts());
-        assert!(tree.count_kind("Button") >= 2, "expected at least 2 action buttons");
+        assert!(
+            tree.has_text("Cancel"),
+            "cancel action missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Add user"),
+            "submit action missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.count_kind("Button") >= 2,
+            "expected at least 2 action buttons"
+        );
     }
 
     #[test]
@@ -338,8 +357,15 @@ mod tests {
             "subtitle missing: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Custom footer"), "custom actions missing: {:?}", tree.texts());
-        assert!(!tree.has_text("Submit"), "default submit should be suppressed");
+        assert!(
+            tree.has_text("Custom footer"),
+            "custom actions missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("Submit"),
+            "default submit should be suppressed"
+        );
     }
 
     #[test]
@@ -372,11 +398,19 @@ mod tests {
         let el = js_form_dialog(&spec, &th, field_stub(), None);
         let tree = probe(&el, 800.0, 600.0);
         // Body field slot still rendered directly.
-        assert!(tree.has_text("Email"), "bare body content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Email"),
+            "bare body content missing: {:?}",
+            tree.texts()
+        );
         // bare auto-suppresses default actions only when show_default_actions
         // is also cleared by the host; default true still renders the row here,
         // so just assert the dialog built without panicking and shows the title.
-        assert!(tree.has_text("Bare"), "title missing in bare mode: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Bare"),
+            "title missing in bare mode: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -415,12 +449,17 @@ mod tests {
 
         let spec = FormDialogSpec::new("Add new user").with_submitting(true);
         let el = FormDialog::from_spec(spec, &theme())
-            .on_submit(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_submit(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 800.0, 600.0, "Submitting\u{2026}");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a submitting dialog resubmitted");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a submitting dialog resubmitted"
+        );
     }
-
 }

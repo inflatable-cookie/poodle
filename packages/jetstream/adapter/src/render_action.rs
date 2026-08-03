@@ -11,7 +11,12 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 
 impl RenderComponent<ButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &ButtonSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve fill (background) color from variant
@@ -50,7 +55,12 @@ impl RenderComponent<ButtonSpec> for JetstreamAdapter {
 
 impl RenderComponent<IconButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &IconButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &IconButtonSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
 
         // Resolve icon size token (used for width/height constraints)
@@ -70,12 +80,20 @@ impl RenderComponent<IconButtonSpec> for JetstreamAdapter {
 
 impl RenderComponent<FormActionsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &FormActionsSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &FormActionsSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve action gap (space between action buttons)
         let gap = theme.resolve_space(spec.action_gap_token());
-        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+        mapped.layout.gap = taffy::Size {
+            width: taffy::LengthPercentage::length(gap),
+            height: taffy::LengthPercentage::length(gap),
+        };
 
         // Resolve stack separation (vertical space above the actions bar)
         let _stack_sep = theme.resolve_space(spec.stack_separation_token());
@@ -86,12 +104,20 @@ impl RenderComponent<FormActionsSpec> for JetstreamAdapter {
 
 impl RenderComponent<ToolbarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ToolbarSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(
+        &self,
+        spec: &ToolbarSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve gap between toolbar items
         let gap = theme.resolve_space(spec.gap_token());
-        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+        mapped.layout.gap = taffy::Size {
+            width: taffy::LengthPercentage::length(gap),
+            height: taffy::LengthPercentage::length(gap),
+        };
 
         // Resolve separator border if present
         if spec.has_separator {
@@ -110,14 +136,20 @@ impl RenderComponent<ToolbarSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
+    use crate::{theme::JetstreamThemeProvider, JetstreamAdapter, WidgetKind};
     use poodle_adapter::RenderComponent;
     use poodle_specs::*;
     use poodle_style::StyleDescriptor;
-    use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
-    fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
-    fn s() -> StyleDescriptor { StyleDescriptor::new() }
-    fn t() -> JetstreamThemeProvider { JetstreamThemeProvider::default() }
+    fn a() -> JetstreamAdapter {
+        JetstreamAdapter::new(JetstreamThemeProvider::default())
+    }
+    fn s() -> StyleDescriptor {
+        StyleDescriptor::new()
+    }
+    fn t() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::default()
+    }
 
     #[test]
     fn button_with_label_uses_label_in_id() {

@@ -26,7 +26,11 @@ pub struct MediaBrowsePanel {
 
 impl MediaBrowsePanel {
     pub fn from_spec(spec: MediaBrowsePanelSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_select: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+        }
     }
 
     /// Fires with the chosen item's id.
@@ -79,7 +83,10 @@ fn build(
     let panel_bg = resolve_color(theme, spec.item_bg_token());
 
     // Root
-    let mut el = ui_element::div().flex_col().self_stretch().min_h(rem_to_px(18.0));
+    let mut el = ui_element::div()
+        .flex_col()
+        .self_stretch()
+        .min_h(rem_to_px(18.0));
 
     // Loading state
     if spec.loading && spec.items.is_empty() {
@@ -152,20 +159,18 @@ fn build(
             .bg(panel_bg_tinted)
             .focusable();
 
-        card = card.child(
-            js_media_thumbnail(
-                &MediaThumbnailSpec::new(match item.kind.as_str() {
-                    "image" => MediaKind::Image,
-                    "audio" => MediaKind::Audio,
-                    "video" => MediaKind::Video,
-                    "document" => MediaKind::Document,
-                    _ => MediaKind::Embed,
-                })
-                    .with_aspect_ratio(AspectRatio::Square)
-                    .with_show_caption(false),
-                theme,
-            ),
-        );
+        card = card.child(js_media_thumbnail(
+            &MediaThumbnailSpec::new(match item.kind.as_str() {
+                "image" => MediaKind::Image,
+                "audio" => MediaKind::Audio,
+                "video" => MediaKind::Video,
+                "document" => MediaKind::Document,
+                _ => MediaKind::Embed,
+            })
+            .with_aspect_ratio(AspectRatio::Square)
+            .with_show_caption(false),
+            theme,
+        ));
 
         // Label
         card = card.child(
@@ -176,7 +181,11 @@ fn build(
         );
 
         // Meta (optional)
-        let meta_text = item.meta.as_ref().cloned().unwrap_or_else(|| item.kind.clone());
+        let meta_text = item
+            .meta
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| item.kind.clone());
         card = card.child(
             ui_element::label(&meta_text)
                 .text_color(text_secondary)
@@ -206,18 +215,16 @@ fn build(
             .justify_center()
             .self_stretch()
             .mt(rem_to_px(grid_gap))
-            .child(
-                js_button(
-                    &ButtonSpec::new()
-                        .with_variant(ButtonVariant::Secondary)
-                        .with_size(spec.size)
-                        .with_size_role(spec.size_role)
-                        .with_density(spec.density)
-                        .with_label(load_label)
-                        .with_disabled(spec.loading),
-                    theme,
-                ),
-            );
+            .child(js_button(
+                &ButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(spec.size)
+                    .with_size_role(spec.size_role)
+                    .with_density(spec.density)
+                    .with_label(load_label)
+                    .with_disabled(spec.loading),
+                theme,
+            ));
         el = el.child(actions);
     }
 
@@ -250,9 +257,17 @@ mod tests {
         let th = theme();
         let tree = probe(&js_media_browse_panel(&base(), &th), 480.0, 320.0);
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("hero.png"), "label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("hero.png"),
+            "label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("3.1 MB"), "meta missing: {:?}", tree.texts());
-        assert!(tree.has_text("clip.mp4"), "second label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("clip.mp4"),
+            "second label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -260,7 +275,11 @@ mod tests {
         let th = theme();
         let spec = MediaBrowsePanelSpec::new().with_loading(true);
         let tree = probe(&js_media_browse_panel(&spec, &th), 480.0, 320.0);
-        assert!(tree.has_text("Loading media..."), "loading copy missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Loading media..."),
+            "loading copy missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -280,7 +299,11 @@ mod tests {
         let th = theme();
         let spec = MediaBrowsePanelSpec::new().with_empty_message("Nothing here");
         let tree = probe(&js_media_browse_panel(&spec, &th), 480.0, 320.0);
-        assert!(tree.has_text("Nothing here"), "empty copy missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Nothing here"),
+            "empty copy missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -288,7 +311,11 @@ mod tests {
         let th = theme();
         let idle = base().with_has_more(true).with_load_more_label("Load more");
         let idle_tree = probe(&js_media_browse_panel(&idle, &th), 480.0, 320.0);
-        assert!(idle_tree.has_text("Load more"), "load-more label missing: {:?}", idle_tree.texts());
+        assert!(
+            idle_tree.has_text("Load more"),
+            "load-more label missing: {:?}",
+            idle_tree.texts()
+        );
 
         let busy = base().with_has_more(true).with_loading(true);
         let busy_tree = probe(&js_media_browse_panel(&busy, &th), 480.0, 320.0);
@@ -305,7 +332,10 @@ mod tests {
         // Contract §8 meta/state font = 0.8125rem = 13px = typography.label.size.
         // Regression guard: caption (11px) and the old 0px GPUI-adapter miss are wrong.
         let expected = resolve_px(&th, MediaBrowsePanelSpec::new().meta_font_token());
-        assert!((expected - 13.0).abs() < 0.01, "label token should be 13px, got {expected}");
+        assert!(
+            (expected - 13.0).abs() < 0.01,
+            "label token should be 13px, got {expected}"
+        );
         let tree = probe(&js_media_browse_panel(&base(), &th), 480.0, 320.0);
         let meta = tree
             .nodes
@@ -313,7 +343,9 @@ mod tests {
             .find(|n| n.text.as_deref() == Some("3.1 MB"))
             .expect("meta node present");
         assert!(
-            meta.text_size.map(|s| (s - expected).abs() < 0.01).unwrap_or(false),
+            meta.text_size
+                .map(|s| (s - expected).abs() < 0.01)
+                .unwrap_or(false),
             "meta font should resolve to {expected}px, got {:?}",
             meta.text_size
         );
@@ -326,7 +358,9 @@ mod tests {
         // Probe one item at a viewport narrower than the min so the min-width floor
         // is exposed as the item's computed width (flex can't shrink below it).
         let one = vec![MediaBrowseItem::new("a", "hero.png", "image").with_meta("3.1 MB")];
-        let spec = MediaBrowsePanelSpec::new().with_items(one).with_size(ControlSize::Lg);
+        let spec = MediaBrowsePanelSpec::new()
+            .with_items(one)
+            .with_size(ControlSize::Lg);
         let tree = probe(&js_media_browse_panel(&spec, &th), 120.0, 320.0);
         let target = rem_to_px(12.0); // 192px
         let stale = rem_to_px(12.5); // 200px — the bug we fixed
@@ -360,5 +394,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [first.id]);
     }
-
 }

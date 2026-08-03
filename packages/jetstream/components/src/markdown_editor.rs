@@ -151,7 +151,11 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
                     // Svelte defaults `ariaLabel` to this rather than leaving
                     // the editing surface nameless; a placeholder is not a
                     // name, so without it the textarea announces as untitled.
-                    .aria_label(if spec.aria_label.is_empty() { "Markdown editor" } else { spec.aria_label.as_str() })
+                    .aria_label(if spec.aria_label.is_empty() {
+                        "Markdown editor"
+                    } else {
+                        spec.aria_label.as_str()
+                    })
                     .w_full()
                     .text_size(textarea_font)
                     .font_family(FontFamily::Mono)
@@ -258,7 +262,11 @@ mod tests {
             "placeholder not rendered: {:?}",
             tree.texts()
         );
-        assert_eq!(tree.count_kind("TextInput"), 1, "edit pane should be a text input");
+        assert_eq!(
+            tree.count_kind("TextInput"),
+            1,
+            "edit pane should be a text input"
+        );
     }
 
     #[test]
@@ -267,14 +275,21 @@ mod tests {
             .with_mode("edit")
             .with_value("# Hello world");
         let tree = probe(&js_markdown_editor(&spec, &theme()), 480.0, 240.0);
-        assert!(tree.has_text("# Hello world"), "value not rendered: {:?}", tree.texts());
+        assert!(
+            tree.has_text("# Hello world"),
+            "value not rendered: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn preview_empty_placeholder() {
         let spec = MarkdownEditorSpec::new().with_mode("preview");
         let tree = probe(&js_markdown_editor(&spec, &theme()), 480.0, 240.0);
-        assert!(tree.has_text("Nothing to preview"), "empty preview copy missing");
+        assert!(
+            tree.has_text("Nothing to preview"),
+            "empty preview copy missing"
+        );
         // No editable text input in preview mode.
         assert_eq!(tree.count_kind("TextInput"), 0);
     }
@@ -288,6 +303,9 @@ mod tests {
         assert_eq!(tree.count_kind("TextInput"), 1, "split has a textarea");
         // Both the editor value and a preview label of the same source text exist.
         let body_hits = tree.texts().iter().filter(|t| **t == "body text").count();
-        assert!(body_hits >= 2, "expected value in editor + preview, got {body_hits}");
+        assert!(
+            body_hits >= 2,
+            "expected value in editor + preview, got {body_hits}"
+        );
     }
 }

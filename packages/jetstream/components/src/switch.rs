@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, SwitchSpec};
 
@@ -27,7 +27,11 @@ pub struct Switch {
 
 impl Switch {
     pub fn from_spec(spec: SwitchSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the state the switch is moving **to**.
@@ -41,7 +45,10 @@ impl crate::element::IntoJsEl for Switch {
     fn into_js_el(self) -> JsEl {
         let el = js_switch(&self.spec, &self.theme);
 
-        match (self.spec.is_disabled || self.spec.is_read_only, self.on_change) {
+        match (
+            self.spec.is_disabled || self.spec.is_read_only,
+            self.on_change,
+        ) {
             (false, Some(handler)) => {
                 let next = !self.spec.current_checked();
                 el.on_click(move |_event| handler(next))
@@ -115,13 +122,21 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .off_color
         .as_deref()
         .and_then(hex_color)
-        .or_else(|| spec.left_tone.color_token().map(|t| resolve_color(theme, t).into()))
+        .or_else(|| {
+            spec.left_tone
+                .color_token()
+                .map(|t| resolve_color(theme, t).into())
+        })
         .unwrap_or(text_primary_c);
     let on_color_c: Color = spec
         .on_color
         .as_deref()
         .and_then(hex_color)
-        .or_else(|| spec.right_tone.color_token().map(|t| resolve_color(theme, t).into()))
+        .or_else(|| {
+            spec.right_tone
+                .color_token()
+                .map(|t| resolve_color(theme, t).into())
+        })
         .unwrap_or(accent_base_c);
 
     // Contract: track fill = color-mix(in srgb, tone N%, surface)
@@ -129,23 +144,27 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // on-track:  mix(on-color  24%, surface)  → 24% on-color  + 76% surface
     // mix(other, f): self*f + other*(1-f), so self.mix_srgb(surface, 0.18) = 18% self + 82% surface
     let off_track_c = off_color_c.mix_srgb(surface_c, 0.18);
-    let on_track_c  = on_color_c.mix_srgb(surface_c, 0.24);
+    let on_track_c = on_color_c.mix_srgb(surface_c, 0.24);
     let track_fill: Color = if is_checked { on_track_c } else { off_track_c };
 
     // Contract: border = border-default (off), color-mix(on-thumb 58%, border-default) (on)
     let on_border_c = on_color_c.mix_srgb(border_default_c, 0.58); // 58% on-thumb, 42% border
-    let track_border: Color = if is_checked { on_border_c } else { border_default_c };
+    let track_border: Color = if is_checked {
+        on_border_c
+    } else {
+        border_default_c
+    };
 
     // Contract: thumb = off-color (off) or on-color (on)
     let thumb_color: Color = if is_checked { on_color_c } else { off_color_c };
 
     // Contract §8 Size adjustments — per-size flat rem literals (matches Svelte).
-    let track_width:   f32 = rem_to_px(switch_track_w_rem(effective_size));
-    let track_height:  f32 = rem_to_px(switch_track_h_rem(effective_size));
+    let track_width: f32 = rem_to_px(switch_track_w_rem(effective_size));
+    let track_height: f32 = rem_to_px(switch_track_h_rem(effective_size));
     let track_padding: f32 = rem_to_px(0.125); // 0.125rem at every size
-    let thumb_size:    f32 = rem_to_px(switch_thumb_rem(effective_size));
-    let thumb_travel:  f32 = rem_to_px(switch_travel_rem(effective_size));
-    let border_width:  f32 = rem_to_px(0.0625);
+    let thumb_size: f32 = rem_to_px(switch_thumb_rem(effective_size));
+    let thumb_travel: f32 = rem_to_px(switch_travel_rem(effective_size));
+    let border_width: f32 = rem_to_px(0.0625);
 
     // Contract §8 track :focus-visible outline = accent.focusRing, offset 0.125rem.
     // JsEl has no :focus-visible hook and js_switch takes no focus-state input, so
@@ -183,7 +202,8 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .h(track_height)
         .rounded(999.0) // pill
         .bg(track_fill)
-        .border(border_width).border_color(track_border)
+        .border(border_width)
+        .border_color(track_border)
         .items_center()
         .pl(thumb_offset)
         .shadow_layers(vec![BoxShadow {
@@ -261,7 +281,8 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .map(str::to_owned)
         .or(composed);
     crate::aria::with_aria_label(root, name.as_deref())
-        .aria_role(jetstream_ui::accesskit::Role::Switch).aria_checked(crate::aria::toggled(spec.checked))
+        .aria_role(jetstream_ui::accesskit::Role::Switch)
+        .aria_checked(crate::aria::toggled(spec.checked))
 }
 
 #[cfg(test)]
@@ -297,8 +318,14 @@ mod tests {
         // xs track 1.75rem = 28px, xl 3rem = 48px — sizes must differ now.
         let xs = js_switch(&SwitchSpec::new().with_size(ControlSize::Xs), &theme());
         let xl = js_switch(&SwitchSpec::new().with_size(ControlSize::Xl), &theme());
-        assert_eq!(xs.children[0].layout.size.width, taffy::Dimension::length(28.0));
-        assert_eq!(xl.children[0].layout.size.width, taffy::Dimension::length(48.0));
+        assert_eq!(
+            xs.children[0].layout.size.width,
+            taffy::Dimension::length(28.0)
+        );
+        assert_eq!(
+            xl.children[0].layout.size.width,
+            taffy::Dimension::length(48.0)
+        );
     }
 
     #[test]
@@ -306,7 +333,11 @@ mod tests {
         // Thumb left edge = padding (off) vs padding + travel (on). Probe the
         // laid-out x of the thumb (deepest Panel under the track).
         let off = probe(&js_switch(&SwitchSpec::new(), &theme()), 220.0, 60.0);
-        let on = probe(&js_switch(&SwitchSpec::new().with_checked(true), &theme()), 220.0, 60.0);
+        let on = probe(
+            &js_switch(&SwitchSpec::new().with_checked(true), &theme()),
+            220.0,
+            60.0,
+        );
         // Deepest node = thumb in both trees.
         let thumb_off_x = off.nodes.iter().max_by_key(|n| n.depth).unwrap().x;
         let thumb_on_x = on.nodes.iter().max_by_key(|n| n.depth).unwrap().x;
@@ -330,7 +361,9 @@ mod tests {
         // on_color hex override (#ff0000) must drive the checked thumb fill —
         // pure red, distinct from the default accent thumb.
         let custom = js_switch(
-            &SwitchSpec::new().with_checked(true).with_on_color("#ff0000"),
+            &SwitchSpec::new()
+                .with_checked(true)
+                .with_on_color("#ff0000"),
             &theme(),
         );
         let tree = probe(&custom, 220.0, 60.0);
@@ -338,7 +371,15 @@ mod tests {
         let thumb = tree.nodes.iter().max_by_key(|n| n.depth).unwrap();
         let bg = thumb.bg.expect("thumb has no fill");
         assert!(
-            bg.approx(ProbeColor { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }, 0.05),
+            bg.approx(
+                ProbeColor {
+                    r: 1.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 1.0
+                },
+                0.05
+            ),
             "custom on_color not applied to thumb: {bg:?}",
         );
     }
@@ -352,7 +393,9 @@ mod tests {
     #[test]
     fn dual_labels_flank_the_track() {
         let el = js_switch(
-            &SwitchSpec::new().with_left_label("Off").with_right_label("On"),
+            &SwitchSpec::new()
+                .with_left_label("Off")
+                .with_right_label("On"),
             &theme(),
         );
         let tree = probe(&el, 220.0, 40.0);
@@ -373,7 +416,9 @@ mod tests {
             let values = Arc::clone(&seen);
 
             let el = Switch::from_spec(
-                SwitchSpec::new().with_label("Notify me").with_checked(checked),
+                SwitchSpec::new()
+                    .with_label("Notify me")
+                    .with_checked(checked),
                 &theme(),
             )
             .on_change(move |next| values.lock().unwrap().push(next))
@@ -392,20 +437,29 @@ mod tests {
         use std::sync::Arc;
 
         for spec in [
-            SwitchSpec::new().with_label("Notify me").with_disabled(true),
-            SwitchSpec::new().with_label("Notify me").with_read_only(true),
+            SwitchSpec::new()
+                .with_label("Notify me")
+                .with_disabled(true),
+            SwitchSpec::new()
+                .with_label("Notify me")
+                .with_read_only(true),
         ] {
             let hits = Arc::new(AtomicUsize::new(0));
             let counter = Arc::clone(&hits);
 
             let el = Switch::from_spec(spec, &theme())
-                .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+                .on_change(move |_| {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                })
                 .into_js_el();
 
             crate::element::click_probe::click_text(&el, 320.0, 80.0, "Notify me");
 
-            assert_eq!(hits.load(Ordering::SeqCst), 0, "an unchangeable switch fired");
+            assert_eq!(
+                hits.load(Ordering::SeqCst),
+                0,
+                "an unchangeable switch fired"
+            );
         }
     }
-
 }

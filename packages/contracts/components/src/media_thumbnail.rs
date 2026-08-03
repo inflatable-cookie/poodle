@@ -166,8 +166,7 @@ impl MediaThumbnailSpec {
     /// True for kinds that show the play/music overlay indicator
     /// (contract §3 Play Indicator — audio/video only).
     pub fn shows_play_indicator(&self) -> bool {
-        self.state == MediaState::Ready
-            && matches!(self.kind, MediaKind::Audio | MediaKind::Video)
+        self.state == MediaState::Ready && matches!(self.kind, MediaKind::Audio | MediaKind::Video)
     }
 
     /// Fallback icon name keyed by kind (contract §9 Fallback Icons By Kind).
@@ -316,7 +315,8 @@ mod tests {
         assert_eq!(spec.aspect_ratio_pair(), (16.0, 10.0));
         assert!(spec.frame_height_for_width(160.0) > 0.0);
 
-        let fixed = MediaThumbnailSpec::new(MediaKind::Image).with_aspect_ratio(AspectRatio::Square);
+        let fixed =
+            MediaThumbnailSpec::new(MediaKind::Image).with_aspect_ratio(AspectRatio::Square);
         assert!(!fixed.is_auto());
         assert_eq!(fixed.aspect_ratio_pair(), (1.0, 1.0));
     }

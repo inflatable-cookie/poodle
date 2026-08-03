@@ -1,7 +1,6 @@
 /// ListCardCounter — icon + count display for use inside ListCard.
 ///
 /// Matches docs/contracts/components/list-card-counter.md.
-
 use poodle_tokens::semantic;
 
 use crate::{IconSize, InlineTypographyMode};

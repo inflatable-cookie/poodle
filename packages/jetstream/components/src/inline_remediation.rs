@@ -121,14 +121,22 @@ mod tests {
             .with_tone(StatusTone::Warning);
         let tree = probe(&js_inline_remediation(&spec, &theme()), 360.0, 160.0);
         assert!(!tree.is_empty(), "remediation produced no nodes");
-        assert!(tree.has_text("Start date"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Start date"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Pick a date in the future."),
             "message missing: {:?}",
             tree.texts()
         );
         // Contract anatomy has no icon part — none of the old tone icons render.
-        assert_eq!(tree.count_kind("Icon"), 0, "contract anatomy has no icon part");
+        assert_eq!(
+            tree.count_kind("Icon"),
+            0,
+            "contract anatomy has no icon part"
+        );
     }
 
     #[test]
@@ -147,15 +155,19 @@ mod tests {
 
     #[test]
     fn action_renders_as_button() {
-        let action = RemediationAction::new("retry", "Retry")
-            .with_variant(ButtonVariant::Secondary);
+        let action =
+            RemediationAction::new("retry", "Retry").with_variant(ButtonVariant::Secondary);
         let spec = InlineRemediationSpec::new("Upload failed.")
             .with_tone(StatusTone::Danger)
             .with_action(action);
         let tree = probe(&js_inline_remediation(&spec, &theme()), 360.0, 160.0);
         assert!(tree.has_text("Upload failed."), "message missing");
         // The action delegates to the Button primitive (real button label present).
-        assert!(tree.has_text("Retry"), "action button label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Retry"),
+            "action button label missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.find_token("inline-remediation-action:retry").is_some(),
             "action interaction id missing"
@@ -166,15 +178,21 @@ mod tests {
     fn tone_drives_border_token() {
         // Border tone resolves from the spec border_token() (= status color).
         assert_eq!(
-            InlineRemediationSpec::new("x").with_tone(StatusTone::Danger).border_token(),
+            InlineRemediationSpec::new("x")
+                .with_tone(StatusTone::Danger)
+                .border_token(),
             "color.status.danger"
         );
         assert_eq!(
-            InlineRemediationSpec::new("x").with_tone(StatusTone::Warning).border_token(),
+            InlineRemediationSpec::new("x")
+                .with_tone(StatusTone::Warning)
+                .border_token(),
             "color.status.warning"
         );
         assert_eq!(
-            InlineRemediationSpec::new("x").with_tone(StatusTone::Info).border_token(),
+            InlineRemediationSpec::new("x")
+                .with_tone(StatusTone::Info)
+                .border_token(),
             "color.status.info"
         );
     }

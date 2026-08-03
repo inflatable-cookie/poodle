@@ -43,7 +43,12 @@ pub fn shimmer_fill(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> glam
 }
 
 /// Build a single skeleton shape element (fill + radius already resolved by caller).
-fn single_shape(fill: glam::Vec4, radius: f32, spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl {
+fn single_shape(
+    fill: glam::Vec4,
+    radius: f32,
+    spec: &SkeletonSpec,
+    theme: &JetstreamThemeProvider,
+) -> JsEl {
     let _ = theme;
     let parsed_w = spec.width.as_deref().and_then(parse_dim);
     let parsed_h = spec.height.as_deref().and_then(parse_dim);
@@ -113,12 +118,20 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Percentage-width line for COLUMN contexts (list-text / card body) — the
     // contract's per-line widths (60/40%, 80/100/60%) are now true percentages.
     let line_pct = |pct: f32, h_px: f32| -> JsEl {
-        ui_element::div().bg(fill).rounded(radius).w_pct(pct).h(h_px)
+        ui_element::div()
+            .bg(fill)
+            .rounded(radius)
+            .w_pct(pct)
+            .h(h_px)
     };
     let line_full = |h_px: f32| -> JsEl { line_pct(1.0, h_px) };
     // Circle skeleton block using the resolved pill radius (not a literal).
     let circle = |side: f32| -> JsEl {
-        ui_element::div().bg(fill).rounded(pill_radius).w(side).h(side)
+        ui_element::div()
+            .bg(fill)
+            .rounded(pill_radius)
+            .w(side)
+            .h(side)
     };
 
     let Some(ref preset) = spec.preset else {
@@ -240,8 +253,14 @@ fn skeleton_pulse() -> jetstream_ui::Animation {
     use jetstream_ui::{AnimatableProperty, Animation, Easing, Keyframe, LoopMode};
     Animation {
         keyframes: vec![
-            Keyframe { at: 0.0, values: vec![(AnimatableProperty::Opacity, 1.0)] },
-            Keyframe { at: 1.0, values: vec![(AnimatableProperty::Opacity, 0.55)] },
+            Keyframe {
+                at: 0.0,
+                values: vec![(AnimatableProperty::Opacity, 1.0)],
+            },
+            Keyframe {
+                at: 1.0,
+                values: vec![(AnimatableProperty::Opacity, 0.55)],
+            },
         ],
         duration_secs: 1.1,
         easing: Easing::EaseInOut,
@@ -278,7 +297,11 @@ mod tests {
         let s = spec().with_shape("line");
         let tree = probe(&js_skeleton(&s, &th), 200.0, 60.0);
         let node = &tree.nodes[0];
-        assert!((node.h - rem_to_px(0.875)).abs() < 0.5, "line height = {}", node.h);
+        assert!(
+            (node.h - rem_to_px(0.875)).abs() < 0.5,
+            "line height = {}",
+            node.h
+        );
     }
 
     #[test]
@@ -287,7 +310,12 @@ mod tests {
         let s = spec().with_shape("circle");
         let tree = probe(&js_skeleton(&s, &th), 200.0, 200.0);
         let n = &tree.nodes[0];
-        assert!((n.w - n.h).abs() < 0.5, "circle not square: {}x{}", n.w, n.h);
+        assert!(
+            (n.w - n.h).abs() < 0.5,
+            "circle not square: {}x{}",
+            n.w,
+            n.h
+        );
         assert!((n.w - rem_to_px(2.5)).abs() < 0.5, "circle side = {}", n.w);
     }
 
@@ -296,13 +324,20 @@ mod tests {
         let th = theme();
         let s = spec().with_shape("block");
         let tree = probe(&js_skeleton(&s, &th), 200.0, 200.0);
-        assert!((tree.nodes[0].h - rem_to_px(6.0)).abs() < 0.5, "block height = {}", tree.nodes[0].h);
+        assert!(
+            (tree.nodes[0].h - rem_to_px(6.0)).abs() < 0.5,
+            "block height = {}",
+            tree.nodes[0].h
+        );
     }
 
     #[test]
     fn explicit_width_height_override_defaults() {
         let th = theme();
-        let s = spec().with_shape("line").with_width("8rem").with_height("3rem");
+        let s = spec()
+            .with_shape("line")
+            .with_width("8rem")
+            .with_height("3rem");
         let tree = probe(&js_skeleton(&s, &th), 400.0, 200.0);
         let n = &tree.nodes[0];
         assert!((n.w - rem_to_px(8.0)).abs() < 0.5, "w = {}", n.w);
@@ -319,7 +354,9 @@ mod tests {
         // avatar is a 2.25rem square.
         let av = rem_to_px(2.25);
         assert!(
-            tree.nodes.iter().any(|n| (n.w - av).abs() < 0.5 && (n.h - av).abs() < 0.5),
+            tree.nodes
+                .iter()
+                .any(|n| (n.w - av).abs() < 0.5 && (n.h - av).abs() < 0.5),
             "missing 2.25rem avatar"
         );
     }
@@ -333,7 +370,9 @@ mod tests {
         assert_eq!(tree.count_kind("Panel"), 5, "{}", tree.to_json());
         // one line uses the line-sm height.
         assert!(
-            tree.nodes.iter().any(|n| (n.h - rem_to_px(0.6875)).abs() < 0.5),
+            tree.nodes
+                .iter()
+                .any(|n| (n.h - rem_to_px(0.6875)).abs() < 0.5),
             "missing line-sm (0.6875rem)"
         );
     }
@@ -346,7 +385,11 @@ mod tests {
         // root + 4 cells = 5 panels.
         assert_eq!(tree.count_kind("Panel"), 5, "{}", tree.to_json());
         // all cells at the 0.875rem line height.
-        let cells = tree.nodes.iter().filter(|n| (n.h - rem_to_px(0.875)).abs() < 0.5).count();
+        let cells = tree
+            .nodes
+            .iter()
+            .filter(|n| (n.h - rem_to_px(0.875)).abs() < 0.5)
+            .count();
         assert_eq!(cells, 4, "expected 4 cells at 0.875rem");
     }
 
@@ -359,7 +402,9 @@ mod tests {
         assert_eq!(tree.count_kind("Panel"), 9, "{}", tree.to_json());
         // header is 6rem tall.
         assert!(
-            tree.nodes.iter().any(|n| (n.h - rem_to_px(6.0)).abs() < 0.5),
+            tree.nodes
+                .iter()
+                .any(|n| (n.h - rem_to_px(6.0)).abs() < 0.5),
             "missing 6rem block header"
         );
         // two pills at 3.5rem × 1.25rem.
@@ -374,15 +419,23 @@ mod tests {
     #[test]
     fn detail_section_preset_emits_lines_rows() {
         let th = theme();
-        let s = spec().with_preset(SkeletonPreset::DetailSection).with_lines(4);
+        let s = spec()
+            .with_preset(SkeletonPreset::DetailSection)
+            .with_lines(4);
         let tree = probe(&js_skeleton(&s, &th), 400.0, 240.0);
         // heading at 8rem wide.
         assert!(
-            tree.nodes.iter().any(|n| (n.w - rem_to_px(8.0)).abs() < 0.5),
+            tree.nodes
+                .iter()
+                .any(|n| (n.w - rem_to_px(8.0)).abs() < 0.5),
             "missing 8rem heading"
         );
         // 4 label cells at 6rem wide (flex-shrink-0).
-        let labels = tree.nodes.iter().filter(|n| (n.w - rem_to_px(6.0)).abs() < 0.5).count();
+        let labels = tree
+            .nodes
+            .iter()
+            .filter(|n| (n.w - rem_to_px(6.0)).abs() < 0.5)
+            .count();
         assert_eq!(labels, 4, "expected 4 detail-row labels");
     }
 

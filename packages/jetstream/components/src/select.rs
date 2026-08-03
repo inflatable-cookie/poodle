@@ -8,14 +8,14 @@
 //! When `spec.searchable` is true, a search input row appears at
 //! the top of the panel.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SelectSpec;
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px,
-    resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    resolve_supporting_visual_size, size_font_rem,
 };
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius};
 
@@ -69,11 +69,15 @@ impl Select {
 
 impl crate::element::IntoJsEl for Select {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, Handlers {
-            toggle: self.on_toggle,
-            change: self.on_change,
-            clear: self.on_clear,
-        })
+        build(
+            &self.spec,
+            &self.theme,
+            Handlers {
+                toggle: self.on_toggle,
+                change: self.on_change,
+                clear: self.on_clear,
+            },
+        )
     }
 }
 
@@ -93,7 +97,9 @@ fn build(spec: &SelectSpec, theme: &JetstreamThemeProvider, handlers: Handlers) 
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
     let item_gap = rem_to_px(0.5);
 
     let fill = resolve_color(theme, "color.background.surface");
@@ -201,7 +207,8 @@ fn build(spec: &SelectSpec, theme: &JetstreamThemeProvider, handlers: Handlers) 
         .child(trigger)
         .child(panel);
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
-        .aria_role(jetstream_ui::accesskit::Role::ComboBox).aria_expanded(spec.open.unwrap_or(false))
+        .aria_role(jetstream_ui::accesskit::Role::ComboBox)
+        .aria_expanded(spec.open.unwrap_or(false))
 }
 
 // ── Trigger builder ──────────────────────────────────────────────────────────
@@ -265,17 +272,17 @@ fn build_trigger(
         let radius_pill = resolve_radius(theme, "radius.pill");
         let clear_pill: Color = Color::from(text_secondary).with_alpha(0.18);
         let mut clear = ui_element::div()
-                .bg(clear_pill)
-                .rounded(radius_pill)
-                .flex_row()
-                .items_center()
-                .justify_center()
-                .cursor_pointer()
-                .child(
-                    ui_element::icon("x")
-                        .size(icon_size)
-                        .text_color(text_secondary),
-                );
+            .bg(clear_pill)
+            .rounded(radius_pill)
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .cursor_pointer()
+            .child(
+                ui_element::icon("x")
+                    .size(icon_size)
+                    .text_color(text_secondary),
+            );
 
         // Its own handler, always: the pill sits inside the trigger, and
         // clicks bubble to the nearest clickable ancestor, so an unwired clear
@@ -393,10 +400,7 @@ fn build_panel(
 
     // Filter options by search query when searchable
     let current_value = spec.current_value();
-    let query_lower = spec
-        .search_query
-        .as_deref()
-        .map(|q| q.to_lowercase());
+    let query_lower = spec.search_query.as_deref().map(|q| q.to_lowercase());
 
     let filtered: Vec<&poodle_specs::ChoiceOption> = spec
         .options
@@ -437,9 +441,9 @@ fn build_panel(
             // Render group header if named
             if let Some(ref name) = group_key {
                 let header_py = rem_to_px(0.25);
-                let header_font = rem_to_px(size_font_rem(
-                    resolve_supporting_visual_size(effective_size),
-                ));
+                let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+                    effective_size,
+                )));
                 panel = panel.child(
                     ui_element::label(name.as_str())
                         .text_color(text_secondary)
@@ -578,10 +582,22 @@ mod tests {
     fn closed_trigger_shows_placeholder_and_chevron() {
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
         let tree = probe(&js_select(&spec, &theme()), 320.0, 200.0);
-        assert!(tree.has_text("Choose a fruit"), "placeholder missing: {:?}", tree.texts());
-        assert!(tree.has_text("chevron-down"), "chevron missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Choose a fruit"),
+            "placeholder missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("chevron-down"),
+            "chevron missing: {:?}",
+            tree.texts()
+        );
         // Closed: no option rows rendered.
-        assert!(!tree.has_text("Apple"), "options leaked when closed: {:?}", tree.texts());
+        assert!(
+            !tree.has_text("Apple"),
+            "options leaked when closed: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -590,8 +606,11 @@ mod tests {
             .with_placeholder("Choose a fruit")
             .with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("Apple") && tree.has_text("Banana") && tree.has_text("Cherry"),
-            "open options missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Apple") && tree.has_text("Banana") && tree.has_text("Cherry"),
+            "open options missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -600,7 +619,11 @@ mod tests {
             .with_value("banana")
             .with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("check"), "selected checkmark missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("check"),
+            "selected checkmark missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -609,7 +632,11 @@ mod tests {
             .with_searchable(true)
             .with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("search"), "search icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("search"),
+            "search icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -619,8 +646,16 @@ mod tests {
             .with_search_query("ban")
             .with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("Banana"), "matching option missing: {:?}", tree.texts());
-        assert!(!tree.has_text("Apple"), "non-matching option not filtered: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Banana"),
+            "matching option missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("Apple"),
+            "non-matching option not filtered: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -631,7 +666,11 @@ mod tests {
             .with_empty_message("No matches")
             .with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("No matches"), "empty message missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("No matches"),
+            "empty message missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -642,8 +681,11 @@ mod tests {
         ];
         let spec = SelectSpec::new(opts).with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("Fruits") && tree.has_text("Vegetables"),
-            "group headers missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Fruits") && tree.has_text("Vegetables"),
+            "group headers missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -651,7 +693,11 @@ mod tests {
         let opts = vec![ChoiceOption::new("apple", "Apple").with_description("A red fruit")];
         let spec = SelectSpec::new(opts).with_open(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 320.0);
-        assert!(tree.has_text("A red fruit"), "option description missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("A red fruit"),
+            "option description missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -661,7 +707,11 @@ mod tests {
             .with_clearable(true);
         let tree = probe(&js_select(&spec, &theme()), 320.0, 200.0);
         // An "x" icon appears in the trigger as the clear affordance.
-        assert!(tree.has_text("x"), "clear button icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("x"),
+            "clear button icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -689,14 +739,19 @@ mod tests {
 
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
         let el = Select::from_spec(spec, &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 200.0, "Choose a fruit");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
-
 
     /// The clear pill sits inside the trigger, so without a handler of its own
     /// clearing would also open the panel it was clearing.
@@ -738,16 +793,15 @@ mod tests {
         };
 
         let el = Select::from_spec(spec, &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 200.0, "Choose a fruit");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled select toggled");
     }
-
-
-
 
     /// The option rows were unclickable until `size.menu.maxHeight` resolved:
     /// the panel had `max-height: 0`, collapsed to its padding, and painted
@@ -769,5 +823,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["banana"]);
     }
-
 }

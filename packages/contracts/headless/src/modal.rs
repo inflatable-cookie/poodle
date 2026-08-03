@@ -58,7 +58,11 @@ fn close(requested: bool) -> (ModalState, Vec<ModalEffect>) {
     (ModalState::Closed, effects)
 }
 
-pub fn modal_transition(state: ModalState, context: ModalContext, event: ModalEvent) -> (ModalState, Vec<ModalEffect>) {
+pub fn modal_transition(
+    state: ModalState,
+    context: ModalContext,
+    event: ModalEvent,
+) -> (ModalState, Vec<ModalEffect>) {
     match (state, event) {
         (ModalState::Closed, ModalEvent::Open) => open(),
         (ModalState::Open, ModalEvent::Close) => close(false),

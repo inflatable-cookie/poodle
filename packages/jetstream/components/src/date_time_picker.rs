@@ -20,8 +20,8 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_ui::{Color, color_mix};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeFieldSpec};
 
@@ -181,7 +181,9 @@ fn build(
         // Composed Calendar (single), seeded from the picker's date.
         let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on.clone());
         if let Some(ref date) = val.date {
-            cal_spec = cal_spec.with_value(date.clone()).with_visible_month(date.clone());
+            cal_spec = cal_spec
+                .with_value(date.clone())
+                .with_visible_month(date.clone());
         }
         cal_spec.is_disabled = spec.is_disabled;
 
@@ -210,17 +212,17 @@ fn build(
             .flex_col()
             .gap(rem_to_px(0.875))
             .child({
-            let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
-            if let Some(handler) = &on_select {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_select(move |iso| handler(iso));
-            }
-            if let Some(handler) = &on_navigate {
-                let handler = std::sync::Arc::clone(handler);
-                calendar = calendar.on_navigate(move |dir| handler(dir));
-            }
-            crate::element::IntoJsEl::into_js_el(calendar)
-        })
+                let mut calendar = crate::calendar::Calendar::from_spec(cal_spec.clone(), theme);
+                if let Some(handler) = &on_select {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_select(move |iso| handler(iso));
+                }
+                if let Some(handler) = &on_navigate {
+                    let handler = std::sync::Arc::clone(handler);
+                    calendar = calendar.on_navigate(move |dir| handler(dir));
+                }
+                crate::element::IntoJsEl::into_js_el(calendar)
+            })
             .child(time_section);
 
         // Surface — established sibling overlay treatment (date_picker.rs):
@@ -298,8 +300,10 @@ mod tests {
 
     #[test]
     fn trigger_shows_complete_value() {
-        let spec = DateTimePickerSpec::new()
-            .with_default_value(DateTimeValue::new(Some("2026-03-14".into()), Some("14:30".into())));
+        let spec = DateTimePickerSpec::new().with_default_value(DateTimeValue::new(
+            Some("2026-03-14".into()),
+            Some("14:30".into()),
+        ));
         let tree = probe(&js_date_time_picker(&spec, &theme()), 360.0, 120.0);
         assert!(
             tree.has_text("2026-03-14 14:30"),
@@ -333,7 +337,11 @@ mod tests {
 
     #[test]
     fn indicator_is_chevron_not_calendar_glyph() {
-        let tree = probe(&js_date_time_picker(&DateTimePickerSpec::new(), &theme()), 360.0, 120.0);
+        let tree = probe(
+            &js_date_time_picker(&DateTimePickerSpec::new(), &theme()),
+            360.0,
+            120.0,
+        );
         // Icon widget carries its registry name as text.
         assert!(
             tree.has_text("chevron-down"),
@@ -346,7 +354,11 @@ mod tests {
 
     #[test]
     fn closed_picker_has_no_overlay() {
-        let tree = probe(&js_date_time_picker(&DateTimePickerSpec::new(), &theme()), 360.0, 480.0);
+        let tree = probe(
+            &js_date_time_picker(&DateTimePickerSpec::new(), &theme()),
+            360.0,
+            480.0,
+        );
         // Calendar emits a month label; the Time Section emits a "TIME" label.
         assert!(!tree.has_text("TIME"), "time section leaked while closed");
         assert!(!tree.has_text("March"), "calendar leaked while closed");
@@ -354,8 +366,10 @@ mod tests {
 
     #[test]
     fn open_picker_composes_calendar_and_time_section() {
-        let mut spec = DateTimePickerSpec::new()
-            .with_default_value(DateTimeValue::new(Some("2026-03-14".into()), Some("14:30".into())));
+        let mut spec = DateTimePickerSpec::new().with_default_value(DateTimeValue::new(
+            Some("2026-03-14".into()),
+            Some("14:30".into()),
+        ));
         spec.default_open = true;
         let el = js_date_time_picker(&spec, &theme());
         let tree = probe(&el, 380.0, 560.0);
@@ -371,8 +385,16 @@ mod tests {
             "calendar weekday headers missing"
         );
         // Time Section label + composed TimeInput value.
-        assert!(tree.has_text("TIME"), "time label missing: {:?}", tree.texts());
-        assert!(tree.has_text("14:30"), "composed time value missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("TIME"),
+            "time label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("14:30"),
+            "composed time value missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -385,7 +407,11 @@ mod tests {
         // Contract §8: 0.6875rem, weight 600, text-secondary.
         let label = find(&el, &|e| e.style.text_size == Some(rem_to_px(0.6875)))
             .expect("time label present");
-        assert_eq!(label.style.text_weight, Some(600), "time label weight not 600");
+        assert_eq!(
+            label.style.text_weight,
+            Some(600),
+            "time label weight not 600"
+        );
         assert_eq!(
             label.style.text_color,
             Some(secondary.into()),
@@ -405,19 +431,28 @@ mod tests {
     #[test]
     fn sizes_produce_different_trigger_heights() {
         let sm = probe(
-            &js_date_time_picker(&DateTimePickerSpec::new().with_size(ControlSize::Sm), &theme()),
+            &js_date_time_picker(
+                &DateTimePickerSpec::new().with_size(ControlSize::Sm),
+                &theme(),
+            ),
             360.0,
             120.0,
         );
         let lg = probe(
-            &js_date_time_picker(&DateTimePickerSpec::new().with_size(ControlSize::Lg), &theme()),
+            &js_date_time_picker(
+                &DateTimePickerSpec::new().with_size(ControlSize::Lg),
+                &theme(),
+            ),
             360.0,
             120.0,
         );
         // Trigger is the first child of root; compare its height.
         let sm_trigger_h = sm.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
-        assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
+        assert!(
+            lg_trigger_h > sm_trigger_h,
+            "sm {sm_trigger_h} !< lg {lg_trigger_h}"
+        );
     }
 
     #[test]
@@ -430,14 +465,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DateTimePicker::from_spec(DateTimePickerSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 420.0, 80.0, "Select date and time");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
-
 
     #[test]
     fn a_day_in_the_popover_reports_its_iso_date() {
@@ -447,15 +487,18 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let days = Arc::clone(&seen);
 
-        let el = DateTimePicker::from_spec(DateTimePickerSpec {
+        let el = DateTimePicker::from_spec(
+            DateTimePickerSpec {
                 open: Some(true),
                 ..DateTimePickerSpec::new().with_default_value(DateTimeValue::new(
                     Some("2026-03-01".to_string()),
                     Some("09:00".to_string()),
                 ))
-            }, &theme())
-            .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
-            .into_js_el();
+            },
+            &theme(),
+        )
+        .on_select(move |iso| days.lock().unwrap().push(iso.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 460.0, 700.0, "17");
 
@@ -470,19 +513,21 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let moves = Arc::clone(&seen);
 
-        let el = DateTimePicker::from_spec(DateTimePickerSpec {
+        let el = DateTimePicker::from_spec(
+            DateTimePickerSpec {
                 open: Some(true),
                 ..DateTimePickerSpec::new().with_default_value(DateTimeValue::new(
                     Some("2026-03-01".to_string()),
                     Some("09:00".to_string()),
                 ))
-            }, &theme())
-            .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
-            .into_js_el();
+            },
+            &theme(),
+        )
+        .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 460.0, 700.0, "chevron-right");
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
     }
-
 }

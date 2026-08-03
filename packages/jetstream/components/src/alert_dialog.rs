@@ -25,8 +25,8 @@
 //! - No ARIA channel: `alertdialog` role / `aria-modal` / `aria-label` are carried
 //!   on the spec but not emitted (tracked repo-wide for Jetstream).
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, DialogKind,
@@ -372,8 +372,12 @@ mod tests {
 
         let el = AlertDialog::from_spec(spec(), &theme())
             .working(true, "Deleting…")
-            .on_confirm(move || { confirms.fetch_add(1, Ordering::SeqCst); })
-            .on_cancel(move || { cancels.fetch_add(1, Ordering::SeqCst); })
+            .on_confirm(move || {
+                confirms.fetch_add(1, Ordering::SeqCst);
+            })
+            .on_cancel(move || {
+                cancels.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 800.0, 600.0, "Deleting…");
@@ -381,7 +385,11 @@ mod tests {
         // The backdrop too.
         crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a working alert dialog still fired");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a working alert dialog still fired"
+        );
     }
 
     /// The contract has `onCancel` cover "built-in cancel and dismissal paths",
@@ -396,12 +404,17 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = AlertDialog::from_spec(spec(), &theme())
-            .on_cancel(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_cancel(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_at(&el, 800.0, 600.0, 4.0, 4.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "the backdrop did not report cancel");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "the backdrop did not report cancel"
+        );
     }
-
 }

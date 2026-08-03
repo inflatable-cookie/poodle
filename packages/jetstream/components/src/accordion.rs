@@ -6,12 +6,14 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
-use poodle_specs::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
+use poodle_specs::ControlSize;
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// Build an accordion element from an AccordionSpec.
 ///
@@ -45,7 +47,11 @@ pub struct Accordion {
 
 impl Accordion {
     pub fn from_spec(spec: AccordionSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the value of the item whose trigger was pressed.
@@ -173,7 +179,11 @@ fn render_item(
 
     // Contract §8 Indicator: chevron-down icon (rotated 180deg when open).
     // JsEl has no rotation, so the chevron swaps icon name (Tier-3).
-    let chevron_icon = if is_expanded { "chevron-down" } else { "chevron-right" };
+    let chevron_icon = if is_expanded {
+        "chevron-down"
+    } else {
+        "chevron-right"
+    };
     let indicator = ui_element::icon(chevron_icon)
         .w(indicator_size)
         .h(indicator_size)
@@ -194,7 +204,9 @@ fn render_item(
     if let (false, Some(handler)) = (item.is_disabled, on_change) {
         let handler = std::sync::Arc::clone(handler);
         let value = item.value.clone();
-        trigger = trigger.cursor_pointer().on_click(move |_event| handler(&value));
+        trigger = trigger
+            .cursor_pointer()
+            .on_click(move |_event| handler(&value));
     }
 
     // Contract §8 Item box-shadow: `inset 0 0.0625rem 0 color-mix(text-inverse
@@ -282,8 +294,16 @@ mod tests {
         assert_eq!(el.children.len(), 2, "two item cards expected");
 
         let tree = probe(&el, 480.0, 320.0);
-        assert!(tree.has_text("Section A"), "title A missing: {:?}", tree.texts());
-        assert!(tree.has_text("Section B"), "title B missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Section A"),
+            "title A missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Section B"),
+            "title B missing: {:?}",
+            tree.texts()
+        );
         // Item B is collapsed but its description must still render (in the trigger).
         assert!(
             tree.has_text("Content for B"),
@@ -395,12 +415,13 @@ mod tests {
         items[0].is_disabled = true;
 
         let el = Accordion::from_spec(AccordionSpec::new(items), &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 600.0, 400.0, "Section A");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled item fired");
     }
-
 }

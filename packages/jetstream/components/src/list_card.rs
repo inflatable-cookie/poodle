@@ -20,7 +20,9 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
+};
 
 /// Render a list card with no host slots (derived leading glyph, no
 /// badges/footer/actions/trailing). Back-compat entry — existing callers are
@@ -38,7 +40,11 @@ pub struct ListCard {
 
 impl ListCard {
     pub fn from_spec(spec: ListCardSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+        }
     }
 
     pub fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
@@ -49,8 +55,8 @@ impl ListCard {
 
 impl crate::element::IntoJsEl for ListCard {
     fn into_js_el(self) -> JsEl {
-        let interactive = (self.spec.is_interactive || self.spec.href.is_some())
-            && !self.spec.is_disabled;
+        let interactive =
+            (self.spec.is_interactive || self.spec.href.is_some()) && !self.spec.is_disabled;
         let el = js_list_card(&self.spec, &self.theme);
 
         match (interactive, self.on_click) {
@@ -283,7 +289,13 @@ pub fn js_list_card_with_slots(
     });
 
     // Trailing lane (contract §8 Trailing) — exclusive, shrink-proof.
-    let trailing_el = trailing.map(|t| ui_element::div().flex_row().flex_none().items_center().child(t));
+    let trailing_el = trailing.map(|t| {
+        ui_element::div()
+            .flex_row()
+            .flex_none()
+            .items_center()
+            .child(t)
+    });
 
     // ── Selection indicator (checkbox box) — contract §3/§8 ─────────────
     let selection_el = (spec.is_selectable
@@ -460,7 +472,11 @@ pub fn js_list_card_with_slots(
     // cards stay interactive (contract §8) but restore their dashed border to
     // full border-default on hover instead of the generic 52% tint.
     if (spec.is_interactive || spec.href.is_some()) && !spec.is_disabled {
-        let hover_border = if spec.is_not_live { border_default } else { hover_border };
+        let hover_border = if spec.is_not_live {
+            border_default
+        } else {
+            hover_border
+        };
         el = el
             .cursor_pointer()
             .focusable()
@@ -481,15 +497,24 @@ mod tests {
     fn active_draws_an_inset_bar_that_the_radius_can_clip() {
         let th = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let plain = js_list_card(&ListCardSpec::new().with_title("Row"), &th);
-        let active = js_list_card(&ListCardSpec::new().with_title("Row").with_active(true), &th);
+        let active = js_list_card(
+            &ListCardSpec::new().with_title("Row").with_active(true),
+            &th,
+        );
 
         assert!(
             active.style.shadow_layers.len() > plain.style.shadow_layers.len(),
             "active should add a shadow layer"
         );
         let bar = active.style.shadow_layers.last().unwrap();
-        assert!(bar.inset, "the bar must be inset, or the radius cannot clip it");
-        assert!(bar.offset_x > 0.0, "the bar is offset from the leading edge");
+        assert!(
+            bar.inset,
+            "the bar must be inset, or the radius cannot clip it"
+        );
+        assert!(
+            bar.offset_x > 0.0,
+            "the bar is offset from the leading edge"
+        );
         assert_eq!(bar.blur, 0.0, "a bar, not a glow");
     }
 
@@ -499,7 +524,10 @@ mod tests {
     fn active_preserves_the_selected_ring() {
         let th = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let selected = js_list_card(
-            &ListCardSpec::new().with_title("Row").with_selectable(true).with_selected(true),
+            &ListCardSpec::new()
+                .with_title("Row")
+                .with_selectable(true)
+                .with_selected(true),
             &th,
         );
         let both = js_list_card(
@@ -522,7 +550,12 @@ mod tests {
 
     fn accent(th: &JetstreamThemeProvider) -> ProbeColor {
         let c = resolve_color(th, "color.accent.base");
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     fn spec() -> ListCardSpec {
@@ -538,8 +571,16 @@ mod tests {
         let th = theme();
         let tree = probe(&js_list_card(&spec(), &th), 360.0, 96.0);
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("design-system-v2.figma"), "title missing: {:?}", tree.texts());
-        assert!(tree.has_text("Edited 2 hours ago"), "subtitle missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("design-system-v2.figma"),
+            "title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Edited 2 hours ago"),
+            "subtitle missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("14.2 MB"), "meta missing: {:?}", tree.texts());
     }
 
@@ -561,8 +602,15 @@ mod tests {
         };
 
         for shape in [LeadingShape::Circle, LeadingShape::RoundedSquare] {
-            let tree = probe(&js_list_card(&spec().with_leading_shape(shape), &th), 360.0, 96.0);
-            assert!(has_box(&tree), "{shape:?} leading box should be {edge}px square");
+            let tree = probe(
+                &js_list_card(&spec().with_leading_shape(shape), &th),
+                360.0,
+                96.0,
+            );
+            assert!(
+                has_box(&tree),
+                "{shape:?} leading box should be {edge}px square"
+            );
         }
     }
 
@@ -585,7 +633,10 @@ mod tests {
             let s = spec().with_leading_size_offset(offset);
             let edge = rem_to_px(s.leading_size_rem());
             let tree = probe(&js_list_card(&s, &th), 360.0, 96.0);
-            assert!(has_box(&tree, edge), "offset {offset} should give a {edge}px leading box");
+            assert!(
+                has_box(&tree, edge),
+                "offset {offset} should give a {edge}px leading box"
+            );
         }
 
         // …and the ladder must actually move, or the loop above would pass on
@@ -593,18 +644,21 @@ mod tests {
         let smaller = spec().with_leading_size_offset(-1).leading_size_rem();
         let base = spec().leading_size_rem();
         let bigger = spec().with_leading_size_offset(1).leading_size_rem();
-        assert!(smaller < base && base < bigger, "{smaller} < {base} < {bigger}");
+        assert!(
+            smaller < base && base < bigger,
+            "{smaller} < {base} < {bigger}"
+        );
     }
 
     #[test]
     fn sash_ribbon_renders_text() {
         let th = theme();
-        let tree = probe(
-            &js_list_card(&spec().with_sash("Free"), &th),
-            360.0,
-            96.0,
+        let tree = probe(&js_list_card(&spec().with_sash("Free"), &th), 360.0, 96.0);
+        assert!(
+            tree.has_text("FREE"),
+            "sash ribbon text missing: {:?}",
+            tree.texts()
         );
-        assert!(tree.has_text("FREE"), "sash ribbon text missing: {:?}", tree.texts());
     }
 
     #[test]
@@ -617,7 +671,11 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("Read-only item"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Read-only item"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         // No meta text like a size string leaks in.
         assert!(!tree.has_text("14.2 MB"), "unexpected meta on bare card");
     }
@@ -627,10 +685,22 @@ mod tests {
         // Back-compat: js_list_card (no slots) still renders title + subtitle.
         let th = theme();
         let tree = probe(&js_list_card(&spec(), &th), 360.0, 96.0);
-        assert!(tree.has_text("design-system-v2.figma"), "title missing: {:?}", tree.texts());
-        assert!(tree.has_text("Edited 2 hours ago"), "subtitle missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("design-system-v2.figma"),
+            "title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Edited 2 hours ago"),
+            "subtitle missing: {:?}",
+            tree.texts()
+        );
         // Derived first-letter glyph present when no leading slot is supplied.
-        assert!(tree.has_text("D"), "derived leading glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("D"),
+            "derived leading glyph missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -652,7 +722,11 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("LEAD"), "leading slot content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("LEAD"),
+            "leading slot content missing: {:?}",
+            tree.texts()
+        );
         // The derived first-letter glyph ("D") must be gone — the slot overrides it.
         assert!(
             !tree.has_text("D"),
@@ -679,7 +753,11 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("24 docs"), "footer slot content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("24 docs"),
+            "footer slot content missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -691,10 +769,21 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("New"), "first badge missing: {:?}", tree.texts());
-        assert!(tree.has_text("Review"), "second badge missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("New"),
+            "first badge missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Review"),
+            "second badge missing: {:?}",
+            tree.texts()
+        );
         // Title still present alongside the badges.
-        assert!(tree.has_text("design-system-v2.figma"), "title missing with badges");
+        assert!(
+            tree.has_text("design-system-v2.figma"),
+            "title missing with badges"
+        );
     }
 
     #[test]
@@ -715,7 +804,11 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("Open"), "trailing slot content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Open"),
+            "trailing slot content missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -739,9 +832,19 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("Trailing"), "trailing missing: {:?}", tree.texts());
-        assert!(!tree.has_text("14.2 MB"), "meta should be suppressed by trailing");
-        assert!(!tree.has_text("Action"), "actions should be suppressed by trailing");
+        assert!(
+            tree.has_text("Trailing"),
+            "trailing missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("14.2 MB"),
+            "meta should be suppressed by trailing"
+        );
+        assert!(
+            !tree.has_text("Action"),
+            "actions should be suppressed by trailing"
+        );
     }
 
     #[test]
@@ -764,7 +867,11 @@ mod tests {
             360.0,
             96.0,
         );
-        assert!(tree.has_text("v2.1"), "corner slot content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("v2.1"),
+            "corner slot content missing: {:?}",
+            tree.texts()
+        );
         // Title still present alongside the corner content.
         assert!(
             tree.has_text("design-system-v2.figma"),
@@ -780,16 +887,7 @@ mod tests {
         let badges = vec![ui_element::label("New")];
         let corner = ui_element::label("v2.1");
         let tree = probe(
-            &js_list_card_with_slots(
-                &spec(),
-                &th,
-                None,
-                badges,
-                None,
-                None,
-                None,
-                Some(corner),
-            ),
+            &js_list_card_with_slots(&spec(), &th, None, badges, None, None, None, Some(corner)),
             360.0,
             96.0,
         );
@@ -807,12 +905,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = ListCard::from_spec(spec(), &theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 480.0, 120.0, "design-system-v2.figma");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_click fired exactly once"
+        );
     }
 
     /// A card that is not interactive draws no pointer cursor, and must not
@@ -830,12 +934,13 @@ mod tests {
             ListCardSpec::new().with_title("design-system-v2.figma"),
             &theme(),
         )
-        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_click(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 480.0, 120.0, "design-system-v2.figma");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a static card fired");
     }
-
 }

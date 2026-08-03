@@ -39,7 +39,7 @@ pub fn js_state_tile(spec: &StateTileSpec, theme: &JetstreamThemeProvider) -> Js
     let pad_y = resolve_px(theme, "space.panel.y");
     let gap = resolve_px(theme, "space.stack.sm"); // label↔value↔trend↔sparkline
     let trend_gap = resolve_px(theme, "space.inline.xs"); // glyph↔label
-    // Typography from spec token methods (contract §2: Label→label, Value→heading).
+                                                          // Typography from spec token methods (contract §2: Label→label, Value→heading).
     let label_size = resolve_px(theme, spec.label_font_size_token());
     let value_size = resolve_px(theme, spec.value_font_size_token());
     let trend_size = resolve_px(theme, spec.trend_font_size_token());
@@ -133,7 +133,11 @@ mod tests {
         let el = js_state_tile(&StateTileSpec::new("Active Users", "1,284"), &th);
         let tree = probe(&el, 240.0, 160.0);
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("Active Users"), "label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Active Users"),
+            "label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("1,284"), "value missing: {:?}", tree.texts());
     }
 
@@ -143,8 +147,14 @@ mod tests {
         let el = js_state_tile(&StateTileSpec::new("Latency", "42ms"), &th);
         let tree = probe(&el, 240.0, 160.0);
         // No trend glyph, no sparkline slot.
-        assert!(tree.find_token("state-tile-sparkline").is_none(), "sparkline should be absent");
-        assert!(!tree.has_text("\u{2191}") && !tree.has_text("\u{2192}"), "no trend glyph expected");
+        assert!(
+            tree.find_token("state-tile-sparkline").is_none(),
+            "sparkline should be absent"
+        );
+        assert!(
+            !tree.has_text("\u{2191}") && !tree.has_text("\u{2192}"),
+            "no trend glyph expected"
+        );
     }
 
     #[test]
@@ -156,8 +166,16 @@ mod tests {
             .with_trend_label("+8.5%");
         let el = js_state_tile(&spec, &th);
         let tree = probe(&el, 240.0, 160.0);
-        assert!(tree.has_text("\u{2191}"), "up glyph missing: {:?}", tree.texts());
-        assert!(tree.has_text("+8.5%"), "trend label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("\u{2191}"),
+            "up glyph missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("+8.5%"),
+            "trend label missing: {:?}",
+            tree.texts()
+        );
         // Up trend resolves the success color via the spec's trend_color_token.
         let resolved: Color = resolve_color(&th, spec.trend_color_token()).into();
         assert!(
@@ -174,7 +192,11 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 240.0, 160.0);
-        assert!(tree.has_text("\u{2193}"), "down glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("\u{2193}"),
+            "down glyph missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -188,8 +210,16 @@ mod tests {
         );
         let tree = probe(&el, 240.0, 160.0);
         // Any non up/down string → right arrow (neutral).
-        assert!(tree.has_text("\u{2192}"), "neutral glyph missing: {:?}", tree.texts());
-        assert!(tree.has_text("Stable"), "trend label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("\u{2192}"),
+            "neutral glyph missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Stable"),
+            "trend label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -200,7 +230,9 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 240.0, 200.0);
-        let slot = tree.find_token("state-tile-sparkline").expect("sparkline slot present");
+        let slot = tree
+            .find_token("state-tile-sparkline")
+            .expect("sparkline slot present");
         assert!(slot.h > 0.0, "sparkline slot should have height");
     }
 

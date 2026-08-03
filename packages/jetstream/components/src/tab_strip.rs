@@ -25,8 +25,8 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{Orientation, TabStripSpec};
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem, size_padding_x_offset_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_padding_x_offset_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
@@ -65,7 +65,8 @@ pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> JsEl
     let effective_size = resolve_semantic_size(spec.size, SemanticControlSizeRole::Control);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Tab inline padding = density control-x + per-size offset (mirrors Button).
-    let pad_x = rem_to_px(control_space_x_rem(spec.density) + size_padding_x_offset_rem(effective_size));
+    let pad_x =
+        rem_to_px(control_space_x_rem(spec.density) + size_padding_x_offset_rem(effective_size));
     // Tab min-height tracks control-height − 0.25rem (same as Tabs underline).
     let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
     let item_gap = resolve_px(theme, spec.item_gap_token());
@@ -99,7 +100,13 @@ pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> JsEl
     for item in &spec.items {
         let is_active = selected.as_deref() == Some(item.value.as_str());
         let is_disabled = item.is_disabled;
-        let text_color = if is_active { accent } else if is_disabled { text_secondary } else { text_primary };
+        let text_color = if is_active {
+            accent
+        } else if is_disabled {
+            text_secondary
+        } else {
+            text_primary
+        };
 
         // Inner row: label (+ optional close button), kept visible in both axes.
         let mut tab = ui_element::button("")
@@ -198,7 +205,12 @@ mod tests {
 
         let accent = resolve_color(&th, "color.accent.base");
         let want = tint(accent, spec.vertical_active_fill_opacity());
-        let want = ProbeColor { r: want.x, g: want.y, b: want.z, a: want.w };
+        let want = ProbeColor {
+            r: want.x,
+            g: want.y,
+            b: want.z,
+            a: want.w,
+        };
         assert!(
             tree.has_background(want, 0.02),
             "vertical active tab missing accent fill; tree: {}",

@@ -47,7 +47,11 @@ pub struct CommandPalette {
 
 impl CommandPalette {
     pub fn from_spec(spec: CommandPaletteSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_select: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+        }
     }
 
     /// Fires with the chosen action's id. Disabled actions never fire.
@@ -150,7 +154,11 @@ fn build(
     .overflow_hidden();
 
     // ── Header: title-group + meta (hint pill + close) ────────────────
-    let mut title_group = ui_element::div().flex_col().gap(rem_to_px(0.125)).grow().min_w_0();
+    let mut title_group = ui_element::div()
+        .flex_col()
+        .gap(rem_to_px(0.125))
+        .grow()
+        .min_w_0();
     if let Some(ref title) = spec.title {
         title_group = title_group.child(
             ui_element::label(title.clone())
@@ -262,13 +270,11 @@ fn build(
     // Non-ready postures render an empty-state message in place of the list;
     // ready renders grouped rows.
     let results = match spec.state {
-        DiscoveryState::Loading => ui_element::div()
-            .py(gap_lg)
-            .child(
-                ui_element::label("Searching\u{2026}")
-                    .text_size(font_size)
-                    .text_color(text_secondary),
-            ),
+        DiscoveryState::Loading => ui_element::div().py(gap_lg).child(
+            ui_element::label("Searching\u{2026}")
+                .text_size(font_size)
+                .text_color(text_secondary),
+        ),
         DiscoveryState::Error => ui_element::div().py(gap_lg).child(
             ui_element::label("Error loading commands")
                 .text_size(font_size)
@@ -465,10 +471,7 @@ mod tests {
         );
 
         // Modal header: title + description text.
-        assert!(
-            tree.has_text("Command Palette"),
-            "header title must render"
-        );
+        assert!(tree.has_text("Command Palette"), "header title must render");
         assert!(
             tree.has_text("Run commands or navigate to files."),
             "header description must render"
@@ -563,8 +566,8 @@ mod tests {
         assert_eq!(palette_status(&spec), "3 commands available.");
 
         // Single enabled action → singular "1 command available."
-        let single = CommandPaletteSpec::new(vec![CommandActionItem::new("a", "Alpha")])
-            .with_open(true);
+        let single =
+            CommandPaletteSpec::new(vec![CommandActionItem::new("a", "Alpha")]).with_open(true);
         assert_eq!(palette_status(&single), "1 command available.");
     }
 
@@ -597,12 +600,13 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = CommandPalette::from_spec(open_spec(), &theme())
-            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_select(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 640.0, 640.0, "Legacy Action");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled action fired");
     }
-
 }

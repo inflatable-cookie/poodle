@@ -7,12 +7,12 @@
 //! 4. Pause dialog — modal overlay with actions
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_specs::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
 use poodle_specs::{
     BadgeSpec, ButtonSpec, DialogSpec, MenuSpec, ProgressSpec, SelectSpec, SeparatorSpec,
     SliderSpec, SpinnerSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec,
     TextInputSpec,
 };
+use poodle_specs::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
 use poodle_style::StyleDescriptor;
 
 use crate::{JetstreamAdapter, JetstreamNodeHandle};
@@ -27,7 +27,11 @@ pub struct DemoSceneScreen {
 
 impl DemoSceneScreen {
     fn new(id: &'static str, title: &'static str) -> Self {
-        Self { id, title, nodes: Vec::new() }
+        Self {
+            id,
+            title,
+            nodes: Vec::new(),
+        }
     }
 
     fn push(&mut self, handle: JetstreamNodeHandle) {
@@ -73,14 +77,14 @@ fn render_settings(a: &JetstreamAdapter, t: &dyn ThemeProvider) -> DemoSceneScre
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&PageHeaderSpec::new("Settings"), &s, t));
     screen.push(a.render(&TabsSpec::new(vec![]), &s, t));
-    screen.push(a.render(&SliderSpec::new(0.75), &s, t));     // Volume
-    screen.push(a.render(&SliderSpec::new(0.5), &s, t));     // Brightness
-    screen.push(a.render(&SwitchSpec::new(), &s, t));     // Fullscreen
-    screen.push(a.render(&SwitchSpec::new(), &s, t));     // VSync
+    screen.push(a.render(&SliderSpec::new(0.75), &s, t)); // Volume
+    screen.push(a.render(&SliderSpec::new(0.5), &s, t)); // Brightness
+    screen.push(a.render(&SwitchSpec::new(), &s, t)); // Fullscreen
+    screen.push(a.render(&SwitchSpec::new(), &s, t)); // VSync
     screen.push(a.render(&SelectSpec::new(vec![]), &s, t)); // Resolution
-    screen.push(a.render(&TextInputSpec::new(), &s, t));  // Player name
-    screen.push(a.render(&ButtonSpec::new(), &s, t));     // Apply
-    screen.push(a.render(&ButtonSpec::new(), &s, t));     // Back
+    screen.push(a.render(&TextInputSpec::new(), &s, t)); // Player name
+    screen.push(a.render(&ButtonSpec::new(), &s, t)); // Apply
+    screen.push(a.render(&ButtonSpec::new(), &s, t)); // Back
 
     screen
 }
@@ -90,14 +94,14 @@ fn render_hud(a: &JetstreamAdapter, t: &dyn ThemeProvider) -> DemoSceneScreen {
     let mut screen = DemoSceneScreen::new("hud", "HUD Overlay");
 
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
-    screen.push(a.render(&ProgressSpec::new(), &s, t));           // Health bar
-    screen.push(a.render(&ProgressSpec::new(), &s, t));           // Energy bar
-    screen.push(a.render(&SpinnerSpec::new(), &s, t));            // Loading/status activity
-    screen.push(a.render(&StatusIndicatorSpec::new(), &s, t));    // Status
-    screen.push(a.render(&BadgeSpec::new(), &s, t));              // Level badge
+    screen.push(a.render(&ProgressSpec::new(), &s, t)); // Health bar
+    screen.push(a.render(&ProgressSpec::new(), &s, t)); // Energy bar
+    screen.push(a.render(&SpinnerSpec::new(), &s, t)); // Loading/status activity
+    screen.push(a.render(&StatusIndicatorSpec::new(), &s, t)); // Status
+    screen.push(a.render(&BadgeSpec::new(), &s, t)); // Level badge
     screen.push(a.render(&StateTileSpec::new("Score", "1250"), &s, t));
     screen.push(a.render(&StateTileSpec::new("Time", "2:34"), &s, t));
-    screen.push(a.render(&ToastStackSpec::new(), &s, t));         // Notifications
+    screen.push(a.render(&ToastStackSpec::new(), &s, t)); // Notifications
 
     screen
 }
@@ -107,10 +111,14 @@ fn render_pause_dialog(a: &JetstreamAdapter, t: &dyn ThemeProvider) -> DemoScene
     let mut screen = DemoSceneScreen::new("pause-dialog", "Pause Dialog");
 
     screen.push(a.render(&DialogSpec::new(), &s, t));
-    screen.push(a.render(&ConfirmActionSpec::new("Paused", "Game paused", "Resume", "Quit"), &s, t));
-    screen.push(a.render(&ButtonSpec::new(), &s, t));  // Resume
-    screen.push(a.render(&ButtonSpec::new(), &s, t));  // Settings
-    screen.push(a.render(&ButtonSpec::new(), &s, t));  // Quit to menu
+    screen.push(a.render(
+        &ConfirmActionSpec::new("Paused", "Game paused", "Resume", "Quit"),
+        &s,
+        t,
+    ));
+    screen.push(a.render(&ButtonSpec::new(), &s, t)); // Resume
+    screen.push(a.render(&ButtonSpec::new(), &s, t)); // Settings
+    screen.push(a.render(&ButtonSpec::new(), &s, t)); // Quit to menu
 
     screen
 }
@@ -136,7 +144,11 @@ mod tests {
     #[test]
     fn main_menu_has_navigation_buttons() {
         let scene = render_main_menu(&adapter(), adapter().theme());
-        let button_count = scene.nodes.iter().filter(|n| n.spec_type == "ButtonSpec").count();
+        let button_count = scene
+            .nodes
+            .iter()
+            .filter(|n| n.spec_type == "ButtonSpec")
+            .count();
         assert!(button_count >= 3, "Main menu needs at least 3 buttons");
     }
 
@@ -161,7 +173,10 @@ mod tests {
     fn pause_dialog_has_confirm_action() {
         let scene = render_pause_dialog(&adapter(), adapter().theme());
         let has_dialog = scene.nodes.iter().any(|n| n.spec_type == "DialogSpec");
-        let has_confirm = scene.nodes.iter().any(|n| n.spec_type == "ConfirmActionSpec");
+        let has_confirm = scene
+            .nodes
+            .iter()
+            .any(|n| n.spec_type == "ConfirmActionSpec");
         assert!(has_dialog && has_confirm);
     }
 
@@ -169,6 +184,9 @@ mod tests {
     fn total_nodes_across_all_scenes() {
         let scenes = render_all_scenes(&adapter());
         let total: usize = scenes.iter().map(|s| s.node_count()).sum();
-        assert!(total >= 30, "Total node count {total} below expected minimum");
+        assert!(
+            total >= 30,
+            "Total node count {total} below expected minimum"
+        );
     }
 }

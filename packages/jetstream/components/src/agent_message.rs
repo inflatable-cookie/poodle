@@ -117,8 +117,16 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> JsEl {
                         ),
                 );
             }
-            MdBlock::List { ordered, start, items } => {
-                let mut list = ui_element::div().flex_col().w_full().pl(s.indent).gap(rem_to_px(0.125));
+            MdBlock::List {
+                ordered,
+                start,
+                items,
+            } => {
+                let mut list = ui_element::div()
+                    .flex_col()
+                    .w_full()
+                    .pl(s.indent)
+                    .gap(rem_to_px(0.125));
                 for (index, item) in items.iter().enumerate() {
                     let marker = if *ordered {
                         format!("{}.", *start as usize + index)
@@ -156,7 +164,12 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> JsEl {
                 );
             }
             MdBlock::Rule => {
-                body = body.child(ui_element::div().w_full().h(rem_to_px(0.0625)).bg(s.quote_rule));
+                body = body.child(
+                    ui_element::div()
+                        .w_full()
+                        .h(rem_to_px(0.0625))
+                        .bg(s.quote_rule),
+                );
             }
         }
     }

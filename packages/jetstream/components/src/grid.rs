@@ -53,9 +53,10 @@ pub fn js_grid(spec: &GridSpec, theme: &JetstreamThemeProvider, children: Vec<Js
                 match tracks[i % tracks.len()] {
                     // Fr tracks → equal columns (weighted ratios degrade; see DELTA).
                     GridTrack::Fr(_) => ui_element::div().flex_grow().min_w_0().child(child),
-                    GridTrack::Rem(rem) => {
-                        ui_element::div().w(rem_to_px(rem)).flex_shrink_0().child(child)
-                    }
+                    GridTrack::Rem(rem) => ui_element::div()
+                        .w(rem_to_px(rem))
+                        .flex_shrink_0()
+                        .child(child),
                 }
             }
             GridColumns::Tracks(_) => ui_element::div().flex_grow().min_w_0().child(child),
@@ -77,7 +78,9 @@ mod tests {
     }
 
     fn cells(n: usize) -> Vec<JsEl> {
-        (0..n).map(|i| ui_element::label(&format!("c{i}"))).collect()
+        (0..n)
+            .map(|i| ui_element::label(&format!("c{i}")))
+            .collect()
     }
 
     #[test]
@@ -91,7 +94,11 @@ mod tests {
 
         // All three cell labels survive layout.
         for i in 0..3 {
-            assert!(tree.has_text(&format!("c{i}")), "missing cell c{i}: {:?}", tree.texts());
+            assert!(
+                tree.has_text(&format!("c{i}")),
+                "missing cell c{i}: {:?}",
+                tree.texts()
+            );
         }
         // Equal-fr wrappers each grew to roughly a third of the row, so all
         // three sit on the same row (same y) with positive width.
@@ -157,6 +164,9 @@ mod tests {
         let tree = probe(&el, 400.0, 200.0);
         // Root has padding, so first child starts inset from the left edge.
         let first_label = tree.nodes.iter().find(|n| n.kind == "Label").unwrap();
-        assert!(first_label.x > 0.0, "padding should inset children: {first_label:?}");
+        assert!(
+            first_label.x > 0.0,
+            "padding should inset children: {first_label:?}"
+        );
     }
 }

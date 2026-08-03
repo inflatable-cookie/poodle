@@ -183,7 +183,10 @@ mod tests {
     #[test]
     fn fraction_clamps_and_normalizes_custom_range() {
         // Custom range 0–500, value 350 → 70%.
-        let spec = MeterSpec::new().with_value(350.0).with_min(0.0).with_max(500.0);
+        let spec = MeterSpec::new()
+            .with_value(350.0)
+            .with_min(0.0)
+            .with_max(500.0);
         assert!((spec.normalized_progress() - 0.7).abs() < 1e-9);
     }
 }

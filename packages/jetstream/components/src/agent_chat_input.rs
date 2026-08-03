@@ -232,11 +232,15 @@ fn build(
     // clamped row count.
     let is_empty = spec.value.is_empty();
     field = field.child(
-        ui_element::label(if is_empty { &spec.placeholder } else { &spec.value })
-            .w_full()
-            .min_h(line_height * spec.visible_rows() as f32)
-            .text_color(if is_empty { placeholder } else { text_primary })
-            .text_size(editor_font),
+        ui_element::label(if is_empty {
+            &spec.placeholder
+        } else {
+            &spec.value
+        })
+        .w_full()
+        .min_h(line_height * spec.visible_rows() as f32)
+        .text_color(if is_empty { placeholder } else { text_primary })
+        .text_size(editor_font),
     );
 
     // ── Toolbar ───────────────────────────────────────────────────────────────
@@ -313,7 +317,11 @@ fn build(
             .child(trailing),
     );
 
-    let mut root = ui_element::div().flex_col().w_full().min_w(0.0).child(field);
+    let mut root = ui_element::div()
+        .flex_col()
+        .w_full()
+        .min_w(0.0)
+        .child(field);
 
     // ── Footer bar ────────────────────────────────────────────────────────────
     if !footer_children.is_empty() {
@@ -345,10 +353,7 @@ fn build(
 }
 
 /// Convenience for the common case: no toolbar or footer children.
-pub fn js_agent_chat_input_bare(
-    spec: &AgentChatInputSpec,
-    theme: &JetstreamThemeProvider,
-) -> JsEl {
+pub fn js_agent_chat_input_bare(spec: &AgentChatInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     js_agent_chat_input(spec, theme, Vec::new(), Vec::new())
 }
 
@@ -384,12 +389,13 @@ mod tests {
     #[test]
     fn value_replaces_the_placeholder() {
         let spec = AgentChatInputSpec::new().with_value("Ship it");
-        let tree = crate::render_probe::probe(
-            &js_agent_chat_input_bare(&spec, &theme()),
-            480.0,
-            200.0,
+        let tree =
+            crate::render_probe::probe(&js_agent_chat_input_bare(&spec, &theme()), 480.0, 200.0);
+        assert!(
+            tree.has_text("Ship it"),
+            "value missing: {:?}",
+            tree.texts()
         );
-        assert!(tree.has_text("Ship it"), "value missing: {:?}", tree.texts());
         assert!(
             !tree.has_text("Send a message"),
             "placeholder must not show with a value: {:?}",
@@ -399,15 +405,18 @@ mod tests {
 
     #[test]
     fn attachments_render_as_chips() {
-        let spec = AgentChatInputSpec::new().with_attachments(vec![
-            AgentChatAttachment::new("a1", "diagram.png").with_icon("image"),
-        ]);
-        let tree = crate::render_probe::probe(
-            &js_agent_chat_input_bare(&spec, &theme()),
-            480.0,
-            240.0,
+        let spec = AgentChatInputSpec::new().with_attachments(vec![AgentChatAttachment::new(
+            "a1",
+            "diagram.png",
+        )
+        .with_icon("image")]);
+        let tree =
+            crate::render_probe::probe(&js_agent_chat_input_bare(&spec, &theme()), 480.0, 240.0);
+        assert!(
+            tree.has_text("diagram.png"),
+            "chip label missing: {:?}",
+            tree.texts()
         );
-        assert!(tree.has_text("diagram.png"), "chip label missing: {:?}", tree.texts());
     }
 
     #[test]
@@ -429,13 +438,21 @@ mod tests {
     fn image_attachments_render_as_tiles_instead_of_labelled_chips() {
         let th = theme();
         let file = AgentChatInputSpec::new()
-            .with_attachments(vec![AgentChatAttachment::new("a1", "notes.md").with_icon("file")]);
-        let image = AgentChatInputSpec::new().with_attachments(vec![
-            AgentChatAttachment::new("a1", "diagram.png").with_thumbnail("assets/diagram.png"),
-        ]);
+            .with_attachments(vec![
+                AgentChatAttachment::new("a1", "notes.md").with_icon("file")
+            ]);
+        let image = AgentChatInputSpec::new().with_attachments(vec![AgentChatAttachment::new(
+            "a1",
+            "diagram.png",
+        )
+        .with_thumbnail("assets/diagram.png")]);
 
         let chip = crate::render_probe::probe(&js_agent_chat_input_bare(&file, &th), 480.0, 240.0);
-        assert!(chip.has_text("notes.md"), "chip should label the file: {:?}", chip.texts());
+        assert!(
+            chip.has_text("notes.md"),
+            "chip should label the file: {:?}",
+            chip.texts()
+        );
 
         // A tile shows the picture, not the filename.
         let tile = crate::render_probe::probe(&js_agent_chat_input_bare(&image, &th), 480.0, 240.0);
@@ -454,7 +471,9 @@ mod tests {
             &AgentChatInputSpec::new().with_context(160_000.0, 200_000.0),
             &th,
         );
-        let without_nodes = crate::render_probe::probe(&without, 480.0, 200.0).nodes.len();
+        let without_nodes = crate::render_probe::probe(&without, 480.0, 200.0)
+            .nodes
+            .len();
         let with_nodes = crate::render_probe::probe(&with, 480.0, 200.0).nodes.len();
         assert!(
             with_nodes > without_nodes,
@@ -490,17 +509,20 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = AgentChatInput::from_spec(
-            AgentChatInputSpec::new().with_value("hi"),
-            &theme(),
-        )
-        .on_action(move || { counter.fetch_add(1, Ordering::SeqCst); })
-        .into_js_el();
+        let el = AgentChatInput::from_spec(AgentChatInputSpec::new().with_value("hi"), &theme())
+            .on_action(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
 
         let spec = AgentChatInputSpec::new().with_value("hi");
         crate::element::click_probe::click_text(&el, 640.0, 300.0, spec.action_icon());
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_action fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_action fired exactly once"
+        );
     }
 
     /// Empty composer, nothing streaming: the control is inert and must not
@@ -515,13 +537,19 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = AgentChatInput::from_spec(AgentChatInputSpec::new(), &theme())
-            .on_action(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_action(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         let spec = AgentChatInputSpec::new();
         crate::element::click_probe::click_text(&el, 640.0, 300.0, spec.action_icon());
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "an inert action control fired");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "an inert action control fired"
+        );
     }
 
     #[test]
@@ -545,5 +573,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["a2"]);
     }
-
 }

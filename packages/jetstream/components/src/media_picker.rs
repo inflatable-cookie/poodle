@@ -9,8 +9,8 @@
 //! (preview-loop) — `MediaPickerItem::has_thumbnail` only drives the
 //! placeholder-vs-image anatomy split.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, FileUploadSpec, MediaPickerItem, MediaPickerSpec};
 
@@ -53,7 +53,12 @@ pub struct MediaPicker {
 
 impl MediaPicker {
     pub fn from_spec(spec: MediaPickerSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_select: None, on_tab_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_select: None,
+            on_tab_change: None,
+        }
     }
 
     /// Fires with the chosen item's id.
@@ -146,21 +151,19 @@ fn build(
     if browsing {
         // ── Search field (contract §2 search; a real TextInput) ──
         root = root.child(
-            ui_element::div()
-                .mt(rem_to_px(0.25))
-                .child(
-                    ui_element::text_input("", "Search media...")
-                        // A placeholder is not an accessible name.
-                        .aria_label("Search media")
-                        .self_stretch()
-                        .border(1.0)
-                        .border_color(border)
-                        .rounded(ctrl_radius)
-                        .px(rem_to_px(0.5))
-                        .py(rem_to_px(0.25))
-                        .text_size(font_size)
-                        .text_color(text_secondary),
-                ),
+            ui_element::div().mt(rem_to_px(0.25)).child(
+                ui_element::text_input("", "Search media...")
+                    // A placeholder is not an accessible name.
+                    .aria_label("Search media")
+                    .self_stretch()
+                    .border(1.0)
+                    .border_color(border)
+                    .rounded(ctrl_radius)
+                    .px(rem_to_px(0.5))
+                    .py(rem_to_px(0.25))
+                    .text_size(font_size)
+                    .text_color(text_secondary),
+            ),
         );
 
         // ── Grid OR empty state ──
@@ -320,9 +323,21 @@ mod tests {
     fn renders_title_and_tabs() {
         let spec = MediaPickerSpec::new("Select an asset").with_open(true);
         let tree = probe(&js_media_picker(&spec, &theme()), 480.0, 400.0);
-        assert!(tree.has_text("Select an asset"), "title missing: {:?}", tree.texts());
-        assert!(tree.has_text("Browse"), "browse tab missing: {:?}", tree.texts());
-        assert!(tree.has_text("Upload"), "upload tab missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Select an asset"),
+            "title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Browse"),
+            "browse tab missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Upload"),
+            "upload tab missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -332,8 +347,16 @@ mod tests {
             .with_items(sample_items());
         let tree = probe(&js_media_picker(&spec, &theme()), 480.0, 480.0);
         // Real item labels (no fabricated "Item N").
-        assert!(tree.has_text("Banner image"), "item 1 missing: {:?}", tree.texts());
-        assert!(tree.has_text("Readme.pdf"), "item 3 missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Banner image"),
+            "item 1 missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Readme.pdf"),
+            "item 3 missing: {:?}",
+            tree.texts()
+        );
         assert!(
             !tree.texts().iter().any(|t| t.starts_with("Item ")),
             "fabricated placeholder items must not render: {:?}",
@@ -439,5 +462,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["upload"]);
     }
-
 }

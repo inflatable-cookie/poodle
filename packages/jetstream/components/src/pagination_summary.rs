@@ -10,11 +10,14 @@ pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThem
     let text_color = resolve_color(theme, "color.text.secondary");
 
     // PaginationSummarySpec has no size/size_role fields — use defaults
-    let effective_size = resolve_semantic_size(ControlSize::default(), SemanticControlSizeRole::default());
+    let effective_size =
+        resolve_semantic_size(ControlSize::default(), SemanticControlSizeRole::default());
     let font_size = rem_to_px(size_font_rem(effective_size));
 
     // Built in the spec so all three targets say the same thing (contract §7).
     let text = spec.summary_text();
 
-    ui_element::label(&text).text_color(text_color).text_size(font_size)
+    ui_element::label(&text)
+        .text_color(text_color)
+        .text_size(font_size)
 }

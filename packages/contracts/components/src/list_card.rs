@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, MenuEntry, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LeadingShape {
@@ -585,8 +585,8 @@ mod context_menu_tests {
     /// where a right-click is the browser's, not the component's.
     #[test]
     fn the_trigger_can_move_to_the_leading_slot() {
-        let spec = ListCardSpec::new()
-            .with_context_menu_trigger(ListCardContextMenuTrigger::Leading);
+        let spec =
+            ListCardSpec::new().with_context_menu_trigger(ListCardContextMenuTrigger::Leading);
         assert_eq!(
             spec.context_menu_trigger,
             ListCardContextMenuTrigger::Leading,

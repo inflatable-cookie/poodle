@@ -83,8 +83,8 @@ mod tabs;
 mod text;
 mod text_input;
 mod text_link;
-mod time_ago;
 mod theme_select;
+mod time_ago;
 mod time_field;
 mod time_zone_select;
 mod toggle_group;
@@ -102,13 +102,11 @@ mod agent_message;
 mod agent_question;
 mod agent_question_record;
 mod agent_transcript;
-mod changed_files;
-mod tool_call;
-mod tool_call_group;
 mod app_header;
 mod audio_player;
 mod block_editor;
 mod card_radio_group;
+mod changed_files;
 mod command_palette;
 mod composite_types;
 mod confirm_action;
@@ -150,18 +148,21 @@ mod split_view;
 mod state_tile;
 mod toast_host;
 mod toast_stack;
+mod tool_call;
+mod tool_call_group;
 mod tree;
 mod validation_summary;
 mod video_player;
 
 pub use accordion::{AccordionSelectionMode, AccordionSpec};
+pub use agent_chat_input::{
+    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ComposerKey, ComposerKeyModifiers,
+    SubmitIntent,
+};
 pub use agent_message::AgentMessageSpec;
 pub use agent_question::AgentQuestionSpec;
 pub use agent_question_record::AgentQuestionRecordSpec;
 pub use agent_transcript::AgentTranscriptSpec;
-pub use changed_files::ChangedFilesSpec;
-pub use tool_call::ToolCallSpec;
-pub use tool_call_group::ToolCallGroupSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
@@ -175,6 +176,7 @@ pub use calendar::{CalendarMode, CalendarSpec};
 pub use call_out::{CallOutSpec, CalloutAnnounceMode};
 pub use card::{CardLayout, CardSpec, CardVariant};
 pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
+pub use changed_files::ChangedFilesSpec;
 pub use checkbox::CheckboxSpec;
 pub use code::{CodeInlineVariant, CodeSpec, CodeTypography};
 pub use code_input::CodeInputSpec;
@@ -194,9 +196,7 @@ pub use editable_label::{EditableLabelActivation, EditableLabelSpec, EditableLab
 pub use eyebrow::{EyebrowElement, EyebrowSize, EyebrowSpacing, EyebrowSpec};
 pub use field::{FieldRelationships, FieldSpec};
 pub use field_set::{FieldSetSpec, SpaceScale};
-pub use file_upload::{
-    format_file_size, FileUploadItem, FileUploadSpec, FileUploadStatus,
-};
+pub use file_upload::{format_file_size, FileUploadItem, FileUploadSpec, FileUploadStatus};
 pub use form_actions::FormActionsSpec;
 pub use form_dialog::FormDialogSpec;
 pub use form_layout::FormLayoutSpec;
@@ -222,13 +222,6 @@ pub use model_picker::{
     ModelPickerEmphasis, ModelPickerSpec, ModelPickerVariant, ModelSelection,
     SEGMENTED_AXIS_MAX_OPTIONS,
 };
-pub use agent_chat_input::{
-    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ComposerKey, ComposerKeyModifiers,
-    SubmitIntent,
-};
-pub use ref_select::{
-    RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant,
-};
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_input::NumberInputSpec;
@@ -242,6 +235,9 @@ pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
 pub use radio_group::RadioGroupSpec;
+pub use ref_select::{RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant};
+pub use tool_call::ToolCallSpec;
+pub use tool_call_group::ToolCallGroupSpec;
 /// Deprecated: use `CalendarSpec` with `CalendarMode::Range` instead.
 pub type RangeCalendarSpec = CalendarSpec;
 pub use range_slider::RangeSliderSpec;
@@ -291,14 +287,13 @@ pub use ui_presentation_provider::UiPresentationProviderSpec;
 /// Deprecated: Use `DateTimeZonePickerSpec` instead.
 pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
-    AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
-    CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,
-    DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
-    FormActionAlign, FormActionDangerItem, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
-    NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
-    PopoverInitialFocus, PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole,
-    resolve_semantic_control_size,
-    SeparatorOrientation, StatusTone,
+    resolve_semantic_control_size, AccordionItemSpec, AccordionSelectionValue, Alignment,
+    BadgeVariant, ButtonTone, ButtonVariant, CalendarWeekStart, CheckState, ChoiceOption,
+    ControlDensity, ControlSize, DateRangeValue, DateTimeRangeValue, DateTimeValue, DialogKind,
+    DialogWidth, Dimension, Direction, DrawerEdge, FormActionAlign, FormActionDangerItem,
+    InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
+    Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus,
+    PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
     TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
 };
@@ -334,12 +329,10 @@ pub use empty_state::{EmptyStateSize, EmptyStateSpec};
 pub use error_boundary::ErrorBoundarySpec;
 pub use filter_builder::{
     default_operators_for_kind, FilterBuilderPicker, FilterBuilderSpec, FilterClause,
-    FilterCombinator, FilterDraft,
-    FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOperandKind,
-    FilterOperatorDefinition, FilterOption,
+    FilterCombinator, FilterDraft, FilterExpression, FilterFieldDefinition, FilterFieldKind,
+    FilterOperand, FilterOperandKind, FilterOperatorDefinition, FilterOption,
 };
 pub use filter_toolbar::FilterToolbarSpec;
-pub use theme_select::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
 pub use form_shell::FormShellSpec;
 pub use inline_list_section::InlineListSectionSpec;
 pub use inline_remediation::InlineRemediationSpec;
@@ -349,9 +342,7 @@ pub use markdown_editor::MarkdownEditorSpec;
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::{MediaPickerItem, MediaPickerSpec, MediaPickerTab};
 pub use media_preview::MediaPreviewSpec;
-pub use media_thumbnail::{
-    MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec,
-};
+pub use media_thumbnail::{MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec};
 pub use metric_tile::{MetricTileSpec, MetricTrend};
 pub use page_header::{PageHeaderAlign, PageHeaderPosture, PageHeaderSpec};
 pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};
@@ -367,6 +358,7 @@ pub use shell_status_bar::ShellStatusBarSpec;
 pub use sidebar_nav::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 pub use split_view::SplitViewSpec;
 pub use state_tile::StateTileSpec;
+pub use theme_select::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
 pub use toast_host::{ToastHostPlacement, ToastHostSpec};
 pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
 pub use tree::{
@@ -455,11 +447,10 @@ mod tests {
         DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
         DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec,
         Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionDangerItem,
-        FormActionsSpec, GridSpec,
-        IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec,
-        NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale,
-        PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
-        SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
+        FormActionsSpec, GridSpec, IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry,
+        MenubarSpec, NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement,
+        PaddingScale, PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec,
+        ScrollShellSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
         TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeFieldSpec,
         TooltipSpec, ValidationState,
@@ -1059,7 +1050,11 @@ mod tests {
         for (tone, icon) in cases {
             let spec = RemediationBannerSpec::new("t", "m").with_tone(tone);
             assert_eq!(spec.tone_icon_name(), icon, "tone {tone:?} icon");
-            assert_eq!(spec.icon_color_token(), tone.color_token(), "tone {tone:?} icon color");
+            assert_eq!(
+                spec.icon_color_token(),
+                tone.color_token(),
+                "tone {tone:?} icon color"
+            );
         }
     }
 
@@ -1073,8 +1068,14 @@ mod tests {
         assert_eq!(base.border_width_token(), semantic::BORDER_WIDTH_DEFAULT);
         assert_eq!(base.label_color_token(), semantic::COLOR_TEXT_SECONDARY);
         assert_eq!(base.value_color_token(), semantic::COLOR_TEXT_PRIMARY);
-        assert_eq!(base.value_font_size_token(), semantic::TYPOGRAPHY_HEADING_SIZE);
-        assert_eq!(base.label_font_size_token(), semantic::TYPOGRAPHY_LABEL_SIZE);
+        assert_eq!(
+            base.value_font_size_token(),
+            semantic::TYPOGRAPHY_HEADING_SIZE
+        );
+        assert_eq!(
+            base.label_font_size_token(),
+            semantic::TYPOGRAPHY_LABEL_SIZE
+        );
         assert_eq!(base.trend_color_token(), semantic::COLOR_TEXT_SECONDARY);
         assert_eq!(base.trend_glyph(), "\u{2192}");
 

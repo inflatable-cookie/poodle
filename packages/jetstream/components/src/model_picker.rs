@@ -34,7 +34,11 @@ pub struct ModelPicker {
 
 impl ModelPicker {
     pub fn from_spec(spec: ModelPickerSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value.
@@ -189,7 +193,11 @@ fn build(
         let applicable = spec.applicable_axes();
         let is_split = !applicable.is_empty();
 
-        let mut models = ui_element::div().flex_col().grow().min_w(0.0).gap(rem_to_px(0.125));
+        let mut models = ui_element::div()
+            .flex_col()
+            .grow()
+            .min_w(0.0)
+            .gap(rem_to_px(0.125));
         for (index, model) in spec.models.iter().enumerate() {
             if let Some(heading) = spec.group_heading_for(index) {
                 models = models.child(
@@ -339,7 +347,10 @@ fn build(
                 // segmented (contract §4).
                 ModelAxisKind::Select if axis.control_kind() == ModelAxisControlKind::List => {
                     let selected = current.as_text().unwrap_or_default().to_string();
-                    let mut list = ui_element::div().flex_col().gap(rem_to_px(0.0625)).min_w(0.0);
+                    let mut list = ui_element::div()
+                        .flex_col()
+                        .gap(rem_to_px(0.0625))
+                        .min_w(0.0);
                     for option in axis.options.iter() {
                         let is_selected = option.value == selected;
                         let mut row = ui_element::div()
@@ -360,7 +371,11 @@ fn build(
                                 ui_element::label(&option.label)
                                     .grow()
                                     .min_w(0.0)
-                                    .text_color(if is_selected { text_primary } else { text_secondary })
+                                    .text_color(if is_selected {
+                                        text_primary
+                                    } else {
+                                        text_secondary
+                                    })
                                     .text_size(rem_to_px(0.8125))
                                     .text_weight(if is_selected { 600 } else { 400 })
                                     .text_ellipsis()
@@ -375,7 +390,8 @@ fn build(
                             );
                         }
                         if option.is_disabled {
-                            row = row.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+                            row =
+                                row.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
                         }
                         list = list.child(row);
                     }
@@ -486,9 +502,17 @@ mod tests {
     #[test]
     fn trigger_shows_model_and_axis_summary() {
         let tree = crate::render_probe::probe(&js_model_picker(&sample(), &theme()), 360.0, 80.0);
-        assert!(tree.has_text("Big Model"), "model label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Big Model"),
+            "model label missing: {:?}",
+            tree.texts()
+        );
         // Both axes apply to `big`: the select label plus the toggle's off label.
-        assert!(tree.has_text("High · Normal"), "summary wrong: {:?}", tree.texts());
+        assert!(
+            tree.has_text("High · Normal"),
+            "summary wrong: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -498,11 +522,27 @@ mod tests {
             360.0,
             520.0,
         );
-        assert!(tree.has_text("Frontier"), "group heading missing: {:?}", tree.texts());
-        assert!(tree.has_text("Deep reasoning"), "description missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Frontier"),
+            "group heading missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Deep reasoning"),
+            "description missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("1M"), "badge missing: {:?}", tree.texts());
-        assert!(tree.has_text("Effort"), "axis label missing: {:?}", tree.texts());
-        assert!(tree.has_text("Speed"), "toggle axis missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Effort"),
+            "axis label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Speed"),
+            "toggle axis missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -512,7 +552,11 @@ mod tests {
             .with_open(true)
             .with_value(ModelSelection::new("small"));
         let tree = crate::render_probe::probe(&js_model_picker(&spec, &theme()), 360.0, 520.0);
-        assert!(tree.has_text("Effort"), "select axis should stay: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Effort"),
+            "select axis should stay: {:?}",
+            tree.texts()
+        );
         assert!(
             !tree.has_text("Speed"),
             "scoped-out axis must not render: {:?}",
@@ -542,7 +586,11 @@ mod tests {
         let tree = crate::render_probe::probe(&js_model_picker(&spec, &theme()), 640.0, 520.0);
         // Five options > the segmented threshold, so every level is its own row.
         for label in ["Minimal", "Low", "Medium", "High", "Maximum"] {
-            assert!(tree.has_text(label), "missing level {label}: {:?}", tree.texts());
+            assert!(
+                tree.has_text(label),
+                "missing level {label}: {:?}",
+                tree.texts()
+            );
         }
     }
 
@@ -553,7 +601,11 @@ mod tests {
         let subdued = sample().with_emphasis(ModelPickerEmphasis::Subdued);
         let tree = crate::render_probe::probe(&js_model_picker(&subdued, &th), 360.0, 80.0);
         // Emphasis is a colour change only: the same text still renders.
-        assert!(tree.has_text("Big Model"), "label missing when subdued: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Big Model"),
+            "label missing when subdued: {:?}",
+            tree.texts()
+        );
         assert_ne!(
             resolve_color(&th, sample().trigger_label_color_token()),
             resolve_color(&th, subdued.trigger_label_color_token()),
@@ -564,10 +616,12 @@ mod tests {
     fn placeholder_shows_without_a_selection() {
         let spec = sample().with_value(ModelSelection::default());
         let tree = crate::render_probe::probe(&js_model_picker(&spec, &theme()), 360.0, 80.0);
-        assert!(tree.has_text("Select model"), "placeholder missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Select model"),
+            "placeholder missing: {:?}",
+            tree.texts()
+        );
     }
-
-
 
     #[test]
     fn choosing_a_model_reports_its_value() {
@@ -590,6 +644,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
     }
-
-
 }

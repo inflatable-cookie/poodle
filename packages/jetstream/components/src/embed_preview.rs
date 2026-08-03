@@ -236,10 +236,16 @@ mod tests {
         let th = theme();
         let spec = EmbedPreviewSpec::new().with_loading(true);
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 200.0);
-        assert!(tree.has_text("Loading preview..."), "loading text missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Loading preview..."),
+            "loading text missing: {:?}",
+            tree.texts()
+        );
         // Skeleton(block) resolves the contract 6rem block height.
         assert!(
-            tree.nodes.iter().any(|n| (n.h - rem_to_px(6.0)).abs() < 0.5),
+            tree.nodes
+                .iter()
+                .any(|n| (n.h - rem_to_px(6.0)).abs() < 0.5),
             "missing 6rem skeleton block: {}",
             tree.to_json()
         );
@@ -250,8 +256,16 @@ mod tests {
         let th = theme();
         let spec = EmbedPreviewSpec::new().with_error("Failed to load embed.");
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 200.0);
-        assert!(tree.has_text("Failed to load embed."), "error text missing: {:?}", tree.texts());
-        assert!(tree.count_kind("Icon") >= 1, "error icon missing: {}", tree.to_json());
+        assert!(
+            tree.has_text("Failed to load embed."),
+            "error text missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.count_kind("Icon") >= 1,
+            "error icon missing: {}",
+            tree.to_json()
+        );
         // No parsed content leaks into the error state.
         assert!(!tree.has_text("youtube embed"));
     }
@@ -261,7 +275,11 @@ mod tests {
         let th = theme();
         let spec = EmbedPreviewSpec::new().with_empty_message("Paste a URL above");
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 200.0);
-        assert!(tree.has_text("Paste a URL above"), "empty message missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Paste a URL above"),
+            "empty message missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.count_kind("Icon") >= 1, "empty icon missing");
     }
 
@@ -271,7 +289,11 @@ mod tests {
         let spec = EmbedPreviewSpec::new().with_parsed(ParsedEmbed::new("youtube", "abc123"));
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 240.0);
         // Provider title "youtube embed" + derived privacy-enhanced URL.
-        assert!(tree.has_text("youtube embed"), "provider title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("youtube embed"),
+            "provider title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.texts()
                 .iter()
@@ -289,8 +311,15 @@ mod tests {
         let spec = EmbedPreviewSpec::new().with_trusted_html("<b>stored embed</b>");
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 200.0);
         // trustedHtml renders even with no parsed embed (not the empty state).
-        assert!(tree.has_text("<b>stored embed</b>"), "trusted html missing: {:?}", tree.texts());
-        assert!(!tree.has_text("No embed to preview"), "trusted html must not show empty state");
+        assert!(
+            tree.has_text("<b>stored embed</b>"),
+            "trusted html missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("No embed to preview"),
+            "trusted html must not show empty state"
+        );
     }
 
     #[test]
@@ -298,14 +327,16 @@ mod tests {
         let th = theme();
         // Parsed embed with no derivable embed URL and no raw embed → fallback link
         // to the original id/url (embed_url() is None for generic without a URL).
-        let spec =
-            EmbedPreviewSpec::new().with_parsed(ParsedEmbed::new("generic", "embed-id-xyz"));
+        let spec = EmbedPreviewSpec::new().with_parsed(ParsedEmbed::new("generic", "embed-id-xyz"));
         let tree = probe(&js_embed_preview(&spec, &th), 320.0, 120.0);
         assert!(
             tree.has_text("embed-id-xyz"),
             "fallback link missing: {:?}",
             tree.texts()
         );
-        assert!(!tree.has_text("No embed to preview"), "fallback must not show empty state");
+        assert!(
+            !tree.has_text("No embed to preview"),
+            "fallback must not show empty state"
+        );
     }
 }

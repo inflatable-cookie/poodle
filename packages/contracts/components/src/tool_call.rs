@@ -239,21 +239,36 @@ mod tests {
     #[test]
     fn a_row_without_output_is_not_interactive() {
         assert!(!ToolCallSpec::new("a", "Ran command").is_interactive());
-        assert!(ToolCallSpec::new("a", "Ran command").with_output("ok").is_interactive());
+        assert!(ToolCallSpec::new("a", "Ran command")
+            .with_output("ok")
+            .is_interactive());
     }
 
     #[test]
     fn empty_output_does_not_count_as_output() {
-        assert!(!ToolCallSpec::new("a", "Ran command").with_output("").is_interactive());
+        assert!(!ToolCallSpec::new("a", "Ran command")
+            .with_output("")
+            .is_interactive());
     }
 
     #[test]
     fn the_icon_follows_the_label_unless_overridden() {
-        assert_eq!(ToolCallSpec::new("a", "Ran command").resolved_icon(), "terminal");
-        assert_eq!(ToolCallSpec::new("a", "File change").resolved_icon(), "file-pen");
-        assert_eq!(ToolCallSpec::new("a", "Something else").resolved_icon(), "dot");
         assert_eq!(
-            ToolCallSpec::new("a", "Something else").with_icon("sparkles").resolved_icon(),
+            ToolCallSpec::new("a", "Ran command").resolved_icon(),
+            "terminal"
+        );
+        assert_eq!(
+            ToolCallSpec::new("a", "File change").resolved_icon(),
+            "file-pen"
+        );
+        assert_eq!(
+            ToolCallSpec::new("a", "Something else").resolved_icon(),
+            "dot"
+        );
+        assert_eq!(
+            ToolCallSpec::new("a", "Something else")
+                .with_icon("sparkles")
+                .resolved_icon(),
             "sparkles"
         );
     }

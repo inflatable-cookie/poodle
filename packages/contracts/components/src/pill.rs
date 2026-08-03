@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 use crate::InlineTypographyMode;
 

@@ -189,9 +189,7 @@ fn status_message(spec: &FormShellSpec, resolved_tone: StatusTone) -> Option<Str
 mod tests {
     use super::*;
     use crate::render_probe::probe;
-    use poodle_specs::{
-        FormActionAlign, FormFieldState, FormSectionSpec, ValidationState,
-    };
+    use poodle_specs::{FormActionAlign, FormFieldState, FormSectionSpec, ValidationState};
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -222,7 +220,11 @@ mod tests {
         );
         assert!(!tree.is_empty(), "form shell produced no nodes");
         // Header
-        assert!(tree.has_text("New Project"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("New Project"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Create a new project workspace."),
             "description missing: {:?}",
@@ -231,7 +233,10 @@ mod tests {
         // Sections: titles + a section description
         assert!(tree.has_text("Project Details"), "section 1 title missing");
         assert!(tree.has_text("Settings"), "section 2 title missing");
-        assert!(tree.has_text("Core metadata."), "section description missing");
+        assert!(
+            tree.has_text("Core metadata."),
+            "section description missing"
+        );
         // Footer actions
         assert!(tree.has_text("Cancel"), "cancel action missing");
         assert!(tree.has_text("Save"), "save action missing");
@@ -256,12 +261,9 @@ mod tests {
     #[test]
     fn invalid_fields_render_danger_status_callout() {
         let fields = vec![
-            FormFieldState::new("name", "Name")
-                .with_validation_state(ValidationState::Invalid),
+            FormFieldState::new("name", "Name").with_validation_state(ValidationState::Invalid)
         ];
-        let spec = FormShellSpec::new("f")
-            .with_title("T")
-            .with_fields(fields);
+        let spec = FormShellSpec::new("f").with_title("T").with_fields(fields);
         let tree = probe(&js_form_shell(&spec, &theme(), vec![], None), 400.0, 400.0);
         // Callout renders an icon badge — danger tone uses the "circle-x" glyph.
         assert!(
@@ -270,7 +272,10 @@ mod tests {
             tree.texts()
         );
         assert_eq!(spec.resolved_status_tone(), StatusTone::Danger);
-        assert!(spec.blocks_submission(), "invalid field should block submission");
+        assert!(
+            spec.blocks_submission(),
+            "invalid field should block submission"
+        );
     }
 
     #[test]
@@ -291,7 +296,11 @@ mod tests {
         let tree = probe(&js_form_shell(&spec, &theme(), vec![], None), 400.0, 400.0);
         assert_eq!(spec.resolved_status_tone(), StatusTone::Pending);
         // Pending callout renders a spinner badge (more than the bare header).
-        assert!(tree.len() > 2, "busy status not rendered: {:?}", tree.texts());
+        assert!(
+            tree.len() > 2,
+            "busy status not rendered: {:?}",
+            tree.texts()
+        );
         assert!(spec.blocks_submission(), "busy should block submission");
     }
 
@@ -309,7 +318,11 @@ mod tests {
         let spec = FormShellSpec::new("f")
             .with_title("T")
             .with_sections(sections());
-        let tree = probe(&js_form_shell(&spec, &theme(), vec![None, None], None), 400.0, 400.0);
+        let tree = probe(
+            &js_form_shell(&spec, &theme(), vec![None, None], None),
+            400.0,
+            400.0,
+        );
         // No callout icon badge present in the ready state.
         assert_eq!(
             tree.count_kind("Icon"),

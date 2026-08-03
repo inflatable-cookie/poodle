@@ -15,8 +15,8 @@
 //!   `tooltip` text is carried on the spec for consumer wiring.
 //! - **Click/keyboard activation** lives in the preview `main.rs` event loop.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, BoxShadow, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec};
 
@@ -50,7 +50,11 @@ pub struct IconButton {
 
 impl IconButton {
     pub fn from_spec(spec: IconButtonSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+        }
     }
 
     /// Fires when the button is pressed.
@@ -80,7 +84,9 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
     let size_px = md_height + rem_to_px(icon_button_size_delta_rem(effective_size));
 
     // ── Glyph tracks the supporting-visual size (contract §13). ──
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
 
     let radius = resolve_radius(theme, "radius.control");
     let is_pressed = spec.is_pressed.unwrap_or(false);
@@ -100,12 +106,8 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
     let status: Option<Color> = match (spec.variant, tone) {
         (ButtonVariant::Danger, _) => Some(danger),
         (_, ButtonTone::Danger) => Some(danger),
-        (_, ButtonTone::Success) => {
-            Some(resolve_color(theme, "color.status.success").into())
-        }
-        (_, ButtonTone::Warning) => {
-            Some(resolve_color(theme, "color.status.warning").into())
-        }
+        (_, ButtonTone::Success) => Some(resolve_color(theme, "color.status.success").into()),
+        (_, ButtonTone::Warning) => Some(resolve_color(theme, "color.status.warning").into()),
         (_, ButtonTone::Default) => None,
     };
 
@@ -120,13 +122,9 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
             (accent, accent.mix_srgb(Color::BLACK, 0.84), text_inverse)
         }
         // Primary danger/success: solid status fill, status-84%-black border, inverse text.
-        (ButtonVariant::Primary, Some(s)) => {
-            (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse)
-        }
+        (ButtonVariant::Primary, Some(s)) => (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse),
         // Danger compat variant ≈ primary status (status is Some(danger) here).
-        (ButtonVariant::Danger, Some(s)) => {
-            (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse)
-        }
+        (ButtonVariant::Danger, Some(s)) => (s, s.mix_srgb(Color::BLACK, 0.84), text_inverse),
         (ButtonVariant::Danger, None) => {
             // Unreachable: Danger variant always yields Some(danger) above.
             (danger, danger.mix_srgb(Color::BLACK, 0.84), text_inverse)
@@ -229,7 +227,11 @@ mod tests {
         let el = js_icon_button(&IconButtonSpec::new().with_icon("plus"), &th);
         // Ghost: transparent fill + transparent border.
         let bg = el.style.background.expect("bg set");
-        assert!(bg.a < 0.01, "ghost fill should be transparent, got a={}", bg.a);
+        assert!(
+            bg.a < 0.01,
+            "ghost fill should be transparent, got a={}",
+            bg.a
+        );
         let border = el.style.border_color.expect("border color set");
         assert!(border.a < 0.01, "ghost border should be transparent");
     }
@@ -265,7 +267,10 @@ mod tests {
         let g = ghost.style.background.expect("ghost bg");
         let s = secondary.style.background.expect("secondary bg");
         // Ghost transparent vs secondary opaque surface — alpha must differ.
-        assert!(g.a < 0.01 && s.a > 0.5, "secondary fill must be opaque surface");
+        assert!(
+            g.a < 0.01 && s.a > 0.5,
+            "secondary fill must be opaque surface"
+        );
     }
 
     #[test]
@@ -345,12 +350,17 @@ mod tests {
     fn loading_swaps_glyph_for_spinner() {
         let th = theme();
         let el = js_icon_button(
-            &IconButtonSpec::new().with_icon("refresh-cw").with_loading(true),
+            &IconButtonSpec::new()
+                .with_icon("refresh-cw")
+                .with_loading(true),
             &th,
         );
         let tree = probe(&el, 80.0, 80.0);
         // Spinner uses the shared "loader" icon; the original glyph is replaced.
-        assert!(tree.has_text("loader"), "loading should render the loader spinner glyph");
+        assert!(
+            tree.has_text("loader"),
+            "loading should render the loader spinner glyph"
+        );
         assert!(
             !tree.has_text("refresh-cw"),
             "glyph must be replaced while loading"
@@ -367,7 +377,10 @@ mod tests {
         );
         let expected = resolve_opacity(&th, "state.opacity.disabled");
         assert!(el.style.disabled);
-        assert!((el.style.opacity - expected).abs() < 0.001, "disabled opacity from token");
+        assert!(
+            (el.style.opacity - expected).abs() < 0.001,
+            "disabled opacity from token"
+        );
     }
 
     #[test]
@@ -375,7 +388,9 @@ mod tests {
         let th = theme();
         let sm = probe(
             &js_icon_button(
-                &IconButtonSpec::new().with_icon("star").with_size(ControlSize::Sm),
+                &IconButtonSpec::new()
+                    .with_icon("star")
+                    .with_size(ControlSize::Sm),
                 &th,
             ),
             80.0,
@@ -383,7 +398,9 @@ mod tests {
         );
         let lg = probe(
             &js_icon_button(
-                &IconButtonSpec::new().with_icon("star").with_size(ControlSize::Lg),
+                &IconButtonSpec::new()
+                    .with_icon("star")
+                    .with_size(ControlSize::Lg),
                 &th,
             ),
             80.0,
@@ -401,7 +418,11 @@ mod tests {
         let th = theme();
         let el = js_icon_button(&IconButtonSpec::new().with_icon("settings"), &th);
         let tree = probe(&el, 80.0, 80.0);
-        assert!(tree.has_text("settings"), "icon glyph renders: {:?}", tree.texts());
+        assert!(
+            tree.has_text("settings"),
+            "icon glyph renders: {:?}",
+            tree.texts()
+        );
         assert_eq!(tree.count_kind("Icon"), 1, "exactly one glyph");
     }
 
@@ -415,12 +436,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = IconButton::from_spec(IconButtonSpec::new().with_icon("check"), &theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 120.0, 80.0, "check");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_click fired exactly once"
+        );
     }
 
     #[test]
@@ -436,12 +463,17 @@ mod tests {
             IconButtonSpec::new().with_icon("check").with_disabled(true),
             &theme(),
         )
-        .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_click(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 120.0, 80.0, "check");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled icon button fired");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a disabled icon button fired"
+        );
     }
-
 }

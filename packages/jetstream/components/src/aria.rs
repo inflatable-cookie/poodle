@@ -121,7 +121,15 @@ mod tests {
     /// An empty string must not shadow the element's own text.
     #[test]
     fn an_empty_label_is_not_attached() {
-        assert!(with_aria_label(div(), Some("")).style.accessibility.label.is_none());
-        assert!(with_aria_label(div(), None).style.accessibility.label.is_none());
+        assert!(with_aria_label(div(), Some(""))
+            .style
+            .accessibility
+            .label
+            .is_none());
+        assert!(with_aria_label(div(), None)
+            .style
+            .accessibility
+            .label
+            .is_none());
     }
 }

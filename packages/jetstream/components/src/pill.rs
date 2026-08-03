@@ -1,7 +1,7 @@
 //! Pill — Jetstream pill/chip component backed by PillSpec.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
@@ -107,7 +107,8 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
 pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // `resolved_size` applies the semantic role; reading `spec.size` here would
     // carry `size_role` and never honour it.
-    let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.resolved_size(), spec.typography);
+    let (min_w, min_h, pad_x, pad_y, font_size) =
+        pill_metrics(spec.resolved_size(), spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
     // `font="mono"` now resolves through the JsEl font-family channel to
     // `--poodle-pill-mono` → code-family (contract §8 `.pill[data-font="mono"]`,
@@ -121,7 +122,11 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
     } else {
         spec.label.clone()
     };
-    let weight = if spec.appearance == PillAppearance::Badge { 700 } else { 600 };
+    let weight = if spec.appearance == PillAppearance::Badge {
+        700
+    } else {
+        600
+    };
     let radius = resolve_radius(theme, "radius.pill");
 
     let mut el = ui_element::label(&label)
@@ -134,8 +139,10 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .rounded(radius)
         .border(1.0)
         .border_color(border)
-        .pl(rem_to_px(pad_x)).pr(rem_to_px(pad_x))
-        .pt(rem_to_px(pad_y)).pb(rem_to_px(pad_y));
+        .pl(rem_to_px(pad_x))
+        .pr(rem_to_px(pad_x))
+        .pt(rem_to_px(pad_y))
+        .pb(rem_to_px(pad_y));
 
     // Letter-spacing: mono variant (0.02em) is the most specific tracking rule
     // for the text run; otherwise badge appearance carries 0.04em. Base pills
@@ -181,7 +188,10 @@ mod tests {
                 .with_typography(InlineTypographyMode::Inherit),
             &theme(),
         );
-        assert_eq!(el.layout.min_size.height, taffy::Dimension::length(rem_to_px(1.8182)));
+        assert_eq!(
+            el.layout.min_size.height,
+            taffy::Dimension::length(rem_to_px(1.8182))
+        );
     }
 
     #[test]

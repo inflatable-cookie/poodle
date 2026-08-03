@@ -35,7 +35,11 @@ pub struct CardToggleGroup {
 
 impl CardToggleGroup {
     pub fn from_spec(spec: CardToggleGroupSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value. Disabled options never fire.
@@ -112,7 +116,9 @@ fn build(
         } else if let Some(handler) = &on_change {
             let handler = std::sync::Arc::clone(handler);
             let value = option.value.clone();
-            option_el = option_el.cursor_pointer().on_click(move |_event| handler(&value));
+            option_el = option_el
+                .cursor_pointer()
+                .on_click(move |_event| handler(&value));
         }
 
         cells.push(option_el);
@@ -189,19 +195,32 @@ mod tests {
         assert_eq!(spec.column_count(), 2);
         let tree = probe(&js_card_toggle_group(&spec, &theme()), 480.0, 320.0);
         for t in ["Alpha", "Bravo", "Charlie", "Delta"] {
-            assert!(tree.has_text(t), "{t} missing with columns=2: {:?}", tree.texts());
+            assert!(
+                tree.has_text(t),
+                "{t} missing with columns=2: {:?}",
+                tree.texts()
+            );
         }
         // Clamp: 0 → 1, 9 → 4.
-        assert_eq!(CardToggleGroupSpec::new(vec![]).with_columns(0).column_count(), 1);
-        assert_eq!(CardToggleGroupSpec::new(vec![]).with_columns(9).column_count(), 4);
+        assert_eq!(
+            CardToggleGroupSpec::new(vec![])
+                .with_columns(0)
+                .column_count(),
+            1
+        );
+        assert_eq!(
+            CardToggleGroupSpec::new(vec![])
+                .with_columns(9)
+                .column_count(),
+            4
+        );
     }
 
     #[test]
     fn multi_select_marks_each_selected_value() {
         // Multi-select: both "a" and "c" selected at once. The spec reports both,
         // and all option titles still render as cards.
-        let spec = CardToggleGroupSpec::new(options())
-            .with_values(vec!["a".into(), "c".into()]);
+        let spec = CardToggleGroupSpec::new(options()).with_values(vec!["a".into(), "c".into()]);
         assert!(spec.is_selected("a"));
         assert!(spec.is_selected("c"));
         assert!(!spec.is_selected("b"));
@@ -210,9 +229,7 @@ mod tests {
         let tree = probe(&el, 480.0, 240.0);
         assert!(!tree.is_empty());
         assert!(
-            tree.has_text("Option A")
-                && tree.has_text("Option B")
-                && tree.has_text("Option C"),
+            tree.has_text("Option A") && tree.has_text("Option B") && tree.has_text("Option C"),
             "selected treatment dropped an option: {:?}",
             tree.texts()
         );
@@ -248,5 +265,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["b"]);
     }
-
 }

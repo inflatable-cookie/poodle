@@ -16,7 +16,11 @@ use poodle_specs::PopoverSpec;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_px, resolve_radius, tint};
 
-pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
+pub fn js_popover(
+    spec: &PopoverSpec,
+    theme: &JetstreamThemeProvider,
+    content: Option<JsEl>,
+) -> JsEl {
     // Contract §8 surface: background = background-elevated, border =
     // border-subtle at 74%, radius = radius-surface.
     let fill = resolve_color(theme, spec.surface_fill_token());
@@ -148,7 +152,11 @@ mod tests {
             .child(ui_element::label("Adjust your preferences."));
         let el = js_popover(&PopoverSpec::new(), &theme(), Some(content));
         let tree = probe(&el, 400.0, 300.0);
-        assert!(tree.has_text("Settings"), "header region missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Settings"),
+            "header region missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Adjust your preferences."),
             "body region missing: {:?}",

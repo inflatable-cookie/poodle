@@ -349,11 +349,7 @@ impl RelationPickerSpec {
         self
     }
 
-    pub fn with_filter_value(
-        mut self,
-        key: impl Into<String>,
-        value: impl Into<String>,
-    ) -> Self {
+    pub fn with_filter_value(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
         self.filter_values.insert(key.into(), value.into());
         self
     }
@@ -512,21 +508,22 @@ mod tests {
             ],
         );
         let opts = filter.resolved_options();
-        assert_eq!(opts[0], (PickerFilterConfig::ALL_VALUE.to_string(), "All".to_string()));
+        assert_eq!(
+            opts[0],
+            (PickerFilterConfig::ALL_VALUE.to_string(), "All".to_string())
+        );
         assert_eq!(opts[1], ("a".to_string(), "Alpha".to_string()));
         assert_eq!(opts.len(), 3);
     }
 
     #[test]
     fn filter_include_all_false_and_custom_all_label() {
-        let no_all =
-            PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
-                .with_include_all(false);
+        let no_all = PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
+            .with_include_all(false);
         assert_eq!(no_all.resolved_options().len(), 1);
 
-        let custom =
-            PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
-                .with_all_label("Any");
+        let custom = PickerFilterConfig::new("k", "K", vec![PickerFilterOption::new("a", "A")])
+            .with_all_label("Any");
         assert_eq!(custom.resolved_options()[0].1, "Any");
     }
 

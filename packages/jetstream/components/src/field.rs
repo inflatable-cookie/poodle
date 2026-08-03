@@ -158,9 +158,17 @@ mod tests {
         let tree = probe(&el, 400.0, 200.0);
 
         // Label text present.
-        assert!(tree.has_text("Display name"), "label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Display name"),
+            "label missing: {:?}",
+            tree.texts()
+        );
         // Required marker present.
-        assert!(tree.has_text("*"), "required marker missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("*"),
+            "required marker missing: {:?}",
+            tree.texts()
+        );
         // Info-icon anatomy part present (icon named "info"), and description is
         // NOT rendered inline as visible body copy.
         assert!(
@@ -210,11 +218,18 @@ mod tests {
         let el = js_field(&spec, &th, None);
         let tree = probe(&el, 400.0, 200.0);
 
-        assert!(tree.has_text("Optional"), "optional marker missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Optional"),
+            "optional marker missing: {:?}",
+            tree.texts()
+        );
         let label_size = resolve_px(&th, spec.label_typography_token());
         let supporting = resolve_px(&th, spec.supporting_text_typography_token());
         // The two sizes differ at md so this assertion is meaningful.
-        assert!(supporting < label_size, "supporting/label sizes should differ");
+        assert!(
+            supporting < label_size,
+            "supporting/label sizes should differ"
+        );
         let opt_node = tree
             .nodes
             .iter()

@@ -82,12 +82,16 @@ impl AgentTranscript {
 
 impl IntoJsEl for AgentTranscript {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, Handlers {
-            tool_run_toggle: self.on_tool_run_toggle,
-            tool_call_toggle: self.on_tool_call_toggle,
-            changed_files_toggle: self.on_changed_files_toggle,
-            file_select: self.on_file_select,
-        })
+        build(
+            &self.spec,
+            &self.theme,
+            Handlers {
+                tool_run_toggle: self.on_tool_run_toggle,
+                tool_call_toggle: self.on_tool_call_toggle,
+                changed_files_toggle: self.on_changed_files_toggle,
+                file_select: self.on_file_select,
+            },
+        )
     }
 }
 
@@ -103,11 +107,7 @@ pub fn js_agent_transcript(spec: &AgentTranscriptSpec, theme: &JetstreamThemePro
     build(spec, theme, Handlers::default())
 }
 
-fn build(
-    spec: &AgentTranscriptSpec,
-    theme: &JetstreamThemeProvider,
-    handlers: Handlers,
-) -> JsEl {
+fn build(spec: &AgentTranscriptSpec, theme: &JetstreamThemeProvider, handlers: Handlers) -> JsEl {
     let activity_color: jetstream_ui::Color = resolve_color(theme, spec.activity_token()).into();
     let font_size = rem_to_px(spec.font_size_rem());
     let inset = rem_to_px(spec.padding_inset_rem());
@@ -238,7 +238,11 @@ mod tests {
         assert!(tree.has_text("bun test"), "{:?}", tree.texts());
         assert!(!tree.has_text("effigy check:gpui"), "{:?}", tree.texts());
         // ...so the toggle is the only thing that can carry the failure.
-        assert!(tree.has_text("+2 previous tool calls"), "{:?}", tree.texts());
+        assert!(
+            tree.has_text("+2 previous tool calls"),
+            "{:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -364,7 +368,11 @@ mod tests {
 
         crate::element::click_probe::click_text(&el, 720.0, 256.0, "1 changed files");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_changed_files_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_changed_files_toggle fired exactly once"
+        );
     }
 
     #[test]

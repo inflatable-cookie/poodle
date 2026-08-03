@@ -314,7 +314,9 @@ fn render_row(
     for _ in 0..depth {
         let mut cell = ui_element::div().w(m.indent).self_stretch().flex_none();
         if m.show_guides {
-            cell = cell.border_l(1.0).border_color_left(tint(m.guide_color, 0.54));
+            cell = cell
+                .border_l(1.0)
+                .border_color_left(tint(m.guide_color, 0.54));
         }
         row = row.child(cell);
     }
@@ -328,20 +330,20 @@ fn render_row(
         .justify_center();
     if is_branch {
         let glyph = if is_expanded { "▾" } else { "▸" };
-        twisty = twisty
-            .id(format!("tree-twisty:{}", node.value))
-            .child(
-                ui_element::label(glyph)
-                    .text_color(m.twisty_color)
-                    .text_size(m.chevron_font),
-            );
+        twisty = twisty.id(format!("tree-twisty:{}", node.value)).child(
+            ui_element::label(glyph)
+                .text_color(m.twisty_color)
+                .text_size(m.chevron_font),
+        );
 
         // Its own handler, always — clicks bubble to the nearest clickable
         // ancestor, so an unwired twisty would select the row it was expanding.
         if let (false, Some(handler)) = (node.is_disabled, &handlers.toggle_expand) {
             let handler = std::sync::Arc::clone(handler);
             let value = node.value.clone();
-            twisty = twisty.cursor_pointer().on_click(move |_event| handler(&value));
+            twisty = twisty
+                .cursor_pointer()
+                .on_click(move |_event| handler(&value));
         } else {
             twisty = twisty.on_click(|_event| {});
         }
@@ -373,7 +375,9 @@ fn render_row(
         if let (false, Some(handler)) = (node.is_disabled, &handlers.check) {
             let handler = std::sync::Arc::clone(handler);
             let value = node.value.clone();
-            cell = cell.cursor_pointer().on_click(move |_event| handler(&value));
+            cell = cell
+                .cursor_pointer()
+                .on_click(move |_event| handler(&value));
         } else {
             cell = cell.on_click(|_event| {});
         }
@@ -507,8 +511,7 @@ mod tests {
         let unopted = TreeSpec::new(vec![leaf("a"), leaf("b")]);
         let mut parent = TreeNode::new("group", "Group");
         parent.children = vec![leaf("child")];
-        let branched =
-            TreeSpec::new(vec![leaf("a"), parent]).with_collapse_twisty_when_flat(true);
+        let branched = TreeSpec::new(vec![leaf("a"), parent]).with_collapse_twisty_when_flat(true);
 
         // Opting in on a flat tree is the only case that collapses.
         assert!(flat.is_flat());
@@ -547,7 +550,10 @@ mod tests {
                     TreeNode::branch(
                         "src/components",
                         "components",
-                        vec![TreeNode::new("src/components/Button.svelte", "Button.svelte")],
+                        vec![TreeNode::new(
+                            "src/components/Button.svelte",
+                            "Button.svelte",
+                        )],
                     ),
                     TreeNode::new("src/index.ts", "index.ts"),
                 ],
@@ -562,8 +568,18 @@ mod tests {
         let el = js_tree(&sample(), &theme());
         let tree = probe(&el, 320.0, 360.0);
         // Every visible node label is present.
-        for label in ["src", "components", "Button.svelte", "index.ts", "README.md"] {
-            assert!(tree.has_text(label), "label {label:?} missing: {:?}", tree.texts());
+        for label in [
+            "src",
+            "components",
+            "Button.svelte",
+            "index.ts",
+            "README.md",
+        ] {
+            assert!(
+                tree.has_text(label),
+                "label {label:?} missing: {:?}",
+                tree.texts()
+            );
         }
         // Expanded branches render the down-chevron glyph; a leaf does not.
         assert!(tree.has_text("\u{25be}"), "expanded twisty glyph missing");
@@ -572,7 +588,10 @@ mod tests {
             find(&el, &|e| e.id.as_deref() == Some("tree-twisty:src")).is_some(),
             "tree-twisty:src id missing"
         );
-        assert!(tree.has_token_prefix("tree:"), "row interaction ids missing");
+        assert!(
+            tree.has_token_prefix("tree:"),
+            "row interaction ids missing"
+        );
     }
 
     #[test]
@@ -590,8 +609,14 @@ mod tests {
         let src = label_x("src");
         let comp = label_x("components");
         let button = label_x("Button.svelte");
-        assert!(comp > src, "depth-1 label not indented past depth-0 ({comp} !> {src})");
-        assert!(button > comp, "depth-2 label not indented past depth-1 ({button} !> {comp})");
+        assert!(
+            comp > src,
+            "depth-1 label not indented past depth-0 ({comp} !> {src})"
+        );
+        assert!(
+            button > comp,
+            "depth-2 label not indented past depth-1 ({button} !> {comp})"
+        );
     }
 
     #[test]
@@ -606,7 +631,10 @@ mod tests {
         let bg = row.style.background.expect("selected row has a fill");
         let bg: Vec4 = Vec4::new(bg.r, bg.g, bg.b, bg.a);
         assert!((bg.x - accent.x).abs() < 0.01, "fill hue is not accent");
-        assert!((bg.w - accent.w * 0.10).abs() < 0.01, "fill alpha not ~10% accent");
+        assert!(
+            (bg.w - accent.w * 0.10).abs() < 0.01,
+            "fill alpha not ~10% accent"
+        );
     }
 
     #[test]
@@ -657,7 +685,10 @@ mod tests {
         let row = find(&el, &|e| e.id.as_deref() == Some("tree:src"))
             .expect("inside drop target row present");
         let bg = row.style.background.expect("inside drop fill present");
-        assert!((bg.a - accent.w * 0.12).abs() < 0.02, "inside fill not ~12% accent");
+        assert!(
+            (bg.a - accent.w * 0.12).abs() < 0.02,
+            "inside fill not ~12% accent"
+        );
     }
 
     #[test]
@@ -714,12 +745,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Tree::from_spec(sample(), &theme())
-            .on_select(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_select(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text_nth(&el, 400.0, 400.0, "▾", 0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "the twisty selected the row");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "the twisty selected the row"
+        );
     }
 
     #[test]
@@ -753,5 +790,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["check:src"]);
     }
-
 }

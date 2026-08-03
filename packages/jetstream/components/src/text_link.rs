@@ -29,7 +29,11 @@ pub struct TextLink {
 
 impl TextLink {
     pub fn from_spec(spec: TextLinkSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+        }
     }
 
     /// Fires when the link is activated. The `href` is on the spec the caller
@@ -78,7 +82,11 @@ mod tests {
     fn renders_label() {
         let el = js_text_link(&TextLinkSpec::new("Open docs"), &theme());
         let tree = probe(&el, 200.0, 40.0);
-        assert!(tree.has_text("Open docs"), "link label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Open docs"),
+            "link label missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -93,7 +101,10 @@ mod tests {
     fn secondary_tone_resolves_secondary() {
         let th = theme();
         let secondary = resolve_color(&th, "color.text.secondary");
-        let el = js_text_link(&TextLinkSpec::new("x").with_tone(TextLinkTone::Secondary), &th);
+        let el = js_text_link(
+            &TextLinkSpec::new("x").with_tone(TextLinkTone::Secondary),
+            &th,
+        );
         assert_eq!(el.style.text_color, Some(secondary.into()));
     }
 
@@ -113,12 +124,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = TextLink::from_spec(TextLinkSpec::new("Open docs"), &theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 200.0, 40.0, "Open docs");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_click fired exactly once"
+        );
     }
 
     #[test]
@@ -131,12 +148,13 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = TextLink::from_spec(TextLinkSpec::new("Open docs").with_disabled(true), &theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 200.0, 40.0, "Open docs");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled link fired");
     }
-
 }

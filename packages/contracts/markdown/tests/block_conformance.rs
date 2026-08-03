@@ -22,7 +22,9 @@ fn inline_value(node: &MdInline) -> Value {
     match node {
         MdInline::Text(value) => json!({ "type": "text", "value": value }),
         MdInline::Code(value) => json!({ "type": "code", "value": value }),
-        MdInline::Strong(children) => json!({ "type": "strong", "children": inlines_value(children) }),
+        MdInline::Strong(children) => {
+            json!({ "type": "strong", "children": inlines_value(children) })
+        }
         MdInline::Em(children) => json!({ "type": "em", "children": inlines_value(children) }),
         MdInline::Del(children) => json!({ "type": "del", "children": inlines_value(children) }),
         MdInline::Link { href, children } => {
@@ -49,7 +51,11 @@ fn block_value(block: &MdBlock) -> Value {
             "lang": match lang { Some(l) => Value::String(l.clone()), None => Value::Null },
             "value": value,
         }),
-        MdBlock::List { ordered, start, items } => json!({
+        MdBlock::List {
+            ordered,
+            start,
+            items,
+        } => json!({
             "type": "list",
             "ordered": ordered,
             "start": start,

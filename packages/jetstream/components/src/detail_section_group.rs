@@ -65,7 +65,11 @@ mod tests {
         let el = js_detail_section_group(
             &DetailSectionGroupSpec::new(),
             &theme(),
-            vec![ui_element::label("A"), ui_element::label("B"), ui_element::label("C")],
+            vec![
+                ui_element::label("A"),
+                ui_element::label("B"),
+                ui_element::label("C"),
+            ],
         );
         let tree = probe(&el, 600.0, 200.0);
         assert!(tree.has_text("A") && tree.has_text("B") && tree.has_text("C"));

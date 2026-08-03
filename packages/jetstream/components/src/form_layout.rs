@@ -8,8 +8,8 @@
 //! `js_callout` primitive; actions delegate to `js_form_actions` (contract §8
 //! Composed Primitives). ALL spacing/colors from tokens.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CallOutSpec, FormActionsSpec, FormLayoutSpec, StatusTone};
 
@@ -108,14 +108,18 @@ pub fn js_form_layout(
     // Error/success delegate to the real Callout primitive (contract §8).
     if let Some(ref error) = spec.error {
         el = el.child(js_callout(
-            &CallOutSpec::new().with_tone(StatusTone::Danger).with_content(error),
+            &CallOutSpec::new()
+                .with_tone(StatusTone::Danger)
+                .with_content(error),
             theme,
         ));
     }
 
     if let Some(ref success) = spec.success {
         el = el.child(js_callout(
-            &CallOutSpec::new().with_tone(StatusTone::Success).with_content(success),
+            &CallOutSpec::new()
+                .with_tone(StatusTone::Success)
+                .with_content(success),
             theme,
         ));
     }
@@ -138,16 +142,18 @@ pub fn js_form_layout(
         let min_w = resolve_px(theme, spec.column_min_width_token());
         let mut fields = ui_element::div().flex_row().flex_wrap().gap(column_gap);
         for child in children {
-            fields = fields.child(
-                ui_element::div().flex_grow().min_w(min_w).child(child),
-            );
+            fields = fields.child(ui_element::div().flex_grow().min_w(min_w).child(child));
         }
         el = el.child(fields);
     }
 
     // Actions delegate to the FormActions primitive (contract §2 Actions / §8).
     if let Some(actions_el) = actions {
-        el = el.child(js_form_actions(&FormActionsSpec::new(), theme, vec![actions_el]));
+        el = el.child(js_form_actions(
+            &FormActionsSpec::new(),
+            theme,
+            vec![actions_el],
+        ));
     }
 
     el
@@ -172,28 +178,46 @@ mod tests {
         let spec = FormLayoutSpec::new().with_columns(1);
         let el = js_form_layout(&spec, &th, vec![field("Name"), field("Email")], None);
         let tree = probe(&el, 600.0, 400.0);
-        assert!(tree.has_text("Name") && tree.has_text("Email"), "fields missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Name") && tree.has_text("Email"),
+            "fields missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn description_renders_above_grid() {
         let th = theme();
-        let spec = FormLayoutSpec::new().with_columns(1).with_description("Fill in the details.");
+        let spec = FormLayoutSpec::new()
+            .with_columns(1)
+            .with_description("Fill in the details.");
         let el = js_form_layout(&spec, &th, vec![field("Name")], None);
         let tree = probe(&el, 600.0, 400.0);
-        assert!(tree.has_text("Fill in the details."), "description missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Fill in the details."),
+            "description missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn error_composes_callout_primitive() {
         let th = theme();
-        let spec = FormLayoutSpec::new().with_columns(1).with_error("Unable to save changes.");
+        let spec = FormLayoutSpec::new()
+            .with_columns(1)
+            .with_error("Unable to save changes.");
         let el = js_form_layout(&spec, &th, vec![field("Name")], None);
         let tree = probe(&el, 600.0, 400.0);
         // Callout renders the message plus an icon badge (its anatomy) — proves
         // composition rather than a bare label.
-        assert!(tree.has_text("Unable to save changes."), "error message missing");
-        assert!(tree.count_kind("Icon") >= 1, "callout icon badge missing — not composed");
+        assert!(
+            tree.has_text("Unable to save changes."),
+            "error message missing"
+        );
+        assert!(
+            tree.count_kind("Icon") >= 1,
+            "callout icon badge missing — not composed"
+        );
     }
 
     #[test]
@@ -210,8 +234,16 @@ mod tests {
             "field-errors heading missing: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Email: Required"), "field-error item 1 missing: {:?}", tree.texts());
-        assert!(tree.has_text("Role: Pick one"), "field-error item 2 missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Email: Required"),
+            "field-error item 1 missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Role: Pick one"),
+            "field-error item 2 missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -233,7 +265,11 @@ mod tests {
         let actions = ui_element::button("Save");
         let el = js_form_layout(&spec, &th, vec![field("Name")], Some(actions));
         let tree = probe(&el, 600.0, 400.0);
-        assert!(tree.has_text("Save"), "action button missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Save"),
+            "action button missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -244,9 +280,18 @@ mod tests {
         let tree = probe(&el, 600.0, 400.0);
         // Both fields present; with a wrapping row they share the first row, so
         // the second field's x-offset is greater than the first's.
-        let first = tree.nodes.iter().find(|n| n.text.as_deref() == Some("First"));
-        let last = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Last"));
+        let first = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("First"));
+        let last = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Last"));
         let (first, last) = (first.expect("First missing"), last.expect("Last missing"));
-        assert!(last.x > first.x, "two-column fields not laid out side by side");
+        assert!(
+            last.x > first.x,
+            "two-column fields not laid out side by side"
+        );
     }
 }

@@ -23,8 +23,8 @@
 //!
 //! ARIA: N/A for Jetstream (no accessibility API).
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, EditableLabelSpec, EditableLabelVariant};
 
@@ -89,7 +89,11 @@ pub struct EditableLabel {
 
 impl EditableLabel {
     pub fn from_spec(spec: EditableLabelSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_edit_start: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_edit_start: None,
+        }
     }
 
     /// Fires when the display-mode label is pressed. Already editing, disabled
@@ -156,9 +160,7 @@ pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvide
 
         if is_flush {
             // Flush editing: bottom accent border only, transparent bg, no padding.
-            input = input
-                .border_b_1()
-                .border_color(edit_border);
+            input = input.border_b_1().border_color(edit_border);
         } else {
             // Default editing: accent border + surface bg + padding + radius.
             input = input
@@ -371,13 +373,22 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = EditableLabel::from_spec(EditableLabelSpec::new().with_value("Untitled"), &test_theme())
-            .on_edit_start(move || { counter.fetch_add(1, Ordering::SeqCst); })
-            .into_js_el();
+        let el = EditableLabel::from_spec(
+            EditableLabelSpec::new().with_value("Untitled"),
+            &test_theme(),
+        )
+        .on_edit_start(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
+        .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 60.0, "Untitled");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_edit_start fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_edit_start fired exactly once"
+        );
     }
 
     /// Already editing, there is nothing to start — and re-reporting it would
@@ -391,14 +402,21 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let spec = EditableLabelSpec::new().with_value("Untitled").with_editing(true);
+        let spec = EditableLabelSpec::new()
+            .with_value("Untitled")
+            .with_editing(true);
         let el = EditableLabel::from_spec(spec, &test_theme())
-            .on_edit_start(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_edit_start(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_at(&el, 320.0, 60.0, 40.0, 20.0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "an editing field restarted the edit");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "an editing field restarted the edit"
+        );
     }
-
 }

@@ -292,4 +292,3 @@ pub fn drawer_title_font_rem(size: ControlSize) -> f32 {
 // scales horizontal cell `padding-inline` only (never height). Mirrors the
 // Svelte `.poodle-table-shell[data-size]` / `[data-density]` overrides, and
 // `poodle_gpui::presentation::table_*` exactly.
-

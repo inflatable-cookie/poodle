@@ -7,8 +7,8 @@
 //! colors resolve from semantic tokens. Selection/activation lives in the
 //! preview event loop (Tier-3); the component renders the active state for the
 //! current `value`.
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::SidebarNavSpec;
 
@@ -32,7 +32,11 @@ pub struct SidebarNav {
 
 impl SidebarNav {
     pub fn from_spec(spec: SidebarNavSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the value of the item that was chosen.
@@ -71,7 +75,7 @@ fn build(
     let separator_mt = rem_to_px(0.125); // contract separator margin-top
     let rail_w = rem_to_px(0.1875); // contract left border 3px
     let nav_pad_x = rem_to_px(0.375); // contract root horizontal padding
-    // Root vertical padding = space-panel-y (density-driven).
+                                      // Root vertical padding = space-panel-y (density-driven).
     let panel_y = rem_to_px(match spec.density {
         poodle_specs::ControlDensity::Compact => 0.5,
         poodle_specs::ControlDensity::Default => 0.75,
@@ -255,16 +259,26 @@ mod tests {
             expected
         );
         // Default (md) = 1.875rem = 30px, NOT control-height 2.25rem = 36px.
-        assert!((expected - 30.0).abs() < 0.5, "md sidebar item should be 30px");
+        assert!(
+            (expected - 30.0).abs() < 0.5,
+            "md sidebar item should be 30px"
+        );
     }
 
     #[test]
     fn renders_group_titles_and_item_labels() {
         let tree = probe(&js_sidebar_nav(&sample(), &theme()), 240.0, 320.0);
-        assert!(tree.has_text("WORKSPACE"), "group title uppercased + rendered");
+        assert!(
+            tree.has_text("WORKSPACE"),
+            "group title uppercased + rendered"
+        );
         assert!(tree.has_text("SETTINGS"), "second group title rendered");
         for label in ["Dashboard", "Projects", "Account", "Team"] {
-            assert!(tree.has_text(label), "item `{label}` missing: {:?}", tree.texts());
+            assert!(
+                tree.has_text(label),
+                "item `{label}` missing: {:?}",
+                tree.texts()
+            );
         }
     }
 
@@ -340,12 +354,13 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = SidebarNav::from_spec(sample(), &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 600.0, "Team");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "the disabled item fired");
     }
-
 }

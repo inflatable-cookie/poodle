@@ -89,7 +89,11 @@ pub fn rgb_to_hsv(rgb: Rgb) -> Hsv {
     let s = if max == 0.0 { 0.0 } else { d / max };
 
     if d == 0.0 {
-        return Hsv { h: 0, s: 0, v: js_round(v * 100.0) };
+        return Hsv {
+            h: 0,
+            s: 0,
+            v: js_round(v * 100.0),
+        };
     }
 
     let h = if max == rn {
@@ -145,10 +149,18 @@ pub fn rgb_to_hsl(rgb: Rgb) -> Hsl {
     let l = (max + min) / 2.0;
 
     if d == 0.0 {
-        return Hsl { h: 0, s: 0, l: js_round(l * 100.0) };
+        return Hsl {
+            h: 0,
+            s: 0,
+            l: js_round(l * 100.0),
+        };
     }
 
-    let s = if l > 0.5 { d / (2.0 - max - min) } else { d / (max + min) };
+    let s = if l > 0.5 {
+        d / (2.0 - max - min)
+    } else {
+        d / (max + min)
+    };
     let h = if max == rn {
         ((gn - bn) / d + if gn < bn { 6.0 } else { 0.0 }) / 6.0
     } else if max == gn {
@@ -174,7 +186,13 @@ pub fn hsl_to_rgb(h: f64, s: f64, l: f64) -> Rgb {
     }
 
     fn hue2rgb(p: f64, q: f64, t: f64) -> f64 {
-        let tt = if t < 0.0 { t + 1.0 } else if t > 1.0 { t - 1.0 } else { t };
+        let tt = if t < 0.0 {
+            t + 1.0
+        } else if t > 1.0 {
+            t - 1.0
+        } else {
+            t
+        };
 
         if tt < 1.0 / 6.0 {
             p + (q - p) * 6.0 * tt
@@ -187,7 +205,11 @@ pub fn hsl_to_rgb(h: f64, s: f64, l: f64) -> Rgb {
         }
     }
 
-    let q = if ln < 0.5 { ln * (1.0 + sn) } else { ln + sn - ln * sn };
+    let q = if ln < 0.5 {
+        ln * (1.0 + sn)
+    } else {
+        ln + sn - ln * sn
+    };
     let p = 2.0 * ln - q;
     let hn = h / 360.0;
 

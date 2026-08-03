@@ -32,8 +32,8 @@
 //! Vertical pad is the contract-exact flat `0.5rem` (`rem_to_px(0.5)`); there is
 //! no dedicated token for it.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, IconButtonSpec,
@@ -81,7 +81,9 @@ fn toned_icon_button(
 ) -> JsEl {
     let effective_size = resolve_semantic_size(size, SemanticControlSizeRole::Control);
     let height = rem_to_px(control_height_rem(effective_size));
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
     let radius = resolve_radius(theme, "radius.control");
 
     let surface: Color = resolve_color(theme, "color.background.surface").into();
@@ -159,7 +161,13 @@ impl BulkActionBar {
 
 impl crate::element::IntoJsEl for BulkActionBar {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_action, self.on_select_all, self.on_clear)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_action,
+            self.on_select_all,
+            self.on_clear,
+        )
     }
 }
 
@@ -444,5 +452,4 @@ mod tests {
             ["action:delete", "all", "clear"]
         );
     }
-
 }

@@ -11,10 +11,10 @@ use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenuSpec};
 
-use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::{
+    elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
 };
-use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 /// Menu — the panel of a dropdown menu.
 ///
@@ -31,7 +31,11 @@ pub struct Menu {
 
 impl Menu {
     pub fn from_spec(spec: MenuSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_action: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_action: None,
+        }
     }
 
     /// Fires with the activated item's value. Separators and disabled items
@@ -133,7 +137,11 @@ fn build(
 
             // ── Checkbox / Radio items ────────────────────────────────────────
             MenuItemKind::Checkbox | MenuItemKind::Radio => {
-                let label_color = if entry.is_destructive { danger_color } else { text_color };
+                let label_color = if entry.is_destructive {
+                    danger_color
+                } else {
+                    text_color
+                };
 
                 // Leading check indicator (or blank spacer to align labels).
                 let check_size = font_size;
@@ -187,7 +195,11 @@ fn build(
                 if entry.is_disabled {
                     item = item.opacity(disabled_opacity);
                 } else {
-                    let hover = if entry.is_destructive { danger_hover_tint } else { hover_tint };
+                    let hover = if entry.is_destructive {
+                        danger_hover_tint
+                    } else {
+                        hover_tint
+                    };
                     item = item.cursor_pointer().hover(move |s| s.bg(hover));
 
                     if let Some(handler) = &on_action {
@@ -202,7 +214,11 @@ fn build(
 
             // ── Action items ─────────────────────────────────────────────────
             MenuItemKind::Action => {
-                let label_color = if entry.is_destructive { danger_color } else { text_color };
+                let label_color = if entry.is_destructive {
+                    danger_color
+                } else {
+                    text_color
+                };
 
                 let mut item = ui_element::div()
                     .aria_role(jetstream_ui::accesskit::Role::MenuItem)
@@ -244,7 +260,11 @@ fn build(
                 if entry.is_disabled {
                     item = item.opacity(disabled_opacity);
                 } else {
-                    let hover = if entry.is_destructive { danger_hover_tint } else { hover_tint };
+                    let hover = if entry.is_destructive {
+                        danger_hover_tint
+                    } else {
+                        hover_tint
+                    };
                     item = item.cursor_pointer().hover(move |s| s.bg(hover));
 
                     if let Some(handler) = &on_action {
@@ -295,15 +315,29 @@ mod tests {
         let tree = probe(&js_menu(&shortcuts_menu(), &theme()), 320.0, 400.0);
         assert!(!tree.is_empty(), "menu produced no nodes");
         // Item labels.
-        assert!(tree.has_text("New file"), "item label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("New file"),
+            "item label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Open…"), "item label missing");
         assert!(tree.has_text("Export as PDF"), "non-shortcut item missing");
         // Shortcut meta column.
-        assert!(tree.has_text("⌘N"), "shortcut meta missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("⌘N"),
+            "shortcut meta missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("⌘S"), "shortcut meta missing");
         // Interaction ids for host event loop.
-        assert!(tree.find_token("menu-item:new").is_some(), "item id missing");
-        assert!(tree.find_token("menu-item:export").is_some(), "item id missing");
+        assert!(
+            tree.find_token("menu-item:new").is_some(),
+            "item id missing"
+        );
+        assert!(
+            tree.find_token("menu-item:export").is_some(),
+            "item id missing"
+        );
     }
 
     #[test]
@@ -319,7 +353,10 @@ mod tests {
         let tree = probe(&js_menu(&spec, &theme()), 320.0, 400.0);
         assert!(tree.has_text("Dark mode"), "checkbox label missing");
         // Checked item renders a leading check icon.
-        assert!(tree.has_text("check"), "check icon missing for checked item");
+        assert!(
+            tree.has_text("check"),
+            "check icon missing for checked item"
+        );
         // Danger item present (color asserted via spec token below).
         assert!(tree.has_text("Delete project"), "danger item missing");
         // Danger foreground resolves from the status token.
@@ -371,12 +408,12 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let spec = MenuSpec::new(vec![
-            MenuEntry::new("rename", "Rename").with_disabled(true),
-        ]);
+        let spec = MenuSpec::new(vec![MenuEntry::new("rename", "Rename").with_disabled(true)]);
 
         let el = Menu::from_spec(spec, &theme())
-            .on_action(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_action(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 400.0, 300.0, "Rename");
@@ -395,7 +432,7 @@ mod tests {
         let values = Arc::clone(&seen);
 
         let spec = MenuSpec::new(vec![
-            MenuEntry::new("notify", "Notifications").with_kind(MenuItemKind::Checkbox),
+            MenuEntry::new("notify", "Notifications").with_kind(MenuItemKind::Checkbox)
         ]);
 
         let el = Menu::from_spec(spec, &theme())
@@ -406,5 +443,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["notify"]);
     }
-
 }

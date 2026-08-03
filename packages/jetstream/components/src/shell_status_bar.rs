@@ -49,10 +49,7 @@ pub fn js_shell_status_bar(
         // Border width token resolves to 0.0625rem (1px at 16px base); JsEl
         // exposes only a fixed 1px top-border setter, so width is approximated
         // at 1px and the per-side top color is set explicitly.
-        el = el
-            .bg(chrome_bg)
-            .border_t_1()
-            .border_color_top(border);
+        el = el.bg(chrome_bg).border_t_1().border_color_top(border);
     }
 
     // Leading region: slot content, or summary fallback when no slot content.
@@ -115,20 +112,26 @@ mod tests {
     fn leading_items_replace_summary_and_trailing_region_appears() {
         let th = theme();
         let spec = ShellStatusBarSpec::new().with_summary("Ready");
-        let leading = vec![
-            ui_element::label("main"),
-            ui_element::label("0 errors"),
+        let leading = vec![ui_element::label("main"), ui_element::label("0 errors")];
+        let trailing = vec![
+            ui_element::label("Ln 42, Col 18"),
+            ui_element::label("UTF-8"),
         ];
-        let trailing = vec![ui_element::label("Ln 42, Col 18"), ui_element::label("UTF-8")];
         let el = js_shell_status_bar(&spec, &th, leading, trailing);
         let tree = probe(&el, 800.0, 40.0);
 
         // Leading slot items present; summary suppressed (slot wins).
         assert!(tree.has_text("main"), "leading branch item missing");
         assert!(tree.has_text("0 errors"), "leading error item missing");
-        assert!(!tree.has_text("Ready"), "summary should be suppressed when leading slot has content");
+        assert!(
+            !tree.has_text("Ready"),
+            "summary should be suppressed when leading slot has content"
+        );
         // Trailing region rendered with its metadata.
-        assert!(tree.has_text("Ln 42, Col 18"), "trailing cursor item missing");
+        assert!(
+            tree.has_text("Ln 42, Col 18"),
+            "trailing cursor item missing"
+        );
         assert!(tree.has_text("UTF-8"), "trailing encoding item missing");
     }
 

@@ -51,17 +51,26 @@ pub fn normalize_slider_value(context: SliderContext, raw: f64) -> f64 {
     )
 }
 
-pub fn slider_transition(context: SliderContext, event: SliderEvent) -> (SliderContext, Vec<SliderEffect>) {
+pub fn slider_transition(
+    context: SliderContext,
+    event: SliderEvent,
+) -> (SliderContext, Vec<SliderEffect>) {
     match event {
         SliderEvent::Input { raw } => {
             let value = normalize_slider_value(context, raw);
 
-            (SliderContext { value, ..context }, vec![SliderEffect::EmitValueChange { value }])
+            (
+                SliderContext { value, ..context },
+                vec![SliderEffect::EmitValueChange { value }],
+            )
         }
         SliderEvent::Commit { raw } => {
             let value = normalize_slider_value(context, raw);
 
-            (SliderContext { value, ..context }, vec![SliderEffect::EmitValueCommit { value }])
+            (
+                SliderContext { value, ..context },
+                vec![SliderEffect::EmitValueCommit { value }],
+            )
         }
         SliderEvent::SetValue { value } => (SliderContext { value, ..context }, vec![]),
     }

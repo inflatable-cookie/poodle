@@ -6,7 +6,9 @@ use poodle_specs::{BrowseState, PickerShellSpec};
 
 use crate::presentation::rem_to_px;
 use crate::spinner::js_spinner;
-use crate::theme_ext::{color_mix, elevation_dialog, elevation_overlay, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{
+    color_mix, elevation_dialog, elevation_overlay, resolve_color, resolve_px, resolve_radius,
+};
 
 pub fn js_picker_shell(
     spec: &PickerShellSpec,
@@ -68,15 +70,12 @@ pub fn js_picker_shell(
         shell = elevation_dialog(shell);
     }
 
-    let mut title_block = ui_element::div()
-        .flex_col()
-        .gap(stack_sm)
-        .child(
-            ui_element::label(&spec.title)
-                .text_color(text_primary)
-                .text_size(title_size)
-                .text_weight(600),
-        );
+    let mut title_block = ui_element::div().flex_col().gap(stack_sm).child(
+        ui_element::label(&spec.title)
+            .text_color(text_primary)
+            .text_size(title_size)
+            .text_weight(600),
+    );
 
     if let Some(description) = spec.description.as_ref() {
         title_block = title_block.child(
@@ -127,15 +126,11 @@ pub fn js_picker_shell(
         // (mirrors the contract §8 sr-only clip + GPUI's 1px box). Jetstream has
         // no a11y channel, so this is visual-collapse only, not an SR live region.
         shell = shell.child(
-            ui_element::div()
-                .w(1.0)
-                .h(1.0)
-                .overflow_hidden()
-                .child(
-                    ui_element::label(status_text)
-                        .text_color(text_secondary)
-                        .text_size(label_size),
-                ),
+            ui_element::div().w(1.0).h(1.0).overflow_hidden().child(
+                ui_element::label(status_text)
+                    .text_color(text_secondary)
+                    .text_size(label_size),
+            ),
         );
     }
 
@@ -220,9 +215,17 @@ mod tests {
         let tree = probe(&el, 480.0, 400.0);
 
         // Header: title + description + meta counts.
-        assert!(tree.has_text("Select a component"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Select a component"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Browse components"), "description missing");
-        assert!(tree.has_text("12 results"), "result count missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("12 results"),
+            "result count missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("0 selected"), "selection count missing");
         // Body content visible in ready state.
         assert!(tree.has_text("candidate-row"), "body content missing");
@@ -235,7 +238,11 @@ mod tests {
         let footer = ui_element::label("Confirm");
         let el = js_picker_shell(&spec, &th, None, None, None, None, Some(footer));
         let tree = probe(&el, 480.0, 400.0);
-        assert!(tree.has_text("Confirm"), "footer action missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Confirm"),
+            "footer action missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -246,9 +253,19 @@ mod tests {
         let el = js_picker_shell(&spec, &th, None, None, Some(body), None, None);
         let tree = probe(&el, 480.0, 400.0);
         // State area fallback (effective_state_*), not the body.
-        assert!(tree.has_text("No results"), "fallback title missing: {:?}", tree.texts());
-        assert!(tree.has_text("No results found."), "fallback message missing");
-        assert!(!tree.has_text("should-not-show"), "body must be hidden when not ready");
+        assert!(
+            tree.has_text("No results"),
+            "fallback title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("No results found."),
+            "fallback message missing"
+        );
+        assert!(
+            !tree.has_text("should-not-show"),
+            "body must be hidden when not ready"
+        );
     }
 
     #[test]
@@ -259,7 +276,10 @@ mod tests {
         let tree = probe(&el, 480.0, 400.0);
         // Root (shell surface) carries a background fill (panel @ 94%).
         let root = &tree.nodes[0];
-        assert!(root.bg.is_some(), "shell surface should have a background fill");
+        assert!(
+            root.bg.is_some(),
+            "shell surface should have a background fill"
+        );
         assert!(root.w > 0.0 && root.h > 0.0, "shell not laid out");
     }
 

@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{BadgeSpec, BadgeVariant};
 

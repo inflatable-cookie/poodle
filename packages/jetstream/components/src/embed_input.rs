@@ -130,8 +130,16 @@ mod tests {
             .with_value("https://youtu.be/dQw4w9WgXcQ")
             .with_detected_parse();
         let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
-        assert!(tree.has_text("youtube"), "provider pill missing: {:?}", tree.texts());
-        assert!(tree.has_text("Embed detected"), "success text missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("youtube"),
+            "provider pill missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Embed detected"),
+            "success text missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -145,8 +153,14 @@ mod tests {
             tree.texts()
         );
         // Error and success are mutually exclusive — no success content.
-        assert!(!tree.has_text("Embed detected"), "error state must not show success text");
-        assert!(!tree.has_text("youtube"), "error state must not show a provider pill");
+        assert!(
+            !tree.has_text("Embed detected"),
+            "error state must not show success text"
+        );
+        assert!(
+            !tree.has_text("youtube"),
+            "error state must not show a provider pill"
+        );
     }
 
     #[test]
@@ -156,7 +170,11 @@ mod tests {
         let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
         // The composed TextInput primitive renders the value (it owns disabled
         // opacity via its own disabled_opacity_token — no hardcoded 0.5 here).
-        assert!(tree.has_text("x"), "input value missing: {}", tree.to_json());
+        assert!(
+            tree.has_text("x"),
+            "input value missing: {}",
+            tree.to_json()
+        );
         assert!(
             tree.nodes.iter().any(|n| n.depth >= 1 && n.bg.is_some()),
             "no field panel: {}",
@@ -169,6 +187,9 @@ mod tests {
         let th = theme();
         let spec = EmbedInputSpec::new();
         let tree = probe(&js_embed_input(&spec, &th), 320.0, 120.0);
-        assert!(!tree.has_text("Embed detected"), "empty input must not show success text");
+        assert!(
+            !tree.has_text("Embed detected"),
+            "empty input must not show success text"
+        );
     }
 }

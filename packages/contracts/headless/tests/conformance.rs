@@ -45,7 +45,10 @@ fn options_from(value: &Value) -> Vec<SelectOption> {
         .map(|entries| {
             entries
                 .iter()
-                .map(|entry| SelectOption { value: s(entry, "value").to_string(), disabled: b(entry, "disabled") })
+                .map(|entry| SelectOption {
+                    value: s(entry, "value").to_string(),
+                    disabled: b(entry, "disabled"),
+                })
                 .collect()
         })
         .unwrap_or_default()
@@ -57,17 +60,31 @@ fn canonicalize(value: &Value) -> Value {
     match value {
         Value::Number(number) => json!(number.as_f64().unwrap_or(0.0)),
         Value::Array(entries) => Value::Array(entries.iter().map(canonicalize).collect()),
-        Value::Object(map) => Value::Object(map.iter().map(|(key, entry)| (key.clone(), canonicalize(entry))).collect()),
+        Value::Object(map) => Value::Object(
+            map.iter()
+                .map(|(key, entry)| (key.clone(), canonicalize(entry)))
+                .collect(),
+        ),
         other => other.clone(),
     }
 }
 
-fn assert_case(machine: &str, case: &Value, actual_effects: Vec<Value>, actual_state: Option<&str>, actual_context: Option<Value>) {
+fn assert_case(
+    machine: &str,
+    case: &Value,
+    actual_effects: Vec<Value>,
+    actual_state: Option<&str>,
+    actual_context: Option<Value>,
+) {
     let name = s(case, "name");
     let expect = &case["expect"];
 
     if let Some(expected_state) = expect.get("state").and_then(Value::as_str) {
-        assert_eq!(actual_state, Some(expected_state), "{machine}/{name}: state");
+        assert_eq!(
+            actual_state,
+            Some(expected_state),
+            "{machine}/{name}: state"
+        );
     }
 
     let expected_effects: Vec<Value> = expect["effects"]
@@ -78,9 +95,15 @@ fn assert_case(machine: &str, case: &Value, actual_effects: Vec<Value>, actual_s
         .map(canonicalize)
         .collect();
     let actual_effects: Vec<Value> = actual_effects.iter().map(canonicalize).collect();
-    assert_eq!(actual_effects, expected_effects, "{machine}/{name}: effects");
+    assert_eq!(
+        actual_effects, expected_effects,
+        "{machine}/{name}: effects"
+    );
 
-    if let (Some(expected_context), Some(actual)) = (expect.get("context").and_then(Value::as_object), actual_context) {
+    if let (Some(expected_context), Some(actual)) = (
+        expect.get("context").and_then(Value::as_object),
+        actual_context,
+    ) {
         for (key, expected_value) in expected_context {
             assert_eq!(
                 canonicalize(&actual[key]),
@@ -102,8 +125,12 @@ fn checkbox_conformance() {
             read_only: b(ctx, "readOnly"),
         };
         let event = match s(&case["event"], "type") {
-            "TOGGLE" => CheckboxEvent::Toggle { next_checked: b(&case["event"], "nextChecked") },
-            "SET_CHECKED" => CheckboxEvent::SetChecked { checked: b(&case["event"], "checked") },
+            "TOGGLE" => CheckboxEvent::Toggle {
+                next_checked: b(&case["event"], "nextChecked"),
+            },
+            "SET_CHECKED" => CheckboxEvent::SetChecked {
+                checked: b(&case["event"], "checked"),
+            },
             other => panic!("unknown checkbox event {other}"),
         };
 
@@ -112,11 +139,19 @@ fn checkbox_conformance() {
             .iter()
             .map(|effect| match effect {
                 CheckboxEffect::RevertNativeChecked => json!({ "type": "revertNativeChecked" }),
-                CheckboxEffect::EmitCheckedChange { checked } => json!({ "type": "emitCheckedChange", "checked": checked }),
+                CheckboxEffect::EmitCheckedChange { checked } => {
+                    json!({ "type": "emitCheckedChange", "checked": checked })
+                }
             })
             .collect();
 
-        assert_case("checkbox", case, effects, None, Some(json!({ "checked": next.checked })));
+        assert_case(
+            "checkbox",
+            case,
+            effects,
+            None,
+            Some(json!({ "checked": next.checked })),
+        );
     }
 }
 
@@ -134,7 +169,11 @@ fn popover_conformance() {
             dismiss_on_outside_interact: b(ctx, "dismissOnOutsideInteract"),
             initial_focus,
         };
-        let state = if s(case, "state") == "open" { PopoverState::Open } else { PopoverState::Closed };
+        let state = if s(case, "state") == "open" {
+            PopoverState::Open
+        } else {
+            PopoverState::Closed
+        };
         let event = match s(&case["event"], "type") {
             "TOGGLE" => PopoverEvent::Toggle,
             "OPEN" => PopoverEvent::Open,
@@ -148,7 +187,9 @@ fn popover_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                PopoverEffect::EmitOpenChange { open } => json!({ "type": "emitOpenChange", "open": open }),
+                PopoverEffect::EmitOpenChange { open } => {
+                    json!({ "type": "emitOpenChange", "open": open })
+                }
                 PopoverEffect::FocusOnOpen { strategy } => json!({
                     "type": "focusOnOpen",
                     "strategy": match strategy {
@@ -160,7 +201,11 @@ fn popover_conformance() {
                 PopoverEffect::RestoreTriggerFocus => json!({ "type": "restoreTriggerFocus" }),
             })
             .collect();
-        let state_name = if next_state == PopoverState::Open { "open" } else { "closed" };
+        let state_name = if next_state == PopoverState::Open {
+            "open"
+        } else {
+            "closed"
+        };
 
         assert_case("popover", case, effects, Some(state_name), None);
     }
@@ -174,7 +219,11 @@ fn modal_conformance() {
             dismiss_on_escape: b(ctx, "dismissOnEscape"),
             dismiss_on_backdrop: b(ctx, "dismissOnBackdrop"),
         };
-        let state = if s(case, "state") == "open" { ModalState::Open } else { ModalState::Closed };
+        let state = if s(case, "state") == "open" {
+            ModalState::Open
+        } else {
+            ModalState::Closed
+        };
         let event = match s(&case["event"], "type") {
             "OPEN" => ModalEvent::Open,
             "CLOSE" => ModalEvent::Close,
@@ -188,7 +237,9 @@ fn modal_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                ModalEffect::EmitOpenChange { open } => json!({ "type": "emitOpenChange", "open": open }),
+                ModalEffect::EmitOpenChange { open } => {
+                    json!({ "type": "emitOpenChange", "open": open })
+                }
                 ModalEffect::EmitRequestClose => json!({ "type": "emitRequestClose" }),
                 ModalEffect::SaveFocusAndEnter => json!({ "type": "saveFocusAndEnter" }),
                 ModalEffect::LockBodyScroll => json!({ "type": "lockBodyScroll" }),
@@ -196,7 +247,11 @@ fn modal_conformance() {
                 ModalEffect::RestoreFocus => json!({ "type": "restoreFocus" }),
             })
             .collect();
-        let state_name = if next_state == ModalState::Open { "open" } else { "closed" };
+        let state_name = if next_state == ModalState::Open {
+            "open"
+        } else {
+            "closed"
+        };
 
         assert_case("modal", case, effects, Some(state_name), None);
     }
@@ -206,7 +261,10 @@ fn modal_conformance() {
 fn hover_conformance() {
     for case in vectors()["hover"].as_array().unwrap() {
         let ctx = &case["context"];
-        let context = HoverContext { open_delay_ms: f(ctx, "openDelayMs"), close_delay_ms: f(ctx, "closeDelayMs") };
+        let context = HoverContext {
+            open_delay_ms: f(ctx, "openDelayMs"),
+            close_delay_ms: f(ctx, "closeDelayMs"),
+        };
         let state = match s(case, "state") {
             "opening" => HoverState::Opening,
             "open" => HoverState::Open,
@@ -218,7 +276,9 @@ fn hover_conformance() {
             "LEAVE" => HoverEvent::Leave,
             "TIMER_FIRE" => HoverEvent::TimerFire,
             "DISMISS" => HoverEvent::Dismiss,
-            "SET_OPEN" => HoverEvent::SetOpen { open: b(&case["event"], "open") },
+            "SET_OPEN" => HoverEvent::SetOpen {
+                open: b(&case["event"], "open"),
+            },
             other => panic!("unknown hover event {other}"),
         };
 
@@ -228,7 +288,9 @@ fn hover_conformance() {
             .map(|effect| match effect {
                 HoverEffect::StartTimer { ms } => json!({ "type": "startTimer", "ms": ms }),
                 HoverEffect::ClearTimer => json!({ "type": "clearTimer" }),
-                HoverEffect::EmitOpenChange { open } => json!({ "type": "emitOpenChange", "open": open }),
+                HoverEffect::EmitOpenChange { open } => {
+                    json!({ "type": "emitOpenChange", "open": open })
+                }
             })
             .collect();
         let state_name = match next_state {
@@ -252,8 +314,12 @@ fn single_select_conformance() {
             disabled: b(ctx, "disabled"),
         };
         let event = match s(&case["event"], "type") {
-            "SELECT" => SingleSelectEvent::Select { value: s(&case["event"], "value").to_string() },
-            "SET_VALUE" => SingleSelectEvent::SetValue { value: opt_string(&case["event"], "value") },
+            "SELECT" => SingleSelectEvent::Select {
+                value: s(&case["event"], "value").to_string(),
+            },
+            "SET_VALUE" => SingleSelectEvent::SetValue {
+                value: opt_string(&case["event"], "value"),
+            },
             other => panic!("unknown singleSelect event {other}"),
         };
 
@@ -261,11 +327,19 @@ fn single_select_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                SingleSelectEffect::EmitValueChange { value } => json!({ "type": "emitValueChange", "value": value }),
+                SingleSelectEffect::EmitValueChange { value } => {
+                    json!({ "type": "emitValueChange", "value": value })
+                }
             })
             .collect();
 
-        assert_case("singleSelect", case, effects, None, Some(json!({ "value": next.value })));
+        assert_case(
+            "singleSelect",
+            case,
+            effects,
+            None,
+            Some(json!({ "value": next.value })),
+        );
     }
 }
 
@@ -281,9 +355,15 @@ fn slider_conformance() {
             disabled: b(ctx, "disabled"),
         };
         let event = match s(&case["event"], "type") {
-            "INPUT" => SliderEvent::Input { raw: f(&case["event"], "raw") },
-            "COMMIT" => SliderEvent::Commit { raw: f(&case["event"], "raw") },
-            "SET_VALUE" => SliderEvent::SetValue { value: f(&case["event"], "value") },
+            "INPUT" => SliderEvent::Input {
+                raw: f(&case["event"], "raw"),
+            },
+            "COMMIT" => SliderEvent::Commit {
+                raw: f(&case["event"], "raw"),
+            },
+            "SET_VALUE" => SliderEvent::SetValue {
+                value: f(&case["event"], "value"),
+            },
             other => panic!("unknown slider event {other}"),
         };
 
@@ -291,27 +371,45 @@ fn slider_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                SliderEffect::EmitValueChange { value } => json!({ "type": "emitValueChange", "value": value }),
-                SliderEffect::EmitValueCommit { value } => json!({ "type": "emitValueCommit", "value": value }),
+                SliderEffect::EmitValueChange { value } => {
+                    json!({ "type": "emitValueChange", "value": value })
+                }
+                SliderEffect::EmitValueCommit { value } => {
+                    json!({ "type": "emitValueCommit", "value": value })
+                }
             })
             .collect();
 
-        assert_case("slider", case, effects, None, Some(json!({ "value": next.value })));
+        assert_case(
+            "slider",
+            case,
+            effects,
+            None,
+            Some(json!({ "value": next.value })),
+        );
     }
 }
 
 #[test]
 fn menu_conformance() {
     for case in vectors()["menu"].as_array().unwrap() {
-        let context = MenuContext { disabled: b(&case["context"], "disabled") };
-        let state = if s(case, "state") == "open" { MenuState::Open } else { MenuState::Closed };
+        let context = MenuContext {
+            disabled: b(&case["context"], "disabled"),
+        };
+        let state = if s(case, "state") == "open" {
+            MenuState::Open
+        } else {
+            MenuState::Closed
+        };
         let event = match s(&case["event"], "type") {
             "TOGGLE" => MenuEvent::Toggle,
             "OPEN" => MenuEvent::Open,
             "CLOSE" => MenuEvent::Close,
             "ESCAPE" => MenuEvent::Escape,
             "OUTSIDE_INTERACT" => MenuEvent::OutsideInteract,
-            "ACTION" => MenuEvent::Action { value: s(&case["event"], "value").to_string() },
+            "ACTION" => MenuEvent::Action {
+                value: s(&case["event"], "value").to_string(),
+            },
             other => panic!("unknown menu event {other}"),
         };
 
@@ -319,12 +417,18 @@ fn menu_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                MenuEffect::EmitOpenChange { open } => json!({ "type": "emitOpenChange", "open": open }),
+                MenuEffect::EmitOpenChange { open } => {
+                    json!({ "type": "emitOpenChange", "open": open })
+                }
                 MenuEffect::EmitAction { value } => json!({ "type": "emitAction", "value": value }),
                 MenuEffect::FocusFirstItem => json!({ "type": "focusFirstItem" }),
             })
             .collect();
-        let state_name = if next_state == MenuState::Open { "open" } else { "closed" };
+        let state_name = if next_state == MenuState::Open {
+            "open"
+        } else {
+            "closed"
+        };
 
         assert_case("menu", case, effects, Some(state_name), None);
     }
@@ -334,10 +438,15 @@ fn menu_conformance() {
 fn disclosure_conformance() {
     for case in vectors()["disclosure"].as_array().unwrap() {
         let ctx = &case["context"];
-        let context = DisclosureContext { open: b(ctx, "open"), disabled: b(ctx, "disabled") };
+        let context = DisclosureContext {
+            open: b(ctx, "open"),
+            disabled: b(ctx, "disabled"),
+        };
         let event = match s(&case["event"], "type") {
             "TOGGLE" => DisclosureEvent::Toggle,
-            "SET_OPEN" => DisclosureEvent::SetOpen { open: b(&case["event"], "open") },
+            "SET_OPEN" => DisclosureEvent::SetOpen {
+                open: b(&case["event"], "open"),
+            },
             other => panic!("unknown disclosure event {other}"),
         };
 
@@ -345,18 +454,30 @@ fn disclosure_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                DisclosureEffect::EmitOpenChange { open } => json!({ "type": "emitOpenChange", "open": open }),
+                DisclosureEffect::EmitOpenChange { open } => {
+                    json!({ "type": "emitOpenChange", "open": open })
+                }
             })
             .collect();
 
-        assert_case("disclosure", case, effects, None, Some(json!({ "open": next.open })));
+        assert_case(
+            "disclosure",
+            case,
+            effects,
+            None,
+            Some(json!({ "open": next.open })),
+        );
     }
 }
 
 fn toggle_value_from(value: &Value, mode: SelectionMode) -> ToggleGroupValue {
     match value {
         Value::Array(entries) => ToggleGroupValue::Multiple(
-            entries.iter().filter_map(Value::as_str).map(str::to_string).collect(),
+            entries
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_string)
+                .collect(),
         ),
         Value::String(single) => ToggleGroupValue::Single(Some(single.clone())),
         _ => match mode {
@@ -378,7 +499,11 @@ fn toggle_value_to_json(value: &ToggleGroupValue) -> Value {
 fn toggle_group_conformance() {
     for case in vectors()["toggleGroup"].as_array().unwrap() {
         let ctx = &case["context"];
-        let mode = if s(ctx, "selectionMode") == "multiple" { SelectionMode::Multiple } else { SelectionMode::Single };
+        let mode = if s(ctx, "selectionMode") == "multiple" {
+            SelectionMode::Multiple
+        } else {
+            SelectionMode::Single
+        };
         let context = ToggleGroupContext {
             value: toggle_value_from(&ctx["value"], mode),
             options: options_from(ctx),
@@ -387,7 +512,9 @@ fn toggle_group_conformance() {
             disabled: b(ctx, "disabled"),
         };
         let event = match s(&case["event"], "type") {
-            "TOGGLE" => ToggleGroupEvent::Toggle { value: s(&case["event"], "value").to_string() },
+            "TOGGLE" => ToggleGroupEvent::Toggle {
+                value: s(&case["event"], "value").to_string(),
+            },
             other => panic!("unknown toggleGroup event {other}"),
         };
 
@@ -395,11 +522,19 @@ fn toggle_group_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                ToggleGroupEffect::EmitValueChange { value } => json!({ "type": "emitValueChange", "value": toggle_value_to_json(value) }),
+                ToggleGroupEffect::EmitValueChange { value } => {
+                    json!({ "type": "emitValueChange", "value": toggle_value_to_json(value) })
+                }
             })
             .collect();
 
-        assert_case("toggleGroup", case, effects, None, Some(json!({ "value": toggle_value_to_json(&next.value) })));
+        assert_case(
+            "toggleGroup",
+            case,
+            effects,
+            None,
+            Some(json!({ "value": toggle_value_to_json(&next.value) })),
+        );
     }
 }
 
@@ -421,13 +556,22 @@ fn tabs_conformance() {
             items,
             value: opt_string(ctx, "value"),
             focus_index: f(ctx, "focusIndex") as usize,
-            activation_mode: if s(ctx, "activationMode") == "manual" { ActivationMode::Manual } else { ActivationMode::Automatic },
+            activation_mode: if s(ctx, "activationMode") == "manual" {
+                ActivationMode::Manual
+            } else {
+                ActivationMode::Automatic
+            },
             reorderable: b(ctx, "reorderable"),
         };
         let event_value = &case["event"];
-        let from_index = event_value.get("fromIndex").and_then(Value::as_u64).map(|index| index as usize);
+        let from_index = event_value
+            .get("fromIndex")
+            .and_then(Value::as_u64)
+            .map(|index| index as usize);
         let event = match s(event_value, "type") {
-            "SELECT" => TabsEvent::Select { value: s(event_value, "value").to_string() },
+            "SELECT" => TabsEvent::Select {
+                value: s(event_value, "value").to_string(),
+            },
             "FOCUS_MOVE" => TabsEvent::FocusMove {
                 direction: match s(event_value, "direction") {
                     "prev" => FocusDirection::Prev,
@@ -438,9 +582,14 @@ fn tabs_conformance() {
                 from_index,
             },
             "ACTIVATE" => TabsEvent::Activate { index: from_index },
-            "CLOSE" => TabsEvent::Close { value: s(event_value, "value").to_string() },
+            "CLOSE" => TabsEvent::Close {
+                value: s(event_value, "value").to_string(),
+            },
             "REORDER_STEP" => TabsEvent::ReorderStep {
-                direction: event_value.get("direction").and_then(Value::as_i64).unwrap_or(1) as i32,
+                direction: event_value
+                    .get("direction")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(1) as i32,
                 from_index,
             },
             "REORDER" => TabsEvent::Reorder {
@@ -454,8 +603,12 @@ fn tabs_conformance() {
         let effects = effects
             .iter()
             .map(|effect| match effect {
-                TabsEffect::EmitValueChange { value } => json!({ "type": "emitValueChange", "value": value }),
-                TabsEffect::EmitReorder { order } => json!({ "type": "emitReorder", "order": order }),
+                TabsEffect::EmitValueChange { value } => {
+                    json!({ "type": "emitValueChange", "value": value })
+                }
+                TabsEffect::EmitReorder { order } => {
+                    json!({ "type": "emitReorder", "order": order })
+                }
                 TabsEffect::EmitClose { value } => json!({ "type": "emitClose", "value": value }),
                 TabsEffect::FocusTab { index } => json!({ "type": "focusTab", "index": index }),
             })
@@ -464,7 +617,8 @@ fn tabs_conformance() {
         let name = s(case, "name");
 
         if let Some(order) = case["expect"].get("order").and_then(Value::as_array) {
-            let actual_order: Vec<Value> = next.items.iter().map(|item| json!(item.value)).collect();
+            let actual_order: Vec<Value> =
+                next.items.iter().map(|item| json!(item.value)).collect();
             assert_eq!(&actual_order, order, "tabs/{name}: order");
         }
 

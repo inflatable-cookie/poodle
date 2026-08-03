@@ -30,7 +30,11 @@ pub enum ResizePhase {
 
 impl ResizeHandle {
     pub fn from_spec(spec: ResizeHandleSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_resize: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_resize: None,
+        }
     }
 
     /// Fires through the gesture: `Start` with `0.0`, `Move` with each frame's
@@ -92,17 +96,23 @@ fn build(
         } else if let Some(handler) = &on_resize {
             let handler = std::sync::Arc::clone(handler);
             let horizontal = matches!(spec.orientation, Orientation::Horizontal);
-            Some(std::sync::Arc::new(move |event: &jetstream_ui::DragEvent| {
-                match event.phase {
-                    jetstream_ui::DragPhase::Start => handler(ResizePhase::Start, 0.0),
-                    jetstream_ui::DragPhase::Move => {
-                        // A horizontal handle is a vertical line: it moves along x.
-                        let delta = if horizontal { event.delta_x } else { event.delta_y };
-                        handler(ResizePhase::Move, delta);
+            Some(std::sync::Arc::new(
+                move |event: &jetstream_ui::DragEvent| {
+                    match event.phase {
+                        jetstream_ui::DragPhase::Start => handler(ResizePhase::Start, 0.0),
+                        jetstream_ui::DragPhase::Move => {
+                            // A horizontal handle is a vertical line: it moves along x.
+                            let delta = if horizontal {
+                                event.delta_x
+                            } else {
+                                event.delta_y
+                            };
+                            handler(ResizePhase::Move, delta);
+                        }
+                        jetstream_ui::DragPhase::End => handler(ResizePhase::End, 0.0),
                     }
-                    jetstream_ui::DragPhase::End => handler(ResizePhase::End, 0.0),
-                }
-            }))
+                },
+            ))
         } else {
             None
         };
@@ -125,13 +135,20 @@ fn build(
             // Grab overlay: 0.5rem wide, centred, absolute (no layout cost).
             ui_element::div()
                 .relative()
-                .w(visual_size).self_stretch().flex_shrink_0()
-                .flex_col().items_center().justify_center()
+                .w(visual_size)
+                .self_stretch()
+                .flex_shrink_0()
+                .flex_col()
+                .items_center()
+                .justify_center()
                 .cursor_col_resize()
                 .child(
                     ui_element::div()
-                        .absolute().left(hit_offset).top(0.0)
-                        .w(hit_size).h_full(),
+                        .absolute()
+                        .left(hit_offset)
+                        .top(0.0)
+                        .w(hit_size)
+                        .h_full(),
                 )
                 .child(arm(build_line(
                     ui_element::div().w_full().h_full().rounded(999.0),
@@ -143,14 +160,19 @@ fn build(
             // Grab overlay: 0.5rem tall, centred, absolute (no layout cost).
             ui_element::div()
                 .relative()
-                .h(visual_size).self_stretch().flex_shrink_0()
-                .flex_row().items_center().justify_center()
+                .h(visual_size)
+                .self_stretch()
+                .flex_shrink_0()
+                .flex_row()
+                .items_center()
+                .justify_center()
                 .cursor_row_resize()
-                .child(arm(
-                    ui_element::div()
-                        .absolute().top(hit_offset).left(0.0)
-                        .h(hit_size).w_full(),
-                ))
+                .child(arm(ui_element::div()
+                    .absolute()
+                    .top(hit_offset)
+                    .left(0.0)
+                    .h(hit_size)
+                    .w_full()))
                 .child(arm(build_line(
                     ui_element::div().h_full().w_full().rounded(999.0),
                 )))
@@ -327,7 +349,10 @@ mod tests {
             .filter(|(p, _)| *p == ResizePhase::Move)
             .map(|(_, d)| d)
             .sum();
-        assert!(moved > 30.0, "the deltas did not sum to the distance: {moved}");
+        assert!(
+            moved > 30.0,
+            "the deltas did not sum to the distance: {moved}"
+        );
     }
 
     #[test]
@@ -345,7 +370,9 @@ mod tests {
                 .with_disabled(true),
             &theme(),
         )
-        .on_resize(move |_, _| { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_resize(move |_, _| {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
         let row = ui_element::div().flex_row().w(200.0).h(100.0).child(handle);
 
@@ -353,5 +380,4 @@ mod tests {
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled handle resized");
     }
-
 }

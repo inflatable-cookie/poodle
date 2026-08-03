@@ -39,7 +39,11 @@ pub struct Rating {
 
 impl Rating {
     pub fn from_spec(spec: RatingSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the rating the pressed star sets — 1-based, so clicking the
@@ -136,7 +140,9 @@ fn build(
         if let (false, false, Some(handler)) = (spec.is_disabled, spec.is_readonly, &on_change) {
             let handler = std::sync::Arc::clone(handler);
             let value = (i + 1) as u32;
-            target = target.cursor_pointer().on_click(move |_event| handler(value));
+            target = target
+                .cursor_pointer()
+                .on_click(move |_event| handler(value));
         }
 
         el = el.child(target);
@@ -163,7 +169,12 @@ mod tests {
     }
 
     fn px_color(v: glam::Vec4) -> ProbeColor {
-        ProbeColor { r: v.x, g: v.y, b: v.z, a: v.w }
+        ProbeColor {
+            r: v.x,
+            g: v.y,
+            b: v.z,
+            a: v.w,
+        }
     }
 
     #[test]
@@ -173,7 +184,12 @@ mod tests {
         // 5 stars: each filled star contributes a base + fill icon (2),
         // each unfilled star contributes only a base (1).
         // value=3 → 3 filled (6 icons) + 2 unfilled (2 icons) = 8 star icons.
-        assert_eq!(tree.count_kind("Icon"), 8, "icon layers: {:?}", tree.texts());
+        assert_eq!(
+            tree.count_kind("Icon"),
+            8,
+            "icon layers: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -189,7 +205,11 @@ mod tests {
         let spec = RatingSpec::new().with_value(5.0).with_max(5);
         let tree = probe(&js_rating(&spec, &theme()), 240.0, 48.0);
         // Every star filled → base + fill = 10 icons.
-        assert_eq!(tree.count_kind("Icon"), 10, "expected 10 icons (all filled)");
+        assert_eq!(
+            tree.count_kind("Icon"),
+            10,
+            "expected 10 icons (all filled)"
+        );
     }
 
     #[test]
@@ -204,7 +224,9 @@ mod tests {
         ));
         // value=1 of 2: one filled (active) star + one unfilled (inactive) star.
         assert!(
-            tree.nodes.iter().any(|n| n.bg.is_none() && n.kind == "Icon"),
+            tree.nodes
+                .iter()
+                .any(|n| n.bg.is_none() && n.kind == "Icon"),
             "icons present"
         );
         // Colors travel on text_color, not bg; assert both resolve to non-equal,
@@ -257,12 +279,13 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Rating::from_spec(RatingSpec::new().with_max(5).with_readonly(true), &theme())
-            .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text_nth(&el, 240.0, 60.0, "star", 0);
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a read-only rating fired");
     }
-
 }

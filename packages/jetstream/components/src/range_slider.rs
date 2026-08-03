@@ -16,8 +16,8 @@
 //! Drag/keyboard interaction is preview-event-loop bound; this renders the
 //! track + filled window + two thumbs at the spec's current values only.
 
-use jetstream_ui::{BoxShadow, Color};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{BoxShadow, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, RangeSliderSpec};
 
@@ -87,7 +87,12 @@ pub struct RangeSlider {
 
 impl RangeSlider {
     pub fn from_spec(spec: RangeSliderSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None, on_value_commit: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+            on_value_commit: None,
+        }
     }
 
     /// Fires continuously while dragging, with `(low, high)`. A thumb cannot
@@ -106,7 +111,12 @@ impl RangeSlider {
 
 impl crate::element::IntoJsEl for RangeSlider {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_change, self.on_value_commit)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_change,
+            self.on_value_commit,
+        )
     }
 }
 
@@ -142,19 +152,8 @@ fn build(
     let track_bg: Color = tint(surface, 0.88).into();
 
     // Normalized positions, step-snapped to the contract grid (anchored at min).
-    let lo = snap_fraction(
-        spec.normalized_low() as f32,
-        spec.min,
-        spec.max,
-        spec.step,
-    );
-    let hi = snap_fraction(
-        spec.normalized_high() as f32,
-        spec.min,
-        spec.max,
-        spec.step,
-    )
-    .max(lo);
+    let lo = snap_fraction(spec.normalized_low() as f32, spec.min, spec.max, spec.step);
+    let hi = snap_fraction(spec.normalized_high() as f32, spec.min, spec.max, spec.step).max(lo);
 
     let tw = track_w();
     let thumb_r = thumb_size * 0.5;
@@ -308,7 +307,14 @@ fn build(
                     on_change.clone(),
                     on_value_commit.clone(),
                 ),
-                arm(RangeThumb::Upper, thumb_hi, low, high, on_change, on_value_commit),
+                arm(
+                    RangeThumb::Upper,
+                    thumb_hi,
+                    low,
+                    high,
+                    on_change,
+                    on_value_commit,
+                ),
             )
         }
     };
@@ -437,7 +443,10 @@ mod tests {
     fn two_thumbs_render_at_md_size() {
         let th = theme();
         // md thumb = 1rem = 16px from the contract size table (not a ratio).
-        let el = js_range_slider(&RangeSliderSpec::new(20.0, 80.0).with_size(ControlSize::Md), &th);
+        let el = js_range_slider(
+            &RangeSliderSpec::new(20.0, 80.0).with_size(ControlSize::Md),
+            &th,
+        );
         // Root container height = min-height md = 1.5rem = 24px.
         assert_eq!(
             el.layout.size.height,
@@ -452,7 +461,8 @@ mod tests {
             .filter(|n| (n.w - 16.0).abs() < 0.5 && (n.h - 16.0).abs() < 0.5)
             .count();
         assert_eq!(
-            thumb_count, 2,
+            thumb_count,
+            2,
             "two md thumbs (1rem = 16px) expected per the size table: {}",
             tree.to_json()
         );
@@ -495,10 +505,7 @@ mod tests {
     #[test]
     fn disabled_applies_state_opacity() {
         let th = theme();
-        let el = js_range_slider(
-            &RangeSliderSpec::new(30.0, 70.0).with_disabled(true),
-            &th,
-        );
+        let el = js_range_slider(&RangeSliderSpec::new(30.0, 70.0).with_disabled(true), &th);
         let expected = resolve_opacity(&th, "state.opacity.disabled");
         assert!(
             (el.style.opacity - expected).abs() < 0.001,
@@ -516,7 +523,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
         let changes = Arc::clone(&seen);
 
-        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let spec = RangeSliderSpec::new(20.0, 80.0)
+            .with_bounds(0.0, 100.0)
+            .with_step(1.0);
         let el = RangeSlider::from_spec(spec, &theme())
             .on_change(move |low, high| changes.lock().unwrap().push((low, high)))
             .into_js_el();
@@ -530,7 +539,13 @@ mod tests {
             .min_by(|a, b| a.x.total_cmp(&b.x))
             .expect("a thumb");
         let y = thumb.y + thumb.h / 2.0;
-        crate::element::click_probe::drag(&el, 400.0, 80.0, (thumb.x + thumb.w / 2.0, y), (thumb.x + 40.0, y));
+        crate::element::click_probe::drag(
+            &el,
+            400.0,
+            80.0,
+            (thumb.x + thumb.w / 2.0, y),
+            (thumb.x + 40.0, y),
+        );
 
         let values = seen.lock().unwrap();
         let (low, high) = *values.last().expect("a drag reported nothing");
@@ -549,7 +564,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<(f64, f64)>>> = Arc::new(Mutex::new(Vec::new()));
         let changes = Arc::clone(&seen);
 
-        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let spec = RangeSliderSpec::new(20.0, 80.0)
+            .with_bounds(0.0, 100.0)
+            .with_step(1.0);
         let el = RangeSlider::from_spec(spec, &theme())
             .on_change(move |low, high| changes.lock().unwrap().push((low, high)))
             .into_js_el();
@@ -562,7 +579,13 @@ mod tests {
             .min_by(|a, b| a.x.total_cmp(&b.x))
             .expect("a thumb");
         let y = thumb.y + thumb.h / 2.0;
-        crate::element::click_probe::drag(&el, 400.0, 80.0, (thumb.x + thumb.w / 2.0, y), (thumb.x + 200.0, y));
+        crate::element::click_probe::drag(
+            &el,
+            400.0,
+            80.0,
+            (thumb.x + thumb.w / 2.0, y),
+            (thumb.x + 200.0, y),
+        );
 
         let values = seen.lock().unwrap();
         // Assert the drag happened before asserting anything about it: `all`
@@ -575,7 +598,10 @@ mod tests {
         );
         let (low, high) = *values.last().unwrap();
         assert_eq!(high, 80.0, "the partner moved");
-        assert_eq!(low, 80.0, "the dragged thumb did not stop against its partner: {low}");
+        assert_eq!(
+            low, 80.0,
+            "the dragged thumb did not stop against its partner: {low}"
+        );
     }
 
     #[test]
@@ -589,12 +615,18 @@ mod tests {
 
         let spec = RangeSliderSpec::new(20.0, 80.0).with_disabled(true);
         let el = RangeSlider::from_spec(spec, &theme())
-            .on_change(move |_, _| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_change(move |_, _| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::drag(&el, 400.0, 80.0, (40.0, 40.0), (120.0, 40.0));
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled range slider moved");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a disabled range slider moved"
+        );
     }
 
     /// Commit fires once per drag, with the settled pair.
@@ -608,7 +640,9 @@ mod tests {
         let c1 = Arc::clone(&changes);
         let c2 = Arc::clone(&commits);
 
-        let spec = RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0).with_step(1.0);
+        let spec = RangeSliderSpec::new(20.0, 80.0)
+            .with_bounds(0.0, 100.0)
+            .with_step(1.0);
         let el = RangeSlider::from_spec(spec, &theme())
             .on_change(move |low, high| c1.lock().unwrap().push((low, high)))
             .on_value_commit(move |low, high| c2.lock().unwrap().push((low, high)))
@@ -634,5 +668,4 @@ mod tests {
         assert_eq!(commits.len(), 1, "commit fired {} times", commits.len());
         assert_eq!(commits[0], *changes.lock().unwrap().last().unwrap());
     }
-
 }

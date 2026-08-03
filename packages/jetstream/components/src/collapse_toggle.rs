@@ -33,7 +33,11 @@ pub struct CollapseToggle {
 
 impl CollapseToggle {
     pub fn from_spec(spec: CollapseToggleSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_toggle: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+        }
     }
 
     /// Fires with the collapsed state the region is moving **to**.
@@ -187,7 +191,10 @@ mod tests {
         let (d_x, d_y) = pad(&default_el);
         let (c_x, c_y) = pad(&comfortable_el);
 
-        assert!(c_x > d_x, "comfortable must widen inline padding: {c_x} vs {d_x}");
+        assert!(
+            c_x > d_x,
+            "comfortable must widen inline padding: {c_x} vs {d_x}"
+        );
         assert!(
             (c_y - d_y).abs() < 0.001,
             "density must not change vertical padding: {c_y} vs {d_y}"
@@ -216,7 +223,10 @@ mod tests {
         let th = theme();
         let el = js_collapse_toggle(&CollapseToggleSpec::new().with_disabled(true), &th);
         let tree = probe(&el, 200.0, 200.0);
-        assert!(tree.count_kind("Icon") >= 1, "disabled toggle must still render the chevron");
+        assert!(
+            tree.count_kind("Icon") >= 1,
+            "disabled toggle must still render the chevron"
+        );
     }
 
     #[test]
@@ -250,16 +260,14 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = CollapseToggle::from_spec(
-            CollapseToggleSpec::new().with_disabled(true),
-            &theme(),
-        )
-        .on_toggle(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
-        .into_js_el();
+        let el = CollapseToggle::from_spec(CollapseToggleSpec::new().with_disabled(true), &theme())
+            .on_toggle(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
 
         crate::element::click_probe::click_at(&el, 80.0, 80.0, 12.0, 12.0);
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a disabled toggle fired");
     }
-
 }

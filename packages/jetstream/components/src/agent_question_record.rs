@@ -131,8 +131,16 @@ mod tests {
             id: "placement".into(),
             prompt: "Where should it appear?".into(),
             options: vec![
-                AgentQuestionOption { value: "inline".into(), label: "Inline".into(), description: None },
-                AgentQuestionOption { value: "composer".into(), label: "Composer".into(), description: None },
+                AgentQuestionOption {
+                    value: "inline".into(),
+                    label: "Inline".into(),
+                    description: None,
+                },
+                AgentQuestionOption {
+                    value: "composer".into(),
+                    label: "Composer".into(),
+                    description: None,
+                },
             ],
             ..Default::default()
         }
@@ -149,10 +157,15 @@ mod tests {
                 text: String::new(),
             },
         );
-        let tree = crate::render_probe::probe(&js_agent_question_record(&spec, &theme()), 720.0, 200.0);
+        let tree =
+            crate::render_probe::probe(&js_agent_question_record(&spec, &theme()), 720.0, 200.0);
 
         assert!(tree.has_text("Composer"), "{:?}", tree.texts());
-        assert!(tree.has_text("Inline"), "the unchosen option was dropped: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Inline"),
+            "the unchosen option was dropped: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -166,7 +179,8 @@ mod tests {
                 text: "in the sidebar".into(),
             },
         );
-        let tree = crate::render_probe::probe(&js_agent_question_record(&spec, &theme()), 720.0, 200.0);
+        let tree =
+            crate::render_probe::probe(&js_agent_question_record(&spec, &theme()), 720.0, 200.0);
 
         assert!(tree.has_text("in the sidebar"), "{:?}", tree.texts());
         assert!(!tree.has_text("Inline"), "{:?}", tree.texts());

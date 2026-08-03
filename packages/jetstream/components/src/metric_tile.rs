@@ -162,14 +162,23 @@ mod tests {
 
     fn probe_color(theme: &JetstreamThemeProvider, token: &str) -> ProbeColor {
         let c = resolve_color(theme, token);
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     #[test]
     fn renders_label_and_value() {
         let spec = MetricTileSpec::new("Coverage", "94%");
         let tree = probe(&js_metric_tile(&spec, &theme()), 200.0, 120.0);
-        assert!(tree.has_text("Coverage"), "label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Coverage"),
+            "label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("94%"), "value missing: {:?}", tree.texts());
     }
 
@@ -186,7 +195,10 @@ mod tests {
         // (text colors aren't probe-sampled, but the icon/label inherit it —
         // assert the trend label rendered and tone token resolves distinctly)
         let secondary = probe_color(&th, "color.text.secondary");
-        assert!(!success.approx(secondary, 0.001), "success tone must differ from default text");
+        assert!(
+            !success.approx(secondary, 0.001),
+            "success tone must differ from default text"
+        );
     }
 
     #[test]
@@ -211,15 +223,18 @@ mod tests {
             .nodes
             .iter()
             .any(|n| (n.w - 64.0).abs() <= 1.0 && (n.h - 24.0).abs() <= 1.0);
-        assert!(has_strip, "sparkline strip (4rem×1.5rem) missing: {}", tree.to_json());
+        assert!(
+            has_strip,
+            "sparkline strip (4rem×1.5rem) missing: {}",
+            tree.to_json()
+        );
     }
 
     #[test]
     fn density_changes_root_padding() {
         let th = theme();
         let compact = MetricTileSpec::new("X", "1").with_density(ControlDensity::Compact);
-        let comfortable =
-            MetricTileSpec::new("X", "1").with_density(ControlDensity::Comfortable);
+        let comfortable = MetricTileSpec::new("X", "1").with_density(ControlDensity::Comfortable);
         // Compact pad-x 0.75rem (12px) vs comfortable 1.25rem (20px) — verify the
         // density-resolved rem accessors diverge (drives root padding).
         assert!(compact.padding_x_rem() < comfortable.padding_x_rem());

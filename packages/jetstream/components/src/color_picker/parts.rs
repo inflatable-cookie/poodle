@@ -2,8 +2,8 @@
 //! decomposition); unchanged.
 
 use glam::Vec4;
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,
@@ -13,10 +13,8 @@ use crate::number_input::js_number_input;
 use crate::presentation::rem_to_px;
 use crate::segmented_control::js_segmented_control;
 use crate::theme_ext::{
-    hsv_to_hsl, pure_hue_vec4, resolve_color, resolve_px,
-    resolve_radius, Hsv, Rgb255,
+    hsv_to_hsl, pure_hue_vec4, resolve_color, resolve_px, resolve_radius, Hsv, Rgb255,
 };
-
 
 /// 2D saturation/value gradient pad. Base = pure hue `hsl(h,100%,50%)`. Two
 /// absolutely positioned overlay children carry the CSS `::before`/`::after`
@@ -125,9 +123,7 @@ pub(super) fn build_controls_panel(
     panel = panel.child(js_segmented_control(&mode_spec, theme));
 
     // Channel inputs for the current mode.
-    panel = panel.child(build_channel_inputs(
-        spec, theme, current, rgb, hsv, alpha,
-    ));
+    panel = panel.child(build_channel_inputs(spec, theme, current, rgb, hsv, alpha));
 
     panel
 }
@@ -174,7 +170,15 @@ pub(super) fn build_hue_strip(theme: &JetstreamThemeProvider, hue: f32) -> JsEl 
         track = track.child(seg);
     }
 
-    slider_wrap("Hue", track, thumb_d, track_h, (hue / 360.0).clamp(0.0, 1.0), elevated, border)
+    slider_wrap(
+        "Hue",
+        track,
+        thumb_d,
+        track_h,
+        (hue / 360.0).clamp(0.0, 1.0),
+        elevated,
+        border,
+    )
 }
 
 /// Alpha slider. CSS layers a transparent→color gradient over a checkerboard;
@@ -211,7 +215,15 @@ pub(super) fn build_alpha_strip(
         .bg(surface_bg)
         .child(overlay);
 
-    slider_wrap("Opacity", track, thumb_d, track_h, alpha.clamp(0.0, 1.0), elevated, border)
+    slider_wrap(
+        "Opacity",
+        track,
+        thumb_d,
+        track_h,
+        alpha.clamp(0.0, 1.0),
+        elevated,
+        border,
+    )
 }
 
 /// Wrap a slider track in a relative container with a thumb at `progress`.
@@ -271,7 +283,10 @@ pub(super) fn build_channel_inputs(
     let radius_control = resolve_radius(theme, "radius.control");
     let label_size = rem_to_px(0.625); // contract: input-label font-size
 
-    let mut row = ui_element::div().flex_row().gap(rem_to_px(0.25)).items_start();
+    let mut row = ui_element::div()
+        .flex_row()
+        .gap(rem_to_px(0.25))
+        .items_start();
 
     let labelled = |child: JsEl, label: &str| -> JsEl {
         ui_element::div()
@@ -323,7 +338,13 @@ pub(super) fn build_channel_inputs(
             row = row.child(labelled(hex_field, "Hex"));
             if spec.show_alpha {
                 row = row.child(labelled(
-                    number("color-picker-a", (alpha * 100.0).round() as f64, 0.0, 100.0, "Alpha"),
+                    number(
+                        "color-picker-a",
+                        (alpha * 100.0).round() as f64,
+                        0.0,
+                        100.0,
+                        "Alpha",
+                    ),
                     "A",
                 ));
             }
@@ -343,7 +364,13 @@ pub(super) fn build_channel_inputs(
             ));
             if spec.show_alpha {
                 row = row.child(labelled(
-                    number("color-picker-a", (alpha * 100.0).round() as f64, 0.0, 100.0, "Alpha"),
+                    number(
+                        "color-picker-a",
+                        (alpha * 100.0).round() as f64,
+                        0.0,
+                        100.0,
+                        "Alpha",
+                    ),
                     "A",
                 ));
             }
@@ -364,7 +391,13 @@ pub(super) fn build_channel_inputs(
             ));
             if spec.show_alpha {
                 row = row.child(labelled(
-                    number("color-picker-a", (alpha * 100.0).round() as f64, 0.0, 100.0, "Alpha"),
+                    number(
+                        "color-picker-a",
+                        (alpha * 100.0).round() as f64,
+                        0.0,
+                        100.0,
+                        "Alpha",
+                    ),
                     "A",
                 ));
             }

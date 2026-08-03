@@ -13,8 +13,8 @@
 //! font atlas is present, so absolute text widths are approximate; structure,
 //! colors, token keys, and non-text dimensions are exact.
 
-use jetstream_ui::{GameUi, Widget};
 use jetstream_ui::ui_element::JsEl;
+use jetstream_ui::{GameUi, Widget};
 
 /// An RGBA color sampled from a node's resolved style, components in `0.0..=1.0`.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -146,14 +146,18 @@ impl ProbeTree {
 
     /// First node whose interaction id equals `key`.
     pub fn find_token(&self, key: &str) -> Option<&ProbeNode> {
-        self.nodes.iter().find(|n| n.token_key.as_deref() == Some(key))
+        self.nodes
+            .iter()
+            .find(|n| n.token_key.as_deref() == Some(key))
     }
 
     /// Any node whose interaction id starts with `prefix` (e.g. `"tree:"`).
     pub fn has_token_prefix(&self, prefix: &str) -> bool {
-        self.nodes
-            .iter()
-            .any(|n| n.token_key.as_deref().is_some_and(|k| k.starts_with(prefix)))
+        self.nodes.iter().any(|n| {
+            n.token_key
+                .as_deref()
+                .is_some_and(|k| k.starts_with(prefix))
+        })
     }
 
     /// Any node rendering exactly this text.
@@ -163,7 +167,10 @@ impl ProbeTree {
 
     /// All non-empty text content, in document order.
     pub fn texts(&self) -> Vec<&str> {
-        self.nodes.iter().filter_map(|n| n.text.as_deref()).collect()
+        self.nodes
+            .iter()
+            .filter_map(|n| n.text.as_deref())
+            .collect()
     }
 
     /// Count nodes of a given widget kind.
@@ -193,10 +200,9 @@ impl ProbeTree {
                 .as_deref()
                 .map(|t| format!("{t:?}"))
                 .unwrap_or_else(|| "null".into());
-            let bg = n
-                .bg
-                .map(|c| format!("[{:.3},{:.3},{:.3},{:.3}]", c.r, c.g, c.b, c.a))
-                .unwrap_or_else(|| "null".into());
+            let bg =
+                n.bg.map(|c| format!("[{:.3},{:.3},{:.3},{:.3}]", c.r, c.g, c.b, c.a))
+                    .unwrap_or_else(|| "null".into());
             out.push_str(&format!(
                 "{indent}{{\"d\":{},\"kind\":{:?},\"token\":{token},\"text\":{text},\"rect\":[{:.1},{:.1},{:.1},{:.1}],\"bg\":{bg}}}{}\n",
                 n.depth,

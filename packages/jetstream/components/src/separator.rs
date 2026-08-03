@@ -54,7 +54,7 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
         SeparatorOrientation::Vertical => {
             ui_element::div()
                 .w(stroke)
-                .h_full()   // min-height 100%
+                .h_full() // min-height 100%
                 .bg(color)
                 .flex_none() // flex: 0 0 auto
         }
@@ -119,7 +119,12 @@ mod tests {
     #[test]
     fn default_tone_uses_full_border_default() {
         let bd = resolve_color(&theme(), "color.border.default");
-        let expected = ProbeColor { r: bd.x, g: bd.y, b: bd.z, a: bd.w };
+        let expected = ProbeColor {
+            r: bd.x,
+            g: bd.y,
+            b: bd.z,
+            a: bd.w,
+        };
         let el = js_separator(&SeparatorSpec::new().with_tone(RuleTone::Default), &theme());
         let tree = probe(&el, 200.0, 20.0);
         assert!(

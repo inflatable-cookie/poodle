@@ -192,11 +192,7 @@ impl LogListSpec {
         self
     }
 
-    pub fn with_filter_value(
-        mut self,
-        field: impl Into<String>,
-        value: impl Into<String>,
-    ) -> Self {
+    pub fn with_filter_value(mut self, field: impl Into<String>, value: impl Into<String>) -> Self {
         self.filter_values.insert(field.into(), value.into());
         self
     }
@@ -239,9 +235,7 @@ impl LogListSpec {
     /// `total ? Math.max(1, Math.ceil(total / pageSize)) : 1`.
     pub fn total_pages(&self) -> usize {
         match self.total {
-            Some(total) if self.page_size > 0 => {
-                (total.div_ceil(self.page_size)).max(1)
-            }
+            Some(total) if self.page_size > 0 => (total.div_ceil(self.page_size)).max(1),
             _ => 1,
         }
     }
@@ -315,22 +309,34 @@ mod tests {
         assert_eq!(LogListSpec::new().total_pages(), 1);
         // Exact multiple.
         assert_eq!(
-            LogListSpec::new().with_page_size(50).with_total(100).total_pages(),
+            LogListSpec::new()
+                .with_page_size(50)
+                .with_total(100)
+                .total_pages(),
             2
         );
         // Ceils remainder.
         assert_eq!(
-            LogListSpec::new().with_page_size(50).with_total(101).total_pages(),
+            LogListSpec::new()
+                .with_page_size(50)
+                .with_total(101)
+                .total_pages(),
             3
         );
         // total < page_size still yields 1.
         assert_eq!(
-            LogListSpec::new().with_page_size(50).with_total(10).total_pages(),
+            LogListSpec::new()
+                .with_page_size(50)
+                .with_total(10)
+                .total_pages(),
             1
         );
         // total = 0 clamps to 1.
         assert_eq!(
-            LogListSpec::new().with_page_size(50).with_total(0).total_pages(),
+            LogListSpec::new()
+                .with_page_size(50)
+                .with_total(0)
+                .total_pages(),
             1
         );
     }

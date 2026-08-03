@@ -60,11 +60,7 @@ impl Default for StackSpec {
 impl StackSpec {
     /// The element's own box. Distinct from `gap` / `padding`, which describe
     /// how it arranges its children.
-    pub fn with_box(
-        mut self,
-        width: Option<Dimension>,
-        height: Option<Dimension>,
-    ) -> Self {
+    pub fn with_box(mut self, width: Option<Dimension>, height: Option<Dimension>) -> Self {
         self.width = width;
         self.height = height;
         self

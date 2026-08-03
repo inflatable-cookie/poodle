@@ -105,7 +105,11 @@ pub fn js_detail_section(
     // columns > 1 → flex-wrap multi-column approximation of the Svelte grid.
     if !content.is_empty() {
         let mut body = if spec.columns > 1 {
-            ui_element::div().flex_row().flex_wrap().gap(body_gap).self_stretch()
+            ui_element::div()
+                .flex_row()
+                .flex_wrap()
+                .gap(body_gap)
+                .self_stretch()
         } else {
             ui_element::div().flex_col().gap(body_gap).self_stretch()
         };
@@ -145,7 +149,11 @@ mod tests {
             .with_description("Core metadata for this project.");
         let el = js_detail_section(&spec, &th, rows(&th), None);
         let tree = probe(&el, 600.0, 400.0);
-        assert!(tree.has_text("Project details"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Project details"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Core metadata for this project."),
             "description missing: {:?}",
@@ -168,7 +176,9 @@ mod tests {
             b: border.b,
             a: border.a,
         };
-        let spec = DetailSectionSpec::new().with_title("Billing").with_separated(true);
+        let spec = DetailSectionSpec::new()
+            .with_title("Billing")
+            .with_separated(true);
         let el = js_detail_section(&spec, &th, rows(&th), None);
         let tree = probe(&el, 600.0, 400.0);
         assert!(
@@ -189,7 +199,9 @@ mod tests {
             b: border.b,
             a: border.a,
         };
-        let spec = DetailSectionSpec::new().with_title("Billing").with_separated(false);
+        let spec = DetailSectionSpec::new()
+            .with_title("Billing")
+            .with_separated(false);
         let el = js_detail_section(&spec, &th, rows(&th), None);
         let tree = probe(&el, 600.0, 400.0);
         assert!(
@@ -214,7 +226,9 @@ mod tests {
     #[test]
     fn multi_column_body_wraps() {
         let th = theme();
-        let spec = DetailSectionSpec::new().with_title("Server metrics").with_columns(3);
+        let spec = DetailSectionSpec::new()
+            .with_title("Server metrics")
+            .with_columns(3);
         let el = js_detail_section(&spec, &th, rows(&th), None);
         // The body container (last child) uses a row direction + wrap for columns > 1.
         let body = el.children.last().expect("body present");

@@ -10,7 +10,9 @@ use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::HoverCardSpec;
 
-use crate::theme_ext::{color_mix, elevation_overlay, resolve_color, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{
+    color_mix, elevation_overlay, resolve_color, resolve_px, resolve_radius, tint,
+};
 
 pub fn js_hover_card(
     spec: &HoverCardSpec,
@@ -93,7 +95,10 @@ mod tests {
         );
         // Root surface laid out with positive size.
         let root = &tree.nodes[0];
-        assert!(root.w > 0.0 && root.h > 0.0, "surface not laid out: {root:?}");
+        assert!(
+            root.w > 0.0 && root.h > 0.0,
+            "surface not laid out: {root:?}"
+        );
     }
 
     #[test]

@@ -163,7 +163,11 @@ pub fn format_relative(diff_seconds: i64, short: bool) -> String {
             format!("{value}{unit_short} ago")
         }
     } else {
-        let unit = if value == 1 { unit_singular } else { unit_plural };
+        let unit = if value == 1 {
+            unit_singular
+        } else {
+            unit_plural
+        };
         if is_future {
             format!("in {value} {unit}")
         } else {

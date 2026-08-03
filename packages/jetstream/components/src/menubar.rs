@@ -28,9 +28,7 @@ use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{MenuItemKind, MenubarSpec};
 
-use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{
     color_mix, elevation_overlay, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint,
 };
@@ -53,7 +51,12 @@ pub struct Menubar {
 
 impl Menubar {
     pub fn from_spec(spec: MenubarSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_trigger: None, on_select: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_trigger: None,
+            on_select: None,
+        }
     }
 
     /// Fires with a top-level entry's value when its trigger is pressed.
@@ -98,8 +101,8 @@ fn build(
     let control_radius = resolve_radius(theme, "radius.control");
     let list_radius = resolve_radius(theme, spec.list_radius_token());
     let border_w = rem_to_px(0.0625); // contract §8 list/overlay border width
-    // List gap 0.125rem / padding 0.1875rem (contract §8 List — literal rems, not
-    // tokens; the spec's trigger_gap_token resolves to inline-sm which is unused).
+                                      // List gap 0.125rem / padding 0.1875rem (contract §8 List — literal rems, not
+                                      // tokens; the spec's trigger_gap_token resolves to inline-sm which is unused).
     let list_gap = rem_to_px(0.125);
     let list_pad = rem_to_px(0.1875);
     // Overlay min-width 12rem, padding 0.25rem (contract §8 Overlay).
@@ -241,7 +244,9 @@ fn build(
                             // plain menu item: one toggles, the other picks one
                             // of a set.
                             .aria_role(match item.kind {
-                                MenuItemKind::Checkbox => jetstream_ui::accesskit::Role::MenuItemCheckBox,
+                                MenuItemKind::Checkbox => {
+                                    jetstream_ui::accesskit::Role::MenuItemCheckBox
+                                }
                                 MenuItemKind::Radio => jetstream_ui::accesskit::Role::MenuItemRadio,
                                 _ => jetstream_ui::accesskit::Role::MenuItem,
                             })
@@ -363,8 +368,16 @@ mod tests {
         );
 
         // Both top-level triggers render.
-        assert!(tree.has_text("File"), "File trigger missing: {:?}", tree.texts());
-        assert!(tree.has_text("Edit"), "Edit trigger missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("File"),
+            "File trigger missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Edit"),
+            "Edit trigger missing: {:?}",
+            tree.texts()
+        );
 
         // The list node (children[0] of root) carries radius-surface + the
         // border-subtle 72% border.
@@ -412,9 +425,21 @@ mod tests {
 
         // The overlay renders the File menu's items + shortcut meta.
         assert!(tree.has_text("New"), "New item missing: {:?}", tree.texts());
-        assert!(tree.has_text("Open..."), "Open item missing: {:?}", tree.texts());
-        assert!(tree.has_text("Cmd+N"), "shortcut meta missing: {:?}", tree.texts());
-        assert!(tree.has_text("Quit"), "Quit item missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Open..."),
+            "Open item missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Cmd+N"),
+            "shortcut meta missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Quit"),
+            "Quit item missing: {:?}",
+            tree.texts()
+        );
 
         // Overlay node (root.children[1]) carries elevated-mix bg + border-default 72%.
         assert_eq!(el.children.len(), 2, "root should hold list + overlay");
@@ -442,14 +467,13 @@ mod tests {
 
         // A separator divider exists in the overlay (a thin Panel child).
         let separator_color = tint(resolve_color(&th, "color.border.subtle"), 0.72);
-        let has_separator = overlay
-            .children
-            .iter()
-            .any(|c| c.style.background.is_some_and(|b| {
+        let has_separator = overlay.children.iter().any(|c| {
+            c.style.background.is_some_and(|b| {
                 (b.r - separator_color.x).abs() < 0.01
                     && (b.g - separator_color.y).abs() < 0.01
                     && (b.b - separator_color.z).abs() < 0.01
-            }));
+            })
+        });
         assert!(has_separator, "overlay should contain a separator divider");
     }
 
@@ -457,8 +481,8 @@ mod tests {
     fn no_overlay_when_menu_empty() {
         let th = theme();
         // Open menu has no items → no overlay renders.
-        let nav = MenubarSpec::new(vec![MenubarEntry::new("empty", "Empty", vec![])])
-            .with_value("empty");
+        let nav =
+            MenubarSpec::new(vec![MenubarEntry::new("empty", "Empty", vec![])]).with_value("empty");
         let el = js_menubar(&nav, &th);
         assert_eq!(
             el.children.len(),
@@ -492,5 +516,4 @@ mod tests {
         assert_eq!(got[0], "trigger:edit");
         assert!(got[1].starts_with("select:"), "{got:?}");
     }
-
 }

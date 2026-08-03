@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, Dimension, SemanticControlSizeRole};
+use crate::types::{
+    ButtonTone, ButtonVariant, ControlDensity, ControlSize, Dimension, SemanticControlSizeRole,
+};
 
 /// Whether a button holds its default minimum width or shrinks to its content.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

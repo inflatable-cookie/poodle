@@ -50,7 +50,11 @@ mod tests {
     fn uppercases_content() {
         let el = js_eyebrow(&EyebrowSpec::new().with_content("File"), &theme());
         let tree = probe(&el, 120.0, 24.0);
-        assert!(tree.has_text("FILE"), "eyebrow should uppercase: {:?}", tree.texts());
+        assert!(
+            tree.has_text("FILE"),
+            "eyebrow should uppercase: {:?}",
+            tree.texts()
+        );
     }
 
     /// Contract §8 size variants: `sm` (default) renders at 0.6875rem; `md`
@@ -73,8 +77,16 @@ mod tests {
             240.0,
             48.0,
         );
-        let sm_size = sm.nodes.iter().find_map(|n| n.text_size).expect("sm font size");
-        let md_size = md.nodes.iter().find_map(|n| n.text_size).expect("md font size");
+        let sm_size = sm
+            .nodes
+            .iter()
+            .find_map(|n| n.text_size)
+            .expect("sm font size");
+        let md_size = md
+            .nodes
+            .iter()
+            .find_map(|n| n.text_size)
+            .expect("md font size");
         assert!(
             md_size > sm_size,
             "md font-size ({md_size}) should exceed sm ({sm_size})"

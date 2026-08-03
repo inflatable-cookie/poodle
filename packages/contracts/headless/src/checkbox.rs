@@ -21,7 +21,10 @@ pub enum CheckboxEffect {
     EmitCheckedChange { checked: bool },
 }
 
-pub fn checkbox_transition(context: CheckboxContext, event: CheckboxEvent) -> (CheckboxContext, Vec<CheckboxEffect>) {
+pub fn checkbox_transition(
+    context: CheckboxContext,
+    event: CheckboxEvent,
+) -> (CheckboxContext, Vec<CheckboxEffect>) {
     match event {
         CheckboxEvent::Toggle { next_checked } => {
             if context.disabled {

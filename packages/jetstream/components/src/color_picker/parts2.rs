@@ -2,16 +2,12 @@
 //! (god-file decomposition); unchanged.
 
 use glam::Vec4;
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{
-    hex_to_rgb255, rgb255_to_vec4, tint, Rgb255,
-};
-
-
+use crate::theme_ext::{hex_to_rgb255, rgb255_to_vec4, tint, Rgb255};
 
 /// Preset swatch grid. Each swatch is a 1.25rem square at its hex color; the
 /// active swatch (matching the current value) gets a text-primary border, the
@@ -86,11 +82,11 @@ pub(super) fn build_swatch_grid(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::render_probe::{probe, ProbeColor};
     use crate::color_picker::js_color_picker;
+    use crate::render_probe::{probe, ProbeColor};
     use crate::theme_ext::resolve_color;
-    use poodle_specs::{ColorInputMode, ColorPickerSpec};
     use poodle_jetstream::JetstreamThemeProvider;
+    use poodle_specs::{ColorInputMode, ColorPickerSpec};
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -158,9 +154,7 @@ mod tests {
     #[test]
     fn open_surface_renders_pad_hue_mode_and_channels() {
         let th = theme();
-        let spec = ColorPickerSpec::new()
-            .with_value("#3b82f6")
-            .with_open(true);
+        let spec = ColorPickerSpec::new().with_value("#3b82f6").with_open(true);
         let el = js_color_picker(&spec, &th);
         let tree = probe(&el, 600.0, 600.0);
 
@@ -260,7 +254,8 @@ mod tests {
         assert!(tree.find_token("color-picker-swatches").is_some());
         for idx in 0..3 {
             assert!(
-                tree.find_token(&format!("color-picker-swatch-{idx}")).is_some(),
+                tree.find_token(&format!("color-picker-swatch-{idx}"))
+                    .is_some(),
                 "swatch {idx} missing"
             );
         }
@@ -272,7 +267,9 @@ mod tests {
     #[test]
     fn malformed_value_falls_back_without_panicking() {
         let th = theme();
-        let spec = ColorPickerSpec::new().with_value("not-a-hex").with_open(true);
+        let spec = ColorPickerSpec::new()
+            .with_value("not-a-hex")
+            .with_open(true);
         let el = js_color_picker(&spec, &th);
         let tree = probe(&el, 600.0, 600.0);
         // Renders the surface using the fallback color, no panic.
@@ -294,7 +291,9 @@ mod tests {
             ColorPickerSpec::new().with_value("#3b82f6"),
             &theme(),
         )
-        .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_toggle(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         // The trigger is the only element; click its centre.
@@ -312,7 +311,11 @@ mod tests {
             trigger.y + trigger.h / 2.0,
         );
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// Only the presets can report a colour: the gradient area would need
@@ -350,7 +353,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["#00ff00"]);
     }
-
 }
-
-

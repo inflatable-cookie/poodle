@@ -202,7 +202,11 @@ mod tests {
 
         assert!(tree.has_text("bun test"), "{:?}", tree.texts());
         assert!(!tree.has_text("cargo check"), "{:?}", tree.texts());
-        assert!(tree.has_text("+1 previous tool calls"), "{:?}", tree.texts());
+        assert!(
+            tree.has_text("+1 previous tool calls"),
+            "{:?}",
+            tree.texts()
+        );
     }
 
     /// The run toggle carries the run id, not a call id — expanding a run and
@@ -233,7 +237,11 @@ mod tests {
 
         crate::element::click_probe::click_text(&el, 720.0, 200.0, "+1 previous tool calls");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// A run forwards to its rows, so opening one call's output does not read as
@@ -263,14 +271,26 @@ mod tests {
         // The collapsed run's only row is the newest call.
         crate::element::click_probe::click_text(&el, 720.0, 200.0, "bun test");
 
-        assert_eq!(seen.lock().unwrap().as_slice(), ["call:b"], "the row's own event fired, not the run's");
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["call:b"],
+            "the row's own event fired, not the run's"
+        );
     }
 
     #[test]
     fn a_single_call_run_renders_no_toggle() {
-        let spec = ToolCallGroupSpec::new("run", vec![call("a", "bun test", ToolCallStatus::Success)]);
+        let spec =
+            ToolCallGroupSpec::new("run", vec![call("a", "bun test", ToolCallStatus::Success)]);
         let tree = crate::render_probe::probe(&js_tool_call_group(&spec, &theme()), 720.0, 96.0);
 
-        assert!(!tree.texts().iter().any(|t| t.contains("previous tool calls")), "{:?}", tree.texts());
+        assert!(
+            !tree
+                .texts()
+                .iter()
+                .any(|t| t.contains("previous tool calls")),
+            "{:?}",
+            tree.texts()
+        );
     }
 }

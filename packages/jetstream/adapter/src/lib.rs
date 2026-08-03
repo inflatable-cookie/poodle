@@ -50,8 +50,8 @@ mod style_map;
 mod theme;
 
 pub use style_map::{
-    map_layout, map_style, JetstreamBoxShadow, JetstreamColor,
-    JetstreamEdges, JetstreamMappedStyle, JetstreamVisuals,
+    map_layout, map_style, JetstreamBoxShadow, JetstreamColor, JetstreamEdges,
+    JetstreamMappedStyle, JetstreamVisuals,
 };
 pub use theme::JetstreamThemeProvider;
 
@@ -126,64 +126,146 @@ impl JetstreamAdapter {
 #[allow(dead_code)]
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Structural
-    "BoxSpec", "StackSpec", "GridSpec", "SurfaceSpec", "SeparatorSpec", "ScrollShellSpec",
+    "BoxSpec",
+    "StackSpec",
+    "GridSpec",
+    "SurfaceSpec",
+    "SeparatorSpec",
+    "ScrollShellSpec",
     "CallOutSpec",
     // Action
-    "ButtonSpec", "IconButtonSpec", "FormActionsSpec", "ToolbarSpec",
+    "ButtonSpec",
+    "IconButtonSpec",
+    "FormActionsSpec",
+    "ToolbarSpec",
     // Input
-    "TextInputSpec", "FieldSpec", "NumberInputSpec",
-    "CodeInputSpec", "EditableLabelSpec", "TimeFieldSpec",
+    "TextInputSpec",
+    "FieldSpec",
+    "NumberInputSpec",
+    "CodeInputSpec",
+    "EditableLabelSpec",
+    "TimeFieldSpec",
     // Selection
-    "CheckboxSpec", "RadioGroupSpec", "SwitchSpec", "SelectSpec", "SliderSpec",
-    "RangeSliderSpec", "SegmentedControlSpec", "TriStateSwitchSpec",
+    "CheckboxSpec",
+    "RadioGroupSpec",
+    "SwitchSpec",
+    "SelectSpec",
+    "SliderSpec",
+    "RangeSliderSpec",
+    "SegmentedControlSpec",
+    "TriStateSwitchSpec",
     // Feedback and display
-    "ProgressSpec", "BadgeSpec", "SpinnerSpec", "StatusIndicatorSpec", "SkeletonSpec", "MeterSpec",
+    "ProgressSpec",
+    "BadgeSpec",
+    "SpinnerSpec",
+    "StatusIndicatorSpec",
+    "SkeletonSpec",
+    "MeterSpec",
     "RatingSpec",
     // Overlay
-    "DialogSpec", "DrawerSpec", "PopoverSpec", "MenuSpec", "TooltipSpec", "TabsSpec",
-    "AccordionSpec", "CollapsibleSpec", "HoverCardSpec", "ContextMenuSpec", "TabStripSpec",
-    "NavigationMenuSpec", "MenubarSpec",
+    "DialogSpec",
+    "DrawerSpec",
+    "PopoverSpec",
+    "MenuSpec",
+    "TooltipSpec",
+    "TabsSpec",
+    "AccordionSpec",
+    "CollapsibleSpec",
+    "HoverCardSpec",
+    "ContextMenuSpec",
+    "TabStripSpec",
+    "NavigationMenuSpec",
+    "MenubarSpec",
     // Informational and temporal
-    "CodeSpec", "EyebrowSpec", "PillSpec", "TimeAgoSpec", "SplitButtonSpec",
-    "ColorPickerSpec", "FileUploadSpec", "DurationInputSpec", "TimeZoneSelectSpec",
-    "DateTimeZonePickerSpec", "CalendarSpec", "DatePickerSpec",
-    "DateRangePickerSpec", "DateTimePickerSpec", "DateTimeRangePickerSpec",
+    "CodeSpec",
+    "EyebrowSpec",
+    "PillSpec",
+    "TimeAgoSpec",
+    "SplitButtonSpec",
+    "ColorPickerSpec",
+    "FileUploadSpec",
+    "DurationInputSpec",
+    "TimeZoneSelectSpec",
+    "DateTimeZonePickerSpec",
+    "CalendarSpec",
+    "DatePickerSpec",
+    "DateRangePickerSpec",
+    "DateTimePickerSpec",
+    "DateTimeRangePickerSpec",
 ];
 
 /// Composite spec type names supported by the Jetstream adapter (47 — full parity).
 #[allow(dead_code)]
 const SUPPORTED_COMPOSITES: &[&str] = &[
     // Form and validation
-    "FormShellSpec", "ValidationSummarySpec", "RemediationBannerSpec",
-    "InlineRemediationSpec", "ConfirmActionSpec",
+    "FormShellSpec",
+    "ValidationSummarySpec",
+    "RemediationBannerSpec",
+    "InlineRemediationSpec",
+    "ConfirmActionSpec",
     // Data and browse
-    "DataTableSpec", "DetailShellSpec",
-    "DetailSectionSpec", "FilterBuilderSpec", "ThemeSelectSpec", "FilterToolbarSpec", "PickerShellSpec",
-    "RelationPickerSpec", "SelectionSummarySpec", "PaginationSummarySpec",
-    "MediaThumbnailSpec", "MediaPreviewSpec", "EmptyStateSpec",
-    "ListContainerSpec", "MetricTileSpec",
+    "DataTableSpec",
+    "DetailShellSpec",
+    "DetailSectionSpec",
+    "FilterBuilderSpec",
+    "ThemeSelectSpec",
+    "FilterToolbarSpec",
+    "PickerShellSpec",
+    "RelationPickerSpec",
+    "SelectionSummarySpec",
+    "PaginationSummarySpec",
+    "MediaThumbnailSpec",
+    "MediaPreviewSpec",
+    "EmptyStateSpec",
+    "ListContainerSpec",
+    "MetricTileSpec",
     // Editing, media, navigation, list, operational
-    "AudioPlayerSpec", "VideoPlayerSpec", "MediaPickerSpec",
+    "AudioPlayerSpec",
+    "VideoPlayerSpec",
+    "MediaPickerSpec",
     "MediaBrowsePanelSpec",
-    "MarkdownEditorSpec", "BlockEditorSpec", "EmbedInputSpec",
-    "EmbedPreviewSpec", "EditableListSpec",
-    "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",
-    "ListCardSpec", "NavCardSpec",
-    "OrderBySpec", "PageHeaderSpec", "PageLoadingSpec",
-    "LogListSpec", "StateTileSpec", "ToastStackSpec", "ToastHostSpec",
-    "SidebarNavSpec", "SplitViewSpec", "ShellStatusBarSpec",
+    "MarkdownEditorSpec",
+    "BlockEditorSpec",
+    "EmbedInputSpec",
+    "EmbedPreviewSpec",
+    "EditableListSpec",
+    "ReorderableListSpec",
+    "BreadcrumbsSpec",
+    "CardRadioGroupSpec",
+    "ListCardSpec",
+    "NavCardSpec",
+    "OrderBySpec",
+    "PageHeaderSpec",
+    "PageLoadingSpec",
+    "LogListSpec",
+    "StateTileSpec",
+    "ToastStackSpec",
+    "ToastHostSpec",
+    "SidebarNavSpec",
+    "SplitViewSpec",
+    "ShellStatusBarSpec",
     // Workstation composites registered here (moved from separate list)
-    "ActionDiscoveryPanelSpec", "AppHeaderSpec", "CommandPaletteSpec",
+    "ActionDiscoveryPanelSpec",
+    "AppHeaderSpec",
+    "CommandPaletteSpec",
     "DockRegionSpec",
 ];
 
 /// Workstation spec type names supported by the Jetstream adapter (13 — full parity).
 #[allow(dead_code)]
 const SUPPORTED_WORKSTATION: &[&str] = &[
-    "ActionDiscoveryPanelSpec", "AppHeaderSpec", "CommandPaletteSpec",
-    "CommandPaletteShellSpec", "DockRegionSpec", "PanelHeaderSpec",
-    "PanelSurfaceSpec", "PanelTabsSpec", "ProjectHeaderSpec",
-    "ShellStatusBarSpec", "SplitViewSpec", "SurfaceTabsSpec",
+    "ActionDiscoveryPanelSpec",
+    "AppHeaderSpec",
+    "CommandPaletteSpec",
+    "CommandPaletteShellSpec",
+    "DockRegionSpec",
+    "PanelHeaderSpec",
+    "PanelSurfaceSpec",
+    "PanelTabsSpec",
+    "ProjectHeaderSpec",
+    "ShellStatusBarSpec",
+    "SplitViewSpec",
+    "SurfaceTabsSpec",
     "WorkspaceShellSpec",
 ];
 
@@ -203,12 +285,17 @@ impl AdapterManifest for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use poodle_adapter::ThemeProvider;
     use super::*;
+    use poodle_adapter::ThemeProvider;
 
     #[test]
     fn jetstream_target_produces_node_handles() {
-        let handle = JetstreamNodeHandle::new("btn-1", "ButtonSpec", WidgetKind::Button, JetstreamMappedStyle::default());
+        let handle = JetstreamNodeHandle::new(
+            "btn-1",
+            "ButtonSpec",
+            WidgetKind::Button,
+            JetstreamMappedStyle::default(),
+        );
         assert_eq!(handle.node_id, "btn-1");
         assert_eq!(handle.spec_type, "ButtonSpec");
         assert_eq!(handle.widget_kind, WidgetKind::Button);

@@ -9,7 +9,9 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-pub use crate::model_picker::{ModelPickerEmphasis as RefSelectEmphasis, ModelPickerVariant as RefSelectVariant};
+pub use crate::model_picker::{
+    ModelPickerEmphasis as RefSelectEmphasis, ModelPickerVariant as RefSelectVariant,
+};
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum RefKind {
@@ -273,7 +275,10 @@ impl RefSelectSpec {
     /// The refs the panel shows for a locally-typed query (native previews hold
     /// the query in `search_value`, so this is the shared filter entry point).
     pub fn filtered_refs(&self, query: &str) -> Vec<&RefOption> {
-        self.refs.iter().filter(|option| option.matches(query)).collect()
+        self.refs
+            .iter()
+            .filter(|option| option.matches(query))
+            .collect()
     }
 
     /// Rows to render: the host's list when it drives search, else the local
@@ -435,14 +440,19 @@ mod tests {
         assert_eq!(spec.trigger_label(), "tree-component");
         let rows = spec.rows();
         assert!(spec.is_current(rows[0]), "main is checked out");
-        assert!(!spec.is_current(rows[1]), "the selected ref is not the current one");
+        assert!(
+            !spec.is_current(rows[1]),
+            "the selected ref is not the current one"
+        );
     }
 
     #[test]
     fn kind_drives_the_glyph_unless_overridden() {
         assert_eq!(RefOption::new("main", "main").resolved_icon(), "git-branch");
         assert_eq!(
-            RefOption::new("v1", "v1").with_kind(RefKind::Tag).resolved_icon(),
+            RefOption::new("v1", "v1")
+                .with_kind(RefKind::Tag)
+                .resolved_icon(),
             "tag"
         );
         assert_eq!(

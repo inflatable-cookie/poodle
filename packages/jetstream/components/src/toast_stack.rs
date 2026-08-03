@@ -65,7 +65,12 @@ pub struct ToastStack {
 
 impl ToastStack {
     pub fn from_spec(spec: ToastStackSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_dismiss: None, on_action: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_dismiss: None,
+            on_action: None,
+        }
     }
 
     /// Fires with the dismissed toast's id.
@@ -191,7 +196,9 @@ fn build(
         if let Some(handler) = &on_dismiss {
             let handler = std::sync::Arc::clone(handler);
             let id = toast.id.clone();
-            dismiss = dismiss.cursor_pointer().on_click(move |_event| handler(&id));
+            dismiss = dismiss
+                .cursor_pointer()
+                .on_click(move |_event| handler(&id));
         }
 
         // Toast box: tinted gradient bg, tone border, elevation shadow, clipped.
@@ -245,7 +252,6 @@ fn build(
     }
 
     crate::aria::with_aria_label(el, spec.aria_label.as_deref())
-
         // Contract: the stack is a list of toasts.
         .aria_role(jetstream_ui::accesskit::Role::List)
 }
@@ -292,7 +298,11 @@ mod tests {
         let el = js_toast_stack(&spec, &theme);
         let toast = &el.children[0];
         assert!(toast.animation.is_some(), "toast enter animation declared");
-        assert!(toast.id.as_deref() == Some("poodle-toast-t1"), "stable per-toast id: {:?}", toast.id);
+        assert!(
+            toast.id.as_deref() == Some("poodle-toast-t1"),
+            "stable per-toast id: {:?}",
+            toast.id
+        );
     }
 
     fn theme() -> JetstreamThemeProvider {
@@ -345,7 +355,12 @@ mod tests {
         let danger = resolve_color(&th, spec.tone_color(&ToastTone::Danger));
         let elevated = resolve_color(&th, spec.fill_token());
         let tinted = color_mix(danger, elevated, 0.12);
-        let tinted = ProbeColor { r: tinted.x, g: tinted.y, b: tinted.z, a: tinted.w };
+        let tinted = ProbeColor {
+            r: tinted.x,
+            g: tinted.y,
+            b: tinted.z,
+            a: tinted.w,
+        };
         assert!(
             tree.has_background(tinted, 0.02),
             "danger toast bg tint missing; bgs: {}",
@@ -356,8 +371,7 @@ mod tests {
     #[test]
     fn message_only_toast_still_renders_title() {
         // Regression: title is required and must render even with no message.
-        let spec = ToastStackSpec::new()
-            .with_toasts(vec![Toast::new("t1", "Title only")]);
+        let spec = ToastStackSpec::new().with_toasts(vec![Toast::new("t1", "Title only")]);
         let tree = probe(&js_toast_stack(&spec, &theme()), 360.0, 120.0);
         assert!(tree.has_text("Title only"), "title missing");
         assert!(tree.has_text("\u{00d7}"), "dismiss missing");
@@ -372,9 +386,8 @@ mod tests {
         let dismisses = Arc::clone(&seen);
         let actions = Arc::clone(&seen);
 
-        let spec = ToastStackSpec::new().with_toasts(vec![
-            Toast::new("t1", "Saved").with_action_label("Undo"),
-        ]);
+        let spec = ToastStackSpec::new()
+            .with_toasts(vec![Toast::new("t1", "Saved").with_action_label("Undo")]);
 
         let el = ToastStack::from_spec(spec, &theme())
             .on_dismiss(move |id| dismisses.lock().unwrap().push(format!("dismiss:{id}")))
@@ -386,5 +399,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["action:t1", "dismiss:t1"]);
     }
-
 }

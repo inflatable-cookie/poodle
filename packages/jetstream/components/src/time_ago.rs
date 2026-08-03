@@ -120,7 +120,10 @@ mod tests {
 
     /// Build an ISO timestamp `secs` seconds before now (UTC) for stable diffs.
     fn iso_secs_ago(secs: i64) -> String {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
         let target = now - secs;
         let days = target.div_euclid(86_400);
         let rem = target.rem_euclid(86_400);
@@ -156,10 +159,16 @@ mod tests {
     #[test]
     fn hours_and_days_thresholds() {
         let th = theme();
-        let h = js_time_ago(&TimeAgoSpec::new().with_timestamp(iso_secs_ago(3 * 3600)), &th);
+        let h = js_time_ago(
+            &TimeAgoSpec::new().with_timestamp(iso_secs_ago(3 * 3600)),
+            &th,
+        );
         assert!(probe(&h, 200.0, 40.0).has_text("3h ago"));
 
-        let d = js_time_ago(&TimeAgoSpec::new().with_timestamp(iso_secs_ago(2 * 86_400)), &th);
+        let d = js_time_ago(
+            &TimeAgoSpec::new().with_timestamp(iso_secs_ago(2 * 86_400)),
+            &th,
+        );
         assert!(probe(&d, 200.0, 40.0).has_text("2d ago"));
     }
 

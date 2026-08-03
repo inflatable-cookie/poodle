@@ -34,7 +34,12 @@ pub struct NumberInput {
 
 impl NumberInput {
     pub fn from_spec(spec: NumberInputSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_increment: None, on_decrement: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_increment: None,
+            on_decrement: None,
+        }
     }
 
     /// Fires when the `+` stepper is pressed. Never fires at the maximum: the
@@ -54,7 +59,12 @@ impl NumberInput {
 
 impl crate::element::IntoJsEl for NumberInput {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_increment, self.on_decrement)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_increment,
+            self.on_decrement,
+        )
     }
 }
 
@@ -72,7 +82,9 @@ fn build(
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
     let inline_sz = rem_to_px(size_font_rem(effective_size));
     // Inner stepper gap from the smallest inline-space token (was a bare 0.25rem).
     let btn_gap = theme.resolve_space_px(spec.stepper_gap_token());
@@ -139,7 +151,16 @@ fn build(
 
     // Prefix affix (boxed: border + surface bg, inside left edge).
     if let Some(prefix) = &spec.prefix {
-        el = el.child(affix_box(prefix, affix_text, affix_bg, affix_border, border_width, font_size, pad_x, height));
+        el = el.child(affix_box(
+            prefix,
+            affix_text,
+            affix_bg,
+            affix_border,
+            border_width,
+            font_size,
+            pad_x,
+            height,
+        ));
     }
 
     // Value display.
@@ -164,7 +185,16 @@ fn build(
 
     // Suffix affix (boxed, inside right edge).
     if let Some(suffix) = &spec.suffix {
-        el = el.child(affix_box(suffix, affix_text, affix_bg, affix_border, border_width, font_size, pad_x, height));
+        el = el.child(affix_box(
+            suffix,
+            affix_text,
+            affix_bg,
+            affix_border,
+            border_width,
+            font_size,
+            pad_x,
+            height,
+        ));
     }
 
     // ── Increment button (only when steppers enabled) ──────────────────────
@@ -250,7 +280,11 @@ mod tests {
     fn steppers_gated_on_show_steppers() {
         let th = theme();
         // Default: no steppers.
-        let without = probe(&js_number_input(&NumberInputSpec::new(1.0), &th), 240.0, 48.0);
+        let without = probe(
+            &js_number_input(&NumberInputSpec::new(1.0), &th),
+            240.0,
+            48.0,
+        );
         assert!(
             without.find_token("poodle-number-input-inc").is_none(),
             "steppers should be hidden by default"
@@ -269,7 +303,11 @@ mod tests {
     fn suffix_unit_renders_as_affix() {
         let spec = NumberInputSpec::new(80.0).with_suffix("kg");
         let tree = probe(&js_number_input(&spec, &theme()), 240.0, 48.0);
-        assert!(tree.has_text("kg"), "suffix unit missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("kg"),
+            "suffix unit missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("80"));
     }
 
@@ -298,7 +336,11 @@ mod tests {
     fn precision_formats_value() {
         let spec = NumberInputSpec::new(3.2).with_precision(2);
         let tree = probe(&js_number_input(&spec, &theme()), 240.0, 48.0);
-        assert!(tree.has_text("3.20"), "precision format missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("3.20"),
+            "precision format missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -361,15 +403,22 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let spec = NumberInputSpec::new(10.0).with_max(10.0).with_steppers(true);
+        let spec = NumberInputSpec::new(10.0)
+            .with_max(10.0)
+            .with_steppers(true);
 
         let el = NumberInput::from_spec(spec, &theme())
-            .on_increment(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_increment(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 240.0, 80.0, "plus");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "the stepper fired at its maximum");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "the stepper fired at its maximum"
+        );
     }
-
 }

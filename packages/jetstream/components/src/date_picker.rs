@@ -15,8 +15,8 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_ui::{Color, color_mix};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarSpec, DatePickerSpec};
 
@@ -252,13 +252,21 @@ mod tests {
         // not the placeholder (regression: component read spec.value directly).
         let spec = DatePickerSpec::new().with_default_value("2026-03-21");
         let tree = probe(&js_date_picker(&spec, &theme()), 320.0, 360.0);
-        assert!(tree.has_text("2026-03-21"), "value missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("2026-03-21"),
+            "value missing: {:?}",
+            tree.texts()
+        );
         assert!(!tree.has_text("Select date"));
     }
 
     #[test]
     fn indicator_is_chevron_icon_not_emoji() {
-        let tree = probe(&js_date_picker(&DatePickerSpec::new(), &theme()), 320.0, 360.0);
+        let tree = probe(
+            &js_date_picker(&DatePickerSpec::new(), &theme()),
+            320.0,
+            360.0,
+        );
         // Icon widget carries its registry name as text.
         assert!(
             tree.has_text("chevron-down"),
@@ -280,7 +288,11 @@ mod tests {
 
     #[test]
     fn closed_picker_has_no_calendar_surface() {
-        let tree = probe(&js_date_picker(&DatePickerSpec::new(), &theme()), 320.0, 360.0);
+        let tree = probe(
+            &js_date_picker(&DatePickerSpec::new(), &theme()),
+            320.0,
+            360.0,
+        );
         // Calendar emits weekday headers / month label; none when closed.
         assert!(!tree.has_text("March"), "calendar leaked while closed");
     }
@@ -297,7 +309,10 @@ mod tests {
             "composed calendar month label missing: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Mo") || tree.has_text("Su"), "weekday headers missing");
+        assert!(
+            tree.has_text("Mo") || tree.has_text("Su"),
+            "weekday headers missing"
+        );
         // Trigger value still present alongside the surface.
         assert!(tree.has_text("2026-03-21"));
     }
@@ -305,19 +320,28 @@ mod tests {
     #[test]
     fn sizes_produce_different_trigger_heights() {
         let sm = probe(
-            &js_date_picker(&DatePickerSpec::new().with_size(poodle_specs::ControlSize::Sm), &theme()),
+            &js_date_picker(
+                &DatePickerSpec::new().with_size(poodle_specs::ControlSize::Sm),
+                &theme(),
+            ),
             320.0,
             120.0,
         );
         let lg = probe(
-            &js_date_picker(&DatePickerSpec::new().with_size(poodle_specs::ControlSize::Lg), &theme()),
+            &js_date_picker(
+                &DatePickerSpec::new().with_size(poodle_specs::ControlSize::Lg),
+                &theme(),
+            ),
             320.0,
             120.0,
         );
         // Trigger is the first child of root; compare its height.
         let sm_trigger_h = sm.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
-        assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
+        assert!(
+            lg_trigger_h > sm_trigger_h,
+            "sm {sm_trigger_h} !< lg {lg_trigger_h}"
+        );
     }
 
     #[test]
@@ -330,12 +354,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DatePicker::from_spec(DatePickerSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 360.0, "Select date");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// The popover's calendar is composed, not reimplemented, so a day pressed
@@ -371,7 +401,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let moves = Arc::clone(&seen);
 
-        let spec = DatePickerSpec::new().with_default_open(true).with_default_value("2026-03-01");
+        let spec = DatePickerSpec::new()
+            .with_default_open(true)
+            .with_default_value("2026-03-01");
         let el = DatePicker::from_spec(spec, &theme())
             .on_navigate(move |dir| moves.lock().unwrap().push(dir.to_string()))
             .into_js_el();
@@ -380,5 +412,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
     }
-
 }

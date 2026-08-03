@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, TimeFieldSpec};
 
@@ -69,7 +69,11 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> Js
     // no equivalent; this is the no-native-input substitute, contract §12).
     let display_text = spec.current_value().unwrap_or("HH:MM");
     let has_value = spec.current_value().is_some();
-    let display_color = if has_value { text_color } else { placeholder_color };
+    let display_color = if has_value {
+        text_color
+    } else {
+        placeholder_color
+    };
 
     // ── Build element ──
     let mut el = ui_element::button(display_text)
@@ -124,7 +128,11 @@ mod tests {
     #[test]
     fn empty_field_shows_hhmm_placeholder() {
         let tree = probe(&js_time_field(&TimeFieldSpec::new(), &theme()), 200.0, 60.0);
-        assert!(tree.has_text("HH:MM"), "placeholder missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("HH:MM"),
+            "placeholder missing: {:?}",
+            tree.texts()
+        );
         // Legacy "--:--" convention dropped in favor of GPUI-aligned "HH:MM".
         assert!(!tree.has_text("--:--"));
     }
@@ -132,19 +140,32 @@ mod tests {
     #[test]
     fn sizes_produce_different_fonts() {
         let xs = probe(
-            &js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xs), &theme()),
+            &js_time_field(
+                &TimeFieldSpec::new()
+                    .with_default_value("09:00")
+                    .with_size(ControlSize::Xs),
+                &theme(),
+            ),
             200.0,
             60.0,
         );
         let xl = probe(
-            &js_time_field(&TimeFieldSpec::new().with_default_value("09:00").with_size(ControlSize::Xl), &theme()),
+            &js_time_field(
+                &TimeFieldSpec::new()
+                    .with_default_value("09:00")
+                    .with_size(ControlSize::Xl),
+                &theme(),
+            ),
             200.0,
             60.0,
         );
         let xs_font = xs.nodes.iter().find_map(|n| n.text_size);
         let xl_font = xl.nodes.iter().find_map(|n| n.text_size);
         assert!(xs_font.is_some() && xl_font.is_some());
-        assert!(xl_font > xs_font, "xl font {xl_font:?} should exceed xs {xs_font:?}");
+        assert!(
+            xl_font > xs_font,
+            "xl font {xl_font:?} should exceed xs {xs_font:?}"
+        );
     }
 
     #[test]
@@ -160,11 +181,19 @@ mod tests {
     #[test]
     fn sizes_produce_different_heights() {
         let sm = js_time_field(
-            &{ let mut s = TimeFieldSpec::new(); s.size = ControlSize::Sm; s },
+            &{
+                let mut s = TimeFieldSpec::new();
+                s.size = ControlSize::Sm;
+                s
+            },
             &theme(),
         );
         let lg = js_time_field(
-            &{ let mut s = TimeFieldSpec::new(); s.size = ControlSize::Lg; s },
+            &{
+                let mut s = TimeFieldSpec::new();
+                s.size = ControlSize::Lg;
+                s
+            },
             &theme(),
         );
         assert_ne!(

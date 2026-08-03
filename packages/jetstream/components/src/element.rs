@@ -80,10 +80,10 @@ pub(crate) mod click_probe {
     //! that were attached to nothing for weeks precisely because nothing could
     //! test them.
 
-    use jetstream_ui::ui_element::JsEl;
-    use jetstream_ui::GameUi;
     use jetstream_input::InputSystem;
     use jetstream_platform::{MouseButton, PlatformEvent};
+    use jetstream_ui::ui_element::JsEl;
+    use jetstream_ui::GameUi;
 
     /// Click the centre of the one node whose text is `text`.
     ///
@@ -104,7 +104,11 @@ pub(crate) mod click_probe {
             .filter(|node| node.text.as_deref() == Some(text))
             .count();
 
-        assert!(matches > 0, "no node with text {text:?} to click. present: {:?}", tree.texts());
+        assert!(
+            matches > 0,
+            "no node with text {text:?} to click. present: {:?}",
+            tree.texts()
+        );
         assert_eq!(
             matches, 1,
             "{matches} nodes carry the text {text:?}, so this click is ambiguous — \
@@ -123,10 +127,19 @@ pub(crate) mod click_probe {
             .filter(|node| node.text.as_deref() == Some(text))
             .nth(index)
             .unwrap_or_else(|| {
-                panic!("no node {index} with text {text:?}. present: {:?}", tree.texts())
+                panic!(
+                    "no node {index} with text {text:?}. present: {:?}",
+                    tree.texts()
+                )
             });
 
-        click_at(el, width, height, node.x + node.w / 2.0, node.y + node.h / 2.0);
+        click_at(
+            el,
+            width,
+            height,
+            node.x + node.w / 2.0,
+            node.y + node.h / 2.0,
+        );
     }
 
     /// Press at `from`, move to `to`, release — driving a real drag.

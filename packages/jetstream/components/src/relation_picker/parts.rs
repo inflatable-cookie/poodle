@@ -4,14 +4,12 @@
 use jetstream_ui::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
-    CheckboxSpec, ChoiceOption, ControlSize, PickerItemSpec,
-    RelationPickerSpec, SelectSpec, SelectionMode, TextInputSpec,
+    CheckboxSpec, ChoiceOption, ControlSize, PickerItemSpec, RelationPickerSpec, SelectSpec,
+    SelectionMode, TextInputSpec,
 };
 
 use crate::checkbox::js_checkbox;
-use crate::presentation::{
-    control_space_x_rem, rem_to_px,
-};
+use crate::presentation::{control_space_x_rem, rem_to_px};
 use crate::select::js_select;
 use crate::text_input::js_text_input;
 use crate::theme_ext::color_mix;
@@ -484,8 +482,7 @@ mod tests {
     #[test]
     fn show_selection_summary_false_hides_summary() {
         let with_summary = js_relation_picker(
-            &RelationPickerSpec::new(sample_items())
-                .with_selected_ids(vec!["btn".into()]),
+            &RelationPickerSpec::new(sample_items()).with_selected_ids(vec!["btn".into()]),
             &theme(),
         );
         let without_summary = js_relation_picker(
@@ -578,6 +575,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["confirm", "cancel"]);
     }
-
 }
-

@@ -106,11 +106,7 @@ mod tests {
 
     #[test]
     fn renders_children() {
-        let el = js_box(
-            &BoxSpec::new(),
-            &theme(),
-            vec![ui_element::label("Inside")],
-        );
+        let el = js_box(&BoxSpec::new(), &theme(), vec![ui_element::label("Inside")]);
         let tree = probe(&el, 200.0, 100.0);
         assert!(tree.has_text("Inside"), "child missing: {:?}", tree.texts());
     }
@@ -119,9 +115,7 @@ mod tests {
     fn fixed_rem_dimensions_resolve_to_px() {
         // width="12rem" height="6rem" -> 192 × 96 logical px (16px base).
         let el = js_box(
-            &BoxSpec::new()
-                .with_width("12rem")
-                .with_height("6rem"),
+            &BoxSpec::new().with_width("12rem").with_height("6rem"),
             &theme(),
             vec![],
         );
@@ -134,11 +128,7 @@ mod tests {
     #[test]
     fn min_dimensions_constrain_root() {
         // min-width forces the box wider than its (empty) content.
-        let el = js_box(
-            &BoxSpec::new().with_min_width("8rem"),
-            &theme(),
-            vec![],
-        );
+        let el = js_box(&BoxSpec::new().with_min_width("8rem"), &theme(), vec![]);
         let tree = probe(&el, 400.0, 100.0);
         let root = &tree.nodes[0];
         assert!(root.w >= 128.0 - 0.5, "min-width applied: {root:?}");
@@ -160,7 +150,10 @@ mod tests {
             .expect("child node present");
         let pad_x = resolve_px(&theme(), poodle_tokens::semantic::SPACE_INLINE_MD);
         assert!(pad_x > 0.0, "md padding token resolves > 0");
-        assert!(child.x >= pad_x - 0.5, "child inset by horizontal padding: {child:?}");
+        assert!(
+            child.x >= pad_x - 0.5,
+            "child inset by horizontal padding: {child:?}"
+        );
     }
 
     #[test]
@@ -172,6 +165,10 @@ mod tests {
             vec![ui_element::label("scrolly")],
         );
         let tree = probe(&el, 100.0, 50.0);
-        assert_eq!(tree.nodes[0].kind, "List", "auto overflow -> scroll list: {:?}", tree.nodes[0]);
+        assert_eq!(
+            tree.nodes[0].kind, "List",
+            "auto overflow -> scroll list: {:?}",
+            tree.nodes[0]
+        );
     }
 }

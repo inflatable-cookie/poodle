@@ -318,18 +318,38 @@ mod tests {
         let tree = probe(&el, 600.0, 400.0);
 
         assert!(!tree.is_empty(), "probe produced no nodes");
-        assert!(tree.has_text("Primary"), "primary pane missing: {:?}", tree.texts());
-        assert!(tree.has_text("Secondary"), "secondary pane missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Primary"),
+            "primary pane missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Secondary"),
+            "secondary pane missing: {:?}",
+            tree.texts()
+        );
         // Root is a row (panes side by side): primary sits left of secondary.
-        let primary_node = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Primary")).unwrap();
-        let secondary_node = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Secondary")).unwrap();
+        let primary_node = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Primary"))
+            .unwrap();
+        let secondary_node = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Secondary"))
+            .unwrap();
         assert!(
             primary_node.x < secondary_node.x,
             "horizontal split should place primary left of secondary: p.x={} s.x={}",
-            primary_node.x, secondary_node.x
+            primary_node.x,
+            secondary_node.x
         );
         // Divider exists between the panes (handle is a panel with a line child).
-        assert!(tree.count_kind("Panel") >= 3, "divider/panes missing panels");
+        assert!(
+            tree.count_kind("Panel") >= 3,
+            "divider/panes missing panels"
+        );
     }
 
     #[test]
@@ -341,13 +361,22 @@ mod tests {
         let el = js_split_view(&spec, &th, Some(primary), Some(secondary));
         let tree = probe(&el, 600.0, 400.0);
 
-        let top = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Top")).unwrap();
-        let bottom = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Bottom")).unwrap();
+        let top = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Top"))
+            .unwrap();
+        let bottom = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Bottom"))
+            .unwrap();
         // Vertical split stacks panes: top is above bottom.
         assert!(
             top.y < bottom.y,
             "vertical split should stack top above bottom: t.y={} b.y={}",
-            top.y, bottom.y
+            top.y,
+            bottom.y
         );
     }
 
@@ -357,7 +386,12 @@ mod tests {
         let spec = SplitViewSpec::new(SplitOrientation::Horizontal)
             .with_show_collapse_primary(true)
             .with_show_collapse_secondary(true);
-        let el = js_split_view(&spec, &th, Some(ui_element::label("P")), Some(ui_element::label("S")));
+        let el = js_split_view(
+            &spec,
+            &th,
+            Some(ui_element::label("P")),
+            Some(ui_element::label("S")),
+        );
         let tree = probe(&el, 600.0, 400.0);
 
         // CollapseToggle renders chevron icons. Horizontal → left + right.
@@ -374,7 +408,11 @@ mod tests {
         );
         // Two toggles → at least two chevron icons.
         let chevron_count = icons.iter().filter(|i| i.contains("chevron")).count();
-        assert!(chevron_count >= 2, "expected 2 collapse chevrons, got {}", chevron_count);
+        assert!(
+            chevron_count >= 2,
+            "expected 2 collapse chevrons, got {}",
+            chevron_count
+        );
     }
 
     #[test]
@@ -383,12 +421,21 @@ mod tests {
         // Fixed primary of 120px in a vertical split should size the pane by
         // height (not width). The probe lets us assert the rendered rect.
         let spec = SplitViewSpec::new(SplitOrientation::Vertical).with_primary_size(120.0);
-        let el = js_split_view(&spec, &th, Some(ui_element::label("Top")), Some(ui_element::label("Bottom")));
+        let el = js_split_view(
+            &spec,
+            &th,
+            Some(ui_element::label("Top")),
+            Some(ui_element::label("Bottom")),
+        );
         let tree = probe(&el, 600.0, 400.0);
 
         // The primary pane is the node whose subtree contains "Top". Its height
         // should be the fixed 120px (axis-correct), not stretched to full width.
-        let top = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Top")).unwrap();
+        let top = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Top"))
+            .unwrap();
         // Walk up: the pane is "Top"'s parent panel — find a panel at top.x with h≈120.
         let pane_h_120 = tree
             .nodes
@@ -417,8 +464,15 @@ mod tests {
         let el = SplitView::from_spec(spec, &theme())
             .primary(ui_element::label("Primary pane"))
             .secondary(ui_element::label("Secondary pane"))
-            .on_primary_collapse(move |next| primaries.lock().unwrap().push(format!("primary:{next}")))
-            .on_secondary_collapse(move |next| secondaries.lock().unwrap().push(format!("secondary:{next}")))
+            .on_primary_collapse(move |next| {
+                primaries.lock().unwrap().push(format!("primary:{next}"))
+            })
+            .on_secondary_collapse(move |next| {
+                secondaries
+                    .lock()
+                    .unwrap()
+                    .push(format!("secondary:{next}"))
+            })
             .into_js_el();
 
         // Two chevron toggles in the divider cluster, in pane order.
@@ -426,7 +480,12 @@ mod tests {
         let toggles: Vec<_> = tree
             .nodes
             .iter()
-            .filter(|n| n.text.as_deref().map(|t| t.starts_with("chevron")).unwrap_or(false))
+            .filter(|n| {
+                n.text
+                    .as_deref()
+                    .map(|t| t.starts_with("chevron"))
+                    .unwrap_or(false)
+            })
             .map(|n| (n.x + n.w / 2.0, n.y + n.h / 2.0))
             .collect();
         assert_eq!(toggles.len(), 2, "two collapse toggles: {:?}", tree.texts());
@@ -477,7 +536,9 @@ mod tests {
             .filter(|(p, _)| *p == ResizePhase::Move)
             .map(|(_, d)| d)
             .sum();
-        assert!(moved > 30.0, "the deltas did not sum to the distance: {moved}");
+        assert!(
+            moved > 30.0,
+            "the deltas did not sum to the distance: {moved}"
+        );
     }
-
 }

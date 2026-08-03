@@ -33,12 +33,27 @@ pub enum FocusDirection {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TabsEvent {
-    Select { value: String },
-    FocusMove { direction: FocusDirection, from_index: Option<usize> },
-    Activate { index: Option<usize> },
-    Close { value: String },
-    ReorderStep { direction: i32, from_index: Option<usize> },
-    Reorder { from_index: usize, to_index: usize },
+    Select {
+        value: String,
+    },
+    FocusMove {
+        direction: FocusDirection,
+        from_index: Option<usize>,
+    },
+    Activate {
+        index: Option<usize>,
+    },
+    Close {
+        value: String,
+    },
+    ReorderStep {
+        direction: i32,
+        from_index: Option<usize>,
+    },
+    Reorder {
+        from_index: usize,
+        to_index: usize,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -64,7 +79,11 @@ pub fn resolve_tabs_value(items: &[TabsItem], value: Option<&str>) -> Option<Str
     crate::nav::first_enabled_index(&disabled_flags(items)).map(|index| items[index].value.clone())
 }
 
-pub fn apply_reorder(items: &[TabsItem], from_index: usize, to_index: usize) -> (Vec<TabsItem>, usize) {
+pub fn apply_reorder(
+    items: &[TabsItem],
+    from_index: usize,
+    to_index: usize,
+) -> (Vec<TabsItem>, usize) {
     if from_index == to_index || from_index >= items.len() || to_index >= items.len() {
         return (items.to_vec(), from_index);
     }
@@ -81,10 +100,16 @@ fn select(context: TabsContext, value: String) -> (TabsContext, Vec<TabsEffect>)
 
     match index {
         Some(index) if !context.items[index].disabled => {
-            let effects = vec![TabsEffect::EmitValueChange { value: value.clone() }];
+            let effects = vec![TabsEffect::EmitValueChange {
+                value: value.clone(),
+            }];
 
             (
-                TabsContext { value: Some(value), focus_index: index, ..context },
+                TabsContext {
+                    value: Some(value),
+                    focus_index: index,
+                    ..context
+                },
                 effects,
             )
         }
@@ -95,16 +120,29 @@ fn select(context: TabsContext, value: String) -> (TabsContext, Vec<TabsEffect>)
 fn reorder(context: TabsContext, from_index: i64, to_index: i64) -> (TabsContext, Vec<TabsEffect>) {
     let count = context.items.len() as i64;
 
-    if !context.reorderable || from_index < 0 || to_index < 0 || from_index >= count || to_index >= count {
+    if !context.reorderable
+        || from_index < 0
+        || to_index < 0
+        || from_index >= count
+        || to_index >= count
+    {
         return (context, vec![]);
     }
 
-    let (items, focus_index) = apply_reorder(&context.items, from_index as usize, to_index as usize);
+    let (items, focus_index) =
+        apply_reorder(&context.items, from_index as usize, to_index as usize);
     let order = items.iter().map(|item| item.value.clone()).collect();
 
     (
-        TabsContext { items, focus_index, ..context },
-        vec![TabsEffect::FocusTab { index: focus_index }, TabsEffect::EmitReorder { order }],
+        TabsContext {
+            items,
+            focus_index,
+            ..context
+        },
+        vec![
+            TabsEffect::FocusTab { index: focus_index },
+            TabsEffect::EmitReorder { order },
+        ],
     )
 }
 
@@ -112,7 +150,10 @@ pub fn tabs_transition(context: TabsContext, event: TabsEvent) -> (TabsContext, 
     match event {
         TabsEvent::Select { value } => select(context, value),
 
-        TabsEvent::FocusMove { direction, from_index } => {
+        TabsEvent::FocusMove {
+            direction,
+            from_index,
+        } => {
             let flags = disabled_flags(&context.items);
             let from = from_index.unwrap_or(context.focus_index);
             let next_index = match direction {
@@ -127,13 +168,18 @@ pub fn tabs_transition(context: TabsContext, event: TabsEvent) -> (TabsContext, 
             };
 
             let mut effects = vec![TabsEffect::FocusTab { index: next_index }];
-            let mut next_context = TabsContext { focus_index: next_index, ..context };
+            let mut next_context = TabsContext {
+                focus_index: next_index,
+                ..context
+            };
 
             if next_context.activation_mode == ActivationMode::Automatic {
                 let next_value = next_context.items[next_index].value.clone();
 
                 if next_context.value.as_deref() != Some(next_value.as_str()) {
-                    effects.push(TabsEffect::EmitValueChange { value: next_value.clone() });
+                    effects.push(TabsEffect::EmitValueChange {
+                        value: next_value.clone(),
+                    });
                     next_context.value = Some(next_value);
                 }
             }
@@ -170,12 +216,18 @@ pub fn tabs_transition(context: TabsContext, event: TabsEvent) -> (TabsContext, 
             }
         }
 
-        TabsEvent::ReorderStep { direction, from_index } => {
+        TabsEvent::ReorderStep {
+            direction,
+            from_index,
+        } => {
             let from = from_index.unwrap_or(context.focus_index) as i64;
 
             reorder(context, from, from + direction.signum() as i64)
         }
 
-        TabsEvent::Reorder { from_index, to_index } => reorder(context, from_index as i64, to_index as i64),
+        TabsEvent::Reorder {
+            from_index,
+            to_index,
+        } => reorder(context, from_index as i64, to_index as i64),
     }
 }

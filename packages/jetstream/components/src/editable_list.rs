@@ -22,13 +22,13 @@
 //!   and `aria-label`s are accepted omissions. Plain `div`s stand in.
 //! - **No window-nav / long-list warning**: feature scope, not yet built.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
+use poodle_specs::EditableListSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, IconButtonSpec, SemanticControlSizeRole, TextInputSpec,
 };
-use poodle_specs::EditableListSpec;
 
 use crate::button::js_button;
 use crate::icon_button::js_icon_button;
@@ -308,8 +308,8 @@ fn build(
                             .and_then(|item| item.label.as_deref())
                             .unwrap_or(&format!("Item {}", i + 1)),
                     )
-                        .text_color(text_primary)
-                        .text_size(item_font),
+                    .text_color(text_primary)
+                    .text_size(item_font),
                 ),
             );
 
@@ -331,9 +331,11 @@ fn build(
                     let handler = std::sync::Arc::clone(handler);
                     remove_btn = remove_btn.on_click(move || handler(i));
                 }
-                row = row.child(ui_element::div().flex_shrink_0().child(
-                    crate::element::IntoJsEl::into_js_el(remove_btn),
-                ));
+                row = row.child(
+                    ui_element::div()
+                        .flex_shrink_0()
+                        .child(crate::element::IntoJsEl::into_js_el(remove_btn)),
+                );
             }
 
             item_list = item_list.child(row);
@@ -412,7 +414,9 @@ mod tests {
     fn renders_item_rows() {
         let th = theme();
         let el = js_editable_list(
-            &EditableListSpec::new().with_item_count(3).with_editable(true),
+            &EditableListSpec::new()
+                .with_item_count(3)
+                .with_editable(true),
             &th,
         );
         let tree = probe(&el, 400.0, 400.0);
@@ -425,7 +429,9 @@ mod tests {
     fn reorderable_renders_drag_handle() {
         let th = theme();
         let with_handle = js_editable_list(
-            &EditableListSpec::new().with_item_count(2).with_reorderable(true),
+            &EditableListSpec::new()
+                .with_item_count(2)
+                .with_reorderable(true),
             &th,
         );
         let no_handle = js_editable_list(
@@ -458,7 +464,10 @@ mod tests {
             &th,
         );
         let editable_tree = probe(&editable, 400.0, 400.0);
-        assert!(editable_tree.has_text("x"), "editable row has a remove button");
+        assert!(
+            editable_tree.has_text("x"),
+            "editable row has a remove button"
+        );
 
         // removable-only → remove present, no add row.
         let removable = js_editable_list(
@@ -469,7 +478,10 @@ mod tests {
             &th,
         );
         let removable_tree = probe(&removable, 400.0, 400.0);
-        assert!(removable_tree.has_text("x"), "removable row has a remove button");
+        assert!(
+            removable_tree.has_text("x"),
+            "removable row has a remove button"
+        );
 
         // neither editable nor removable → no remove button.
         let plain = js_editable_list(
@@ -512,7 +524,10 @@ mod tests {
         );
         let tree = probe(&el, 400.0, 400.0);
         assert!(!tree.has_text("Item 1"), "no item rows when empty");
-        assert!(tree.has_text("Add item"), "add affordance still present when empty");
+        assert!(
+            tree.has_text("Add item"),
+            "add affordance still present when empty"
+        );
     }
 
     #[test]
@@ -527,7 +542,11 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 400.0, 400.0);
-        assert!(tree.has_text("2/5"), "counter shows N/M: {:?}", tree.texts());
+        assert!(
+            tree.has_text("2/5"),
+            "counter shows N/M: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -560,7 +579,10 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 400.0, 400.0);
-        assert!(tree.has_text("Save Order"), "submit button renders when dirty");
+        assert!(
+            tree.has_text("Save Order"),
+            "submit button renders when dirty"
+        );
         assert!(tree.has_text("Cancel"), "cancel button renders when dirty");
     }
 
@@ -662,9 +684,22 @@ mod tests {
         let sm_tree = probe(&sm, 400.0, 400.0);
         let xl_tree = probe(&xl, 400.0, 400.0);
         // The item row (depth 2: root → list → row) is taller at xl.
-        let sm_row_h = sm_tree.nodes.iter().find(|n| n.depth == 2).map(|n| n.h).unwrap_or(0.0);
-        let xl_row_h = xl_tree.nodes.iter().find(|n| n.depth == 2).map(|n| n.h).unwrap_or(0.0);
-        assert!(xl_row_h > sm_row_h, "xl row taller than sm ({xl_row_h} vs {sm_row_h})");
+        let sm_row_h = sm_tree
+            .nodes
+            .iter()
+            .find(|n| n.depth == 2)
+            .map(|n| n.h)
+            .unwrap_or(0.0);
+        let xl_row_h = xl_tree
+            .nodes
+            .iter()
+            .find(|n| n.depth == 2)
+            .map(|n| n.h)
+            .unwrap_or(0.0);
+        assert!(
+            xl_row_h > sm_row_h,
+            "xl row taller than sm ({xl_row_h} vs {sm_row_h})"
+        );
     }
 
     /// The row's index, matching the contract's own index-based onRemove.
@@ -676,7 +711,9 @@ mod tests {
         let seen: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
         let indices = Arc::clone(&seen);
 
-        let spec = EditableListSpec::new().with_item_count(3).with_editable(true);
+        let spec = EditableListSpec::new()
+            .with_item_count(3)
+            .with_editable(true);
         let el = EditableList::from_spec(spec, &theme())
             .on_remove(move |i| indices.lock().unwrap().push(i))
             .into_js_el();
@@ -711,5 +748,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["submit", "cancel"]);
     }
-
 }

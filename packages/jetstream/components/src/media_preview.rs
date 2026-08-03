@@ -4,8 +4,8 @@
 //! (eyebrow / title / description + pill metadata), and a body (caption), per
 //! the contract §3/§10 anatomy. Size and density resolve from the spec's
 //! contract-exact rem tables.
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 
@@ -145,9 +145,17 @@ mod tests {
         let tree = probe(&js_media_preview(&spec, &th), 600.0, 600.0);
 
         assert!(!tree.is_empty());
-        assert!(tree.has_text("Hero banner"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Hero banner"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         // Eyebrow uppercased.
-        assert!(tree.has_text("IMAGE"), "eyebrow missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("IMAGE"),
+            "eyebrow missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Main landing page banner image."),
             "description missing: {:?}",
@@ -158,7 +166,11 @@ mod tests {
         assert!(tree.has_text("245 KB"));
         assert!(tree.has_text("PNG"));
         // Nested thumbnail placeholder icon present (image fallback).
-        assert!(tree.texts().contains(&"image"), "thumbnail icon missing: {:?}", tree.texts());
+        assert!(
+            tree.texts().contains(&"image"),
+            "thumbnail icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -168,7 +180,11 @@ mod tests {
             .with_thumbnail_meta("Waveform")
             .with_metadata(vec!["WAV".to_string()]);
         let tree = probe(&js_media_preview(&spec, &th), 600.0, 600.0);
-        assert!(tree.has_text("Waveform"), "thumbnail_meta missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Waveform"),
+            "thumbnail_meta missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("WAV"));
     }
 
@@ -181,7 +197,11 @@ mod tests {
             .with_state_message("This file cannot be previewed.")
             .with_aspect_ratio(AspectRatio::Landscape);
         let tree = probe(&js_media_preview(&spec, &th), 600.0, 600.0);
-        assert!(tree.has_text("Corrupted file"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Corrupted file"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Preview unavailable"),
             "state title missing: {:?}",

@@ -291,7 +291,11 @@ impl ModelAxisBinding {
         self
     }
 
-    pub fn with_labels(mut self, on_label: impl Into<String>, off_label: impl Into<String>) -> Self {
+    pub fn with_labels(
+        mut self,
+        on_label: impl Into<String>,
+        off_label: impl Into<String>,
+    ) -> Self {
         self.on_label = Some(on_label.into());
         self.off_label = Some(off_label.into());
         self
@@ -361,7 +365,11 @@ pub struct ModelCapabilityAxis {
 }
 
 impl ModelCapabilityAxis {
-    pub fn select(key: impl Into<String>, label: impl Into<String>, options: Vec<ModelAxisOption>) -> Self {
+    pub fn select(
+        key: impl Into<String>,
+        label: impl Into<String>,
+        options: Vec<ModelAxisOption>,
+    ) -> Self {
         Self {
             key: key.into(),
             label: label.into(),
@@ -461,7 +469,11 @@ impl ModelCapabilityAxis {
         self
     }
 
-    pub fn with_labels(mut self, on_label: impl Into<String>, off_label: impl Into<String>) -> Self {
+    pub fn with_labels(
+        mut self,
+        on_label: impl Into<String>,
+        off_label: impl Into<String>,
+    ) -> Self {
         self.on_label = Some(on_label.into());
         self.off_label = Some(off_label.into());
         self
@@ -520,7 +532,11 @@ impl ModelCapabilityAxis {
                 .find(|option| &option.value == text)
                 .map(|option| option.label.clone()),
             (ModelAxisKind::Toggle, ModelAxisValue::Flag(flag)) => {
-                if *flag { self.on_label.clone() } else { self.off_label.clone() }
+                if *flag {
+                    self.on_label.clone()
+                } else {
+                    self.off_label.clone()
+                }
             }
             _ => None,
         }
@@ -755,7 +771,9 @@ impl ModelPickerSpec {
     pub fn resolved_selection(&self) -> ModelSelection {
         let mut resolved = ModelSelection::new(self.value.model.clone());
         for axis in self.applicable_axes() {
-            resolved.axes.push((axis.key.clone(), self.axis_value(&axis)));
+            resolved
+                .axes
+                .push((axis.key.clone(), self.axis_value(&axis)));
         }
         resolved
     }
@@ -884,7 +902,9 @@ mod tests {
                 ModelOption::new("small", "Small Model")
                     .with_group("Frontier")
                     .with_axes(vec!["effort".into()]),
-                ModelOption::new("legacy", "Legacy").with_group("Archive").with_disabled(true),
+                ModelOption::new("legacy", "Legacy")
+                    .with_group("Archive")
+                    .with_disabled(true),
             ])
             .with_axes(vec![effort_axis(), speed_axis()])
             .with_value(ModelSelection::new("big"))
@@ -897,14 +917,21 @@ mod tests {
 
         // `speed` is scoped to `big` only.
         spec.value = ModelSelection::new("small");
-        let keys: Vec<_> = spec.applicable_axes().iter().map(|a| a.key.clone()).collect();
+        let keys: Vec<_> = spec
+            .applicable_axes()
+            .iter()
+            .map(|a| a.key.clone())
+            .collect();
         assert_eq!(keys, vec!["effort".to_string()]);
 
         // A held value for a scoped-out axis never survives resolution.
         spec.value = ModelSelection::new("small").with_axis("speed", ModelAxisValue::Flag(true));
         let resolved = spec.resolved_selection();
         assert!(resolved.axis("speed").is_none());
-        assert_eq!(resolved.axis("effort"), Some(&ModelAxisValue::Text("low".into())));
+        assert_eq!(
+            resolved.axis("effort"),
+            Some(&ModelAxisValue::Text("low".into()))
+        );
     }
 
     #[test]
@@ -923,12 +950,14 @@ mod tests {
                 ])
                 .with_default_value(ModelAxisValue::Text("high".into()))
                 .into()]),
-                ModelOption::new("openai", "OpenAI").with_axes(vec![ModelAxisBinding::new("effort")
-                    .with_options(vec![
-                        ModelAxisOption::new("minimal", "Minimal"),
-                        ModelAxisOption::new("medium", "Medium"),
-                    ])
-                    .into()]),
+                ModelOption::new("openai", "OpenAI").with_axes(vec![ModelAxisBinding::new(
+                    "effort",
+                )
+                .with_options(vec![
+                    ModelAxisOption::new("minimal", "Minimal"),
+                    ModelAxisOption::new("medium", "Medium"),
+                ])
+                .into()]),
             ])
             .with_axes(vec![ModelCapabilityAxis::select(
                 "effort",
@@ -946,12 +975,9 @@ mod tests {
 
         // Switching provider re-resolves the axis and drops the level that only
         // exists on the other one.
-        let openai = spec
-            .clone()
-            .with_value(ModelSelection::new("openai").with_axis(
-                "effort",
-                ModelAxisValue::Text("max".into()),
-            ));
+        let openai = spec.clone().with_value(
+            ModelSelection::new("openai").with_axis("effort", ModelAxisValue::Text("max".into())),
+        );
         assert_eq!(openai.applicable_axes()[0].options.len(), 2);
         assert_eq!(
             openai.resolved_selection().axis("effort"),
@@ -968,7 +994,11 @@ mod tests {
             ])
             .with_axes(vec![effort_axis()])
             .with_value(ModelSelection::new("m"));
-        let keys: Vec<_> = spec.applicable_axes().iter().map(|a| a.key.clone()).collect();
+        let keys: Vec<_> = spec
+            .applicable_axes()
+            .iter()
+            .map(|a| a.key.clone())
+            .collect();
         assert_eq!(keys, vec!["effort".to_string()]);
     }
 
@@ -986,20 +1016,27 @@ mod tests {
         let three = ModelCapabilityAxis::select(
             "effort",
             "Effort",
-            (0..3).map(|n| ModelAxisOption::new(n.to_string(), n.to_string())).collect(),
+            (0..3)
+                .map(|n| ModelAxisOption::new(n.to_string(), n.to_string()))
+                .collect(),
         );
         assert_eq!(three.control_kind(), ModelAxisControlKind::Segmented);
 
         let seven = ModelCapabilityAxis::select(
             "effort",
             "Effort",
-            (0..7).map(|n| ModelAxisOption::new(n.to_string(), n.to_string())).collect(),
+            (0..7)
+                .map(|n| ModelAxisOption::new(n.to_string(), n.to_string()))
+                .collect(),
         );
         assert_eq!(seven.control_kind(), ModelAxisControlKind::List);
 
         // The explicit hint wins in both directions.
         assert_eq!(
-            seven.clone().with_control(ModelAxisControl::Segmented).control_kind(),
+            seven
+                .clone()
+                .with_control(ModelAxisControl::Segmented)
+                .control_kind(),
             ModelAxisControlKind::Segmented
         );
         assert_eq!(
@@ -1067,7 +1104,10 @@ mod tests {
     #[test]
     fn subdued_emphasis_dims_the_resting_trigger_label() {
         let spec = sample();
-        assert_eq!(spec.trigger_label_color_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(
+            spec.trigger_label_color_token(),
+            semantic::COLOR_TEXT_PRIMARY
+        );
         assert_eq!(
             spec.with_emphasis(ModelPickerEmphasis::Subdued)
                 .trigger_label_color_token(),
@@ -1094,7 +1134,9 @@ mod tests {
         assert!(model.image.is_some());
         assert_eq!(model.image.as_ref().unwrap().alt_text(), "");
         assert_eq!(
-            ModelImage::new("/logos/m.svg").with_alt("M logo").alt_text(),
+            ModelImage::new("/logos/m.svg")
+                .with_alt("M logo")
+                .alt_text(),
             "M logo"
         );
     }

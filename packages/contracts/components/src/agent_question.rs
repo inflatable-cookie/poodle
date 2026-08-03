@@ -117,7 +117,11 @@ impl AgentQuestionSpec {
     }
 
     pub fn answer(&self) -> Option<AgentQuestionAnswer> {
-        resolve_question_answer(self.active_question(), &self.selections, &self.override_text)
+        resolve_question_answer(
+            self.active_question(),
+            &self.selections,
+            &self.override_text,
+        )
     }
 
     /// Shortcuts run out after nine; the tenth option has no digit.
@@ -234,8 +238,16 @@ mod tests {
             id: "placement".into(),
             prompt: "Where?".into(),
             options: vec![
-                AgentQuestionOption { value: "inline".into(), label: "Inline".into(), description: None },
-                AgentQuestionOption { value: "composer".into(), label: "Composer".into(), description: None },
+                AgentQuestionOption {
+                    value: "inline".into(),
+                    label: "Inline".into(),
+                    description: None,
+                },
+                AgentQuestionOption {
+                    value: "composer".into(),
+                    label: "Composer".into(),
+                    description: None,
+                },
             ],
             allow_multiple,
             ..Default::default()
@@ -271,7 +283,10 @@ mod tests {
         assert_eq!(spec.shortcut_for(0), Some(1));
         assert_eq!(spec.shortcut_for(8), Some(9));
         assert_eq!(spec.shortcut_for(9), None);
-        assert_eq!(spec.clone().with_show_shortcuts(false).shortcut_for(0), None);
+        assert_eq!(
+            spec.clone().with_show_shortcuts(false).shortcut_for(0),
+            None
+        );
     }
 
     #[test]

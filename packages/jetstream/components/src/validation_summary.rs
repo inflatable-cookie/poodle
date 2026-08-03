@@ -156,8 +156,8 @@ mod tests {
 
     #[test]
     fn renders_title_and_entry_rows() {
-        let spec = ValidationSummarySpec::new(invalid_entries())
-            .with_title("Fix the following fields");
+        let spec =
+            ValidationSummarySpec::new(invalid_entries()).with_title("Fix the following fields");
         let tree = probe(&js_validation_summary(&spec, &theme()), 400.0, 300.0);
         assert!(!tree.is_empty(), "summary produced no nodes");
         assert!(
@@ -167,7 +167,10 @@ mod tests {
         );
         // Both entries: labels + messages.
         assert!(tree.has_text("Project title"), "entry 1 label missing");
-        assert!(tree.has_text("Title is required."), "entry 1 message missing");
+        assert!(
+            tree.has_text("Title is required."),
+            "entry 1 message missing"
+        );
         assert!(tree.has_text("URL slug"), "entry 2 label missing");
         // Field-id interaction ids present for host focus-jump emulation.
         assert!(
@@ -234,8 +237,14 @@ mod tests {
         // Danger precedence over pending.
         assert_eq!(spec.border_token(), "color.status.danger");
         let tree = probe(&js_validation_summary(&spec, &theme()), 400.0, 300.0);
-        assert!(tree.has_text("Asset search"), "pending entry missing in mixed");
-        assert!(tree.has_text("Project title"), "invalid entry missing in mixed");
+        assert!(
+            tree.has_text("Asset search"),
+            "pending entry missing in mixed"
+        );
+        assert!(
+            tree.has_text("Project title"),
+            "invalid entry missing in mixed"
+        );
     }
 
     #[test]

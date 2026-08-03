@@ -13,8 +13,8 @@
 //! copied-state swap is a preview-loop interaction (the copy button is rendered
 //! but inert here).
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
 
@@ -294,7 +294,9 @@ mod tests {
 
     #[test]
     fn inline_mode_has_no_block_chrome() {
-        let spec = CodeSpec::new().with_content("npm install").with_inline(true);
+        let spec = CodeSpec::new()
+            .with_content("npm install")
+            .with_inline(true);
         let el = js_code(&spec, &theme());
         let tree = probe(&el, 400.0, 200.0);
 

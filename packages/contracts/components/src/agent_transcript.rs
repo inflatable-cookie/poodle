@@ -134,7 +134,12 @@ impl AgentTranscriptSpec {
 
     /// Only meaningful when the host drives a scroll position; the natives
     /// render unwindowed by default.
-    pub fn window(&self, heights: &[f64], scroll_top: f64, viewport_height: f64) -> TranscriptWindow {
+    pub fn window(
+        &self,
+        heights: &[f64],
+        scroll_top: f64,
+        viewport_height: f64,
+    ) -> TranscriptWindow {
         transcript_window(
             heights,
             self.estimated_block_height as f64,

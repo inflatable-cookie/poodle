@@ -1,4 +1,4 @@
-use crate::types::{Dimension};
+use crate::types::Dimension;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 

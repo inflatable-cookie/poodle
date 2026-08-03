@@ -127,7 +127,11 @@ mod tests {
             tree.texts()
         );
         // Grouped children present.
-        assert!(tree.has_text("Email") && tree.has_text("Phone"), "fields missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Email") && tree.has_text("Phone"),
+            "fields missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -152,8 +156,14 @@ mod tests {
 
         // Both column wrappers laid out; with 2 columns at 600px width the two
         // field wrappers should sit on the same row (similar y).
-        let first = tree.nodes.iter().find(|n| n.text.as_deref() == Some("First"));
-        let second = tree.nodes.iter().find(|n| n.text.as_deref() == Some("Second"));
+        let first = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("First"));
+        let second = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Second"));
         assert!(first.is_some() && second.is_some(), "both columns present");
         let (f, s) = (first.unwrap(), second.unwrap());
         assert!(

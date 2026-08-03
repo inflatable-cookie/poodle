@@ -205,9 +205,21 @@ mod tests {
         let tree = probe(&js_table(&standard_spec(), &th), 600.0, 300.0);
         assert!(!tree.is_empty(), "table produced no nodes");
         // Header labels are uppercased per contract §8.
-        assert!(tree.has_text("NAME"), "header NAME missing: {:?}", tree.texts());
-        assert!(tree.has_text("ROLE"), "header ROLE missing: {:?}", tree.texts());
-        assert!(tree.has_text("HOURS"), "header HOURS missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("NAME"),
+            "header NAME missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("ROLE"),
+            "header ROLE missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("HOURS"),
+            "header HOURS missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]

@@ -161,7 +161,11 @@ impl MeterSpec {
 
     /// Clamped value inside `[min, safe_max]` (contract §3 `safeValue`).
     pub fn safe_value(&self) -> f64 {
-        let max = if self.max <= self.min { self.min + 1.0 } else { self.max };
+        let max = if self.max <= self.min {
+            self.min + 1.0
+        } else {
+            self.max
+        };
         self.value.clamp(self.min, max)
     }
 
@@ -281,7 +285,10 @@ mod tests {
 
     #[test]
     fn level_prefers_high_over_low() {
-        let spec = MeterSpec::new().with_value(90.0).with_low(95.0).with_high(80.0);
+        let spec = MeterSpec::new()
+            .with_value(90.0)
+            .with_low(95.0)
+            .with_high(80.0);
         // Both thresholds match; high wins (contract §3).
         assert_eq!(spec.level(), MeterLevel::High);
         assert_eq!(spec.fill_token(), semantic::COLOR_STATUS_WARNING);
@@ -309,7 +316,10 @@ mod tests {
         let spec = MeterSpec::new().with_value(35.0);
         assert_eq!(spec.value_display_text(), "35%");
         assert_eq!(
-            MeterSpec::new().with_value(35.0).with_value_text("35k / 100k").value_display_text(),
+            MeterSpec::new()
+                .with_value(35.0)
+                .with_value_text("35k / 100k")
+                .value_display_text(),
             "35k / 100k"
         );
     }

@@ -164,7 +164,9 @@ fn build(
             if let Some(handler) = &on_toggle {
                 let handler = std::sync::Arc::clone(handler);
                 let next = !is_expanded;
-                toggle = toggle.cursor_pointer().on_click(move |_event| handler(next));
+                toggle = toggle
+                    .cursor_pointer()
+                    .on_click(move |_event| handler(next));
             }
 
             header = header.child(toggle);
@@ -261,7 +263,10 @@ mod tests {
         );
         // Search input + active chip both laid out.
         assert!(tree.has_text("Search…"), "search input missing");
-        assert!(tree.has_text("Status: Active"), "active filter chip missing");
+        assert!(
+            tree.has_text("Status: Active"),
+            "active filter chip missing"
+        );
     }
 
     #[test]
@@ -277,7 +282,10 @@ mod tests {
 
         // Collapsed → chevron-right, summary present, grid (search input) hidden.
         assert!(tree.has_text("chevron-right"), "collapsed chevron missing");
-        assert!(tree.has_text("3 filters active"), "summary missing when collapsed");
+        assert!(
+            tree.has_text("3 filters active"),
+            "summary missing when collapsed"
+        );
         assert!(
             !tree.has_text("Search…"),
             "controls grid should be hidden when collapsed"
@@ -356,11 +364,14 @@ mod tests {
                 .on_toggle(move |next| values.lock().unwrap().push(next))
                 .into_js_el();
 
-            let chevron = if collapsed { "chevron-right" } else { "chevron-down" };
+            let chevron = if collapsed {
+                "chevron-right"
+            } else {
+                "chevron-down"
+            };
             crate::element::click_probe::click_text(&el, 640.0, 240.0, chevron);
 
             assert_eq!(seen.lock().unwrap().as_slice(), [expected]);
         }
     }
-
 }

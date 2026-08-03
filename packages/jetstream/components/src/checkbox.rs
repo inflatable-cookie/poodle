@@ -82,7 +82,11 @@ pub struct Checkbox {
 
 impl Checkbox {
     pub fn from_spec(spec: CheckboxSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the state the checkbox is moving **to**.
@@ -101,7 +105,10 @@ impl crate::element::IntoJsEl for Checkbox {
 
         // Read-only is not disabled — it stays focusable and full strength —
         // but it does not change, so it must not report a change either.
-        match (self.spec.is_disabled || self.spec.is_read_only, self.on_change) {
+        match (
+            self.spec.is_disabled || self.spec.is_read_only,
+            self.on_change,
+        ) {
             (false, Some(handler)) => {
                 let next = !matches!(self.spec.current_state(), CheckState::Checked);
                 el.on_click(move |_event| handler(next))
@@ -151,10 +158,18 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
 
     // Contract: mark icon per state (Svelte uses Icon name="check"/"minus")
-    let mark_color = if is_checked { text_inverse } else { text_primary };
+    let mark_color = if is_checked {
+        text_inverse
+    } else {
+        text_primary
+    };
 
     // Contract: indicator border = selected color when checked, border-default when unchecked
-    let indicator_border = if is_checked { selected_fill } else { border_default };
+    let indicator_border = if is_checked {
+        selected_fill
+    } else {
+        border_default
+    };
     // Contract: indicator bg = selected color when checked, background-surface when unchecked
     let surface = resolve_color(theme, "color.background.surface");
     let indicator_bg = if is_checked { selected_fill } else { surface };
@@ -172,23 +187,27 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
         .h(indicator_size)
         .rounded(indicator_radius)
         .bg(indicator_bg)
-        .border(border_width).border_color(indicator_border)
-        .items_center().justify_center();
+        .border(border_width)
+        .border_color(indicator_border)
+        .items_center()
+        .justify_center();
 
     // Mark: SVG icon (contract: check for checked, minus for mixed)
     match state {
         CheckState::Checked => {
             indicator = indicator.child(
                 ui_element::icon("check")
-                    .w(mark_size).h(mark_size)
-                    .text_color(mark_color)
+                    .w(mark_size)
+                    .h(mark_size)
+                    .text_color(mark_color),
             );
         }
         CheckState::Mixed => {
             indicator = indicator.child(
                 ui_element::icon("minus")
-                    .w(mark_size).h(mark_size)
-                    .text_color(mark_color)
+                    .w(mark_size)
+                    .h(mark_size)
+                    .text_color(mark_color),
             );
         }
         CheckState::Unchecked => {}
@@ -207,7 +226,7 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
         root = root.child(
             ui_element::label(label)
                 .text_color(text_primary)
-                .text_size(label_size) // from TYPOGRAPHY_LABEL_SIZE token
+                .text_size(label_size), // from TYPOGRAPHY_LABEL_SIZE token
         );
     }
 
@@ -222,7 +241,8 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Jetstream has no cursor token, so we omit cursor styling (platform default).
 
     crate::aria::with_aria_label(root, spec.aria_label.as_deref())
-        .aria_role(jetstream_ui::accesskit::Role::CheckBox).aria_checked(crate::aria::toggled(spec.checked))
+        .aria_role(jetstream_ui::accesskit::Role::CheckBox)
+        .aria_checked(crate::aria::toggled(spec.checked))
 }
 
 #[cfg(test)]
@@ -236,21 +256,34 @@ mod tests {
     }
 
     fn vec4_to_probe(c: glam::Vec4) -> ProbeColor {
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     #[test]
     fn checked_checkbox_renders_check_glyph() {
         let el = js_checkbox(&CheckboxSpec::new().with_checked(true), &theme());
         let tree = probe(&el, 200.0, 60.0);
-        assert!(tree.has_text("check"), "checked → check icon: {}", tree.to_json());
+        assert!(
+            tree.has_text("check"),
+            "checked → check icon: {}",
+            tree.to_json()
+        );
     }
 
     #[test]
     fn mixed_checkbox_renders_minus_glyph() {
         let el = js_checkbox(&CheckboxSpec::new().with_mixed(true), &theme());
         let tree = probe(&el, 200.0, 60.0);
-        assert!(tree.has_text("minus"), "mixed → minus icon: {}", tree.to_json());
+        assert!(
+            tree.has_text("minus"),
+            "mixed → minus icon: {}",
+            tree.to_json()
+        );
     }
 
     #[test]
@@ -281,13 +314,16 @@ mod tests {
         let theme = theme();
         // Svelte: indicator = icon-{size} + 0.125rem.
         // xs: 0.625 + 0.125 = 0.75rem = 12px
-        let ind_xs = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xs), &theme).children[0];
+        let ind_xs =
+            &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xs), &theme).children[0];
         assert_eq!(ind_xs.layout.size.width, taffy::Dimension::length(12.0));
         // sm: 0.75 + 0.125 = 0.875rem = 14px
-        let ind_sm = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Sm), &theme).children[0];
+        let ind_sm =
+            &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Sm), &theme).children[0];
         assert_eq!(ind_sm.layout.size.width, taffy::Dimension::length(14.0));
         // xl: 1.5 + 0.125 = 1.625rem = 26px
-        let ind_xl = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xl), &theme).children[0];
+        let ind_xl =
+            &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xl), &theme).children[0];
         assert_eq!(ind_xl.layout.size.width, taffy::Dimension::length(26.0));
     }
 
@@ -297,7 +333,11 @@ mod tests {
         let el = js_checkbox(&CheckboxSpec::new().with_checked(true), &th);
         let tree = probe(&el, 200.0, 60.0);
         let accent = vec4_to_probe(resolve_color(&th, "color.accent.base"));
-        assert!(tree.has_background(accent, 0.01), "checked fill = accent: {}", tree.to_json());
+        assert!(
+            tree.has_background(accent, 0.01),
+            "checked fill = accent: {}",
+            tree.to_json()
+        );
     }
 
     #[test]
@@ -311,14 +351,23 @@ mod tests {
         let custom = rgb255_to_vec4(hex_to_rgb255("#ff0000").unwrap(), 1.0);
         let custom_probe = vec4_to_probe(custom);
         let accent = vec4_to_probe(resolve_color(&th, "color.accent.base"));
-        assert!(!custom_probe.approx(accent, 0.01), "precondition: custom != accent");
+        assert!(
+            !custom_probe.approx(accent, 0.01),
+            "precondition: custom != accent"
+        );
         // Fill (background) uses the custom color.
-        assert!(tree.has_background(custom_probe, 0.01), "custom fill: {}", tree.to_json());
+        assert!(
+            tree.has_background(custom_probe, 0.01),
+            "custom fill: {}",
+            tree.to_json()
+        );
         // Border tracks selected_color too (not surfaced via probe → check JsEl tree).
         let indicator = &el.children[0];
         let bc = indicator.style.border_color.expect("indicator border");
         assert!(
-            (bc.r - custom.x).abs() < 0.01 && (bc.g - custom.y).abs() < 0.01 && (bc.b - custom.z).abs() < 0.01,
+            (bc.r - custom.x).abs() < 0.01
+                && (bc.g - custom.y).abs() < 0.01
+                && (bc.b - custom.z).abs() < 0.01,
             "checked indicator border should use selected_color"
         );
     }
@@ -329,7 +378,12 @@ mod tests {
         let el = js_checkbox(&CheckboxSpec::new().with_disabled(true), &th);
         let expected = resolve_opacity(&th, "state.opacity.disabled");
         assert!(el.style.disabled);
-        assert!((el.style.opacity - expected).abs() < 0.001, "opacity {} != {}", el.style.opacity, expected);
+        assert!(
+            (el.style.opacity - expected).abs() < 0.001,
+            "opacity {} != {}",
+            el.style.opacity,
+            expected
+        );
     }
 
     #[test]
@@ -351,7 +405,9 @@ mod tests {
             let values = Arc::clone(&seen);
 
             let el = Checkbox::from_spec(
-                CheckboxSpec::new().with_label("Ship it").with_checked(checked),
+                CheckboxSpec::new()
+                    .with_label("Ship it")
+                    .with_checked(checked),
                 &theme(),
             )
             .on_change(move |next| values.lock().unwrap().push(next))
@@ -393,20 +449,29 @@ mod tests {
         use std::sync::Arc;
 
         for spec in [
-            CheckboxSpec::new().with_label("Ship it").with_disabled(true),
-            CheckboxSpec::new().with_label("Ship it").with_read_only(true),
+            CheckboxSpec::new()
+                .with_label("Ship it")
+                .with_disabled(true),
+            CheckboxSpec::new()
+                .with_label("Ship it")
+                .with_read_only(true),
         ] {
             let hits = Arc::new(AtomicUsize::new(0));
             let counter = Arc::clone(&hits);
 
             let el = Checkbox::from_spec(spec, &theme())
-                .on_change(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+                .on_change(move |_| {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                })
                 .into_js_el();
 
             crate::element::click_probe::click_text(&el, 320.0, 80.0, "Ship it");
 
-            assert_eq!(hits.load(Ordering::SeqCst), 0, "an unchangeable checkbox fired");
+            assert_eq!(
+                hits.load(Ordering::SeqCst),
+                0,
+                "an unchangeable checkbox fired"
+            );
         }
     }
-
 }

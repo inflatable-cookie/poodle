@@ -215,7 +215,10 @@ mod tests {
         assert_eq!(totals.file_count, 2);
         assert_eq!(totals.additions, 376);
         assert_eq!(totals.deletions, 16);
-        assert_eq!(spec.accessible_name(), "2 changed files, 376 added, 16 removed");
+        assert_eq!(
+            spec.accessible_name(),
+            "2 changed files, 376 added, 16 removed"
+        );
     }
 
     #[test]

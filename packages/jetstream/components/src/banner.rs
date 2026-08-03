@@ -2,8 +2,8 @@
 //!
 //! Uses Color::mix for tinted fill and SVG icon per tone.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{BannerSpec, StatusTone};
 
@@ -42,8 +42,10 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .bg(fill)
         .border(1.0)
         .border_color(border_color)
-        .pl(pad_x).pr(pad_x)
-        .pt(pad_y).pb(pad_y)
+        .pl(pad_x)
+        .pr(pad_x)
+        .pt(pad_y)
+        .pb(pad_y)
         .flex_row()
         .items_center()
         .gap(gap);
@@ -52,8 +54,9 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     if spec.has_icon {
         el = el.child(
             ui_element::icon(tone_icon(spec.tone))
-                .w(icon_size).h(icon_size)
-                .text_color(icon_color)
+                .w(icon_size)
+                .h(icon_size)
+                .text_color(icon_color),
         );
     }
 
@@ -62,7 +65,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
             ui_element::label(title)
                 .text_color(text_primary)
                 .text_size(font_size)
-                .text_weight(600)
+                .text_weight(600),
         );
     }
 
@@ -71,7 +74,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
             ui_element::label(message)
                 .text_color(text_primary)
                 .text_size(font_size)
-                .grow()
+                .grow(),
         );
     }
 
@@ -79,9 +82,10 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     if spec.is_dismissible {
         el = el.child(
             ui_element::icon("x")
-                .w(icon_size).h(icon_size)
+                .w(icon_size)
+                .h(icon_size)
                 .text_color(text_primary)
-                .cursor_pointer()
+                .cursor_pointer(),
         );
     }
 

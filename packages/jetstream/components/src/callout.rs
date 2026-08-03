@@ -6,10 +6,12 @@
 //! Resolves tone fill/border via `Color::mix` and renders the leading icon
 //! badge, optional dismiss control, and all six tones (incl. neutral + pending).
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone};
+use poodle_specs::{
+    CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
+};
 
 use crate::presentation::{
     panel_space_x_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
@@ -41,7 +43,11 @@ pub struct Callout {
 
 impl Callout {
     pub fn from_spec(spec: CallOutSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_dismiss: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_dismiss: None,
+        }
     }
 
     /// Fires when the dismiss control is pressed. It renders only for a
@@ -70,7 +76,9 @@ fn build(
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Supporting (icon) visual size — used for the glyph inside the badge.
-    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
 
     // Padding: contract §8 root = 0.625rem block / space.panel.x inline.
     let pad_x = rem_to_px(panel_space_x_rem(spec.density));
@@ -105,7 +113,12 @@ fn build(
         tone_color.mix_srgb(panel, 0.10)
     };
     let border = if is_neutral {
-        Color::new(border_subtle.x, border_subtle.y, border_subtle.z, border_subtle.w * 0.88)
+        Color::new(
+            border_subtle.x,
+            border_subtle.y,
+            border_subtle.z,
+            border_subtle.w * 0.88,
+        )
     } else if is_pending {
         tone_color.mix_srgb(border_default, 0.26)
     } else {
@@ -126,11 +139,7 @@ fn build(
         .gap(gap);
 
     // ── Body: icon badge + content ───────────────────────────
-    let mut body = ui_element::div()
-        .flex_row()
-        .items_start()
-        .gap(gap)
-        .grow();
+    let mut body = ui_element::div().flex_row().items_start().gap(gap).grow();
 
     // Circular icon badge — 1.375rem, surface at 78%, 999px radius (contract §8).
     let badge_size = rem_to_px(1.375);
@@ -236,19 +245,29 @@ mod tests {
             .with_content("Body text.");
         let tree = probe(&js_callout(&spec, &theme()), 400.0, 200.0);
         assert!(!tree.is_empty(), "callout produced no nodes");
-        assert!(tree.has_text("Information"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Information"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         // Icon badge present: an Icon node carrying the tone icon name.
         assert!(
             tree.count_kind("Icon") >= 1,
             "no icon badge rendered: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("info"), "info tone icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("info"),
+            "info tone icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn dismissible_renders_x_control() {
-        let plain = CallOutSpec::new().with_tone(StatusTone::Info).with_title("T");
+        let plain = CallOutSpec::new()
+            .with_tone(StatusTone::Info)
+            .with_title("T");
         let dismissible = plain.clone().dismissible(true);
         let plain_tree = probe(&js_callout(&plain, &theme()), 400.0, 200.0);
         let dismiss_tree = probe(&js_callout(&dismissible, &theme()), 400.0, 200.0);
@@ -258,7 +277,11 @@ mod tests {
             dismiss_tree.find_token("poodle-callout-dismiss").is_some(),
             "dismiss control missing when dismissible"
         );
-        assert!(dismiss_tree.has_text("x"), "x icon missing: {:?}", dismiss_tree.texts());
+        assert!(
+            dismiss_tree.has_text("x"),
+            "x icon missing: {:?}",
+            dismiss_tree.texts()
+        );
         // Non-dismissible callout has neither.
         assert!(
             plain_tree.find_token("poodle-callout-dismiss").is_none(),
@@ -268,8 +291,12 @@ mod tests {
 
     #[test]
     fn neutral_and_pending_tones_render() {
-        let neutral = CallOutSpec::new().with_tone(StatusTone::Neutral).with_title("N");
-        let pending = CallOutSpec::new().with_tone(StatusTone::Pending).with_title("P");
+        let neutral = CallOutSpec::new()
+            .with_tone(StatusTone::Neutral)
+            .with_title("N");
+        let pending = CallOutSpec::new()
+            .with_tone(StatusTone::Pending)
+            .with_title("P");
         let neutral_tree = probe(&js_callout(&neutral, &theme()), 400.0, 200.0);
         let pending_tree = probe(&js_callout(&pending, &theme()), 400.0, 200.0);
 
@@ -291,7 +318,10 @@ mod tests {
         let d = probe(&js_callout(&danger, &theme()), 400.0, 200.0);
         let n_bg = n.nodes[0].bg.expect("neutral root has no bg");
         let d_bg = d.nodes[0].bg.expect("danger root has no bg");
-        assert!(!n_bg.approx(d_bg, 0.01), "neutral and danger fills should differ");
+        assert!(
+            !n_bg.approx(d_bg, 0.01),
+            "neutral and danger fills should differ"
+        );
     }
 
     #[test]
@@ -308,7 +338,10 @@ mod tests {
         let cmf_body = probe(&js_callout(&comfortable, &theme()), 400.0, 200.0).nodes[1].x;
         let _ = (cx, dx);
         assert!(c_body < d_body, "compact padding not tighter than default");
-        assert!(d_body < cmf_body, "comfortable padding not looser than default");
+        assert!(
+            d_body < cmf_body,
+            "comfortable padding not looser than default"
+        );
     }
 
     #[test]
@@ -326,12 +359,17 @@ mod tests {
             .dismissible(true);
 
         let el = Callout::from_spec(spec, &theme())
-            .on_dismiss(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_dismiss(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 480.0, 160.0, "x");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_dismiss fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_dismiss fired exactly once"
+        );
     }
-
 }

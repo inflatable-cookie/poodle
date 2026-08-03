@@ -53,7 +53,13 @@ impl DockRegion {
 
 impl crate::element::IntoJsEl for DockRegion {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.content, self.on_tab_change, self.on_collapse_toggle)
+        build(
+            &self.spec,
+            &self.theme,
+            self.content,
+            self.on_tab_change,
+            self.on_collapse_toggle,
+        )
     }
 }
 
@@ -102,59 +108,70 @@ fn build(
     // mixed 32% into the subtle border.
     let (root_bg, root_border) = match spec.emphasis {
         DockEmphasis::Standard => (panel_fill, border_subtle),
-        DockEmphasis::Quiet => (
-            tint(panel_fill, 0.0),
-            tint(border_subtle, 0.0),
-        ),
+        DockEmphasis::Quiet => (tint(panel_fill, 0.0), tint(border_subtle, 0.0)),
         DockEmphasis::Strong => (panel_fill, color_mix(accent, border_subtle, 0.32)),
     };
 
     // Build a single tab. `compact` → icon-only (label suppressed); `vertical`
     // → full-width stacked entry.
-    let build_tab = |value: &str, label: &str, icon: Option<&str>, compact: bool, vertical: bool| -> JsEl {
-        let is_active = active.as_deref() == Some(value);
-        let text_color = if is_active { text_primary } else { text_muted };
+    let build_tab =
+        |value: &str, label: &str, icon: Option<&str>, compact: bool, vertical: bool| -> JsEl {
+            let is_active = active.as_deref() == Some(value);
+            let text_color = if is_active { text_primary } else { text_muted };
 
-        // Icon-only compact / icon-strip tabs render the icon glyph; otherwise
-        // the label text. When an icon exists it is shown alongside the label.
-        let display = if compact {
-            icon.unwrap_or(label).to_string()
-        } else if let Some(ic) = icon {
-            format!("{ic} {label}")
-        } else {
-            label.to_string()
+            // Icon-only compact / icon-strip tabs render the icon glyph; otherwise
+            // the label text. When an icon exists it is shown alongside the label.
+            let display = if compact {
+                icon.unwrap_or(label).to_string()
+            } else if let Some(ic) = icon {
+                format!("{ic} {label}")
+            } else {
+                label.to_string()
+            };
+
+            let mut tab_btn = ui_element::button(&display)
+                .id(format!("dock-tab-{value}"))
+                .text_color(text_color)
+                .text_size(tab_font)
+                .text_weight(if is_active { 600 } else { 400 })
+                .focusable()
+                .cursor_pointer();
+
+            if vertical {
+                tab_btn = tab_btn
+                    .w_full()
+                    .pt(space_y * 0.5)
+                    .pb(space_y * 0.5)
+                    .pl(space_x)
+                    .pr(space_x);
+            } else if compact {
+                tab_btn = tab_btn
+                    .pl(space_x * 0.5)
+                    .pr(space_x * 0.5)
+                    .pt(space_y * 0.5)
+                    .pb(space_y * 0.5);
+            } else {
+                tab_btn = tab_btn
+                    .pl(space_x)
+                    .pr(space_x)
+                    .pt(space_y * 0.5)
+                    .pb(space_y * 0.5);
+            }
+
+            if is_active {
+                tab_btn = tab_btn
+                    .bg(active_bg)
+                    .border_b_2()
+                    .border_color_bottom(accent);
+            }
+            if let Some(handler) = &on_tab_change {
+                let handler = std::sync::Arc::clone(handler);
+                let value = value.to_string();
+                tab_btn = tab_btn.on_click(move |_event| handler(&value));
+            }
+
+            tab_btn
         };
-
-        let mut tab_btn = ui_element::button(&display)
-            .id(format!("dock-tab-{value}"))
-            .text_color(text_color)
-            .text_size(tab_font)
-            .text_weight(if is_active { 600 } else { 400 })
-            .focusable()
-            .cursor_pointer();
-
-        if vertical {
-            tab_btn = tab_btn.w_full().pt(space_y * 0.5).pb(space_y * 0.5).pl(space_x).pr(space_x);
-        } else if compact {
-            tab_btn = tab_btn.pl(space_x * 0.5).pr(space_x * 0.5).pt(space_y * 0.5).pb(space_y * 0.5);
-        } else {
-            tab_btn = tab_btn.pl(space_x).pr(space_x).pt(space_y * 0.5).pb(space_y * 0.5);
-        }
-
-        if is_active {
-            tab_btn = tab_btn
-                .bg(active_bg)
-                .border_b_2()
-                .border_color_bottom(accent);
-        }
-        if let Some(handler) = &on_tab_change {
-            let handler = std::sync::Arc::clone(handler);
-            let value = value.to_string();
-            tab_btn = tab_btn.on_click(move |_event| handler(&value));
-        }
-
-        tab_btn
-    };
 
     // Collapse toggle (only when collapsible).
     let build_toggle = |vertical: bool| -> JsEl {
@@ -171,7 +188,11 @@ fn build(
         if vertical {
             t = t.w_full().pt(space_y * 0.5).pb(space_y * 0.5);
         } else {
-            t = t.pl(space_x * 0.5).pr(space_x * 0.5).pt(space_y * 0.5).pb(space_y * 0.5);
+            t = t
+                .pl(space_x * 0.5)
+                .pr(space_x * 0.5)
+                .pt(space_y * 0.5)
+                .pb(space_y * 0.5);
         }
         if let Some(handler) = &on_collapse_toggle {
             let handler = std::sync::Arc::clone(handler);
@@ -200,7 +221,11 @@ fn build(
         } else {
             ui_element::div().flex_col()
         };
-        stack = stack.bg(root_bg).border(border_w).border_color(root_border).grow();
+        stack = stack
+            .bg(root_bg)
+            .border(border_w)
+            .border_color(root_border)
+            .grow();
 
         for item in &spec.items {
             let mut cell = ui_element::div()
@@ -225,10 +250,7 @@ fn build(
 
     // ── Collapsed: hidden posture (toggle only) ─────────────────
     if spec.is_collapsed && spec.collapsed_posture == DockCollapsedPosture::Hidden {
-        let mut region = ui_element::div()
-            .flex_col()
-            .items_center()
-            .justify_center();
+        let mut region = ui_element::div().flex_col().items_center().justify_center();
         if spec.is_collapsible {
             region = region.child(build_toggle(false).pt(space_y).pb(space_y));
         }
@@ -251,7 +273,13 @@ fn build(
                 strip = strip.child(build_toggle(true));
             }
             for item in &spec.items {
-                strip = strip.child(build_tab(&item.value, &item.label, item.icon.as_deref(), true, true));
+                strip = strip.child(build_tab(
+                    &item.value,
+                    &item.label,
+                    item.icon.as_deref(),
+                    true,
+                    true,
+                ));
             }
             return strip;
         } else {
@@ -268,7 +296,13 @@ fn build(
                 .border(border_w)
                 .border_color(root_border);
             for item in &spec.items {
-                strip = strip.child(build_tab(&item.value, &item.label, item.icon.as_deref(), true, false));
+                strip = strip.child(build_tab(
+                    &item.value,
+                    &item.label,
+                    item.icon.as_deref(),
+                    true,
+                    false,
+                ));
             }
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(false));
@@ -296,9 +330,20 @@ fn build(
         .border_color(border_subtle);
 
     // Tab list grows; toggle pinned at the end.
-    let mut tab_list = ui_element::div().flex_row().items_center().gap(tab_gap).flex_1().min_w_0();
+    let mut tab_list = ui_element::div()
+        .flex_row()
+        .items_center()
+        .gap(tab_gap)
+        .flex_1()
+        .min_w_0();
     for item in &spec.items {
-        tab_list = tab_list.child(build_tab(&item.value, &item.label, item.icon.as_deref(), false, false));
+        tab_list = tab_list.child(build_tab(
+            &item.value,
+            &item.label,
+            item.icon.as_deref(),
+            false,
+            false,
+        ));
     }
     tab_bar = tab_bar.child(tab_list);
     if spec.is_collapsible {
@@ -353,13 +398,30 @@ mod tests {
         let tree = render(&spec());
         assert!(!tree.is_empty(), "no nodes rendered");
         // All three tab buttons rendered (label text present).
-        assert!(tree.texts().iter().any(|t| t.contains("Explorer")), "Explorer tab missing: {:?}", tree.texts());
-        assert!(tree.texts().iter().any(|t| t.contains("Search")), "Search tab missing");
-        assert!(tree.texts().iter().any(|t| t.contains("Source Control")), "SCM tab missing");
+        assert!(
+            tree.texts().iter().any(|t| t.contains("Explorer")),
+            "Explorer tab missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.texts().iter().any(|t| t.contains("Search")),
+            "Search tab missing"
+        );
+        assert!(
+            tree.texts().iter().any(|t| t.contains("Source Control")),
+            "SCM tab missing"
+        );
         // Body content present.
-        assert!(tree.has_text("Panel body"), "body missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Panel body"),
+            "body missing: {:?}",
+            tree.texts()
+        );
         // Tab button anatomy present.
-        assert!(tree.find_token("dock-tab-explorer").is_some(), "tab id missing");
+        assert!(
+            tree.find_token("dock-tab-explorer").is_some(),
+            "tab id missing"
+        );
     }
 
     #[test]
@@ -372,7 +434,11 @@ mod tests {
         let el = js_dock_region(&s, &theme(), None);
         let tree = probe(&el, 480.0, 80.0);
         // Compact mode shows icon glyphs, not labels.
-        assert!(tree.texts().iter().any(|t| t.contains("folder")), "compact icon missing: {:?}", tree.texts());
+        assert!(
+            tree.texts().iter().any(|t| t.contains("folder")),
+            "compact icon missing: {:?}",
+            tree.texts()
+        );
         assert!(
             !tree.texts().iter().any(|t| t.contains("Explorer")),
             "compact tabs must suppress labels: {:?}",
@@ -469,14 +535,23 @@ mod tests {
 
     #[test]
     fn static_mode_stacks_panels() {
-        let s = DockRegionSpec::new(DockEdge::Top, items())
-            .with_sizing(DockSizing::Static);
+        let s = DockRegionSpec::new(DockEdge::Top, items()).with_sizing(DockSizing::Static);
         let el = js_dock_region(&s, &theme(), None);
         let tree = probe(&el, 480.0, 200.0);
         // Static mode renders each panel label, no collapse toggle.
-        assert!(tree.has_text("Explorer"), "static panel missing: {:?}", tree.texts());
-        assert!(tree.find_token("dock-stack-explorer").is_some(), "stack item id missing");
-        assert!(tree.find_token("dock-collapse").is_none(), "static mode must not render collapse toggle");
+        assert!(
+            tree.has_text("Explorer"),
+            "static panel missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.find_token("dock-stack-explorer").is_some(),
+            "stack item id missing"
+        );
+        assert!(
+            tree.find_token("dock-collapse").is_none(),
+            "static mode must not render collapse toggle"
+        );
     }
 
     #[test]
@@ -520,5 +595,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [true]);
     }
-
 }

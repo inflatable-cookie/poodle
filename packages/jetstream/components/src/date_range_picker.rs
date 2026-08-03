@@ -19,8 +19,8 @@
 //! ARIA is N/A: the Jetstream runtime has no accessibility channel
 //! (no `aria-haspopup`/`aria-expanded`/`role="dialog"`).
 
-use jetstream_ui::{Color, color_mix};
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::{color_mix, Color};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{CalendarMode, CalendarSpec, DateRangePickerSpec};
 
@@ -291,7 +291,11 @@ mod tests {
 
     #[test]
     fn indicator_is_chevron_icon() {
-        let tree = probe(&js_date_range_picker(&DateRangePickerSpec::new(), &theme()), 360.0, 80.0);
+        let tree = probe(
+            &js_date_range_picker(&DateRangePickerSpec::new(), &theme()),
+            360.0,
+            80.0,
+        );
         // Icon widget carries its registry name as text.
         assert!(
             tree.has_text("chevron-down"),
@@ -303,7 +307,11 @@ mod tests {
 
     #[test]
     fn closed_picker_has_no_calendar_surface() {
-        let tree = probe(&js_date_range_picker(&DateRangePickerSpec::new(), &theme()), 360.0, 80.0);
+        let tree = probe(
+            &js_date_range_picker(&DateRangePickerSpec::new(), &theme()),
+            360.0,
+            80.0,
+        );
         // Calendar emits weekday headers / month label; none when closed.
         assert!(!tree.has_text("March"), "calendar leaked while closed");
         assert!(!tree.has_text("Mo"), "weekday header leaked while closed");
@@ -342,7 +350,11 @@ mod tests {
         }
         let start = find(&el, &|e| e.id.as_deref() == Some("poodle-cal-day-1"))
             .expect("range start cell present in composed calendar");
-        assert_eq!(start.style.background, Some(accent), "range start = accent fill");
+        assert_eq!(
+            start.style.background,
+            Some(accent),
+            "range start = accent fill"
+        );
     }
 
     #[test]
@@ -357,19 +369,28 @@ mod tests {
     #[test]
     fn sizes_produce_different_trigger_heights() {
         let sm = probe(
-            &js_date_range_picker(&DateRangePickerSpec::new().with_size(ControlSize::Sm), &theme()),
+            &js_date_range_picker(
+                &DateRangePickerSpec::new().with_size(ControlSize::Sm),
+                &theme(),
+            ),
             360.0,
             120.0,
         );
         let lg = probe(
-            &js_date_range_picker(&DateRangePickerSpec::new().with_size(ControlSize::Lg), &theme()),
+            &js_date_range_picker(
+                &DateRangePickerSpec::new().with_size(ControlSize::Lg),
+                &theme(),
+            ),
             360.0,
             120.0,
         );
         // Trigger is the first child of root; compare its height.
         let sm_trigger_h = sm.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
         let lg_trigger_h = lg.nodes.get(1).map(|n| n.h).unwrap_or(0.0);
-        assert!(lg_trigger_h > sm_trigger_h, "sm {sm_trigger_h} !< lg {lg_trigger_h}");
+        assert!(
+            lg_trigger_h > sm_trigger_h,
+            "sm {sm_trigger_h} !< lg {lg_trigger_h}"
+        );
     }
 
     #[test]
@@ -382,12 +403,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = DateRangePicker::from_spec(DateRangePickerSpec::new(), &theme())
-            .on_toggle(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 360.0, 80.0, "Select date range");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     /// A range is two day presses; the component reports each one and the host
@@ -439,5 +466,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["next"]);
     }
-
 }

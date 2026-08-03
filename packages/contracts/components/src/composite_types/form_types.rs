@@ -6,7 +6,6 @@
 
 use crate::{ButtonVariant, FormActionAlign, StatusTone, ValidationState};
 
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AnnouncementMode {
     None,
@@ -365,4 +364,3 @@ fn is_probably_url(input: &str) -> bool {
     (input.starts_with("http://") || input.starts_with("https://"))
         && !input.contains(char::is_whitespace)
 }
-

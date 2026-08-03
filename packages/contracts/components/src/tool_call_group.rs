@@ -246,7 +246,9 @@ mod tests {
 
     #[test]
     fn a_single_call_run_renders_no_toggle() {
-        assert!(!ToolCallGroupSpec::new("run", vec![call("a", ToolCallStatus::Success)]).shows_toggle());
+        assert!(
+            !ToolCallGroupSpec::new("run", vec![call("a", ToolCallStatus::Success)]).shows_toggle()
+        );
     }
 
     #[test]
@@ -267,6 +269,11 @@ mod tests {
 
     #[test]
     fn an_empty_run_does_not_panic() {
-        assert_eq!(ToolCallGroupSpec::new("run", Vec::new()).rendered_calls().len(), 0);
+        assert_eq!(
+            ToolCallGroupSpec::new("run", Vec::new())
+                .rendered_calls()
+                .len(),
+            0
+        );
     }
 }

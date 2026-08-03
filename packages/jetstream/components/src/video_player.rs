@@ -234,9 +234,21 @@ mod tests {
         let spec = VideoPlayerSpec::new("clip.mp4").with_playing(true);
         let tree = probe(&js_video_player(&spec, &th), 480.0, 270.0);
         // Playing → pause glyph; volume-2 (unmuted); maximize-2 (windowed).
-        assert!(tree.has_text("pause"), "missing pause icon; icons: {:?}", tree.texts());
-        assert!(tree.has_text("volume-2"), "missing volume icon; icons: {:?}", tree.texts());
-        assert!(tree.has_text("maximize-2"), "missing fullscreen icon; icons: {:?}", tree.texts());
+        assert!(
+            tree.has_text("pause"),
+            "missing pause icon; icons: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("volume-2"),
+            "missing volume icon; icons: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("maximize-2"),
+            "missing fullscreen icon; icons: {:?}",
+            tree.texts()
+        );
         assert!(tree.count_kind("Icon") >= 3, "expected >=3 transport icons");
     }
 
@@ -250,9 +262,21 @@ mod tests {
             .with_volume(0.0)
             .with_fullscreen(true);
         let tree = probe(&js_video_player(&spec, &th), 480.0, 270.0);
-        assert!(tree.has_text("play"), "paused → play glyph; icons: {:?}", tree.texts());
-        assert!(tree.has_text("volume-x"), "muted → volume-x; icons: {:?}", tree.texts());
-        assert!(tree.has_text("minimize-2"), "fullscreen → minimize-2; icons: {:?}", tree.texts());
+        assert!(
+            tree.has_text("play"),
+            "paused → play glyph; icons: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("volume-x"),
+            "muted → volume-x; icons: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("minimize-2"),
+            "fullscreen → minimize-2; icons: {:?}",
+            tree.texts()
+        );
     }
 
     /// Seek bar uses the ProgressBar widget (proportional fill), not a fixed sliver.
@@ -293,12 +317,18 @@ mod tests {
         // Paused at 0 → big play present (two `play` glyphs: big + transport).
         let paused = VideoPlayerSpec::new("clip.mp4");
         let tree = probe(&js_video_player(&paused, &th), 480.0, 270.0);
-        assert!(tree.count_kind("Icon") >= 4, "big-play + transport icons expected");
+        assert!(
+            tree.count_kind("Icon") >= 4,
+            "big-play + transport icons expected"
+        );
 
         // Playing → no big play (transport shows pause).
         let playing = VideoPlayerSpec::new("clip.mp4").with_playing(true);
         let tree2 = probe(&js_video_player(&playing, &th), 480.0, 270.0);
-        assert!(!tree2.has_text("play"), "big play should be hidden while playing");
+        assert!(
+            !tree2.has_text("play"),
+            "big play should be hidden while playing"
+        );
     }
 
     /// Size scaling flows through (xl bigger button than xs).

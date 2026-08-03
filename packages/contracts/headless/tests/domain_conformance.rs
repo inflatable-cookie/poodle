@@ -11,7 +11,11 @@ fn canonicalize(value: &Value) -> Value {
     match value {
         Value::Number(number) => json!(number.as_f64().unwrap_or(0.0)),
         Value::Array(entries) => Value::Array(entries.iter().map(canonicalize).collect()),
-        Value::Object(map) => Value::Object(map.iter().map(|(key, entry)| (key.clone(), canonicalize(entry))).collect()),
+        Value::Object(map) => Value::Object(
+            map.iter()
+                .map(|(key, entry)| (key.clone(), canonicalize(entry)))
+                .collect(),
+        ),
         other => other.clone(),
     }
 }
@@ -46,7 +50,8 @@ fn date_conformance() {
             }
             "addMonths" => {
                 let date = parse_iso_date(s(case, "iso")).unwrap();
-                let result = format_iso_date(add_months(date, case["amount"].as_i64().unwrap() as i32));
+                let result =
+                    format_iso_date(add_months(date, case["amount"].as_i64().unwrap() as i32));
                 assert_eq!(result, expect.as_str().unwrap(), "addMonths {case}");
             }
             "parse" => {
@@ -56,18 +61,39 @@ fn date_conformance() {
             }
             "compare" => {
                 let result = compare_iso_date(s(case, "left"), s(case, "right")).unwrap();
-                assert_eq!(i64::from(result), expect.as_i64().unwrap(), "compare {case}");
+                assert_eq!(
+                    i64::from(result),
+                    expect.as_i64().unwrap(),
+                    "compare {case}"
+                );
             }
             "monthAnchor" => {
-                assert_eq!(month_anchor_iso(s(case, "iso")).unwrap(), expect.as_str().unwrap(), "monthAnchor {case}");
+                assert_eq!(
+                    month_anchor_iso(s(case, "iso")).unwrap(),
+                    expect.as_str().unwrap(),
+                    "monthAnchor {case}"
+                );
             }
             "normalizeRange" => {
-                let (start, end) = normalize_date_range(Some(s(case, "start")), Some(s(case, "end")));
-                assert_eq!(start.as_deref(), expect["start"].as_str(), "normalizeRange start {case}");
-                assert_eq!(end.as_deref(), expect["end"].as_str(), "normalizeRange end {case}");
+                let (start, end) =
+                    normalize_date_range(Some(s(case, "start")), Some(s(case, "end")));
+                assert_eq!(
+                    start.as_deref(),
+                    expect["start"].as_str(),
+                    "normalizeRange start {case}"
+                );
+                assert_eq!(
+                    end.as_deref(),
+                    expect["end"].as_str(),
+                    "normalizeRange end {case}"
+                );
             }
             "withinRange" => {
-                let result = is_iso_date_within_range(s(case, "iso"), Some(s(case, "start")), Some(s(case, "end")));
+                let result = is_iso_date_within_range(
+                    s(case, "iso"),
+                    Some(s(case, "start")),
+                    Some(s(case, "end")),
+                );
                 assert_eq!(result, expect.as_bool().unwrap(), "withinRange {case}");
             }
             "startOfWeek" => {
@@ -78,7 +104,11 @@ fn date_conformance() {
             "weekBoundaryDelta" => {
                 let to_end = s(case, "edge") == "end";
                 let result = day_delta_for_week_boundary(s(case, "iso"), week_start(case), to_end);
-                assert_eq!(i64::from(result), expect.as_i64().unwrap(), "weekBoundaryDelta {case}");
+                assert_eq!(
+                    i64::from(result),
+                    expect.as_i64().unwrap(),
+                    "weekBoundaryDelta {case}"
+                );
             }
             "daysBetween" => {
                 let result = days_between(s(case, "start"), s(case, "end")).unwrap();
@@ -86,7 +116,8 @@ fn date_conformance() {
             }
             "calendarWeeks" => {
                 // today far outside every vector month so isToday never fires
-                let weeks = build_calendar_weeks(s(case, "visibleMonth"), week_start(case), "1900-01-01");
+                let weeks =
+                    build_calendar_weeks(s(case, "visibleMonth"), week_start(case), "1900-01-01");
                 let actual: Value = json!(weeks
                     .iter()
                     .map(|week| week
@@ -117,8 +148,16 @@ fn color_conformance() {
         let sf = || case["s"].as_f64().unwrap();
 
         match op {
-            "normalizeHex" => assert_eq!(normalize_hex(s(case, "hex")), expect.as_str().unwrap(), "{case}"),
-            "isValidHex" => assert_eq!(is_valid_hex(s(case, "hex")), expect.as_bool().unwrap(), "{case}"),
+            "normalizeHex" => assert_eq!(
+                normalize_hex(s(case, "hex")),
+                expect.as_str().unwrap(),
+                "{case}"
+            ),
+            "isValidHex" => assert_eq!(
+                is_valid_hex(s(case, "hex")),
+                expect.as_bool().unwrap(),
+                "{case}"
+            ),
             "hexToRgb" => {
                 let (rgb, alpha) = hex_to_rgb(s(case, "hex")).unwrap();
                 let mut actual = rgb_json(rgb);
@@ -136,34 +175,88 @@ fn color_conformance() {
                 }
                 assert_eq!(actual, expected, "hexToRgb {case}");
             }
-            "rgbToHex" => assert_eq!(rgb_to_hex(Rgb { r: ri(), g: gi(), b: bi() }, None), expect.as_str().unwrap(), "{case}"),
+            "rgbToHex" => assert_eq!(
+                rgb_to_hex(
+                    Rgb {
+                        r: ri(),
+                        g: gi(),
+                        b: bi()
+                    },
+                    None
+                ),
+                expect.as_str().unwrap(),
+                "{case}"
+            ),
             "rgbToHexAlpha" => {
                 let a = case["a"].as_f64().unwrap();
-                assert_eq!(rgb_to_hex(Rgb { r: ri(), g: gi(), b: bi() }, Some(a)), expect.as_str().unwrap(), "{case}");
+                assert_eq!(
+                    rgb_to_hex(
+                        Rgb {
+                            r: ri(),
+                            g: gi(),
+                            b: bi()
+                        },
+                        Some(a)
+                    ),
+                    expect.as_str().unwrap(),
+                    "{case}"
+                );
             }
             "rgbToHsv" => {
-                let hsv = rgb_to_hsv(Rgb { r: ri(), g: gi(), b: bi() });
-                assert_eq!(json!({ "h": hsv.h, "s": hsv.s, "v": hsv.v }), *expect, "rgbToHsv {case}");
+                let hsv = rgb_to_hsv(Rgb {
+                    r: ri(),
+                    g: gi(),
+                    b: bi(),
+                });
+                assert_eq!(
+                    json!({ "h": hsv.h, "s": hsv.s, "v": hsv.v }),
+                    *expect,
+                    "rgbToHsv {case}"
+                );
             }
             "rgbToHsl" => {
-                let hsl = rgb_to_hsl(Rgb { r: ri(), g: gi(), b: bi() });
-                assert_eq!(json!({ "h": hsl.h, "s": hsl.s, "l": hsl.l }), *expect, "rgbToHsl {case}");
+                let hsl = rgb_to_hsl(Rgb {
+                    r: ri(),
+                    g: gi(),
+                    b: bi(),
+                });
+                assert_eq!(
+                    json!({ "h": hsl.h, "s": hsl.s, "l": hsl.l }),
+                    *expect,
+                    "rgbToHsl {case}"
+                );
             }
             "hsvToRgb" => {
                 let v = case["v"].as_f64().unwrap();
-                assert_eq!(rgb_json(hsv_to_rgb(hf(), sf(), v)), *expect, "hsvToRgb {case}");
+                assert_eq!(
+                    rgb_json(hsv_to_rgb(hf(), sf(), v)),
+                    *expect,
+                    "hsvToRgb {case}"
+                );
             }
             "hsvToHex" => {
                 let v = case["v"].as_f64().unwrap();
-                assert_eq!(hsv_to_hex(hf(), sf(), v, None), expect.as_str().unwrap(), "hsvToHex {case}");
+                assert_eq!(
+                    hsv_to_hex(hf(), sf(), v, None),
+                    expect.as_str().unwrap(),
+                    "hsvToHex {case}"
+                );
             }
             "hslToRgb" => {
                 let l = case["l"].as_f64().unwrap();
-                assert_eq!(rgb_json(hsl_to_rgb(hf(), sf(), l)), *expect, "hslToRgb {case}");
+                assert_eq!(
+                    rgb_json(hsl_to_rgb(hf(), sf(), l)),
+                    *expect,
+                    "hslToRgb {case}"
+                );
             }
             "hexToHsv" => {
                 let hsv = hex_to_hsv(s(case, "hex")).unwrap();
-                assert_eq!(json!({ "h": hsv.h, "s": hsv.s, "v": hsv.v }), *expect, "hexToHsv {case}");
+                assert_eq!(
+                    json!({ "h": hsv.h, "s": hsv.s, "v": hsv.v }),
+                    *expect,
+                    "hexToHsv {case}"
+                );
             }
             other => panic!("unknown color op {other}"),
         }
@@ -251,7 +344,13 @@ fn nodes_from(value: &Value) -> Vec<VecNode> {
 fn strings_from(value: &Value) -> Vec<String> {
     value
         .as_array()
-        .map(|entries| entries.iter().filter_map(Value::as_str).map(str::to_string).collect())
+        .map(|entries| {
+            entries
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_string)
+                .collect()
+        })
         .unwrap_or_default()
 }
 
@@ -345,7 +444,11 @@ fn tree_conformance() {
                     "offsetY": window.offset_y,
                     "totalHeight": window.total_height,
                 });
-                assert_eq!(canonicalize(&actual), canonicalize(expect), "virtualWindow {case}");
+                assert_eq!(
+                    canonicalize(&actual),
+                    canonicalize(expect),
+                    "virtualWindow {case}"
+                );
             }
             other => panic!("unknown tree op {other}"),
         }

@@ -16,9 +16,8 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
     FilterBuilderPicker, FilterBuilderSpec, FilterCombinator, FilterFieldDefinition,
-    FilterFieldKind, FilterOperand,
-    FilterOperandKind, IconButtonSpec, NumberInputSpec, SegmentedControlSpec, SelectSpec,
-    TextInputSpec,
+    FilterFieldKind, FilterOperand, FilterOperandKind, IconButtonSpec, NumberInputSpec,
+    SegmentedControlSpec, SelectSpec, TextInputSpec,
 };
 
 use crate::button::js_button;
@@ -214,7 +213,11 @@ struct Handlers {
 
 impl FilterBuilder {
     pub fn from_spec(spec: FilterBuilderSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), handlers: Handlers::default() }
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: Handlers::default(),
+        }
     }
 
     /// Fires with the clause's id when its pill's remove glyph is pressed.
@@ -293,11 +296,7 @@ pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvide
     build(spec, theme, &Handlers::default())
 }
 
-fn build(
-    spec: &FilterBuilderSpec,
-    theme: &JetstreamThemeProvider,
-    handlers: &Handlers,
-) -> JsEl {
+fn build(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvider, handlers: &Handlers) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
@@ -491,12 +490,18 @@ fn build(
         field = field.child(trailing);
     }
 
-    let mut root = ui_element::div().flex_col().gap(root_gap).min_w(0.0).child(field);
+    let mut root = ui_element::div()
+        .flex_col()
+        .gap(root_gap)
+        .min_w(0.0)
+        .child(field);
 
     // ── Dialog surface (rendered inline when open) ────────────────────────────
     if spec.is_open {
         // Contract: the open overlay panel is a `dialog`.
-        let mut panel = ui_element::div().flex_col().gap(panel_gap)
+        let mut panel = ui_element::div()
+            .flex_col()
+            .gap(panel_gap)
             .aria_role(jetstream_ui::accesskit::Role::Dialog);
 
         // Combinator (2+ clauses) — static two-option indicator.
@@ -511,7 +516,11 @@ fn build(
                     .pb(rem_to_px(0.25))
                     .rounded(radius)
                     .bg(if selected { accent } else { surface })
-                    .text_color(if selected { accent_text } else { text_secondary })
+                    .text_color(if selected {
+                        accent_text
+                    } else {
+                        text_secondary
+                    })
                     .text_size(rem_to_px(0.75));
                 if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_combinator_change) {
                     let handler = std::sync::Arc::clone(handler);
@@ -588,7 +597,11 @@ fn build(
                 ));
             }
 
-            let commit_label = if draft.editing_id.is_some() { "Update" } else { "Add" };
+            let commit_label = if draft.editing_id.is_some() {
+                "Update"
+            } else {
+                "Add"
+            };
             let mut commit = crate::button::Button::from_spec(
                 ButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
@@ -701,9 +714,11 @@ mod tests {
 
     fn fields() -> Vec<FilterFieldDefinition> {
         vec![
-            FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(
-                vec![FilterOption::new("clap", "CLAP"), FilterOption::new("vst3", "VST3")],
-            ),
+            FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum)
+                .with_options(vec![
+                    FilterOption::new("clap", "CLAP"),
+                    FilterOption::new("vst3", "VST3"),
+                ]),
             FilterFieldDefinition::new("hidden", "Hidden", FilterFieldKind::Boolean),
             FilterFieldDefinition::new("tag-count", "Tag count", FilterFieldKind::Number),
         ]
@@ -731,40 +746,67 @@ mod tests {
     #[test]
     fn empty_open_shows_no_filters_and_hides_reset() {
         let el = js_filter_builder(
-            &FilterBuilderSpec::new().with_fields(fields()).with_open(true),
+            &FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true),
             &theme(),
         );
         let tree = crate::render_probe::probe(&el, 320.0, 240.0);
-        assert!(tree.has_text("No filters"), "empty text wrong: {:?}", tree.texts());
+        assert!(
+            tree.has_text("No filters"),
+            "empty text wrong: {:?}",
+            tree.texts()
+        );
         // Empty + combinator off → opener label and placeholder summary both "Filter".
-        assert!(tree.has_text("Filter"), "opener/placeholder missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Filter"),
+            "opener/placeholder missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn populated_shows_inline_pill_labels() {
-        let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
+        let tree =
+            crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
         assert!(
             tree.has_text("Format is any of CLAP, VST3"),
             "multi-enum pill label wrong: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Hidden is false"), "boolean pill wrong: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Hidden is false"),
+            "boolean pill wrong: {:?}",
+            tree.texts()
+        );
         // Summary count text is suppressed while pills convey the clauses (no
         // duplicate count). `populated()` opts into the combinator with 2 clauses,
         // so the opener label reflects the match mode ("All").
-        assert!(tree.has_text("All"), "opener mode label missing: {:?}", tree.texts());
-        assert!(!tree.has_text("2 filters"), "count must not duplicate the pills: {:?}", tree.texts());
+        assert!(
+            tree.has_text("All"),
+            "opener mode label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            !tree.has_text("2 filters"),
+            "count must not duplicate the pills: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
     fn combinator_shows_only_with_two_clauses() {
         // Two clauses → combinator visible.
-        let tree = crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
+        let tree =
+            crate::render_probe::probe(&js_filter_builder(&populated(), &theme()), 360.0, 320.0);
         assert!(tree.has_text("Match all") && tree.has_text("Match any"));
 
         // One clause → combinator hidden (even with the toggle enabled).
-        let one = FilterBuilderSpec::new().with_fields(fields()).with_open(true).with_show_combinator(true).with_value(
-            FilterExpression {
+        let one = FilterBuilderSpec::new()
+            .with_fields(fields())
+            .with_open(true)
+            .with_show_combinator(true)
+            .with_value(FilterExpression {
                 combinator: FilterCombinator::And,
                 clauses: vec![FilterClause::new(
                     "hidden-1",
@@ -772,11 +814,18 @@ mod tests {
                     "is",
                     FilterOperand::Boolean(true),
                 )],
-            },
-        );
+            });
         let tree = crate::render_probe::probe(&js_filter_builder(&one, &theme()), 360.0, 240.0);
-        assert!(!tree.has_text("Match all"), "combinator must hide with <2 clauses: {:?}", tree.texts());
-        assert!(tree.has_text("Hidden is true"), "single clause pill missing: {:?}", tree.texts());
+        assert!(
+            !tree.has_text("Match all"),
+            "combinator must hide with <2 clauses: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Hidden is true"),
+            "single clause pill missing: {:?}",
+            tree.texts()
+        );
     }
 
     /// As OrderBy: a pointer produces an intent on one pill, not a clause list,
@@ -789,15 +838,17 @@ mod tests {
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let ids = Arc::clone(&seen);
 
-        let spec = FilterBuilderSpec::new().with_fields(fields()).with_value(FilterExpression {
-            combinator: FilterCombinator::And,
-            clauses: vec![FilterClause::new(
-                "c1",
-                "hidden",
-                "is",
-                FilterOperand::Boolean(true),
-            )],
-        });
+        let spec = FilterBuilderSpec::new()
+            .with_fields(fields())
+            .with_value(FilterExpression {
+                combinator: FilterCombinator::And,
+                clauses: vec![FilterClause::new(
+                    "c1",
+                    "hidden",
+                    "is",
+                    FilterOperand::Boolean(true),
+                )],
+            });
 
         let el = FilterBuilder::from_spec(spec, &theme())
             .on_remove(move |id| ids.lock().unwrap().push(id.to_string()))
@@ -833,15 +884,20 @@ mod tests {
             });
 
         let el = FilterBuilder::from_spec(spec, &theme())
-            .on_reset(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_reset(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         // Two "x" glyphs: the pill's remove and the reset. Index 1 is reset.
         crate::element::click_probe::click_text_nth(&el, 640.0, 240.0, "x", 1);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_reset fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_reset fired exactly once"
+        );
     }
-
 
     #[test]
     fn the_opener_reports_a_toggle() {
@@ -852,18 +908,19 @@ mod tests {
         let hits = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&hits);
 
-        let el = FilterBuilder::from_spec(
-            FilterBuilderSpec::new().with_fields(fields()),
-            &theme(),
-        )
-        .on_toggle(move || {
-            counter.fetch_add(1, Ordering::SeqCst);
-        })
-        .into_js_el();
+        let el = FilterBuilder::from_spec(FilterBuilderSpec::new().with_fields(fields()), &theme())
+            .on_toggle(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
+            .into_js_el();
 
         crate::element::click_probe::click_text_nth(&el, 640.0, 240.0, "Filter", 0);
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_toggle fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_toggle fired exactly once"
+        );
     }
 
     #[test]
@@ -875,7 +932,9 @@ mod tests {
         let pickers = Arc::clone(&seen);
 
         let el = FilterBuilder::from_spec(
-            FilterBuilderSpec::new().with_fields(fields()).with_open(true),
+            FilterBuilderSpec::new()
+                .with_fields(fields())
+                .with_open(true),
             &theme(),
         )
         .on_picker_toggle(move |picker| pickers.lock().unwrap().push(picker.to_string()))

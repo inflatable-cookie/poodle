@@ -9,8 +9,8 @@
 //! This runtime’s `JsEl` builder does not yet map it onto an accessibility
 //! metadata channel; hosts should read the spec when they need disclosure state.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ButtonSpec;
 use poodle_specs::ButtonTone;
@@ -22,8 +22,8 @@ use std::sync::Arc;
 
 use crate::element::{ActionHandler, IntoJsEl};
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem, size_min_width_rem, size_padding_x_offset_rem,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_min_width_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -41,7 +41,11 @@ pub struct Button {
 
 impl Button {
     pub fn from_spec(spec: ButtonSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+        }
     }
 
     /// Fires when the button is pressed.
@@ -134,8 +138,16 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let icon_inset = resolve_px(theme, ButtonSpec::icon_side_inset_token());
     let has_leading = spec.leading_icon.is_some() || spec.is_loading;
     let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
-    let pad_left = if has_leading { pad_x - icon_inset } else { pad_x };
-    let pad_right = if has_trailing { pad_x - icon_inset } else { pad_x };
+    let pad_left = if has_leading {
+        pad_x - icon_inset
+    } else {
+        pad_x
+    };
+    let pad_right = if has_trailing {
+        pad_x - icon_inset
+    } else {
+        pad_x
+    };
 
     let radius = resolve_radius(theme, spec.radius_token());
     // Inner gap between label and icons (contract §8: `space.button.gap` = 0.375rem).
@@ -153,7 +165,11 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // ── Build element ──
     // When icons are present: Button root with empty label, children for layout.
     // When no icons: Button root carries the label text directly.
-    let button_label = if has_icons { String::new() } else { label_text.clone() };
+    let button_label = if has_icons {
+        String::new()
+    } else {
+        label_text.clone()
+    };
 
     let mut el = ui_element::button(&button_label)
         .h(height)
@@ -224,7 +240,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 ui_element::icon("loader")
                     .w(icon_size)
                     .h(icon_size)
-                    .text_color(text_color)
+                    .text_color(text_color),
             );
         }
 
@@ -234,7 +250,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 ui_element::icon(icon_name.as_str())
                     .w(icon_size)
                     .h(icon_size)
-                    .text_color(text_color)
+                    .text_color(text_color),
             );
         }
 
@@ -244,7 +260,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 ui_element::label(&label_text)
                     .text_size(label_size)
                     .text_color(text_color)
-                    .letter_spacing_em(0.01) // contract §8: letter-spacing 0.01em
+                    .letter_spacing_em(0.01), // contract §8: letter-spacing 0.01em
             );
         }
 
@@ -254,7 +270,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
                 ui_element::icon(icon_name.as_str())
                     .w(icon_size)
                     .h(icon_size)
-                    .text_color(text_color)
+                    .text_color(text_color),
             );
         }
 
@@ -291,12 +307,18 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Button::from_spec(ButtonSpec::new().with_label("Save"), &test_theme())
-            .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_click(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 80.0, "Save");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_click fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_click fired exactly once"
+        );
     }
 
     /// Disabled and loading both take the button out of the tab order and drop
@@ -314,7 +336,9 @@ mod tests {
             let counter = Arc::clone(&hits);
 
             let el = Button::from_spec(spec, &test_theme())
-                .on_click(move || { counter.fetch_add(1, Ordering::SeqCst); })
+                .on_click(move || {
+                    counter.fetch_add(1, Ordering::SeqCst);
+                })
                 .into_js_el();
 
             crate::element::click_probe::click_text(&el, 320.0, 80.0, "Save");
@@ -350,9 +374,7 @@ mod tests {
     #[test]
     fn disabled_button_has_reduced_opacity() {
         let theme = test_theme();
-        let spec = ButtonSpec::new()
-            .with_label("Disabled")
-            .with_disabled(true);
+        let spec = ButtonSpec::new().with_label("Disabled").with_disabled(true);
         let el = js_button(&spec, &theme);
         assert!(el.style.disabled);
         assert!(el.style.opacity < 1.0);
@@ -361,11 +383,19 @@ mod tests {
     #[test]
     fn sm_button_is_shorter_than_md() {
         let theme = test_theme();
-        let sm = js_button(&ButtonSpec::new().with_size(ControlSize::Sm).with_label("S"), &theme);
-        let md = js_button(&ButtonSpec::new().with_size(ControlSize::Md).with_label("M"), &theme);
+        let sm = js_button(
+            &ButtonSpec::new().with_size(ControlSize::Sm).with_label("S"),
+            &theme,
+        );
+        let md = js_button(
+            &ButtonSpec::new().with_size(ControlSize::Md).with_label("M"),
+            &theme,
+        );
         // sm should be 28px (1.75rem), md should be 36px (2.25rem)
-        assert_ne!(sm.layout.size.height, md.layout.size.height,
-            "sm and md should have different heights");
+        assert_ne!(
+            sm.layout.size.height, md.layout.size.height,
+            "sm and md should have different heights"
+        );
     }
 
     #[test]
@@ -375,7 +405,10 @@ mod tests {
             .with_label("Create")
             .with_leading_icon("+");
         let el = js_button(&spec, &theme);
-        assert!(!el.children.is_empty(), "Button with leading icon should have children");
+        assert!(
+            !el.children.is_empty(),
+            "Button with leading icon should have children"
+        );
     }
 
     #[test]

@@ -5,8 +5,8 @@
 //!
 //! ALL dimensions resolve from tokens or spec methods. ZERO hardcoded pixel values.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{SpinnerSpec, SpinnerTone, SpinnerVariant};
 
@@ -50,13 +50,7 @@ fn build_dots(spec: &SpinnerSpec, tone: jetstream_ui::Color) -> JsEl {
 
     let mut row = ui_element::div().flex_row().items_center().gap(gap);
     for _ in 0..3 {
-        row = row.child(
-            ui_element::div()
-                .w(dot)
-                .h(dot)
-                .rounded(999.0)
-                .bg(tone),
-        );
+        row = row.child(ui_element::div().w(dot).h(dot).rounded(999.0).bg(tone));
     }
     row
 }
@@ -201,7 +195,11 @@ mod tests {
         let el = js_spinner(&spec, &theme());
         let tree = probe(&el, 64.0, 64.0);
         let root = &tree.nodes[0];
-        assert!((root.w - 16.0).abs() < 0.01, "ring width != 16px: {}", root.w);
+        assert!(
+            (root.w - 16.0).abs() < 0.01,
+            "ring width != 16px: {}",
+            root.w
+        );
         // Stroke width is spec-resolved (0.125rem) — not hardcoded.
         assert!((spec.ring_border_width_rem() - 0.125).abs() < f32::EPSILON);
     }
@@ -252,7 +250,6 @@ mod tests {
         assert!((spec.opacity_peak() - 0.76).abs() < f32::EPSILON);
     }
 
-
     /// Ring declares the contract's 0.8s rotation as a real runtime animation,
     /// with a stable id so the engine's clock survives immediate-mode rebuilds.
     #[test]
@@ -267,7 +264,10 @@ mod tests {
     fn grid_cells_carry_staggered_pulses() {
         let spec = SpinnerSpec::new().with_variant(SpinnerVariant::Grid);
         let el = js_spinner(&spec, &theme());
-        assert!(el.children.iter().all(|c| c.animation.is_some() && c.id.is_some()));
+        assert!(el
+            .children
+            .iter()
+            .all(|c| c.animation.is_some() && c.id.is_some()));
     }
 
     #[test]

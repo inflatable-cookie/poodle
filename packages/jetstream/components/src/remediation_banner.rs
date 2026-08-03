@@ -18,8 +18,8 @@
 //! ZERO hardcoded colors. The announce role (`spec.accessibility_role()`) has no
 //! JsEl accessibility channel; hosts read the spec to apply `role`/`aria-live`.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ButtonSpec;
 use poodle_specs::RemediationAction;
@@ -178,7 +178,11 @@ mod tests {
             "tone icon missing: {:?}",
             tree.texts()
         );
-        assert!(tree.has_text("Review needed"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Review needed"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Resolve the blocking error."),
             "message missing: {:?}",
@@ -201,8 +205,16 @@ mod tests {
         let tree = probe(&el, 480.0, 200.0);
         // Real Button widgets (not bare labels) carry the action labels.
         assert!(tree.count_kind("Button") >= 2, "expected 2 action buttons");
-        assert!(tree.has_text("Resolve"), "primary label missing: {:?}", tree.texts());
-        assert!(tree.has_text("Inspect"), "secondary label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Resolve"),
+            "primary label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Inspect"),
+            "secondary label missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.find_token("remediation-action-resolve").is_some(),
             "primary action id missing"
@@ -214,7 +226,11 @@ mod tests {
         let th = theme();
         let action = RemediationAction::new("retry", "Retry").with_disabled(true);
         let el = action_button(&action, &th);
-        assert!(el.style.opacity < 1.0, "disabled action should dim, got {}", el.style.opacity);
+        assert!(
+            el.style.opacity < 1.0,
+            "disabled action should dim, got {}",
+            el.style.opacity
+        );
     }
 
     #[test]
@@ -229,7 +245,11 @@ mod tests {
             tree.find_token("remediation-banner-dismiss").is_some(),
             "dismiss control missing"
         );
-        assert!(tree.has_text("x"), "dismiss glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("x"),
+            "dismiss glyph missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -237,12 +257,17 @@ mod tests {
         let th = theme();
         let danger_color: Color = resolve_color(&th, "color.status.danger").into();
         let el = js_remediation_banner(
-            &RemediationBannerSpec::new("Critical", "Pipeline failed").with_tone(StatusTone::Danger),
+            &RemediationBannerSpec::new("Critical", "Pipeline failed")
+                .with_tone(StatusTone::Danger),
             &th,
         );
         // Danger tone → x-circle icon + status-danger border.
         let tree = probe(&el, 480.0, 200.0);
-        assert!(tree.has_text("x-circle"), "danger icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("x-circle"),
+            "danger icon missing: {:?}",
+            tree.texts()
+        );
         let border = el.style.border_color.expect("border color set");
         assert!(
             (border.r - danger_color.r).abs() < 0.02 && (border.g - danger_color.g).abs() < 0.02,
@@ -260,6 +285,10 @@ mod tests {
         let tree = probe(&el, 480.0, 200.0);
         assert_eq!(tree.count_kind("Button"), 0, "no actions → no buttons");
         // Success tone icon present.
-        assert!(tree.has_text("check-circle"), "success icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("check-circle"),
+            "success icon missing: {:?}",
+            tree.texts()
+        );
     }
 }

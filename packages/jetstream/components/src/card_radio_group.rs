@@ -31,7 +31,11 @@ pub struct CardRadioGroup {
 
 impl CardRadioGroup {
     pub fn from_spec(spec: CardRadioGroupSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     /// Fires with the chosen option's value. Disabled options never fire.
@@ -163,7 +167,9 @@ fn build(
         } else if let Some(handler) = &on_change {
             let handler = std::sync::Arc::clone(handler);
             let value = option.value.clone();
-            card = card.cursor_pointer().on_click(move |_event| handler(&value));
+            card = card
+                .cursor_pointer()
+                .on_click(move |_event| handler(&value));
         }
 
         root = root.child(card);
@@ -294,5 +300,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["pro"]);
     }
-
 }

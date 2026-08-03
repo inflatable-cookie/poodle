@@ -118,7 +118,16 @@ pub fn js_list_container_with_slots(
     breadcrumbs: Option<JsEl>,
     actions: Option<JsEl>,
 ) -> JsEl {
-    build_with_slots(spec, theme, content, filters, batch, breadcrumbs, actions, None)
+    build_with_slots(
+        spec,
+        theme,
+        content,
+        filters,
+        batch,
+        breadcrumbs,
+        actions,
+        None,
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -162,15 +171,13 @@ fn build_with_slots(
         ListContainerState::Ready => {
             // Filters region (optional)
             if let Some(filters) = filters {
-                container = container.child(
-                    ui_element::div().flex_col().gap(region_gap).child(filters),
-                );
+                container =
+                    container.child(ui_element::div().flex_col().gap(region_gap).child(filters));
             }
             // Batch region (optional)
             if let Some(batch) = batch {
-                container = container.child(
-                    ui_element::div().flex_col().gap(region_gap).child(batch),
-                );
+                container =
+                    container.child(ui_element::div().flex_col().gap(region_gap).child(batch));
             }
             // Content region
             let mut content_region = ui_element::div().flex_col().gap(region_gap);
@@ -186,8 +193,7 @@ fn build_with_slots(
 
                 // PaginationSummary — only when summary enabled and totals known.
                 if spec.show_pagination_summary {
-                    if let (Some(total_items), Some(page_size)) =
-                        (spec.total_items, spec.page_size)
+                    if let (Some(total_items), Some(page_size)) = (spec.total_items, spec.page_size)
                     {
                         let summary_spec = PaginationSummarySpec::new(
                             spec.current_page.max(1),
@@ -208,7 +214,8 @@ fn build_with_slots(
                         .clone()
                         .unwrap_or_else(|| "List pagination".to_string()),
                 );
-                let mut pager = crate::pagination_comp::Pagination::from_spec(pagination_spec, theme);
+                let mut pager =
+                    crate::pagination_comp::Pagination::from_spec(pagination_spec, theme);
                 if let Some(handler) = &on_page_change {
                     let handler = std::sync::Arc::clone(handler);
                     pager = pager.on_page_change(move |page| handler(page));
@@ -261,8 +268,7 @@ fn build_with_slots(
                 .empty_title
                 .clone()
                 .unwrap_or_else(|| "Nothing here yet".to_string());
-            let mut empty = EmptyStateSpec::new(title)
-                .with_variant(empty_variant(spec));
+            let mut empty = EmptyStateSpec::new(title).with_variant(empty_variant(spec));
             if let Some(ref msg) = spec.empty_message {
                 empty = empty.with_message(msg.clone());
             }
@@ -315,17 +321,27 @@ mod tests {
 
         assert!(!tree.is_empty(), "probe produced no nodes");
         // Header title + subtitle + eyebrow flow through PageHeader.
-        assert!(tree.has_text("Projects"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Projects"),
+            "title missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Manage your team's projects"),
             "subtitle missing: {:?}",
             tree.texts()
         );
         // Host content rendered in the Ready content region.
-        assert!(tree.has_text("Row one"), "content missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Row one"),
+            "content missing: {:?}",
+            tree.texts()
+        );
         // PaginationSummary "Showing 11 – 20 of 48" renders (page 2, size 10).
         assert!(
-            tree.texts().iter().any(|t| t.contains("48") && t.contains("Showing")),
+            tree.texts()
+                .iter()
+                .any(|t| t.contains("48") && t.contains("Showing")),
             "pagination summary missing: {:?}",
             tree.texts()
         );
@@ -345,8 +361,16 @@ mod tests {
         );
         let tree = probe(&el, 640.0, 480.0);
 
-        assert!(tree.has_text("Filter bar"), "filters slot missing: {:?}", tree.texts());
-        assert!(tree.has_text("3 selected"), "batch slot missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Filter bar"),
+            "filters slot missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("3 selected"),
+            "batch slot missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -377,7 +401,11 @@ mod tests {
             tree.texts()
         );
         // Header title still renders alongside the forwarded slots.
-        assert!(tree.has_text("Projects"), "title missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Projects"),
+            "title missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -462,5 +490,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [3]);
     }
-
 }

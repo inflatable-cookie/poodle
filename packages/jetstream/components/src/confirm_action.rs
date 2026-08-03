@@ -97,7 +97,13 @@ impl ConfirmAction {
 
 impl crate::element::IntoJsEl for ConfirmAction {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_trigger, self.on_confirm, self.on_cancel)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_trigger,
+            self.on_confirm,
+            self.on_cancel,
+        )
     }
 }
 
@@ -226,9 +232,14 @@ mod tests {
         // Warning tone: trigger is a default-toned secondary Button; the dialog
         // opens with the (non-danger) AlertDialog tone. Both paths must compose.
         let th = theme();
-        let closed = ConfirmActionSpec::new("Archive this project?", "It will be archived.", "Archive", "Cancel")
-            .with_tone(StatusTone::Warning)
-            .with_trigger_label("Archive project");
+        let closed = ConfirmActionSpec::new(
+            "Archive this project?",
+            "It will be archived.",
+            "Archive",
+            "Cancel",
+        )
+        .with_tone(StatusTone::Warning)
+        .with_trigger_label("Archive project");
         let closed_tree = probe(&js_confirm_action(&closed, &th), 480.0, 320.0);
         assert!(
             closed_tree.has_text("Archive project"),
@@ -299,7 +310,9 @@ mod tests {
         crate::element::click_probe::click_text(&el, 800.0, 600.0, "Archive");
         crate::element::click_probe::click_text(&el, 800.0, 600.0, "Cancel");
 
-        assert_eq!(seen.lock().unwrap().as_slice(), ["trigger", "confirm", "cancel"]);
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["trigger", "confirm", "cancel"]
+        );
     }
-
 }

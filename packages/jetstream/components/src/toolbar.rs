@@ -129,10 +129,11 @@ mod tests {
     /// stretching to fill the probe viewport. Returns the toolbar's height.
     fn toolbar_height(spec: &ToolbarSpec) -> f32 {
         let th = theme();
-        let wrapped = ui_element::div()
-            .flex_col()
-            .items_start()
-            .child(js_toolbar(spec, &th, items()));
+        let wrapped =
+            ui_element::div()
+                .flex_col()
+                .items_start()
+                .child(js_toolbar(spec, &th, items()));
         let tree = probe(&wrapped, 400.0, 200.0);
         // node[0] = wrapper, node[1] = toolbar root.
         tree.nodes[1].h

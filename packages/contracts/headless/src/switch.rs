@@ -20,7 +20,10 @@ pub enum SwitchEffect {
     EmitCheckedChange { checked: bool },
 }
 
-pub fn switch_transition(context: SwitchContext, event: SwitchEvent) -> (SwitchContext, Vec<SwitchEffect>) {
+pub fn switch_transition(
+    context: SwitchContext,
+    event: SwitchEvent,
+) -> (SwitchContext, Vec<SwitchEffect>) {
     match event {
         SwitchEvent::Toggle { next_checked } => {
             if context.disabled {
@@ -32,8 +35,13 @@ pub fn switch_transition(context: SwitchContext, event: SwitchEvent) -> (SwitchC
             }
 
             (
-                SwitchContext { checked: next_checked, ..context },
-                vec![SwitchEffect::EmitCheckedChange { checked: next_checked }],
+                SwitchContext {
+                    checked: next_checked,
+                    ..context
+                },
+                vec![SwitchEffect::EmitCheckedChange {
+                    checked: next_checked,
+                }],
             )
         }
         SwitchEvent::SetChecked { checked } => (SwitchContext { checked, ..context }, vec![]),

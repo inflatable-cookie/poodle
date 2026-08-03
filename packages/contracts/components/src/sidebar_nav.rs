@@ -265,9 +265,24 @@ mod tests {
     #[test]
     fn item_height_tracks_size_table() {
         // sidebar table, NOT control-height (md = 1.875rem, not 2.25rem)
-        assert_eq!(SidebarNavSpec::new(vec![]).with_size(ControlSize::Md).item_height_rem(), 1.875);
-        assert_eq!(SidebarNavSpec::new(vec![]).with_size(ControlSize::Xs).item_height_rem(), 1.375);
-        assert_eq!(SidebarNavSpec::new(vec![]).with_size(ControlSize::Xl).item_height_rem(), 2.375);
+        assert_eq!(
+            SidebarNavSpec::new(vec![])
+                .with_size(ControlSize::Md)
+                .item_height_rem(),
+            1.875
+        );
+        assert_eq!(
+            SidebarNavSpec::new(vec![])
+                .with_size(ControlSize::Xs)
+                .item_height_rem(),
+            1.375
+        );
+        assert_eq!(
+            SidebarNavSpec::new(vec![])
+                .with_size(ControlSize::Xl)
+                .item_height_rem(),
+            2.375
+        );
     }
 
     #[test]

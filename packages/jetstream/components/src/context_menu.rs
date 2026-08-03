@@ -10,7 +10,7 @@
 
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{ControlSize, ContextMenuSpec, MenuItemKind};
+use poodle_specs::{ContextMenuSpec, ControlSize, MenuItemKind};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{elevation_overlay, resolve_color, resolve_opacity, resolve_radius, tint};
@@ -41,7 +41,11 @@ pub struct ContextMenu {
 
 impl ContextMenu {
     pub fn from_spec(spec: ContextMenuSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_action: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_action: None,
+        }
     }
 
     /// Fires with the activated item's value. Separators and disabled items
@@ -139,7 +143,11 @@ fn build(
 
             // ── Checkbox / Radio items (leading check indicator) ──────────────
             MenuItemKind::Checkbox | MenuItemKind::Radio => {
-                let label_color = if entry.is_destructive { danger_color } else { text_color };
+                let label_color = if entry.is_destructive {
+                    danger_color
+                } else {
+                    text_color
+                };
                 let leading = if entry.is_checked {
                     ui_element::icon("check")
                         .w(font_size)
@@ -200,7 +208,11 @@ fn build(
 
             // ── Action items ─────────────────────────────────────────────────
             MenuItemKind::Action => {
-                let label_color = if entry.is_destructive { danger_color } else { text_color };
+                let label_color = if entry.is_destructive {
+                    danger_color
+                } else {
+                    text_color
+                };
 
                 let mut item = ui_element::div()
                     .aria_role(jetstream_ui::accesskit::Role::MenuItem)
@@ -294,11 +306,19 @@ mod tests {
         assert!(!tree.is_empty(), "probe produced no nodes");
         // Item labels present.
         for label in ["Cut", "Copy", "Paste", "Select all", "Delete"] {
-            assert!(tree.has_text(label), "missing item label {label}: {:?}", tree.texts());
+            assert!(
+                tree.has_text(label),
+                "missing item label {label}: {:?}",
+                tree.texts()
+            );
         }
         // Shortcut (meta) labels present.
         for sc in ["Cmd+X", "Cmd+C", "Cmd+V", "Cmd+A", "Del"] {
-            assert!(tree.has_text(sc), "missing shortcut {sc}: {:?}", tree.texts());
+            assert!(
+                tree.has_text(sc),
+                "missing shortcut {sc}: {:?}",
+                tree.texts()
+            );
         }
     }
 
@@ -315,7 +335,10 @@ mod tests {
             .iter()
             .filter(|n| n.kind == "Panel" && (n.h - 1.0).abs() < 0.01)
             .count();
-        assert!(dividers >= 2, "expected >=2 separator dividers, got {dividers}");
+        assert!(
+            dividers >= 2,
+            "expected >=2 separator dividers, got {dividers}"
+        );
     }
 
     #[test]
@@ -323,7 +346,7 @@ mod tests {
         let th = theme();
         let danger = resolve_color(&th, "color.status.danger");
         let spec = ContextMenuSpec::new(vec![
-            MenuEntry::new("delete", "Delete").with_destructive(true),
+            MenuEntry::new("delete", "Delete").with_destructive(true)
         ]);
         let el = js_context_menu(&spec, &th);
         let tree = probe(&el, 400.0, 200.0);
@@ -366,7 +389,10 @@ mod tests {
             .and_then(|n| n.text_size)
             .expect("xl label font");
 
-        assert!(xl_font > xs_font, "xl font {xl_font} should exceed xs font {xs_font}");
+        assert!(
+            xl_font > xs_font,
+            "xl font {xl_font} should exceed xs font {xs_font}"
+        );
     }
 
     #[test]
@@ -389,5 +415,4 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), [first.value]);
     }
-
 }

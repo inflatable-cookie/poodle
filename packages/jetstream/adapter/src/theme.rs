@@ -8,8 +8,8 @@
 use std::collections::HashMap;
 
 use poodle_adapter::ThemeProvider;
-use poodle_tokens::typed::{self, ColorValue};
 use poodle_tokens::themes::ThemeDefinition;
+use poodle_tokens::typed::{self, ColorValue};
 
 /// Theme provider for the Jetstream rendering adapter.
 ///
@@ -51,7 +51,10 @@ impl JetstreamThemeProvider {
             if key.contains("color.") {
                 if let Some(hex) = value.strip_prefix('#') {
                     color_overrides.insert(key.to_string(), parse_hex_color(hex));
-                } else if let Some(inner) = value.strip_prefix("rgba(").and_then(|s| s.strip_suffix(')')) {
+                } else if let Some(inner) = value
+                    .strip_prefix("rgba(")
+                    .and_then(|s| s.strip_suffix(')'))
+                {
                     color_overrides.insert(key.to_string(), parse_rgba(inner));
                 }
             }
@@ -82,7 +85,10 @@ impl JetstreamThemeProvider {
         if let Some(hex) = token.strip_prefix('#') {
             return parse_hex_color(hex);
         }
-        if let Some(inner) = token.strip_prefix("rgba(").and_then(|s| s.strip_suffix(')')) {
+        if let Some(inner) = token
+            .strip_prefix("rgba(")
+            .and_then(|s| s.strip_suffix(')'))
+        {
             return parse_rgba(inner);
         }
         if let Some(color) = self.match_override(token) {
@@ -106,7 +112,8 @@ impl JetstreamThemeProvider {
     /// theme overrides — later calls win when tokens conflict.
     pub fn with_density(mut self, density: &poodle_tokens::density::DensityDefinition) -> Self {
         for &(key, value) in density.overrides {
-            self.space_overrides.insert(key.to_string(), value.to_string());
+            self.space_overrides
+                .insert(key.to_string(), value.to_string());
         }
         self
     }
@@ -115,9 +122,13 @@ impl JetstreamThemeProvider {
     ///
     /// Control-size overrides adjust control height, min-width, and
     /// default icon size for the given size stop.
-    pub fn with_control_size(mut self, size: &poodle_tokens::density::ControlSizeDefinition) -> Self {
+    pub fn with_control_size(
+        mut self,
+        size: &poodle_tokens::density::ControlSizeDefinition,
+    ) -> Self {
         for &(key, value) in size.overrides {
-            self.space_overrides.insert(key.to_string(), value.to_string());
+            self.space_overrides
+                .insert(key.to_string(), value.to_string());
         }
         self
     }
@@ -305,7 +316,7 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("size.panel.header") => Some(typed::semantic::SIZE_PANEL_HEADER.0),
         t if t.contains("size.list.grid.minItemWidth") => {
             Some(typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.0)
-        },
+        }
         // Overlay dimensions. These were missing, and a token this function does
         // not know resolves to 0 — so `Select`'s panel got `max-height: 0`,
         // collapsed to its padding, and painted rows it could not hit-test. The
@@ -315,14 +326,14 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("size.popover.maxWidth") => Some(typed::semantic::SIZE_POPOVER_MAX_WIDTH.0),
         t if t.contains("size.hoverCard.maxWidth") => {
             Some(typed::semantic::SIZE_HOVER_CARD_MAX_WIDTH.0)
-        },
+        }
         t if t.contains("size.select.minWidth") => Some(typed::semantic::SIZE_SELECT_MIN_WIDTH.0),
         t if t.contains("size.dateTimeRangePicker.minWidth") => {
             Some(typed::semantic::SIZE_DATE_TIME_RANGE_PICKER_MIN_WIDTH.0)
-        },
+        }
         t if t.contains("size.fileUpload.dropZoneMinHeight") => {
             Some(typed::semantic::SIZE_FILE_UPLOAD_DROP_ZONE_MIN_HEIGHT.0)
-        },
+        }
         // Space tokens
         t if t.contains("space.stack.sm") => Some(typed::semantic::SPACE_STACK_SM.0),
         t if t.contains("space.stack.md") => Some(typed::semantic::SPACE_STACK_MD.0),
@@ -336,32 +347,60 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("space.control.x") => Some(typed::semantic::SPACE_CONTROL_X.0),
         t if t.contains("space.control.y") => Some(typed::semantic::SPACE_CONTROL_Y.0),
         t if t.contains("space.button.gap") => Some(typed::semantic::SPACE_BUTTON_GAP.0),
-        t if t.contains("space.button.iconInset") => Some(typed::semantic::SPACE_BUTTON_ICON_INSET.0),
+        t if t.contains("space.button.iconInset") => {
+            Some(typed::semantic::SPACE_BUTTON_ICON_INSET.0)
+        }
         // Radius tokens
         t if t.contains("radius.control") => Some(typed::semantic::RADIUS_CONTROL.0),
         t if t.contains("radius.surface") => Some(typed::semantic::RADIUS_SURFACE.0),
         t if t.contains("radius.pill") => Some(typed::semantic::RADIUS_PILL.0),
         // Border width tokens
-        t if t.contains("border.width.default") || t.contains("borderWidth.default") => Some(typed::semantic::BORDER_WIDTH_DEFAULT.0),
-        t if t.contains("border.width.focus") || t.contains("borderWidth.focus") => Some(typed::semantic::BORDER_WIDTH_FOCUS.0),
+        t if t.contains("border.width.default") || t.contains("borderWidth.default") => {
+            Some(typed::semantic::BORDER_WIDTH_DEFAULT.0)
+        }
+        t if t.contains("border.width.focus") || t.contains("borderWidth.focus") => {
+            Some(typed::semantic::BORDER_WIDTH_FOCUS.0)
+        }
         // Typography sizes / line-heights — read from typed semantic constants,
         // never hardcoded. Order longest/most-specific paths first so e.g.
         // `typography.label.lineHeight` does not get swallowed by the
         // `typography.label.size` arm (`contains` matches substrings).
-        t if t.contains("typography.body.lineHeight") => Some(typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.0),
+        t if t.contains("typography.body.lineHeight") => {
+            Some(typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.0)
+        }
         t if t.contains("typography.body.size") => Some(typed::semantic::TYPOGRAPHY_BODY_SIZE.0),
-        t if t.contains("typography.label.lineHeight") => Some(typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.0),
-        t if t.contains("typography.label.weight") => Some(typed::semantic::TYPOGRAPHY_LABEL_WEIGHT),
+        t if t.contains("typography.label.lineHeight") => {
+            Some(typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.0)
+        }
+        t if t.contains("typography.label.weight") => {
+            Some(typed::semantic::TYPOGRAPHY_LABEL_WEIGHT)
+        }
         t if t.contains("typography.label.size") => Some(typed::semantic::TYPOGRAPHY_LABEL_SIZE.0),
-        t if t.contains("typography.caption.lineHeight") => Some(typed::semantic::TYPOGRAPHY_CAPTION_LINE_HEIGHT.0),
-        t if t.contains("typography.caption.weight") => Some(typed::semantic::TYPOGRAPHY_CAPTION_WEIGHT),
-        t if t.contains("typography.caption.size") => Some(typed::semantic::TYPOGRAPHY_CAPTION_SIZE.0),
-        t if t.contains("typography.counter.size") => Some(typed::semantic::TYPOGRAPHY_COUNTER_SIZE.0),
-        t if t.contains("typography.heading.lineHeight") => Some(typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.0),
-        t if t.contains("typography.heading.weight") => Some(typed::semantic::TYPOGRAPHY_HEADING_WEIGHT),
-        t if t.contains("typography.heading.size") => Some(typed::semantic::TYPOGRAPHY_HEADING_SIZE.0),
+        t if t.contains("typography.caption.lineHeight") => {
+            Some(typed::semantic::TYPOGRAPHY_CAPTION_LINE_HEIGHT.0)
+        }
+        t if t.contains("typography.caption.weight") => {
+            Some(typed::semantic::TYPOGRAPHY_CAPTION_WEIGHT)
+        }
+        t if t.contains("typography.caption.size") => {
+            Some(typed::semantic::TYPOGRAPHY_CAPTION_SIZE.0)
+        }
+        t if t.contains("typography.counter.size") => {
+            Some(typed::semantic::TYPOGRAPHY_COUNTER_SIZE.0)
+        }
+        t if t.contains("typography.heading.lineHeight") => {
+            Some(typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.0)
+        }
+        t if t.contains("typography.heading.weight") => {
+            Some(typed::semantic::TYPOGRAPHY_HEADING_WEIGHT)
+        }
+        t if t.contains("typography.heading.size") => {
+            Some(typed::semantic::TYPOGRAPHY_HEADING_SIZE.0)
+        }
         t if t.contains("typography.heading") => Some(typed::semantic::TYPOGRAPHY_HEADING_SIZE.0),
-        t if t.contains("typography.code.lineHeight") => Some(typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.0),
+        t if t.contains("typography.code.lineHeight") => {
+            Some(typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.0)
+        }
         t if t.contains("typography.code.size") => Some(typed::semantic::TYPOGRAPHY_CODE_SIZE.0),
         // Opacity tokens
         t if t.contains("state.opacity.disabled") => Some(typed::semantic::STATE_OPACITY_DISABLED),
@@ -417,8 +456,8 @@ impl JetstreamThemeProvider {
 
 #[cfg(test)]
 mod tests {
-    use poodle_adapter::ThemeProvider;
     use super::*;
+    use poodle_adapter::ThemeProvider;
 
     #[test]
     fn resolves_hex_color_tokens() {
@@ -473,7 +512,10 @@ mod tests {
     #[test]
     fn unknown_tokens_return_safe_defaults() {
         let theme = JetstreamThemeProvider::default();
-        assert_eq!(theme.resolve_color("unknown"), ColorValue(0.0, 0.0, 0.0, 1.0));
+        assert_eq!(
+            theme.resolve_color("unknown"),
+            ColorValue(0.0, 0.0, 0.0, 1.0)
+        );
         assert_eq!(theme.resolve_space("unknown"), 0.0);
         assert_eq!(theme.resolve_opacity("unknown"), 1.0);
     }
@@ -540,10 +582,15 @@ mod contrast_tests {
     fn neutral_contrast_matches_gpui_reference() {
         let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let surface = theme.resolve_color("color.background.surface");
-        assert!((surface.0 - 17.073 / 255.0).abs() < 0.002, "surface r {}", surface.0);
+        assert!(
+            (surface.0 - 17.073 / 255.0).abs() < 0.002,
+            "surface r {}",
+            surface.0
+        );
         let border = theme.resolve_color("color.border.default");
         assert!((border.3 - 0.11).abs() < 0.001, "border alpha {}", border.3);
-        let full = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE).with_contrast(1.0);
+        let full =
+            JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE).with_contrast(1.0);
         let literal = full.resolve_color("color.background.surface");
         assert!((literal.0 - 21.0 / 255.0).abs() < 0.002, "k=1 literal");
         let accent = theme.resolve_color("color.accent.base");
@@ -606,5 +653,4 @@ mod contrast_tests {
             "these tokens resolve to 0 — a component asking for one gets a silent zero: {dead:?}"
         );
     }
-
 }

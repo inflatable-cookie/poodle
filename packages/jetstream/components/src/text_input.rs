@@ -6,8 +6,8 @@
 //! Supports: leading/trailing icons, prefix/suffix affixes, validation state
 //! indicators, multiline mode, char count display, and search clear button.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState,
@@ -33,7 +33,11 @@ pub struct TextInput {
 
 impl TextInput {
     pub fn from_spec(spec: TextInputSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_clear: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_clear: None,
+        }
     }
 
     /// Fires when the search clear button is pressed. It renders only for a
@@ -96,7 +100,11 @@ fn build(
     } else {
         current_value
     };
-    let show_color = if is_placeholder { placeholder_color } else { text_color };
+    let show_color = if is_placeholder {
+        placeholder_color
+    } else {
+        text_color
+    };
 
     // ── Input row ──────────────────────────────────────────────────────────
     // Focus-within treatment (border-focus + fill-focus + focus-ring shadow,
@@ -106,9 +114,11 @@ fn build(
     // preview-owned (this component is render-only).
     let mut input_row = ui_element::div()
         .bg(fill)
-        .border(border_width).border_color(border_color)
+        .border(border_width)
+        .border_color(border_color)
         .rounded(radius)
-        .pl(pad_x).pr(pad_x)
+        .pl(pad_x)
+        .pr(pad_x)
         .flex_row()
         .gap(inline_gap)
         .focusable()
@@ -117,13 +127,14 @@ fn build(
     if spec.is_multiline() {
         // Multiline: min-height based on rows, top-aligned, vertical padding
         input_row = input_row
-            .min_h(rem_to_px(control_height_rem(effective_size) * spec.rows as f32))
+            .min_h(rem_to_px(
+                control_height_rem(effective_size) * spec.rows as f32,
+            ))
             .items_start()
-            .pt(pad_y).pb(pad_y);
+            .pt(pad_y)
+            .pb(pad_y);
     } else {
-        input_row = input_row
-            .h(height)
-            .items_center();
+        input_row = input_row.h(height).items_center();
     }
 
     // Prefix affix (left edge, with right divider)
@@ -145,7 +156,8 @@ fn build(
     if let Some(icon_name) = &spec.leading_icon {
         input_row = input_row.child(
             ui_element::icon(icon_name.as_str())
-                .w(icon_sz).h(icon_sz)
+                .w(icon_sz)
+                .h(icon_sz)
                 .text_color(icon_color),
         );
     }
@@ -164,7 +176,8 @@ fn build(
     if let Some(icon_name) = &spec.trailing_icon {
         input_row = input_row.child(
             ui_element::icon(icon_name.as_str())
-                .w(icon_sz).h(icon_sz)
+                .w(icon_sz)
+                .h(icon_sz)
                 .text_color(icon_color),
         );
     } else {
@@ -176,7 +189,8 @@ fn build(
                 let color = resolve_color(theme, spec.validation_indicator_color_token());
                 input_row = input_row.child(
                     ui_element::icon("check")
-                        .w(icon_sz).h(icon_sz)
+                        .w(icon_sz)
+                        .h(icon_sz)
                         .text_color(color),
                 );
             }
@@ -184,7 +198,8 @@ fn build(
                 let color = resolve_color(theme, spec.validation_indicator_color_token());
                 input_row = input_row.child(
                     ui_element::icon("x")
-                        .w(icon_sz).h(icon_sz)
+                        .w(icon_sz)
+                        .h(icon_sz)
                         .text_color(color),
                 );
             }
@@ -210,7 +225,8 @@ fn build(
             .cursor_pointer()
             .child(
                 ui_element::icon("x")
-                    .w(icon_sz).h(icon_sz)
+                    .w(icon_sz)
+                    .h(icon_sz)
                     .text_color(icon_color),
             );
 
@@ -228,13 +244,11 @@ fn build(
             .w(border_width)
             .self_stretch()
             .bg(affix_sep_color);
-        input_row = input_row
-            .child(divider)
-            .child(
-                ui_element::label(suffix.as_str())
-                    .text_color(affix_color)
-                    .text_size(font_size),
-            );
+        input_row = input_row.child(divider).child(
+            ui_element::label(suffix.as_str())
+                .text_color(affix_color)
+                .text_size(font_size),
+        );
     }
 
     if spec.is_disabled {
@@ -261,14 +275,11 @@ fn build(
             None => format!("{}", current_len),
         };
 
-        let char_count_row = ui_element::div()
-            .flex_row()
-            .justify_end()
-            .child(
-                ui_element::label(&count_text)
-                    .text_color(count_color)
-                    .text_size(count_font),
-            );
+        let char_count_row = ui_element::div().flex_row().justify_end().child(
+            ui_element::label(&count_text)
+                .text_color(count_color)
+                .text_size(count_font),
+        );
 
         return ui_element::div()
             .flex_col()
@@ -291,7 +302,12 @@ mod tests {
 
     fn probe_color(theme: &JetstreamThemeProvider, token: &str) -> ProbeColor {
         let c = resolve_color(theme, token);
-        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+        ProbeColor {
+            r: c.x,
+            g: c.y,
+            b: c.z,
+            a: c.w,
+        }
     }
 
     #[test]
@@ -299,7 +315,11 @@ mod tests {
         let th = theme();
         let spec = TextInputSpec::new().with_placeholder("Jane Doe");
         let tree = probe(&js_text_input(&spec, &th), 400.0, 80.0);
-        assert!(tree.has_text("Jane Doe"), "placeholder missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Jane Doe"),
+            "placeholder missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -313,7 +333,11 @@ mod tests {
         let danger = resolve_color(&th, "color.status.danger");
         // Border color isn't surfaced as bg, but the invalid indicator icon "x"
         // proves the invalid branch rendered.
-        assert!(tree.has_text("x"), "invalid indicator icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("x"),
+            "invalid indicator icon missing: {:?}",
+            tree.texts()
+        );
         let _ = danger;
     }
 
@@ -324,7 +348,11 @@ mod tests {
             .with_value("ok")
             .with_validation_state(ValidationState::Valid);
         let tree = probe(&js_text_input(&spec, &th), 400.0, 80.0);
-        assert!(tree.has_text("check"), "valid check icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("check"),
+            "valid check icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -335,9 +363,16 @@ mod tests {
             .with_validation_state(ValidationState::Pending);
         let tree = probe(&js_text_input(&spec, &th), 400.0, 80.0);
         // Pending uses the shared ring spinner (no static `loader`/`check`/`x` glyph).
-        assert!(!tree.has_text("loader"), "pending should not use loader glyph");
+        assert!(
+            !tree.has_text("loader"),
+            "pending should not use loader glyph"
+        );
         // Spinner ring renders extra structural nodes beyond the bare input.
-        assert!(tree.len() > 2, "pending spinner not rendered: {}", tree.len());
+        assert!(
+            tree.len() > 2,
+            "pending spinner not rendered: {}",
+            tree.len()
+        );
     }
 
     #[test]
@@ -348,8 +383,16 @@ mod tests {
             .with_leading_icon("search")
             .with_trailing_icon("calendar");
         let tree = probe(&js_text_input(&spec, &th), 400.0, 80.0);
-        assert!(tree.has_text("search"), "leading icon missing: {:?}", tree.texts());
-        assert!(tree.has_text("calendar"), "trailing icon missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("search"),
+            "leading icon missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("calendar"),
+            "trailing icon missing: {:?}",
+            tree.texts()
+        );
     }
 
     #[test]
@@ -364,7 +407,10 @@ mod tests {
         assert!(tree.has_text("kg"), "suffix missing: {:?}", tree.texts());
         // Separators are border-default solid Panel dividers — at least two thin bars.
         let sep = probe_color(&th, "color.border.default");
-        assert!(tree.has_background(sep, 0.02), "affix separator not colored border-default");
+        assert!(
+            tree.has_background(sep, 0.02),
+            "affix separator not colored border-default"
+        );
     }
 
     #[test]
@@ -376,11 +422,21 @@ mod tests {
             .with_show_char_count(true)
             .with_max_length(10);
         let t1 = probe(&js_text_input(&with_max, &th), 400.0, 80.0);
-        assert!(t1.has_text("3/10"), "char count n/max missing: {:?}", t1.texts());
+        assert!(
+            t1.has_text("3/10"),
+            "char count n/max missing: {:?}",
+            t1.texts()
+        );
         // Without max → bare "n" (Svelte parity).
-        let no_max = TextInputSpec::new().with_value("abcd").with_show_char_count(true);
+        let no_max = TextInputSpec::new()
+            .with_value("abcd")
+            .with_show_char_count(true);
         let t2 = probe(&js_text_input(&no_max, &th), 400.0, 80.0);
-        assert!(t2.has_text("4"), "bare char count missing: {:?}", t2.texts());
+        assert!(
+            t2.has_text("4"),
+            "bare char count missing: {:?}",
+            t2.texts()
+        );
     }
 
     #[test]
@@ -407,12 +463,18 @@ mod tests {
             .with_value("poodle");
 
         let el = TextInput::from_spec(spec, &theme())
-            .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_clear(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 80.0, "x");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_clear fired exactly once"
+        );
     }
 
     #[test]
@@ -431,12 +493,13 @@ mod tests {
             .with_read_only(true);
 
         let el = TextInput::from_spec(spec, &theme())
-            .on_clear(move || { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_clear(move || {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 320.0, 80.0, "x");
 
         assert_eq!(hits.load(Ordering::SeqCst), 0, "a read-only field cleared");
     }
-
 }

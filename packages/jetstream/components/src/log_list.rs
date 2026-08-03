@@ -37,7 +37,11 @@ pub struct LogList {
 
 impl LogList {
     pub fn from_spec(spec: LogListSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_clear_filters: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_clear_filters: None,
+        }
     }
 
     /// Fires when the clear affordance is pressed. It renders only while a
@@ -86,10 +90,8 @@ fn build(
 
     // Audit mode is entered when the spec carries audit-only state, matching
     // the GPUI/Svelte audit branch which owns those surfaces.
-    let is_audit = spec.loading
-        || spec.error.is_some()
-        || spec.has_audit_toolbar()
-        || spec.show_pagination();
+    let is_audit =
+        spec.loading || spec.error.is_some() || spec.has_audit_toolbar() || spec.show_pagination();
 
     // Root
     let mut el = ui_element::div()
@@ -287,7 +289,11 @@ fn build(
         };
         toolbar = toolbar.child(
             ui_element::button(*level)
-                .text_color(if is_active { chip_color } else { text_secondary })
+                .text_color(if is_active {
+                    chip_color
+                } else {
+                    text_secondary
+                })
                 .text_size(label_font)
                 .text_weight(if is_active { 600 } else { 400 })
                 .focusable(),
@@ -390,11 +396,17 @@ mod tests {
                 .with_filter_value("level", "error"),
             &theme(),
         )
-        .on_clear_filters(move || { counter.fetch_add(1, Ordering::SeqCst); })
+        .on_clear_filters(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        })
         .into_js_el();
 
         crate::element::click_probe::click_text(&el, 800.0, 480.0, "Clear");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 1, "on_clear_filters fired exactly once");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            1,
+            "on_clear_filters fired exactly once"
+        );
     }
 }

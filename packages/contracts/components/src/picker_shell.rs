@@ -156,9 +156,8 @@ impl PickerShellSpec {
     }
 
     pub fn result_count_text(&self) -> Option<String> {
-        self.result_count.map(|count| {
-            format!("{} result{}", count, if count == 1 { "" } else { "s" })
-        })
+        self.result_count
+            .map(|count| format!("{} result{}", count, if count == 1 { "" } else { "s" }))
     }
 
     pub fn effective_state_title(&self) -> &str {

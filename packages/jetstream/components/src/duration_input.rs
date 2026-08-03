@@ -13,8 +13,8 @@
 //! (rendered styling; actual focus tracking + keyboard ±1/onChange live in the
 //! preview event loop). ALL dimensions resolve from tokens.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, FontFamily, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ControlSize, DurationInputSpec};
 
@@ -309,10 +309,16 @@ mod tests {
 
     #[test]
     fn renders_segment_labels_and_separator() {
-        let spec = DurationInputSpec::new().with_value("01:30").with_show_seconds(false);
+        let spec = DurationInputSpec::new()
+            .with_value("01:30")
+            .with_show_seconds(false);
         let el = js_duration_input(&spec, &theme());
         let tree = probe(&el, 400.0, 200.0);
-        assert!(tree.has_text("h"), "hours label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("h"),
+            "hours label missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("m"), "minutes label missing");
         assert!(tree.has_text(":"), "separator glyph missing");
     }

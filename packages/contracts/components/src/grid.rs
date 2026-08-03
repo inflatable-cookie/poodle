@@ -199,17 +199,28 @@ mod tests {
     #[test]
     fn gap_resolves_contract_space_scale() {
         // Contract §8: none→0, sm→inline-sm, md→panel-y, lg→panel-x.
-        assert_eq!(GridSpec::new().with_gap(PaddingScale::None).resolved_column_gap(), None);
         assert_eq!(
-            GridSpec::new().with_gap(PaddingScale::Sm).resolved_column_gap(),
+            GridSpec::new()
+                .with_gap(PaddingScale::None)
+                .resolved_column_gap(),
+            None
+        );
+        assert_eq!(
+            GridSpec::new()
+                .with_gap(PaddingScale::Sm)
+                .resolved_column_gap(),
             Some(semantic::SPACE_INLINE_SM)
         );
         assert_eq!(
-            GridSpec::new().with_gap(PaddingScale::Md).resolved_column_gap(),
+            GridSpec::new()
+                .with_gap(PaddingScale::Md)
+                .resolved_column_gap(),
             Some(semantic::SPACE_PANEL_Y)
         );
         assert_eq!(
-            GridSpec::new().with_gap(PaddingScale::Lg).resolved_column_gap(),
+            GridSpec::new()
+                .with_gap(PaddingScale::Lg)
+                .resolved_column_gap(),
             Some(semantic::SPACE_PANEL_X)
         );
     }
@@ -223,11 +234,15 @@ mod tests {
 
     #[test]
     fn padding_resolves_contract_space_scale_both_axes() {
-        let inset = GridSpec::new().with_padding(PaddingScale::Md).resolved_padding();
+        let inset = GridSpec::new()
+            .with_padding(PaddingScale::Md)
+            .resolved_padding();
         assert_eq!(inset.horizontal, Some(semantic::SPACE_PANEL_Y));
         assert_eq!(inset.vertical, Some(semantic::SPACE_PANEL_Y));
 
-        let none = GridSpec::new().with_padding(PaddingScale::None).resolved_padding();
+        let none = GridSpec::new()
+            .with_padding(PaddingScale::None)
+            .resolved_padding();
         assert_eq!(none, Inset::none());
     }
 
@@ -236,22 +251,35 @@ mod tests {
         let cols = GridSpec::new().with_columns("1fr 1fr 1fr").parsed_columns();
         assert_eq!(
             cols,
-            GridColumns::Tracks(vec![GridTrack::Fr(1.0), GridTrack::Fr(1.0), GridTrack::Fr(1.0)])
+            GridColumns::Tracks(vec![
+                GridTrack::Fr(1.0),
+                GridTrack::Fr(1.0),
+                GridTrack::Fr(1.0)
+            ])
         );
     }
 
     #[test]
     fn parses_mixed_ratio_tracks() {
         let cols = GridSpec::new().with_columns("1fr 2fr").parsed_columns();
-        assert_eq!(cols, GridColumns::Tracks(vec![GridTrack::Fr(1.0), GridTrack::Fr(2.0)]));
+        assert_eq!(
+            cols,
+            GridColumns::Tracks(vec![GridTrack::Fr(1.0), GridTrack::Fr(2.0)])
+        );
     }
 
     #[test]
     fn parses_repeat_count() {
-        let cols = GridSpec::new().with_columns("repeat(3, 1fr)").parsed_columns();
+        let cols = GridSpec::new()
+            .with_columns("repeat(3, 1fr)")
+            .parsed_columns();
         assert_eq!(
             cols,
-            GridColumns::Tracks(vec![GridTrack::Fr(1.0), GridTrack::Fr(1.0), GridTrack::Fr(1.0)])
+            GridColumns::Tracks(vec![
+                GridTrack::Fr(1.0),
+                GridTrack::Fr(1.0),
+                GridTrack::Fr(1.0)
+            ])
         );
     }
 

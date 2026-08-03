@@ -119,7 +119,11 @@ impl ToggleGroupSpec {
             ToggleGroupSelectionMode::Multiple => {
                 let current = self.selected_values();
                 if current.iter().any(|v| v == value) {
-                    current.iter().filter(|v| v.as_str() != value).cloned().collect()
+                    current
+                        .iter()
+                        .filter(|v| v.as_str() != value)
+                        .cloned()
+                        .collect()
                 } else {
                     let mut next: Vec<String> = current.to_vec();
                     next.push(value.to_string());
@@ -211,9 +215,6 @@ mod tests {
             vec!["grid".to_string(), "board".to_string(), "list".to_string()]
         );
         // Toggling a present value removes it (allow_deactivation has no effect here).
-        assert_eq!(
-            spec.next_value_on_toggle("grid"),
-            vec!["board".to_string()]
-        );
+        assert_eq!(spec.next_value_on_toggle("grid"), vec!["board".to_string()]);
     }
 }

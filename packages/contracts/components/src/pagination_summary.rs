@@ -69,7 +69,10 @@ mod label_tests {
     fn matches_the_svelte_strings() {
         let spec = PaginationSummarySpec::new(2, 25, 67).with_total_pages(3);
         assert_eq!(spec.summary_text(), "Showing 26-50 of 67");
-        assert_eq!(spec.accessible_label(), "Showing 26-50 of 67 across 3 pages");
+        assert_eq!(
+            spec.accessible_label(),
+            "Showing 26-50 of 67 across 3 pages"
+        );
     }
 
     /// An empty result set reads "0-0 of 0", not "1-0".

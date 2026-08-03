@@ -12,7 +12,11 @@ use crate::theme_ext::resolve_px;
 
 /// Render a form-actions row with no inline danger content (the common case).
 /// Delegates to [`js_form_actions_full`] with an empty danger group.
-pub fn js_form_actions(spec: &FormActionsSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
+pub fn js_form_actions(
+    spec: &FormActionsSpec,
+    theme: &JetstreamThemeProvider,
+    children: Vec<JsEl>,
+) -> JsEl {
     js_form_actions_full(spec, theme, Vec::new(), children)
 }
 
@@ -61,9 +65,15 @@ pub fn js_form_actions_full(
     }
 
     match spec.align {
-        FormActionAlign::Start => { el = el.justify_start(); }
-        FormActionAlign::End => { el = el.justify_end(); }
-        FormActionAlign::Between => { el = el.justify_between(); }
+        FormActionAlign::Start => {
+            el = el.justify_start();
+        }
+        FormActionAlign::End => {
+            el = el.justify_end();
+        }
+        FormActionAlign::Between => {
+            el = el.justify_between();
+        }
     }
 
     // Inline danger group (contract §2 danger snippet, §8 Danger Inline:
@@ -135,7 +145,11 @@ mod tests {
         let th = theme();
         let el = js_form_actions(&FormActionsSpec::new(), &th, primary_secondary(&th));
         let tree = probe(&el, 600.0, 100.0);
-        assert!(tree.has_text("Cancel"), "secondary button missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Cancel"),
+            "secondary button missing: {:?}",
+            tree.texts()
+        );
         assert!(
             tree.has_text("Save changes"),
             "primary button missing: {:?}",
@@ -218,16 +232,34 @@ mod tests {
         let el = js_form_actions_full(&spec, &th, danger, primary_secondary(&th));
         let tree = probe(&el, 600.0, 100.0);
         // Inline danger button is present alongside the two primary actions.
-        assert!(tree.has_text("Delete"), "inline danger missing: {:?}", tree.texts());
-        assert!(tree.has_text("Save changes"), "primary missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Delete"),
+            "inline danger missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Save changes"),
+            "primary missing: {:?}",
+            tree.texts()
+        );
         // Delete + overflow-trigger + Cancel + Save = 4 Button widgets (the icon
         // button is itself a Button containing an Icon glyph).
-        assert_eq!(tree.count_kind("Button"), 4, "expected danger + trigger + 2 primary");
+        assert_eq!(
+            tree.count_kind("Button"),
+            4,
+            "expected danger + trigger + 2 primary"
+        );
         // The overflow trigger renders the ellipsis glyph icon.
         assert!(
-            tree.nodes.iter().any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
+            tree.nodes
+                .iter()
+                .any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
             "overflow danger trigger (ellipsis Icon) missing: {:?}",
-            tree.nodes.iter().filter(|n| n.kind == "Icon").map(|n| n.text.clone()).collect::<Vec<_>>()
+            tree.nodes
+                .iter()
+                .filter(|n| n.kind == "Icon")
+                .map(|n| n.text.clone())
+                .collect::<Vec<_>>()
         );
     }
 
@@ -239,7 +271,10 @@ mod tests {
         let tree = probe(&el, 600.0, 100.0);
         assert_eq!(tree.count_kind("Button"), 2);
         assert!(
-            !tree.nodes.iter().any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
+            !tree
+                .nodes
+                .iter()
+                .any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
             "no overflow trigger expected without dangerItems"
         );
     }

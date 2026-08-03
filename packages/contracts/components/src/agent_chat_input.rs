@@ -343,7 +343,10 @@ impl AgentChatInputSpec {
     /// (contract §12).
     pub fn visible_rows(&self) -> usize {
         let lines = self.value.lines().count().max(1);
-        lines.clamp(self.min_rows.max(1), self.max_rows.max(self.min_rows.max(1)))
+        lines.clamp(
+            self.min_rows.max(1),
+            self.max_rows.max(self.min_rows.max(1)),
+        )
     }
 
     /// Contract §4: map a key gesture to composer intent.
@@ -555,9 +558,13 @@ mod tests {
         assert!(AgentChatInputSpec::new().with_value("hi").can_submit());
         // Whitespace is not text.
         assert!(!AgentChatInputSpec::new().with_value("   \n ").can_submit());
-        assert!(AgentChatInputSpec::new().with_allow_empty_submit(true).can_submit());
+        assert!(AgentChatInputSpec::new()
+            .with_allow_empty_submit(true)
+            .can_submit());
         // Busy always allows the action — stopping must not be blocked.
-        assert!(AgentChatInputSpec::new().with_status(AgentChatStatus::Busy).can_submit());
+        assert!(AgentChatInputSpec::new()
+            .with_status(AgentChatStatus::Busy)
+            .can_submit());
         // Disabled beats everything.
         assert!(!AgentChatInputSpec::new()
             .with_value("hi")
@@ -643,7 +650,9 @@ mod tests {
         assert_eq!(intent, SubmitIntent::Submit);
         // …but it never reaches on_submit: stopping is deliberate.
         assert!(!busy.accepts_submit(intent));
-        assert!(AgentChatInputSpec::new().with_value("hi").accepts_submit(intent));
+        assert!(AgentChatInputSpec::new()
+            .with_value("hi")
+            .accepts_submit(intent));
     }
 
     #[test]
@@ -651,13 +660,16 @@ mod tests {
         let file = AgentChatAttachment::new("a1", "release-notes.md");
         assert!(!file.is_thumbnail());
 
-        let image = AgentChatAttachment::new("a2", "diagram.png").with_thumbnail("/tmp/diagram.png");
+        let image =
+            AgentChatAttachment::new("a2", "diagram.png").with_thumbnail("/tmp/diagram.png");
         assert!(image.is_thumbnail());
         assert_eq!(image.thumbnail_url.as_deref(), Some("/tmp/diagram.png"));
 
         // Tiles are square and grow with the size ladder.
         let spec = AgentChatInputSpec::new();
-        assert!(spec.attachment_thumb_rem(ControlSize::Xs) < spec.attachment_thumb_rem(ControlSize::Xl));
+        assert!(
+            spec.attachment_thumb_rem(ControlSize::Xs) < spec.attachment_thumb_rem(ControlSize::Xl)
+        );
     }
 
     #[test]

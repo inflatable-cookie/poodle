@@ -31,14 +31,25 @@ pub fn single_select_transition(
 ) -> (SingleSelectContext, Vec<SingleSelectEffect>) {
     match event {
         SingleSelectEvent::Select { value } => {
-            let option = context.options.iter().find(|candidate| candidate.value == value);
+            let option = context
+                .options
+                .iter()
+                .find(|candidate| candidate.value == value);
             let same = context.value.as_deref() == Some(value.as_str());
 
             match option {
                 Some(option) if !context.disabled && !option.disabled && !same => {
-                    let effects = vec![SingleSelectEffect::EmitValueChange { value: value.clone() }];
+                    let effects = vec![SingleSelectEffect::EmitValueChange {
+                        value: value.clone(),
+                    }];
 
-                    (SingleSelectContext { value: Some(value), ..context }, effects)
+                    (
+                        SingleSelectContext {
+                            value: Some(value),
+                            ..context
+                        },
+                        effects,
+                    )
                 }
                 _ => (context, vec![]),
             }

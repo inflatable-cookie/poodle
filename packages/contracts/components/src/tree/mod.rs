@@ -384,9 +384,9 @@ impl TreeSpec {
     /// the gutter they all need it to stay aligned.
     pub fn is_flat(&self) -> bool {
         fn any_branch(nodes: &[TreeNode]) -> bool {
-            nodes
-                .iter()
-                .any(|node| node.is_branch || !node.children.is_empty() || any_branch(&node.children))
+            nodes.iter().any(|node| {
+                node.is_branch || !node.children.is_empty() || any_branch(&node.children)
+            })
         }
         self.collapse_twisty_when_flat && !any_branch(&self.nodes)
     }
@@ -528,7 +528,10 @@ mod flat_tests {
         let mut parent = TreeNode::new("group", "Group");
         parent.children = vec![leaf("child")];
         let nested = TreeSpec::new(vec![leaf("a"), parent]).with_collapse_twisty_when_flat(true);
-        assert!(!nested.is_flat(), "a branch anywhere brings the gutter back");
+        assert!(
+            !nested.is_flat(),
+            "a branch anywhere brings the gutter back"
+        );
     }
 
     /// Opt-in: flatness alone does not collapse the gutter, because a tree

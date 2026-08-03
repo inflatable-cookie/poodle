@@ -46,7 +46,8 @@ pub fn to_epoch_days(date: IsoDate) -> i64 {
     let era = if y >= 0 { y } else { y - 399 } / 400;
     let yoe = (y - era * 400) as u64;
     let m = i64::from(date.month);
-    let doy = ((153 * (if m > 2 { m - 3 } else { m + 9 }) + 2) / 5 + i64::from(date.day) - 1) as u64;
+    let doy =
+        ((153 * (if m > 2 { m - 3 } else { m + 9 }) + 2) / 5 + i64::from(date.day) - 1) as u64;
     let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
 
     era * 146097 + doe as i64 - 719468
@@ -107,7 +108,11 @@ pub fn add_months(date: IsoDate, amount: i32) -> IsoDate {
     let year = total.div_euclid(12);
     let month = (total.rem_euclid(12) + 1) as u32;
 
-    IsoDate { year, month, day: 1 }
+    IsoDate {
+        year,
+        month,
+        day: 1,
+    }
 }
 
 pub fn start_of_month(date: IsoDate) -> IsoDate {
@@ -126,8 +131,14 @@ pub fn compare_iso_date(left: &str, right: &str) -> Option<i32> {
 }
 
 /// Range endpoints ordered start <= end (mirror of `normalizeDateRange`).
-pub fn normalize_date_range(start: Option<&str>, end: Option<&str>) -> (Option<String>, Option<String>) {
-    match (parse_iso_date(start.unwrap_or("")), parse_iso_date(end.unwrap_or(""))) {
+pub fn normalize_date_range(
+    start: Option<&str>,
+    end: Option<&str>,
+) -> (Option<String>, Option<String>) {
+    match (
+        parse_iso_date(start.unwrap_or("")),
+        parse_iso_date(end.unwrap_or("")),
+    ) {
         (Some(s), Some(e)) if to_epoch_days(s) > to_epoch_days(e) => {
             (Some(format_iso_date(e)), Some(format_iso_date(s)))
         }
@@ -158,7 +169,10 @@ fn weekday_offset(day: u32, week_starts_on: WeekStart) -> u32 {
 }
 
 pub fn start_of_week(date: IsoDate, week_starts_on: WeekStart) -> IsoDate {
-    add_days(date, -i64::from(weekday_offset(weekday(date), week_starts_on)))
+    add_days(
+        date,
+        -i64::from(weekday_offset(weekday(date), week_starts_on)),
+    )
 }
 
 /// Signed day delta from `iso` to its week start (negative) or end (positive).
@@ -190,7 +204,11 @@ pub fn build_calendar_weeks(
     let anchor = parse_iso_date(visible_month)
         .or_else(|| parse_iso_date(today_iso))
         .map(start_of_month)
-        .unwrap_or(IsoDate { year: 1970, month: 1, day: 1 });
+        .unwrap_or(IsoDate {
+            year: 1970,
+            month: 1,
+            day: 1,
+        });
     let first_visible = start_of_week(anchor, week_starts_on);
     let first_epoch = to_epoch_days(first_visible);
 

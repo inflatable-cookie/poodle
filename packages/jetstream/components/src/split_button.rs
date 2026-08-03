@@ -12,8 +12,8 @@
 //! contract §6 ARIA roles (menu/menuitem/separator, aria-haspopup/expanded) are
 //! an accepted delta.
 
-use jetstream_ui::Color;
 use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::Color;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{ButtonTone, ButtonVariant, SplitButtonSpec, SplitMenuItem};
 
@@ -142,7 +142,13 @@ impl SplitButton {
 
 impl crate::element::IntoJsEl for SplitButton {
     fn into_js_el(self) -> JsEl {
-        build(&self.spec, &self.theme, self.on_click, self.on_dropdown, self.on_action)
+        build(
+            &self.spec,
+            &self.theme,
+            self.on_click,
+            self.on_dropdown,
+            self.on_action,
+        )
     }
 }
 
@@ -167,7 +173,9 @@ fn build(
     // Contract §8 Chevron: per-size icon dimension (0.625–0.875rem).
     let chevron_size = rem_to_px(split_button_chevron_size_rem(effective_size));
     // Spinner glyph tracks the supporting-visual size (one stop down).
-    let spinner_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let spinner_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
     // Contract §8 Divider: 60% of control height, centered.
     let divider_h = height * 0.6;
     // Contract §8 Toggle half: per-size width (1.75–2.5rem), zero padding.
@@ -190,10 +198,7 @@ fn build(
     let label = spec.label.as_deref().unwrap_or("");
 
     // ── Root row ──
-    let mut root = ui_element::div()
-        .flex_row()
-        .items_center()
-        .rounded(radius);
+    let mut root = ui_element::div().flex_row().items_center().rounded(radius);
 
     // ── Primary half ──
     // Spinner + label live as children so Taffy lays them out with the gap.
@@ -405,7 +410,12 @@ mod tests {
     }
 
     fn probe_color(c: Color) -> ProbeColor {
-        ProbeColor { r: c.r, g: c.g, b: c.b, a: c.a }
+        ProbeColor {
+            r: c.r,
+            g: c.g,
+            b: c.b,
+            a: c.a,
+        }
     }
 
     fn menu_items() -> Vec<SplitMenuItem> {
@@ -425,7 +435,11 @@ mod tests {
         let tree = probe(&el, 400.0, 120.0);
 
         // Primary label present.
-        assert!(tree.has_text("Save"), "primary label missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("Save"),
+            "primary label missing: {:?}",
+            tree.texts()
+        );
         // Chevron glyph present (trailing dropdown trigger).
         assert!(
             tree.has_text("chevron-down"),
@@ -433,7 +447,11 @@ mod tests {
             tree.texts()
         );
         // Two button segments (primary + toggle).
-        assert_eq!(tree.count_kind("Button"), 2, "expected primary + toggle buttons");
+        assert_eq!(
+            tree.count_kind("Button"),
+            2,
+            "expected primary + toggle buttons"
+        );
         // Divider Panel present at 60% control height. Default md height = 2.25rem
         // (36px) → divider 21.6px. Find the thin (1px wide) panel.
         let divider = tree
@@ -467,7 +485,11 @@ mod tests {
         assert!(tree.has_text("Save as template"), "menu item 2 missing");
         assert!(tree.has_text("Discard changes"), "menu item 3 missing");
         // primary + toggle + 3 actionable menu items = 5 buttons.
-        assert_eq!(tree.count_kind("Button"), 5, "expected 2 control + 3 menu buttons");
+        assert_eq!(
+            tree.count_kind("Button"),
+            5,
+            "expected 2 control + 3 menu buttons"
+        );
     }
 
     #[test]
@@ -480,8 +502,15 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 400.0, 200.0);
-        assert!(!tree.has_text("Save as draft"), "menu must stay hidden when closed");
-        assert_eq!(tree.count_kind("Button"), 2, "only primary + toggle when closed");
+        assert!(
+            !tree.has_text("Save as draft"),
+            "menu must stay hidden when closed"
+        );
+        assert_eq!(
+            tree.count_kind("Button"),
+            2,
+            "only primary + toggle when closed"
+        );
     }
 
     // ── Variant / tone: ghost is transparent-filled, danger differs ──
@@ -554,7 +583,11 @@ mod tests {
             &th,
         );
         let tree = probe(&el, 400.0, 120.0);
-        assert!(tree.has_text("loader"), "loading spinner glyph missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("loader"),
+            "loading spinner glyph missing: {:?}",
+            tree.texts()
+        );
         // Loading also dims the control (is_unavailable).
         assert!(el.style.opacity < 1.0, "loading should dim the control");
     }
@@ -563,7 +596,9 @@ mod tests {
     fn disabled_dims_control() {
         let th = theme();
         let el = js_split_button(
-            &SplitButtonSpec::new().with_label("Save").with_disabled(true),
+            &SplitButtonSpec::new()
+                .with_label("Save")
+                .with_disabled(true),
             &th,
         );
         assert!(el.style.opacity < 1.0, "disabled should reduce opacity");
@@ -625,5 +660,4 @@ mod tests {
             ["primary", "dropdown", "action:template"]
         );
     }
-
 }

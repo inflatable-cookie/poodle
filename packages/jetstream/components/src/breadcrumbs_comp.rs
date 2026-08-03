@@ -31,7 +31,11 @@ pub struct Breadcrumbs {
 
 impl Breadcrumbs {
     pub fn from_spec(spec: BreadcrumbsSpec, theme: &JetstreamThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_navigate: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_navigate: None,
+        }
     }
 
     /// Fires with the crumb's `href` when one is chosen.
@@ -77,7 +81,11 @@ fn build(
     let visible = spec.visible_items();
     let visible_len = visible.len();
 
-    let mut el = ui_element::div().flex_row().flex_wrap().items_center().gap(gap);
+    let mut el = ui_element::div()
+        .flex_row()
+        .flex_wrap()
+        .items_center()
+        .gap(gap);
 
     for (i, item) in visible.iter().enumerate() {
         if i > 0 {
@@ -92,7 +100,11 @@ fn build(
         }
 
         let is_current = spec.is_current_at(item, i, visible_len);
-        let color = if is_current { current_color } else { text_color };
+        let color = if is_current {
+            current_color
+        } else {
+            text_color
+        };
 
         // Contract §8: current is color-only, no weight bump.
         let mut crumb = ui_element::label(&item.label)
@@ -104,7 +116,9 @@ fn build(
         if let (false, Some(href), Some(handler)) = (is_current, item.href.as_ref(), &on_navigate) {
             let handler = std::sync::Arc::clone(handler);
             let href = href.clone();
-            crumb = crumb.cursor_pointer().on_click(move |_event| handler(&href));
+            crumb = crumb
+                .cursor_pointer()
+                .on_click(move |_event| handler(&href));
         }
 
         el = el.child(crumb);
@@ -189,7 +203,11 @@ mod tests {
         let tree = probe(&js_breadcrumbs(&spec, &theme()), 600.0, 80.0);
         // first + … + last 2 → Home, ellipsis, Primitives, Button.
         assert!(tree.has_text("Home"));
-        assert!(tree.has_text("\u{2026}"), "ellipsis crumb missing: {:?}", tree.texts());
+        assert!(
+            tree.has_text("\u{2026}"),
+            "ellipsis crumb missing: {:?}",
+            tree.texts()
+        );
         assert!(tree.has_text("Primitives"));
         assert!(tree.has_text("Button"));
         assert!(!tree.has_text("Workspace"), "middle items should collapse");
@@ -276,12 +294,17 @@ mod tests {
         let counter = Arc::clone(&hits);
 
         let el = Breadcrumbs::from_spec(BreadcrumbsSpec::new(trail()), &theme())
-            .on_navigate(move |_| { counter.fetch_add(1, Ordering::SeqCst); })
+            .on_navigate(move |_| {
+                counter.fetch_add(1, Ordering::SeqCst);
+            })
             .into_js_el();
 
         crate::element::click_probe::click_text(&el, 600.0, 80.0, "Home");
 
-        assert_eq!(hits.load(Ordering::SeqCst), 0, "a crumb with no href navigated");
+        assert_eq!(
+            hits.load(Ordering::SeqCst),
+            0,
+            "a crumb with no href navigated"
+        );
     }
-
 }

@@ -31,7 +31,6 @@ pub struct PopoverSpec {
     /// Overrides the default `24rem` surface max-width, in rem
     /// (contract §3 `surfaceMaxWidth`). `None` → default.
     pub surface_max_width_rem: Option<f32>,
-
 }
 
 impl Default for PopoverSpec {
@@ -124,12 +123,14 @@ impl PopoverSpec {
 
     /// Effective surface min-width in rem (override or contract default `14rem`).
     pub fn effective_surface_min_width_rem(&self) -> f32 {
-        self.surface_min_width_rem.unwrap_or(POPOVER_SURFACE_MIN_WIDTH_REM)
+        self.surface_min_width_rem
+            .unwrap_or(POPOVER_SURFACE_MIN_WIDTH_REM)
     }
 
     /// Effective surface max-width in rem (override or contract default `24rem`).
     pub fn effective_surface_max_width_rem(&self) -> f32 {
-        self.surface_max_width_rem.unwrap_or(POPOVER_SURFACE_MAX_WIDTH_REM)
+        self.surface_max_width_rem
+            .unwrap_or(POPOVER_SURFACE_MAX_WIDTH_REM)
     }
 
     pub fn surface_fill_token(&self) -> &'static str {

@@ -41,7 +41,9 @@ fn open(context: PopoverContext) -> (PopoverState, Vec<PopoverEffect>) {
         PopoverState::Open,
         vec![
             PopoverEffect::EmitOpenChange { open: true },
-            PopoverEffect::FocusOnOpen { strategy: context.initial_focus },
+            PopoverEffect::FocusOnOpen {
+                strategy: context.initial_focus,
+            },
         ],
     )
 }
@@ -49,7 +51,10 @@ fn open(context: PopoverContext) -> (PopoverState, Vec<PopoverEffect>) {
 fn close() -> (PopoverState, Vec<PopoverEffect>) {
     (
         PopoverState::Closed,
-        vec![PopoverEffect::EmitOpenChange { open: false }, PopoverEffect::RestoreTriggerFocus],
+        vec![
+            PopoverEffect::EmitOpenChange { open: false },
+            PopoverEffect::RestoreTriggerFocus,
+        ],
     )
 }
 
@@ -64,8 +69,14 @@ pub fn popover_transition(
 
     match (state, event) {
         (PopoverState::Closed, PopoverEvent::Toggle | PopoverEvent::Open) => open(context),
-        (PopoverState::Open, PopoverEvent::Toggle | PopoverEvent::Close | PopoverEvent::Escape) => close(),
-        (PopoverState::Open, PopoverEvent::OutsideInteract) if context.dismiss_on_outside_interact => close(),
+        (PopoverState::Open, PopoverEvent::Toggle | PopoverEvent::Close | PopoverEvent::Escape) => {
+            close()
+        }
+        (PopoverState::Open, PopoverEvent::OutsideInteract)
+            if context.dismiss_on_outside_interact =>
+        {
+            close()
+        }
         _ => (state, vec![]),
     }
 }

@@ -159,6 +159,9 @@ mod tests {
             .find(|n| n.text.as_deref() == Some("b"))
             .unwrap()
             .x;
-        assert!(bx > ax, "horizontal children not in a row: a.x={ax} b.x={bx}");
+        assert!(
+            bx > ax,
+            "horizontal children not in a row: a.x={ax} b.x={bx}"
+        );
     }
 }

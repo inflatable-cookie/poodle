@@ -79,10 +79,7 @@ impl TreeSpec {
     /// Total number of nodes in the tree (all depths).
     pub fn total_node_count(&self) -> usize {
         fn count(nodes: &[TreeNode]) -> usize {
-            nodes
-                .iter()
-                .map(|n| 1 + count(&n.children))
-                .sum()
+            nodes.iter().map(|n| 1 + count(&n.children)).sum()
         }
         count(&self.nodes)
     }
