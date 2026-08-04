@@ -210,6 +210,24 @@ pub enum NodePosition {
     },
 }
 
+/// Phase of a drag interaction.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum NodeDragPhase {
+    Start,
+    Move,
+    End,
+}
+
+/// A drag event, in the vocabulary's terms: per-frame deltas only. Absolute
+/// positions are a backend concern (they depend on layout, which the
+/// component never sees).
+#[derive(Clone, Copy, Debug)]
+pub struct NodeDragEvent {
+    pub phase: NodeDragPhase,
+    pub delta_x: f32,
+    pub delta_y: f32,
+}
+
 /// Handler for an activation (click, enter key, tap). Payload is captured by
 /// the component when it builds the closure — the vocabulary carries no event
 /// plumbing, and `poodle-events`' `SemanticEvent` remains the layer above.
@@ -225,6 +243,9 @@ pub struct Interaction {
     /// describes (components bake disabled opacity into the descriptor).
     pub disabled: bool,
     pub on_activate: Option<ActivateHandler>,
+    /// Drag handler. Unlike activation, drags do not bubble: the exact node
+    /// under the pointer must carry the handler.
+    pub on_drag: Option<Arc<dyn Fn(&NodeDragEvent) + Send + Sync>>,
 }
 
 /// Accessibility roles the ported components have needed so far. Grows with
