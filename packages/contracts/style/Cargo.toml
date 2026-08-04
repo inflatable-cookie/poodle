@@ -2,6 +2,7 @@
 name = "poodle-style"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.90"
 description = "Resolved style descriptor IR for Poodle multi-renderer targets."
 
 [lib]

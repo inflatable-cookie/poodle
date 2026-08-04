@@ -2,6 +2,7 @@
 name = "poodle-jetstream-components"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.90"
 description = "Poodle component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
 
 [dependencies]

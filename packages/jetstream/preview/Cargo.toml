@@ -2,6 +2,7 @@
 name = "poodle-jetstream-preview"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.90"
 default-run = "poodle-jetstream-preview"
 description = "Jetstream preview application for the Poodle design system — showcases all Poodle components rendered via the Jetstream game engine."
 
