@@ -68,3 +68,6 @@ pub fn hex_color(hex: &str) -> Option<ColorValue> {
 pub const TRANSPARENT: ColorValue = ColorValue(0.0, 0.0, 0.0, 0.0);
 /// Pure black, for the contract's darkening mixes.
 pub const BLACK: ColorValue = ColorValue(0.0, 0.0, 0.0, 1.0);
+
+/// Pure white, for the contract's lightening mixes.
+pub const WHITE: ColorValue = ColorValue(1.0, 1.0, 1.0, 1.0);

@@ -13,18 +13,26 @@
 //! `packages/jetstream/components` and `packages/gpui/components`
 //! predecessors once its parity fixtures are green on both backends.
 
+pub mod avatar;
 pub mod badge;
 pub mod button;
 pub mod checkbox;
 pub mod color;
 pub mod icon_button;
 pub mod presentation;
+pub mod progress;
 pub mod select;
+pub mod spinner;
 pub mod switch;
+pub mod tooltip;
 
+pub use avatar::avatar;
 pub use badge::badge;
 pub use button::button;
 pub use checkbox::checkbox;
 pub use icon_button::icon_button;
+pub use progress::progress;
 pub use select::{select, SelectHandlers};
+pub use spinner::spinner;
 pub use switch::switch;
+pub use tooltip::tooltip;

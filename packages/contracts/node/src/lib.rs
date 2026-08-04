@@ -53,6 +53,12 @@ pub enum NodeKind {
     Text { content: String },
     /// A named icon. The backend rasterises; the name is the contract.
     Icon { name: String, size: f32 },
+    /// An image by source path/URL; the backend owns decode and upload.
+    /// Fits by covering the box (object-fit: cover) — the one mode a
+    /// component has needed so far.
+    Image { source: String },
+    /// A determinate progress bar: the backend fills `fraction` of the track.
+    Progress { fraction: f32 },
     /// A button widget: the backend's native pressable, carrying its label.
     /// Distinct from `Container` + `Text` because backends give buttons
     /// intrinsic behaviour (pressed visuals, activation semantics) that a
@@ -114,6 +120,25 @@ pub struct NodeStyle {
     /// non-empty it wins over `descriptor.shadow`, which stays the one-token
     /// single-shadow convenience.
     pub shadow_layers: Vec<ShadowLayer>,
+    /// Never grow or shrink in flex layout.
+    pub flex_none: bool,
+    /// Stretch across the parent's cross axis (align-self: stretch).
+    pub self_stretch: bool,
+    /// Explicit flex-grow factor. Fractional splits (progress's 40/60 bar)
+    /// need a raw factor; `LayoutSizing::Grow` stays the common 1.0 case.
+    pub flex_grow: Option<f32>,
+    /// Wrap flex children onto multiple lines.
+    pub flex_wrap: bool,
+    /// Keep text on one line (white-space: nowrap).
+    pub no_wrap: bool,
+    /// Border-top colour override — the bright arc of a ring spinner. The
+    /// other sides keep `descriptor.border.color`.
+    pub border_color_top: Option<ColorValue>,
+    /// Linear-gradient background: angle in degrees, sRGB stops at 0..=1.
+    /// Wins over `descriptor.background` when set.
+    pub gradient: Option<(f32, Vec<(ColorValue, f32)>)>,
+    /// A declared keyframe animation on this node.
+    pub animation: Option<NodeAnimation>,
     /// Render above everything and escape ancestor clip rects. The overlay
     /// half of a popover/menu/dropdown; position it with
     /// [`NodePosition::Absolute`] inside a [`NodePosition::Relative`] parent.
@@ -137,6 +162,14 @@ impl Default for NodeStyle {
             text_size: None,
             text_weight: None,
             fill_width: false,
+            flex_none: false,
+            self_stretch: false,
+            flex_grow: None,
+            flex_wrap: false,
+            no_wrap: false,
+            border_color_top: None,
+            gradient: None,
+            animation: None,
             letter_spacing_em: None,
             text_align: None,
             active: None,
@@ -209,15 +242,91 @@ pub enum NodeRole {
     ListItem,
     ListBox,
     ListBoxOption,
+    Image,
     Menu,
     MenuItem,
+    ProgressIndicator,
     RadioGroup,
     RadioButton,
+    Status,
     Switch,
     Tab,
     TabList,
     TextInput,
     Tooltip,
+}
+
+/// A property an animation may drive. Backends map to their own channels.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum AnimProperty {
+    Opacity,
+    Rotate,
+    TranslateX,
+    TranslateY,
+    ScaleX,
+    ScaleY,
+}
+
+/// Animation easing.
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
+pub enum AnimEasing {
+    #[default]
+    Linear,
+    EaseIn,
+    EaseOut,
+    EaseInOut,
+}
+
+/// Loop behaviour.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum AnimLoop {
+    #[default]
+    Once,
+    Loop,
+    PingPong,
+}
+
+/// One keyframe: property values at a position in the cycle (0.0..=1.0).
+#[derive(Clone, Debug)]
+pub struct AnimKeyframe {
+    pub at: f32,
+    pub values: Vec<(AnimProperty, f32)>,
+}
+
+/// A declared keyframe animation. The node declares; the backend drives the
+/// clock. `key` is the stable identity that lets an immediate-mode backend
+/// keep the clock running across tree rebuilds — nodes sharing a key share a
+/// clock and stay in phase, like CSS keyframes.
+#[derive(Clone, Debug)]
+pub struct NodeAnimation {
+    pub key: String,
+    pub keyframes: Vec<AnimKeyframe>,
+    pub duration_secs: f32,
+    pub easing: AnimEasing,
+    pub loop_mode: AnimLoop,
+}
+
+impl NodeAnimation {
+    /// The classic: continuous rotation, `duration_secs` per revolution.
+    pub fn spin(key: impl Into<String>, duration_secs: f32) -> Self {
+        let tau = std::f32::consts::TAU;
+        Self {
+            key: key.into(),
+            keyframes: vec![
+                AnimKeyframe {
+                    at: 0.0,
+                    values: vec![(AnimProperty::Rotate, 0.0)],
+                },
+                AnimKeyframe {
+                    at: 1.0,
+                    values: vec![(AnimProperty::Rotate, tau)],
+                },
+            ],
+            duration_secs,
+            easing: AnimEasing::Linear,
+            loop_mode: AnimLoop::Loop,
+        }
+    }
 }
 
 /// Tri-state checked value, for checkboxes and switches.
@@ -298,7 +407,7 @@ impl Node {
                     out.push(label.as_str());
                 }
             }
-            NodeKind::Container => {}
+            NodeKind::Image { .. } | NodeKind::Progress { .. } | NodeKind::Container => {}
         }
         for child in &self.children {
             child.collect_texts(out);
@@ -325,6 +434,8 @@ impl fmt::Debug for Node {
             NodeKind::Text { content } => format!("Text({content:?})"),
             NodeKind::Icon { name, .. } => format!("Icon({name:?})"),
             NodeKind::Button { label } => format!("Button({label:?})"),
+            NodeKind::Image { source } => format!("Image({source:?})"),
+            NodeKind::Progress { fraction } => format!("Progress({fraction})"),
         };
         f.debug_struct("Node")
             .field("kind", &kind)
