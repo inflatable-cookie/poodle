@@ -1,0 +1,16 @@
+[package]
+name = "poodle-node"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+description = "Poodle's render vocabulary — the node tree components emit and backends interpret."
+
+[dependencies]
+poodle-layout = { path = "../layout" }
+poodle-style = { path = "../style" }
+poodle-tokens = { path = "../tokens" }
+
+[package.metadata.poodle]
+public-intent = true
+channel = "preview"
+stability = "pre-release"
