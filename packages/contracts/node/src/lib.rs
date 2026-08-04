@@ -105,6 +105,14 @@ pub struct NodeStyle {
     pub text_size: Option<f32>,
     /// Font weight, same optionality argument.
     pub text_weight: Option<u16>,
+    /// Font family request (`poodle_style::FontFamily`), same optionality.
+    pub font_family: Option<FontFamily>,
+    /// Line height as a multiple of the font size.
+    pub line_height: Option<f32>,
+    /// Soft-wrap text to the container width (white-space: normal).
+    pub text_wrap: bool,
+    /// Fill the parent's height (height: 100%), the vertical `fill_width`.
+    pub fill_height: bool,
     /// Fill the parent's width (width: 100%). Candidate for a
     /// `LayoutSizing::Fraction` variant once `poodle-layout` can take the
     /// breaking change; a flag here keeps v0 additive.
@@ -161,6 +169,10 @@ impl Default for NodeStyle {
             text_ellipsis: false,
             text_size: None,
             text_weight: None,
+            font_family: None,
+            line_height: None,
+            text_wrap: false,
+            fill_height: false,
             fill_width: false,
             flex_none: false,
             self_stretch: false,
@@ -266,6 +278,7 @@ pub enum NodeRole {
     Image,
     Menu,
     MenuItem,
+    Splitter,
     ProgressIndicator,
     RadioGroup,
     RadioButton,
