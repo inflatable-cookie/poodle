@@ -53,6 +53,31 @@ pub enum NodeKind {
     Text { content: String },
     /// A named icon. The backend rasterises; the name is the contract.
     Icon { name: String, size: f32 },
+    /// A button widget: the backend's native pressable, carrying its label.
+    /// Distinct from `Container` + `Text` because backends give buttons
+    /// intrinsic behaviour (pressed visuals, activation semantics) that a
+    /// styled box does not get.
+    Button { label: String },
+}
+
+/// Horizontal text alignment.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TextAlign {
+    Left,
+    Center,
+    Right,
+}
+
+/// One layer of a shadow stack.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct ShadowLayer {
+    pub offset_x: f32,
+    pub offset_y: f32,
+    pub blur: f32,
+    pub spread: f32,
+    pub color: ColorValue,
+    /// Inner shadow (highlight/inset) rather than a drop.
+    pub inset: bool,
 }
 
 /// Visual style: the shared descriptor plus the tree-level properties a flat
@@ -78,6 +103,17 @@ pub struct NodeStyle {
     /// `LayoutSizing::Fraction` variant once `poodle-layout` can take the
     /// breaking change; a flag here keeps v0 additive.
     pub fill_width: bool,
+    /// Letter spacing in em, applied to this node's text.
+    pub letter_spacing_em: Option<f32>,
+    /// Horizontal text alignment. `None` = the backend's default (left).
+    pub text_align: Option<TextAlign>,
+    /// Style values swapped in while the node is pressed. Same contract as
+    /// `hover`.
+    pub active: Option<StylePatch>,
+    /// Multi-layer shadow stack (inset highlights, outset drops). When
+    /// non-empty it wins over `descriptor.shadow`, which stays the one-token
+    /// single-shadow convenience.
+    pub shadow_layers: Vec<ShadowLayer>,
     /// Render above everything and escape ancestor clip rects. The overlay
     /// half of a popover/menu/dropdown; position it with
     /// [`NodePosition::Absolute`] inside a [`NodePosition::Relative`] parent.
@@ -101,6 +137,10 @@ impl Default for NodeStyle {
             text_size: None,
             text_weight: None,
             fill_width: false,
+            letter_spacing_em: None,
+            text_align: None,
+            active: None,
+            shadow_layers: Vec::new(),
             overlay: false,
             min_width: None,
             max_width: None,
@@ -173,10 +213,19 @@ pub enum NodeRole {
     MenuItem,
     RadioGroup,
     RadioButton,
+    Switch,
     Tab,
     TabList,
     TextInput,
     Tooltip,
+}
+
+/// Tri-state checked value, for checkboxes and switches.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum NodeToggled {
+    True,
+    False,
+    Mixed,
 }
 
 /// What the node declares about itself to assistive technology.
@@ -186,11 +235,21 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    pub toggled: Option<NodeToggled>,
 }
 
 impl Node {
     pub fn container() -> Self {
         Self::default()
+    }
+
+    pub fn button(label: impl Into<String>) -> Self {
+        Self {
+            kind: NodeKind::Button {
+                label: label.into(),
+            },
+            ..Self::default()
+        }
     }
 
     pub fn text(content: impl Into<String>) -> Self {
@@ -234,6 +293,11 @@ impl Node {
         match &self.kind {
             NodeKind::Text { content } => out.push(content.as_str()),
             NodeKind::Icon { name, .. } => out.push(name.as_str()),
+            NodeKind::Button { label } => {
+                if !label.is_empty() {
+                    out.push(label.as_str());
+                }
+            }
             NodeKind::Container => {}
         }
         for child in &self.children {
@@ -260,6 +324,7 @@ impl fmt::Debug for Node {
             NodeKind::Container => "Container".to_string(),
             NodeKind::Text { content } => format!("Text({content:?})"),
             NodeKind::Icon { name, .. } => format!("Icon({name:?})"),
+            NodeKind::Button { label } => format!("Button({label:?})"),
         };
         f.debug_struct("Node")
             .field("kind", &kind)
