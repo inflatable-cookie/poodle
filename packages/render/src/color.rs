@@ -71,3 +71,38 @@ pub const BLACK: ColorValue = ColorValue(0.0, 0.0, 0.0, 1.0);
 
 /// Pure white, for the contract's lightening mixes.
 pub const WHITE: ColorValue = ColorValue(1.0, 1.0, 1.0, 1.0);
+
+fn to_linear(c: f32) -> f32 {
+    if c <= 0.04045 {
+        c / 12.92
+    } else {
+        ((c + 0.055) / 1.055).powf(2.4)
+    }
+}
+
+fn srgb_encode(c: f32) -> f32 {
+    if c <= 0.003_130_8 {
+        c * 12.92
+    } else {
+        1.055 * c.powf(1.0 / 2.4) - 0.055
+    }
+}
+
+/// Linear-space mix: `fraction` weights `a`. Decode → lerp → encode.
+///
+/// Distinct from [`mix_srgb`]: the old tier had BOTH recipes — `color_mix`
+/// lerps in sRGB gamma (most state recipes), while `tabs::blend` lerps the
+/// linear values directly (card/block selected fills). A first `mix_linear`
+/// was deleted when nothing used it; tabs is the component that proved the
+/// second recipe real.
+pub fn mix_linear(a: ColorValue, b: ColorValue, fraction: f32) -> ColorValue {
+    let f = fraction.clamp(0.0, 1.0);
+    let inv = 1.0 - f;
+    let mix_c = |x: f32, y: f32| srgb_encode(to_linear(x) * f + to_linear(y) * inv);
+    ColorValue(
+        mix_c(a.0, b.0),
+        mix_c(a.1, b.1),
+        mix_c(a.2, b.2),
+        a.3 * f + b.3 * inv,
+    )
+}

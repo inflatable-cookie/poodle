@@ -161,6 +161,12 @@ pub struct NodeStyle {
     /// Bottom-only border width (toolbar separators). Overrides nothing —
     /// composes with the uniform `descriptor.border` when both are set.
     pub border_bottom_width: Option<f32>,
+    /// Right-only border width (vertical tab lists' edge rule).
+    pub border_right_width: Option<f32>,
+    /// Top-only border width (vertical block-tab separators).
+    pub border_top_width: Option<f32>,
+    /// Left-only border width (horizontal block-tab separators).
+    pub border_left_width: Option<f32>,
     /// Linear-gradient background: angle in degrees, sRGB stops at 0..=1.
     /// Wins over `descriptor.background` when set.
     pub gradient: Option<(f32, Vec<(ColorValue, f32)>)>,
@@ -205,6 +211,9 @@ impl Default for NodeStyle {
             border_color_top: None,
             border_dashed: false,
             border_bottom_width: None,
+            border_right_width: None,
+            border_top_width: None,
+            border_left_width: None,
             gradient: None,
             animation: None,
             letter_spacing_em: None,
