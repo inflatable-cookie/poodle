@@ -165,6 +165,8 @@ pub struct NodeStyle {
     /// Border-left colour override — the tone accent of an inline
     /// remediation. The other sides keep `descriptor.border.color`.
     pub border_color_left: Option<ColorValue>,
+    /// Border-bottom colour override — an active tab's accent underline.
+    pub border_color_bottom: Option<ColorValue>,
     /// Grayscale filter amount (0.0 = full colour, 1.0 = fully desaturated) —
     /// a not-live card's washed-out treatment.
     pub grayscale: f32,
@@ -222,6 +224,7 @@ impl Default for NodeStyle {
             no_wrap: false,
             border_color_top: None,
             border_color_left: None,
+            border_color_bottom: None,
             grayscale: 0.0,
             border_dashed: false,
             border_bottom_width: None,
