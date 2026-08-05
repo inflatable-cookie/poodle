@@ -115,7 +115,9 @@ pub mod text_link;
 pub mod time_ago;
 pub mod toast_host;
 pub mod toast_stack;
+pub mod toggle_group;
 pub mod tooltip;
+pub mod tri_state_switch;
 pub mod validation_summary;
 
 pub use avatar::avatar;
@@ -218,5 +220,7 @@ pub use text_link::text_link;
 pub use time_ago::time_ago;
 pub use toast_host::toast_host;
 pub use toast_stack::{toast_stack, ToastStackHandlers};
+pub use toggle_group::toggle_group;
 pub use tooltip::tooltip;
+pub use tri_state_switch::tri_state_switch;
 pub use validation_summary::validation_summary;

@@ -384,3 +384,12 @@ pub fn size_height_offset_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 0.5,
     }
 }
+
+/// ToggleGroup inter-item gap in rem per density (contract §8 Root).
+pub fn toggle_group_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.1875,
+        ControlDensity::Default => 0.25,
+        ControlDensity::Comfortable => 0.375,
+    }
+}
