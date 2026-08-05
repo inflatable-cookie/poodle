@@ -162,6 +162,9 @@ pub struct NodeStyle {
     /// Border-top colour override — the bright arc of a ring spinner. The
     /// other sides keep `descriptor.border.color`.
     pub border_color_top: Option<ColorValue>,
+    /// Border-left colour override — the tone accent of an inline
+    /// remediation. The other sides keep `descriptor.border.color`.
+    pub border_color_left: Option<ColorValue>,
     /// Dashed border (empty states). Solid when false.
     pub border_dashed: bool,
     /// Bottom-only border width (toolbar separators). Overrides nothing —
@@ -215,6 +218,7 @@ impl Default for NodeStyle {
             flex_wrap: false,
             no_wrap: false,
             border_color_top: None,
+            border_color_left: None,
             border_dashed: false,
             border_bottom_width: None,
             border_right_width: None,
