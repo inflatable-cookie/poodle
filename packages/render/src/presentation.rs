@@ -373,3 +373,14 @@ pub fn date_picker_indicator_font_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 0.875,
     }
 }
+
+/// Control min-height offset in rem from the md baseline (contract §8).
+pub fn size_height_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.5,
+        ControlSize::Sm => -0.375,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.375,
+        ControlSize::Xl => 0.5,
+    }
+}
