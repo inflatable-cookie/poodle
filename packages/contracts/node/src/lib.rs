@@ -158,6 +158,9 @@ pub struct NodeStyle {
     pub border_color_top: Option<ColorValue>,
     /// Dashed border (empty states). Solid when false.
     pub border_dashed: bool,
+    /// Bottom-only border width (toolbar separators). Overrides nothing —
+    /// composes with the uniform `descriptor.border` when both are set.
+    pub border_bottom_width: Option<f32>,
     /// Linear-gradient background: angle in degrees, sRGB stops at 0..=1.
     /// Wins over `descriptor.background` when set.
     pub gradient: Option<(f32, Vec<(ColorValue, f32)>)>,
@@ -201,6 +204,7 @@ impl Default for NodeStyle {
             no_wrap: false,
             border_color_top: None,
             border_dashed: false,
+            border_bottom_width: None,
             gradient: None,
             animation: None,
             letter_spacing_em: None,

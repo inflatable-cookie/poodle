@@ -167,3 +167,12 @@ pub fn panel_space_x_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 1.25,
     }
 }
+
+/// Panel vertical padding in rem for a density.
+pub fn panel_space_y_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.5,
+        ControlDensity::Default => 0.75,
+        ControlDensity::Comfortable => 1.0,
+    }
+}
