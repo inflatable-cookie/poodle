@@ -1,0 +1,69 @@
+//! FieldSet — legend, description, and an equal-column field grid.
+//!
+//! Contract: `docs/contracts/components/field-set.md`
+//! Ported from: `packages/jetstream/components/src/field_set.rs`.
+
+use poodle_adapter::ThemeProvider;
+use poodle_node::{LayoutDirection, LayoutSizing, Node};
+use poodle_specs::FieldSetSpec;
+
+use crate::presentation::rem_to_px;
+
+pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+    let col_gap = spec
+        .column_gap_token()
+        .map(|t| theme.resolve_space(t))
+        .unwrap_or(0.0);
+    let row_gap = col_gap + rem_to_px(FieldSetSpec::ROW_GAP_EXTRA_REM);
+    let legend_color = theme.resolve_color(spec.legend_color_token());
+    let legend_size = rem_to_px(FieldSetSpec::LEGEND_SIZE_REM);
+
+    let mut root = Node::container();
+    root.style.descriptor.layout.direction = LayoutDirection::Column;
+
+    if let Some(ref legend) = spec.legend {
+        let mut l = Node::text(legend.to_uppercase());
+        l.style.descriptor.text_color = Some(legend_color);
+        l.style.text_size = Some(legend_size);
+        l.style.text_weight = Some(600);
+        l.style.letter_spacing_em = Some(0.12);
+        l.style.descriptor.layout.spacing.margin.bottom =
+            theme.resolve_space(spec.legend_margin_bottom_token());
+        root = root.child(l);
+    }
+
+    if let Some(ref description) = spec.description {
+        let mut d = Node::text(description);
+        d.style.descriptor.text_color = Some(theme.resolve_color(spec.description_color_token()));
+        d.style.text_size = Some(theme.resolve_space(spec.description_size_token()));
+        d.style.descriptor.layout.spacing.margin.bottom =
+            theme.resolve_space(spec.description_margin_bottom_token());
+        root = root.child(d);
+    }
+
+    // Equal-fraction columns via flex_wrap + per-child flex-basis.
+    let cols = spec.columns.max(1);
+    let mut grid = Node::container();
+    grid.style.descriptor.layout.direction = LayoutDirection::Row;
+    grid.style.flex_wrap = true;
+    grid.style.descriptor.layout.spacing.gap = if cols > 1 { row_gap } else { col_gap };
+
+    for child in children {
+        let mut wrapper = Node::container();
+        // Explicit Row (see switch.rs): the old tier got taffy's Row default.
+        wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
+        wrapper.style.min_width = Some(0.0);
+        // The old builder chains .child() before layout config; children order
+        // is what matters and the adapter emits fields, not call order.
+        if cols > 1 {
+            let basis_pct = 100.0 / cols as f32;
+            wrapper.style.flex_basis = Some(basis_pct);
+            wrapper.style.flex_fill = true;
+        } else {
+            wrapper.style.descriptor.layout.width = LayoutSizing::Grow;
+        }
+        grid = grid.child(wrapper.child(child));
+    }
+
+    root.child(grid)
+}
