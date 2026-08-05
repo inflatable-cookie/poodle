@@ -329,6 +329,8 @@ pub enum NodeRole {
     ListItem,
     ListBox,
     ListBoxOption,
+    /// Append-only output surface (a transcript, a console).
+    Log,
     Image,
     Menu,
     MenuBar,
