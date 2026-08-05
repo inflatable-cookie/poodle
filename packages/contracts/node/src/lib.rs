@@ -135,6 +135,16 @@ pub struct NodeStyle {
     /// Explicit flex-grow factor. Fractional splits (progress's 40/60 bar)
     /// need a raw factor; `LayoutSizing::Grow` stays the common 1.0 case.
     pub flex_grow: Option<f32>,
+    /// Grow + shrink with a zero min-size, WITHOUT cross-axis stretch —
+    /// distinct from `LayoutSizing::Grow`, which stretches. Skeleton's text
+    /// columns are the proving call site.
+    pub flex_fill: bool,
+    /// Never shrink below natural size (flex-shrink: 0), still growable.
+    pub flex_shrink_zero: bool,
+    /// Flex-basis in pixels (seed size before grow/shrink distribute).
+    pub flex_basis: Option<f32>,
+    /// Width as a fraction of the parent (0.0..=1.0).
+    pub width_pct: Option<f32>,
     /// Wrap flex children onto multiple lines.
     pub flex_wrap: bool,
     /// Keep text on one line (white-space: nowrap).
@@ -177,6 +187,10 @@ impl Default for NodeStyle {
             flex_none: false,
             self_stretch: false,
             flex_grow: None,
+            flex_fill: false,
+            flex_shrink_zero: false,
+            flex_basis: None,
+            width_pct: None,
             flex_wrap: false,
             no_wrap: false,
             border_color_top: None,
