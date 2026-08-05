@@ -23,8 +23,8 @@ renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
 
 - Rendering, draw calls, and the widget tree — owned by `jetstream-runtime`
 - Event handling and input dispatch — owned by `jetstream-runtime`
-- Component render functions (`js_button`, `js_checkbox`, etc.) — owned by
-  `poodle-jetstream-components`
+- Component render functions — owned by `poodle-render` (`Spec + Theme →
+  Node`); the Jetstream backend interprets nodes via `jetstream-poodle`
 - Token definitions and values — owned by `poodle-tokens`
 - Component spec structs — owned by `poodle-specs`
 
@@ -33,16 +33,16 @@ renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
 ```
 ComponentSpec (e.g. ButtonSpec)
     + JetstreamThemeProvider (token resolution)
-        ↓ js_button(spec, theme) → JsEl
-            (fluent builder: div().h(height).bg(fill).child(...))
+        ↓ poodle_render::button(spec, theme, handlers) → poodle_node::Node
+        ↓ jetstream_poodle::to_js_el(&node) → JsEl
         ↓ game_ui.render_immediate(&root_el)
             (materialize JsEl tree → UiTree → Taffy layout → draw commands)
 ```
 
 The adapter layer sits between the spec and the render function. It is not
-called directly by application code — application code calls component render
-functions from `poodle-jetstream-components` and passes in a
-`JetstreamThemeProvider`.
+called directly by application code — application code renders components via
+`poodle-render` and converts once at the backend boundary with
+`jetstream-poodle`, passing in a `JetstreamThemeProvider`.
 
 ## `JetstreamThemeProvider`
 
@@ -155,7 +155,8 @@ glam              = "0.29"
 
 ## Related Crates
 
-- `poodle-jetstream-components` — component render functions (`js_button`, `js_checkbox`, etc.)
+- `poodle-render` — component render functions (`Spec + Theme → Node`)
+- `jetstream-poodle` (in the Jetstream repo) — the Node → JsEl backend
 - `poodle-specs` — component spec structs (`ButtonSpec`, `CheckboxSpec`, etc.)
 - `poodle-tokens` — token definitions and `ThemeDefinition`/`DensityDefinition`/`ControlSizeDefinition`
 - `poodle-adapter` — `ThemeProvider` trait definition
