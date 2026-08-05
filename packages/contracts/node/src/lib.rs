@@ -68,6 +68,12 @@ pub enum NodeKind {
     /// intrinsic behaviour (pressed visuals, activation semantics) that a
     /// styled box does not get.
     Button { label: String },
+    /// A single-line text field seeded with its current value; shows
+    /// `placeholder` when the value is empty. Same rationale as `Button`:
+    /// backends give inputs intrinsic behaviour (caret, selection, IME,
+    /// intrinsic min-width) a styled box does not get. Render-side the value
+    /// is host-owned — the node declares the field, the host drives edits.
+    Input { value: String, placeholder: String },
 }
 
 /// Horizontal text alignment.
@@ -445,6 +451,16 @@ impl Node {
         }
     }
 
+    pub fn input(value: impl Into<String>, placeholder: impl Into<String>) -> Self {
+        Self {
+            kind: NodeKind::Input {
+                value: value.into(),
+                placeholder: placeholder.into(),
+            },
+            ..Self::default()
+        }
+    }
+
     pub fn icon(name: impl Into<String>, size: f32) -> Self {
         Self {
             kind: NodeKind::Icon {
@@ -477,6 +493,9 @@ impl Node {
         match &self.kind {
             NodeKind::Text { content } => out.push(content.as_str()),
             NodeKind::Icon { name, .. } => out.push(name.as_str()),
+            NodeKind::Input { value, placeholder } => {
+                out.push(if value.is_empty() { placeholder } else { value });
+            }
             NodeKind::Button { label } => {
                 if !label.is_empty() {
                     out.push(label.as_str());
@@ -511,6 +530,7 @@ impl fmt::Debug for Node {
             NodeKind::Button { label } => format!("Button({label:?})"),
             NodeKind::Image { source } => format!("Image({source:?})"),
             NodeKind::Progress { fraction } => format!("Progress({fraction})"),
+            NodeKind::Input { value, .. } => format!("Input({value:?})"),
         };
         f.debug_struct("Node")
             .field("kind", &kind)

@@ -269,3 +269,64 @@ pub fn drawer_title_font_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 1.125,
     }
 }
+
+/// EditableList drag-handle square in rem. Contract: xs 0.875, sm/md 1.0, lg 1.125, xl 1.25.
+pub fn editable_list_handle_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.875,
+        ControlSize::Sm | ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
+
+/// EditableList item horizontal padding in rem. Contract: xs 0.5, sm/md 0.625, lg 0.75, xl 0.875.
+pub fn editable_list_item_x_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5,
+        ControlSize::Sm | ControlSize::Md => 0.625,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.875,
+    }
+}
+
+/// EditableList item vertical padding in rem. Contract: xs 0.375, sm 0.4375, md 0.5, lg 0.5625, xl 0.625.
+pub fn editable_list_item_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.4375,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.5625,
+        ControlSize::Xl => 0.625,
+    }
+}
+
+/// EditableList item / content font size in rem. Contract: xs 0.6875, sm 0.75, md 0.8125, lg 0.875, xl 0.9375.
+pub fn editable_list_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// EditableList inter-row gap in rem. Contract density: compact 0.0625, default 0.125, comfortable 0.1875.
+pub fn editable_list_list_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.0625,
+        ControlDensity::Default => 0.125,
+        ControlDensity::Comfortable => 0.1875,
+    }
+}
+
+/// EditableList per-item inner gap (handle↔content↔remove) in rem. Contract
+/// density: compact 0.375, default 0.5, comfortable 0.625.
+pub fn editable_list_item_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.375,
+        ControlDensity::Default => 0.5,
+        ControlDensity::Comfortable => 0.625,
+    }
+}
