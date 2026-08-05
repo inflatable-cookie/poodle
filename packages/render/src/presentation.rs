@@ -436,3 +436,25 @@ pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 0.5,
     }
 }
+
+/// SplitButton toggle-half width in rem per size (contract §8).
+pub fn split_button_toggle_width_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.75,
+        ControlSize::Sm => 1.875,
+        ControlSize::Md => 2.0,
+        ControlSize::Lg => 2.25,
+        ControlSize::Xl => 2.5,
+    }
+}
+
+/// SplitButton chevron icon size in rem per size (contract §8).
+pub fn split_button_chevron_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.625,
+        ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
