@@ -524,3 +524,66 @@ pub fn table_cell_pad_inline_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 1.125,
     }
 }
+
+// ── RelationPicker size / density scales (contract §8) ──────────────────────
+
+/// Candidate-item vertical padding in rem (`--relation-picker-item-y`).
+pub fn relation_picker_item_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.5,
+    }
+}
+
+/// Candidate-item horizontal padding in rem (`--relation-picker-item-x`).
+pub fn relation_picker_item_x_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.5,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// Candidate-item internal gap in rem.
+pub fn relation_picker_item_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        _ => 0.5,
+    }
+}
+
+/// Candidate title font-size in rem.
+pub fn relation_picker_title_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// Candidate description font-size in rem.
+pub fn relation_picker_desc_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5625,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.6875,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.8125,
+    }
+}
+
+/// Inter-row list gap in rem per density.
+pub fn relation_picker_list_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.1875,
+        ControlDensity::Default => 0.25,
+        ControlDensity::Comfortable => 0.3125,
+    }
+}

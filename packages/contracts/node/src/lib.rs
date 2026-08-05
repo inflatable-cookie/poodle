@@ -341,6 +341,8 @@ pub enum NodeRole {
     MenuItemCheckBox,
     MenuItemRadio,
     Splitter,
+    /// A value along a track (hue/alpha channel strips, range thumbs).
+    Slider,
     ProgressIndicator,
     RadioGroup,
     RadioButton,
