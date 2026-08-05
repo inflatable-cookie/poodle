@@ -4,16 +4,16 @@
 //! resolves the fallback (initials → image when `src` set), shape, tone, and
 //! size from tokens. No hand-rolled circles.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::avatar::js_avatar;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_avatar;
+
 use poodle_specs::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    let row = |children: Vec<JsEl>| -> JsEl {
+    let row = |children: Vec<El>| -> El {
         let mut r = div().flex_row().items_center().gap(12.0);
         for c in children {
             r = r.child(c);
@@ -117,7 +117,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

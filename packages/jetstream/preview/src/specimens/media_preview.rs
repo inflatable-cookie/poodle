@@ -1,14 +1,14 @@
 //! MediaPreview specimen — Card-composed media preview surface.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::media_preview::js_media_preview;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_media_preview;
+
 use poodle_specs::{
     AspectRatio, CardVariant, ControlDensity, ControlSize, MediaKind, MediaPreviewSpec, MediaState,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -142,7 +142,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn size_preview(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) -> JsEl {
+fn size_preview(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) -> El {
     js_media_preview(
         &MediaPreviewSpec::new(MediaKind::Image, format!("Hero banner ({label})"))
             .with_eyebrow("Image")
@@ -154,7 +154,7 @@ fn size_preview(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) 
     )
 }
 
-fn density_preview(theme: &JetstreamThemeProvider, density: ControlDensity, label: &str) -> JsEl {
+fn density_preview(theme: &JetstreamThemeProvider, density: ControlDensity, label: &str) -> El {
     js_media_preview(
         &MediaPreviewSpec::new(MediaKind::Image, format!("Hero banner ({label})"))
             .with_eyebrow("Image")
@@ -166,7 +166,7 @@ fn density_preview(theme: &JetstreamThemeProvider, density: ControlDensity, labe
     )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

@@ -1,15 +1,15 @@
 //! FieldSet specimen — legend + description, grouped real Field children,
 //! multi-column, span, gap-none.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::field::js_field;
-use poodle_jetstream_components::field_set::js_field_set;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_field;
+use crate::compat::js_field_set;
+use crate::compat::js_text_input;
+
 use poodle_specs::{FieldSetSpec, FieldSpec, SpaceScale, TextInputSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -96,7 +96,7 @@ fn field(
     label_text: &str,
     description: Option<&str>,
     value: Option<&str>,
-) -> JsEl {
+) -> El {
     let mut spec = FieldSpec::new(id, label_text);
     if let Some(d) = description {
         spec = spec.with_description(d);
@@ -108,7 +108,7 @@ fn field(
     js_field(&spec, theme, Some(js_text_input(&input, theme)))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

@@ -1,13 +1,13 @@
 //! FloatingOverlay specimen — anchor + positioned surface, all four placements.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::floating_overlay::js_floating_overlay;
-use poodle_jetstream_components::presentation::{control_height_rem, rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_floating_overlay;
+use crate::compat::{control_height_rem, rem_to_px, size_font_rem};
+
 use poodle_specs::{ControlSize, OverlayPlacement};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let text_primary = resolve_color(theme, "color.text.primary");
     let surface_bg = resolve_color(theme, "color.background.surface");
@@ -19,7 +19,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let anchor_w = rem_to_px(7.0); // estimated trigger width
 
     // Reusable anchor button builder
-    let anchor = |label_text: &str| -> JsEl {
+    let anchor = |label_text: &str| -> El {
         button(label_text)
             .text_color(text_primary)
             .text_size(font_size)
@@ -33,7 +33,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     };
 
     // Reusable floating panel builder
-    let panel = |content: &str| -> JsEl {
+    let panel = |content: &str| -> El {
         div()
             .bg(elevated_bg)
             .border_1().border_color(border)
@@ -130,7 +130,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

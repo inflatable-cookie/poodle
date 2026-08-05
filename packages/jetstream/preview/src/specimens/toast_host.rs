@@ -1,12 +1,12 @@
 //! ToastHost specimen — positioned toast container.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::toast_host::js_toast_host;
+
+use crate::compat::js_toast_host;
 use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastStackSpec, ToastTone};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let border = resolve_color(theme, "color.border.default");
     let panel = resolve_color(theme, "color.background.panel");
@@ -81,7 +81,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// Relative bordered surface a host anchors inside.
-fn surface(border: glam::Vec4, panel: glam::Vec4) -> JsEl {
+fn surface(border: ColorValue, panel: ColorValue) -> El {
     div()
         .relative()
         .min_h(220.0)
@@ -91,7 +91,7 @@ fn surface(border: glam::Vec4, panel: glam::Vec4) -> JsEl {
         .bg(panel)
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

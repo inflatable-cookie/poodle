@@ -5,10 +5,10 @@
 //! loading (spinner), and disabled. Every example is a real `js_icon_button`
 //! resolving all visuals from tokens.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::icon_button::js_icon_button;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_icon_button;
+
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec};
 
 /// One icon button with variant + tone + icon + accessible name.
@@ -18,7 +18,7 @@ fn ib(
     tone: ButtonTone,
     icon: &str,
     aria: &str,
-) -> JsEl {
+) -> El {
     js_icon_button(
         &IconButtonSpec::new()
             .with_variant(variant)
@@ -29,7 +29,7 @@ fn ib(
     )
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -149,7 +149,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn size_btn(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
+fn size_btn(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     js_icon_button(
         &IconButtonSpec::new()
             .with_variant(ButtonVariant::Secondary)
@@ -160,7 +160,7 @@ fn size_btn(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
     )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

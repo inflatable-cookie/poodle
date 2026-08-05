@@ -12,10 +12,10 @@
 //! disclosure chevron (the trigger has no expand affordance), so a chevron
 //! group would be a fake — omitted per CLAUDE.md "no fakes".
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::navigation_menu::js_navigation_menu;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_navigation_menu;
+
 use poodle_specs::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec};
 
 /// The full item set with leading icons + viewport descriptions (mirrors GPUI),
@@ -51,7 +51,7 @@ fn ladder_items() -> Vec<NavigationMenuEntry> {
     ]
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -93,7 +93,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn ladder(theme: &JetstreamThemeProvider, lbl: &str, spec: NavigationMenuSpec) -> JsEl {
+fn ladder(theme: &JetstreamThemeProvider, lbl: &str, spec: NavigationMenuSpec) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     div().flex_col().gap(8.0)
         .child(label(lbl).text_color(secondary).text_size(11.0).text_weight(700))
@@ -103,7 +103,7 @@ fn ladder(theme: &JetstreamThemeProvider, lbl: &str, spec: NavigationMenuSpec) -
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

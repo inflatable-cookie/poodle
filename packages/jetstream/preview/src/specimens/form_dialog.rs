@@ -1,22 +1,22 @@
 //! FormDialog specimen — modal dialog wrapping a form.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::field::js_field;
-use poodle_jetstream_components::form_actions::js_form_actions;
-use poodle_jetstream_components::form_dialog::js_form_dialog;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_field;
+use crate::compat::js_form_actions;
+use crate::compat::js_form_dialog;
+use crate::compat::js_text_input;
+
 use poodle_specs::{
     ButtonSpec, ButtonVariant, FieldSpec, FormActionsSpec, FormDialogSpec, TextInputSpec,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Real Field (label + control) wrapping a real TextInput — no fakes (CLAUDE.md).
-    let field = |id: &str, lbl: &str, placeholder: &str| -> JsEl {
+    let field = |id: &str, lbl: &str, placeholder: &str| -> El {
         let input = js_text_input(
             &TextInputSpec::new().with_id(id).with_placeholder(placeholder),
             theme,
@@ -92,7 +92,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

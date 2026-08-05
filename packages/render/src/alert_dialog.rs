@@ -30,6 +30,7 @@ fn confirm_button_tone(tone: AlertDialogTone) -> ButtonTone {
     }
 }
 
+#[derive(Default)]
 pub struct AlertDialogHandlers {
     pub confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     /// Fires for cancel AND every dismissal route, per contract.

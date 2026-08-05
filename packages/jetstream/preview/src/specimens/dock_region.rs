@@ -5,23 +5,23 @@
 //! separate component and out of scope here). Every region is the real
 //! `js_dock_region`; postures are driven entirely from `DockRegionSpec`.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::dock_region::js_dock_region;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_dock_region;
+use crate::compat::{rem_to_px, size_font_rem};
+
 use poodle_specs::{
     ControlSize, DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing,
     PanelTabItem,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let text_primary = resolve_color(theme, "color.text.primary");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
 
     // Panel content snippet builder for expanded regions.
-    let body = move |text: &str| -> JsEl {
+    let body = move |text: &str| -> El {
         label(text)
             .text_color(text_primary)
             .text_size(body_font)
@@ -217,8 +217,8 @@ fn emphasis_cell(
     emphasis: DockEmphasis,
     text: &str,
     body_font: f32,
-    text_primary: glam::Vec4,
-) -> JsEl {
+    text_primary: ColorValue,
+) -> El {
     div()
         .w(rem_to_px(12.5))
         .h(rem_to_px(7.5))
@@ -242,7 +242,7 @@ fn emphasis_cell(
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

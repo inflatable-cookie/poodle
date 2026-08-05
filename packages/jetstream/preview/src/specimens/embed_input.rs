@@ -6,15 +6,15 @@
 //! states. Every group composes the real `js_embed_input` (which itself wraps
 //! the real `js_text_input` + `js_pill`) — no hand-rolled inputs or fakes.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::embed_input::js_embed_input;
-use poodle_jetstream_components::field::js_field;
-use poodle_jetstream_components::presentation::rem_to_px;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_embed_input;
+use crate::compat::js_field;
+
+
 use poodle_specs::{EmbedInputSpec, FieldSpec, ParsedEmbed};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let border_subtle = resolve_color(theme, "color.border.subtle");
     let panel_bg = resolve_color(theme, "color.background.panel");
@@ -157,7 +157,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn provider_header_row(text_secondary: glam::Vec4, border: glam::Vec4, font: f32) -> JsEl {
+fn provider_header_row(text_secondary: ColorValue, border: ColorValue, font: f32) -> El {
     div().flex_row().border_b_1().border_color(border)
         .child(
             label("Provider").flex_1()
@@ -175,13 +175,13 @@ fn provider_header_row(text_secondary: glam::Vec4, border: glam::Vec4, font: f32
 fn provider_row(
     provider: &str,
     patterns: &str,
-    text_secondary: glam::Vec4,
-    panel_bg: glam::Vec4,
-    border: glam::Vec4,
+    text_secondary: ColorValue,
+    panel_bg: ColorValue,
+    border: ColorValue,
     radius: f32,
     font: f32,
     is_last: bool,
-) -> JsEl {
+) -> El {
     let mut row = div().flex_row();
     if !is_last {
         row = row.border_b_1().border_color(border);
@@ -205,17 +205,17 @@ fn provider_row(
 
 fn state_row(
     title: &str,
-    text_secondary: glam::Vec4,
+    text_secondary: ColorValue,
     font: f32,
     spec: EmbedInputSpec,
     theme: &JetstreamThemeProvider,
-) -> JsEl {
+) -> El {
     div().flex_col().gap(4.0)
         .child(label(title.to_string()).text_size(font).font_weight(500).text_color(text_secondary))
         .child(js_embed_input(&spec, theme))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

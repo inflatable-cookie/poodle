@@ -7,21 +7,21 @@
 //! `js_icon`), matching the GPUI specimen's `with_leading` / `with_trailing` /
 //! `with_footer` compositions.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::icon::js_icon;
-use poodle_jetstream_components::list_card::{js_list_card, js_list_card_with_slots};
-use poodle_jetstream_components::list_card_counter::js_list_card_counter;
-use poodle_jetstream_components::pill::js_pill;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_icon;
+use crate::compat::{js_list_card, js_list_card_with_slots};
+use crate::compat::js_list_card_counter;
+use crate::compat::js_pill;
+
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, IconSize, IconSpec, LeadingFill, LeadingShape,
     ListCardCounterSpec, ListCardLayout, ListCardSpec, PillAppearance, PillSize, PillSpec, PillTone,
     SelectionIndicator,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -603,7 +603,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

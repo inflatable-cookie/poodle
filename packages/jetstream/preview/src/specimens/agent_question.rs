@@ -3,11 +3,11 @@
 //! Rendering only: selection state is shown, never driven. Answering a question
 //! is host-event-loop work, as with every native control here.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::agent_question::js_agent_question;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_agent_question;
+
 use poodle_specs::AgentQuestionSpec;
 
 fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
@@ -46,7 +46,7 @@ fn targets() -> AgentQuestionItem {
     }
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -94,7 +94,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

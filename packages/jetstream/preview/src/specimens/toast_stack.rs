@@ -1,12 +1,12 @@
 //! ToastStack specimen — notification toast stack.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::toast_stack::js_toast_stack;
+
+use crate::compat::js_toast_stack;
 use poodle_specs::{ControlDensity, ControlSize, Toast, ToastStackSpec, ToastTone};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // ── Tones: one toast per tone (info / success / warning / danger) ──
@@ -67,7 +67,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 
 /// xs–xl size ladder, each an info toast + a success toast with an action
 /// (mirrors the Svelte sizes snippet).
-fn sizes(theme: &JetstreamThemeProvider) -> JsEl {
+fn sizes(theme: &JetstreamThemeProvider) -> El {
     let order = [
         (ControlSize::Xs, "xs"),
         (ControlSize::Sm, "sm"),
@@ -95,7 +95,7 @@ fn sizes(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// compact / default / comfortable density ladder.
-fn densities(theme: &JetstreamThemeProvider) -> JsEl {
+fn densities(theme: &JetstreamThemeProvider) -> El {
     let order = [
         (ControlDensity::Compact, "compact"),
         (ControlDensity::Default, "default"),
@@ -122,7 +122,7 @@ fn densities(theme: &JetstreamThemeProvider) -> JsEl {
     col
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

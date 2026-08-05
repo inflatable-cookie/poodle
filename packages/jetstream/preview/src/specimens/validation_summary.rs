@@ -10,13 +10,13 @@
 //! so `active_entries()` is empty and the component renders nothing — proven by
 //! the muted placeholder note (specimen chrome, not part of the component).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::resolve_color;
-use poodle_jetstream_components::validation_summary::js_validation_summary;
+
+use crate::compat::js_validation_summary;
 use poodle_specs::{ValidationState, ValidationSummaryEntry, ValidationSummarySpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -107,7 +107,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 /// The empty state: only valid entries, so `active_entries()` is empty and the
 /// component renders nothing. A muted placeholder note makes the absence legible
 /// (the note is specimen chrome, not part of the component).
-fn empty_group(theme: &JetstreamThemeProvider, secondary: glam::Vec4) -> JsEl {
+fn empty_group(theme: &JetstreamThemeProvider, secondary: ColorValue) -> El {
     div()
         .flex_col()
         .gap(8.0)
@@ -132,7 +132,7 @@ fn empty_group(theme: &JetstreamThemeProvider, secondary: glam::Vec4) -> JsEl {
         )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

@@ -4,20 +4,20 @@
 //! against the contract (`docs/contracts/components/form-actions.md`). All rows
 //! are real `js_form_actions` / `js_form_actions_full` instances composing real
 //! `js_button` actions; no hand-rolled boxes. The responsive container-query
-//! collapse (§8 Responsive Swap) is a host/preview-loop concern with no JsEl
+//! collapse (§8 Responsive Swap) is a host/preview-loop concern with no El
 //! channel, so the inline danger group + overflow trigger both render.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::form_actions::{js_form_actions, js_form_actions_full};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::{js_form_actions, js_form_actions_full};
+
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, FormActionAlign, FormActionDangerItem,
     FormActionsSpec,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Action button helpers (real js_button instances).
@@ -60,7 +60,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // `dangerItems` on the spec turns on the ghost ellipsis overflow
         // trigger (contract §2 danger menu / §8 Responsive Swap); the inline
         // danger ghost button is the `__danger` group content. Both render
-        // together — the JsEl render-immediate model has no container-query
+        // together — the El render-immediate model has no container-query
         // channel for the width-driven swap.
         .child(group("Responsive danger actions (overflow)", secondary,
             js_form_actions_full(
@@ -125,10 +125,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 /// top separation only — child button size stays constant (contract §8).
 fn density_row(
     theme: &JetstreamThemeProvider,
-    text_secondary: glam::Vec4,
+    text_secondary: ColorValue,
     label_text: &str,
     density: ControlDensity,
-) -> JsEl {
+) -> El {
     div().flex_col().gap(4.0)
         .child(label(label_text).text_color(text_secondary).text_size(11.0))
         .child(
@@ -139,7 +139,7 @@ fn density_row(
         )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

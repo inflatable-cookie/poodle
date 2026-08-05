@@ -4,7 +4,7 @@
 //! newest call is invisible in the visible row, so the collapsed toggle is the
 //! only thing that can carry it.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_headless::agent_question::{
     AgentQuestionAnswer, AgentQuestionItem, AgentQuestionOption, AgentQuestionOutcome,
 };
@@ -13,8 +13,8 @@ use poodle_headless::agent_transcript::{
     TranscriptChangedFiles, TranscriptItem, TranscriptMessage, TranscriptToolCall,
 };
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::agent_transcript::js_agent_transcript;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_agent_transcript;
+
 use poodle_specs::AgentTranscriptSpec;
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
@@ -35,7 +35,7 @@ fn message(id: &str, markdown: &str) -> TranscriptItem {
     })
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // The changed-files card splits the commands either side of it into two
@@ -155,7 +155,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

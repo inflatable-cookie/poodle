@@ -1,14 +1,14 @@
 //! Accordion specimen.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::accordion::js_accordion;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_accordion;
+
 use poodle_specs::{
     AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -126,7 +126,7 @@ fn variant_items(label: &str) -> Vec<AccordionItemSpec> {
     }]
 }
 
-fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) -> JsEl {
+fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) -> El {
     js_accordion(
         &AccordionSpec::new(variant_items(label))
             .with_size(size)
@@ -135,7 +135,7 @@ fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) 
     )
 }
 
-fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, label: &str) -> JsEl {
+fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, label: &str) -> El {
     js_accordion(
         &AccordionSpec::new(variant_items(label))
             .with_density(density)
@@ -144,7 +144,7 @@ fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, labe
     )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

@@ -6,13 +6,13 @@
 //! preview-loop concern, not the pure-render component. Track fill + thumb
 //! position come from the spec's value via `js_slider` (no hand-rolled fill).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::slider::js_slider;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_slider;
+
 use poodle_specs::{ControlDensity, ControlSize, SliderSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Single-value slider, 0..100 unless overridden.
@@ -83,11 +83,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn row(content: JsEl) -> JsEl {
+fn row(content: El) -> El {
     div().w(300.0).child(content)
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

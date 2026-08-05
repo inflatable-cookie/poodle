@@ -7,17 +7,17 @@
 //! the shared `PickerShell` / `SelectionSummary` / `Select` composites — no
 //! hand-rolled boxes.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::relation_picker::js_relation_picker;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_relation_picker;
+
 use poodle_specs::{
     BrowseState, ControlDensity, ControlSize, DrillDownConfig, DrillDownItem, DrillDownLeafGroup,
     DrillDownLevel, PickerFilterConfig, PickerFilterOption, PickerItemSpec, RelationPickerSpec,
     SelectionMode, SemanticControlSizeRole,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let items = || {
@@ -262,7 +262,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     root
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

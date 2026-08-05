@@ -1,13 +1,13 @@
 //! PageHeader specimen — page-level title and action region.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::page_header::{js_page_header, js_page_header_with_slots};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::{js_page_header, js_page_header_with_slots};
+
 use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, PageHeaderSpec, StatusTone};
 
-fn actions(theme: &JetstreamThemeProvider) -> JsEl {
+fn actions(theme: &JetstreamThemeProvider) -> El {
     div()
         .flex_row()
         .items_center()
@@ -27,7 +27,7 @@ fn actions(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -97,7 +97,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

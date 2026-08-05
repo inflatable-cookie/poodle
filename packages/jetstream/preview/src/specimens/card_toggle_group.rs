@@ -7,10 +7,10 @@
 //! `js_card_toggle_group`. The spec carries no `columns`/`count` fields, so those
 //! are not exercised here (shared-spec gap noted in the parity doc).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::card_toggle_group::js_card_toggle_group;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_card_toggle_group;
+
 use poodle_specs::{CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize};
 
 fn view_options() -> Vec<CardToggleOption> {
@@ -22,7 +22,7 @@ fn view_options() -> Vec<CardToggleOption> {
     ]
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let mut root = div().flex_col().gap(24.0);
@@ -118,7 +118,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     root
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

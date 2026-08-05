@@ -1,15 +1,15 @@
 //! Surface specimen — themed containers across tone, border, and padding.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::surface::js_surface;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::{rem_to_px, size_font_rem};
+use crate::compat::js_surface;
+
 use poodle_specs::{
     ControlSize, PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let primary = resolve_color(theme, "color.text.primary");
@@ -141,7 +141,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

@@ -11,14 +11,14 @@
 //! so this specimen demonstrates the tone/open-state matrix that the component
 //! actually supports rather than faking the unsupported groups.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::confirm_action::js_confirm_action;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_confirm_action;
+
 use poodle_specs::ConfirmActionSpec;
 use poodle_specs::StatusTone;
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -92,7 +92,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

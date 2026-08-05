@@ -5,10 +5,10 @@
 //! keyboard navigation (handled in the main event loop). The remaining trees are
 //! static scaling demos.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::tree::js_tree;
+
+use crate::compat::js_tree;
 use poodle_specs::{ControlDensity, ControlSize, TreeNode, TreeSpec};
 
 use crate::app_state::{demo_file_tree, AppState};
@@ -17,7 +17,7 @@ fn expanded() -> Vec<String> {
     vec!["src".into(), "src/components".into()]
 }
 
-pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -78,7 +78,7 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// Floating context menu for the tree, anchored at the right-click position.
-fn menu_overlay(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+fn menu_overlay(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     let (x, y) = state.tree.menu_pos;
     let surface = resolve_color(theme, "color.background.elevated");
     let border = resolve_color(theme, "color.border.default");
@@ -111,7 +111,7 @@ fn menu_overlay(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
         .child(item("Delete", "tree-menu:delete"))
 }
 
-fn size_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn size_row(theme: &JetstreamThemeProvider) -> El {
     let mut row = div().flex_row().gap(16.0);
     for size in [
         ControlSize::Xs,
@@ -131,7 +131,7 @@ fn size_row(theme: &JetstreamThemeProvider) -> JsEl {
     row
 }
 
-fn density_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn density_row(theme: &JetstreamThemeProvider) -> El {
     let mut row = div().flex_row().gap(16.0);
     for density in [
         ControlDensity::Compact,
@@ -149,7 +149,7 @@ fn density_row(theme: &JetstreamThemeProvider) -> JsEl {
     row
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

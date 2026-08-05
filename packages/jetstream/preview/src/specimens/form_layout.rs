@@ -4,19 +4,19 @@
 //! wrapping a real `js_text_input`, and actions are real `js_button`s. All visual
 //! values resolve from tokens via the component specs.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::field::js_field;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::form_layout::js_form_layout;
+use crate::compat::js_button;
+use crate::compat::js_field;
+use crate::compat::js_text_input;
+use crate::compat::js_form_layout;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, FieldSpec, FormLayoutSpec, TextInputSpec, ValidationState,
 };
-use poodle_jetstream_components::theme_ext::resolve_color;
+
 
 /// Real Field (label + control) wrapping a real TextInput, all token-resolved.
-fn field(id: &str, lbl: &str, placeholder: &str, theme: &JetstreamThemeProvider) -> JsEl {
+fn field(id: &str, lbl: &str, placeholder: &str, theme: &JetstreamThemeProvider) -> El {
     let input = js_text_input(
         &TextInputSpec::new()
             .with_id(id)
@@ -33,7 +33,7 @@ fn field_invalid(
     value: &str,
     error: &str,
     theme: &JetstreamThemeProvider,
-) -> JsEl {
+) -> El {
     let input = js_text_input(
         &TextInputSpec::new()
             .with_id(id)
@@ -51,14 +51,14 @@ fn field_invalid(
 }
 
 /// Real action button (Cancel = secondary, Save = primary).
-fn action_button(lbl: &str, variant: ButtonVariant, theme: &JetstreamThemeProvider) -> JsEl {
+fn action_button(lbl: &str, variant: ButtonVariant, theme: &JetstreamThemeProvider) -> El {
     js_button(&ButtonSpec::new().with_label(lbl).with_variant(variant), theme)
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    let actions = || -> JsEl {
+    let actions = || -> El {
         div()
             .flex_row()
             .justify_end()
@@ -173,7 +173,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

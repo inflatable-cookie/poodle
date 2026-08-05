@@ -2,10 +2,10 @@
 //! bold + end-aligned column), caption, minimal key-value, empty state, plus
 //! the size and density variant axes. All visuals resolve from `js_table`/tokens.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::table::js_table;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_table;
+
 use poodle_specs::{ColumnAlign, ControlDensity, ControlSize, TableColumn, TableRow, TableSpec};
 
 fn team_columns() -> Vec<TableColumn> {
@@ -70,7 +70,7 @@ fn minimal_rows() -> Vec<TableRow> {
     ]
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let sizes: &[(&str, ControlSize)] = &[
@@ -163,7 +163,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Densities", secondary, density_col))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

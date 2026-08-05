@@ -1,14 +1,14 @@
 //! Field specimen — label/control, required, optional, description (info icon),
 //! error, pending, valid, plus sizes and densities.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::field::js_field;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_field;
+use crate::compat::js_text_input;
+
 use poodle_specs::{ControlDensity, ControlSize, FieldSpec, TextInputSpec, ValidationState};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -146,7 +146,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn size_row(theme: &JetstreamThemeProvider, size: ControlSize, id: &str, ph: &str) -> JsEl {
+fn size_row(theme: &JetstreamThemeProvider, size: ControlSize, id: &str, ph: &str) -> El {
     div().w(300.0).child(js_field(
         &FieldSpec::new(id, "Display name")
             .with_description("This is how your name appears to other users.")
@@ -159,7 +159,7 @@ fn size_row(theme: &JetstreamThemeProvider, size: ControlSize, id: &str, ph: &st
     ))
 }
 
-fn density_row(theme: &JetstreamThemeProvider, density: ControlDensity, id: &str, ph: &str) -> JsEl {
+fn density_row(theme: &JetstreamThemeProvider, density: ControlDensity, id: &str, ph: &str) -> El {
     div().w(300.0).child(js_field(
         &FieldSpec::new(id, "Display name")
             .with_description("This is how your name appears to other users.")
@@ -172,7 +172,7 @@ fn density_row(theme: &JetstreamThemeProvider, density: ControlDensity, id: &str
     ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

@@ -4,14 +4,14 @@
 //! (js_text_input / js_select / js_icon_button / js_button), mirroring the
 //! Svelte FilterToolbarSpecimen — no stand-in label chips.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::filter_toolbar::js_filter_toolbar;
-use poodle_jetstream_components::icon_button::js_icon_button;
-use poodle_jetstream_components::select::js_select;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_filter_toolbar;
+use crate::compat::js_icon_button;
+use crate::compat::js_select;
+use crate::compat::js_text_input;
+
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ChoiceOption, ControlDensity, ControlSize, FilterToolbarSpec,
     IconButtonSpec, SelectSpec, TextInputSpec,
@@ -43,7 +43,7 @@ fn owner_options() -> Vec<ChoiceOption> {
     ]
 }
 
-fn search(theme: &JetstreamThemeProvider, size: Option<ControlSize>, density: Option<ControlDensity>) -> JsEl {
+fn search(theme: &JetstreamThemeProvider, size: Option<ControlSize>, density: Option<ControlDensity>) -> El {
     let mut spec = TextInputSpec::new()
         .with_input_type("search")
         .with_placeholder("Search…")
@@ -62,7 +62,7 @@ fn select(
     options: Vec<ChoiceOption>,
     size: Option<ControlSize>,
     density: Option<ControlDensity>,
-) -> JsEl {
+) -> El {
     let mut spec = SelectSpec::new(options).with_value("all");
     if let Some(size) = size {
         spec = spec.with_size(size);
@@ -73,7 +73,7 @@ fn select(
     js_select(&spec, theme)
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Refresh icon-button for the header actions slot.
@@ -234,7 +234,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     root
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

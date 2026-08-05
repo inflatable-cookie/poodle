@@ -1,9 +1,9 @@
 //! FilterBuilder specimen — filter-clause builder with editable pills.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::filter_builder::js_filter_builder;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_filter_builder;
+
 use poodle_specs::{
     ControlDensity, ControlSize, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
     FilterExpression, FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOption,
@@ -45,7 +45,7 @@ fn single() -> FilterExpression {
     }
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -154,7 +154,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

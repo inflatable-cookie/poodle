@@ -3,20 +3,20 @@
 //! Contract: `docs/contracts/components/icon-provider.md`
 //!
 //! IconProvider renders no chrome of its own. In Jetstream the icon registry is
-//! shared process-wide (names resolve via `ui_element::icon`), so — exactly like
+//! shared process-wide (names resolve via `icon`), so — exactly like
 //! GPUI — the provider is a no-visual compatibility boundary: descendant icons
 //! resolve from the same registry whether or not a provider wraps them. There is
 //! no `js_icon_provider` builder; the boundary's only observable effect is that
 //! the icons below render. This specimen shows real `js_icon`s inside a labeled
 //! "provider scope" and states the boundary is non-visual.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::icon::js_icon;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_icon;
+
 use poodle_specs::IconSpec;
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let primary = resolve_color(theme, "color.text.primary");
     let border = resolve_color(theme, "color.border.subtle");

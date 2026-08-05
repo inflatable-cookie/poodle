@@ -1,16 +1,16 @@
 //! Tabs specimen — all four variants, icon+count tabs, disabled tabs.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::tabs::js_tabs;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_tabs;
+
 use poodle_specs::{
     ControlDensity, ControlSize, Orientation, TabDefinition, TabVariant, TabsSpec,
 };
 
 use crate::app_state::AppState;
 
-pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Basic tabs — used for most variant groups.
@@ -267,7 +267,7 @@ fn density_spec(items: &[TabDefinition], density: ControlDensity) -> TabsSpec {
         .with_value("details")
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

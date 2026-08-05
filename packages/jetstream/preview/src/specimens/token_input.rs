@@ -11,10 +11,10 @@
 //! size (xs–xl) and density scales. Entry/commit/remove wiring lives in the
 //! preview event loop (render-only here, per the parity doc).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::token_input::js_token_input;
+
+use crate::compat::js_token_input;
 use poodle_specs::{ControlDensity, ControlSize, TokenInputSpec};
 
 /// Convenience: a populated token-input bound to an id with a placeholder.
@@ -26,7 +26,7 @@ fn field(id: &str, values: &[&str], placeholder: &str) -> TokenInputSpec {
     spec
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // ── Default: committed tokens render as pills before the draft input. ──
@@ -113,7 +113,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// Size scale (xs–xl): size drives padding, font, and pill size.
-fn sizes(theme: &JetstreamThemeProvider) -> JsEl {
+fn sizes(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     [
         (ControlSize::Xs, "xs"),
@@ -146,7 +146,7 @@ fn sizes(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// Density scale: density drives the inline wrap gap.
-fn densities(theme: &JetstreamThemeProvider) -> JsEl {
+fn densities(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     [
         (ControlDensity::Compact, "compact"),
@@ -176,7 +176,7 @@ fn densities(theme: &JetstreamThemeProvider) -> JsEl {
     })
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

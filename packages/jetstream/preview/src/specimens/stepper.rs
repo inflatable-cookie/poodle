@@ -4,13 +4,13 @@
 //! current one is exactly what position-derived state cannot express, and it is
 //! why `status` is a property of the step.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::stepper::js_stepper;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_stepper;
+
 use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep, Orientation};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // The Soundcheck arrangement this design came from.
@@ -112,7 +112,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         )))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

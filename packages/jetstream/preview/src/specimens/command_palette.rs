@@ -11,15 +11,15 @@
 //! `relative().min_h(...)` container that confines the scrim to that group's
 //! region (the same posture as the GPUI specimen's `div().relative()`).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::command_palette::js_command_palette;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_command_palette;
+
 use poodle_specs::{
     CommandActionItem, CommandPaletteSpec, ControlDensity, ControlSize, DiscoveryState,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Grouped actions with shortcuts (File / Edit / View) — mirrors GPUI.
@@ -191,7 +191,7 @@ fn open_state_spec(
 /// Labeled group wrapping an open palette. The palette renders an `.overlay()`
 /// scrim that fills the nearest positioned ancestor, so the content area is
 /// `relative()` with a `min_h` to confine and reveal the centered modal.
-fn group_open(title: &str, text_secondary: glam::Vec4, palette: JsEl) -> JsEl {
+fn group_open(title: &str, text_secondary: ColorValue, palette: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

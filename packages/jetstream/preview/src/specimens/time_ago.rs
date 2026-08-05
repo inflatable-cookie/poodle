@@ -4,13 +4,13 @@
 //! parse → diff → threshold-table formatting (not hand-typed relative strings).
 //! Live ticking is a preview-loop concern and is not wired here.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::time_ago::js_time_ago;
+
+use crate::compat::js_time_ago;
 use poodle_specs::{InlineTypographyMode, TimeAgoSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -75,7 +75,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 }
 
 /// A short-form TimeAgo with a caption describing the expected relative text.
-fn row(timestamp: &str, caption: &str, text_secondary: glam::Vec4, theme: &JetstreamThemeProvider) -> JsEl {
+fn row(timestamp: &str, caption: &str, text_secondary: ColorValue, theme: &JetstreamThemeProvider) -> El {
     div()
         .flex_row()
         .gap(8.0)
@@ -92,9 +92,9 @@ fn row(timestamp: &str, caption: &str, text_secondary: glam::Vec4, theme: &Jetst
 fn row_long(
     timestamp: &str,
     caption: &str,
-    text_secondary: glam::Vec4,
+    text_secondary: ColorValue,
     theme: &JetstreamThemeProvider,
-) -> JsEl {
+) -> El {
     div()
         .flex_row()
         .gap(8.0)
@@ -110,7 +110,7 @@ fn row_long(
         )
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

@@ -6,10 +6,10 @@
 //! which wraps the real `js_button` + `js_code` — no fakes. The JSON payload
 //! mirrors the Svelte/GPUI specimens so all targets dump the same shape.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::debug_dialog::js_debug_dialog;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_debug_dialog;
+
 use poodle_specs::{ButtonVariant, ControlSize, DebugDialogSpec};
 
 /// JSON payload mirrored from the Svelte/GPUI specimens (object with id/status
@@ -18,7 +18,7 @@ fn sample_value() -> &'static str {
     "{\n  \"id\": \"asset_42\",\n  \"status\": \"ready\",\n  \"checks\": [\n    \"metadata\",\n    \"thumbnail\",\n    \"permissions\"\n  ]\n}"
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0).max_w(640.0)
@@ -51,7 +51,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

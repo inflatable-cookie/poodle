@@ -1,13 +1,13 @@
 //! Collapsible specimen — collapsible sections in open and closed states.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::collapsible::js_collapsible;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_collapsible;
+use crate::compat::{rem_to_px, size_font_rem};
+
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_muted = resolve_color(theme, "color.text.secondary");
@@ -71,7 +71,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn variant_body(theme: &JetstreamThemeProvider) -> JsEl {
+fn variant_body(theme: &JetstreamThemeProvider) -> El {
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_muted = resolve_color(theme, "color.text.secondary");
     label("Resolves from the size/density tokens.")
@@ -79,7 +79,7 @@ fn variant_body(theme: &JetstreamThemeProvider) -> JsEl {
         .text_size(body_font)
 }
 
-fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label_text: &str) -> JsEl {
+fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label_text: &str) -> El {
     div().w(300.0).child(js_collapsible(
         &CollapsibleSpec::new()
             .with_title(format!("Collapsible at {label_text}"))
@@ -94,7 +94,7 @@ fn density_variant(
     theme: &JetstreamThemeProvider,
     density: ControlDensity,
     label_text: &str,
-) -> JsEl {
+) -> El {
     div().w(300.0).child(js_collapsible(
         &CollapsibleSpec::new()
             .with_title(format!("Collapsible at {label_text}"))
@@ -105,7 +105,7 @@ fn density_variant(
     ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

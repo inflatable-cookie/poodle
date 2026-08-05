@@ -8,10 +8,10 @@
 //! checkbox, clear button, and toned ghost `js_icon_button` actions — is built
 //! entirely by `js_bulk_action_bar` from the spec. No hand-rolled chrome.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::bulk_action_bar::js_bulk_action_bar;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_bulk_action_bar;
+
 use poodle_specs::{
     BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize,
 };
@@ -31,7 +31,7 @@ fn default_actions() -> Vec<BulkAction> {
     ]
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -108,7 +108,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn size_block(theme: &JetstreamThemeProvider, lbl: &str, size: ControlSize) -> JsEl {
+fn size_block(theme: &JetstreamThemeProvider, lbl: &str, size: ControlSize) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     ladder(lbl, secondary,
         js_bulk_action_bar(
@@ -120,7 +120,7 @@ fn size_block(theme: &JetstreamThemeProvider, lbl: &str, size: ControlSize) -> J
         ))
 }
 
-fn density_block(theme: &JetstreamThemeProvider, lbl: &str, density: ControlDensity) -> JsEl {
+fn density_block(theme: &JetstreamThemeProvider, lbl: &str, density: ControlDensity) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     ladder(lbl, secondary,
         js_bulk_action_bar(
@@ -132,13 +132,13 @@ fn density_block(theme: &JetstreamThemeProvider, lbl: &str, density: ControlDens
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }
 
-fn ladder(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn ladder(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0).text_weight(700))
         .child(content)

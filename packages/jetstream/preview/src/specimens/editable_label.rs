@@ -1,14 +1,14 @@
 //! EditableLabel specimen — display + editing modes, variants, sizes, densities.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::editable_label::js_editable_label;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_editable_label;
+
 use poodle_specs::{
     ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -116,7 +116,7 @@ const DENSITIES: &[(ControlDensity, &str)] = &[
     (ControlDensity::Comfortable, "comfortable"),
 ];
 
-fn sizes_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn sizes_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (size, label_text) in SIZES {
         col = col.child(
@@ -133,7 +133,7 @@ fn sizes_row(theme: &JetstreamThemeProvider) -> JsEl {
     col
 }
 
-fn densities_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn densities_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (density, _label_text) in DENSITIES {
         col = col.child(
@@ -150,11 +150,11 @@ fn densities_row(theme: &JetstreamThemeProvider) -> JsEl {
     col
 }
 
-fn row(content: JsEl) -> JsEl {
+fn row(content: El) -> El {
     div().w(300.0).child(content)
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

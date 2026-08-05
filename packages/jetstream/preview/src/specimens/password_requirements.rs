@@ -1,10 +1,10 @@
 //! PasswordRequirements specimen — met/unmet rules, all met, none met,
 //! mixed, loading, error, empty, and the size ladder.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::password_requirements::js_password_requirements;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_password_requirements;
+
 use poodle_specs::{ControlSize, PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
 fn policy() -> PasswordRequirementsPolicy {
@@ -16,7 +16,7 @@ fn policy() -> PasswordRequirementsPolicy {
         .with_description("Use a long password with varied character types.")
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let sizes: [(ControlSize, &str); 5] = [
@@ -108,7 +108,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Sizes", secondary, size_ladder))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

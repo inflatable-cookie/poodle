@@ -21,12 +21,12 @@
 use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use jetstream_ui::Color;
-use poodle_jetstream_components::theme_ext::*;
+use crate::jsx::*;
 
-use poodle_jetstream_components::eyebrow::js_eyebrow;
-use poodle_jetstream_components::pill::js_pill;
-use poodle_jetstream_components::tabs::js_tabs;
-use poodle_jetstream_components::toggle_group::js_toggle_group;
+
+
+
+
 use poodle_specs::{
     EyebrowSpec, PillSpec, TabDefinition, TabVariant, TabsSpec, ToggleGroupOption,
     ToggleGroupSpec,
@@ -67,7 +67,7 @@ fn build_tab_bar(
     // Mirror the Svelte top bar: title, Poodle pill-variant Tabs for section
     // navigation, and summary Pills (theme/density/size) on the right —
     // dogfooding the real components instead of hand-rolled chrome.
-    let nav = js_tabs(
+    let nav = crate::jsx::jel(crate::compat::js_tabs(
         &TabsSpec::new(vec![
             TabDefinition::new("components", "Components"),
             TabDefinition::new("demo", "Demo"),
@@ -84,12 +84,12 @@ fn build_tab_bar(
         // "tab group" and nothing else — and this preview has more than one.
         .with_aria_label("Preview sections"),
         theme,
-    );
+    ));
 
     let summary = div().flex_row().gap(8.0).items_center()
-        .child(js_pill(&PillSpec::new().with_label(state.theme_preset.label()), theme))
-        .child(js_pill(&PillSpec::new().with_label(state.density.label()), theme))
-        .child(js_pill(&PillSpec::new().with_label(state.control_size.label()), theme));
+        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.theme_preset.label()), theme)))
+        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.density.label()), theme)))
+        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.control_size.label()), theme)));
 
     div().flex_row().w_full().px(12.0).py(8.0).gap(16.0)
         .items_center()
@@ -123,13 +123,13 @@ fn build_controls_bar(
             .collect();
         div().flex_col().gap(4.0)
             .flex_shrink_0()
-            .child(js_eyebrow(&EyebrowSpec::default().with_content(eyebrow), theme))
-            .child(js_toggle_group(
+            .child(crate::jsx::jel(crate::compat::js_eyebrow(&EyebrowSpec::default().with_content(eyebrow), theme)))
+            .child(crate::jsx::jel(crate::compat::js_toggle_group(
                 &ToggleGroupSpec::new(opts)
                     .with_value(vec![active.to_string()])
                     .with_size(poodle_specs::ControlSize::Xs),
                 theme,
-            ))
+            )))
     };
 
     let theme_labels: Vec<&str> = ThemePreset::ALL.iter().map(|t| t.label()).collect();

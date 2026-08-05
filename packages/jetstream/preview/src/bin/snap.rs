@@ -20,7 +20,7 @@ use glam::Mat4;
 use wgpu::util::DeviceExt;
 
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::theme_ext::{elevation_overlay, elevation_dialog, resolve_color};
+use poodle_jetstream_preview::jsx::{elevation_overlay, elevation_dialog, resolve_color};
 
 fn headless_device() -> (wgpu::Device, wgpu::Queue) {
     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
@@ -495,10 +495,10 @@ fn main() {
     // Real component: color picker (open) — its saturation square (hue bg + white→
     // transparent + transparent→black overlays) and rainbow hue strip exercise gradients.
     let panel = resolve_color(&theme, "color.background.panel");
-    let cp = poodle_jetstream_components::color_picker::js_color_picker(
+    let cp = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_color_picker(
         &poodle_specs::ColorPickerSpec::new().with_value("#6366f1").with_open(true),
         &theme,
-    );
+    ));
     let cp_scene = ui_element::div()
         .w(560.0).h(360.0).p(24.0).bg(panel).flex_row()
         .child(cp);
@@ -506,7 +506,7 @@ fn main() {
 
     // Progress (determinate + indeterminate) — gradient fill bars (no bg → were invisible
     // before the gate fix).
-    let mk_prog = |spec| poodle_jetstream_components::progress::js_progress(spec, &theme);
+    let mk_prog = |spec| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_progress(spec, &theme));
     let prog_scene = ui_element::div()
         .w(420.0).h(120.0).p(24.0).bg(panel).flex_col().gap(20.0)
         .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new().with_value(0.6))))
@@ -528,7 +528,7 @@ fn main() {
     snapshot(&text_scene, 460, 200, "/tmp/poodle-snap-text.png");
 
     // Font-family: same string sans vs mono. In mono "iiii MMMM 0000" the columns line up.
-    use jetstream_text::layout::FontFamily;
+    use jetstream_ui::FontFamily;
     let s = "iiii MMMM 0000 — code()";
     let fam_scene = ui_element::div()
         .w(460.0).h(120.0).p(24.0).bg(panel).flex_col().gap(16.0)
@@ -537,13 +537,13 @@ fn main() {
     snapshot(&fam_scene, 460, 120, "/tmp/poodle-snap-fontfamily.png");
 
     // Real component spot-check: code block should render its source in mono.
-    let code = poodle_jetstream_components::code::js_code(
+    let code = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_code(
         &poodle_specs::CodeSpec::new()
             .with_content("fn main() {\n    let xs = [1, 2, 3];\n}")
             .with_language("rust")
             .with_show_line_numbers(true),
         &theme,
-    );
+    ));
     let code_scene = ui_element::div()
         .w(460.0).h(160.0).p(24.0).bg(panel).flex_col().gap(10.0)
         .child(ui_element::label("Source (expect monospace):").text_size(13.0).text_color(muted))
@@ -558,10 +558,10 @@ fn main() {
     snapshot(&ls_scene, 460, 120, "/tmp/poodle-snap-letterspacing.png");
 
     // Real component spot-check: eyebrow (uppercased + 0.12em tracked from its spec).
-    let eb = poodle_jetstream_components::eyebrow::js_eyebrow(
+    let eb = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_eyebrow(
         &poodle_specs::EyebrowSpec::new().with_content("overview"),
         &theme,
-    );
+    ));
     let eb_scene = ui_element::div()
         .w(460.0).h(90.0).p(24.0).bg(panel).flex_col()
         .child(eb);
@@ -585,14 +585,14 @@ fn main() {
     // Real component spot-check: menu (items call .hover(|s| s.bg(hover))); pointer over
     // the 2nd item should show the hover fill.
     use poodle_specs::MenuEntry;
-    let menu = poodle_jetstream_components::menu::js_menu(
+    let menu = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_menu(
         &poodle_specs::MenuSpec::new(vec![
             MenuEntry::new("new", "New file"),
             MenuEntry::new("open", "Open…"),
             MenuEntry::new("save", "Save"),
         ]),
         &theme,
-    );
+    ));
     let menu_scene = ui_element::div()
         .w(320.0).h(180.0).p(20.0).bg(panel).flex_col().items_start()
         .child(menu);
@@ -615,10 +615,10 @@ fn main() {
     snapshot(&border_scene, 520, 140, "/tmp/poodle-snap-border.png");
 
     // Real component spot-check: empty-state renders a dashed container border.
-    let es = poodle_jetstream_components::empty_state::js_empty_state(
+    let es = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_empty_state(
         &poodle_specs::EmptyStateSpec::new("No items yet"),
         &theme,
-    );
+    ));
     let es_scene = ui_element::div()
         .w(420.0).h(200.0).p(24.0).bg(panel).flex_col()
         .child(es);
@@ -665,10 +665,10 @@ fn main() {
     snapshot(&inset_scene, 640, 150, "/tmp/poodle-snap-inset.png");
 
     // Real component spot-check: list-card highlighted → inset accent ring.
-    let lc = |hl: bool| poodle_jetstream_components::list_card::js_list_card(
+    let lc = |hl: bool| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_list_card(
         &poodle_specs::ListCardSpec::new().with_title("Project Alpha").with_highlighted(hl),
         &theme,
-    );
+    ));
     let lc_scene = ui_element::div()
         .w(460.0).h(200.0).p(24.0).bg(panel).flex_col().gap(16.0)
         .child(lc(true))   // highlighted → inset accent ring
@@ -686,7 +686,7 @@ fn main() {
     // Real component spot-check: tabs with a drop-target tab (inset accent ring) +
     // a drag-source tab (opacity 0.4).
     use poodle_specs::TabDefinition;
-    let tabs = poodle_jetstream_components::tabs::js_tabs(
+    let tabs = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_tabs(
         &poodle_specs::TabsSpec::new(vec![
             TabDefinition::new("over", "Overview"),
             TabDefinition::new("det", "Details"),
@@ -695,7 +695,7 @@ fn main() {
         .with_drag_value(Some("over".into()))
         .with_drop_target_value(Some("set".into())),
         &theme,
-    );
+    ));
     let tabs_scene = ui_element::div()
         .w(460.0).h(110.0).p(24.0).bg(panel).flex_col()
         .child(tabs);
@@ -703,8 +703,8 @@ fn main() {
 
     // Button treatment shadows: primary (inset highlight + drop) / secondary (highlight) / ghost.
     use poodle_specs::ButtonVariant;
-    let mkbtn = |v: ButtonVariant| poodle_jetstream_components::button::js_button(
-        &poodle_specs::ButtonSpec::new().with_label("Save").with_variant(v), &theme);
+    let mkbtn = |v: ButtonVariant| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_button(
+        &poodle_specs::ButtonSpec::new().with_label("Save").with_variant(v), &theme));
     let btn_scene = ui_element::div()
         .w(460.0).h(110.0).p(24.0).flex_row().items_center().gap(20.0)
         .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
@@ -714,8 +714,8 @@ fn main() {
     snapshot(&btn_scene, 460, 110, "/tmp/poodle-snap-btnshadow.png");
 
     // Treatment spot-check: switch (track inset highlight + thumb outset drop), on light bg.
-    let sw = poodle_jetstream_components::switch::js_switch(
-        &poodle_specs::SwitchSpec::new().with_checked(true), &theme);
+    let sw = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_switch(
+        &poodle_specs::SwitchSpec::new().with_checked(true), &theme));
     let sw_scene = ui_element::div()
         .w(300.0).h(100.0).p(28.0).flex_row().items_center()
         .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
@@ -724,11 +724,11 @@ fn main() {
 
     // Card elevated 4-layer shadow stack, on a light bg.
     use poodle_specs::CardVariant;
-    let card = poodle_jetstream_components::card::js_card(
+    let card = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_card(
         &poodle_specs::CardSpec::new().with_variant(CardVariant::Elevated),
         &theme,
-        vec![ui_element::div().w(180.0).h(70.0)],
-    );
+        vec![poodle_jetstream_preview::nel::div().w(180.0).h(70.0)],
+    ));
     let card_scene = ui_element::div()
         .w(320.0).h(180.0).p(36.0).flex_row().items_center().justify_center()
         .bg(Vec4::new(0.91, 0.92, 0.94, 1.0))
@@ -755,10 +755,10 @@ fn main() {
     // Same scene, two timeline points — pixel-different PNGs prove the engine
     // animation actually rotates the rendered quads.
     let spinner_scene = || {
-        let sp = poodle_jetstream_components::spinner::js_spinner(
+        let sp = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_spinner(
             &poodle_specs::SpinnerSpec::new().with_size(poodle_specs::SpinnerSize::Xl),
             &theme,
-        );
+        ));
         ui_element::div()
             .w(160.0).h(160.0).flex_row().items_center().justify_center()
             .bg(Vec4::new(0.10, 0.11, 0.13, 1.0))

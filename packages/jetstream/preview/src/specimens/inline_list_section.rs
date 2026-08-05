@@ -5,18 +5,18 @@
 //! empty state, and an unframed (no-card) variant. Rows compose real `js_text` +
 //! `js_pill`; header actions are real `js_icon_button`s — no hand-rolled boxes.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::icon_button::js_icon_button;
-use poodle_jetstream_components::inline_list_section::js_inline_list_section;
-use poodle_jetstream_components::pill::js_pill;
-use poodle_jetstream_components::text::js_text;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_icon_button;
+use crate::compat::js_inline_list_section;
+use crate::compat::js_pill;
+use crate::compat::js_text;
+
 use poodle_specs::{
     ButtonVariant, IconButtonSpec, InlineListSectionSpec, PillSpec, PillTone, TextSpec, TextWeight,
 };
 
-fn row(name: &str, status: &str, theme: &JetstreamThemeProvider) -> JsEl {
+fn row(name: &str, status: &str, theme: &JetstreamThemeProvider) -> El {
     let tone = if status == "Ready" {
         PillTone::Success
     } else {
@@ -39,7 +39,7 @@ fn row(name: &str, status: &str, theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(20.0)
@@ -105,7 +105,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

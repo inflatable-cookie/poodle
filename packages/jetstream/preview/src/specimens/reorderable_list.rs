@@ -1,25 +1,25 @@
 //! ReorderableList specimen — drag-and-drop list with grip handles.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::reorderable_list::js_reorderable_list;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_reorderable_list;
+use crate::compat::{rem_to_px, size_font_rem};
+
 use poodle_specs::{ControlSize, ReorderableListSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
-    let items: Vec<JsEl> = vec![
+    let items: Vec<El> = vec![
         label("Introduction").text_color(text_primary).text_size(body_font),
         label("Background").text_color(text_primary).text_size(body_font),
         label("Methods").text_color(text_primary).text_size(body_font),
         label("Results").text_color(text_primary).text_size(body_font),
     ];
 
-    let drag_items: Vec<JsEl> = vec![
+    let drag_items: Vec<El> = vec![
         label("Track A").text_color(text_primary).text_size(body_font),
         label("Track B (dragging)").text_color(text_primary).text_size(body_font),
         label("Track C").text_color(text_primary).text_size(body_font),
@@ -44,7 +44,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

@@ -12,12 +12,12 @@
 //! resolving its chrome (panel-mix fill, border-subtle, radius.surface) and its
 //! size/density padding + gap from tokens.
 
-use jetstream_ui::ui_element::*;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::icon_button::js_icon_button;
-use poodle_jetstream_components::separator::js_separator;
-use poodle_jetstream_components::theme_ext::*;
-use poodle_jetstream_components::toolbar::js_toolbar;
+use crate::nel::*;
+use crate::compat::js_button;
+use crate::compat::js_icon_button;
+use crate::compat::js_separator;
+
+use crate::compat::js_toolbar;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, Orientation,
@@ -25,7 +25,7 @@ use poodle_specs::{
 };
 
 /// Ghost icon button used as a toolbar chrome action.
-fn ib(theme: &JetstreamThemeProvider, icon: &str, aria: &str) -> JsEl {
+fn ib(theme: &JetstreamThemeProvider, icon: &str, aria: &str) -> El {
     js_icon_button(
         &IconButtonSpec::new()
             .with_variant(ButtonVariant::Ghost)
@@ -36,7 +36,7 @@ fn ib(theme: &JetstreamThemeProvider, icon: &str, aria: &str) -> JsEl {
 }
 
 /// Vertical divider between toolbar item groups.
-fn divider(theme: &JetstreamThemeProvider) -> JsEl {
+fn divider(theme: &JetstreamThemeProvider) -> El {
     js_separator(
         &SeparatorSpec::new()
             .with_orientation(SeparatorOrientation::Vertical)
@@ -45,7 +45,7 @@ fn divider(theme: &JetstreamThemeProvider) -> JsEl {
     )
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // ── Formatting toolbar (contract §13): ghost icon buttons grouped by a
@@ -205,7 +205,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Vertical orientation", secondary, vertical))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

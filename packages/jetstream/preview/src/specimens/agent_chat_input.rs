@@ -1,18 +1,18 @@
 //! AgentChatInput specimen — agent composer with a model picker in the toolbar,
 //! a context ring and the submit/stop action.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::agent_chat_input::js_agent_chat_input;
-use poodle_jetstream_components::model_picker::js_model_picker;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_agent_chat_input;
+use crate::compat::js_model_picker;
+
 use poodle_specs::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlDensity, ControlSize,
     ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerEmphasis,
     ModelPickerSpec, ModelSelection,
 };
 
-fn picker(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
+fn picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     let spec = ModelPickerSpec::new()
         .with_models(vec![
             ModelOption::new("atlas-pro", "Atlas Pro")
@@ -47,7 +47,7 @@ fn base() -> AgentChatInputSpec {
     AgentChatInputSpec::new().with_placeholder("Ask for follow-up changes or attach images")
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -186,7 +186,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

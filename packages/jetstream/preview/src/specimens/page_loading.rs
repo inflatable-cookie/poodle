@@ -1,13 +1,13 @@
 //! PageLoading specimen — inline + overlay presentation, indeterminate,
 //! determinate, cancel control, and the size ladder.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::page_loading::js_page_loading;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_page_loading;
+
 use poodle_specs::{ControlSize, PageLoadingPresentation, PageLoadingSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let sizes: [(ControlSize, &str); 5] = [
@@ -81,7 +81,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Sizes", secondary, size_ladder))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

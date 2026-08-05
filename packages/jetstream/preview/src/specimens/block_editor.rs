@@ -14,15 +14,15 @@
 //! channel; the faithful equivalent is the spec block path, which is what these
 //! groups exercise. Editing / add / remove / reorder are preview-event-loop bound.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::block_editor::js_block_editor;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_block_editor;
+
 use poodle_specs::{
     BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Shared block vocabulary (consumer-owned per contract — the shell is a
@@ -118,7 +118,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

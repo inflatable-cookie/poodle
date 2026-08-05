@@ -7,18 +7,18 @@
 //! tokens (`js_detail_item` / `js_detail_item_with_slots`, `js_button`,
 //! `js_pill`) — no hand-coded chrome.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::detail_item::{js_detail_item, js_detail_item_with_slots};
-use poodle_jetstream_components::pill::js_pill;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::{js_detail_item, js_detail_item_with_slots};
+use crate::compat::js_pill;
+
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout,
     DetailItemPresentation, DetailItemSpec, PillAppearance, PillSpec, PillTone,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -120,7 +120,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvider) -> JsEl {
+fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
     let muted = resolve_color(theme, "color.text.muted");
     div().flex_col().gap(4.0)
         .child(label(name).text_color(muted).text_size(11.0))
@@ -142,7 +142,7 @@ fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvi
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

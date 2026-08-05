@@ -4,10 +4,10 @@
 //! inheritance, accessible/decorative modes (`with_aria_label`), and a
 //! representative icon grid. Every glyph is a real `js_icon` sized from tokens.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::icon::js_icon;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_icon;
+
 use poodle_specs::{IconSize, IconSpec};
 
 /// Icons rendered once per size in the sizes section.
@@ -30,7 +30,7 @@ const GALLERY_ICONS: &[&str] = &[
     "bookmark", "code", "heart", "home", "key", "list", "star",
 ];
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let primary = resolve_color(theme, "color.text.primary");
     let accent = resolve_color(theme, "color.accent.base");
@@ -74,7 +74,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             render_gallery(theme, primary, secondary)))
 }
 
-fn render_sizes(theme: &JetstreamThemeProvider, primary: glam::Vec4, secondary: glam::Vec4) -> JsEl {
+fn render_sizes(theme: &JetstreamThemeProvider, primary: ColorValue, secondary: ColorValue) -> El {
     let sizes: &[(&str, IconSize)] = &[
         ("sm", IconSize::Sm),
         ("md", IconSize::Md),
@@ -96,16 +96,16 @@ fn render_sizes(theme: &JetstreamThemeProvider, primary: glam::Vec4, secondary: 
 fn color_cell(
     icon: &str,
     name: &str,
-    color: glam::Vec4,
-    secondary: glam::Vec4,
+    color: ColorValue,
+    secondary: ColorValue,
     theme: &JetstreamThemeProvider,
-) -> JsEl {
+) -> El {
     div().flex_col().items_center().gap(4.0)
         .child(div().text_color(color).child(js_icon(&IconSpec::new(icon), theme)))
         .child(label(name).text_color(secondary).text_size(10.0))
 }
 
-fn render_gallery(theme: &JetstreamThemeProvider, primary: glam::Vec4, secondary: glam::Vec4) -> JsEl {
+fn render_gallery(theme: &JetstreamThemeProvider, primary: ColorValue, secondary: ColorValue) -> El {
     let mut gallery = div().flex_row().flex_wrap().gap(6.0);
     for &name in GALLERY_ICONS {
         gallery = gallery.child(
@@ -117,7 +117,7 @@ fn render_gallery(theme: &JetstreamThemeProvider, primary: glam::Vec4, secondary
     gallery
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

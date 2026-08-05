@@ -7,15 +7,15 @@
 //! footers are the real `js_form_actions` primitive with `js_button` actions, and
 //! the selection summary is the real `js_selection_summary` — no hand-rolled boxes.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::form_actions::js_form_actions;
-use poodle_jetstream_components::picker_shell::js_picker_shell;
-use poodle_jetstream_components::selection_summary::js_selection_summary;
-use poodle_jetstream_components::text::js_text;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_form_actions;
+use crate::compat::js_picker_shell;
+use crate::compat::js_selection_summary;
+use crate::compat::js_text;
+use crate::compat::js_text_input;
+
 use poodle_specs::{
     BrowseState, ButtonSpec, ButtonVariant, FormActionsSpec, PickerShellSpec, PickerVariant,
     RemediationAction, SelectionMode, SelectionSummaryItem, SelectionSummarySpec, TextInputSpec,
@@ -23,7 +23,7 @@ use poodle_specs::{
 };
 
 /// One candidate row: primary label + optional secondary meta (real `js_text`).
-fn result_row(label_text: &str, meta: &str, theme: &JetstreamThemeProvider) -> JsEl {
+fn result_row(label_text: &str, meta: &str, theme: &JetstreamThemeProvider) -> El {
     let mut row = div()
         .flex_row()
         .items_center()
@@ -41,7 +41,7 @@ fn result_row(label_text: &str, meta: &str, theme: &JetstreamThemeProvider) -> J
 }
 
 /// Confirm/cancel footer built from the real `js_form_actions` primitive.
-fn picker_footer(theme: &JetstreamThemeProvider) -> JsEl {
+fn picker_footer(theme: &JetstreamThemeProvider) -> El {
     js_form_actions(
         &FormActionsSpec::new(),
         theme,
@@ -62,11 +62,11 @@ fn picker_footer(theme: &JetstreamThemeProvider) -> JsEl {
     )
 }
 
-fn search_field(placeholder: &str, theme: &JetstreamThemeProvider) -> JsEl {
+fn search_field(placeholder: &str, theme: &JetstreamThemeProvider) -> El {
     js_text_input(&TextInputSpec::new().with_placeholder(placeholder), theme)
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -229,7 +229,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

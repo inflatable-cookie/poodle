@@ -6,23 +6,23 @@
 //! presentation. Every panel is rendered by the real `js_action_discovery_panel`
 //! resolving values from the token system; the bordered frame uses token colors.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::action_discovery_panel::js_action_discovery_panel;
-use poodle_jetstream_components::presentation::rem_to_px;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_action_discovery_panel;
+
+
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, ControlDensity,
     DiscoveryState, SemanticControlSizeRole,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let border_subtle = resolve_color(theme, "color.border.subtle");
 
     // Bordered, size-bounded frame so every panel sits in the same surface,
     // matching the GPUI specimen's `framed` wrapper.
-    let framed = move |inner: JsEl| -> JsEl {
+    let framed = move |inner: El| -> El {
         div()
             .max_w(rem_to_px(32.0))
             .max_h(rem_to_px(20.0))
@@ -192,7 +192,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

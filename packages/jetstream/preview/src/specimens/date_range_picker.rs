@@ -5,13 +5,13 @@
 //! resolve from `DateRangePickerSpec` + tokens. Specimens render static state,
 //! so the open flag is seeded directly on the spec (`with_open`).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::date_range_picker::js_date_range_picker;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_date_range_picker;
+
 use poodle_specs::{ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -105,7 +105,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
+fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     let mut spec = DateRangePickerSpec::new()
         .with_size(size)
         .with_default_value(DateRangeValue::new(
@@ -116,7 +116,7 @@ fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
     div().w(320.0).child(js_date_range_picker(&spec, theme))
 }
 
-fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> JsEl {
+fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
     let mut spec = DateRangePickerSpec::new()
         .with_density(density)
         .with_default_value(DateRangeValue::new(
@@ -127,7 +127,7 @@ fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> JsEl
     div().w(320.0).child(js_date_range_picker(&spec, theme))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

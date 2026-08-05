@@ -1,16 +1,16 @@
 //! Dialog specimen — dialogs with title, description, content, width variants, and actions.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::dialog::js_dialog;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_dialog;
+use crate::compat::{rem_to_px, size_font_rem};
+
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlSize, DialogKind, DialogSpec, DialogWidth,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let text_primary = resolve_color(theme, "color.text.primary");
 
@@ -199,7 +199,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
@@ -207,7 +207,7 @@ fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
 
 /// Build a long, vertically-scrolling list of timestamped log rows for the
 /// scrollable-body dialog specimen. Mirrors the Svelte 20-row activity log.
-fn scroll_log_rows(text_primary: glam::Vec4, text_secondary: glam::Vec4) -> Vec<JsEl> {
+fn scroll_log_rows(text_primary: ColorValue, text_secondary: ColorValue) -> Vec<El> {
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let time_font = rem_to_px(size_font_rem(ControlSize::Xs));
     let messages = [

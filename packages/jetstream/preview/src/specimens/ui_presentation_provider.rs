@@ -11,11 +11,11 @@
 //! controls. Mirrors the GPUI specimen's three rows: compact/sm, comfortable/lg,
 //! and a nested override (outer default/md, inner compact/sm).
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::text_input::js_text_input;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_button;
+use crate::compat::js_text_input;
+
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, SemanticControlSizeRole, TextInputSpec,
     UiPresentationProviderSpec,
@@ -30,7 +30,7 @@ fn scoped_controls(
     size: ControlSize,
     text: &str,
     theme: &JetstreamThemeProvider,
-) -> JsEl {
+) -> El {
     let provider = UiPresentationProviderSpec::new()
         .with_density(density)
         .with_size_scale(size);
@@ -53,12 +53,12 @@ fn scoped_controls(
         )))
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let border = resolve_color(theme, "color.border.subtle");
 
     // A bordered region stands in for the provider subtree.
-    let region = move |child: JsEl| -> JsEl {
+    let region = move |child: El| -> El {
         div().p(12.0).border_1().border_color(border).rounded(6.0).child(child)
     };
 
@@ -85,7 +85,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)

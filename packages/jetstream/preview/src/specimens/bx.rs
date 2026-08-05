@@ -3,14 +3,14 @@
 //! All groups are spec-driven: dimensions and overflow resolve through the
 //! `BoxSpec` / `js_box` path, not hand-coded wrappers.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::bx::js_box;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_box;
+use crate::compat::{rem_to_px, size_font_rem};
+
 use poodle_specs::{BoxSpec, ControlSize, Overflow, PaddingScale};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
@@ -18,7 +18,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
 
     // Outer chrome makes the box bounds visible without styling the Box itself
     // (Box is a neutral container — background/border are out of contract scope).
-    let frame = |inner: JsEl| {
+    let frame = |inner: El| {
         div()
             .border(1.0)
             .border_color(border)
@@ -93,7 +93,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

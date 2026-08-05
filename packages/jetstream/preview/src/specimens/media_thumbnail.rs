@@ -1,15 +1,15 @@
 //! MediaThumbnail specimen — framed media preview with state posture.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::media_thumbnail::js_media_thumbnail;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_media_thumbnail;
+
 use poodle_specs::{
     AspectRatio, MediaFit, MediaFrameWidth, MediaKind, MediaPresentation, MediaState,
     MediaThumbnailSpec,
 };
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -183,11 +183,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn thumb(theme: &JetstreamThemeProvider, spec: MediaThumbnailSpec) -> JsEl {
+fn thumb(theme: &JetstreamThemeProvider, spec: MediaThumbnailSpec) -> El {
     js_media_thumbnail(&spec, theme)
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

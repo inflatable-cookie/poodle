@@ -6,13 +6,13 @@
 //! Windowed mode / long-list warning are feature-scope unbuilt in
 //! `js_editable_list` and are intentionally omitted.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::editable_list::js_editable_list;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_editable_list;
+
 use poodle_specs::{ControlDensity, ControlSize, EditableListSpec};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -185,7 +185,7 @@ const DENSITIES: &[(ControlDensity, &str)] = &[
     (ControlDensity::Comfortable, "comfortable"),
 ];
 
-fn sized_list(theme: &JetstreamThemeProvider, spec: EditableListSpec) -> JsEl {
+fn sized_list(theme: &JetstreamThemeProvider, spec: EditableListSpec) -> El {
     js_editable_list(
         &spec
             .with_item_count(3)
@@ -198,7 +198,7 @@ fn sized_list(theme: &JetstreamThemeProvider, spec: EditableListSpec) -> JsEl {
     )
 }
 
-fn sizes_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn sizes_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (size, _label) in SIZES {
         col = col.child(sized_list(theme, EditableListSpec::new().with_size(*size)));
@@ -206,7 +206,7 @@ fn sizes_row(theme: &JetstreamThemeProvider) -> JsEl {
     col
 }
 
-fn densities_row(theme: &JetstreamThemeProvider) -> JsEl {
+fn densities_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (density, _label) in DENSITIES {
         col = col.child(sized_list(theme, EditableListSpec::new().with_density(*density)));
@@ -214,7 +214,7 @@ fn densities_row(theme: &JetstreamThemeProvider) -> JsEl {
     col
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)

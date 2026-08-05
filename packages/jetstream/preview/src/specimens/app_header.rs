@@ -7,18 +7,18 @@
 //! composed via `js_app_header_with_slots`; action / utility clusters are real
 //! `js_button` / `js_icon_button` rows. Zero hand-rolled boxes.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::app_header::{js_app_header, js_app_header_with_slots};
-use poodle_jetstream_components::button::js_button;
-use poodle_jetstream_components::icon_button::js_icon_button;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::{js_app_header, js_app_header_with_slots};
+use crate::compat::js_button;
+use crate::compat::js_icon_button;
+
 use poodle_specs::{
     AppHeaderSpec, ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec,
 };
 
 /// A ghost text-button cluster — the global-actions region (contract §2 actions).
-fn ghost_actions(theme: &JetstreamThemeProvider, labels: &[&str], size: ControlSize) -> JsEl {
+fn ghost_actions(theme: &JetstreamThemeProvider, labels: &[&str], size: ControlSize) -> El {
     let mut row = div().flex_row().items_center().gap(4.0);
     for lbl in labels {
         row = row.child(js_button(
@@ -33,7 +33,7 @@ fn ghost_actions(theme: &JetstreamThemeProvider, labels: &[&str], size: ControlS
 }
 
 /// A trailing utility cluster of icon buttons (contract §2 utility region).
-fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSize) -> JsEl {
+fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSize) -> El {
     let mut row = div().flex_row().items_center().gap(4.0);
     for ic in icons {
         row = row.child(js_icon_button(
@@ -53,7 +53,7 @@ fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSi
 
 /// The shared demo header used by both ladders: a "My Application" title with
 /// New/Open ghost actions and a settings utility icon (mirrors GPUI `demo_header`).
-fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
     let size = spec.effective_size();
     js_app_header_with_slots(
         &spec,
@@ -64,7 +64,7 @@ fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     )
 }
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let accent = resolve_color(theme, "color.accent.base");
     let text_primary = resolve_color(theme, "color.text.primary");
@@ -142,14 +142,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }
 
 /// A ladder entry: a bold muted label above a single header instance.
-fn ladder(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn ladder(title: &str, text_secondary: ColorValue, content: El) -> El {
     div().flex_col().gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0).text_weight(700))
         .child(content)

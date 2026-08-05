@@ -4,13 +4,13 @@
 //! from `CalendarSpec` + tokens. Specimens render static state, so selection
 //! and range fields are seeded directly on the spec.
 
-use jetstream_ui::ui_element::*;
+use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::calendar::js_calendar;
-use poodle_jetstream_components::theme_ext::*;
+use crate::compat::js_calendar;
+
 use poodle_specs::{CalendarMode, CalendarSpec, ControlDensity, ControlSize, DateRangeValue};
 
-pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div()
@@ -139,7 +139,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ))
 }
 
-fn sized_calendar(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
+fn sized_calendar(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     let mut spec = CalendarSpec::new().with_size(size);
     spec.default_value = Some("2026-03-14".to_string());
     spec.visible_month = Some("2026-03".to_string());
@@ -147,7 +147,7 @@ fn sized_calendar(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
     js_calendar(&spec, theme)
 }
 
-fn dense_calendar(theme: &JetstreamThemeProvider, density: ControlDensity) -> JsEl {
+fn dense_calendar(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
     let mut spec = CalendarSpec::new().with_density(density);
     spec.default_value = Some("2026-03-14".to_string());
     spec.visible_month = Some("2026-03".to_string());
@@ -155,7 +155,7 @@ fn dense_calendar(theme: &JetstreamThemeProvider, density: ControlDensity) -> Js
     js_calendar(&spec, theme)
 }
 
-fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
     div()
         .flex_col()
         .gap(8.0)
