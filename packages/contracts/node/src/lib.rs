@@ -313,6 +313,8 @@ pub enum NodeRole {
     Image,
     Menu,
     MenuItem,
+    MenuItemCheckBox,
+    MenuItemRadio,
     Splitter,
     ProgressIndicator,
     RadioGroup,

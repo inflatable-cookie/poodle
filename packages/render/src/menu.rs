@@ -1,0 +1,200 @@
+//! Menu — the panel of a dropdown menu: actions, checks, radios, separators.
+//!
+//! Contract: `docs/contracts/components/menu.md`
+//! Ported from: `packages/jetstream/components/src/menu.rs`. Renders the
+//! panel only — the trigger belongs to the consumer, and open/close policy is
+//! the host's.
+
+use std::sync::Arc;
+
+use poodle_adapter::ThemeProvider;
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing, Node, NodeRole,
+    NodeToggled, StylePatch,
+};
+use poodle_specs::{MenuItemKind, MenuSpec};
+
+use crate::color::with_alpha;
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+
+pub fn menu(
+    spec: &MenuSpec,
+    theme: &dyn ThemeProvider,
+    on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let meta_font_size = rem_to_px(0.6875);
+
+    let item_px = rem_to_px(control_space_x_rem(spec.density));
+    let item_py = rem_to_px(0.375);
+    let menu_py = rem_to_px(0.25);
+    let item_gap = theme.resolve_space("space.inline.sm");
+    let separator_my = rem_to_px(0.25);
+    let item_radius = (theme
+        .resolve_radius(spec.overlay_radius_token())
+        .min(theme.resolve_radius("radius.control"))
+        - rem_to_px(0.125))
+    .max(0.0);
+
+    let fill = theme.resolve_color(spec.surface_fill_token());
+    let border = theme.resolve_color(spec.overlay_border_token());
+    let radius = theme.resolve_radius(spec.overlay_radius_token());
+    let text_color = theme.resolve_color(spec.item_text_token());
+    let muted_color = theme.resolve_color("color.text.secondary");
+    let separator_color = theme.resolve_color(spec.separator_color_token());
+    let danger_color = theme.resolve_color("color.status.danger");
+    let accent_color = theme.resolve_color(spec.item_highlight_token());
+    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+
+    let hover_tint = with_alpha(accent_color, accent_color.3 * 0.16);
+    let danger_hover_tint = with_alpha(danger_color, danger_color.3 * 0.14);
+
+    let mut el = Node::container();
+    {
+        let s = &mut el.style;
+        s.descriptor.background = Some(fill);
+        s.descriptor.border.width = 1.0;
+        s.descriptor.border.color = border;
+        s.descriptor.corner_radii.top_left = radius;
+        s.descriptor.corner_radii.top_right = radius;
+        s.descriptor.corner_radii.bottom_right = radius;
+        s.descriptor.corner_radii.bottom_left = radius;
+        s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.spacing.padding.top = menu_py;
+        s.descriptor.layout.spacing.padding.bottom = menu_py;
+        s.min_width = Some(rem_to_px(14.0));
+        // Token-accurate elevation.overlay, same mapping as select's panel.
+        s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
+        s.overlay = true;
+    }
+
+    // One item body shared by all three interactive kinds.
+    let build_item = |entry: &poodle_specs::MenuEntry, leading: Option<Node>| -> Node {
+        let label_color = if entry.is_destructive {
+            danger_color
+        } else {
+            text_color
+        };
+
+        let mut item = Node::container();
+        item.id = Some(format!("menu-item:{}", entry.value));
+        {
+            let s = &mut item.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = item_gap;
+            s.descriptor.layout.spacing.padding.left = item_px;
+            s.descriptor.layout.spacing.padding.right = item_px;
+            s.descriptor.layout.spacing.padding.top = item_py;
+            s.descriptor.layout.spacing.padding.bottom = item_py;
+            s.descriptor.corner_radii.top_left = item_radius;
+            s.descriptor.corner_radii.top_right = item_radius;
+            s.descriptor.corner_radii.bottom_right = item_radius;
+            s.descriptor.corner_radii.bottom_left = item_radius;
+        }
+        item.interaction.focusable = true;
+
+        if let Some(lead) = leading {
+            item = item.child(lead);
+        }
+
+        let mut label = Node::text(&entry.label);
+        label.style.descriptor.text_color = Some(label_color);
+        label.style.text_size = Some(font_size);
+        label.style.descriptor.layout.width = LayoutSizing::Grow;
+        item = item.child(label);
+
+        // Trailing: a check (action kind only) or the mono shortcut hint.
+        if matches!(entry.kind, MenuItemKind::Action) && entry.is_checked {
+            let mut check = Node::icon("check", font_size);
+            check.style.descriptor.text_color = Some(accent_color);
+            item = item.child(check);
+        } else if let Some(ref shortcut) = entry.shortcut_label {
+            let mut meta = Node::text(shortcut);
+            meta.style.descriptor.text_color = Some(muted_color);
+            meta.style.text_size = Some(meta_font_size);
+            meta.style.font_family = Some(FontFamily::Mono);
+            item = item.child(meta);
+        }
+
+        if entry.is_disabled {
+            item.style.descriptor.opacity = disabled_opacity;
+        } else {
+            let hover = if entry.is_destructive {
+                danger_hover_tint
+            } else {
+                hover_tint
+            };
+            item.style.descriptor.cursor = CursorHint::Pointer;
+            item.style.hover = Some(StylePatch {
+                background: Some(hover),
+                border_color: None,
+                text_color: None,
+            });
+            if let Some(handler) = &on_action {
+                let handler = Arc::clone(handler);
+                let value = entry.value.clone();
+                item.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            }
+        }
+        item
+    };
+
+    for entry in &spec.items {
+        match entry.kind {
+            MenuItemKind::Separator => {
+                let mut sep = Node::container();
+                {
+                    let s = &mut sep.style;
+                    // Explicit Row (see switch.rs).
+                    s.descriptor.layout.direction = LayoutDirection::Row;
+                    s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(0.0625));
+                    s.descriptor.background = Some(separator_color);
+                    s.descriptor.layout.spacing.margin.top = separator_my;
+                    s.descriptor.layout.spacing.margin.bottom = separator_my;
+                }
+                sep.a11y.role = Some(NodeRole::Splitter);
+                el = el.child(sep);
+            }
+            MenuItemKind::Checkbox | MenuItemKind::Radio => {
+                // Leading check or a blank spacer keeping labels aligned.
+                let check_size = font_size;
+                let leading = if entry.is_checked {
+                    let mut c = Node::icon("check", check_size);
+                    c.style.descriptor.text_color = Some(accent_color);
+                    c
+                } else {
+                    let mut s = Node::container();
+                    // Explicit Row (see switch.rs).
+                    s.style.descriptor.layout.direction = LayoutDirection::Row;
+                    s.style.descriptor.layout.width = LayoutSizing::Fixed(check_size);
+                    s.style.descriptor.layout.height = LayoutSizing::Fixed(check_size);
+                    s
+                };
+                let mut item = build_item(entry, Some(leading));
+                item.a11y.role = Some(match entry.kind {
+                    MenuItemKind::Radio => NodeRole::MenuItemRadio,
+                    _ => NodeRole::MenuItemCheckBox,
+                });
+                item.a11y.toggled = Some(if entry.is_checked {
+                    NodeToggled::True
+                } else {
+                    NodeToggled::False
+                });
+                el = el.child(item);
+            }
+            MenuItemKind::Action => {
+                let mut item = build_item(entry, None);
+                item.a11y.role = Some(NodeRole::MenuItem);
+                el = el.child(item);
+            }
+        }
+    }
+
+    if let Some(label) = spec.aria_label.as_deref() {
+        el.a11y.label = Some(label.to_string());
+    }
+    el.a11y.role = Some(NodeRole::Menu);
+    el
+}
