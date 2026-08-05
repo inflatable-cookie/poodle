@@ -121,6 +121,7 @@ pub mod toast_stack;
 pub mod toggle_group;
 pub mod token_input;
 pub mod tooltip;
+pub mod tree;
 pub mod tri_state_switch;
 pub mod validation_summary;
 
@@ -230,5 +231,6 @@ pub use toast_stack::{toast_stack, ToastStackHandlers};
 pub use toggle_group::toggle_group;
 pub use token_input::token_input;
 pub use tooltip::tooltip;
+pub use tree::{tree, TreeHandlers};
 pub use tri_state_switch::tri_state_switch;
 pub use validation_summary::validation_summary;

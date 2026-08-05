@@ -345,6 +345,8 @@ pub enum NodeRole {
     TextInput,
     Toolbar,
     Tooltip,
+    Tree,
+    TreeItem,
 }
 
 /// A property an animation may drive. Backends map to their own channels.
@@ -436,6 +438,9 @@ pub struct NodeA11y {
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
     pub toggled: Option<NodeToggled>,
+    /// Hierarchy level (1-based) — a treeitem's depth, announced as
+    /// "level N" rather than inferred from indentation nobody can see.
+    pub level: Option<usize>,
 }
 
 impl Node {
