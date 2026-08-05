@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole,
     ShadowLayer,
 };
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity, ControlSize};

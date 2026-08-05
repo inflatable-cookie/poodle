@@ -6,8 +6,8 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
-    LayoutSizing, MainAxisAlignment, Node, TextAlign,
+    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, TextAlign,
 };
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
 
