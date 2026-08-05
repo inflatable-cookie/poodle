@@ -330,3 +330,35 @@ pub fn editable_list_item_gap_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 0.625,
     }
 }
+
+/// Calendar day-cell square in rem. Contract §8: xs 1.75, sm 2.0, md 2.25, lg 2.5, xl 2.75.
+pub fn calendar_cell_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.75,
+        ControlSize::Sm => 2.0,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.5,
+        ControlSize::Xl => 2.75,
+    }
+}
+
+/// Calendar nav button (prev/next month) width/height in rem.
+pub fn calendar_nav_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.0,
+        ControlSize::Lg => 2.25,
+        ControlSize::Xl => 2.5,
+    }
+}
+
+/// Calendar day button font-size in rem.
+pub fn calendar_day_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs | ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
