@@ -15,10 +15,14 @@
 
 pub mod avatar;
 pub mod badge;
+pub mod banner;
 pub mod button;
+pub mod callout;
 pub mod card;
 pub mod checkbox;
 pub mod color;
+pub mod empty_state;
+pub mod eyebrow;
 pub mod icon_button;
 pub mod presentation;
 pub mod progress;
@@ -36,9 +40,13 @@ pub mod tooltip;
 
 pub use avatar::avatar;
 pub use badge::badge;
+pub use banner::banner;
 pub use button::button;
+pub use callout::callout;
 pub use card::card;
 pub use checkbox::checkbox;
+pub use empty_state::empty_state;
+pub use eyebrow::eyebrow;
 pub use icon_button::icon_button;
 pub use progress::progress;
 pub use radio_group::radio_group;

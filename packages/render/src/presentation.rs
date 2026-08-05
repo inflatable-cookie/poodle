@@ -158,3 +158,12 @@ pub fn icon_token(size: ControlSize) -> &'static str {
         ControlSize::Xl => "size.icon.xl",
     }
 }
+
+/// Panel horizontal padding in rem for a density (callout, panels).
+pub fn panel_space_x_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.75,
+        ControlDensity::Default => 1.0,
+        ControlDensity::Comfortable => 1.25,
+    }
+}

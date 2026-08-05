@@ -35,6 +35,10 @@ pub use poodle_tokens::typed::{ColorValue, ShadowValue};
 /// contains. Pure data plus interaction closures.
 #[derive(Clone, Default)]
 pub struct Node {
+    /// Stable identity for host targeting (event loops address nodes by id)
+    /// and animation clocks. An animation's `key` also becomes the id when no
+    /// explicit one is set.
+    pub id: Option<String>,
     pub kind: NodeKind,
     pub style: NodeStyle,
     pub position: NodePosition,
@@ -152,6 +156,8 @@ pub struct NodeStyle {
     /// Border-top colour override — the bright arc of a ring spinner. The
     /// other sides keep `descriptor.border.color`.
     pub border_color_top: Option<ColorValue>,
+    /// Dashed border (empty states). Solid when false.
+    pub border_dashed: bool,
     /// Linear-gradient background: angle in degrees, sRGB stops at 0..=1.
     /// Wins over `descriptor.background` when set.
     pub gradient: Option<(f32, Vec<(ColorValue, f32)>)>,
@@ -194,6 +200,7 @@ impl Default for NodeStyle {
             flex_wrap: false,
             no_wrap: false,
             border_color_top: None,
+            border_dashed: false,
             gradient: None,
             animation: None,
             letter_spacing_em: None,
@@ -279,6 +286,7 @@ pub struct Interaction {
 /// DOM) at the edge.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NodeRole {
+    Alert,
     Button,
     CheckBox,
     ComboBox,
