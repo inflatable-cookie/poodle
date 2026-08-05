@@ -313,6 +313,7 @@ pub enum NodeRole {
     ListBoxOption,
     Image,
     Menu,
+    MenuBar,
     MenuItem,
     MenuItemCheckBox,
     MenuItemRadio,
