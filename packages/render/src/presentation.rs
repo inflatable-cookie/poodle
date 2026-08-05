@@ -362,3 +362,14 @@ pub fn calendar_day_font_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 0.875,
     }
 }
+
+/// DatePicker disclosure-chevron font-size in rem per size.
+pub fn date_picker_indicator_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.625,
+        ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
