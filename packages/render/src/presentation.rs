@@ -176,3 +176,85 @@ pub fn panel_space_y_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 1.0,
     }
 }
+
+/// Breadcrumbs gap in rem per size.
+pub fn breadcrumbs_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// Breadcrumbs density gap override in rem.
+pub fn breadcrumbs_density_gap_rem(density: ControlDensity) -> Option<f32> {
+    match density {
+        ControlDensity::Compact => Some(0.25),
+        ControlDensity::Default => None,
+        ControlDensity::Comfortable => Some(0.75),
+    }
+}
+
+/// Breadcrumbs font in rem per size (md == typography.body.size).
+pub fn breadcrumbs_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.78125,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 1.0,
+        ControlSize::Xl => 1.125,
+    }
+}
+
+/// Toolbar block padding in rem per size.
+pub fn toolbar_pad_block_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.125,
+        ControlSize::Sm => 0.1875,
+        ControlSize::Md => 0.25,
+        ControlSize::Lg => 0.3125,
+        ControlSize::Xl => 0.375,
+    }
+}
+
+/// Toolbar inline padding in rem per size.
+pub fn toolbar_pad_inline_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.3125,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.625,
+    }
+}
+
+/// Toolbar gap in rem per size.
+pub fn toolbar_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.3125,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.625,
+    }
+}
+
+/// Toolbar density inline-padding override in rem.
+pub fn toolbar_density_pad_inline_rem(density: ControlDensity) -> Option<f32> {
+    match density {
+        ControlDensity::Compact => Some(0.25),
+        ControlDensity::Default => None,
+        ControlDensity::Comfortable => Some(0.5),
+    }
+}
+
+/// Toolbar density gap override in rem.
+pub fn toolbar_density_gap_rem(density: ControlDensity) -> Option<f32> {
+    match density {
+        ControlDensity::Compact => Some(0.25),
+        ControlDensity::Default => None,
+        ControlDensity::Comfortable => Some(0.5),
+    }
+}

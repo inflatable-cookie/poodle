@@ -314,6 +314,7 @@ pub enum NodeRole {
     Tab,
     TabList,
     TextInput,
+    Toolbar,
     Tooltip,
 }
 
