@@ -1,9 +1,9 @@
 <script lang="ts">
   import "@poodle/styles/breadcrumbs.css";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { BreadcrumbItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { BreadcrumbItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   let {
     items = [],

@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/spinner.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, SemanticControlSizeRole } from "./types";
-  import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types.ts";
+  import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types.ts";
 
   let {
     variant = "ring",

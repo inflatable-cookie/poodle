@@ -7,11 +7,11 @@
   import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Button } from "./Button.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Select } from "./Select.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
   import type {
     ActiveSort,
@@ -23,7 +23,7 @@
     SemanticControlSizeRole,
     SortDirection,
     SortField,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     fields?: SortField[];

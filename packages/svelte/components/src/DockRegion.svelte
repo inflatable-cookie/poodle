@@ -2,7 +2,7 @@
   import "@poodle/styles/dock-region.css";
   import { onDestroy, tick, type Snippet } from "svelte";
 
-  import { createDockExternalDragController } from "./dock-external-drag";
+  import { createDockExternalDragController } from "./dock-external-drag.ts";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as Tabs } from "./Tabs.svelte";
   import type {
@@ -19,7 +19,7 @@
     SemanticControlSizeRole,
     TabItem,
     TabVariant,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     edge?: DockEdge;

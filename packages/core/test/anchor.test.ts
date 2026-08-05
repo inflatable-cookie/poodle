@@ -6,7 +6,7 @@ import {
   isPointAnchorClipped,
   viewportClipRect,
   type ClipRect,
-} from "../src/dom/anchor";
+} from "../src/dom/anchor.ts";
 
 const rect = (top: number, right: number, bottom: number, left: number): ClipRect => ({
   top,

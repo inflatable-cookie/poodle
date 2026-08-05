@@ -8,16 +8,16 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { checkboxTransition } from "../src/checkbox";
-import { disclosureTransition } from "../src/disclosure";
-import { hoverTransition } from "../src/hover";
-import { menuTransition } from "../src/menu";
-import { modalTransition } from "../src/modal";
-import { popoverTransition } from "../src/popover";
-import { singleSelectTransition } from "../src/single-select";
-import { sliderTransition } from "../src/slider";
-import { tabsTransition } from "../src/tabs";
-import { toggleGroupTransition } from "../src/toggle-group";
+import { checkboxTransition } from "../src/checkbox.ts";
+import { disclosureTransition } from "../src/disclosure.ts";
+import { hoverTransition } from "../src/hover.ts";
+import { menuTransition } from "../src/menu.ts";
+import { modalTransition } from "../src/modal.ts";
+import { popoverTransition } from "../src/popover.ts";
+import { singleSelectTransition } from "../src/single-select.ts";
+import { sliderTransition } from "../src/slider.ts";
+import { tabsTransition } from "../src/tabs.ts";
+import { toggleGroupTransition } from "../src/toggle-group.ts";
 
 const vectors = JSON.parse(
   readFileSync(join(import.meta.dir, "..", "..", "contracts", "headless", "vectors", "machines.json"), "utf8"),

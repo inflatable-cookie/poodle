@@ -9,7 +9,7 @@
  * (matches pre-machine behavior).
  */
 
-import type { TransitionResult } from "./machine";
+import type { TransitionResult } from "./machine.ts";
 
 export type MenuState = "closed" | "open";
 

@@ -9,7 +9,7 @@
   import { default as EmptyState } from "./EmptyState.svelte";
   import { default as PageHeader } from "./PageHeader.svelte";
 
-  import type { BrowseState, EmptyStateVariant } from "./types";
+  import type { BrowseState, EmptyStateVariant } from "./types.ts";
 
   interface Props {
     title: string;

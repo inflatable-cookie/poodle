@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { hoverTransition, type HoverContext } from "../src/hover";
+import { hoverTransition, type HoverContext } from "../src/hover.ts";
 
 const tooltip: HoverContext = { openDelayMs: 300, closeDelayMs: 0 };
 const hoverCard: HoverContext = { openDelayMs: 250, closeDelayMs: 200 };

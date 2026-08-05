@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/video-player.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     src: string;

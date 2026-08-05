@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/status-bar.css";
   import type { Snippet } from "svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     summary?: string | null;

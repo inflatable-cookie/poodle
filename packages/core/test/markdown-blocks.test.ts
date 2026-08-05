@@ -6,7 +6,7 @@ import {
   markdownPlainText,
   type MarkedToken,
   type MdBlock,
-} from "../src/markdown-blocks";
+} from "../src/markdown-blocks.ts";
 
 import fixtures from "../../contracts/headless/vectors/markdown-blocks.json" with { type: "json" };
 

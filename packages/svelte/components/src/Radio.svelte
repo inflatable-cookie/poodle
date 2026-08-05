@@ -2,12 +2,12 @@
   import "@poodle/styles/radio.css";
   import { switchTransition } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     id?: string | undefined;

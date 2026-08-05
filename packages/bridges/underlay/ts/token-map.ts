@@ -1,4 +1,4 @@
-import { tokens } from "../../../tokens/artifacts/ts/index";
+import { tokens } from "../../../tokens/artifacts/ts/index.ts";
 
 export type UnderlayBridgeToken = {
   underlayVar: string;

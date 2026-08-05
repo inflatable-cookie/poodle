@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/progress.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     value?: number | null;

@@ -2,10 +2,10 @@
   import "@poodle/styles/toast-stack.css";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
-  import type { ToastItem } from "./types";
+  import type { ToastItem } from "./types.ts";
 
   let {
     items = [],

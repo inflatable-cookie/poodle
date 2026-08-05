@@ -5,12 +5,12 @@
 <script lang="ts">
   import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-range-picker.css";
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Calendar } from "./Calendar.svelte";
-  import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     value?: DateRangeValue | null | undefined;

@@ -1,4 +1,4 @@
-import { controlSizes, densityModes, themes } from "../../../tokens/artifacts/ts/themes";
+import { controlSizes, densityModes, themes } from "../../../tokens/artifacts/ts/themes.ts";
 
 export type UnderlayThemeBridge = {
   underlayThemeId: string;

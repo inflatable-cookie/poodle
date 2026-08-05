@@ -6,7 +6,7 @@ import {
   flattenSelectOptions,
   isSelectOptionDisabled,
   selectOpenHighlightIndex,
-} from "../src/select";
+} from "../src/select.ts";
 
 const flat = [
   { value: "a", label: "Apple" },

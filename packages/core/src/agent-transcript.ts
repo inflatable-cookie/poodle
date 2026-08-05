@@ -15,7 +15,7 @@
  * cannot drift between the web targets and the natives.
  */
 
-import type { AgentQuestionAnswer, AgentQuestionItem } from "./agent-question";
+import type { AgentQuestionAnswer, AgentQuestionItem } from "./agent-question.ts";
 
 export type TranscriptRole = "user" | "assistant";
 

@@ -1,9 +1,9 @@
 <script lang="ts">
   import "@poodle/styles/metric-tile.css";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation } from "./presentation";
+  import { getUiPresentation } from "./presentation.ts";
 
-  import type { ControlDensity } from "./types";
+  import type { ControlDensity } from "./types.ts";
 
   let {
     label,

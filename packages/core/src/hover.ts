@@ -10,7 +10,7 @@
  * matching the pre-machine components.
  */
 
-import type { TransitionResult } from "./machine";
+import type { TransitionResult } from "./machine.ts";
 
 export type HoverState = "closed" | "opening" | "open" | "closing";
 

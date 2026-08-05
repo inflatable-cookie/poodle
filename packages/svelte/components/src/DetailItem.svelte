@@ -3,8 +3,8 @@
   import type { Snippet } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Popover } from "./Popover.svelte";
-  import { getUiPresentation } from "./presentation";
-  import type { ControlDensity } from "./types";
+  import { getUiPresentation } from "./presentation.ts";
+  import type { ControlDensity } from "./types.ts";
 
   interface Props {
     density?: ControlDensity | null;

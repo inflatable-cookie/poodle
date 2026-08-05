@@ -2,8 +2,8 @@
   import "@poodle/styles/status-indicator.css";
   import type { Snippet } from "svelte";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types.ts";
 
   type StatusIndicatorTypography = "label" | "inherit";
 

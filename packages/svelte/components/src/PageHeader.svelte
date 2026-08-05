@@ -6,8 +6,8 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     title?: string | null;

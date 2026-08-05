@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
-import { COMPONENT_PROPS, SMOKE_EXCLUDE } from "../../../../test/fixtures/component-props";
+import { COMPONENT_PROPS, SMOKE_EXCLUDE } from "../../../../test/fixtures/component-props.ts";
 
 // Anatomy smoke across EVERY Svelte component. The module glob means new
 // components are covered automatically — coverage cannot silently regress.

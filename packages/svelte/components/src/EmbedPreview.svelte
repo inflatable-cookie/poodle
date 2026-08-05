@@ -3,7 +3,7 @@
   import { default as Skeleton } from "./Skeleton.svelte";
   import { default as TextLink } from "./TextLink.svelte";
 
-  import type { ParsedEmbed } from "./types";
+  import type { ParsedEmbed } from "./types.ts";
 
   let {
     parsed = null,

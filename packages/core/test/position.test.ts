@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { resolveOverlayPosition, type RectLike } from "../src/position";
+import { resolveOverlayPosition, type RectLike } from "../src/position.ts";
 
 const viewport = { width: 1000, height: 800 };
 

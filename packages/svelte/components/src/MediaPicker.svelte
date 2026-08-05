@@ -5,7 +5,7 @@
   import { default as Tabs } from "./Tabs.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
   import type {
     ControlDensity,
@@ -13,8 +13,8 @@
     FileUploadItem,
     SemanticControlSizeRole,
     TabItem,
-  } from "./types";
-  import type { MediaPickerItem } from "./types";
+  } from "./types.ts";
+  import type { MediaPickerItem } from "./types.ts";
 
   interface Props {
     open?: boolean | null | undefined;

@@ -8,8 +8,8 @@
   } from "@poodle/headless";
 
   import { default as Icon } from "./Icon.svelte";
-  import { formatNumber, snapToStep } from "./internal";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { formatNumber, snapToStep } from "./internal.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
   import type {
     ControlDensity,
@@ -18,7 +18,7 @@
     InputValidator,
     SemanticControlSizeRole,
     ValidationState,
-  } from "./types";
+  } from "./types.ts";
 
   interface NumberInputValidationChange {
     status: InputValidationStatus;

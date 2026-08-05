@@ -2,9 +2,9 @@
   import "@poodle/styles/box.css";
   import type { Snippet } from "svelte";
 
-  import { joinStyles, overflowValue, scaleToSpace } from "./internal";
+  import { joinStyles, overflowValue, scaleToSpace } from "./internal.ts";
 
-  import type { OverflowMode, SpaceScale } from "./types";
+  import type { OverflowMode, SpaceScale } from "./types.ts";
 
   let {
     padding = "none",

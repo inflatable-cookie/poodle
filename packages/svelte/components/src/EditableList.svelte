@@ -7,8 +7,8 @@
   import { default as IconButton } from "./IconButton.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     items?: T[];

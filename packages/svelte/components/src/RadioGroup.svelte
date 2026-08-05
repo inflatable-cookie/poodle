@@ -6,8 +6,8 @@
   import "@poodle/styles/radio-group.css";
   import { singleSelectTransition } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     value?: string | null | undefined;

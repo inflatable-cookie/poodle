@@ -1,11 +1,11 @@
 <script lang="ts">
   import "@poodle/styles/audio-player.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     src: string;

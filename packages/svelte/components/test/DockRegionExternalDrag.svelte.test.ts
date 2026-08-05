@@ -7,7 +7,7 @@ import type {
   DockExternalDragSource,
   DockExternalDropTarget,
   PanelTabItem,
-} from "../src/types";
+} from "../src/types.ts";
 
 const items: PanelTabItem[] = [
   { value: "explorer", label: "Explorer" },

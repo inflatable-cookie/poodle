@@ -26,7 +26,7 @@ import {
   toggleQuestionSelection,
   type AgentQuestionAnswer,
   type AgentQuestionItem,
-} from "../src/agent-question";
+} from "../src/agent-question.ts";
 
 const vectors = JSON.parse(
   readFileSync(

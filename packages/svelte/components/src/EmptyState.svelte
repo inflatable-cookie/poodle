@@ -3,10 +3,10 @@
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation } from "./presentation";
-  import type { ControlDensity } from "./types";
+  import { getUiPresentation } from "./presentation.ts";
+  import type { ControlDensity } from "./types.ts";
 
-  import type { EmptyStateSize, EmptyStateVariant } from "./types";
+  import type { EmptyStateSize, EmptyStateVariant } from "./types.ts";
 
   interface Props {
     title: string;

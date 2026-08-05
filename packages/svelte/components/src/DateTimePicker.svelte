@@ -5,7 +5,7 @@
 <script lang="ts">
   import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-time-picker.css";
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Calendar } from "./Calendar.svelte";
   import { default as TimeInput } from "./TimeInput.svelte";
   import {
@@ -13,10 +13,10 @@
     monthAnchorIso,
     normalizeDateTimeValue,
     todayIsoDate,
-  } from "./date";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  } from "./date.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, DateTimeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateTimeValue, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     value?: DateTimeValue | null | undefined;

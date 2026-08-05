@@ -8,10 +8,10 @@
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import MenuSurface from "./MenuSurface.svelte";
 
-  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     items?: MenuItem[];

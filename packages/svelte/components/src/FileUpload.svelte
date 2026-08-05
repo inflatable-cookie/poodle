@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/file-upload.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { ControlDensity, ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types.ts";
 
   import {
     DEFAULT_COMPRESSION,
@@ -12,7 +12,7 @@
     validateUploadFile,
     type FileUploadValidationError,
     type ImageCompressionOptions,
-  } from "./file-upload";
+  } from "./file-upload.ts";
 
   let {
     size = null,

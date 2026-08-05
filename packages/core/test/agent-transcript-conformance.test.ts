@@ -23,7 +23,7 @@ import {
   transcriptWindow,
   type TranscriptItem,
   type TranscriptToolRun,
-} from "../src/agent-transcript";
+} from "../src/agent-transcript.ts";
 
 const vectors = JSON.parse(
   readFileSync(

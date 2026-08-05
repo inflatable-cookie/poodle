@@ -8,7 +8,7 @@ import {
   tabsTransition,
   type TabsContext,
   type TabsItem,
-} from "../src/tabs";
+} from "../src/tabs.ts";
 
 const items: TabsItem[] = [
   { value: "a" },

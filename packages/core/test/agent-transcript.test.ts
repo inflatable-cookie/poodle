@@ -11,7 +11,7 @@ import {
   type TranscriptItem,
   type TranscriptToolCall,
   type TranscriptToolRun,
-} from "../src/agent-transcript";
+} from "../src/agent-transcript.ts";
 
 const call = (
   id: string,

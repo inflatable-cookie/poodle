@@ -1,6 +1,6 @@
-import { underlayWrapperPolicies, underlayZeroLeakRules } from "./component-wrappers";
-import { underlayThemeMap } from "./theme-map";
-import { underlayTokenMap } from "./token-map";
+import { underlayWrapperPolicies, underlayZeroLeakRules } from "./component-wrappers.ts";
+import { underlayThemeMap } from "./theme-map.ts";
+import { underlayTokenMap } from "./token-map.ts";
 
 export type UnderlayAdoptionSurfaceProof = {
   underlayExport: string;

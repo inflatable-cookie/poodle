@@ -1,4 +1,4 @@
-import type { WorkspaceLayoutSnapshot } from "./types";
+import type { WorkspaceLayoutSnapshot } from "./types.ts";
 
 export function serializeWorkspaceLayoutSnapshot(snapshot: WorkspaceLayoutSnapshot): string {
   return JSON.stringify(snapshot, null, 2);

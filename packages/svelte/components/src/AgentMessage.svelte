@@ -7,14 +7,14 @@
   import Code from "./Code.svelte";
   import Separator from "./Separator.svelte";
   import TextLink from "./TextLink.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     TranscriptRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     markdown?: string;

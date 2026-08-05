@@ -2,10 +2,10 @@
   import "@poodle/styles/pill.css";
   import type { Snippet } from "svelte";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import { getPillContext, type PillTypography } from "./pill-context";
-  import type { ControlDensity, SemanticControlSizeRole } from "./types";
-  import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getPillContext, type PillTypography } from "./pill-context.ts";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types.ts";
+  import type { PillAppearance, PillFont, PillSize, PillTone } from "./types.ts";
 
   let {
     tone = "neutral",

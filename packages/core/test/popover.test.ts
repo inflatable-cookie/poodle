@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { popoverParts, popoverTransition, type PopoverContext } from "../src/popover";
+import { popoverParts, popoverTransition, type PopoverContext } from "../src/popover.ts";
 
 function ctx(overrides: Partial<PopoverContext> = {}): PopoverContext {
   return { disabled: false, dismissOnOutsideInteract: true, initialFocus: "first-focusable", ...overrides };

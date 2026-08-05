@@ -9,7 +9,7 @@ import {
   treeToggleCheck,
   treeVirtualWindow,
   type TreeNodeLike,
-} from "../src/tree";
+} from "../src/tree.ts";
 
 const nodes: TreeNodeLike[] = [
   {

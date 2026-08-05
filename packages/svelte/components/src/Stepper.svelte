@@ -7,7 +7,7 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation";
+  } from "./presentation.ts";
 
   import type {
     ControlDensity,
@@ -15,7 +15,7 @@
     Orientation,
     SemanticControlSizeRole,
     StepperStep,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     steps?: StepperStep[];

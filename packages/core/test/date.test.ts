@@ -17,7 +17,7 @@ import {
   normalizeDateTimeRangeValue,
   parseIsoDate,
   startOfWeek,
-} from "../src/date";
+} from "../src/date.ts";
 
 describe("iso parse/format/arithmetic", () => {
   test("round trip and invalid handling", () => {

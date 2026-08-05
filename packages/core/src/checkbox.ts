@@ -6,7 +6,7 @@
  * are pure; callbacks and DOM fixups are emitted as effects.
  */
 
-import type { PartAttrs } from "./machine";
+import type { PartAttrs } from "./machine.ts";
 
 export interface CheckboxContext {
   checked: boolean;

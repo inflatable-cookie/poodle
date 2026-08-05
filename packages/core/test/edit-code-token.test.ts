@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import { editLabelTransition, listReorderKeyIntent, type EditLabelContext } from "../src/edit";
+import { editLabelTransition, listReorderKeyIntent, type EditLabelContext } from "../src/edit.ts";
 import {
   clampCodePosition,
   codeInsertReplacement,
   codeSelectionRange,
   codeSlotSelection,
   sanitizeCodeValue,
-} from "../src/code-input";
-import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "../src/token";
+} from "../src/code-input.ts";
+import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "../src/token.ts";
 
 function ctx(overrides: Partial<EditLabelContext> = {}): EditLabelContext {
   return { value: "Original", draft: "Original", disabled: false, canStartEdit: true, ...overrides };

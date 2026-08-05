@@ -13,22 +13,22 @@
     type TabsEvent as HeadlessTabsEvent,
   } from "@poodle/headless";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
-  import { firstEnabledIndex } from "./internal";
+  import { firstEnabledIndex } from "./internal.ts";
   import {
     handleDragStart as startDrag,
     handleDragOver as overDrag,
     handleDrop as dropDrag,
-  } from "./tabs-reorder";
+  } from "./tabs-reorder.ts";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation";
+  } from "./presentation.ts";
 
   import type {
     ControlDensity,
@@ -38,7 +38,7 @@
     TabActivationMode,
     TabItem,
     TabVariant,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     value?: string | null;

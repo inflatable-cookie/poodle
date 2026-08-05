@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { readable, writable, type Readable, type Writable } from "svelte/store";
 
-import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
 export interface UiPresentationContextValue {
   density: ControlDensity;

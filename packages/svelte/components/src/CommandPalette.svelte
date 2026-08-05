@@ -6,16 +6,16 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   import { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
 
-  import type { CommandActionItem, DiscoveryState } from "./types";
+  import type { CommandActionItem, DiscoveryState } from "./types.ts";
 
   interface Props {
     open?: boolean;

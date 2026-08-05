@@ -12,11 +12,11 @@
     type ModalEvent,
   } from "@poodle/headless";
   import { onDestroy, tick, type Snippet } from "svelte";
-  import { portal } from "./portal";
+  import { portal } from "./portal.ts";
   import { default as IconButton } from "./IconButton.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     open?: boolean | null | undefined;

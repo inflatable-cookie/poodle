@@ -12,7 +12,7 @@
   import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Button } from "./Button.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
   import { default as Icon } from "./Icon.svelte";
@@ -21,7 +21,7 @@
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as Select } from "./Select.svelte";
   import { default as TextInput } from "./TextInput.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import {
     clauseLabel,
     cloneOperand,
@@ -30,7 +30,7 @@
     isClauseComplete,
     resolveDefaultOperator,
     resolveOperators,
-  } from "./filter-builder-model";
+  } from "./filter-builder-model.ts";
   import type {
     ControlDensity,
     ControlSize,
@@ -40,7 +40,7 @@
     FilterFieldDefinition,
     FilterOperand,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     fields?: FilterFieldDefinition[];

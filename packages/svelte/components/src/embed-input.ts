@@ -1,4 +1,4 @@
-import type { EmbedMeta, EmbedParseResult, ParsedEmbed } from "./types";
+import type { EmbedMeta, EmbedParseResult, ParsedEmbed } from "./types.ts";
 
 export type EmbedParseState = {
   parsed: ParsedEmbed | null;

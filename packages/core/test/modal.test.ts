@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { modalTransition, type ModalContext } from "../src/modal";
+import { modalTransition, type ModalContext } from "../src/modal.ts";
 
 function ctx(overrides: Partial<ModalContext> = {}): ModalContext {
   return { dismissOnEscape: true, dismissOnBackdrop: true, ...overrides };

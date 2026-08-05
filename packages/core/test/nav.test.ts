@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { findNextEnabledIndex, firstEnabledIndex } from "../src/nav";
+import { findNextEnabledIndex, firstEnabledIndex } from "../src/nav.ts";
 
 const items = [{ disabled: false }, { disabled: true }, { disabled: false }, { disabled: false }];
 

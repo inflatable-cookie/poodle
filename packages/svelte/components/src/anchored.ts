@@ -14,7 +14,7 @@ import {
   type OverlaySurfaceGeometryChangeHandler,
 } from "@poodle/headless";
 
-import type { OverlayPlacement } from "./types";
+import type { OverlayPlacement } from "./types.ts";
 
 export interface AnchoredOptions {
   /**

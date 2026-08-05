@@ -7,8 +7,8 @@
     panelSpaceXRem,
     panelSpaceYRem,
     setUiPresentation,
-  } from "./presentation";
-  import type { ControlDensity, ControlSize } from "./types";
+  } from "./presentation.ts";
+  import type { ControlDensity, ControlSize } from "./types.ts";
 
   interface Props {
     density?: ControlDensity;

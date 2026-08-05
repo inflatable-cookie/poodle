@@ -20,14 +20,14 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation";
+  } from "./presentation.ts";
 
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     TranscriptItem,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     items?: TranscriptItem[];

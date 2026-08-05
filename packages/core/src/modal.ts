@@ -10,7 +10,7 @@
  * adapter executes.
  */
 
-import type { TransitionResult } from "./machine";
+import type { TransitionResult } from "./machine.ts";
 
 export type ModalState = "closed" | "open";
 

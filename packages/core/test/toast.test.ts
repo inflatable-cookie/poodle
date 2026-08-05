@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { isToastSticky, normalizeToast, reconcileToastTimers, resolveToastTone } from "../src/toast";
+import { isToastSticky, normalizeToast, reconcileToastTimers, resolveToastTone } from "../src/toast.ts";
 
 describe("resolveToastTone / normalizeToast", () => {
   test("tone wins over variant; variant maps; default info", () => {

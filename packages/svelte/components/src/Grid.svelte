@@ -2,9 +2,9 @@
   import "@poodle/styles/grid.css";
   import type { Snippet } from "svelte";
 
-  import { joinStyles, scaleToSpace } from "./internal";
+  import { joinStyles, scaleToSpace } from "./internal.ts";
 
-  import type { SpaceScale } from "./types";
+  import type { SpaceScale } from "./types.ts";
 
   let {
     columns = "1fr",

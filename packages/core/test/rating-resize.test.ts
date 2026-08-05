@@ -9,8 +9,8 @@ import {
   ratingSelectValue,
   resolveRatingStep,
   trimRatingFraction,
-} from "../src/rating";
-import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "../src/resize";
+} from "../src/rating.ts";
+import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "../src/resize.ts";
 
 describe("rating math", () => {
   test("step resolution caps at 1 and rejects invalid", () => {

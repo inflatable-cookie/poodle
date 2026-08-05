@@ -2,7 +2,7 @@ export {
   canonicalTokenFamilies,
   underlayTokenMap,
   type UnderlayBridgeToken,
-} from "./token-map";
+} from "./token-map.ts";
 export {
   canonicalPoodleThemes,
   underlayControlSizeMap,
@@ -10,12 +10,12 @@ export {
   underlayThemeMap,
   type UnderlayModeBridge,
   type UnderlayThemeBridge,
-} from "./theme-map";
+} from "./theme-map.ts";
 export {
   underlayWrapperPolicies,
   underlayZeroLeakRules,
   type UnderlayWrapperPolicy,
-} from "./component-wrappers";
+} from "./component-wrappers.ts";
 export {
   underlayAdoptionSurfaceProof,
   underlayRemainingAdoptionFriction,
@@ -23,7 +23,7 @@ export {
   validateUnderlayZeroLeakProof,
   type UnderlayAdoptionSurfaceProof,
   type UnderlayZeroLeakProof,
-} from "./zero-leak-proof";
+} from "./zero-leak-proof.ts";
 export {
   buildNightfireBlockEditorBridge,
   nightfireTypePickerNeedsSlotOverride,
@@ -40,4 +40,4 @@ export {
   type UnderlayPoodleBlockTypeDefinition,
   type UnderlayPoodleBlockTypeGroup,
   type UnderlayPoodleBlockTypeItems,
-} from "./nightfire-block-editor";
+} from "./nightfire-block-editor.ts";

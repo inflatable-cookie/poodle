@@ -3,15 +3,15 @@
   import { default as Button } from "./Button.svelte";
   import { default as Callout } from "./Callout.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   import { default as MediaThumbnail } from "./MediaThumbnail.svelte";
-  import type { MediaKind, MediaPickerItem } from "./types";
+  import type { MediaKind, MediaPickerItem } from "./types.ts";
 
   interface Props {
     loading?: boolean;

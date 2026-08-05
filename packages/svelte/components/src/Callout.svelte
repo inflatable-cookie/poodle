@@ -2,9 +2,9 @@
   import "@poodle/styles/callout.css";
   import type { Snippet } from "svelte";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import { default as Spinner } from "./Spinner.svelte";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types.ts";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
 

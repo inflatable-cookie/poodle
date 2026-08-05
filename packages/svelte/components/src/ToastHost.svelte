@@ -9,8 +9,8 @@
     ToastHostStore,
     ToastHostStoreItem,
     ToastItem,
-  } from "./types";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   let {
     store,

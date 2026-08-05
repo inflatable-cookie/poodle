@@ -3,7 +3,7 @@
   import type { Snippet } from "svelte";
   import { default as Spinner } from "./Spinner.svelte";
 
-  import type { BrowseState } from "./types";
+  import type { BrowseState } from "./types.ts";
 
   interface Props {
     title?: string | null;

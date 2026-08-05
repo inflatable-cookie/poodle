@@ -4,10 +4,10 @@
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
-  import type { CardRadioItem } from "./types";
+  import type { CardRadioItem } from "./types.ts";
 
   interface CardSnippetProps {
     item: CardRadioItem;

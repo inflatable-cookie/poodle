@@ -1,6 +1,6 @@
 <script lang="ts">
   import "@poodle/styles/separator.css";
-  import type { Orientation, SeparatorTone } from "./types";
+  import type { Orientation, SeparatorTone } from "./types.ts";
 
   interface Props {
     orientation?: Orientation;

@@ -36,7 +36,7 @@ export {
   formatFileSize,
   type FileUploadValidationError,
   type ImageCompressionOptions,
-} from "./file-upload";
+} from "./file-upload.ts";
 export { default as FilterBuilder } from "./FilterBuilder.svelte";
 export { default as FormActions } from "./FormActions.svelte";
 export { default as Grid } from "./Grid.svelte";
@@ -107,7 +107,7 @@ export {
   currentTheme,
   type ThemeController,
   type ThemeControllerConfig,
-} from "./theme-controller";
+} from "./theme-controller.ts";
 export { default as ToggleGroup } from "./ToggleGroup.svelte";
 export { default as Toolbar } from "./Toolbar.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
@@ -119,7 +119,7 @@ export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";
 export {
   formatDisplayDate,
   formatDisplayDateTime,
-} from "./date";
+} from "./date.ts";
 export {
   controlHeightRem,
   controlSpaceXRem,
@@ -128,12 +128,12 @@ export {
   panelSpaceYRem,
   resolveSemanticControlSize,
   resolveSupportingVisualSize,
-} from "./presentation";
+} from "./presentation.ts";
 
 // Overlay infrastructure: hosts building their own anchored surface get the
 // same portalling and placement the library uses (002-anchored-overlays.md).
-export { anchored, type AnchoredOptions } from "./anchored";
-export { portal } from "./portal";
+export { anchored, type AnchoredOptions } from "./anchored.ts";
+export { portal } from "./portal.ts";
 export type {
   OverlaySurfaceGeometry,
   OverlaySurfaceGeometryChange,
@@ -166,7 +166,7 @@ export {
   parseEmbed,
   renderEmbed,
   resolveEmbedParseState,
-} from "./embed-input";
+} from "./embed-input.ts";
 export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
@@ -186,7 +186,7 @@ export {
   mergeMediaBrowseItems,
   runMediaUploadWorkflow,
   uploadMediaWithKnownHash,
-} from "./media-workflow";
+} from "./media-workflow.ts";
 export { default as MediaPreview } from "./MediaPreview.svelte";
 export { default as MediaThumbnail } from "./MediaThumbnail.svelte";
 export { default as PageHeader } from "./PageHeader.svelte";
@@ -203,7 +203,7 @@ export { default as ToastHost } from "./ToastHost.svelte";
 export {
   parseWorkspaceLayoutSnapshot,
   serializeWorkspaceLayoutSnapshot,
-} from "./persistence";
+} from "./persistence.ts";
 
 // --- Types ---
 export type {
@@ -408,5 +408,5 @@ export type {
   ToastHostStoreItem,
   ToastTone,
   WorkspaceLayoutSnapshot,
-} from "./types";
-export type { IconNodeElement, IconNodes, IconSet } from "./icon-registry";
+} from "./types.ts";
+export type { IconNodeElement, IconNodes, IconSet } from "./icon-registry.ts";

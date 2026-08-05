@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
-import { menuTransition } from "../src/menu";
+import { menuTransition } from "../src/menu.ts";
 
-import { menuItemHasSubmenu, menuListCanActivate, menuListNavigate, menuNavigableItems } from "../src/menu";
+import { menuItemHasSubmenu, menuListCanActivate, menuListNavigate, menuNavigableItems } from "../src/menu.ts";
 
 describe("menu list machinery", () => {
   const items = [

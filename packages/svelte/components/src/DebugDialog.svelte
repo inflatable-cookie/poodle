@@ -3,7 +3,7 @@
   import { default as Code } from "./Code.svelte";
   import { default as Dialog } from "./Dialog.svelte";
 
-  import type { ButtonVariant, ControlSize } from "./types";
+  import type { ButtonVariant, ControlSize } from "./types.ts";
 
   let {
     value = null,

@@ -5,7 +5,7 @@ import type {
   DockExternalDragPrepareContext,
   DockExternalDragSource,
   PanelTabItem,
-} from "./types";
+} from "./types.ts";
 
 type ExternalPreparationState = {
   panel: PanelTabItem;

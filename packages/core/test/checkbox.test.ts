@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { checkboxParts, checkboxState, checkboxTransition, type CheckboxContext } from "../src/checkbox";
+import { checkboxParts, checkboxState, checkboxTransition, type CheckboxContext } from "../src/checkbox.ts";
 
 function ctx(overrides: Partial<CheckboxContext> = {}): CheckboxContext {
   return { checked: false, mixed: false, disabled: false, readOnly: false, ...overrides };

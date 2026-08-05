@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/field-set.css";
   import type { Snippet } from "svelte";
-  import { scaleToSpace } from "./internal";
-  import type { SpaceScale } from "./types";
+  import { scaleToSpace } from "./internal.ts";
+  import type { SpaceScale } from "./types.ts";
 
   interface Props {
     legend?: string | null;

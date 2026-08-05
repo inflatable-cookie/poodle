@@ -4,8 +4,8 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as Popover } from "./Popover.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types.ts";
 
   interface FieldControlProps {
     describedBy: string | null;

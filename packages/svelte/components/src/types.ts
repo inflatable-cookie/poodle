@@ -1,7 +1,7 @@
 import type { Component } from "svelte";
 import type { Readable } from "svelte/store";
 
-import type { IconNodes } from "./icon-registry";
+import type { IconNodes } from "./icon-registry.ts";
 
 export type {
   OverlaySurfaceGeometry,

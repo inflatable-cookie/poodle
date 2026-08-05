@@ -7,17 +7,17 @@
   import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Icon } from "./Icon.svelte";
   import { default as TextInput } from "./TextInput.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import { filterRefs, groupHeadingFor, refIcon, refKindIcon, refLabel } from "./ref-select-model";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { filterRefs, groupHeadingFor, refIcon, refKindIcon, refLabel } from "./ref-select-model.ts";
   import type {
     ControlDensity,
     ControlSize,
     RefOption,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     refs?: RefOption[];

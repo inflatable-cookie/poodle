@@ -4,10 +4,10 @@
 
   import { registerDismissLayer, pointAnchor } from "@poodle/headless";
 
-  import { menuNavigableItems } from "./internal";
-  import { anchored } from "./anchored";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
+  import { menuNavigableItems } from "./internal.ts";
+  import { anchored } from "./anchored.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     size?: ControlSize | null;

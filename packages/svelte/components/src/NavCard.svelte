@@ -1,9 +1,9 @@
 <script lang="ts">
   import "@poodle/styles/nav-card.css";
   import type { Snippet } from "svelte";
-  import { getUiPresentation } from "./presentation";
+  import { getUiPresentation } from "./presentation.ts";
 
-  import type { ControlDensity } from "./types";
+  import type { ControlDensity } from "./types.ts";
 
   interface Props {
     title: string;

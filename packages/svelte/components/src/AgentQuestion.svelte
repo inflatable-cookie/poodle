@@ -15,9 +15,9 @@
 
   import Checkbox from "./Checkbox.svelte";
   import Eyebrow from "./Eyebrow.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     questions?: AgentQuestionItem[];

@@ -1,12 +1,12 @@
 <script lang="ts">
   import "@poodle/styles/icon.css";
   import { fromStore } from "svelte/store";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, SemanticControlSizeRole } from "./types";
-  import type { ControlSize } from "./types";
-  import type { IconNodes } from "./icon-registry";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlSize } from "./types.ts";
+  import type { IconNodes } from "./icon-registry.ts";
 
-  import { resolveIconNodes, getIconSetStore } from "./icon-registry";
+  import { resolveIconNodes, getIconSetStore } from "./icon-registry.ts";
 
   /**
    * The icon to display. Accepts:

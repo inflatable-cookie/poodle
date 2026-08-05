@@ -4,14 +4,14 @@
 
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as ResizeHandle } from "./ResizeHandle.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     CollapseDirection,
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     SplitOrientation,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     orientation?: SplitOrientation;

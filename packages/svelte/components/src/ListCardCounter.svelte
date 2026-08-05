@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/list-card-counter.css";
   import { default as Icon } from "./Icon.svelte";
-  import type { IconProp } from "./types";
+  import type { IconProp } from "./types.ts";
   import { default as Tooltip } from "./Tooltip.svelte";
 
   type ListCardCounterTypography = "label" | "inherit";

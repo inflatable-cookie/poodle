@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/skeleton.css";
   import { pxToRem } from "@poodle/svelte-tokens";
-  import type { SkeletonShape, SkeletonPreset } from "./types";
+  import type { SkeletonShape, SkeletonPreset } from "./types.ts";
 
   let {
     shape = "line",

@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import type { ThemeOption } from "./types";
+  import type { ThemeOption } from "./types.ts";
 
   let nextThemeSelectId = 0;
 
@@ -14,15 +14,15 @@
   import { tick } from "svelte";
   import { get } from "svelte/store";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import { getThemeController } from "./theme-controller";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getThemeController } from "./theme-controller.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     /** Theme catalogue. Falls back to the theme controller's list, then empty. */

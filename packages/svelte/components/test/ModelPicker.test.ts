@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import ModelPicker from "../src/ModelPicker.svelte";
-import type { ModelCapabilityAxis, ModelOption } from "../src/types";
+import type { ModelCapabilityAxis, ModelOption } from "../src/types.ts";
 
 // The picker's contract is per-model axis resolution: axes are declared once by
 // key, each model references the keys it exposes, and a binding may override the

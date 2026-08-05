@@ -7,7 +7,7 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation";
+  } from "./presentation.ts";
   import { default as Spinner } from "./Spinner.svelte";
   import type {
     ButtonTone,
@@ -16,7 +16,7 @@
     ControlSize,
     IconProp,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     variant?: ButtonVariant;

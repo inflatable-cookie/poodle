@@ -2,10 +2,10 @@
   import "@poodle/styles/slider.css";
   import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@poodle/headless";
 
-  import { joinStyles } from "./internal";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { joinStyles } from "./internal.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     size?: ControlSize | null;

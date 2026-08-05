@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import { hexToRgb, hexToHsv, hsvToHex, isValidHex, normalizeHex, rgbToHex } from "../src/color";
-import { adjustDurationSegment, durationTotalSeconds, setDurationSegment } from "../src/duration";
+import { hexToRgb, hexToHsv, hsvToHex, isValidHex, normalizeHex, rgbToHex } from "../src/color.ts";
+import { adjustDurationSegment, durationTotalSeconds, setDurationSegment } from "../src/duration.ts";
 
 describe("color conversions", () => {
   test("hex validation and normalization", () => {

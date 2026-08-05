@@ -4,15 +4,15 @@
   import { default as ListCard } from "./ListCard.svelte";
   import { default as Skeleton } from "./Skeleton.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
   import { default as EmptyState } from "./EmptyState.svelte";
 
-  import type { CommandActionItem, DiscoveryState } from "./types";
+  import type { CommandActionItem, DiscoveryState } from "./types.ts";
 
   interface Props {
     items?: CommandActionItem[];

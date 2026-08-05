@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import { disclosureTransition } from "../src/disclosure";
-import { buildVisiblePages, canRequestPage } from "../src/pagination";
+import { disclosureTransition } from "../src/disclosure.ts";
+import { buildVisiblePages, canRequestPage } from "../src/pagination.ts";
 
 describe("disclosureTransition", () => {
   test("toggle flips and emits; disabled inert; SET_OPEN silent", () => {

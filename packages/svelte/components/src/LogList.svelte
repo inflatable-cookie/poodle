@@ -10,7 +10,7 @@
   import { default as TextLink } from "./TextLink.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     AuditLogEntry,
     ControlDensity,
@@ -21,7 +21,7 @@
     LogFilter,
     LogLevel,
     SemanticControlSizeRole,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     entries?: LogEntry[];

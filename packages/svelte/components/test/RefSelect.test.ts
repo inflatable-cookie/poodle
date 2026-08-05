@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import RefSelect from "../src/RefSelect.svelte";
-import type { RefOption } from "../src/types";
+import type { RefOption } from "../src/types.ts";
 
 // The component's contract is filtering, the current marker, and the fact that
 // a host-supplied query hands filtering over entirely.

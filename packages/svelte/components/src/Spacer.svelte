@@ -1,6 +1,6 @@
 <script lang="ts">
   import "@poodle/styles/spacer.css";
-  import { joinStyles } from "./internal";
+  import { joinStyles } from "./internal.ts";
 
   interface Props {
     grow?: number;

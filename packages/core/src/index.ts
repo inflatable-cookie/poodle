@@ -1,8 +1,8 @@
-export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
+export type { TransitionResult, PartAttrs, AttrValue } from "./machine.ts";
 
-export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
+export { findNextEnabledIndex, firstEnabledIndex } from "./nav.ts";
 
-export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
+export { getFocusableElements, trapFocusKeydown } from "./dom/focus.ts";
 
 export {
   disclosureTransition,
@@ -10,13 +10,13 @@ export {
   type DisclosureEvent,
   type DisclosureEffect,
   type DisclosureResult,
-} from "./disclosure";
+} from "./disclosure.ts";
 
 export {
   buildVisiblePages,
   canRequestPage,
   type VisiblePage,
-} from "./pagination";
+} from "./pagination.ts";
 
 export {
   validationStatusToState,
@@ -27,7 +27,7 @@ export {
   isValidSlugFormat,
   type InputValidationStatus,
   type ValidationState,
-} from "./input";
+} from "./input.ts";
 
 export {
   hoverTransition,
@@ -36,7 +36,7 @@ export {
   type HoverEvent,
   type HoverEffect,
   type HoverResult,
-} from "./hover";
+} from "./hover.ts";
 
 export {
   menuTransition,
@@ -51,7 +51,7 @@ export {
   type MenuEvent,
   type MenuEffect,
   type MenuResult,
-} from "./menu";
+} from "./menu.ts";
 
 export {
   modalTransition,
@@ -60,14 +60,14 @@ export {
   type ModalEvent,
   type ModalEffect,
   type ModalResult,
-} from "./modal";
+} from "./modal.ts";
 export {
   layerContains,
   registerDismissLayer,
   resolveDismiss,
   type DismissLayer,
-} from "./dom/dismiss";
-export { createInstanceId } from "./dom/id";
+} from "./dom/dismiss.ts";
+export { createInstanceId } from "./dom/id.ts";
 export {
   copyOverlayViewportRect,
   equalOverlaySurfaceGeometry,
@@ -78,7 +78,7 @@ export {
   type OverlaySurfaceGeometryObserver,
   type OverlaySurfaceGeometryObserverOptions,
   type OverlayViewportRect,
-} from "./dom/overlay-geometry";
+} from "./dom/overlay-geometry.ts";
 export {
   anchorElement,
   clipsOverflow,
@@ -98,7 +98,7 @@ export {
   type AnchorViewport,
   type ClipRect,
   type VirtualAnchor,
-} from "./dom/anchor";
+} from "./dom/anchor.ts";
 
 export {
   checkboxTransition,
@@ -110,7 +110,7 @@ export {
   type CheckboxResult,
   type CheckboxPartProps,
   type CheckboxParts,
-} from "./checkbox";
+} from "./checkbox.ts";
 
 export {
   popoverTransition,
@@ -123,7 +123,7 @@ export {
   type PopoverResult,
   type PopoverPartProps,
   type PopoverParts,
-} from "./popover";
+} from "./popover.ts";
 
 export {
   switchTransition,
@@ -132,7 +132,7 @@ export {
   type SwitchEvent,
   type SwitchEffect,
   type SwitchResult,
-} from "./switch";
+} from "./switch.ts";
 
 export {
   singleSelectTransition,
@@ -141,7 +141,7 @@ export {
   type SingleSelectEvent,
   type SingleSelectEffect,
   type SingleSelectResult,
-} from "./single-select";
+} from "./single-select.ts";
 
 export {
   editLabelTransition,
@@ -152,7 +152,7 @@ export {
   type EditLabelEffect,
   type EditLabelResult,
   type ListReorderIntent,
-} from "./edit";
+} from "./edit.ts";
 
 export {
   sanitizeCodeValue,
@@ -160,14 +160,14 @@ export {
   codeSelectionRange,
   codeSlotSelection,
   codeInsertReplacement,
-} from "./code-input";
+} from "./code-input.ts";
 
 export {
   mergeTokens,
   splitTokenInput,
   tokenBackspaceRemoves,
   type TokenSplit,
-} from "./token";
+} from "./token.ts";
 
 export {
   resolveRatingStep,
@@ -179,14 +179,14 @@ export {
   ratingPointerValue,
   ratingSelectValue,
   ratingKeyboardStep,
-} from "./rating";
+} from "./rating.ts";
 
 export {
   resizeAxisPosition,
   resizeDragDelta,
   resizeKeydownStep,
   type ResizeOrientation,
-} from "./resize";
+} from "./resize.ts";
 
 export {
   submitsOnSelect,
@@ -207,7 +207,7 @@ export {
   type QuestionProgressState,
   type QuestionProgress,
   type AnsweredQuestion,
-} from "./agent-question";
+} from "./agent-question.ts";
 
 export {
   groupTranscriptItems,
@@ -234,7 +234,7 @@ export {
   type ChangedFilesTotals,
   type ChangedFileNode,
   type TranscriptWindow,
-} from "./agent-transcript";
+} from "./agent-transcript.ts";
 
 export {
   blocksFromMarked,
@@ -243,7 +243,7 @@ export {
   type MdBlock,
   type MdInline,
   type MarkedToken,
-} from "./markdown-blocks";
+} from "./markdown-blocks.ts";
 
 export {
   flattenVisibleTreeRows,
@@ -261,7 +261,7 @@ export {
   type TreeCheckState,
   type TreeKeyIntent,
   type TreeVirtualWindow,
-} from "./tree";
+} from "./tree.ts";
 
 export {
   toggleGroupTransition,
@@ -271,7 +271,7 @@ export {
   type ToggleGroupEvent,
   type ToggleGroupEffect,
   type ToggleGroupResult,
-} from "./toggle-group";
+} from "./toggle-group.ts";
 
 export {
   sliderTransition,
@@ -289,7 +289,7 @@ export {
   type RangeSliderEvent,
   type RangeSliderEffect,
   type RangeSliderResult,
-} from "./slider";
+} from "./slider.ts";
 
 export {
   resolveOverlayPosition,
@@ -298,11 +298,11 @@ export {
   type RectLike,
   type ViewportSize,
   type OverlayPosition,
-} from "./position";
+} from "./position.ts";
 
-export * from "./date";
+export * from "./date.ts";
 
-export * from "./color";
+export * from "./color.ts";
 
 export {
   durationTotalSeconds,
@@ -311,7 +311,7 @@ export {
   padDurationSegment,
   type DurationValue,
   type DurationSegment,
-} from "./duration";
+} from "./duration.ts";
 
 export {
   isSelectOptionDisabled,
@@ -321,7 +321,7 @@ export {
   selectOpenHighlightIndex,
   type SelectOptionLike,
   type SelectGroupLike,
-} from "./select";
+} from "./select.ts";
 
 export {
   resolveToastTone,
@@ -332,7 +332,7 @@ export {
   type ToastHostInput,
   type NormalizedToast,
   type ToastTimerPlan,
-} from "./toast";
+} from "./toast.ts";
 
 export {
   tabsTransition,
@@ -355,4 +355,4 @@ export {
   type TabsTooltipEvent,
   type TabsTooltipEffect,
   type TabsPartProps,
-} from "./tabs";
+} from "./tabs.ts";

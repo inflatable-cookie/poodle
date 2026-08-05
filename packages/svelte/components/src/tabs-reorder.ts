@@ -1,4 +1,4 @@
-import type { TabItem } from "./types";
+import type { TabItem } from "./types.ts";
 
 const TAB_REORDER_TYPE = "application/x-poodle-tab-reorder";
 

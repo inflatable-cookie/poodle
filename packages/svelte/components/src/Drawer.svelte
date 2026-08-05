@@ -13,9 +13,9 @@
   } from "@poodle/headless";
   import { onDestroy, tick, type Snippet } from "svelte";
   import { fade } from "svelte/transition";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
 
-  import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types.ts";
 
   interface Props {
     open?: boolean | null | undefined;

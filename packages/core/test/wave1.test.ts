@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
-import { switchTransition } from "../src/switch";
-import { singleSelectTransition, type SingleSelectContext } from "../src/single-select";
-import { toggleGroupTransition, type ToggleGroupContext } from "../src/toggle-group";
+import { switchTransition } from "../src/switch.ts";
+import { singleSelectTransition, type SingleSelectContext } from "../src/single-select.ts";
+import { toggleGroupTransition, type ToggleGroupContext } from "../src/toggle-group.ts";
 import {
   normalizeRangeValue,
   rangeSliderTransition,
@@ -11,7 +11,7 @@ import {
   snapToStep,
   type RangeSliderContext,
   type SliderContext,
-} from "../src/slider";
+} from "../src/slider.ts";
 
 describe("switchTransition", () => {
   const ctx = { checked: false, disabled: false, readOnly: false };

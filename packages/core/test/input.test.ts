@@ -7,7 +7,7 @@ import {
   parseStep,
   slugify,
   validationStatusToState,
-} from "../src/input";
+} from "../src/input.ts";
 
 describe("validationStatusToState", () => {
   test("maps statuses; idle falls back", () => {

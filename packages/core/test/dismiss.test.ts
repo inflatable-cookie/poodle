@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { resolveDismiss, type DismissLayer } from "../src/dom/dismiss";
+import { resolveDismiss, type DismissLayer } from "../src/dom/dismiss.ts";
 
 function layer(overrides: Partial<DismissLayer> = {}): DismissLayer {
   return {

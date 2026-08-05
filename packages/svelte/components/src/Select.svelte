@@ -10,9 +10,9 @@
   } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
-  import { anchored } from "./anchored";
+  import { anchored } from "./anchored.ts";
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
@@ -26,7 +26,7 @@
     SelectOptionGroup,
     SelectTriggerRenderState,
     ValidationState,
-  } from "./types";
+  } from "./types.ts";
 
   interface Props {
     id?: string;
