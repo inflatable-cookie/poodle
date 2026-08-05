@@ -258,3 +258,14 @@ pub fn toolbar_density_gap_rem(density: ControlDensity) -> Option<f32> {
         ControlDensity::Comfortable => Some(0.5),
     }
 }
+
+/// Drawer header title font in rem per size.
+pub fn drawer_title_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.8125,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.0625,
+        ControlSize::Xl => 1.125,
+    }
+}
