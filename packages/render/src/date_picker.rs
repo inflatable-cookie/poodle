@@ -109,6 +109,7 @@ pub fn date_picker(
             background: Some(hover_bg),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
 
         if let Some(handler) = &handlers.on_toggle {

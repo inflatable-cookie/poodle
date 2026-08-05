@@ -246,6 +246,8 @@ pub struct StylePatch {
     pub background: Option<ColorValue>,
     pub border_color: Option<ColorValue>,
     pub text_color: Option<ColorValue>,
+    /// Opacity override — a hover-revealed affordance's 0→1.
+    pub opacity: Option<f32>,
 }
 
 /// How the node participates in layout flow.

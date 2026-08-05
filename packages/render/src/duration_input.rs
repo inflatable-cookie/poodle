@@ -234,6 +234,7 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
             background: Some(segment_focus_bg),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
     }
 

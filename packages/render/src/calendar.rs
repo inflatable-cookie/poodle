@@ -339,6 +339,7 @@ pub fn calendar(
                 background: Some(nav_btn_hover_bg),
                 border_color: None,
                 text_color: None,
+                opacity: None,
             });
         }
         all_corners(&mut btn, control_radius);
@@ -382,6 +383,7 @@ pub fn calendar(
                 background: None,
                 border_color: Some(trigger_underline_hover),
                 text_color: None,
+                opacity: None,
             });
         }
         t
@@ -544,6 +546,7 @@ pub fn calendar(
                             background: Some(selected_hover_bg),
                             border_color: None,
                             text_color: None,
+                            opacity: None,
                         });
                     }
                 } else if is_in_range {
@@ -569,6 +572,7 @@ pub fn calendar(
                             background: Some(hover_bg),
                             border_color: Some(hover_border),
                             text_color: None,
+                            opacity: None,
                         });
                     }
                 }

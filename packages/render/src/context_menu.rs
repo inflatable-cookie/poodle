@@ -139,6 +139,7 @@ pub fn context_menu(
                 background: Some(hover_tint),
                 border_color: None,
                 text_color: None,
+                opacity: None,
             });
             if let Some(handler) = &on_action {
                 let handler = Arc::clone(handler);

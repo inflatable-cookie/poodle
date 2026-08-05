@@ -85,6 +85,7 @@ pub fn text_input(
             border_color: Some(hover_border),
             background: None,
             text_color: None,
+            opacity: None,
         });
         if spec.is_multiline() {
             s.min_height = Some(rem_to_px(

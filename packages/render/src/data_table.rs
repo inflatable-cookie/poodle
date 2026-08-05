@@ -255,6 +255,7 @@ pub fn data_table(
                 background: Some(header_hover),
                 border_color: None,
                 text_color: None,
+                opacity: None,
             });
 
             if let Some(handler) = &handlers.on_sort {

@@ -61,6 +61,7 @@ pub fn list_card_counter(
             background: None,
             border_color: None,
             text_color: Some(primary),
+            opacity: None,
         });
         if let Some(handler) = on_link_click {
             row.interaction.on_activate = Some(Arc::new(move || handler()));

@@ -114,6 +114,7 @@ pub fn menubar(
                     background: Some(open_bg),
                     border_color: None,
                     text_color: None,
+                    opacity: None,
                 });
             }
         }
@@ -201,6 +202,7 @@ pub fn menubar(
                                     background: Some(item_hover),
                                     border_color: None,
                                     text_color: None,
+                                    opacity: None,
                                 });
                             }
                         }

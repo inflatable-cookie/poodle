@@ -114,6 +114,7 @@ fn toned_icon_button(
             background: Some(hover_bg),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
     }
     el.interaction.focusable = true;

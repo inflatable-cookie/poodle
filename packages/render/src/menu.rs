@@ -131,6 +131,7 @@ pub fn menu(
                 background: Some(hover),
                 border_color: None,
                 text_color: None,
+                opacity: None,
             });
             if let Some(handler) = &on_action {
                 let handler = Arc::clone(handler);

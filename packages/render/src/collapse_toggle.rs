@@ -60,6 +60,7 @@ pub fn collapse_toggle(
             background: Some(hover_fill),
             border_color: None,
             text_color: Some(hover_text),
+            opacity: None,
         });
         if let Some(handler) = on_toggle {
             let next = !spec.is_collapsed;

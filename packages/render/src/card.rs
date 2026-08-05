@@ -129,6 +129,7 @@ pub fn card(spec: &CardSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> 
             background: Some(hover_fill),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
         el.style.descriptor.cursor = CursorHint::Pointer;
     }

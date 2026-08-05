@@ -179,6 +179,7 @@ fn build_trigger(
             background: Some(hover_fill),
             border_color: Some(hover_border),
             text_color: None,
+            opacity: None,
         });
     }
     el.interaction.focusable = true;

@@ -203,6 +203,7 @@ pub fn file_upload(
             background: Some(hover_bg),
             border_color: Some(focus_border),
             text_color: None,
+            opacity: None,
         });
         dropzone.style.descriptor.cursor = CursorHint::Pointer;
     }
@@ -363,6 +364,7 @@ fn file_item(
             background: Some(surface_mix),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
     }
     all_corners(&mut remove, rem_to_px(999.0));

@@ -61,7 +61,7 @@ pub fn metric_tile(spec: &MetricTileSpec, theme: &dyn ThemeProvider) -> Node {
     label.style.descriptor.text_color = Some(label_color);
     label.style.text_size = Some(label_font);
     label.style.font_family = Some(FontFamily::Mono);
-    let mut el = el.child(label);
+    let el = el.child(label);
 
     // Body: value + optional inline sparkline.
     let mut body = Node::container();

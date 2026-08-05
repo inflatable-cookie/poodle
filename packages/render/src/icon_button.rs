@@ -129,11 +129,13 @@ pub fn icon_button(
             background: Some(hover_fill),
             border_color: Some(hover_border),
             text_color: None,
+            opacity: None,
         });
         el.style.active = Some(StylePatch {
             background: Some(active_fill),
             border_color: None,
             text_color: None,
+            opacity: None,
         });
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));

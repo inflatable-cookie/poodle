@@ -210,6 +210,7 @@ pub fn editable_label(
                 background: Some(hover_bg),
                 border_color: Some(hover_border),
                 text_color: None,
+                opacity: None,
             });
         }
         row
