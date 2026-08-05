@@ -304,6 +304,7 @@ pub enum NodeRole {
     ProgressIndicator,
     RadioGroup,
     RadioButton,
+    Region,
     Status,
     Switch,
     Tab,
