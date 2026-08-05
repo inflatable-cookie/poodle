@@ -482,3 +482,45 @@ pub fn code_input_slot_font_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 1.25,
     }
 }
+
+/// Table body cell font-size in rem per size (contract §8).
+pub fn table_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// Table header font-size in rem per size (contract §8).
+pub fn table_header_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5625,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.6875,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.8125,
+    }
+}
+
+/// Table cell vertical padding in rem per size (contract §8).
+pub fn table_cell_pad_block_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.3125,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// Table cell horizontal padding in rem per density (contract §8).
+pub fn table_cell_pad_inline_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.5,
+        ControlDensity::Default => 0.75,
+        ControlDensity::Comfortable => 1.125,
+    }
+}
