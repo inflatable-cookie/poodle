@@ -458,3 +458,27 @@ pub fn split_button_chevron_size_rem(size: ControlSize) -> f32 {
         ControlSize::Xl => 0.875,
     }
 }
+
+/// CodeInput slot square size in rem per size. Contract §7: xs 1.5, sm 1.75,
+/// md 2.25, lg 2.75, xl 3.25.
+pub fn code_input_slot_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.75,
+        ControlSize::Xl => 3.25,
+    }
+}
+
+/// CodeInput slot digit font-size in rem per size. Contract §7: xs 0.8125,
+/// sm 0.875, md 1, lg 1.125, xl 1.25.
+pub fn code_input_slot_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.8125,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
