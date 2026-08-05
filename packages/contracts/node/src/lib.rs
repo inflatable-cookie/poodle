@@ -300,6 +300,7 @@ pub struct Interaction {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NodeRole {
     Alert,
+    AlertDialog,
     Button,
     CheckBox,
     ComboBox,

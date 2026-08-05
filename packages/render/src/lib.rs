@@ -15,6 +15,7 @@
 
 pub mod avatar;
 pub mod accordion;
+pub mod alert_dialog;
 pub mod badge;
 pub mod banner;
 pub mod breadcrumbs;
@@ -57,6 +58,7 @@ pub mod tooltip;
 
 pub use avatar::avatar;
 pub use accordion::accordion;
+pub use alert_dialog::{alert_dialog, AlertDialogHandlers, DEFAULT_WORKING_LABEL};
 pub use badge::badge;
 pub use banner::banner;
 pub use breadcrumbs::breadcrumbs;
