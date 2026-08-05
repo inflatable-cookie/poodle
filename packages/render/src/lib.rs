@@ -103,6 +103,8 @@ pub mod time_zone_select;
 pub mod toolbar;
 pub mod text_link;
 pub mod time_ago;
+pub mod toast_host;
+pub mod toast_stack;
 pub mod tooltip;
 pub mod validation_summary;
 
@@ -194,5 +196,7 @@ pub use time_field::time_field;
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use text_link::text_link;
 pub use time_ago::time_ago;
+pub use toast_host::toast_host;
+pub use toast_stack::{toast_stack, ToastStackHandlers};
 pub use tooltip::tooltip;
 pub use validation_summary::validation_summary;
