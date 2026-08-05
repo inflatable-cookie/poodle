@@ -337,6 +337,7 @@ pub enum NodeRole {
     RadioButton,
     Region,
     Row,
+    SpinButton,
     Status,
     Switch,
     Tab,

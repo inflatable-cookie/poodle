@@ -393,3 +393,46 @@ pub fn toggle_group_gap_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 0.375,
     }
 }
+
+/// Token-row padding-block offset in rem added to `space.control.y`.
+pub fn token_input_pad_y_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.125,
+        ControlSize::Sm => -0.0625,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.0625,
+        ControlSize::Xl => 0.125,
+    }
+}
+
+/// Token-row padding-inline offset in rem added to `space.control.x`.
+pub fn token_input_pad_x_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.25,
+        ControlSize::Sm => -0.125,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.125,
+        ControlSize::Xl => 0.1875,
+    }
+}
+
+/// Token-row / draft-input font size in rem (`--token-input-font-size`).
+/// `None` → use the resolved `typography.body.size` token (md base).
+pub fn token_input_font_rem(size: ControlSize) -> Option<f32> {
+    match size {
+        ControlSize::Xs => Some(0.75),
+        ControlSize::Sm => Some(0.8125),
+        ControlSize::Md => None,
+        ControlSize::Lg => Some(0.9375),
+        ControlSize::Xl => Some(1.0),
+    }
+}
+
+/// Token-row wrap gap in rem (`--token-input-gap`).
+pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.25,
+        ControlDensity::Default => 0.375,
+        ControlDensity::Comfortable => 0.5,
+    }
+}
