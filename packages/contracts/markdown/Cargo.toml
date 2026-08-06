@@ -2,7 +2,7 @@
 name = "poodle-markdown"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.90"
+rust-version = "1.95"
 description = "Poodle shared markdown block model: normalises pulldown-cmark into the same blocks the web target derives from marked, so every renderer shows the same document."
 
 [lib]
