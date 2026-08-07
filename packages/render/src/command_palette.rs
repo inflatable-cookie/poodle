@@ -24,16 +24,38 @@ use poodle_node::{
 };
 use poodle_specs::{CommandActionItem, CommandPaletteSpec, DiscoveryState, TextInputSpec};
 
-use crate::color::{mix_srgb, TRANSPARENT};
+use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::text_input::text_input;
+use crate::text_input::text_input_with_change;
+
+#[derive(Default)]
+pub struct CommandPaletteHandlers {
+    pub select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub query_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub close: Option<Arc<dyn Fn() + Send + Sync>>,
+}
 
 pub fn command_palette(
     spec: &CommandPaletteSpec,
     theme: &dyn ThemeProvider,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    command_palette_with_handlers(
+        spec,
+        theme,
+        CommandPaletteHandlers {
+            select: on_select,
+            ..Default::default()
+        },
+    )
+}
+
+pub fn command_palette_with_handlers(
+    spec: &CommandPaletteSpec,
+    theme: &dyn ThemeProvider,
+    handlers: CommandPaletteHandlers,
 ) -> Node {
     // Closed: render nothing. Consumers that never touched `is_open` still
     // render because the spec default is `true`.
@@ -43,7 +65,7 @@ pub fn command_palette(
 
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_size = rem_to_px(size_font_rem(effective_size));
+    let icon_size = theme.resolve_space("size.icon.md");
     let panel_px = rem_to_px(panel_space_x_rem(spec.density));
     let panel_py = rem_to_px(panel_space_y_rem(spec.density));
 
@@ -54,7 +76,7 @@ pub fn command_palette(
     let surface_bg = theme.resolve_color(spec.results_fill_token());
     let border_default = theme.resolve_color("color.border.default");
     // Contract §9 dialog border = border-default mixed 42% with transparent.
-    let dialog_border = mix_srgb(border_default, TRANSPARENT, 0.42);
+    let dialog_border = with_alpha(border_default, border_default.3 * 0.42);
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_muted = theme.resolve_color("color.text.muted");
@@ -150,7 +172,7 @@ pub fn command_palette(
     }
     if let Some(ref hint) = spec.invocation_hint {
         // Contract §9 hint bg = background.surface 76%.
-        let hint_bg = mix_srgb(surface_subtle, TRANSPARENT, 0.76);
+        let hint_bg = with_alpha(surface_subtle, surface_subtle.3 * 0.76);
         let mut pill = Node::container();
         {
             let s = &mut pill.style;
@@ -182,6 +204,8 @@ pub fn command_palette(
     close.a11y.role = Some(NodeRole::Button);
     close.a11y.label = Some("Close command palette".to_string());
     close.id = Some("poodle-cmd-palette-close".to_string());
+    close.interaction.focusable = true;
+    close.interaction.on_activate = handlers.close.clone();
     {
         let s = &mut close.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -224,7 +248,7 @@ pub fn command_palette(
         .with_size(spec.size)
         .with_size_role(spec.size_role)
         .with_density(spec.density);
-    let mut query = text_input(&query_spec, theme, None);
+    let mut query = text_input_with_change(&query_spec, theme, handlers.query_change);
     query.style.fill_width = true;
     modal = modal.child(query);
 
@@ -330,7 +354,7 @@ pub fn command_palette(
                     row.style.descriptor.opacity = disabled_opacity;
                 } else {
                     row.style.descriptor.cursor = CursorHint::Pointer;
-                    if let Some(handler) = &on_select {
+                    if let Some(handler) = &handlers.select {
                         let handler = Arc::clone(handler);
                         let id = action.id.clone();
                         row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
@@ -429,5 +453,56 @@ fn palette_status(spec: &CommandPaletteSpec) -> String {
                 .unwrap_or_default();
             format!("{count} command{plural} available.{active_suffix}")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn query_select_and_close_handlers_reach_their_nodes() {
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let query_seen = Arc::clone(&seen);
+        let select_seen = Arc::clone(&seen);
+        let close_seen = Arc::clone(&seen);
+        let spec = CommandPaletteSpec::new(vec![CommandActionItem::new("save", "Save")]);
+        let node = command_palette_with_handlers(
+            &spec,
+            &theme(),
+            CommandPaletteHandlers {
+                query_change: Some(Arc::new(move |value| {
+                    query_seen.lock().unwrap().push(format!("query:{value}"));
+                })),
+                select: Some(Arc::new(move |value| {
+                    select_seen.lock().unwrap().push(format!("select:{value}"));
+                })),
+                close: Some(Arc::new(move || {
+                    close_seen.lock().unwrap().push("close".to_string());
+                })),
+            },
+        );
+
+        let query = node
+            .find(&|node| matches!(&node.kind, poodle_node::NodeKind::Input { .. }))
+            .expect("query input");
+        let save = node
+            .find(&|node| node.id.as_deref() == Some("poodle-cmd-palette-save"))
+            .expect("save action");
+        let close = node
+            .find(&|node| node.id.as_deref() == Some("poodle-cmd-palette-close"))
+            .expect("close action");
+        (query.interaction.on_text_change.as_ref().unwrap())("sav");
+        (save.interaction.on_activate.as_ref().unwrap())();
+        (close.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            ["query:sav", "select:save", "close"]
+        );
     }
 }

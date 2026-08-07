@@ -1,30 +1,36 @@
+use crate::node_compat::{DetailItem, DetailSection, DetailSectionGroup, Eyebrow, IntoCompatNode};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{DetailItem, DetailSection, DetailSectionGroup, Eyebrow};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     ControlDensity, DetailItemLayout, DetailItemSpec, DetailSectionGroupLayout,
     DetailSectionGroupSpec, DetailSectionSpec, EyebrowSpec,
 };
 
 fn section(title: &str, a: &str, b: &str, theme: &GpuiThemeProvider) -> DetailSection {
-    DetailSection::from_spec(DetailSectionSpec::new().with_title(title), theme).with_body(
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(6.0))
-            .child(DetailItem::from_spec(
+    let mut body = Node::container();
+    body.style.descriptor.layout.direction = LayoutDirection::Column;
+    body.style.descriptor.layout.spacing.gap = 6.0;
+    body = body
+        .child(
+            DetailItem::from_spec(
                 DetailItemSpec::new("First")
                     .with_value(a)
                     .with_layout(DetailItemLayout::Stacked),
                 theme,
-            ))
-            .child(DetailItem::from_spec(
+            )
+            .into_compat_node(),
+        )
+        .child(
+            DetailItem::from_spec(
                 DetailItemSpec::new("Second")
                     .with_value(b)
                     .with_layout(DetailItemLayout::Stacked),
                 theme,
-            )),
-    )
+            )
+            .into_compat_node(),
+        );
+    DetailSection::from_spec(DetailSectionSpec::new().with_title(title), theme).with_body(body)
 }
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -33,51 +39,45 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex_col()
         .gap(px(24.0))
         // --- Grid layout (default auto-fit) ---
-        .child(
-            group_block(
-                "Grid layout",
-                DetailSectionGroup::from_spec(
-                    DetailSectionGroupSpec::new().with_aria_label("Project metadata"),
-                    theme,
-                )
-                .child(section("General", "Platform", "Active", theme))
-                .child(section("Runtime", "eu-west-1", "Production", theme))
-                .child(section("Policy", "90 days", "Required", theme)),
+        .child(group_block(
+            "Grid layout",
+            DetailSectionGroup::from_spec(
+                DetailSectionGroupSpec::new().with_aria_label("Project metadata"),
                 theme,
-            ),
-        )
+            )
+            .child(section("General", "Platform", "Active", theme))
+            .child(section("Runtime", "eu-west-1", "Production", theme))
+            .child(section("Policy", "90 days", "Required", theme)),
+            theme,
+        ))
         // --- Stack layout ---
-        .child(
-            group_block(
-                "Stack layout",
-                DetailSectionGroup::from_spec(
-                    DetailSectionGroupSpec::new()
-                        .with_layout(DetailSectionGroupLayout::Stack)
-                        .with_item_min_column_width("10rem"),
-                    theme,
-                )
-                .child(section("Access", "Editor", "Workspace", theme))
-                .child(section("Billing", "Team", "Monthly", theme)),
+        .child(group_block(
+            "Stack layout",
+            DetailSectionGroup::from_spec(
+                DetailSectionGroupSpec::new()
+                    .with_layout(DetailSectionGroupLayout::Stack)
+                    .with_item_min_column_width("10rem"),
                 theme,
-            ),
-        )
+            )
+            .child(section("Access", "Editor", "Workspace", theme))
+            .child(section("Billing", "Team", "Monthly", theme)),
+            theme,
+        ))
         // --- Column cap (maxColumns = 2) ---
-        .child(
-            group_block(
-                "Column cap (maxColumns = 2)",
-                DetailSectionGroup::from_spec(
-                    DetailSectionGroupSpec::new()
-                        .with_min_column_width("10rem")
-                        .with_max_columns(2),
-                    theme,
-                )
-                .child(section("One", "1", "—", theme))
-                .child(section("Two", "2", "—", theme))
-                .child(section("Three", "3", "—", theme))
-                .child(section("Four", "4", "—", theme)),
+        .child(group_block(
+            "Column cap (maxColumns = 2)",
+            DetailSectionGroup::from_spec(
+                DetailSectionGroupSpec::new()
+                    .with_min_column_width("10rem")
+                    .with_max_columns(2),
                 theme,
-            ),
-        )
+            )
+            .child(section("One", "1", "—", theme))
+            .child(section("Two", "2", "—", theme))
+            .child(section("Three", "3", "—", theme))
+            .child(section("Four", "4", "—", theme)),
+            theme,
+        ))
         // --- Density variants ---
         .child(group_block(
             "Density: compact",

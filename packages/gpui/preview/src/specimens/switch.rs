@@ -1,10 +1,27 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Switch};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Switch};
 use poodle_specs::{EyebrowSpec, SwitchSpec, SwitchTone};
+use std::sync::Arc;
+
+fn switch_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
+    let events = state.node_events.clone();
+    let init_key = format!("{key}__init");
+    Arc::new(move |checked| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetToggle {
+            key: init_key.clone(),
+            value: true,
+        });
+        events.push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value: checked,
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -37,19 +54,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         } else {
                             state.specimens.is_on(key)
                         };
-                        let key_owned = key.to_string();
-                        let init_key_owned = init_key.clone();
                         let mut spec = SwitchSpec::new().with_checked(is_on);
                         spec.label = Some(label.to_string());
-                        col = col.child(Switch::from_spec(spec, theme).with_id(key).on_change(
-                            cx.listener(move |this, _checked: &bool, _w, cx| {
-                                if !this.state.specimens.is_on(&init_key_owned) {
-                                    this.state.specimens.toggle(&init_key_owned);
-                                }
-                                this.state.specimens.toggle(&key_owned);
-                                cx.notify();
-                            }),
-                        ));
+                        col = col.child(
+                            Switch::from_spec(spec, theme)
+                                .with_id(key)
+                                .on_change(switch_change(state, key)),
+                        );
                     }
                     col
                 }),

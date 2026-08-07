@@ -21,6 +21,15 @@ pub fn color_to_hsla(c: ColorValue) -> Hsla {
     rgba.into()
 }
 
+/// Convert a gpui `Hsla` back to a Poodle `ColorValue` (RGBA f32).
+///
+/// The inverse of [`color_to_hsla`], for specimen content authored in HSL that
+/// has to reach the node vocabulary (which is sRGB).
+pub fn hsla_to_color_value(c: Hsla) -> ColorValue {
+    let rgba: gpui::Rgba = c.into();
+    ColorValue(rgba.r, rgba.g, rgba.b, rgba.a)
+}
+
 /// Convert a `GpuiColor` to gpui's `Hsla`.
 pub fn gpui_color_to_hsla(c: &GpuiColor) -> Hsla {
     let rgba = gpui::Rgba {

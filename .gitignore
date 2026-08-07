@@ -96,3 +96,5 @@ docs/screenshots/
 # self-populates.
 packages/gpui/preview/baselines/
 packages/jetstream/preview/baselines/
+test/native-visual/out/
+test/native-visual/out-jetstream/

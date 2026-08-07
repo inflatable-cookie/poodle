@@ -1,238 +1,312 @@
 //! TextInput — a text field: affixes, icons, validation, char count.
 //!
 //! Contract: `docs/contracts/components/text-input.md`
-//! Ported from: `packages/jetstream/components/src/text_input.rs`, which is
-//! render-only — editing, caret and focus treatment are host concerns on
-//! every native target, so no native slot is needed here. The pending
-//! validation state composes the ring [`crate::spinner`], the first
-//! component-in-component reuse on the node path.
+//! Ported from: `packages/gpui/components/src/primitives/text_input.rs`.
+//! The node declares the current value and replacement-text callback; the
+//! backend owns key dispatch and the eventual native editor/IME integration.
 
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, StylePatch,
+    TextChangeHandler,
 };
 use poodle_specs::{
-    SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState,
+    ControlDensity, ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone,
+    SpinnerVariant, TextInputSpec, ValidationState,
 };
 
-use crate::color::mix_srgb;
+use crate::color::with_alpha;
+use crate::icon::icon;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
 };
 use crate::spinner::spinner;
 
+/// Render a text input without an editing callback.
+///
+/// `on_clear` stays in the stable call shape while the old GPUI tier remains
+/// the native parity reference. That tier has no clear affordance, so this
+/// slice deliberately does not invent one on the replacement path.
 pub fn text_input(
     spec: &TextInputSpec,
     theme: &dyn ThemeProvider,
-    on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    _on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    text_input_with_change(spec, theme, None)
+}
+
+/// Render a text input with host-owned replacement-text updates.
+pub fn text_input_with_change(
+    spec: &TextInputSpec,
+    theme: &dyn ThemeProvider,
+    on_change: Option<TextChangeHandler>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = rem_to_px(control_height_rem(effective_size));
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let pad_y = theme.resolve_space(spec.vertical_padding_token());
-    let icon_sz = rem_to_px(size_font_rem(effective_size));
+    let control_height = theme.resolve_space(spec.control_height_token())
+        + rem_to_px(size_height_offset_rem(effective_size));
+    let density_offset_rem = match spec.density {
+        ControlDensity::Compact => -0.125,
+        ControlDensity::Default => 0.0,
+        ControlDensity::Comfortable => 0.125,
+    };
+    let inline_padding = theme.resolve_space(spec.horizontal_padding_token())
+        + rem_to_px(size_padding_x_offset_rem(effective_size) + density_offset_rem);
     let inline_gap = theme.resolve_space(spec.inline_gap_token());
-    let border_width = theme.resolve_space(spec.border_width_token());
-
-    let fill = theme.resolve_color(spec.fill_token());
-    let border_color = theme.resolve_color(spec.border_token());
     let radius = theme.resolve_radius(spec.radius_token());
-    let text_color = theme.resolve_color(spec.text_color_token());
-    let placeholder_color = theme.resolve_color(spec.placeholder_color_token());
+    let body_size = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.8125,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 0.9375,
+        ControlSize::Xl => 1.0,
+    });
+    let body_line_height = theme.resolve_space(spec.body_line_height_token()) / body_size;
+
+    let border_default = theme.resolve_color(spec.border_token());
+    let surface_raw = theme.resolve_color(spec.fill_token());
+    let surface_bg = with_alpha(surface_raw, surface_raw.3 * 0.82);
+    let border = with_alpha(border_default, border_default.3 * 0.72);
+    let hover_border = with_alpha(border_default, border_default.3 * 0.92);
+    let effective_border = match spec.validation_state {
+        ValidationState::Invalid => theme.resolve_color("color.status.danger"),
+        ValidationState::Valid => theme.resolve_color("color.status.success"),
+        ValidationState::Pending => theme.resolve_color("color.accent.base"),
+        ValidationState::None => border,
+    };
+    let text_primary = theme.resolve_color(spec.text_color_token());
+    let text_secondary = theme.resolve_color(spec.placeholder_color_token());
     let icon_color = theme.resolve_color(spec.icon_color_token());
-    let affix_color = theme.resolve_color(spec.affix_color_token());
-    let affix_sep_color = theme.resolve_color(spec.affix_separator_solid_token());
 
-    // Hover border: contract color-mix(border 78%, text-primary).
-    let text_primary = theme.resolve_color("color.text.primary");
-    let hover_border = mix_srgb(border_color, text_primary, 0.78);
-
-    // Slug mode: value + prefix in code family so the slug reads as one unit.
-    let is_slug = spec.input_type == "slug";
     let current_value = spec.current_value();
-    let is_placeholder = current_value.is_empty() || spec.value.is_none();
-    let show_text = if is_placeholder {
+    let display_text = if current_value.is_empty() {
         spec.placeholder.as_deref().unwrap_or("")
     } else {
         current_value
     };
-    let show_color = if is_placeholder {
-        placeholder_color
+    let display_color = if current_value.is_empty() {
+        text_secondary
     } else {
-        text_color
+        text_primary
     };
 
-    // ── Input row ──
-    let mut input_row = Node::container();
+    let mut inner = Node::container();
     {
-        let s = &mut input_row.style;
-        s.descriptor.background = Some(fill);
-        s.descriptor.border.width = border_width;
-        s.descriptor.border.color = border_color;
-        s.descriptor.corner_radii.top_left = radius;
-        s.descriptor.corner_radii.top_right = radius;
-        s.descriptor.corner_radii.bottom_right = radius;
-        s.descriptor.corner_radii.bottom_left = radius;
-        s.descriptor.layout.spacing.padding.left = pad_x;
-        s.descriptor.layout.spacing.padding.right = pad_x;
+        let s = &mut inner.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = inline_gap;
-        s.hover = Some(StylePatch {
-            border_color: Some(hover_border),
-            background: None,
-            text_color: None,
-            opacity: None,
-        });
-        if spec.is_multiline() {
-            s.min_height = Some(rem_to_px(
-                control_height_rem(effective_size) * spec.rows as f32,
-            ));
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-            s.descriptor.layout.spacing.padding.top = pad_y;
-            s.descriptor.layout.spacing.padding.bottom = pad_y;
-        } else {
-            s.descriptor.layout.height = LayoutSizing::Fixed(height);
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        }
+        s.fill_width = true;
+        s.fill_height = true;
     }
-    input_row.interaction.focusable = true;
 
-    let divider = |sep: poodle_node::ColorValue| {
-        let mut d = Node::container();
-        d.style.descriptor.layout.width = LayoutSizing::Fixed(border_width);
-        d.style.self_stretch = true;
-        d.style.descriptor.background = Some(sep);
-        d
-    };
-
-    // Prefix affix (left edge, right divider).
     if let Some(prefix) = &spec.prefix {
-        let mut prefix_label = Node::text(prefix.as_str());
-        prefix_label.style.descriptor.text_color = Some(affix_color);
-        prefix_label.style.text_size = Some(font_size);
-        if is_slug {
-            prefix_label.style.font_family = Some(FontFamily::Mono);
-        }
-        input_row = input_row.child(prefix_label).child(divider(affix_sep_color));
+        inner = inner.child(affix(prefix, true, inline_gap, spec, theme));
     }
 
-    // Leading icon.
-    if let Some(icon_name) = &spec.leading_icon {
-        let mut icon = Node::icon(icon_name.as_str(), icon_sz);
-        icon.style.descriptor.text_color = Some(icon_color);
-        input_row = input_row.child(icon);
+    if let Some(name) = &spec.leading_icon {
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(glyph);
     }
 
-    // Value (grows); slug renders in code family.
-    let mut value_label = Node::text(show_text);
-    value_label.style.descriptor.text_color = Some(show_color);
-    value_label.style.text_size = Some(font_size);
-    value_label.style.descriptor.layout.width = LayoutSizing::Grow;
-    if is_slug {
-        value_label.style.font_family = Some(FontFamily::Mono);
-    }
-    input_row = input_row.child(value_label);
+    let mut value = Node::text(display_text);
+    value.style.descriptor.layout.width = LayoutSizing::Grow;
+    value.style.descriptor.layout.overflow_x = poodle_node::LayoutOverflow::Hidden;
+    value.style.descriptor.text_color = Some(display_color);
+    value.style.text_ellipsis = true;
+    value.style.no_wrap = true;
+    inner = inner.child(value);
 
-    // Trailing icon wins over the validation indicator.
-    if let Some(icon_name) = &spec.trailing_icon {
-        let mut icon = Node::icon(icon_name.as_str(), icon_sz);
-        icon.style.descriptor.text_color = Some(icon_color);
-        input_row = input_row.child(icon);
-    } else {
+    if spec.show_char_count {
+        let len = current_value.len();
+        let over = spec.max_length.is_some_and(|max| len > max);
+        let mut count = Node::text(match spec.max_length {
+            Some(max) => format!("{len}/{max}"),
+            None => len.to_string(),
+        });
+        count.style.descriptor.text_color = Some(theme.resolve_color(if over {
+            spec.char_count_over_color_token()
+        } else {
+            spec.char_count_color_token()
+        }));
+        count.style.text_size = Some(theme.resolve_space(spec.char_count_font_size_token()));
+        count.style.no_wrap = true;
+        inner = inner.child(count);
+    }
+
+    if spec.shows_validation_status {
         match spec.validation_state {
             ValidationState::Valid | ValidationState::Invalid => {
-                let color = theme.resolve_color(spec.validation_indicator_color_token());
-                let glyph = if spec.validation_state == ValidationState::Valid {
+                let name = if spec.validation_state == ValidationState::Valid {
                     "check"
                 } else {
                     "x"
                 };
-                let mut icon = Node::icon(glyph, icon_sz);
-                icon.style.descriptor.text_color = Some(color);
-                input_row = input_row.child(icon);
+                let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+                glyph.style.descriptor.text_color =
+                    Some(theme.resolve_color(spec.validation_indicator_color_token()));
+                inner = inner.child(glyph);
             }
             ValidationState::Pending => {
-                input_row = input_row.child(spinner(
+                let mut pending = spinner(
                     &SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_size(SpinnerSize::Sm)
                         .with_tone(SpinnerTone::Accent),
                     theme,
-                ));
+                );
+                pending.style.descriptor.text_color =
+                    Some(theme.resolve_color(spec.validation_indicator_color_token()));
+                inner = inner.child(pending);
             }
             ValidationState::None => {}
         }
     }
 
-    // Clear button (search type, non-empty value).
-    if spec.input_type == "search" && spec.show_clear_button && !current_value.is_empty() {
-        let mut clear = Node::button("");
-        clear.a11y.label = Some("Clear search query".to_string());
-        clear.style.descriptor.cursor = CursorHint::Pointer;
-        let mut x = Node::icon("x", icon_sz);
-        x.style.descriptor.text_color = Some(icon_color);
-        clear = clear.child(x);
-
-        if let (false, false, Some(handler)) = (spec.is_disabled, spec.is_read_only, &on_clear) {
-            let handler = Arc::clone(handler);
-            clear.interaction.on_activate = Some(Arc::new(move || handler()));
-        }
-
-        input_row = input_row.child(clear);
+    if let Some(name) = &spec.trailing_icon {
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(glyph);
     }
 
-    // Suffix affix (right edge, left divider).
     if let Some(suffix) = &spec.suffix {
-        let mut suffix_label = Node::text(suffix.as_str());
-        suffix_label.style.descriptor.text_color = Some(affix_color);
-        suffix_label.style.text_size = Some(font_size);
-        input_row = input_row.child(divider(affix_sep_color)).child(suffix_label);
+        inner = inner.child(affix(suffix, false, inline_gap, spec, theme));
     }
 
+    let mut root = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
+    root.id = Some(match spec.id.as_deref() {
+        Some(id) => format!("poodle-input-{id}"),
+        None => "poodle-input".to_string(),
+    });
+    {
+        let s = &mut root.style;
+        s.descriptor.background = Some(surface_bg);
+        // The native reference uses GPUI's `border_1()` directly. The token
+        // can resolve to zero on the compact axis, which removes both the
+        // stroke and its one-pixel content inset.
+        s.descriptor.border.width = 1.0;
+        s.descriptor.border.color = effective_border;
+        s.descriptor.corner_radii.top_left = radius;
+        s.descriptor.corner_radii.top_right = radius;
+        s.descriptor.corner_radii.bottom_right = radius;
+        s.descriptor.corner_radii.bottom_left = radius;
+        s.descriptor.layout.height = LayoutSizing::Fixed(control_height);
+        s.descriptor.layout.spacing.padding.left = inline_padding;
+        s.descriptor.layout.spacing.padding.right = inline_padding;
+        s.descriptor.text_color = Some(text_primary);
+        s.text_size = Some(body_size);
+        s.line_height = Some(body_line_height);
+        s.fill_width = true;
+        s.hover = Some(StylePatch {
+            background: None,
+            border_color: Some(hover_border),
+            text_color: None,
+            opacity: None,
+        });
+    }
+    root.interaction.focusable = true;
+    if !spec.is_disabled && !spec.is_read_only {
+        root.interaction.on_text_change = on_change;
+    }
     if spec.is_disabled {
-        input_row.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
-        input_row.interaction.disabled = true;
+        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.cursor = CursorHint::NotAllowed;
+        root.interaction.disabled = true;
     }
-
-    // ── Char count (wraps the row in a column) ──
-    if spec.show_char_count {
-        let current_len = current_value.chars().count();
-        let over = spec.max_length.map_or(false, |max| current_len > max);
-        let count_color = if over {
-            theme.resolve_color(spec.char_count_over_color_token())
-        } else {
-            theme.resolve_color(spec.char_count_color_token())
-        };
-        let count_font = theme.resolve_space(spec.char_count_font_size_token());
-        let count_text = match spec.max_length {
-            Some(max) => format!("{}/{}", current_len, max),
-            None => format!("{}", current_len),
-        };
-
-        let mut count_label = Node::text(&count_text);
-        count_label.style.descriptor.text_color = Some(count_color);
-        count_label.style.text_size = Some(count_font);
-
-        let mut char_count_row = Node::container();
-        char_count_row.style.descriptor.layout.direction = LayoutDirection::Row;
-        char_count_row.style.descriptor.layout.alignment.main = MainAxisAlignment::End;
-        let char_count_row = char_count_row.child(count_label);
-
-        let mut column = Node::container();
-        column.style.descriptor.layout.direction = LayoutDirection::Column;
-        column.style.descriptor.layout.spacing.gap = rem_to_px(0.25);
-        // Faithful to the old tier: the aria label does not survive the
-        // char-count wrap there either; parity first, contract fix later on
-        // both paths at once.
-        return column.child(input_row).child(char_count_row);
-    }
-
     if let Some(label) = spec.aria_label.as_deref() {
-        input_row.a11y.label = Some(label.to_string());
+        root.a11y.label = Some(label.to_string());
     }
-    input_row
+    root.child(inner)
+}
+
+fn affix(
+    text: &str,
+    prefix: bool,
+    inline_gap: f32,
+    spec: &TextInputSpec,
+    theme: &dyn ThemeProvider,
+) -> Node {
+    let separator_base = theme.resolve_color(spec.affix_separator_color_token());
+    let separator = with_alpha(separator_base, separator_base.3 * 0.52);
+    let mut el = Node::container();
+    {
+        let s = &mut el.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.text_color = Some(theme.resolve_color(spec.affix_color_token()));
+        s.no_wrap = true;
+        if prefix {
+            s.descriptor.layout.spacing.padding.right = inline_gap;
+            s.descriptor.layout.spacing.margin.right = inline_gap;
+            s.border_right_width = Some(1.0);
+        } else {
+            s.descriptor.layout.spacing.padding.left = inline_gap;
+            s.descriptor.layout.spacing.margin.left = inline_gap;
+            s.border_left_width = Some(1.0);
+        }
+        s.descriptor.border.color = separator;
+    }
+    el.child(Node::text(text))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeKind;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn root_is_a_full_width_input_with_inline_count_and_validation() {
+        let spec = TextInputSpec::new()
+            .with_id("email")
+            .with_value("bad@")
+            .with_max_length(12)
+            .with_show_char_count(true)
+            .with_validation_state(ValidationState::Invalid);
+        let node = text_input(&spec, &theme(), None);
+
+        assert!(matches!(node.kind, NodeKind::Input { .. }));
+        assert_eq!(node.id.as_deref(), Some("poodle-input-email"));
+        assert!(node.style.fill_width);
+        assert_eq!(node.style.descriptor.border.width, 1.0);
+        assert_eq!(node.children.len(), 1, "one inline content row");
+        assert_eq!(node.children[0].children.len(), 3, "value + count + status");
+        assert_eq!(
+            node.style.descriptor.border.color,
+            theme().resolve_color("color.status.danger")
+        );
+    }
+
+    #[test]
+    fn editable_callback_lives_on_the_input_but_read_only_suppresses_it() {
+        let callback: TextChangeHandler = Arc::new(|_| {});
+        let editable =
+            text_input_with_change(&TextInputSpec::new(), &theme(), Some(callback.clone()));
+        assert!(editable.interaction.on_text_change.is_some());
+
+        let read_only = text_input_with_change(
+            &TextInputSpec::new().with_read_only(true),
+            &theme(),
+            Some(callback),
+        );
+        assert!(read_only.interaction.on_text_change.is_none());
+    }
+
+    #[test]
+    fn affixes_keep_separator_inside_the_inline_row() {
+        let node = text_input(
+            &TextInputSpec::new().with_prefix("$").with_suffix("/mo"),
+            &theme(),
+            None,
+        );
+        let children = &node.children[0].children;
+        assert_eq!(children[0].style.border_right_width, Some(1.0));
+        assert_eq!(children[2].style.border_left_width, Some(1.0));
+    }
 }

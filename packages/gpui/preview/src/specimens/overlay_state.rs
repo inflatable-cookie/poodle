@@ -4,16 +4,6 @@ use gpui::*;
 
 use crate::PreviewRoot;
 
-pub(crate) fn set_toggle(
-    root: &mut PreviewRoot,
-    key: &'static str,
-    value: bool,
-    cx: &mut Context<PreviewRoot>,
-) {
-    root.state.specimens.set_toggle(key, value);
-    cx.notify();
-}
-
 pub(crate) fn set_toggle_via_entity(
     root: &WeakEntity<PreviewRoot>,
     key: impl Into<String>,

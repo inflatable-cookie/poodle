@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, MediaThumbnail};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, MediaThumbnail};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{
     AspectRatio, MediaFit, MediaFrameWidth, MediaKind, MediaPresentation, MediaState,

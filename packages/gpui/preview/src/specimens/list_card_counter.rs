@@ -1,7 +1,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::ListCardCounter;
 use poodle_specs::{InlineTypographyMode, ListCardCounterSpec};
+
+use crate::node_compat::ListCardCounter;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()

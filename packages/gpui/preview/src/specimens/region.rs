@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, Region};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Region};
 use poodle_specs::{EyebrowSpec, RegionSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

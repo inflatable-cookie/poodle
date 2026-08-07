@@ -1,10 +1,24 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, TimeZoneSelect};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, TimeZoneSelect};
 use poodle_specs::{EyebrowSpec, TimeZoneSelectSpec};
+use std::sync::{Arc, Mutex};
+
+fn toggle_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move || {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Toggle(key.to_string()));
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -33,10 +47,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_open(is_open),
                         theme,
                     )
-                    .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                        this.state.specimens.toggle("tz-select-open");
-                        cx.notify();
-                    })),
+                    .on_toggle(toggle_handler(&state.node_events, "tz-select-open")),
                 ),
         )
         // --- With pre-selected zone ---

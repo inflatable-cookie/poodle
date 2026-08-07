@@ -1,12 +1,13 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{CollapseToggle, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{CollapseToggle, Eyebrow};
 use poodle_specs::{CollapseDirection, CollapseToggleSpec, EyebrowSpec};
+use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -17,6 +18,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let right_collapsed = state.specimens.is_on("ct-right-collapsed");
     let up_collapsed = state.specimens.is_on("ct-up-collapsed");
     let down_collapsed = state.specimens.is_on("ct-down-collapsed");
+
+    let toggle_handler = |key: &'static str| {
+        let events = state.node_events.clone();
+        Arc::new(move |value: bool| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: key.to_string(),
+                value,
+            });
+        }) as Arc<dyn Fn(bool) + Send + Sync>
+    };
 
     // Helper: labeled toggle with direction name + state
     let labeled = |toggle: CollapseToggle, name: &str, collapsed: bool| -> Div {
@@ -66,12 +77,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("interactive-left")
-                            .on_toggle(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("ct-left-collapsed");
-                                    cx.notify();
-                                },
-                            )),
+                            .on_toggle(toggle_handler("ct-left-collapsed")),
                             "Left",
                             left_collapsed,
                         ))
@@ -83,12 +89,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("interactive-right")
-                            .on_toggle(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("ct-right-collapsed");
-                                    cx.notify();
-                                },
-                            )),
+                            .on_toggle(toggle_handler("ct-right-collapsed")),
                             "Right",
                             right_collapsed,
                         ))
@@ -100,12 +101,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("interactive-up")
-                            .on_toggle(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("ct-up-collapsed");
-                                    cx.notify();
-                                },
-                            )),
+                            .on_toggle(toggle_handler("ct-up-collapsed")),
                             "Up",
                             up_collapsed,
                         ))
@@ -117,12 +113,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("interactive-down")
-                            .on_toggle(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("ct-down-collapsed");
-                                    cx.notify();
-                                },
-                            )),
+                            .on_toggle(toggle_handler("ct-down-collapsed")),
                             "Down",
                             down_collapsed,
                         )),

@@ -45,7 +45,10 @@ pub fn form_dialog(
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let section_gap = rem_to_px(size_font_rem(effective_size));
+    // FormDialog's body stack follows the shared stack-md contract. Using the
+    // control font ladder here made subtitle/form and bare-body spacing drift
+    // from the old GPUI composite.
+    let section_gap = theme.resolve_space("space.stack.md");
 
     let text_secondary = theme.resolve_color("color.text.secondary");
 

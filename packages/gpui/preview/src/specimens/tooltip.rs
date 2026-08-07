@@ -1,10 +1,10 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Button, Eyebrow, Tooltip};
 use crate::specimens::overlay_state;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Tooltip};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, OverlayPlacement,
     TooltipSpec,

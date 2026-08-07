@@ -1,14 +1,29 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, TabStrip, Tabs};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, TabStrip, Tabs};
 use poodle_specs::{
     ControlDensity, ControlSize, EyebrowSpec, Orientation, TabDefinition, TabStripItem,
     TabStripSpec, TabVariant, TabsSpec,
 };
+use std::sync::Arc;
+
+fn node_value_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value: &str| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn node_close_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    node_value_handler(state, key)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -39,13 +54,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-underline")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-underline-value".to_string(), val.to_string());
-            cx.notify();
-        }))
+        .on_change(node_value_handler(state, "tabs-underline-value"))
         .with_content(
             "overview".to_string(),
             div()
@@ -102,13 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let card_component = Tabs::from_spec(card_spec, theme)
         .with_id("specimen-card")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-card-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-card-value"));
 
     // 2b. CARD VARIANT WITH COUNTS — icons + count badges on each tab.
     let counts_tabs = vec![
@@ -136,13 +139,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_aria_label("Mailbox folders");
     let counts_component = Tabs::from_spec(counts_spec, theme)
         .with_id("specimen-card-counts")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-counts-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-counts-value"));
 
     // 3. PILL VARIANT (WITH ICONS)
     let pill_tabs = vec![
@@ -166,13 +163,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let pill_component = Tabs::from_spec(pill_spec, theme)
         .with_id("specimen-pill")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-pill-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-pill-value"));
 
     // 3b. BLOCK VARIANT (FULL-WIDTH, SEPARATORS)
     let block_tabs = vec![
@@ -197,13 +188,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let block_component = Tabs::from_spec(block_spec, theme)
         .with_id("specimen-block")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-block-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-block-value"));
 
     // 4. UNDERLINE WITH ICONS (NO PANEL)
     let underline_icon_tabs = vec![
@@ -228,13 +213,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let underline_icon_component = Tabs::from_spec(underline_icon_spec, theme)
         .with_id("specimen-underline-icons")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-underline-icon-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-underline-icon-value"));
 
     // 5. STRIP VARIANT (HORIZONTAL, CLOSABLE, REORDERABLE)
     let strip_items = vec![
@@ -272,20 +251,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let strip_component = TabStrip::from_spec(strip_spec, theme)
         .with_id("specimen-strip")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-strip-value".to_string(), val.to_string());
-            cx.notify();
-        }))
-        .on_close(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-strip-closed".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-strip-value"))
+        .on_close(node_close_handler(state, "tabs-strip-closed"));
 
     // 6. STRIP VARIANT (VERTICAL)
     let vertical_items = vec![
@@ -310,13 +277,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let vertical_component = TabStrip::from_spec(vertical_spec, theme)
         .with_id("specimen-vertical")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-vertical-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-vertical-value"));
 
     // 7. COLLAPSE TOGGLE
     let panel_collapsed = state.specimens.is_on("tabs-panel-collapsed");
@@ -349,13 +310,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let collapse_component = TabStrip::from_spec(collapse_spec, theme)
         .with_id("specimen-collapse")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-collapse-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-collapse-value"));
 
     // 8. FULL-WIDTH (tabs flex to fill the row)
     let full_width_tabs = vec![
@@ -377,13 +332,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_aria_label("Full-width sections");
     let full_width_component = Tabs::from_spec(full_width_spec, theme)
         .with_id("specimen-fullwidth")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tabs-fullwidth-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tabs-fullwidth-value"));
 
     // 9. SIZE MATRIX (xs → xl, card variant)
     let size_specs = [
@@ -404,9 +353,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_size(size)
         .with_value("details")
         .with_aria_label(format!("{label} tabs"));
-        size_row = size_row.child(
-            Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{label}")),
-        );
+        size_row =
+            size_row.child(Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{label}")));
     }
 
     // 10. DENSITY MATRIX (compact / default / comfortable, card variant)
@@ -426,9 +374,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_density(density)
         .with_value("details")
         .with_aria_label(format!("{label} tabs"));
-        density_row = density_row.child(
-            Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{label}")),
-        );
+        density_row = density_row
+            .child(Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{label}")));
     }
 
     // 11. REORDER DRAG STATES (drag-source + drop-target)

@@ -3,8 +3,13 @@
 //! Contract: `docs/contracts/components/pill.md`
 //! Ported from: `packages/jetstream/components/src/pill.rs`.
 
+use std::sync::Arc;
+
 use poodle_adapter::ThemeProvider;
-use poodle_node::{ColorValue, FontFamily, Node};
+use poodle_node::{
+    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment,
+    Node, NodeRole,
+};
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use crate::color::{hex_color, mix_srgb, with_alpha, WHITE};
@@ -56,7 +61,10 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
         PillAppearance::Badge => ColorValue(0.0, 0.0, 0.0, 0.0),
         _ => match spec.tone {
             PillTone::Success | PillTone::Danger | PillTone::Info | PillTone::Warning => {
-                mix_srgb(tone_color, border_subtle, 0.38)
+                // The old GPUI tier used `border_subtle.blend(tone.opacity(0.38))`.
+                // GPUI's blend mixes RGB but deliberately preserves the base alpha;
+                // `border-subtle` is translucent in dark themes.
+                with_alpha(mix_srgb(tone_color, border_subtle, 0.38), border_subtle.3)
             }
             PillTone::Neutral => with_alpha(border_subtle, border_subtle.3 * 0.82),
         },
@@ -88,6 +96,14 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
 }
 
 pub fn pill(spec: &PillSpec, theme: &dyn ThemeProvider) -> Node {
+    pill_with_remove(spec, theme, None)
+}
+
+pub fn pill_with_remove(
+    spec: &PillSpec,
+    theme: &dyn ThemeProvider,
+    on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
     let (min_w, min_h, pad_x, pad_y, font_size) =
         pill_metrics(spec.resolved_size(), spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
@@ -138,11 +154,70 @@ pub fn pill(spec: &PillSpec, theme: &dyn ThemeProvider) -> Node {
         }
         if spec.is_disabled {
             s.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+            s.descriptor.cursor = CursorHint::NotAllowed;
         }
+
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+    }
+    if spec.is_removable {
+        let mut remove = Node::container();
+        remove.id = Some("poodle-pill-remove".to_string());
+        remove.a11y.role = Some(NodeRole::Button);
+        remove.a11y.label = Some(format!("Remove {}", spec.label));
+        remove.style.descriptor.layout.direction = LayoutDirection::Row;
+        remove.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        remove.style.descriptor.cursor = CursorHint::Pointer;
+
+        let mut icon = Node::icon("x", theme.resolve_space("size.icon.sm"));
+        icon.style.descriptor.text_color = Some(theme.resolve_color("color.icon.muted"));
+        let mut remove = remove.child(icon);
+        if let Some(handler) = on_remove {
+            remove.interaction.on_activate = Some(handler);
+        }
+        el = el.child(remove);
     }
 
     if let Some(aria) = spec.aria_label.as_deref() {
         el.a11y.label = Some(aria.to_string());
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Mutex;
+
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn removable_pill_exposes_and_runs_its_remove_action() {
+        let removes = Arc::new(Mutex::new(0));
+        let sink = Arc::clone(&removes);
+        let spec = PillSpec::new().with_label("Filter").with_removable(true);
+
+        let node = pill_with_remove(
+            &spec,
+            &theme(),
+            Some(Arc::new(move || *sink.lock().unwrap() += 1)),
+        );
+        let remove = node
+            .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
+            .expect("remove action");
+
+        assert_eq!(remove.a11y.role, Some(NodeRole::Button));
+        assert_eq!(remove.a11y.label.as_deref(), Some("Remove Filter"));
+        (remove
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("activatable"))();
+        assert_eq!(*removes.lock().unwrap(), 1);
+    }
 }

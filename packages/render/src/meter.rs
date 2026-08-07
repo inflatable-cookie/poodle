@@ -35,6 +35,7 @@ pub fn meter(spec: &MeterSpec, theme: &dyn ThemeProvider) -> Node {
     let track_height = rem_to_px(spec.track_thickness_rem(effective_size));
 
     let fraction = spec.normalized_progress() as f32;
+    let fill = theme.resolve_color(spec.fill_token());
 
     if spec.shape == MeterShape::Ring {
         // Contract §8 ring shape: the track mixes at 88%, not the bar's 96%.
@@ -52,6 +53,9 @@ pub fn meter(spec: &MeterSpec, theme: &dyn ThemeProvider) -> Node {
         s.fill_width = true;
         s.min_height = Some(track_height);
         s.self_stretch = true;
+        // The node backend uses the progress text-color channel for the
+        // proportional fill; keep the track background independent.
+        s.descriptor.text_color = Some(fill);
         let c = &mut s.descriptor.corner_radii;
         c.top_left = radius;
         c.top_right = radius;

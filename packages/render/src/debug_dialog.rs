@@ -9,11 +9,11 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node};
-use poodle_specs::{ButtonSpec, CodeSpec, DebugDialogSpec};
+use poodle_specs::{ButtonSpec, CodeSpec, DebugDialogSpec, DialogSpec, DialogWidth};
 
 use crate::button::button;
 use crate::code::code;
-use crate::presentation::rem_to_px;
+use crate::dialog::dialog;
 
 pub fn debug_dialog(spec: &DebugDialogSpec, theme: &dyn ThemeProvider) -> Node {
     if !spec.has_value() {
@@ -36,12 +36,23 @@ pub fn debug_dialog(spec: &DebugDialogSpec, theme: &dyn ThemeProvider) -> Node {
         code_spec = code_spec.with_max_height(mh);
     }
 
+    let dialog_spec = DialogSpec::new()
+        .with_title(spec.title.clone())
+        .with_width(DialogWidth::Lg)
+        .with_show_close_button(spec.show_close_button)
+        .with_close_label(spec.close_label.clone());
+
     let mut root = Node::container();
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = rem_to_px(0.75);
+        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
     }
-    root.child(button(&button_spec, theme, None))
-        .child(code(&code_spec, theme))
+    root.child(button(&button_spec, theme, None)).child(dialog(
+        &dialog_spec,
+        theme,
+        vec![code(&code_spec, theme)],
+        None,
+        None,
+    ))
 }

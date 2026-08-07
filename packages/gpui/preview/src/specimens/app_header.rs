@@ -1,16 +1,15 @@
+use crate::node_compat::{AppHeader, Button, Eyebrow, IconButton, IntoCompatNode};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{AppHeader, Button, Eyebrow, IconButton};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::AppHeaderSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, IconButtonSpec,
 };
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("color.text.primary");
-
     div()
         .flex()
         .flex_col()
@@ -39,85 +38,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_aria_label("Application header"),
                                 theme,
                             )
-                            .with_primary_actions(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(4.0))
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new()
-                                                .with_variant(ButtonVariant::Ghost)
-                                                .with_label("File")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-file"),
-                                    )
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new()
-                                                .with_variant(ButtonVariant::Ghost)
-                                                .with_label("Edit")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-edit"),
-                                    )
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new()
-                                                .with_variant(ButtonVariant::Ghost)
-                                                .with_label("View")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-view"),
-                                    )
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new()
-                                                .with_variant(ButtonVariant::Ghost)
-                                                .with_label("Help")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-help"),
-                                    ),
-                            )
-                            .with_utility_items(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(4.0))
-                                    .child(
-                                        IconButton::from_spec(
-                                            IconButtonSpec::new()
-                                                .with_icon("search")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-search"),
-                                    )
-                                    .child(
-                                        IconButton::from_spec(
-                                            IconButtonSpec::new()
-                                                .with_icon("bell")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-bell"),
-                                    )
-                                    .child(
-                                        IconButton::from_spec(
-                                            IconButtonSpec::new()
-                                                .with_icon("settings")
-                                                .with_size(ControlSize::Sm),
-                                            theme,
-                                        )
-                                        .with_id("ah-settings"),
-                                    ),
-                            ),
+                            .with_primary_actions(action_row(
+                                theme,
+                                &[("ah-file", "File"), ("ah-edit", "Edit"),
+                                  ("ah-view", "View"), ("ah-help", "Help")],
+                                ControlSize::Sm,
+                                4.0,
+                            ))
+                            .with_utility_items(utility_row(
+                                theme,
+                                &[("ah-search", "search"), ("ah-bell", "bell"),
+                                  ("ah-settings", "settings")],
+                                ControlSize::Sm,
+                                4.0,
+                            )),
                         )
                         .child(
                             div()
@@ -143,43 +77,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ))
                 .child(
                     AppHeader::from_spec(AppHeaderSpec::new().with_title("My Application"), theme)
-                        .with_primary_actions(
-                            div()
-                                .flex()
-                                .items_center()
-                                .gap(px(6.0))
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Ghost)
-                                            .with_label("New")
-                                            .with_size(ControlSize::Sm),
-                                        theme,
-                                    )
-                                    .with_id("ah-new"),
-                                )
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Ghost)
-                                            .with_label("Open")
-                                            .with_size(ControlSize::Sm),
-                                        theme,
-                                    )
-                                    .with_id("ah-open"),
-                                ),
-                        )
-                        .with_utility_items(
-                            div().flex().items_center().gap(px(4.0)).child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("settings")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-settings2"),
-                            ),
-                        ),
+                        .with_primary_actions(action_row(
+                            theme,
+                            &[("ah-new", "New"), ("ah-open", "Open")],
+                            ControlSize::Sm,
+                            6.0,
+                        ))
+                        .with_utility_items(utility_row(
+                            theme,
+                            &[("ah-settings2", "settings")],
+                            ControlSize::Sm,
+                            4.0,
+                        )),
                 ),
         )
         .child(
@@ -210,50 +119,13 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         AppHeaderSpec::new().with_aria_label("Custom identity header"),
                         theme,
                     )
-                    .with_leading(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .child(
-                                div()
-                                    .w(px(20.0))
-                                    .h(px(20.0))
-                                    .rounded(px(4.0))
-                                    .bg(color_to_hsla(theme.resolve_color("color.accent.base"))),
-                            )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .font_weight(FontWeight::SEMIBOLD)
-                                    .text_color(color_to_hsla(text_primary))
-                                    .child("Poodle Studio"),
-                            ),
-                    )
-                    .with_utility_items(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(4.0))
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("bell")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-bell2"),
-                            )
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("user")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-user2"),
-                            ),
-                    ),
+                    .with_leading(identity_slot(theme))
+                    .with_utility_items(utility_row(
+                        theme,
+                        &[("ah-bell2", "bell"), ("ah-user2", "user")],
+                        ControlSize::Sm,
+                        4.0,
+                    )),
                 ),
         )
         // --- Density ladder ---
@@ -304,6 +176,82 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
 }
 
+fn action_row(
+    theme: &GpuiThemeProvider,
+    labels: &[(&str, &str)],
+    size: ControlSize,
+    gap: f32,
+) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = gap;
+    for (id, label) in labels {
+        row = row.child(
+            Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_label(*label)
+                    .with_size(size),
+                theme,
+            )
+            .with_id(*id)
+            .into_compat_node(),
+        );
+    }
+    row
+}
+
+fn utility_row(
+    theme: &GpuiThemeProvider,
+    items: &[(&str, &str)],
+    size: ControlSize,
+    gap: f32,
+) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = gap;
+    for (id, icon) in items {
+        row = row.child(
+            IconButton::from_spec(
+                IconButtonSpec::new().with_icon(*icon).with_size(size),
+                theme,
+            )
+            .with_id(*id)
+            .into_compat_node(),
+        );
+    }
+    row
+}
+
+fn identity_slot(theme: &GpuiThemeProvider) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = 8.0;
+
+    let mut mark = Node::container();
+    mark.style.descriptor.layout.direction = LayoutDirection::Row;
+    mark.style.descriptor.layout.width = LayoutSizing::Fixed(20.0);
+    mark.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+    mark.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+    for corner in [
+        &mut mark.style.descriptor.corner_radii.top_left,
+        &mut mark.style.descriptor.corner_radii.top_right,
+        &mut mark.style.descriptor.corner_radii.bottom_right,
+        &mut mark.style.descriptor.corner_radii.bottom_left,
+    ] {
+        *corner = 4.0;
+    }
+
+    let mut title = Node::text("Poodle Studio");
+    title.style.text_size = Some(14.0);
+    title.style.text_weight = Some(600);
+    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    row.child(mark).child(title)
+}
+
 /// Label above a ladder header, mirroring the Svelte specimen's variant-block label.
 fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
     div()
@@ -317,62 +265,53 @@ fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
 /// icon — the demo shape used by both ladders (matches the Svelte specimen).
 fn demo_header(spec: AppHeaderSpec, theme: &GpuiThemeProvider, id_suffix: &str) -> AppHeader {
     let action_size = spec.effective_size();
+    let new_id = format!("ah-new-{id_suffix}");
+    let open_id = format!("ah-open-{id_suffix}");
+    let settings_id = format!("ah-settings-{id_suffix}");
     AppHeader::from_spec(spec, theme)
-        .with_primary_actions(
-            div()
-                .flex()
-                .items_center()
-                .gap(px(6.0))
-                .child(
-                    Button::from_spec(
-                        ButtonSpec::new()
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_label("New")
-                            .with_size(action_size),
-                        theme,
-                    )
-                    .with_id(format!("ah-new-{id_suffix}")),
-                )
-                .child(
-                    Button::from_spec(
-                        ButtonSpec::new()
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_label("Open")
-                            .with_size(action_size),
-                        theme,
-                    )
-                    .with_id(format!("ah-open-{id_suffix}")),
-                ),
-        )
-        .with_utility_items(
-            div().flex().items_center().gap(px(4.0)).child(
-                IconButton::from_spec(
-                    IconButtonSpec::new()
-                        .with_icon("settings")
-                        .with_size(action_size),
-                    theme,
-                )
-                .with_id(format!("ah-settings-{id_suffix}")),
-            ),
-        )
+        .with_primary_actions(action_row(
+            theme,
+            &[
+                (new_id.as_str(), "New"),
+                (open_id.as_str(), "Open"),
+            ],
+            action_size,
+            6.0,
+        ))
+        .with_utility_items(utility_row(
+            theme,
+            &[(settings_id.as_str(), "settings")],
+            action_size,
+            4.0,
+        ))
 }
 
 fn density_block(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
-    div().flex().flex_col().gap(px(8.0)).child(ladder_label(theme, label)).child(demo_header(
-        AppHeaderSpec::new()
-            .with_title("My Application")
-            .with_density(density),
-        theme,
-        &format!("density-{label}").to_lowercase(),
-    ))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(ladder_label(theme, label))
+        .child(demo_header(
+            AppHeaderSpec::new()
+                .with_title("My Application")
+                .with_density(density),
+            theme,
+            &format!("density-{label}").to_lowercase(),
+        ))
 }
 
 fn size_block(theme: &GpuiThemeProvider, label: &str, size: ControlSize) -> Div {
-    div().flex().flex_col().gap(px(8.0)).child(ladder_label(theme, label)).child(demo_header(
-        AppHeaderSpec::new()
-            .with_title("My Application")
-            .with_size(size),
-        theme,
-        &format!("size-{label}").to_lowercase(),
-    ))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(ladder_label(theme, label))
+        .child(demo_header(
+            AppHeaderSpec::new()
+                .with_title("My Application")
+                .with_size(size),
+            theme,
+            &format!("size-{label}").to_lowercase(),
+        ))
 }

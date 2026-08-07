@@ -1,6 +1,7 @@
+use crate::node_compat::{Eyebrow, StatusIndicator};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, StatusIndicator};
+
 use poodle_specs::{EyebrowSpec, InlineTypographyMode, StatusIndicatorSpec, StatusTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

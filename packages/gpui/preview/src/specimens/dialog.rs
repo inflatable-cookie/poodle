@@ -1,23 +1,113 @@
-use crate::app_state::AppState;
-use crate::specimens::overlay_state;
-use crate::style_bridge::color_to_hsla;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Dialog, Eyebrow, IntoCompatNode, Pill};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Button, Dialog, Eyebrow, Pill};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec,
     PillAppearance, PillSpec, PillTone,
 };
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn set_toggle_click(
+    state: &AppState,
+    key: &'static str,
+    value: bool,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value,
+        });
+    })
+}
+
+fn set_toggle_open_change(
+    state: &AppState,
+    key: &'static str,
+) -> Arc<dyn Fn(bool) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value,
+        });
+    })
+}
+
+fn text(theme: &impl ThemeProvider, value: impl Into<String>, size: f32, token: &str) -> Node {
+    let mut node = Node::text(value);
+    node.style.text_size = Some(size);
+    node.style.descriptor.text_color = Some(theme.resolve_color(token));
+    node
+}
+
+fn column(children: impl IntoIterator<Item = Node>, gap: f32) -> Node {
+    let mut node = Node::container();
+    node.style.descriptor.layout.direction = LayoutDirection::Column;
+    node.style.descriptor.layout.spacing.gap = gap;
+    node.children = children.into_iter().collect();
+    node
+}
+
+fn row(children: impl IntoIterator<Item = Node>, gap: f32, justify_end: bool) -> Node {
+    let mut node = Node::container();
+    node.style.descriptor.layout.direction = LayoutDirection::Row;
+    node.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    if justify_end {
+        node.style.descriptor.layout.alignment.main = MainAxisAlignment::End;
+    }
+    node.style.descriptor.layout.spacing.gap = gap;
+    node.children = children.into_iter().collect();
+    node
+}
+
+fn action_row(children: impl IntoIterator<Item = Node>) -> Node {
+    row(children, 8.0, true)
+}
+
+fn button(
+    theme: &GpuiThemeProvider,
+    spec: ButtonSpec,
+    id: impl Into<String>,
+    on_click: Arc<dyn Fn() + Send + Sync>,
+) -> Node {
+    Button::from_spec(spec, theme)
+        .with_id(id)
+        .on_click(on_click)
+        .into_compat_node()
+}
+
+fn close_button(theme: &GpuiThemeProvider, state: &AppState, key: &'static str) -> Node {
+    button(
+        theme,
+        ButtonSpec::new()
+            .with_variant(ButtonVariant::Ghost)
+            .with_label("Close"),
+        format!("{key}-close"),
+        set_toggle_click(state, key, false),
+    )
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let border_default = theme.resolve_color("color.border.default");
-    let panel_bg = theme.resolve_color("color.background.panel");
-    let accent = theme.resolve_color("color.accent.base");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let root_handle = cx.weak_entity();
+    let text_secondary = "color.text.secondary";
+    let accent = "color.accent.base";
+
+    let open_button = |id: &'static str, key: &'static str, label: &'static str| {
+        Button::from_spec(
+            ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_label(label),
+            theme,
+        )
+        .with_id(id)
+        .on_click(set_toggle_click(state, key, true))
+        .into_any_element()
+    };
 
     let button_row = |label: &'static str, button: AnyElement| {
         div()
@@ -32,175 +122,86 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .child(button)
     };
 
-    let open_button = |id: &'static str,
-                       key: &'static str,
-                       label: &'static str,
-                       cx: &mut Context<PreviewRoot>| {
-        Button::from_spec(
-            ButtonSpec::new()
-                .with_variant(ButtonVariant::Secondary)
-                .with_label(label),
-            theme,
-        )
-        .with_id(id)
-        .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-            overlay_state::set_toggle(this, key, true, cx);
-        }))
-        .into_any_element()
-    };
-
-    let mut content = div().flex().flex_col().gap(px(12.0)).child(button_row(
-        "Informational",
-        open_button(
+    let mut root = div().flex().flex_col().gap(px(12.0));
+    for (label, id, key, text) in [
+        (
+            "Informational",
             "dialog-shortcuts-trigger",
             "dialog-shortcuts-open",
             "View details",
-            cx,
         ),
-    ));
-
-    content = content.child(button_row(
-        "Form",
-        open_button(
+        (
+            "Form",
             "dialog-form-trigger",
             "dialog-form-open",
             "Create project",
-            cx,
         ),
-    ));
-
-    content = content.child(button_row(
-        "Custom header",
-        open_button(
+        (
+            "Custom header",
             "dialog-changelog-trigger",
             "dialog-changelog-open",
             "View changelog",
-            cx,
         ),
-    ));
-
-    content = content.child(button_row(
-        "Custom footer",
-        open_button(
+        (
+            "Custom footer",
             "dialog-terms-trigger",
             "dialog-terms-open",
             "Terms & conditions",
-            cx,
         ),
-    ));
-
-    content = content.child(button_row(
-        "Bare mode",
-        open_button(
+        (
+            "Bare mode",
             "dialog-bare-trigger",
             "dialog-bare-open",
             "Preview image",
-            cx,
         ),
-    ));
-
-    content = content.child(button_row(
-        "Scrollable",
-        open_button(
+        (
+            "Scrollable",
             "dialog-scroll-trigger",
             "dialog-scroll-open",
             "View log",
-            cx,
         ),
-    ));
+    ] {
+        root = root.child(button_row(label, open_button(id, key, text)));
+    }
 
-    let width_buttons = div()
-        .flex()
-        .flex_wrap()
-        .items_center()
-        .gap(px(8.0))
-        .child(open_button(
-            "dialog-width-sm-trigger",
-            "dialog-width-sm-open",
-            "sm",
-            cx,
-        ))
-        .child(open_button(
-            "dialog-width-md-trigger",
-            "dialog-width-md-open",
-            "md",
-            cx,
-        ))
-        .child(open_button(
-            "dialog-width-lg-trigger",
-            "dialog-width-lg-open",
-            "lg",
-            cx,
-        ))
-        .child(open_button(
-            "dialog-width-xl-trigger",
-            "dialog-width-xl-open",
-            "xl",
-            cx,
-        ))
-        .child(open_button(
-            "dialog-width-full-trigger",
-            "dialog-width-full-open",
-            "full",
-            cx,
-        ))
-        .into_any_element();
-    content = content.child(button_row("Width presets", width_buttons));
+    let width_buttons = [
+        ("sm", "dialog-width-sm-trigger", "dialog-width-sm-open"),
+        ("md", "dialog-width-md-trigger", "dialog-width-md-open"),
+        ("lg", "dialog-width-lg-trigger", "dialog-width-lg-open"),
+        ("xl", "dialog-width-xl-trigger", "dialog-width-xl-open"),
+        ("full", "dialog-width-full-trigger", "dialog-width-full-open"),
+    ]
+    .into_iter()
+    .fold(div().flex().flex_wrap().items_center().gap(px(8.0)), |row, (label, id, key)| {
+        row.child(open_button(id, key, label))
+    });
+    root = root.child(button_row("Width presets", width_buttons.into_any_element()));
 
-    content = content.child(button_row(
+    root = root.child(button_row(
         "Alert",
-        open_button(
-            "dialog-alert-trigger",
-            "dialog-alert-open",
-            "Delete item",
-            cx,
-        ),
+        open_button("dialog-alert-trigger", "dialog-alert-open", "Delete item"),
     ));
-
-    content = content.child(button_row(
+    root = root.child(button_row(
         "Non-dismissible",
         open_button(
             "dialog-persistent-trigger",
             "dialog-persistent-open",
             "Open persistent",
-            cx,
         ),
     ));
 
-    let mut root = div().flex().flex_col().gap(px(24.0)).child(content);
+    let mut root = div().flex().flex_col().gap(px(24.0)).child(root);
 
     if state.specimens.is_on("dialog-shortcuts-open") {
-        let shortcuts = |keys: &'static str, label: &'static str| {
-            let mut kbd_bg = color_to_hsla(panel_bg);
-            kbd_bg.a *= 0.8;
-            div()
-                .flex()
-                .items_center()
-                .gap(px(12.0))
-                .child(
-                    div()
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .min_w(px(72.0))
-                        .px(px(8.0))
-                        .py(px(4.0))
-                        .border_1()
-                        .border_color(color_to_hsla(border_default))
-                        .rounded(px(4.0))
-                        .bg(kbd_bg)
-                        .text_size(px(12.0))
-                        .font_weight(FontWeight::MEDIUM)
-                        .child(keys),
-                )
-                .child(
-                    div()
-                        .text_size(px(13.0))
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(label),
-                )
-        };
-
+        let shortcuts = [
+            ("⌘ K", "Command palette"),
+            ("⌘ S", "Save"),
+            ("⌘ /", "Toggle comment"),
+            ("⌘ ⇧ P", "Quick actions"),
+            ("Esc", "Close dialog"),
+        ]
+        .into_iter()
+        .map(|(keys, label)| row([text(theme, keys, 12.0, "color.text.primary"), text(theme, label, 13.0, text_secondary)], 12.0, false));
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -208,54 +209,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-shortcuts-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(shortcuts("\u{2318} K", "Command palette"))
-                    .child(shortcuts("\u{2318} S", "Save"))
-                    .child(shortcuts("\u{2318} /", "Toggle comment"))
-                    .child(shortcuts("\u{2318} \u{21E7} P", "Quick actions"))
-                    .child(shortcuts("Esc", "Close dialog")),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-shortcuts-open"))
+            .with_content(column(shortcuts, 8.0)),
         );
     }
 
     if state.specimens.is_on("dialog-form-open") {
-        let field = |label: &'static str, placeholder: &'static str| {
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(4.0))
-                .child(
-                    div()
-                        .text_size(px(13.0))
-                        .font_weight(FontWeight::MEDIUM)
-                        .child(label),
-                )
-                .child(
-                    div()
-                        .h(px(32.0))
-                        .px(px(10.0))
-                        .flex()
-                        .items_center()
-                        .border_1()
-                        .border_color(color_to_hsla(border_default))
-                        .rounded(px(4.0))
-                        .bg(color_to_hsla(panel_bg))
-                        .text_size(px(13.0))
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(placeholder),
-                )
-        };
-
+        let fields = [
+            ("Project name", "My project"),
+            ("Template", "Choose a template"),
+            ("Description", "What is this project for?"),
+        ]
+        .into_iter()
+        .map(|(label, placeholder)| {
+            column(
+                [
+                    text(theme, label, 13.0, "color.text.primary"),
+                    text(theme, placeholder, 13.0, text_secondary),
+                ],
+                4.0,
+            )
+        });
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -265,90 +239,62 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-form-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(12.0))
-                    .child(
-                        div()
-                            .flex()
-                            .gap(px(16.0))
-                            .child(div().flex_1().child(field("Project name", "My project")))
-                            .child(div().flex_1().child(field("Template", "Choose a template"))),
-                    )
-                    .child(field("Description", "What is this project for?"))
-                    .child(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .child(
-                                div()
-                                    .w(px(16.0))
-                                    .h(px(16.0))
-                                    .border_1()
-                                    .border_color(color_to_hsla(border_default))
-                                    .rounded(px(3.0)),
-                            )
-                            .child(div().text_size(px(13.0)).child("Make this project private")),
-                    ),
-            )
-            .with_actions(
-                div()
-                    .flex()
-                    .gap(px(8.0))
-                    .child(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_label("Cancel"),
-                            theme,
-                        )
-                        .with_id("dialog-form-cancel")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "dialog-form-open", false, cx);
-                            },
-                        )),
-                    )
-                    .child(
-                        Button::from_spec(ButtonSpec::new().with_label("Create project"), theme)
-                            .with_id("dialog-form-create")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "dialog-form-open", false, cx);
-                            })),
-                    ),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-form-open"))
+            .with_content(column(fields, 12.0))
+            .with_actions(action_row([
+                button(
+                    theme,
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_label("Cancel"),
+                    "dialog-form-cancel",
+                    set_toggle_click(state, "dialog-form-open", false),
+                ),
+                button(
+                    theme,
+                    ButtonSpec::new().with_label("Create project"),
+                    "dialog-form-create",
+                    set_toggle_click(state, "dialog-form-open", false),
+                ),
+            ])),
         );
     }
 
     if state.specimens.is_on("dialog-changelog-open") {
-        let entry = |title: &'static str, body: &'static str| {
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(4.0))
-                .child(
-                    div()
-                        .text_size(px(14.0))
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .child(title),
+        let header = row(
+            [
+                text(theme, "What's new", 16.0, "color.text.primary"),
+                Pill::from_spec(
+                    PillSpec::new()
+                        .with_label("v2.4.0")
+                        .with_tone(PillTone::Info)
+                        .with_appearance(PillAppearance::Badge),
+                    theme,
                 )
-                .child(
-                    div()
-                        .text_size(px(13.0))
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(body),
-                )
-        };
-
+                .into_compat_node(),
+            ],
+            10.0,
+            false,
+        );
+        let body = column(
+            [
+                column(
+                    [
+                        text(theme, "Dialog flexibility improvements", 14.0, "color.text.primary"),
+                        text(theme, "Dialogs now support custom headers, footers, width presets, and bare mode.", 13.0, text_secondary),
+                    ],
+                    4.0,
+                ),
+                column(
+                    [
+                        text(theme, "Size propagation fixes", 14.0, "color.text.primary"),
+                        text(theme, "All parent components now correctly forward size and density to embedded children.", 13.0, text_secondary),
+                    ],
+                    4.0,
+                ),
+            ],
+            14.0,
+        );
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -356,49 +302,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("What's new"),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-changelog-open", open, cx);
-                }
-            })
-            .with_header(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(10.0))
-                    .child(
-                        div()
-                            .text_size(px(16.0))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .child("What's new"),
-                    )
-                    .child(Pill::from_spec(
-                        PillSpec::new()
-                            .with_label("v2.4.0")
-                            .with_tone(PillTone::Info)
-                            .with_appearance(PillAppearance::Badge),
-                        theme,
-                    )),
-            )
-            .with_content(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(14.0))
-                    .child(entry(
-                        "Dialog flexibility improvements",
-                        "Dialogs now support custom headers, footers, width presets, and bare mode.",
-                    ))
-                    .child(entry(
-                        "Size propagation fixes",
-                        "All parent components now correctly forward size and density to embedded children.",
-                    )),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-changelog-open"))
+            .with_header(header)
+            .with_content(body),
         );
     }
 
     if state.specimens.is_on("dialog-terms-open") {
+        let footer = row(
+            [
+                text(theme, "Read full terms", 13.0, accent),
+                action_row([
+                    button(
+                        theme,
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_label("Decline"),
+                        "dialog-terms-decline",
+                        set_toggle_click(state, "dialog-terms-open", false),
+                    ),
+                    button(
+                        theme,
+                        ButtonSpec::new().with_label("Accept"),
+                        "dialog-terms-accept",
+                        set_toggle_click(state, "dialog-terms-open", false),
+                    ),
+                ]),
+            ],
+            16.0,
+            false,
+        );
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -406,70 +339,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-terms-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(13.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("By using this service, you agree to our terms and conditions."),
-            )
-            .with_footer(
-                div()
-                    .flex()
-                    .items_center()
-                    .justify_between()
-                    .child(
-                        div()
-                            .text_size(px(13.0))
-                            .text_color(color_to_hsla(accent))
-                            .child("Read full terms"),
-                    )
-                    .child(
-                        div()
-                            .flex()
-                            .gap(px(8.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Ghost)
-                                        .with_label("Decline"),
-                                    theme,
-                                )
-                                .with_id("dialog-terms-decline")
-                                .on_click(cx.listener(
-                                    |this, _e: &ClickEvent, _w, cx| {
-                                        overlay_state::set_toggle(
-                                            this,
-                                            "dialog-terms-open",
-                                            false,
-                                            cx,
-                                        );
-                                    },
-                                )),
-                            )
-                            .child(
-                                Button::from_spec(ButtonSpec::new().with_label("Accept"), theme)
-                                    .with_id("dialog-terms-accept")
-                                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                        overlay_state::set_toggle(
-                                            this,
-                                            "dialog-terms-open",
-                                            false,
-                                            cx,
-                                        );
-                                    })),
-                            ),
-                    ),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-terms-open"))
+            .with_content(text(theme, "By using this service, you agree to our terms and conditions.", 13.0, text_secondary))
+            .with_footer(footer),
         );
     }
 
     if state.specimens.is_on("dialog-bare-open") {
+        let mut preview = Node::container();
+        preview.style.descriptor.layout.direction = LayoutDirection::Column;
+        preview.style.min_height = Some(320.0);
+        preview.style.descriptor.background = Some(theme.resolve_color("color.background.canvas"));
+        preview = preview.child(row([text(theme, "2400 × 1600", 14.0, text_secondary)], 0.0, false));
+        let details = row(
+            [
+                column(
+                    [
+                        text(theme, "landscape-hero.png", 13.0, "color.text.primary"),
+                        text(theme, "2.4 MB · Uploaded today", 12.0, text_secondary),
+                    ],
+                    2.0,
+                ),
+                action_row([
+                    close_button(theme, state, "dialog-bare-open"),
+                    button(
+                        theme,
+                        ButtonSpec::new().with_label("Download"),
+                        "dialog-bare-download",
+                        set_toggle_click(state, "dialog-bare-open", false),
+                    ),
+                ]),
+            ],
+            16.0,
+            false,
+        );
+        preview = preview.child(details);
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -478,102 +382,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("Image preview"),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-bare-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .flex()
-                    .flex_col()
-                    .child(
-                        div()
-                            .w_full()
-                            .min_h(px(320.0))
-                            .flex()
-                            .items_center()
-                            .justify_center()
-                            .bg(hsla(0.0, 0.0, 0.08, 1.0))
-                            .child(
-                                div()
-                                    .text_size(px(14.0))
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child("2400 × 1600"),
-                            ),
-                    )
-                    .child(
-                        div()
-                            .flex()
-                            .items_center()
-                            .justify_between()
-                            .gap(px(16.0))
-                            .px(px(16.0))
-                            .py(px(12.0))
-                            .border_t_1()
-                            .border_color(color_to_hsla(border_subtle))
-                            .child(
-                                div()
-                                    .flex()
-                                    .flex_col()
-                                    .gap(px(2.0))
-                                    .child(
-                                        div()
-                                            .text_size(px(13.0))
-                                            .font_weight(FontWeight::SEMIBOLD)
-                                            .child("landscape-hero.png"),
-                                    )
-                                    .child(
-                                        div()
-                                            .text_size(px(12.0))
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("2.4 MB · Uploaded today"),
-                                    ),
-                            )
-                            .child(
-                                div()
-                                    .flex()
-                                    .gap(px(8.0))
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new()
-                                                .with_variant(ButtonVariant::Ghost)
-                                                .with_label("Close"),
-                                            theme,
-                                        )
-                                        .with_id("dialog-bare-close")
-                                        .on_click(
-                                            cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                                overlay_state::set_toggle(
-                                                    this,
-                                                    "dialog-bare-open",
-                                                    false,
-                                                    cx,
-                                                );
-                                            }),
-                                        ),
-                                    )
-                                    .child(
-                                        Button::from_spec(
-                                            ButtonSpec::new().with_label("Download"),
-                                            theme,
-                                        )
-                                        .with_id("dialog-bare-download")
-                                        .on_click(
-                                            cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                                overlay_state::set_toggle(
-                                                    this,
-                                                    "dialog-bare-open",
-                                                    false,
-                                                    cx,
-                                                );
-                                            }),
-                                        ),
-                                    ),
-                            ),
-                    ),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-bare-open"))
+            .with_content(preview),
         );
     }
 
@@ -588,37 +398,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Deploy started",
             "Review requested",
         ];
-        let mut log_list = div()
-            .flex()
-            .flex_col()
-            .gap(px(4.0))
-            .max_h(px(288.0))
-            .overflow_hidden();
-        for i in 0..20u32 {
+        let entries = (0..20u32).map(|i| {
             let hour = (9 + i / 3).min(23);
             let minute = (i * 17) % 60;
-            log_list = log_list.child(
-                div()
-                    .flex()
-                    .gap(px(12.0))
-                    .py(px(6.0))
-                    .border_b_1()
-                    .border_color(color_to_hsla(border_subtle))
-                    .child(
-                        div()
-                            .min_w(px(48.0))
-                            .text_size(px(12.0))
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(format!("{:02}:{:02}", hour, minute)),
-                    )
-                    .child(
-                        div()
-                            .text_size(px(13.0))
-                            .child(messages[(i as usize) % messages.len()].to_string()),
-                    ),
-            );
-        }
-
+            row(
+                [
+                    text(theme, format!("{hour:02}:{minute:02}"), 12.0, text_secondary),
+                    text(theme, messages[(i as usize) % messages.len()], 13.0, "color.text.primary"),
+                ],
+                12.0,
+                false,
+            )
+        });
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -627,39 +418,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-scroll-open", open, cx);
-                }
-            })
-            .with_content(log_list)
-            .with_actions(
-                div()
-                    .flex()
-                    .gap(px(8.0))
-                    .child(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_label("Close"),
-                            theme,
-                        )
-                        .with_id("dialog-scroll-close")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "dialog-scroll-open", false, cx);
-                            },
-                        )),
-                    )
-                    .child(
-                        Button::from_spec(ButtonSpec::new().with_label("Export log"), theme)
-                            .with_id("dialog-scroll-export")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "dialog-scroll-open", false, cx);
-                            })),
-                    ),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-scroll-open"))
+            .with_content(column(entries, 4.0))
+            .with_actions(action_row([
+                button(
+                    theme,
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_label("Close"),
+                    "dialog-scroll-close",
+                    set_toggle_click(state, "dialog-scroll-open", false),
+                ),
+                button(
+                    theme,
+                    ButtonSpec::new().with_label("Export log"),
+                    "dialog-scroll-export",
+                    set_toggle_click(state, "dialog-scroll-open", false),
+                ),
+            ])),
         );
     }
 
@@ -679,25 +455,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_show_close_button(true),
                     theme,
                 )
-                .on_open_change({
-                    let root = root_handle.clone();
-                    move |open, _window, cx| {
-                        overlay_state::set_toggle_via_entity(&root, key, open, cx);
-                    }
-                })
-                .with_content(
-                    div()
-                        .text_size(px(13.0))
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!("This dialog uses width=\"{label}\".")),
-                )
-                .with_actions(
-                    Button::from_spec(ButtonSpec::new().with_label("Close"), theme)
-                        .with_id(format!("dialog-width-{label}-close"))
-                        .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, key, false, cx);
-                        })),
-                ),
+                .on_open_change(set_toggle_open_change(state, key))
+                .with_content(text(theme, format!("This dialog uses width=\"{label}\"."), 13.0, text_secondary))
+                .with_actions(close_button(theme, state, key)),
             );
         }
     }
@@ -711,27 +471,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_dismiss_on_escape(false),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-persistent-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(13.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(
-                        "This dialog cannot be dismissed by clicking the backdrop or pressing Escape.",
-                    ),
-            )
-            .with_actions(
-                Button::from_spec(ButtonSpec::new().with_label("Done"), theme)
-                    .with_id("dialog-persistent-done")
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        overlay_state::set_toggle(this, "dialog-persistent-open", false, cx);
-                    })),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-persistent-open"))
+            .with_content(text(theme, "This dialog cannot be dismissed by clicking the backdrop or pressing Escape.", 13.0, text_secondary))
+            .with_actions(button(
+                theme,
+                ButtonSpec::new().with_label("Done"),
+                "dialog-persistent-done",
+                set_toggle_click(state, "dialog-persistent-open", false),
+            )),
         );
     }
 
@@ -741,52 +488,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 DialogSpec::new()
                     .with_role(DialogKind::AlertDialog)
                     .with_title("Delete item?")
-                    .with_description(
-                        "This will permanently remove the item and all associated data.",
-                    ),
+                    .with_description("This will permanently remove the item and all associated data."),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "dialog-alert-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(13.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("This action cannot be undone."),
-            )
-            .with_actions(
-                div()
-                    .flex()
-                    .gap(px(8.0))
-                    .child(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Secondary)
-                                .with_label("Cancel"),
-                            theme,
-                        )
-                        .with_id("dialog-alert-cancel")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, "dialog-alert-open", false, cx);
-                        })),
-                    )
-                    .child(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_tone(ButtonTone::Danger)
-                                .with_label("Delete"),
-                            theme,
-                        )
-                        .with_id("dialog-alert-delete")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, "dialog-alert-open", false, cx);
-                        })),
-                    ),
-            ),
+            .on_open_change(set_toggle_open_change(state, "dialog-alert-open"))
+            .with_content(text(theme, "This action cannot be undone.", 13.0, text_secondary))
+            .with_actions(action_row([
+                button(
+                    theme,
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Cancel"),
+                    "dialog-alert-cancel",
+                    set_toggle_click(state, "dialog-alert-open", false),
+                ),
+                button(
+                    theme,
+                    ButtonSpec::new()
+                        .with_tone(ButtonTone::Danger)
+                        .with_label("Delete"),
+                    "dialog-alert-delete",
+                    set_toggle_click(state, "dialog-alert-open", false),
+                ),
+            ])),
         );
     }
 

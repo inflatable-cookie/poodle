@@ -22,7 +22,7 @@ use poodle_specs::{
     StatusTone,
 };
 
-use crate::alert_dialog::{alert_dialog, AlertDialogHandlers};
+use crate::alert_dialog::{alert_dialog_with_content, AlertDialogHandlers};
 use crate::button::button;
 
 /// Host callbacks: trigger (closed state), confirm and cancel (open state).
@@ -59,7 +59,22 @@ pub fn confirm_action(
     theme: &dyn ThemeProvider,
     handlers: ConfirmActionHandlers,
 ) -> Node {
+    confirm_action_with_slots(spec, theme, None, None, handlers)
+}
+
+/// Render with optional trigger and dialog-body slots. The slots remain nodes,
+/// so every backend sees the same composed structure.
+pub fn confirm_action_with_slots(
+    spec: &ConfirmActionSpec,
+    theme: &dyn ThemeProvider,
+    trigger: Option<Node>,
+    content: Option<Node>,
+    handlers: ConfirmActionHandlers,
+) -> Node {
     if !spec.is_open {
+        if let Some(trigger) = trigger {
+            return trigger;
+        }
         // Closed: render the default trigger — a composed secondary button with
         // the derived tone (contract §2 DefaultTrigger). All button visuals
         // (height, padding, fill, border, radius, focus) resolve via button.
@@ -84,14 +99,69 @@ pub fn confirm_action(
         .with_size_role(spec.size_role)
         .with_density(spec.density);
 
-    alert_dialog(
+    let dialog = alert_dialog_with_content(
         &alert_spec,
         theme,
         false,
         "Working\u{2026}",
+        content.into_iter().collect(),
         AlertDialogHandlers {
             confirm: handlers.on_confirm,
             cancel: handlers.on_cancel,
         },
-    )
+    );
+
+    if let Some(trigger) = trigger {
+        Node::container().child(trigger).child(dialog)
+    } else {
+        dialog
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn open_custom_slots_and_actions_stay_live() {
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let confirm_seen = Arc::clone(&seen);
+        let cancel_seen = Arc::clone(&seen);
+        let spec =
+            ConfirmActionSpec::new("Delete?", "Permanent.", "Delete", "Cancel").with_open(true);
+        let node = confirm_action_with_slots(
+            &spec,
+            &theme(),
+            Some(Node::button("Custom trigger")),
+            Some(Node::text("Typed confirmation")),
+            ConfirmActionHandlers {
+                on_trigger: None,
+                on_confirm: Some(Arc::new(move || {
+                    confirm_seen.lock().unwrap().push("confirm")
+                })),
+                on_cancel: Some(Arc::new(move || cancel_seen.lock().unwrap().push("cancel"))),
+            },
+        );
+
+        assert!(node.has_text("Custom trigger"));
+        assert!(node.has_text("Typed confirmation"));
+        let confirm = node
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Button { label } if label == "Delete")
+            })
+            .expect("confirm button");
+        let cancel = node
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Button { label } if label == "Cancel")
+            })
+            .expect("cancel button");
+        (confirm.interaction.on_activate.as_ref().unwrap())();
+        (cancel.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["confirm", "cancel"]);
+    }
 }

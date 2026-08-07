@@ -49,7 +49,8 @@ pub fn surface(spec: &SurfaceSpec, theme: &dyn ThemeProvider, children: Vec<Node
     if let Some(border_token) = spec.resolved_border_color() {
         let base_border = theme.resolve_color(border_token);
         let s = &mut el.style;
-        s.descriptor.border.color = with_alpha(base_border, base_border.3 * spec.border_mix_ratio());
+        s.descriptor.border.color =
+            with_alpha(base_border, base_border.3 * spec.border_mix_ratio());
         s.descriptor.border.width = spec
             .resolved_border_width()
             .map(|t| theme.resolve_space(t))

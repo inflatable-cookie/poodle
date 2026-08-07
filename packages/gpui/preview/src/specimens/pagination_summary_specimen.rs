@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, PaginationSummary};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, PaginationSummary};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::PaginationSummarySpec;
 

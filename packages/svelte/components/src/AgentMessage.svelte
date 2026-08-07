@@ -95,7 +95,16 @@
           start={block.ordered && block.start !== 1 ? block.start : undefined}
         >
           {#each block.items as item}
-            <li class="poodle-agent-message__list-item">{@render blockList(item)}</li>
+            <!-- Single-paragraph items render their inlines directly: the
+                 marker sits on the text line with inside positioning, and a
+                 redundant <p> would push the content below the marker. -->
+            <li class="poodle-agent-message__list-item">
+              {#if item.length === 1 && item[0].type === "paragraph"}
+                {@render inlines(item[0].children)}
+              {:else}
+                {@render blockList(item)}
+              {/if}
+            </li>
           {/each}
         </svelte:element>
       {:else if block.type === "blockquote"}

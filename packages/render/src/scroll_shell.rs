@@ -63,6 +63,10 @@ pub fn scroll_shell(
             }
         }
         s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
+        s.fill_height = true;
+        s.min_width = Some(0.0);
+        s.min_height = Some(0.0);
     }
 
     // Token-resolved padding inset on the viewport (contract §8 padding scale).
@@ -89,6 +93,12 @@ pub fn scroll_shell(
         // Explicit Row (see switch.rs).
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
+        s.fill_height = true;
+        s.min_width = Some(0.0);
+        s.min_height = Some(0.0);
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         let r = theme.resolve_radius("radius.surface");
         s.descriptor.corner_radii.top_left = r;
         s.descriptor.corner_radii.top_right = r;

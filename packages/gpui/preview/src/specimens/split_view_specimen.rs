@@ -1,11 +1,17 @@
-use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, SplitView};
+use crate::style_bridge::{color_to_hsla, hsla_to_color_value};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, SplitView};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{SplitOrientation, SplitViewSpec};
+
+/// The specimen frames are full-width inside the preview's content column, so
+/// this is the axis extent the divider's pixel deltas are measured against.
+/// See `SplitView::with_extent_px`.
+const FRAME_WIDTH_PX: f32 = 640.0;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -15,7 +21,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // Small helper: coloured region block used as a stand-in for
     // Svelte's <Region> primitive (which is a simple labelled swatch).
-    let region = move |label: &'static str, hue: f32| {
+    let region = move |label: &'static str, hue: f32| -> Node {
         let region_bg = Hsla {
             h: hue / 360.0,
             s: 0.55,
@@ -28,16 +34,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             l: 0.78,
             a: 1.0,
         };
-        div()
-            .size_full()
-            .flex()
-            .items_center()
-            .justify_center()
-            .bg(region_bg)
-            .text_size(px(13.0))
-            .font_weight(FontWeight::MEDIUM)
-            .text_color(region_text)
-            .child(label)
+        let mut block = Node::container();
+        {
+            let s = &mut block.style;
+            s.descriptor.background = Some(hsla_to_color_value(region_bg));
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            s.fill_width = true;
+            s.fill_height = true;
+            // Typography sits on the block, not the caption: the old tier set
+            // it on the wrapper and let the string inherit, and centring a
+            // caption that carries its own metrics lands a few px off.
+            s.descriptor.text_color = Some(hsla_to_color_value(region_text));
+            s.text_size = Some(13.0);
+            s.text_weight = Some(500);
+        }
+        block.child(Node::text(label.to_string()))
     };
 
     // Frame wrapper: bordered container so the split view has visible
@@ -65,15 +78,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     )
     .with_primary(region("Sidebar", 220.0))
     .with_secondary(region("Main content", 140.0))
+    .with_extent_px(FRAME_WIDTH_PX)
     .on_ratio_change({
-        let listener = cx.listener(move |this: &mut PreviewRoot, ratio: &f32, _window, cx| {
-            this.state
-                .specimens
-                .select(ratio_key, (ratio * 100.0).round().max(1.0) as usize);
-            cx.notify();
-        });
-        move |ratio, window, cx| listener(&ratio, window, cx)
+        // Context-free: the drag streams through the node event queue, which is
+        // drained at the top of the next render.
+        let queue = std::sync::Arc::clone(&state.node_events);
+        std::sync::Arc::new(move |ratio: f32| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::Select {
+                key: ratio_key.to_string(),
+                index: (ratio * 100.0).round().max(1.0) as usize,
+            });
+        })
     });
+    let _ = cx;
 
     div()
         .flex()

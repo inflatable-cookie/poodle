@@ -1,17 +1,28 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Eyebrow, FormActions};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, FormActions};
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, EyebrowSpec, FormActionAlign,
     FormActionDangerItem, FormActionsSpec,
 };
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn set_text_click(state: &AppState, value: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "form-action-last".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let last_action = state
@@ -45,15 +56,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("fa-cancel-end")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "form-action-last".to_string(),
-                                        "Cancel".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(set_text_click(state, "Cancel")),
                         )
                         .with_action(
                             Button::from_spec(
@@ -63,15 +66,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("fa-save-end")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "form-action-last".to_string(),
-                                        "Save changes".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(set_text_click(state, "Save changes")),
                         ),
                 ),
         )
@@ -143,15 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("fa-save-between")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("form-action-last".to_string(), "Save".to_string());
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(set_text_click(state, "Save")),
                     ),
                 ),
         )
@@ -304,28 +291,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    FormActions::from_spec(
-                        FormActionsSpec::new().with_top_border(true),
-                        theme,
-                    )
-                    .with_action(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Secondary)
-                                .with_label("Cancel"),
-                            theme,
+                    FormActions::from_spec(FormActionsSpec::new().with_top_border(true), theme)
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Cancel"),
+                                theme,
+                            )
+                            .with_id("fa-cancel-border"),
                         )
-                        .with_id("fa-cancel-border"),
-                    )
-                    .with_action(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Primary)
-                                .with_label("Save changes"),
-                            theme,
-                        )
-                        .with_id("fa-save-border"),
-                    ),
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Save changes"),
+                                theme,
+                            )
+                            .with_id("fa-save-border"),
+                        ),
                 ),
         )
         // --- Last action feedback ---
@@ -347,29 +331,29 @@ fn density_row(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) 
         .flex()
         .flex_col()
         .gap(px(4.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(
-            FormActions::from_spec(
-                FormActionsSpec::new().with_density(density),
-                theme,
-            )
-            .with_action(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Secondary)
-                        .with_label("Cancel"),
-                    theme,
+            FormActions::from_spec(FormActionsSpec::new().with_density(density), theme)
+                .with_action(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label("Cancel"),
+                        theme,
+                    )
+                    .with_id(format!("fa-density-cancel-{label}")),
                 )
-                .with_id(format!("fa-density-cancel-{label}")),
-            )
-            .with_action(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Primary)
-                        .with_label("Save changes"),
-                    theme,
-                )
-                .with_id(format!("fa-density-save-{label}")),
-            ),
+                .with_action(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Save changes"),
+                        theme,
+                    )
+                    .with_id(format!("fa-density-save-{label}")),
+                ),
         )
 }

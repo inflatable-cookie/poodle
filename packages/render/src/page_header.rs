@@ -25,17 +25,6 @@ use crate::presentation::{
     rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
 };
 
-/// Map a status tone icon name (mirrors the Callout/banner convention).
-fn tone_icon(tone: poodle_specs::StatusTone) -> &'static str {
-    match tone {
-        poodle_specs::StatusTone::Neutral | poodle_specs::StatusTone::Info => "info",
-        poodle_specs::StatusTone::Success => "check-circle",
-        poodle_specs::StatusTone::Warning => "alert-triangle",
-        poodle_specs::StatusTone::Danger => "x-circle",
-        poodle_specs::StatusTone::Pending => "loader",
-    }
-}
-
 /// Map the resolved control size to the supporting-visual `PillSize` the count
 /// badge renders at (matches Svelte `resolveSupportingVisualSize`).
 fn count_pill_size(size: ControlSize) -> PillSize {
@@ -102,7 +91,7 @@ pub fn page_header(
     let back_color = theme.resolve_color(spec.back_color_token());
     let context_dot = theme.resolve_color(spec.context_dot_color_token());
     let banner_color = theme.resolve_color(spec.banner_color_token());
-    let panel = theme.resolve_color("color.background.panel");
+    let surface = theme.resolve_color("color.background.surface");
     let banner_radius = theme.resolve_radius(spec.banner_radius_token());
 
     let primary_title = spec.primary_title();
@@ -113,7 +102,9 @@ pub fn page_header(
         let s = &mut outer.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.spacing.padding.top = pad_y;
         s.descriptor.layout.spacing.padding.bottom = pad_y;
+        s.fill_width = true;
     }
 
     // ── Top row: title block (left) + actions row (right) ─────────────────────
@@ -196,9 +187,11 @@ pub fn page_header(
             }
             let mut arrow = Node::icon("arrow-left", icon_size);
             arrow.style.descriptor.text_color = Some(back_color);
-            let mut back = back
-                .child(arrow)
-                .child(styled_text(&spec.back_display_label(), back_color, back_size));
+            let mut back = back.child(arrow).child(styled_text(
+                &spec.back_display_label(),
+                back_color,
+                back_size,
+            ));
             if spec.back_is_contextual {
                 let mut dot = Node::container();
                 {
@@ -245,6 +238,8 @@ pub fn page_header(
             PageHeaderAlign::Start => MainAxisAlignment::Start,
             PageHeaderAlign::Between => MainAxisAlignment::SpaceBetween,
         };
+        s.descriptor.layout.spacing.gap = header_gap;
+        s.fill_width = true;
     }
     let mut top_row = top_row.child(left_col);
     if let Some(actions_row) = actions_row {
@@ -279,7 +274,8 @@ pub fn page_header(
     if spec.has_banner() {
         if let Some(ref message) = spec.banner_message {
             // Tinted banner fill: mix banner tone into the panel surface.
-            let tinted_fill = mix_srgb(banner_color, panel, 0.12);
+            let tinted_fill = mix_srgb(banner_color, surface, 0.12);
+            let banner_border = mix_srgb(banner_color, surface, 0.38);
             let mut banner = Node::container();
             {
                 let s = &mut banner.style;
@@ -288,22 +284,17 @@ pub fn page_header(
                 s.descriptor.corner_radii.top_right = banner_radius;
                 s.descriptor.corner_radii.bottom_right = banner_radius;
                 s.descriptor.corner_radii.bottom_left = banner_radius;
-                s.border_left_width = Some(1.0);
-                s.descriptor.border.color = banner_color;
+                s.border_left_width = Some(2.0);
+                s.border_color_left = Some(banner_border);
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 pad.left = rem_to_px(0.75);
                 pad.right = rem_to_px(0.75);
                 pad.top = rem_to_px(0.5);
                 pad.bottom = rem_to_px(0.5);
-                s.descriptor.layout.direction = LayoutDirection::Row;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+                s.descriptor.layout.direction = LayoutDirection::Column;
             }
-            let mut icon = Node::icon(tone_icon(spec.banner_tone), rem_to_px(1.0));
-            icon.style.descriptor.text_color = Some(banner_color);
-            let mut msg = styled_text(message, text_primary, body_font);
-            msg.style.descriptor.layout.width = LayoutSizing::Grow;
-            outer = outer.child(banner.child(icon).child(msg));
+            let msg = styled_text(message, banner_color, body_font);
+            outer = outer.child(banner.child(msg));
         }
     }
 

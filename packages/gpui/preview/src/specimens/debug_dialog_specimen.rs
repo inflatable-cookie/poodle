@@ -1,6 +1,6 @@
+use crate::node_compat::{DebugDialog, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{DebugDialog, Eyebrow};
 use poodle_specs::{ButtonVariant, ControlSize, DebugDialogSpec, EyebrowSpec};
 
 /// JSON payload mirrored from the Svelte specimen so both targets dump the same

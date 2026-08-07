@@ -1,6 +1,6 @@
+use crate::node_compat::{Button, Eyebrow, FilterToolbar, IconButton, Select, TextInput};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, FilterToolbar, IconButton, Select, TextInput};
 use poodle_specs::FilterToolbarSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ChoiceOption, ControlDensity, ControlSize, EyebrowSpec,
@@ -34,7 +34,7 @@ fn owner_options() -> Vec<ChoiceOption> {
     ]
 }
 
-fn search_input(theme: &GpuiThemeProvider, id: &str) -> AnyElement {
+fn search_input(theme: &GpuiThemeProvider, id: &str) -> TextInput {
     TextInput::from_spec(
         TextInputSpec::new()
             .with_id(id)
@@ -42,13 +42,11 @@ fn search_input(theme: &GpuiThemeProvider, id: &str) -> AnyElement {
             .with_placeholder("Search…"),
         theme,
     )
-    .into_any_element()
 }
 
-fn select_input(theme: &GpuiThemeProvider, id: &str, options: Vec<ChoiceOption>) -> AnyElement {
+fn select_input(theme: &GpuiThemeProvider, id: &str, options: Vec<ChoiceOption>) -> Select {
     Select::from_spec(SelectSpec::new(options).with_default_value("all"), theme)
         .with_id(id.to_string())
-        .into_any_element()
 }
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

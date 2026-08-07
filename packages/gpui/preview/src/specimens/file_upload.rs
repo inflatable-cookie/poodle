@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, FileUpload};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, FileUpload};
 use poodle_specs::{EyebrowSpec, FileUploadItem, FileUploadSpec, FileUploadStatus};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

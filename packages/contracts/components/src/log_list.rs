@@ -88,9 +88,189 @@ impl LogFilter {
     }
 }
 
+/// Stream-entry severity. Contract §"Types": `"info" | "warn" | "error"`.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum LogLevel {
+    #[default]
+    Info,
+    Warn,
+    Error,
+}
+
+impl LogLevel {
+    /// The contract's wire value, and the key the level chips count by.
+    pub fn value(self) -> &'static str {
+        match self {
+            LogLevel::Info => "info",
+            LogLevel::Warn => "warn",
+            LogLevel::Error => "error",
+        }
+    }
+}
+
+/// The principal behind an audit entry (Svelte `LogActor`).
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct LogActor {
+    pub id: String,
+    pub email: Option<String>,
+    pub name: Option<String>,
+    /// Resolved link target for the actor. The web target builds this from a
+    /// `getActorHref` callback; the Rust targets take the resolved value
+    /// because they carry no callback channel.
+    pub href: Option<String>,
+}
+
+impl LogActor {
+    pub fn new(id: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            ..Self::default()
+        }
+    }
+
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+
+    pub fn with_email(mut self, email: impl Into<String>) -> Self {
+        self.email = Some(email.into());
+        self
+    }
+
+    pub fn with_href(mut self, href: impl Into<String>) -> Self {
+        self.href = Some(href.into());
+        self
+    }
+
+    /// Contract §"resolveActorName": name, then email, then a truncated id.
+    pub fn display_name(&self) -> String {
+        if let Some(name) = &self.name {
+            return name.clone();
+        }
+        if let Some(email) = &self.email {
+            return email.clone();
+        }
+        let short: String = self.id.chars().take(8).collect();
+        format!("User {short}")
+    }
+}
+
+/// A stream-mode entry (Svelte `StreamLogEntry`).
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct StreamLogEntry {
+    pub id: Option<String>,
+    pub timestamp: String,
+    pub level: LogLevel,
+    pub message: String,
+}
+
+impl StreamLogEntry {
+    pub fn new(timestamp: impl Into<String>, level: LogLevel, message: impl Into<String>) -> Self {
+        Self {
+            id: None,
+            timestamp: timestamp.into(),
+            level,
+            message: message.into(),
+        }
+    }
+
+    pub fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id = Some(id.into());
+        self
+    }
+}
+
+/// An audit-mode entry (Svelte `AuditLogEntry`).
+///
+/// `details` is deliberately absent: it exists only to feed the web target's
+/// `entryDetails` snippet, and the Rust targets have no snippet channel.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct AuditLogEntry {
+    pub id: String,
+    pub occurred_at: String,
+    pub actor: Option<LogActor>,
+    pub action: String,
+    pub resource_type: String,
+    pub resource_id: String,
+    pub resource_label: Option<String>,
+    /// Resolved link target for the resource, from the web target's
+    /// `getResourceHref` callback.
+    pub resource_href: Option<String>,
+}
+
+impl AuditLogEntry {
+    pub fn new(
+        id: impl Into<String>,
+        occurred_at: impl Into<String>,
+        action: impl Into<String>,
+        resource_type: impl Into<String>,
+        resource_id: impl Into<String>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            occurred_at: occurred_at.into(),
+            actor: None,
+            action: action.into(),
+            resource_type: resource_type.into(),
+            resource_id: resource_id.into(),
+            resource_label: None,
+            resource_href: None,
+        }
+    }
+
+    pub fn with_actor(mut self, actor: LogActor) -> Self {
+        self.actor = Some(actor);
+        self
+    }
+
+    pub fn with_resource_label(mut self, label: impl Into<String>) -> Self {
+        self.resource_label = Some(label.into());
+        self
+    }
+
+    pub fn with_resource_href(mut self, href: impl Into<String>) -> Self {
+        self.resource_href = Some(href.into());
+        self
+    }
+
+    /// Contract §"resolveActorName": an entry without an actor reads "System".
+    pub fn actor_name(&self) -> String {
+        match &self.actor {
+            Some(actor) => actor.display_name(),
+            None => "System".to_string(),
+        }
+    }
+
+    /// Contract §"resolveActionLabel": underscores become spaces.
+    pub fn action_label(&self) -> String {
+        self.action.replace('_', " ")
+    }
+
+    /// Contract §"resolveResourceLabel": underscores become spaces.
+    pub fn resource_type_label(&self) -> String {
+        self.resource_type.replace('_', " ")
+    }
+}
+
+/// A log row: stream or audit (Svelte `LogEntry`).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LogEntry {
+    Stream(StreamLogEntry),
+    Audit(AuditLogEntry),
+}
+
+impl LogEntry {
+    pub fn is_audit(&self) -> bool {
+        matches!(self, LogEntry::Audit(_))
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LogListSpec {
-    pub entry_count: usize,
+    /// Stream or audit rows (Svelte `entries`). The rendered variant is
+    /// inferred from these: any audit entry makes the list an audit list.
+    pub entries: Vec<LogEntry>,
     pub max_entries: usize,
     pub auto_scroll: bool,
     pub filter_level: Option<String>,
@@ -123,7 +303,7 @@ pub struct LogListSpec {
 impl LogListSpec {
     pub fn new() -> Self {
         Self {
-            entry_count: 0,
+            entries: Vec::new(),
             max_entries: 500,
             auto_scroll: true,
             filter_level: None,
@@ -142,9 +322,59 @@ impl LogListSpec {
         }
     }
 
-    pub fn with_entry_count(mut self, entry_count: usize) -> Self {
-        self.entry_count = entry_count;
+    pub fn with_entries(mut self, entries: impl IntoIterator<Item = LogEntry>) -> Self {
+        self.entries.extend(entries);
         self
+    }
+
+    /// How many rows the list holds (Svelte `entries.length`).
+    pub fn entry_count(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Whether the list renders as an audit list. Contract §"resolvedVariant":
+    /// `auto` resolves to audit when any entry is an audit entry.
+    pub fn is_audit(&self) -> bool {
+        self.entries.iter().any(LogEntry::is_audit)
+    }
+
+    /// Audit rows only, in order.
+    pub fn audit_entries(&self) -> impl Iterator<Item = &AuditLogEntry> {
+        self.entries.iter().filter_map(|entry| match entry {
+            LogEntry::Audit(audit) => Some(audit),
+            LogEntry::Stream(_) => None,
+        })
+    }
+
+    /// Stream rows only, in order, after the level and text filters.
+    /// Contract §"filteredEntries".
+    pub fn stream_entries(&self) -> Vec<&StreamLogEntry> {
+        let needle = self.filter_text.trim().to_lowercase();
+        self.entries
+            .iter()
+            .filter_map(|entry| match entry {
+                LogEntry::Stream(stream) => Some(stream),
+                LogEntry::Audit(_) => None,
+            })
+            .filter(|stream| match self.filter_level.as_deref() {
+                Some(level) if !level.is_empty() => stream.level.value() == level,
+                _ => true,
+            })
+            .filter(|stream| {
+                needle.is_empty() || stream.message.to_lowercase().contains(&needle)
+            })
+            .collect()
+    }
+
+    /// Per-level stream counts for the level chips (Svelte `levelCounts`).
+    pub fn level_count(&self, level: LogLevel) -> usize {
+        self.entries
+            .iter()
+            .filter(|entry| match entry {
+                LogEntry::Stream(stream) => stream.level == level,
+                LogEntry::Audit(_) => false,
+            })
+            .count()
     }
 
     pub fn with_max_entries(mut self, max_entries: usize) -> Self {
@@ -217,7 +447,7 @@ impl LogListSpec {
     /// Whether audit mode should show the loading surface (loading and no
     /// current entries). Matches Svelte `loading && auditEntries.length === 0`.
     pub fn is_loading(&self) -> bool {
-        self.loading && self.entry_count == 0
+        self.loading && self.audit_entries().next().is_none()
     }
 
     /// Whether any filter value is non-empty (Svelte `hasActiveFilters`).
@@ -285,7 +515,7 @@ mod tests {
     #[test]
     fn defaults_match_contract() {
         let spec = LogListSpec::new();
-        assert_eq!(spec.entry_count, 0);
+        assert_eq!(spec.entry_count(), 0);
         assert_eq!(spec.max_entries, 500);
         assert!(spec.auto_scroll);
         assert_eq!(spec.filter_level, None);
@@ -358,11 +588,77 @@ mod tests {
     fn is_loading_requires_no_entries() {
         assert!(LogListSpec::new().with_loading(true).is_loading());
         // Loading but entries present → not the loading surface.
+        // Loading is the audit surface, so audit rows are what suppress it.
         assert!(!LogListSpec::new()
             .with_loading(true)
-            .with_entry_count(3)
+            .with_entries([LogEntry::Audit(AuditLogEntry::new(
+                "a1", "2026-01-01T00:00:00Z", "create", "project", "p-1",
+            ))])
             .is_loading());
         assert!(!LogListSpec::new().is_loading());
+    }
+
+    #[test]
+    fn variant_resolves_to_audit_when_any_entry_is_audit() {
+        let stream = LogListSpec::new().with_entries([LogEntry::Stream(StreamLogEntry::new(
+            "10:23:01",
+            LogLevel::Info,
+            "Server started",
+        ))]);
+        assert!(!stream.is_audit());
+
+        let mixed = stream.clone().with_entries([LogEntry::Audit(AuditLogEntry::new(
+            "a1", "2026-01-01T00:00:00Z", "create", "project", "p-1",
+        ))]);
+        assert!(mixed.is_audit());
+        assert_eq!(mixed.entry_count(), 2);
+    }
+
+    #[test]
+    fn stream_entries_apply_level_and_text_filters() {
+        let spec = LogListSpec::new().with_entries([
+            LogEntry::Stream(StreamLogEntry::new("1", LogLevel::Info, "cache warm")),
+            LogEntry::Stream(StreamLogEntry::new("2", LogLevel::Warn, "cache miss")),
+            LogEntry::Stream(StreamLogEntry::new("3", LogLevel::Error, "boom")),
+        ]);
+        assert_eq!(spec.stream_entries().len(), 3);
+        assert_eq!(spec.level_count(LogLevel::Warn), 1);
+
+        let by_level = spec.clone().with_filter_level("warn");
+        assert_eq!(by_level.stream_entries().len(), 1);
+
+        // Text filter is case-insensitive and matches the message.
+        let by_text = spec.clone().with_filter_text("CACHE");
+        assert_eq!(by_text.stream_entries().len(), 2);
+    }
+
+    #[test]
+    fn actor_name_falls_back_through_name_email_then_id() {
+        let entry = |actor: Option<LogActor>| AuditLogEntry {
+            actor,
+            ..AuditLogEntry::new("a1", "2026-01-01T00:00:00Z", "user_login", "project", "p-1")
+        };
+        assert_eq!(entry(None).actor_name(), "System");
+        assert_eq!(
+            entry(Some(LogActor::new("0123456789").with_name("Alice"))).actor_name(),
+            "Alice"
+        );
+        assert_eq!(
+            entry(Some(LogActor::new("0123456789").with_email("a@b.c"))).actor_name(),
+            "a@b.c"
+        );
+        assert_eq!(
+            entry(Some(LogActor::new("0123456789"))).actor_name(),
+            "User 01234567"
+        );
+    }
+
+    #[test]
+    fn audit_labels_replace_underscores() {
+        let entry =
+            AuditLogEntry::new("a1", "2026-01-01T00:00:00Z", "user_login", "work_space", "w-1");
+        assert_eq!(entry.action_label(), "user login");
+        assert_eq!(entry.resource_type_label(), "work space");
     }
 
     #[test]

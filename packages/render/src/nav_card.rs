@@ -24,6 +24,25 @@ pub fn nav_card(
     theme: &dyn ThemeProvider,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    nav_card_inner(spec, theme, on_click, None, true)
+}
+
+pub fn nav_card_with_icon(
+    spec: &NavCardSpec,
+    theme: &dyn ThemeProvider,
+    on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+    icon: Option<Node>,
+) -> Node {
+    nav_card_inner(spec, theme, on_click, icon, false)
+}
+
+fn nav_card_inner(
+    spec: &NavCardSpec,
+    theme: &dyn ThemeProvider,
+    on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+    icon: Option<Node>,
+    use_placeholder: bool,
+) -> Node {
     let fill = theme.resolve_color(spec.fill_token());
     let border = theme.resolve_color(spec.border_token());
     let radius = theme.resolve_radius(spec.radius_token());
@@ -73,18 +92,24 @@ pub fn nav_card(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     }
-    // Placeholder glyph: first letter of title, accent-colored (the Svelte
-    // `icon()` snippet region maps to a host-provided glyph).
-    let mut glyph = Node::text(
-        spec.title
-            .chars()
-            .next()
-            .map_or(String::new(), |c| c.to_uppercase().to_string()),
-    );
-    glyph.style.descriptor.text_color = Some(accent);
-    glyph.style.text_size = Some(icon_font);
-    glyph.style.text_weight = Some(600);
-    let icon_slot = icon_slot.child(glyph);
+    // The preview may provide a real icon node. The first-letter glyph remains
+    // the host-neutral fallback used by the shared recipe when no slot exists.
+    let icon_slot = if let Some(icon) = icon {
+        icon_slot.child(icon)
+    } else if use_placeholder {
+        let mut glyph = Node::text(
+            spec.title
+                .chars()
+                .next()
+                .map_or(String::new(), |c| c.to_uppercase().to_string()),
+        );
+        glyph.style.descriptor.text_color = Some(accent);
+        glyph.style.text_size = Some(icon_font);
+        glyph.style.text_weight = Some(600);
+        icon_slot.child(glyph)
+    } else {
+        icon_slot
+    };
 
     // ── Title row (title + optional badge) ──────────────────────────────
     let mut title_row = Node::container();

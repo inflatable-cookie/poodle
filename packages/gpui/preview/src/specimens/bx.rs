@@ -1,13 +1,22 @@
+use crate::node_compat::{Box, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Box, Eyebrow};
+use poodle_node::Node;
 use poodle_specs::{BoxSpec, Dimension, EyebrowSpec, Overflow, PaddingScale};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let border = theme.resolve_color("color.border.default");
+
+    let body = |content: &str| {
+        let mut node = Node::text(content);
+        node.style.text_size = Some(14.0);
+        node.style.descriptor.text_color = Some(text_secondary);
+        node.style.fill_width = true;
+        node
+    };
 
     let demo_outline = |child: AnyElement| {
         div()
@@ -24,10 +33,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (no padding)"), theme))
                 .child(demo_outline(
                     Box::from_spec(BoxSpec::new(), theme)
-                        .with_child(
-                            div().text_sm().text_color(color_to_hsla(text_secondary))
-                                .child("Content inside a Box with no padding.".to_string())
-                        )
+                        .with_child(body("Content inside a Box with no padding."))
                         .into_any_element(),
                 ))
         )
@@ -37,10 +43,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With padding"), theme))
                 .child(demo_outline(
                     Box::from_spec(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
-                        .with_child(
-                            div().text_sm().text_color(color_to_hsla(text_secondary))
-                                .child("Content inside a Box with large padding.".to_string())
-                        )
+                        .with_child(body("Content inside a Box with large padding."))
                         .into_any_element(),
                 ))
         )
@@ -56,10 +59,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_height(Dimension::new("6rem")),
                         theme,
                     )
-                    .with_child(
-                        div().text_sm().text_color(color_to_hsla(text_secondary))
-                            .child("Fixed 12\u{00d7}6rem box.".to_string())
-                    )
+                    .with_child(body("Fixed 12\u{00d7}6rem box."))
                     .into_any_element(),
                 ))
         )
@@ -76,10 +76,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_overflow(Overflow::Hidden),
                         theme,
                     )
-                    .with_child(
-                        div().text_sm().text_color(color_to_hsla(text_secondary))
-                            .child("This text is too long and will be clipped by the overflow hidden setting on the box container.".to_string())
-                    )
+                    .with_child(body("This text is too long and will be clipped by the overflow hidden setting on the box container."))
                     .into_any_element(),
                 ))
         )

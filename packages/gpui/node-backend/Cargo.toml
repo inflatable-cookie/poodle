@@ -1,0 +1,18 @@
+[package]
+name = "poodle-gpui-node-backend"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.95"
+description = "GPUI backend for the Poodle render vocabulary: interprets poodle-node trees as GPUI elements."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+gpui = "0.2.2"
+poodle-node = { path = "../../contracts/node" }
+
+[package.metadata.poodle]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

@@ -1007,7 +1007,7 @@ export type ModelSelection = { model: string; axes: Record<string, ModelAxisValu
 // AgentChatInput
 // ---------------------------------------------------------------------------
 
-export type AgentChatStatus = "idle" | "busy" | "questioning";
+export type AgentChatStatus = "idle" | "busy" | "questioning" | "reviewing-plan";
 
 export type AgentChatAttachment = {
   id: string;
@@ -1049,6 +1049,9 @@ export type RefOption = {
  * declaration here would be a second thing to keep in step.
  */
 export type {
+  AgentPlanDecision,
+  AgentPlanSettledStatus,
+  AgentPlanStatus,
   AgentQuestionOption,
   AgentQuestionItem,
   AgentQuestionOutcome,
@@ -1061,6 +1064,7 @@ export type {
   TranscriptAnsweredQuestion,
   TranscriptBlock,
   TranscriptChangedFiles,
+  TranscriptDecidedPlan,
   TranscriptItem,
   TranscriptMessage,
   TranscriptRole,

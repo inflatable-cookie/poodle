@@ -1,9 +1,10 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, SelectionSummary};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, SelectionSummary};
+use std::sync::Arc;
 use poodle_specs::{
     ControlSize, EyebrowSpec, RemediationAction, SelectionSummaryItem, SelectionSummarySpec,
 };
@@ -37,8 +38,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_clear_action(RemediationAction::new("clear", "Clear")),
                         theme,
                     )
-                    .on_remove(|_id, _ev, _window, _app| {})
-                    .on_clear(|_ev, _window, _app| {}),
+                    .on_remove(Arc::new(|_id| {}))
+                    .on_clear(Arc::new(|| {})),
                 ),
         )
         // --- Empty state: reserved-height container, "No selection" placeholder ---
@@ -75,7 +76,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_clear_action(RemediationAction::new("clear", "Clear")),
                         theme,
                     )
-                    .on_clear(|_ev, _window, _app| {}),
+                    .on_clear(Arc::new(|| {})),
                 ),
         )
         // --- Sizes (all 5 of the contract size ladder) ---

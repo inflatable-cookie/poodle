@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodePosition, StylePatch,
 };
 use poodle_specs::SidebarNavSpec;
 
@@ -39,7 +39,7 @@ pub fn sidebar_nav(
     let separator_mt = rem_to_px(0.125); // contract separator margin-top
     let rail_w = rem_to_px(0.1875); // contract left border 3px
     let nav_pad_x = rem_to_px(0.375); // contract root horizontal padding
-    // Root vertical padding = space-panel-y (density-driven).
+                                      // Root vertical padding = space-panel-y (density-driven).
     let panel_y = rem_to_px(match spec.density {
         poodle_specs::ControlDensity::Compact => 0.5,
         poodle_specs::ControlDensity::Default => 0.75,
@@ -91,8 +91,10 @@ pub fn sidebar_nav(
                 s.descriptor.layout.spacing.margin.top = separator_mt;
                 s.descriptor.layout.spacing.padding.top = group_gap - separator_mt;
                 s.border_top_width = Some(1.0);
-                s.border_color_top =
-                    Some(with_alpha(separator_color, separator_color.3 * SEPARATOR_ALPHA));
+                s.border_color_top = Some(with_alpha(
+                    separator_color,
+                    separator_color.3 * SEPARATOR_ALPHA,
+                ));
             }
         }
 
@@ -104,6 +106,7 @@ pub fn sidebar_nav(
                 s.descriptor.text_color = Some(group_title_color);
                 s.text_size = Some(title_font);
                 s.text_weight = Some(700);
+                s.line_height = Some(1.2); // contract §8 title line-height
                 s.letter_spacing_em = Some(0.18); // contract §8 title tracking
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 pad.left = item_px;
@@ -134,6 +137,7 @@ pub fn sidebar_nav(
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                 s.text_size = Some(item_font);
+                s.line_height = Some(1.3); // contract §8 item line-height
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 pad.left = item_px;
                 pad.right = item_px;
@@ -148,18 +152,44 @@ pub fn sidebar_nav(
                 s.border_color_left = Some(ColorValue(0.0, 0.0, 0.0, 0.0));
 
                 if is_active {
-                    // Active: accent left rail + bg fill + bolder weight +
-                    // inset ring rendered as a 1px all-side border @20%.
+                    // Active: accent left rail + bg fill + bolder weight. The
+                    // inset ring is a separate child below, NOT a uniform
+                    // border here: gpui has one border colour per element, so
+                    // an accent left rail plus a ring-coloured box on the same
+                    // node collapses to one colour on all four sides and the
+                    // rail disappears into a full accent outline.
                     s.descriptor.text_color = Some(item_active_color);
                     s.text_weight = Some(600);
                     s.descriptor.background = Some(active_bg);
-                    s.descriptor.border.width = 1.0;
-                    s.descriptor.border.color = active_ring;
                     s.border_color_left = Some(accent);
                 } else {
                     s.descriptor.text_color = Some(item_color);
                     s.text_weight = Some(500);
                 }
+            }
+
+            if is_active {
+                // Inset ring: a full-bleed 1px accent@20% overlay, matching the
+                // old tier's emulation of an inset box-shadow.
+                let mut ring = Node::container();
+                {
+                    let s = &mut ring.style;
+                    s.descriptor.border.width = 1.0;
+                    s.descriptor.border.color = active_ring;
+                    let c = &mut s.descriptor.corner_radii;
+                    c.top_left = item_radius;
+                    c.top_right = item_radius;
+                    c.bottom_right = item_radius;
+                    c.bottom_left = item_radius;
+                }
+                ring.position = NodePosition::Absolute {
+                    top: Some(0.0),
+                    left: Some(0.0),
+                    right: Some(0.0),
+                    bottom: Some(0.0),
+                };
+                item_el.position = NodePosition::Relative;
+                item_el = item_el.child(ring);
             }
 
             if item.is_disabled {

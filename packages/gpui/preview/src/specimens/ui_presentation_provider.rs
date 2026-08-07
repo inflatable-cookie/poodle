@@ -8,12 +8,12 @@
 //! This specimen covers all three contract §12 integration rows: compact/sm,
 //! comfortable/lg, and a NESTED override (outer default/md, inner compact/sm).
 
+use crate::node_compat::{Button, Eyebrow, TextInput};
+use crate::providers::UiPresentationProvider;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, TextInput, UiPresentationProvider};
 use poodle_specs::{
-    ButtonSpec, ControlDensity, ControlSize, EyebrowSpec, TextInputSpec,
-    UiPresentationProviderSpec,
+    ButtonSpec, ControlDensity, ControlSize, EyebrowSpec, TextInputSpec, UiPresentationProviderSpec,
 };
 
 /// A row of real controls scoped by a presentation provider.
@@ -49,7 +49,10 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(child)
 }
 

@@ -98,6 +98,8 @@ export const allComponents: ComponentEntry[] = [
   entry("AgentMessage", "display", "One turn of agent prose, rendered from the shared markdown block model.", true),
   entry("AgentQuestion", "input", "The question an agent asks mid-turn, hosted by the composer.", true),
   entry("AgentQuestionRecord", "display", "The read-only record an answered question leaves in the transcript.", true),
+  entry("AgentPlan", "input", "The plan an agent proposes at the end of a plan-mode turn, hosted by the composer.", true),
+  entry("AgentPlanRecord", "display", "The read-only record a decided plan leaves in the transcript.", true),
   entry("ToolCallGroup", "display", "A contiguous run of tool calls behind one collapsible summary.", true),
   entry("ToolCall", "display", "One row of agent work, with its output behind a disclosure.", true),
   entry("ChangedFiles", "display", "What a turn touched: counted summary expanding into a directory tree.", true),

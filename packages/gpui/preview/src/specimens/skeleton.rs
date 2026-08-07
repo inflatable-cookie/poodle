@@ -3,9 +3,10 @@
 //! `Skeleton::from_spec(SkeletonSpec::new().with_preset(...))` so the
 //! component's own preset-rendering path is what's under test.
 
+use crate::node_compat::{Eyebrow, Skeleton};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Skeleton};
+
 use poodle_specs::{EyebrowSpec, SkeletonPreset, SkeletonSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -123,18 +124,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_row()
                 .gap(px(16.0))
-                .child(
-                    div().flex_1().child(Skeleton::from_spec(
-                        SkeletonSpec::new().with_preset(SkeletonPreset::Card),
-                        theme,
-                    )),
-                )
-                .child(
-                    div().flex_1().child(Skeleton::from_spec(
-                        SkeletonSpec::new().with_preset(SkeletonPreset::Card),
-                        theme,
-                    )),
-                ),
+                .child(div().flex_1().child(Skeleton::from_spec(
+                    SkeletonSpec::new().with_preset(SkeletonPreset::Card),
+                    theme,
+                )))
+                .child(div().flex_1().child(Skeleton::from_spec(
+                    SkeletonSpec::new().with_preset(SkeletonPreset::Card),
+                    theme,
+                ))),
         ))
         // --- Preset: detail-section (lines=4) ---
         .child(group(

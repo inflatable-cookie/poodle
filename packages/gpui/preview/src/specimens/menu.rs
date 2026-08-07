@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Eyebrow, Menu};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +7,55 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Menu};
 use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, MenuEntry, MenuItemKind, MenuSpec};
+use std::sync::Arc;
+
+fn menu_click(
+    state: &AppState,
+    key: &'static str,
+    close_keys: [&'static str; 2],
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::Toggle(key.to_string()));
+        for close_key in close_keys {
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: close_key.to_string(),
+                value: false,
+            });
+        }
+    })
+}
+
+fn menu_select(state: &AppState, open_key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::Change {
+            open_key: open_key.to_string(),
+            value_key: "menu-last-action".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn settings_select(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        let mut events = events.lock().unwrap();
+        match value {
+            "theme" => events.push(NodeSpecimenEvent::Toggle("menu-dark-mode".to_string())),
+            "notifications" => {
+                events.push(NodeSpecimenEvent::Toggle("menu-notifications".to_string()))
+            }
+            _ => {}
+        }
+        events.push(NodeSpecimenEvent::SetText {
+            key: "menu-last-action".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -83,32 +131,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("menu-file-trigger")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("menu-file-open");
-                                    this.state
-                                        .specimens
-                                        .toggles
-                                        .insert("menu-settings-open".to_string(), false);
-                                    this.state
-                                        .specimens
-                                        .toggles
-                                        .insert("menu-destructive-open".to_string(), false);
-                                    cx.notify();
-                                },
+                            .on_click(menu_click(
+                                state,
+                                "menu-file-open",
+                                ["menu-settings-open", "menu-destructive-open"],
                             )),
                         )
-                        .on_select(cx.listener(|this, val: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("menu-last-action".to_string(), val.to_string());
-                            this.state
-                                .specimens
-                                .toggles
-                                .insert("menu-file-open".to_string(), false);
-                            cx.notify();
-                        })),
+                        .on_select(menu_select(state, "menu-file-open")),
                 ),
         )
         .child(
@@ -132,37 +161,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("menu-settings-trigger")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("menu-settings-open");
-                                    this.state
-                                        .specimens
-                                        .toggles
-                                        .insert("menu-file-open".to_string(), false);
-                                    this.state
-                                        .specimens
-                                        .toggles
-                                        .insert("menu-destructive-open".to_string(), false);
-                                    cx.notify();
-                                },
+                            .on_click(menu_click(
+                                state,
+                                "menu-settings-open",
+                                ["menu-file-open", "menu-destructive-open"],
                             )),
                         )
-                        .on_select(cx.listener(|this, val: &str, _w, cx| {
-                            match val {
-                                "theme" => {
-                                    this.state.specimens.toggle("menu-dark-mode");
-                                }
-                                "notifications" => {
-                                    this.state.specimens.toggle("menu-notifications");
-                                }
-                                _ => {}
-                            }
-                            this.state
-                                .specimens
-                                .text
-                                .insert("menu-last-action".to_string(), val.to_string());
-                            cx.notify();
-                        })),
+                        .on_select(settings_select(state)),
                 ),
         )
         .child(
@@ -196,32 +201,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("menu-actions-trigger")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggle("menu-destructive-open");
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("menu-file-open".to_string(), false);
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("menu-settings-open".to_string(), false);
-                                cx.notify();
-                            },
+                        .on_click(menu_click(
+                            state,
+                            "menu-destructive-open",
+                            ["menu-file-open", "menu-settings-open"],
                         )),
                     )
-                    .on_select(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("menu-last-action".to_string(), val.to_string());
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("menu-destructive-open".to_string(), false);
-                        cx.notify();
-                    })),
+                    .on_select(menu_select(state, "menu-destructive-open")),
                 ),
         )
         // --- Last action feedback ---

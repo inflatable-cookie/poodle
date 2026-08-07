@@ -1,12 +1,59 @@
-use crate::app_state::AppState;
+//! SplitButton specimen — migrated to the node tier (g12.019 Batch B).
+//!
+//! Every SplitButton below renders through the node tier:
+//! `poodle_render::split_button` (`Spec + Theme → Node`) interpreted by
+//! `poodle_gpui_node_backend::to_gpui`. The old hand-written
+//! `poodle_gpui_components::SplitButton` no longer renders this specimen;
+//! everything around the split buttons (layout, Eyebrow headings, captions)
+//! is unchanged.
+//!
+//! Node interaction closures are context-free (`Arc<dyn Fn() + Send + Sync>`),
+//! so instead of `cx.listener` the handlers push `NodeSpecimenEvent`s onto a
+//! queue the next render drains into specimen state (see `app_state.rs`).
+//! Menu open/close stays host-owned; the "Dropdown menu open" section
+//! expresses it through the spec's `is_open` field.
+
+use crate::node_compat::Eyebrow;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, SplitButton};
+
+use poodle_render::{split_button, SplitButtonHandlers};
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, SplitButtonSpec, SplitMenuItem};
+
+/// Build a node-tier SplitButton with the given handlers.
+fn node_split_button(
+    spec: SplitButtonSpec,
+    state: &AppState,
+    handlers: SplitButtonHandlers,
+) -> AnyElement {
+    let node = split_button(&spec, &state.theme, handlers);
+    poodle_gpui_node_backend::to_gpui(&node)
+}
+
+/// A node-tier SplitButton with no handlers (matrix / open menu / loading /
+/// disabled / sizes / densities).
+fn node_split_button_static(spec: SplitButtonSpec, state: &AppState) -> AnyElement {
+    node_split_button(spec, state, SplitButtonHandlers::default())
+}
+
+/// A click/dropdown handler that records `value` under the shared
+/// "split-btn-action" text key, mirroring the old specimen's listeners.
+fn action_handler(state: &AppState, value: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "split-btn-action".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -32,36 +79,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Primary variant"),
                     theme,
                 ))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Primary)
-                            .with_label("Save")
-                            .with_items(vec![
-                                SplitMenuItem::action("save-draft", "Save as draft"),
-                                SplitMenuItem::action("save-template", "Save as template"),
-                                SplitMenuItem::Separator,
-                                SplitMenuItem::action("discard", "Discard changes"),
-                            ]),
-                        theme,
-                    )
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("split-btn-action".to_string(), "click: Save".to_string());
-                        cx.notify();
-                    }))
-                    .on_dropdown(cx.listener(
-                        |this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.text.insert(
-                                "split-btn-action".to_string(),
-                                "dropdown: toggle".to_string(),
-                            );
-                            cx.notify();
-                        },
-                    )),
-                ),
+                .child(node_split_button(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Save")
+                        .with_items(vec![
+                            SplitMenuItem::action("save-draft", "Save as draft"),
+                            SplitMenuItem::action("save-template", "Save as template"),
+                            SplitMenuItem::Separator,
+                            SplitMenuItem::action("discard", "Discard changes"),
+                        ]),
+                    state,
+                    SplitButtonHandlers {
+                        on_click: Some(action_handler(state, "click: Save")),
+                        on_dropdown: Some(action_handler(state, "dropdown: toggle")),
+                        on_action: None,
+                    },
+                )),
         )
         // --- Secondary variant ---
         .child(
@@ -73,35 +107,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Secondary variant"),
                     theme,
                 ))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Secondary)
-                            .with_label("Export")
-                            .with_items(vec![
-                                SplitMenuItem::action("csv", "Export as CSV"),
-                                SplitMenuItem::action("json", "Export as JSON"),
-                                SplitMenuItem::action("pdf", "Export as PDF"),
-                            ]),
-                        theme,
-                    )
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("split-btn-action".to_string(), "click: Export".to_string());
-                        cx.notify();
-                    }))
-                    .on_dropdown(cx.listener(
-                        |this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.text.insert(
-                                "split-btn-action".to_string(),
-                                "dropdown: toggle".to_string(),
-                            );
-                            cx.notify();
-                        },
-                    )),
-                ),
+                .child(node_split_button(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Export")
+                        .with_items(vec![
+                            SplitMenuItem::action("csv", "Export as CSV"),
+                            SplitMenuItem::action("json", "Export as JSON"),
+                            SplitMenuItem::action("pdf", "Export as PDF"),
+                        ]),
+                    state,
+                    SplitButtonHandlers {
+                        on_click: Some(action_handler(state, "click: Export")),
+                        on_dropdown: Some(action_handler(state, "dropdown: toggle")),
+                        on_action: None,
+                    },
+                )),
         )
         // --- Danger tone ---
         .child(
@@ -113,26 +134,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Danger tone"),
                     theme,
                 ))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Secondary)
-                            .with_tone(ButtonTone::Danger)
-                            .with_label("Delete")
-                            .with_items(vec![
-                                SplitMenuItem::action("delete-selected", "Delete selected"),
-                                SplitMenuItem::action("delete-all", "Delete all"),
-                            ]),
-                        theme,
-                    )
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("split-btn-action".to_string(), "click: Delete".to_string());
-                        cx.notify();
-                    })),
-                ),
+                .child(node_split_button(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_tone(ButtonTone::Danger)
+                        .with_label("Delete")
+                        .with_items(vec![
+                            SplitMenuItem::action("delete-selected", "Delete selected"),
+                            SplitMenuItem::action("delete-all", "Delete all"),
+                        ]),
+                    state,
+                    SplitButtonHandlers {
+                        on_click: Some(action_handler(state, "click: Delete")),
+                        on_dropdown: None,
+                        on_action: None,
+                    },
+                )),
         )
         // --- Variant x tone matrix ---
         .child(
@@ -149,9 +166,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .flex_col()
                         .gap(px(8.0))
-                        .child(matrix_row(theme, ButtonVariant::Primary))
-                        .child(matrix_row(theme, ButtonVariant::Secondary))
-                        .child(matrix_row(theme, ButtonVariant::Ghost)),
+                        .child(matrix_row(state, ButtonVariant::Primary))
+                        .child(matrix_row(state, ButtonVariant::Secondary))
+                        .child(matrix_row(state, ButtonVariant::Ghost)),
                 ),
         )
         // --- Dropdown menu open ---
@@ -164,7 +181,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Dropdown menu open (items + separator)"),
                     theme,
                 ))
-                .child(SplitButton::from_spec(
+                .child(node_split_button_static(
                     SplitButtonSpec::new()
                         .with_variant(ButtonVariant::Primary)
                         .with_label("Save")
@@ -173,10 +190,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SplitMenuItem::action("save-template", "Save as template"),
                             SplitMenuItem::Separator,
                             SplitMenuItem::action("discard", "Discard changes"),
-                        ]),
-                    theme,
-                )
-                .open(true)),
+                        ])
+                        .with_open(true),
+                    state,
+                )),
         )
         // --- Loading state ---
         .child(
@@ -188,12 +205,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Loading state"),
                     theme,
                 ))
-                .child(SplitButton::from_spec(
+                .child(node_split_button_static(
                     SplitButtonSpec::new()
                         .with_variant(ButtonVariant::Primary)
                         .with_label("Saving...")
                         .with_loading(true),
-                    theme,
+                    state,
                 )),
         )
         // --- Disabled ---
@@ -206,12 +223,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Disabled"),
                     theme,
                 ))
-                .child(SplitButton::from_spec(
+                .child(node_split_button_static(
                     SplitButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
                         .with_label("Save")
                         .with_disabled(true),
-                    theme,
+                    state,
                 )),
         )
         // --- Submit semantics ---
@@ -224,34 +241,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Submit semantics"),
                     theme,
                 ))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Primary)
-                            .with_label("Save changes")
-                            .with_items(vec![
-                                SplitMenuItem::action("save", "Save changes"),
-                                SplitMenuItem::action("save-close", "Save & close"),
-                            ]),
-                        theme,
-                    )
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "submit: Save changes".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                    .on_dropdown(cx.listener(
-                        |this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.text.insert(
-                                "split-btn-action".to_string(),
-                                "dropdown: toggle".to_string(),
-                            );
-                            cx.notify();
-                        },
-                    )),
-                ),
+                .child(node_split_button(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Save changes")
+                        .with_items(vec![
+                            SplitMenuItem::action("save", "Save changes"),
+                            SplitMenuItem::action("save-close", "Save & close"),
+                        ]),
+                    state,
+                    SplitButtonHandlers {
+                        on_click: Some(action_handler(state, "submit: Save changes")),
+                        on_dropdown: Some(action_handler(state, "dropdown: toggle")),
+                        on_action: None,
+                    },
+                )),
         )
         // --- Constrained scroll container ---
         .child(
@@ -272,35 +276,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
                         .p(px(12.0))
                         .child(div().h(px(60.0))) // spacer
-                        .child(
-                            SplitButton::from_spec(
-                                SplitButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_label("Queue actions")
-                                    .with_items(vec![
-                                        SplitMenuItem::action("queue-retry", "Retry failed"),
-                                        SplitMenuItem::action("queue-clear", "Clear queue"),
-                                        SplitMenuItem::action("queue-export", "Export log"),
-                                    ]),
-                                theme,
-                            )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "split-btn-action".to_string(),
-                                    "click: Queue actions".to_string(),
-                                );
-                                cx.notify();
-                            }))
-                            .on_dropdown(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "split-btn-action".to_string(),
-                                        "dropdown: toggle".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
-                        ),
+                        .child(node_split_button(
+                            SplitButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Queue actions")
+                                .with_items(vec![
+                                    SplitMenuItem::action("queue-retry", "Retry failed"),
+                                    SplitMenuItem::action("queue-clear", "Clear queue"),
+                                    SplitMenuItem::action("queue-export", "Export log"),
+                                ]),
+                            state,
+                            SplitButtonHandlers {
+                                on_click: Some(action_handler(state, "click: Queue actions")),
+                                on_dropdown: Some(action_handler(state, "dropdown: toggle")),
+                                on_action: None,
+                            },
+                        )),
                 ),
         )
         // --- Last action ---
@@ -328,8 +319,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "split-button",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
+            let node = split_button(
+                &SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
                     .with_size(size)
                     .with_label("Action")
@@ -338,30 +329,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         SplitMenuItem::action("b", "Action B"),
                     ]),
                 theme,
-            )
-            .into_any_element()
+                SplitButtonHandlers::default(),
+            );
+            poodle_gpui_node_backend::to_gpui(&node)
         },
         |density, theme: &GpuiThemeProvider| {
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
+            let node = split_button(
+                &SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
                     .with_label("Action")
                     .with_items(vec![
                         SplitMenuItem::action("a", "Action A"),
                         SplitMenuItem::action("b", "Action B"),
-                    ]),
+                    ])
+                    .with_density(density),
                 theme,
-            )
-            .density(density)
-            .into_any_element()
+                SplitButtonHandlers::default(),
+            );
+            poodle_gpui_node_backend::to_gpui(&node)
         },
     )
 }
 
 /// One row of the variant x tone matrix: default / danger / success for a variant.
-fn matrix_row(theme: &GpuiThemeProvider, variant: ButtonVariant) -> Div {
+fn matrix_row(state: &AppState, variant: ButtonVariant) -> Div {
     let cell = |tone: ButtonTone, label: &str| {
-        SplitButton::from_spec(
+        node_split_button_static(
             SplitButtonSpec::new()
                 .with_variant(variant)
                 .with_tone(tone)
@@ -370,9 +363,8 @@ fn matrix_row(theme: &GpuiThemeProvider, variant: ButtonVariant) -> Div {
                     SplitMenuItem::action("a", "Action A"),
                     SplitMenuItem::action("b", "Action B"),
                 ]),
-            theme,
+            state,
         )
-        .into_any_element()
     };
 
     div()

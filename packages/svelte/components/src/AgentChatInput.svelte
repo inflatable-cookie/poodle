@@ -30,6 +30,10 @@
     question?: Snippet;
     /** Whether the live question could be answered from its own state alone. */
     questionCanSubmit?: boolean;
+    /** Editor placeholder while a plan awaits a decision; the editor is the revise channel. */
+    planPlaceholder?: string;
+    /** The plan region. Host composes an `AgentPlan` into it. */
+    plan?: Snippet;
     status?: AgentChatStatus;
     disabled?: boolean;
     readOnly?: boolean;
@@ -64,6 +68,8 @@
     questionPlaceholder = "Type your own answer, or leave this blank to use the selected option",
     question = undefined,
     questionCanSubmit = false,
+    planPlaceholder = "Describe what to change, or decide the plan above",
+    plan = undefined,
     status = "idle",
     disabled = false,
     readOnly = false,
@@ -101,17 +107,24 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isBusy = $derived(status === "busy");
   const isQuestioning = $derived(status === "questioning");
+  const isReviewingPlan = $derived(status === "reviewing-plan");
   /**
    * While a question is live the editor is the override, so an empty editor is
    * still submittable when an option is chosen — the question's own state
    * decides. See agent-chat-input.md §Question Region.
+   *
+   * A proposed plan does not get that treatment: the turn is already complete,
+   * so the editor keeps its ordinary semantics and sending a message is the
+   * revise channel. See agent-chat-input.md §Plan Region.
    */
   const actionEnabled = $derived(
     isQuestioning
       ? !disabled && (value.trim().length > 0 || questionCanSubmit)
       : canSubmitGate({ disabled, isBusy, value, allowEmptySubmit }),
   );
-  const resolvedPlaceholder = $derived(isQuestioning ? questionPlaceholder : placeholder);
+  const resolvedPlaceholder = $derived(
+    isQuestioning ? questionPlaceholder : isReviewingPlan ? planPlaceholder : placeholder,
+  );
   const contextPercent = $derived(contextPercentage(contextUsed, contextLimit));
   const showContext = $derived(contextLimit !== null && contextLimit > 0);
   const contextHigh = $derived(contextLimit === null ? null : contextLimit * contextWarnAt);
@@ -215,6 +228,16 @@
     {#if isQuestioning && question}
       <div class="poodle-agent-chat-input__question">
         {@render question()}
+      </div>
+    {/if}
+
+    <!-- The plan sits above the editor for the same reason the question does:
+         it is input requiring the operator's attention. Unlike a question it
+         does not block the turn — the editor keeps its ordinary semantics and
+         a sent message is the revise channel. -->
+    {#if isReviewingPlan && plan}
+      <div class="poodle-agent-chat-input__plan">
+        {@render plan()}
       </div>
     {/if}
 

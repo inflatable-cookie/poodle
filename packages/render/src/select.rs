@@ -20,10 +20,10 @@ use poodle_node::{
 };
 use poodle_specs::{SelectSpec, ValidationState};
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::color::with_alpha;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    resolve_supporting_visual_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
+    size_height_offset_rem, size_padding_x_offset_rem,
 };
 
 /// Handlers a host wires to a select. The component does not own open state —
@@ -38,21 +38,43 @@ pub struct SelectHandlers {
 
 pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHandlers) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = rem_to_px(control_height_rem(effective_size));
+    // Axis-faithful metrics (g12.019 recipe correction): the axis-layered
+    // token plus the per-size offset — the old GPUI tier's form, matching
+    // Svelte's `--poodle-select-control-height` / inline-padding CSS vars —
+    // not the fixed per-size tables (`control_height_rem` /
+    // `control_space_x_rem`), which ignore the theme's density/control-size
+    // layering. At base tokens (the Jetstream provider, no axes) md/default
+    // reproduces the old fixed values; under a preview axis the select now
+    // follows the axis like Svelte does.
+    let height = theme.resolve_space("size.control.height")
+        + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
-    let item_gap = rem_to_px(0.5);
+    let pad_x = theme.resolve_space("space.control.x")
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
+    // The indicator is always the sm icon token (the old GPUI tier's
+    // `IconSize::Sm`), not a per-control-size ladder stop.
+    let icon_size = theme.resolve_space("size.icon.sm");
+    let item_gap = theme.resolve_space("space.inline.sm");
 
-    let fill = theme.resolve_color("color.background.surface");
-    let base_border = theme.resolve_color("color.border.default");
+    let surface = theme.resolve_color("color.background.surface");
+    let border_default = theme.resolve_color("color.border.default");
     let radius = theme.resolve_radius("radius.control");
     let surface_radius = theme.resolve_radius("radius.surface");
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_placeholder = theme.resolve_color("color.text.placeholder");
+    // Svelte paints the placeholder in text-secondary
+    // (`select.css`: `--poodle-recipe-select-placeholder-control-text` falls
+    // back to `--poodle-color-text-secondary`). `color.text.placeholder` is
+    // not a token — no provider resolves it (it fell back to black).
+    let text_placeholder = text_secondary;
     let icon_muted = theme.resolve_color("color.icon.muted");
     let panel_fill = theme.resolve_color(spec.overlay_fill_token());
+
+    // Trigger treatment (the old GPUI tier's interactive-subtle recipe):
+    // surface/border at reduced alpha over the page, not the full-strength
+    // tokens.
+    let fill = with_alpha(surface, surface.3 * 0.82);
+    let base_border = with_alpha(border_default, border_default.3 * 0.72);
 
     let validation_border = match spec.validation_state {
         ValidationState::Invalid => Some(theme.resolve_color("color.status.danger")),
@@ -62,23 +84,30 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     };
     let border_color = validation_border.unwrap_or(base_border);
 
-    // Hover: border toward text (validation colour holds when set), background
-    // toward the elevated surface. Same recipe, same fractions, as both tiers.
-    let hover_border = validation_border.unwrap_or_else(|| mix_srgb(base_border, text_primary, 0.78));
-    let hover_fill = mix_srgb(fill, panel_fill, 0.5);
+    // Hover: border toward full strength (validation colour holds when set),
+    // background slightly more opaque. Same recipe as the old GPUI tier.
+    let hover_border =
+        validation_border.unwrap_or_else(|| with_alpha(border_default, border_default.3 * 0.92));
+    let hover_fill = with_alpha(surface, surface.3 * 0.88);
 
-    let (display_text, display_color) = match spec.trigger_text() {
-        Some(text) => (text, text_primary),
-        None => (
-            spec.placeholder.as_deref().unwrap_or("Select…"),
-            text_placeholder,
-        ),
+    let display_text = spec
+        .trigger_text()
+        .map(str::to_string)
+        .or_else(|| spec.placeholder.clone())
+        .unwrap_or_else(|| "Select…".to_string());
+    // Placeholder styling keys on having no VALUE (Svelte:
+    // `data-placeholder = !hasSelection`), not on the trigger text —
+    // `trigger_text()` itself falls back to the placeholder string.
+    let display_color = if spec.current_value().is_some() {
+        text_primary
+    } else {
+        text_placeholder
     };
 
     let show_clear = spec.clearable && spec.current_value().is_some() && !spec.is_disabled;
 
     let trigger = build_trigger(
-        display_text,
+        &display_text,
         display_color,
         icon_muted,
         text_secondary,
@@ -98,7 +127,13 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
         handlers,
     );
 
+    // The old GPUI tier wraps the select in a `min_w(size.select.minWidth)`
+    // container in both states; carry that floor on the returned root.
+    let root_min_width = theme.resolve_space("size.select.minWidth");
+
     if !spec.current_open() {
+        let mut trigger = trigger;
+        trigger.style.min_width = Some(root_min_width);
         return trigger;
     }
 
@@ -126,6 +161,7 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
 
     let mut root = Node::container().child(trigger).child(panel);
     root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.style.min_width = Some(root_min_width);
     root.position = NodePosition::Relative;
     if let Some(label) = spec.aria_label.as_deref() {
         root.a11y.label = Some(label.to_string());
@@ -373,8 +409,9 @@ fn build_panel(
         for group_key in &seen_groups {
             if let Some(ref name) = group_key {
                 let header_py = rem_to_px(0.25);
-                let header_font =
-                    rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+                let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+                    effective_size,
+                )));
                 let mut header = Node::text(name.as_str());
                 {
                     let s = &mut header.style;
@@ -509,6 +546,41 @@ mod tests {
         assert!(node.has_text("Choose a fruit"), "{:?}", node.texts());
         assert!(node.has_text("chevron-down"), "{:?}", node.texts());
         assert!(!node.has_text("Apple"), "options leaked when closed");
+    }
+
+    #[test]
+    fn trigger_metrics_follow_the_axis_faithful_recipe() {
+        // height = size.control.height token (36px at base) + per-size offset
+        let cases = [
+            (poodle_specs::ControlSize::Xs, 28.0),
+            (poodle_specs::ControlSize::Sm, 30.0),
+            (poodle_specs::ControlSize::Md, 36.0),
+            (poodle_specs::ControlSize::Lg, 42.0),
+            (poodle_specs::ControlSize::Xl, 44.0),
+        ];
+        for (size, expected) in cases {
+            let spec = SelectSpec::new(fruit_options()).with_size(size);
+            let node = select(&spec, &theme(), &SelectHandlers::default());
+            match node.style.descriptor.layout.height {
+                LayoutSizing::Fixed(h) => {
+                    assert_eq!(h, expected, "height for {size:?}");
+                }
+                ref other => panic!("expected fixed height, got {other:?}"),
+            }
+        }
+        // The placeholder paints in text.secondary (Svelte's recipe), not the
+        // nonexistent `color.text.placeholder` token.
+        let theme = theme();
+        let secondary =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.secondary");
+        let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
+        let node = select(&spec, &theme, &SelectHandlers::default());
+        let label = node
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "Choose a fruit"),
+            )
+            .expect("placeholder label");
+        assert_eq!(label.style.descriptor.text_color, Some(secondary));
     }
 
     #[test]

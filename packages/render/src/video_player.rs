@@ -85,6 +85,10 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     };
 
     // ── Root container — black surface, token radius ───────────────────────
+    //
+    // The chrome has a contract minimum height (220px @ 16px base) and pins its
+    // controls to the bottom edge; without both, the viewport collapses to zero
+    // and the controls ride up out of the black surface.
     let mut el = Node::container();
     {
         let s = &mut el.style;
@@ -92,6 +96,9 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.alignment.main = MainAxisAlignment::End;
+        s.min_height = Some(rem_to_px(13.75));
+        s.fill_width = true;
         s.self_stretch = true;
     }
     all_pill(&mut el, radius);
@@ -102,6 +109,9 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         let s = &mut video_area.style;
         s.descriptor.background = Some(black);
         s.descriptor.layout.width = LayoutSizing::Grow;
+        // Grow on the column's main axis too, so the viewport takes the slack
+        // above the controls rather than shrinking to its content.
+        s.descriptor.layout.height = LayoutSizing::Grow;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -121,6 +131,10 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
             s.descriptor.cursor = CursorHint::Pointer;
         }
         all_pill(&mut big, pill);
+        // The big play affordance reads as an outlined circle; the glyph sits
+        // inside it.
+        big.style.descriptor.border.width = rem_to_px(0.125);
+        big.style.descriptor.border.color = white_90;
         big.interaction.focusable = true;
         let mut glyph = Node::icon("play", big_play_size * 0.5);
         glyph.style.descriptor.text_color = Some(white_90);
@@ -137,6 +151,13 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         let s = &mut controls.style;
         s.descriptor.background = Some(overlay);
         s.descriptor.layout.direction = LayoutDirection::Column;
+        // Asymmetric inset: the tall top pad is what lifts the controls clear
+        // of the video content behind the overlay.
+        let pad = &mut s.descriptor.layout.spacing.padding;
+        pad.top = rem_to_px(1.5);
+        pad.left = rem_to_px(0.5);
+        pad.right = rem_to_px(0.5);
+        pad.bottom = rem_to_px(0.375);
     }
 
     // Progress / seek bar — Progress node (widget default accent fill).
@@ -146,10 +167,15 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     };
     {
         let s = &mut progress_bar.style;
-        s.min_height = Some(track_height);
+        s.descriptor.layout.height = LayoutSizing::Fixed(track_height);
         s.self_stretch = true;
         s.descriptor.layout.spacing.margin.bottom = rem_to_px(0.375);
         s.descriptor.background = Some(white_20);
+        // `text_color` is the channel the backend reads for a Progress node's
+        // filled portion; without it the played region renders white on a white
+        // track and the seek position is invisible.
+        s.descriptor.text_color = Some(theme.resolve_color("color.accent.base"));
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
     }
     all_pill(&mut progress_bar, pill);
     let mut controls = controls.child(progress_bar);

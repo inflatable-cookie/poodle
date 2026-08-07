@@ -614,7 +614,8 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "form-shell",
         display_name: "FormShell",
-        description: "Orchestrated form surface with sections, status summary, and submission gating.",
+        description:
+            "Orchestrated form surface with sections, status summary, and submission gating.",
     },
     ComponentEntry {
         slug: "validation-summary",

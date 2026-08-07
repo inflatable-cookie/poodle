@@ -5,46 +5,42 @@
 //!
 //! Anatomy (per contract §2):
 //! ```text
-//! [Root]
-//!   ├── [Info]               (optional — show_info && total > 0)
-//!   └── [Controls Wrapper]
-//!         ├── [Limit Selector] (optional — show_limit_selector)
-//!         └── [Controls]
-//!               ├── First   (full variant)
-//!               ├── Previous
-//!               ├── Pages / Summary  (variant-specific center)
-//!               ├── Next
-//!               └── Last    (full variant)
+//! [Wrapping Row]
+//!   ├── [Info]           (optional — show_info && total > 0)
+//!   ├── [Limit Selector] (optional — show_limit_selector)
+//!   ├── First            (wired full variant)
+//!   ├── Previous
+//!   ├── Pages / Summary  (variant-specific center)
+//!   ├── Next
+//!   └── Last             (wired full variant)
 //! ```
 //!
 //! `on_page_change` carries the destination page: prev and next resolve to a
 //! number here rather than being separate events. The current page, a disabled
-//! arrow and the ellipsis never fire. No `on_limit_change` — the page-size
-//! control renders its Select closed.
+//! arrow and the ellipsis never fire. `pagination_with_handlers` additionally
+//! exposes the limit Select's controlled open and page-size changes.
 
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node,
+    Node, NodeRole,
 };
-use poodle_specs::{ControlDensity, PageItem, PaginationSpec, PaginationVariant};
+use poodle_specs::{ChoiceOption, PageItem, PaginationSpec, PaginationVariant, SelectSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
 };
 
-/// Inter-control / inter-page gap in px for a density.
-///
-/// Contract §8 Density: compact `3px`, default `0.25rem`, comfortable `0.375rem`.
-fn density_gap_px(density: ControlDensity) -> f32 {
-    match density {
-        ControlDensity::Compact => 3.0,
-        ControlDensity::Default => rem_to_px(0.25),
-        ControlDensity::Comfortable => rem_to_px(0.375),
-    }
+#[derive(Default, Clone)]
+pub struct PaginationHandlers {
+    pub page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    pub limit_open: bool,
+    pub limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    pub page_size_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 }
 
 pub fn pagination(
@@ -52,13 +48,34 @@ pub fn pagination(
     theme: &dyn ThemeProvider,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> Node {
+    pagination_with_handlers(
+        spec,
+        theme,
+        &PaginationHandlers {
+            page_change: on_page_change,
+            ..PaginationHandlers::default()
+        },
+    )
+}
+
+pub fn pagination_with_handlers(
+    spec: &PaginationSpec,
+    theme: &dyn ThemeProvider,
+    handlers: &PaginationHandlers,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-    let height = rem_to_px(control_height_rem(effective_size));
+    let base_height = theme.resolve_space("size.control.height");
+    let height = base_height + rem_to_px(size_height_offset_rem(effective_size)) - rem_to_px(0.125);
+    let button_min_width = base_height + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    // Contract: controls/pages gap is density-driven (not pad_x).
-    let gap = density_gap_px(spec.density);
+    let pad_x = theme.resolve_space("space.control.x")
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
+    let gap_sm = theme.resolve_space("space.inline.sm");
+    let gap_md = theme.resolve_space("space.inline.md");
+    let root_gap = if spec.is_compact { gap_sm } else { gap_md };
+    let label_size = theme.resolve_space("typography.label.size");
+    let icon_size = theme.resolve_space("size.icon.sm");
     let radius = theme.resolve_radius(spec.radius_token());
 
     let text_primary = theme.resolve_color(spec.button_text_token());
@@ -76,28 +93,41 @@ pub fn pagination(
 
     let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
 
-    // ── root: info row + controls-wrapper stacked. ─────────────────────────────
+    // One wrapping row: info, optional limit selector and navigation controls.
     let mut root = Node::container();
     {
         let s = &mut root.style;
-        s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.spacing.gap = root_gap;
+        s.flex_wrap = true;
     }
 
-    // Chrome root treatment: padding + top border + elevated 92% background.
+    // Chrome root treatment: padding, uniform subtle border and surface fill.
     // `resolved_chrome` applies the contract's precedence — `standalone` only
     // overrides when the host set it, otherwise `chrome` decides.
     if spec.resolved_chrome() {
-        let elevated = theme.resolve_color("color.background.elevated");
+        let surface_bg = theme.resolve_color("color.background.surface");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let chrome_radius = theme.resolve_radius("radius.control");
         let s = &mut root.style;
-        s.descriptor.background = Some(with_alpha(elevated, elevated.3 * 0.92));
-        s.border_top_width = Some(1.0);
-        s.descriptor.border.color = border_color;
+        s.descriptor.background = Some(surface_bg);
+        s.descriptor.border.width = 1.0;
+        s.descriptor.border.color = border_subtle;
+        let c = &mut s.descriptor.corner_radii;
+        c.top_left = chrome_radius;
+        c.top_right = chrome_radius;
+        c.bottom_right = chrome_radius;
+        c.bottom_left = chrome_radius;
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = theme.resolve_space("space.panel.x");
-        pad.right = theme.resolve_space("space.panel.x");
-        pad.top = theme.resolve_space("space.control.y");
-        pad.bottom = theme.resolve_space("space.control.y");
+        pad.left = if spec.is_compact { gap_sm } else { gap_md };
+        pad.right = pad.left;
+        pad.top = if spec.is_compact {
+            theme.resolve_space("space.inline.xs")
+        } else {
+            gap_sm
+        };
+        pad.bottom = pad.top;
     }
 
     if spec.is_loading {
@@ -108,108 +138,102 @@ pub fn pagination(
     if spec.show_info {
         if let Some(text) = spec.info_string() {
             let mut info = Node::text(&text);
-            info.style.text_size = Some(font_size);
+            info.style.text_size = Some(label_size);
             info.style.descriptor.text_color = Some(text_secondary);
             root = root.child(info);
         }
     }
 
-    // ── controls-wrapper: limit selector + controls. ───────────────────────────
-    let mut wrapper = Node::container();
-    {
-        let s = &mut wrapper.style;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
-    }
-
     // Limit selector (all variants per contract §2 — "Show [n] per page").
     if spec.show_limit_selector && !spec.limit_options.is_empty() {
-        wrapper = wrapper.child(build_limit_selector(
-            spec, theme, height, font_size, pad_x, radius, gap,
+        root = root.child(build_limit_selector(
+            spec, theme, handlers, height, label_size, pad_x, radius, gap_sm,
         ));
     }
 
-    // Controls row.
-    let mut controls = Node::container();
-    {
-        let s = &mut controls.style;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = gap;
-    }
-
     // Helper: build a page-item / nav button (square-min-width, content-driven width).
-    let make_button = |label: &str, is_current: bool, is_disabled: bool, goto: Option<usize>| {
-        let bg = if is_current { current_bg } else { surface };
-        let bc = if is_current { current_border } else { button_border };
+    let make_button =
+        |label: &str, is_page: bool, is_current: bool, is_disabled: bool, goto: Option<usize>| {
+            let bg = if is_current { current_bg } else { surface };
+            let bc = if is_current {
+                current_border
+            } else {
+                button_border
+            };
 
-        let mut btn = Node::button(label);
-        {
-            let s = &mut btn.style;
-            // Contract: min-width = control-height, height = control-height,
-            // content-driven width with padding 0 control-x.
-            s.min_width = Some(height);
-            s.descriptor.layout.height = LayoutSizing::Fixed(height);
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = pad_x;
-            pad.right = pad_x;
-            s.descriptor.corner_radii.top_left = radius;
-            s.descriptor.corner_radii.top_right = radius;
-            s.descriptor.corner_radii.bottom_right = radius;
-            s.descriptor.corner_radii.bottom_left = radius;
-            s.descriptor.border.width = 1.0;
-            s.descriptor.border.color = bc;
-            s.descriptor.background = Some(bg);
-            s.descriptor.text_color = Some(text_primary);
-            s.text_size = Some(font_size);
-            s.text_weight = Some(600);
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-            s.descriptor.cursor = CursorHint::Pointer;
-        }
-        btn.interaction.focusable = true;
-
-        if is_disabled || spec.is_loading {
-            btn.style.descriptor.opacity = disabled_opacity;
-            btn.interaction.disabled = true;
-        } else if !is_current {
-            // The current page is where you already are, so it is not a route.
-            if let (Some(page), Some(handler)) = (goto, &on_page_change) {
-                let handler = Arc::clone(handler);
-                btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+            let mut btn = Node::button(label);
+            {
+                let s = &mut btn.style;
+                // Contract: min-width = control-height, height = control-height,
+                // content-driven width with padding 0 control-x.
+                if is_page {
+                    s.min_width = Some(button_min_width);
+                }
+                s.descriptor.layout.height = LayoutSizing::Fixed(height);
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.left = pad_x;
+                pad.right = pad_x;
+                s.descriptor.corner_radii.top_left = radius;
+                s.descriptor.corner_radii.top_right = radius;
+                s.descriptor.corner_radii.bottom_right = radius;
+                s.descriptor.corner_radii.bottom_left = radius;
+                s.descriptor.border.width = 1.0;
+                s.descriptor.border.color = bc;
+                s.descriptor.background = Some(bg);
+                s.descriptor.text_color = Some(text_primary);
+                s.text_size = Some(font_size);
+                if is_page {
+                    s.text_weight = Some(if is_current { 700 } else { 600 });
+                }
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+                s.descriptor.cursor = CursorHint::Pointer;
             }
-        }
+            btn.a11y.role = Some(NodeRole::Button);
+            btn.interaction.focusable = true;
 
-        btn
-    };
+            if is_disabled || spec.is_loading {
+                btn.style.descriptor.opacity = disabled_opacity;
+                btn.interaction.disabled = true;
+            } else if !is_current {
+                // The current page is where you already are, so it is not a route.
+                if let (Some(page), Some(handler)) = (goto, &handlers.page_change) {
+                    let handler = Arc::clone(handler);
+                    btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+                }
+            }
+
+            btn
+        };
 
     let is_full = spec.variant == PaginationVariant::Full;
     let prev_disabled = spec.is_first_page();
     let next_disabled = spec.is_last_page();
 
     // First button (`««`) — full variant only.
-    if is_full {
-        controls = controls.child(make_button("««", false, prev_disabled, Some(1)));
+    if is_full && handlers.page_change.is_some() {
+        root = root.child(make_button("««", false, false, prev_disabled, Some(1)));
     }
 
     // Previous button — text "Prev" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button(
+        root = root.child(make_button(
             "Prev",
+            false,
             false,
             prev_disabled,
             Some(spec.current_page.saturating_sub(1).max(1)),
         ));
     } else {
-        controls = controls.child(arrow_button(
+        root = root.child(arrow_button(
             "chevron-left",
             prev_disabled || spec.is_loading,
             Some(spec.current_page.saturating_sub(1).max(1)),
-            on_page_change.as_ref(),
+            handlers.page_change.as_ref(),
             height,
-            font_size,
+            button_min_width,
+            icon_size,
             radius,
             button_border,
             surface,
@@ -227,7 +251,7 @@ pub fn pagination(
                 let s = &mut pages_row.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = gap;
+                s.descriptor.layout.spacing.gap = gap_sm;
             }
             for item in spec.visible_pages() {
                 match item {
@@ -235,6 +259,7 @@ pub fn pagination(
                         let is_current = n == spec.current_page;
                         pages_row = pages_row.child(make_button(
                             &n.to_string(),
+                            true,
                             is_current,
                             false,
                             Some(n),
@@ -251,49 +276,50 @@ pub fn pagination(
                             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
                         }
-                        let mut dots = Node::text("…");
+                        let mut dots = Node::text("...");
                         dots.style.text_size = Some(font_size);
+                        dots.style.text_weight = Some(600);
                         dots.style.descriptor.text_color = Some(text_secondary);
                         pages_row = pages_row.child(cell.child(dots));
                     }
                 }
             }
-            controls = controls.child(pages_row);
+            root = root.child(pages_row);
         }
         PaginationVariant::Full => {
             // Contract: full center summary = "Page X of Y".
-            controls = controls.child(summary_label(
-                &spec.full_summary(),
-                font_size,
-                text_secondary,
-            ));
+            let mut label = Node::text(spec.full_summary());
+            label.style.text_size = Some(label_size);
+            label.style.descriptor.text_color = Some(text_secondary);
+            root = root.child(label);
         }
         PaginationVariant::Simple => {
             // Contract: simple center summary = item range "X–Y of Z".
-            controls = controls.child(summary_label(
-                &spec.simple_summary(),
-                font_size,
-                text_secondary,
-            ));
+            let mut label = Node::text(spec.simple_summary());
+            label.style.text_size = Some(label_size);
+            label.style.descriptor.text_color = Some(text_secondary);
+            root = root.child(label);
         }
     }
 
     // Next button — text "Next" for simple, chevron icon otherwise.
     if spec.variant == PaginationVariant::Simple {
-        controls = controls.child(make_button(
+        root = root.child(make_button(
             "Next",
+            false,
             false,
             next_disabled,
             Some((spec.current_page + 1).min(spec.total_pages)),
         ));
     } else {
-        controls = controls.child(arrow_button(
+        root = root.child(arrow_button(
             "chevron-right",
             next_disabled || spec.is_loading,
             Some((spec.current_page + 1).min(spec.total_pages)),
-            on_page_change.as_ref(),
+            handlers.page_change.as_ref(),
             height,
-            font_size,
+            button_min_width,
+            icon_size,
             radius,
             button_border,
             surface,
@@ -304,12 +330,17 @@ pub fn pagination(
     }
 
     // Last button (`»»`) — full variant only.
-    if is_full {
-        controls = controls.child(make_button("»»", false, next_disabled, Some(spec.total_pages)));
+    if is_full && handlers.page_change.is_some() {
+        root = root.child(make_button(
+            "»»",
+            false,
+            false,
+            next_disabled,
+            Some(spec.total_pages),
+        ));
     }
 
-    let wrapper = wrapper.child(controls);
-    let mut root = root.child(wrapper);
+    let mut root = root;
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
             root.a11y.label = Some(label.to_string());
@@ -320,17 +351,6 @@ pub fn pagination(
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 
-/// Variant-center summary text with 0.5rem side padding.
-fn summary_label(text: &str, font_size: f32, color: ColorValue) -> Node {
-    let mut label = Node::text(text);
-    label.style.text_size = Some(font_size);
-    label.style.descriptor.text_color = Some(color);
-    let pad = &mut label.style.descriptor.layout.spacing.padding;
-    pad.left = rem_to_px(0.5);
-    pad.right = rem_to_px(0.5);
-    label
-}
-
 /// Chevron arrow nav button (prev / next). Square min-width, icon-only.
 #[allow(clippy::too_many_arguments)]
 fn arrow_button(
@@ -339,7 +359,8 @@ fn arrow_button(
     goto: Option<usize>,
     on_page_change: Option<&Arc<dyn Fn(usize) + Send + Sync>>,
     height: f32,
-    font_size: f32,
+    min_width: f32,
+    icon_size: f32,
     radius: f32,
     button_border: ColorValue,
     surface: ColorValue,
@@ -359,10 +380,11 @@ fn arrow_button(
     };
 
     let mut btn = Node::button("");
+    btn.a11y.role = Some(NodeRole::Button);
     btn.a11y.label = Some(action_label.to_string());
     {
         let s = &mut btn.style;
-        s.min_width = Some(height);
+        s.min_width = Some(min_width);
         s.descriptor.layout.height = LayoutSizing::Fixed(height);
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = pad_x;
@@ -381,7 +403,7 @@ fn arrow_button(
     }
     btn.interaction.focusable = true;
 
-    let mut chevron = Node::icon(icon, font_size);
+    let mut chevron = Node::icon(icon, icon_size);
     chevron.style.descriptor.text_color = Some(text_primary);
     let mut btn = btn.child(chevron);
 
@@ -395,12 +417,13 @@ fn arrow_button(
     btn
 }
 
-/// Limit selector: "Show [n ▾] per page" — matches Svelte limit row anatomy.
-/// The select is rendered as a static bordered box (interaction is host-side).
+/// Limit selector: "Show [n ▾] per page" — matches the old GPUI row anatomy.
+/// Fully wired hosts get the shared Select; static callers keep the closed box.
 #[allow(clippy::too_many_arguments)]
 fn build_limit_selector(
     spec: &PaginationSpec,
     theme: &dyn ThemeProvider,
+    handlers: &PaginationHandlers,
     height: f32,
     font_size: f32,
     pad_x: f32,
@@ -425,7 +448,55 @@ fn build_limit_selector(
         t
     };
 
-    // <select> visual: bordered box + value + chevron.
+    if handlers.limit_open_change.is_some() && handlers.page_size_change.is_some() {
+        let options = spec
+            .limit_options
+            .iter()
+            .copied()
+            .map(|size| ChoiceOption::new(size.to_string(), size.to_string()))
+            .collect();
+        let select_spec = SelectSpec::new(options)
+            .with_value(page_size_label.clone())
+            .with_open(handlers.limit_open)
+            .with_size(spec.size)
+            .with_size_role(spec.size_role)
+            .with_density(spec.density)
+            .with_aria_label("Items per page");
+
+        let toggle = handlers.limit_open_change.as_ref().map(|handler| {
+            let handler = Arc::clone(handler);
+            let next = !handlers.limit_open;
+            Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
+        });
+        let change = handlers.page_size_change.as_ref().map(|handler| {
+            let handler = Arc::clone(handler);
+            Arc::new(move |value: &str| {
+                if let Ok(size) = value.parse::<usize>() {
+                    handler(size);
+                }
+            }) as Arc<dyn Fn(&str) + Send + Sync>
+        });
+        let select_handlers = crate::SelectHandlers {
+            toggle,
+            change,
+            clear: None,
+        };
+        let select_box = crate::select(&select_spec, theme, &select_handlers);
+
+        let mut row = Node::container();
+        {
+            let s = &mut row.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = gap;
+        }
+        return row
+            .child(text("Show", text_secondary))
+            .child(select_box)
+            .child(text("per page", text_secondary));
+    }
+
+    // Static <select> visual when the host did not wire controlled state.
     let mut select_box = Node::container();
     {
         let s = &mut select_box.style;

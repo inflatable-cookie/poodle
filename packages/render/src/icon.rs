@@ -10,6 +10,7 @@ use poodle_specs::IconSpec;
 
 pub fn icon(spec: &IconSpec, theme: &dyn ThemeProvider) -> Node {
     let size = theme.resolve_space(spec.size_token());
+    let color = theme.resolve_color("color.icon.primary");
 
     let mut el = Node::icon(&spec.name, size);
     {
@@ -17,9 +18,28 @@ pub fn icon(spec: &IconSpec, theme: &dyn ThemeProvider) -> Node {
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        // GPUI SVGs do not inherit a usable tint without an explicit text
+        // colour. This is the old tier's default icon colour.
+        s.descriptor.text_color = Some(color);
     }
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn emits_the_explicit_gpui_svg_tint() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let node = icon(&IconSpec::new("plus"), &theme);
+        assert_eq!(
+            node.style.descriptor.text_color,
+            Some(theme.resolve_color("color.icon.primary"))
+        );
+    }
 }

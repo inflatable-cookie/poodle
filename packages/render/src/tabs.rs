@@ -14,9 +14,10 @@ use poodle_node::{
 };
 use poodle_specs::{TabVariant, TabsSpec};
 
-use crate::color::{mix_linear, with_alpha};
+use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    control_height_rem, control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
 };
 
 pub type TabHandler = Arc<dyn Fn(&str) + Send + Sync>;
@@ -43,7 +44,7 @@ fn build_tab_label(
     // Vertical/icon-only: icon alone, label fallback so the tab is never empty.
     if icon_only {
         if let Some(ref icon_name) = tab.icon {
-            let mut i = Node::icon(icon_name.as_str(), font_size);
+            let mut i = Node::icon(icon_name.as_str(), theme.resolve_space("size.icon.sm"));
             i.style.descriptor.text_color = Some(text_color);
             return i;
         }
@@ -70,7 +71,7 @@ fn build_tab_label(
     }
 
     if let Some(ref icon_name) = tab.icon {
-        let mut i = Node::icon(icon_name.as_str(), font_size);
+        let mut i = Node::icon(icon_name.as_str(), theme.resolve_space("size.icon.sm"));
         i.style.descriptor.text_color = Some(text_color);
         row = row.child(i);
     }
@@ -82,8 +83,8 @@ fn build_tab_label(
 
     if let Some(count) = tab.count {
         let caption_size = theme.resolve_space("typography.caption.size");
-        let accent = theme.resolve_color("color.accent.base");
-        let badge_bg = with_alpha(accent, accent.3 * 0.14);
+        let surface = theme.resolve_color("color.background.surface");
+        let badge_bg = mix_srgb(text_color, surface, 0.14);
         let mut badge = Node::text(format!("{count}"));
         {
             let s = &mut badge.style;
@@ -103,25 +104,20 @@ fn build_tab_label(
 }
 
 /// The card variant's close button; interaction wires through `on_close`.
-fn build_close_button(theme: &dyn ThemeProvider, font_size: f32, tab_label: &str) -> Node {
-    let icon_color = theme.resolve_color("color.text.secondary");
-    let radius = (theme.resolve_radius("radius.control") - rem_to_px(0.125)).max(0.0);
-    let box_sz = rem_to_px(1.25);
+fn build_close_button(theme: &dyn ThemeProvider, tab_label: &str) -> Node {
+    let icon_color = theme.resolve_color("color.icon.muted");
+    let icon_size = theme.resolve_space("size.icon.sm");
     let mut btn = Node::button("");
     btn.a11y.label = Some(format!("Close {tab_label}"));
     {
         let s = &mut btn.style;
-        s.descriptor.layout.width = LayoutSizing::Fixed(box_sz);
-        s.descriptor.layout.height = LayoutSizing::Fixed(box_sz);
-        s.descriptor.layout.spacing.margin.right = rem_to_px(0.25);
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         s.descriptor.cursor = CursorHint::Pointer;
     }
-    rounded_all(&mut btn, radius);
     btn.interaction.focusable = true;
-    let mut x = Node::icon("x", font_size);
+    let mut x = Node::icon("x", icon_size);
     x.style.descriptor.text_color = Some(icon_color);
     btn.child(x)
 }
@@ -177,11 +173,15 @@ fn wire_select(node: &mut Node, is_disabled: bool, value: &str, on_change: Optio
     }
 }
 
-fn render_underline(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&TabHandler>) -> Node {
+fn render_underline(
+    spec: &TabsSpec,
+    theme: &dyn ThemeProvider,
+    on_change: Option<&TabHandler>,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
+    let control_y = theme.resolve_space("space.control.y");
 
     let accent = theme.resolve_color(spec.indicator_token());
     let border = theme.resolve_color(spec.list_border_token());
@@ -219,7 +219,11 @@ fn render_underline(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Optio
     for tab in &spec.tabs {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         let mut tab_el = Node::container();
         tab_el.a11y.role = Some(NodeRole::Tab);
@@ -229,14 +233,10 @@ fn render_underline(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Optio
             let s = &mut tab_el.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            // The old builder's `.flex_grow()` zeroes min_size AFTER the
-            // earlier `.min_h()`: full-width tabs end with no height floor.
-            // Order is call-site semantics there; here it is a conditional.
-            if !full_width {
-                s.min_height = Some(min_h);
-            }
             s.descriptor.layout.spacing.padding.left = pad_x;
             s.descriptor.layout.spacing.padding.right = pad_x;
+            s.descriptor.layout.spacing.padding.top = control_y;
+            s.descriptor.layout.spacing.padding.bottom = control_y;
             s.text_size = Some(font_size);
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);
@@ -272,8 +272,8 @@ fn render_card(
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
+    let pad_x = rem_to_px(panel_space_x_rem(spec.density));
+    let control_y = theme.resolve_space("space.control.y");
 
     let accent = theme.resolve_color(spec.indicator_token());
     let border = theme.resolve_color(spec.list_border_token());
@@ -285,10 +285,9 @@ fn render_card(
 
     let card_default_bg = with_alpha(surface_bg, surface_bg.3 * 0.92);
     let card_default_border = with_alpha(border, border.3 * 0.68);
-    // Selected fills lerp in LINEAR space — the old tier's `blend`, not its
-    // sRGB `color_mix`. Both recipes exist; tabs is the one that uses this one.
-    let card_selected_bg = mix_linear(accent, surface_bg, 0.14);
-    let card_selected_border = mix_linear(accent, border, 0.32);
+    // The old GPUI tier uses its sRGB `color_mix` helper for selected cards.
+    let card_selected_bg = mix_srgb(accent, surface_bg, 0.14);
+    let card_selected_border = mix_srgb(accent, border, 0.32);
 
     let selected = spec.current_value().map(|s| s.to_string());
     let vertical = spec.is_vertical();
@@ -306,13 +305,17 @@ fn render_card(
                 s.fill_width = true;
             }
         }
-        s.descriptor.layout.spacing.gap = rem_to_px(0.125);
+        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
     }
 
     for tab in &spec.tabs {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
         let (bg, bc) = if is_active {
             (card_selected_bg, card_selected_border)
         } else {
@@ -325,12 +328,10 @@ fn render_card(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-            // Same `.flex_grow()`-clobbers-min_h ordering as underline.
-            if !full_width {
-                s.min_height = Some(min_h);
-            }
             s.descriptor.layout.spacing.padding.left = pad_x;
             s.descriptor.layout.spacing.padding.right = pad_x;
+            s.descriptor.layout.spacing.padding.top = control_y;
+            s.descriptor.layout.spacing.padding.bottom = control_y;
             s.text_size = Some(font_size);
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);
@@ -352,7 +353,7 @@ fn render_card(
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
         if tab.is_closable {
-            let mut close = build_close_button(theme, font_size, &tab.label);
+            let mut close = build_close_button(theme, &tab.label);
             close.interaction.on_activate = Some(match (is_disabled, on_close) {
                 (false, Some(handler)) => {
                     let handler = Arc::clone(handler);
@@ -411,7 +412,11 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
     for tab in &spec.tabs {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         let mut tab_el = Node::container();
         {
@@ -444,7 +449,11 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
     container
 }
 
-fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&TabHandler>) -> Node {
+fn render_block(
+    spec: &TabsSpec,
+    theme: &dyn ThemeProvider,
+    on_change: Option<&TabHandler>,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
@@ -460,8 +469,7 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&T
 
     let list_bg = with_alpha(panel_bg, panel_bg.3 * spec.block_list_bg_opacity());
     let separator = with_alpha(border, border.3 * spec.block_separator_opacity());
-    // Linear-space lerp, as in card.
-    let selected_bg = mix_linear(accent, surface_bg, spec.block_selected_accent_mix());
+    let selected_bg = mix_srgb(accent, surface_bg, spec.block_selected_accent_mix());
 
     let selected = spec.current_value().map(|s| s.to_string());
     let vertical = spec.is_vertical();
@@ -484,12 +492,15 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&T
     for (idx, tab) in spec.tabs.iter().enumerate() {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
         let is_disabled = tab.is_disabled;
-        let text_color = if is_active { text_primary } else { text_secondary };
+        let text_color = if is_active {
+            text_primary
+        } else {
+            text_secondary
+        };
 
         let mut tab_el = Node::container();
         {
             let s = &mut tab_el.style;
-            s.flex_fill = true;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
@@ -500,6 +511,12 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&T
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);
             s.descriptor.cursor = CursorHint::Pointer;
+            if vertical {
+                s.fill_width = true;
+            } else if spec.uses_full_width() {
+                s.flex_fill = true;
+                s.fill_width = true;
+            }
             // Sibling separator: left border (horizontal) / top border (vertical).
             if idx > 0 {
                 s.descriptor.border.color = separator;

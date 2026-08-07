@@ -55,13 +55,7 @@ fn abs_block(
 }
 
 /// Mini theme preview: canvas fill + surface card + accent dot + text bar.
-fn swatch(
-    option: &ThemeOption,
-    theme: &dyn ThemeProvider,
-    w: f32,
-    h: f32,
-    selected: bool,
-) -> Node {
+fn swatch(option: &ThemeOption, theme: &dyn ThemeProvider, w: f32, h: f32, selected: bool) -> Node {
     let fallback = theme.resolve_color("color.background.surface");
     let color = |hex: &str| hex_color(hex).unwrap_or(fallback);
     let border = theme.resolve_color("color.border.subtle");
@@ -171,8 +165,9 @@ pub fn theme_select(
     let mut root = Node::container();
     {
         let s = &mut root.style;
-        s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = rem_to_px(0.375);
+        // The old GPUI root is a horizontal row: the open surface sits beside
+        // the trigger rather than becoming a second block below it.
+        s.descriptor.layout.direction = LayoutDirection::Row;
     }
     let mut root = root.child(trigger);
 

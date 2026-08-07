@@ -15,6 +15,7 @@
  * cannot drift between the web targets and the natives.
  */
 
+import type { AgentPlanSettledStatus } from "./agent-plan.ts";
 import type { AgentQuestionAnswer, AgentQuestionItem } from "./agent-question.ts";
 
 export type TranscriptRole = "user" | "assistant";
@@ -82,6 +83,30 @@ export interface TranscriptActivity {
   kind: "activity";
   id: string;
   label: string;
+  /**
+   * Whether the activity pulses. Defaults to true. Terminal states ("Turn
+   * cancelled") reuse this strip but must not signal ongoing work.
+   */
+  spinning?: boolean;
+}
+
+/**
+ * The record a decided plan leaves behind.
+ *
+ * The pending plan lives in the composer, because deciding it is input that
+ * requires the operator's attention. This is what it leaves in the conversation
+ * once decided — read-only by construction, so there is never a second decision
+ * surface on screen. Without it the transcript would have a hole where the
+ * operator steered the agent.
+ */
+export interface TranscriptDecidedPlan {
+  kind: "decided-plan";
+  id: string;
+  /** Raw markdown of the plan that was decided. */
+  plan: string;
+  status: AgentPlanSettledStatus;
+  /** When the decision was made, formatted by the host. */
+  decidedAt?: string;
 }
 
 export type TranscriptItem =
@@ -89,6 +114,7 @@ export type TranscriptItem =
   | TranscriptToolCall
   | TranscriptChangedFiles
   | TranscriptAnsweredQuestion
+  | TranscriptDecidedPlan
   | TranscriptActivity;
 
 // ── Contiguous-run grouping ──
@@ -114,6 +140,7 @@ export type TranscriptBlock =
   | TranscriptToolRun
   | TranscriptChangedFiles
   | TranscriptAnsweredQuestion
+  | TranscriptDecidedPlan
   | TranscriptActivity;
 
 /**

@@ -56,18 +56,26 @@ pub fn breadcrumbs(
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                 s.descriptor.text_color = Some(sep_color);
             }
-            el = el.child(sep.child(icon(&sep_icon_spec, theme)));
+            let mut sep_icon = icon(&sep_icon_spec, theme);
+            // The native primitive overrides the icon tint to the separator
+            // tier; the node backend does not inherit text color from a
+            // parent container, so carry that override on the icon itself.
+            sep_icon.style.descriptor.text_color = Some(sep_color);
+            el = el.child(sep.child(sep_icon));
         }
 
         let is_current = spec.is_current_at(item, i, visible_len);
-        let color = if is_current { current_color } else { text_color };
+        let color = if is_current {
+            current_color
+        } else {
+            text_color
+        };
 
         let mut crumb = Node::text(&item.label);
         crumb.style.descriptor.text_color = Some(color);
         crumb.style.text_size = Some(font_size);
 
-        if let (false, Some(href), Some(handler)) = (is_current, item.href.as_ref(), &on_navigate)
-        {
+        if let (false, Some(href), Some(handler)) = (is_current, item.href.as_ref(), &on_navigate) {
             let handler = Arc::clone(handler);
             let href = href.clone();
             crumb.style.descriptor.cursor = CursorHint::Pointer;

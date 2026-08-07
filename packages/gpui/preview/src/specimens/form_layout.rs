@@ -1,7 +1,7 @@
-use crate::app_state::AppState;
 use crate::PreviewRoot;
+use crate::app_state::AppState;
+use crate::node_compat::{Button, Checkbox, CompatRow, Eyebrow, Field, FormLayout, TextInput};
 use gpui::*;
-use poodle_gpui_components::{Button, Checkbox, Eyebrow, Field, FormLayout, TextInput};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, EyebrowSpec, TextInputSpec, ValidationState,
 };
@@ -76,9 +76,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             ),
                         )
                         .with_actions(
-                            div()
-                                .flex()
-                                .gap(px(8.0))
+                            CompatRow::new()
+                                .gap(theme.resolve_space_value("space.inline.sm"))
                                 .justify_end()
                                 .child(
                                     Button::from_spec(
@@ -170,9 +169,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             ),
                         )
                         .with_actions(
-                            div()
-                                .flex()
-                                .gap(px(8.0))
+                            CompatRow::new()
+                                .gap(theme.resolve_space_value("space.inline.sm"))
                                 .justify_end()
                                 .child(
                                     Button::from_spec(

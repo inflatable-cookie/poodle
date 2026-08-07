@@ -1,8 +1,8 @@
+use crate::node_compat::{Eyebrow, Separator};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Separator};
 use poodle_specs::{EyebrowSpec, RuleTone, SeparatorOrientation, SeparatorSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

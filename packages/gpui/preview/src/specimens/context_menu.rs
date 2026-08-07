@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{ContextMenu, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +7,18 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{ContextMenu, Eyebrow};
 use poodle_specs::{ContextMenuSpec, EyebrowSpec, MenuEntry, MenuItemKind};
+use std::sync::Arc;
+
+fn select_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "context-menu-action".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -63,13 +74,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ContextMenu::from_spec(spec, theme)
                         .with_id("specimen-context-menu")
                         .with_trigger(target_area)
-                        .on_select(cx.listener(|this, val: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("context-menu-action".to_string(), val.to_string());
-                            cx.notify();
-                        })),
+                        .on_select(select_handler(state)),
                 ),
         )
         .when(last_action.is_some(), |d| {

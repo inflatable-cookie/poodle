@@ -305,3 +305,9 @@
 .poodle-agent-chat-input__question {
   padding-bottom: var(--poodle-space-stack-sm);
 }
+
+/* The plan region: same seat as the question region — input requiring the
+   operator's attention lives above the editor, not in the transcript. */
+.poodle-agent-chat-input__plan {
+  padding-bottom: var(--poodle-space-stack-sm);
+}

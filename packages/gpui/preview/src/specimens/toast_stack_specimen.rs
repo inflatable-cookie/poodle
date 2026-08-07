@@ -1,6 +1,6 @@
+use crate::node_compat::{Button, Eyebrow, ToastStack};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, ToastStack};
 use poodle_specs::{ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_specs::{Toast, ToastStackSpec, ToastTone};
 
@@ -72,9 +72,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let mut size_stack = div().flex().flex_col().gap(px(16.0));
     for (size, size_label) in control_sizes {
         let toasts = vec![
-            Toast::new(format!("size-{size_label}-1"), format!("Toast at {size_label}"))
-                .with_tone(ToastTone::Info)
-                .with_message("Chrome scales with size."),
+            Toast::new(
+                format!("size-{size_label}-1"),
+                format!("Toast at {size_label}"),
+            )
+            .with_tone(ToastTone::Info)
+            .with_message("Chrome scales with size."),
             Toast::new(format!("size-{size_label}-2"), "Action available")
                 .with_tone(ToastTone::Success)
                 .with_message("Dismiss and action controls follow the same ladder.")
@@ -114,10 +117,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(group(theme, "Tones", surface(
-            ToastStack::from_spec(ToastStackSpec::new().with_toasts(tone_toasts), theme),
-            260.0,
-        )))
+        .child(group(
+            theme,
+            "Tones",
+            surface(
+                ToastStack::from_spec(ToastStackSpec::new().with_toasts(tone_toasts), theme),
+                260.0,
+            ),
+        ))
         .child(group(
             theme,
             "Interactive stack",

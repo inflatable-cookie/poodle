@@ -1,9 +1,9 @@
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{Eyebrow, ListContainer};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, ListContainer};
+use poodle_node::Node;
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{ListContainerSpec, ListContainerState};
 
@@ -34,12 +34,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             .with_page_size(10),
                         theme,
                     )
-                    .with_content(
-                        div()
-                            .text_sm()
-                            .text_color(color_to_hsla(text_secondary))
-                            .child("[ List items rendered here ]"),
-                    ),
+                    .with_content({
+                        let mut content = Node::text("[ List items rendered here ]");
+                        content.style.text_size = Some(14.0);
+                        content.style.descriptor.text_color = Some(text_secondary);
+                        content
+                    }),
                 ),
         )
         // --- State handling ---

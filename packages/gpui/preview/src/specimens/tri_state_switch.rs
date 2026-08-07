@@ -1,19 +1,11 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, TriStateSwitch};
-use poodle_specs::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec};
-
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, TriStateSwitch};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
-
-fn state_key(state: CheckState) -> usize {
-    match state {
-        CheckState::Unchecked => 0,
-        CheckState::Mixed => 1,
-        CheckState::Checked => 2,
-    }
-}
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_specs::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec, TriStateValue};
+use std::sync::Arc;
 
 fn state_from_key(value: usize) -> CheckState {
     match value {
@@ -31,7 +23,17 @@ fn state_label(state: CheckState) -> &'static str {
     }
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn filter_change(state: &AppState) -> Arc<dyn Fn(TriStateValue) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::Select {
+            key: "tri-state-filter".to_string(),
+            index: value.index(),
+        });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -56,14 +58,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         TriStateSwitchSpec::new().with_state(filter_state),
                         theme,
                     )
-                    .on_change(cx.listener(
-                        |this, value: &CheckState, _w, cx| {
-                            this.state
-                                .specimens
-                                .select("tri-state-filter", state_key(*value));
-                            cx.notify();
-                        },
-                    )),
+                    .on_change(filter_change(state)),
                 )
                 .child(
                     div()
@@ -210,14 +205,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_included_color("#22c55e"),
                         theme,
                     )
-                    .on_change(cx.listener(
-                        |this, value: &CheckState, _w, cx| {
-                            this.state
-                                .specimens
-                                .select("tri-state-filter", state_key(*value));
-                            cx.notify();
-                        },
-                    )),
+                    .on_change(filter_change(state)),
                 ),
         )
 }

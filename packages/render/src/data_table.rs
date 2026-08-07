@@ -80,10 +80,17 @@ pub fn data_table(
     let header_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
     let body_font = rem_to_px(size_font_rem(effective_size));
     let label_size = theme.resolve_space("typography.label.size");
-    let cell_gap = rem_to_px(0.5);
     let cell_px = rem_to_px(control_space_x_rem(spec.density));
-    let header_py = rem_to_px(panel_space_y_rem(spec.density));
-    let row_py = rem_to_px(panel_space_y_rem(spec.density) - 0.125);
+    // Svelte uses the effective control size for both header and body cell
+    // padding. Keep the two rows on one metric ladder so size variants do
+    // not drift vertically between backends.
+    let cell_py = rem_to_px(match effective_size {
+        poodle_specs::ControlSize::Xs => 0.3125,
+        poodle_specs::ControlSize::Sm => 0.375,
+        poodle_specs::ControlSize::Md => 0.5,
+        poodle_specs::ControlSize::Lg => 0.625,
+        poodle_specs::ControlSize::Xl => 0.75,
+    });
     let gap_sm = theme.resolve_space("space.inline.sm");
     let gap_md = theme.resolve_space("space.inline.md");
     let icon_sm = theme.resolve_space("size.icon.sm");
@@ -138,8 +145,8 @@ pub fn data_table(
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 pad.left = cell_px;
                 pad.right = cell_px;
-                pad.top = row_py;
-                pad.bottom = row_py;
+                pad.top = cell_py;
+                pad.bottom = cell_py;
                 s.descriptor.border.width = 1.0;
                 s.descriptor.border.color = border_default;
                 s.descriptor.cursor = CursorHint::Pointer;
@@ -162,10 +169,8 @@ pub fn data_table(
             s.descriptor.layout.alignment.main = MainAxisAlignment::End;
             s.descriptor.layout.spacing.gap = gap_md;
             let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = cell_px;
-            pad.right = cell_px;
-            pad.top = header_py;
-            pad.bottom = header_py;
+            pad.top = cell_py;
+            pad.bottom = cell_py;
             s.border_bottom_width = Some(1.0);
             s.descriptor.border.color = border;
         }
@@ -184,12 +189,9 @@ pub fn data_table(
     {
         let s = &mut header.style;
         s.descriptor.background = Some(header_fill);
-        s.descriptor.layout.spacing.gap = cell_gap;
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = cell_px;
-        pad.right = cell_px;
-        pad.top = header_py;
-        pad.bottom = header_py;
+        pad.top = cell_py;
+        pad.bottom = cell_py;
     }
 
     // Selectable: "select all" checkbox column header
@@ -225,6 +227,8 @@ pub fn data_table(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.spacing.gap = rem_to_px(0.25);
             s.descriptor.layout.width = LayoutSizing::Grow;
+            s.descriptor.layout.spacing.padding.left = cell_px;
+            s.descriptor.layout.spacing.padding.right = cell_px;
             if col.align_end {
                 s.descriptor.layout.alignment.main = MainAxisAlignment::End;
             }
@@ -275,6 +279,8 @@ pub fn data_table(
             let s = &mut cell.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(actions_width);
             s.descriptor.layout.alignment.main = MainAxisAlignment::End;
+            s.descriptor.layout.spacing.padding.left = cell_px;
+            s.descriptor.layout.spacing.padding.right = cell_px;
         }
         let mut label = Node::text("Actions");
         label.style.descriptor.text_color = Some(text_secondary);
@@ -298,8 +304,8 @@ pub fn data_table(
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = cell_px;
             pad.right = cell_px;
-            pad.top = row_py;
-            pad.bottom = row_py;
+            pad.top = cell_py;
+            pad.bottom = cell_py;
             s.border_bottom_width = Some(1.0);
             s.descriptor.border.color = border;
         }
@@ -334,8 +340,8 @@ pub fn data_table(
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = cell_px;
             pad.right = cell_px;
-            pad.top = row_py;
-            pad.bottom = row_py;
+            pad.top = cell_py;
+            pad.bottom = cell_py;
         }
         let mut msg = Node::text(empty_msg);
         msg.style.descriptor.text_color = Some(text_secondary);
@@ -361,12 +367,9 @@ pub fn data_table(
             {
                 let s = &mut row_el.style;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = cell_gap;
                 let pad = &mut s.descriptor.layout.spacing.padding;
-                pad.left = cell_px;
-                pad.right = cell_px;
-                pad.top = row_py;
-                pad.bottom = row_py;
+                pad.top = cell_py;
+                pad.bottom = cell_py;
                 s.descriptor.border.width = 1.0;
                 s.descriptor.border.color = border;
                 s.descriptor.background = Some(row_bg);
@@ -424,6 +427,8 @@ pub fn data_table(
                     {
                         let s = &mut cell.style;
                         s.descriptor.layout.width = LayoutSizing::Grow;
+                        s.descriptor.layout.spacing.padding.left = cell_px;
+                        s.descriptor.layout.spacing.padding.right = cell_px;
                         if col.align_end {
                             s.descriptor.layout.alignment.main = MainAxisAlignment::End;
                         }
@@ -448,6 +453,8 @@ pub fn data_table(
                     cell.style.descriptor.text_color = Some(text_primary);
                     cell.style.text_size = Some(body_font);
                     cell.style.descriptor.layout.width = LayoutSizing::Grow;
+                    cell.style.descriptor.layout.spacing.padding.left = cell_px;
+                    cell.style.descriptor.layout.spacing.padding.right = cell_px;
                     if col.align_end {
                         cell.style.text_align = Some(TextAlign::Right);
                     }
@@ -462,6 +469,8 @@ pub fn data_table(
                     let s = &mut cell.style;
                     s.descriptor.layout.width = LayoutSizing::Fixed(actions_width);
                     s.descriptor.layout.alignment.main = MainAxisAlignment::End;
+                    s.descriptor.layout.spacing.padding.left = cell_px;
+                    s.descriptor.layout.spacing.padding.right = cell_px;
                 }
                 let mut action = Node::text(&spec.row_action_label);
                 action.style.descriptor.text_color = Some(accent);
@@ -489,8 +498,8 @@ pub fn data_table(
                         let pad = &mut s.descriptor.layout.spacing.padding;
                         pad.left = cell_px;
                         pad.right = cell_px;
-                        pad.top = row_py;
-                        pad.bottom = row_py;
+                        pad.top = cell_py;
+                        pad.bottom = cell_py;
                         s.descriptor.border.width = 1.0;
                         s.descriptor.border.color = border;
                     }
@@ -566,8 +575,8 @@ pub fn data_table(
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = cell_px;
             pad.right = cell_px;
-            pad.top = header_py;
-            pad.bottom = header_py;
+            pad.top = cell_py;
+            pad.bottom = cell_py;
             s.border_top_width = Some(1.0);
             s.descriptor.border.color = border;
         }

@@ -1,16 +1,17 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, RelationPicker};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{DrillEnterArgs, Eyebrow, RelationPicker};
 use poodle_specs::{
     BrowseState, DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel,
     PickerFilterConfig, PickerFilterOption, PickerItemSpec, RelationPickerSpec, SelectionMode,
 };
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -196,53 +197,42 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     RelationPicker::from_spec(
                         RelationPickerSpec::new(Vec::new())
                             .with_drill_down(drill_config)
-                            .with_drill_down_path(drill_path)
+                            .with_drill_down_path(drill_path.clone())
                             .with_selection_mode(SelectionMode::Multiple)
                             .with_state(BrowseState::Ready),
                         theme,
                     )
-                    .on_drill_enter(cx.listener(|this, args: &DrillEnterArgs, _w, cx| {
-                        let current = this
-                            .state
-                            .specimens
-                            .text
-                            .get("relation-picker-drill-path")
-                            .cloned()
-                            .unwrap_or_default();
-                        let next = if current.is_empty() {
-                            args.item_id.clone()
-                        } else {
-                            format!("{}/{}", current, args.item_id)
-                        };
-                        this.state
-                            .specimens
-                            .text
-                            .insert("relation-picker-drill-path".to_string(), next);
-                        cx.notify();
-                    }))
-                    .on_breadcrumb_click(cx.listener(
-                        |this, depth: &usize, _w, cx| {
-                            let current = this
-                                .state
-                                .specimens
-                                .text
-                                .get("relation-picker-drill-path")
-                                .cloned()
-                                .unwrap_or_default();
-                            let segs: Vec<&str> = if current.is_empty() {
-                                Vec::new()
+                    .on_drill_enter({
+                        let events = Arc::clone(&state.node_events);
+                        let current_path = drill_path.join("/");
+                        Arc::new(move |item_id: &str| {
+                            let next = if current_path.is_empty() {
+                                item_id.to_string()
                             } else {
-                                current.split('/').collect()
+                                format!("{current_path}/{item_id}")
                             };
-                            let kept: Vec<&str> = segs.into_iter().take(*depth).collect();
-                            let next = kept.join("/");
-                            this.state
-                                .specimens
-                                .text
-                                .insert("relation-picker-drill-path".to_string(), next);
-                            cx.notify();
-                        },
-                    )),
+                            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "relation-picker-drill-path".to_string(),
+                                value: next,
+                            });
+                        })
+                    })
+                    .on_breadcrumb_click({
+                        let events = Arc::clone(&state.node_events);
+                        let current_path = drill_path.clone();
+                        Arc::new(move |depth: usize| {
+                            let next = current_path
+                                .iter()
+                                .take(depth)
+                                .cloned()
+                                .collect::<Vec<_>>()
+                                .join("/");
+                            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "relation-picker-drill-path".to_string(),
+                                value: next,
+                            });
+                        })
+                    }),
                 ),
         )
         // --- Semantic presentation (chrome size role, comfortable density) ---
@@ -332,10 +322,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     );
 
     // --- Sizes (xs–xl) ---
-    let mut sizes_row = div().flex().flex_col().gap(px(16.0)).child(Eyebrow::from_spec(
-        EyebrowSpec::new().with_content("Sizes"),
-        theme,
-    ));
+    let mut sizes_row = div()
+        .flex()
+        .flex_col()
+        .gap(px(16.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Sizes"),
+            theme,
+        ));
     for (label, size) in [
         ("XS", ControlSize::Xs),
         ("SM", ControlSize::Sm),
@@ -369,10 +363,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     root = root.child(sizes_row);
 
     // --- Densities ---
-    let mut densities_row = div().flex().flex_col().gap(px(16.0)).child(Eyebrow::from_spec(
-        EyebrowSpec::new().with_content("Densities"),
-        theme,
-    ));
+    let mut densities_row = div()
+        .flex()
+        .flex_col()
+        .gap(px(16.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Densities"),
+            theme,
+        ));
     for (label, density) in [
         ("Compact", ControlDensity::Compact),
         ("Default", ControlDensity::Default),

@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, MediaBrowsePanel};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, MediaBrowsePanel};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{
     ControlDensity, ControlSize, MediaBrowseItem, MediaBrowsePanelSpec, SemanticControlSizeRole,

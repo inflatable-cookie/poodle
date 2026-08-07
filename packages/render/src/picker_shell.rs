@@ -7,7 +7,9 @@ use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
 };
-use poodle_specs::{BrowseState, PickerShellSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{
+    BrowseState, PickerShellSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
+};
 
 use crate::color::{mix_srgb, TRANSPARENT};
 use crate::presentation::rem_to_px;
@@ -100,7 +102,8 @@ pub fn picker_shell(
     ));
 
     if let Some(description) = spec.description.as_ref() {
-        title_block = title_block.child(text(description.clone(), text_secondary, label_size, None));
+        title_block =
+            title_block.child(text(description.clone(), text_secondary, label_size, None));
     }
 
     let mut meta = Node::container();
@@ -149,12 +152,8 @@ pub fn picker_shell(
             s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
             s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         }
-        shell = shell.child(clip.child(text(
-            status_text.clone(),
-            text_secondary,
-            label_size,
-            None,
-        )));
+        shell =
+            shell.child(clip.child(text(status_text.clone(), text_secondary, label_size, None)));
     }
 
     if spec.state == BrowseState::Ready {

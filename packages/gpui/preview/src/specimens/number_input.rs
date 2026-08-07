@@ -1,12 +1,39 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, NumberInput};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, NumberInput};
 use poodle_specs::{EyebrowSpec, NumberInputSpec, ValidationState};
+use std::sync::{Arc, Mutex};
+
+fn step_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+    current: f64,
+    step: f64,
+    bound: f64,
+    increment: bool,
+    precision: Option<usize>,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let next = if increment {
+        (current + step).min(bound)
+    } else {
+        (current - step).max(bound)
+    };
+    let value = precision
+        .map(|digits| format!("{next:.digits$}"))
+        .unwrap_or_else(|| format!("{next}"));
+    let events = Arc::clone(events);
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.clone(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -52,37 +79,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Quantity"),
                         theme,
                     )
-                    .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                        let cur: f64 = this
-                            .state
-                            .specimens
-                            .text
-                            .get("number-input-quantity")
-                            .and_then(|s| s.parse().ok())
-                            .unwrap_or(1.0);
-                        let new_val = (cur + 1.0).min(100.0);
-                        this.state
-                            .specimens
-                            .text
-                            .insert("number-input-quantity".to_string(), format!("{}", new_val));
-                        cx.notify();
-                    }))
-                    .on_decrement(cx.listener(
-                        move |this, _e: &ClickEvent, _w, cx| {
-                            let cur: f64 = this
-                                .state
-                                .specimens
-                                .text
-                                .get("number-input-quantity")
-                                .and_then(|s| s.parse().ok())
-                                .unwrap_or(1.0);
-                            let new_val = (cur - 1.0).max(0.0);
-                            this.state.specimens.text.insert(
-                                "number-input-quantity".to_string(),
-                                format!("{}", new_val),
-                            );
-                            cx.notify();
-                        },
+                    .on_increment(step_handler(
+                        &state.node_events,
+                        "number-input-quantity",
+                        quantity,
+                        1.0,
+                        100.0,
+                        true,
+                        None,
+                    ))
+                    .on_decrement(step_handler(
+                        &state.node_events,
+                        "number-input-quantity",
+                        quantity,
+                        1.0,
+                        0.0,
+                        false,
+                        None,
                     )),
                 )
                 .child(
@@ -111,37 +124,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Price"),
                         theme,
                     )
-                    .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                        let cur: f64 = this
-                            .state
-                            .specimens
-                            .text
-                            .get("number-input-price")
-                            .and_then(|s| s.parse().ok())
-                            .unwrap_or(29.99);
-                        let new_val = ((cur + 0.01) * 100.0).round() / 100.0;
-                        this.state
-                            .specimens
-                            .text
-                            .insert("number-input-price".to_string(), format!("{:.2}", new_val));
-                        cx.notify();
-                    }))
-                    .on_decrement(cx.listener(
-                        move |this, _e: &ClickEvent, _w, cx| {
-                            let cur: f64 = this
-                                .state
-                                .specimens
-                                .text
-                                .get("number-input-price")
-                                .and_then(|s| s.parse().ok())
-                                .unwrap_or(29.99);
-                            let new_val = ((cur - 0.01) * 100.0).round() / 100.0;
-                            this.state.specimens.text.insert(
-                                "number-input-price".to_string(),
-                                format!("{:.2}", new_val.max(0.0)),
-                            );
-                            cx.notify();
-                        },
+                    .on_increment(step_handler(
+                        &state.node_events,
+                        "number-input-price",
+                        price,
+                        0.01,
+                        f64::INFINITY,
+                        true,
+                        Some(2),
+                    ))
+                    .on_decrement(step_handler(
+                        &state.node_events,
+                        "number-input-price",
+                        price,
+                        0.01,
+                        0.0,
+                        false,
+                        Some(2),
                     )),
                 )
                 .child(

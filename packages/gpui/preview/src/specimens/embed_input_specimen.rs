@@ -1,8 +1,8 @@
+use crate::node_compat::{EmbedInput, Eyebrow, Field};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{EmbedInput, Eyebrow, Field};
 use poodle_specs::{EmbedInputSpec, ParsedEmbed};
 use poodle_specs::{EyebrowSpec, FieldSpec};
 
@@ -108,7 +108,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         FieldSpec::new("embed-input-video", "Video embed"),
                         theme,
                     )
-                    .with_control(
+                    .with_embed_control(
                         EmbedInput::from_spec(
                             EmbedInputSpec::new()
                                 .with_placeholder("https://youtube.com/watch?v=..."),

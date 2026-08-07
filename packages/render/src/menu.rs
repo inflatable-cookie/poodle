@@ -9,13 +9,13 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing, Node, NodeRole,
-    NodeToggled, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole, NodeToggled, StylePatch,
 };
-use poodle_specs::{MenuItemKind, MenuSpec};
+use poodle_specs::{ControlDensity, ControlSize, MenuItemKind, MenuSpec};
 
-use crate::color::with_alpha;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::color::{mix_srgb, with_alpha};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 
 pub fn menu(
     spec: &MenuSpec,
@@ -23,11 +23,21 @@ pub fn menu(
     on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let meta_font_size = rem_to_px(0.6875);
+    let font_size = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 0.9375,
+        ControlSize::Xl => 1.0,
+    });
+    let item_min_height = rem_to_px(control_height_rem(effective_size));
+    let meta_font_size = theme.resolve_space("typography.caption.size");
 
-    let item_px = rem_to_px(control_space_x_rem(spec.density));
-    let item_py = rem_to_px(0.375);
+    let item_px = rem_to_px(match spec.density {
+        ControlDensity::Compact => 0.375,
+        ControlDensity::Default | ControlDensity::Comfortable => 0.75,
+    });
+    let item_py = theme.resolve_space("space.control.y");
     let menu_py = rem_to_px(0.25);
     let item_gap = theme.resolve_space("space.inline.sm");
     let separator_my = rem_to_px(0.25);
@@ -37,18 +47,22 @@ pub fn menu(
         - rem_to_px(0.125))
     .max(0.0);
 
-    let fill = theme.resolve_color(spec.surface_fill_token());
-    let border = theme.resolve_color(spec.overlay_border_token());
+    let elevated = theme.resolve_color(spec.surface_fill_token());
+    let panel = theme.resolve_color("color.background.panel");
+    let fill = mix_srgb(elevated, panel, 0.98);
+    let border_base = theme.resolve_color(spec.overlay_border_token());
+    let border = with_alpha(border_base, border_base.3 * 0.72);
     let radius = theme.resolve_radius(spec.overlay_radius_token());
     let text_color = theme.resolve_color(spec.item_text_token());
     let muted_color = theme.resolve_color("color.text.secondary");
-    let separator_color = theme.resolve_color(spec.separator_color_token());
+    let separator_base = theme.resolve_color(spec.separator_color_token());
     let danger_color = theme.resolve_color("color.status.danger");
     let accent_color = theme.resolve_color(spec.item_highlight_token());
     let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
 
     let hover_tint = with_alpha(accent_color, accent_color.3 * 0.16);
     let danger_hover_tint = with_alpha(danger_color, danger_color.3 * 0.14);
+    let separator_color = with_alpha(separator_base, separator_base.3 * 0.72);
 
     let mut el = Node::container();
     {
@@ -63,7 +77,9 @@ pub fn menu(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.padding.top = menu_py;
         s.descriptor.layout.spacing.padding.bottom = menu_py;
-        s.min_width = Some(rem_to_px(14.0));
+        s.descriptor.layout.spacing.padding.left = menu_py;
+        s.descriptor.layout.spacing.padding.right = menu_py;
+        s.min_width = Some(theme.resolve_space("size.menu.minWidth"));
         // Token-accurate elevation.overlay, same mapping as select's panel.
         s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
         s.overlay = true;
@@ -83,7 +99,9 @@ pub fn menu(
             let s = &mut item.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
             s.descriptor.layout.spacing.gap = item_gap;
+            s.min_height = Some(item_min_height);
             s.descriptor.layout.spacing.padding.left = item_px;
             s.descriptor.layout.spacing.padding.right = item_px;
             s.descriptor.layout.spacing.padding.top = item_py;
@@ -100,7 +118,11 @@ pub fn menu(
         }
 
         let mut label = Node::text(&entry.label);
-        label.style.descriptor.text_color = Some(label_color);
+        label.style.descriptor.text_color = Some(if entry.is_disabled {
+            muted_color
+        } else {
+            label_color
+        });
         label.style.text_size = Some(font_size);
         label.style.descriptor.layout.width = LayoutSizing::Grow;
         item = item.child(label);
@@ -114,7 +136,6 @@ pub fn menu(
             let mut meta = Node::text(shortcut);
             meta.style.descriptor.text_color = Some(muted_color);
             meta.style.text_size = Some(meta_font_size);
-            meta.style.font_family = Some(FontFamily::Mono);
             item = item.child(meta);
         }
 

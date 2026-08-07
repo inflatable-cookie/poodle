@@ -23,8 +23,8 @@ use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, mix_srgb, with_alpha};
 use crate::date_picker::DatePickerHandlers;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, date_picker_indicator_font_rem, panel_space_x_rem,
-    panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
 };
 use crate::time_field::time_field;
 
@@ -34,19 +34,22 @@ pub fn date_time_range_picker(
     handlers: DatePickerHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = rem_to_px(control_height_rem(effective_size));
+    let height = theme.resolve_space("size.control.height")
+        + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    // Contract §8 indicator font-size per size — shared ladder with the
-    // sibling date/time pickers.
-    let icon_size = rem_to_px(date_picker_indicator_font_rem(effective_size));
+    let pad_x = theme.resolve_space("space.inline.md")
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
+    let inline_gap = theme.resolve_space("space.inline.sm");
+    let icon_size = theme.resolve_space("size.icon.sm");
 
     let fill = theme.resolve_color("color.background.surface");
     let elevated = theme.resolve_color("color.background.elevated");
     let border_color = theme.resolve_color("color.border.default");
+    let accent = theme.resolve_color("color.accent.base");
     let radius = theme.resolve_radius("radius.control");
     let text_color = theme.resolve_color("color.text.primary");
     let muted = theme.resolve_color("color.text.secondary");
+    let icon_muted = theme.resolve_color("color.icon.muted");
 
     // Hover: color-mix(surface 86%, elevated).
     let hover_bg = mix_srgb(fill, elevated, 0.14);
@@ -77,9 +80,14 @@ pub fn date_time_range_picker(
     let mut trigger = Node::container();
     {
         let s = &mut trigger.style;
+        s.fill_width = true;
         s.descriptor.background = Some(fill);
         s.descriptor.border.width = 1.0;
-        s.descriptor.border.color = border_color;
+        s.descriptor.border.color = if spec.current_open() {
+            accent
+        } else {
+            border_color
+        };
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_right = radius;
@@ -91,7 +99,7 @@ pub fn date_time_range_picker(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = rem_to_px(0.75); // contract trigger gap
+        s.descriptor.layout.spacing.gap = inline_gap;
     }
     trigger.interaction.focusable = true;
 
@@ -100,9 +108,9 @@ pub fn date_time_range_picker(
     value_label.style.text_size = Some(font_size);
     value_label.style.descriptor.layout.width = LayoutSizing::Grow;
     // Disclosure chevron (contract §2 Indicator; text-secondary, per-size).
-    let mut chevron = Node::icon("chevron-down", icon_size);
-    chevron.style.descriptor.text_color = Some(muted);
-    let mut trigger = trigger.child(value_label).child(chevron);
+    let mut indicator = Node::icon("calendar", icon_size);
+    indicator.style.descriptor.text_color = Some(icon_muted);
+    let mut trigger = trigger.child(value_label).child(indicator);
 
     if !spec.is_disabled {
         trigger.style.descriptor.cursor = CursorHint::Pointer;
@@ -125,7 +133,8 @@ pub fn date_time_range_picker(
         let s = &mut root.style;
         // Explicit Row (see switch.rs): closed = single trigger child.
         s.descriptor.layout.direction = LayoutDirection::Row;
-        s.min_width = Some(rem_to_px(18.0));
+        s.fill_width = true;
+        s.min_width = Some(theme.resolve_space("size.dateTimeRangePicker.minWidth"));
     }
     let mut root = root.child(trigger);
 
@@ -157,7 +166,8 @@ pub fn date_time_range_picker(
             {
                 let s = &mut section.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.width = LayoutSizing::Grow;
+                s.flex_grow = Some(1.0);
+                s.flex_basis = Some(0.0);
                 s.descriptor.layout.spacing.gap = rem_to_px(0.375); // contract Time Section gap
             }
             let mut caption = Node::text(label);
@@ -171,9 +181,10 @@ pub fn date_time_range_picker(
         let mut times_row = Node::container();
         {
             let s = &mut times_row.style;
+            s.fill_width = true;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-            s.descriptor.layout.spacing.gap = rem_to_px(0.75);
+            s.descriptor.layout.spacing.gap = inline_gap;
         }
         let times_row = times_row
             .child(time_section("START TIME", val.start.time.clone()))
@@ -183,7 +194,9 @@ pub fn date_time_range_picker(
         let mut body = Node::container();
         {
             let s = &mut body.style;
+            s.fill_width = true;
             s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = rem_to_px(0.875);
         }
         let body = body
@@ -192,6 +205,7 @@ pub fn date_time_range_picker(
                 theme,
                 CalendarHandlers {
                     on_select: handlers.on_select.clone(),
+                    on_range_select: None,
                     on_navigate: handlers.on_navigate.clone(),
                 },
             ))
@@ -220,17 +234,17 @@ pub fn date_time_range_picker(
             s.descriptor.border.color = surface_border;
             s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
             let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = rem_to_px(panel_space_y_rem(spec.density));
-            pad.bottom = rem_to_px(panel_space_y_rem(spec.density));
-            pad.left = rem_to_px(panel_space_x_rem(spec.density));
-            pad.right = rem_to_px(panel_space_x_rem(spec.density));
+            pad.top = theme.resolve_space("space.panel.y");
+            pad.bottom = theme.resolve_space("space.panel.y");
+            pad.left = theme.resolve_space("space.panel.x");
+            pad.right = theme.resolve_space("space.panel.x");
         }
         let surface = surface.child(body);
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
         // platform delta; rendered as a flow column with the contract gap).
         root.style.descriptor.layout.direction = LayoutDirection::Column;
-        root.style.descriptor.layout.spacing.gap = rem_to_px(0.375);
+        root.style.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
         root = root.child(surface);
     }
 

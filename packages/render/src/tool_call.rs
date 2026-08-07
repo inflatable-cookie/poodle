@@ -10,9 +10,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::ToolCallSpec;
 
 use crate::presentation::rem_to_px;

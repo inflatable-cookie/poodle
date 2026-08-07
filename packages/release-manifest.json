@@ -152,14 +152,6 @@
       "channel": "preview"
     },
     {
-      "name": "poodle-gpui-components",
-      "path": "packages/gpui/components",
-      "kind": "renderer-components",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
       "name": "poodle-gpui-preview",
       "path": "packages/gpui/preview",
       "kind": "native-preview",

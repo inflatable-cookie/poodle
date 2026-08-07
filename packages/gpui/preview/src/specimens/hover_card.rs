@@ -1,11 +1,26 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, HoverCard};
 use crate::specimens::overlay_state;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, HoverCard};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{EyebrowSpec, HoverCardSpec, OverlayPlacement};
+
+fn content(title: &str, body: &str, secondary: poodle_node::ColorValue) -> Node {
+    let mut root = Node::container();
+    root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.style.descriptor.layout.spacing.gap = 4.0;
+    root.style.max_width = Some(256.0);
+    let mut heading = Node::text(title);
+    heading.style.text_size = Some(14.0);
+    heading.style.text_weight = Some(600);
+    let mut copy = Node::text(body);
+    copy.style.text_size = Some(12.0);
+    copy.style.descriptor.text_color = Some(secondary);
+    root.child(heading).child(copy)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -58,20 +73,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .child("@clay".to_string())
                         )
                         .with_content(
-                            div().flex().flex_col().gap(px(4.0))
-                                .max_w(px(256.0))
-                                .child(
-                                    div()
-                                        .text_sm()
-                                        .font_weight(FontWeight::SEMIBOLD)
-                                        .child("Clay".to_string())
-                                )
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Design systems engineer working on Poodle. Loves component architecture and accessibility.".to_string())
-                                )
+                            content(
+                                "Clay",
+                                "Design systems engineer working on Poodle. Loves component architecture and accessibility.",
+                                text_secondary,
+                            )
                         )
                 )
         )
@@ -115,20 +121,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .child("poodle/svelte-primitives".to_string())
                     )
                     .with_content(
-                        div().flex().flex_col().gap(px(4.0))
-                            .max_w(px(256.0))
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .font_weight(FontWeight::SEMIBOLD)
-                                    .child("svelte-primitives".to_string())
-                            )
-                            .child(
-                                div()
-                                    .text_xs()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child("Core primitive components for the Poodle design system. 64 components, 94% coverage.".to_string())
-                            )
+                        content(
+                            "svelte-primitives",
+                            "Core primitive components for the Poodle design system. 64 components, 94% coverage.",
+                            text_secondary,
+                        )
                     )
                 )
         )

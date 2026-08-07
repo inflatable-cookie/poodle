@@ -84,6 +84,23 @@ impl VideoPlayerSpec {
         self
     }
 
+    pub fn with_captions_src(mut self, captions_src: impl Into<String>) -> Self {
+        self.captions_src = Some(captions_src.into());
+        self
+    }
+
+    pub fn with_show_captions(mut self, shows_captions: bool) -> Self {
+        self.shows_captions = shows_captions;
+        self
+    }
+
+    /// Contract §2: the captions `<track>` renders only when both
+    /// `showCaptions` and `captionsSrc` are present. It carries no chrome of
+    /// its own on any target.
+    pub fn renders_captions_track(&self) -> bool {
+        self.shows_captions && self.captions_src.is_some()
+    }
+
     pub fn progress(&self) -> f64 {
         if self.duration <= 0.0 {
             0.0

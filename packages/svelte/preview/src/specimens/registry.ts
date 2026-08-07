@@ -90,6 +90,8 @@ import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import StepperSpecimen from "./StepperSpecimen.svelte";
 import AgentMessageSpecimen from "./AgentMessageSpecimen.svelte";
+import AgentPlanSpecimen from "./AgentPlanSpecimen.svelte";
+import AgentPlanRecordSpecimen from "./AgentPlanRecordSpecimen.svelte";
 import AgentQuestionSpecimen from "./AgentQuestionSpecimen.svelte";
 import AgentQuestionRecordSpecimen from "./AgentQuestionRecordSpecimen.svelte";
 import AgentTranscriptSpecimen from "./AgentTranscriptSpecimen.svelte";
@@ -243,6 +245,8 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "segmented-control": SegmentedControlSpecimen,
   stepper: StepperSpecimen,
   "agent-message": AgentMessageSpecimen,
+  "agent-plan": AgentPlanSpecimen,
+  "agent-plan-record": AgentPlanRecordSpecimen,
   "agent-question": AgentQuestionSpecimen,
   "agent-question-record": AgentQuestionRecordSpecimen,
   "agent-transcript": AgentTranscriptSpecimen,

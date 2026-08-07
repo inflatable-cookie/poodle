@@ -1,12 +1,43 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Calendar, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Calendar, Eyebrow};
 use poodle_specs::{CalendarMode, CalendarSpec, DateRangeValue, EyebrowSpec};
+use std::sync::{Arc, Mutex};
+
+fn text_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn range_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+) -> Arc<dyn Fn(&DateRangeValue) + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move |range| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetOptionalText {
+            key: "calendar-range-start".to_string(),
+            value: range.start.clone(),
+        });
+        events.push(NodeSpecimenEvent::SetOptionalText {
+            key: "calendar-range-end".to_string(),
+            value: range.end.clone(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -42,20 +73,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     Calendar::from_spec(spec, theme)
                         .with_id("interactive")
-                        .on_select(cx.listener(|this, date: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("calendar-selected".to_string(), date.to_string());
-                            cx.notify();
-                        }))
-                        .on_navigate(cx.listener(|this, month: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("calendar-nav-month".to_string(), month.to_string());
-                            cx.notify();
-                        }))
+                        .on_select(text_handler(&state.node_events, "calendar-selected"))
+                        .on_navigate(text_handler(&state.node_events, "calendar-nav-month"))
                 })
                 .child(
                     div()
@@ -114,25 +133,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                     Calendar::from_spec(spec, theme)
                         .with_id("range")
-                        .on_range_select(cx.listener(|this, range: &DateRangeValue, _w, cx| {
-                            if let Some(ref start) = range.start {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("calendar-range-start".to_string(), start.clone());
-                            } else {
-                                this.state.specimens.text.remove("calendar-range-start");
-                            }
-                            if let Some(ref end) = range.end {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("calendar-range-end".to_string(), end.clone());
-                            } else {
-                                this.state.specimens.text.remove("calendar-range-end");
-                            }
-                            cx.notify();
-                        }))
+                        .on_range_select(range_handler(&state.node_events))
                 })
                 .child(
                     div()

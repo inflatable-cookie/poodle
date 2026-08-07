@@ -1,13 +1,16 @@
+use crate::node_compat::Text;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::theme_ext::resolve_px;
-use poodle_gpui_components::Text;
-use poodle_specs::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight};
+
+use poodle_specs::{
+    TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // Spacing between specimen rows resolves from the stack-sm token, not a
     // hardcoded px value.
-    let stack_gap = resolve_px(theme, "space.stack.sm");
+    let stack_gap = px(theme.resolve_space("space.stack.sm"));
     div()
         .flex()
         .flex_col()

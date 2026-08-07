@@ -1,9 +1,10 @@
+use crate::node_compat::{Eyebrow, IntoCompatNode, MediaPreview, Surface};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, MediaPreview, Surface};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
-    AspectRatio, CardVariant, ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPreviewSpec,
-    MediaState, SurfaceSpec, SurfaceTone,
+    AspectRatio, CardVariant, ControlDensity, ControlSize, EyebrowSpec, MediaKind,
+    MediaPreviewSpec, MediaState, SurfaceSpec, SurfaceTone,
 };
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -61,37 +62,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_col()
                 .gap(px(12.0))
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Image, "Rendering preview")
-                            .with_eyebrow("Image")
-                            .with_state(MediaState::Loading)
-                            .with_state_message("Preview is being generated.")
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    ),
-                )
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
-                            .with_eyebrow("Document")
-                            .with_state(MediaState::Error)
-                            .with_state_title("Preview unavailable")
-                            .with_state_message("This file cannot be previewed.")
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    ),
-                )
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Image, "Empty slot")
-                            .with_eyebrow("Image")
-                            .with_state(MediaState::Empty)
-                            .with_state_message("No preview available yet.")
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    ),
-                ),
+                .child(MediaPreview::from_spec(
+                    MediaPreviewSpec::new(MediaKind::Image, "Rendering preview")
+                        .with_eyebrow("Image")
+                        .with_state(MediaState::Loading)
+                        .with_state_message("Preview is being generated.")
+                        .with_aspect_ratio(AspectRatio::Landscape),
+                    theme,
+                ))
+                .child(MediaPreview::from_spec(
+                    MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
+                        .with_eyebrow("Document")
+                        .with_state(MediaState::Error)
+                        .with_state_title("Preview unavailable")
+                        .with_state_message("This file cannot be previewed.")
+                        .with_aspect_ratio(AspectRatio::Landscape),
+                    theme,
+                ))
+                .child(MediaPreview::from_spec(
+                    MediaPreviewSpec::new(MediaKind::Image, "Empty slot")
+                        .with_eyebrow("Image")
+                        .with_state(MediaState::Empty)
+                        .with_state_message("No preview available yet.")
+                        .with_aspect_ratio(AspectRatio::Landscape),
+                    theme,
+                )),
         ))
         // ── Card variants ──
         .child(group(
@@ -195,15 +190,19 @@ fn density_preview(
 }
 
 /// Real Surface-based media slot content (token-resolved tone + radius).
-fn media_slot(theme: &GpuiThemeProvider, text: &str) -> impl IntoElement {
-    Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), theme).with_content(
-        div()
-            .flex()
-            .items_center()
-            .justify_center()
-            .min_h(px(140.0))
-            .child(text.to_string()),
-    )
+fn media_slot(theme: &GpuiThemeProvider, text: &str) -> Node {
+    let mut content = Node::container();
+    content.style.descriptor.layout.direction = LayoutDirection::Row;
+    content.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    content.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+    content.style.descriptor.layout.height = LayoutSizing::Constrained {
+        min: Some(140.0),
+        max: None,
+    };
+    content = content.child(Node::text(text));
+    Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), theme)
+        .with_content(content)
+        .into_compat_node()
 }
 
 fn group(label: &str, theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {

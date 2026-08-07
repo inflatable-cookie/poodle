@@ -1,17 +1,61 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Accordion, Eyebrow};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Accordion, Eyebrow};
+use poodle_node::Node;
 use poodle_specs::{
     AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
     EyebrowSpec,
 };
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn content_node(text: impl Into<String>, color: poodle_node::ColorValue) -> Node {
+    let mut node = Node::text(text);
+    node.style.text_size = Some(14.0);
+    node.style.line_height = Some(1.5);
+    node.style.descriptor.text_color = Some(color);
+    node
+}
+
+fn single_toggle(state: &AppState, current: Option<String>) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetToggle {
+            key: "accordion-single-__init".to_string(),
+            value: true,
+        });
+        for item in ["getting-started", "api-reference", "accessibility"] {
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: format!("accordion-single-{item}"),
+                value: current.as_deref() != Some(value) && item == value,
+            });
+        }
+    })
+}
+
+fn multi_toggle(state: &AppState, current: Vec<String>) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetToggle {
+            key: "accordion-multi-__init".to_string(),
+            value: true,
+        });
+        for item in ["design", "keyboard", "known-issues"] {
+            let was_open = current.iter().any(|open| open == item);
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: format!("accordion-multi-{item}"),
+                value: if item == value { !was_open } else { was_open },
+            });
+        }
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let ts = crate::style_bridge::color_to_hsla(text_secondary);
 
     // --- Single selection items ---
     let single_items = vec![
@@ -52,35 +96,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let mut single_accordion = Accordion::from_spec(single_spec, theme)
         .with_id("specimen-accordion-single")
-        .on_toggle(cx.listener(|this, value: &str, _w, cx| {
-            // Mark as initialized so defaults stop applying
-            let init_key = "accordion-single-__init".to_string();
-            if !this.state.specimens.is_on(&init_key) {
-                this.state.specimens.toggle(&init_key);
-            }
-            let key = format!("accordion-single-{}", value);
-            let is_on = this.state.specimens.is_on(&key);
-            for item_val in &["getting-started", "api-reference", "accessibility"] {
-                let k = format!("accordion-single-{}", item_val);
-                if this.state.specimens.is_on(&k) {
-                    this.state.specimens.toggle(&k);
-                }
-            }
-            if !is_on {
-                this.state.specimens.toggle(&key);
-            }
-            cx.notify();
-        }));
+        .on_toggle(single_toggle(state, single_expanded.clone()));
 
     for (value, text) in &single_content {
-        single_accordion = single_accordion.with_content(
-            *value,
-            div()
-                .text_size(px(14.0))
-                .line_height(relative(1.5))
-                .text_color(ts)
-                .child(text.to_string()),
-        );
+        single_accordion =
+            single_accordion.with_content(*value, content_node(text.to_string(), text_secondary));
     }
 
     // --- Multiple selection items ---
@@ -118,35 +138,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_collapsible(true);
 
     if !multi_expanded.is_empty() {
-        multi_spec = multi_spec.with_value(AccordionSelectionValue::Multiple(multi_expanded));
+        multi_spec =
+            multi_spec.with_value(AccordionSelectionValue::Multiple(multi_expanded.clone()));
     }
 
     let mut multi_accordion = Accordion::from_spec(multi_spec, theme)
         .with_id("specimen-accordion-multi")
-        .on_toggle(cx.listener(|this, value: &str, _w, cx| {
-            let init_key = "accordion-multi-__init".to_string();
-            if !this.state.specimens.is_on(&init_key) {
-                // First interaction: initialize from defaults
-                this.state.specimens.toggle(&init_key);
-                for default_val in &["design", "keyboard"] {
-                    let k = format!("accordion-multi-{}", default_val);
-                    this.state.specimens.toggle(&k); // set defaults on
-                }
-            }
-            let key = format!("accordion-multi-{}", value);
-            this.state.specimens.toggle(&key);
-            cx.notify();
-        }));
+        .on_toggle(multi_toggle(state, multi_expanded.clone()));
 
     for (value, text) in &multi_content {
-        multi_accordion = multi_accordion.with_content(
-            *value,
-            div()
-                .text_size(px(14.0))
-                .line_height(relative(1.5))
-                .text_color(ts)
-                .child(text.to_string()),
-        );
+        multi_accordion =
+            multi_accordion.with_content(*value, content_node(text.to_string(), text_secondary));
     }
 
     // --- Descriptions + disabled item (static) ---
@@ -173,21 +175,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .with_id("specimen-accordion-described");
 
     for (value, text) in [
-        ("plan", "Group related changes together and keep the scope tight."),
+        (
+            "plan",
+            "Group related changes together and keep the scope tight.",
+        ),
         (
             "build",
             "Each dimension and color must trace back to a semantic token.",
         ),
-        ("locked", "This panel cannot be opened while the item is disabled."),
+        (
+            "locked",
+            "This panel cannot be opened while the item is disabled.",
+        ),
     ] {
-        described_accordion = described_accordion.with_content(
-            value,
-            div()
-                .text_size(px(14.0))
-                .line_height(relative(1.5))
-                .text_color(ts)
-                .child(text.to_string()),
-        );
+        described_accordion =
+            described_accordion.with_content(value, content_node(text.to_string(), text_secondary));
     }
 
     // --- Sizes (xs–xl, static) ---
@@ -203,18 +205,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         let acc = Accordion::from_spec(
             AccordionSpec::new(vec![AccordionItemSpec::new("section", "Section")
                 .with_description("Resolves dimensions from the size token.")])
-                .with_value(AccordionSelectionValue::Single("section".to_string())),
+            .with_value(AccordionSelectionValue::Single("section".to_string())),
             theme,
         )
         .with_id(format!("specimen-accordion-size-{label}"))
         .size(size)
         .with_content(
             "section",
-            div()
-                .text_size(px(14.0))
-                .line_height(relative(1.5))
-                .text_color(ts)
-                .child(format!("Accordion panel content at {label} size.")),
+            content_node(
+                format!("Accordion panel content at {label} size."),
+                text_secondary,
+            ),
         );
         sizes_row = sizes_row.child(acc);
     }
@@ -230,18 +231,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         let acc = Accordion::from_spec(
             AccordionSpec::new(vec![AccordionItemSpec::new("section", "Section")
                 .with_description("Density only changes inline spacing, not height.")])
-                .with_value(AccordionSelectionValue::Single("section".to_string())),
+            .with_value(AccordionSelectionValue::Single("section".to_string())),
             theme,
         )
         .with_id(format!("specimen-accordion-density-{label}"))
         .with_density(density)
         .with_content(
             "section",
-            div()
-                .text_size(px(14.0))
-                .line_height(relative(1.5))
-                .text_color(ts)
-                .child(format!("Accordion panel content at {label} density.")),
+            content_node(
+                format!("Accordion panel content at {label} density."),
+                text_secondary,
+            ),
         );
         densities_row = densities_row.child(acc);
     }
@@ -262,8 +262,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(group("Single selection", single_accordion.into_any_element()))
-        .child(group("Multiple selection", multi_accordion.into_any_element()))
+        .child(group(
+            "Single selection",
+            single_accordion.into_any_element(),
+        ))
+        .child(group(
+            "Multiple selection",
+            multi_accordion.into_any_element(),
+        ))
         .child(group(
             "Descriptions + disabled item",
             described_accordion.into_any_element(),

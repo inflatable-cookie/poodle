@@ -1,9 +1,9 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Field, TextInput};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Field, TextInput};
 use poodle_specs::{EyebrowSpec, FieldSpec, TextInputSpec, ValidationState};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -56,24 +56,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_description("Enter your full name."),
                         theme,
                     )
-                    .with_control(
-                        TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("name-field")
-                                .with_placeholder("Jane Doe")
-                                .with_value(&name_value),
-                            theme,
-                        )
-                        .on_change(cx.listener(
-                            |this, val: &str, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("text-input-name".to_string(), val.to_string());
-                                cx.notify();
-                            },
-                        )),
-                    ),
+                    .with_control(live_text_input(
+                        TextInputSpec::new()
+                            .with_id("name-field")
+                            .with_placeholder("Jane Doe")
+                            .with_value(&name_value),
+                        theme,
+                        state,
+                        "text-input-name",
+                    )),
                 ),
         )
         // --- With validation ---
@@ -99,25 +90,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         },
                         theme,
                     )
-                    .with_control(
-                        TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("email-field")
-                                .with_placeholder("you@example.com")
-                                .with_value(&email_value)
-                                .with_validation_state(validation_state),
-                            theme,
-                        )
-                        .on_change(cx.listener(
-                            |this, val: &str, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("text-input-email".to_string(), val.to_string());
-                                cx.notify();
-                            },
-                        )),
-                    ),
+                    .with_control(live_text_input(
+                        TextInputSpec::new()
+                            .with_id("email-field")
+                            .with_placeholder("you@example.com")
+                            .with_value(&email_value)
+                            .with_validation_state(validation_state),
+                        theme,
+                        state,
+                        "text-input-email",
+                    )),
                 ),
         )
         // --- Async validation ---
@@ -138,24 +120,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_pending_message("Checking availability..."),
                         theme,
                     )
-                    .with_control(
-                        TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("workspace-field")
-                                .with_value(&workspace_value)
-                                .with_validation_state(ValidationState::Pending),
-                            theme,
-                        )
-                        .on_change(cx.listener(
-                            |this, val: &str, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("text-input-workspace".to_string(), val.to_string());
-                                cx.notify();
-                            },
-                        )),
-                    ),
+                    .with_control(live_text_input(
+                        TextInputSpec::new()
+                            .with_id("workspace-field")
+                            .with_value(&workspace_value)
+                            .with_validation_state(ValidationState::Pending),
+                        theme,
+                        state,
+                        "text-input-workspace",
+                    )),
                 ),
         )
         // --- Slug ---
@@ -450,4 +423,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .into_any_element()
         },
     )
+}
+
+fn live_text_input(
+    spec: TextInputSpec,
+    theme: &GpuiThemeProvider,
+    state: &AppState,
+    key: &'static str,
+) -> TextInput {
+    let events = state.node_events.clone();
+    TextInput::from_spec(spec, theme).on_change(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
 }

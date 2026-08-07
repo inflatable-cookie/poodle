@@ -1,13 +1,14 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, MarkdownEditor};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, MarkdownEditor};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::MarkdownEditorSpec;
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -33,14 +34,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_mode(&md_mode),
                         theme,
                     )
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("editor-md-value".to_string(), val.to_string());
-                        cx.notify();
-                    }))
-                    .on_mode_change(cx.listener(|this, mode: &str, _w, cx| {
-                        this.state.specimens.text.insert("editor-md-mode".to_string(), mode.to_string());
-                        cx.notify();
-                    }))
+                    .on_change({
+                        let events = Arc::clone(&state.node_events);
+                        Arc::new(move |value: &str| {
+                            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "editor-md-value".to_string(),
+                                value: value.to_string(),
+                            });
+                        })
+                    })
+                    .on_mode_change({
+                        let events = Arc::clone(&state.node_events);
+                        Arc::new(move |mode: &str| {
+                            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "editor-md-mode".to_string(),
+                                value: mode.to_string(),
+                            });
+                        })
+                    })
                 )
                 .child(
                     div().text_xs().text_color(color_to_hsla(text_secondary))

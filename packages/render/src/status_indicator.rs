@@ -9,7 +9,7 @@
 //! reference tier.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, ShadowLayer};
 use poodle_specs::{ControlDensity, ControlSize, StatusIndicatorSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -41,6 +41,19 @@ pub fn status_indicator(spec: &StatusIndicatorSpec, theme: &dyn ThemeProvider) -
         c.bottom_right = 999.0;
         c.bottom_left = 999.0;
         s.descriptor.background = Some(status_color);
+        s.shadow_layers.push(ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: rem_to_px(0.125),
+            color: poodle_node::ColorValue(
+                status_color.0,
+                status_color.1,
+                status_color.2,
+                status_color.3 * 0.18,
+            ),
+            inset: false,
+        });
     }
 
     // Root: inline-flex, gap.
@@ -59,6 +72,7 @@ pub fn status_indicator(spec: &StatusIndicatorSpec, theme: &dyn ThemeProvider) -
         label.style.descriptor.text_color = Some(text_primary);
         label.style.text_size = Some(label_size);
         label.style.text_weight = Some(600);
+        label.style.line_height = Some(1.3);
         root = root.child(label);
     }
 
@@ -68,4 +82,26 @@ pub fn status_indicator(spec: &StatusIndicatorSpec, theme: &dyn ThemeProvider) -
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::StatusTone;
+
+    #[test]
+    fn dot_ring_and_label_line_height_match_the_old_gpui_tier() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = StatusIndicatorSpec::new()
+            .with_status(StatusTone::Success)
+            .with_label("Ready");
+        let node = status_indicator(&spec, &theme);
+        assert_eq!(node.children[0].style.shadow_layers.len(), 1);
+        assert_eq!(
+            node.children[0].style.shadow_layers[0].spread,
+            rem_to_px(0.125)
+        );
+        assert_eq!(node.children[1].style.line_height, Some(1.3));
+    }
 }

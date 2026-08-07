@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, Field, TextInput};
 use crate::PreviewRoot;
 use gpui::*;
-use poodle_gpui_components::{Eyebrow, Field, TextInput};
 use poodle_specs::{
     ControlDensity, ControlSize, EyebrowSpec, FieldSpec, TextInputSpec, ValidationState,
 };
@@ -234,16 +234,14 @@ fn size_row(
                 .with_size(size),
             theme,
         )
-        .with_control(
-            TextInput::from_spec(
-                TextInputSpec::new()
-                    .with_id(id)
-                    .with_placeholder(label)
-                    .with_size(size)
-                    .with_aria_label("Display name"),
-                theme,
-            ),
-        ),
+        .with_control(TextInput::from_spec(
+            TextInputSpec::new()
+                .with_id(id)
+                .with_placeholder(label)
+                .with_size(size)
+                .with_aria_label("Display name"),
+            theme,
+        )),
     )
 }
 
@@ -260,15 +258,13 @@ fn density_row(
                 .with_density(density),
             theme,
         )
-        .with_control(
-            TextInput::from_spec(
-                TextInputSpec::new()
-                    .with_id(id)
-                    .with_placeholder(label)
-                    .with_density(density)
-                    .with_aria_label("Display name"),
-                theme,
-            ),
-        ),
+        .with_control(TextInput::from_spec(
+            TextInputSpec::new()
+                .with_id(id)
+                .with_placeholder(label)
+                .with_density(density)
+                .with_aria_label("Display name"),
+            theme,
+        )),
     )
 }

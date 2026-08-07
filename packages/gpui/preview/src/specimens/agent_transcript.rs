@@ -1,13 +1,15 @@
-use crate::app_state::AppState;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{AgentTranscript, Eyebrow};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{AgentTranscript, Eyebrow};
-use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
 use poodle_headless::agent_transcript::{
     ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
     TranscriptMessage, TranscriptToolCall,
 };
+use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
     TranscriptItem::ToolCall(TranscriptToolCall {
@@ -27,7 +29,7 @@ fn message(id: &str, markdown: &str) -> TranscriptItem {
     })
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
@@ -56,15 +58,35 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TranscriptItem::ChangedFiles(TranscriptChangedFiles {
             id: "diff".to_string(),
             files: vec![
-                ChangedFile { path: "cp-api/crates/latex/src/lexer.rs".into(), additions: 271, deletions: 10, status: None },
-                ChangedFile { path: "cp-api/tools/export_fixture.rs".into(), additions: 89, deletions: 1, status: None },
-                ChangedFile { path: "cp-docs/book-port.md".into(), additions: 15, deletions: 5, status: None },
+                ChangedFile {
+                    path: "cp-api/crates/latex/src/lexer.rs".into(),
+                    additions: 271,
+                    deletions: 10,
+                    status: None,
+                },
+                ChangedFile {
+                    path: "cp-api/tools/export_fixture.rs".into(),
+                    additions: 89,
+                    deletions: 1,
+                    status: None,
+                },
+                ChangedFile {
+                    path: "cp-docs/book-port.md".into(),
+                    additions: 15,
+                    deletions: 5,
+                    status: None,
+                },
             ],
         }),
-        call("t6", "jq -r .body_html /tmp/g0216.json", ToolCallStatus::Success),
+        call(
+            "t6",
+            "jq -r .body_html /tmp/g0216.json",
+            ToolCallStatus::Success,
+        ),
         TranscriptItem::Activity(TranscriptActivity {
             id: "act".to_string(),
             label: "Working for 1h 1m".to_string(),
+            spinning: None,
         }),
     ];
 
@@ -90,12 +112,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .map(|id| id.to_string())
             .collect()
     };
-    let toggle = |prefix: &'static str| {
-        cx.listener(move |this: &mut PreviewRoot, id: &str, _w: &mut Window, cx| {
-            this.state
-                .specimens
-                .toggle(&format!("transcript.{prefix}.{id}"));
-            cx.notify();
+    let toggle = |prefix: &'static str| -> Arc<dyn Fn(&str) + Send + Sync> {
+        let events = state.node_events.clone();
+        Arc::new(move |id| {
+            events.lock().unwrap().push(NodeSpecimenEvent::Toggle(format!(
+                "transcript.{prefix}.{id}"
+            )));
         })
     };
     let file_clicks = state.specimens.count("transcript.files");
@@ -122,10 +144,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_tool_run_toggle(toggle("run"))
     .on_tool_call_toggle(toggle("call"))
     .on_changed_files_toggle(toggle("diff"))
-    .on_file_select(cx.listener(|this: &mut PreviewRoot, _id: &str, _w: &mut Window, cx| {
-        this.state.specimens.increment("transcript.files");
-        cx.notify();
-    }))
+    .on_file_select({
+        let events = state.node_events.clone();
+        Arc::new(move |_id| {
+            events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::Increment("transcript.files".to_string()));
+        })
+    })
     .into_any_element();
 
     div()
@@ -152,8 +179,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Expanded run",
             AgentTranscript::from_spec(
-                AgentTranscriptSpec::new(failing)
-                    .with_expanded_tool_runs(vec!["f1".to_string()]),
+                AgentTranscriptSpec::new(failing).with_expanded_tool_runs(vec!["f1".to_string()]),
                 theme,
             )
             .into_any_element(),
@@ -161,7 +187,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Markdown subset",
-            AgentTranscript::from_spec(AgentTranscriptSpec::new(markdown), theme).into_any_element(),
+            AgentTranscript::from_spec(AgentTranscriptSpec::new(markdown), theme)
+                .into_any_element(),
         ))
         .child(group(
             theme,

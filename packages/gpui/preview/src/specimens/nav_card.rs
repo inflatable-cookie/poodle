@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, Icon, NavCard};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Icon, NavCard};
 use poodle_specs::{ControlDensity, EyebrowSpec, IconSpec, NavCardSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -106,7 +106,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density variants (compact / default / comfortable)"),
+                    EyebrowSpec::new()
+                        .with_content("Density variants (compact / default / comfortable)"),
                     theme,
                 ))
                 .child(

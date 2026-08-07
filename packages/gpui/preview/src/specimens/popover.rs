@@ -1,11 +1,11 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Button, Eyebrow, Popover};
 use crate::specimens::overlay_state;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Popover};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, EyebrowSpec, OverlayPlacement, PopoverSpec, PopoverSurfaceWidth,
 };
@@ -20,7 +20,7 @@ fn popover_case(
     key: &'static str,
     spec: PopoverSpec,
     trigger_label: &str,
-    content: AnyElement,
+    content: Node,
 ) -> Popover {
     let is_open = state.specimens.is_on(key);
     Popover::from_spec(spec.with_open(is_open), theme)
@@ -61,33 +61,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let root = cx.weak_entity();
 
     // Heading + paragraph content block (matches the Svelte specimen body).
-    let heading_paragraph = |heading: &str, body: &str| -> AnyElement {
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(4.0))
-            .child(
-                div()
-                    .text_sm()
-                    .font_weight(FontWeight::BOLD)
-                    .text_color(color_to_hsla(text_primary))
-                    .child(heading.to_string()),
-            )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(body.to_string()),
-            )
-            .into_any_element()
+    let heading_paragraph = |heading: &str, body: &str| -> Node {
+        let mut content = Node::container();
+        content.style.descriptor.layout.direction = LayoutDirection::Column;
+        content.style.descriptor.layout.spacing.gap = 4.0;
+        let mut title = Node::text(heading);
+        title.style.text_size = Some(14.0);
+        title.style.text_weight = Some(700);
+        title.style.descriptor.text_color = Some(text_primary);
+        let mut paragraph = Node::text(body);
+        paragraph.style.text_size = Some(12.0);
+        paragraph.style.descriptor.text_color = Some(text_secondary);
+        content.child(title).child(paragraph)
     };
 
-    let paragraph = |body: &str| -> AnyElement {
-        div()
-            .text_xs()
-            .text_color(color_to_hsla(text_secondary))
-            .child(body.to_string())
-            .into_any_element()
+    let paragraph = |body: &str| -> Node {
+        let mut paragraph = Node::text(body);
+        paragraph.style.text_size = Some(12.0);
+        paragraph.style.descriptor.text_color = Some(text_secondary);
+        paragraph
     };
 
     div()

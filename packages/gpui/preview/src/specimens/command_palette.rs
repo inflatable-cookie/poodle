@@ -1,17 +1,46 @@
-use crate::app_state::AppState;
-use crate::specimens::overlay_state;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, CommandPalette, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Button, CommandPalette, Eyebrow};
 use poodle_specs::{ButtonSpec, CommandActionItem, CommandPaletteSpec, DiscoveryState};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec};
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn open_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value: true,
+        });
+    })
+}
+
+fn set_text(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn close_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value: false,
+        });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let root_handle = cx.weak_entity();
 
     let actions = vec![
         CommandActionItem::new("save", "Save")
@@ -71,9 +100,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     Button::from_spec(ButtonSpec::new().with_label("Open Command Palette"), theme)
                         .with_id("cmd-palette-open")
-                        .on_click(cx.listener(|this, _event: &ClickEvent, _window, cx| {
-                            overlay_state::set_toggle(this, "cmd-palette-open", true, cx);
-                        })),
+                        .on_click(open_click(state, "cmd-palette-open")),
                 ),
         )
         .child(
@@ -88,15 +115,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     Button::from_spec(ButtonSpec::new().with_label("Open compact palette"), theme)
                         .with_id("cmd-palette-compact-open")
-                        .on_click(cx.listener(|this, _event: &ClickEvent, _window, cx| {
-                            overlay_state::set_toggle(this, "cmd-palette-compact-open", true, cx);
-                        })),
+                        .on_click(open_click(state, "cmd-palette-compact-open")),
                 ),
         );
 
     // The specimen column is `relative` so the palette's `absolute
     // inset_0` backdrop fills this region (GPUI has no `fixed`/`vw`).
-    let mut root = div().relative().flex().flex_col().gap(px(24.0)).child(triggers);
+    let mut root = div()
+        .relative()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(triggers);
 
     // ── Open: main grouped palette ────────────────────────────────
     if is_open {
@@ -111,26 +141,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         root = root.child(
             CommandPalette::from_spec(spec, theme)
                 .with_id("cmd-palette")
-                .on_select(cx.listener(|this, val: &str, _w, cx| {
-                    this.state
-                        .specimens
-                        .text
-                        .insert("cmd-palette-query".to_string(), val.to_string());
-                    cx.notify();
-                }))
-                .on_query_change(cx.listener(|this, val: &str, _w, cx| {
-                    this.state
-                        .specimens
-                        .text
-                        .insert("cmd-palette-query".to_string(), val.to_string());
-                    cx.notify();
-                }))
-                .on_open_change({
-                    let root = root_handle.clone();
-                    move |open, _window, cx| {
-                        overlay_state::set_toggle_via_entity(&root, "cmd-palette-open", open, cx);
-                    }
-                }),
+                .on_select(set_text(state, "cmd-palette-query"))
+                .on_query_change(set_text(state, "cmd-palette-query"))
+                .on_close(close_click(state, "cmd-palette-open")),
         );
     }
 
@@ -154,17 +167,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .with_id("cmd-palette-compact")
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(
-                        &root,
-                        "cmd-palette-compact-open",
-                        open,
-                        cx,
-                    );
-                }
-            }),
+            .on_close(close_click(state, "cmd-palette-compact-open")),
         );
     }
 

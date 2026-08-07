@@ -6,6 +6,8 @@
 mod app_state;
 mod component_registry;
 mod contract_usage_docs;
+mod node_compat;
+mod providers;
 mod specimens;
 #[allow(dead_code)]
 mod style_bridge;
@@ -58,11 +60,12 @@ impl AssetSource for PreviewAssets {
 }
 
 use app_state::{
-    AppState, ContrastStop, ControlSize, Density, Section, ThemePreset, TokenPanel,
+    AppState, ChromeEvent, ContrastStop, ControlSize, Density, NodeSpecimenEvent, Section,
+    ThemePreset, TokenPanel,
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::load_contract_usage_docs;
-use poodle_gpui_components::{Code, SidebarNav, Tabs, TextInput};
+use crate::node_compat::{Code, SidebarNav, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -101,6 +104,8 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Apply interactions node-backed specimens reported since the last frame.
+        self.state.drain_node_events();
         let theme = &self.state.theme;
 
         let canvas_bg = theme.resolve_color("color.background.canvas");
@@ -191,16 +196,20 @@ impl PreviewRoot {
             .with_variant(TabVariant::Pill)
             .with_value(active_value);
 
+        let queue = std::sync::Arc::clone(&self.state.node_events);
         Tabs::from_spec(spec, &self.state.theme)
             .with_id("nav-tabs")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                match val {
-                    "Components" => this.state.section = Section::Components,
-                    "Tokens" => this.state.section = Section::Tokens,
-                    "Treatments" => this.state.section = Section::Treatments,
-                    _ => {}
-                }
-                cx.notify();
+            .on_change(std::sync::Arc::new(move |val: &str| {
+                let section = match val {
+                    "Components" => Section::Components,
+                    "Tokens" => Section::Tokens,
+                    "Treatments" => Section::Treatments,
+                    _ => return,
+                };
+                queue
+                    .lock()
+                    .unwrap()
+                    .push(NodeSpecimenEvent::Chrome(ChromeEvent::Section(section)));
             }))
     }
 
@@ -345,13 +354,18 @@ impl PreviewRoot {
                             &self.state.theme,
                         )
                         .with_id("component-search")
-                        .on_change(cx.listener(
-                            |this, val: &str, _w, cx| {
-                                this.state.component_search = val.to_string();
-                                this.state.section = Section::Components;
-                                cx.notify();
-                            },
-                        )),
+                        .on_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            move |val: &str| {
+                                let mut events = queue.lock().unwrap();
+                                events.push(NodeSpecimenEvent::Chrome(
+                                    ChromeEvent::ComponentSearch(val.to_string()),
+                                ));
+                                events.push(NodeSpecimenEvent::Chrome(ChromeEvent::Section(
+                                    Section::Components,
+                                )));
+                            }
+                        }),
                     ),
             )
     }
@@ -528,15 +542,18 @@ impl PreviewRoot {
                                 theme,
                             )
                             .with_id("token-panel-tabs")
-                            .on_change(cx.listener(
-                                |this, val: &str, _w, cx| {
-                                    this.state.active_token_panel = match val {
+                            .on_change({
+                                let queue = std::sync::Arc::clone(&self.state.node_events);
+                                std::sync::Arc::new(move |val: &str| {
+                                    let panel = match val {
                                         "token-inspector" => TokenPanel::Inspector,
                                         _ => TokenPanel::Summary,
                                     };
-                                    cx.notify();
-                                },
-                            )),
+                                    queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                        ChromeEvent::TokenPanel(panel),
+                                    ));
+                                })
+                            }),
                         )
                         .child(
                             div()
@@ -565,10 +582,19 @@ impl PreviewRoot {
                                                 theme,
                                             )
                                             .with_id("token-inspector-query")
-                                            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                                this.state.token_inspector_query = val.to_string();
-                                                cx.notify();
-                                            })),
+                                            .on_change({
+                                                let queue =
+                                                    std::sync::Arc::clone(&self.state.node_events);
+                                                move |val: &str| {
+                                                    queue.lock().unwrap().push(
+                                                        NodeSpecimenEvent::Chrome(
+                                                            ChromeEvent::TokenInspectorQuery(
+                                                                val.to_string(),
+                                                            ),
+                                                        ),
+                                                    );
+                                                }
+                                            }),
                                         )
                                         .child(
                                             div()
@@ -637,12 +663,14 @@ impl PreviewRoot {
             .border_r_1()
             .border_color(color_to_hsla(border_subtle).opacity(0.6))
             .child(
-                SidebarNav::from_spec(sidebar_spec, theme).on_select(cx.listener(
-                    |this, val: &str, _window, cx| {
-                        this.state.active_component_slug = Some(val.to_string());
-                        cx.notify();
-                    },
-                )),
+                SidebarNav::from_spec(sidebar_spec, theme).on_change({
+                    let queue = std::sync::Arc::clone(&self.state.node_events);
+                    std::sync::Arc::new(move |val: &str| {
+                        queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                            ChromeEvent::ActiveComponent(val.to_string()),
+                        ));
+                    })
+                }),
             );
 
         // Outer layout: horizontal flex row with explicit height.
@@ -1468,7 +1496,6 @@ fn parse_cli_args() -> CliArgs {
     }
 }
 
-
 /// Set once the window has drawn `FRAMES_BEFORE_CAPTURE` frames.
 ///
 /// Screenshot mode used to sleep a fixed 1.5s and capture whatever was on
@@ -1512,7 +1539,11 @@ const MIN_SETTLE: std::time::Duration = std::time::Duration::from_millis(900);
 /// `position` is in the same coordinate space the events are observed in —
 /// see `calibrate` for how callers translate window-content coordinates into
 /// it.
-fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType, position: Point<Pixels>) {
+fn post_mouse_event(
+    window: &mut Window,
+    event_type: objc2_app_kit::NSEventType,
+    position: Point<Pixels>,
+) {
     use objc2::MainThreadMarker;
     use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
     use objc2_foundation::NSPoint;
@@ -1550,7 +1581,10 @@ fn post_mouse_event(window: &mut Window, event_type: objc2_app_kit::NSEventType,
             pressure,
         );
     let Some(event) = event else {
-        eprintln!("click driver: NSEvent construction failed for {:?}", event_type);
+        eprintln!(
+            "click driver: NSEvent construction failed for {:?}",
+            event_type
+        );
         return;
     };
     app.postEvent_atStart(&event, false);
@@ -1646,14 +1680,53 @@ fn dispatch_type(text: &str) {
 /// the text-editing proofs.
 fn ansi_key_code(ch: char) -> Option<u16> {
     Some(match ch {
-        'a' => 0, 's' => 1, 'd' => 2, 'f' => 3, 'h' => 4, 'g' => 5, 'z' => 6,
-        'x' => 7, 'c' => 8, 'v' => 9, 'b' => 11, 'q' => 12, 'w' => 13,
-        'e' => 14, 'r' => 15, 'y' => 16, 't' => 17, '1' => 18, '2' => 19,
-        '3' => 20, '4' => 21, '6' => 22, '5' => 23, '=' => 24, '9' => 25,
-        '7' => 26, '-' => 27, '8' => 28, '0' => 29, ']' => 30, 'o' => 31,
-        'u' => 32, '[' => 33, 'i' => 34, 'p' => 35, 'l' => 37, 'j' => 38,
-        '\'' => 39, 'k' => 40, ';' => 41, '\\' => 42, ',' => 43, '/' => 44,
-        'n' => 45, 'm' => 46, '.' => 47, ' ' => 49,
+        'a' => 0,
+        's' => 1,
+        'd' => 2,
+        'f' => 3,
+        'h' => 4,
+        'g' => 5,
+        'z' => 6,
+        'x' => 7,
+        'c' => 8,
+        'v' => 9,
+        'b' => 11,
+        'q' => 12,
+        'w' => 13,
+        'e' => 14,
+        'r' => 15,
+        'y' => 16,
+        't' => 17,
+        '1' => 18,
+        '2' => 19,
+        '3' => 20,
+        '4' => 21,
+        '6' => 22,
+        '5' => 23,
+        '=' => 24,
+        '9' => 25,
+        '7' => 26,
+        '-' => 27,
+        '8' => 28,
+        '0' => 29,
+        ']' => 30,
+        'o' => 31,
+        'u' => 32,
+        '[' => 33,
+        'i' => 34,
+        'p' => 35,
+        'l' => 37,
+        'j' => 38,
+        '\'' => 39,
+        'k' => 40,
+        ';' => 41,
+        '\\' => 42,
+        ',' => 43,
+        '/' => 44,
+        'n' => 45,
+        'm' => 46,
+        '.' => 47,
+        ' ' => 49,
         _ => return None,
     })
 }
@@ -1746,7 +1819,12 @@ impl ClickCalibration {
     }
 
     /// Solve `observed = posted * scale + offset` from two probe pairs.
-    fn solve(p1_posted: Point<Pixels>, p1_seen: Point<Pixels>, p2_posted: Point<Pixels>, p2_seen: Point<Pixels>) -> Option<Self> {
+    fn solve(
+        p1_posted: Point<Pixels>,
+        p1_seen: Point<Pixels>,
+        p2_posted: Point<Pixels>,
+        p2_seen: Point<Pixels>,
+    ) -> Option<Self> {
         let dx_posted = f32::from(p2_posted.x - p1_posted.x);
         let dy_posted = f32::from(p2_posted.y - p1_posted.y);
         let dx_seen = f32::from(p2_seen.x - p1_seen.x);
@@ -1781,6 +1859,10 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
         return;
     };
 
+    // Node-backed specimens report interactions through a queue that renders
+    // drain; a print that ran before the next frame would miss them, so
+    // drain here too.
+    root.update(cx, |root, _cx| root.state.drain_node_events());
     let state = root.read(cx);
     let mut lines: Vec<String> = Vec::new();
 
@@ -1807,7 +1889,11 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
 
     // Sorted so the output is stable enough to assert on.
     lines.sort();
-    let focus = if window.focused(cx).is_some() { "yes" } else { "no" };
+    let focus = if window.focused(cx).is_some() {
+        "yes"
+    } else {
+        "no"
+    };
     println!("STATE focused={focus} {}", lines.join(" "));
 }
 
@@ -1986,6 +2072,15 @@ fn main() {
                 if !cli.clicks.is_empty() || cli.print_state.is_some() {
                     schedule_interaction(window, cx, cli.clicks.clone(), cli.print_state.clone());
                 } else if screenshot_mode {
+                    // A centered screenshot window can open under the physical
+                    // pointer and freeze an arbitrary hover state into the
+                    // baseline. Move GPUI's pointer position outside the
+                    // content before counting settled frames.
+                    post_mouse_event(
+                        window,
+                        objc2_app_kit::NSEventType::MouseMoved,
+                        point(px(-100.0), px(-100.0)),
+                    );
                     schedule_frames_drawn(window, FRAMES_BEFORE_CAPTURE);
                 }
 

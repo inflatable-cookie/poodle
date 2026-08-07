@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{EditableLabel, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,10 +7,41 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{EditableLabel, Eyebrow};
-use poodle_specs::{
-    EditableLabelActivation, EditableLabelSpec, EditableLabelVariant, EyebrowSpec,
-};
+use poodle_specs::{EditableLabelActivation, EditableLabelSpec, EditableLabelVariant, EyebrowSpec};
+use std::sync::Arc;
+
+fn queue_change(state: &AppState, key: &str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(&state.node_events);
+    let key = key.to_string();
+    Arc::new(move |value: &str| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.clone(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn queue_commit(
+    state: &AppState,
+    value_key: &str,
+    record_event: bool,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(&state.node_events);
+    let value_key = value_key.to_string();
+    Arc::new(move |value: &str| {
+        let mut queue = events.lock().unwrap();
+        queue.push(NodeSpecimenEvent::SetText {
+            key: value_key.clone(),
+            value: value.to_string(),
+        });
+        if record_event {
+            queue.push(NodeSpecimenEvent::SetText {
+                key: "editable-label-event".to_string(),
+                value: format!("Committed: \"{value}\""),
+            });
+        }
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -88,13 +120,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("editing")
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-live".to_string(), val.to_string());
-                        cx.notify();
-                    })),
+                    .on_change(queue_change(state, "editable-label-live")),
                 ),
         )
         // --- Double-click to edit (default, interactive) ---
@@ -113,24 +139,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("default")
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-title".to_string(), val.to_string());
-                        cx.notify();
-                    }))
-                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-title".to_string(), val.to_string());
-                        this.state.specimens.text.insert(
-                            "editable-label-event".to_string(),
-                            format!("Committed: \"{}\"", val),
-                        );
-                        cx.notify();
-                    })),
+                    .on_change(queue_change(state, "editable-label-title"))
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-title",
+                        true,
+                    )),
                 ),
         )
         // --- Click to edit with icon (enterOrSpace + showEditIcon) ---
@@ -152,17 +166,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("with-icon")
-                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-title".to_string(), val.to_string());
-                        this.state.specimens.text.insert(
-                            "editable-label-event".to_string(),
-                            format!("Committed: \"{}\"", val),
-                        );
-                        cx.notify();
-                    })),
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-title",
+                        true,
+                    )),
                 ),
         )
         // --- Empty state (emptyText) ---
@@ -185,17 +193,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("empty")
-                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-empty".to_string(), val.to_string());
-                        this.state.specimens.text.insert(
-                            "editable-label-event".to_string(),
-                            format!("Committed: \"{}\"", val),
-                        );
-                        cx.notify();
-                    })),
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-empty",
+                        true,
+                    )),
                 ),
         )
         // --- Flush variant (display) ---
@@ -218,13 +220,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("flush")
-                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("editable-label-flush".to_string(), val.to_string());
-                        cx.notify();
-                    })),
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-flush",
+                        false,
+                    )),
                 ),
         )
         // --- Flush variant (editing — bottom border only) ---

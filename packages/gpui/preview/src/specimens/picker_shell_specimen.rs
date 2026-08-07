@@ -1,12 +1,10 @@
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{Button, Eyebrow, FormActions, PickerShell, TextInput};
 use gpui::*;
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, FormActions, PickerShell, TextInput};
 use poodle_specs::{BrowseState, PickerShellSpec, PickerVariant, SelectionMode};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, EyebrowSpec, FormActionsSpec, TextInputSpec,
-};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, FormActionsSpec, TextInputSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -44,9 +42,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_id("picker-search-1"),
                     )
                     .with_results(
-                        div()
-                            .flex()
-                            .flex_col()
+                        Node::container()
                             .child(result_row(
                                 "Button",
                                 "Primitive",
@@ -102,7 +98,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_state(BrowseState::Loading),
                         theme,
                     )
-                    .with_results(div()),
+                    .with_results(Node::container()),
                 ),
         )
         // --- No results ---
@@ -123,7 +119,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_query("xyzzy"),
                         theme,
                     )
-                    .with_results(div()),
+                    .with_results(Node::container()),
                 ),
         )
         // --- Multiple selection ---
@@ -147,9 +143,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_results(
-                        div()
-                            .flex()
-                            .flex_col()
+                        Node::container()
                             .child(result_row(
                                 "Button",
                                 "Selected",
@@ -202,9 +196,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_id("picker-search-popover"),
                     )
                     .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
+                        Node::container()
                             .child(result_row(
                                 "Button",
                                 "Primitive",
@@ -258,9 +250,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_id("picker-search-modal"),
                     )
                     .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
+                        Node::container()
                             .child(result_row(
                                 "Acme Corp",
                                 "Selected",
@@ -303,7 +293,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_state(BrowseState::Error),
                         theme,
                     )
-                    .with_body(div()),
+                    .with_body(Node::container()),
                 ),
         )
         // --- Empty state ---
@@ -323,7 +313,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_state(BrowseState::Empty),
                         theme,
                     )
-                    .with_body(div()),
+                    .with_body(Node::container()),
                 ),
         )
 }
@@ -358,28 +348,33 @@ fn result_row(
     primary: poodle_tokens::typed::ColorValue,
     secondary: poodle_tokens::typed::ColorValue,
     hover: poodle_tokens::typed::ColorValue,
-) -> Div {
-    let mut row = div()
-        .flex()
-        .items_center()
-        .justify_between()
-        .px(px(12.0))
-        .py(px(8.0))
-        .hover(|s| s.bg(color_to_hsla(hover)))
-        .cursor(CursorStyle::PointingHand)
-        .child(
-            div()
-                .text_sm()
-                .text_color(color_to_hsla(primary))
-                .child(label.to_string()),
-        );
+) -> Node {
+    let mut row = Node::container();
+    {
+        let s = &mut row.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.spacing.padding.left = 12.0;
+        s.descriptor.layout.spacing.padding.right = 12.0;
+        s.descriptor.layout.spacing.padding.top = 8.0;
+        s.descriptor.layout.spacing.padding.bottom = 8.0;
+        s.descriptor.cursor = poodle_node::CursorHint::Pointer;
+        s.fill_width = true;
+        s.hover = Some(poodle_node::StylePatch {
+            background: Some(hover),
+            ..Default::default()
+        });
+    }
+    let mut left = Node::text(label);
+    left.style.text_size = Some(14.0);
+    left.style.descriptor.text_color = Some(primary);
+    row = row.child(left);
     if !meta.is_empty() {
-        row = row.child(
-            div()
-                .text_xs()
-                .text_color(color_to_hsla(secondary))
-                .child(meta.to_string()),
-        );
+        let mut right = Node::text(meta);
+        right.style.text_size = Some(12.0);
+        right.style.descriptor.text_color = Some(secondary);
+        row = row.child(right);
     }
     row
 }

@@ -7,9 +7,7 @@
 //! either an empty message or the item list, optionally wrapped in a Card.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{CardSpec, InlineListSectionSpec};
 
 use crate::card::card;

@@ -9,8 +9,7 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, LayoutOverflow,
-    Node,
+    ColorValue, CrossAxisAlignment, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
 };
 use poodle_specs::{MetricTileSpec, MetricTrend};
 

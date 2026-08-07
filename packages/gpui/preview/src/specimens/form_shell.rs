@@ -10,10 +10,11 @@
 //! typography, and opacity resolve from the spec's token methods.
 
 use crate::app_state::AppState;
+use crate::node_compat::{Button, Eyebrow, Field, FormShell, IntoCompatNode, TextInput};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Field, FormShell, TextInput};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, EyebrowSpec, FormActionAlign, FormFieldState, FormSectionSpec,
     FormShellSpec, StatusTone, TextInputSpec, ValidationState,
@@ -27,12 +28,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(32.0))
         .max_w(px(560.0))
-        .child(group(
-            theme,
-            "Ready",
-            ready_spec(),
-            FieldStates::Ready,
-        ))
+        .child(group(theme, "Ready", ready_spec(), FieldStates::Ready))
         .child(group(
             theme,
             "Blocked (invalid field)",
@@ -59,6 +55,16 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 enum FieldStates {
     Ready,
     Invalid,
+}
+
+fn node_column(gap: f32, children: impl IntoIterator<Item = Node>) -> Node {
+    let mut node = Node::container();
+    node.style.descriptor.layout.direction = LayoutDirection::Column;
+    node.style.descriptor.layout.spacing.gap = gap;
+    for child in children {
+        node = node.child(child);
+    }
+    node
 }
 
 /// A labelled specimen group: eyebrow + a fully-built `FormShell`.
@@ -92,15 +98,14 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
                 .with_disabled(disabled || busy)
         }
     };
-    let email_field = email_field
-        .with_control(TextInput::from_spec(email_input, theme).with_id(format!("fs-email-{label}")));
+    let email_field = email_field.with_control(
+        TextInput::from_spec(email_input, theme).with_id(format!("fs-email-{label}")),
+    );
 
-    let account_slot = div()
-        .flex()
-        .flex_col()
-        .gap(px(12.0))
-        .child(name_field)
-        .child(email_field);
+    let account_slot = node_column(
+        12.0,
+        [name_field.into_compat_node(), email_field.into_compat_node()],
+    );
 
     // ── Profile section slot (real Field + TextInput) ────────
     let bio_slot = Field::new("fs-bio", "Bio", theme).with_control(
@@ -112,13 +117,17 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
             theme,
         )
         .with_id(format!("fs-bio-{label}")),
-    );
+    )
+    .into_compat_node();
 
     div()
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(
             FormShell::from_spec(spec, theme)
                 .with_section_slot(account_slot)
@@ -189,8 +198,7 @@ fn busy_spec() -> FormShellSpec {
         .with_fields(vec![
             FormFieldState::new("fs-name", "Full name")
                 .with_validation_state(ValidationState::Valid),
-            FormFieldState::new("fs-email", "Email")
-                .with_validation_state(ValidationState::Valid),
+            FormFieldState::new("fs-email", "Email").with_validation_state(ValidationState::Valid),
             FormFieldState::new("fs-bio", "Bio"),
         ])
 }

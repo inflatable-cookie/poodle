@@ -1,4 +1,20 @@
-use crate::app_state::AppState;
+//! Icon Button specimen — migrated to the node tier in g12.019 Batch B.
+//!
+//! Every IconButton below renders through the node tier:
+//! `poodle_render::icon_button` (`Spec + Theme → Node`) interpreted by
+//! `poodle_gpui_node_backend::to_gpui`. The old hand-written
+//! `poodle_gpui_components::IconButton` no longer renders this specimen;
+//! everything around the buttons (layout, Eyebrow headings, captions) is
+//! unchanged.
+//!
+//! Node interaction closures are context-free (`Arc<dyn Fn() + Send + Sync>`),
+//! so instead of `cx.listener` the handlers push `NodeSpecimenEvent`s onto a
+//! queue the next render drains into specimen state (see `app_state.rs`).
+
+use crate::node_compat::Eyebrow;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +22,21 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, IconButton};
+
+use poodle_render::icon_button;
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, IconButtonSpec};
+
+/// Build a node-tier IconButton with an optional click handler.
+/// Static instances (danger/success tones, disabled/loading states, string
+/// names, sizes, densities) pass `None`.
+fn node_icon_button(
+    spec: IconButtonSpec,
+    state: &AppState,
+    on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> AnyElement {
+    let node = icon_button(&spec, &state.theme, on_click);
+    poodle_gpui_node_backend::to_gpui(&node)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -37,63 +66,54 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .flex()
                         .gap(px(8.0))
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_icon("plus")
-                                    .with_aria_label("Add"),
-                                theme,
-                            )
-                            .with_id("add")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("icon-btn-last".to_string(), "Add".to_string());
-                                    cx.notify();
-                                },
-                            )),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_icon("settings")
-                                    .with_aria_label("Settings"),
-                                theme,
-                            )
-                            .with_id("settings")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "icon-btn-last".to_string(),
-                                        "Settings".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_icon("x")
-                                    .with_aria_label("Close"),
-                                theme,
-                            )
-                            .with_id("close")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("icon-btn-last".to_string(), "Close".to_string());
-                                    cx.notify();
-                                },
-                            )),
-                        ),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_icon("plus")
+                                .with_aria_label("Add"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                        key: "icon-btn-last".to_string(),
+                                        value: "Add".to_string(),
+                                    });
+                                })
+                            }),
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_icon("settings")
+                                .with_aria_label("Settings"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                        key: "icon-btn-last".to_string(),
+                                        value: "Settings".to_string(),
+                                    });
+                                })
+                            }),
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_icon("x")
+                                .with_aria_label("Close"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                        key: "icon-btn-last".to_string(),
+                                        value: "Close".to_string(),
+                                    });
+                                })
+                            }),
+                        )),
                 ),
         )
         // --- Danger tone ---
@@ -110,39 +130,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .flex()
                         .gap(px(8.0))
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_tone(ButtonTone::Danger)
-                                    .with_icon("trash-2")
-                                    .with_aria_label("Delete"),
-                                theme,
-                            )
-                            .with_id("danger-primary"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_tone(ButtonTone::Danger)
-                                    .with_icon("trash-2")
-                                    .with_aria_label("Delete"),
-                                theme,
-                            )
-                            .with_id("danger-secondary"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_tone(ButtonTone::Danger)
-                                    .with_icon("trash-2")
-                                    .with_aria_label("Delete"),
-                                theme,
-                            )
-                            .with_id("danger-ghost"),
-                        ),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_tone(ButtonTone::Danger)
+                                .with_icon("trash-2")
+                                .with_aria_label("Delete"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_tone(ButtonTone::Danger)
+                                .with_icon("trash-2")
+                                .with_aria_label("Delete"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_tone(ButtonTone::Danger)
+                                .with_icon("trash-2")
+                                .with_aria_label("Delete"),
+                            state,
+                            None,
+                        )),
                 ),
         )
         // --- Success tone ---
@@ -159,39 +173,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .flex()
                         .gap(px(8.0))
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_tone(ButtonTone::Success)
-                                    .with_icon("check")
-                                    .with_aria_label("Approve"),
-                                theme,
-                            )
-                            .with_id("success-primary"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_tone(ButtonTone::Success)
-                                    .with_icon("check")
-                                    .with_aria_label("Approve"),
-                                theme,
-                            )
-                            .with_id("success-secondary"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_tone(ButtonTone::Success)
-                                    .with_icon("check")
-                                    .with_aria_label("Approve"),
-                                theme,
-                            )
-                            .with_id("success-ghost"),
-                        ),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_tone(ButtonTone::Success)
+                                .with_icon("check")
+                                .with_aria_label("Approve"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_tone(ButtonTone::Success)
+                                .with_icon("check")
+                                .with_aria_label("Approve"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_tone(ButtonTone::Success)
+                                .with_icon("check")
+                                .with_aria_label("Approve"),
+                            state,
+                            None,
+                        )),
                 ),
         )
         // --- Toggle (text editor toolbar) ---
@@ -209,60 +217,54 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .gap(px(8.0))
                         .items_center()
-                        .child({
-                            let bold = state.specimens.is_on("icon-btn-bold");
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_icon("bold")
-                                    .with_pressed(bold)
-                                    .with_aria_label("Bold"),
-                                theme,
-                            )
-                            .with_id("toggle-bold")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("icon-btn-bold");
-                                    cx.notify();
-                                },
-                            ))
-                        })
-                        .child({
-                            let italic = state.specimens.is_on("icon-btn-italic");
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_icon("italic")
-                                    .with_pressed(italic)
-                                    .with_aria_label("Italic"),
-                                theme,
-                            )
-                            .with_id("toggle-italic")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("icon-btn-italic");
-                                    cx.notify();
-                                },
-                            ))
-                        })
-                        .child({
-                            let underline = state.specimens.is_on("icon-btn-underline");
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_icon("underline")
-                                    .with_pressed(underline)
-                                    .with_aria_label("Underline"),
-                                theme,
-                            )
-                            .with_id("toggle-underline")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("icon-btn-underline");
-                                    cx.notify();
-                                },
-                            ))
-                        }),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_icon("bold")
+                                .with_pressed(state.specimens.is_on("icon-btn-bold"))
+                                .with_aria_label("Bold"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
+                                        "icon-btn-bold".to_string(),
+                                    ));
+                                })
+                            }),
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_icon("italic")
+                                .with_pressed(state.specimens.is_on("icon-btn-italic"))
+                                .with_aria_label("Italic"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
+                                        "icon-btn-italic".to_string(),
+                                    ));
+                                })
+                            }),
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_icon("underline")
+                                .with_pressed(state.specimens.is_on("icon-btn-underline"))
+                                .with_aria_label("Underline"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
+                                        "icon-btn-underline".to_string(),
+                                    ));
+                                })
+                            }),
+                        )),
                 ),
         )
         // --- States ---
@@ -280,47 +282,42 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .gap(px(8.0))
                         .items_center()
-                        .child({
-                            let pinned = state.specimens.is_on("icon-btn-pinned");
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("map-pin")
-                                    .with_pressed(pinned)
-                                    .with_aria_label("Pin"),
-                                theme,
-                            )
-                            .with_id("state-pressed")
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("icon-btn-pinned");
-                                    this.state.specimens.text.insert(
-                                        "icon-btn-last".to_string(),
-                                        "Pin toggled".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            ))
-                        })
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("settings")
-                                    .with_disabled(true)
-                                    .with_aria_label("Settings"),
-                                theme,
-                            )
-                            .with_id("state-disabled"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("loader")
-                                    .with_loading(true)
-                                    .with_aria_label("Loading"),
-                                theme,
-                            )
-                            .with_id("state-loading"),
-                        ),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_icon("map-pin")
+                                .with_pressed(state.specimens.is_on("icon-btn-pinned"))
+                                .with_aria_label("Pin"),
+                            state,
+                            Some({
+                                let events = state.node_events.clone();
+                                Arc::new(move || {
+                                    let mut events = events.lock().unwrap();
+                                    events.push(NodeSpecimenEvent::Toggle(
+                                        "icon-btn-pinned".to_string(),
+                                    ));
+                                    events.push(NodeSpecimenEvent::SetText {
+                                        key: "icon-btn-last".to_string(),
+                                        value: "Pin toggled".to_string(),
+                                    });
+                                })
+                            }),
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_icon("settings")
+                                .with_disabled(true)
+                                .with_aria_label("Settings"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_icon("loader")
+                                .with_loading(true)
+                                .with_aria_label("Loading"),
+                            state,
+                            None,
+                        )),
                 ),
         )
         // --- String name (built-in internals) ---
@@ -337,36 +334,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .flex()
                         .gap(px(8.0))
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_icon("plus")
-                                    .with_aria_label("Add"),
-                                theme,
-                            )
-                            .with_id("str-plus"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_icon("search")
-                                    .with_aria_label("Search"),
-                                theme,
-                            )
-                            .with_id("str-search"),
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_icon("x")
-                                    .with_aria_label("Close"),
-                                theme,
-                            )
-                            .with_id("str-close"),
-                        ),
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_icon("plus")
+                                .with_aria_label("Add"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_icon("search")
+                                .with_aria_label("Search"),
+                            state,
+                            None,
+                        ))
+                        .child(node_icon_button(
+                            IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_icon("x")
+                                .with_aria_label("Close"),
+                            state,
+                            None,
+                        )),
                 ),
         )
         // --- Click feedback ---
@@ -386,29 +377,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "icon-button",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            IconButton::from_spec(
-                IconButtonSpec::new()
+            let node = icon_button(
+                &IconButtonSpec::new()
                     .with_icon("star")
                     .with_size(size)
                     .with_aria_label("Star"),
                 theme,
-            )
-            .with_id(SharedString::from(format!("specimen-size-{:?}", size)))
-            .into_any_element()
+                None,
+            );
+            poodle_gpui_node_backend::to_gpui(&node)
         },
         |density, theme: &GpuiThemeProvider| {
-            IconButton::from_spec(
-                IconButtonSpec::new()
+            let node = icon_button(
+                &IconButtonSpec::new()
                     .with_icon("star")
+                    .with_density(density)
                     .with_aria_label("Star"),
                 theme,
-            )
-            .with_id(SharedString::from(format!(
-                "specimen-density-{:?}",
-                density
-            )))
-            .density(density)
-            .into_any_element()
+                None,
+            );
+            poodle_gpui_node_backend::to_gpui(&node)
         },
     )
 }

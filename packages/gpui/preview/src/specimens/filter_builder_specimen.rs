@@ -1,11 +1,11 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, FilterBuilder};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, FilterBuilder};
 use poodle_specs::{
     EyebrowSpec, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft, FilterExpression,
     FilterFieldDefinition, FilterFieldKind, FilterOperand, FilterOption,
@@ -13,11 +13,13 @@ use poodle_specs::{
 
 fn demo_fields() -> Vec<FilterFieldDefinition> {
     vec![
-        FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(vec![
-            FilterOption::new("clap", "CLAP"),
-            FilterOption::new("vst3", "VST3"),
-            FilterOption::new("lv2", "LV2"),
-        ]),
+        FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(
+            vec![
+                FilterOption::new("clap", "CLAP"),
+                FilterOption::new("vst3", "VST3"),
+                FilterOption::new("lv2", "LV2"),
+            ],
+        ),
         FilterFieldDefinition::new("hidden", "Hidden", FilterFieldKind::Boolean),
         FilterFieldDefinition::new("tag-count", "Tag count", FilterFieldKind::Number),
         FilterFieldDefinition::new("name", "Name", FilterFieldKind::Text),
@@ -35,7 +37,12 @@ fn demo_value() -> FilterExpression {
                 FilterOperand::Options(vec!["clap".into(), "vst3".into()]),
             ),
             FilterClause::new("hidden-1", "hidden", "is", FilterOperand::Boolean(false)),
-            FilterClause::new("tag-count-1", "tag-count", "gte", FilterOperand::Number(3.0)),
+            FilterClause::new(
+                "tag-count-1",
+                "tag-count",
+                "gte",
+                FilterOperand::Number(3.0),
+            ),
         ],
     }
 }

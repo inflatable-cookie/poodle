@@ -1,6 +1,7 @@
+use crate::node_compat::{Eyebrow, Spinner};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, Spinner};
+
 use poodle_specs::{EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::app_state::AppState;

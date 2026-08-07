@@ -452,12 +452,10 @@ pub fn filter_builder(
                     s.text_size = Some(rem_to_px(0.75));
                 }
                 all_corners(&mut segment, radius);
-                if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_combinator_change)
-                {
+                if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_combinator_change) {
                     let handler = Arc::clone(handler);
                     segment.style.descriptor.cursor = CursorHint::Pointer;
-                    segment.interaction.on_activate =
-                        Some(Arc::new(move || handler(combinator)));
+                    segment.interaction.on_activate = Some(Arc::new(move || handler(combinator)));
                 }
                 segment
             };
@@ -467,11 +465,11 @@ pub fn filter_builder(
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.spacing.gap = rem_to_px(0.25);
             }
-            panel = panel.child(
-                combi
-                    .child(mk("Match all", is_and, "and"))
-                    .child(mk("Match any", !is_and, "or")),
-            );
+            panel = panel.child(combi.child(mk("Match all", is_and, "and")).child(mk(
+                "Match any",
+                !is_and,
+                "or",
+            )));
         }
 
         // Draft editor (adding or editing a clause).

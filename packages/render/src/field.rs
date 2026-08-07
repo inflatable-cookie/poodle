@@ -18,7 +18,11 @@ pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>)
     // Contract §8: label = color-mix(text-primary 45%, text-secondary).
     let label_primary = theme.resolve_color(spec.label_color_primary_token());
     let label_secondary = theme.resolve_color(spec.label_color_secondary_token());
-    let label_color = mix_srgb(label_primary, label_secondary, FieldSpec::LABEL_COLOR_PRIMARY_RATIO);
+    let label_color = mix_srgb(
+        label_primary,
+        label_secondary,
+        FieldSpec::LABEL_COLOR_PRIMARY_RATIO,
+    );
     let row_gap = theme.resolve_space(spec.row_gap_token());
     let supporting_size = theme.resolve_space(spec.supporting_text_typography_token());
 

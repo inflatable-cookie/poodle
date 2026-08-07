@@ -1,6 +1,7 @@
+use crate::node_compat::{Avatar, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Avatar, Eyebrow};
+
 use poodle_specs::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone, EyebrowSpec};
 
 // A small embedded SVG portrait so the image group renders a real image node
@@ -71,7 +72,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .items_center()
                 .gap(px(12.0))
-                .child(Avatar::from_spec(AvatarSpec::new().with_initials("A"), theme))
+                .child(Avatar::from_spec(
+                    AvatarSpec::new().with_initials("A"),
+                    theme,
+                ))
                 .child(Avatar::from_spec(
                     AvatarSpec::new().with_initials("AB"),
                     theme,

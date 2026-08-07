@@ -16,14 +16,16 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{
-    CallOutSpec, LogFilterKind, LogListSpec, PaginationSpec, SpinnerSize, SpinnerSpec, StatusTone,
+    CallOutSpec, LogFilterKind, LogLevel, LogListSpec, PaginationSpec, SpinnerSize, SpinnerSpec,
+    StatusTone,
 };
 
 use crate::callout::callout;
+use crate::color::{mix_srgb, with_alpha};
 use crate::pagination::pagination;
 use crate::presentation::{
     control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
@@ -160,8 +162,7 @@ pub fn log_list(
                 let mut field = Node::container();
                 field.style.descriptor.layout.direction = LayoutDirection::Column;
                 field.style.descriptor.layout.spacing.gap = rem_to_px(0.25);
-                let field =
-                    field.child(text(filter.label.clone(), text_secondary, caption_size));
+                let field = field.child(text(filter.label.clone(), text_secondary, caption_size));
                 toolbar = toolbar.child(field.child(control));
             }
 
@@ -217,13 +218,15 @@ pub fn log_list(
             frame.style.descriptor.layout.direction = LayoutDirection::Row;
             frame.style.descriptor.layout.spacing.padding.top = rem_to_px(1.0);
             frame.style.descriptor.layout.spacing.padding.bottom = rem_to_px(1.0);
-            return el.child(frame.child(callout(
-                &CallOutSpec::new()
-                    .with_tone(StatusTone::Danger)
-                    .with_content(error.clone()),
-                theme,
-                None,
-            )));
+            return el.child(
+                frame.child(callout(
+                    &CallOutSpec::new()
+                        .with_tone(StatusTone::Danger)
+                        .with_content(error.clone()),
+                    theme,
+                    None,
+                )),
+            );
         }
 
         // Empty audit surface (spec carries no entry payload yet).
@@ -299,7 +302,11 @@ pub fn log_list(
             _ => text_secondary,
         };
         let mut chip = Node::button(*level);
-        chip.style.descriptor.text_color = Some(if is_active { chip_color } else { text_secondary });
+        chip.style.descriptor.text_color = Some(if is_active {
+            chip_color
+        } else {
+            text_secondary
+        });
         chip.style.text_size = Some(label_font);
         chip.style.text_weight = Some(if is_active { 600 } else { 400 });
         chip.interaction.focusable = true;
@@ -333,15 +340,11 @@ pub fn log_list(
         s.descriptor.border.color = border_default;
     }
     all_radius(&mut filter_box, radius_control);
-    toolbar = toolbar.child(filter_box.child(text(
-        filter_display,
-        text_secondary,
-        label_token_size,
-    )));
+    toolbar =
+        toolbar.child(filter_box.child(text(filter_display, text_secondary, label_token_size)));
     el = el.child(toolbar);
 
-    // Entry area. The spec carries no entry payload (only `entry_count`), so we
-    // surface a count rather than fabricate log lines.
+    // Entry area — stream rows, filtered and capped by the spec.
     let mut entries_area = Node::container();
     {
         let s = &mut entries_area.style;
@@ -352,7 +355,8 @@ pub fn log_list(
         s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
     }
 
-    if spec.entry_count == 0 {
+    let rows = spec.stream_entries();
+    if rows.is_empty() {
         let mut empty = Node::container();
         {
             let s = &mut empty.style;
@@ -369,24 +373,175 @@ pub fn log_list(
             label_token_size,
         )));
     } else {
-        let shown = spec.entry_count.min(spec.max_entries);
-        entries_area = entries_area.child(text(
-            format!("{shown} entries"),
-            text_secondary,
-            label_token_size,
-        ));
+        // Contract `.poodle-log-list__entry`: a mono row of
+        // [timestamp | level | message], tinted by level, capped at
+        // `maxEntries` and separated by a half-strength subtle rule.
+        let entry_font = rem_to_px(0.8125);
+        let row_gap = rem_to_px(0.75);
+        let row_pad_y = rem_to_px(0.5);
+        let row_pad_x = rem_to_px(0.875);
+        let rule = with_alpha(border, border.3 * 0.55);
+        let level_tint = |level: LogLevel| match level {
+            LogLevel::Info => text_primary,
+            LogLevel::Warn => mix_srgb(warn_color, text_primary, 0.84),
+            LogLevel::Error => mix_srgb(error_color, text_primary, 0.84),
+        };
+
+        for (i, entry) in rows.iter().take(spec.max_entries).enumerate() {
+            let mut row = Node::container();
+            {
+                let s = &mut row.style;
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+                s.descriptor.layout.spacing.gap = row_gap;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.top = row_pad_y;
+                pad.bottom = row_pad_y;
+                pad.left = row_pad_x;
+                pad.right = row_pad_x;
+                s.font_family = Some(FontFamily::Mono);
+                s.text_size = Some(entry_font);
+                s.line_height = Some(1.45);
+                s.descriptor.text_color = Some(level_tint(entry.level));
+                // The first row carries no rule; every later one is separated.
+                if i > 0 {
+                    s.border_top_width = Some(1.0);
+                    s.border_color_top = Some(rule);
+                }
+            }
+
+            let mut stamp = text(entry.timestamp.clone(), text_secondary, entry_font);
+            stamp.style.no_wrap = true;
+            let mut level = text(
+                entry.level.value().to_uppercase(),
+                text_secondary,
+                entry_font,
+            );
+            level.style.no_wrap = true;
+            level.style.text_weight = Some(700);
+            let mut message = text(entry.message.clone(), level_tint(entry.level), entry_font);
+            message.style.min_width = Some(0.0);
+            message.style.text_wrap = true;
+            message.style.flex_grow = Some(1.0);
+
+            entries_area = entries_area.child(row.child(stamp).child(level).child(message));
+        }
     }
 
     el = el.child(entries_area);
 
     // Scroll-to-latest hint.
     if spec.auto_scroll {
-        el = el.child(text(
-            "New entries".to_string(),
-            text_secondary,
-            label_font,
-        ));
+        el = el.child(text("New entries".to_string(), text_secondary, label_font));
     }
 
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeKind;
+    use poodle_specs::{AuditLogEntry, LogEntry, StreamLogEntry};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    /// Every text run in the tree, in order.
+    fn texts(node: &Node) -> Vec<String> {
+        let mut out = Vec::new();
+        fn walk(node: &Node, out: &mut Vec<String>) {
+            if let NodeKind::Text { content } = &node.kind {
+                out.push(content.clone());
+            }
+            for child in &node.children {
+                walk(child, out);
+            }
+        }
+        walk(node, &mut out);
+        out
+    }
+
+    fn stream_spec() -> LogListSpec {
+        LogListSpec::new().with_entries([
+            LogEntry::Stream(StreamLogEntry::new(
+                "10:23:01",
+                LogLevel::Info,
+                "Server started",
+            )),
+            LogEntry::Stream(StreamLogEntry::new(
+                "10:23:05",
+                LogLevel::Warn,
+                "Cache miss",
+            )),
+            LogEntry::Stream(StreamLogEntry::new("10:23:08", LogLevel::Error, "Timeout")),
+        ])
+    }
+
+    #[test]
+    fn stream_rows_render_timestamp_level_and_message() {
+        let node = log_list(&stream_spec(), &theme(), None);
+        let runs = texts(&node);
+        for expected in [
+            "10:23:01",
+            "INFO",
+            "Server started",
+            "10:23:05",
+            "WARN",
+            "Cache miss",
+            "10:23:08",
+            "ERROR",
+            "Timeout",
+        ] {
+            assert!(
+                runs.iter().any(|run| run == expected),
+                "missing {expected:?} in {runs:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn level_filter_drops_non_matching_rows() {
+        let node = log_list(&stream_spec().with_filter_level("error"), &theme(), None);
+        let runs = texts(&node);
+        assert!(runs.iter().any(|run| run == "Timeout"));
+        assert!(!runs.iter().any(|run| run == "Server started"));
+    }
+
+    #[test]
+    fn text_filter_matches_the_message_case_insensitively() {
+        let node = log_list(&stream_spec().with_filter_text("CACHE"), &theme(), None);
+        let runs = texts(&node);
+        assert!(runs.iter().any(|run| run == "Cache miss"));
+        assert!(!runs.iter().any(|run| run == "Timeout"));
+    }
+
+    #[test]
+    fn max_entries_caps_the_rendered_rows() {
+        let node = log_list(&stream_spec().with_max_entries(1), &theme(), None);
+        let runs = texts(&node);
+        assert!(runs.iter().any(|run| run == "Server started"));
+        assert!(!runs.iter().any(|run| run == "Cache miss"));
+    }
+
+    #[test]
+    fn an_empty_stream_renders_the_empty_surface() {
+        let node = log_list(&LogListSpec::new(), &theme(), None);
+        assert!(texts(&node).iter().any(|run| run == "No log entries"));
+    }
+
+    #[test]
+    fn audit_entries_switch_the_list_into_audit_mode() {
+        let spec = LogListSpec::new().with_entries([LogEntry::Audit(AuditLogEntry::new(
+            "a1",
+            "2026-01-01T00:00:00Z",
+            "user_login",
+            "workspace",
+            "w-1",
+        ))]);
+        assert!(spec.is_audit());
+        // Audit rows are not stream rows, so the stream surface stays empty.
+        assert!(spec.stream_entries().is_empty());
+    }
 }

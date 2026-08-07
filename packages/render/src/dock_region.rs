@@ -10,10 +10,12 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole,
 };
-use poodle_specs::{DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing};
+use poodle_specs::{
+    DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing, DockTabsPlacement,
+};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
@@ -46,9 +48,10 @@ pub fn dock_region(
     let fill = theme.resolve_color(spec.strip_fill_token());
     let panel_fill = theme.resolve_color("color.background.panel");
     let border_subtle = theme.resolve_color("color.border.subtle");
-    let text_primary = theme.resolve_color("color.text.primary");
+    let radius_control = theme.resolve_radius("radius.control");
     let text_muted = theme.resolve_color("color.text.secondary");
     let accent = theme.resolve_color("color.accent.base");
+    let hover_bg = theme.resolve_color("color.background.hover");
     // Active-tab fill: accent mixed into the strip fill (matches GPUI's
     // `accent.opacity(0.10)` and the Svelte active-tab tint). TOKEN GAP: no
     // semantic opacity token for the selected-tab tint strength, so the ratio
@@ -57,6 +60,7 @@ pub fn dock_region(
     let active_bg = mix_srgb(accent, fill, ACTIVE_TAB_ACCENT_RATIO);
 
     let is_side_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);
+    let is_tabs_on_edge = spec.tabs_placement == DockTabsPlacement::Edge && is_side_edge;
     let active = spec.current_value().map(|s| s.to_string());
 
     // ── Root emphasis treatment ────────────────────────────────
@@ -68,31 +72,53 @@ pub fn dock_region(
         DockEmphasis::Strong => (panel_fill, mix_srgb(accent, border_subtle, 0.32)),
     };
 
+    // A dock borders only the edge it docks against — a left dock rules its
+    // right side, a top dock its bottom. A box on all four sides reads as a
+    // detached card rather than a region attached to the shell.
+    let apply_edge_border = |s: &mut poodle_node::NodeStyle| {
+        // Only the width is per-side; the colour rides the uniform channel,
+        // which every side falls back to. The uniform WIDTH stays zero so no
+        // box is drawn.
+        s.descriptor.border.color = root_border;
+        match spec.edge {
+            DockEdge::Left => s.border_right_width = Some(border_w),
+            DockEdge::Right => s.border_left_width = Some(border_w),
+            DockEdge::Top => s.border_bottom_width = Some(border_w),
+            DockEdge::Bottom => s.border_top_width = Some(border_w),
+        }
+        s.descriptor.background = Some(root_bg);
+    };
+
     // Build a single tab. `compact` → icon-only (label suppressed); `vertical`
     // → full-width stacked entry.
     let build_tab =
         |value: &str, label: &str, icon: Option<&str>, compact: bool, vertical: bool| -> Node {
             let is_active = active.as_deref() == Some(value);
 
-            // Icon-only compact / icon-strip tabs render the icon glyph;
-            // otherwise the label text. When an icon exists it is shown
-            // alongside the label.
-            let display = if compact {
-                icon.unwrap_or(label).to_string()
-            } else if let Some(ic) = icon {
-                format!("{ic} {label}")
-            } else {
-                label.to_string()
-            };
-
-            let mut tab_btn = Node::button(&display);
+            let mut tab_btn = Node::button("");
             tab_btn.id = Some(format!("dock-tab-{value}"));
             {
                 let s = &mut tab_btn.style;
-                s.descriptor.text_color = Some(if is_active { text_primary } else { text_muted });
+                // Icon and label are separate children behind a gap, not one
+                // interpolated string — a joined string collapses the gap to a
+                // single space and shifts every tab's centring.
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+                s.descriptor.layout.spacing.gap = space_x * 0.5;
+                // Active tabs read as an accent-tinted pill: accent text on an
+                // accent-into-strip fill, at the same weight as the rest. The
+                // underline-plus-bold treatment this used to carry belongs to
+                // TabStrip, not to a dock's panel tabs.
+                s.descriptor.text_color = Some(if is_active { accent } else { text_muted });
                 s.text_size = Some(tab_font);
-                s.text_weight = Some(if is_active { 600 } else { 400 });
+                s.text_weight = Some(400);
                 s.descriptor.cursor = CursorHint::Pointer;
+                let c = &mut s.descriptor.corner_radii;
+                c.top_left = radius_control;
+                c.top_right = radius_control;
+                c.bottom_right = radius_control;
+                c.bottom_left = radius_control;
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 if vertical {
                     s.fill_width = true;
@@ -113,10 +139,28 @@ pub fn dock_region(
                 }
                 if is_active {
                     s.descriptor.background = Some(active_bg);
-                    s.border_bottom_width = Some(2.0);
-                    s.border_color_bottom = Some(accent);
+                } else {
+                    s.hover = Some(poodle_node::StylePatch {
+                        background: Some(hover_bg),
+                        ..poodle_node::StylePatch::default()
+                    });
                 }
             }
+            // Icon-only compact / icon-strip tabs render the icon glyph;
+            // otherwise icon (when present) then label.
+            let mut tab_btn = tab_btn;
+            if let Some(ic) = icon {
+                let mut glyph = Node::text(ic.to_string());
+                glyph.style.descriptor.text_color =
+                    Some(if is_active { accent } else { text_muted });
+                tab_btn = tab_btn.child(glyph);
+            }
+            if !compact {
+                tab_btn = tab_btn.child(Node::text(label.to_string()));
+            } else if icon.is_none() {
+                tab_btn = tab_btn.child(Node::text(label.to_string()));
+            }
+            let mut tab_btn = tab_btn;
             tab_btn.interaction.focusable = true;
             if let Some(handler) = &handlers.on_tab_change {
                 let handler = Arc::clone(handler);
@@ -187,8 +231,7 @@ pub fn dock_region(
                 LayoutDirection::Column
             };
             s.descriptor.background = Some(root_bg);
-            s.descriptor.border.width = border_w;
-            s.descriptor.border.color = root_border;
+            apply_edge_border(s);
             s.descriptor.layout.width = LayoutSizing::Grow;
         }
         let mut stack = stack;
@@ -251,8 +294,7 @@ pub fn dock_region(
                 pad.top = space_y;
                 pad.bottom = space_y;
                 s.descriptor.background = Some(fill);
-                s.descriptor.border.width = border_w;
-                s.descriptor.border.color = root_border;
+                apply_edge_border(s);
             }
             let mut strip = strip;
             if spec.is_collapsible {
@@ -282,8 +324,7 @@ pub fn dock_region(
                 pad.top = space_y * 0.5;
                 pad.bottom = space_y * 0.5;
                 s.descriptor.background = Some(fill);
-                s.descriptor.border.width = border_w;
-                s.descriptor.border.color = root_border;
+                apply_edge_border(s);
             }
             let mut strip = strip;
             for item in &spec.items {
@@ -307,9 +348,16 @@ pub fn dock_region(
     {
         let s = &mut el.style;
         s.descriptor.background = Some(root_bg);
-        s.descriptor.border.width = border_w;
-        s.descriptor.border.color = root_border;
-        s.descriptor.layout.direction = LayoutDirection::Column;
+        apply_edge_border(s);
+        // A side dock runs its strip down the edge and puts the body beside it;
+        // a top/bottom dock stacks strip over body.
+        if is_tabs_on_edge {
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.fill_height = true;
+        } else {
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.fill_width = true;
+        }
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
     el.a11y.role = Some(NodeRole::TabList);
@@ -317,24 +365,41 @@ pub fn dock_region(
     let mut tab_bar = Node::container();
     {
         let s = &mut tab_bar.style;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = tab_gap;
-        let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = space_x;
-        pad.right = space_x;
-        pad.top = space_y * 0.5;
-        s.border_bottom_width = Some(1.0);
-        s.descriptor.border.color = border_subtle;
+        s.descriptor.background = Some(fill);
+        if is_tabs_on_edge {
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+            s.descriptor.layout.spacing.gap = space_y * 0.5;
+            let pad = &mut s.descriptor.layout.spacing.padding;
+            pad.top = space_y;
+            pad.bottom = space_y;
+        } else {
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = tab_gap;
+            let pad = &mut s.descriptor.layout.spacing.padding;
+            pad.left = space_x;
+            pad.right = space_x;
+            pad.top = space_y * 0.5;
+            pad.bottom = space_y * 0.5;
+            s.border_bottom_width = Some(border_w);
+            s.descriptor.border.color = border_subtle;
+        }
     }
 
     // Tab list grows; toggle pinned at the end.
     let mut tab_list = Node::container();
     {
         let s = &mut tab_list.style;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = tab_gap;
+        if is_tabs_on_edge {
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+            s.descriptor.layout.spacing.gap = space_y * 0.5;
+        } else {
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = tab_gap;
+        }
         s.flex_grow = Some(1.0);
         s.flex_basis = Some(0.0);
         s.min_width = Some(0.0);
@@ -346,24 +411,42 @@ pub fn dock_region(
             &item.label,
             item.icon.as_deref(),
             false,
-            false,
+            is_tabs_on_edge,
         ));
     }
     let mut tab_bar = tab_bar.child(tab_list);
     if spec.is_collapsible {
-        tab_bar = tab_bar.child(build_toggle(false));
+        tab_bar = tab_bar.child(build_toggle(is_tabs_on_edge));
     }
-    let mut el = el.child(tab_bar);
 
-    // Body region — active panel content.
-    if let Some(c) = content {
+    let body = content.map(|c| {
         let mut body = Node::container();
         // Explicit Row (see switch.rs).
         body.style.descriptor.layout.direction = LayoutDirection::Row;
-        body.style.descriptor.layout.width = LayoutSizing::Grow;
+        body.style.flex_grow = Some(1.0);
+        body.style.flex_basis = Some(0.0);
+        body.style.min_width = Some(0.0);
         body.style.min_height = Some(0.0);
-        el = el.child(body.child(c));
-    }
+        body.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        body.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        body.child(c)
+    });
+
+    // A right-edge dock keeps its strip against the shell edge, so the body
+    // comes first.
+    let mut el = if is_tabs_on_edge && spec.edge == DockEdge::Right {
+        let el = match body {
+            Some(b) => el.child(b),
+            None => el,
+        };
+        el.child(tab_bar)
+    } else {
+        let el = el.child(tab_bar);
+        match body {
+            Some(b) => el.child(b),
+            None => el,
+        }
+    };
 
     // Cross-region drop-zone affordance.
     if spec.can_accept_panel {

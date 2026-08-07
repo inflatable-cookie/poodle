@@ -48,6 +48,9 @@ pub struct RelationPickerHandlers {
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the drill context's id when a drill row is entered.
     pub on_drill_enter: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires with the retained path depth when back/breadcrumb navigation is
+    /// activated. The host truncates its drill path to that depth.
+    pub on_breadcrumb_click: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub on_confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
 }
@@ -91,7 +94,15 @@ pub fn relation_picker(
     let item_y = rem_to_px(relation_picker_item_y_rem(effective_size));
     let label_size = theme.resolve_space("typography.label.size");
 
-    let search = build_search(spec, theme, effective_size, text_secondary, accent, label_size);
+    let search = build_search(
+        spec,
+        theme,
+        effective_size,
+        text_secondary,
+        accent,
+        label_size,
+        &handlers,
+    );
 
     let selection_items = spec.selection_summary_items();
     let selection = if spec.show_selection_summary && !selection_items.is_empty() {
@@ -168,7 +179,10 @@ pub fn relation_picker(
             list.style.descriptor.layout.spacing.gap = list_gap;
             let mut list = list;
             for item in spec.current_items() {
-                let is_selected = spec.selected_ids.iter().any(|selected| selected == &item.id);
+                let is_selected = spec
+                    .selected_ids
+                    .iter()
+                    .any(|selected| selected == &item.id);
                 let mut row = candidate_row(
                     &item,
                     is_selected,
@@ -284,6 +298,7 @@ fn build_search(
     text_secondary: ColorValue,
     accent: ColorValue,
     label_size: f32,
+    handlers: &RelationPickerHandlers,
 ) -> Node {
     let mut col = Node::container();
     col.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -304,6 +319,11 @@ fn build_search(
             back.style.descriptor.text_color = Some(text_secondary);
             back.style.text_size = Some(label_size);
             back.interaction.focusable = true;
+            if let Some(handler) = &handlers.on_breadcrumb_click {
+                let handler = Arc::clone(handler);
+                let depth = spec.drill_down_path.len().saturating_sub(1);
+                back.interaction.on_activate = Some(Arc::new(move || handler(depth)));
+            }
             crumbs = crumbs.child(back);
 
             for (idx, item_id) in spec.drill_down_path.iter().enumerate() {
@@ -379,7 +399,8 @@ fn build_search(
                 .with_size_role(spec.size_role)
                 .with_density(spec.density);
             select_spec.aria_label = Some(format!("{} filter", filter.label));
-            filters_row = filters_row.child(select(&select_spec, theme, &SelectHandlers::default()));
+            filters_row =
+                filters_row.child(select(&select_spec, theme, &SelectHandlers::default()));
         }
         col = col.child(filters_row);
     }

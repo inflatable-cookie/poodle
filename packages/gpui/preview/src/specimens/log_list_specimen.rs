@@ -1,25 +1,32 @@
+use crate::node_compat::{Eyebrow, LogList};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, LogEntry, LogLevel, LogList};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{LogFilter, LogListSpec};
+use poodle_specs::{
+    AuditLogEntry, LogActor, LogEntry, LogFilter, LogLevel, LogListSpec, StreamLogEntry,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+    // The contract's level set is info | warn | error; the old GPUI tier's extra
+    // `Debug` level had no contract or Svelte counterpart.
+    let stream = |ts: &str, level: LogLevel, message: &str| {
+        LogEntry::Stream(StreamLogEntry::new(ts, level, message))
+    };
     let sample_entries = || {
         vec![
-            LogEntry::new("10:23:01", LogLevel::Info, "Server started on port 3000"),
-            LogEntry::new(
+            stream("10:23:01", LogLevel::Info, "Server started on port 3000"),
+            stream(
                 "10:23:02",
-                LogLevel::Debug,
+                LogLevel::Info,
                 "Loading configuration from env",
             ),
-            LogEntry::new("10:23:05", LogLevel::Warn, "Cache miss for key 'user:42'"),
-            LogEntry::new(
+            stream("10:23:05", LogLevel::Warn, "Cache miss for key 'user:42'"),
+            stream(
                 "10:23:08",
                 LogLevel::Error,
                 "Failed to connect to database: timeout",
             ),
-            LogEntry::new(
+            stream(
                 "10:23:10",
                 LogLevel::Info,
                 "Retrying connection (attempt 2/3)",
@@ -29,28 +36,41 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
     let audit_entries = || {
         vec![
-            LogEntry::new("09:14:22", LogLevel::Info, "Workspace role updated")
-                .with_actor("Alice Chen")
-                .with_actor_href("/users/alice")
-                .with_action("updated")
-                .with_resource("Workspace » Acme")
-                .with_resource_href("/workspaces/acme"),
-            LogEntry::new("09:17:03", LogLevel::Warn, "Access policy modified")
-                .with_actor("Bob Martinez")
-                .with_actor_href("/users/bob")
-                .with_action("modified")
-                .with_resource("Policy » Backups")
-                .with_resource_href("/policies/backups"),
-            LogEntry::new("09:22:41", LogLevel::Error, "API key revoked")
-                .with_actor("Carol Patel")
-                .with_actor_href("/users/carol")
-                .with_action("revoked")
-                .with_resource("API key » pk_live_abc123")
-                .with_resource_href("/keys/pk_live_abc123"),
-            LogEntry::new("09:30:12", LogLevel::Info, "Scheduled backup started")
-                .with_action("started")
-                .with_resource("Scheduled task » Nightly backup"),
-            // ^ actor_name is None on purpose — renders as "System"
+            LogEntry::Audit(
+                AuditLogEntry::new("a1", "09:14:22", "updated", "workspace", "acme")
+                    .with_actor(
+                        LogActor::new("u-alice")
+                            .with_name("Alice Chen")
+                            .with_href("/users/alice"),
+                    )
+                    .with_resource_label("Workspace \u{00BB} Acme")
+                    .with_resource_href("/workspaces/acme"),
+            ),
+            LogEntry::Audit(
+                AuditLogEntry::new("a2", "09:17:03", "modified", "policy", "backups")
+                    .with_actor(
+                        LogActor::new("u-bob")
+                            .with_name("Bob Martinez")
+                            .with_href("/users/bob"),
+                    )
+                    .with_resource_label("Policy \u{00BB} Backups")
+                    .with_resource_href("/policies/backups"),
+            ),
+            LogEntry::Audit(
+                AuditLogEntry::new("a3", "09:22:41", "revoked", "api_key", "pk_live_abc123")
+                    .with_actor(
+                        LogActor::new("u-carol")
+                            .with_name("Carol Patel")
+                            .with_href("/users/carol"),
+                    )
+                    .with_resource_label("API key \u{00BB} pk_live_abc123")
+                    .with_resource_href("/keys/pk_live_abc123"),
+            ),
+            // No actor on purpose — contract §"resolveActorName" reads "System".
+            LogEntry::Audit(
+                AuditLogEntry::new("a4", "09:30:12", "started", "scheduled_task", "nightly")
+                    .with_resource_label("Scheduled task \u{00BB} Nightly backup"),
+            ),
         ]
     };
 
@@ -71,11 +91,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     LogList::from_spec(
                         LogListSpec::new()
-                            .with_entry_count(5)
+                            .with_entries(sample_entries())
                             .with_auto_scroll(true),
                         theme,
-                    )
-                    .with_entries(sample_entries()),
+                    ),
                 ),
         )
         // -- Filtered (errors only) --
@@ -91,12 +110,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     LogList::from_spec(
                         LogListSpec::new()
-                            .with_entry_count(1)
+                            .with_entries(sample_entries())
                             .with_filter_level("error")
                             .with_auto_scroll(true),
                         theme,
-                    )
-                    .with_entries(sample_entries()),
+                    ),
                 ),
         )
         // -- Audit log (actor + resource links) --
@@ -112,11 +130,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     LogList::from_spec(
                         LogListSpec::new()
-                            .with_entry_count(4)
+                            .with_entries(audit_entries())
                             .with_auto_scroll(false),
                         theme,
-                    )
-                    .with_entries(audit_entries()),
+                    ),
                 ),
         )
         // -- Audit log with filter toolbar + pagination --
@@ -132,7 +149,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     LogList::from_spec(
                         LogListSpec::new()
-                            .with_entry_count(4)
+                            .with_entries(audit_entries())
                             .with_filter(
                                 LogFilter::select("action", "Action")
                                     .with_placeholder("All actions")
@@ -146,8 +163,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_page_size(4)
                             .with_total(18),
                         theme,
-                    )
-                    .with_entries(audit_entries()),
+                    ),
                 ),
         )
         // -- Audit log loading state --
@@ -176,7 +192,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(LogList::from_spec(
-                    LogListSpec::new().with_error("Failed to load audit entries: request timed out"),
+                    LogListSpec::new()
+                        .with_error("Failed to load audit entries: request timed out"),
                     theme,
                 )),
         )

@@ -14,14 +14,14 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, NodeToggled, ShadowLayer,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodePosition, NodeRole, NodeToggled, ShadowLayer,
 };
 use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
 use crate::color::{hex_color, mix_srgb, BLACK};
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 
 /// Track inset in rem, derived from density (contract §8).
@@ -85,12 +85,16 @@ pub fn tri_state_switch(
     let inset = rem_to_px(track_inset_rem(spec.density));
     // Contract: segment min-width = min-content-width + x*2.
     let min_segment_width = rem_to_px(tri_state_min_content_width_rem(effective_size)) + x * 2.0;
+    let track_width = min_segment_width * 3.0 + inset * 2.0;
 
     let border_width = rem_to_px(0.0625); // contract hairline
 
     // Contract §8: segment typography from the label tokens (fixed).
-    let label_size = theme.resolve_space(spec.label_size_token());
-    let label_weight = theme.resolve_space(spec.label_weight_token()) as u16;
+    let label_size = rem_to_px(size_font_rem(effective_size));
+    // `typography.label.weight` is the contract's fixed medium weight. Weight
+    // tokens are not dimensions, so they must not travel through
+    // `ThemeProvider::resolve_space` (the GPUI provider correctly returns 0).
+    let label_weight = 500;
 
     // ── Per-state selection fill + border ──
     let value = spec.value();
@@ -108,48 +112,99 @@ pub fn tri_state_switch(
 
     // ── Build segments ──
     let states = [
-        (TriStateValue::Excluded, spec.excluded_label(), excluded_color),
+        (
+            TriStateValue::Excluded,
+            spec.excluded_label(),
+            excluded_color,
+        ),
         (TriStateValue::Default, spec.default_label(), default_color),
-        (TriStateValue::Included, spec.included_label(), included_color),
+        (
+            TriStateValue::Included,
+            spec.included_label(),
+            included_color,
+        ),
     ];
 
     let segment_height = height - inset * 2.0;
+    let segment_radius = segment_height / 2.0;
+
+    let mut selection = Node::container();
+    selection.position = NodePosition::Absolute {
+        top: Some(inset),
+        left: Some(inset + min_segment_width * value.index() as f32),
+        right: None,
+        bottom: None,
+    };
+    {
+        let s = &mut selection.style;
+        s.descriptor.layout.width = LayoutSizing::Fixed(min_segment_width);
+        s.descriptor.layout.height = LayoutSizing::Fixed(segment_height);
+        let c = &mut s.descriptor.corner_radii;
+        c.top_left = segment_radius;
+        c.top_right = segment_radius;
+        c.bottom_right = segment_radius;
+        c.bottom_left = segment_radius;
+        s.descriptor.background = Some(selection_fill);
+        s.descriptor.border.width = border_width;
+        s.descriptor.border.color = selection_border;
+        s.shadow_layers = vec![
+            ShadowLayer {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.0625),
+                blur: 0.0,
+                spread: 0.0,
+                color: ColorValue(1.0, 1.0, 1.0, 0.08),
+                inset: false,
+            },
+            ShadowLayer {
+                offset_x: 0.0,
+                offset_y: rem_to_px(0.125),
+                blur: rem_to_px(0.5),
+                spread: 0.0,
+                color: ColorValue(0.0, 0.0, 0.0, 0.18),
+                inset: false,
+            },
+        ];
+    }
 
     // ── Root ──
     let mut root = Node::container();
+    root.position = NodePosition::Relative;
     {
         let s = &mut root.style;
+        s.descriptor.layout.width = LayoutSizing::Fixed(track_width);
         s.descriptor.layout.height = LayoutSizing::Fixed(height);
         let c = &mut s.descriptor.corner_radii;
-        c.top_left = 999.0;
-        c.top_right = 999.0;
-        c.bottom_right = 999.0;
-        c.bottom_left = 999.0;
+        let root_radius = height / 2.0;
+        c.top_left = root_radius;
+        c.top_right = root_radius;
+        c.bottom_right = root_radius;
+        c.bottom_left = root_radius;
         s.descriptor.background = Some(root_bg);
         s.descriptor.border.width = border_width;
         s.descriptor.border.color = border_default;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = inset;
-        pad.right = inset;
-        pad.top = inset;
-        pad.bottom = inset;
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
     }
+    root = root.child(selection);
 
     for &(state, label_text, state_color) in &states {
         let is_active = value == state;
 
         // Active uses per-state color; inactive uses text-secondary.
-        let seg_text_color = if is_active { state_color } else { text_secondary };
+        let seg_text_color = if is_active {
+            state_color
+        } else {
+            text_secondary
+        };
 
-        // Active segment paints the selection fill/border + shadow; inactive
-        // is transparent over the shared track.
+        // The selection capsule paints behind three transparent segments.
         let transparent = ColorValue(0.0, 0.0, 0.0, 0.0);
-        let seg_bg = if is_active { selection_fill } else { transparent };
-        let seg_border = if is_active { selection_border } else { transparent };
 
         let mut segment = Node::button(label_text);
+        segment.position = NodePosition::Relative;
         // Contract: three mutually exclusive states — each is a `radio`.
         segment.a11y.role = Some(NodeRole::RadioButton);
         segment.a11y.toggled = Some(if is_active {
@@ -159,48 +214,26 @@ pub fn tri_state_switch(
         });
         {
             let s = &mut segment.style;
-            s.min_height = Some(segment_height);
-            s.min_width = Some(min_segment_width);
+            s.descriptor.layout.width = LayoutSizing::Fixed(min_segment_width);
+            s.descriptor.layout.height = LayoutSizing::Fixed(segment_height);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = x;
             pad.right = x;
             let c = &mut s.descriptor.corner_radii;
-            c.top_left = 999.0;
-            c.top_right = 999.0;
-            c.bottom_right = 999.0;
-            c.bottom_left = 999.0;
-            s.descriptor.background = Some(seg_bg);
+            c.top_left = segment_radius;
+            c.top_right = segment_radius;
+            c.bottom_right = segment_radius;
+            c.bottom_left = segment_radius;
+            s.descriptor.background = Some(transparent);
             s.descriptor.border.width = border_width;
-            s.descriptor.border.color = seg_border;
+            s.descriptor.border.color = transparent;
             s.descriptor.text_color = Some(seg_text_color);
             s.text_size = Some(label_size);
             s.text_weight = Some(label_weight);
+            s.no_wrap = true;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-
-            // Selection box-shadow on the active segment (contract §8): an
-            // inset top highlight plus an outset drop.
-            if is_active {
-                s.shadow_layers = vec![
-                    ShadowLayer {
-                        offset_x: 0.0,
-                        offset_y: rem_to_px(0.0625),
-                        blur: 0.0,
-                        spread: 0.0,
-                        color: ColorValue(1.0, 1.0, 1.0, 0.08),
-                        inset: true,
-                    },
-                    ShadowLayer {
-                        offset_x: 0.0,
-                        offset_y: rem_to_px(0.125),
-                        blur: rem_to_px(0.5),
-                        spread: 0.0,
-                        color: ColorValue(0.0, 0.0, 0.0, 0.18),
-                        inset: false,
-                    },
-                ];
-            }
         }
         segment.interaction.focusable = true;
 

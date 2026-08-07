@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Eyebrow, Separator, Toolbar};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,11 +7,21 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Separator, Toolbar};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, Orientation, RuleTone,
     SeparatorOrientation, SeparatorSpec, ToolbarSpec,
 };
+use std::sync::Arc;
+
+fn set_last_action_click(state: &AppState, value: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "toolbar-last".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -50,15 +61,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("toolbar-bold")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("toolbar-last".to_string(), "Bold".to_string());
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(set_last_action_click(state, "Bold")),
                     )
                     .child(
                         Button::from_spec(
@@ -69,15 +72,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("toolbar-italic")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("toolbar-last".to_string(), "Italic".to_string());
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(set_last_action_click(state, "Italic")),
                     )
                     .child(
                         Button::from_spec(
@@ -177,15 +172,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("toolbar-publish")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("toolbar-last".to_string(), "Publish".to_string());
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(set_last_action_click(state, "Publish")),
                     ),
                 ),
         )

@@ -10,6 +10,7 @@
   } from "@poodle/headless";
 
   import AgentMessage from "./AgentMessage.svelte";
+  import AgentPlanRecord from "./AgentPlanRecord.svelte";
   import AgentQuestionRecord from "./AgentQuestionRecord.svelte";
   import ChangedFiles from "./ChangedFiles.svelte";
   import EmptyState from "./EmptyState.svelte";
@@ -299,7 +300,9 @@
 
     {#if activity}
       <div class="poodle-agent-transcript__activity">
-        <Spinner variant="dots" size={glyphSize} tone="current" />
+        {#if activity.spinning !== false}
+          <Spinner variant="dots" size={glyphSize} tone="current" />
+        {/if}
         <span class="poodle-agent-transcript__activity-label">{activity.label}</span>
       </div>
     {/if}
@@ -343,6 +346,14 @@
     <AgentQuestionRecord
       question={block.question}
       answer={block.answer}
+      size={resolvedSize}
+      density={resolvedDensity}
+    />
+  {:else if block.kind === "decided-plan"}
+    <AgentPlanRecord
+      plan={block.plan}
+      status={block.status}
+      decidedAt={block.decidedAt}
       size={resolvedSize}
       density={resolvedDensity}
     />

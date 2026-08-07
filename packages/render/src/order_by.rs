@@ -333,7 +333,12 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                     }),
                 );
 
-                list = list.child(row.child(handle).child(label).child(direction).child(remove));
+                list = list.child(
+                    row.child(handle)
+                        .child(label)
+                        .child(direction)
+                        .child(remove),
+                );
             }
             panel = panel.child(list);
         }
@@ -347,7 +352,9 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
             let options: Vec<ChoiceOption> = spec
                 .available_fields()
                 .into_iter()
-                .map(|field| ChoiceOption::new(field.resolved_key().to_string(), field.label.clone()))
+                .map(|field| {
+                    ChoiceOption::new(field.resolved_key().to_string(), field.label.clone())
+                })
                 .collect();
             let mut select_spec = SelectSpec::new(options)
                 .with_placeholder("+ Add field")

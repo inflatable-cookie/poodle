@@ -16,22 +16,23 @@
 //! token system via `theme.resolve_*` + the spec's `border_token()`/`gap_token()`
 //! — zero hand-coded visual values (CLAUDE.md "no fakes").
 
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, EyebrowSpec, InlineRemediationSpec, RemediationAction, StatusTone,
 };
+use std::sync::Arc;
 
 /// Render one InlineRemediation from a spec, resolving all visuals from tokens.
 fn remediation(
     spec: &InlineRemediationSpec,
     theme: &GpuiThemeProvider,
-    cx: &mut Context<PreviewRoot>,
+    state: &AppState,
 ) -> AnyElement {
     // ── Colors (token-resolved) ──
     // Contract §6 Border: tone → color.status.* (from border_token()).
@@ -108,6 +109,7 @@ fn remediation(
     // ── Action (contract §2 "delegates to Button primitive") ──
     if let Some(ref action) = spec.action {
         let action_id = action.id.clone();
+        let events = state.node_events.clone();
         root = root.child(
             Button::from_spec(
                 ButtonSpec::new()
@@ -117,11 +119,13 @@ fn remediation(
                 theme,
             )
             .with_id(format!("inline-remediation-action-{}", action.id))
-            .on_click(cx.listener(move |_this, _e: &ClickEvent, _w, cx| {
+            .on_click(Arc::new(move || {
                 // Action click is owned by the caller's recovery logic; the
-                // specimen just acknowledges it by re-rendering.
-                let _ = &action_id;
-                cx.notify();
+                // specimen records the acknowledgement for the click driver.
+                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                    key: "inline-remediation-last".to_string(),
+                    value: action_id.clone(),
+                });
             })),
         );
     }
@@ -135,11 +139,14 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(child)
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     div()
@@ -155,13 +162,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(12.0))
                 .child(remediation(
-                    &InlineRemediationSpec::new(
-                        "Double-check this value before continuing.",
-                    )
-                    .with_tone(StatusTone::Info)
-                    .with_title("Info"),
+                    &InlineRemediationSpec::new("Double-check this value before continuing.")
+                        .with_tone(StatusTone::Info)
+                        .with_title("Info"),
                     theme,
-                    cx,
+                    state,
                 ))
                 .child(remediation(
                     &InlineRemediationSpec::new(
@@ -170,16 +175,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_tone(StatusTone::Warning)
                     .with_title("Warning"),
                     theme,
-                    cx,
+                    state,
                 ))
                 .child(remediation(
-                    &InlineRemediationSpec::new(
-                        "The end date must fall after the start date.",
-                    )
-                    .with_tone(StatusTone::Danger)
-                    .with_title("Danger"),
+                    &InlineRemediationSpec::new("The end date must fall after the start date.")
+                        .with_tone(StatusTone::Danger)
+                        .with_title("Danger"),
                     theme,
-                    cx,
+                    state,
                 )),
         ))
         // ── Actionless (pure messaging) ──
@@ -187,12 +190,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Actionless",
             theme,
             remediation(
-                &InlineRemediationSpec::new(
-                    "Slugs must be lowercase and contain no spaces.",
-                )
-                .with_tone(StatusTone::Info),
+                &InlineRemediationSpec::new("Slugs must be lowercase and contain no spaces.")
+                    .with_tone(StatusTone::Info),
                 theme,
-                cx,
+                state,
             ),
         ))
         // ── With action (delegates to Button primitive) ──
@@ -208,7 +209,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_variant(ButtonVariant::Secondary),
                     ),
                 theme,
-                cx,
+                state,
             ),
         ))
         // ── Referenced fields (cross-field attribution hint) ──
@@ -216,21 +217,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Referenced fields",
             theme,
             remediation(
-                &InlineRemediationSpec::new(
-                    "Password and confirmation must match.",
-                )
-                .with_tone(StatusTone::Warning)
-                .with_title("Mismatch")
-                .with_referenced_field_ids(vec![
-                    "password".to_string(),
-                    "confirm-password".to_string(),
-                ])
-                .with_action(
-                    RemediationAction::new("clear", "Clear both")
-                        .with_variant(ButtonVariant::Ghost),
-                ),
+                &InlineRemediationSpec::new("Password and confirmation must match.")
+                    .with_tone(StatusTone::Warning)
+                    .with_title("Mismatch")
+                    .with_referenced_field_ids(vec![
+                        "password".to_string(),
+                        "confirm-password".to_string(),
+                    ])
+                    .with_action(
+                        RemediationAction::new("clear", "Clear both")
+                            .with_variant(ButtonVariant::Ghost),
+                    ),
                 theme,
-                cx,
+                state,
             ),
         ))
         // ── Disabled action ──
@@ -247,7 +246,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_disabled(true),
                     ),
                 theme,
-                cx,
+                state,
             ),
         ))
 }

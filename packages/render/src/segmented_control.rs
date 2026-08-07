@@ -1,14 +1,17 @@
 //! SegmentedControl — an inline choice between exclusive options.
 //!
 //! Contract: `docs/contracts/components/segmented-control.md`
-//! Ported from: `packages/jetstream/components/src/segmented_control.rs`.
+//! Ported from: `packages/jetstream/components/src/segmented_control.rs`,
+//! reconciled against the old GPUI tier
+//! (`packages/gpui/components/src/primitives/segmented_control.rs`) for the
+//! g12.019 node-backend migration.
 
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
-    ShadowLayer,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole, ShadowLayer, StylePatch,
 };
 use poodle_specs::SegmentedControlSpec;
 
@@ -23,15 +26,28 @@ pub fn segmented_control(
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    // Fixed per-size/per-density tables, transcribed from the old GPUI tier
+    // (g12.019): unlike select/button, this component's old tier is
+    // deliberately fixed-table — Svelte's `--poodle-segmented-control-height`
+    // / `--poodle-segmented-control-x` are overridden by the data-size /
+    // data-density stops, so the token+offset re-anchor does not apply here
+    // and the visual gate expects the ladder values.
     let height = rem_to_px(control_height_rem(effective_size));
     // Contract §8: label font fixed at 0.75rem for all sizes.
     let font_size = rem_to_px(0.75);
+    // Contract §8: segment padding-x is density-driven
+    // (`--poodle-segmented-control-x`: 0.5/0.75/1rem), not size-offset.
     let seg_px = rem_to_px(control_space_x_rem(spec.density));
     let inner = rem_to_px(0.125);
-    let seg_py = inner;
+    // Segment height = control height minus the container's 0.125rem
+    // top+bottom padding. The old GPUI tier sets it explicitly so the
+    // selected fill spans the full inner track, and centers the label with
+    // flex instead of vertical padding.
+    let segment_height = height - rem_to_px(0.25);
 
     let selected_fill = theme.resolve_color(spec.selected_fill_token());
     let surface = theme.resolve_color("color.background.surface");
+    let elevated = theme.resolve_color("color.background.elevated");
     let text_primary = theme.resolve_color("color.text.primary");
     let border_subtle = theme.resolve_color("color.border.subtle");
     let text_inverse = theme.resolve_color("color.text.inverse");
@@ -39,8 +55,20 @@ pub fn segmented_control(
     let control_radius = theme.resolve_radius("radius.control");
     let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
 
+    // Contract: root bg = surface 93% mix with text-primary; root border =
+    // border-subtle at 84% alpha.
     let root_bg = mix_srgb(surface, text_primary, 0.93);
     let root_border = with_alpha(border_subtle, border_subtle.3 * 0.84);
+    // Segment hover, the old GPUI tier's recipe: surface 84% over elevated.
+    let hover_fill = mix_srgb(surface, elevated, 0.84);
+    // Contract §8 selected Label: `box-shadow inset 0 0.0625rem 0
+    // color-mix(white 12%, transparent)`. No `white` token exists;
+    // `text.inverse` is the closest semantic (white in the dark theme),
+    // mixed to 12% alpha. GPUI has no inset shadow, so the old tier
+    // approximates the highlight as a 1px top edge line (offset y =
+    // 0.0625rem, blur 0, spread 0) — transcribed here as a non-inset layer.
+    let selected_highlight = with_alpha(text_inverse, text_inverse.3 * 0.12);
+    // Contract §8 Label: inner radius = calc(radius-control - 0.125rem).
     let inner_radius = (control_radius - inner).max(0.0);
 
     let selected = spec.current_value();
@@ -69,9 +97,13 @@ pub fn segmented_control(
 
     for option in &spec.options {
         let is_selected = selected == Some(option.value.as_str());
-        let is_option_disabled = !spec.is_disabled && option.is_disabled;
+        let is_enabled = !spec.is_disabled && !option.is_disabled;
 
-        let text_color = if is_selected { text_inverse } else { text_muted };
+        let text_color = if is_selected {
+            text_inverse
+        } else {
+            text_muted
+        };
 
         let mut seg = Node::button(&option.label);
         {
@@ -79,14 +111,21 @@ pub fn segmented_control(
             s.text_size = Some(font_size);
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);
+            s.descriptor.layout.height = LayoutSizing::Fixed(segment_height);
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             s.descriptor.layout.spacing.padding.left = seg_px;
             s.descriptor.layout.spacing.padding.right = seg_px;
-            s.descriptor.layout.spacing.padding.top = seg_py;
-            s.descriptor.layout.spacing.padding.bottom = seg_py;
             s.descriptor.corner_radii.top_left = inner_radius;
             s.descriptor.corner_radii.top_right = inner_radius;
             s.descriptor.corner_radii.bottom_right = inner_radius;
             s.descriptor.corner_radii.bottom_left = inner_radius;
+            // Old tier: the label stays on one line and truncates with an
+            // ellipsis instead of wrapping or overflowing the segment.
+            s.no_wrap = true;
+            s.text_ellipsis = true;
+            s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
             if is_selected {
                 s.descriptor.background = Some(selected_fill);
                 s.shadow_layers = vec![ShadowLayer {
@@ -94,28 +133,35 @@ pub fn segmented_control(
                     offset_y: rem_to_px(0.0625),
                     blur: 0.0,
                     spread: 0.0,
-                    color: ColorValue(1.0, 1.0, 1.0, 0.12),
-                    inset: true,
+                    color: selected_highlight,
+                    inset: false,
                 }];
             }
             if spec.equal_width {
                 s.descriptor.layout.width = LayoutSizing::Grow;
             }
-            if is_option_disabled {
-                s.descriptor.opacity = disabled_opacity;
+            if is_enabled {
+                // Old tier: pointer cursor and hover fill on every enabled
+                // segment, whether or not a change handler is wired.
+                s.descriptor.cursor = CursorHint::Pointer;
+                s.hover = Some(StylePatch {
+                    background: Some(hover_fill),
+                    border_color: None,
+                    text_color: None,
+                    opacity: None,
+                });
             }
         }
+        // Old tier: every segment stays focusable. A disabled option is
+        // simply never wired — and, unlike Svelte, never dimmed; the parity
+        // gate targets the old tier, so no per-option opacity is baked in.
         seg.interaction.focusable = true;
-        if is_option_disabled {
-            seg.interaction.disabled = true;
-        }
 
         // Re-picking the current segment still fires: the host asked to be
         // told about clicks, and swallowing one would hide a "confirm".
-        if let (false, false, Some(handler)) = (spec.is_disabled, option.is_disabled, &on_change) {
+        if let (true, Some(handler)) = (is_enabled, &on_change) {
             let handler = Arc::clone(handler);
             let value = option.value.clone();
-            seg.style.descriptor.cursor = CursorHint::Pointer;
             seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
         }
 
@@ -124,6 +170,7 @@ pub fn segmented_control(
 
     if spec.is_disabled {
         el.style.descriptor.opacity = disabled_opacity;
+        el.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
@@ -131,4 +178,232 @@ pub fn segmented_control(
     }
     el.a11y.role = Some(NodeRole::RadioGroup);
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{ChoiceOption, ControlDensity, ControlSize};
+
+    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn view_options() -> Vec<ChoiceOption> {
+        vec![
+            ChoiceOption::new("grid", "Grid"),
+            ChoiceOption::new("list", "List"),
+            ChoiceOption::new("table", "Table"),
+        ]
+    }
+
+    fn find_segment<'a>(node: &'a Node, label: &str) -> &'a Node {
+        node.find(&|n| matches!(&n.kind, poodle_node::NodeKind::Button { label: l } if l == label))
+            .unwrap_or_else(|| panic!("segment {label:?} exists"))
+    }
+
+    #[test]
+    fn track_metrics_follow_the_old_tiers_fixed_tables() {
+        // height = the fixed per-size ladder (`control_height_rem` — the
+        // old GPUI tier's deliberate form for this component, matching
+        // Svelte's data-size stops, not select's token+offset); segment
+        // height = track height minus the container's 0.125rem top+bottom
+        // padding. Label font is a fixed 0.75rem for every size
+        // (contract §8).
+        let cases = [
+            (ControlSize::Xs, 24.0),
+            (ControlSize::Sm, 28.0),
+            (ControlSize::Md, 36.0),
+            (ControlSize::Lg, 44.0),
+            (ControlSize::Xl, 52.0),
+        ];
+        for (size, expected) in cases {
+            let spec = SegmentedControlSpec::new(view_options()).with_size(size);
+            let node = segmented_control(&spec, &theme(), None);
+            match node.style.descriptor.layout.height {
+                LayoutSizing::Fixed(h) => assert_eq!(h, expected, "track height for {size:?}"),
+                ref other => panic!("expected fixed track height, got {other:?}"),
+            }
+            let seg = find_segment(&node, "List");
+            match seg.style.descriptor.layout.height {
+                LayoutSizing::Fixed(h) => {
+                    assert_eq!(h, expected - 4.0, "segment height for {size:?}")
+                }
+                ref other => panic!("expected fixed segment height, got {other:?}"),
+            }
+            assert_eq!(seg.style.text_size, Some(12.0), "font for {size:?}");
+        }
+    }
+
+    #[test]
+    fn segment_padding_is_density_driven() {
+        // padding-x = the fixed per-density table (`control_space_x_rem`:
+        // 0.5/0.75/1rem = 8/12/16px), the old GPUI tier's form, matching
+        // Svelte's data-density stops.
+        let cases = [
+            (ControlDensity::Compact, 8.0),
+            (ControlDensity::Default, 12.0),
+            (ControlDensity::Comfortable, 16.0),
+        ];
+        for (density, expected) in cases {
+            let spec = SegmentedControlSpec::new(view_options()).with_density(density);
+            let node = segmented_control(&spec, &theme(), None);
+            let seg = find_segment(&node, "List");
+            assert_eq!(
+                seg.style.descriptor.layout.spacing.padding.left, expected,
+                "padding-x for {density:?}"
+            );
+            assert_eq!(seg.style.descriptor.layout.spacing.padding.right, expected);
+        }
+    }
+
+    #[test]
+    fn selected_segment_gets_accent_fill_and_top_highlight() {
+        let theme = theme();
+        let accent = theme.resolve_color("color.accent.base");
+        let text_inverse = theme.resolve_color("color.text.inverse");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("list");
+        let node = segmented_control(&spec, &theme, None);
+
+        let selected_seg = find_segment(&node, "List");
+        assert_eq!(selected_seg.style.descriptor.background, Some(accent));
+        assert_eq!(selected_seg.style.descriptor.text_color, Some(text_inverse));
+        // The contract's inset highlight, transcribed the old tier's way: a
+        // non-inset 1px top line in text.inverse at 12% alpha (GPUI has no
+        // inset shadow).
+        assert_eq!(
+            selected_seg.style.shadow_layers,
+            vec![ShadowLayer {
+                offset_x: 0.0,
+                offset_y: 1.0,
+                blur: 0.0,
+                spread: 0.0,
+                color: with_alpha(text_inverse, text_inverse.3 * 0.12),
+                inset: false,
+            }]
+        );
+
+        let unselected_seg = find_segment(&node, "Grid");
+        assert_eq!(unselected_seg.style.descriptor.background, None);
+        assert_eq!(
+            unselected_seg.style.descriptor.text_color,
+            Some(text_secondary)
+        );
+        assert!(unselected_seg.style.shadow_layers.is_empty());
+    }
+
+    #[test]
+    fn enabled_segments_show_pointer_cursor_and_hover_fill_without_a_handler() {
+        let theme = theme();
+        let surface = theme.resolve_color("color.background.surface");
+        let elevated = theme.resolve_color("color.background.elevated");
+        let hover_fill = mix_srgb(surface, elevated, 0.84);
+
+        // No change handler wired: the old tier still shows the affordances.
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let node = segmented_control(&spec, &theme, None);
+        for label in ["Grid", "List", "Table"] {
+            let seg = find_segment(&node, label);
+            assert_eq!(seg.style.descriptor.cursor, CursorHint::Pointer, "{label}");
+            assert_eq!(
+                seg.style.hover,
+                Some(StylePatch {
+                    background: Some(hover_fill),
+                    border_color: None,
+                    text_color: None,
+                    opacity: None,
+                }),
+                "{label}"
+            );
+            assert!(seg.interaction.focusable, "{label}");
+            assert!(seg.interaction.on_activate.is_none(), "{label}");
+        }
+    }
+
+    #[test]
+    fn disabled_option_is_never_wired_but_not_dimmed() {
+        let mut options = view_options();
+        options.push(ChoiceOption::new("draft", "Draft").with_disabled(true));
+        let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
+        let spec = SegmentedControlSpec::new(options).with_default_value("grid");
+        let node = segmented_control(&spec, &theme(), Some(handlers));
+
+        let draft = find_segment(&node, "Draft");
+        assert!(draft.interaction.on_activate.is_none());
+        assert!(!draft.interaction.disabled);
+        assert!(draft.interaction.focusable);
+        assert_ne!(draft.style.descriptor.cursor, CursorHint::Pointer);
+        assert!(draft.style.hover.is_none());
+        // The old GPUI tier does not dim a disabled option (Svelte does);
+        // the parity gate targets the old tier.
+        assert_eq!(draft.style.descriptor.opacity, 1.0);
+
+        // Siblings stay wired.
+        assert!(find_segment(&node, "List")
+            .interaction
+            .on_activate
+            .is_some());
+    }
+
+    #[test]
+    fn disabled_control_dims_the_track_and_shows_not_allowed() {
+        let theme = theme();
+        let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+        let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
+        let spec = SegmentedControlSpec {
+            is_disabled: true,
+            ..SegmentedControlSpec::new(view_options()).with_default_value("grid")
+        };
+        let node = segmented_control(&spec, &theme, Some(handlers));
+
+        assert_eq!(node.style.descriptor.opacity, disabled_opacity);
+        assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
+        for label in ["Grid", "List", "Table"] {
+            let seg = find_segment(&node, label);
+            assert!(seg.interaction.on_activate.is_none(), "{label}");
+            assert!(seg.style.hover.is_none(), "{label}");
+            assert_ne!(seg.style.descriptor.cursor, CursorHint::Pointer, "{label}");
+        }
+    }
+
+    #[test]
+    fn choosing_a_segment_reports_its_value_through_the_node_handler() {
+        use std::sync::Mutex;
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let node = segmented_control(&spec, &theme(), Some(on_change));
+
+        let list = find_segment(&node, "List");
+        (list.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["list"]);
+    }
+
+    #[test]
+    fn equal_width_grows_segments_content_fit_leaves_them_alone() {
+        let spec = SegmentedControlSpec::new(view_options());
+        let node = segmented_control(&spec, &theme(), None);
+        let seg = find_segment(&node, "List");
+        assert_eq!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
+
+        let spec = SegmentedControlSpec::new(view_options()).with_equal_width(false);
+        let node = segmented_control(&spec, &theme(), None);
+        let seg = find_segment(&node, "List");
+        assert_ne!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
+    }
+
+    #[test]
+    fn radiogroup_role_and_aria_label_ride_the_root() {
+        let spec = SegmentedControlSpec::new(view_options());
+        let mut spec_with_label = spec.clone();
+        spec_with_label.aria_label = Some("View mode".to_string());
+        let node = segmented_control(&spec_with_label, &theme(), None);
+        assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
+        assert_eq!(node.a11y.label.as_deref(), Some("View mode"));
+    }
 }

@@ -20,6 +20,8 @@ pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<N
 
     let mut root = Node::container();
     root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.style.fill_width = true;
+    root.style.self_stretch = true;
 
     if let Some(ref legend) = spec.legend {
         let mut l = Node::text(legend.to_uppercase());
@@ -44,11 +46,20 @@ pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<N
     // Equal-fraction columns via flex_wrap + per-child flex-basis.
     let cols = spec.columns.max(1);
     let mut grid = Node::container();
-    grid.style.descriptor.layout.direction = LayoutDirection::Row;
-    grid.style.flex_wrap = true;
-    grid.style.descriptor.layout.spacing.gap = if cols > 1 { row_gap } else { col_gap };
+    grid.style.descriptor.layout.direction = if cols > 1 {
+        LayoutDirection::Row
+    } else {
+        LayoutDirection::Column
+    };
+    grid.style.flex_wrap = cols > 1;
+    grid.style.descriptor.layout.spacing.gap = if cols > 1 { col_gap } else { row_gap };
+    grid.style.fill_width = true;
+    grid.style.self_stretch = true;
 
-    for child in children {
+    for mut child in children {
+        // Field controls are full-width within their grid cell in the old
+        // GPUI tier; make the slot's cross-axis intent explicit for nodes.
+        child.style.fill_width = true;
         let mut wrapper = Node::container();
         // Explicit Row (see switch.rs): the old tier got taffy's Row default.
         wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -56,11 +67,13 @@ pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<N
         // The old builder chains .child() before layout config; children order
         // is what matters and the adapter emits fields, not call order.
         if cols > 1 {
-            let basis_pct = 100.0 / cols as f32;
-            wrapper.style.flex_basis = Some(basis_pct);
-            wrapper.style.flex_fill = true;
+            // GPUI's `.flex_1()` is grow + zero basis, which gives each
+            // child an equal share of the wrapping row.
+            wrapper.style.flex_grow = Some(1.0);
+            wrapper.style.flex_basis = Some(0.0);
         } else {
             wrapper.style.descriptor.layout.width = LayoutSizing::Grow;
+            wrapper.style.fill_width = true;
         }
         grid = grid.child(wrapper.child(child));
     }

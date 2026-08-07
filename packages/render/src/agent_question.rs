@@ -7,9 +7,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_question::QuestionProgressState;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::AgentQuestionSpec;
 
 use crate::color::{mix_srgb, TRANSPARENT};

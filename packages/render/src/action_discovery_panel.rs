@@ -12,8 +12,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment, Node,
-    NodeRole, ShadowLayer,
+    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment, Node, NodeRole,
+    ShadowLayer,
 };
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
@@ -343,7 +343,8 @@ pub fn action_discovery_panel(
                         s.text_weight = Some(600);
                         s.letter_spacing_em = Some(0.03); // contract §9 chip: 0.03em
                     }
-                    trailing = trailing.child(chip_shell(with_alpha(accent, accent.3 * 0.16)).child(label));
+                    trailing = trailing
+                        .child(chip_shell(with_alpha(accent, accent.3 * 0.16)).child(label));
                 }
 
                 if let Some(ref shortcut) = action.shortcut {
@@ -357,7 +358,8 @@ pub fn action_discovery_panel(
                         // Contract §9 kbd override: code-family (monospace).
                         s.font_family = Some(FontFamily::Mono);
                     }
-                    trailing = trailing.child(chip_shell(with_alpha(surface, surface.3 * 0.76)).child(label));
+                    trailing = trailing
+                        .child(chip_shell(with_alpha(surface, surface.3 * 0.76)).child(label));
                 }
 
                 row = row.child(trailing);

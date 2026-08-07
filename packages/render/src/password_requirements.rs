@@ -30,18 +30,17 @@ fn requirement_item(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     }
     let mut icon = Node::icon(indicator_icon, icon_size);
+    icon.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(rem_to_px(0.875));
     icon.style.descriptor.text_color = Some(indicator_color);
     let mut label = Node::text(label_text);
     label.style.text_size = Some(font_size);
+    label.style.line_height = Some(1.5);
     // The label tracks the indicator colour: a met requirement reads green.
     label.style.descriptor.text_color = Some(indicator_color);
     row.child(icon).child(label)
 }
 
-pub fn password_requirements(
-    spec: &PasswordRequirementsSpec,
-    theme: &dyn ThemeProvider,
-) -> Node {
+pub fn password_requirements(spec: &PasswordRequirementsSpec, theme: &dyn ThemeProvider) -> Node {
     // ── Token resolution ──
     let fill = theme.resolve_color(spec.fill_token());
     let border_color = theme.resolve_color(spec.border_token());
@@ -55,7 +54,11 @@ pub fn password_requirements(
     let title_size = rem_to_px(PasswordRequirementsSpec::title_size_rem(effective_size));
     let body_size = rem_to_px(PasswordRequirementsSpec::body_size_rem(effective_size));
     let icon_size = body_size; // indicator tracks body type size
-    let gap = rem_to_px(PasswordRequirementsSpec::hint_gap_rem(effective_size));
+    let title_gap = rem_to_px(PasswordRequirementsSpec::hint_gap_rem(effective_size));
+    let description_gap = rem_to_px(PasswordRequirementsSpec::description_gap_rem(
+        effective_size,
+    ));
+    let hint_gap = rem_to_px(PasswordRequirementsSpec::hint_gap_rem(effective_size));
     let item_gap = rem_to_px(0.375); // indicator↔label gap
     let padding = rem_to_px(PasswordRequirementsSpec::padding_rem(effective_size));
     let border_width = theme.resolve_space(spec.border_width_token());
@@ -66,7 +69,6 @@ pub fn password_requirements(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = gap;
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = padding;
         pad.right = padding;
@@ -91,16 +93,22 @@ pub fn password_requirements(
 
     // ── Loading state (no title — matches the reference) ──
     if spec.is_loading {
-        return root.child(text(&spec.loading_label, body_size, text_color));
+        let mut loading = text(&spec.loading_label, body_size, text_color);
+        loading.style.line_height = Some(1.5);
+        return root.child(loading);
     }
 
     // ── Requirements checklist (title lives only in this branch) ──
     if let Some(ref policy) = spec.requirements {
         let mut title = text(&format!("{}:", spec.title), title_size, title_color);
         title.style.text_weight = Some(600);
+        title.style.descriptor.layout.spacing.margin.bottom = title_gap;
         root = root.child(title);
 
-        root = root.child(requirement_item(
+        let mut list = Node::container();
+        list.style.descriptor.layout.direction = LayoutDirection::Column;
+        list.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
+        list = list.child(requirement_item(
             &format!("At least {} characters", policy.min_length),
             spec.length_met(),
             met_color,
@@ -111,7 +119,7 @@ pub fn password_requirements(
         ));
 
         if policy.require_mixed_case {
-            root = root.child(requirement_item(
+            list = list.child(requirement_item(
                 "Mix of uppercase and lowercase letters",
                 spec.mixed_case_met(),
                 met_color,
@@ -123,7 +131,7 @@ pub fn password_requirements(
         }
 
         if policy.require_digit {
-            root = root.child(requirement_item(
+            list = list.child(requirement_item(
                 "At least one number",
                 spec.digit_met(),
                 met_color,
@@ -135,7 +143,7 @@ pub fn password_requirements(
         }
 
         if policy.require_special {
-            root = root.child(requirement_item(
+            list = list.child(requirement_item(
                 "At least one special character",
                 spec.special_met(),
                 met_color,
@@ -146,17 +154,27 @@ pub fn password_requirements(
             ));
         }
 
+        root = root.child(list);
+
         if let Some(ref description) = policy.description {
-            root = root.child(text(description.as_str(), body_size, text_color));
+            let mut d = text(description.as_str(), body_size, text_color);
+            d.style.line_height = Some(1.5);
+            d.style.descriptor.layout.spacing.margin.top = description_gap;
+            root = root.child(d);
         }
 
         // Hint — only inside the requirements branch (matches the reference).
         if let Some(ref hint) = spec.hint {
-            root = root.child(text(hint.as_str(), body_size, text_color));
+            let mut h = text(hint.as_str(), body_size, text_color);
+            h.style.line_height = Some(1.5);
+            h.style.descriptor.layout.spacing.margin.top = hint_gap;
+            root = root.child(h);
         }
     } else if let Some(ref error) = spec.error {
         // ── Error state (no requirements, no title) ──
-        root = root.child(text(error.as_str(), body_size, error_color));
+        let mut e = text(error.as_str(), body_size, error_color);
+        e.style.line_height = Some(1.5);
+        root = root.child(e);
     }
 
     root.a11y.role = Some(NodeRole::Alert);

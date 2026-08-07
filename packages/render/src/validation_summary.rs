@@ -9,9 +9,7 @@
 //! focus imperatively.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::ValidationSummarySpec;
 
 /// Semibold label weight (typography constant; see form_shell).

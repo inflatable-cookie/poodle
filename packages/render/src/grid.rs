@@ -4,14 +4,13 @@
 //! Ported from: `packages/jetstream/components/src/grid.rs`.
 //!
 //! Column tracks drive per-child flex:
-//!   - `Fr` tracks → each child grows equally (grow 1, min-width 0).
+//!   - `Fr` tracks → each child grows by its declared track weight.
 //!   - `AutoFit { min_rem }` → each child is at least `min_rem` wide and grows
 //!     to fill, wrapping like `repeat(auto-fit, minmax(min_rem, 1fr))`.
 //!   - `Rem` fixed track → child takes that exact width, no grow/shrink.
 //!
-//! DELTAS vs CSS grid: weighted ratio tracks (`1fr 2fr`) collapse to EQUAL
-//! columns; explicit `rows` tracks are not honored (rows emerge from
-//! flex-wrap); `gap` is one value on both axes.
+//! DELTAS vs CSS grid: explicit `rows` tracks are not honored (rows emerge
+//! from flex-wrap); `gap` is one value on both axes.
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutSizing, Node};
@@ -22,6 +21,17 @@ use crate::presentation::rem_to_px;
 pub fn grid(spec: &GridSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
     let padding = spec.resolved_padding();
     let columns = spec.parsed_columns();
+    let fr_total = match &columns {
+        GridColumns::Tracks(tracks) => tracks
+            .iter()
+            .filter_map(|track| match track {
+                GridTrack::Fr(weight) => Some(*weight),
+                GridTrack::Rem(_) => None,
+            })
+            .sum::<f32>()
+            .max(1.0),
+        GridColumns::AutoFit { .. } => 1.0,
+    };
 
     let mut el = Node::container();
     {
@@ -63,10 +73,11 @@ pub fn grid(spec: &GridSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> 
                 }
                 GridColumns::Tracks(tracks) if !tracks.is_empty() => {
                     match tracks[i % tracks.len()] {
-                        // Fr tracks → equal columns (weighted ratios degrade).
-                        GridTrack::Fr(_) => {
-                            s.flex_fill = true;
+                        GridTrack::Fr(weight) => {
+                            s.flex_grow = Some(weight);
+                            s.width_pct = Some(weight / fr_total - 0.001);
                             s.min_width = Some(0.0);
+                            s.flex_shrink_zero = true;
                         }
                         GridTrack::Rem(rem) => {
                             s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(rem));
@@ -89,4 +100,24 @@ pub fn grid(spec: &GridSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> 
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fractional_tracks_keep_their_declared_weight() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let node = grid(
+            &GridSpec::new().with_columns("1fr 2fr"),
+            &theme,
+            vec![Node::text("one"), Node::text("two")],
+        );
+
+        assert_eq!(node.children[0].style.flex_grow, Some(1.0));
+        assert_eq!(node.children[1].style.flex_grow, Some(2.0));
+        assert!(node.children[0].style.width_pct < node.children[1].style.width_pct);
+    }
 }

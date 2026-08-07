@@ -1,6 +1,6 @@
+use crate::node_compat::{EmbedPreview, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{EmbedPreview, Eyebrow};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{EmbedPreviewSpec, ParsedEmbed};
 

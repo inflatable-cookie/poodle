@@ -1,9 +1,9 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, ModelPicker};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, ModelPicker};
 use poodle_specs::{
     EyebrowSpec, ModelAxisBinding, ModelAxisControl, ModelAxisOption, ModelAxisValue,
     ModelCapabilityAxis, ModelImage, ModelOption, ModelPickerEmphasis, ModelPickerSpec,

@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, MetricTile};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, MetricTile};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{ControlDensity, MetricTileSpec, MetricTrend};
 
@@ -116,9 +116,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         ))
                         // No-trend sparkline (contract §12 "Memory")
                         .child(MetricTile::from_spec(
-                            MetricTileSpec::new("Memory", "4.2 GB").with_sparkline(vec![
-                                3.8, 3.9, 4.0, 4.1, 4.0, 4.1, 4.2,
-                            ]),
+                            MetricTileSpec::new("Memory", "4.2 GB")
+                                .with_sparkline(vec![3.8, 3.9, 4.0, 4.1, 4.0, 4.1, 4.2]),
                             theme,
                         )),
                 ),
@@ -134,30 +133,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    div()
-                        .flex()
-                        .gap(px(12.0))
-                        .flex_wrap()
-                        .children(
-                            [
-                                ("Compact", ControlDensity::Compact),
-                                ("Default", ControlDensity::Default),
-                                ("Comfortable", ControlDensity::Comfortable),
-                            ]
-                            .into_iter()
-                            .map(|(_, density)| {
-                                MetricTile::from_spec(
-                                    MetricTileSpec::new("Requests/min", "1,204")
-                                        .with_trend(MetricTrend::Up)
-                                        .with_trend_label("+5%")
-                                        .with_sparkline(vec![
-                                            800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0,
-                                        ])
-                                        .with_density(density),
-                                    theme,
-                                )
-                            }),
-                        ),
+                    div().flex().gap(px(12.0)).flex_wrap().children(
+                        [
+                            ("Compact", ControlDensity::Compact),
+                            ("Default", ControlDensity::Default),
+                            ("Comfortable", ControlDensity::Comfortable),
+                        ]
+                        .into_iter()
+                        .map(|(_, density)| {
+                            MetricTile::from_spec(
+                                MetricTileSpec::new("Requests/min", "1,204")
+                                    .with_trend(MetricTrend::Up)
+                                    .with_trend_label("+5%")
+                                    .with_sparkline(vec![
+                                        800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0,
+                                    ])
+                                    .with_density(density),
+                                theme,
+                            )
+                        }),
+                    ),
                 ),
         )
 }

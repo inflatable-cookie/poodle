@@ -13,7 +13,6 @@ use poodle_node::{
 };
 use poodle_specs::{SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::color::with_alpha;
 use crate::presentation::rem_to_px;
 
 pub fn spinner(spec: &SpinnerSpec, theme: &dyn ThemeProvider) -> Node {
@@ -35,31 +34,13 @@ pub fn spinner(spec: &SpinnerSpec, theme: &dyn ThemeProvider) -> Node {
     root
 }
 
-/// Ring: rotating circle whose top border is the bright arc.
+/// Ring: the same spinner SVG asset and rotation used by the old GPUI tier.
 fn build_ring(spec: &SpinnerSpec, tone: ColorValue) -> Node {
-    let diameter = rem_to_px(spec.ring_size_rem());
-    let border_width = rem_to_px(spec.ring_border_width_rem());
-    let track_color = with_alpha(tone, tone.3 * spec.track_opacity());
-
-    let mut el = Node::container();
-    {
-        let s = &mut el.style;
-        s.descriptor.layout.width = LayoutSizing::Fixed(diameter);
-        s.descriptor.layout.height = LayoutSizing::Fixed(diameter);
-        s.descriptor.corner_radii.top_left = 999.0;
-        s.descriptor.corner_radii.top_right = 999.0;
-        s.descriptor.corner_radii.bottom_right = 999.0;
-        s.descriptor.corner_radii.bottom_left = 999.0;
-        s.descriptor.border.width = border_width;
-        s.descriptor.border.color = track_color;
-        s.border_color_top = Some(tone);
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-        // Contract: spinner-ring 0.8s linear infinite. One shared key: all
-        // ring spinners share a clock and rotate in phase, like CSS keyframes.
-        s.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
-    }
+    let mut el = Node::icon("spinner", spec.size_px());
+    el.style.descriptor.text_color = Some(tone);
+    // Contract: spinner-ring 0.8s linear infinite. One shared key: all ring
+    // spinners share a clock and rotate in phase, like CSS keyframes.
+    el.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
     el
 }
 
@@ -157,5 +138,27 @@ fn cell_pulse(index: usize, floor: f32, span: f32, phase: f32) -> NodeAnimation 
         duration_secs: 1.2,
         easing: AnimEasing::Linear,
         loop_mode: AnimLoop::Loop,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ring_uses_the_reference_svg_asset_and_rotation() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let node = spinner(&SpinnerSpec::new(), &theme);
+        assert!(matches!(
+            &node.kind,
+            poodle_node::NodeKind::Icon { name, .. } if name == "spinner"
+        ));
+        let animation = node.style.animation.expect("ring rotation");
+        assert_eq!(animation.duration_secs, 0.8);
+        assert!(animation.keyframes.iter().any(|frame| frame
+            .values
+            .iter()
+            .any(|(property, _)| *property == AnimProperty::Rotate)));
     }
 }

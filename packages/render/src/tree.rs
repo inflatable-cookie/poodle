@@ -16,8 +16,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodePosition, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, DropEdge, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeKey, NodeModifiers, NodePoint, NodePosition, NodeRole,
 };
 use poodle_specs::{
     CheckState, CheckboxSpec, ControlDensity, ControlSize, DropPosition, SpinnerSpec, TreeNode,
@@ -36,6 +36,22 @@ pub struct TreeHandlers {
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_toggle_expand: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_check: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Row activation carrying the modifier state, for multi-select. When set
+    /// it replaces `on_select`: Shift extends from the anchor, the platform
+    /// accel toggles one row, a bare click replaces the selection.
+    pub on_select_modified: Option<Arc<dyn Fn(&str, NodeModifiers) + Send + Sync>>,
+    /// Right-click on a row, with the pointer anchor for the menu.
+    pub on_context_menu: Option<Arc<dyn Fn(&str, NodePoint) + Send + Sync>>,
+    /// A navigation or command key while a row holds focus. The component
+    /// reports the key and the row it landed on; resolving it into a focus
+    /// move, an expand, or a rename is the host's job, because only the host
+    /// knows the flattened visible order.
+    pub on_key: Option<Arc<dyn Fn(&str, NodeKey, NodeModifiers) + Send + Sync>>,
+    /// A drag is hovering `over`, landing at `edge`. Drives the drop
+    /// indicator; `dragged` is the row the gesture started on.
+    pub on_drag_over: Option<Arc<dyn Fn(&str, &str, DropEdge) + Send + Sync>>,
+    /// A drag was released: move `dragged` to `edge` of `over`.
+    pub on_reorder: Option<Arc<dyn Fn(&str, &str, DropEdge) + Send + Sync>>,
 }
 
 /// Tree-specific row height (denser than SidebarNav); density never alters it.
@@ -101,6 +117,7 @@ struct TreeMetrics {
     drag_accent: ColorValue,
     drop_target: Option<String>,
     drop_position: DropPosition,
+    reorderable: bool,
 }
 
 pub fn tree(spec: &TreeSpec, theme: &dyn ThemeProvider, handlers: TreeHandlers) -> Node {
@@ -136,6 +153,7 @@ pub fn tree(spec: &TreeSpec, theme: &dyn ThemeProvider, handlers: TreeHandlers) 
         drag_accent: theme.resolve_color(spec.selected_fill_token()),
         drop_target: spec.drop_target_value.clone(),
         drop_position: spec.drop_position,
+        reorderable: spec.reorderable,
     };
 
     let pad_y = theme.resolve_space("space.panel.y");
@@ -285,11 +303,52 @@ fn render_row(
         s.descriptor.border.color = ring_color;
     }
 
-    if let (false, Some(handler)) = (node.is_disabled, &handlers.on_select) {
+    // Modifier-aware selection wins over the plain one — a node wires either
+    // `on_activate` or `on_activate_modified`, never both.
+    if let (false, Some(handler)) = (node.is_disabled, &handlers.on_select_modified) {
+        let handler = Arc::clone(handler);
+        let value = node.value.clone();
+        row.style.descriptor.cursor = CursorHint::Pointer;
+        row.interaction.on_activate_modified =
+            Some(Arc::new(move |mods| handler(&value, mods)));
+    } else if let (false, Some(handler)) = (node.is_disabled, &handlers.on_select) {
         let handler = Arc::clone(handler);
         let value = node.value.clone();
         row.style.descriptor.cursor = CursorHint::Pointer;
         row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+    }
+
+    if let (false, Some(handler)) = (node.is_disabled, &handlers.on_context_menu) {
+        let handler = Arc::clone(handler);
+        let value = node.value.clone();
+        row.interaction.on_context = Some(Arc::new(move |point| handler(&value, point)));
+    }
+
+    if let (false, Some(handler)) = (node.is_disabled, &handlers.on_key) {
+        let handler = Arc::clone(handler);
+        let value = node.value.clone();
+        row.interaction.on_key = Some(Arc::new(move |key, mods| handler(&value, key, mods)));
+    }
+
+    // Reorder: every row is both a source and a zone, so a row can be dropped
+    // onto any other. The backend derives the edge from the row's own bounds.
+    if !node.is_disabled && m.reorderable {
+        row.interaction.drag_payload = Some(node.value.clone());
+        row.interaction.drop_zone = true;
+        if let Some(handler) = &handlers.on_drag_over {
+            let handler = Arc::clone(handler);
+            let value = node.value.clone();
+            row.interaction.on_drop_hover = Some(Arc::new(move |event| {
+                handler(&event.payload, &value, event.edge)
+            }));
+        }
+        if let Some(handler) = &handlers.on_reorder {
+            let handler = Arc::clone(handler);
+            let value = node.value.clone();
+            row.interaction.on_drop = Some(Arc::new(move |event| {
+                handler(&event.payload, &value, event.edge)
+            }));
+        }
     }
 
     // Indent cells (left border draws the ancestor guide line).
@@ -298,8 +357,7 @@ fn render_row(
         let mut cell = indent_cell(m);
         if m.show_guides {
             cell.style.border_left_width = Some(1.0);
-            cell.style.border_color_left =
-                Some(with_alpha(m.guide_color, m.guide_color.3 * 0.54));
+            cell.style.border_color_left = Some(with_alpha(m.guide_color, m.guide_color.3 * 0.54));
         }
         row = row.child(cell);
     }

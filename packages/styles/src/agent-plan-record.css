@@ -1,0 +1,90 @@
+/*
+ * AgentPlanRecord — the read-only record a decided plan leaves.
+ *
+ * Contract: docs/contracts/components/agent-plan-record.md.
+ *
+ * No decision affordance at all, which is what makes hosting the live plan in
+ * the composer safe: a re-decide control here would let the reader change a
+ * decision the agent has already acted on. The one interactive part is the
+ * disclosure between the summary and the full plan.
+ */
+
+.poodle-agent-plan-record {
+  --poodle-agent-plan-record-gap: 0.375rem;
+  --poodle-agent-plan-record-inset: 0.75rem;
+  --poodle-agent-plan-record-font-size: 0.8125rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-agent-plan-record-gap);
+  padding: var(--poodle-agent-plan-record-inset);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-background-surface);
+  font-size: var(--poodle-agent-plan-record-font-size);
+}
+
+.poodle-agent-plan-record[data-size="xs"] { --poodle-agent-plan-record-font-size: 0.6875rem; }
+.poodle-agent-plan-record[data-size="sm"] { --poodle-agent-plan-record-font-size: 0.75rem; }
+.poodle-agent-plan-record[data-size="md"] { --poodle-agent-plan-record-font-size: 0.8125rem; }
+.poodle-agent-plan-record[data-size="lg"] { --poodle-agent-plan-record-font-size: 0.875rem; }
+.poodle-agent-plan-record[data-size="xl"] { --poodle-agent-plan-record-font-size: 0.9375rem; }
+
+.poodle-agent-plan-record[data-density="compact"] { --poodle-agent-plan-record-gap: 0.25rem; --poodle-agent-plan-record-inset: 0.5rem; }
+.poodle-agent-plan-record[data-density="comfortable"] { --poodle-agent-plan-record-gap: 0.5rem; --poodle-agent-plan-record-inset: 1rem; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+/* The header is the decision at a glance: the badge, and when it happened
+   when the host tracks it. */
+.poodle-agent-plan-record__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.poodle-agent-plan-record__badge {
+  color: var(--poodle-color-accent-base);
+  font-weight: var(--poodle-typography-label-weight);
+}
+
+/* A dismissed plan is a non-event; the badge stays, but at meta strength. */
+.poodle-agent-plan-record__badge[data-status="dismissed"] {
+  color: var(--poodle-color-text-tertiary);
+}
+
+.poodle-agent-plan-record__meta {
+  color: var(--poodle-color-text-tertiary);
+}
+
+/* One step down from live prose: this is history, not the current subject. */
+.poodle-agent-plan-record__summary {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-agent-plan-record__body {
+  min-width: 0;
+}
+
+/* ── Disclosure ──────────────────────────────────────────────────────────── */
+
+.poodle-agent-plan-record__toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--poodle-color-text-tertiary);
+  font: inherit;
+  font-size: var(--poodle-agent-plan-record-font-size);
+  cursor: pointer;
+}
+
+.poodle-agent-plan-record__toggle:hover {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-agent-plan-record__toggle:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}

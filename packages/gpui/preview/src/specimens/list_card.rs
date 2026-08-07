@@ -1,20 +1,53 @@
-use crate::app_state::AppState;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{
+    ContextMenu, Eyebrow, Icon, IntoCompatNode, ListCard, ListCardCounter, Pill, StatusIndicator,
+};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, StatusIndicator};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::{
     ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, InlineTypographyMode, LeadingFill,
     LeadingShape, ListCardCounterSpec, ListCardLayout, ListCardSpec, MenuEntry, MenuItemKind,
     PillSpec, PillTone, SelectionIndicator, StatusIndicatorSpec, StatusTone,
 };
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn node_row(gap: f32) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = gap;
+    row
+}
+
+fn card_click(state: &AppState, value: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "list-card-clicked".to_string(),
+            value: value.to_string(),
+        });
+    })
+}
+
+fn context_menu_select(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "list-card-clicked".to_string(),
+            value: format!("Action: {value}"),
+        });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_muted = theme.resolve_color("color.text.muted");
-    let footer_counter_gap = px(theme.resolve_space("space.inline.md"));
+    let footer_counter_gap = theme.resolve_space("space.inline.md");
 
     let last_clicked = state.specimens.text.get("list-card-clicked").cloned();
 
@@ -54,15 +87,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "design-system-v2.figma".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "design-system-v2.figma")),
                         )
                         .child(
                             ListCard::from_spec(
@@ -80,15 +105,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "component-specs.pdf".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "component-specs.pdf")),
                         )
                         .child(
                             ListCard::from_spec(
@@ -106,15 +123,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "brand-assets.zip".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "brand-assets.zip")),
                         ),
                 ),
         )
@@ -196,7 +205,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_subtitle("Running on port 8080"),
                                 theme,
                             )
-                            .with_leading(StatusIndicator::from_spec(status, theme))
+                            .with_leading(StatusIndicator::node_from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
                                 PillSpec::new()
                                     .with_label("Active")
@@ -214,7 +223,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_subtitle("High queue depth"),
                                 theme,
                             )
-                            .with_leading(StatusIndicator::from_spec(status, theme))
+                            .with_leading(StatusIndicator::node_from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
                                 PillSpec::new()
                                     .with_label("Degraded")
@@ -232,7 +241,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_subtitle("Connection timeout"),
                                 theme,
                             )
-                            .with_leading(StatusIndicator::from_spec(status, theme))
+                            .with_leading(StatusIndicator::node_from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
                                 PillSpec::new()
                                     .with_label("Down")
@@ -269,16 +278,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             // Corner: supplementary header-corner content (icon + label),
                             // tertiary-colored, top-right in the header row.
                             .with_corner(
-                                div()
-                                    .flex()
-                                    .flex_row()
-                                    .items_center()
-                                    .gap(px(4.0))
-                                    .child(Icon::from_spec(
-                                        IconSpec::new("git-branch").with_size(IconSize::Sm),
-                                        theme,
-                                    ))
-                                    .child("v2.1"),
+                                node_row(4.0)
+                                    .child(
+                                        Icon::from_spec(
+                                            IconSpec::new("git-branch").with_size(IconSize::Sm),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
+                                    )
+                                    .child(Node::text("v2.1")),
                             ),
                         )
                         .child(
@@ -290,16 +298,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_corner(
-                                div()
-                                    .flex()
-                                    .flex_row()
-                                    .items_center()
-                                    .gap(px(4.0))
-                                    .child(Icon::from_spec(
-                                        IconSpec::new("clock").with_size(IconSize::Sm),
-                                        theme,
-                                    ))
-                                    .child("2d"),
+                                node_row(4.0)
+                                    .child(
+                                        Icon::from_spec(
+                                            IconSpec::new("clock").with_size(IconSize::Sm),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
+                                    )
+                                    .child(Node::text("2d")),
                             ),
                         ),
                 ),
@@ -315,40 +322,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    div()
-                        .text_size(px(20.0))
-                        .child(
-                            ListCard::from_spec(
-                                ListCardSpec::new()
-                                    .with_title("Activity Feed")
-                                    .with_subtitle("Inline metadata scales with the parent"),
+                    div().text_size(px(20.0)).child(
+                        ListCard::from_spec(
+                            ListCardSpec::new()
+                                .with_title("Activity Feed")
+                                .with_subtitle("Inline metadata scales with the parent"),
+                            theme,
+                        )
+                        .with_leading(
+                            Icon::from_spec(
+                                IconSpec::new("activity").with_size(IconSize::Sm),
                                 theme,
                             )
-                            .with_leading(
-                                Icon::from_spec(
-                                    IconSpec::new("activity").with_size(IconSize::Sm),
-                                    theme,
-                                )
-                                .with_color(color_to_hsla(text_muted)),
-                            )
-                            .with_footer(
-                                div()
-                                    .flex()
-                                    .flex_row()
-                                    .items_center()
-                                    .gap(footer_counter_gap)
-                                    .child(ListCardCounter::from_spec(
+                            .with_color(color_to_hsla(text_muted)),
+                        )
+                        .with_footer(
+                            node_row(footer_counter_gap)
+                                .child(
+                                    ListCardCounter::from_spec(
                                         ListCardCounterSpec::new("eye", 128)
                                             .with_typography(InlineTypographyMode::Inherit),
                                         theme,
-                                    ))
-                                    .child(ListCardCounter::from_spec(
+                                    )
+                                    .into_compat_node(),
+                                )
+                                .child(
+                                    ListCardCounter::from_spec(
                                         ListCardCounterSpec::new("message-circle", 14)
                                             .with_typography(InlineTypographyMode::Inherit),
                                         theme,
-                                    )),
-                            ),
+                                    )
+                                    .into_compat_node(),
+                                ),
                         ),
+                    ),
                 ),
         )
         // -- With footer counters --
@@ -381,21 +388,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_color(color_to_hsla(text_muted)),
                             )
                             .with_footer(
-                                div()
-                                    .flex()
-                                    .flex_row()
-                                    .items_center()
-                                    .gap(footer_counter_gap)
-                                    .child(ListCardCounter::from_spec(
-                                        ListCardCounterSpec::new("eye", 12)
-                                            .with_tooltip("12 views"),
-                                        theme,
-                                    ))
-                                    .child(ListCardCounter::from_spec(
-                                        ListCardCounterSpec::new("share", 3)
-                                            .with_tooltip("3 shares"),
-                                        theme,
-                                    )),
+                                node_row(footer_counter_gap)
+                                    .child(
+                                        ListCardCounter::from_spec(
+                                            ListCardCounterSpec::new("eye", 12)
+                                                .with_tooltip("12 views"),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
+                                    )
+                                    .child(
+                                        ListCardCounter::from_spec(
+                                            ListCardCounterSpec::new("share", 3)
+                                                .with_tooltip("3 shares"),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
+                                    ),
                             ),
                         )
                         .child(
@@ -413,28 +422,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_color(color_to_hsla(text_muted)),
                             )
                             .with_footer(
-                                div()
-                                    .flex()
-                                    .flex_row()
-                                    .items_center()
-                                    .gap(footer_counter_gap)
-                                    .child(ListCardCounter::from_spec(
-                                        ListCardCounterSpec::new("eye", 156)
-                                            .with_tooltip("156 reads"),
-                                        theme,
-                                    ))
-                                    .child(ListCardCounter::from_spec(
-                                        ListCardCounterSpec::new("pencil", 24)
-                                            .with_tooltip("24 edits"),
-                                        theme,
-                                    ))
-                                    .child(ListCardCounter::from_spec(
-                                        ListCardCounterSpec::new("message-circle", 8)
-                                            .with_tooltip("8 comments")
-                                            .with_href("#comments"),
-                                        theme,
+                                node_row(footer_counter_gap)
+                                    .child(
+                                        ListCardCounter::from_spec(
+                                            ListCardCounterSpec::new("eye", 156)
+                                                .with_tooltip("156 reads"),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
                                     )
-                                    .on_link_click(|_ev, _w, _a| {})),
+                                    .child(
+                                        ListCardCounter::from_spec(
+                                            ListCardCounterSpec::new("pencil", 24)
+                                                .with_tooltip("24 edits"),
+                                            theme,
+                                        )
+                                        .into_compat_node(),
+                                    )
+                                    .child(
+                                        ListCardCounter::from_spec(
+                                            ListCardCounterSpec::new("message-circle", 8)
+                                                .with_tooltip("8 comments")
+                                                .with_href("#comments"),
+                                            theme,
+                                        )
+                                        .on_link_click(|| {})
+                                        .into_compat_node(),
+                                    ),
                             ),
                         ),
                 ),
@@ -549,13 +563,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_color(color_to_hsla(text_muted)),
                         ),
                     )
-                    .on_select(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("list-card-clicked".to_string(), format!("Action: {}", val));
-                        cx.notify();
-                    })),
+                    .on_select(context_menu_select(state)),
                 ),
         )
         // -- Not live (draft state) --
@@ -651,15 +659,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "Free tier plan".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "Free tier plan")),
                         )
                         .child(
                             ListCard::from_spec(
@@ -681,15 +681,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(gpui::white()),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "Premium integration".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "Premium integration")),
                         )
                         .child(
                             ListCard::from_spec(
@@ -708,15 +700,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 )
                                 .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(
-                                |this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "list-card-clicked".to_string(),
-                                        "Legacy connector".to_string(),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_click(card_click(state, "Legacy connector")),
                         ),
                 ),
         )
@@ -867,9 +851,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_color(color_to_hsla(text_muted)),
                             )
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new()
-                                    .with_label("2")
-                                    .with_tone(PillTone::Neutral),
+                                PillSpec::new().with_label("2").with_tone(PillTone::Neutral),
                                 theme,
                             )),
                         )

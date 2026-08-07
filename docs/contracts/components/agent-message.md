@@ -56,7 +56,7 @@ Inline nodes render inside paragraphs, headings and list items: `strong` → `<s
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `markdown` | `string` | `""` | yes | raw markdown; the component parses it |
-| `role` | `TranscriptRole` | `"assistant"` | no | `user` messages render on the subdued surface |
+| `role` | `TranscriptRole` | `"assistant"` | no | `user` messages render right-aligned on a lighter elevated surface, sized to content |
 | `isStreaming` | `boolean` | `false` | no | shows the caret and suppresses the trailing-whitespace trim |
 | `linkTarget` | `string \| null` | `null` | no | `target` for rendered links; the host decides whether links leave the app |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role |
@@ -102,7 +102,7 @@ authority.
 Normalisations that exist purely to keep the two in step, and must not be
 "simplified" away:
 
-- **List items always contain blocks**, tight or loose. Tight lists emit no
+- **List items contain blocks**, tight or loose, except a single-paragraph item, which renders its inlines directly so an inside marker stays on the text line. Tight lists emit no
   paragraph events in `pulldown-cmark`; wrapping unconditionally removes
   tight-vs-loose as a divergence.
 - **An unannotated fence has no language** (`null`), not an empty one. A
@@ -154,7 +154,7 @@ type MdBlock =
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | assistant | `role="assistant"` | prose on the page surface, no container chrome |
-| user | `role="user"` | prose on the subdued surface with inset padding and a radius |
+| user | `role="user"` | prose on the lighter elevated surface with inset padding and a radius, right-aligned and sized to content |
 | streaming | `isStreaming` | caret follows the last rendered inline node, blinking |
 | empty | `markdown` is empty | nothing renders; the component contributes no box |
 
@@ -222,7 +222,7 @@ surface that shows agent prose.
 | inline code font | `--poodle-typography-code-family`, `--poodle-typography-label-size` |
 | blockquote rule | `--poodle-color-border-subtle` |
 | blockquote text | `--poodle-color-text-secondary` |
-| user surface | `--poodle-color-background-surface` |
+| user surface | `--poodle-color-background-elevated` |
 | user radius | `--poodle-radius-surface` |
 | caret | `--poodle-color-accent-base` |
 
@@ -263,7 +263,7 @@ Density drives block spacing and list indent only, never line height.
 - [ ] every markdown vector produces the same block model in both languages
 - [ ] unsupported constructs degrade to text and never vanish
 - [ ] an unannotated fence reports no language rather than an empty one
-- [ ] list items always contain blocks, tight or loose
+- [ ] list items contain blocks except single-paragraph items, which unwrap to inlines
 - [ ] `plainText` includes code-block source
 - [ ] `onLinkClick` suppresses default navigation when set
 - [ ] no vendor vocabulary anywhere in the component
@@ -290,6 +290,7 @@ Density drives block spacing and list indent only, never line height.
 | Natives show no streaming caret | neither native re-renders per token during spec resolution | accepted | host drives re-render |
 | Tables degrade to text on every target | out of the v1 subset; adding them means a table block model and four renderers | accepted | promote if a consumer needs them |
 | No syntax highlighting | `Code` does not highlight either; adding it is a `Code` decision, not a message one | accepted | tracked on the Code contract |
+| Single-paragraph list-item unwrap and flush-left inside markers are Svelte-only | React/GPUI/Jetstream keep block-wrapped items and outside markers | pending review | port to the other runtimes when one is next touched |
 | Natives have no `onLinkClick` | inline nodes flatten to text on both, so there is no link element to hang a handler on. A handler for something that is not drawn is exactly the dead-handler pattern | accepted, tracked | arrives with rich inline runs |
 
 ## 13. Approval And Adoption Notes

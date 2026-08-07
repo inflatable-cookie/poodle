@@ -1,8 +1,9 @@
+use crate::node_compat::Eyebrow;
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, TimeAgo};
+use crate::node_compat::TimeAgo;
 use poodle_specs::{EyebrowSpec, InlineTypographyMode, TimeAgoSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

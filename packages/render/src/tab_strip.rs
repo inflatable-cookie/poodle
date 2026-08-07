@@ -8,13 +8,15 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole,
+};
 use poodle_specs::{Orientation, SemanticControlSizeRole, TabStripSpec};
 
 use crate::color::with_alpha;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-    size_padding_x_offset_rem,
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
 };
 
 /// Host callbacks: select (tab value) and close (tab value).
@@ -77,14 +79,12 @@ pub fn tab_strip(
     // Tab inline padding = density control-x + per-size offset (mirrors Button).
     let pad_x =
         rem_to_px(control_space_x_rem(spec.density) + size_padding_x_offset_rem(effective_size));
-    // Tab min-height tracks control-height − 0.25rem (same as Tabs underline).
-    let min_h = rem_to_px(control_height_rem(effective_size) - 0.25);
+    let control_y = theme.resolve_space("space.control.y");
+    let inline_gap = theme.resolve_space("space.inline.sm");
     let item_gap = theme.resolve_space(spec.item_gap_token());
-    let close_gap = theme.resolve_space(spec.close_button_gap_token());
 
     // ── Colors ───────────────────────────────────────────────────────────
     let accent = theme.resolve_color("color.accent.base");
-    let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
     let border = theme.resolve_color("color.border.subtle");
     let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
@@ -113,13 +113,10 @@ pub fn tab_strip(
     for item in &spec.items {
         let is_active = selected.as_deref() == Some(item.value.as_str());
         let is_disabled = item.is_disabled;
-        let text_color = if is_active {
-            accent
-        } else if is_disabled {
-            text_secondary
-        } else {
-            text_primary
-        };
+        // TabStrip keeps inactive labels on the secondary text tier. This is
+        // the native GPUI primitive's established hierarchy (active tabs use
+        // the accent tier; disabled tabs then apply the disabled opacity).
+        let text_color = if is_active { accent } else { text_secondary };
 
         // Inner row: label (+ optional close button), visible in both axes.
         let mut tab = Node::button("");
@@ -127,11 +124,15 @@ pub fn tab_strip(
             let s = &mut tab.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = close_gap;
-            s.min_height = Some(min_h);
+            // Match the native primitive's row gap. The close button also
+            // carries its explicit affordance margin, so both terms are part
+            // of the established spacing contract.
+            s.descriptor.layout.spacing.gap = inline_gap;
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = pad_x;
             pad.right = pad_x;
+            pad.top = control_y;
+            pad.bottom = control_y;
             s.text_size = Some(font_size);
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);

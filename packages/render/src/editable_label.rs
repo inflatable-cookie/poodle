@@ -23,8 +23,11 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, StylePatch,
+    TextChangeHandler,
 };
-use poodle_specs::{ControlDensity, ControlSize, EditableLabelSpec, EditableLabelVariant};
+use poodle_specs::{
+    ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
+};
 
 use crate::color::{mix_srgb, TRANSPARENT};
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -74,10 +77,33 @@ fn density_pad_x_offset_rem(density: ControlDensity) -> f32 {
     }
 }
 
+#[derive(Default, Clone)]
+pub struct EditableLabelHandlers {
+    pub on_edit_start: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_change: Option<TextChangeHandler>,
+    pub on_commit: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
 pub fn editable_label(
     spec: &EditableLabelSpec,
     theme: &dyn ThemeProvider,
     on_edit_start: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    editable_label_with_handlers(
+        spec,
+        theme,
+        EditableLabelHandlers {
+            on_edit_start,
+            ..EditableLabelHandlers::default()
+        },
+    )
+}
+
+pub fn editable_label_with_handlers(
+    spec: &EditableLabelSpec,
+    theme: &dyn ThemeProvider,
+    handlers: EditableLabelHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -143,6 +169,15 @@ pub fn editable_label(
             }
         }
         input.interaction.focusable = true;
+        if !spec.is_disabled {
+            input.interaction.on_text_change = handlers.on_change.clone();
+            input.interaction.on_cancel = handlers.on_cancel.clone();
+            if let Some(handler) = &handlers.on_commit {
+                let handler = Arc::clone(handler);
+                let value = spec.value.clone();
+                input.interaction.on_submit = Some(Arc::new(move || handler(&value)));
+            }
+        }
         input
     } else {
         // ── Display mode: label text + optional edit affordance ─────────
@@ -221,8 +256,12 @@ pub fn editable_label(
         el.interaction.disabled = true;
     }
 
-    if !spec.is_editing && !spec.is_disabled {
-        if let Some(handler) = on_edit_start {
+    if !spec.is_editing
+        && !spec.is_disabled
+        && spec.activation_mode != EditableLabelActivation::Programmatic
+    {
+        if let Some(handler) = handlers.on_edit_start {
+            el.interaction.focusable = true;
             el.interaction.on_activate = Some(Arc::new(move || handler()));
         }
     }

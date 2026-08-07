@@ -1,12 +1,28 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, RangeSlider};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, RangeSlider};
 use poodle_specs::{EyebrowSpec, RangeSliderSpec};
+use std::sync::Arc;
+
+fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |low, high| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetText {
+            key: format!("{key}-lo"),
+            value: format!("{low:.0}"),
+        });
+        events.push(NodeSpecimenEvent::SetText {
+            key: format!("{key}-hi"),
+            value: format!("{high:.0}"),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -65,28 +81,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Price range"),
                                 theme,
                             )
-                            .on_change("range-slider-default", cx.listener(
-                                |this, pair: &(f64, f64), _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "range-slider-default-lo".to_string(),
-                                        format!("{:.0}", pair.0),
-                                    );
-                                    this.state.specimens.text.insert(
-                                        "range-slider-default-hi".to_string(),
-                                        format!("{:.0}", pair.1),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_change(
+                                "range-slider-default",
+                                range_change(state, "range-slider-default"),
+                            ),
                         )
                         .child(
                             div()
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child(format!(
-                                    "${:.0} \u{2013} ${:.0}",
-                                    default_lo, default_hi
-                                )),
+                                .child(format!("${:.0} \u{2013} ${:.0}", default_lo, default_hi)),
                         ),
                 ),
         )
@@ -113,28 +117,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Age range"),
                                 theme,
                             )
-                            .on_change("range-slider-step", cx.listener(
-                                |this, pair: &(f64, f64), _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "range-slider-step-lo".to_string(),
-                                        format!("{:.0}", pair.0),
-                                    );
-                                    this.state.specimens.text.insert(
-                                        "range-slider-step-hi".to_string(),
-                                        format!("{:.0}", pair.1),
-                                    );
-                                    cx.notify();
-                                },
-                            )),
+                            .on_change(
+                                "range-slider-step",
+                                range_change(state, "range-slider-step"),
+                            ),
                         )
                         .child(
                             div()
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child(format!(
-                                    "Ages {:.0} \u{2013} {:.0}",
-                                    step_lo, step_hi
-                                )),
+                                .child(format!("Ages {:.0} \u{2013} {:.0}", step_lo, step_hi)),
                         ),
                 ),
         )

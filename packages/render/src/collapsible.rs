@@ -6,9 +6,7 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, ShadowLayer,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, ShadowLayer};
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 
 use crate::color::{mix_srgb, with_alpha};
@@ -26,7 +24,6 @@ pub fn collapsible(
     let open_gap = theme.resolve_space("space.stack.md");
     let root_gap = if is_open { open_gap } else { 0.0 };
     let trigger_gap = theme.resolve_space("space.inline.md");
-    let heading_gap = theme.resolve_space("space.inline.sm");
 
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -49,6 +46,7 @@ pub fn collapsible(
     let root_bg = mix_srgb(elevated, panel, 0.40);
     let root_border = with_alpha(border_subtle, border_subtle.3 * spec.border_subtle_alpha());
     let highlight_border = with_alpha(accent_base, accent_base.3 * spec.highlight_border_alpha());
+    let highlight_halo = with_alpha(accent_base, accent_base.3 * spec.highlight_halo_alpha());
 
     let pad_y = rem_to_px(0.625);
     let pad_x = rem_to_px(match spec.density {
@@ -56,9 +54,6 @@ pub fn collapsible(
         ControlDensity::Default => 1.0,
         ControlDensity::Comfortable => 1.0,
     });
-
-    let text_inverse = theme.resolve_color("color.text.inverse");
-    let root_highlight = ColorValue(text_inverse.0, text_inverse.1, text_inverse.2, 0.08);
 
     let mut outer = Node::container();
     {
@@ -82,14 +77,16 @@ pub fn collapsible(
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
-        s.shadow_layers = vec![ShadowLayer {
-            offset_x: 0.0,
-            offset_y: rem_to_px(0.0625),
-            blur: 0.0,
-            spread: 0.0,
-            color: root_highlight,
-            inset: true,
-        }];
+        if spec.highlighted {
+            s.shadow_layers = vec![ShadowLayer {
+                offset_x: 0.0,
+                offset_y: 0.0,
+                blur: 0.0,
+                spread: rem_to_px(0.125),
+                color: highlight_halo,
+                inset: false,
+            }];
+        }
     }
 
     // Trigger: heading block + chevron.
@@ -97,7 +94,6 @@ pub fn collapsible(
     {
         let s = &mut heading.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = heading_gap;
         s.min_width = Some(0.0);
         s.flex_grow = Some(1.0);
         s.flex_basis = Some(0.0);
@@ -118,7 +114,11 @@ pub fn collapsible(
         heading = heading.child(d);
     }
 
-    let chevron_icon = if is_open { "chevron-down" } else { "chevron-right" };
+    let chevron_icon = if is_open {
+        "chevron-down"
+    } else {
+        "chevron-right"
+    };
     let mut indicator = Node::icon(chevron_icon, icon_size);
     indicator.style.flex_shrink_zero = true;
     indicator.style.descriptor.text_color = Some(text_secondary);

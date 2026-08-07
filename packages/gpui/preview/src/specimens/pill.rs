@@ -1,12 +1,12 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, Pill};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Pill};
 use poodle_specs::{
-    ControlSize, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize,
-    PillSpec, PillTone,
+    ControlSize, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec,
+    PillTone,
 };
 
 fn control_size_to_pill(size: ControlSize) -> PillSize {
@@ -321,12 +321,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .items_center()
                         .child(
                             Pill::from_spec(
-                                PillSpec::new()
-                                    .with_label("Tag")
-                                    .with_removable(true),
+                                PillSpec::new().with_label("Tag").with_removable(true),
                                 theme,
                             )
-                            .on_remove(|_e, _w, _cx| {}),
+                            .on_remove(|| {}),
                         )
                         .child(
                             Pill::from_spec(
@@ -336,7 +334,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_removable(true),
                                 theme,
                             )
-                            .on_remove(|_e, _w, _cx| {}),
+                            .on_remove(|| {}),
                         )
                         .child(
                             Pill::from_spec(
@@ -346,7 +344,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_removable(true),
                                 theme,
                             )
-                            .on_remove(|_e, _w, _cx| {}),
+                            .on_remove(|| {}),
                         ),
                 ),
         )

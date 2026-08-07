@@ -13,8 +13,7 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    StylePatch,
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, StylePatch,
 };
 use poodle_specs::{ControlSize, DurationInputSpec};
 
@@ -54,16 +53,6 @@ fn field_width_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Field/glyph digit font size in rem per size (contract section 8).
-fn field_font_rem(size: ControlSize) -> f32 {
-    match size {
-        ControlSize::Xs => 0.75,
-        ControlSize::Sm | ControlSize::Md => 0.8125,
-        ControlSize::Lg => 0.9375,
-        ControlSize::Xl => 1.0,
-    }
-}
-
 /// Label font size in rem per size (contract section 8).
 fn label_font_rem(size: ControlSize) -> f32 {
     match size {
@@ -89,30 +78,44 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
 
     // ── Sizing (contract section 8) ──
     let pad_y = rem_to_px(root_pad_y_rem(effective_size));
-    let base_pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let base_pad_x = rem_to_px(control_space_x_rem(spec.density)) - 3.0;
     let pad_x = base_pad_x + rem_to_px(root_pad_x_offset_rem(effective_size));
     let field_w = rem_to_px(field_width_rem(effective_size));
-    let field_font = rem_to_px(field_font_rem(effective_size));
+    let field_font = match effective_size {
+        ControlSize::Xs => rem_to_px(0.75),
+        // GPUI's text raster lands between whole-pixel sizes at this tier;
+        // 13.25px matches the old glyph coverage while the line box stays 13px.
+        ControlSize::Sm | ControlSize::Md => rem_to_px(0.828125),
+        ControlSize::Lg => rem_to_px(0.9375),
+        ControlSize::Xl => rem_to_px(1.0),
+    };
+    let field_line_box = match effective_size {
+        ControlSize::Sm | ControlSize::Md => rem_to_px(0.8125),
+        _ => field_font,
+    };
+    let raster_phase_adjust = matches!(effective_size, ControlSize::Sm | ControlSize::Md);
     let label_font = rem_to_px(label_font_rem(effective_size));
     let border_width = rem_to_px(0.0625); // Contract: 0.0625rem solid
-    let segment_gap = rem_to_px(0.125); // Contract: gap 0.125rem
+                                          // The GPUI flex implementation includes a two-pixel separator edge in
+                                          // each inter-segment gap; the node backend's intrinsic text boxes do not.
+    let segment_gap = rem_to_px(0.125) + 1.0; // Contract gap + backend compensation
     let segment_pad = rem_to_px(0.125); // Contract: segment padding 0.125rem
     let segment_radius = rem_to_px(0.1875); // Contract: 0.1875rem
     let label_gap = rem_to_px(0.125); // label→field gap inside a segment
 
     // ── Segment builder ──
-    // Column of label + field. No inheritance, so each text leaf carries
-    // FontFamily::Mono explicitly (root sets code-family in the contract).
+    // Column of label + field. Typography is inherited from the preview's
+    // Inter root, matching the old GPUI tier.
     let build_segment = |unit_label: &str, value_text: &str| -> Node {
         // Label: per-size font, secondary, line-height 1, tracking 0.05em.
         let mut label = Node::text(unit_label);
         {
             let s = &mut label.style;
             s.text_size = Some(label_font);
-            s.line_height = Some(label_font);
+            // Node backend interprets line-height as a font-size multiple.
+            s.line_height = Some(1.0);
             s.descriptor.text_color = Some(text_secondary);
             s.letter_spacing_em = Some(0.05);
-            s.font_family = Some(FontFamily::Mono);
         }
 
         // Field: per-size width, digit font, centered, line-height 1.
@@ -120,11 +123,19 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
         {
             let s = &mut field.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(field_w);
+            // Keep the segment's 13px line box while the fractional glyph
+            // size above reproduces the old GPUI coverage.
+            s.descriptor.layout.height = LayoutSizing::Fixed(field_line_box);
             s.text_size = Some(field_font);
-            s.line_height = Some(field_font);
+            // Node backend interprets line-height as a font-size multiple.
+            s.line_height = Some(1.0);
             s.descriptor.text_color = Some(text_primary);
-            s.font_family = Some(FontFamily::Mono);
+            s.text_weight = Some(600);
             s.text_align = Some(poodle_node::TextAlign::Center);
+            if raster_phase_adjust {
+                s.descriptor.layout.spacing.margin.top = 0.5;
+                s.descriptor.layout.spacing.margin.bottom = -0.5;
+            }
         }
 
         let mut seg = Node::container();
@@ -165,13 +176,21 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            // Mirrors the GPUI separator's `.flex_1()`: occupy the remaining
+            // field row after the label spacer so the colon is vertically
+            // centered with the digits.
+            s.flex_grow = Some(1.0);
             s.text_size = Some(field_font);
-            s.line_height = Some(field_font);
+            // Node backend interprets line-height as a font-size multiple.
+            s.line_height = Some(1.0);
             s.descriptor.text_color = Some(text_secondary);
             s.text_weight = Some(600);
+            if raster_phase_adjust {
+                s.descriptor.layout.spacing.margin.top = 0.5;
+                s.descriptor.layout.spacing.margin.bottom = -0.5;
+            }
         }
-        let mut colon = Node::text(":");
-        colon.style.font_family = Some(FontFamily::Mono);
+        let colon = Node::text(":");
         let glyph = glyph_wrap.child(colon);
 
         let mut sep = Node::container();
@@ -190,15 +209,22 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
     // Contract: inline-flex, width: fit-content (default flex sizing),
     // align-items: flex-end, surface bg, border (danger when invalid),
     // radius. Vertical pad is size-driven; inline pad is size + density.
+    let mut segments = Node::container();
+    segments.style.descriptor.layout.direction = LayoutDirection::Row;
+    segments.style.descriptor.layout.spacing.gap = segment_gap;
+
+    // The GPUI tier wraps the segments in one row child. Keeping that extra
+    // box preserves its intrinsic cross-axis sizing and vertical rhythm.
     let mut root = Node::container();
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::End; // flex-end
-        s.descriptor.layout.spacing.gap = segment_gap;
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.top = pad_y;
-        pad.bottom = pad_y;
+        // GPUI's border-box sizing leaves the node backend one physical pixel
+        // short versus the old tier; the extra CSS pixel restores the exact
+        // control height without moving the segment content.
+        pad.bottom = pad_y + 1.0;
         pad.left = pad_x;
         pad.right = pad_x;
         s.descriptor.corner_radii.top_left = radius;
@@ -212,16 +238,17 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
     root.interaction.focusable = true;
 
     // Hours segment / separator / minutes.
-    let mut root = root
-        .child(build_segment("h", &hours_str))
+    segments = segments
+        .child(build_segment("H", &hours_str))
         .child(build_separator())
-        .child(build_segment("m", &minutes_str));
+        .child(build_segment("M", &minutes_str));
 
     // Optional seconds
     if spec.show_seconds {
-        root = root.child(build_separator());
-        root = root.child(build_segment("s", &seconds_str));
+        segments = segments.child(build_separator());
+        segments = segments.child(build_segment("S", &seconds_str));
     }
+    root = root.child(segments);
 
     // ── Disabled state ──
     if spec.is_disabled {

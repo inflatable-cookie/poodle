@@ -1,9 +1,125 @@
 # g12 — React Full Parity And Web Verification Depth
 
-**Status: active, strict-paused.** The React parity program (`001`–`008`) and
+**Status: active.** The React parity program (`001`–`008`) and
 the bounded work through `018` are complete. `017` remains
-native-interaction evidence with its IME follow-up unpromoted. No
-implementation card is ready.
+native-interaction evidence with its IME follow-up unpromoted. `019` (GPUI
+node backend) is in progress; Batch A and Batch B waves 1–2 are complete.
+Wave 3's TextInput/Field and static Button/IconButton slices through the
+header/list family plus its FormActions/Button-label slice are pixel-green; its
+AlertDialog/ConfirmAction trigger slice is pixel-green; its Tooltip/Popover
+and Menu/CommandPalette trigger slices plus its Dialog/Drawer live Button
+slice are also pixel-green. The old Button census is zero; the 32-site
+Checkbox/Switch/TriStateSwitch family is pixel-green and click-proven; the
+19-site Slider/RangeSlider family is pixel-green and drag-proven; all seven
+RadioGroup sites are pixel-green and selection-proven; all 18
+Pagination/Stepper sites are pixel-green, with Pagination navigation and
+controlled limit state click-proven. Wave 3 is complete after the final Field
+site moved to shared render nodes with exact pixels. Wave 4 has started: all
+29 standalone Pill sites and all 43 standalone ListCard sites are node-backed,
+handler-proven, and pixel-green; the ListCard slice also migrated its seven
+embedded Pill sites. The final embedded ListCard and six Pill sites are now
+node-backed and pixel-green too, leaving both old-tier censuses at zero.
+All 36 DetailItem sites are node-backed and pixel-green too, with no old-tier
+DetailItem specimen import remaining.
+The 18-site DetailSection/DetailSectionGroup/DetailShell family is node-backed
+and pixel-green too, with all three old-tier specimen import censuses at zero.
+The 33-site ListCardCounter/MetricTile/Code display batch is also node-backed
+and pixel-green, with all three old-tier specimen import censuses at zero.
+The 16-site ListContainer/ListGrid/Surface list-shell batch is node-backed and
+pixel-green too, with all three old-tier specimen import censuses at zero.
+Wave 4 is complete after the 25-site Box/Grid/Stack/Spacer/Separator structural
+batch also moved to shared nodes with exact pixels and five zero old-tier
+censuses. Wave 5's 20-site AlertDialog/ConfirmAction, Tooltip/Popover, and
+Menu/CommandPalette overlay batch is node-backed, handler-proven, and
+pixel-green, with six zero old-tier censuses.
+The following 24-site Accordion/Collapsible/ContextMenu/HoverCard/Menubar/
+NavigationMenu batch is node-backed, interaction-proven, and pixel-green too,
+with all six old-tier constructor censuses at zero.
+The following 23-site DatePicker/DateRangePicker/DateTimePicker/
+DateTimeRangePicker batch is node-backed, interaction-proven, and pixel-green
+too, with all four old-tier constructor censuses at zero.
+The following 26-site Calendar/DateTimeZonePicker/TimeField/TimeZoneSelect batch
+is node-backed, interaction-proven, and pixel-green too, with all four old-tier
+constructor censuses at zero.
+The following 24-site ColorPicker/DurationInput/NumberInput value-input batch
+is node-backed and interaction-proven; ColorPicker and NumberInput are exact,
+while DurationInput retains a deterministic 0.0033% digit-raster residual with
+no baseline change. The following 27-site CodeInput/TokenInput/FileUpload
+input-composite batch is node-backed and pixel-exact with zero old-tier
+constructor sites. The following 21-site Tabs/TabStrip batch is also
+node-backed and pixel-exact with both old-tier censuses at zero. The following
+six-site Breadcrumbs slice is also node-backed and pixel-exact with its old-tier
+census at zero. The following seven-site TextLink slice is also node-backed and
+pixel-exact with its old-tier census at zero. The following seven-site
+SelectionSummary slice is also node-backed and pixel-exact with its old-tier
+census at zero. Wave 11's Meter/Rating/Table feedback/data slice is also
+node-backed and pixel-exact with all three old-tier constructor censuses at
+zero; Rating selection is event-bridged and Meter/Table preserve their native
+fill and flex-layout recipes.
+Wave 12's PaginationSummary/ValidationSummary/EmptyState/ResizeHandle utility
+slice is also node-backed and pixel-exact with zero old-tier constructor sites;
+Progress is node-backed across all sites, and Region is now node-backed too;
+its documented dashed-border raster residual remains deferred.
+Wave 13's MetaBar/MetaItem/NavCard/Callout/StatusBar slice is node-backed with
+zero old-tier constructor sites; NavCard and Callout are exact, while the
+metadata/status text-raster deltas remain parked.
+Wave 14's PasswordRequirements/ErrorBoundary/InlineListSection/CollapseToggle
+slice is node-backed with zero old-tier constructor sites; ErrorBoundary,
+InlineListSection, and CollapseToggle are exact, while PasswordRequirements'
+0.0077% check/cross raster delta remains parked.
+Wave 15's Toolbar slice is node-backed with zero old-tier constructor sites and
+an exact focused capture.
+Wave 16's OrderBy/RefSelect slice is node-backed with zero old-tier constructor
+sites; their focused text/icon raster deltas remain parked at 0.0122% and
+0.2216%. Wave 17's PageHeader slice is also node-backed with zero old-tier
+constructor sites; its 0.0453% text/icon/banner-edge residual remains
+deferred. The standalone FormActions specimen is exact; AppHeader is now
+node-backed with an exact focused capture. PickerShell is now node-backed with
+aligned ready-body geometry; its 0.5576% focused text/control-raster residual
+is deferred.
+FilterToolbar is now node-backed with an exact focused capture, including its
+Select/TextInput child slots. ModelPicker is now node-backed with aligned
+model/axis panel geometry; its 0.2638% focused text/control-raster residual is
+deferred. The embedded AgentChatInput slots carry a matching deferred 0.1210%
+trigger/control residual.
+FormShell is now node-backed with section slots and action rows; its focused
+capture has only a deferred 0.0054% text/icon raster residual.
+FormLayout is now node-backed with aligned field/control geometry; its 0.7501%
+text/button raster residual is deferred. FormDialog is now node-backed with a
+0.1980% modal/text-raster residual. MediaThumbnail, EmbedPreview, and
+MediaPreview are now node-backed too; their 0.1492%, 0.2103%, and 0.1154%
+focused deltas are deferred text/icon raster parity.
+CardRadioGroup, EmbedInput, and PageLoading are node-backed as well. EmbedInput
+is focused exact; CardRadioGroup retains a deferred 0.9761% selected-state/text
+residual, and PageLoading remains skipped by the native gate.
+MediaPicker is node-backed too; its browse/upload geometry is aligned with a
+deferred 0.5516% icon/text residual.
+DataTable, AgentQuestion, and AgentTranscript are node-backed too; AgentQuestion
+is focused exact, while DataTable retains a 0.7217% text/layout-raster residual
+and AgentTranscript a 0.0131% text-raster residual.
+SidebarNav and MediaBrowsePanel are node-backed too, with 0.2954% and 0.1829%
+text/icon residuals. ToastStack preserves its corner overlay and retains a
+deferred 1.1702% text/icon/animation-raster residual.
+ToastHost is node-backed too, preserving placement with a deferred 0.5661%
+text/icon/animation-raster residual.
+Dialog and Drawer are node-backed too; Dialog keeps custom header/footer slots,
+and both focused captures are exact.
+DebugDialog, ActionDiscoveryPanel, and BulkActionBar are node-backed too, with
+only the documented text/icon-raster residuals.
+AgentChatInput is node-backed with ModelPicker, toolbar, and footer slots; its
+0.1377% text/control-raster residual is deferred.
+FilterBuilder and MarkdownEditor are node-backed through the shared renderers;
+MarkdownEditor preserves text/mode events through the node event queue. Their
+focused 1.0752% and 0.2304% residuals remain deferred text/layout-raster parity.
+EditableList and RelationPicker are node-backed too; RelationPicker preserves
+drill-entry and back-path events through the node queue. Their focused 0.0063%
+and 1.3903% residuals remain deferred text/geometry parity.
+EditableLabel is node-backed too; its text-change, submit, and cancel intents
+use the node interaction contract and preview event queue. Its focused 0.5334%
+text-raster residual remains deferred; Wave 40's full gate compared all 136
+components with no capture failures or baseline writes.
+FieldSet is now node-backed with an exact focused capture. ThemeSelect is also
+node-backed with an exact focused capture.
 
 **React parity: COMPLETE.** All 132 components ported to `@poodle/react` and
 Playwright-verified against the Svelte preview. The React preview is a full
@@ -92,6 +208,18 @@ Runway:
 - `018-public-overlay-geometry-observation.md` — explicit immutable viewport
   snapshots for built-in Popover/Menu surfaces across Svelte and React, without
   public DOM or host-runtime coupling. **Complete; requested by Longhorn.**
+- `019-gpui-node-backend.md` — the symmetric GPUI half of the
+  Poodle↔Jetstream inversion: a Node → GPUI interpreter crate, GPUI preview
+  migration onto `poodle-render` nodes, then deletion of
+  `packages/gpui/components` — the last duplicate component tier. Verified by
+  the g12.014 native visual gate held at zero diff. **In progress; Batch A
+  and Batch B waves 1–2 complete; Wave 3's old Button census is zero and the
+  32-site Checkbox/Switch/TriStateSwitch family is node-backed, pixel-green,
+  and click-proven; the 18-site Pagination/Stepper family is node-backed and
+  pixel-green; Waves 3–4 are complete; Wave 5's first 93 constructor sites are
+  node-backed and pixel-green; Waves 6–10 cover CodeInput/TokenInput/FileUpload,
+  Tabs/TabStrip, Breadcrumbs, TextLink, and SelectionSummary with exact focused
+  captures and zero old-tier constructor sites.**
 
 - Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
@@ -100,67 +228,23 @@ Runway:
 
 ## Next Task
 
-Choose and promote the next bounded owner before implementation resumes. The
-accessibility follow-up candidates below remain evidence, not ready work:
+``019-gpui-node-backend.md`` is COMPLETE. `packages/gpui/components` — 170 files, 44,796 lines, the
+last duplicate component tier — is deleted. Every Poodle target now renders one
+implementation (`poodle-render` emitting `poodle-node` trees) through a thin
+per-target backend.
 
-- **Accessible names: zero unnamed controls, and gated.** `test:jetstream-a11y`
-  projects every specimen's tree headlessly and now runs in `ci:native`. It
-  found 629 and all 629 are closed. It lives in `ci:native` rather than
-  `ci:rust` because it renders specimens, so it needs the sibling jetstream
-  repo — the same constraint that already makes that group local-only.
+Final native visual gate: 136 compared, 96 exact, 39 failing, every failure a
+named residual or a slug deliberately held back from the baseline refresh.
+Probe tests were mined into `packages/render/src/presentation.rs` (98 → 109
+render tests) before the tier went, and the handler-drift gate was repointed at
+`poodle-render` rather than dropped with its old subject.
 
-  Almost none of the 629 were missing information. Components held the words
-  and discarded them: `bulk-action-bar` dropped the `label` its own action
-  struct carried, `markdown-editor` bound tool captions as `_label`, `dialog`
-  never read the `close_label` that had sat on its spec defaulting to "Close
-  dialog". One engine bug accounted for 186 alone — a caption living in a
-  child left its button unnamed, now ARIA name-from-content.
+Follow-ups, none blocking: Tree's 0.9648% residual (focus-ring expression and
+guide-line rendering — not raster, and it wants one decision on how the
+vocabulary expresses focus-visible, which `sidebar_nav` gets wrong the same
+way); a first clean comparison for `block-editor` and `log-list`; and pruning
+`check:jetstream` / `test:jetstream`, which point at a package deleted in
+`ee704699`.
 
-  **The method was checking Svelte, not reasoning about the residue.** Twice
-  the remainder looked like caller error and twice it was a default the
-  reference already had: `switch` composing a name from
-  `leftLabel`/`rightLabel`, `app-header` falling back to `title`,
-  `markdown-editor` defaulting to "Markdown editor", `file-upload` naming each
-  remove button after its file, `text-input` naming its clear button "Clear
-  search query". `SelectSpec` turned out to have an `aria_label` field with no
-  builder to set it.
-
-- **Contract ARIA roles: complete, gated in `ci:native`.** All 124 requirements
-  a contract names are projected by their component, bar 10 exempt with a
-  recorded reason. `effigy drift:roles` extracts every `role="…"`, maps it onto
-  `accesskit::Role`, and checks the tree that component actually renders.
-
-  **The overlay category is now empty, and that is the finding.** It started at
-  48 requirements excused as "observable only with an overlay open" — a list I
-  wrote by reasoning rather than checking. Every single one was wrong. The
-  specimens already rendered those overlays: `select`, `menubar` and
-  `context-menu` outright, and `popover`, `drawer`, `hover-card`,
-  `command-palette` and the date pickers regardless of their open flag, which
-  the visual gate confirmed by showing **no pixel change** when they were
-  opened. In each case the component simply never claimed the role, and the
-  exemption hid it.
-
-  The category is kept because `specimenRendersOpen` now polices it: an entry
-  whose specimen opens the overlay is reported as stale rather than honoured.
-
-  The 10 remaining exemptions each carry a justification, not just a key —
-  triggers the consumer composes (`menu`, `hover-card`, `tooltip`), surfaces
-  this API does not model (`data-table`'s column menu, `field`'s info popover),
-  and states only reachable at runtime (`editable-list`'s alert and status).
-
-  The two gates check each other: the naming gate caught three regressions
-  introduced by role work, because giving an element a role that requires a
-  name makes it answerable where it was previously ignorable.
-
-- **The AX audit sees one screen.** `effigy test:jetstream-ax` reads the real
-  macOS tree (471 elements of ours, 467 named, against GPUI's 7/1) but only for
-  whatever the preview is showing. Per-slug is the same shape as the visual
-  gate's sweep.
-- **Nobody has listened to it.** The tree is correct and named; whether
-  VoiceOver's announcements read sensibly is a judgement a machine cannot make.
-- **Both visual gates cover one axis only** (`eclipse-compact-sm`).
-- **GPUI baselines are display-dependent.** A capture taken on a 1x display is
-  1348x1478 where the 2x baseline is 2696x2396, so every baseline fails on size
-  after the machine's display setup changes. The gate compares against the
-  machine's own last capture, so this is a rebaseline rather than a defect —
-  but it is one more thing the offscreen Jetstream gate does not have.
+Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` and
+`docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.

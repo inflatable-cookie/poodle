@@ -44,6 +44,20 @@ pub fn alert_dialog(
     working_label: &str,
     handlers: AlertDialogHandlers,
 ) -> Node {
+    alert_dialog_with_content(spec, theme, working, working_label, Vec::new(), handlers)
+}
+
+/// Render an alert dialog with caller-supplied body nodes between the optional
+/// item-detail row and the actions. This is the shared equivalent of the
+/// Svelte/legacy GPUI default content slot.
+pub fn alert_dialog_with_content(
+    spec: &AlertDialogSpec,
+    theme: &dyn ThemeProvider,
+    working: bool,
+    working_label: &str,
+    content: Vec<Node>,
+    handlers: AlertDialogHandlers,
+) -> Node {
     let size = spec.size;
     let size_role = spec.size_role;
     let density = spec.density;
@@ -112,6 +126,7 @@ pub fn alert_dialog(
         v.style.text_size = Some(body_font);
         children.push(row.child(l).child(v));
     }
+    children.extend(content);
 
     // Compose the real dialog; working gates every dismissal route.
     let mut dialog_spec = DialogSpec::new()

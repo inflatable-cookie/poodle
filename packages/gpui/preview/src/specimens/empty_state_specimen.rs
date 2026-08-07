@@ -1,6 +1,6 @@
+use crate::node_compat::{EmptyState, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{EmptyState, Eyebrow};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 

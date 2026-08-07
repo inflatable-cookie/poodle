@@ -11,7 +11,9 @@
 //! Scroll ownership is expressed with overflow-scroll on the chosen region.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, Node};
+use poodle_node::{
+    CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+};
 use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
@@ -38,7 +40,9 @@ pub fn detail_shell(
     let heading_size = theme.resolve_space("typography.heading.size");
 
     let text_primary = theme.resolve_color(spec.state_title_color_token());
+    let header_text = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color(spec.state_message_color_token());
+    let border = theme.resolve_color("color.border.subtle");
 
     // Scroll ownership (contract §3 scrollMode): shell scrolls vs body scrolls.
     let scroll_shell = matches!(spec.scroll_owner, ScrollOwner::Shell);
@@ -48,10 +52,11 @@ pub fn detail_shell(
         let s = &mut shell.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
+        s.flex_grow = Some(1.0);
         s.descriptor.layout.spacing.gap = stack_gap;
         s.descriptor.background = Some(bg);
         if scroll_shell {
-            s.descriptor.layout.overflow_x = LayoutOverflow::Scroll;
             s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
         }
     }
@@ -64,6 +69,8 @@ pub fn detail_shell(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.fill_width = true;
+            s.border_bottom_width = Some(1.0);
+            s.border_color_bottom = Some(border);
             s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = panel_x;
@@ -74,10 +81,9 @@ pub fn detail_shell(
 
         if let Some(ref title) = spec.title {
             let mut t = Node::text(title);
-            t.style.descriptor.text_color = Some(text_primary);
+            t.style.descriptor.text_color = Some(header_text);
             t.style.text_size = Some(heading_size);
             t.style.text_weight = Some(600);
-            t.style.line_height = Some(1.2);
             header_region = header_region.child(t);
         }
         if let Some(h) = header {
@@ -93,6 +99,7 @@ pub fn detail_shell(
             let s = &mut body.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            s.flex_grow = Some(1.0);
             s.descriptor.layout.spacing.gap = stack_gap;
             s.fill_width = true;
             let pad = &mut s.descriptor.layout.spacing.padding;
@@ -125,6 +132,7 @@ pub fn detail_shell(
             let s = &mut region.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            s.flex_grow = Some(1.0);
             s.descriptor.layout.spacing.gap = stack_gap;
             s.fill_width = true;
             let pad = &mut s.descriptor.layout.spacing.padding;
@@ -144,13 +152,22 @@ pub fn detail_shell(
         } else {
             // Loading prepends the shared grid spinner before the copy.
             if spec.state == DetailState::Loading {
-                region = region.child(spinner(
+                let mut loading = Node::container();
+                {
+                    let s = &mut loading.style;
+                    s.descriptor.layout.direction = LayoutDirection::Row;
+                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                    s.descriptor.layout.alignment.main = MainAxisAlignment::Start;
+                    s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+                }
+                loading = loading.child(spinner(
                     &SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Grid)
                         .with_size(SpinnerSize::Md)
                         .with_tone(SpinnerTone::Accent),
                     theme,
                 ));
+                region = region.child(loading);
             }
             // Default state title + optional message.
             let mut title = Node::text(spec.effective_state_title());
@@ -175,4 +192,37 @@ pub fn detail_shell(
         }
     }
     shell
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loading_shell_keeps_the_header_rule_and_grid_spinner_row() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = DetailShellSpec::new()
+            .with_title("Loading")
+            .with_state(DetailState::Loading);
+        let node = detail_shell(&spec, &theme, None, None, None);
+
+        let header = &node.children[0];
+        assert_eq!(header.style.border_bottom_width, Some(1.0));
+        assert_eq!(
+            header.style.border_color_bottom,
+            Some(theme.resolve_color("color.border.subtle"))
+        );
+
+        let region = &node.children[1];
+        let loading_row = &region.children[0];
+        assert_eq!(
+            loading_row.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert!(matches!(
+            loading_row.children[0].style.descriptor.layout.height,
+            LayoutSizing::Fixed(15.0)
+        ));
+    }
 }

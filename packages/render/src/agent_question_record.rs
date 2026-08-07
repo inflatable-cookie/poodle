@@ -12,10 +12,7 @@ use poodle_specs::AgentQuestionRecordSpec;
 
 use crate::presentation::rem_to_px;
 
-pub fn agent_question_record(
-    spec: &AgentQuestionRecordSpec,
-    theme: &dyn ThemeProvider,
-) -> Node {
+pub fn agent_question_record(spec: &AgentQuestionRecordSpec, theme: &dyn ThemeProvider) -> Node {
     let surface = theme.resolve_color(spec.surface_token());
     let border = theme.resolve_color(spec.border_token());
     let prompt_color = theme.resolve_color(spec.prompt_token());

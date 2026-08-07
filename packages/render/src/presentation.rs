@@ -587,3 +587,187 @@ pub fn relation_picker_list_gap_rem(density: ControlDensity) -> f32 {
         ControlDensity::Comfortable => 0.3125,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    //! Mined from the old GPUI tier's `presentation/metrics_c.rs` before that
+    //! tier was deleted (g12.019 Batch C). These are the Svelte-derived sizing
+    //! ladders every backend now resolves through this one module, so the
+    //! assertions matter more here than they did in a single tier.
+    use super::*;
+
+    // ── resolve_semantic_size ───────────────────────────────────────────────
+
+    #[test]
+    fn control_role_is_identity() {
+        for size in [
+            ControlSize::Xs,
+            ControlSize::Sm,
+            ControlSize::Md,
+            ControlSize::Lg,
+            ControlSize::Xl,
+        ] {
+            assert_eq!(
+                resolve_semantic_size(size, SemanticControlSizeRole::Control),
+                size
+            );
+        }
+    }
+
+    #[test]
+    fn chrome_role_shifts_down_one_stop_and_clamps() {
+        let cases = [
+            (ControlSize::Xl, ControlSize::Lg),
+            (ControlSize::Lg, ControlSize::Md),
+            (ControlSize::Md, ControlSize::Sm),
+            // Floor: sm and xs stay put.
+            (ControlSize::Sm, ControlSize::Sm),
+            (ControlSize::Xs, ControlSize::Xs),
+        ];
+        for (from, want) in cases {
+            assert_eq!(
+                resolve_semantic_size(from, SemanticControlSizeRole::Chrome),
+                want,
+                "chrome role from {from:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn prominent_role_shifts_up_one_stop_and_clamps() {
+        let cases = [
+            (ControlSize::Xs, ControlSize::Sm),
+            (ControlSize::Sm, ControlSize::Md),
+            (ControlSize::Md, ControlSize::Lg),
+            // Ceiling.
+            (ControlSize::Xl, ControlSize::Xl),
+        ];
+        for (from, want) in cases {
+            assert_eq!(
+                resolve_semantic_size(from, SemanticControlSizeRole::Prominent),
+                want,
+                "prominent role from {from:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn supporting_visual_shifts_down_one_stop_and_clamps() {
+        let cases = [
+            (ControlSize::Xl, ControlSize::Lg),
+            (ControlSize::Lg, ControlSize::Md),
+            (ControlSize::Md, ControlSize::Sm),
+            (ControlSize::Sm, ControlSize::Sm),
+            (ControlSize::Xs, ControlSize::Xs),
+        ];
+        for (from, want) in cases {
+            assert_eq!(
+                resolve_supporting_visual_size(from),
+                want,
+                "supporting visual from {from:?}"
+            );
+        }
+    }
+
+    // ── Size ladders (Svelte CSS values) ────────────────────────────────────
+
+    #[test]
+    fn control_heights_match_svelte() {
+        assert_eq!(control_height_rem(ControlSize::Xs), 1.5);
+        assert_eq!(control_height_rem(ControlSize::Sm), 1.75);
+        assert_eq!(control_height_rem(ControlSize::Md), 2.25);
+        assert_eq!(control_height_rem(ControlSize::Lg), 2.75);
+        assert_eq!(control_height_rem(ControlSize::Xl), 3.25);
+    }
+
+    #[test]
+    fn height_offsets_match_svelte_css() {
+        assert_eq!(size_height_offset_rem(ControlSize::Xs), -0.5);
+        assert_eq!(size_height_offset_rem(ControlSize::Sm), -0.375);
+        assert_eq!(size_height_offset_rem(ControlSize::Md), 0.0);
+        assert_eq!(size_height_offset_rem(ControlSize::Lg), 0.375);
+        assert_eq!(size_height_offset_rem(ControlSize::Xl), 0.5);
+    }
+
+    #[test]
+    fn font_sizes_match_svelte_css() {
+        assert_eq!(size_font_rem(ControlSize::Xs), 0.6875);
+        assert_eq!(size_font_rem(ControlSize::Sm), 0.75);
+        assert_eq!(size_font_rem(ControlSize::Md), 0.8125);
+        assert_eq!(size_font_rem(ControlSize::Lg), 0.875);
+        assert_eq!(size_font_rem(ControlSize::Xl), 0.9375);
+    }
+
+    #[test]
+    fn min_widths_match_svelte_css() {
+        assert_eq!(size_min_width_rem(ControlSize::Xs), 3.75);
+        assert_eq!(size_min_width_rem(ControlSize::Sm), 4.25);
+        assert_eq!(size_min_width_rem(ControlSize::Md), 5.0);
+        assert_eq!(size_min_width_rem(ControlSize::Lg), 5.75);
+        assert_eq!(size_min_width_rem(ControlSize::Xl), 6.5);
+    }
+
+    // ── Density ladders ─────────────────────────────────────────────────────
+
+    #[test]
+    fn density_space_values_match_svelte() {
+        assert_eq!(control_space_x_rem(ControlDensity::Compact), 0.5);
+        assert_eq!(control_space_x_rem(ControlDensity::Default), 0.75);
+        assert_eq!(control_space_x_rem(ControlDensity::Comfortable), 1.0);
+
+        assert_eq!(panel_space_x_rem(ControlDensity::Compact), 0.75);
+        assert_eq!(panel_space_x_rem(ControlDensity::Default), 1.0);
+        assert_eq!(panel_space_x_rem(ControlDensity::Comfortable), 1.25);
+
+        assert_eq!(panel_space_y_rem(ControlDensity::Compact), 0.5);
+        assert_eq!(panel_space_y_rem(ControlDensity::Default), 0.75);
+        assert_eq!(panel_space_y_rem(ControlDensity::Comfortable), 1.0);
+    }
+
+    // ── EditableList scales (contract §8) ───────────────────────────────────
+
+    #[test]
+    fn editable_list_scales_match_contract() {
+        assert_eq!(editable_list_handle_size_rem(ControlSize::Xs), 0.875);
+        assert_eq!(editable_list_handle_size_rem(ControlSize::Sm), 1.0);
+        assert_eq!(editable_list_handle_size_rem(ControlSize::Md), 1.0);
+        assert_eq!(editable_list_handle_size_rem(ControlSize::Lg), 1.125);
+        assert_eq!(editable_list_handle_size_rem(ControlSize::Xl), 1.25);
+
+        assert_eq!(editable_list_item_x_rem(ControlSize::Xs), 0.5);
+        assert_eq!(editable_list_item_x_rem(ControlSize::Md), 0.625);
+        assert_eq!(editable_list_item_x_rem(ControlSize::Xl), 0.875);
+
+        assert_eq!(editable_list_item_y_rem(ControlSize::Xs), 0.375);
+        assert_eq!(editable_list_item_y_rem(ControlSize::Sm), 0.4375);
+        assert_eq!(editable_list_item_y_rem(ControlSize::Md), 0.5);
+        assert_eq!(editable_list_item_y_rem(ControlSize::Xl), 0.625);
+
+        assert_eq!(editable_list_font_rem(ControlSize::Xs), 0.6875);
+        assert_eq!(editable_list_font_rem(ControlSize::Md), 0.8125);
+        assert_eq!(editable_list_font_rem(ControlSize::Xl), 0.9375);
+
+        assert_eq!(editable_list_list_gap_rem(ControlDensity::Compact), 0.0625);
+        assert_eq!(editable_list_list_gap_rem(ControlDensity::Default), 0.125);
+        assert_eq!(
+            editable_list_list_gap_rem(ControlDensity::Comfortable),
+            0.1875
+        );
+
+        assert_eq!(editable_list_item_gap_rem(ControlDensity::Compact), 0.375);
+        assert_eq!(editable_list_item_gap_rem(ControlDensity::Default), 0.5);
+        assert_eq!(
+            editable_list_item_gap_rem(ControlDensity::Comfortable),
+            0.625
+        );
+    }
+
+    // ── rem_to_px ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn rem_to_px_uses_16px_base() {
+        assert_eq!(rem_to_px(1.0), 16.0);
+        assert_eq!(rem_to_px(0.5), 8.0);
+        assert_eq!(rem_to_px(2.25), 36.0);
+    }
+}

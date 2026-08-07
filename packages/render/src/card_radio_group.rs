@@ -53,6 +53,8 @@ pub fn card_radio_group(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
         s.flex_wrap = true;
         s.descriptor.layout.spacing.gap = grid_gap;
     }
@@ -154,10 +156,14 @@ pub fn card_radio_group(
             NodeToggled::False
         });
         option_card.style.descriptor.layout.width = LayoutSizing::Grow;
+        // Match the old GPUI option wrapper's `flex_1().min_w(0)`: a zero
+        // basis makes every radio cell share the row before intrinsic labels
+        // can claim width, and the zero minimum permits descriptions to wrap.
+        option_card.style.flex_basis = Some(0.0);
+        option_card.style.min_width = Some(0.0);
 
         if is_item_disabled {
-            option_card.style.descriptor.opacity =
-                theme.resolve_opacity("state.opacity.disabled");
+            option_card.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
         } else if let Some(handler) = &on_change {
             let handler = Arc::clone(handler);
             let value = option.value.clone();

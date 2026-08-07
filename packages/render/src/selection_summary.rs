@@ -3,18 +3,16 @@
 //! Contract: `docs/contracts/components/selection-summary.md`
 //! Ported from: `packages/jetstream/components/src/selection_summary.rs`.
 //!
-//! Chip/overflow fills are the old tier's linear-space lerps between
-//! elevated and surface → `mix_linear`.
+//! Chip/overflow fills and stacked borders follow the old GPUI tier's
+//! elevated fill and reduced-alpha border recipe.
 
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, MainAxisAlignment, Node,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node};
 use poodle_specs::{ControlDensity, SelectionSummarySpec};
 
-use crate::color::mix_linear;
+use crate::color::with_alpha;
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 
 /// Host callbacks: per-chip remove (item id) + clear-all.
@@ -42,6 +40,8 @@ pub fn selection_summary(
     let chip_font = rem_to_px(SelectionSummarySpec::chip_font_rem(effective_size));
     // Overflow badge carries its own font-size per size, distinct from chips.
     let overflow_font = rem_to_px(SelectionSummarySpec::overflow_font_rem(effective_size));
+    let overflow_line_height = SelectionSummarySpec::overflow_line_height_rem(effective_size)
+        / SelectionSummarySpec::overflow_font_rem(effective_size);
     let gap = rem_to_px(match spec.density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default => control_space_x_rem(spec.density),
@@ -53,12 +53,14 @@ pub fn selection_summary(
     let text_color = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_tertiary = theme.resolve_color("color.text.tertiary");
-    let surface = theme.resolve_color("color.background.surface");
     let elevated = theme.resolve_color("color.background.elevated");
-    // Linear-space lerps toward surface (glam Vec4::lerp in the reference).
-    let chip_bg = mix_linear(surface, elevated, 0.40);
-    let overflow_bg = mix_linear(surface, elevated, 0.32);
-    let chip_border = theme.resolve_color("color.border.subtle");
+    // The old GPUI tier keeps the elevated hue and only uses the surface
+    // alpha in its Hsla construction. Both source fills are opaque, so the
+    // effective fill is elevated. Borders are stacked at 70% alpha.
+    let chip_bg = elevated;
+    let overflow_bg = elevated;
+    let chip_border_base = theme.resolve_color("color.border.subtle");
+    let chip_border = with_alpha(chip_border_base, chip_border_base.3 * 0.7);
     let accent = theme.resolve_color("color.accent.base");
     let bottom_pad = rem_to_px(match spec.density {
         ControlDensity::Compact => 0.5,
@@ -117,7 +119,9 @@ pub fn selection_summary(
         label.style.descriptor.text_color = Some(text_color);
         label.style.text_size = Some(chip_font);
         // Anatomy is ChipLabel + RemoveIcon only (contract §2).
-        let mut x = Node::text("×");
+        // Keep the old tier's ballot-X glyph (U+2715); the multiplication
+        // sign is narrower and changes chip widths in the native gate.
+        let mut x = Node::text("\u{2715}");
         x.style.descriptor.text_color = Some(text_secondary);
         x.style.text_size = Some(chip_font);
         let mut chip = chip.child(label).child(x);
@@ -138,6 +142,7 @@ pub fn selection_summary(
             let s = &mut overflow.style;
             s.descriptor.text_color = Some(text_secondary);
             s.text_size = Some(overflow_font);
+            s.line_height = Some(overflow_line_height);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = overflow_px;
             pad.right = overflow_px;
@@ -171,7 +176,6 @@ pub fn selection_summary(
         let s = &mut clear_lane.style;
         s.flex_fill = true;
         s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.main = MainAxisAlignment::End;
     }
     el.child(clear_lane.child(clear))
 }

@@ -17,7 +17,6 @@ gpui = "0.2.2"
 
 # Poodle adapter + contracts + real components
 poodle-gpui = { path = "../adapter" }
-poodle-gpui-components = { path = "../components" }
 poodle-gpui-node-backend = { path = "../node-backend" }
 poodle-render = { path = "../../render" }
 poodle-node = { path = "../../contracts/node" }

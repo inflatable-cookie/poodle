@@ -9,8 +9,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole,
-    ShadowLayer,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, ShadowLayer,
 };
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity, ControlSize};
 
@@ -20,6 +19,16 @@ use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 pub fn accordion(
     spec: &AccordionSpec,
     theme: &dyn ThemeProvider,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    accordion_with_content(spec, theme, &[], on_change)
+}
+
+/// Render with per-item content keyed by accordion item value.
+pub fn accordion_with_content(
+    spec: &AccordionSpec,
+    theme: &dyn ThemeProvider,
+    content: &[(String, Node)],
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -44,6 +53,10 @@ pub fn accordion(
             effective_size,
             spec.density,
             theme,
+            content
+                .iter()
+                .find(|(value, _)| value == &item.value)
+                .map(|(_, node)| node),
             on_change.as_ref(),
         ));
     }
@@ -63,6 +76,7 @@ fn render_item(
     effective_size: ControlSize,
     density: ControlDensity,
     theme: &dyn ThemeProvider,
+    content: Option<&Node>,
     on_change: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let border_subtle = theme.resolve_color("color.border.subtle");
@@ -117,9 +131,9 @@ fn render_item(
 
     // Indicator swaps chevron name with the state.
     let chevron_icon = if is_expanded {
-        "chevron-down"
+        "chevron-up"
     } else {
-        "chevron-right"
+        "chevron-down"
     };
     let mut indicator = Node::icon(chevron_icon, indicator_size);
     indicator.style.flex_shrink_zero = true;
@@ -186,6 +200,9 @@ fn render_item(
             s.self_stretch = true;
         }
         panel.a11y.role = Some(NodeRole::Region);
+        if let Some(content) = content {
+            panel = panel.child(content.clone());
+        }
         el = el.child(panel);
     }
 
@@ -195,4 +212,46 @@ fn render_item(
     }
 
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::AccordionSelectionValue;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn keyed_content_and_toggle_handlers_reach_the_expanded_item() {
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let toggle_seen = Arc::clone(&seen);
+        let spec = AccordionSpec::new(vec![
+            AccordionItemSpec::new("first", "First"),
+            AccordionItemSpec::new("second", "Second"),
+        ])
+        .with_value(AccordionSelectionValue::Single("first".to_string()));
+        let content = vec![
+            ("first".to_string(), Node::text("Expanded body")),
+            ("second".to_string(), Node::text("Hidden body")),
+        ];
+        let node = accordion_with_content(
+            &spec,
+            &theme(),
+            &content,
+            Some(Arc::new(move |value| {
+                toggle_seen.lock().unwrap().push(value.to_string());
+            })),
+        );
+
+        assert!(node.has_text("Expanded body"));
+        assert!(!node.has_text("Hidden body"));
+        let second_trigger = node
+            .find(&|node| node.interaction.on_activate.is_some() && node.has_text("Second"))
+            .expect("second accordion trigger");
+        (second_trigger.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["second"]);
+    }
 }

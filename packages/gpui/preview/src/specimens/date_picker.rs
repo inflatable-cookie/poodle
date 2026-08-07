@@ -1,12 +1,41 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{DatePicker, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{DatePicker, Eyebrow};
 use poodle_specs::{DatePickerSpec, EyebrowSpec};
+use std::sync::{Arc, Mutex};
+
+fn toggle_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move || {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Toggle(key.to_string()));
+    })
+}
+
+fn select_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    open_key: &'static str,
+    value_key: &'static str,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::Change {
+            open_key: open_key.to_string(),
+            value_key: value_key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -51,21 +80,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     DatePicker::from_spec(spec, theme)
                         .with_id("default")
-                        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state.specimens.toggle("date-picker-default-open");
-                            cx.notify();
-                        }))
-                        .on_select(cx.listener(|this, date: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("date-picker-default-value".to_string(), date.to_string());
-                            this.state
-                                .specimens
-                                .toggles
-                                .insert("date-picker-default-open".to_string(), false);
-                            cx.notify();
-                        }))
+                        .on_toggle(toggle_handler(
+                            &state.node_events,
+                            "date-picker-default-open",
+                        ))
+                        .on_select(select_handler(
+                            &state.node_events,
+                            "date-picker-default-open",
+                            "date-picker-default-value",
+                        ))
                 })
                 .child(
                     div()
@@ -94,21 +117,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.aria_label = Some("Pre-filled date".to_string());
                     DatePicker::from_spec(spec, theme)
                         .with_id("with-value")
-                        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state.specimens.toggle("date-picker-prefilled-open");
-                            cx.notify();
-                        }))
-                        .on_select(cx.listener(|this, date: &str, _w, cx| {
-                            this.state.specimens.text.insert(
-                                "date-picker-prefilled-value".to_string(),
-                                date.to_string(),
-                            );
-                            this.state
-                                .specimens
-                                .toggles
-                                .insert("date-picker-prefilled-open".to_string(), false);
-                            cx.notify();
-                        }))
+                        .on_toggle(toggle_handler(
+                            &state.node_events,
+                            "date-picker-prefilled-open",
+                        ))
+                        .on_select(select_handler(
+                            &state.node_events,
+                            "date-picker-prefilled-open",
+                            "date-picker-prefilled-value",
+                        ))
                 }),
         )
         // --- Disabled ---

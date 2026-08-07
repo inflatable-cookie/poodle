@@ -1,7 +1,7 @@
+use crate::node_compat::{Eyebrow, SidebarNav};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, SidebarNav};
 use poodle_specs::{EyebrowSpec, SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 
 use crate::style_bridge::color_to_hsla;

@@ -189,6 +189,16 @@ export {
 } from "./resize.ts";
 
 export {
+  canDecidePlan,
+  decidePlan,
+  planStatusLabel,
+  planRecordSummary,
+  type AgentPlanStatus,
+  type AgentPlanSettledStatus,
+  type AgentPlanDecision,
+} from "./agent-plan.ts";
+
+export {
   submitsOnSelect,
   toggleQuestionSelection,
   resolveQuestionAnswer,
@@ -228,6 +238,7 @@ export {
   type TranscriptChangedFiles,
   type TranscriptActivity,
   type TranscriptAnsweredQuestion,
+  type TranscriptDecidedPlan,
   type TranscriptItem,
   type TranscriptToolRun,
   type TranscriptBlock,

@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Menubar};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +7,50 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Menubar};
 use poodle_specs::{EyebrowSpec, MenuEntry, MenuItemKind, MenubarEntry, MenubarSpec};
+use std::sync::Arc;
+
+fn trigger_handler(state: &AppState, current: Option<String>) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "menubar-active".to_string(),
+            value: if current.as_deref() == Some(value) {
+                String::new()
+            } else {
+                value.to_string()
+            },
+        });
+    })
+}
+
+fn select_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        let mut events = events.lock().unwrap();
+        match value {
+            "show-sidebar" => events.push(NodeSpecimenEvent::Toggle(
+                "menubar-show-sidebar".to_string(),
+            )),
+            "show-statusbar" => events.push(NodeSpecimenEvent::Toggle(
+                "menubar-show-statusbar".to_string(),
+            )),
+            "zoom-100" | "zoom-125" | "zoom-150" => events.push(NodeSpecimenEvent::SetText {
+                key: "menubar-zoom".to_string(),
+                value: value.to_string(),
+            }),
+            _ => {}
+        }
+        events.push(NodeSpecimenEvent::SetText {
+            key: "menubar-last-action".to_string(),
+            value: value.to_string(),
+        });
+        events.push(NodeSpecimenEvent::SetText {
+            key: "menubar-active".to_string(),
+            value: String::new(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -112,43 +155,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     Menubar::from_spec(spec, theme)
                         .with_id("specimen-menubar")
-                        .on_trigger(cx.listener(|this, val: &str, _w, cx| {
-                            let current = this.state.specimens.text.get("menubar-active").cloned();
-                            if current.as_deref() == Some(val) {
-                                this.state.specimens.text.remove("menubar-active");
-                            } else {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("menubar-active".to_string(), val.to_string());
-                            }
-                            cx.notify();
-                        }))
-                        .on_select(cx.listener(|this, val: &str, _w, cx| {
-                            // Toggle checkbox rows and set the radio group so the
-                            // View menu's checked indicators reflect real state.
-                            match val {
-                                "show-sidebar" => {
-                                    this.state.specimens.toggle("menubar-show-sidebar");
-                                }
-                                "show-statusbar" => {
-                                    this.state.specimens.toggle("menubar-show-statusbar");
-                                }
-                                "zoom-100" | "zoom-125" | "zoom-150" => {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("menubar-zoom".to_string(), val.to_string());
-                                }
-                                _ => {}
-                            }
-                            this.state
-                                .specimens
-                                .text
-                                .insert("menubar-last-action".to_string(), val.to_string());
-                            this.state.specimens.text.remove("menubar-active");
-                            cx.notify();
-                        })),
+                        .on_trigger(trigger_handler(state, active_menu.clone()))
+                        .on_select(select_handler(state)),
                 )
                 .when(last_action.is_some(), |d| {
                     d.child(

@@ -10,7 +10,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    MainAxisAlignment, Node, NodePosition, NodeRole,
 };
 use poodle_specs::{DialogSpec, SemanticControlSizeRole};
 
@@ -24,6 +24,24 @@ pub fn dialog(
     theme: &dyn ThemeProvider,
     children: Vec<Node>,
     actions: Option<Node>,
+    on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    dialog_with_slots(spec, theme, children, actions, None, None, on_request_close)
+}
+
+/// Render a dialog with optional custom header and footer slots.
+///
+/// The base `dialog` entry point keeps the contract's default anatomy. This
+/// variant is used by the GPUI compatibility bridge for the legacy
+/// `with_header`/`with_footer` slots while preserving the same surface and
+/// dismissal wiring.
+pub fn dialog_with_slots(
+    spec: &DialogSpec,
+    theme: &dyn ThemeProvider,
+    children: Vec<Node>,
+    actions: Option<Node>,
+    header_override: Option<Node>,
+    footer_override: Option<Node>,
     on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -91,28 +109,37 @@ pub fn dialog(
     }
 
     // ── Header: title/description left, optional close right ──
-    let has_header = spec.title.is_some() || spec.description.is_some() || spec.show_close_button;
+    let has_header = header_override.is_some()
+        || spec.title.is_some()
+        || spec.description.is_some()
+        || spec.show_close_button;
     if has_header {
-        let mut header_col = Node::container();
-        {
-            let s = &mut header_col.style;
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = header_gap;
-            s.descriptor.layout.width = LayoutSizing::Grow;
-        }
-        if let Some(ref title) = spec.title {
-            let mut t = Node::text(title);
-            t.style.descriptor.text_color = Some(title_color);
-            t.style.text_size = Some(title_font);
-            t.style.text_weight = Some(600);
-            header_col = header_col.child(t);
-        }
-        if let Some(ref description) = spec.description {
-            let mut d = Node::text(description);
-            d.style.descriptor.text_color = Some(desc_color);
-            d.style.text_size = Some(body_font);
-            header_col = header_col.child(d);
-        }
+        let mut header_col = if let Some(header) = header_override {
+            header
+        } else {
+            let mut header_col = Node::container();
+            {
+                let s = &mut header_col.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.spacing.gap = header_gap;
+                s.descriptor.layout.width = LayoutSizing::Grow;
+            }
+            if let Some(ref title) = spec.title {
+                let mut t = Node::text(title);
+                t.style.descriptor.text_color = Some(title_color);
+                t.style.text_size = Some(title_font);
+                t.style.text_weight = Some(600);
+                header_col = header_col.child(t);
+            }
+            if let Some(ref description) = spec.description {
+                let mut d = Node::text(description);
+                d.style.descriptor.text_color = Some(desc_color);
+                d.style.text_size = Some(body_font);
+                header_col = header_col.child(d);
+            }
+            header_col
+        };
+        header_col.style.descriptor.layout.width = LayoutSizing::Grow;
 
         let mut header_row = Node::container();
         {
@@ -176,7 +203,9 @@ pub fn dialog(
     }
 
     // ── Actions: end-justified row ──
-    if let Some(actions_el) = actions {
+    if let Some(footer_el) = footer_override {
+        panel = panel.child(footer_el);
+    } else if let Some(actions_el) = actions {
         let mut row = Node::container();
         {
             let s = &mut row.style;
@@ -202,6 +231,13 @@ fn backdrop(
     on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     let mut root = Node::container();
+    root.id = Some("poodle-dialog-backdrop".to_string());
+    root.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(0.0),
+    };
     {
         let s = &mut root.style;
         // Explicit Row (see switch.rs): the old backdrop relied on the default.

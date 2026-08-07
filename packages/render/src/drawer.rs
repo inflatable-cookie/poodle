@@ -157,7 +157,8 @@ pub fn drawer(
     }
 
     // Inside-clicks must end at the panel, not reach the dismissing backdrop.
-    if let (true, true, Some(handler)) = (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close)
+    if let (true, true, Some(handler)) =
+        (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close)
     {
         let handler = Arc::clone(handler);
         overlay.interaction.on_activate = Some(Arc::new(move || handler()));

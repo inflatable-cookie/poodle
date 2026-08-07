@@ -119,11 +119,30 @@ pub struct TranscriptAnsweredQuestion {
     pub answer: Option<crate::agent_question::AgentQuestionAnswer>,
 }
 
+/// The record a decided plan leaves behind.
+///
+/// The pending plan lives in the composer, because deciding it is input that
+/// requires the operator's attention. This is what it leaves in the
+/// conversation once decided — read-only by construction, so there is never a
+/// second decision surface on screen.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TranscriptDecidedPlan {
+    pub id: String,
+    /// Raw markdown of the plan that was decided.
+    pub plan: String,
+    pub status: crate::agent_plan::AgentPlanStatus,
+    /// When the decision was made, formatted by the host.
+    pub decided_at: Option<String>,
+}
+
 /// The live footer — "Working for 1h 1m". Present only while the turn runs.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TranscriptActivity {
     pub id: String,
     pub label: String,
+    /// Whether the activity pulses. Defaults to true. Terminal states ("Turn
+    /// cancelled") reuse this strip but must not signal ongoing work.
+    pub spinning: Option<bool>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -132,6 +151,7 @@ pub enum TranscriptItem {
     ToolCall(TranscriptToolCall),
     ChangedFiles(TranscriptChangedFiles),
     AnsweredQuestion(TranscriptAnsweredQuestion),
+    DecidedPlan(TranscriptDecidedPlan),
     Activity(TranscriptActivity),
 }
 
@@ -142,6 +162,7 @@ impl TranscriptItem {
             TranscriptItem::ToolCall(item) => &item.id,
             TranscriptItem::ChangedFiles(item) => &item.id,
             TranscriptItem::AnsweredQuestion(item) => &item.id,
+            TranscriptItem::DecidedPlan(item) => &item.id,
             TranscriptItem::Activity(item) => &item.id,
         }
     }
@@ -152,6 +173,7 @@ impl TranscriptItem {
             TranscriptItem::ToolCall(_) => "tool-call",
             TranscriptItem::ChangedFiles(_) => "changed-files",
             TranscriptItem::AnsweredQuestion(_) => "answered-question",
+            TranscriptItem::DecidedPlan(_) => "decided-plan",
             TranscriptItem::Activity(_) => "activity",
         }
     }
@@ -210,6 +232,7 @@ pub enum TranscriptBlock {
     ToolRun(TranscriptToolRun),
     ChangedFiles(TranscriptChangedFiles),
     AnsweredQuestion(TranscriptAnsweredQuestion),
+    DecidedPlan(TranscriptDecidedPlan),
     Activity(TranscriptActivity),
 }
 
@@ -220,6 +243,7 @@ impl TranscriptBlock {
             TranscriptBlock::ToolRun(_) => "tool-run",
             TranscriptBlock::ChangedFiles(_) => "changed-files",
             TranscriptBlock::AnsweredQuestion(_) => "answered-question",
+            TranscriptBlock::DecidedPlan(_) => "decided-plan",
             TranscriptBlock::Activity(_) => "activity",
         }
     }
@@ -230,6 +254,7 @@ impl TranscriptBlock {
             TranscriptBlock::ToolRun(item) => &item.id,
             TranscriptBlock::ChangedFiles(item) => &item.id,
             TranscriptBlock::AnsweredQuestion(item) => &item.id,
+            TranscriptBlock::DecidedPlan(item) => &item.id,
             TranscriptBlock::Activity(item) => &item.id,
         }
     }
@@ -274,6 +299,10 @@ pub fn group_transcript_items(items: &[TranscriptItem]) -> Vec<TranscriptBlock> 
             TranscriptItem::AnsweredQuestion(item) => {
                 in_run = false;
                 blocks.push(TranscriptBlock::AnsweredQuestion(item.clone()));
+            }
+            TranscriptItem::DecidedPlan(item) => {
+                in_run = false;
+                blocks.push(TranscriptBlock::DecidedPlan(item.clone()));
             }
             TranscriptItem::Activity(item) => {
                 in_run = false;

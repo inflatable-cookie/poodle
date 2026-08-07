@@ -1,12 +1,19 @@
+use crate::node_compat::{Button, DetailItem, DetailSection, Eyebrow, IntoCompatNode};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, DetailItem, DetailSection, Eyebrow};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::DetailSectionSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout, DetailItemSpec,
     EyebrowSpec,
 };
+
+fn node_column(children: Vec<Node>) -> Node {
+    let mut node = Node::container();
+    node.style.descriptor.layout.direction = LayoutDirection::Column;
+    children.into_iter().fold(node, Node::child)
+}
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
@@ -30,27 +37,28 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_description("Core metadata for this project."),
                         theme,
                     )
-                    .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Name").with_value("Poodle Design System"),
-                                theme,
-                            ))
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Owner").with_value("Clay + Aura"),
-                                theme,
-                            ))
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Created").with_value("March 2025"),
-                                theme,
-                            ))
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Status").with_value("Active"),
-                                theme,
-                            )),
-                    ),
+                    .with_body(node_column(vec![
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Name").with_value("Poodle Design System"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Owner").with_value("Clay + Aura"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Created").with_value("March 2025"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Status").with_value("Active"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                    ])),
                 ),
         )
         // --- With actions ---
@@ -75,23 +83,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             )
                             .with_id("ds-edit"),
                         )
-                        .with_body(
-                            div()
-                                .flex()
-                                .flex_col()
-                                .child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Plan").with_value("Pro"),
-                                    theme,
-                                ))
-                                .child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Billing cycle").with_value("Monthly"),
-                                    theme,
-                                ))
-                                .child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Next invoice").with_value("April 1, 2026"),
-                                    theme,
-                                )),
-                        ),
+                        .with_body(node_column(vec![
+                            DetailItem::from_spec(
+                                DetailItemSpec::new("Plan").with_value("Pro"),
+                                theme,
+                            )
+                            .into_compat_node(),
+                            DetailItem::from_spec(
+                                DetailItemSpec::new("Billing cycle").with_value("Monthly"),
+                                theme,
+                            )
+                            .into_compat_node(),
+                            DetailItem::from_spec(
+                                DetailItemSpec::new("Next invoice").with_value("April 1, 2026"),
+                                theme,
+                            )
+                            .into_compat_node(),
+                        ])),
                 ),
         )
         // --- DetailItem with description ---
@@ -109,24 +117,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         DetailSectionSpec::new().with_title("Configuration"),
                         theme,
                     )
-                    .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("API endpoint")
-                                    .with_value("https://api.example.com/v2")
-                                    .with_description("The base URL for all API requests.")
-                                    .with_truncate_value(true),
-                                theme,
-                            ))
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Rate limit")
-                                    .with_value("1,000 req/min")
-                                    .with_description("Maximum requests per minute."),
-                                theme,
-                            )),
-                    ),
+                    .with_body(node_column(vec![
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("API endpoint")
+                                .with_value("https://api.example.com/v2")
+                                .with_description("The base URL for all API requests.")
+                                .with_truncate_value(true),
+                            theme,
+                        )
+                        .into_compat_node(),
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Rate limit")
+                                .with_value("1,000 req/min")
+                                .with_description("Maximum requests per minute."),
+                            theme,
+                        )
+                        .into_compat_node(),
+                    ])),
                 ),
         )
         // --- Two-column details ---
@@ -147,15 +154,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_columns(2),
                         theme,
                     )
-                    .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .child(col_item("Route", "local-brokered", theme))
-                            .child(col_item("Posture", "aura-local-brokered", theme))
-                            .child(col_item("Authority", "local", theme))
-                            .child(col_item("Displays", "2", theme)),
-                    ),
+                    .with_body(node_column(vec![
+                        col_item("Route", "local-brokered", theme),
+                        col_item("Posture", "aura-local-brokered", theme),
+                        col_item("Authority", "local", theme),
+                        col_item("Displays", "2", theme),
+                    ])),
                 ),
         )
         // --- Description only (no title) ---
@@ -170,23 +174,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ))
                 .child(
                     DetailSection::from_spec(
-                        DetailSectionSpec::new()
-                            .with_description("A section header carried by description text alone."),
+                        DetailSectionSpec::new().with_description(
+                            "A section header carried by description text alone.",
+                        ),
                         theme,
                     )
-                    .with_body(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Region").with_value("eu-west-1"),
-                                theme,
-                            ))
-                            .child(DetailItem::from_spec(
-                                DetailItemSpec::new("Zone").with_value("eu-west-1a"),
-                                theme,
-                            )),
-                    ),
+                    .with_body(node_column(vec![
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Region").with_value("eu-west-1"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                        DetailItem::from_spec(
+                            DetailItemSpec::new("Zone").with_value("eu-west-1a"),
+                            theme,
+                        )
+                        .into_compat_node(),
+                    ])),
                 ),
         )
         // --- Density variants ---
@@ -218,17 +222,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 /// A stacked detail row sized for a two-column wrapping body. The relative
 /// flex-basis (half row, minus a hair) mirrors the DetailSectionGroup column
 /// pattern so two items land per row inside the `columns(2)` flex-wrap body.
-fn col_item(label: &str, value: &str, theme: &GpuiThemeProvider) -> Div {
-    div()
-        .flex_grow()
-        .flex_shrink_0()
-        .flex_basis(relative(0.5 - 0.01))
-        .child(DetailItem::from_spec(
+fn col_item(label: &str, value: &str, theme: &GpuiThemeProvider) -> Node {
+    let mut node = Node::container();
+    node.style.descriptor.layout.direction = LayoutDirection::Row;
+    node.style.flex_grow = Some(1.0);
+    node.style.flex_shrink_zero = true;
+    node.child(
+        DetailItem::from_spec(
             DetailItemSpec::new(label)
                 .with_value(value)
                 .with_layout(DetailItemLayout::Stacked),
             theme,
-        ))
+        )
+        .into_compat_node(),
+    )
 }
 
 fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
@@ -252,14 +259,11 @@ fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider)
                     .with_density(density),
                 theme,
             )
-            .with_body(
-                div()
-                    .flex()
-                    .flex_col()
-                    .child(col_item("Default role", "Editor", theme))
-                    .child(col_item("Approvals", "Required", theme))
-                    .child(col_item("Region", "eu-west-1", theme))
-                    .child(col_item("Retention", "30 days", theme)),
-            ),
+            .with_body(node_column(vec![
+                col_item("Default role", "Editor", theme),
+                col_item("Approvals", "Required", theme),
+                col_item("Region", "eu-west-1", theme),
+                col_item("Retention", "30 days", theme),
+            ])),
         )
 }

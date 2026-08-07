@@ -1,18 +1,18 @@
 use crate::app_state::AppState;
+use crate::node_compat::{AgentChatInput, Eyebrow, IntoCompatNode, ModelPicker};
 use crate::specimens::specimen_layout::specimen_layout;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{AgentChatInput, Eyebrow, ModelPicker};
+use poodle_node::Node;
 use poodle_specs::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlSize, EyebrowSpec,
     ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerEmphasis,
     ModelPickerSpec, ModelSelection,
 };
 
-fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> AnyElement {
+fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> Node {
     let spec = ModelPickerSpec::new()
         .with_models(vec![
             ModelOption::new("atlas-pro", "Atlas Pro")
@@ -40,7 +40,14 @@ fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> AnyElement {
         .with_size(size)
         // Subdued inside the composer: the editor should hold the eye.
         .with_emphasis(ModelPickerEmphasis::Subdued);
-    ModelPicker::from_spec(spec, theme).into_any_element()
+    ModelPicker::from_spec(spec, theme).into_compat_node()
+}
+
+fn toolbar_text(theme: &GpuiThemeProvider, value: &'static str) -> Node {
+    let mut node = Node::text(value);
+    node.style.text_size = Some(theme.resolve_space("typography.caption.size"));
+    node.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    node
 }
 
 fn demo_spec() -> AgentChatInputSpec {
@@ -61,8 +68,6 @@ fn section(title: &str, theme: &GpuiThemeProvider, content: AnyElement) -> Div {
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
-
     let examples = div()
         .flex()
         .flex_col()
@@ -73,18 +78,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             // Three controls, so the hairline dividers between them render.
             AgentChatInput::from_spec(demo_spec().with_context(64_000.0, 200_000.0), theme)
                 .toolbar_child(demo_picker(theme, ControlSize::Md))
-                .toolbar_child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Full access"),
-                )
-                .toolbar_child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Build"),
-                )
+                .toolbar_child(toolbar_text(theme, "Full access"))
+                .toolbar_child(toolbar_text(theme, "Build"))
                 .into_any_element(),
         ))
         .child(section(
@@ -132,17 +127,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .toolbar_child(demo_picker(theme, ControlSize::Md))
             .footer_child(
-                div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Current checkout"),
+                toolbar_text(theme, "Current checkout"),
             )
-            .footer_child(
-                div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("main"),
-            )
+            .footer_child(toolbar_text(theme, "main"))
             .into_any_element(),
         ))
         .child(section(

@@ -1,6 +1,6 @@
+use crate::node_compat::{EditableList, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{EditableList, Eyebrow};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec};
 
 fn group(title: &str, theme: &GpuiThemeProvider, body: EditableList) -> Div {
@@ -203,10 +203,14 @@ fn sample_list(theme: &GpuiThemeProvider) -> EditableList {
 }
 
 fn sizes_section(theme: &GpuiThemeProvider) -> Div {
-    let mut col = div().flex().flex_col().gap(px(12.0)).child(Eyebrow::from_spec(
-        EyebrowSpec::new().with_content("Sizes"),
-        theme,
-    ));
+    let mut col = div()
+        .flex()
+        .flex_col()
+        .gap(px(12.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Sizes"),
+            theme,
+        ));
     for (size, _label) in SIZES {
         col = col.child(sample_list(theme).with_size(*size));
     }
@@ -214,10 +218,14 @@ fn sizes_section(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn densities_section(theme: &GpuiThemeProvider) -> Div {
-    let mut col = div().flex().flex_col().gap(px(12.0)).child(Eyebrow::from_spec(
-        EyebrowSpec::new().with_content("Densities"),
-        theme,
-    ));
+    let mut col = div()
+        .flex()
+        .flex_col()
+        .gap(px(12.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Densities"),
+            theme,
+        ));
     for (density, _label) in DENSITIES {
         col = col.child(sample_list(theme).with_density(*density));
     }

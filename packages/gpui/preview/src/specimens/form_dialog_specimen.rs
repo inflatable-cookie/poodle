@@ -1,6 +1,6 @@
+use crate::node_compat::{Button, Eyebrow, Field, FormActions, FormDialog, TextInput};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Field, FormActions, FormDialog, TextInput};
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionsSpec, TextInputSpec,
 };

@@ -1,12 +1,54 @@
-use crate::app_state::AppState;
+//! Segmented Control specimen — migrated to the node tier (g12.019 Batch B).
+//!
+//! Every SegmentedControl below renders through the node tier:
+//! `poodle_render::segmented_control` (`Spec + Theme → Node`) interpreted by
+//! `poodle_gpui_node_backend::to_gpui`. The old hand-written
+//! `poodle_gpui_components::SegmentedControl` no longer renders this specimen;
+//! everything around the controls (layout, Eyebrow headings, captions) is
+//! unchanged.
+//!
+//! Node interaction closures are context-free (`Arc<dyn Fn(&str) + Send +
+//! Sync>`), so instead of `cx.listener` the change handler pushes a
+//! `NodeSpecimenEvent::SetText` onto a queue the next render drains into
+//! specimen state (see `app_state.rs`).
+
+use crate::node_compat::Eyebrow;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, SegmentedControl};
+
+use poodle_render::segmented_control;
 use poodle_specs::{ChoiceOption, EyebrowSpec, SegmentedControlSpec};
+
+/// Build a node-tier SegmentedControl whose change handler records the picked
+/// value under `segmented-value` (drained into specimen state next render).
+fn node_segmented_control(spec: SegmentedControlSpec, state: &AppState) -> AnyElement {
+    let events = state.node_events.clone();
+    let on_change: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |value: &str| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: "segmented-value".to_string(),
+            value: value.to_string(),
+        });
+    });
+    let node = segmented_control(&spec, &state.theme, Some(on_change));
+    poodle_gpui_node_backend::to_gpui(&node)
+}
+
+/// A node-tier SegmentedControl with no change handler (disabled / static /
+/// sizes / densities).
+fn node_segmented_control_static(
+    spec: SegmentedControlSpec,
+    theme: &GpuiThemeProvider,
+) -> AnyElement {
+    let node = segmented_control(&spec, theme, None);
+    poodle_gpui_node_backend::to_gpui(&node)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -45,6 +87,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SegmentedControlSpec::new(view_options).with_default_value("list");
     fully_disabled_spec.is_disabled = true;
 
+    // --- Equal width: carries an aria label ("Time range") ---
+    let mut equal_width_spec = SegmentedControlSpec::new(vec![
+        ChoiceOption::new("day", "Day"),
+        ChoiceOption::new("week", "Week"),
+        ChoiceOption::new("month", "Month"),
+        ChoiceOption::new("year", "Year"),
+    ])
+    .with_default_value("week")
+    .with_equal_width(true);
+    equal_width_spec.aria_label = Some("Time range".to_string());
+
+    // --- Content fit: per-option aria labels + group label "Timeline window" ---
+    let mut content_fit_spec = SegmentedControlSpec::new(vec![
+        ChoiceOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+        ChoiceOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+        ChoiceOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+    ])
+    .with_default_value("24h")
+    .with_size(poodle_specs::ControlSize::Xs)
+    .with_equal_width(false);
+    content_fit_spec.aria_label = Some("Timeline window".to_string());
+
     let examples = div()
         .flex()
         .flex_col()
@@ -59,17 +123,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Default"),
                     theme,
                 ))
-                .child(
-                    SegmentedControl::from_spec(default_spec, theme)
-                        .with_id("seg-default")
-                        .on_change(cx.listener(|this, value: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("segmented-value".to_string(), value.to_string());
-                            cx.notify();
-                        })),
-                )
+                .child(node_segmented_control(default_spec, state))
                 .child(
                     div()
                         .text_sm()
@@ -87,10 +141,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("With disabled option"),
                     theme,
                 ))
-                .child(
-                    SegmentedControl::from_spec(disabled_opt_spec, theme)
-                        .with_id("seg-disabled-opt"),
-                ),
+                .child(node_segmented_control_static(disabled_opt_spec, theme)),
         )
         // --- Fully disabled ---
         .child(
@@ -102,10 +153,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Fully disabled"),
                     theme,
                 ))
-                .child(
-                    SegmentedControl::from_spec(fully_disabled_spec, theme)
-                        .with_id("seg-fully-disabled"),
-                ),
+                .child(node_segmented_control_static(fully_disabled_spec, theme)),
         )
         // --- Equal width segments (equalWidth=true, default) ---
         .child(
@@ -118,21 +166,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    div().w(px(360.0)).child(
-                        SegmentedControl::from_spec(
-                            SegmentedControlSpec::new(vec![
-                                ChoiceOption::new("day", "Day"),
-                                ChoiceOption::new("week", "Week"),
-                                ChoiceOption::new("month", "Month"),
-                                ChoiceOption::new("year", "Year"),
-                            ])
-                            .with_default_value("week")
-                            .with_equal_width(true),
-                            theme,
-                        )
-                        .with_id("seg-equal-width")
-                        .aria_label("Time range"),
-                    ),
+                    div()
+                        .w(px(360.0))
+                        .child(node_segmented_control_static(equal_width_spec, theme)),
                 ),
         )
         // --- Content fit (equalWidth=false): segments size to label, group left-aligns ---
@@ -145,21 +181,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Content fit (equalWidth=false)"),
                     theme,
                 ))
-                .child(
-                    SegmentedControl::from_spec(
-                        SegmentedControlSpec::new(vec![
-                            ChoiceOption::new("1h", "1h").with_aria_label("Last 1 hour"),
-                            ChoiceOption::new("6h", "6h").with_aria_label("Last 6 hours"),
-                            ChoiceOption::new("24h", "24h").with_aria_label("Last 24 hours"),
-                        ])
-                        .with_default_value("24h")
-                        .with_size(poodle_specs::ControlSize::Xs)
-                        .with_equal_width(false),
-                        theme,
-                    )
-                    .with_id("seg-content-fit")
-                    .aria_label("Timeline window"),
-                ),
+                .child(node_segmented_control_static(content_fit_spec, theme)),
         )
         .into_any_element();
 
@@ -177,22 +199,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "segmented-control",
         examples,
         move |size, theme: &GpuiThemeProvider| {
-            SegmentedControl::from_spec(
-                SegmentedControlSpec::new(make_opts()).with_default_value("grid"),
+            node_segmented_control_static(
+                SegmentedControlSpec::new(make_opts())
+                    .with_default_value("grid")
+                    .with_size(size),
                 theme,
             )
-            .with_id(format!("specimen-size-{:?}", size))
-            .size(size)
-            .into_any_element()
         },
         move |density, theme: &GpuiThemeProvider| {
-            SegmentedControl::from_spec(
-                SegmentedControlSpec::new(make_opts()).with_default_value("grid"),
+            node_segmented_control_static(
+                SegmentedControlSpec::new(make_opts())
+                    .with_default_value("grid")
+                    .with_density(density),
                 theme,
             )
-            .with_id(format!("specimen-density-{:?}", density))
-            .density(density)
-            .into_any_element()
         },
     )
 }

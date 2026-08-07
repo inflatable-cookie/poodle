@@ -69,7 +69,6 @@ pub fn code(spec: &CodeSpec, theme: &dyn ThemeProvider) -> Node {
     let pre_pad_x = rem_to_px(panel_space_x_rem(spec.density));
     let pre_pad_y = rem_to_px(panel_space_y_rem(spec.density));
     let source_font = rem_to_px(size_font_rem(effective_size));
-    let source_line_height = rem_to_px(size_font_rem(effective_size) * 1.4);
 
     let border = theme.resolve_color(spec.border_token());
     let radius = theme.resolve_radius(spec.surface_radius_token());
@@ -159,7 +158,7 @@ pub fn code(spec: &CodeSpec, theme: &dyn ThemeProvider) -> Node {
         s.descriptor.layout.spacing.padding.top = pre_pad_y;
         s.descriptor.layout.spacing.padding.bottom = pre_pad_y;
         s.text_size = Some(source_font);
-        s.line_height = Some(source_line_height);
+        s.line_height = Some(1.4);
         s.descriptor.layout.overflow_x = LayoutOverflow::Scroll;
         s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
         if let Some(mh) = spec.max_height {
@@ -216,4 +215,22 @@ pub fn code(spec: &CodeSpec, theme: &dyn ThemeProvider) -> Node {
         root.a11y.label = Some(label.to_string());
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn block_source_uses_contract_relative_line_height() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let node = code(&CodeSpec::new().with_content("let value = 1;"), &theme);
+        let scroll = node
+            .children
+            .last()
+            .expect("block code always renders a source surface");
+
+        assert_eq!(scroll.style.line_height, Some(1.4));
+    }
 }

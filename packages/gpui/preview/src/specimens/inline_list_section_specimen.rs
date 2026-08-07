@@ -1,24 +1,26 @@
+use crate::node_compat::{Eyebrow, IconButton, InlineListSection, IntoCompatNode, Pill, Text};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, IconButton, InlineListSection, Pill, Text};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment};
 use poodle_specs::{
-    ButtonVariant, EyebrowSpec, IconButtonSpec, InlineListSectionSpec, PillSpec, PillTone, TextSpec,
-    TextWeight,
+    ButtonVariant, EyebrowSpec, IconButtonSpec, InlineListSectionSpec, PillSpec, PillTone,
+    TextSpec, TextWeight,
 };
 
-fn row(name: &str, status: &str, theme: &GpuiThemeProvider) -> Div {
-    div()
-        .flex()
-        .items_center()
-        .justify_between()
-        .gap(px(12.0))
-        .w_full()
-        .min_w_0()
-        .child(Text::from_spec(
+fn row(name: &str, status: &str, theme: &GpuiThemeProvider) -> poodle_node::Node {
+    let mut row = poodle_node::Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+    row.style.descriptor.layout.spacing.gap = 12.0;
+    row.style.descriptor.layout.width = LayoutSizing::Grow;
+    row.style.min_width = Some(0.0);
+    row.children = vec![
+        Text::node_from_spec(
             TextSpec::new(name).with_weight(TextWeight::Medium),
             theme,
-        ))
-        .child(Pill::from_spec(
+        ),
+        Pill::from_spec(
             PillSpec::new()
                 .with_label(status)
                 .with_tone(if status == "Ready" {
@@ -27,7 +29,10 @@ fn row(name: &str, status: &str, theme: &GpuiThemeProvider) -> Div {
                     PillTone::Neutral
                 }),
             theme,
-        ))
+        )
+        .into_compat_node(),
+    ];
+    row
 }
 
 fn group(label: &str, theme: &GpuiThemeProvider, body: impl IntoElement) -> Div {

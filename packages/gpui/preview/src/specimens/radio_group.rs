@@ -1,12 +1,23 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, RadioGroup};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, RadioGroup};
 use poodle_specs::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
+use std::sync::Arc;
+
+fn radio_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -59,13 +70,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("radio-plan")
-                    .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("radio-plan".to_string(), value.to_string());
-                        cx.notify();
-                    })),
+                    .on_change(radio_change(state, "radio-plan")),
                 )
                 .child(
                     div()
@@ -92,13 +97,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("radio-size")
-                    .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("radio-size".to_string(), value.to_string());
-                        cx.notify();
-                    })),
+                    .on_change(radio_change(state, "radio-size")),
                 )
                 .child(
                     div()
@@ -139,8 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         RadioGroupSpec::new(vec![
                             ChoiceOption::new("free", "Free"),
                             ChoiceOption::new("pro", "Pro"),
-                            ChoiceOption::new("enterprise", "Enterprise")
-                                .with_disabled(true),
+                            ChoiceOption::new("enterprise", "Enterprise").with_disabled(true),
                         ])
                         .with_value("pro"),
                         theme,
@@ -170,13 +168,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("radio-custom-color")
-                    .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("radio-plan".to_string(), value.to_string());
-                        cx.notify();
-                    })),
+                    .on_change(radio_change(state, "radio-plan")),
                 ),
         )
         .into_any_element();

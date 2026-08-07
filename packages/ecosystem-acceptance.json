@@ -107,7 +107,6 @@
       "coveredPackages": [
         "poodle-specs",
         "poodle-gpui",
-        "poodle-gpui-components",
         "poodle-gpui-preview"
       ],
       "evidenceArtifacts": [

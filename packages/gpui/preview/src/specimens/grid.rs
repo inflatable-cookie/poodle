@@ -1,8 +1,8 @@
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{Eyebrow, Grid, Surface};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Grid, Surface};
+use poodle_node::Node;
 use poodle_specs::{EyebrowSpec, GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -13,12 +13,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
             .with_padding(PaddingScale::Md);
-        Surface::from_spec(spec, theme).with_content(
-            div()
-                .text_sm()
-                .text_color(color_to_hsla(text_secondary))
-                .child(label.to_string()),
-        )
+        let mut content = Node::text(label);
+        content.style.text_size = Some(14.0);
+        content.style.descriptor.text_color = Some(text_secondary);
+        Surface::from_spec(spec, theme).with_content(content)
     };
 
     let surface_sm = |label: &str| {
@@ -26,12 +24,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
             .with_padding(PaddingScale::Sm);
-        Surface::from_spec(spec, theme).with_content(
-            div()
-                .text_sm()
-                .text_color(color_to_hsla(text_secondary))
-                .child(label.to_string()),
-        )
+        let mut content = Node::text(label);
+        content.style.text_size = Some(14.0);
+        content.style.descriptor.text_color = Some(text_secondary);
+        Surface::from_spec(spec, theme).with_content(content)
     };
 
     div()

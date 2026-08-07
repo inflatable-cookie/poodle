@@ -1,7 +1,10 @@
+use crate::node_compat::{Eyebrow, MediaPicker};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, MediaPicker, MediaPickerItem};
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPickerSpec, MediaPickerTab, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPickerItem, MediaPickerSpec,
+    MediaPickerTab, SemanticControlSizeRole,
+};
 
 fn sample_items() -> Vec<MediaPickerItem> {
     vec![
@@ -65,14 +68,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EyebrowSpec::new().with_content("Empty state"),
                     theme,
                 ))
-                .child(
-                    MediaPicker::from_spec(
-                        MediaPickerSpec::new("Select an asset")
-                            .with_open(true)
-                            .with_empty_message("No media items yet."),
-                        theme,
-                    ),
-                ),
+                .child(MediaPicker::from_spec(
+                    MediaPickerSpec::new("Select an asset")
+                        .with_open(true)
+                        .with_empty_message("No media items yet."),
+                    theme,
+                )),
         )
         .child(
             div()

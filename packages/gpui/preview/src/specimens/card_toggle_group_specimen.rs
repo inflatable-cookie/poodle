@@ -1,7 +1,21 @@
+//! Card Toggle Group specimen — g12.019 node-tier migration.
+//!
+//! Every CardToggleGroup below renders through the node tier:
+//! `poodle_render::card_toggle_group` (`Spec + Theme → Node`) interpreted by
+//! `poodle_gpui_node_backend::to_gpui`. The old hand-written
+//! `poodle_gpui_components::CardToggleGroup` no longer renders this specimen;
+//! everything around the groups (layout, Eyebrow headings) is unchanged.
+//!
+//! This specimen is fully static (no handlers wired), so every instance passes
+//! `None` for the `on_change` callback.
+
+use crate::node_compat::Eyebrow;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{CardToggleGroup, Eyebrow};
-use poodle_specs::{CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec};
+
+use poodle_specs::{
+    CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec,
+};
 
 /// Static view options reused across the specimen groups.
 fn view_options() -> Vec<CardToggleOption> {
@@ -11,6 +25,12 @@ fn view_options() -> Vec<CardToggleOption> {
         CardToggleOption::new("board", "Board view")
             .with_description("Group records into columns."),
     ]
+}
+
+/// A node-tier CardToggleGroup with no handlers (this specimen is fully static).
+fn node_card_toggle_group(spec: CardToggleGroupSpec, theme: &GpuiThemeProvider) -> AnyElement {
+    let node = poodle_render::card_toggle_group(&spec, theme, None);
+    poodle_gpui_node_backend::to_gpui(&node)
 }
 
 fn section(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> Div {
@@ -35,7 +55,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section(
             theme,
             "View mode (single selection)",
-            CardToggleGroup::from_spec(
+            node_card_toggle_group(
                 CardToggleGroupSpec::new(view_options()).with_values(vec!["grid".into()]),
                 theme,
             ),
@@ -44,7 +64,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section(
             theme,
             "Multiple selection",
-            CardToggleGroup::from_spec(
+            node_card_toggle_group(
                 CardToggleGroupSpec::new(view_options())
                     .with_values(vec!["grid".into(), "board".into()]),
                 theme,
@@ -54,7 +74,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section(
             theme,
             "Disabled option",
-            CardToggleGroup::from_spec(
+            node_card_toggle_group(
                 CardToggleGroupSpec::new(vec![
                     CardToggleOption::new("draft", "Draft").with_description("In progress."),
                     CardToggleOption::new("live", "Live").with_description("Published."),
@@ -70,7 +90,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section(
             theme,
             "Disabled group",
-            CardToggleGroup::from_spec(
+            node_card_toggle_group(
                 CardToggleGroupSpec::new(view_options())
                     .with_values(vec!["list".into()])
                     .with_disabled(true),
@@ -87,7 +107,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ControlSize::Lg,
                 ControlSize::Xl,
             ] {
-                row = row.child(CardToggleGroup::from_spec(
+                row = row.child(node_card_toggle_group(
                     CardToggleGroupSpec::new(view_options())
                         .with_values(vec!["grid".into()])
                         .with_size(size),
@@ -107,7 +127,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ControlDensity::Default,
                     ControlDensity::Comfortable,
                 ] {
-                    row = row.child(CardToggleGroup::from_spec(
+                    row = row.child(node_card_toggle_group(
                         CardToggleGroupSpec::new(view_options())
                             .with_values(vec!["grid".into()])
                             .with_density(density),

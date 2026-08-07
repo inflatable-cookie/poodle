@@ -15,7 +15,7 @@ use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, CrossAxisAlignment, CursorHint,
     LayoutDirection, LayoutSizing, Node, NodeAnimation, NodePosition, NodeRole, TextAlign,
 };
-use poodle_specs::{ControlDensity, ControlSize, ToastStackSpec};
+use poodle_specs::{ControlDensity, ControlSize, ToastPosition, ToastStackSpec};
 
 use crate::color::{mix_srgb, WHITE};
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -133,7 +133,36 @@ pub fn toast_stack(
         let s = &mut el.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = stack_gap;
+        s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(22.5));
     }
+    // Corner-mounted overlay: keep the stack out of flow and anchor it to
+    // the nearest relative host, matching the old GPUI wrapper.
+    el.position = match spec.position {
+        ToastPosition::TopRight => NodePosition::Absolute {
+            top: Some(pad),
+            right: Some(pad),
+            left: None,
+            bottom: None,
+        },
+        ToastPosition::TopLeft => NodePosition::Absolute {
+            top: Some(pad),
+            left: Some(pad),
+            right: None,
+            bottom: None,
+        },
+        ToastPosition::BottomRight => NodePosition::Absolute {
+            bottom: Some(pad),
+            right: Some(pad),
+            top: None,
+            left: None,
+        },
+        ToastPosition::BottomLeft => NodePosition::Absolute {
+            bottom: Some(pad),
+            left: Some(pad),
+            top: None,
+            right: None,
+        },
+    };
 
     for toast in &spec.toasts {
         let tone_color = theme.resolve_color(spec.tone_color(&toast.tone));

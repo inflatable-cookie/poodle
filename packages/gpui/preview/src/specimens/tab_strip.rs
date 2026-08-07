@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, TabStrip};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +7,18 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, TabStrip};
 use poodle_specs::{EyebrowSpec, Orientation, TabStripItem, TabStripSpec};
+use std::sync::Arc;
+
+fn node_value_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value: &str| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 /// TabStrip — the tablist-only primitive (contract: tab-strip.md).
 ///
@@ -56,36 +67,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_reorderable(true)
         .with_aria_label("File tabs");
 
-    // `on_reorder` carries two payload args (value + direction), which the
-    // single-event `cx.listener` shape cannot express, so capture the entity
-    // handle and update state directly.
-    let reorder_entity = cx.entity();
     let horizontal_component = TabStrip::from_spec(horizontal_spec, theme)
         .with_id("tab-strip-horizontal")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tab-strip-h-value".to_string(), val.to_string());
-            cx.notify();
-        }))
-        .on_close(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tab-strip-closed".to_string(), val.to_string());
-            cx.notify();
-        }))
-        .on_reorder(move |val, dir, _w, cx| {
-            let label = format!("{val} ({})", if dir < 0 { "left" } else { "right" });
-            reorder_entity.update(cx, |this, cx| {
-                this.state
-                    .specimens
-                    .text
-                    .insert("tab-strip-reorder".to_string(), label.clone());
-                cx.notify();
-            });
-        });
+        .on_change(node_value_handler(state, "tab-strip-h-value"))
+        .on_close(node_value_handler(state, "tab-strip-closed"));
 
     // ── 2. DISABLED ITEM — skipped by arrow nav ─────────────────────
     let disabled_items = vec![
@@ -106,13 +91,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_aria_label("Status tabs");
     let disabled_component = TabStrip::from_spec(disabled_spec, theme)
         .with_id("tab-strip-disabled")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tab-strip-disabled-value".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tab-strip-disabled-value"));
 
     // ── 3. VERTICAL — labels + close buttons stay visible ───────────
     let vertical_items = vec![
@@ -134,20 +113,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_aria_label("Activity bar");
     let vertical_component = TabStrip::from_spec(vertical_spec, theme)
         .with_id("tab-strip-vertical")
-        .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tab-strip-vertical-value".to_string(), val.to_string());
-            cx.notify();
-        }))
-        .on_close(cx.listener(|this, val: &str, _w, cx| {
-            this.state
-                .specimens
-                .text
-                .insert("tab-strip-closed".to_string(), val.to_string());
-            cx.notify();
-        }));
+        .on_change(node_value_handler(state, "tab-strip-vertical-value"))
+        .on_close(node_value_handler(state, "tab-strip-closed"));
 
     // ── ASSEMBLE EXAMPLES ───────────────────────────────────────────
     let examples = div()

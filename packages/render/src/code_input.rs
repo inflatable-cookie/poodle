@@ -10,11 +10,12 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, ShadowLayer,
     TextAlign,
 };
 use poodle_specs::{CodeInputSpec, ControlDensity, ValidationState};
 
+use crate::color::with_alpha;
 use crate::presentation::{
     code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px, resolve_semantic_size,
 };
@@ -30,20 +31,22 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let border_default = theme.resolve_color("color.border.default");
     let accent_border = theme.resolve_color("color.accent.border");
+    let focus_ring = theme.resolve_color("color.accent.focusRing");
     let danger = theme.resolve_color("color.status.danger");
     let radius = theme.resolve_radius("radius.control");
 
     // Contract §7: only the invalid case (or an error) changes slot colors.
     let slot_border = if is_invalid { danger } else { border_default };
     let active_border = if is_invalid { danger } else { accent_border };
+    let active_ring = if is_invalid { danger } else { focus_ring };
 
     // ── Sizing (contract §7) ──
     // Slots are square at every size; font follows the slot font ladder.
     let slot_size = rem_to_px(code_input_slot_size_rem(effective_size));
     let font_size = rem_to_px(code_input_slot_font_rem(effective_size));
     let border_width = rem_to_px(0.0625); // 1px = 0.0625rem, contract border width
-    // Inter-slot gap: compact space.inline.xs, default space.inline.sm,
-    // comfortable space.inline.md.
+                                          // Inter-slot gap: compact space.inline.xs, default space.inline.sm,
+                                          // comfortable space.inline.md.
     let gap = match spec.density {
         ControlDensity::Compact => theme.resolve_space("space.inline.xs"),
         ControlDensity::Default => theme.resolve_space("space.inline.sm"),
@@ -57,16 +60,21 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
     let chars = spec.sanitized_chars();
 
     // ── Root container ──
-    let mut root = Node::container();
-    root.style.descriptor.layout.direction = LayoutDirection::Row;
-    root.style.descriptor.layout.spacing.gap = gap;
-    root.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.spacing.gap = gap;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.interaction.focusable = true;
+
+    // The old tier keeps the component label, slot row, and supporting copy
+    // in one column. Keeping that wrapper is part of the visual contract.
+    let active_idx = chars.len().min(spec.length.saturating_sub(1));
 
     // ── Visual slots ──
     for i in 0..spec.length {
         let ch = chars.get(i).copied();
-        // Active slot = the next empty slot to fill (caret position).
-        let is_active = i == chars.len() && !spec.is_disabled;
+        // Active slot = the next empty slot, or the final slot when complete.
+        let is_active = i == active_idx && !spec.is_disabled;
         let display_text = match ch {
             Some(_) if spec.mask => "\u{2022}".to_string(),
             Some(c) => c.to_string(),
@@ -91,10 +99,24 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
             c.bottom_left = radius;
             s.descriptor.background = Some(surface);
             s.descriptor.border.width = border_width;
-            s.descriptor.border.color = if is_active { active_border } else { slot_border };
+            s.descriptor.border.color = if is_active {
+                active_border
+            } else {
+                slot_border
+            };
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            if is_active {
+                s.shadow_layers = vec![ShadowLayer {
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                    blur: 0.0,
+                    spread: rem_to_px(0.125),
+                    color: with_alpha(active_ring, active_ring.3 * 0.28),
+                    inset: false,
+                }];
+            }
             // 3+3 split for 6-digit codes.
             if spec.length == 6 && i == 2 {
                 s.descriptor.layout.spacing.margin.right = split_margin;
@@ -108,50 +130,55 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
             s.text_size = Some(font_size);
             s.descriptor.text_color = Some(slot_text_color);
             s.text_weight = Some(600);
-            s.font_family = Some(FontFamily::Mono);
             s.text_align = Some(TextAlign::Center);
         }
 
-        root = root.child(slot.child(value));
+        row = row.child(slot.child(value));
     }
 
-    // ── Error message (below slots) ──
+    let mut outer = Node::container();
+    {
+        let s = &mut outer.style;
+        s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+    }
+    if !spec.label.is_empty() {
+        let mut label = Node::text(spec.label.as_str());
+        label.style.text_size = Some(rem_to_px(crate::presentation::size_font_rem(
+            effective_size,
+        )));
+        label.style.text_weight = Some(500);
+        label.style.descriptor.text_color = Some(text_primary);
+        outer = outer.child(label);
+    }
+    outer = outer.child(row);
+
+    if let Some(ref hint) = spec.hint {
+        if spec.error.is_none() {
+            let mut hint_node = Node::text(hint.as_str());
+            hint_node.style.text_size = Some(theme.resolve_space("typography.label.size"));
+            hint_node.style.descriptor.text_color = Some(text_secondary);
+            outer = outer.child(hint_node);
+        }
+    }
     if let Some(ref error) = spec.error {
         let mut error_label = Node::text(error.as_str());
         error_label.style.text_size = Some(theme.resolve_space("typography.label.size"));
         error_label.style.descriptor.text_color = Some(danger);
-
-        let mut outer = Node::container();
-        {
-            let s = &mut outer.style;
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        }
-        let mut outer = outer.child(root).child(error_label);
-
-        if spec.is_disabled {
-            outer.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
-            outer.interaction.disabled = true;
-        }
-        if let Some(label) = spec.aria_label.as_deref() {
-            if !label.is_empty() {
-                outer.a11y.label = Some(label.to_string());
-            }
-        }
-        return outer;
+        outer = outer.child(error_label);
     }
 
     // ── Disabled state ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
-        root.interaction.disabled = true;
+        outer.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        outer.interaction.disabled = true;
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
+            outer.a11y.label = Some(label.to_string());
         }
     }
-    root
+    outer
 }

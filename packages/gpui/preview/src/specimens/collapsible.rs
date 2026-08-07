@@ -1,12 +1,36 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Collapsible, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Collapsible, Eyebrow};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{CollapsibleSpec, EyebrowSpec};
+use std::sync::Arc;
+
+fn toggle(state: &AppState, key: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |_| {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Toggle(key.to_string()));
+    })
+}
+
+fn content(lines: &[&str], color: poodle_node::ColorValue) -> Node {
+    let mut root = Node::container();
+    root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.style.descriptor.layout.spacing.gap = 4.0;
+    for line in lines {
+        let mut text = Node::text(*line);
+        text.style.text_size = Some(12.0);
+        text.style.descriptor.text_color = Some(color);
+        root = root.child(text);
+    }
+    root
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -26,34 +50,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let closed_collapsible = Collapsible::from_spec(closed_spec, theme)
         .with_id("specimen-closed")
-        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-            this.state.specimens.toggle("collapsible-closed");
-            cx.notify();
-        }))
-        .with_content(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(4.0))
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Build target: production".to_string()),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Output directory: dist/".to_string()),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Source maps: enabled".to_string()),
-                ),
-        );
+        .on_toggle(toggle(state, "collapsible-closed"))
+        .with_content(content(
+            &[
+                "Build target: production",
+                "Output directory: dist/",
+                "Source maps: enabled",
+            ],
+            text_secondary,
+        ));
 
     // ── Group: Default open ──────────────────────────────────────────
     let open_toggled = state.specimens.is_on("collapsible-open-toggled");
@@ -63,34 +68,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let open_collapsible = Collapsible::from_spec(open_spec, theme)
         .with_id("specimen-open")
-        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-            this.state.specimens.toggle("collapsible-open-toggled");
-            cx.notify();
-        }))
-        .with_content(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(4.0))
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Cache TTL: 3600s".to_string()),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Retry count: 3".to_string()),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Timeout: 30s".to_string()),
-                ),
-        );
+        .on_toggle(toggle(state, "collapsible-open-toggled"))
+        .with_content(content(
+            &["Cache TTL: 3600s", "Retry count: 3", "Timeout: 30s"],
+            text_secondary,
+        ));
 
     // ── Group: Disabled ──────────────────────────────────────────────
     let disabled_spec = CollapsibleSpec::new()
@@ -100,12 +82,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let disabled_collapsible = Collapsible::from_spec(disabled_spec, theme)
         .with_id("specimen-disabled")
-        .with_content(
-            div()
-                .text_xs()
-                .text_color(color_to_hsla(text_secondary))
-                .child("This content is hidden behind a disabled collapsible.".to_string()),
-        );
+        .with_content(content(
+            &["This content is hidden behind a disabled collapsible."],
+            text_secondary,
+        ));
 
     // ── Group: Highlighted ───────────────────────────────────────────
     // highlighted=true applies the accent border + halo from the spec's
@@ -118,19 +98,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let highlighted_collapsible = Collapsible::from_spec(highlighted_spec, theme)
         .with_id("specimen-highlighted")
-        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-            this.state.specimens.toggle("collapsible-highlighted-toggled");
-            cx.notify();
-        }))
-        .with_content(
-            div()
-                .text_xs()
-                .text_color(color_to_hsla(text_secondary))
-                .child(
-                    "Highlighted collapsibles draw attention to a matched or focused section."
-                        .to_string(),
-                ),
-        );
+        .on_toggle(toggle(state, "collapsible-highlighted-toggled"))
+        .with_content(content(
+            &["Highlighted collapsibles draw attention to a matched or focused section."],
+            text_secondary,
+        ));
 
     let examples = div()
         .flex()

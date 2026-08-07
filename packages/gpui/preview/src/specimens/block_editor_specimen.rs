@@ -1,14 +1,27 @@
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{BlockEditor, Eyebrow};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{BlockEditor, Eyebrow};
+use poodle_node::{FontFamily, LayoutDirection, Node};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock};
+use poodle_tokens::typed::ColorValue;
+
+/// A caller-owned block body: a text run at a declared size, weight and tone.
+///
+/// These are the consumer-supplied bodies BlockEditor's slot path takes — the
+/// spec-driven examples further down carry no children at all.
+fn text_block(text: &str, size: f32, color: ColorValue) -> Node {
+    let mut node = Node::text(text.to_string());
+    node.style.text_size = Some(size);
+    node.style.descriptor.text_color = Some(color);
+    node
+}
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
+    let accent = theme.resolve_color("color.accent.base");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Default blocks ---
@@ -17,33 +30,64 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)
-                        .with_child(
-                            div().text_size(px(18.0)).font_weight(FontWeight::BOLD)
-                                .text_color(color_to_hsla(text_primary))
-                                .child("Getting Started")
-                        )
-                        .with_child(
-                            div().text_size(px(14.0))
-                                .text_color(color_to_hsla(text_primary))
-                                .child("This is a paragraph block. Each block can be reordered, changed, or removed using the toolbar that appears on hover.")
-                        )
-                        .with_child(
-                            div().text_size(px(14.0)).italic()
-                                .text_color(color_to_hsla(text_secondary))
-                                .pl(px(12.0))
-                                .border_l_2()
-                                .border_color(color_to_hsla(text_secondary).opacity(0.3))
-                                .child("A blockquote block for highlighted content.")
-                        )
-                        .with_child(
-                            div().text_size(px(13.0))
-                                .font_family("Monaco, Menlo, monospace")
-                                .text_color(color_to_hsla(text_primary))
-                                .bg(color_to_hsla(text_secondary).opacity(0.08))
-                                .rounded(px(4.0))
-                                .px(px(10.0)).py(px(8.0))
-                                .child("fn main() {\n    println!(\"Hello, world!\");\n}")
-                        )
+                        .with_child({
+                            let mut heading = text_block("Getting Started", 18.0, text_primary);
+                            heading.style.text_weight = Some(700);
+                            heading
+                        })
+                        .with_child(text_block(
+                            "This is a paragraph block. Each block can be reordered, changed, or removed using the toolbar that appears on hover.",
+                            14.0,
+                            text_primary,
+                        ))
+                        .with_child({
+                            // Blockquote: italic, tinted left rule, inset text.
+                            let mut quote = Node::container();
+                            {
+                                let s = &mut quote.style;
+                                s.descriptor.layout.direction = LayoutDirection::Column;
+                                s.descriptor.layout.spacing.padding.left = 12.0;
+                                s.border_left_width = Some(2.0);
+                                s.border_color_left =
+                                    Some(ColorValue(text_secondary.0, text_secondary.1, text_secondary.2, text_secondary.3 * 0.3));
+                                s.text_italic = true;
+                            }
+                            quote.child(text_block(
+                                "A blockquote block for highlighted content.",
+                                14.0,
+                                text_secondary,
+                            ))
+                        })
+                        .with_child({
+                            // Code block: mono face on a faint panel.
+                            let mut code = Node::container();
+                            {
+                                let s = &mut code.style;
+                                s.descriptor.layout.direction = LayoutDirection::Column;
+                                s.descriptor.background = Some(ColorValue(
+                                    text_secondary.0,
+                                    text_secondary.1,
+                                    text_secondary.2,
+                                    text_secondary.3 * 0.08,
+                                ));
+                                let c = &mut s.descriptor.corner_radii;
+                                c.top_left = 4.0;
+                                c.top_right = 4.0;
+                                c.bottom_right = 4.0;
+                                c.bottom_left = 4.0;
+                                let pad = &mut s.descriptor.layout.spacing.padding;
+                                pad.left = 10.0;
+                                pad.right = 10.0;
+                                pad.top = 8.0;
+                                pad.bottom = 8.0;
+                                s.font_family = Some(FontFamily::Mono);
+                            }
+                            code.child(text_block(
+                                "fn main() {\n    println!(\"Hello, world!\");\n}",
+                                13.0,
+                                text_primary,
+                            ))
+                        })
                 )
         )
         // --- Custom blocks ---
@@ -52,30 +96,41 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)
-                        .with_child(
-                            div().text_size(px(14.0))
-                                .text_color(color_to_hsla(text_primary))
-                                .child("A text block with regular content.")
-                        )
-                        .with_child(
-                            div()
-                                .bg(color_to_hsla(theme.resolve_color("color.accent.base")).opacity(0.08))
-                                .border_l_2()
-                                .border_color(color_to_hsla(theme.resolve_color("color.accent.base")))
-                                .rounded(px(4.0))
-                                .px(px(12.0)).py(px(8.0))
-                                .child(
-                                    div().text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD)
-                                        .text_color(color_to_hsla(theme.resolve_color("color.accent.base")))
-                                        .mb(px(4.0))
-                                        .child("Callout")
-                                )
-                                .child(
-                                    div().text_size(px(14.0))
-                                        .text_color(color_to_hsla(text_primary))
-                                        .child("This is a callout block with custom styling.")
-                                )
-                        )
+                        .with_child(text_block(
+                            "A text block with regular content.",
+                            14.0,
+                            text_primary,
+                        ))
+                        .with_child({
+                            // Callout: accent left rule over an accent wash.
+                            let mut callout = Node::container();
+                            {
+                                let s = &mut callout.style;
+                                s.descriptor.layout.direction = LayoutDirection::Column;
+                                s.descriptor.background =
+                                    Some(ColorValue(accent.0, accent.1, accent.2, accent.3 * 0.08));
+                                s.border_left_width = Some(2.0);
+                                s.border_color_left = Some(accent);
+                                let c = &mut s.descriptor.corner_radii;
+                                c.top_left = 4.0;
+                                c.top_right = 4.0;
+                                c.bottom_right = 4.0;
+                                c.bottom_left = 4.0;
+                                let pad = &mut s.descriptor.layout.spacing.padding;
+                                pad.left = 12.0;
+                                pad.right = 12.0;
+                                pad.top = 8.0;
+                                pad.bottom = 8.0;
+                            }
+                            let mut label = text_block("Callout", 12.0, accent);
+                            label.style.text_weight = Some(600);
+                            label.style.descriptor.layout.spacing.margin.bottom = 4.0;
+                            callout.child(label).child(text_block(
+                                "This is a callout block with custom styling.",
+                                14.0,
+                                text_primary,
+                            ))
+                        })
                 )
         )
         // --- Consumer-driven block types ---

@@ -1,15 +1,87 @@
-use crate::app_state::AppState;
+//! Select specimen — the g12.019 Batch A pilot.
+//!
+//! Every Select below renders through the node tier: `poodle_render::select`
+//! (`Spec + Theme → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
+//! The old hand-written `poodle_gpui_components::Select` no longer renders
+//! this specimen; everything around the selects (layout, Eyebrow headings,
+//! captions) is unchanged.
+//!
+//! Node interaction closures are context-free (`Arc<dyn Fn() + Send + Sync>`),
+//! so instead of `cx.listener` the handlers push `NodeSpecimenEvent`s onto a
+//! queue the next render drains into specimen state (see `app_state.rs`).
+
+use crate::node_compat::Eyebrow;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Eyebrow, Select};
+
+use poodle_render::{select, SelectHandlers};
 use poodle_specs::{
     ChoiceOption, ControlSize, EyebrowSpec, SelectMode, SelectSpec, ValidationState,
 };
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+/// Build a node-tier Select with the specimen's toggle/change/clear wiring.
+/// Mirrors the old specimen's behavior: toggle flips `{id}-open`, change
+/// records `{id}-value` and closes, clear reports the default value ("").
+fn node_select(id: &'static str, spec: SelectSpec, state: &AppState) -> AnyElement {
+    let events = state.node_events.clone();
+
+    let toggle_key = format!("{}-open", id);
+    let toggle = {
+        let events = events.clone();
+        Arc::new(move || {
+            events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::Toggle(toggle_key.clone()));
+        })
+    };
+
+    let change_open_key = format!("{}-open", id);
+    let change_value_key = format!("{}-value", id);
+    let change = {
+        let events = events.clone();
+        Arc::new(move |value: &str| {
+            events.lock().unwrap().push(NodeSpecimenEvent::Change {
+                open_key: change_open_key.clone(),
+                value_key: change_value_key.clone(),
+                value: value.to_string(),
+            });
+        })
+    };
+
+    let clear_open_key = format!("{}-open", id);
+    let clear_value_key = format!("{}-value", id);
+    let clear_value = spec.default_value.clone().unwrap_or_default();
+    let clear = Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::Change {
+            open_key: clear_open_key.clone(),
+            value_key: clear_value_key.clone(),
+            value: clear_value.clone(),
+        });
+    });
+
+    let handlers = SelectHandlers {
+        toggle: Some(toggle),
+        change: Some(change),
+        clear: Some(clear),
+    };
+    let node = select(&spec, &state.theme, &handlers);
+    poodle_gpui_node_backend::to_gpui(&node)
+}
+
+/// A node-tier Select with no handlers (disabled / validation / sizes).
+fn node_select_static(spec: SelectSpec, state: &AppState) -> AnyElement {
+    let node = select(&spec, &state.theme, &SelectHandlers::default());
+    poodle_gpui_node_backend::to_gpui(&node)
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -56,25 +128,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let get_open = |key: &str| state.specimens.is_on(key);
     let get_value = |key: &str| state.specimens.text.get(key).cloned();
 
-    // Helper for building a Select with common toggle/change handlers
-    let build_select =
-        |id: &'static str, spec: SelectSpec, cx: &mut Context<PreviewRoot>| -> Select {
-            let open_key = format!("{}-open", id);
-            Select::from_spec(spec, theme)
-                .with_id(id)
-                .on_toggle(cx.listener(move |this, _open: &bool, _w, cx| {
-                    this.state.specimens.toggle(&open_key);
-                    cx.notify();
-                }))
-                .on_change(cx.listener(move |this, val: &str, _w, cx| {
-                    let open_key = format!("{}-open", id);
-                    let value_key = format!("{}-value", id);
-                    this.state.specimens.text.insert(value_key, val.to_string());
-                    this.state.specimens.toggles.insert(open_key, false);
-                    cx.notify();
-                }))
-        };
-
     div()
         .flex()
         .flex_col()
@@ -102,7 +155,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(6.0))
                         .max_w(px(320.0))
-                        .child(build_select("select-native", spec, cx))
+                        .child(node_select("select-native", spec, state))
                         .when(value.is_some(), |d| {
                             d.child(
                                 div()
@@ -137,7 +190,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(6.0))
                         .max_w(px(320.0))
-                        .child(build_select("select-custom", spec, cx))
+                        .child(node_select("select-custom", spec, state))
                         .when(value.is_some(), |d| {
                             d.child(
                                 div()
@@ -172,7 +225,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(6.0))
                         .max_w(px(320.0))
-                        .child(build_select("select-searchable", spec, cx))
+                        .child(node_select("select-searchable", spec, state))
                         .when(value.is_some(), |d| {
                             d.child(
                                 div()
@@ -207,7 +260,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(6.0))
                         .max_w(px(320.0))
-                        .child(build_select("select-searchable-grouped", spec, cx))
+                        .child(node_select("select-searchable-grouped", spec, state))
                         .when(value.is_some(), |d| {
                             d.child(
                                 div()
@@ -243,7 +296,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(6.0))
                         .max_w(px(320.0))
-                        .child(build_select("select-freeform", spec, cx))
+                        .child(node_select("select-freeform", spec, state))
                         .when(value.is_some(), |d| {
                             d.child(
                                 div()
@@ -274,7 +327,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     div()
                         .max_w(px(320.0))
-                        .child(build_select("select-rich", spec, cx))
+                        .child(node_select("select-rich", spec, state))
                 }),
         )
         // --- Clearable (custom) ---
@@ -298,7 +351,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     div()
                         .max_w(px(320.0))
-                        .child(build_select("select-clearable", spec, cx))
+                        .child(node_select("select-clearable", spec, state))
                 }),
         )
         // --- Native grouped ---
@@ -320,7 +373,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     div()
                         .max_w(px(320.0))
-                        .child(build_select("select-native-grouped", spec, cx))
+                        .child(node_select("select-native-grouped", spec, state))
                 }),
         )
         // --- Disabled ---
@@ -341,7 +394,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                     div()
                         .max_w(px(320.0))
-                        .child(Select::from_spec(spec, theme).with_id("select-disabled"))
+                        .child(node_select_static(spec, state))
                 }),
         )
         // --- Validation states ---
@@ -360,36 +413,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(12.0))
                         .max_w(px(320.0))
-                        .child(
-                            Select::from_spec(
-                                SelectSpec::new(fruit_options.clone())
-                                    .with_placeholder("Pick one")
-                                    .with_value("apple")
-                                    .with_validation_state(ValidationState::Invalid),
-                                theme,
-                            )
-                            .with_id("select-invalid"),
-                        )
-                        .child(
-                            Select::from_spec(
-                                SelectSpec::new(fruit_options.clone())
-                                    .with_placeholder("Pick one")
-                                    .with_value("banana")
-                                    .with_validation_state(ValidationState::Valid),
-                                theme,
-                            )
-                            .with_id("select-valid"),
-                        )
-                        .child(
-                            Select::from_spec(
-                                SelectSpec::new(fruit_options.clone())
-                                    .with_placeholder("Pick one")
-                                    .with_value("cherry")
-                                    .with_validation_state(ValidationState::Pending),
-                                theme,
-                            )
-                            .with_id("select-pending"),
-                        ),
+                        .child(node_select_static(
+                            SelectSpec::new(fruit_options.clone())
+                                .with_placeholder("Pick one")
+                                .with_value("apple")
+                                .with_validation_state(ValidationState::Invalid),
+                            state,
+                        ))
+                        .child(node_select_static(
+                            SelectSpec::new(fruit_options.clone())
+                                .with_placeholder("Pick one")
+                                .with_value("banana")
+                                .with_validation_state(ValidationState::Valid),
+                            state,
+                        ))
+                        .child(node_select_static(
+                            SelectSpec::new(fruit_options.clone())
+                                .with_placeholder("Pick one")
+                                .with_value("cherry")
+                                .with_validation_state(ValidationState::Pending),
+                            state,
+                        )),
                 ),
         )
         // --- Sizes (xs → xl) ---
@@ -411,16 +455,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ("xl", ControlSize::Xl),
                     ];
                     let mut col = div().flex().flex_col().gap(px(12.0)).max_w(px(320.0));
-                    for (label, size) in sizes {
-                        col = col.child(
-                            Select::from_spec(
-                                SelectSpec::new(fruit_options.clone())
-                                    .with_placeholder("Select...")
-                                    .with_size(size),
-                                theme,
-                            )
-                            .with_id(format!("select-size-{label}")),
-                        );
+                    for (_label, size) in sizes {
+                        col = col.child(node_select_static(
+                            SelectSpec::new(fruit_options.clone())
+                                .with_placeholder("Select...")
+                                .with_size(size),
+                            state,
+                        ));
                     }
                     col
                 }),

@@ -12,11 +12,11 @@
 //! preview event loop); the specimen renders the resting state.
 
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, TokenInput};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, TokenInput};
 use poodle_specs::{ControlSize, EyebrowSpec, TokenInputSpec};
 
 /// A labelled example row (eyebrow caption above the control).

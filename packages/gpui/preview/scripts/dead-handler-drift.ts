@@ -1,5 +1,5 @@
 /**
- * GPUI handler drift: a component that accepts a handler must use it.
+ * Handler drift: a component that accepts a handler must use it.
  *
  * `Stepper` stored `on_change` and `on_rerun` in eleven places and attached
  * neither. The builders type-checked, the pointing-hand cursor promised a
@@ -14,7 +14,21 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-const ROOT = new URL("../../components/src", import.meta.url).pathname;
+/**
+ * Two surfaces, since g12.019 deleted the hand-written GPUI tier this
+ * originally scanned.
+ *
+ * `poodle-render` is where the components live now: each declares a
+ * `*Handlers` struct of `pub on_x: Option<...>` fields and reads them as
+ * `handlers.on_x` while building its node tree. `node_compat.rs` is the
+ * preview's bridge, whose builders store handlers on `self` and forward them —
+ * the original `self.on_x` shape.
+ *
+ * The rule is unchanged and the failure it catches is the same one: a builder
+ * that type-checks, promises a click, and does nothing.
+ */
+const RENDER_ROOT = new URL("../../../render/src", import.meta.url).pathname;
+const COMPAT_FILE = new URL("../src/node_compat.rs", import.meta.url).pathname;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -63,17 +77,25 @@ function moduleSource(file: string): string {
     .join("\n");
 }
 
-for (const file of walk(ROOT)) {
+const targets = [...walk(RENDER_ROOT), COMPAT_FILE];
+
+for (const file of targets) {
   const source = readFileSync(file, "utf8");
-  const fields = [...source.matchAll(/^\s+(on_[a-z_]+):\s*Option</gm)].map((m) => m[1]);
+  const fields = [...source.matchAll(/^\s+(?:pub )?(on_[a-z_]+):\s*Option</gm)].map((m) => m[1]);
   const scope = moduleSource(file);
 
   for (const field of new Set(fields)) {
-    // Every read of the field, minus the assignment inside its own builder.
-    const reads = [...scope.matchAll(new RegExp(`self\\.${field}\\b`, "g"))].length;
-    const writes = [...scope.matchAll(new RegExp(`self\\.${field}\\s*=`, "g"))].length;
+    // Handlers reach a component two ways: as a `*Handlers` struct field, read
+    // as `handlers.on_x`, or as a plain function parameter, read as a bare
+    // `on_x`. So a read is any mention NOT followed by `:` — that suffix is
+    // either the declaration or a struct-literal key, neither of which is a
+    // use. Assignments are then subtracted, so merely storing a handler never
+    // counts as using it.
+    const mentions = [...scope.matchAll(new RegExp(`\\b${field}\\b(\\s*:)?`, "g"))];
+    const reads = mentions.filter((m) => !m[1]).length;
+    const writes = [...scope.matchAll(new RegExp(`\\.${field}\\s*=[^=]`, "g"))].length;
 
-    const relative = file.replace(`${ROOT}/`, "");
+    const relative = file.replace(`${RENDER_ROOT}/`, "").replace(/^.*\/src\//, "");
     const known = BASELINE[relative]?.includes(field) ?? false;
 
     if (reads - writes <= 0) {
@@ -87,7 +109,7 @@ for (const file of walk(ROOT)) {
 }
 
 if (dead.length > 0) {
-  console.error("GPUI components accept handlers they never use:\n");
+  console.error("Components accept handlers they never use:\n");
   for (const entry of dead) console.error(`  ${entry}`);
   console.error(
     `\n${dead.length} dead handler(s). Either wire the handler or stop accepting it —` +

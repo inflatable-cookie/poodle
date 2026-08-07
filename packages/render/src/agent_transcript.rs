@@ -122,6 +122,10 @@ pub fn agent_transcript(
                     root = root.child(agent_question_record(&card, theme));
                 }
             }
+            // Decided plans are retained in the shared transcript contract;
+            // this renderer has no plan-card primitive yet, so keep the
+            // record in the grouping stream without adding a visual block.
+            TranscriptBlock::DecidedPlan(_) => {}
             TranscriptBlock::Activity(_) => {}
         }
     }

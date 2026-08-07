@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, VideoPlayer};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, VideoPlayer};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{
     AspectRatio, ControlDensity, ControlSize, SemanticControlSizeRole, VideoPlayerSpec,
@@ -55,19 +55,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_volume(0.0),
             ),
         ))
-        // Captions track present (GPUI VideoPlayer::with_captions builder).
+        // Captions track present. Contract §2 renders it as a `<track>` child
+        // of the media element, so it carries no visible chrome — the old GPUI
+        // tier's extra "subtitles" control button was a tier-local invention
+        // with no contract or Svelte counterpart and does not survive the move.
         .child(group(
             theme,
             "With captions",
-            div().max_w(px(480.0)).child(
-                VideoPlayer::from_spec(
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(40.0)
-                        .with_playing(true),
-                    theme,
-                )
-                .with_captions(true),
+            player(
+                theme,
+                480.0,
+                VideoPlayerSpec::new(src)
+                    .with_duration(64.0)
+                    .with_current_time(40.0)
+                    .with_playing(true)
+                    .with_captions_src("https://example.invalid/flower.vtt")
+                    .with_show_captions(true),
             ),
         ))
         // Fullscreen — fullscreen button shows exit-fullscreen icon.

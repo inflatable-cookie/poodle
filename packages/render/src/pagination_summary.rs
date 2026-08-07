@@ -4,17 +4,11 @@
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
-use poodle_specs::{ControlSize, PaginationSummarySpec, SemanticControlSizeRole};
-
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use poodle_specs::PaginationSummarySpec;
 
 pub fn pagination_summary(spec: &PaginationSummarySpec, theme: &dyn ThemeProvider) -> Node {
     let text_color = theme.resolve_color("color.text.secondary");
-
-    // PaginationSummarySpec has no size/size_role fields — use defaults.
-    let effective_size =
-        resolve_semantic_size(ControlSize::default(), SemanticControlSizeRole::default());
-    let font_size = rem_to_px(size_font_rem(effective_size));
+    let font_size = theme.resolve_space("typography.body.size");
 
     // Built in the spec so all three targets say the same thing (contract §7).
     let mut label = Node::text(&spec.summary_text());

@@ -81,15 +81,23 @@ pub fn checkbox(
     let state = spec.current_state();
     let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
 
-    let mark_color = if is_checked { text_inverse } else { text_primary };
-    let indicator_border = if is_checked { selected_fill } else { border_default };
+    let mark_color = if is_checked {
+        text_inverse
+    } else {
+        text_primary
+    };
+    let indicator_border = if is_checked {
+        selected_fill
+    } else {
+        border_default
+    };
     let surface = theme.resolve_color("color.background.surface");
     let indicator_bg = if is_checked { selected_fill } else { surface };
 
     let icon_px = theme.resolve_space(icon_token(effective_size));
     let indicator_size = indicator_size_px(icon_px);
     let indicator_radius = rem_to_px(indicator_radius_rem(effective_size));
-    let border_width = theme.resolve_space("border.width.default");
+    let border_width = theme.resolve_border_width("border.width.default");
     let mark_size = mark_size_px(effective_size, icon_px);
 
     let mut indicator = Node::container();
@@ -138,6 +146,7 @@ pub fn checkbox(
         let mut text = Node::text(label);
         text.style.descriptor.text_color = Some(text_primary);
         text.style.text_size = Some(label_size);
+        text.style.text_weight = Some(500);
         root = root.child(text);
     }
 

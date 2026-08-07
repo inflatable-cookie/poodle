@@ -1,4 +1,5 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, TimeField};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -6,8 +7,21 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, TimeField};
 use poodle_specs::{EyebrowSpec, TimeFieldSpec};
+use std::sync::{Arc, Mutex};
+
+fn change_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -54,13 +68,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             spec.aria_label = Some("Start time".to_string());
                             TimeField::from_spec(spec, theme)
                                 .with_id("default")
-                                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("time-field-default".to_string(), val.to_string());
-                                    cx.notify();
-                                }))
+                                .on_change(change_handler(&state.node_events, "time-field-default"))
                         })
                         .when(!default_value.is_empty(), |d| {
                             d.child(
@@ -92,13 +100,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             spec.aria_label = Some("Meeting time".to_string());
                             TimeField::from_spec(spec, theme)
                                 .with_id("with-value")
-                                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("time-field-meeting".to_string(), val.to_string());
-                                    cx.notify();
-                                }))
+                                .on_change(change_handler(&state.node_events, "time-field-meeting"))
                         })
                         .child(
                             div()

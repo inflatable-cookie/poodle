@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, Field, FieldSet, TextInput};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Field, FieldSet, TextInput};
 use poodle_specs::{EyebrowSpec, FieldSetSpec, FieldSpec, SpaceScale, TextInputSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

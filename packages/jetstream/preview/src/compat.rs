@@ -716,69 +716,10 @@ pub fn js_list_container_with_slots(spec: &ListContainerSpec, theme: &JetstreamT
     ))
 }
 
-// ── Box (bx) — neutral layout container; layout primitive implemented
-// directly on the node vocabulary.
-
-fn parse_dimension_px(dim: &Dimension) -> Option<f32> {
-    let s = dim.as_str().trim();
-    if let Some(stripped) = s.strip_suffix("px") {
-        stripped.trim().parse::<f32>().ok()
-    } else if let Some(stripped) = s.strip_suffix("rem") {
-        stripped.trim().parse::<f32>().ok().map(|rem| rem * 16.0)
-    } else {
-        s.parse::<f32>().ok()
-    }
-}
-
 pub fn js_box(spec: &BoxSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
-    let padding = spec.resolved_padding();
-    let mut el = crate::nel::div();
-
-    if let Some(w) = &spec.width {
-        if let Some(v) = parse_dimension_px(w) {
-            el = el.w(v);
-        } else if w.as_str().trim() == "100%" {
-            el = el.w_full();
-        }
-    }
-    if let Some(h) = &spec.height {
-        if let Some(v) = parse_dimension_px(h) {
-            el = el.h(v);
-        } else if h.as_str().trim() == "100%" {
-            el = el.h_full();
-        }
-    }
-    if let Some(mw) = &spec.min_width {
-        if let Some(v) = parse_dimension_px(mw) {
-            el = el.min_w(v);
-        }
-    }
-    if let Some(mh) = &spec.min_height {
-        if let Some(v) = parse_dimension_px(mh) {
-            el = el.min_h(v);
-        }
-    }
-    if let Some(h) = padding.horizontal {
-        let px_val = crate::nel::resolve_px(theme, h);
-        el = el.pl(px_val).pr(px_val);
-    }
-    if let Some(v) = padding.vertical {
-        let px_val = crate::nel::resolve_px(theme, v);
-        el = el.pt(px_val).pb(px_val);
-    }
-    match spec.overflow {
-        Overflow::Hidden | Overflow::Clip => el = el.overflow_hidden(),
-        Overflow::Auto | Overflow::Scroll => el = el.overflow_scroll(),
-        Overflow::Visible => {}
-    }
-    let mut node: Node = el.into();
-    for child in children {
-        node.children.push(child.into());
-    }
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            node.a11y.label = Some(label.to_string());
-        }
-    }
-    El(node)
+    El(pr::bx(
+        spec,
+        theme,
+        children.into_iter().map(Node::from).collect(),
+    ))
 }

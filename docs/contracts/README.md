@@ -49,6 +49,8 @@ contract references the rule rather than restating it:
 - `components/action-discovery-panel.md`
 - `components/agent-chat-input.md`
 - `components/agent-message.md`
+- `components/agent-plan-record.md`
+- `components/agent-plan.md`
 - `components/agent-question-record.md`
 - `components/agent-question.md`
 - `components/agent-transcript.md`

@@ -1,10 +1,10 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, Stepper};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Stepper};
-use poodle_specs::{EyebrowSpec, StepStatus, StepperSpec, StepperStep, Orientation};
+use poodle_specs::{EyebrowSpec, Orientation, StepStatus, StepperSpec, StepperStep};
 
 /// The Soundcheck arrangement this design came from.
 fn wizard_steps() -> Vec<StepperStep> {

@@ -1,9 +1,9 @@
 use crate::app_state::AppState;
+use crate::node_compat::{ActionDiscoveryPanel, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{ActionDiscoveryPanel, Eyebrow};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState,
@@ -197,8 +197,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(framed(
-                    ActionDiscoveryPanel::from_spec(empty_spec, theme)
-                        .with_id("action-disc-empty"),
+                    ActionDiscoveryPanel::from_spec(empty_spec, theme).with_id("action-disc-empty"),
                 )),
         )
         .child(
@@ -211,8 +210,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(framed(
-                    ActionDiscoveryPanel::from_spec(error_spec, theme)
-                        .with_id("action-disc-error"),
+                    ActionDiscoveryPanel::from_spec(error_spec, theme).with_id("action-disc-error"),
                 )),
         )
         .child(

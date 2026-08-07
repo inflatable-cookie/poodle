@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Code, Separator};
+use crate::node_compat::{Code, Separator};
 use poodle_specs::{CodeSpec, SeparatorSpec};
 
 use crate::contract_usage_docs::{ContractUsageDocs, UsageEvent, UsageProp, UsageSlot};

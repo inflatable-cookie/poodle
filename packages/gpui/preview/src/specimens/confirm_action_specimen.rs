@@ -1,13 +1,46 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, ConfirmAction, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Button, ConfirmAction, Eyebrow};
+use poodle_node::{FontFamily, LayoutDirection, Node};
 use poodle_specs::ConfirmActionSpec;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn open_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value: true,
+        });
+    })
+}
+
+fn finish_click(
+    state: &AppState,
+    open_key: &'static str,
+    message: Option<&'static str>,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetToggle {
+            key: open_key.to_string(),
+            value: false,
+        });
+        if let Some(message) = message {
+            events.push(NodeSpecimenEvent::SetText {
+                key: "confirm-action-last".to_string(),
+                value: message.to_string(),
+            });
+        }
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let panel_bg = theme.resolve_color("color.background.panel");
 
@@ -59,34 +92,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-danger-trigger")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("confirm-action-danger-open".to_string(), true);
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(open_click(state, "confirm-action-danger-open")),
                     )
-                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-danger-open".to_string(), false);
-                        this.state.specimens.text.insert(
-                            "confirm-action-last".to_string(),
-                            "Record deleted".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-danger-open".to_string(), false);
-                        cx.notify();
-                    })),
+                    .on_confirm(finish_click(
+                        state,
+                        "confirm-action-danger-open",
+                        Some("Record deleted"),
+                    ))
+                    .on_cancel(finish_click(
+                        state,
+                        "confirm-action-danger-open",
+                        None,
+                    )),
                 ),
         )
         // --- Warning tone ---
@@ -119,34 +136,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-warning-trigger")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("confirm-action-warning-open".to_string(), true);
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(open_click(state, "confirm-action-warning-open")),
                     )
-                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-warning-open".to_string(), false);
-                        this.state.specimens.text.insert(
-                            "confirm-action-last".to_string(),
-                            "Project archived".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-warning-open".to_string(), false);
-                        cx.notify();
-                    })),
+                    .on_confirm(finish_click(
+                        state,
+                        "confirm-action-warning-open",
+                        Some("Project archived"),
+                    ))
+                    .on_cancel(finish_click(
+                        state,
+                        "confirm-action-warning-open",
+                        None,
+                    )),
                 ),
         )
         // --- Custom trigger slot (ghost button) ---
@@ -179,34 +180,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-ghost-trigger")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("confirm-action-ghost-open".to_string(), true);
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(open_click(state, "confirm-action-ghost-open")),
                     )
-                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-ghost-open".to_string(), false);
-                        this.state.specimens.text.insert(
-                            "confirm-action-last".to_string(),
-                            "Filters cleared".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-ghost-open".to_string(), false);
-                        cx.notify();
-                    })),
+                    .on_confirm(finish_click(
+                        state,
+                        "confirm-action-ghost-open",
+                        Some("Filters cleared"),
+                    ))
+                    .on_cancel(finish_click(
+                        state,
+                        "confirm-action-ghost-open",
+                        None,
+                    )),
                 ),
         )
         // --- With body content ---
@@ -240,49 +225,39 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-body-trigger")
-                        .on_click(cx.listener(
-                            |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("confirm-action-body-open".to_string(), true);
-                                cx.notify();
-                            },
-                        )),
+                        .on_click(open_click(state, "confirm-action-body-open")),
                     )
                     .with_content({
-                        let code_bg = {
-                            let mut h = color_to_hsla(panel_bg);
-                            h.a *= 0.9;
-                            h
-                        };
-                        div()
-                            .px(px(12.0))
-                            .py(px(8.0))
-                            .rounded(px(6.0))
-                            .bg(code_bg)
-                            .text_size(px(13.0))
-                            .font_family("Menlo")
-                            .child("pk_live_abc123...xyz789")
+                        let mut code = Node::text("pk_live_abc123...xyz789");
+                        code.style.descriptor.layout.direction = LayoutDirection::Row;
+                        code.style.descriptor.layout.spacing.padding.left = 12.0;
+                        code.style.descriptor.layout.spacing.padding.right = 12.0;
+                        code.style.descriptor.layout.spacing.padding.top = 8.0;
+                        code.style.descriptor.layout.spacing.padding.bottom = 8.0;
+                        code.style.descriptor.corner_radii.top_left = 6.0;
+                        code.style.descriptor.corner_radii.top_right = 6.0;
+                        code.style.descriptor.corner_radii.bottom_left = 6.0;
+                        code.style.descriptor.corner_radii.bottom_right = 6.0;
+                        code.style.descriptor.background = Some(poodle_tokens::typed::ColorValue(
+                            panel_bg.0,
+                            panel_bg.1,
+                            panel_bg.2,
+                            panel_bg.3 * 0.9,
+                        ));
+                        code.style.text_size = Some(13.0);
+                        code.style.font_family = Some(FontFamily::Mono);
+                        code
                     })
-                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-body-open".to_string(), false);
-                        this.state
-                            .specimens
-                            .text
-                            .insert("confirm-action-last".to_string(), "Key revoked".to_string());
-                        cx.notify();
-                    }))
-                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("confirm-action-body-open".to_string(), false);
-                        cx.notify();
-                    })),
+                    .on_confirm(finish_click(
+                        state,
+                        "confirm-action-body-open",
+                        Some("Key revoked"),
+                    ))
+                    .on_cancel(finish_click(
+                        state,
+                        "confirm-action-body-open",
+                        None,
+                    )),
                 ),
         )
         // --- Last action (only when a confirm has fired) ---

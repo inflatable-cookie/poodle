@@ -228,15 +228,6 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "poodle-gpui-components",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "runtime-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
       "name": "poodle-gpui-preview",
       "channel": "preview",
       "publicIntent": true,

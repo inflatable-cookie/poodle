@@ -1,8 +1,8 @@
+use crate::node_compat::{BulkActionBar, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{BulkActionBar, Eyebrow};
 use poodle_specs::{
     BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, EyebrowSpec,
 };
@@ -23,7 +23,6 @@ fn default_actions() -> Vec<BulkAction> {
 }
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-
     div()
         .flex()
         .flex_col()

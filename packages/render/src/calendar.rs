@@ -14,7 +14,7 @@
 //! Keyboard / roving-tabindex / month-change editors are host-owned; the
 //! component renders at the current spec state and exposes interaction ids.
 //! `on_select` fires with the pressed day as an ISO date (`2026-07-31`);
-//! `on_navigate` with `"prev"` or `"next"`.
+//! `on_navigate` with the resulting `"YYYY-MM"` month.
 //!
 //! Colour recipes here are the old tier's *linear-space* lerp
 //! (`jetstream_ui::color_mix`), so they go through [`mix_linear`], not
@@ -26,9 +26,9 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, StylePatch, TextAlign,
+    Node, NodeRole, StylePatch,
 };
-use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart};
+use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart, DateRangeValue};
 
 use crate::color::{mix_linear, with_alpha, WHITE};
 use crate::presentation::{
@@ -135,7 +135,7 @@ fn outside_cell(
     outside_opacity: f32,
     day: u32,
 ) -> Node {
-    let mut cell = Node::container();
+    let mut cell = Node::text(day.to_string());
     cell.a11y.role = Some(NodeRole::Cell);
     {
         let s = &mut cell.style;
@@ -147,18 +147,36 @@ fn outside_cell(
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         s.text_size = Some(day_font_px);
         s.descriptor.text_color = Some(text_secondary);
-        s.text_align = Some(TextAlign::Center);
         s.descriptor.opacity = outside_opacity;
     }
     all_corners(&mut cell, control_radius);
-    cell.child(Node::text(day.to_string()))
+    cell
 }
 
-/// Host callbacks: `on_select` (ISO day) + `on_navigate` ("prev"/"next").
+/// Host callbacks: single-day selection, range selection, and month navigation.
 #[derive(Default)]
 pub struct CalendarHandlers {
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_range_select: Option<Arc<dyn Fn(&DateRangeValue) + Send + Sync>>,
     pub on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+fn compute_next_range(
+    current_start: Option<&str>,
+    current_end: Option<&str>,
+    clicked: &str,
+) -> DateRangeValue {
+    match (current_start, current_end) {
+        (None, _) => DateRangeValue::new(Some(clicked.to_string()), None),
+        (Some(start), None) => {
+            if clicked >= start {
+                DateRangeValue::new(Some(start.to_string()), Some(clicked.to_string()))
+            } else {
+                DateRangeValue::new(Some(clicked.to_string()), Some(start.to_string()))
+            }
+        }
+        (Some(_), Some(_)) => DateRangeValue::new(Some(clicked.to_string()), None),
+    }
 }
 
 pub fn calendar(
@@ -173,15 +191,13 @@ pub fn calendar(
     let nav_btn_size_px = rem_to_px(calendar_nav_size_rem(effective_size));
     let day_font_px = rem_to_px(calendar_day_font_rem(effective_size));
     let month_label_font_px = rem_to_px(size_font_rem(effective_size));
-    // Weekday caption font — contract §8 weekday label `0.6875rem`.
-    let weekday_font_px = rem_to_px(0.6875);
+    let weekday_font_px = theme.resolve_space("typography.caption.size");
     // Weekday header row height — no token exists; contract-adjacent rem.
     let weekday_row_height_px = rem_to_px(1.5);
 
     let pad_px = rem_to_px(0.75);
     let gap_sm_px = rem_to_px(0.125);
-    // Root gap (contract §8 Root gap 0.75rem).
-    let root_gap_px = rem_to_px(0.75);
+    let root_gap_px = theme.resolve_space("space.inline.sm");
     // Header inner gap between the month + year triggers.
     let trigger_gap_px = rem_to_px(0.375);
 
@@ -223,15 +239,7 @@ pub fn calendar(
     let (year, month) = spec
         .effective_visible_month()
         .and_then(parse_year_month)
-        .unwrap_or_else(|| {
-            // Fall back to current month derived from system clock
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap_or_default()
-                .as_secs();
-            let (y, m, _) = days_to_ymd((now / 86400) as i64);
-            (y, m)
-        });
+        .unwrap_or((2026, 1));
 
     // ── Today ─────────────────────────────────────────────────────────────────
 
@@ -301,6 +309,9 @@ pub fn calendar(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(
+            calendar_cell_size_rem(effective_size) * 7.0 + 0.125 * 6.0 + 0.75 * 2.0,
+        ));
         s.descriptor.layout.spacing.gap = root_gap_px;
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = pad_px;
@@ -321,7 +332,18 @@ pub fn calendar(
 
     // ── Nav header ────────────────────────────────────────────────────────────
 
-    let nav_button = |icon: &str, id: &str, label: &str, direction: &'static str| -> Node {
+    let prev_month = if month == 1 {
+        format!("{:04}-12", year - 1)
+    } else {
+        format!("{year:04}-{:02}", month - 1)
+    };
+    let next_month = if month == 12 {
+        format!("{:04}-01", year + 1)
+    } else {
+        format!("{year:04}-{:02}", month + 1)
+    };
+
+    let nav_button = |icon: &str, id: &str, label: &str, target_month: String| -> Node {
         let mut btn = Node::button("");
         btn.a11y.label = Some(label.to_string());
         btn.id = Some(id.to_string());
@@ -343,17 +365,22 @@ pub fn calendar(
             });
         }
         all_corners(&mut btn, control_radius);
-        let mut chevron = Node::icon(icon, day_font_px);
+        let mut chevron = Node::icon(icon, theme.resolve_space("size.icon.sm"));
         chevron.style.descriptor.text_color = Some(icon_muted);
         let mut btn = btn.child(chevron);
         if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_navigate) {
             let handler = Arc::clone(handler);
-            btn.interaction.on_activate = Some(Arc::new(move || handler(direction)));
+            btn.interaction.on_activate = Some(Arc::new(move || handler(&target_month)));
         }
         btn
     };
-    let prev_btn = nav_button("chevron-left", "poodle-cal-prev", "Previous month", "prev");
-    let next_btn = nav_button("chevron-right", "poodle-cal-next", "Next month", "next");
+    let prev_btn = nav_button(
+        "chevron-left",
+        "poodle-cal-prev",
+        "Previous month",
+        prev_month,
+    );
+    let next_btn = nav_button("chevron-right", "poodle-cal-next", "Next month", next_month);
 
     // Month Label = composed Month Trigger + Year Trigger (contract §2). Each
     // is a control with a dashed-underline edit affordance rendered at the
@@ -364,13 +391,12 @@ pub fn calendar(
         // Trigger underline). Color is uniform — only the bottom side has
         // width, so only the underline shows; the hover override (which
         // carries uniform border color) recolors it.
-        let mut t = Node::button(label);
+        let mut t = Node::text(label);
         t.id = Some(id.to_string());
         {
             let s = &mut t.style;
             s.text_size = Some(month_label_font_px);
             s.text_weight = Some(600);
-            s.letter_spacing_em = Some(0.02); // contract __month: letter-spacing 0.02em
             s.descriptor.text_color = Some(text_primary);
             s.border_bottom_width = Some(1.0);
             s.descriptor.border.color = trigger_underline;
@@ -417,6 +443,8 @@ pub fn calendar(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+        s.descriptor.layout.spacing.padding.top = root_gap_px;
+        s.descriptor.layout.spacing.padding.bottom = root_gap_px;
     }
     root = root.child(
         nav_header
@@ -436,7 +464,7 @@ pub fn calendar(
 
     for i in 0..7u32 {
         let idx = ((i + week_start_offset) % 7) as usize;
-        let mut day = Node::text(WEEKDAYS_SUN[idx]);
+        let mut day = Node::text(WEEKDAYS_SUN[idx].to_uppercase());
         {
             let s = &mut day.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(cell_size_px);
@@ -445,9 +473,7 @@ pub fn calendar(
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             s.text_size = Some(weekday_font_px);
             s.text_weight = Some(600);
-            s.letter_spacing_em = Some(0.04); // contract __weekday: letter-spacing 0.04em
             s.descriptor.text_color = Some(text_secondary);
-            s.text_align = Some(TextAlign::Center);
         }
         header_row = header_row.child(day);
     }
@@ -519,7 +545,7 @@ pub fn calendar(
                     };
                 let is_range_edge = is_range_start || is_range_end;
 
-                let mut cell = Node::container();
+                let mut cell = Node::text(day_num.to_string());
                 cell.id = Some(format!("poodle-cal-day-{day_num}"));
                 {
                     let s = &mut cell.style;
@@ -530,7 +556,6 @@ pub fn calendar(
                     s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                     s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
                     s.text_size = Some(day_font_px);
-                    s.text_align = Some(TextAlign::Center);
                 }
                 all_corners(&mut cell, control_radius);
 
@@ -581,13 +606,29 @@ pub fn calendar(
                     cell.style.descriptor.cursor = CursorHint::Pointer;
                 }
 
-                if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_select) {
-                    let handler = Arc::clone(handler);
-                    let iso = date_iso.clone();
-                    cell.interaction.on_activate = Some(Arc::new(move || handler(&iso)));
+                if !spec.is_disabled {
+                    if is_range_mode {
+                        if let Some(handler) = &handlers.on_range_select {
+                            let handler = Arc::clone(handler);
+                            let start = range_start_iso.clone();
+                            let end = range_end_iso.clone();
+                            let iso = date_iso.clone();
+                            cell.interaction.on_activate = Some(Arc::new(move || {
+                                handler(&compute_next_range(
+                                    start.as_deref(),
+                                    end.as_deref(),
+                                    &iso,
+                                ));
+                            }));
+                        }
+                    } else if let Some(handler) = &handlers.on_select {
+                        let handler = Arc::clone(handler);
+                        let iso = date_iso.clone();
+                        cell.interaction.on_activate = Some(Arc::new(move || handler(&iso)));
+                    }
                 }
 
-                cell.child(Node::text(day_num.to_string()))
+                cell
             };
 
             day_row = day_row.child(cell);
@@ -603,4 +644,28 @@ pub fn calendar(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::compute_next_range;
+
+    #[test]
+    fn range_selection_starts_completes_swaps_and_restarts() {
+        let started = compute_next_range(None, None, "2026-03-12");
+        assert_eq!(started.start.as_deref(), Some("2026-03-12"));
+        assert_eq!(started.end, None);
+
+        let completed = compute_next_range(started.start.as_deref(), None, "2026-03-20");
+        assert_eq!(completed.start.as_deref(), Some("2026-03-12"));
+        assert_eq!(completed.end.as_deref(), Some("2026-03-20"));
+
+        let swapped = compute_next_range(Some("2026-03-12"), None, "2026-03-05");
+        assert_eq!(swapped.start.as_deref(), Some("2026-03-05"));
+        assert_eq!(swapped.end.as_deref(), Some("2026-03-12"));
+
+        let restarted = compute_next_range(Some("2026-03-05"), Some("2026-03-12"), "2026-03-25");
+        assert_eq!(restarted.start.as_deref(), Some("2026-03-25"));
+        assert_eq!(restarted.end, None);
+    }
 }

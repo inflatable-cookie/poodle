@@ -8,9 +8,7 @@
 //! the Svelte grid).
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::DetailSectionSpec;
 
 use crate::presentation::rem_to_px;
@@ -44,6 +42,7 @@ pub fn detail_section(
 
     let mut el = Node::container();
     el.style.descriptor.layout.direction = LayoutDirection::Column;
+    el.style.fill_width = true;
 
     // Top separator rule — rendered when is_separated (density-driven gap).
     if spec.is_separated {
@@ -71,6 +70,7 @@ pub fn detail_section(
             s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
             s.descriptor.layout.spacing.gap = header_gap;
             s.descriptor.layout.spacing.margin.bottom = root_gap;
+            s.fill_width = true;
         }
 
         // Title + description stacked vertically (title-gap between).
@@ -79,7 +79,6 @@ pub fn detail_section(
             let s = &mut title_block.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.spacing.gap = title_gap;
-            s.flex_fill = true;
         }
 
         if let Some(ref title) = spec.title {

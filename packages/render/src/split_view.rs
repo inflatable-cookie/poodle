@@ -14,7 +14,9 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
+use poodle_node::{
+    CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+};
 use poodle_specs::{
     CollapseDirection, CollapseToggleSpec, Orientation, ResizeHandleSpec, SplitOrientation,
     SplitViewSpec,
@@ -52,6 +54,15 @@ pub fn split_view(
         p.style.descriptor.layout.direction = LayoutDirection::Row;
         p.style.min_width = Some(0.0);
         p.style.min_height = Some(0.0);
+        // Old tier: panes clip and fill the cross axis (`h_full` on a
+        // horizontal split, `w_full` on a vertical one).
+        p.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        p.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        if is_horizontal {
+            p.style.fill_height = true;
+        } else {
+            p.style.fill_width = true;
+        }
         p
     };
     // Apply a fixed/collapsed pixel size on the correct axis for the
@@ -84,12 +95,15 @@ pub fn split_view(
             axis_fixed(pane_base(), size)
         } else {
             let mut p = pane_base();
-            // Secondary fixed → primary fills remaining space; otherwise ratio.
-            p.style.flex_grow = Some(if spec.secondary_size.is_some() {
-                1.0
+            // Secondary fixed → primary fills remaining space; otherwise the
+            // ratio seeds the basis and grow/shrink settle the divider's
+            // thickness (old tier: `flex_basis(relative(ratio))`).
+            if spec.secondary_size.is_some() {
+                p.style.flex_grow = Some(1.0);
             } else {
-                ratio
-            });
+                p.style.flex_grow = Some(1.0);
+                p.style.flex_basis_pct = Some(ratio);
+            }
             if let Some(min) = spec.min_primary_size {
                 p = axis_min(p, min);
             }
@@ -110,7 +124,8 @@ pub fn split_view(
             axis_fixed(pane_base(), size)
         } else {
             let mut p = pane_base();
-            p.style.flex_grow = Some(secondary_ratio);
+            p.style.flex_grow = Some(1.0);
+            p.style.flex_basis_pct = Some(secondary_ratio);
             if let Some(min) = spec.min_secondary_size {
                 p = axis_min(p, min);
             }
@@ -213,6 +228,16 @@ pub fn split_view(
         };
         // Old tier `.grow()`: flex props + stretch + min-size 0.
         s.descriptor.layout.width = LayoutSizing::Grow;
+        // Old tier `.size_full()`. Without the height the split collapses to
+        // its panes' content height instead of filling the host's frame, which
+        // is the whole point of a split layout.
+        s.fill_width = true;
+        s.fill_height = true;
+        // Old tier dims the whole split when disabled; the divider's own
+        // disabled treatment is separate.
+        if spec.is_disabled {
+            s.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        }
     }
 
     let mut el = el.child(primary_pane).child(divider).child(secondary_pane);

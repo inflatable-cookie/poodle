@@ -15,9 +15,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch,
 };
-use poodle_specs::{
-    ControlDensity, ControlSize, FileUploadSpec, MediaPickerItem, MediaPickerSpec,
-};
+use poodle_specs::{ControlDensity, ControlSize, FileUploadSpec, MediaPickerItem, MediaPickerSpec};
 
 use crate::color::TRANSPARENT;
 use crate::file_upload::file_upload;
@@ -276,12 +274,23 @@ fn grid_item(
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
         all_radius(&mut t, rem_to_px(0.25));
-        let mut glyph = Node::icon("image", rem_to_px(1.5));
+        let mut glyph = Node::icon(
+            match item.kind {
+                poodle_specs::MediaKind::Image => "image",
+                poodle_specs::MediaKind::Audio => "music",
+                poodle_specs::MediaKind::Video => "play",
+                poodle_specs::MediaKind::Document => "file-text",
+                poodle_specs::MediaKind::Embed => "external-link",
+            },
+            rem_to_px(1.5),
+        );
         glyph.style.descriptor.text_color = Some(placeholder_color);
         t.child(glyph)
     };
 
-    let mut cell = Node::button(&item.label);
+    // The explicit label node below owns the tile caption. A non-empty
+    // `Node::button` label would make the GPUI backend emit a second caption.
+    let mut cell = Node::button("");
     {
         let s = &mut cell.style;
         s.descriptor.layout.direction = LayoutDirection::Column;

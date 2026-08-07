@@ -118,22 +118,36 @@ impl ThemePreset {
     pub fn build_theme(self) -> GpuiThemeProvider {
         match self {
             ThemePreset::Default => GpuiThemeProvider::new(),
-            ThemePreset::Eclipse => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
+            ThemePreset::Eclipse => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE)
+            }
             ThemePreset::Iceberg => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ICEBERG)
             }
             ThemePreset::Graphite => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::GRAPHITE)
             }
-            ThemePreset::Midnight => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MIDNIGHT),
+            ThemePreset::Midnight => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MIDNIGHT)
+            }
             ThemePreset::Nord => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::NORD),
             ThemePreset::Rose => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ROSE),
-            ThemePreset::Forest => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::FOREST),
-            ThemePreset::Solarized => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::SOLARIZED),
-            ThemePreset::Hornet => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::HORNET),
-            ThemePreset::Cobalt => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT),
+            ThemePreset::Forest => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::FOREST)
+            }
+            ThemePreset::Solarized => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::SOLARIZED)
+            }
+            ThemePreset::Hornet => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::HORNET)
+            }
+            ThemePreset::Cobalt => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT)
+            }
             ThemePreset::Clay => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::CLAY),
-            ThemePreset::Meadow => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MEADOW),
+            ThemePreset::Meadow => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MEADOW)
+            }
         }
     }
 }
@@ -437,6 +451,102 @@ impl TreePreviewState {
     }
 }
 
+/// An interaction a node-backed specimen reported through a context-free
+/// handler. Node interaction closures are `Arc<dyn Fn() + Send + Sync>` — no
+/// `&mut App` — so a specimen handler records intent here and the next render
+/// drains the queue into real specimen state (the backend requests the
+/// repaint after invoking a handler).
+pub enum NodeSpecimenEvent {
+    /// Toggle a boolean specimen key (e.g. `select-native-open`).
+    Toggle(String),
+    /// Set a boolean specimen key to a specific value (e.g. opening a dialog
+    /// whose trigger must remain idempotent).
+    SetToggle { key: String, value: bool },
+    /// Set a text specimen key and close the owning overlay
+    /// (e.g. select's change: record the value, close the panel).
+    Change {
+        open_key: String,
+        value_key: String,
+        value: String,
+    },
+    /// Set a text specimen key without touching any overlay state
+    /// (e.g. segmented-control change, button "last clicked" captions).
+    SetText { key: String, value: String },
+    /// Set or clear an optional text specimen key (e.g. either endpoint of a
+    /// partially selected calendar range).
+    SetOptionalText { key: String, value: Option<String> },
+    /// Set a selection index (e.g. a tri-state control's chosen segment).
+    Select { key: String, index: usize },
+    /// Increment a counter specimen key (e.g. `btn-clicks`).
+    Increment(String),
+    /// Update the DataTable sort state using the component's host-owned
+    /// sort-cycle contract.
+    DataTableSort { column: String },
+    /// Toggle a DataTable row and record the visible row action caption.
+    DataTableRowClick { row_id: String },
+    /// Apply a context-menu action to the mutable tree demo, then close it.
+    TreeContextAction {
+        action: String,
+        value: String,
+        label: String,
+    },
+    /// A preview-chrome control (the shell's own nav, search and panel tabs,
+    /// not a specimen) reporting through the same context-free seam. These
+    /// mutate `AppState` directly rather than specimen state.
+    Chrome(ChromeEvent),
+    /// A Tree interaction. Tree drives more host state than any other
+    /// specimen — selection, focus, expansion, rename, drag and menu — so it
+    /// gets its own event rather than a dozen flat variants.
+    Tree(TreeEvent),
+}
+
+/// State changes the node-backed Tree specimen can request.
+#[derive(Clone, Debug)]
+pub enum TreeEvent {
+    Focus(String),
+    ToggleExpand(String),
+    /// A resolved multi-selection, already computed by the specimen through
+    /// the shared `compute_selection`.
+    Select {
+        values: Vec<String>,
+        anchor: Option<String>,
+        focused: String,
+    },
+    /// Toggle every checkable leaf under the clicked row.
+    Check(Vec<String>),
+    RenameStart {
+        value: String,
+        label: String,
+    },
+    RenameChange(String),
+    RenameCommit(String),
+    RenameCancel,
+    OpenMenu {
+        value: String,
+        x: i32,
+        y: i32,
+    },
+    SetDrop {
+        value: String,
+        position: DropPosition,
+    },
+    Reorder {
+        from: String,
+        to: String,
+        position: DropPosition,
+    },
+}
+
+/// State changes the preview shell's own node-backed controls can request.
+#[derive(Clone, Debug)]
+pub enum ChromeEvent {
+    Section(Section),
+    ComponentSearch(String),
+    ActiveComponent(String),
+    TokenPanel(TokenPanel),
+    TokenInspectorQuery(String),
+}
+
 /// Global application state.
 pub struct AppState {
     pub section: Section,
@@ -452,6 +562,8 @@ pub struct AppState {
     #[allow(dead_code)]
     pub debug_clicks: u32,
     pub specimens: SpecimenState,
+    /// Pending events from node-backed specimens; drained at render start.
+    pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     pub tree: TreePreviewState,
 }
 
@@ -480,7 +592,135 @@ impl AppState {
             token_inspector_query: String::new(),
             debug_clicks: 0,
             specimens: SpecimenState::new(),
+            node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),
+        }
+    }
+
+    /// Apply queued node-specimen events to the specimen state. Called at the
+    /// top of every render so handler-triggered changes take effect in the
+    /// frame the backend's repaint request produces.
+    pub fn drain_node_events(&mut self) {
+        let events: Vec<NodeSpecimenEvent> = std::mem::take(&mut *self.node_events.lock().unwrap());
+        for event in events {
+            match event {
+                NodeSpecimenEvent::Toggle(key) => {
+                    self.specimens.toggle(&key);
+                }
+                NodeSpecimenEvent::SetToggle { key, value } => {
+                    self.specimens.set_toggle(&key, value);
+                }
+                NodeSpecimenEvent::Change {
+                    open_key,
+                    value_key,
+                    value,
+                } => {
+                    self.specimens.text.insert(value_key, value);
+                    self.specimens.toggles.insert(open_key, false);
+                }
+                NodeSpecimenEvent::SetText { key, value } => {
+                    self.specimens.text.insert(key, value);
+                }
+                NodeSpecimenEvent::SetOptionalText { key, value } => match value {
+                    Some(value) => {
+                        self.specimens.text.insert(key, value);
+                    }
+                    None => {
+                        self.specimens.text.remove(&key);
+                    }
+                },
+                NodeSpecimenEvent::Select { key, index } => {
+                    self.specimens.select(&key, index);
+                }
+                NodeSpecimenEvent::Increment(key) => {
+                    self.specimens.increment(&key);
+                }
+                NodeSpecimenEvent::DataTableSort { column } => {
+                    let current_col = self
+                        .specimens
+                        .text
+                        .get("dt-sort-col")
+                        .cloned()
+                        .unwrap_or_else(|| "name".to_string());
+                    let current_dir = self
+                        .specimens
+                        .text
+                        .get("dt-sort-dir")
+                        .cloned()
+                        .unwrap_or_else(|| "asc".to_string());
+                    if column == current_col {
+                        let next_dir = if current_dir == "asc" { "desc" } else { "asc" };
+                        self.specimens
+                            .text
+                            .insert("dt-sort-dir".to_string(), next_dir.to_string());
+                    } else {
+                        self.specimens
+                            .text
+                            .insert("dt-sort-col".to_string(), column);
+                        self.specimens
+                            .text
+                            .insert("dt-sort-dir".to_string(), "asc".to_string());
+                    }
+                }
+                NodeSpecimenEvent::DataTableRowClick { row_id } => {
+                    self.specimens.toggle(&format!("dt-row-{row_id}"));
+                    self.specimens.text.insert(
+                        "dt-last-action".to_string(),
+                        format!("Clicked row {row_id}"),
+                    );
+                }
+                NodeSpecimenEvent::TreeContextAction {
+                    action,
+                    value,
+                    label,
+                } => {
+                    match action.as_str() {
+                        "rename" => self.tree.start_rename(&value, &label),
+                        "delete" => self.tree.delete_node(&value),
+                        _ => {}
+                    }
+                    self.tree.close_menu();
+                }
+                NodeSpecimenEvent::Tree(event) => match event {
+                    TreeEvent::Focus(value) => self.tree.set_focused(&value),
+                    TreeEvent::ToggleExpand(value) => self.tree.toggle_expanded(&value),
+                    TreeEvent::Select {
+                        values,
+                        anchor,
+                        focused,
+                    } => self.tree.apply_selection(values, anchor, &focused),
+                    TreeEvent::Check(leaves) => self.tree.toggle_checked(&leaves),
+                    TreeEvent::RenameStart { value, label } => {
+                        self.tree.start_rename(&value, &label)
+                    }
+                    TreeEvent::RenameChange(text) => self.tree.editing_text = text,
+                    TreeEvent::RenameCommit(text) => self.tree.commit_rename(&text),
+                    TreeEvent::RenameCancel => self.tree.cancel_rename(),
+                    TreeEvent::OpenMenu { value, x, y } => self.tree.open_menu(&value, x, y),
+                    TreeEvent::SetDrop { value, position } => {
+                        self.tree.set_drop(&value, position)
+                    }
+                    TreeEvent::Reorder {
+                        from,
+                        to,
+                        position,
+                    } => {
+                        self.tree.reorder(&from, &to, position);
+                        self.tree.clear_drop();
+                    }
+                },
+                NodeSpecimenEvent::Chrome(event) => match event {
+                    ChromeEvent::Section(section) => self.section = section,
+                    ChromeEvent::ComponentSearch(query) => self.component_search = query,
+                    ChromeEvent::ActiveComponent(slug) => {
+                        self.active_component_slug = Some(slug);
+                    }
+                    ChromeEvent::TokenPanel(panel) => self.active_token_panel = panel,
+                    ChromeEvent::TokenInspectorQuery(query) => {
+                        self.token_inspector_query = query;
+                    }
+                },
+            }
         }
     }
 

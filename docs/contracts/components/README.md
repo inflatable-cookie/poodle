@@ -12,6 +12,8 @@ primitives and layout surfaces through higher-order application components.
 - `action-discovery-panel.md`
 - `agent-chat-input.md`
 - `agent-message.md`
+- `agent-plan-record.md`
+- `agent-plan.md`
 - `agent-question-record.md`
 - `agent-question.md`
 - `agent-transcript.md`

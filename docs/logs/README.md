@@ -15,6 +15,7 @@ Logs record completed batches and decision evidence.
 
 - `2026-07/29-public-dock-drag-extension-and-preview-artifact.md`
 - `2026-08/01-public-overlay-geometry-observation.md`
+- `2026-08/07-175745-gpui-node-backend-batch-b-handoff.md`
 
 ## Next Task
 

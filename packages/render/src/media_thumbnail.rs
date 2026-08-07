@@ -23,6 +23,19 @@ const FRAME_FILL_REF_REM: f32 = 20.0;
 const FRAME_XL_REM: f32 = 24.0;
 
 pub fn media_thumbnail(spec: &MediaThumbnailSpec, theme: &dyn ThemeProvider) -> Node {
+    media_thumbnail_with_content(spec, theme, None)
+}
+
+/// Render a thumbnail with caller-provided media content in the ready frame.
+///
+/// The plain `media_thumbnail` entry point keeps the contract fallback icon;
+/// composites such as `MediaPreview` can supply a node here for their media
+/// slot without teaching the shared spec about backend elements.
+pub fn media_thumbnail_with_content(
+    spec: &MediaThumbnailSpec,
+    theme: &dyn ThemeProvider,
+    media_content: Option<Node>,
+) -> Node {
     let panel = theme.resolve_color(spec.frame_panel_token());
     let border = theme.resolve_color(spec.frame_border_token());
     let text_primary = theme.resolve_color("color.text.primary");
@@ -144,36 +157,38 @@ pub fn media_thumbnail(spec: &MediaThumbnailSpec, theme: &dyn ThemeProvider) -> 
         }
 
         frame = frame.child(state);
+    } else if let Some(content) = media_content {
+        frame = frame.child(content);
     } else {
         // ── Placeholder fallback icon (contract §9) ────────────
         let mut fallback = Node::icon(spec.fallback_icon(), rem_to_px(1.75));
         fallback.style.descriptor.text_color = Some(placeholder_color);
         frame = frame.child(fallback);
+    }
 
-        // ── Play indicator (audio/video, contract §3) ─────────
-        if spec.shows_play_indicator() {
-            let play_color = theme.resolve_color(spec.play_color_token());
-            let mut chip = Node::container();
-            {
-                let s = &mut chip.style;
-                s.descriptor.background = Some(with_alpha(elevated, elevated.3 * 0.78));
-                s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(2.0));
-                s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(2.0));
-                s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-            }
-            all_radius(&mut chip, play_radius);
-            chip.position = NodePosition::Absolute {
-                top: None,
-                left: Some(rem_to_px(0.625)),
-                right: None,
-                bottom: Some(rem_to_px(0.625)),
-            };
-            let mut glyph = Node::icon(spec.play_indicator_icon(), rem_to_px(0.9375));
-            glyph.style.descriptor.text_color = Some(play_color);
-            frame = frame.child(chip.child(glyph));
+    // ── Play indicator (audio/video, contract §3) ─────────
+    if spec.shows_play_indicator() {
+        let play_color = theme.resolve_color(spec.play_color_token());
+        let mut chip = Node::container();
+        {
+            let s = &mut chip.style;
+            s.descriptor.background = Some(with_alpha(elevated, elevated.3 * 0.78));
+            s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(2.0));
+            s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(2.0));
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
+        all_radius(&mut chip, play_radius);
+        chip.position = NodePosition::Absolute {
+            top: None,
+            left: Some(rem_to_px(0.625)),
+            right: None,
+            bottom: Some(rem_to_px(0.625)),
+        };
+        let mut glyph = Node::icon(spec.play_indicator_icon(), rem_to_px(0.9375));
+        glyph.style.descriptor.text_color = Some(play_color);
+        frame = frame.child(chip.child(glyph));
     }
 
     // ── Badge overlay (contract §9) ────────────────────────────

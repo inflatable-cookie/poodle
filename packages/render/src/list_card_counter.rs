@@ -36,6 +36,7 @@ pub fn list_card_counter(
     let dim = rem_to_px(spec.icon_size_rem());
     icon_el.style.descriptor.layout.width = LayoutSizing::Fixed(dim);
     icon_el.style.descriptor.layout.height = LayoutSizing::Fixed(dim);
+    icon_el.style.descriptor.text_color = Some(secondary);
 
     let count = Node::text(format!("{}", spec.count));
 
@@ -69,4 +70,24 @@ pub fn list_card_counter(
     }
 
     row
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn icon_and_count_share_the_secondary_tone() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = ListCardCounterSpec::new("file-text", 24);
+        let node = list_card_counter(&spec, &theme, None);
+        let secondary = theme.resolve_color(ListCardCounterSpec::text_secondary_token());
+
+        assert_eq!(node.style.descriptor.text_color, Some(secondary));
+        assert_eq!(
+            node.children[0].style.descriptor.text_color,
+            Some(secondary)
+        );
+    }
 }

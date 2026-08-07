@@ -1,6 +1,6 @@
+use crate::node_compat::{ErrorBoundary, Eyebrow, Surface, Text};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{ErrorBoundary, Eyebrow, Surface, Text};
 use poodle_specs::{
     ErrorBoundarySpec, EyebrowSpec, PaddingScale, SurfaceBorder, SurfaceSpec, TextSpec,
 };
@@ -22,7 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_padding(PaddingScale::Md),
                     theme,
                 )
-                .with_content(Text::from_spec(
+                .with_content(Text::node_from_spec(
                     TextSpec::new("Stable child content renders without boundary chrome."),
                     theme,
                 )),
@@ -45,9 +45,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             "Default fallback",
             theme,
             ErrorBoundary::from_spec(
-                ErrorBoundarySpec::new().with_error_message(
-                    "An unexpected error occurred while rendering this view.",
-                ),
+                ErrorBoundarySpec::new()
+                    .with_error_message("An unexpected error occurred while rendering this view."),
                 theme,
             ),
         ))

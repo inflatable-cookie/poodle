@@ -2,7 +2,7 @@ use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::Table;
+use crate::node_compat::Table;
 use poodle_specs::{TableColumn, TableRow, TableSpec};
 
 #[derive(Clone, Copy)]

@@ -21,8 +21,9 @@ renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
 ## What This Crate Does NOT Own
 
 - The GPUI rendering engine — owned by `gpui`
-- Component structs and their `IntoElement` implementations — owned by
-  `poodle-gpui-components`
+- Component recipes — owned by `poodle-render`, which emits backend-neutral
+  `poodle-node` trees; `poodle-gpui-node-backend` interprets them as GPUI
+  elements (g12.019 replaced the hand-written `poodle-gpui-components` tier)
 - Token definitions and values — owned by `poodle-tokens`
 - Component spec structs — owned by `poodle-specs`
 

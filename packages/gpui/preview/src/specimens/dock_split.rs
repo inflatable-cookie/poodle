@@ -1,10 +1,12 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{DockRegion, Eyebrow, SplitView};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{DockRegion, Eyebrow, SplitView};
+use poodle_node::Node;
 use poodle_specs::EyebrowSpec;
+use poodle_tokens::typed::ColorValue;
 use poodle_specs::{
     DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, PanelTabItem, SplitOrientation,
     SplitViewSpec,
@@ -151,12 +153,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     div().h(px(100.0)).child(
                         DockRegion::from_spec(top_spec, theme).with_content(
-                            div().p(px(8.0)).child(
-                                div()
-                                    .text_xs()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child("Output: Build succeeded in 2.3s"),
-                            ),
+                            panel_body("Output: Build succeeded in 2.3s", text_secondary, false),
                         ),
                     ),
                 ),
@@ -175,12 +172,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().h(px(120.0)).flex().child(
                         div().w(px(200.0)).h_full().child(
                             DockRegion::from_spec(static_left_spec, theme).with_content(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Files: index.ts, package.json, README.md"),
-                                ),
+                                panel_body("Files: index.ts, package.json, README.md", text_secondary, false),
                             ),
                         ),
                     ),
@@ -200,21 +192,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().h(px(160.0)).flex().child(
                         div().w(px(220.0)).h_full().child(
                             DockRegion::from_spec(flex_expanded_spec, theme)
-                                .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("dock-active-tab".to_string(), tab_id.to_string());
-                                    cx.notify();
-                                }))
+                                .on_tab_change(tab_change(&state.node_events, "dock-active-tab", None))
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .whitespace_nowrap()
-                                            .child(tab_content.to_string()),
-                                    ),
+                                    panel_body(tab_content.to_string(), text_secondary, true),
                                 ),
                         ),
                     ),
@@ -233,7 +213,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     div().h(px(100.0)).flex().child(
-                        DockRegion::from_spec(flex_collapsed_spec, theme).with_content(div()),
+                        DockRegion::from_spec(flex_collapsed_spec, theme).with_content(Node::container()),
                     ),
                 ),
         )
@@ -258,25 +238,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .h_full()
                                 .child(
                                     DockRegion::from_spec(toggle_spec, theme)
-                                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                            this.state.specimens.text.insert(
-                                                "dock-toggle-tab".to_string(),
-                                                tab_id.to_string(),
-                                            );
-                                            // Expand when a tab is clicked while collapsed
-                                            this.state
-                                                .specimens
-                                                .toggles
-                                                .insert("dock-toggle-collapsed".to_string(), false);
-                                            cx.notify();
-                                        }))
+                                        .on_tab_change(tab_change(&state.node_events, "dock-toggle-tab", Some("dock-toggle-collapsed")))
                                         .with_content(
-                                            div().p(px(8.0)).child(
-                                                div()
-                                                    .text_xs()
-                                                    .text_color(color_to_hsla(text_secondary))
-                                                    .child(format!("Active: {}", toggle_tab)),
-                                            ),
+                                            panel_body(format!("Active: {}", toggle_tab), text_secondary, false),
                                         ),
                                 ),
                         )
@@ -318,20 +282,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().h(px(120.0)).flex().justify_end().child(
                         div().w(px(200.0)).h_full().child(
                             DockRegion::from_spec(flex_right_spec, theme)
-                                .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                    this.state
-                                        .specimens
-                                        .text
-                                        .insert("dock-right-tab".to_string(), tab_id.to_string());
-                                    cx.notify();
-                                }))
+                                .on_tab_change(tab_change(&state.node_events, "dock-right-tab", None))
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child(format!("Active: {}", right_tab)),
-                                    ),
+                                    panel_body(format!("Active: {}", right_tab), text_secondary, false),
                                 ),
                         ),
                     ),
@@ -356,24 +309,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .h(px(if bottom_collapsed { 36.0 } else { 120.0 }))
                                 .child(
                                     DockRegion::from_spec(bottom_spec, theme)
-                                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                            this.state.specimens.text.insert(
-                                                "dock-bottom-tab".to_string(),
-                                                tab_id.to_string(),
-                                            );
-                                            this.state
-                                                .specimens
-                                                .toggles
-                                                .insert("dock-bottom-collapsed".to_string(), false);
-                                            cx.notify();
-                                        }))
+                                        .on_tab_change(tab_change(&state.node_events, "dock-bottom-tab", Some("dock-bottom-collapsed")))
                                         .with_content(
-                                            div().p(px(8.0)).child(
-                                                div()
-                                                    .text_xs()
-                                                    .text_color(color_to_hsla(text_secondary))
-                                                    .child(format!("Terminal: {}", bottom_tab)),
-                                            ),
+                                            panel_body(format!("Terminal: {}", bottom_tab), text_secondary, false),
                                         ),
                                 ),
                         )
@@ -432,12 +370,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("Quiet"),
-                                    ),
+                                    panel_body("Quiet", text_secondary, false),
                                 ),
                             ),
                         )
@@ -458,12 +391,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("Standard"),
-                                    ),
+                                    panel_body("Standard", text_secondary, false),
                                 ),
                             ),
                         )
@@ -484,12 +412,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("Strong"),
-                                    ),
+                                    panel_body("Strong", text_secondary, false),
                                 ),
                             ),
                         ),
@@ -521,7 +444,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_collapsed_posture(DockCollapsedPosture::Hidden),
                             theme,
                         )
-                        .with_content(div()),
+                        .with_content(Node::container()),
                     ),
                 ),
         )
@@ -552,7 +475,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_collapsed_posture(DockCollapsedPosture::IconStrip),
                             theme,
                         )
-                        .with_content(div()),
+                        .with_content(Node::container()),
                     ),
                 ),
         )
@@ -584,12 +507,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_content(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Accepts cross-region panel drops"),
-                                ),
+                                panel_body("Accepts cross-region panel drops", text_secondary, false),
                             ),
                         ),
                     ),
@@ -630,12 +548,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("Left dock \u{2014} 3 panels"),
-                                    ),
+                                    panel_body("Left dock \u{2014} 3 panels", text_secondary, false),
                                 ),
                             ),
                         )
@@ -653,12 +566,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_content(
-                                    div().p(px(8.0)).child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child("Right dock \u{2014} 1 panel"),
-                                    ),
+                                    panel_body("Right dock \u{2014} 1 panel", text_secondary, false),
                                 ),
                             ),
                         ),
@@ -678,20 +586,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().h(px(100.0)).child(
                         SplitView::from_spec(h_split_spec, theme)
                             .with_primary(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Primary pane"),
-                                ),
+                                panel_body("Primary pane", text_secondary, false),
                             )
                             .with_secondary(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Secondary pane"),
-                                ),
+                                panel_body("Secondary pane", text_secondary, false),
                             ),
                     ),
                 ),
@@ -710,22 +608,55 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().h(px(120.0)).child(
                         SplitView::from_spec(v_split_spec, theme)
                             .with_primary(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Primary pane"),
-                                ),
+                                panel_body("Primary pane", text_secondary, false),
                             )
                             .with_secondary(
-                                div().p(px(8.0)).child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Secondary pane"),
-                                ),
+                                panel_body("Secondary pane", text_secondary, false),
                             ),
                     ),
                 ),
         )
+}
+
+/// The dock/split content slot used throughout this specimen: a padded block
+/// holding one line of secondary-tinted caption text.
+fn panel_body(text: impl Into<String>, color: ColorValue, nowrap: bool) -> Node {
+    let mut body = Node::container();
+    {
+        let s = &mut body.style;
+        let pad = &mut s.descriptor.layout.spacing.padding;
+        pad.top = 8.0;
+        pad.right = 8.0;
+        pad.bottom = 8.0;
+        pad.left = 8.0;
+        // gpui `.text_xs()` is 0.75rem against the preview's 16px base.
+        s.text_size = Some(12.0);
+        s.descriptor.text_color = Some(color);
+        s.text_wrap = !nowrap;
+    }
+    body.child(Node::text(text.into()))
+}
+
+/// A context-free `on_tab_change` for the dock specimens: records the chosen
+/// tab and, where the demo expands on selection, clears the collapsed flag.
+/// Both land on the node event queue, drained at the top of the next render.
+fn tab_change(
+    queue: &std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+    expand_key: Option<&'static str>,
+) -> std::sync::Arc<dyn Fn(&str) + Send + Sync> {
+    let queue = std::sync::Arc::clone(queue);
+    std::sync::Arc::new(move |tab_id: &str| {
+        let mut events = queue.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: tab_id.to_string(),
+        });
+        if let Some(expand) = expand_key {
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: expand.to_string(),
+                value: false,
+            });
+        }
+    })
 }

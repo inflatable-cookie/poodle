@@ -34,9 +34,15 @@
 .poodle-agent-message[data-density="comfortable"] { --poodle-agent-message-block-gap: 1.125rem; --poodle-agent-message-list-indent: 1.5rem; --poodle-agent-message-inset: 1rem; }
 
 .poodle-agent-message[data-role="user"] {
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(100%, var(--poodle-agent-message-measure));
+  margin-left: auto;
   padding: var(--poodle-agent-message-inset);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-color-background-surface);
+  /* One step lighter than the canvas so the operator's own words read as
+     theirs at a glance; right-aligned to keep the two voices apart. */
+  background: var(--poodle-color-background-elevated);
 }
 
 .poodle-agent-message__body {
@@ -63,9 +69,13 @@
 .poodle-agent-message__heading[data-level="5"] { font-size: 1em; }
 .poodle-agent-message__heading[data-level="6"] { font-size: 0.9em; }
 
+/* Markers sit inside the item edge and the whole list indents by the
+   density-scaled token: marker and text stay on one line, and the list reads
+   as set off from the prose without markers protruding past it. */
 .poodle-agent-message__list {
   margin: 0;
   padding-left: var(--poodle-agent-message-list-indent);
+  list-style-position: inside;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;

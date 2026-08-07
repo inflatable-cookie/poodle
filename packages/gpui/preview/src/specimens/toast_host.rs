@@ -1,7 +1,7 @@
+use crate::node_compat::{Button, Eyebrow, ToastHost};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, ToastHost};
 use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastTone};
 

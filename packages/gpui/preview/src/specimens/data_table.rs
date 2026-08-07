@@ -1,10 +1,12 @@
-use crate::app_state::AppState;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{DataTable, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{DataTable, Eyebrow};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, StatusTone};
 use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
@@ -51,7 +53,31 @@ fn make_rows() -> Vec<TableRowSpec> {
     ]
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn sort_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |column| {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::DataTableSort {
+                column: column.to_string(),
+            });
+    })
+}
+
+fn row_click_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |row_id| {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::DataTableRowClick {
+                row_id: row_id.to_string(),
+            });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -173,49 +199,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_row_action_label("Open"),
                         theme,
                     )
-                    .on_sort(cx.listener(|this, col_id: &str, _w, cx| {
-                        let current_col = this
-                            .state
-                            .specimens
-                            .text
-                            .get("dt-sort-col")
-                            .cloned()
-                            .unwrap_or_else(|| "name".to_string());
-                        let current_dir = this
-                            .state
-                            .specimens
-                            .text
-                            .get("dt-sort-dir")
-                            .cloned()
-                            .unwrap_or_else(|| "asc".to_string());
-
-                        if col_id == current_col {
-                            // Toggle direction
-                            let new_dir = if current_dir == "asc" { "desc" } else { "asc" };
-                            this.state
-                                .specimens
-                                .text
-                                .insert("dt-sort-dir".to_string(), new_dir.to_string());
-                        } else {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("dt-sort-col".to_string(), col_id.to_string());
-                            this.state
-                                .specimens
-                                .text
-                                .insert("dt-sort-dir".to_string(), "asc".to_string());
-                        }
-                        cx.notify();
-                    }))
-                    .on_row_click(cx.listener(|this, row_id: &str, _w, cx| {
-                        this.state.specimens.toggle(&format!("dt-row-{}", row_id));
-                        this.state.specimens.text.insert(
-                            "dt-last-action".to_string(),
-                            format!("Clicked row {}", row_id),
-                        );
-                        cx.notify();
-                    })),
+                    .on_sort(sort_handler(state))
+                    .on_row_click(row_click_handler(state)),
                 ),
         )
         // Status line

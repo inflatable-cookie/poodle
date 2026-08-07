@@ -44,9 +44,12 @@ pub fn detail_section_group(
             }
         }
         DetailSectionGroupLayout::Grid => {
-            // Wrapping grid. Each column is at least `min_column_width` wide
-            // and grows to fill the row, wrapping when columns no longer fit.
+            // Match the old GPUI tier's capped wrapping grid: the percentage
+            // seed admits at most `max_columns`, then flex-grow distributes
+            // the remaining row width evenly.
             let column_min = rem_to_px(spec.min_column_width_rem());
+            let columns = spec.max_columns.clamp(2, 5) as f32;
+            let basis = 1.0 / columns - 0.01;
 
             {
                 let s = &mut root.style;
@@ -60,9 +63,11 @@ pub fn detail_section_group(
                     let s = &mut wrap.style;
                     // Explicit Row (see switch.rs).
                     s.descriptor.layout.direction = LayoutDirection::Row;
-                    // flex: 1 — grow from a zero basis, min width legible.
+                    // GPUI's node backend maps width_pct to `relative(...)`,
+                    // preserving the old percentage flex-basis geometry.
                     s.flex_grow = Some(1.0);
-                    s.flex_basis = Some(0.0);
+                    s.flex_shrink_zero = true;
+                    s.width_pct = Some(basis);
                     s.min_width = Some(column_min);
                 }
                 root = root.child(wrap.child(child));
@@ -75,4 +80,28 @@ pub fn detail_section_group(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn max_columns_seeds_each_grid_cell_with_the_old_percentage_width() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = DetailSectionGroupSpec::new().with_max_columns(2);
+        let node = detail_section_group(
+            &spec,
+            &theme,
+            vec![Node::container(), Node::container(), Node::container()],
+        );
+
+        assert_eq!(node.children.len(), 3);
+        for cell in &node.children {
+            assert_eq!(cell.style.width_pct, Some(0.49));
+            assert_eq!(cell.style.flex_grow, Some(1.0));
+            assert!(cell.style.flex_shrink_zero);
+        }
+    }
 }

@@ -9,16 +9,14 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{PillAppearance, PillSpec, PillTone, TextInputSpec, TokenInputSpec};
 
 use crate::color::{mix_srgb, TRANSPARENT};
-use crate::pill::pill;
+use crate::pill::pill_with_remove;
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, token_input_font_rem,
-    token_input_gap_rem, token_input_pad_x_offset_rem, token_input_pad_y_offset_rem,
+    control_space_x_rem, rem_to_px, resolve_semantic_size, token_input_gap_rem,
+    token_input_pad_x_offset_rem, token_input_pad_y_offset_rem,
 };
 use crate::text_input::text_input;
 
@@ -43,16 +41,12 @@ pub fn token_input(
 
     let surface = theme.resolve_color("color.background.surface");
     let border = theme.resolve_color("color.border.subtle");
-    let text_secondary = theme.resolve_color("color.text.secondary");
     // Field family matches TextInput's interactive-subtle treatment: a
     // surface-mix fill behind a subtle border.
     let fill = mix_srgb(surface, TRANSPARENT, 0.96);
     let radius = theme.resolve_radius("radius.control");
 
     // Size-driven font + density-driven wrap gap (contract §8).
-    let token_font = token_input_font_rem(effective_size)
-        .map(rem_to_px)
-        .unwrap_or_else(|| theme.resolve_space("typography.body.size"));
     let gap = rem_to_px(token_input_gap_rem(spec.density));
 
     // Padding-block from control.y + per-size offset; padding-inline from
@@ -83,43 +77,23 @@ pub fn token_input(
         pad.bottom = pad_y;
     }
 
-    for (index, token) in spec.values.iter().enumerate() {
-        let token_pill = pill(
-            &PillSpec::new()
-                .with_label(token.clone())
-                .with_tone(PillTone::Neutral)
-                .with_appearance(PillAppearance::Subtle)
-                .with_size(pill_size(effective_size)),
-            theme,
-        );
-        // Token = pill label + remove `×` (contract §2). The remove
-        // affordance is omitted while disabled or read-only.
-        let mut chip = Node::container();
-        {
-            let s = &mut chip.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.min_width = Some(0.0);
-            s.descriptor.layout.spacing.gap = rem_to_px(0.125);
-        }
-        let mut chip = chip.child(token_pill);
-        if can_edit {
-            let mut remove = Node::button("×");
-            remove.id = Some(format!("poodle-token-remove-{index}"));
-            remove.style.descriptor.text_color = Some(text_secondary);
-            remove.style.text_size = Some(token_font);
-            remove.interaction.focusable = true;
-
-            if let Some(handler) = &on_remove {
+    for token in &spec.values {
+        let remove = if can_edit {
+            on_remove.as_ref().map(|handler| {
                 let handler = Arc::clone(handler);
                 let value = token.clone();
-                remove.style.descriptor.cursor = CursorHint::Pointer;
-                remove.interaction.on_activate = Some(Arc::new(move || handler(&value)));
-            }
-
-            chip = chip.child(remove);
-        }
-        row = row.child(chip);
+                Arc::new(move || handler(&value)) as Arc<dyn Fn() + Send + Sync>
+            })
+        } else {
+            None
+        };
+        let token_pill = PillSpec::new()
+            .with_label(token.clone())
+            .with_tone(PillTone::Neutral)
+            .with_appearance(PillAppearance::Subtle)
+            .with_size(pill_size(effective_size))
+            .with_removable(can_edit);
+        row = row.child(pill_with_remove(&token_pill, theme, remove));
     }
 
     // Live draft control — a real composed text input. Inherits size,

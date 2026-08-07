@@ -6,9 +6,7 @@
 //! Anatomy (contract §2): icon + content (title/message/actions) + dismiss.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{ButtonSpec, RemediationAction, RemediationBannerSpec};
 
 use crate::button::button;

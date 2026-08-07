@@ -14,9 +14,7 @@
 //! intrinsic width (shrink 0), utility justifies to the end.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::AppHeaderSpec;
 
 use crate::color::with_alpha;

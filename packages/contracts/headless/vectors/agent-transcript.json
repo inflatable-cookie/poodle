@@ -169,6 +169,55 @@
       ]
     },
     {
+      "name": "a decided plan splits a run",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "decided-plan",
+          "id": "p",
+          "plan": "Ship it.",
+          "status": "accepted"
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a"
+          ],
+          "leadCallId": "a",
+          "hiddenCount": 0,
+          "status": "success"
+        },
+        {
+          "kind": "decided-plan",
+          "id": "p"
+        },
+        {
+          "kind": "tool-run",
+          "id": "b",
+          "callIds": [
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 0,
+          "status": "success"
+        }
+      ]
+    },
+    {
       "name": "the screenshot turn",
       "items": [
         {

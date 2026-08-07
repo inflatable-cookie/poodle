@@ -1,12 +1,39 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{ColorPicker, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{ColorPicker, Eyebrow};
 use poodle_specs::{ColorInputMode, ColorPickerSpec, EyebrowSpec};
+use std::sync::{Arc, Mutex};
+
+fn toggle_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move || {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Toggle(key.to_string()));
+    })
+}
+
+fn change_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -86,18 +113,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("basic")
-                            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                                this.state.specimens.toggle("color-picker-basic-open");
-                                cx.notify();
-                            }))
-                            .on_change(cx.listener(
-                                |this, val: &str, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "color-picker-basic-value".to_string(),
-                                        val.to_string(),
-                                    );
-                                    cx.notify();
-                                },
+                            .on_toggle(toggle_handler(
+                                &state.node_events,
+                                "color-picker-basic-open",
+                            ))
+                            .on_change(change_handler(
+                                &state.node_events,
+                                "color-picker-basic-value",
                             )),
                         )
                         .child(
@@ -127,17 +149,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("swatches")
-                    .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                        this.state.specimens.toggle("color-picker-swatches-open");
-                        cx.notify();
-                    }))
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("color-picker-swatches-value".to_string(), val.to_string());
-                        cx.notify();
-                    })),
+                    .on_toggle(toggle_handler(
+                        &state.node_events,
+                        "color-picker-swatches-open",
+                    ))
+                    .on_change(change_handler(
+                        &state.node_events,
+                        "color-picker-swatches-value",
+                    )),
                 ),
         )
         // --- With alpha ---
@@ -164,18 +183,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("alpha")
-                            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                                this.state.specimens.toggle("color-picker-alpha-open");
-                                cx.notify();
-                            }))
-                            .on_change(cx.listener(
-                                |this, val: &str, _w, cx| {
-                                    this.state.specimens.text.insert(
-                                        "color-picker-alpha-value".to_string(),
-                                        val.to_string(),
-                                    );
-                                    cx.notify();
-                                },
+                            .on_toggle(toggle_handler(
+                                &state.node_events,
+                                "color-picker-alpha-open",
+                            ))
+                            .on_change(change_handler(
+                                &state.node_events,
+                                "color-picker-alpha-value",
                             )),
                         )
                         .child(
@@ -205,13 +219,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("open")
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("color-picker-open-value".to_string(), val.to_string());
-                        cx.notify();
-                    })),
+                    .on_change(change_handler(
+                        &state.node_events,
+                        "color-picker-open-value",
+                    )),
                 ),
         )
         // --- Preview only (no input) ---

@@ -483,6 +483,8 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     note: "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
     exportNames: [
       "AgentMessage",
+      "AgentPlan",
+      "AgentPlanRecord",
       "AgentQuestion",
       "AgentQuestionRecord",
       "AgentTranscript",

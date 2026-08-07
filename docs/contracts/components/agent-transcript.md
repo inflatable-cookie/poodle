@@ -34,11 +34,13 @@ the same adjacency scan.
   │   ├── [Runway .agent-transcript__runway] <div>  (conditional: virtualized; holds total scroll height)
   │   │   └── [Slice .agent-transcript__slice] <div>  (translated to the window's offset)
   │   │       └── [Block .agent-transcript__block] <div>  (repeated; data-kind)
-  │   │           ├── AgentMessage      (data-kind="message")
-  │   │           ├── ToolCallGroup     (data-kind="tool-run")
-  │   │           └── ChangedFiles      (data-kind="changed-files")
+  │   │           ├── AgentMessage         (data-kind="message")
+  │   │           ├── ToolCallGroup        (data-kind="tool-run")
+  │   │           ├── ChangedFiles         (data-kind="changed-files")
+  │   │           ├── AgentQuestionRecord  (data-kind="answered-question")
+  │   │           └── AgentPlanRecord      (data-kind="decided-plan")
   │   ├── [Activity .agent-transcript__activity] <div>  (conditional: an activity item is present)
-  │   │   ├── [Activity Spinner .agent-transcript__activity-spinner] Spinner (variant="dots")
+  │   │   ├── [Activity Spinner .agent-transcript__activity-spinner] Spinner (variant="dots")  (omitted when the activity item sets spinning: false)
   │   │   └── [Activity Label .agent-transcript__activity-label] <span>
   │   └── [Empty .agent-transcript__empty] EmptyState  (conditional: no items)
   └── [Jump .agent-transcript__jump] <button type="button">  (conditional: not pinned to bottom)
@@ -53,7 +55,7 @@ the same adjacency scan.
 | Runway | no | full-height spacer that gives the scrollbar its range while only a window of blocks exists | — |
 | Slice | no | the rendered window, offset to sit where its blocks belong | — |
 | Block | yes | one grouped block; `data-kind` carries which | `--poodle-space-stack-lg` (between blocks) |
-| Activity | no | the live footer — spinner plus "Working for 1h 1m" | `--poodle-color-text-secondary` |
+| Activity | no | the live footer — spinner plus "Working for 1h 1m"; terminal states ("Turn cancelled") reuse the strip with `spinning: false`, which omits the spinner so nothing signals ongoing work | `--poodle-color-text-secondary` |
 | Empty | no | `EmptyState` shown when there are no items at all | (EmptyState contract) |
 | Jump | no | returns the reader to the bottom and re-arms following | `--poodle-color-background-elevated`, `--poodle-radius-pill`, `--poodle-elevation-overlay` |
 
@@ -140,12 +142,31 @@ type ChangedFile = {
 };
 
 type TranscriptChangedFiles = { kind: "changed-files"; id: string; files: ChangedFile[] };
-type TranscriptActivity = { kind: "activity"; id: string; label: string };
+type TranscriptActivity = { kind: "activity"; id: string; label: string; spinning?: boolean };
+
+// The records live items leave behind; both render read-only. See
+// agent-question-record.md and agent-plan-record.md.
+type TranscriptAnsweredQuestion = {
+  kind: "answered-question";
+  id: string;
+  question: AgentQuestionItem;
+  answer: AgentQuestionAnswer;
+};
+type TranscriptDecidedPlan = {
+  kind: "decided-plan";
+  id: string;
+  /** Raw markdown of the plan that was decided. */
+  plan: string;
+  status: "accepted" | "revised" | "dismissed";
+  decidedAt?: string;
+};
 
 type TranscriptItem =
   | TranscriptMessage
   | TranscriptToolCall
   | TranscriptChangedFiles
+  | TranscriptAnsweredQuestion
+  | TranscriptDecidedPlan
   | TranscriptActivity;
 
 /** What grouping produces. */
@@ -154,6 +175,8 @@ type TranscriptBlock =
   | TranscriptMessage
   | TranscriptToolRun
   | TranscriptChangedFiles
+  | TranscriptAnsweredQuestion
+  | TranscriptDecidedPlan
   | TranscriptActivity;
 ```
 
@@ -336,7 +359,7 @@ block's own height.
 | `data-empty` | `true` | root, when there are no items |
 | `data-pinned` | `true`/`false` | root |
 | `data-virtualized` | `true`/`false` | root |
-| `data-kind` | `message`/`tool-run`/`changed-files` | each block |
+| `data-kind` | `message`/`tool-run`/`changed-files`/`answered-question`/`decided-plan` | each block |
 
 ## 9. Svelte Notes
 

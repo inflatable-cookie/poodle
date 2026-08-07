@@ -1,17 +1,68 @@
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{Breadcrumbs, Button, Eyebrow, IntoCompatNode, PageHeader, Pill};
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Breadcrumbs, Button, Eyebrow, PageHeader, Pill, TimeAgo};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
     BreadcrumbItem, BreadcrumbsSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec,
-    PillAppearance, PillSpec, PillTone, StatusTone, TimeAgoSpec,
+    PillAppearance, PillSpec, PillTone, StatusTone,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("color.text.secondary");
+fn actions(theme: &GpuiThemeProvider, items: &[(&str, &str)]) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.spacing.gap = 6.0;
+    for (id, label) in items {
+        row = row.child(
+            Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_label(*label)
+                    .with_size(ControlSize::Sm),
+                theme,
+            )
+            .with_id(*id)
+            .into_compat_node(),
+        );
+    }
+    row
+}
 
+fn meta(theme: &GpuiThemeProvider) -> Node {
+    let secondary = theme.resolve_color("color.text.secondary");
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = 12.0;
+    row = row.child(
+        Pill::from_spec(
+            PillSpec::new()
+                .with_label("Active")
+                .with_tone(PillTone::Success)
+                .with_appearance(PillAppearance::Badge),
+            theme,
+        )
+        .into_compat_node(),
+    );
+    let mut every = Node::text("Every 6 hours");
+    every.style.text_size = Some(13.0);
+    every.style.descriptor.text_color = Some(secondary);
+    row = row.child(every);
+    let mut last = Node::container();
+    last.style.descriptor.layout.direction = LayoutDirection::Row;
+    last.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    last.style.descriptor.layout.spacing.gap = 4.0;
+    let mut last_label = Node::text("Last run");
+    last_label.style.text_size = Some(13.0);
+    last_label.style.descriptor.text_color = Some(secondary);
+    let mut last_value = Node::text("4mo ago");
+    last_value.style.text_size = Some(13.0);
+    last_value.style.descriptor.text_color = Some(secondary);
+    row.child(last.child(last_label).child(last_value))
+}
+
+pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
         .flex()
         .flex_col()
@@ -49,31 +100,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_back("/dashboard", "Dashboard"),
                         theme,
                     )
-                    .with_actions(
-                        div()
-                            .flex()
-                            .gap(px(6.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Upload")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-media-upload"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Settings")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-media-settings"),
-                            ),
-                    ),
+                    .with_actions(actions(
+                        theme,
+                        &[("ph-media-upload", "Upload"), ("ph-media-settings", "Settings")],
+                    )),
                 ),
         )
         // --- With eyebrow and actions ---
@@ -93,31 +123,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_subtitle("Primary interactive control for triggering actions."),
                         theme,
                     )
-                    .with_actions(
-                        div()
-                            .flex()
-                            .gap(px(6.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("View source")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-source"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Edit")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-edit"),
-                            ),
-                    ),
+                    .with_actions(actions(
+                        theme,
+                        &[("ph-source", "View source"), ("ph-edit", "Edit")],
+                    )),
                 ),
         )
         // --- With count ---
@@ -156,31 +165,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_banner("This task is currently paused.", StatusTone::Warning),
                         theme,
                     )
-                    .with_actions(
-                        div()
-                            .flex()
-                            .gap(px(6.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Run now")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-sync-run"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Edit")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-sync-edit"),
-                            ),
-                    ),
+                    .with_actions(actions(
+                        theme,
+                        &[("ph-sync-run", "Run now"), ("ph-sync-edit", "Edit")],
+                    )),
                 ),
         )
         // --- With MetaBar ---
@@ -200,63 +188,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_back("/system/tasks", "Tasks"),
                         theme,
                     )
-                    .with_meta(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(12.0))
-                            .child(Pill::from_spec(
-                                PillSpec::new()
-                                    .with_label("Active")
-                                    .with_tone(PillTone::Success)
-                                    .with_appearance(PillAppearance::Badge),
-                                theme,
-                            ))
-                            .child(
-                                div()
-                                    .text_size(px(13.0))
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child("Every 6 hours"),
-                            )
-                            .child(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(4.0))
-                                    .text_size(px(13.0))
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(div().child("Last run"))
-                                    .child(TimeAgo::from_spec(
-                                        TimeAgoSpec::new().with_timestamp("2026-03-30T08:15:00Z"),
-                                        theme,
-                                    )),
-                            ),
-                    )
-                    .with_actions(
-                        div()
-                            .flex()
-                            .gap(px(6.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Run now")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-meta-run"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Edit schedule")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ph-meta-edit"),
-                            ),
-                    ),
+                    .with_meta(meta(theme))
+                    .with_actions(actions(
+                        theme,
+                        &[("ph-meta-run", "Run now"), ("ph-meta-edit", "Edit schedule")],
+                    )),
                 ),
         )
         // --- Title only ---

@@ -47,6 +47,16 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
       },
     ],
   },
+  // Pending shows the controls; the record fixture below covers the settled
+  // side, so the fixture pair spans both surfaces.
+  AgentPlan: {
+    plan: "1. Add the component\n2. Wire the composer\n3. Run the gates",
+    status: "pending",
+  },
+  AgentPlanRecord: {
+    plan: "1. Add the component\n2. Wire the composer\n3. Run the gates",
+    status: "accepted",
+  },
   AgentTranscript: {
     items: [
       { kind: "message", id: "m1", role: "assistant", markdown: "Checking the parser." },

@@ -8,36 +8,23 @@
 //! the no-native-input substitute, contract §12).
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_specs::{ControlSize, TimeFieldSpec};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole, TextChangeHandler};
+use poodle_specs::TimeFieldSpec;
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_height_offset_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
 };
 
-/// Font size in rem per size override (contract section 8).
-fn time_font_size_rem(size: ControlSize) -> f32 {
-    match size {
-        ControlSize::Xs => 0.75,
-        ControlSize::Sm | ControlSize::Md => 0.8125, // body-size baseline
-        ControlSize::Lg => 0.9375,
-        ControlSize::Xl => 1.0,
-    }
-}
-
-/// Padding-x offset in rem per size (contract section 8).
-fn time_padding_x_offset_rem(size: ControlSize) -> f32 {
-    match size {
-        ControlSize::Xs => -0.125,
-        ControlSize::Sm => -0.0625,
-        ControlSize::Md => 0.0,
-        ControlSize::Lg => 0.125,
-        ControlSize::Xl => 0.1875,
-    }
-}
-
 pub fn time_field(spec: &TimeFieldSpec, theme: &dyn ThemeProvider) -> Node {
+    time_field_with_change(spec, theme, None)
+}
+
+pub fn time_field_with_change(
+    spec: &TimeFieldSpec,
+    theme: &dyn ThemeProvider,
+    on_change: Option<TextChangeHandler>,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
@@ -48,15 +35,15 @@ pub fn time_field(spec: &TimeFieldSpec, theme: &dyn ThemeProvider) -> Node {
     let radius = theme.resolve_radius(spec.radius_token());
 
     // ── Sizing (contract section 8) ──
-    let min_height = rem_to_px(control_height_rem(effective_size))
+    let min_height = theme.resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
-    let base_pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let pad_x = base_pad_x + rem_to_px(time_padding_x_offset_rem(effective_size));
-    let font_size = rem_to_px(time_font_size_rem(effective_size));
+    let pad_x = theme.resolve_space("space.control.x")
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
+    let font_size = rem_to_px(size_font_rem(effective_size));
     let border_width = rem_to_px(0.0625); // Contract: 0.0625rem solid
 
     // ── Display text ──
-    let display_text = spec.current_value().unwrap_or("HH:MM");
+    let value = spec.current_value().unwrap_or_default();
     let has_value = spec.current_value().is_some();
     let display_color = if has_value {
         text_color
@@ -65,7 +52,8 @@ pub fn time_field(spec: &TimeFieldSpec, theme: &dyn ThemeProvider) -> Node {
     };
 
     // ── Build element ──
-    let mut el = Node::button(display_text);
+    let mut el = Node::input(value, "HH:MM");
+    el.a11y.role = Some(NodeRole::TextInput);
     {
         let s = &mut el.style;
         s.min_height = Some(min_height);
@@ -93,6 +81,8 @@ pub fn time_field(spec: &TimeFieldSpec, theme: &dyn ThemeProvider) -> Node {
     if spec.is_disabled {
         el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
+    } else {
+        el.interaction.on_text_change = on_change;
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
@@ -101,4 +91,39 @@ pub fn time_field(spec: &TimeFieldSpec, theme: &dyn ThemeProvider) -> Node {
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn editable_time_field_reports_replacement_text() {
+        let observed = Arc::new(Mutex::new(String::new()));
+        let capture = Arc::clone(&observed);
+        let node = time_field_with_change(
+            &TimeFieldSpec::new(),
+            &theme(),
+            Some(Arc::new(move |value| {
+                *capture.lock().unwrap() = value.to_string();
+            })),
+        );
+
+        assert!(matches!(node.kind, poodle_node::NodeKind::Input { .. }));
+        node.interaction.on_text_change.unwrap()("09:30");
+        assert_eq!(*observed.lock().unwrap(), "09:30");
+    }
+
+    #[test]
+    fn disabled_time_field_is_not_editable() {
+        let mut spec = TimeFieldSpec::new();
+        spec.is_disabled = true;
+        let node = time_field_with_change(&spec, &theme(), Some(Arc::new(|_| {})));
+        assert!(node.interaction.on_text_change.is_none());
+    }
 }

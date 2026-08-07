@@ -15,8 +15,8 @@ use poodle_node::{
     NodeToggled,
 };
 use poodle_specs::{
-    ChoiceOption, ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind,
-    ModelAxisValue, ModelPickerSpec, ModelPickerVariant, SegmentedControlSpec, SwitchSpec,
+    ChoiceOption, ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind, ModelAxisValue,
+    ModelPickerSpec, ModelPickerVariant, SegmentedControlSpec, SwitchSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha};
@@ -291,8 +291,7 @@ pub fn model_picker(
             }
 
             if model.is_disabled {
-                row.style.descriptor.opacity =
-                    theme.resolve_opacity(spec.disabled_opacity_token());
+                row.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
             } else if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = model.value.clone();
@@ -456,8 +455,10 @@ pub fn model_picker(
         let mut dialog = Node::container();
         {
             let s = &mut dialog.style;
-            // Explicit Row (see switch.rs).
-            s.descriptor.layout.direction = LayoutDirection::Row;
+            // The GPUI surface is a block wrapper around the horizontal panel.
+            // Keep the wrapper column-oriented so its panel stretches to the
+            // constrained surface width; the panel itself owns the row split.
+            s.descriptor.layout.direction = LayoutDirection::Column;
             // The split layout needs room for both columns (contract §7).
             s.min_width = Some(rem_to_px(if is_split { 32.0 } else { 18.0 }));
             s.max_width = Some(rem_to_px(if is_split { 40.0 } else { 26.0 }));

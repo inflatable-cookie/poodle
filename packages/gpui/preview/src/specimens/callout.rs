@@ -1,12 +1,13 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, Callout, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Callout, Eyebrow};
 use poodle_specs::{ButtonSpec, ButtonVariant, CallOutSpec, EyebrowSpec, StatusTone};
+use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -14,6 +15,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let dismissed_info = state.specimens.is_on("callout-dismissed-info");
     let dismissed_warning = state.specimens.is_on("callout-dismissed-warning");
+    let info_dismiss = Arc::new({
+        let events = state.node_events.clone();
+        move || {
+            events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::Toggle("callout-dismissed-info".to_string()));
+        }
+    });
+    let warning_dismiss = Arc::new({
+        let events = state.node_events.clone();
+        move || {
+            events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
+                "callout-dismissed-warning".to_string(),
+            ));
+        }
+    });
 
     let examples = div().flex().flex_col().gap(px(24.0))
         // --- Tones ---
@@ -94,10 +112,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_content("This callout can be dismissed by the user."),
                                 theme,
                             )
-                            .on_dismiss(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggles.insert("callout-dismissed-info".to_string(), true);
-                                cx.notify();
-                            }))
+                            .on_dismiss(info_dismiss.clone())
                             .into_any_element()
                         } else {
                             div().text_xs().text_color(color_to_hsla(text_secondary))
@@ -112,10 +127,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_content("This warning can also be dismissed."),
                                 theme,
                             )
-                            .on_dismiss(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggles.insert("callout-dismissed-warning".to_string(), true);
-                                cx.notify();
-                            }))
+                            .on_dismiss(warning_dismiss.clone())
                             .into_any_element()
                         } else {
                             div().text_xs().text_color(color_to_hsla(text_secondary))

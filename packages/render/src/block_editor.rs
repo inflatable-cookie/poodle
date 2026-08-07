@@ -208,6 +208,22 @@ fn render_block_content(
 }
 
 pub fn block_editor(spec: &BlockEditorSpec, theme: &dyn ThemeProvider) -> Node {
+    block_editor_with_children(spec, theme, Vec::new())
+}
+
+/// Block editor with caller-owned block bodies.
+///
+/// The spec drives blocks whenever `spec.blocks` is non-empty; `children` is
+/// the escape hatch for consumers that own their block vocabulary and hand
+/// over already-rendered bodies. Each child is wrapped in the same block shell
+/// so spacing and background stay contract-consistent, but without a toolbar —
+/// there is no block-type metadata to drive the selects. Ignored when the spec
+/// carries blocks.
+pub fn block_editor_with_children(
+    spec: &BlockEditorSpec,
+    theme: &dyn ThemeProvider,
+    children: Vec<Node>,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Resolve chrome from tokens / contract recipe rems ───────────────────
@@ -405,6 +421,33 @@ pub fn block_editor(spec: &BlockEditorSpec, theme: &dyn ThemeProvider) -> Node {
             code_bg,
             radius_control,
         )));
+    }
+
+    if spec.blocks.is_empty() {
+        for child in children {
+            let mut shell = Node::container();
+            {
+                let s = &mut shell.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                let c = &mut s.descriptor.corner_radii;
+                c.top_left = radius_control;
+                c.top_right = radius_control;
+                c.bottom_right = radius_control;
+                c.bottom_left = radius_control;
+                s.descriptor.background = Some(block_bg);
+            }
+            let mut body = Node::container();
+            {
+                let s = &mut body.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.left = content_x;
+                pad.right = content_x;
+                pad.top = content_y;
+                pad.bottom = content_y;
+            }
+            root = root.child(shell.child(body.child(child)));
+        }
     }
 
     if disabled {

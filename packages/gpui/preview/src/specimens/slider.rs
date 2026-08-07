@@ -1,12 +1,23 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Slider};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Slider};
 use poodle_specs::{EyebrowSpec, SliderSpec};
+use std::sync::Arc;
+
+fn slider_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: format!("{value:.0}"),
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -51,13 +62,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("slider-volume")
-                    .on_change(cx.listener(|this, val: &f64, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("slider-volume".to_string(), format!("{:.0}", val));
-                        cx.notify();
-                    })),
+                    .on_change(slider_change(state, "slider-volume")),
                 )
                 .child(
                     div()
@@ -87,13 +92,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("slider-opacity")
-                    .on_change(cx.listener(|this, val: &f64, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("slider-opacity".to_string(), format!("{:.0}", val));
-                        cx.notify();
-                    })),
+                    .on_change(slider_change(state, "slider-opacity")),
                 )
                 .child(
                     div()
@@ -115,31 +114,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    Slider::from_spec(
-                        SliderSpec::new(10.0)
-                            .with_bounds(0.0, 100.0),
-                        theme,
-                    )
-                    .aria_label("Low value")
-                    .with_id("slider-value-low"),
+                    Slider::from_spec(SliderSpec::new(10.0).with_bounds(0.0, 100.0), theme)
+                        .aria_label("Low value")
+                        .with_id("slider-value-low"),
                 )
                 .child(
-                    Slider::from_spec(
-                        SliderSpec::new(50.0)
-                            .with_bounds(0.0, 100.0),
-                        theme,
-                    )
-                    .aria_label("Mid value")
-                    .with_id("slider-value-mid"),
+                    Slider::from_spec(SliderSpec::new(50.0).with_bounds(0.0, 100.0), theme)
+                        .aria_label("Mid value")
+                        .with_id("slider-value-mid"),
                 )
                 .child(
-                    Slider::from_spec(
-                        SliderSpec::new(90.0)
-                            .with_bounds(0.0, 100.0),
-                        theme,
-                    )
-                    .aria_label("High value")
-                    .with_id("slider-value-high"),
+                    Slider::from_spec(SliderSpec::new(90.0).with_bounds(0.0, 100.0), theme)
+                        .aria_label("High value")
+                        .with_id("slider-value-high"),
                 ),
         )
         // --- Custom min / max + step ---

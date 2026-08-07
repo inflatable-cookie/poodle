@@ -1,10 +1,24 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{DateRangePicker, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{DateRangePicker, Eyebrow};
 use poodle_specs::{DateRangePickerSpec, DateRangeValue, EyebrowSpec};
+use std::sync::{Arc, Mutex};
+
+fn toggle_handler(
+    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &'static str,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = Arc::clone(events);
+    Arc::new(move || {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Toggle(key.to_string()));
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -32,12 +46,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.aria_label = Some("Select date range".to_string());
                     DateRangePicker::from_spec(spec, theme)
                         .with_id("default")
-                        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state
-                                .specimens
-                                .toggle("date-range-picker-default-open");
-                            cx.notify();
-                        }))
+                        .on_toggle(toggle_handler(
+                            &state.node_events,
+                            "date-range-picker-default-open",
+                        ))
                 }),
         )
         // --- With default range ---
@@ -61,12 +73,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.aria_label = Some("Pre-filled range".to_string());
                     DateRangePicker::from_spec(spec, theme)
                         .with_id("with-range")
-                        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state
-                                .specimens
-                                .toggle("date-range-picker-prefilled-open");
-                            cx.notify();
-                        }))
+                        .on_toggle(toggle_handler(
+                            &state.node_events,
+                            "date-range-picker-prefilled-open",
+                        ))
                 }),
         )
         // --- Open (range calendar) ---

@@ -7,14 +7,15 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, TextAlign,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{NumberInputSpec, ValidationState};
 
+use crate::color::with_alpha;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    resolve_supporting_visual_size, size_font_rem,
+    control_height_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
+    size_font_rem, size_padding_x_offset_rem,
 };
 
 /// Host callbacks: increment / decrement presses. Bounds- or state-disabled
@@ -41,7 +42,11 @@ fn affix_box(
     let mut el = Node::container();
     {
         let s = &mut el.style;
-        s.descriptor.layout.height = LayoutSizing::Fixed(height);
+        // GPUI's `.h_full()` fills the value row's cross axis; using a fixed
+        // height here leaves the border-box one pixel outside that row in the
+        // node backend and produces a doubled vertical rule.
+        let _ = height;
+        s.fill_height = true;
         s.descriptor.background = Some(bg);
         s.descriptor.border.width = border_width;
         s.descriptor.border.color = border_color;
@@ -66,14 +71,16 @@ pub fn number_input(
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    // The old GPUI component resolves this token through the active theme
+    // density (the visual axis), then applies the semantic size offset. The
+    // spec density is for callers' standalone contracts and is not the
+    // preview theme's density override.
+    let pad_x = theme.resolve_space(spec.horizontal_padding_token())
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
-    let inline_sz = rem_to_px(size_font_rem(effective_size));
-    // Inner stepper gap from the smallest inline-space token.
-    let btn_gap = theme.resolve_space(spec.stepper_gap_token());
-    let border_width = theme.resolve_space(spec.border_width_token());
+    let border_width = theme.resolve_border_width(spec.border_width_token());
 
     let border = theme.resolve_color(spec.border_token());
     let radius = theme.resolve_radius(spec.radius_token());
@@ -94,7 +101,11 @@ pub fn number_input(
         ValidationState::None => border,
     };
 
-    let value_text = spec.formatted_value();
+    let value = spec.clamped_value();
+    let value_text = match spec.precision {
+        Some(precision) => format!("{:.*}", precision as usize, value),
+        None => format!("{value}"),
+    };
 
     // Bounds checks for stepper button disabled state.
     let at_min = !spec.min.is_infinite() && spec.value <= spec.min;
@@ -115,9 +126,19 @@ pub fn number_input(
         s.descriptor.layout.height = LayoutSizing::Fixed(height);
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        // Old GPUI wrapper declares `.w_full()`; channel fields rely on that
+        // declaration when their parent distributes the three inputs.
+        s.fill_width = true;
     }
 
-    let stepper = |icon: &str, label: &str, id: &str, pad_l: f32, pad_r: f32, blocked: bool,
+    let stepper_bg = theme.resolve_color(spec.stepper_fill_token());
+    let stepper_bg = with_alpha(stepper_bg, stepper_bg.3 * 0.88);
+    let stepper = |icon: &str,
+                   label: &str,
+                   id: &str,
+                   blocked: bool,
                    handler: Option<Arc<dyn Fn() + Send + Sync>>|
      -> Node {
         let mut btn = Node::button("");
@@ -125,10 +146,20 @@ pub fn number_input(
         btn.id = Some(id.to_string());
         {
             let s = &mut btn.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            s.flex_grow = Some(1.0);
+            s.descriptor.background = Some(stepper_bg);
+            let inner_radius = (radius - rem_to_px(0.125)).max(0.0);
+            s.descriptor.corner_radii.top_left = inner_radius;
+            s.descriptor.corner_radii.top_right = inner_radius;
+            s.descriptor.corner_radii.bottom_right = inner_radius;
+            s.descriptor.corner_radii.bottom_left = inner_radius;
             let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = pad_l;
-            pad.right = pad_r;
             s.descriptor.cursor = CursorHint::Pointer;
+            pad.top = 0.0;
+            pad.bottom = 0.0;
         }
         btn.interaction.focusable = true;
         let mut glyph = Node::icon(icon, icon_size);
@@ -143,22 +174,25 @@ pub fn number_input(
         btn
     };
 
-    // ── Decrement button (only when steppers enabled) ──────────────────────
-    if spec.show_steppers {
-        el = el.child(stepper(
-            "minus",
-            "Decrement",
-            "poodle-number-input-dec",
-            pad_x,
-            btn_gap,
-            at_min || spec.is_disabled || spec.is_read_only,
-            handlers.on_decrement.clone(),
-        ));
+    // ── Value row: the old GPUI tier's left-hand field area ────────────────
+    let mut value_row = Node::container();
+    {
+        let s = &mut value_row.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        // Old GPUI/Svelte contract: affix↔value gap is a fixed 0.5rem,
+        // independent of the active density's inline token ladder.
+        s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+        s.descriptor.layout.spacing.padding.left = pad_x;
+        s.descriptor.layout.spacing.padding.right = pad_x;
+        s.flex_grow = Some(1.0);
+        s.flex_basis = Some(0.0);
+        s.min_width = Some(0.0);
     }
 
     // Prefix affix (boxed: border + surface bg, inside left edge).
     if let Some(prefix) = &spec.prefix {
-        el = el.child(affix_box(
+        value_row = value_row.child(affix_box(
             prefix,
             affix_text,
             affix_bg,
@@ -176,21 +210,20 @@ pub fn number_input(
         let s = &mut value.style;
         s.descriptor.text_color = Some(text_color);
         s.text_size = Some(font_size);
-        s.descriptor.layout.width = LayoutSizing::Grow;
-        s.text_align = Some(TextAlign::Center);
+        s.line_height = Some(1.4);
+        // The old GPUI tier uses `.flex_1()` for the value slot: grow and
+        // shrink from a zero basis, rather than intrinsic text width. That
+        // distinction only shows up when the field is one of several
+        // fractional channel inputs (ColorPicker's RGB/HSL rows).
+        s.flex_grow = Some(1.0);
+        s.flex_basis = Some(0.0);
+        s.min_width = Some(0.0);
     }
-    el = el.child(value);
-
-    // Validation state icon (trailing, before suffix/increment).
-    if let ValidationState::Invalid = spec.validation_state {
-        let mut alert = Node::icon("alert-circle", inline_sz);
-        alert.style.descriptor.text_color = Some(theme.resolve_color("color.status.danger"));
-        el = el.child(alert);
-    }
+    value_row = value_row.child(value);
 
     // Suffix affix (boxed, inside right edge).
     if let Some(suffix) = &spec.suffix {
-        el = el.child(affix_box(
+        value_row = value_row.child(affix_box(
             suffix,
             affix_text,
             affix_bg,
@@ -202,17 +235,38 @@ pub fn number_input(
         ));
     }
 
-    // ── Increment button (only when steppers enabled) ──────────────────────
+    el = el.child(value_row);
+
+    // ── Vertical steppers (only when enabled) ─────────────────────────────
     if spec.show_steppers {
-        el = el.child(stepper(
-            "plus",
-            "Increment",
-            "poodle-number-input-inc",
-            btn_gap,
-            pad_x,
-            at_max || spec.is_disabled || spec.is_read_only,
-            handlers.on_increment.clone(),
-        ));
+        let stepper_width = rem_to_px(1.25);
+        let mut steppers = Node::container();
+        {
+            let s = &mut steppers.style;
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.width = LayoutSizing::Fixed(stepper_width);
+            s.fill_height = true;
+            s.descriptor.layout.spacing.padding.top = 1.0;
+            s.descriptor.layout.spacing.padding.right = 1.0;
+            s.descriptor.layout.spacing.padding.bottom = 1.0;
+            s.descriptor.layout.spacing.padding.left = 1.0;
+        }
+        steppers = steppers
+            .child(stepper(
+                "plus",
+                "Increment",
+                "poodle-number-input-inc",
+                at_max || spec.is_disabled || spec.is_read_only,
+                handlers.on_increment.clone(),
+            ))
+            .child(stepper(
+                "minus",
+                "Decrement",
+                "poodle-number-input-dec",
+                at_min || spec.is_disabled || spec.is_read_only,
+                handlers.on_decrement.clone(),
+            ));
+        el = el.child(steppers);
     }
 
     if spec.is_disabled {

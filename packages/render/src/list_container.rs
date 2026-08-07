@@ -125,7 +125,11 @@ pub fn list_container(
                             page_size.max(1),
                             total_items,
                         );
-                        pager_region = pager_region.child(pagination_summary(&summary_spec, theme));
+                        let mut summary = Node::container();
+                        summary.style.descriptor.layout.direction = LayoutDirection::Row;
+                        summary.style.fill_width = true;
+                        pager_region = pager_region
+                            .child(summary.child(pagination_summary(&summary_spec, theme)));
                     }
                 }
 
@@ -138,8 +142,16 @@ pub fn list_container(
                         .clone()
                         .unwrap_or_else(|| "List pagination".to_string()),
                 );
-                pager_region =
-                    pager_region.child(pagination(&pagination_spec, theme, on_page_change));
+                let mut controls = Node::container();
+                controls.style.descriptor.layout.direction = LayoutDirection::Row;
+                controls.style.descriptor.layout.alignment.main =
+                    poodle_node::MainAxisAlignment::End;
+                controls.style.fill_width = true;
+                pager_region = pager_region.child(controls.child(pagination(
+                    &pagination_spec,
+                    theme,
+                    on_page_change,
+                )));
 
                 container = container.child(pager_region);
             }
@@ -193,4 +205,39 @@ pub fn list_container(
         }
     }
     container
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::MainAxisAlignment;
+
+    #[test]
+    fn ready_pager_preserves_full_width_summary_and_end_aligned_controls() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = ListContainerSpec::new("Items")
+            .with_total_pages(3)
+            .with_total_items(24)
+            .with_page_size(10);
+        let node = list_container(&spec, &theme, ListContainerSlots::default(), None);
+        let header = &node.children[0];
+        let pager = node.children.last().expect("ready list renders pager");
+
+        assert!(header.style.fill_width);
+        assert_eq!(
+            header.style.descriptor.layout.spacing.padding.top,
+            header.style.descriptor.layout.spacing.padding.bottom
+        );
+        assert!(pager.children[0].style.fill_width);
+        assert_eq!(
+            pager.children[0].children[0].style.text_size,
+            Some(theme.resolve_space("typography.body.size"))
+        );
+        assert!(pager.children[1].style.fill_width);
+        assert_eq!(
+            pager.children[1].style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End
+        );
+    }
 }

@@ -1,12 +1,14 @@
+use crate::app_state::NodeSpecimenEvent;
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, Rating};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Rating};
 use poodle_specs::{EyebrowSpec, RatingSpec};
+use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -18,6 +20,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("rating-interactive")
         .copied()
         .unwrap_or(3);
+    let node_events = state.node_events.clone();
+    let on_change = Arc::new(move |value: u32| {
+        node_events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::Select {
+                key: "rating-interactive".to_string(),
+                index: value as usize,
+            });
+    });
 
     let examples = div()
         .flex()
@@ -38,13 +50,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         RatingSpec::new().with_value(interactive_rating as f64),
                         theme,
                     )
-                    .on_change(cx.listener(|this, val: &usize, _w, cx| {
-                        this.state
-                            .specimens
-                            .selections
-                            .insert("rating-interactive".to_string(), *val);
-                        cx.notify();
-                    })),
+                    .on_change(on_change.clone()),
                 )
                 .child(
                     div()

@@ -7,7 +7,7 @@
 //! vertical padding, density scales horizontal padding.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, Node, TextAlign};
+use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{ColumnAlign, TableSpec};
 
 use crate::color::{mix_srgb, with_alpha};
@@ -58,14 +58,19 @@ pub fn table(spec: &TableSpec, theme: &dyn ThemeProvider) -> Node {
             s.descriptor.text_color = Some(color);
             s.text_size = Some(size);
             s.text_weight = weight;
+            s.line_height = Some(1.5);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = cell_px;
             pad.right = cell_px;
             pad.top = cell_py;
             pad.bottom = cell_py;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            // GPUI's `.flex_1()` uses a zero basis; pairing it with grow keeps
+            // all table columns equal instead of sizing from intrinsic text.
+            s.flex_basis = Some(0.0);
             if align_end {
-                s.text_align = Some(TextAlign::Right);
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.main = MainAxisAlignment::End;
             }
         }
         c
@@ -98,6 +103,7 @@ pub fn table(spec: &TableSpec, theme: &dyn ThemeProvider) -> Node {
             s.descriptor.text_color = Some(caption_text);
             s.text_size = Some(caption_font);
             s.text_weight = Some(500);
+            s.line_height = Some(1.5);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = caption_px;
             pad.right = caption_px;

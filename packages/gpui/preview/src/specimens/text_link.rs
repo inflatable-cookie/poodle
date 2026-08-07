@@ -1,8 +1,8 @@
 use crate::style_bridge::color_to_hsla;
+use crate::node_compat::TextLink;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::TextLink;
 use poodle_specs::{TextLinkSpec, TextLinkTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

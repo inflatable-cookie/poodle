@@ -27,7 +27,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
-    LayoutSizing, Node, NodePosition, NodeRole,
+    LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
 };
 use poodle_specs::{
     ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,
@@ -38,9 +38,7 @@ use crate::color::{
     Rgb255, BLACK, TRANSPARENT, WHITE,
 };
 use crate::number_input::number_input;
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::segmented_control::segmented_control;
 
 /// Default fallback color when the spec value is missing/malformed (#6366f1).
@@ -91,7 +89,10 @@ pub fn color_picker(
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let trigger_size = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    // The preview theme's density is the active visual axis; the old GPUI
+    // tier resolves the control padding from that theme rather than the
+    // standalone spec density.
+    let pad_x = theme.resolve_space("space.control.x");
 
     // ── Resolved chrome tokens ────────────────────────────────────
     let border = theme.resolve_color(spec.border_token());
@@ -120,16 +121,6 @@ pub fn color_picker(
     let current_color = rgb255_to_color(rgb, alpha);
 
     // ── Trigger swatch — fills with the ACTUAL current color ──────
-    let mut preview = Node::container();
-    {
-        let s = &mut preview.style;
-        // Explicit Row (see switch.rs).
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.width = LayoutSizing::Grow;
-        s.descriptor.background = Some(current_color);
-    }
-    all_radius(&mut preview, (trigger_radius - 1.0).max(0.0));
-
     let mut trigger = Node::container();
     trigger.id = Some("color-picker-trigger".to_string());
     {
@@ -138,6 +129,7 @@ pub fn color_picker(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.width = LayoutSizing::Fixed(trigger_size);
         s.descriptor.layout.height = LayoutSizing::Fixed(trigger_size);
+        s.descriptor.background = Some(current_color);
         s.descriptor.border.width = 1.0;
         s.descriptor.border.color = trigger_border;
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
@@ -150,8 +142,6 @@ pub fn color_picker(
         let handler = Arc::clone(handler);
         trigger.interaction.on_activate = Some(Arc::new(move || handler()));
     }
-    let trigger = trigger.child(preview);
-
     // ── Controls row: trigger + optional inline hex input ─────────
     let mut controls_row = Node::container();
     controls_row.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -227,7 +217,9 @@ pub fn color_picker(
 
         let mut picker_area = Node::container();
         picker_area.style.descriptor.layout.direction = LayoutDirection::Row;
-        picker_area.style.descriptor.layout.spacing.gap = rem_to_px(0.625);
+        // GPUI uses the inline-md token for the pad↔controls gap (12px on
+        // this axis), not the surface stack approximation.
+        picker_area.style.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
         picker_area.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
         let mut surface = surface.child(picker_area.child(gradient_pad).child(controls_panel));
 
@@ -281,7 +273,8 @@ fn build_gradient_pad(hsv: Hsv, current_color: ColorValue, radius_control: f32) 
 
     // Transparent → black, top to bottom (CSS `to bottom` == 0deg here).
     let mut after = inset_overlay();
-    after.style.gradient = Some((0.0, vec![(black_t, 0.0), (BLACK, 1.0)]));
+    // GPUI's 180° axis is top-to-bottom; 0° would invert the value ramp.
+    after.style.gradient = Some((180.0, vec![(black_t, 0.0), (BLACK, 1.0)]));
 
     // Thumb ring at current S/V.
     let mut thumb = Node::container();
@@ -294,6 +287,14 @@ fn build_gradient_pad(hsv: Hsv, current_color: ColorValue, radius_control: f32) 
         s.descriptor.border.width = 2.0;
         s.descriptor.border.color = WHITE;
         s.descriptor.background = Some(current_color);
+        s.shadow_layers = vec![ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: 1.0,
+            color: ColorValue(0.0, 0.0, 0.0, 0.3),
+            inset: false,
+        }];
     }
     all_radius(&mut thumb, thumb_d / 2.0);
     thumb.position = NodePosition::Absolute {
@@ -367,7 +368,17 @@ fn build_controls_panel(
     .with_default_value(mode_value)
     .with_size(spec.size)
     .with_density(spec.density);
-    panel = panel.child(segmented_control(&mode_spec, theme, None));
+    // The old GPUI SegmentedControl uses `.flex_1()` for equal-width mode
+    // buttons. The shared renderer's generic Grow sizing preserves its
+    // content-sized behavior for the standalone specimen, so apply the
+    // zero-basis form at this fractional ColorPicker call site.
+    let mut mode = segmented_control(&mode_spec, theme, None);
+    for segment in &mut mode.children {
+        segment.style.flex_grow = Some(1.0);
+        segment.style.flex_basis = Some(0.0);
+        segment.style.min_width = Some(0.0);
+    }
+    panel = panel.child(mode);
 
     // Channel inputs for the current mode.
     panel.child(build_channel_inputs(spec, theme, current, rgb, hsv, alpha))
@@ -510,7 +521,12 @@ fn slider_wrap(
     all_radius(&mut thumb, thumb_d / 2.0);
     thumb.position = NodePosition::Absolute {
         top: Some(thumb_top),
-        left: Some(progress * rem_to_px(10.0) - thumb_d / 2.0),
+        // The fixed 24rem surface leaves 11.625rem for the controls track
+        // after padding, the 10rem gradient pad, and the inline-md gap.
+        // GPUI's `left(relative(progress))` uses that actual track width;
+        // keeping the same width here avoids pinning the thumb to the pad
+        // size.
+        left: Some(progress * rem_to_px(11.625) - thumb_d / 2.0),
         right: None,
         bottom: None,
     };
@@ -546,12 +562,15 @@ fn build_channel_inputs(
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
     let radius_control = theme.resolve_radius("radius.control");
-    let label_size = rem_to_px(0.625); // contract: input-label font-size
+    // The old GPUI channel captions use the active typography label token
+    // (13px on the eclipse axis), not the compact 0.625rem CSS annotation.
+    let label_size = theme.resolve_space("typography.label.size");
 
     let mut row = Node::container();
     row.style.descriptor.layout.direction = LayoutDirection::Row;
     row.style.descriptor.layout.spacing.gap = rem_to_px(0.25);
     row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+    row.style.fill_width = true;
     let mut row = row;
 
     let labelled = |child: Node, label: &str| -> Node {
@@ -578,7 +597,11 @@ fn build_channel_inputs(
             .with_aria_label(aria)
             .with_size(spec.size)
             .with_density(spec.density);
-        let mut input = number_input(&n, theme, crate::number_input::NumberInputHandlers::default());
+        let mut input = number_input(
+            &n,
+            theme,
+            crate::number_input::NumberInputHandlers::default(),
+        );
         input.id = Some(id.to_string());
         input
     };

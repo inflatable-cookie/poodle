@@ -70,7 +70,13 @@ pub fn list_card(
     let border_default = theme.resolve_color(spec.hover_border_token());
     let radius = theme.resolve_radius(spec.radius_token());
     let text_secondary = theme.resolve_color(spec.subtitle_color_token());
-    let accent = theme.resolve_color(spec.accent_base_token());
+    let meta_color = theme.resolve_color(spec.meta_color_token());
+    let theme_accent = theme.resolve_color(spec.accent_base_token());
+    let accent = spec
+        .accent_color
+        .as_deref()
+        .and_then(hex_color)
+        .unwrap_or(theme_accent);
     let on_accent = theme.resolve_color(spec.on_accent_color_token());
 
     // fill = color-mix(surface 88%, text-primary); hover = 82%.
@@ -82,7 +88,7 @@ pub fn list_card(
 
     // Spacing — contract §8 Root.
     let pad_x = theme.resolve_space("space.inline.md"); // 0.75rem
-    let pad_y = theme.resolve_space("space.stack.sm"); // 0.5rem (contract 0.625 — reference delta)
+    let pad_y = rem_to_px(0.625);
     let gap = theme.resolve_space("space.inline.md"); // 0.75rem
 
     // Typography — title from label-size token; subtitle/meta small.
@@ -153,7 +159,9 @@ pub fn list_card(
         s.descriptor.text_color = Some(text_primary);
         s.text_size = Some(title_font);
         s.text_weight = Some(500);
+        s.descriptor.layout.overflow_x = poodle_node::LayoutOverflow::Hidden;
         s.text_ellipsis = true;
+        s.no_wrap = true;
         s.flex_fill = true;
         s.min_width = Some(0.0);
     }
@@ -241,7 +249,7 @@ pub fn list_card(
         .flatten()
         .map(|m| {
             let mut meta = Node::text(m);
-            meta.style.descriptor.text_color = Some(text_secondary);
+            meta.style.descriptor.text_color = Some(meta_color);
             meta.style.text_size = Some(small_font);
             meta.style.flex_none = true;
             meta
@@ -291,7 +299,7 @@ pub fn list_card(
 
     // ── Reorder handle (two columns of dots) — contract §2 Handle ───────
     let handle_el = spec.show_reorder_handle.then(|| {
-        let dot = theme.resolve_space("space.inline.xs") / 2.0; // 0.125rem dot
+        let dot = rem_to_px(0.1875);
         let dot_gap = rem_to_px(0.125);
         let handle_color = text_secondary;
         let dot_el = || {
@@ -332,7 +340,7 @@ pub fn list_card(
             .unwrap_or_else(|| theme.resolve_color(spec.sash_bg_token()));
         let mut sash = Node::text(sash_text.to_uppercase());
         sash.position = NodePosition::Absolute {
-            top: Some(0.0),
+            top: Some(rem_to_px(0.34375)),
             left: Some(0.0),
             right: None,
             bottom: None,
@@ -342,12 +350,13 @@ pub fn list_card(
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = rem_to_px(0.375);
             pad.right = rem_to_px(0.375);
-            pad.top = rem_to_px(0.0625);
-            pad.bottom = rem_to_px(0.0625);
+            pad.top = rem_to_px(0.125);
+            pad.bottom = rem_to_px(0.125);
             s.descriptor.background = Some(sash_bg);
             s.descriptor.text_color = Some(on_accent);
             s.text_size = Some(rem_to_px(0.5625));
             s.text_weight = Some(700);
+            s.line_height = Some(0.75 / 0.5625);
         }
         sash
     });
@@ -356,6 +365,7 @@ pub fn list_card(
     let mut el = Node::container();
     {
         let s = &mut el.style;
+        s.fill_width = true;
         s.descriptor.background = Some(fill);
         s.descriptor.border.width = 1.0;
         s.descriptor.border.color = border;
@@ -432,31 +442,23 @@ pub fn list_card(
         el = el.child(sash);
     }
 
-    // Not-live: dashed 0.1875rem border at default@72%, grayscale(1), and
-    // reduced opacity (contract §8).
+    // GPUI 0.2.2's old tier kept the one-pixel hairline for not-live cards;
+    // only the dash pattern and reduced opacity changed there.
     if spec.is_not_live {
         let s = &mut el.style;
-        s.descriptor.border.width = rem_to_px(0.1875);
         s.border_dashed = true;
-        s.descriptor.border.color = with_alpha(border_default, border_default.3 * 0.72);
-        s.grayscale = 1.0;
         s.descriptor.opacity = spec.not_live_opacity();
     }
 
     // Disabled: token opacity.
     if spec.is_disabled {
         el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
-    // Interactive: hover background + border, pointer + focusable. Not-live
-    // cards restore their dashed border to full border-default on hover.
+    // Interactive: hover background + border, pointer + focusable.
     let interactive = (spec.is_interactive || spec.href.is_some()) && !spec.is_disabled;
     if interactive {
-        let hover_border = if spec.is_not_live {
-            border_default
-        } else {
-            hover_border
-        };
         el.style.descriptor.cursor = CursorHint::Pointer;
         el.interaction.focusable = true;
         el.style.hover = Some(StylePatch {
@@ -481,3 +483,45 @@ pub fn list_card(
 // Silence unused-import lint when hex sash isn't exercised.
 #[allow(unused)]
 fn _t(_: ColorValue) {}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Mutex;
+
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn activation_only_reaches_available_interactive_cards() {
+        let activations = Arc::new(Mutex::new(0));
+        let sink = Arc::clone(&activations);
+        let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+            *sink.lock().unwrap() += 1;
+        });
+
+        let live = ListCardSpec {
+            title: "Interactive".into(),
+            is_interactive: true,
+            ..Default::default()
+        };
+        let node = list_card(
+            &live,
+            &theme(),
+            ListCardSlots::default(),
+            Some(Arc::clone(&handler)),
+        );
+        (node.interaction.on_activate.as_ref().expect("activation"))();
+        assert_eq!(*activations.lock().unwrap(), 1);
+
+        let disabled = ListCardSpec {
+            is_disabled: true,
+            ..live
+        };
+        let node = list_card(&disabled, &theme(), ListCardSlots::default(), Some(handler));
+        assert!(node.interaction.on_activate.is_none());
+        assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
+    }
+}

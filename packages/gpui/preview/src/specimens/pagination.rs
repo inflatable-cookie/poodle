@@ -1,12 +1,48 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Pagination};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Pagination};
 use poodle_specs::{EyebrowSpec, PaginationSpec, PaginationVariant};
+use std::sync::Arc;
+
+fn page_change(state: &AppState) -> Arc<dyn Fn(usize) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |page| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::Select {
+            key: "pagination-full-page".to_string(),
+            index: page,
+        });
+        events.push(NodeSpecimenEvent::SetText {
+            key: "pagination-full-goto".to_string(),
+            value: page.to_string(),
+        });
+    })
+}
+
+fn limit_open_change(state: &AppState) -> Arc<dyn Fn(bool) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |open| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: "pagination-full-limit-open".to_string(),
+            value: open,
+        });
+    })
+}
+
+fn page_size_change(state: &AppState) -> Arc<dyn Fn(usize) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |size| {
+        events.lock().unwrap().push(NodeSpecimenEvent::Select {
+            key: "pagination-full-ps".to_string(),
+            index: size,
+        });
+    })
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -35,10 +71,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let total_items = 248usize;
     let showing_from = (full_page.saturating_sub(1)).saturating_mul(full_ps) + 1;
     let showing_to = (full_page * full_ps).min(total_items);
-    let full_info = format!(
-        "Showing {}–{} of {}",
-        showing_from, showing_to, total_items
-    );
+    let full_info = format!("Showing {}–{} of {}", showing_from, showing_to, total_items);
 
     let examples = div()
         .flex()
@@ -168,31 +201,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Full pagination"),
                         theme,
                     )
-                    .on_page_change(cx.listener(|this, page: &usize, _w, cx| {
-                        this.state
-                            .specimens
-                            .selections
-                            .insert("pagination-full-page".to_string(), *page);
-                        this.state
-                            .specimens
-                            .text
-                            .insert("pagination-full-goto".to_string(), page.to_string());
-                        cx.notify();
-                    }))
+                    .on_page_change(page_change(state))
                     .limit_selector_open(full_limit_open)
-                    .on_limit_open_change(cx.listener(|this, open: &bool, _w, cx| {
-                        this.state
-                            .specimens
-                            .set_toggle("pagination-full-limit-open", *open);
-                        cx.notify();
-                    }))
-                    .on_page_size_change(cx.listener(|this, n: &usize, _w, cx| {
-                        this.state
-                            .specimens
-                            .selections
-                            .insert("pagination-full-ps".to_string(), *n);
-                        cx.notify();
-                    })),
+                    .on_limit_open_change(limit_open_change(state))
+                    .on_page_size_change(page_size_change(state)),
                 )
                 .child(
                     div()

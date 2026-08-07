@@ -1,6 +1,6 @@
+use crate::node_compat::{Eyebrow, Table};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Table};
 use poodle_specs::{
     ColumnAlign, ControlDensity, ControlSize, EyebrowSpec, TableColumn, TableRow, TableSpec,
 };

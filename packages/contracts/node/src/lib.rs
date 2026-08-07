@@ -109,12 +109,21 @@ pub struct NodeStyle {
     pub hover: Option<StylePatch>,
     /// Truncate overflowing text with an ellipsis instead of clipping.
     pub text_ellipsis: bool,
+    /// Draw a one-pixel text underline using the backend's native decoration.
+    pub text_underline: bool,
+    /// Optional decoration tint for text underlines. When absent, the
+    /// backend uses the text color, matching native GPUI defaults.
+    pub text_underline_color: Option<ColorValue>,
     /// Text size in pixels. Optional so a backend can distinguish "the
     /// component chose 13px" from "use your default" — stamping a default here
     /// would change output the component never asked for.
     pub text_size: Option<f32>,
     /// Font weight, same optionality argument.
     pub text_weight: Option<u16>,
+    /// Italic text (`font-style: italic`). Several contracts call for it —
+    /// blockquotes, empty-state captions, unsaved-edit labels — and without a
+    /// channel for it recipes reach for a tone change as a substitute.
+    pub text_italic: bool,
     /// Font family request (`poodle_style::FontFamily`), same optionality.
     pub font_family: Option<FontFamily>,
     /// Line height as a multiple of the font size.
@@ -153,6 +162,14 @@ pub struct NodeStyle {
     pub flex_shrink_zero: bool,
     /// Flex-basis in pixels (seed size before grow/shrink distribute).
     pub flex_basis: Option<f32>,
+    /// Flex-basis as a fraction of the parent's main axis (0.0..=1.0).
+    ///
+    /// Distinct from `flex_basis`: a ratio-allocated pane seeds at a share of
+    /// the container and then shrinks to make room for siblings like a
+    /// divider. Seeding at zero and growing by the ratio instead distributes
+    /// the divider's thickness across both panes, which moves the split.
+    /// Wins over `flex_basis` when both are set.
+    pub flex_basis_pct: Option<f32>,
     /// Width as a fraction of the parent (0.0..=1.0).
     pub width_pct: Option<f32>,
     /// Wrap flex children onto multiple lines.
@@ -206,8 +223,11 @@ impl Default for NodeStyle {
             descriptor: StyleDescriptor::new(),
             hover: None,
             text_ellipsis: false,
+            text_underline: false,
+            text_underline_color: None,
             text_size: None,
             text_weight: None,
+            text_italic: false,
             font_family: None,
             line_height: None,
             text_wrap: false,
@@ -219,6 +239,7 @@ impl Default for NodeStyle {
             flex_fill: false,
             flex_shrink_zero: false,
             flex_basis: None,
+            flex_basis_pct: None,
             width_pct: None,
             flex_wrap: false,
             no_wrap: false,
@@ -293,10 +314,86 @@ pub struct NodeDragEvent {
     pub delta_y: f32,
 }
 
+/// Modifier state at the moment of an interaction.
+///
+/// `accel` is the platform's "toggle one of many" modifier — Cmd on macOS,
+/// Ctrl elsewhere. Backends collapse their platform pair onto this one flag so
+/// components never branch on the host OS.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct NodeModifiers {
+    pub shift: bool,
+    pub accel: bool,
+    pub alt: bool,
+}
+
+/// A point in the backend's window space, logical px.
+///
+/// The vocabulary hands a component a position in exactly one place —
+/// [`Interaction::on_context`] — because a context menu is anchored to the
+/// pointer by definition, so the anchor *is* the semantic rather than leaked
+/// layout. Nothing else exposes coordinates.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct NodePoint {
+    pub x: f32,
+    pub y: f32,
+}
+
+/// A key the backend dispatches to the focused node.
+///
+/// Named physically, not semantically: ArrowDown means "next row" in a tree
+/// and "next option" in a select, so the meaning belongs to the component.
+/// Enter/Tab and Escape are deliberately absent — they stay on
+/// [`Interaction::on_submit`] and [`Interaction::on_cancel`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NodeKey {
+    ArrowUp,
+    ArrowDown,
+    ArrowLeft,
+    ArrowRight,
+    Home,
+    End,
+    Space,
+    F2,
+}
+
+/// Where a drop lands relative to the zone it is over.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum DropEdge {
+    Before,
+    #[default]
+    Inside,
+    After,
+}
+
+/// A drag hovering or released over a drop zone.
+///
+/// The backend hit-tests zones and derives `edge` from where the pointer sits
+/// within the zone node's OWN bounds — geometry the backend already holds. The
+/// component names its zones and receives a semantic edge, so this does not
+/// reopen the delta-only rule on [`NodeDragEvent`]: no coordinate reaches the
+/// component here either.
+#[derive(Clone, Debug)]
+pub struct NodeDropEvent {
+    /// The [`Interaction::drag_payload`] of the node the gesture started on.
+    pub payload: String,
+    pub edge: DropEdge,
+}
+
 /// Handler for an activation (click, enter key, tap). Payload is captured by
 /// the component when it builds the closure — the vocabulary carries no event
 /// plumbing, and `poodle-events`' `SemanticEvent` remains the layer above.
 pub type ActivateHandler = Arc<dyn Fn() + Send + Sync>;
+
+/// Handler for a host-edited text value. The node carries the current value
+/// in [`NodeKind::Input`]; the backend owns key/IME dispatch and reports the
+/// replacement string through this callback.
+pub type TextChangeHandler = Arc<dyn Fn(&str) + Send + Sync>;
+
+/// Handler for a host-owned edit submission (Enter or Tab on an input).
+pub type SubmitHandler = Arc<dyn Fn() + Send + Sync>;
+
+/// Handler for a host-owned edit cancellation (Escape on an input).
+pub type CancelHandler = Arc<dyn Fn() + Send + Sync>;
 
 /// Interaction intent. Dispatching — hit-testing, ordering, focus — is the
 /// backend's job; this declares what the node wants when dispatch reaches it.
@@ -308,9 +405,39 @@ pub struct Interaction {
     /// describes (components bake disabled opacity into the descriptor).
     pub disabled: bool,
     pub on_activate: Option<ActivateHandler>,
+    /// Reports replacement text for an input node. Backends with a native
+    /// editor use its change stream; lightweight backends may provide a
+    /// smaller editing subset while preserving the same callback contract.
+    pub on_text_change: Option<TextChangeHandler>,
+    /// Completes the current input edit on Enter or Tab. The component
+    /// captures the current value in the closure; the backend only maps the
+    /// key gesture.
+    pub on_submit: Option<SubmitHandler>,
+    /// Cancels the current input edit on Escape.
+    pub on_cancel: Option<CancelHandler>,
     /// Drag handler. Unlike activation, drags do not bubble: the exact node
     /// under the pointer must carry the handler.
     pub on_drag: Option<Arc<dyn Fn(&NodeDragEvent) + Send + Sync>>,
+    /// Activation that needs the modifier state — multi-select lists, where
+    /// Shift extends the range and the platform accel toggles one item. When
+    /// set the backend calls this INSTEAD of `on_activate`, so a node wires
+    /// one or the other, never both.
+    pub on_activate_modified: Option<Arc<dyn Fn(NodeModifiers) + Send + Sync>>,
+    /// Secondary (right) activation, carrying the pointer anchor for a
+    /// context menu.
+    pub on_context: Option<Arc<dyn Fn(NodePoint) + Send + Sync>>,
+    /// Navigation and command keys, while this node holds focus.
+    pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) + Send + Sync>>,
+    /// Marks this node as a drag source carrying an opaque payload id. The
+    /// component chooses the id; the backend only carries it back.
+    pub drag_payload: Option<String>,
+    /// Marks this node as a drop zone for `drag_payload` gestures.
+    pub drop_zone: bool,
+    /// Fires repeatedly while a drag hovers this zone — drives the drop
+    /// indicator.
+    pub on_drop_hover: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
+    /// Fires once when a drag is released over this zone.
+    pub on_drop: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
 }
 
 /// Accessibility roles the ported components have needed so far. Grows with

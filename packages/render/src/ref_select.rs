@@ -11,9 +11,7 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{ControlDensity, ControlSize, RefSelectSpec, RefSelectVariant, TextInputSpec};
 
 use crate::color::with_alpha;
@@ -226,8 +224,7 @@ pub fn ref_select(
             }
 
             if option.is_disabled {
-                row.style.descriptor.opacity =
-                    theme.resolve_opacity(spec.disabled_opacity_token());
+                row.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
             } else if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = option.value.clone();

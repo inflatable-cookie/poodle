@@ -1,21 +1,50 @@
-use crate::app_state::AppState;
-use crate::specimens::overlay_state;
-use crate::style_bridge::color_to_hsla;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Button, CompatRow, Drawer, Eyebrow};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Button, Drawer, Eyebrow};
+use poodle_node::Node;
 use poodle_specs::{ButtonSpec, ButtonVariant, DrawerEdge, DrawerSpec, EyebrowSpec};
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn set_toggle_click(
+    state: &AppState,
+    key: &'static str,
+    value: bool,
+) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value,
+        });
+    })
+}
+
+fn set_toggle_open_change(
+    state: &AppState,
+    key: &'static str,
+) -> Arc<dyn Fn(bool) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value,
+        });
+    })
+}
+
+fn body_copy(theme: &impl ThemeProvider, text: impl Into<String>) -> Node {
+    let mut node = Node::text(text);
+    node.style.text_size = Some(14.0);
+    node.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    node
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let root_handle = cx.weak_entity();
 
-    let trigger = |id: &'static str,
-                   key: &'static str,
-                   label: &'static str,
-                   cx: &mut Context<PreviewRoot>| {
+    let trigger = |id: &'static str, key: &'static str, label: &'static str| {
         Button::from_spec(
             ButtonSpec::new()
                 .with_variant(ButtonVariant::Secondary)
@@ -23,9 +52,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
         )
         .with_id(id)
-        .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-            overlay_state::set_toggle(this, key, true, cx);
-        }))
+        .on_click(set_toggle_click(state, key, true))
         .into_any_element()
     };
 
@@ -47,7 +74,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "drawer-right-trigger",
                     "drawer-right-open",
                     "Open right drawer",
-                    cx,
                 )),
         )
         .child(
@@ -64,7 +90,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "drawer-left-trigger",
                     "drawer-left-open",
                     "Open left drawer",
-                    cx,
                 )),
         )
         .child(
@@ -81,7 +106,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "drawer-top-trigger",
                     "drawer-top-open",
                     "Open top drawer",
-                    cx,
                 )),
         )
         .child(
@@ -98,7 +122,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "drawer-bottom-trigger",
                     "drawer-bottom-open",
                     "Open bottom drawer",
-                    cx,
                 )),
         );
 
@@ -110,24 +133,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_description("Configure your preferences."),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "drawer-right-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(
-                        "Drawer content goes here. You can put forms, navigation, or any other content.",
-                    ),
-            )
-            .with_main_content(
-                div()
-                    .flex()
-                    .gap(px(6.0))
+            .on_open_change(set_toggle_open_change(state, "drawer-right-open"))
+            .with_content(body_copy(
+                theme,
+                "Drawer content goes here. You can put forms, navigation, or any other content.",
+            ))
+            .with_actions(
+                CompatRow::new()
+                    .gap(6.0)
                     .justify_end()
                     .child(
                         Button::from_spec(
@@ -137,16 +150,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("drawer-cancel")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, "drawer-right-open", false, cx);
-                        })),
+                        .on_click(set_toggle_click(state, "drawer-right-open", false)),
                     )
                     .child(
                         Button::from_spec(ButtonSpec::new().with_label("Save"), theme)
                             .with_id("drawer-save")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "drawer-right-open", false, cx);
-                            })),
+                            .on_click(set_toggle_click(state, "drawer-right-open", false)),
                     ),
             ),
         );
@@ -160,18 +169,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_title("Navigation"),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "drawer-left-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Side navigation or filters can live in a left-edge drawer."),
-            ),
+            .on_open_change(set_toggle_open_change(state, "drawer-left-open"))
+            .with_content(body_copy(
+                theme,
+                "Side navigation or filters can live in a left-edge drawer.",
+            )),
         );
     }
 
@@ -184,27 +186,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_description("Recent activity slides down from the top edge."),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "drawer-top-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(
-                        "Top-anchored drawers span the full width and are useful for banners or alerts.",
-                    ),
-            )
-            .with_main_content(
-                div().flex().justify_end().child(
+            .on_open_change(set_toggle_open_change(state, "drawer-top-open"))
+            .with_content(body_copy(
+                theme,
+                "Top-anchored drawers span the full width and are useful for banners or alerts.",
+            ))
+            .with_actions(
+                CompatRow::new().justify_end().child(
                     Button::from_spec(ButtonSpec::new().with_label("Dismiss"), theme)
                         .with_id("drawer-top-dismiss")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, "drawer-top-open", false, cx);
-                        })),
+                        .on_click(set_toggle_click(state, "drawer-top-open", false)),
                 ),
             ),
         );
@@ -219,24 +210,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_description("A bottom sheet anchored to the lower edge."),
                 theme,
             )
-            .on_open_change({
-                let root = root_handle.clone();
-                move |open, _window, cx| {
-                    overlay_state::set_toggle_via_entity(&root, "drawer-bottom-open", open, cx);
-                }
-            })
-            .with_content(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(
-                        "Bottom-anchored drawers span the full width and rise from the lower edge.",
-                    ),
-            )
-            .with_main_content(
-                div()
-                    .flex()
-                    .gap(px(6.0))
+            .on_open_change(set_toggle_open_change(state, "drawer-bottom-open"))
+            .with_content(body_copy(
+                theme,
+                "Bottom-anchored drawers span the full width and rise from the lower edge.",
+            ))
+            .with_actions(
+                CompatRow::new()
+                    .gap(6.0)
                     .justify_end()
                     .child(
                         Button::from_spec(
@@ -246,16 +227,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("drawer-bottom-cancel")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            overlay_state::set_toggle(this, "drawer-bottom-open", false, cx);
-                        })),
+                        .on_click(set_toggle_click(state, "drawer-bottom-open", false)),
                     )
                     .child(
                         Button::from_spec(ButtonSpec::new().with_label("Apply"), theme)
                             .with_id("drawer-bottom-apply")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                overlay_state::set_toggle(this, "drawer-bottom-open", false, cx);
-                            })),
+                            .on_click(set_toggle_click(state, "drawer-bottom-open", false)),
                     ),
             ),
         );

@@ -1,9 +1,9 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, RefSelect};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, RefSelect};
 use poodle_specs::{
     EyebrowSpec, RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant,
 };

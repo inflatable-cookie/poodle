@@ -7,10 +7,12 @@
 //! (Tier-3), so the edit pane is an Input node (placeholder + current value)
 //! and the preview shows source text.
 
+use std::sync::Arc;
+
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node,
+    MainAxisAlignment, Node, TextChangeHandler,
 };
 use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 
@@ -29,7 +31,22 @@ const TOOLS: [(&str, &str); 7] = [
     ("list", "List"),
 ];
 
+/// Host-owned interactions for the markdown editor.
+#[derive(Default, Clone)]
+pub struct MarkdownEditorHandlers {
+    pub on_change: Option<TextChangeHandler>,
+    pub on_mode_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
 pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> Node {
+    markdown_editor_with_handlers(spec, theme, MarkdownEditorHandlers::default())
+}
+
+pub fn markdown_editor_with_handlers(
+    spec: &MarkdownEditorSpec,
+    theme: &dyn ThemeProvider,
+    handlers: MarkdownEditorHandlers,
+) -> Node {
     // ── Size / density geometry (contract §8 tables, token-resolved rem) ──
     let tool_size = rem_to_px(spec.tool_size_rem());
     let toolbar_y = rem_to_px(spec.toolbar_y_rem());
@@ -140,6 +157,15 @@ pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> 
 
     // Mode switcher — delegates chrome to IconButton.
     let mode_button = |icon: &str, aria: &str, mode_val: &str| -> Node {
+        let on_activate = if spec.mode == mode_val {
+            None
+        } else {
+            handlers.on_mode_change.as_ref().map(|handler| {
+                let handler = Arc::clone(handler);
+                let mode = mode_val.to_string();
+                Arc::new(move || handler(&mode)) as Arc<dyn Fn() + Send + Sync>
+            })
+        };
         icon_button(
             &IconButtonSpec::new()
                 .with_icon(icon)
@@ -153,7 +179,7 @@ pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> 
                 .with_size_role(spec.size_role)
                 .with_density(spec.density),
             theme,
-            None,
+            on_activate,
         )
     };
     let mut modes = Node::container();
@@ -173,7 +199,7 @@ pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> 
             .child(mode_button("columns-2", "Split", "split"))
             .child(mode_button("eye", "Preview", "preview")),
     );
-    let mut el = el.child(toolbar);
+    let el = el.child(toolbar);
 
     // ── Body ──────────────────────────────────────────────────
     let mut body = Node::container();
@@ -193,6 +219,11 @@ pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> 
         } else {
             spec.aria_label.clone()
         });
+        input.interaction.focusable = !spec.is_disabled;
+        input.interaction.disabled = spec.is_disabled;
+        if !spec.is_disabled {
+            input.interaction.on_text_change = handlers.on_change.clone();
+        }
         {
             let s = &mut input.style;
             s.fill_width = true;

@@ -66,6 +66,16 @@ fn item_from(value: &Value) -> TranscriptItem {
         "activity" => TranscriptItem::Activity(TranscriptActivity {
             id: s(value, "id").to_string(),
             label: s(value, "label").to_string(),
+            spinning: None,
+        }),
+        "decided-plan" => TranscriptItem::DecidedPlan(TranscriptDecidedPlan {
+            id: s(value, "id").to_string(),
+            plan: s(value, "plan").to_string(),
+            status: poodle_headless::agent_plan::AgentPlanStatus::from_str_or_default(s(value, "status")),
+            decided_at: value
+                .get("decidedAt")
+                .and_then(Value::as_str)
+                .map(str::to_string),
         }),
         _ => TranscriptItem::Message(TranscriptMessage {
             id: s(value, "id").to_string(),

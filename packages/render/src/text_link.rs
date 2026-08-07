@@ -10,6 +10,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_node::{CursorHint, Node};
 use poodle_specs::TextLinkSpec;
 
+use crate::color::with_alpha;
+
 pub fn text_link(
     spec: &TextLinkSpec,
     theme: &dyn ThemeProvider,
@@ -19,6 +21,10 @@ pub fn text_link(
 
     let mut el = Node::text(&spec.label);
     el.style.descriptor.text_color = Some(color);
+    // The native GPUI tier keeps TextLink underlined at rest; the node
+    // vocabulary carries that decoration through the shared backend.
+    el.style.text_underline = true;
+    el.style.text_underline_color = Some(with_alpha(color, color.3 * 0.55));
 
     if spec.disabled {
         el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");

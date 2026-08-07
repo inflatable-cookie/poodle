@@ -27,11 +27,7 @@ pub struct StepperHandlers {
     pub on_rerun: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-pub fn stepper(
-    spec: &StepperSpec,
-    theme: &dyn ThemeProvider,
-    handlers: StepperHandlers,
-) -> Node {
+pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperHandlers) -> Node {
     let row_height = rem_to_px(spec.row_height_rem());
     let marker_size = rem_to_px(spec.marker_size_rem());
     let font_size = rem_to_px(spec.font_size_rem());
@@ -99,27 +95,15 @@ pub fn stepper(
             StepStatus::Pending => label_color,
         };
 
-        // The marker carries index, glyph or spinner by status. Pending is
-        // the only case that shows a number.
-        let marker: Node = match step.status {
-            StepStatus::Complete | StepStatus::Failed | StepStatus::Running => {
-                let name = match step.status {
-                    StepStatus::Complete => "check",
-                    StepStatus::Failed => "x",
-                    _ => "loader",
-                };
-                let mut m = Node::icon(name, marker_font_size);
-                m.style.descriptor.text_color = Some(marker_color);
-                m
-            }
-            StepStatus::Pending => {
-                let mut m = Node::text(format!("{}", index + 1));
-                m.style.text_size = Some(marker_font_size);
-                m.style.text_weight = Some(700);
-                m.style.descriptor.text_color = Some(marker_color);
-                m
-            }
+        let marker_glyph = match step.status {
+            StepStatus::Complete => "✓".to_string(),
+            StepStatus::Failed => "✕".to_string(),
+            StepStatus::Running => "◌".to_string(),
+            StepStatus::Pending => format!("{}", index + 1),
         };
+        let mut marker = Node::text(marker_glyph);
+        marker.style.text_size = Some(marker_font_size);
+        marker.style.descriptor.text_color = Some(marker_color);
 
         let mut marker_box = Node::container();
         {
@@ -158,6 +142,9 @@ pub fn stepper(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.spacing.gap = gap;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            if spec.orientation == Orientation::Horizontal {
+                s.flex_basis = Some(0.0);
+            }
             s.min_width = Some(0.0);
             s.min_height = Some(row_height);
             let pad = &mut s.descriptor.layout.spacing.padding;
@@ -198,6 +185,9 @@ pub fn stepper(
             // items_stretch is the flex default — silence is correct here.
             s.min_width = Some(0.0);
             s.descriptor.layout.width = LayoutSizing::Grow;
+            if spec.orientation == Orientation::Horizontal {
+                s.flex_basis = Some(0.0);
+            }
             if is_current {
                 s.descriptor.background = Some(with_alpha(accent, accent.3 * 0.10));
             }
@@ -235,7 +225,8 @@ pub fn stepper(
                 s.flex_shrink_zero = true;
             }
             rerun.interaction.focusable = true;
-            let mut glyph = Node::icon("refresh-cw", marker_font_size);
+            let mut glyph = Node::text("⟳");
+            glyph.style.text_size = Some(font_size);
             glyph.style.descriptor.text_color = Some(label_color);
             let mut rerun = rerun.child(glyph);
 

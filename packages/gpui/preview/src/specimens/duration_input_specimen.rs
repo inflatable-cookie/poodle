@@ -1,11 +1,11 @@
 use crate::app_state::AppState;
+use crate::node_compat::{DurationInput, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{DurationInput, Eyebrow};
 use poodle_specs::{DurationInputSpec, EyebrowSpec, ValidationState};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

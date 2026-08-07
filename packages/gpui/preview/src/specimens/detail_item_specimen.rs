@@ -1,8 +1,9 @@
+use crate::node_compat::{Button, DetailItem, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, DetailItem, Eyebrow};
+use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout,
     DetailItemPresentation, DetailItemSpec, EyebrowSpec,
@@ -10,6 +11,25 @@ use poodle_specs::{
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let success = theme.resolve_color("color.status.success");
+
+    let mut status_value = Node::container();
+    status_value.style.descriptor.layout.direction = LayoutDirection::Row;
+    status_value.style.descriptor.layout.spacing.padding.left = 8.0;
+    status_value.style.descriptor.layout.spacing.padding.right = 8.0;
+    status_value.style.descriptor.layout.spacing.padding.top = 2.0;
+    status_value.style.descriptor.layout.spacing.padding.bottom = 2.0;
+    status_value.style.descriptor.background =
+        Some(poodle_render::color::with_alpha(success, success.3 * 0.15));
+    let radii = &mut status_value.style.descriptor.corner_radii;
+    radii.top_left = 999.0;
+    radii.top_right = 999.0;
+    radii.bottom_right = 999.0;
+    radii.bottom_left = 999.0;
+    let mut status_text = Node::text("Active");
+    status_text.style.text_size = Some(12.0);
+    status_text.style.text_weight = Some(500);
+    status_text.style.descriptor.text_color = Some(success);
+    let status_value = status_value.child(status_text);
 
     div().flex().flex_col().gap(px(24.0))
         // --- Basic label-value pairs ---
@@ -66,18 +86,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         DetailItemSpec::new("Status"),
                         theme,
                     )
-                    .with_value_content(
-                        div()
-                            .px(px(8.0)).py(px(2.0))
-                            .rounded(px(999.0))
-                            .bg(color_to_hsla(success).opacity(0.15))
-                            .child(
-                                div().text_xs()
-                                    .text_color(color_to_hsla(success))
-                                    .font_weight(FontWeight::MEDIUM)
-                                    .child("Active".to_string())
-                            )
-                    )
+                    .with_value_content(status_value)
                 )
         )
         // --- Surface presentation ---

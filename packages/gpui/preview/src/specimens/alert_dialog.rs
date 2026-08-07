@@ -1,15 +1,26 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{AlertDialog, Button, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{AlertDialog, Button, Eyebrow};
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec,
 };
+use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+fn open_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move || {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: key.to_string(),
+            value: true,
+        });
+    })
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -35,10 +46,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("alert-danger-trigger")
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("alert-danger-open".to_string(), true);
-                        cx.notify();
-                    }))
+                    .on_click(open_click(state, "alert-danger-open"))
                 )
                 .when(danger_open, |el| {
                     el.child(
@@ -65,10 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("alert-warning-trigger")
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("alert-warning-open".to_string(), true);
-                        cx.notify();
-                    }))
+                    .on_click(open_click(state, "alert-warning-open"))
                 )
                 .when(warning_open, |el| {
                     el.child(

@@ -1,6 +1,6 @@
+use crate::node_compat::{AudioPlayer, Eyebrow};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{AudioPlayer, Eyebrow};
 use poodle_specs::AudioPlayerSpec;
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 
@@ -22,7 +22,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 // Idle / paused at start — play icon, 0:00.
                 .child(player(
                     theme,
-                    AudioPlayerSpec::new(src).with_duration(184.0).with_current_time(0.0),
+                    AudioPlayerSpec::new(src)
+                        .with_duration(184.0)
+                        .with_current_time(0.0),
                 ))
                 // Playing, mid-progress — pause icon + seek fill proportional to current_time.
                 .child(player(
@@ -183,7 +185,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn player(theme: &GpuiThemeProvider, spec: AudioPlayerSpec) -> Div {
-    div().w(px(420.0)).child(AudioPlayer::from_spec(spec, theme))
+    div()
+        .w(px(420.0))
+        .child(AudioPlayer::from_spec(spec, theme))
 }
 
 fn group(theme: &GpuiThemeProvider, title: &str, content: impl IntoElement) -> Div {

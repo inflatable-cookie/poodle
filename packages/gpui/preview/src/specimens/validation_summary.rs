@@ -10,15 +10,13 @@
 //! renders nothing — proven by the placeholder note beside it.
 
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, ValidationSummary};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, ValidationSummary};
-use poodle_specs::{
-    EyebrowSpec, ValidationState, ValidationSummaryEntry, ValidationSummarySpec,
-};
+use poodle_specs::{EyebrowSpec, ValidationState, ValidationSummaryEntry, ValidationSummarySpec};
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -119,7 +117,10 @@ fn group(theme: &GpuiThemeProvider, label: &str, summary: AnyElement) -> Div {
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(summary)
 }
 

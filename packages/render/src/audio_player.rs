@@ -9,14 +9,12 @@
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeKind,
+    NodeKind, StylePatch, TextAlign,
 };
 use poodle_specs::{AudioPlayerSpec, ControlDensity, ControlSize};
 
-use crate::color::with_alpha;
-use crate::presentation::{
-    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::color::mix_srgb;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 
 /// Format seconds as m:ss.
 fn format_time(seconds: f64) -> String {
@@ -26,7 +24,9 @@ fn format_time(seconds: f64) -> String {
 
 pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
+    // Contract §"CurrentTime/TotalTime": the time labels are label-size type,
+    // not the control's own size ladder.
+    let font_size = theme.resolve_space("typography.label.size");
 
     // Size-driven dimensions from contract.
     let button_size = rem_to_px(match effective_size {
@@ -55,14 +55,20 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         ControlSize::Xl => 5.0,
     });
 
-    // Density-driven spacing from contract.
+    // Density-driven spacing (contract §"Density Overrides"). `gap` and `pad-y`
+    // share one ladder; `pad-x` has its own and is NOT the generic
+    // `control_space_x_rem` — comfortable is 0.875rem here, not 1rem.
     let gap = rem_to_px(match spec.density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default => 0.5,
         ControlDensity::Comfortable => 0.625,
     });
-    let pad_y = rem_to_px(panel_space_y_rem(spec.density));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_y = gap;
+    let pad_x = rem_to_px(match spec.density {
+        ControlDensity::Compact => 0.5,
+        ControlDensity::Default => 0.75,
+        ControlDensity::Comfortable => 0.875,
+    });
 
     let fill = theme.resolve_color(spec.fill_token());
     let border = theme.resolve_color("color.border.default");
@@ -70,10 +76,17 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     let text_primary = theme.resolve_color(spec.control_color_token());
     let text_secondary = theme.resolve_color("color.text.secondary");
 
+    // Contract §"SeekSlider track"/"VolumeSlider track": both tracks are
+    // 0.25rem tall with a 0.125rem radius — a contract-exact geometry, not the
+    // pill radius the surrounding controls use.
     let track_height = rem_to_px(0.25);
+    let track_radius = rem_to_px(0.125);
     let pill = theme.resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
     let accent = theme.resolve_color("color.accent.base");
+    // Transport hover tint, matching the other controls' accent-into-surface
+    // hover treatment.
+    let hover_fill = mix_srgb(accent, fill, 0.12);
 
     // Transport icon button (sized circle + tinted glyph).
     let icon_btn = |name: &'static str| -> Node {
@@ -92,6 +105,10 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
         b.interaction.focusable = true;
+        b.style.hover = Some(StylePatch {
+            background: Some(hover_fill),
+            ..StylePatch::default()
+        });
         let mut glyph = Node::icon(name, icon_size);
         glyph.style.descriptor.text_color = Some(text_primary);
         b.child(glyph)
@@ -104,6 +121,7 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         s.text_size = Some(font_size);
         s.font_family = Some(FontFamily::Mono);
         s.min_width = Some(time_width);
+        s.text_align = Some(TextAlign::Center);
         l
     };
 
@@ -142,14 +160,18 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     };
     {
         let s = &mut seek.style;
-        s.min_height = Some(track_height);
-        s.self_stretch = true;
+        // Fixed track height, NOT `self_stretch` — stretching made the track
+        // fill the whole transport row instead of reading as a 0.25rem rail.
+        s.descriptor.layout.height = LayoutSizing::Fixed(track_height);
         let c = &mut s.descriptor.corner_radii;
-        c.top_left = pill;
-        c.top_right = pill;
-        c.bottom_right = pill;
-        c.bottom_left = pill;
+        c.top_left = track_radius;
+        c.top_right = track_radius;
+        c.bottom_right = track_radius;
+        c.bottom_left = track_radius;
+        // Track base per contract; `text_color` is the channel the backend
+        // reads for a Progress node's filled portion.
         s.descriptor.background = Some(text_primary);
+        s.descriptor.text_color = Some(accent);
         s.descriptor.layout.width = LayoutSizing::Grow;
         s.min_width = Some(rem_to_px(4.0));
     }
@@ -173,13 +195,18 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     };
     {
         let s = &mut volume.style;
-        s.min_height = Some(track_height);
+        s.descriptor.layout.height = LayoutSizing::Fixed(track_height);
         let c = &mut s.descriptor.corner_radii;
-        c.top_left = pill;
-        c.top_right = pill;
-        c.bottom_right = pill;
-        c.bottom_left = pill;
-        s.descriptor.background = Some(with_alpha(accent, accent.3 * 0.30));
+        c.top_left = track_radius;
+        c.top_right = track_radius;
+        c.bottom_right = track_radius;
+        c.bottom_left = track_radius;
+        // The contract's solid accent track assumes a native range thumb marks
+        // the value. This tier draws a proportional fill instead, so the base
+        // is accent mixed into the surface — a solid accent track under an
+        // accent fill would carry no information.
+        s.descriptor.background = Some(mix_srgb(accent, fill, 0.30));
+        s.descriptor.text_color = Some(accent);
         s.descriptor.layout.width = LayoutSizing::Fixed(volume_width);
     }
     el = el.child(volume);

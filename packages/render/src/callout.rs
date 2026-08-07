@@ -40,7 +40,9 @@ pub fn callout(
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
 
     let pad_x = rem_to_px(panel_space_x_rem(spec.density));
     let pad_y = rem_to_px(0.625);
@@ -92,6 +94,7 @@ pub fn callout(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = gap;
+        s.fill_width = true;
     }
 
     // ── Body: icon badge + content ──
@@ -119,6 +122,7 @@ pub fn callout(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.flex_shrink_zero = true;
     }
     if is_pending {
         badge = badge.child(spinner(
@@ -142,6 +146,7 @@ pub fn callout(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = content_gap;
         s.descriptor.layout.width = LayoutSizing::Grow;
+        s.min_width = Some(0.0);
     }
     if let Some(ref title) = spec.title {
         let mut t = Node::text(title);

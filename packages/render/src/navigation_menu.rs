@@ -6,13 +6,11 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, Node, StylePatch,
-};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{ControlDensity, NavigationMenuSpec};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
 
 /// Trigger horizontal padding in rem per density (contract §8 Density table):
 /// compact 0.5, default/comfortable 0.75 — NOT the generic ladder.
@@ -38,7 +36,12 @@ pub fn navigation_menu(
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
+    let font_size = rem_to_px(match effective_size {
+        poodle_specs::ControlSize::Xs => 0.6875,
+        poodle_specs::ControlSize::Sm | poodle_specs::ControlSize::Md => 0.75,
+        poodle_specs::ControlSize::Lg => 0.8125,
+        poodle_specs::ControlSize::Xl => 0.875,
+    });
     let pad_x = rem_to_px(nav_trigger_pad_x_rem(spec.density));
 
     // List gap = space-inline-sm (contract §7/§8).
@@ -52,6 +55,7 @@ pub fn navigation_menu(
     let control_height = theme.resolve_space("size.control.height");
 
     let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
     let accent = theme.resolve_color("color.accent.base");
     let surface = theme.resolve_color("color.background.surface");
     let border_subtle = theme.resolve_color("color.border.subtle");
@@ -94,24 +98,21 @@ pub fn navigation_menu(
         // Contract §3 `icon`: an entry with a leading icon composes icon +
         // label as explicit children separated by the trigger gap; the icon
         // is tinted to the trigger foreground and sized to the trigger font.
-        // Without an icon the label is the button's own text.
-        let mut btn = if let Some(ref icon_name) = entry.icon {
+        let mut btn = {
             let mut b = Node::button("");
+            b.a11y.role = Some(NodeRole::Button);
             b.style.descriptor.layout.direction = LayoutDirection::Row;
             b.style.descriptor.layout.spacing.gap = list_gap;
-            let mut glyph = Node::icon(icon_name.as_str(), font_size);
-            glyph.style.descriptor.text_color = Some(text_primary);
+            if let Some(ref icon_name) = entry.icon {
+                let mut glyph = Node::icon(icon_name.as_str(), font_size);
+                glyph.style.descriptor.text_color = Some(text_primary);
+                b = b.child(glyph);
+            }
             let mut label = Node::text(&entry.label);
             label.style.descriptor.text_color = Some(text_primary);
             label.style.text_size = Some(font_size);
             label.style.text_weight = Some(600);
-            b.child(glyph).child(label)
-        } else {
-            let mut b = Node::button(&entry.label);
-            b.style.descriptor.text_color = Some(text_primary);
-            b.style.text_size = Some(font_size);
-            b.style.text_weight = Some(600);
-            b
+            b.child(label)
         };
         {
             let s = &mut btn.style;
@@ -165,11 +166,10 @@ pub fn navigation_menu(
 
     // Viewport — rendered only when an item is active (contract §2/§4).
     // Contract §8: panel padding, border-subtle@74% hairline, radius-surface,
-    // panel@96% fill; the elevation-overlay shadow is NOT applied (matches
-    // the reference tier's omission).
+    // panel@96% fill and elevation-overlay shadow.
     if let Some(active_item) = spec.current_item() {
-        let panel_x = theme.resolve_space("space.panel.x");
-        let panel_y = theme.resolve_space("space.panel.y");
+        let panel_x = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_y = rem_to_px(panel_space_y_rem(spec.density));
         let viewport_radius = theme.resolve_radius(spec.viewport_radius_token());
         let panel = theme.resolve_color("color.background.panel");
         let panel_bg = with_alpha(panel, panel.3 * 0.96);
@@ -188,6 +188,7 @@ pub fn navigation_menu(
             s.descriptor.border.width = border_w;
             s.descriptor.border.color = viewport_border;
             s.descriptor.background = Some(panel_bg);
+            s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
         }
         all_corners(&mut viewport, viewport_radius);
 
@@ -196,8 +197,8 @@ pub fn navigation_menu(
         let mut viewport = viewport;
         if let Some(description) = active_item.description.as_deref() {
             let mut d = Node::text(description);
-            d.style.descriptor.text_color = Some(text_primary);
-            d.style.text_size = Some(font_size);
+            d.style.descriptor.text_color = Some(text_secondary);
+            d.style.text_size = Some(theme.resolve_space("typography.body.size"));
             viewport = viewport.child(d);
         }
 

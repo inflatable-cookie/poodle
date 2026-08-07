@@ -30,6 +30,7 @@ region takes any Poodle control.
 [Root .agent-chat-input] <div>  (carries data-size/data-density/data-status/data-disabled)
   ├── [Field .agent-chat-input__field] <div>  (the bordered, rounded composer block)
   │   ├── [Question .agent-chat-input__question] AgentQuestion (conditional: status="questioning")
+  │   ├── [Plan .agent-chat-input__plan] AgentPlan (conditional: status="reviewing-plan")
   │   ├── [Attachments .agent-chat-input__attachments] <ul> (conditional: attachments non-empty)
   │   │   └── [Attachment .agent-chat-input__attachment] <li> (repeated; data-variant="chip"|"thumbnail")
   │   │       ├── [Attachment Thumb .agent-chat-input__attachment-thumb] <img>  (thumbnail variant)
@@ -72,7 +73,7 @@ every other interactive part reuses a Poodle primitive.
 |------|------|---------|----------|-------|
 | `value` | `string` | `""` | no | message text; controlled when bound, otherwise component-owned |
 | `placeholder` | `string` | `"Send a message"` | no | editor placeholder |
-| `status` | `"idle" \| "busy" \| "questioning"` | `"idle"` | no | `busy` flips the action button to stop; `questioning` renders the question region and blocks ordinary sending |
+| `status` | `"idle" \| "busy" \| "questioning" \| "reviewing-plan"` | `"idle"` | no | `busy` flips the action button to stop; `questioning` renders the question region and blocks ordinary sending; `reviewing-plan` renders the plan region and keeps ordinary sending |
 | `disabled` | `boolean` | `false` | no | disables the editor, action button and attachment removal |
 | `readOnly` | `boolean` | `false` | no | editor is not editable; the action button still works (submit stays possible) |
 | `ariaLabel` | `string` | `"Message"` | no | accessible name for the editor |
@@ -227,7 +228,7 @@ while busy is also dropped (stop is deliberate, not accidental).
 
 | Element | Attribute | Value |
 |---------|-----------|-------|
-| Root | `data-status` | `"idle"` / `"busy"` |
+| Root | `data-status` | `"idle"` / `"busy"` / `"questioning"` / `"reviewing-plan"` |
 | Editor | `aria-label` | from `ariaLabel` |
 | Editor | `aria-multiline` | `"true"` (implicit on textarea) |
 | Editor | `aria-disabled` / `disabled` | native attribute when `disabled` |
@@ -325,6 +326,44 @@ the transcript stays scrollable so the reader can check something before
 answering. What blocks is this component refusing to send anything but an
 answer. See `agent-question.md` §2.
 
+### Plan Region
+
+While `status="reviewing-plan"` the field carries an `AgentPlan` above the
+attachments, and — unlike the question — the composer's parts keep their
+ordinary roles:
+
+| Part | While reviewing a plan |
+|------|------------------------|
+| Editor | an ordinary editor; placeholder becomes `planPlaceholder` |
+| Action | sends an ordinary message |
+| `onSubmit` | fires as an ordinary send; the host routes the text to the agent as revision feedback |
+
+The difference is the blocking semantics. A question blocks the turn, so the
+composer's submit becomes the answer. A proposed plan arrives *after* the
+plan-mode turn completes, so nothing is left to block: the plan waits on the
+operator's next action, and sending a message is the revise channel, not an
+error. See `agent-plan.md` §2.
+
+The plan owns its decision controls; the composer supplies only the seat and
+the editor:
+
+```svelte
+<AgentChatInput status="reviewing-plan" onSubmit={sendRevision}>
+  {#snippet plan()}
+    <AgentPlan plan={planMarkdown} onAccept={accept} onRevise={focusEditor} onDismiss={dismiss} />
+  {/snippet}
+</AgentChatInput>
+```
+
+Name the host's markdown binding anything but `plan`: inside
+`{#snippet plan()}` the identifier `plan` is the snippet itself, so a
+same-named variable is shadowed and `AgentPlan.plan` receives the snippet
+function instead of the markdown string.
+
+Once the operator decides, the host returns to `status="idle"` and appends a
+`decided-plan` item, rendered by `AgentPlanRecord`, so the transcript shows
+what was decided without keeping a second decision surface on screen.
+
 ## 8. Token Usage
 
 | Part | Token | Purpose |
@@ -366,7 +405,7 @@ spacing — never the field's vertical padding or the action box.
 |-----------|---------|--------|
 | `data-size` | Root | `"xs"`–`"xl"` |
 | `data-density` | Root | `"compact"`, `"default"`, `"comfortable"` |
-| `data-status` | Root | `"idle"`, `"busy"` |
+| `data-status` | Root | `"idle"`, `"busy"`, `"questioning"`, `"reviewing-plan"` |
 | `data-disabled` | Root | `"true"` / `"false"` |
 | `data-dividers` | Leading | `"true"` / `"false"` |
 | `data-kind` | Attachment | host-supplied kind, when present |

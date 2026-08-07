@@ -1,7 +1,8 @@
+use crate::node_compat::{Eyebrow, Icon};
+use crate::providers::IconProvider;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Icon, IconProvider};
 use poodle_specs::{EyebrowSpec, IconSpec};
 
 use crate::style_bridge::color_to_hsla;

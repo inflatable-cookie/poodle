@@ -1,0 +1,110 @@
+{
+  "decide": [
+    {
+      "name": "a pending plan can be accepted",
+      "status": "pending",
+      "next": "accepted",
+      "decidedAt": "2026-08-07T10:00:00Z",
+      "decision": {
+        "status": "accepted",
+        "decidedAt": "2026-08-07T10:00:00Z"
+      },
+      "canDecide": true
+    },
+    {
+      "name": "a pending plan can be revised",
+      "status": "pending",
+      "next": "revised",
+      "decision": {
+        "status": "revised"
+      },
+      "canDecide": true
+    },
+    {
+      "name": "a pending plan can be dismissed",
+      "status": "pending",
+      "next": "dismissed",
+      "decision": {
+        "status": "dismissed"
+      },
+      "canDecide": true
+    },
+    {
+      "name": "an accepted plan cannot be re-decided",
+      "status": "accepted",
+      "next": "dismissed",
+      "decision": null,
+      "canDecide": false
+    },
+    {
+      "name": "a revised plan cannot be re-decided",
+      "status": "revised",
+      "next": "accepted",
+      "decision": null,
+      "canDecide": false
+    },
+    {
+      "name": "a dismissed plan cannot be re-decided",
+      "status": "dismissed",
+      "next": "accepted",
+      "decision": null,
+      "canDecide": false
+    }
+  ],
+  "labels": [
+    { "status": "pending", "label": "Pending" },
+    { "status": "accepted", "label": "Accepted" },
+    { "status": "revised", "label": "Revised" },
+    { "status": "dismissed", "label": "Dismissed" }
+  ],
+  "summary": [
+    {
+      "name": "a short plan is unchanged",
+      "plan": "Ship it.",
+      "maxLength": 160,
+      "summary": "Ship it."
+    },
+    {
+      "name": "whitespace collapses to single spaces",
+      "plan": "## Steps\n\n- first\n- second\n- third",
+      "maxLength": 160,
+      "summary": "## Steps - first - second - third"
+    },
+    {
+      "name": "edge whitespace is trimmed",
+      "plan": "  padded plan  ",
+      "maxLength": 160,
+      "summary": "padded plan"
+    },
+    {
+      "name": "an empty plan summarises to nothing",
+      "plan": "  \n ",
+      "maxLength": 160,
+      "summary": ""
+    },
+    {
+      "name": "a plan at the budget is not truncated",
+      "plan": "exactly twenty chars",
+      "maxLength": 20,
+      "summary": "exactly twenty chars"
+    },
+    {
+      "name": "a long plan truncates with an ellipsis inside the budget",
+      "plan": "exactly twenty chars and then some more",
+      "maxLength": 20,
+      "summary": "exactly twenty char…"
+    },
+    {
+      "name": "truncation trims the dangling space",
+      "plan": "a b c d e f g h",
+      "maxLength": 4,
+      "summary": "a b…"
+    },
+    {
+      "name": "a zero budget summarises to nothing",
+      "plan": "anything",
+      "maxLength": 0,
+      "summary": ""
+    }
+  ]
+}

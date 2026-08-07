@@ -22,12 +22,12 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, StylePatch, TextAlign,
+    MainAxisAlignment, Node, NodePosition, StylePatch, TextAlign,
 };
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
 
 /// Dropzone min-height in rem per size (contract section 8).
 fn dropzone_min_height_rem(size: ControlSize) -> f32 {
@@ -67,25 +67,6 @@ fn hint_font_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Dropzone padding in rem per density (contract §8 panel padding /
-/// Svelte compact 1rem / comfortable 1.75rem).
-fn dropzone_padding_rem(density: ControlDensity) -> f32 {
-    match density {
-        ControlDensity::Compact => 1.0,
-        ControlDensity::Default => 1.5,
-        ControlDensity::Comfortable => 1.75,
-    }
-}
-
-/// Dropzone-content gap in rem per density (Svelte content-gap override).
-fn content_gap_rem(density: ControlDensity) -> f32 {
-    match density {
-        ControlDensity::Compact => 0.25,
-        ControlDensity::Default => 0.375,
-        ControlDensity::Comfortable => 0.5,
-    }
-}
-
 /// File-item padding in rem per density (Svelte item-padding override).
 fn item_padding_rem(density: ControlDensity) -> f32 {
     match density {
@@ -122,14 +103,30 @@ pub fn file_upload(
     let icon_sz = rem_to_px(icon_size_rem(effective_size));
     let label_font = rem_to_px(label_font_rem(effective_size));
     let hint_font = rem_to_px(hint_font_rem(effective_size));
-    let padding = rem_to_px(dropzone_padding_rem(spec.density));
-    let content_gap = rem_to_px(content_gap_rem(spec.density));
+    let padding_x = rem_to_px(panel_space_x_rem(spec.density));
+    let padding_y = rem_to_px(panel_space_y_rem(spec.density));
+    let content_gap = theme.resolve_space("space.inline.sm");
     let root_gap = rem_to_px(0.5); // space.stack.sm
     let border_width = rem_to_px(0.125); // 0.125rem dashed
 
     // ── Dropzone content ──
     let mut icon = Node::icon("upload", icon_sz);
     icon.style.descriptor.text_color = Some(text_secondary);
+    // The old Icon element's glyph sits 8px lower inside its 2rem box. Keep
+    // that compositor offset explicit while the box itself remains in flow.
+    icon.position = NodePosition::Absolute {
+        top: Some(rem_to_px(0.5)),
+        left: Some(0.0),
+        right: None,
+        bottom: None,
+    };
+    let mut icon_box = Node::container();
+    {
+        let s = &mut icon_box.style;
+        s.descriptor.layout.width = LayoutSizing::Fixed(icon_sz);
+        s.descriptor.layout.height = LayoutSizing::Fixed(icon_sz);
+    }
+    let icon_box = icon_box.child(icon);
 
     // Label "Drop files here or browse" — the accent "browse" affordance is
     // a separate accent-colored run after the prompt (contract Browse part).
@@ -140,13 +137,15 @@ pub fn file_upload(
         s.descriptor.layout.spacing.gap = rem_to_px(0.25);
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.text_size = Some(label_font);
+        s.descriptor.text_color = Some(text_secondary);
+        s.descriptor.layout.spacing.margin.top = -rem_to_px(0.25);
+        s.descriptor.layout.spacing.margin.bottom = rem_to_px(0.25);
     }
-    let mut prompt = Node::text("Drop files here or");
-    prompt.style.text_size = Some(label_font);
-    prompt.style.descriptor.text_color = Some(text_secondary);
+    let prompt = Node::text("Drop files here or");
     let mut browse = Node::text("browse");
-    browse.style.text_size = Some(label_font);
     browse.style.descriptor.text_color = Some(accent);
+    browse.style.text_underline = true;
     let label_row = label_row.child(prompt).child(browse);
 
     let mut dropzone_content = Node::container();
@@ -157,13 +156,14 @@ pub fn file_upload(
         s.descriptor.layout.spacing.gap = content_gap;
         s.text_align = Some(TextAlign::Center);
     }
-    let mut dropzone_content = dropzone_content.child(icon).child(label_row);
+    let mut dropzone_content = dropzone_content.child(icon_box).child(label_row);
 
     // Hint: `accept · Max <size>` (contract / Svelte copy).
     if let Some(hint_text) = build_hint_text(spec) {
         let mut hint = Node::text(&hint_text);
         hint.style.text_size = Some(hint_font);
         hint.style.descriptor.text_color = Some(text_tertiary);
+        hint.style.descriptor.layout.spacing.margin.top = -rem_to_px(0.5);
         dropzone_content = dropzone_content.child(hint);
     }
 
@@ -173,10 +173,10 @@ pub fn file_upload(
         let s = &mut dropzone.style;
         s.min_height = Some(min_height);
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = padding;
-        pad.right = padding;
-        pad.top = padding;
-        pad.bottom = padding;
+        pad.left = padding_x;
+        pad.right = padding_x;
+        pad.top = padding_y;
+        pad.bottom = padding_y;
         s.descriptor.background = Some(TRANSPARENT); // contract: transparent default
         s.descriptor.border.width = border_width;
         s.border_dashed = true; // contract: 0.125rem dashed
@@ -412,8 +412,8 @@ fn progress_track(progress: u8, track_bg: ColorValue, fill: ColorValue) -> Node 
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.fill_height = true;
         s.descriptor.background = Some(fill);
-        s.flex_basis = Some(p);
-        s.flex_fill = true;
+        s.flex_basis = Some(0.0);
+        s.flex_grow = Some(p);
     }
     if p <= 0.0 {
         let s = &mut bar.style;
@@ -444,8 +444,8 @@ fn progress_track(progress: u8, track_bg: ColorValue, fill: ColorValue) -> Node 
             // Explicit Row (see switch.rs).
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.fill_height = true;
-            s.flex_basis = Some(100.0 - p);
-            s.flex_fill = true;
+            s.flex_basis = Some(0.0);
+            s.flex_grow = Some(100.0 - p);
         }
         track = track.child(remainder);
     }

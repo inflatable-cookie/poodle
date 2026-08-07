@@ -1,8 +1,8 @@
-use crate::style_bridge::color_to_hsla;
+use crate::node_compat::{Eyebrow, ScrollShell};
 use gpui::*;
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, ScrollShell};
 use poodle_specs::{Direction, EyebrowSpec, ScrollShellSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -10,20 +10,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let border = theme.resolve_color("color.border.default");
 
     let surface_row = |label: &str| {
-        div()
-            .h(px(24.0))
-            .rounded(px(3.0))
-            .border_1()
-            .border_color(color_to_hsla(border))
-            .px(px(8.0))
-            .flex()
-            .items_center()
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(label.to_string()),
-            )
+        let mut row = Node::container();
+        {
+            let s = &mut row.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.height = LayoutSizing::Fixed(24.0);
+            s.descriptor.layout.spacing.padding.left = 8.0;
+            s.descriptor.layout.spacing.padding.right = 8.0;
+            s.fill_width = true;
+            s.descriptor.border.width = 1.0;
+            s.descriptor.border.color = border;
+            s.descriptor.corner_radii.top_left = 3.0;
+            s.descriptor.corner_radii.top_right = 3.0;
+            s.descriptor.corner_radii.bottom_right = 3.0;
+            s.descriptor.corner_radii.bottom_left = 3.0;
+        }
+        let mut text = Node::text(label);
+        text.style.text_size = Some(12.0);
+        text.style.descriptor.text_color = Some(text_secondary);
+        row.child(text)
     };
 
     div()
@@ -82,9 +88,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_child(
-                            div()
-                                .flex()
-                                .gap(px(4.0))
+                            {
+                                let mut row = Node::container();
+                                row.style.descriptor.layout.direction = LayoutDirection::Row;
+                                row.style.descriptor.layout.spacing.gap = 4.0;
+                                row
                                 .child(column_item("Column 1", border, text_secondary))
                                 .child(column_item("Column 2", border, text_secondary))
                                 .child(column_item("Column 3", border, text_secondary))
@@ -94,7 +102,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .child(column_item("Column 7", border, text_secondary))
                                 .child(column_item("Column 8", border, text_secondary))
                                 .child(column_item("Column 9", border, text_secondary))
-                                .child(column_item("Column 10", border, text_secondary)),
+                                .child(column_item("Column 10", border, text_secondary))
+                            },
                         ),
                     ),
                 ),
@@ -105,21 +114,26 @@ fn column_item(
     label: &str,
     border: poodle_tokens::typed::ColorValue,
     text: poodle_tokens::typed::ColorValue,
-) -> Div {
-    div()
-        .h(px(28.0))
-        .px(px(12.0))
-        .rounded(px(3.0))
-        .border_1()
-        .border_color(color_to_hsla(border))
-        .flex()
-        .items_center()
-        .flex_shrink_0()
-        .child(
-            div()
-                .text_xs()
-                .text_color(color_to_hsla(text))
-                .whitespace_nowrap()
-                .child(label.to_string()),
-        )
+) -> Node {
+    let mut item = Node::container();
+    {
+        let s = &mut item.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.height = LayoutSizing::Fixed(28.0);
+        s.descriptor.layout.spacing.padding.left = 12.0;
+        s.descriptor.layout.spacing.padding.right = 12.0;
+        s.flex_none = true;
+        s.descriptor.border.width = 1.0;
+        s.descriptor.border.color = border;
+        s.descriptor.corner_radii.top_left = 3.0;
+        s.descriptor.corner_radii.top_right = 3.0;
+        s.descriptor.corner_radii.bottom_right = 3.0;
+        s.descriptor.corner_radii.bottom_left = 3.0;
+    }
+    let mut content = Node::text(label);
+    content.style.text_size = Some(12.0);
+    content.style.descriptor.text_color = Some(text);
+    content.style.no_wrap = true;
+    item.child(content)
 }

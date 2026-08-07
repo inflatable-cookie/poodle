@@ -12,10 +12,18 @@ use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 
 use crate::card::card;
 use crate::color::with_alpha;
-use crate::media_thumbnail::media_thumbnail;
 use crate::presentation::rem_to_px;
 
 pub fn media_preview(spec: &MediaPreviewSpec, theme: &dyn ThemeProvider) -> Node {
+    media_preview_with_content(spec, theme, None)
+}
+
+/// Render a media preview with an optional caller-owned media slot.
+pub fn media_preview_with_content(
+    spec: &MediaPreviewSpec,
+    theme: &dyn ThemeProvider,
+    media_content: Option<Node>,
+) -> Node {
     let text_primary = theme.resolve_color(spec.title_color_token());
     let text_secondary = theme.resolve_color(spec.secondary_text_token());
     let meta_fill_base = theme.resolve_color(spec.meta_fill_token());
@@ -44,7 +52,8 @@ pub fn media_preview(spec: &MediaPreviewSpec, theme: &dyn ThemeProvider) -> Node
     if let Some(ref state_message) = spec.state_message {
         thumb_spec = thumb_spec.with_state_message(state_message.clone());
     }
-    let thumbnail = media_thumbnail(&thumb_spec, theme);
+    let thumbnail =
+        crate::media_thumbnail::media_thumbnail_with_content(&thumb_spec, theme, media_content);
 
     // ── Header: heading block + pill metadata ──────────────────
     let mut heading = Node::container();

@@ -99,6 +99,8 @@ mod ui_presentation_provider;
 mod action_discovery_panel;
 mod agent_chat_input;
 mod agent_message;
+mod agent_plan;
+mod agent_plan_record;
 mod agent_question;
 mod agent_question_record;
 mod agent_transcript;
@@ -160,6 +162,8 @@ pub use agent_chat_input::{
     SubmitIntent,
 };
 pub use agent_message::AgentMessageSpec;
+pub use agent_plan::AgentPlanSpec;
+pub use agent_plan_record::AgentPlanRecordSpec;
 pub use agent_question::AgentQuestionSpec;
 pub use agent_question_record::AgentQuestionRecordSpec;
 pub use agent_transcript::AgentTranscriptSpec;
@@ -337,7 +341,10 @@ pub use form_shell::FormShellSpec;
 pub use inline_list_section::InlineListSectionSpec;
 pub use inline_remediation::InlineRemediationSpec;
 pub use list_container::{ListContainerSpec, ListContainerState};
-pub use log_list::{LogFilter, LogFilterKind, LogFilterOption, LogListSpec};
+pub use log_list::{
+    AuditLogEntry, LogActor, LogEntry, LogFilter, LogFilterKind, LogFilterOption, LogLevel,
+    LogListSpec, StreamLogEntry,
+};
 pub use markdown_editor::MarkdownEditorSpec;
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::{MediaPickerItem, MediaPickerSpec, MediaPickerTab};

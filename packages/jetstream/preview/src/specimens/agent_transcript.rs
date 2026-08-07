@@ -57,6 +57,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         TranscriptItem::Activity(TranscriptActivity {
             id: "act".to_string(),
             label: "Working for 1h 1m".to_string(),
+            spinning: None,
         }),
     ];
 

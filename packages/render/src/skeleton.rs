@@ -60,16 +60,16 @@ fn skeleton_pulse() -> NodeAnimation {
         keyframes: vec![
             AnimKeyframe {
                 at: 0.0,
-                values: vec![(AnimProperty::Opacity, 1.0)],
+                values: vec![(AnimProperty::Opacity, 0.5)],
             },
             AnimKeyframe {
                 at: 1.0,
-                values: vec![(AnimProperty::Opacity, 0.55)],
+                values: vec![(AnimProperty::Opacity, 0.8)],
             },
         ],
-        duration_secs: 1.1,
-        easing: AnimEasing::EaseInOut,
-        loop_mode: AnimLoop::PingPong,
+        duration_secs: 1.6,
+        easing: AnimEasing::Linear,
+        loop_mode: AnimLoop::Loop,
     }
 }
 
@@ -94,8 +94,7 @@ fn single_shape(fill: ColorValue, radius: f32, spec: &SkeletonSpec) -> Node {
             }
         }
         _ => {
-            s.descriptor.layout.height =
-                LayoutSizing::Fixed(parsed_h.unwrap_or(rem_to_px(0.875)));
+            s.descriptor.layout.height = LayoutSizing::Fixed(parsed_h.unwrap_or(rem_to_px(0.875)));
             match parsed_w {
                 Some(w) => s.descriptor.layout.width = LayoutSizing::Fixed(w),
                 None => s.fill_width = true,
@@ -130,8 +129,7 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
     let cell_pct = |pct: f32, h_px: f32| -> Node {
         let mut n = shape(fill, radius);
         n.style.descriptor.layout.height = LayoutSizing::Fixed(h_px);
-        n.style.flex_fill = true;
-        n.style.flex_basis = Some(pct * 100.0);
+        n.style.width_pct = Some(pct);
         n
     };
     // True percentage line for COLUMN contexts.
@@ -163,7 +161,9 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
 
     let Some(ref preset) = spec.preset else {
         let mut el = single_shape(fill, radius, spec);
-        el.style.animation = Some(skeleton_pulse());
+        if spec.is_animated {
+            el.style.animation = Some(skeleton_pulse());
+        }
         return el;
     };
 
@@ -171,7 +171,8 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
         SkeletonPreset::AvatarLine => {
             let mut r = row(gap_075);
             r.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            r.child(circle(rem_to_px(2.25))).child(rect(rem_to_px(10.0), line_h))
+            r.child(circle(rem_to_px(2.25)))
+                .child(rect(rem_to_px(10.0), line_h))
         }
         SkeletonPreset::ListItem => {
             let mut text_col = col(gap_0375);
@@ -181,23 +182,33 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
                 .child(line_pct(0.40, line_sm_h));
             let mut r = row(gap_075);
             r.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            r.style.fill_width = true;
+            r.style.descriptor.layout.spacing.padding.top = gap_05;
+            r.style.descriptor.layout.spacing.padding.bottom = gap_05;
             r.child(circle(rem_to_px(2.25))).child(text_col)
         }
-        SkeletonPreset::TableRow => row(gap_075)
-            .child(cell_pct(0.40, line_h))
-            .child(cell_pct(0.60, line_h))
-            .child(cell_pct(0.60, line_h))
-            .child(cell_pct(0.20, line_h)),
+        SkeletonPreset::TableRow => {
+            let mut table_row = row(gap_075);
+            table_row.style.fill_width = true;
+            table_row.style.descriptor.layout.spacing.padding.top = gap_0625;
+            table_row.style.descriptor.layout.spacing.padding.bottom = gap_0625;
+            table_row
+                .child(cell_pct(0.40, line_h))
+                .child(cell_pct(0.60, line_h))
+                .child(cell_pct(0.60, line_h))
+                .child(cell_pct(0.20, line_h))
+        }
         SkeletonPreset::Card => {
             let block_radius = (surface_radius - rem_to_px(0.375)).max(0.0);
             let mut header = shape(fill, block_radius);
             header.style.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(6.0));
             header.style.fill_width = true;
 
-            let body = col(gap_0375)
+            let mut body = col(gap_0375)
                 .child(line_pct(0.80, line_h))
                 .child(line_full(line_h))
                 .child(line_pct(0.60, line_h));
+            body.style.fill_width = true;
 
             let pill = || {
                 let mut p = shape(fill, pill_radius);
@@ -210,6 +221,7 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
             let footer = footer.child(pill()).child(pill());
 
             let mut card = col(gap_075);
+            card.style.fill_width = true;
             {
                 let pad = &mut card.style.descriptor.layout.spacing.padding;
                 let p = rem_to_px(1.0);
@@ -222,6 +234,7 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
         }
         SkeletonPreset::DetailSection => {
             let mut section = col(gap_0625).child(rect(rem_to_px(8.0), rem_to_px(1.0)));
+            section.style.fill_width = true;
             for _ in 0..spec.lines {
                 let mut label = shape(fill, radius);
                 label.style.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(6.0));
@@ -241,6 +254,46 @@ pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
         }
     };
     // The whole skeleton breathes; opacity cascades to every shape.
-    built.style.animation = Some(skeleton_pulse());
+    if spec.is_animated {
+        built.style.animation = Some(skeleton_pulse());
+    }
     built
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn static_skeleton_has_no_animation() {
+        let node = skeleton(&SkeletonSpec::new().with_animated(false), &theme());
+        assert!(node.style.animation.is_none());
+    }
+
+    #[test]
+    fn list_and_table_presets_keep_reference_padding() {
+        let list = skeleton(
+            &SkeletonSpec::new().with_preset(SkeletonPreset::ListItem),
+            &theme(),
+        );
+        assert_eq!(
+            list.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(0.5)
+        );
+        assert!(list.style.fill_width);
+
+        let table = skeleton(
+            &SkeletonSpec::new().with_preset(SkeletonPreset::TableRow),
+            &theme(),
+        );
+        assert_eq!(
+            table.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(0.625)
+        );
+        assert!(table.style.fill_width);
+    }
 }

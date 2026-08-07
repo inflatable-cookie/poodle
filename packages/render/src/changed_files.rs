@@ -180,10 +180,8 @@ pub fn changed_files(
                 s.descriptor.layout.spacing.padding.left = rem_to_px(0.75) * depth as f32;
             }
 
-            let mut glyph = Node::icon(
-                if node.is_directory { "folder" } else { "file" },
-                icon_size,
-            );
+            let mut glyph =
+                Node::icon(if node.is_directory { "folder" } else { "file" }, icon_size);
             glyph.style.descriptor.text_color = Some(scope_color);
 
             let mut label = text(node.label.clone(), count_color, font_size, None);

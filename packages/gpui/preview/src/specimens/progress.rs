@@ -1,9 +1,9 @@
 use crate::app_state::AppState;
+use crate::node_compat::{Eyebrow, Progress};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Progress};
 use poodle_specs::{EyebrowSpec, ProgressSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

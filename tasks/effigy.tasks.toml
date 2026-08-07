@@ -153,14 +153,15 @@
   { task = "ci:rust" },
 ]
 
-# Native compile-rot check (macOS: gpui pulls metal). GPUI has no unit tests —
-# its components need a live window — so `cargo check` is the only gate there.
-# Jetstream renders and dispatches clicks headlessly, so it has real tests and
-# they run below. jetstream/components needs the sibling jetstream-runtime repo,
-# so it is LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
+# Native compile-rot check (macOS: gpui pulls metal). The preview is the only
+# GPUI crate that needs a live window; since g12.019 the components themselves
+# are `poodle-render` nodes, so their real coverage is CPU-only and runs in
+# `cargo test -p poodle-render` (109 probes) and the node backend's own tests.
+# The pixel gate is `test:native-visual`, which does need a window and is
+# LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
 "check:gpui" = [
-  { run = "cargo check -p poodle-gpui-components --manifest-path packages/gpui/components/Cargo.toml" },
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { run = "cargo test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
 "check:jetstream" = "cargo check -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
 # Render probes and click probes: layout, token resolution and interaction, all

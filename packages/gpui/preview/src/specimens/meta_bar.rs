@@ -1,6 +1,6 @@
+use crate::node_compat::{Code, CompatRow, Eyebrow, MetaBar, MetaItem, Pill};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Code, Eyebrow, MetaBar, MetaItem, Pill};
 use poodle_specs::{
     CodeSpec, EyebrowSpec, InlineTypographyMode, MetaBarSpec, MetaItemSpec, PillSpec, PillTone,
 };
@@ -49,11 +49,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_child(
                         MetaItem::from_spec(MetaItemSpec::new().with_label("Owner"), theme)
-                            .with_value(div().child("Clay")),
+                            .with_value("Clay"),
                     )
                     .with_child(
                         MetaItem::from_spec(MetaItemSpec::new().with_label("Updated"), theme)
-                            .with_value(div().child("2 hours ago")),
+                            .with_value("2 hours ago"),
                     ),
                 ),
         )
@@ -70,7 +70,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     MetaBar::from_spec(MetaBarSpec::new().with_show_separators(false), theme)
                         .with_child(
                             MetaItem::from_spec(MetaItemSpec::new().with_label("Type"), theme)
-                                .with_value(div().child("Media")),
+                                .with_value("Media"),
                         )
                         .with_child(Pill::from_spec(
                             PillSpec::new()
@@ -78,7 +78,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_tone(PillTone::Info),
                             theme,
                         ))
-                        .with_child(MetaItem::new(theme).with_value(div().child("1920 x 1080"))),
+                        .with_child(MetaItem::new(theme).with_value("1920 x 1080")),
                 ),
         )
 }
@@ -93,24 +93,22 @@ pub(crate) fn render_meta_item(theme: &GpuiThemeProvider) -> Div {
             "Labeled",
             theme,
             MetaItem::from_spec(MetaItemSpec::new().with_label("Owner"), theme)
-                .with_value(div().child("Clay")),
+                .with_value("Clay"),
         ))
         .child(specimen_card(
             "Rich Value",
             theme,
             MetaItem::from_spec(MetaItemSpec::new().with_label("State"), theme).with_value(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(6.0))
+                CompatRow::new()
+                    .gap(6.0)
                     .child(Pill::from_spec(
                         PillSpec::new()
                             .with_label("Active")
                             .with_tone(PillTone::Success),
                         theme,
                     ))
-                    .child(div().child("Ready for review")),
-            ),
+                    .child("Ready for review"),
+                ),
         ))
         .child(specimen_card(
             "Inherit typography",
@@ -128,7 +126,7 @@ pub(crate) fn render_meta_item(theme: &GpuiThemeProvider) -> Div {
                             .with_typography(InlineTypographyMode::Inherit),
                         theme,
                     )
-                    .with_value(div().child("Platform")),
+                    .with_value("Platform"),
                 )
                 .child(div().child("today")),
         ))

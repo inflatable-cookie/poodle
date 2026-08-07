@@ -95,6 +95,8 @@ pub fn form_layout(
         let s = &mut el.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = section_gap;
+        s.fill_width = true;
+        s.self_stretch = true;
     }
 
     if let Some(ref desc) = spec.description {
@@ -152,6 +154,8 @@ pub fn form_layout(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.flex_wrap = true;
             s.descriptor.layout.spacing.gap = column_gap;
+            s.fill_width = true;
+            s.self_stretch = true;
         }
         for child in children {
             let mut cell = Node::container();
@@ -159,7 +163,12 @@ pub fn form_layout(
                 let s = &mut cell.style;
                 // Explicit Row (see switch.rs).
                 s.descriptor.layout.direction = LayoutDirection::Row;
-                s.flex_fill = true;
+                // Match the GPUI tier's percentage flex-basis + grow: the
+                // basis admits the configured number of columns before the
+                // intrinsic min-width decides whether a row wraps.
+                s.flex_grow = Some(1.0);
+                s.flex_shrink_zero = true;
+                s.width_pct = Some(1.0 / spec.columns as f32 - 0.01);
                 s.min_width = Some(min_w);
             }
             fields = fields.child(cell.child(child));
@@ -169,7 +178,11 @@ pub fn form_layout(
 
     // Actions delegate to the FormActions primitive (contract §2 / §8).
     if let Some(actions_el) = actions {
-        el = el.child(form_actions(&FormActionsSpec::new(), theme, vec![actions_el]));
+        el = el.child(form_actions(
+            &FormActionsSpec::new(),
+            theme,
+            vec![actions_el],
+        ));
     }
 
     el

@@ -12,8 +12,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node,
-    NodeDragEvent, NodeDragPhase, NodePosition, ShadowValue,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeDragEvent,
+    NodeDragPhase, NodePosition, ShadowValue,
 };
 use poodle_specs::{ControlSize, SliderSpec};
 
@@ -36,15 +36,6 @@ fn thumb_diameter_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Root min-height in rem — contract §8 size table (lg/xl inherit md).
-fn min_height_rem(size: ControlSize) -> f32 {
-    match size {
-        ControlSize::Xs => 1.25,
-        ControlSize::Sm => 1.375,
-        ControlSize::Md | ControlSize::Lg | ControlSize::Xl => 1.5,
-    }
-}
-
 /// Handlers: `change` fires per-frame during a drag (clamped, snapped);
 /// `commit` fires once at drag end with the settled value.
 #[derive(Default, Clone)]
@@ -58,8 +49,6 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
     let track_h = rem_to_px(0.375);
-    let container_h = rem_to_px(min_height_rem(effective_size));
-
     let pill = theme.resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
 
@@ -75,9 +64,6 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     let range = (spec.max - spec.min).max(0.001);
     let fraction = ((spec.value - spec.min) / range).clamp(0.0, 1.0) as f32;
 
-    let tw = track_w();
-    let fill_w = fraction * tw;
-    let rem_w = (tw - fill_w).max(0.0);
     let thumb_r = thumb_size * 0.5;
 
     // Drags do not bubble: every segment under the pointer carries the same
@@ -154,43 +140,18 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         }
     };
 
-    // Fill segment: left portion in accent, left corners rounded.
-    let mut fill = Node::container();
-    {
-        let s = &mut fill.style;
-        s.descriptor.layout.width = LayoutSizing::Fixed(fill_w);
-        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        s.descriptor.background = Some(accent);
-        s.descriptor.corner_radii.top_left = pill;
-        s.descriptor.corner_radii.bottom_left = pill;
-    }
-    draggable(&mut fill);
-
-    // Remainder segment: the rest, right corners rounded.
-    let mut remainder = Node::container();
-    {
-        let s = &mut remainder.style;
-        s.descriptor.layout.width = LayoutSizing::Fixed(rem_w);
-        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        s.descriptor.background = Some(track_bg);
-        s.descriptor.corner_radii.top_right = pill;
-        s.descriptor.corner_radii.bottom_right = pill;
-    }
-    draggable(&mut remainder);
-
-    // Thumb: absolute at the fill/remainder junction, vertically centred on
-    // the track, with the contract's drop shadow.
+    // Thumb: anchored to the right edge of the percentage-width fill so the
+    // track can use the host's full available width like the GPUI reference.
     let thumb_top = -(thumb_r - track_h * 0.5);
-    let thumb_left = fill_w - thumb_r;
     let mut thumb = Node::container();
     {
         let s = &mut thumb.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(thumb_size);
         s.descriptor.layout.height = LayoutSizing::Fixed(thumb_size);
-        s.descriptor.corner_radii.top_left = pill;
-        s.descriptor.corner_radii.top_right = pill;
-        s.descriptor.corner_radii.bottom_right = pill;
-        s.descriptor.corner_radii.bottom_left = pill;
+        s.descriptor.corner_radii.top_left = thumb_r;
+        s.descriptor.corner_radii.top_right = thumb_r;
+        s.descriptor.corner_radii.bottom_right = thumb_r;
+        s.descriptor.corner_radii.bottom_left = thumb_r;
         s.descriptor.background = Some(elevated);
         s.descriptor.border.width = border_w;
         s.descriptor.border.color = border_default;
@@ -204,31 +165,51 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     }
     thumb.position = NodePosition::Absolute {
         top: Some(thumb_top),
-        left: Some(thumb_left),
-        right: None,
+        left: None,
+        right: Some(-thumb_r),
         bottom: None,
     };
     draggable(&mut thumb);
 
-    // Track row: relative container holding fill, remainder, thumb.
+    // Filled portion. Its right edge is the thumb anchor.
+    let mut fill = Node::container();
+    fill.position = NodePosition::Relative;
+    {
+        let s = &mut fill.style;
+        s.width_pct = Some(fraction);
+        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
+        s.descriptor.background = Some(accent);
+        s.descriptor.corner_radii.top_left = pill;
+        s.descriptor.corner_radii.top_right = pill;
+        s.descriptor.corner_radii.bottom_right = pill;
+        s.descriptor.corner_radii.bottom_left = pill;
+    }
+    draggable(&mut fill);
+    let fill = fill.child(thumb);
+
+    // Track: full-width 6px pill. Its absolute thumb may overflow vertically
+    // without changing the 6px layout height, matching the old GPUI anatomy.
     let mut track = Node::container();
     {
         let s = &mut track.style;
-        s.descriptor.layout.width = LayoutSizing::Fixed(tw);
-        s.descriptor.layout.height = LayoutSizing::Fixed(thumb_size);
+        s.fill_width = true;
+        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.background = Some(track_bg);
+        s.descriptor.corner_radii.top_left = pill;
+        s.descriptor.corner_radii.top_right = pill;
+        s.descriptor.corner_radii.bottom_right = pill;
+        s.descriptor.corner_radii.bottom_left = pill;
     }
     track.position = NodePosition::Relative;
-    let track = track.child(fill).child(remainder).child(thumb);
+    draggable(&mut track);
+    let track = track.child(fill);
 
     let mut el = Node::container();
     {
         let s = &mut el.style;
-        s.descriptor.layout.height = LayoutSizing::Fixed(container_h);
-        s.descriptor.layout.width = LayoutSizing::Grow;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.fill_width = true;
     }
     let mut el = el.child(track);
 

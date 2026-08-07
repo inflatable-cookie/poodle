@@ -5,9 +5,7 @@
 //! compose [`crate::button`].
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EmptyStateSpec, EmptyStateVariant,
     SemanticControlSizeRole,
@@ -120,6 +118,7 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         s.descriptor.corner_radii.bottom_right = root_radius;
         s.descriptor.corner_radii.bottom_left = root_radius;
         s.descriptor.background = Some(root_bg);
+        s.fill_width = true;
     }
     el = el.child(visual);
 
@@ -135,12 +134,15 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
     title.style.descriptor.text_color = Some(text_primary);
     title.style.text_size = Some(title_font);
     title.style.text_weight = Some(600);
+    title.style.text_align = Some(poodle_node::TextAlign::Center);
     copy = copy.child(title);
 
     if let Some(ref desc) = spec.message {
         let mut m = Node::text(desc);
         m.style.descriptor.text_color = Some(text_secondary);
         m.style.text_size = Some(message_font);
+        m.style.text_align = Some(poodle_node::TextAlign::Center);
+        m.style.max_width = Some(rem_to_px(24.0));
         copy = copy.child(m);
     }
     el = el.child(copy);

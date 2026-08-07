@@ -32,6 +32,27 @@ pub fn separator(spec: &SeparatorSpec, theme: &dyn ThemeProvider) -> Node {
             }
         }
     }
-    el.a11y.role = Some(NodeRole::Splitter);
+    if !spec.decorative {
+        el.a11y.role = Some(NodeRole::Splitter);
+    }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn exposes_separator_semantics_only_when_requested() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+
+        assert_eq!(separator(&SeparatorSpec::new(), &theme).a11y.role, None);
+        assert_eq!(
+            separator(&SeparatorSpec::new().with_decorative(false), &theme)
+                .a11y
+                .role,
+            Some(NodeRole::Splitter)
+        );
+    }
 }

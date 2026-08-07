@@ -1,12 +1,52 @@
-use crate::app_state::AppState;
+//! ToggleGroup specimen — migrated to the node tier (g12.019 Batch B).
+//!
+//! Every ToggleGroup below renders through `poodle_render::toggle_group`
+//! (`Spec + Theme → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
+//! The old hand-written `poodle_gpui_components::ToggleGroup` no longer
+//! renders this specimen; everything around the groups (layout, Eyebrow
+//! headings, captions) is unchanged.
+//!
+//! Node interaction closures are context-free (`Arc<dyn Fn(&str) + Send +
+//! Sync>`), so instead of `cx.listener` the change handler pushes a
+//! `NodeSpecimenEvent::SetText` onto a queue the next render drains into
+//! specimen state (see `app_state.rs`).
+
+use crate::node_compat::Eyebrow;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, ToggleGroup};
-use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode};
+
+use poodle_render::toggle_group;
+use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+
+/// Build a node-tier ToggleGroup whose change handler records the activated
+/// option's value under `key`. Mirrors the old specimen's behavior:
+/// `on_change` fires with the option value and the specimen stores it in the
+/// text map (`--print-state` reads it back).
+fn node_toggle_group(spec: ToggleGroupSpec, key: &'static str, state: &AppState) -> AnyElement {
+    let events = state.node_events.clone();
+    let on_change: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |value: &str| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+    });
+    let node = toggle_group(&spec, &state.theme, Some(on_change));
+    poodle_gpui_node_backend::to_gpui(&node)
+}
+
+/// A node-tier ToggleGroup with no handlers (multiple / deactivation /
+/// disabled / sizes / densities).
+fn node_toggle_group_static(spec: ToggleGroupSpec, state: &AppState) -> AnyElement {
+    let node = toggle_group(&spec, &state.theme, None);
+    poodle_gpui_node_backend::to_gpui(&node)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -67,18 +107,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Single selection"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(single_options, theme)
-                        .aria_label("View mode")
-                        .default_value(vec![single_value.clone()])
-                        .on_change(cx.listener(|this, val: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("toggle-group-single".to_string(), val.to_string());
-                            cx.notify();
-                        })),
-                )
+                .child(node_toggle_group(
+                    ToggleGroupSpec::new(single_options)
+                        .with_aria_label("View mode")
+                        .with_value(vec![single_value.clone()]),
+                    "toggle-group-single",
+                    state,
+                ))
                 .child(
                     div()
                         .text_sm()
@@ -95,18 +130,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Four options"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(four_options, theme)
-                        .aria_label("Text alignment")
-                        .default_value(vec![four_value])
-                        .on_change(cx.listener(|this, val: &str, _w, cx| {
-                            this.state
-                                .specimens
-                                .text
-                                .insert("toggle-group-four".to_string(), val.to_string());
-                            cx.notify();
-                        })),
-                ),
+                .child(node_toggle_group(
+                    ToggleGroupSpec::new(four_options)
+                        .with_aria_label("Text alignment")
+                        .with_value(vec![four_value]),
+                    "toggle-group-four",
+                    state,
+                )),
         )
         .child(
             div()
@@ -117,12 +147,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Multiple selection"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(multi_options, theme)
-                        .aria_label("Filter tags")
-                        .default_value(vec!["design".to_string(), "docs".to_string()])
-                        .selection_mode(ToggleGroupSelectionMode::Multiple),
-                )
+                .child(node_toggle_group_static(
+                    ToggleGroupSpec::new(multi_options)
+                        .with_aria_label("Filter tags")
+                        .with_default_value(vec!["design".to_string(), "docs".to_string()])
+                        .with_selection_mode(ToggleGroupSelectionMode::Multiple),
+                    state,
+                ))
                 .child(
                     div()
                         .text_sm()
@@ -140,19 +171,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Allow deactivation"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(
-                        vec![
-                            ToggleGroupOption::new("grid", "Grid"),
-                            ToggleGroupOption::new("list", "List"),
-                            ToggleGroupOption::new("board", "Board"),
-                        ],
-                        theme,
-                    )
-                    .aria_label("Optional view mode")
-                    .default_value(vec!["grid".to_string()])
-                    .allow_deactivation(true),
-                ),
+                .child(node_toggle_group_static(
+                    ToggleGroupSpec::new(vec![
+                        ToggleGroupOption::new("grid", "Grid"),
+                        ToggleGroupOption::new("list", "List"),
+                        ToggleGroupOption::new("board", "Board"),
+                    ])
+                    .with_aria_label("Optional view mode")
+                    .with_default_value(vec!["grid".to_string()])
+                    .with_allow_deactivation(true),
+                    state,
+                )),
         )
         // --- Disabled group ---
         .child(
@@ -164,12 +193,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Disabled"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(disabled_options, theme)
-                        .aria_label("Disabled toggle group")
-                        .default_value(vec!["list".to_string()])
-                        .disabled(true),
-                ),
+                .child(node_toggle_group_static(
+                    ToggleGroupSpec::new(disabled_options)
+                        .with_aria_label("Disabled toggle group")
+                        .with_default_value(vec!["list".to_string()])
+                        .with_disabled(true),
+                    state,
+                )),
         )
         // --- Disabled item ---
         .child(
@@ -181,18 +211,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Disabled item"),
                     theme,
                 ))
-                .child(
-                    ToggleGroup::new(
-                        vec![
-                            ToggleGroupOption::new("grid", "Grid"),
-                            ToggleGroupOption::new("list", "List").with_disabled(true),
-                            ToggleGroupOption::new("board", "Board"),
-                        ],
-                        theme,
-                    )
-                    .aria_label("Toggle group with disabled item")
-                    .default_value(vec!["grid".to_string()]),
-                ),
+                .child(node_toggle_group_static(
+                    ToggleGroupSpec::new(vec![
+                        ToggleGroupOption::new("grid", "Grid"),
+                        ToggleGroupOption::new("list", "List").with_disabled(true),
+                        ToggleGroupOption::new("board", "Board"),
+                    ])
+                    .with_aria_label("Toggle group with disabled item")
+                    .with_default_value(vec!["grid".to_string()]),
+                    state,
+                )),
         )
         .into_any_element();
 
@@ -210,16 +238,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "toggle-group",
         examples,
         move |size, theme: &GpuiThemeProvider| {
-            ToggleGroup::new(make_opts(), theme)
-                .default_value(vec!["grid".to_string()])
-                .size(size)
-                .into_any_element()
+            let spec = ToggleGroupSpec::new(make_opts())
+                .with_default_value(vec!["grid".to_string()])
+                .with_size(size);
+            poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
         },
         move |density, theme: &GpuiThemeProvider| {
-            ToggleGroup::new(make_opts(), theme)
-                .default_value(vec!["grid".to_string()])
-                .density(density)
-                .into_any_element()
+            let spec = ToggleGroupSpec::new(make_opts())
+                .with_default_value(vec!["grid".to_string()])
+                .with_density(density);
+            poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
         },
     )
 }

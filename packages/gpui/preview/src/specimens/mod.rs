@@ -37,15 +37,15 @@ mod token_input;
 mod toolbar;
 
 // ── Selection ─────────────────────────────────────────────
+mod agent_question;
+mod agent_transcript;
 mod checkbox;
 mod radio_group;
 mod range_slider;
 mod segmented_control;
-mod agent_question;
-mod agent_transcript;
-mod stepper;
 mod select;
 mod slider;
+mod stepper;
 mod switch;
 mod toggle_group;
 mod tri_state_switch;
@@ -91,6 +91,7 @@ mod tabs;
 mod tooltip;
 
 // ── Composites ────────────────────────────────────────────
+mod agent_chat_input_specimen;
 mod audio_player_specimen;
 mod block_editor_specimen;
 mod breadcrumbs_specimen;
@@ -112,6 +113,7 @@ mod embed_preview_specimen;
 mod empty_state_specimen;
 mod error_boundary_specimen;
 mod field_set_specimen;
+mod filter_builder_specimen;
 mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod form_layout;
@@ -130,12 +132,8 @@ mod media_preview_specimen;
 mod media_thumbnail_specimen;
 mod meta_bar;
 mod metric_tile_specimen;
-mod nav_card;
-mod agent_chat_input_specimen;
-mod filter_builder_specimen;
 mod model_picker_specimen;
-mod ref_select_specimen;
-mod theme_select_specimen;
+mod nav_card;
 mod order_by_specimen;
 mod page_header_specimen;
 mod page_loading_specimen;
@@ -143,11 +141,13 @@ mod pagination;
 mod pagination_summary_specimen;
 mod password_requirements;
 mod picker_shell_specimen;
+mod ref_select_specimen;
 mod relation_picker_specimen;
 mod selection_summary_specimen;
 mod sidebar_nav;
 mod split_view_specimen;
 mod table;
+mod theme_select_specimen;
 mod time_ago_specimen;
 mod toast_host;
 mod toast_stack_specimen;
@@ -319,11 +319,9 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             segmented_control::render(state, cx),
         ),
         "stepper" => specimen_card("Stepper", theme, stepper::render(state, cx)),
-        "agent-question" => specimen_card(
-            "AgentQuestion",
-            theme,
-            agent_question::render(state, cx),
-        ),
+        "agent-question" => {
+            specimen_card("AgentQuestion", theme, agent_question::render(state, cx))
+        }
         "agent-transcript" => specimen_card(
             "AgentTranscript",
             theme,
@@ -451,23 +449,27 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         ),
         "sidebar-nav" => specimen_card("SidebarNav", theme, sidebar_nav::render(theme)),
         "tree" => specimen_card("Tree", theme, tree::render(state, cx)),
-        "filter-builder" => {
-            specimen_card("FilterBuilder", theme, filter_builder_specimen::render(state, cx))
-        }
-        "model-picker" => {
-            specimen_card("ModelPicker", theme, model_picker_specimen::render(state, cx))
-        }
-        "ref-select" => {
-            specimen_card("RefSelect", theme, ref_select_specimen::render(state, cx))
-        }
+        "filter-builder" => specimen_card(
+            "FilterBuilder",
+            theme,
+            filter_builder_specimen::render(state, cx),
+        ),
+        "model-picker" => specimen_card(
+            "ModelPicker",
+            theme,
+            model_picker_specimen::render(state, cx),
+        ),
+        "ref-select" => specimen_card("RefSelect", theme, ref_select_specimen::render(state, cx)),
         "agent-chat-input" => specimen_card(
             "AgentChatInput",
             theme,
             agent_chat_input_specimen::render(state, cx),
         ),
-        "theme-select" => {
-            specimen_card("ThemeSelect", theme, theme_select_specimen::render(state, cx))
-        }
+        "theme-select" => specimen_card(
+            "ThemeSelect",
+            theme,
+            theme_select_specimen::render(state, cx),
+        ),
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
         "breadcrumbs" => specimen_card(
@@ -568,9 +570,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             specimen_card("CommandPalette", theme, command_palette::render(state, cx))
         }
         "dock-region" => specimen_card("DockRegion", theme, dock_split::render(state, cx)),
-        "split-view" => {
-            specimen_card("SplitView", theme, split_view_specimen::render(state, cx))
-        }
+        "split-view" => specimen_card("SplitView", theme, split_view_specimen::render(state, cx)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card(
             "ActionDiscoveryPanel",

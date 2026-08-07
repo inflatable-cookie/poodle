@@ -22,8 +22,8 @@ use poodle_specs::{CalendarSpec, DatePickerSpec};
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, mix_srgb, with_alpha};
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, date_picker_indicator_font_rem, panel_space_x_rem,
-    panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    date_picker_indicator_font_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_height_offset_rem, size_padding_x_offset_rem,
 };
 
 /// Host callbacks: `on_toggle` (trigger pressed; the spec owns open state),
@@ -47,15 +47,19 @@ pub fn date_picker(
     let fill = theme.resolve_color("color.background.surface");
     let elevated = theme.resolve_color("color.background.elevated");
     let border = theme.resolve_color("color.border.default");
+    let accent = theme.resolve_color("color.accent.base");
     let radius = theme.resolve_radius("radius.control");
     let text_color = theme.resolve_color("color.text.primary");
     let muted = theme.resolve_color("color.text.secondary");
 
     // ── Sizing (contract §7/§8) ──
-    let height = rem_to_px(control_height_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let height = theme.resolve_space("size.control.height")
+        + rem_to_px(size_height_offset_rem(effective_size));
+    let pad_x = theme.resolve_space("space.inline.md")
+        + rem_to_px(size_padding_x_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     let indicator_size = rem_to_px(date_picker_indicator_font_rem(effective_size));
+    let inline_gap = theme.resolve_space("space.inline.sm");
 
     // Contract trigger hover: color-mix(surface 86%, elevated) — the old
     // tier's sRGB mix with fill weighted 0.14.
@@ -76,9 +80,10 @@ pub fn date_picker(
     let mut trigger = Node::container();
     {
         let s = &mut trigger.style;
+        s.fill_width = true;
         s.descriptor.background = Some(fill);
         s.descriptor.border.width = 1.0;
-        s.descriptor.border.color = border;
+        s.descriptor.border.color = if spec.current_open() { accent } else { border };
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_right = radius;
@@ -90,7 +95,7 @@ pub fn date_picker(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = rem_to_px(0.75); // contract trigger gap
+        s.descriptor.layout.spacing.gap = inline_gap;
     }
     trigger.interaction.focusable = true;
 
@@ -124,7 +129,7 @@ pub fn date_picker(
         let s = &mut root.style;
         // Closed: single trigger child in the old tier's default Row.
         s.descriptor.layout.direction = LayoutDirection::Row;
-        s.min_width = Some(rem_to_px(14.0));
+        s.fill_width = true;
     }
     let mut root = root.child(trigger);
 
@@ -159,16 +164,18 @@ pub fn date_picker(
             // Token-accurate elevation.overlay.
             s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
             let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = rem_to_px(panel_space_y_rem(spec.density));
-            pad.bottom = rem_to_px(panel_space_y_rem(spec.density));
-            pad.left = rem_to_px(panel_space_x_rem(spec.density));
-            pad.right = rem_to_px(panel_space_x_rem(spec.density));
+            let surface_pad = theme.resolve_space("space.inline.md");
+            pad.top = surface_pad;
+            pad.bottom = surface_pad;
+            pad.left = surface_pad;
+            pad.right = surface_pad;
         }
         let surface = surface.child(calendar(
             &cal_spec,
             theme,
             CalendarHandlers {
                 on_select: handlers.on_select.clone(),
+                on_range_select: None,
                 on_navigate: handlers.on_navigate.clone(),
             },
         ));
@@ -176,7 +183,7 @@ pub fn date_picker(
         // Trigger + anchored-below surface stack (overlay anchoring is a
         // platform delta; rendered as a flow column with the contract gap).
         root.style.descriptor.layout.direction = LayoutDirection::Column;
-        root.style.descriptor.layout.spacing.gap = rem_to_px(0.375);
+        root.style.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
         root = root.child(surface);
     }
 
