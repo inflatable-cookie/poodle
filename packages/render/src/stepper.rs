@@ -18,13 +18,15 @@ use poodle_node::{
 use poodle_specs::{Orientation, StepStatus, StepperSpec};
 
 use crate::color::with_alpha;
-use crate::presentation::rem_to_px;
+use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_rem};
 
-/// Host callbacks: change and rerun, each carrying the step's value.
+/// Host callbacks: change and rerun, each carrying the step's value, plus the
+/// summary's collapse toggle carrying the new state.
 #[derive(Default)]
 pub struct StepperHandlers {
     pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_rerun: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_collapsed_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperHandlers) -> Node {
@@ -71,6 +73,30 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
     }
     if let Some(aria) = &spec.aria_label {
         root.a11y.label = Some(aria.clone());
+    }
+
+    // Collapse folds the stepper, not step content: expanding reveals the same
+    // rows that were always there. Vertical only — see `stepper.md` §3.
+    if spec.shows_summary() {
+        root = root.child(summary_row(
+            spec,
+            theme,
+            &handlers,
+            SummaryColors {
+                border,
+                accent,
+                danger,
+                label: label_color,
+                active_label,
+            },
+            hairline,
+            disabled_opacity,
+        ));
+    }
+
+    if spec.is_collapsed_now() {
+        // Omitted, not hidden: hidden triggers are still stops in the tab order.
+        return root;
     }
 
     let last = spec.steps.len().saturating_sub(1);
@@ -263,4 +289,162 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
     }
 
     root
+}
+
+/// The colours the summary row shares with the step rows.
+struct SummaryColors {
+    border: ColorValue,
+    accent: ColorValue,
+    danger: ColorValue,
+    label: ColorValue,
+    active_label: ColorValue,
+}
+
+/// The collapsed one-line form: chevron, rail, current step label, `n/m`.
+fn summary_row(
+    spec: &StepperSpec,
+    theme: &dyn ThemeProvider,
+    handlers: &StepperHandlers,
+    colors: SummaryColors,
+    hairline: f32,
+    disabled_opacity: f32,
+) -> Node {
+    let row_height = rem_to_px(spec.row_height_rem());
+    let font_size = rem_to_px(spec.font_size_rem());
+    let pad_y = rem_to_px(spec.padding_block_rem());
+    let pad_x = rem_to_px(spec.padding_inline_rem());
+    let gap = rem_to_px(spec.gap_rem());
+    let rail_gap = rem_to_px(spec.rail_gap_rem());
+    let segment_thickness = rem_to_px(spec.rail_thickness_rem());
+    let chevron_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        spec.resolved_size(),
+    )));
+    let count_color = theme.resolve_color(spec.count_token());
+    let rail_pending = theme.resolve_color(spec.rail_pending_token());
+
+    let is_collapsed = spec.is_collapsed_now();
+    let completed = spec.completed_count();
+    let total = spec.steps.len();
+    let current_label = spec
+        .current_step()
+        .map(|step| step.label.clone())
+        .unwrap_or_default();
+
+    let mut summary = Node::button("");
+    // The visible `n/m` is decorative — "five slash five" is not a sentence, so
+    // the name spells it out. Chevron and rail restate the same facts.
+    summary.a11y.label = Some(format!(
+        "{current_label}, {completed} of {total} steps complete"
+    ));
+    summary.a11y.role = Some(NodeRole::Button);
+    summary.a11y.expanded = Some(!is_collapsed);
+    summary.interaction.focusable = true;
+    {
+        let s = &mut summary.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.min_width = Some(0.0);
+        s.min_height = Some(row_height);
+        let pad = &mut s.descriptor.layout.spacing.padding;
+        pad.left = pad_x;
+        pad.right = pad_x;
+        pad.top = pad_y;
+        pad.bottom = pad_y;
+        s.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.0));
+        s.text_size = Some(font_size);
+        // Expanded, the summary sits above the list and draws the same divider
+        // the steps draw between themselves. Collapsed it is the last row.
+        if !is_collapsed {
+            s.border_bottom_width = Some(hairline);
+            s.descriptor.border.color = colors.border;
+        }
+    }
+
+    if spec.is_disabled {
+        summary.style.descriptor.opacity = disabled_opacity;
+        summary.interaction.disabled = true;
+    } else {
+        summary.style.descriptor.cursor = CursorHint::Pointer;
+        summary.style.hover = Some(StylePatch {
+            background: Some(with_alpha(
+                colors.active_label,
+                colors.active_label.3 * 0.06,
+            )),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        });
+        if let Some(handler) = &handlers.on_collapsed_change {
+            let handler = Arc::clone(handler);
+            let next = !is_collapsed;
+            summary.interaction.on_activate = Some(Arc::new(move || handler(next)));
+        }
+    }
+
+    let mut chevron = Node::icon(
+        if is_collapsed {
+            "chevron-right"
+        } else {
+            "chevron-down"
+        },
+        chevron_size,
+    );
+    chevron.style.flex_shrink_zero = true;
+    chevron.style.descriptor.text_color = Some(colors.label);
+
+    // Two codes on two channels: colour is status, length is position. At dash
+    // size one mark cannot hold two colour codes legibly, so the current step
+    // keeps the full length and every other step draws half.
+    let current_value = spec.current_value().map(str::to_owned);
+    let mut rail = Node::container();
+    {
+        let s = &mut rail.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.spacing.gap = rail_gap;
+        s.flex_shrink_zero = true;
+    }
+    for step in &spec.steps {
+        let is_current = current_value.as_deref() == Some(step.value.as_str());
+        let segment_width = rem_to_px(spec.rail_segment_width_rem(is_current));
+        let fill = match step.status {
+            StepStatus::Complete => colors.accent,
+            // The same hue as complete, dimmer: running is on its way to it.
+            StepStatus::Running => with_alpha(colors.accent, colors.accent.3 * 0.55),
+            StepStatus::Failed => colors.danger,
+            StepStatus::Pending => rail_pending,
+        };
+        let mut segment = Node::container();
+        {
+            let s = &mut segment.style;
+            s.descriptor.layout.width = LayoutSizing::Fixed(segment_width);
+            s.descriptor.layout.height = LayoutSizing::Fixed(segment_thickness);
+            s.flex_shrink_zero = true;
+            s.descriptor.background = Some(fill);
+            let c = &mut s.descriptor.corner_radii;
+            c.top_left = 999.0;
+            c.top_right = 999.0;
+            c.bottom_right = 999.0;
+            c.bottom_left = 999.0;
+        }
+        rail = rail.child(segment);
+    }
+
+    let mut label = Node::text(current_label);
+    label.style.text_size = Some(font_size);
+    label.style.descriptor.text_color = Some(colors.active_label);
+    label.style.descriptor.layout.width = LayoutSizing::Grow;
+    label.style.flex_basis = Some(0.0);
+    label.style.min_width = Some(0.0);
+
+    // Trailing edge, so a stack of collapsed steppers right-aligns its counts
+    // regardless of how long the labels are.
+    let mut count = Node::text(format!("{completed}/{total}"));
+    count.style.text_size = Some(font_size);
+    count.style.descriptor.text_color = Some(count_color);
+    count.style.flex_shrink_zero = true;
+
+    summary.child(chevron).child(rail).child(label).child(count)
 }

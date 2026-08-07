@@ -168,17 +168,33 @@
       "channel": "preview"
     },
     {
-      "name": "poodle-jetstream-components",
-      "path": "packages/jetstream/components",
+      "name": "poodle-jetstream-preview",
+      "path": "packages/jetstream/preview",
+      "kind": "native-preview",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "poodle-node",
+      "path": "packages/contracts/node",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "poodle-render",
+      "path": "packages/render",
       "kind": "renderer-components",
       "language": "rust",
       "publicIntent": true,
       "channel": "preview"
     },
     {
-      "name": "poodle-jetstream-preview",
-      "path": "packages/jetstream/preview",
-      "kind": "native-preview",
+      "name": "poodle-gpui-node-backend",
+      "path": "packages/gpui/node-backend",
+      "kind": "renderer-backend",
       "language": "rust",
       "publicIntent": true,
       "channel": "preview"

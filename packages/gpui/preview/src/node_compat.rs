@@ -534,6 +534,7 @@ pub(crate) struct ThemeSelect {
     spec: ThemeSelectSpec,
     theme: GpuiThemeProvider,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 pub(crate) struct ModelPicker {
@@ -2080,6 +2081,7 @@ impl ThemeSelect {
             spec,
             theme: theme.clone(),
             on_change: None,
+            on_open_change: None,
         }
     }
 
@@ -2093,14 +2095,27 @@ impl ThemeSelect {
         self
     }
 
-    #[allow(dead_code)]
     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.on_change = Some(handler);
         self
     }
 
+    /// Fires with the open state the trigger is moving to; `is_open` is
+    /// controlled, so the host flips the spec.
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_open_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::theme_select(&self.spec, &self.theme, self.on_change)
+        poodle_render::theme_select_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::ThemeSelectHandlers {
+                on_change: self.on_change,
+                on_open_change: self.on_open_change,
+            },
+        )
     }
 }
 
@@ -3527,6 +3542,8 @@ pub(crate) struct TextInput {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_change: Option<poodle_node::TextChangeHandler>,
+    on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 impl TextInput {
@@ -3536,6 +3553,8 @@ impl TextInput {
             theme: theme.clone(),
             id_suffix: None,
             on_change: None,
+            on_selection_change: None,
+            on_focus_change: None,
         }
     }
 
@@ -3559,9 +3578,29 @@ impl TextInput {
         self
     }
 
+    pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_focus_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.on_selection_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        let mut node =
-            poodle_render::text_input_with_change(&self.spec, &self.theme, self.on_change);
+        let mut node = poodle_render::text_input_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::TextInputHandlers {
+                on_change: self.on_change,
+                on_selection_change: self.on_selection_change,
+                on_focus_change: self.on_focus_change,
+            },
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-input-{id}"));
         }

@@ -18,6 +18,9 @@
   --poodle-stepper-pad-y: 0.7rem;
   --poodle-stepper-pad-x: 0.8rem;
   --poodle-stepper-gap: 0.55rem;
+  --poodle-stepper-rail-segment-width: 1rem;
+  --poodle-stepper-rail-thickness: 0.1875rem;
+  --poodle-stepper-rail-gap: 0.25rem;
 
   display: grid;
   grid-auto-flow: column;
@@ -36,6 +39,8 @@
   --poodle-stepper-font-size: 0.625rem;
   --poodle-stepper-marker-font-size: 0.5625rem;
   --poodle-stepper-pad-y: 0.5rem;
+  --poodle-stepper-rail-segment-width: 0.75rem;
+  --poodle-stepper-rail-thickness: 0.125rem;
 }
 
 .poodle-stepper[data-size="sm"] {
@@ -44,6 +49,8 @@
   --poodle-stepper-font-size: 0.6875rem;
   --poodle-stepper-marker-font-size: 0.5625rem;
   --poodle-stepper-pad-y: 0.625rem;
+  --poodle-stepper-rail-segment-width: 0.875rem;
+  --poodle-stepper-rail-thickness: 0.125rem;
 }
 
 .poodle-stepper[data-size="md"] {
@@ -52,6 +59,8 @@
   --poodle-stepper-font-size: 0.75rem;
   --poodle-stepper-marker-font-size: 0.625rem;
   --poodle-stepper-pad-y: 0.7rem;
+  --poodle-stepper-rail-segment-width: 1rem;
+  --poodle-stepper-rail-thickness: 0.1875rem;
 }
 
 .poodle-stepper[data-size="lg"] {
@@ -60,6 +69,8 @@
   --poodle-stepper-font-size: 0.8125rem;
   --poodle-stepper-marker-font-size: 0.6875rem;
   --poodle-stepper-pad-y: 0.8rem;
+  --poodle-stepper-rail-segment-width: 1.125rem;
+  --poodle-stepper-rail-thickness: 0.1875rem;
 }
 
 .poodle-stepper[data-size="xl"] {
@@ -68,6 +79,8 @@
   --poodle-stepper-font-size: 0.875rem;
   --poodle-stepper-marker-font-size: 0.75rem;
   --poodle-stepper-pad-y: 0.9rem;
+  --poodle-stepper-rail-segment-width: 1.25rem;
+  --poodle-stepper-rail-thickness: 0.25rem;
 }
 
 /* ── Density: horizontal spacing only, never height ──────────────────────── */
@@ -75,12 +88,14 @@
 .poodle-stepper[data-density="compact"] {
   --poodle-stepper-pad-x: 0.625rem;
   --poodle-stepper-gap: 0.4375rem;
+  --poodle-stepper-rail-gap: 0.1875rem;
 }
 
 
 .poodle-stepper[data-density="comfortable"] {
   --poodle-stepper-pad-x: 1rem;
   --poodle-stepper-gap: 0.6875rem;
+  --poodle-stepper-rail-gap: 0.3125rem;
 }
 
 /* ── Steps ───────────────────────────────────────────────────────────────── */
@@ -271,4 +286,110 @@
 
 .poodle-stepper__rerun:disabled {
   opacity: var(--poodle-state-opacity-disabled);
+}
+
+/* ── Summary: the collapsed one-line form ────────────────────────────────── */
+
+/* Vertical only. A horizontal stepper is already one line, so folding it would
+   trade legible step labels for a row of dashes and buy back no height —
+   see stepper.md §3. Collapsing hides the stepper, not step content: there is
+   still nothing here that makes this an accordion. */
+
+.poodle-stepper__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-stepper-gap);
+  min-height: var(--poodle-stepper-row-height);
+  padding: var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x);
+  border: 0;
+  /* Expanded, the summary is a row above the list and needs the same divider
+     the steps draw between themselves. Collapsed it is the last row. */
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: transparent;
+  color: var(--poodle-color-text-primary);
+  font: inherit;
+  font-size: var(--poodle-stepper-font-size);
+  text-align: left;
+}
+
+.poodle-stepper[data-collapsed="true"] .poodle-stepper__summary {
+  border-bottom: 0;
+}
+
+.poodle-stepper__summary:not(:disabled) {
+  cursor: pointer;
+}
+
+.poodle-stepper__summary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
+}
+
+.poodle-stepper__summary:disabled {
+  opacity: var(--poodle-state-opacity-disabled);
+}
+
+.poodle-stepper__summary:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
+}
+
+.poodle-stepper__summary-chevron {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--poodle-color-text-secondary);
+}
+
+/* ── Rail: one dash per step ─────────────────────────────────────────────── */
+
+/* Two codes on two channels: colour is status, length is position. At dash size
+   one mark cannot hold two colour codes legibly, so the current step keeps the
+   full length and every other step draws half. */
+
+.poodle-stepper__rail {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--poodle-stepper-rail-gap);
+}
+
+.poodle-stepper__rail-segment {
+  flex: 0 0 auto;
+  width: calc(var(--poodle-stepper-rail-segment-width) / 2);
+  height: var(--poodle-stepper-rail-thickness);
+  border-radius: 999px;
+  background: var(--poodle-color-border-strong);
+}
+
+.poodle-stepper__rail-segment[data-current="true"] {
+  width: var(--poodle-stepper-rail-segment-width);
+}
+
+.poodle-stepper__rail-segment[data-status="complete"] {
+  background: var(--poodle-color-accent-base);
+}
+
+/* The same hue as complete, dimmer: a running step is on its way to being one. */
+.poodle-stepper__rail-segment[data-status="running"] {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 55%, transparent);
+}
+
+.poodle-stepper__rail-segment[data-status="failed"] {
+  background: var(--poodle-color-status-danger);
+}
+
+.poodle-stepper__summary-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Trailing edge, so a stack of collapsed steppers right-aligns its counts
+   regardless of how long the labels are. */
+.poodle-stepper__summary-count {
+  flex: 0 0 auto;
+  color: var(--poodle-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
 }

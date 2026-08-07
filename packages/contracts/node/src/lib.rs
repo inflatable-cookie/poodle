@@ -44,6 +44,9 @@ pub struct Node {
     pub position: NodePosition,
     pub interaction: Interaction,
     pub a11y: NodeA11y,
+    /// An input's caret and selection, when the host owns one. Ignored by
+    /// every other kind, and by any backend that does not draw carets.
+    pub caret: Option<NodeCaret>,
     pub children: Vec<Node>,
 }
 
@@ -74,6 +77,44 @@ pub enum NodeKind {
     /// intrinsic min-width) a styled box does not get. Render-side the value
     /// is host-owned — the node declares the field, the host drives edits.
     Input { value: String, placeholder: String },
+}
+
+/// How far a pointer selection reaches out from where it landed.
+///
+/// A backend knows the click count; only the component knows what a "word" is,
+/// so the backend names the granularity and the component resolves it.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum SelectGranularity {
+    /// Exactly the reported range: a single click, or a drag.
+    #[default]
+    Character,
+    /// Expand each end to its word: a double click.
+    Word,
+    /// The whole value: a triple click.
+    Line,
+}
+
+/// Where an input's caret is and what colour to draw it.
+///
+/// A separate channel rather than fields on [`NodeKind::Input`]: adding fields
+/// to a struct variant breaks every `match` in every backend, and the
+/// vocabulary's additions have to be additive for real — a backend that has
+/// never heard of carets must keep compiling and keep rendering the value.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct NodeCaret {
+    /// `(start, end)` as **character** indices into the input's value. A
+    /// collapsed range is a caret; a wider one is a selection.
+    ///
+    /// Characters, not bytes: the vocabulary is shared by backends with
+    /// different string representations, and a component counting `chars()` is
+    /// the only encoding-independent answer. Backends convert at their own
+    /// edge, where they know what their text system counts in.
+    pub selection: (usize, usize),
+    /// Caret colour, resolved by the component from tokens. The backend paints
+    /// it, because placing it means measuring shaped glyphs.
+    pub caret_color: ColorValue,
+    /// Selected-text wash, resolved by the component from tokens.
+    pub selection_color: ColorValue,
 }
 
 /// Horizontal text alignment.
@@ -143,6 +184,12 @@ pub struct NodeStyle {
     /// Style values swapped in while the node is pressed. Same contract as
     /// `hover`.
     pub active: Option<StylePatch>,
+    /// Style values swapped in while the node itself holds focus — the
+    /// contracts' `focus-visible` state. Distinct from [`Self::active`], which
+    /// is the *pressed* state: a focused-but-unpressed control showed nothing
+    /// at all before this existed, so a clicked text field looked identical to
+    /// an idle one. Only meaningful on a focusable node.
+    pub focus: Option<StylePatch>,
     /// Multi-layer shadow stack (inset highlights, outset drops). When
     /// non-empty it wins over `descriptor.shadow`, which stays the one-token
     /// single-shadow convenience.
@@ -257,6 +304,7 @@ impl Default for NodeStyle {
             letter_spacing_em: None,
             text_align: None,
             active: None,
+            focus: None,
             shadow_layers: Vec::new(),
             overlay: false,
             min_width: None,
@@ -415,9 +463,52 @@ pub struct Interaction {
     pub on_submit: Option<SubmitHandler>,
     /// Cancels the current input edit on Escape.
     pub on_cancel: Option<CancelHandler>,
+    /// Raw editing keys for a text field: the key name (`"a"`, `"left"`,
+    /// `"backspace"`, …) and the modifiers held.
+    ///
+    /// Deliberately lower level than [`Self::on_text_change`]. Editing depends
+    /// on the caret, which the component owns via its spec — so the component
+    /// decides what a keystroke means and reports the resulting value and
+    /// selection, rather than the backend guessing. That also keeps one
+    /// editing model shared across targets instead of one per backend.
+    pub on_edit_key: Option<Arc<dyn Fn(&str, NodeModifiers) + Send + Sync>>,
+    /// Fires when the pointer sets an input's caret or selection, as
+    /// **character** indices into the value.
+    ///
+    /// A click reports a collapsed range; a drag reports an anchored one. The
+    /// backend derives both from measured text, so the component never sees a
+    /// coordinate — the same division as `on_scrub`'s fraction.
+    pub on_select_range: Option<Arc<dyn Fn(usize, usize, SelectGranularity) + Send + Sync>>,
+    /// Insert text at the caret, replacing any selection.
+    ///
+    /// Paste, and eventually an IME commit or a text drop: the backend has
+    /// text from somewhere the component cannot reach, and the component owns
+    /// where it lands. Distinct from `on_edit_key`, which reports a keystroke
+    /// rather than content.
+    pub on_edit_insert: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires when this node gains or loses focus, with the state it moved to.
+    ///
+    /// Focus is the backend's (the vocabulary says so), but a component that
+    /// draws a caret has to know. Without a *blur* report the host can only
+    /// ever latch focus on, which leaves a caret sitting in a field that no
+    /// longer has it — two disagreeing ideas of what is focused.
+    pub on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     /// Drag handler. Unlike activation, drags do not bubble: the exact node
     /// under the pointer must carry the handler.
     pub on_drag: Option<Arc<dyn Fn(&NodeDragEvent) + Send + Sync>>,
+    /// Scrub handler for controls whose value IS a position along themselves —
+    /// sliders, range sliders, seek bars.
+    ///
+    /// Reports where the pointer sits along this node's main axis as a
+    /// fraction (0.0 = start, 1.0 = end), on press and continuously while
+    /// dragging, including once the pointer leaves the node. Like
+    /// [`DropEdge`], the backend derives it from bounds it already owns and the
+    /// component receives a semantic value, never a coordinate.
+    ///
+    /// Prefer this over [`Self::on_drag`] for value controls: a delta needs the
+    /// component to guess its own rendered length, which it cannot know, and
+    /// that guess is wrong whenever the control is not its natural size.
+    pub on_scrub: Option<Arc<dyn Fn(f32) + Send + Sync>>,
     /// Activation that needs the modifier state — multi-select lists, where
     /// Shift extends the range and the platform accel toggles one item. When
     /// set the backend calls this INSTEAD of `on_activate`, so a node wires
@@ -612,6 +703,26 @@ impl Node {
             },
             ..Self::default()
         }
+    }
+
+    /// Give an input a caret: a selection range and the colours to draw it in.
+    ///
+    /// Position is the *backend's* to compute — mapping a character index to an
+    /// x offset means measuring shaped glyphs, which no target-independent
+    /// layer can do. The component supplies the index and the colour; the
+    /// backend supplies the pixels.
+    pub fn with_caret(
+        mut self,
+        selection_range: (usize, usize),
+        caret_color: ColorValue,
+        selection_color: ColorValue,
+    ) -> Self {
+        self.caret = Some(NodeCaret {
+            selection: selection_range,
+            caret_color,
+            selection_color,
+        });
+        self
     }
 
     pub fn icon(name: impl Into<String>, size: f32) -> Self {

@@ -949,6 +949,13 @@ impl PreviewState {
                 if let Some(&preset) = ThemePreset::ALL.get(idx) {
                     self.app.set_theme(preset);
                 }
+                // Choosing a theme closes the picker.
+                self.app.theme_select_open = false;
+                self.app.dirty = true;
+            }
+            shell::ShellAction::ToggleThemeSelect => {
+                self.app.theme_select_open = !self.app.theme_select_open;
+                self.app.dirty = true;
             }
             shell::ShellAction::SelectDensity(idx) => {
                 if let Some(&density) = Density::ALL.get(idx) {

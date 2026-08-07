@@ -152,6 +152,37 @@ impl ThemePreset {
     }
 }
 
+/// Swatch options for the header theme picker.
+///
+/// Each preset's swatch is resolved from that preset's own tokens rather than
+/// hardcoded hex, so a token change cannot leave the picker previewing a colour
+/// the theme no longer uses. Built once — resolving twelve themes per frame
+/// would be pure waste.
+fn build_theme_options() -> Vec<poodle_specs::ThemeOption> {
+    use poodle_adapter::ThemeProvider;
+    fn hex(c: poodle_tokens::typed::ColorValue) -> String {
+        let ch = |v: f32| (v.clamp(0.0, 1.0) * 255.0).round() as u8;
+        format!("#{:02x}{:02x}{:02x}", ch(c.0), ch(c.1), ch(c.2))
+    }
+    ThemePreset::ALL
+        .iter()
+        .map(|preset| {
+            let t = preset.build_theme();
+            poodle_specs::ThemeOption::new(
+                preset.label(),
+                preset.label(),
+                poodle_specs::ThemeSwatch::new(
+                    hex(t.resolve_color("color.background.canvas")),
+                    hex(t.resolve_color("color.background.panel")),
+                    hex(t.resolve_color("color.accent.base")),
+                    hex(t.resolve_color("color.text.primary")),
+                    hex(t.resolve_color("color.border.default")),
+                ),
+            )
+        })
+        .collect()
+}
+
 /// Density mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Density {
@@ -224,41 +255,14 @@ impl ControlSize {
     }
 }
 
-/// Neutral-contrast stops for the preview toggle (mirrors the web slider).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ContrastStop {
-    Flat,
-    Default,
-    Mid,
-    Full,
-}
-
-impl ContrastStop {
-    pub const ALL: &[ContrastStop] = &[
-        ContrastStop::Flat,
-        ContrastStop::Default,
-        ContrastStop::Mid,
-        ContrastStop::Full,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            ContrastStop::Flat => "0.4",
-            ContrastStop::Default => "0.5",
-            ContrastStop::Mid => "0.75",
-            ContrastStop::Full => "1",
-        }
-    }
-
-    pub fn value(self) -> f32 {
-        match self {
-            ContrastStop::Flat => 0.4,
-            ContrastStop::Default => 0.5,
-            ContrastStop::Mid => 0.75,
-            ContrastStop::Full => 1.0,
-        }
-    }
-}
+/// The neutral-contrast axis is continuous, like the web preview's range input
+/// and the Jetstream shell's slider. It used to be four preset stops behind a
+/// toggle group here, which could not express the values between them.
+pub const CONTRAST_MIN: f32 = 0.0;
+pub const CONTRAST_MAX: f32 = 1.0;
+/// Where the preview starts. Lower than the tokens' own midpoint: the flatter
+/// neutral ramp is the one most of the component work is judged against.
+pub const CONTRAST_DEFAULT: f32 = 0.25;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenPanel {
@@ -290,6 +294,11 @@ pub struct SpecimenState {
     pub selections: HashMap<String, usize>,
     pub counters: HashMap<String, u32>,
     pub text: HashMap<String, String>,
+    /// Caret/selection per text specimen key. The Rust targets have no native
+    /// editor, so the caret is host state exactly like the value is — a field
+    /// whose value is stored but whose caret is not inserts every keystroke at
+    /// index 0, which spells typed text backwards.
+    pub carets: HashMap<String, (usize, usize)>,
 }
 
 impl SpecimenState {
@@ -310,6 +319,7 @@ impl SpecimenState {
             selections: HashMap::new(),
             counters: HashMap::new(),
             text: HashMap::new(),
+            carets: HashMap::new(),
         }
     }
 
@@ -475,6 +485,12 @@ pub enum NodeSpecimenEvent {
     /// Set or clear an optional text specimen key (e.g. either endpoint of a
     /// partially selected calendar range).
     SetOptionalText { key: String, value: Option<String> },
+    /// Move a field's caret or selection, as character indices into its value.
+    SetCaret {
+        key: String,
+        start: usize,
+        end: usize,
+    },
     /// Set a selection index (e.g. a tri-state control's chosen segment).
     Select { key: String, index: usize },
     /// Increment a counter specimen key (e.g. `btn-clicks`).
@@ -541,7 +557,16 @@ pub enum TreeEvent {
 #[derive(Clone, Debug)]
 pub enum ChromeEvent {
     Section(Section),
+    /// The theme picker's trigger reported the open state it is moving to.
+    ThemeSelectOpen(bool),
+    /// Neutral-contrast slider moved; clamped and applied to the theme.
+    Contrast(f32),
+    /// A theme swatch was chosen; rebuilds the theme provider and closes.
+    Theme(ThemePreset),
     ComponentSearch(String),
+    /// Caret/selection moved in the header search box.
+    SearchSelection(usize, usize),
+    SearchFocused(bool),
     ActiveComponent(String),
     TokenPanel(TokenPanel),
     TokenInspectorQuery(String),
@@ -554,8 +579,20 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
-    pub contrast: ContrastStop,
+    /// Neutral-contrast knob, 0.0..=1.0. Starts at `CONTRAST_DEFAULT`, which is
+    /// the preview's starting point rather than the tokens' own midpoint (0.5).
+    pub contrast: f32,
     pub component_search: String,
+    /// Caret/selection in the header search box, and whether it holds focus.
+    /// The Rust targets have no native editor, so the host owns the cursor.
+    pub search_selection: (usize, usize),
+    pub search_focused: bool,
+    /// The header theme picker's popover state; `ThemeSelectSpec::is_open` is
+    /// controlled, so the host owns it.
+    pub theme_select_open: bool,
+    /// Swatch options for the header theme picker, resolved once from each
+    /// preset's own tokens rather than hardcoded hex.
+    pub theme_options: Vec<poodle_specs::ThemeOption>,
     pub active_component_slug: Option<String>,
     pub active_token_panel: TokenPanel,
     pub token_inspector_query: String,
@@ -585,8 +622,12 @@ impl AppState {
             theme_preset: preset,
             density,
             control_size,
-            contrast: ContrastStop::Default,
+            contrast: CONTRAST_DEFAULT,
             component_search: String::new(),
+            search_selection: (0, 0),
+            search_focused: false,
+            theme_select_open: false,
+            theme_options: build_theme_options(),
             active_component_slug: None,
             active_token_panel: TokenPanel::Summary,
             token_inspector_query: String::new(),
@@ -619,7 +660,16 @@ impl AppState {
                     self.specimens.toggles.insert(open_key, false);
                 }
                 NodeSpecimenEvent::SetText { key, value } => {
+                    // A replaced value can be shorter than the old caret.
+                    let len = value.chars().count();
+                    if let Some(caret) = self.specimens.carets.get_mut(&key) {
+                        caret.0 = caret.0.min(len);
+                        caret.1 = caret.1.min(len);
+                    }
                     self.specimens.text.insert(key, value);
+                }
+                NodeSpecimenEvent::SetCaret { key, start, end } => {
+                    self.specimens.carets.insert(key, (start, end));
                 }
                 NodeSpecimenEvent::SetOptionalText { key, value } => match value {
                     Some(value) => {
@@ -711,7 +761,26 @@ impl AppState {
                 },
                 NodeSpecimenEvent::Chrome(event) => match event {
                     ChromeEvent::Section(section) => self.section = section,
-                    ChromeEvent::ComponentSearch(query) => self.component_search = query,
+                    ChromeEvent::ThemeSelectOpen(open) => self.theme_select_open = open,
+                    ChromeEvent::Contrast(value) => {
+                        self.contrast = value.clamp(CONTRAST_MIN, CONTRAST_MAX);
+                        self.rebuild_theme();
+                    }
+                    ChromeEvent::Theme(preset) => {
+                        self.set_theme(preset);
+                        self.theme_select_open = false;
+                    }
+                    ChromeEvent::ComponentSearch(query) => {
+                        // Keep the caret inside a value the host just changed.
+                        let len = query.chars().count();
+                        self.component_search = query;
+                        self.search_selection.0 = self.search_selection.0.min(len);
+                        self.search_selection.1 = self.search_selection.1.min(len);
+                    }
+                    ChromeEvent::SearchSelection(start, end) => {
+                        self.search_selection = (start, end);
+                    }
+                    ChromeEvent::SearchFocused(focused) => self.search_focused = focused,
                     ChromeEvent::ActiveComponent(slug) => {
                         self.active_component_slug = Some(slug);
                     }
@@ -737,7 +806,7 @@ impl AppState {
         let mut theme = self.theme_preset.build_theme();
         theme = theme.with_density(self.density.token_definition());
         theme = theme.with_control_size(self.control_size.token_definition());
-        theme = theme.with_contrast(self.contrast.value());
+        theme = theme.with_contrast(self.contrast);
         self.theme = theme;
     }
 }

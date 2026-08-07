@@ -28,16 +28,16 @@ use std::time::Duration;
 
 use gpui::{
     div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement, App,
-    AppContext,
-    ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement, IntoElement, KeyDownEvent,
-    MouseButton, ParentElement, SharedString, Stateful, StatefulInteractiveElement,
+    AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement, IntoElement,
+    KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement,
+    SharedString, Stateful, StatefulInteractiveElement,
     StyleRefinement, Styled, StyledImage, Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
     FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
-    NodePoint, NodePosition, NodeRole, StylePatch, TextAlign,
+    NodePoint, NodePosition, NodeRole, SelectGranularity, StylePatch, TextAlign,
 };
 
 /// sRGB passthrough — the exact conversion the old GPUI tier performed.
@@ -55,8 +55,25 @@ pub fn color(c: ColorValue) -> Hsla {
 
 /// Deterministic per-tree ids for nodes that need element state (interaction)
 /// but declare none. Tree order is stable across frames for a stable tree, so
-/// a counter keeps the same node on the same id between rebuilds.
+/// a counter keeps the same node on the same id between rebuilds — but ONLY if
+/// the counter restarts each frame. See [`reset_element_ids`].
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
+/// Restart the generated-id counter. Call once per frame, before building.
+///
+/// gpui stores a click's `pending_mouse_down` in the element state it keys by
+/// `ElementId`. A real click spans many frames, so if a node's id changes
+/// between the press and the release, the release reads a fresh state, finds
+/// no pending press, and the click is silently dropped. Without this reset the
+/// counter runs monotonically forever and every generated id is new on every
+/// frame — so every node that does not declare an id becomes unclickable.
+///
+/// This is invisible to both existing gates: the visual gate compares static
+/// frames, and the in-process click driver posts press and release inside a
+/// single frame, so it never crosses a rebuild.
+pub fn reset_element_ids() {
+    NEXT_ID.store(0, Ordering::Relaxed);
+}
 
 fn element_id(node: &Node) -> ElementId {
     if let Some(id) = &node.id {
@@ -107,9 +124,35 @@ pub fn to_gpui(node: &Node) -> AnyElement {
             build_box(node, el)
         }
         NodeKind::Input { value, placeholder } => {
+            // A childless input renders its own value; composite inputs supply
+            // styled children (affixes, count) and the backend must not
+            // duplicate the value underneath them.
             let el = if node.children.is_empty() {
-                let text = if value.is_empty() { placeholder } else { value };
-                div().child(text.clone())
+                let display = if value.is_empty() {
+                    placeholder.clone()
+                } else {
+                    value.clone()
+                };
+                let text_color = node
+                    .style
+                    .descriptor
+                    .text_color
+                    .map(color)
+                    .unwrap_or_else(gpui::white);
+                let id = element_id_string(node);
+                let focused = is_focused(&id) || FOCUS_SCOPE.with(|f| f.get());
+                div().child(input_text::input_text(
+                    id,
+                    display,
+                    value.clone(),
+                    text_color,
+                    node.caret.map(|c| c.selection),
+                    node.caret.map(|c| color(c.caret_color)).unwrap_or(text_color),
+                    node.caret
+                        .map(|c| color(c.selection_color))
+                        .unwrap_or(text_color),
+                    focused,
+                ))
             } else {
                 div()
             };
@@ -239,6 +282,9 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.drop_zone
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
+        || node.interaction.on_scrub.is_some()
+        || node.interaction.on_select_range.is_some()
+        || node.interaction.on_focus_change.is_some()
         || node.id.is_some()
         // `active` style patches and scroll overflow live on gpui 0.2.2's
         // StatefulInteractiveElement — both need element state.
@@ -680,7 +726,22 @@ fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node) -> E {
     }
     if let Some(patch) = &node.style.hover {
         let patch = *patch;
-        el = el.hover(move |s| apply_patch(s, patch));
+        // gpui refines hover *after* focus (`div.rs`: focus_style at 2490,
+        // hover_style at 2506), so a hover border silently overwrites a focus
+        // ring — a focused field lost its ring the moment you moved the mouse
+        // over it. Fold the focus patch back on top inside the hover closure
+        // while this node actually holds focus, so the last word is focus's.
+        let focus_patch = node
+            .style
+            .focus
+            .filter(|_| is_focused(&element_id_string(node)));
+        el = el.hover(move |s| {
+            let s = apply_patch(s, patch);
+            match focus_patch {
+                Some(focus) => apply_patch(s, focus),
+                None => s,
+            }
+        });
     }
     el
 }
@@ -689,10 +750,73 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
     if node.interaction.focusable {
         el = el.focusable();
     }
+
+    // Real focus, observed both ways. gpui auto-creates a focus handle and
+    // keeps it in element state it never hands back, so we own one instead:
+    // created lazily in the paint pass (the first place with an `App`) and
+    // attached from the next build onward. That makes *blur* observable, which
+    // is what a latched-on-click flag could never do.
+    if tracks_focus(node) {
+        let id = element_id_string(node);
+        if let Some(handle) = focus_handle_for(&id) {
+            el = el.track_focus(&handle);
+        }
+        let on_focus_change = node.interaction.on_focus_change.clone();
+        el = el.child(
+            gpui::canvas(
+                move |_bounds, window, cx| {
+                    let mut created = false;
+                    let handle = FOCUS_HANDLES.with(|handles| {
+                        handles
+                            .borrow_mut()
+                            .entry(id.clone())
+                            .or_insert_with(|| {
+                                created = true;
+                                cx.focus_handle()
+                            })
+                            .clone()
+                    });
+                    if created {
+                        // The element that wants this handle was already built
+                        // without it — nothing else would repaint, so the
+                        // handle would sit unattached and never see a focus.
+                        cx.refresh_windows();
+                    }
+                    let now = handle.is_focused(window);
+                    let changed = FOCUS_STATES.with(|states| {
+                        let mut states = states.borrow_mut();
+                        states.insert(id.clone(), now) != Some(now)
+                    });
+                    if changed {
+                        if !now {
+                            // A stale measured line must not answer clicks on
+                            // whatever takes this id next.
+                            input_text::forget(&id);
+                        }
+                        if let Some(handler) = &on_focus_change {
+                            handler(now);
+                        }
+                        cx.refresh_windows();
+                    }
+                },
+                |_, _, _, _| {},
+            )
+            .absolute()
+            .size_full(),
+        );
+    }
     if !node.interaction.disabled {
         if let Some(patch) = &node.style.active {
             let patch = *patch;
             el = el.active(move |s| apply_patch(s, patch));
+        }
+        // gpui's focus styling needs the element focusable, which the
+        // `focusable` flag above has already arranged.
+        if node.interaction.focusable {
+            if let Some(patch) = &node.style.focus {
+                let patch = *patch;
+                el = el.focus(move |s| apply_patch(s, patch));
+            }
         }
     }
     if node.interaction.disabled {
@@ -720,14 +844,130 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
             });
         }
     }
-    if let NodeKind::Input { value, .. } = &node.kind {
-        let current_value = value.clone();
-        let change = node.interaction.on_text_change.clone();
+    if let NodeKind::Input { .. } = &node.kind {
+        let edit_key = node.interaction.on_edit_key.clone();
+
+        // Click to place the caret, drag to select. Both are the same
+        // question — "which character is under this x?" — answered from the
+        // last painted line, because only a painted line has been measured.
+        if let Some(select) = node.interaction.on_select_range.clone() {
+            let id = element_id_string(node);
+            let down_id = id.clone();
+            let down_select = select.clone();
+            el = el.on_mouse_down(
+                MouseButton::Left,
+                move |event: &MouseDownEvent, _window, cx| {
+                    let Some(index) = input_text::char_index_for_position(&down_id, event.position)
+                    else {
+                        return;
+                    };
+                    // Click count is the backend's to know; what a "word" is
+                    // is not, so the granularity is named rather than resolved.
+                    let granularity = match event.click_count {
+                        0 | 1 => SelectGranularity::Character,
+                        2 => SelectGranularity::Word,
+                        _ => SelectGranularity::Line,
+                    };
+                    if granularity != SelectGranularity::Character {
+                        down_select(index, index, granularity);
+                        cx.refresh_windows();
+                        return;
+                    }
+                    if event.modifiers.shift {
+                        // Shift-click extends from wherever the drag anchor is.
+                        if let Some(anchor) = input_text::drag_anchor(&down_id) {
+                            down_select(anchor, index, granularity);
+                            cx.refresh_windows();
+                            return;
+                        }
+                    }
+                    input_text::begin_select(&down_id, index);
+                    down_select(index, index, granularity);
+                    cx.refresh_windows();
+                },
+            );
+
+            let move_id = id.clone();
+            el = el.on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
+                let Some(anchor) = input_text::drag_anchor(&move_id) else {
+                    return;
+                };
+                if !event.dragging() {
+                    return;
+                }
+                let Some(index) = input_text::char_index_for_position(&move_id, event.position)
+                else {
+                    return;
+                };
+                if index != anchor {
+                    select(anchor, index, SelectGranularity::Character);
+                    cx.refresh_windows();
+                }
+            });
+
+            // `_out` as well: a drag that ends past the field's edge must still
+            // end, or the next unrelated move keeps extending the selection.
+            el = el.on_mouse_up(MouseButton::Left, move |_event: &MouseUpEvent, _window, _cx| {
+                input_text::end_select();
+            });
+            el = el.on_mouse_up_out(
+                MouseButton::Left,
+                move |_event: &MouseUpEvent, _window, _cx| {
+                    input_text::end_select();
+                },
+            );
+        }
+
         let submit = node.interaction.on_submit.clone();
         let cancel = node.interaction.on_cancel.clone();
-        if change.is_some() || submit.is_some() || cancel.is_some() {
+        // Clipboard is the backend's: the text comes from outside the tree, and
+        // `App` reaches it directly. (IME still needs an `EntityInputHandler`,
+        // which a `&Node -> AnyElement` backend has no entity to hang on.)
+        let insert = node.interaction.on_edit_insert.clone();
+        let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {
+            let NodeKind::Input { value, .. } = &node.kind else {
+                return None;
+            };
+            let (start, end) = if a <= b { (a, b) } else { (b, a) };
+            let text: String = value.chars().skip(start).take(end - start).collect();
+            (!text.is_empty()).then_some(text)
+        });
+        if edit_key.is_some() || submit.is_some() || cancel.is_some() || insert.is_some() {
             el = el.on_key_down(move |event: &KeyDownEvent, _window, cx| {
                 let key = event.keystroke.key.as_str();
+                let accel = event.keystroke.modifiers.platform;
+                if accel && matches!(key, "c" | "x" | "v") {
+                    match key {
+                        "c" | "x" => {
+                            // Copying an empty selection must not clear what is
+                            // already on the clipboard.
+                            if let Some(text) = &selection_text {
+                                cx.write_to_clipboard(gpui::ClipboardItem::new_string(
+                                    text.clone(),
+                                ));
+                                if key == "x" {
+                                    if let Some(insert) = &insert {
+                                        insert("");
+                                    }
+                                }
+                                cx.refresh_windows();
+                            }
+                        }
+                        _ => {
+                            if let Some(text) =
+                                cx.read_from_clipboard().and_then(|item| item.text())
+                            {
+                                if let Some(insert) = &insert {
+                                    // A single-line field takes a multi-line
+                                    // paste as one line, like `<input>` does.
+                                    insert(&text.replace('\n', " "));
+                                    cx.refresh_windows();
+                                }
+                            }
+                        }
+                    }
+                    return;
+                }
                 if matches!(key, "enter" | "tab") {
                     if let Some(handler) = &submit {
                         handler();
@@ -742,54 +982,100 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
                     }
                 }
 
-                if let Some(change) = &change {
-                    if let Some(next) = replacement_for_key(
-                        &current_value,
-                        key,
-                        event.keystroke.modifiers.platform,
-                        event.keystroke.modifiers.control,
-                    ) {
-                        change(&next);
-                        cx.refresh_windows();
-                    }
+                // Editing itself belongs to the component: it owns the caret
+                // through its spec, so it decides what the key means. The
+                // backend only reports which key arrived.
+                if let Some(edit) = &edit_key {
+                    edit(key, node_modifiers(&event.keystroke.modifiers));
+                    cx.refresh_windows();
                 }
             });
         }
     }
     if let Some(handler) = &node.interaction.on_drag {
-        // gpui 0.2.2's fluent surface has mouse-down and mouse-move but no
-        // mouse-up listener (the same delta the old tier's slider records),
-        // so NodeDragPhase::End is never emitted. Deltas are per-frame, from
-        // the last reported pointer position — the vocabulary's contract.
+        // `on_drag_move`, NOT `on_mouse_move`: the latter only fires while the
+        // pointer is over this element's hitbox, so a drag detached the moment
+        // it left the control — a slider stayed with the mouse for a few pixels
+        // and then stopped. `on_drag_move` keeps receiving moves anywhere in the
+        // window as long as the gesture started here, which is what a drag is.
+        //
+        // gpui 0.2.2 has no mouse-up listener on this surface, so
+        // NodeDragPhase::End is still never emitted. Deltas remain per-frame
+        // from the last reported position — the vocabulary's contract.
+        // Registering `on_drag` makes gpui swallow this element's mouse-down, so
+        // Start cannot come from a down listener: the first move of a gesture
+        // emits it, then reports deltas.
         let last: Rc<RefCell<Option<(f32, f32)>>> = Rc::new(RefCell::new(None));
-        let last_down = last.clone();
         let last_move = last.clone();
-        let down = handler.clone();
         let mv = handler.clone();
         el = el
-            .on_mouse_down(MouseButton::Left, move |event, _window, _cx| {
-                *last_down.borrow_mut() = Some((event.position.x.into(), event.position.y.into()));
-                down(&NodeDragEvent {
-                    phase: NodeDragPhase::Start,
-                    delta_x: 0.0,
-                    delta_y: 0.0,
-                });
+            .on_drag(NodeGestureDrag, |_, _, _window, cx| {
+                cx.new(|_| EmptyDragPreview)
             })
-            .on_mouse_move(move |event, _window, cx| {
-                if event.pressed_button != Some(MouseButton::Left) {
-                    return;
-                }
-                let pos: (f32, f32) = (event.position.x.into(), event.position.y.into());
+            .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
+                let pos: (f32, f32) = (event.event.position.x.into(), event.event.position.y.into());
                 let mut last = last_move.borrow_mut();
-                if let Some(prev) = *last {
-                    mv(&NodeDragEvent {
+                match *last {
+                    None => mv(&NodeDragEvent {
+                        phase: NodeDragPhase::Start,
+                        delta_x: 0.0,
+                        delta_y: 0.0,
+                    }),
+                    Some(prev) => mv(&NodeDragEvent {
                         phase: NodeDragPhase::Move,
                         delta_x: pos.0 - prev.0,
                         delta_y: pos.1 - prev.1,
-                    });
+                    }),
+                }
+                cx.refresh_windows();
+                *last = Some(pos);
+            });
+    }
+
+    if let Some(handler) = &node.interaction.on_scrub {
+        // A scrub reports where the pointer sits ALONG this element, as a
+        // fraction of its own width. Pressing counts — clicking a slider track
+        // jumps the value there — and the gesture then follows the pointer
+        // anywhere via `on_drag_move`.
+        //
+        // A mouse-down event carries no bounds, so a zero-cost `canvas` child
+        // records the track's rectangle at paint time for the press to read.
+        // `on_drag_move` supplies its own.
+        let track: Rc<RefCell<Option<gpui::Bounds<gpui::Pixels>>>> = Rc::new(RefCell::new(None));
+        let track_paint = track.clone();
+        let track_press = track.clone();
+        let press = handler.clone();
+        let mv = handler.clone();
+        el = el
+            .child(
+                gpui::canvas(
+                    move |bounds, _window, _cx| {
+                        *track_paint.borrow_mut() = Some(bounds);
+                    },
+                    |_, _, _, _| {},
+                )
+                .absolute()
+                .size_full(),
+            )
+            // `on_click`, NOT `on_mouse_down`: registering `on_drag` on an
+            // element makes gpui's drag machinery swallow that element's
+            // mouse-down, so a down listener here never runs. Click survives,
+            // and a press-without-drag is exactly the track-click case.
+            .on_click(move |event: &ClickEvent, _window, cx| {
+                if let Some(bounds) = *track_press.borrow() {
+                    press(scrub_fraction(event.position().x.into(), bounds));
                     cx.refresh_windows();
                 }
-                *last = Some(pos);
+            })
+            .on_drag(NodeGestureDrag, |_, _, _window, cx| {
+                cx.new(|_| EmptyDragPreview)
+            })
+            .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
+                mv(scrub_fraction(
+                    event.event.position.x.into(),
+                    event.bounds,
+                ));
+                cx.refresh_windows();
             });
     }
     el = apply_selection_listeners(el, node);
@@ -919,6 +1205,21 @@ fn edge_for(rel: f32, accepts_inside: bool) -> DropEdge {
     }
 }
 
+/// Where `x` sits across `bounds`, clamped to 0.0..=1.0.
+fn scrub_fraction(x: f32, bounds: gpui::Bounds<gpui::Pixels>) -> f32 {
+    let left: f32 = bounds.origin.x.into();
+    let width: f32 = bounds.size.width.into();
+    if width <= 0.0 {
+        return 0.0;
+    }
+    ((x - left) / width).clamp(0.0, 1.0)
+}
+
+/// Marker payload for gesture drags (scrub, resize) — distinct from
+/// `NodeDragPayload`, so a scrub never lands in a drop zone.
+#[derive(Clone, Copy, Debug)]
+struct NodeGestureDrag;
+
 /// The dragged node's opaque id, carried through gpui's drag channel.
 #[derive(Clone, Debug)]
 struct NodeDragPayload {
@@ -935,27 +1236,69 @@ impl gpui::Render for EmptyDragPreview {
     }
 }
 
-fn replacement_for_key(
-    current: &str,
-    key: &str,
-    platform_modifier: bool,
-    control_modifier: bool,
-) -> Option<String> {
-    if key == "backspace" {
-        let mut chars: Vec<char> = current.chars().collect();
-        chars.pop();
-        Some(chars.into_iter().collect())
-    } else if key.chars().count() == 1 && !platform_modifier && !control_modifier {
-        Some(format!("{current}{key}"))
-    } else {
-        None
+
+/// The id `element_id` would assign, as a string, for keying editor state.
+// Focus handles we own, so we can ask "is this node focused?" — gpui's
+// auto-created handle lives in element state it never hands back. Created
+// lazily in the paint pass (which has an `App`) and used from the next build
+// onward; keyed by element id, like every other per-node cache here.
+thread_local! {
+    /// Whether the subtree currently being built sits inside a focused node.
+    static FOCUS_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    static FOCUS_HANDLES: RefCell<std::collections::HashMap<String, gpui::FocusHandle>> =
+        RefCell::new(std::collections::HashMap::new());
+    static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
+        RefCell::new(std::collections::HashMap::new());
+}
+
+fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
+    FOCUS_HANDLES.with(|h| h.borrow().get(id).cloned())
+}
+
+/// Whether this node held focus as of the last frame.
+///
+/// One source of truth, and it is gpui's: an earlier pass latched a spec flag
+/// on click, which could only ever turn focus *on* — a field kept its caret
+/// forever once clicked. Reading the real handle means blur is just as
+/// observable as focus.
+fn is_focused(id: &str) -> bool {
+    FOCUS_STATES.with(|s| s.borrow().get(id).copied().unwrap_or(false))
+}
+
+/// Whether a node wants focus tracked: it draws differently when focused, or
+/// it asked to be told.
+fn tracks_focus(node: &Node) -> bool {
+    // Deliberately not "every input": a field's value node is an input too,
+    // and gpui focuses the *innermost* focusable element under the pointer, so
+    // tracking it stole focus from the field root that carries the key
+    // listeners — clicks focused something that could not type. The value node
+    // learns it is focused by inheritance instead (see `apply_children`).
+    node.interaction.on_focus_change.is_some()
+        || (node.interaction.focusable && node.style.focus.is_some())
+}
+
+fn element_id_string(node: &Node) -> String {
+    match &node.id {
+        Some(id) => id.clone(),
+        None => match &node.style.animation {
+            Some(anim) => anim.key.clone(),
+            None => String::new(),
+        },
     }
 }
 
 fn apply_children<E: ParentElement>(mut el: E, node: &Node) -> E {
+    // A focused field's caret sits on the *value* node, several levels below
+    // the focusable root that actually holds focus (affixes and icons are
+    // siblings of the value). Focus is inherited down the subtree here, the
+    // same way a real input's caret shows because its wrapper has focus.
+    let inherited = FOCUS_SCOPE.with(|f| f.get());
+    let scope = inherited || (tracks_focus(node) && is_focused(&element_id_string(node)));
+    FOCUS_SCOPE.with(|f| f.set(scope));
     for child in &node.children {
         el = el.child(to_gpui(child));
     }
+    FOCUS_SCOPE.with(|f| f.set(inherited));
     el
 }
 
@@ -1051,6 +1394,8 @@ where
 // `poodle-gpui-components::primitives::button`), and g12.015 holds GPUI
 // accessibility upstream work deliberately. The channels are walked (read)
 // here so the omission is a decision, not a drift.
+
+mod input_text;
 
 #[cfg(test)]
 mod tests;

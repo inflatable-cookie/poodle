@@ -96,18 +96,3 @@ fn gpui_animation_maps_loop_modes_and_easing() {
     assert!(((a.easing)(1.0) - 1.0).abs() < 1e-6);
     assert!(((a.easing)(0.5) - 0.5).abs() < 1e-6);
 }
-
-#[test]
-fn lightweight_input_editing_reports_replacement_text() {
-    assert_eq!(
-        replacement_for_key("café", "backspace", false, false),
-        Some("caf".to_string())
-    );
-    assert_eq!(
-        replacement_for_key("caf", "é", false, false),
-        Some("café".to_string())
-    );
-    assert_eq!(replacement_for_key("caf", "enter", false, false), None);
-    assert_eq!(replacement_for_key("caf", "a", true, false), None);
-    assert_eq!(replacement_for_key("caf", "a", false, true), None);
-}

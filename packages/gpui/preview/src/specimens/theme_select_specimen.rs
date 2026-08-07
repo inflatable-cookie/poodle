@@ -1,10 +1,10 @@
-use crate::app_state::AppState;
-use crate::node_compat::ThemeSelect;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, ThemeSelect};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
+use poodle_specs::{EyebrowSpec, ThemeOption, ThemeSelectSpec, ThemeSwatch};
 
 fn demo_themes() -> Vec<ThemeOption> {
     vec![
@@ -44,23 +44,86 @@ fn demo_themes() -> Vec<ThemeOption> {
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
+    // Interactive case. The popover is anchored and absolutely positioned, so
+    // a permanently-open example would sit on top of whatever follows it — the
+    // open state belongs to the specimen, driven by the trigger, exactly as the
+    // Popover and Menu specimens do it.
+    let open_key = "theme-select-open";
+    let value_key = "theme-select-value";
+    let is_open = state.specimens.is_on(open_key);
+    let current = state
+        .specimens
+        .text
+        .get(value_key)
+        .cloned()
+        .unwrap_or_else(|| "midnight".to_string());
+
+    let interactive = ThemeSelect::from_spec(
+        ThemeSelectSpec::new()
+            .with_themes(demo_themes())
+            .with_value(&current)
+            .with_open(is_open),
+        theme,
+    )
+    .on_open_change({
+        let queue = std::sync::Arc::clone(&state.node_events);
+        std::sync::Arc::new(move |open: bool| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: open_key.to_string(),
+                value: open,
+            });
+        })
+    })
+    .on_change({
+        let queue = std::sync::Arc::clone(&state.node_events);
+        std::sync::Arc::new(move |value: &str| {
+            // Record the choice and close, mirroring the component's own
+            // select-then-dismiss behaviour.
+            let mut events = queue.lock().unwrap();
+            events.push(NodeSpecimenEvent::SetText {
+                key: value_key.to_string(),
+                value: value.to_string(),
+            });
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: open_key.to_string(),
+                value: false,
+            });
+        })
+    });
+
+    let labelled = |label: &str, body: AnyElement| {
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .child(Eyebrow::from_spec(
+                EyebrowSpec::new().with_content(label),
+                theme,
+            ))
+            .child(body)
+    };
+
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(ThemeSelect::from_spec(
-            ThemeSelectSpec::new()
-                .with_themes(demo_themes())
-                .with_value("midnight")
-                .with_open(true),
-            theme,
+        // `deferred` so the open popover paints above the examples below it
+        // rather than behind them — the host half of the contract's portalled
+        // surface, the same treatment the app header uses.
+        .child(labelled(
+            "Interactive — click the trigger",
+            deferred(interactive).into_any_element(),
         ))
-        .child(ThemeSelect::from_spec(
-            ThemeSelectSpec::new()
-                .with_themes(demo_themes())
-                .with_value("nord")
-                .with_disabled(true),
-            theme,
+        .child(labelled(
+            "Disabled",
+            ThemeSelect::from_spec(
+                ThemeSelectSpec::new()
+                    .with_themes(demo_themes())
+                    .with_value("nord")
+                    .with_disabled(true),
+                theme,
+            )
+            .into_any_element(),
         ))
         .into_any_element();
 

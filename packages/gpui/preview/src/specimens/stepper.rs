@@ -50,6 +50,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         StepperStep::new("extract", "Extract tokens").with_status(StepStatus::Complete),
     ];
 
+    let lane = vec![
+        StepperStep::new("scan", "Scan the tree").with_status(StepStatus::Complete),
+        StepperStep::new("plan", "Draft the lane plan").with_status(StepStatus::Complete),
+        StepperStep::new("review", "Review with the gate").with_status(StepStatus::Complete),
+        StepperStep::new("apply", "Apply the changes").with_status(StepStatus::Complete),
+        StepperStep::new("record", "Record architecture verdict and next lane")
+            .with_status(StepStatus::Complete),
+    ];
+
+    // All four statuses on one rail — the only arrangement where the collapsed
+    // form's colour coding is legible at a glance.
+    let mixed = vec![
+        StepperStep::new("read", "Read source").with_status(StepStatus::Complete),
+        StepperStep::new("gate", "Quality gate").with_status(StepStatus::Failed),
+        StepperStep::new("extract", "Extract tokens").with_status(StepStatus::Running),
+        StepperStep::new("apply", "Apply changes"),
+    ];
+
     let examples = div()
         .flex()
         .flex_col()
@@ -75,6 +93,53 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_orientation(Orientation::Vertical)
                         .with_value("categories")
                         .with_aria_label("DAW sync steps, vertical"),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(group(
+            theme,
+            "Collapsed",
+            div()
+                .max_w(px(480.0))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(lane.clone())
+                        .with_orientation(Orientation::Vertical)
+                        .with_collapsible(true)
+                        .with_collapsed(true)
+                        .with_value("record")
+                        .with_aria_label("Lane progress"),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(group(
+            theme,
+            "Collapsed, expanded",
+            div()
+                .max_w(px(480.0))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(lane)
+                        .with_orientation(Orientation::Vertical)
+                        .with_collapsible(true)
+                        .with_value("record")
+                        .with_aria_label("Lane progress, expanded"),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(group(
+            theme,
+            "Collapsed statuses",
+            div()
+                .max_w(px(480.0))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(mixed)
+                        .with_orientation(Orientation::Vertical)
+                        .with_collapsible(true)
+                        .with_collapsed(true)
+                        .with_value("extract")
+                        .with_aria_label("Pipeline progress"),
                     theme,
                 ))
                 .into_any_element(),

@@ -15,11 +15,15 @@ export interface StepperProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   orientation?: Orientation;
+  collapsible?: boolean;
+  collapsed?: boolean;
+  defaultCollapsed?: boolean;
   disabled?: boolean;
   ariaLabel?: string | null;
   rerunLabel?: string;
   onValueChange?: (value: string) => void;
   onRerun?: (value: string) => void;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 /**
@@ -50,11 +54,15 @@ export function Stepper({
   sizeRole = "control",
   density = null,
   orientation = "horizontal",
+  collapsible = false,
+  collapsed,
+  defaultCollapsed = false,
   disabled = false,
   ariaLabel = null,
   rerunLabel = "Re-run step",
   onValueChange,
   onRerun,
+  onCollapsedChange,
 }: StepperProps) {
   const uiPresentation = useUiPresentation();
   // Falling back to the first step matters: a stepper with no current step
@@ -62,6 +70,7 @@ export function Stepper({
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(
     defaultValue ?? steps[0]?.value ?? null,
   );
+  const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(defaultCollapsed);
   const rootRef = useRef<HTMLElement | null>(null);
 
   const isControlled = value !== undefined;
@@ -70,7 +79,23 @@ export function Stepper({
   const resolvedDensity = density ?? uiPresentation.density;
   const markerVisualSize = resolveSupportingVisualSize(resolvedSize);
 
+  // Collapse is vertical-only (stepper.md §3): a horizontal stepper is already
+  // one line, so folding it trades legible labels for dashes and buys back no
+  // height. `collapsible` is ignored rather than half-honoured.
+  const canCollapse = collapsible && orientation === "vertical";
+  const isCollapsedControlled = collapsed !== undefined;
+  const isCollapsed = canCollapse && (isCollapsedControlled ? collapsed : uncontrolledCollapsed);
+  const currentStep = steps.find((step) => step.value === currentValue) ?? steps[0];
+  const completedCount = steps.filter((step) => step.status === "complete").length;
+
   const isStepDisabled = (step: StepperStep) => disabled || step.isDisabled === true;
+
+  function toggleCollapsed() {
+    if (disabled) return;
+    const next = !isCollapsed;
+    if (!isCollapsedControlled) setUncontrolledCollapsed(next);
+    onCollapsedChange?.(next);
+  }
 
   function selectStep(step: StepperStep) {
     if (isStepDisabled(step)) return;
@@ -109,8 +134,45 @@ export function Stepper({
       data-size={resolvedSize}
       data-density={resolvedDensity}
       data-orientation={orientation}
+      data-collapsible={canCollapse ? "true" : undefined}
+      data-collapsed={canCollapse ? String(isCollapsed) : undefined}
       aria-label={ariaLabel ?? undefined}
     >
+      {canCollapse ? (
+        // The visible "5/5" is aria-hidden and restated in the name: "five
+        // slash five" is not a sentence. Chevron and rail say nothing the name
+        // does not already say.
+        <button
+          type="button"
+          className="poodle-stepper__summary"
+          disabled={disabled}
+          aria-expanded={!isCollapsed}
+          aria-label={`${currentStep?.label ?? ""}, ${completedCount} of ${steps.length} steps complete`}
+          onClick={toggleCollapsed}
+        >
+          <span className="poodle-stepper__summary-chevron" aria-hidden="true">
+            <Icon name={isCollapsed ? "chevron-right" : "chevron-down"} size={markerVisualSize} />
+          </span>
+          <span className="poodle-stepper__rail" aria-hidden="true">
+            {steps.map((step) => (
+              <span
+                key={step.value}
+                className="poodle-stepper__rail-segment"
+                data-status={step.status}
+                data-current={currentValue === step.value ? "true" : undefined}
+              />
+            ))}
+          </span>
+          <span className="poodle-stepper__summary-label">{currentStep?.label ?? ""}</span>
+          <span className="poodle-stepper__summary-count" aria-hidden="true">
+            {completedCount}/{steps.length}
+          </span>
+        </button>
+      ) : null}
+
+      {/* Collapsed drops the list from the tree rather than hiding it: hidden
+          triggers would still be four unreachable stops in the tab order. */}
+      {isCollapsed ? null : (
       <ol className="poodle-stepper__list">
         {steps.map((step, index) => (
           <li key={step.value} className="poodle-stepper__step" data-status={step.status}>
@@ -154,6 +216,7 @@ export function Stepper({
           </li>
         ))}
       </ol>
+      )}
     </nav>
   );
 }

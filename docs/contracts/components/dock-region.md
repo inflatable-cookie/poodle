@@ -478,6 +478,7 @@ When flexible and expanded, each edge gets a single border on its inner side:
 | `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `padding-right` | `0.5rem` |
+| `min-height` | `2.75rem`; `2rem` when the root is `data-density="compact"` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 
 #### `.dock-region__tabs`

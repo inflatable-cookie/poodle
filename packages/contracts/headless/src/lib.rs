@@ -24,5 +24,6 @@ pub mod single_select;
 pub mod slider;
 pub mod switch;
 pub mod tabs;
+pub mod text_input;
 pub mod toggle_group;
 pub mod tree;

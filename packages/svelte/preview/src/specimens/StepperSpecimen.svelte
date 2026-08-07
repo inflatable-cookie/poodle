@@ -26,8 +26,26 @@
     { value: "apply", label: "Apply changes", status: "pending" },
   ];
 
+  // All four statuses on one rail — the only arrangement where the collapsed
+  // form's colour coding is legible at a glance.
+  const mixedSteps: StepperStep[] = [
+    { value: "read", label: "Read source", status: "complete" },
+    { value: "gate", label: "Quality gate", status: "failed" },
+    { value: "extract", label: "Extract tokens", status: "running" },
+    { value: "apply", label: "Apply changes", status: "pending" },
+  ];
+
+  const doneSteps: StepperStep[] = [
+    { value: "scan", label: "Scan the tree", status: "complete" },
+    { value: "plan", label: "Draft the lane plan", status: "complete" },
+    { value: "review", label: "Review with the gate", status: "complete" },
+    { value: "apply", label: "Apply the changes", status: "complete" },
+    { value: "record", label: "Record architecture verdict and next lane", status: "complete" },
+  ];
+
   let current = $state("categories");
   let lastRerun = $state("");
+  let collapsed = $state(true);
 </script>
 
 <SpecimenLayout>
@@ -49,6 +67,33 @@
         value={current}
         ariaLabel="DAW sync steps, vertical"
         onValueChange={(value) => (current = value)}
+      />
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Collapsed">
+    <div style="max-width: 30rem;">
+      <Stepper
+        steps={doneSteps}
+        orientation="vertical"
+        collapsible
+        bind:collapsed
+        defaultValue="record"
+        ariaLabel="Lane progress"
+      />
+    </div>
+    <p>Collapsed: <strong>{collapsed}</strong></p>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Collapsed statuses">
+    <div style="max-width: 30rem;">
+      <Stepper
+        steps={mixedSteps}
+        orientation="vertical"
+        collapsible
+        defaultCollapsed
+        defaultValue="extract"
+        ariaLabel="Pipeline progress"
       />
     </div>
   </SpecimenGroup>

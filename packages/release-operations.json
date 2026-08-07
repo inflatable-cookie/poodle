@@ -246,7 +246,25 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "poodle-jetstream-components",
+      "name": "poodle-jetstream-preview",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "poodle-node",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "poodle-render",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "runtime-backed",
@@ -255,10 +273,10 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "poodle-jetstream-preview",
+      "name": "poodle-gpui-node-backend",
       "channel": "preview",
       "publicIntent": true,
-      "changeControl": "tooling-owned",
+      "changeControl": "adapter-backed",
       "requiresReleaseNotes": true,
       "requiresDeprecationRecord": true,
       "removalGate": "successor-and-generation-delay"

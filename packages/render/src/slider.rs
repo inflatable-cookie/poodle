@@ -133,8 +133,58 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         }))
     };
 
+    // Scrub: the value IS the pointer's position along the track, so the
+    // backend reports a fraction of the control's own width and the component
+    // maps it onto the range. This replaced a delta accumulation that had to
+    // assume a fixed track length (`track_w()`), which was wrong for any slider
+    // not rendered at exactly that size — the header's contrast control moved a
+    // fraction of the distance the pointer did. It also makes pressing the
+    // track jump the value there, which a delta can never do.
+    let scrub_handler: Option<Arc<dyn Fn(f32) + Send + Sync>> = if handlers.change.is_none() {
+        None
+    } else {
+        let min = spec.min;
+        let max = spec.max;
+        let context = poodle_headless::slider::SliderContext {
+            value: spec.value,
+            min: spec.min,
+            max: spec.max,
+            step: spec.step,
+            disabled: false,
+        };
+        let on_change = handlers.change.clone();
+        Some(Arc::new(move |fraction: f32| {
+            let raw = min + (max - min) * fraction as f64;
+            let (_, effects) = poodle_headless::slider::slider_transition(
+                context,
+                poodle_headless::slider::SliderEvent::Input { raw },
+            );
+            for effect in effects {
+                if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect {
+                    if let Some(handler) = &on_change {
+                        handler(value);
+                    }
+                }
+            }
+        }))
+    };
+
+    // Thumb and fill only advertise the affordance. The scrub itself belongs to
+    // the TRACK, because the fraction is measured across the node that carries
+    // it — putting it on the thumb would measure across the thumb's own few
+    // pixels. Both are children of the track, so a press on either still
+    // reaches it.
     let draggable = |node: &mut Node| {
-        if let Some(handler) = &drag_handler {
+        if scrub_handler.is_some() || drag_handler.is_some() {
+            node.style.descriptor.cursor = CursorHint::Pointer;
+        }
+    };
+
+    let scrubbable = |node: &mut Node| {
+        if let Some(handler) = &scrub_handler {
+            node.style.descriptor.cursor = CursorHint::Pointer;
+            node.interaction.on_scrub = Some(Arc::clone(handler));
+        } else if let Some(handler) = &drag_handler {
             node.style.descriptor.cursor = CursorHint::Pointer;
             node.interaction.on_drag = Some(Arc::clone(handler));
         }
@@ -203,8 +253,27 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         s.descriptor.corner_radii.bottom_left = pill;
     }
     track.position = NodePosition::Relative;
-    draggable(&mut track);
     let track = track.child(fill);
+
+    // Grab area. The track paints 6px tall, which is a punishing pointer
+    // target — the same reason ResizeHandle's contract puts its grab area on an
+    // overlay rather than the visible line. This transparent overlay spans the
+    // track's full width (so the scrub fraction is still measured across the
+    // track) and reaches past it vertically, giving the whole control height as
+    // hit area.
+    let mut grab = Node::container();
+    {
+        let s = &mut grab.style;
+        s.fill_width = true;
+    }
+    grab.position = NodePosition::Absolute {
+        top: Some(-thumb_r),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(-thumb_r),
+    };
+    scrubbable(&mut grab);
+    let track = track.child(grab);
 
     let mut el = Node::container();
     {
@@ -224,4 +293,43 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         el.a11y.label = Some(label.to_string());
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn find_scrub(node: &Node) -> Option<&Node> {
+        node.find(&|n| n.interaction.on_scrub.is_some())
+    }
+
+    #[test]
+    fn the_track_carries_the_scrub_and_the_thumb_does_not() {
+        // The fraction is measured across whichever node carries the handler,
+        // so it belongs to the full-width track. On the thumb it would measure
+        // across a few pixels and the value would jump wildly.
+        let handlers = SliderHandlers {
+            change: Some(Arc::new(|_| {})),
+            commit: None,
+        };
+        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let node = slider(&spec, &theme(), &handlers);
+
+        let scrub = find_scrub(&node).expect("a node carries the scrub handler");
+        assert!(
+            scrub.style.fill_width,
+            "the scrub belongs to the full-width track"
+        );
+    }
+
+    #[test]
+    fn no_change_handler_means_no_scrub() {
+        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let node = slider(&spec, &theme(), &SliderHandlers::default());
+        assert!(find_scrub(&node).is_none());
+    }
 }

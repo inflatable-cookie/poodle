@@ -132,8 +132,22 @@ fn build_controls_bar(
             )))
     };
 
-    let theme_labels: Vec<&str> = ThemePreset::ALL.iter().map(|t| t.label()).collect();
-    bar = bar.child(group("Theme", &theme_labels, state.theme_preset.label()));
+    // Theme picker — the real ThemeSelect, matching the Svelte preview, rather
+    // than one toggle button per theme.
+    let theme_group = div().flex_col().gap(4.0)
+        .flex_shrink_0()
+        .child(crate::jsx::jel(crate::compat::js_eyebrow(
+            &EyebrowSpec::default().with_content("Theme"),
+            theme,
+        )))
+        .child(crate::jsx::jel(crate::compat::js_theme_select(
+            &poodle_specs::ThemeSelectSpec::new()
+                .with_themes(state.theme_options.clone())
+                .with_value(state.theme_preset.label())
+                .with_open(state.theme_select_open),
+            theme,
+        )));
+    bar = bar.child(theme_group);
 
     let density_labels: Vec<&str> = Density::ALL.iter().map(|d| d.label()).collect();
     bar = bar.child(group("Density", &density_labels, state.density.label()));
@@ -367,6 +381,7 @@ pub enum ShellAction {
     SelectTab(usize),
     SelectSidebarItem(usize),
     SelectTheme(usize),
+    ToggleThemeSelect,
     SelectDensity(usize),
     SelectSize(usize),
     ToggleProbe(usize), // 0=disabled, 1=invalid, 2=busy
@@ -392,6 +407,15 @@ pub fn parse_action(token_key: Option<&str>) -> ShellAction {
     if let Some(idx_str) = key.strip_prefix("sidebar:") {
         if let Ok(idx) = idx_str.parse::<usize>() {
             return ShellAction::SelectSidebarItem(idx);
+        }
+    }
+    // ThemeSelect dispatches by node id, like every other Jetstream control.
+    if key == "theme-select-trigger" {
+        return ShellAction::ToggleThemeSelect;
+    }
+    if let Some(name) = key.strip_prefix("theme-select-tile-") {
+        if let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name) {
+            return ShellAction::SelectTheme(idx);
         }
     }
     if let Some(name) = key.strip_prefix("theme:") {

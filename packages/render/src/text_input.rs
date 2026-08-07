@@ -29,6 +29,11 @@ use crate::spinner::spinner;
 /// `on_clear` stays in the stable call shape while the old GPUI tier remains
 /// the native parity reference. That tier has no clear affordance, so this
 /// slice deliberately does not invent one on the replacement path.
+/// Selected-text wash: accent at 30%, the same strength the other selection
+/// surfaces use.
+const SELECTION_ALPHA: f32 = 0.30;
+
+
 pub fn text_input(
     spec: &TextInputSpec,
     theme: &dyn ThemeProvider,
@@ -37,12 +42,46 @@ pub fn text_input(
     text_input_with_change(spec, theme, None)
 }
 
+/// Host callbacks for an editable field.
+///
+/// `on_change` reports the new value; `on_selection_change` reports where the
+/// caret or selection moved to. The host stores both — the caret is spec state,
+/// exactly like `TreeSpec::focused_value`, because the Rust targets have no
+/// native editor to own it for them.
+#[derive(Default)]
+pub struct TextInputHandlers {
+    pub on_change: Option<TextChangeHandler>,
+    pub on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    /// Fires when the field is activated (clicked or entered). The host stores
+    /// it so the next render knows to draw a caret. The backend reports both
+    /// directions: it owns focus, so it is the only layer that can see a blur.
+    pub on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
 /// Render a text input with host-owned replacement-text updates.
 pub fn text_input_with_change(
     spec: &TextInputSpec,
     theme: &dyn ThemeProvider,
     on_change: Option<TextChangeHandler>,
 ) -> Node {
+    text_input_with_handlers(
+        spec,
+        theme,
+        TextInputHandlers {
+            on_change,
+            ..TextInputHandlers::default()
+        },
+    )
+}
+
+/// Render a text input that can actually be edited: the caret moves, keys
+/// insert where it is, and selections replace.
+pub fn text_input_with_handlers(
+    spec: &TextInputSpec,
+    theme: &dyn ThemeProvider,
+    handlers: TextInputHandlers,
+) -> Node {
+    let on_change = handlers.on_change.clone();
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let control_height = theme.resolve_space(spec.control_height_token())
         + rem_to_px(size_height_offset_rem(effective_size));
@@ -63,6 +102,7 @@ pub fn text_input_with_change(
         ControlSize::Xl => 1.0,
     });
     let body_line_height = theme.resolve_space(spec.body_line_height_token()) / body_size;
+    let selection_fill = theme.resolve_color("color.accent.base");
 
     let border_default = theme.resolve_color(spec.border_token());
     let surface_raw = theme.resolve_color(spec.fill_token());
@@ -80,11 +120,6 @@ pub fn text_input_with_change(
     let icon_color = theme.resolve_color(spec.icon_color_token());
 
     let current_value = spec.current_value();
-    let display_text = if current_value.is_empty() {
-        spec.placeholder.as_deref().unwrap_or("")
-    } else {
-        current_value
-    };
     let display_color = if current_value.is_empty() {
         text_secondary
     } else {
@@ -111,12 +146,86 @@ pub fn text_input_with_change(
         inner = inner.child(glyph);
     }
 
-    let mut value = Node::text(display_text);
-    value.style.descriptor.layout.width = LayoutSizing::Grow;
-    value.style.descriptor.layout.overflow_x = poodle_node::LayoutOverflow::Hidden;
-    value.style.descriptor.text_color = Some(display_color);
-    value.style.text_ellipsis = true;
-    value.style.no_wrap = true;
+    // A STABLE, distinct id per field. Backends key element state by it —
+    // gpui stores focus and the editing cursor there — so two unnamed inputs
+    // sharing one id share a caret and steal each other's focus. Falling back
+    // to the field's own descriptive text keeps unnamed fields apart without
+    // inventing per-frame identity, which would break clicks entirely.
+    let field_id = match spec.id.as_deref() {
+        Some(id) => format!("poodle-input-{id}"),
+        None => {
+            let descriptor = [
+                spec.aria_label.as_deref(),
+                spec.placeholder.as_deref(),
+                spec.name.as_deref(),
+            ]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>()
+            .join("-");
+            if descriptor.is_empty() {
+                "poodle-input".to_string()
+            } else {
+                format!("poodle-input-{descriptor}")
+            }
+        }
+    };
+
+    // The value is one input node, not a stack of text runs: the caret and
+    // the selection are drawn by the backend at *measured* positions, because
+    // mapping a character index to an x offset means shaping glyphs, and no
+    // target-independent layer can do that. The component supplies the index
+    // and the colours; the backend supplies the pixels, and decides when to
+    // draw them at all — it is the only thing that knows what holds focus.
+    let mut value = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
+    // Derived from the field's id, because the backend caches this node's
+    // *measured* line under it to answer "which character did I click?".
+    value.id = Some(format!("{field_id}-value"));
+    {
+        let s = &mut value.style;
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.descriptor.layout.overflow_x = poodle_node::LayoutOverflow::Hidden;
+        s.descriptor.text_color = Some(display_color);
+        s.text_ellipsis = true;
+        s.no_wrap = true;
+        s.min_width = Some(0.0);
+    }
+    let mut value_caret = None;
+    if !spec.is_disabled {
+        let caret_color = if spec.is_read_only {
+            // Read-only fields still select and still show where the selection
+            // is; what they do not do is show an insertion point.
+            with_alpha(text_primary, 0.0)
+        } else {
+            text_primary
+        };
+        value = value.with_caret(
+            spec.selection_range(),
+            caret_color,
+            with_alpha(selection_fill, selection_fill.3 * SELECTION_ALPHA),
+        );
+        value_caret = value.caret;
+        if let Some(on_selection_change) = handlers.on_selection_change.clone() {
+            // The backend names the granularity because it counts the clicks;
+            // resolving it needs to know what a word is, which is a text rule
+            // and therefore shared, not per-backend.
+            let text = spec.current_value().to_string();
+            value.interaction.on_select_range = Some(Arc::new(
+                move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
+                    let (start, end) = match granularity {
+                        poodle_node::SelectGranularity::Character => (start, end),
+                        poodle_node::SelectGranularity::Word => {
+                            let (a, _) = poodle_headless::text_input::word_range_at(&text, start);
+                            let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
+                            (a, b)
+                        }
+                        poodle_node::SelectGranularity::Line => (0, text.chars().count()),
+                    };
+                    on_selection_change(start, end);
+                },
+            ));
+        }
+    }
     inner = inner.child(value);
 
     if spec.show_char_count {
@@ -176,10 +285,7 @@ pub fn text_input_with_change(
     }
 
     let mut root = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
-    root.id = Some(match spec.id.as_deref() {
-        Some(id) => format!("poodle-input-{id}"),
-        None => "poodle-input".to_string(),
-    });
+    root.id = Some(field_id.clone());
     {
         let s = &mut root.style;
         s.descriptor.background = Some(surface_bg);
@@ -207,8 +313,81 @@ pub fn text_input_with_change(
         });
     }
     root.interaction.focusable = true;
+    // Contract §States focus-visible: the field rings in the accent focus
+    // colour. Without it a clicked field looked exactly like an idle one —
+    // The caret says where typing lands; the ring says the field will receive
+    // it at all, and is the only signal a keyboard-focused field gets.
+    if !spec.is_disabled {
+        root.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
+    }
     if !spec.is_disabled && !spec.is_read_only {
+        // Keys go through the shared editing model rather than the backend's:
+        // the caret lives in this spec, so only the component can say what a
+        // keystroke means. Backends just report which key arrived.
+        let value = spec.current_value().to_string();
+        let (start, end) = spec.selection_range();
+        let on_selection = handlers.on_selection_change.clone();
+        let change = on_change.clone();
+        root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+            let state = poodle_headless::text_input::EditState {
+                anchor: start,
+                head: end,
+            };
+            let Some(outcome) =
+                poodle_headless::text_input::edit_transition(&value, state, key, mods.shift, mods.accel)
+            else {
+                return;
+            };
+            if let Some(next) = outcome.value {
+                if let Some(change) = &change {
+                    change(&next);
+                }
+            }
+            if let Some(on_selection) = &on_selection {
+                on_selection(outcome.state.anchor, outcome.state.head);
+            }
+        }));
+        // Paste and cut arrive as content, not as a keystroke, so they go
+        // through the same edit model by a different door.
+        {
+            let value = spec.current_value().to_string();
+            let (start, end) = spec.selection_range();
+            let on_selection = handlers.on_selection_change.clone();
+            let change = on_change.clone();
+            root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &value,
+                    poodle_headless::text_input::EditState {
+                        anchor: start,
+                        head: end,
+                    },
+                    text,
+                );
+                if let Some(next) = outcome.value {
+                    if let Some(change) = &change {
+                        change(&next);
+                    }
+                }
+                if let Some(on_selection) = &on_selection {
+                    on_selection(outcome.state.anchor, outcome.state.head);
+                }
+            }));
+        }
+        // The root carries the caret too. It never *draws* one — it has
+        // children, so the backend does not render its intrinsic value — but
+        // key events arrive at the focusable root, and copy/cut need to know
+        // what is selected without hunting through the subtree for it.
+        root.caret = value_caret;
         root.interaction.on_text_change = on_change;
+        // Focus is reported by the backend, which is the only thing that knows
+        // it. An earlier pass latched this on activation, so it could report a
+        // gain and never a loss — a field kept its caret after focus moved on.
+        root.interaction.on_focus_change = handlers.on_focus_change.clone();
     }
     if spec.is_disabled {
         root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
@@ -253,6 +432,91 @@ fn affix(
 
 #[cfg(test)]
 mod tests {
+
+    /// The value is a single input node carrying its caret, not a stack of
+    /// text runs. Runs positioned the caret without measuring anything, which
+    /// is why they could not answer a click: `closest_index_for_x` needs one
+    /// shaped line, not a boundary between two.
+    #[test]
+    fn the_value_is_one_input_node_carrying_the_caret_and_its_colors() {
+        let theme = theme();
+        let node = text_input_with_handlers(
+            &TextInputSpec::new()
+                .with_id("stock")
+                .with_value("hello")
+                .with_selection(1, 4),
+            &theme,
+            TextInputHandlers::default(),
+        );
+        let value = node
+            .find(&|n| n.id.as_deref() == Some("poodle-input-stock-value"))
+            .expect("the value node is keyed off the field id");
+        let NodeKind::Input { value: text, .. } = &value.kind else {
+            panic!("the value node must be an input");
+        };
+        assert_eq!(text, "hello");
+        let caret = value.caret.expect("the value node carries the caret");
+        assert_eq!(caret.selection, (1, 4));
+    }
+
+    /// Pointer selection lands on the value node, because that is the node
+    /// whose text gets measured. On the field root it would have to hit-test
+    /// against affixes and icons as if they were characters.
+    #[test]
+    fn pointer_selection_is_reported_from_the_value_node_only() {
+        let theme = theme();
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = text_input_with_handlers(
+            &TextInputSpec::new().with_id("stock").with_value("hello"),
+            &theme,
+            TextInputHandlers {
+                on_selection_change: Some(Arc::new(move |a, b| sink.lock().unwrap().push((a, b)))),
+                ..TextInputHandlers::default()
+            },
+        );
+        let value = node
+            .find(&|n| n.id.as_deref() == Some("poodle-input-stock-value"))
+            .expect("value node");
+        let select = value
+            .interaction
+            .on_select_range
+            .as_ref()
+            .expect("the value node reports pointer selection");
+        select(1, 3, poodle_node::SelectGranularity::Character);
+        assert_eq!(*seen.lock().unwrap(), vec![(1, 3)]);
+
+        // A double click reports where it landed; the word around it is the
+        // component's to work out, because only it knows what a word is.
+        select(1, 1, poodle_node::SelectGranularity::Word);
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 5)));
+        select(2, 2, poodle_node::SelectGranularity::Line);
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 5)));
+        assert!(
+            node.interaction.on_select_range.is_none(),
+            "the field root must not hit-test characters"
+        );
+    }
+
+    /// A disabled field draws no caret at all: `with_caret` is what turns the
+    /// caret on, so a disabled field must never reach it.
+    #[test]
+    fn a_disabled_field_carries_no_caret() {
+        let theme = theme();
+        let node = text_input_with_handlers(
+            &TextInputSpec::new()
+                .with_id("stock")
+                .with_value("hello")
+                .with_disabled(true),
+            &theme,
+            TextInputHandlers::default(),
+        );
+        let value = node
+            .find(&|n| n.id.as_deref() == Some("poodle-input-stock-value"))
+            .expect("value node");
+        assert_eq!(value.caret, None);
+    }
+
     use super::*;
     use poodle_adapter::ThemeProvider;
     use poodle_node::NodeKind;

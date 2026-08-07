@@ -65,6 +65,9 @@ Updated: 2026-07-10
 | `autocomplete` | `string \| undefined` | `undefined` | no | native autocomplete attribute |
 | `disabled` | `boolean` | `false` | no | disables editing and interaction |
 | `readOnly` | `boolean` | `false` | no | allows selection without editing |
+| `selectionStart` | `number` | `0` | no | caret / selection start, in characters. **Rust targets only** — the web target reads the DOM's own selection |
+| `selectionEnd` | `number` | `0` | no | caret / selection end; equal to `selectionStart` means a plain caret. **Rust targets only** |
+| `isFocused` | `boolean` | `false` | no | whether the field holds focus, so the caret is drawn. **Rust targets only** |
 | `required` | `boolean` | `false` | no | native required attribute |
 | `pattern` | `string \| undefined` | `undefined` | no | native pattern attribute |
 | `spellcheck` | `boolean \| undefined` | `undefined` | no | native spellcheck attribute |
@@ -242,6 +245,63 @@ plumbing stay adapter-side.
 - `list`: from list prop; associates a native datalist for browser-provided suggestions
 - Prefix/suffix: decorative, not announced; `user-select: none`
 - Labeling rules: placeholder text never counts as the accessible name
+
+### Caret Ownership (Rust targets)
+
+`<input>` owns its caret, its selection and its focus. GPUI and Jetstream have
+no native editor to own them, so ownership splits three ways:
+
+- **The host owns the caret's position.** `selectionStart` and `selectionEnd`
+  are controlled props, reported back through `onSelectionChange` the way
+  `TreeSpec::focused_value` is. Nothing else survives a re-render, and a field
+  whose value is stored but whose caret is not inserts every keystroke at index
+  0 — typed text comes out backwards.
+- **The backend owns focus, and where the caret is drawn.** Placing a caret at
+  character *n* means measuring shaped glyphs, so it is painted by the backend
+  (gpui: `shape_line` / `x_for_index`), not laid out by the component. The same
+  measurement answers the reverse question — `closest_index_for_x` is what
+  makes click-to-position and drag-to-select possible at all. Focus is the
+  backend's for the same reason: only it can observe a *blur*.
+- **The rules are shared.** `poodle_headless::text_input::edit_transition`
+  implements the table below once for every target rather than once per
+  backend.
+
+`isFocused` remains a prop for hosts that want to drive focus, but the caret
+does not depend on it: the backend draws a caret only in the field that
+actually holds focus, so a host that never wires focus still behaves correctly.
+
+Caret blink is the backend's: solid on any edit or caret move, then a ~1s
+cycle, and only while focused. So is scrolling the caret into view — a value
+wider than its field scrolls horizontally to keep the caret visible, and
+returns to the start on blur.
+
+### Pointer Selection
+
+| Gesture | Result |
+|---------|--------|
+| click | caret at the nearest character boundary |
+| drag | selection from the press point to the pointer |
+| double click | selects the word under the pointer |
+| triple click | selects the whole value |
+| shift-click | extends the existing selection |
+
+"Word" is a run of alphanumerics or `_`; a run of anything else is its own
+word, so double-clicking punctuation selects the punctuation rather than
+swallowing the words either side.
+
+The backend reports where the pointer landed and how far the gesture reaches
+(character, word, line) — it counts the clicks, but only the component knows
+what a word is.
+
+### Clipboard (Rust targets)
+
+Copy, cut and paste work on the platform clipboard. The backend owns them,
+because the text comes from outside the tree; the shared edit model owns where
+a paste lands. A multi-line paste collapses to one line, as `<input>` does, and
+copying an empty selection leaves the clipboard alone.
+
+IME and dead keys are **not** implemented: they need a platform input handler
+bound to an entity, which a `Node -> element` backend has none of.
 
 ### Keyboard
 

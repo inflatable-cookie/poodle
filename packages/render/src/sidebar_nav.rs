@@ -130,6 +130,12 @@ pub fn sidebar_nav(
             // Item box: min-height drives the row height; vertical centring
             // stands in for the contract padding-block on single-line labels.
             let mut item_el = Node::button(&item.label);
+            // A STABLE id per item, matching the old tier's `sidebar-nav-{value}`.
+            // Without one the backend falls back to a per-build counter, so the
+            // element's identity changes every frame — and gpui's `on_click`
+            // needs it to survive from mouse-down to mouse-up, so every click is
+            // dropped.
+            item_el.id = Some(format!("sidebar-nav-{}", item.value));
             {
                 let s = &mut item_el.style;
                 s.min_height = Some(item_height);
@@ -211,8 +217,11 @@ pub fn sidebar_nav(
                     text_color: Some(item_active_color),
                     opacity: None,
                 });
-                // Focus-visible: accent focus ring (contract §6/§8).
-                s.active = Some(StylePatch {
+                // Focus-visible: accent focus ring (contract §6/§8). This was
+                // on `active` — gpui's *pressed* state — so the ring flashed on
+                // mouse-down and never showed for keyboard focus, which is the
+                // state the contract names. `focus` is the right channel.
+                s.focus = Some(StylePatch {
                     background: None,
                     border_color: Some(focus_ring),
                     text_color: None,

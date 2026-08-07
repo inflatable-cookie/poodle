@@ -431,11 +431,29 @@ fn live_text_input(
     state: &AppState,
     key: &'static str,
 ) -> TextInput {
+    // The caret is host state here for the same reason the value is: with no
+    // native editor, nothing else survives a re-render. Storing the value but
+    // not the caret leaves every keystroke inserting at index 0 — "abc" typed
+    // into an empty field comes out "cba".
+    let (start, end) = state.specimens.carets.get(key).copied().unwrap_or_default();
+    let spec = spec.with_selection(start, end);
     let events = state.node_events.clone();
-    TextInput::from_spec(spec, theme).on_change(move |value| {
-        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-            key: key.to_string(),
-            value: value.to_string(),
-        });
-    })
+    let selection_events = state.node_events.clone();
+    TextInput::from_spec(spec, theme)
+        .on_change(move |value| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: key.to_string(),
+                value: value.to_string(),
+            });
+        })
+        .on_selection_change(std::sync::Arc::new(move |start: usize, end: usize| {
+            selection_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetCaret {
+                    key: key.to_string(),
+                    start,
+                    end,
+                });
+        }))
 }

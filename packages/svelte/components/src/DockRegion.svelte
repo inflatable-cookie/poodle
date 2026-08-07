@@ -5,6 +5,7 @@
   import { createDockExternalDragController } from "./dock-external-drag.ts";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as Tabs } from "./Tabs.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
   import type {
     ControlDensity,
     ControlSize,
@@ -74,6 +75,10 @@
   }: Props = $props();
 
   const PANEL_DRAG_TYPE = "application/x-poodle-panel-drag";
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const isVerticalEdge = $derived(edge === "left" || edge === "right");
   const activeItem = $derived(items.find((item) => item.value === value) ?? items[0] ?? null);
@@ -336,6 +341,8 @@
   data-edge={edge}
   data-sizing={sizing}
   data-emphasis={emphasis}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-collapsed={collapsed || undefined}
   data-collapsed-posture={collapsed ? collapsedPosture : undefined}
   aria-label={ariaLabel ?? `${edge} dock`}

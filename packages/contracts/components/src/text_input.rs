@@ -13,6 +13,17 @@ pub struct TextInputSpec {
     pub input_mode: Option<String>,
     pub is_disabled: bool,
     pub is_read_only: bool,
+    /// Caret / selection as char offsets into the value, and whether the field
+    /// holds focus.
+    ///
+    /// The web target gets these from the DOM's own selection. The Rust targets
+    /// have no native editor, so the host owns them the same way it owns
+    /// `TreeSpec::focused_value` — the component reports changes, the host
+    /// stores them, and the next render draws the caret where they say.
+    /// `selection_start == selection_end` is a plain caret.
+    pub selection_start: usize,
+    pub selection_end: usize,
+    pub is_focused: bool,
     pub validation_state: ValidationState,
     pub aria_label: Option<String>,
     pub description_id: Option<String>,
@@ -69,6 +80,9 @@ impl Default for TextInputSpec {
             input_mode: None,
             is_disabled: false,
             is_read_only: false,
+            selection_start: 0,
+            selection_end: 0,
+            is_focused: false,
             validation_state: ValidationState::None,
             aria_label: None,
             description_id: None,
@@ -140,6 +154,26 @@ impl TextInputSpec {
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
         self
+    }
+
+    /// Place the caret, or select a range when the two differ.
+    pub fn with_selection(mut self, start: usize, end: usize) -> Self {
+        self.selection_start = start;
+        self.selection_end = end;
+        self
+    }
+
+    pub fn with_focused(mut self, is_focused: bool) -> Self {
+        self.is_focused = is_focused;
+        self
+    }
+
+    /// The selection as an ordered `(start, end)` pair, clamped to the value.
+    pub fn selection_range(&self) -> (usize, usize) {
+        let len = self.current_value().chars().count();
+        let a = self.selection_start.min(len);
+        let b = self.selection_end.min(len);
+        (a.min(b), a.max(b))
     }
 
     pub fn with_read_only(mut self, is_read_only: bool) -> Self {

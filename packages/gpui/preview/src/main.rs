@@ -24,7 +24,9 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{
     CodeSpec, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
-    SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, TabDefinition,
+    SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, SliderSpec,
+    TabDefinition,
+    ThemeSelectSpec,
     TabVariant, TabsSpec, TextInputSpec,
 };
 
@@ -60,12 +62,13 @@ impl AssetSource for PreviewAssets {
 }
 
 use app_state::{
-    AppState, ChromeEvent, ContrastStop, ControlSize, Density, NodeSpecimenEvent, Section,
+    AppState, ChromeEvent, ControlSize, Density, NodeSpecimenEvent, Section, CONTRAST_MAX,
+    CONTRAST_MIN,
     ThemePreset, TokenPanel,
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::load_contract_usage_docs;
-use crate::node_compat::{Code, SidebarNav, Tabs, TextInput};
+use crate::node_compat::{Code, SidebarNav, Slider, Tabs, TextInput, ThemeSelect};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -106,6 +109,10 @@ impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // Apply interactions node-backed specimens reported since the last frame.
         self.state.drain_node_events();
+        // Restart the backend's generated-id counter so a node that declares no
+        // id keeps the same ElementId between frames. gpui keys a click's
+        // pending mouse-down by element id, and a real click spans frames.
+        poodle_gpui_node_backend::reset_element_ids();
         let theme = &self.state.theme;
 
         let canvas_bg = theme.resolve_color("color.background.canvas");
@@ -272,23 +279,59 @@ impl PreviewRoot {
             .border_b_1()
             .border_color(color_to_hsla(border_subtle))
             .flex_shrink_0()
-            .overflow_hidden()
-            // Theme group
-            .child({
-                let opts: Vec<(&str, bool)> = ThemePreset::ALL
-                    .iter()
-                    .map(|p| (p.label(), self.state.theme_preset == *p))
-                    .collect();
-                self.render_toggle_group(
-                    "Theme",
-                    text_secondary,
-                    &opts,
-                    accent,
-                    border,
-                    "theme",
-                    cx,
-                )
-            })
+            // No `overflow_hidden` here: the ThemeSelect panel paints outside
+            // this bar when open, and clipping it left the swatch grid cut in
+            // half. See the placement note in the g12.019 card — the shared
+            // recipe lays the panel out beside the trigger rather than
+            // portalling it, which the contract asks for.
+            // Theme group — the real ThemeSelect, as the Svelte preview uses,
+            // rather than a row of one button per theme.
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(px(10.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("THEME"),
+                    )
+                    .child(deferred(
+                        ThemeSelect::from_spec(
+                            ThemeSelectSpec::new()
+                                .with_themes(self.state.theme_options.clone())
+                                .with_value(self.state.theme_preset.label())
+                                .with_open(self.state.theme_select_open),
+                            &self.state.theme,
+                        )
+                        .on_open_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            std::sync::Arc::new(move |open: bool| {
+                                queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                    ChromeEvent::ThemeSelectOpen(open),
+                                ));
+                            })
+                        })
+                        .on_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            std::sync::Arc::new(move |value: &str| {
+                                let Some(preset) = ThemePreset::ALL
+                                    .iter()
+                                    .copied()
+                                    .find(|p| p.label() == value)
+                                else {
+                                    return;
+                                };
+                                queue
+                                    .lock()
+                                    .unwrap()
+                                    .push(NodeSpecimenEvent::Chrome(ChromeEvent::Theme(preset)));
+                            })
+                        }),
+                    )),
+            )
             // Density group
             .child({
                 let opts: Vec<(&str, bool)> = Density::ALL
@@ -313,22 +356,57 @@ impl PreviewRoot {
                     .collect();
                 self.render_toggle_group("Size", text_secondary, &opts, accent, border, "size", cx)
             })
-            // Contrast group (neutral-ramp knob, mirrors the web slider)
-            .child({
-                let opts: Vec<(&str, bool)> = ContrastStop::ALL
-                    .iter()
-                    .map(|c| (c.label(), self.state.contrast == *c))
-                    .collect();
-                self.render_toggle_group(
-                    "Contrast",
-                    text_secondary,
-                    &opts,
-                    accent,
-                    border,
-                    "contrast",
-                    cx,
-                )
-            })
+            // Contrast — a real Slider over the continuous neutral-ramp axis,
+            // matching the web preview's range input and the Jetstream shell.
+            // Four preset buttons could not express the values between them.
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(px(10.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("CONTRAST  {:.2}", self.state.contrast)),
+                    )
+                    .child(
+                        // The slider fills its host's width, so the header has
+                        // to give it one — unsized it collapsed to a stub. The
+                        // box is the same 32px the toggle buttons beside it
+                        // use, with the 6px track centred in it, so the row
+                        // lines up on one baseline instead of the slider
+                        // floating above it.
+                        div()
+                            .w(px(160.0))
+                            .h(px(32.0))
+                            .flex()
+                            .items_center()
+                            .child(Slider::from_spec(
+                            SliderSpec {
+                                // The default step is 1.0, which over a 0..1
+                                // range can only ever snap to the endpoints —
+                                // the axis is continuous, so it needs a fine
+                                // one.
+                                step: 0.01,
+                                ..SliderSpec::new(self.state.contrast as f64)
+                                    .with_bounds(CONTRAST_MIN as f64, CONTRAST_MAX as f64)
+                            },
+                            &self.state.theme,
+                        )
+                        .with_id("contrast")
+                        .aria_label("Neutral contrast")
+                        .on_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            std::sync::Arc::new(move |value: f64| {
+                                queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                    ChromeEvent::Contrast(value as f32),
+                                ));
+                            })
+                        })),
+                    ),
+            )
             .child(
                 div()
                     .flex()
@@ -350,10 +428,31 @@ impl PreviewRoot {
                                 .with_input_type("search")
                                 .with_placeholder("Find component...")
                                 .with_value(&self.state.component_search)
+                                .with_selection(
+                                    self.state.search_selection.0,
+                                    self.state.search_selection.1,
+                                )
+                                .with_focused(self.state.search_focused)
                                 .with_aria_label("Search components"),
                             &self.state.theme,
                         )
                         .with_id("component-search")
+                        .on_focus_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            std::sync::Arc::new(move |focused: bool| {
+                                queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                    ChromeEvent::SearchFocused(focused),
+                                ));
+                            })
+                        })
+                        .on_selection_change({
+                            let queue = std::sync::Arc::clone(&self.state.node_events);
+                            std::sync::Arc::new(move |start: usize, end: usize| {
+                                queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                    ChromeEvent::SearchSelection(start, end),
+                                ));
+                            })
+                        })
                         .on_change({
                             let queue = std::sync::Arc::clone(&self.state.node_events);
                             move |val: &str| {
@@ -424,10 +523,6 @@ impl PreviewRoot {
                     }
                     "size" => {
                         this.state.control_size = ControlSize::ALL[i];
-                        this.state.rebuild_theme();
-                    }
-                    "contrast" => {
-                        this.state.contrast = ContrastStop::ALL[i];
                         this.state.rebuild_theme();
                     }
                     _ => {}
@@ -1429,16 +1524,25 @@ fn parse_cli_args() -> CliArgs {
                 }
             }
             // Repeatable: `--click 120,340 --click 120,400` clicks in order.
+            // `--click X,Y` or `--click X,Y,N` for an N-times click (2 is a
+            // double click, which is how word-select is driven).
             "--click" => {
                 if let Some(val) = args.get(i + 1) {
-                    if let Some((x, y)) = val.split_once(',') {
-                        if let (Ok(x), Ok(y)) = (x.trim().parse::<f32>(), y.trim().parse::<f32>()) {
-                            clicks.push(DriverAction::Click(point(px(x), px(y))));
-                        } else {
-                            eprintln!("--click expects X,Y in pixels, got {val:?}");
+                    let parts: Vec<&str> = val.split(',').collect();
+                    match parts.as_slice() {
+                        [x, y] | [x, y, _] => {
+                            let count = match parts.get(2) {
+                                Some(n) => n.trim().parse::<isize>().unwrap_or(1),
+                                None => 1,
+                            };
+                            match (x.trim().parse::<f32>(), y.trim().parse::<f32>()) {
+                                (Ok(x), Ok(y)) => {
+                                    clicks.push(DriverAction::Click(point(px(x), px(y)), count))
+                                }
+                                _ => eprintln!("--click expects X,Y[,N] in pixels, got {val:?}"),
+                            }
                         }
-                    } else {
-                        eprintln!("--click expects X,Y in pixels, got {val:?}");
+                        _ => eprintln!("--click expects X,Y[,N] in pixels, got {val:?}"),
                     }
                     i += 1;
                 }
@@ -1467,6 +1571,13 @@ fn parse_cli_args() -> CliArgs {
             "--type" => {
                 if let Some(val) = args.get(i + 1) {
                     clicks.push(DriverAction::Type(val.clone()));
+                    i += 1;
+                }
+            }
+            // `--key cmd-v` sends one chord to the focused element.
+            "--key" => {
+                if let Some(val) = args.get(i + 1) {
+                    clicks.push(DriverAction::Key(val.clone()));
                     i += 1;
                 }
             }
@@ -1544,6 +1655,18 @@ fn post_mouse_event(
     event_type: objc2_app_kit::NSEventType,
     position: Point<Pixels>,
 ) {
+    post_mouse_event_counted(window, event_type, position, 1)
+}
+
+/// `click_count` is what makes a double click a double click: gpui reads it
+/// straight off the NSEvent, so a synthetic click that always says 1 can never
+/// drive word-select however fast it repeats.
+fn post_mouse_event_counted(
+    window: &mut Window,
+    event_type: objc2_app_kit::NSEventType,
+    position: Point<Pixels>,
+    click_count: isize,
+) {
     use objc2::MainThreadMarker;
     use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
     use objc2_foundation::NSPoint;
@@ -1577,7 +1700,7 @@ fn post_mouse_event(
             ns_window.windowNumber(),
             None,
             0,
-            1,
+            click_count,
             pressure,
         );
     let Some(event) = event else {
@@ -1593,9 +1716,11 @@ fn post_mouse_event(
 /// One input gesture from the CLI, in the order given.
 #[derive(Clone)]
 enum DriverAction {
-    Click(Point<Pixels>),
+    Click(Point<Pixels>, isize),
     Drag(Point<Pixels>, Point<Pixels>),
     Type(String),
+    /// One keystroke with modifiers, e.g. `cmd-c`, `shift-left`.
+    Key(String),
 }
 
 /// Dispatch a synthetic click: move, down, up.
@@ -1603,11 +1728,11 @@ enum DriverAction {
 /// The move comes first: hit testing keys off the last known pointer
 /// position, so a down with no preceding move lands on a window that thinks
 /// the pointer is somewhere else.
-fn dispatch_click(window: &mut Window, position: Point<Pixels>) {
+fn dispatch_click(window: &mut Window, position: Point<Pixels>, click_count: isize) {
     use objc2_app_kit::NSEventType;
     post_mouse_event(window, NSEventType::MouseMoved, position);
-    post_mouse_event(window, NSEventType::LeftMouseDown, position);
-    post_mouse_event(window, NSEventType::LeftMouseUp, position);
+    post_mouse_event_counted(window, NSEventType::LeftMouseDown, position, click_count);
+    post_mouse_event_counted(window, NSEventType::LeftMouseUp, position, click_count);
 }
 
 /// Dispatch synthetic typing: one keyDown/keyUp pair per character, called
@@ -1618,6 +1743,88 @@ fn dispatch_click(window: &mut Window, position: Point<Pixels>) {
 /// gpui parses the event's charactersIgnoringModifiers and dispatches along
 /// its own focus path, so the target element must be focused first (click
 /// it).
+/// Post one keystroke, with modifiers: `cmd-c`, `shift-left`, `backspace`.
+///
+/// `--type` covers plain characters; chords need this, and without it the
+/// clipboard and shift-selection paths cannot be driven at all.
+fn dispatch_key(chord: &str) {
+    use objc2_app_kit::NSEventModifierFlags;
+
+    let mut modifiers = NSEventModifierFlags::empty();
+    let mut parts: Vec<&str> = chord.split('-').collect();
+    let key = parts.pop().unwrap_or("");
+    for part in parts {
+        match part {
+            "cmd" | "super" | "platform" => modifiers |= NSEventModifierFlags::Command,
+            "shift" => modifiers |= NSEventModifierFlags::Shift,
+            "alt" | "option" => modifiers |= NSEventModifierFlags::Option,
+            "ctrl" | "control" => modifiers |= NSEventModifierFlags::Control,
+            other => eprintln!("key driver: unknown modifier {other:?}"),
+        }
+    }
+
+    // Named keys carry no character; gpui reads them off the keycode.
+    let named = match key {
+        "left" => Some(123),
+        "right" => Some(124),
+        "down" => Some(125),
+        "up" => Some(126),
+        "home" => Some(115),
+        "end" => Some(119),
+        "backspace" => Some(51),
+        "delete" => Some(117),
+        "escape" => Some(53),
+        "enter" | "return" => Some(36),
+        "tab" => Some(48),
+        _ => None,
+    };
+    match named {
+        Some(code) => post_key(code, "", modifiers),
+        None => match key.chars().next().and_then(ansi_key_code) {
+            Some(code) => post_key(code, key, modifiers),
+            None => eprintln!("key driver: no keycode for {key:?}"),
+        },
+    }
+}
+
+fn post_key(key_code: u16, characters: &str, modifiers: objc2_app_kit::NSEventModifierFlags) {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSApplication, NSEvent, NSEventType};
+    use objc2_foundation::{NSPoint, NSString};
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        eprintln!("key driver: not on the main thread");
+        return;
+    };
+    let app = NSApplication::sharedApplication(mtm);
+    let ns_windows = app.windows();
+    let Some(ns_window) = ns_windows.iter().next() else {
+        eprintln!("key driver: no NSWindow to send to");
+        return;
+    };
+    let window_number = ns_window.windowNumber();
+    let chars = NSString::from_str(characters);
+    for event_type in [NSEventType::KeyDown, NSEventType::KeyUp] {
+        let event =
+            NSEvent::keyEventWithType_location_modifierFlags_timestamp_windowNumber_context_characters_charactersIgnoringModifiers_isARepeat_keyCode(
+                event_type,
+                NSPoint { x: 0.0, y: 0.0 },
+                modifiers,
+                0.0,
+                window_number,
+                None,
+                &chars,
+                &chars,
+                false,
+                key_code,
+            );
+        match event {
+            Some(event) => app.postEvent_atStart(&event, false),
+            None => eprintln!("key driver: NSEvent construction failed for keycode {key_code}"),
+        }
+    }
+}
+
 fn dispatch_type(text: &str) {
     use objc2::MainThreadMarker;
     use objc2_app_kit::{NSApplication, NSEvent, NSEventModifierFlags, NSEventType};
@@ -1961,8 +2168,8 @@ fn schedule_interaction(
             for action in clicks {
                 cx.update(|window, _cx| {
                     match &action {
-                        DriverAction::Click(position) => {
-                            dispatch_click(window, calibration.apply(*position));
+                        DriverAction::Click(position, count) => {
+                            dispatch_click(window, calibration.apply(*position), *count);
                         }
                         DriverAction::Drag(from, to) => {
                             dispatch_drag(
@@ -1972,6 +2179,7 @@ fn schedule_interaction(
                             );
                         }
                         DriverAction::Type(text) => dispatch_type(text),
+                        DriverAction::Key(chord) => dispatch_key(chord),
                     }
                     window.refresh();
                     post_frame_flush(window);

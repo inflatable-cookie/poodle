@@ -24,14 +24,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .flex_col()
         .gap(24.0)
         .child(group(
-            "Theme picker (open)",
-            secondary,
-            js_theme_select(
-                &ThemeSelectSpec::new().with_themes(themes()).with_value("midnight").with_open(true),
-                theme,
-            ),
-        ))
-        .child(group(
             "Disabled",
             secondary,
             js_theme_select(
@@ -65,6 +57,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             theme,
                         )
                     }),
+            ),
+        ))
+        // Last on purpose: the popover is anchored and absolutely positioned,
+        // so it overlays whatever follows it. Jetstream specimens are pure
+        // functions of the theme with no host state, so this one cannot be
+        // driven open by a click the way the GPUI specimen now is.
+        .child(group(
+            "Theme picker (open)",
+            secondary,
+            js_theme_select(
+                &ThemeSelectSpec::new().with_themes(themes()).with_value("midnight").with_open(true),
+                theme,
             ),
         ))
 }

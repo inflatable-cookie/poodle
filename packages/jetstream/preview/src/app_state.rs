@@ -93,6 +93,25 @@ impl ThemePreset {
         ThemePreset::Meadow,
     ];
 
+    /// The token theme this preset selects. Mirrors `rebuild_shell`'s mapping;
+    /// shared so the swatch builder and the renderer cannot drift apart.
+    pub fn theme_definition(self) -> &'static poodle_tokens::themes::ThemeDefinition {
+        match self {
+            ThemePreset::Eclipse => &poodle_tokens::themes::ECLIPSE,
+            ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
+            ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
+            ThemePreset::Midnight => &poodle_tokens::themes::MIDNIGHT,
+            ThemePreset::Nord => &poodle_tokens::themes::NORD,
+            ThemePreset::Rose => &poodle_tokens::themes::ROSE,
+            ThemePreset::Forest => &poodle_tokens::themes::FOREST,
+            ThemePreset::Solarized => &poodle_tokens::themes::SOLARIZED,
+            ThemePreset::Hornet => &poodle_tokens::themes::HORNET,
+            ThemePreset::Cobalt => &poodle_tokens::themes::COBALT,
+            ThemePreset::Clay => &poodle_tokens::themes::CLAY,
+            ThemePreset::Meadow => &poodle_tokens::themes::MEADOW,
+        }
+    }
+
     pub fn label(self) -> &'static str {
         match self {
             ThemePreset::Eclipse => "eclipse",
@@ -382,6 +401,35 @@ impl TabsPreviewState {
 }
 
 /// Global application state.
+/// Swatch options for the header theme picker, resolved from each preset's own
+/// tokens rather than hardcoded hex, and built once.
+fn build_theme_options() -> Vec<poodle_specs::ThemeOption> {
+    use poodle_adapter::ThemeProvider;
+    fn hex(c: poodle_tokens::typed::ColorValue) -> String {
+        let ch = |v: f32| (v.clamp(0.0, 1.0) * 255.0).round() as u8;
+        format!("#{:02x}{:02x}{:02x}", ch(c.0), ch(c.1), ch(c.2))
+    }
+    ThemePreset::ALL
+        .iter()
+        .map(|preset| {
+            let t = poodle_jetstream::JetstreamThemeProvider::from_theme(
+                preset.theme_definition(),
+            );
+            poodle_specs::ThemeOption::new(
+                preset.label(),
+                preset.label(),
+                poodle_specs::ThemeSwatch::new(
+                    hex(t.resolve_color("color.background.canvas")),
+                    hex(t.resolve_color("color.background.panel")),
+                    hex(t.resolve_color("color.accent.base")),
+                    hex(t.resolve_color("color.text.primary")),
+                    hex(t.resolve_color("color.border.default")),
+                ),
+            )
+        })
+        .collect()
+}
+
 pub struct AppState {
     pub section: Section,
     pub theme_preset: ThemePreset,
@@ -391,6 +439,12 @@ pub struct AppState {
     pub contrast: f32,
     /// Sidebar/catalogue filter (toolbar search box).
     pub search: String,
+    /// The header theme picker's popover state; `ThemeSelectSpec::is_open` is
+    /// controlled, so the shell owns it.
+    pub theme_select_open: bool,
+    /// Swatch options for the header theme picker, resolved once from each
+    /// preset's own tokens.
+    pub theme_options: Vec<poodle_specs::ThemeOption>,
     /// Active specimen-page view (Examples/Sizes/Densities).
     pub specimen_view: SpecimenView,
     pub active_component_idx: Option<usize>,
@@ -419,6 +473,8 @@ impl AppState {
             control_size: ControlSize::Md,
             contrast: 0.5,
             search: String::new(),
+            theme_select_open: false,
+            theme_options: build_theme_options(),
             specimen_view: SpecimenView::Examples,
             active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,

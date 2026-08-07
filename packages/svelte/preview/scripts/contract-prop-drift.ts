@@ -33,7 +33,14 @@ function contractProps(md: string): Set<string> {
   const table = end < 0 ? rest : rest.slice(0, end);
   for (const line of table.split("\n")) {
     const m = line.match(/^\|\s*`([a-zA-Z_$][\w$]*)`\s*\|/);
-    if (m && !/^on[A-Z]/.test(m[1])) props.add(m[1]);
+    if (!m || /^on[A-Z]/.test(m[1])) continue;
+    // A prop the contract marks as belonging to specific targets is not drift:
+    // some state the DOM owns natively has to be a controlled prop where there
+    // is no DOM. TextInput's caret is the case that forced this — `<input>`
+    // owns its selection, GPUI and Jetstream have to be told. Marked in the
+    // notes column as "**Rust targets only**" or similar.
+    if (/\*\*[^*]*targets only\*\*/i.test(line)) continue;
+    props.add(m[1]);
   }
   return props;
 }

@@ -72,6 +72,12 @@ pub struct StepperSpec {
     pub density: ControlDensity,
     /// Axis the steps flow along; vertical stacks the same steps as rows.
     pub orientation: Orientation,
+    /// Whether the stepper folds to a one-line summary.
+    ///
+    /// Vertical only — see [`StepperSpec::shows_summary`].
+    pub collapsible: bool,
+    /// Current collapse state; inert unless [`StepperSpec::shows_summary`].
+    pub is_collapsed: bool,
 }
 
 impl Default for StepperSpec {
@@ -88,6 +94,8 @@ impl Default for StepperSpec {
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
             orientation: Orientation::Horizontal,
+            collapsible: false,
+            is_collapsed: false,
         }
     }
 }
@@ -150,6 +158,47 @@ impl StepperSpec {
         self
     }
 
+    pub fn with_collapsible(mut self, collapsible: bool) -> Self {
+        self.collapsible = collapsible;
+        self
+    }
+
+    pub fn with_collapsed(mut self, is_collapsed: bool) -> Self {
+        self.is_collapsed = is_collapsed;
+        self
+    }
+
+    /// Whether the summary row is rendered at all.
+    ///
+    /// Collapse is vertical-only, and deliberately so: a horizontal stepper is
+    /// already one line, so folding it would trade a row of legible step labels
+    /// for a row of dashes and buy back no height. See `stepper.md` §3.
+    pub fn shows_summary(&self) -> bool {
+        self.collapsible && self.orientation == Orientation::Vertical
+    }
+
+    /// Whether the step list is omitted.
+    pub fn is_collapsed_now(&self) -> bool {
+        self.shows_summary() && self.is_collapsed
+    }
+
+    /// Steps that have finished — the numerator of the summary's `n/m`.
+    pub fn completed_count(&self) -> usize {
+        self.steps
+            .iter()
+            .filter(|step| step.status == StepStatus::Complete)
+            .count()
+    }
+
+    /// The step whose label the summary shows.
+    pub fn current_step(&self) -> Option<&StepperStep> {
+        let current = self.current_value()?;
+        self.steps
+            .iter()
+            .find(|step| step.value == current)
+            .or_else(|| self.steps.first())
+    }
+
     /// The step that is current, falling back to the first.
     ///
     /// A stepper with no current step renders every row as "not here", which is
@@ -197,6 +246,31 @@ impl StepperSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
+    }
+
+    /// Colour of the summary's `n/m` count.
+    pub fn count_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    /// Colour of a rail segment that has not run.
+    pub fn rail_pending_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_STRONG
+    }
+
+    /// Base colour of a rail segment, by status.
+    ///
+    /// Colour carries status and length carries position — see
+    /// [`StepperSpec::rail_segment_width_rem`]. Splitting the two codes across
+    /// two channels is what lets a dash say both at a size where a second
+    /// colour would say neither. `Running` shares the complete hue and is
+    /// dimmed at render: it is on its way to being complete.
+    pub fn rail_token(&self, status: StepStatus) -> &'static str {
+        match status {
+            StepStatus::Failed => self.danger_token(),
+            StepStatus::Complete | StepStatus::Running => self.accent_token(),
+            StepStatus::Pending => self.rail_pending_token(),
+        }
     }
 
     /// Marker colour for a step, by status and whether it is current.
@@ -265,6 +339,38 @@ impl StepperSpec {
         }
     }
 
+    /// Width of a rail dash. A dash is a mark with intrinsic dimensions, so
+    /// its width is size.
+    ///
+    /// The current step draws the full length and every other step draws half,
+    /// which is how the rail says *where you are* without spending a second
+    /// colour on it: colour is already carrying status, and at dash size one
+    /// mark cannot hold two colour codes legibly. Length is the free channel.
+    pub fn rail_segment_width_rem(&self, is_current: bool) -> f32 {
+        let full = match self.resolved_size() {
+            ControlSize::Xs => 0.75,
+            ControlSize::Sm => 0.875,
+            ControlSize::Md => 1.0,
+            ControlSize::Lg => 1.125,
+            ControlSize::Xl => 1.25,
+        };
+        if is_current {
+            full
+        } else {
+            full / 2.0
+        }
+    }
+
+    pub fn rail_thickness_rem(&self) -> f32 {
+        match self.resolved_size() {
+            ControlSize::Xs => 0.125,
+            ControlSize::Sm => 0.125,
+            ControlSize::Md => 0.1875,
+            ControlSize::Lg => 0.1875,
+            ControlSize::Xl => 0.25,
+        }
+    }
+
     // ── Density: horizontal spacing only, never height ──
 
     pub fn padding_inline_rem(&self) -> f32 {
@@ -280,6 +386,15 @@ impl StepperSpec {
             ControlDensity::Compact => 0.4375,
             ControlDensity::Default => 0.55,
             ControlDensity::Comfortable => 0.6875,
+        }
+    }
+
+    /// Space between dashes is spacing between siblings, so it is density.
+    pub fn rail_gap_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.1875,
+            ControlDensity::Default => 0.25,
+            ControlDensity::Comfortable => 0.3125,
         }
     }
 }
@@ -329,5 +444,61 @@ mod tests {
         assert_eq!(dense.row_height_rem(), base.row_height_rem());
         assert_eq!(dense.padding_block_rem(), base.padding_block_rem());
         assert!(dense.padding_inline_rem() < base.padding_inline_rem());
+        // The dash keeps its intrinsic size; only the space between dashes moves.
+        assert_eq!(
+            dense.rail_segment_width_rem(true),
+            base.rail_segment_width_rem(true)
+        );
+        assert_eq!(dense.rail_thickness_rem(), base.rail_thickness_rem());
+        assert!(dense.rail_gap_rem() < base.rail_gap_rem());
+    }
+
+    /// Collapse is vertical-only, and horizontal must not half-honour it.
+    #[test]
+    fn a_horizontal_stepper_never_collapses() {
+        let spec = StepperSpec::new(vec![StepperStep::new("a", "One")])
+            .with_collapsible(true)
+            .with_collapsed(true);
+        assert!(!spec.shows_summary());
+        assert!(!spec.is_collapsed_now());
+
+        let vertical = spec.with_orientation(Orientation::Vertical);
+        assert!(vertical.shows_summary());
+        assert!(vertical.is_collapsed_now());
+    }
+
+    #[test]
+    fn the_summary_counts_completed_steps_and_names_the_current_one() {
+        let spec = StepperSpec::new(vec![
+            StepperStep::new("a", "Read").with_status(StepStatus::Complete),
+            StepperStep::new("b", "Gate").with_status(StepStatus::Failed),
+            StepperStep::new("c", "Apply"),
+        ])
+        .with_value("c");
+
+        // Failed is not complete: the count is what finished, not what ran.
+        assert_eq!(spec.completed_count(), 1);
+        assert_eq!(spec.current_step().map(|s| s.label.as_str()), Some("Apply"));
+    }
+
+    /// The rail splits two codes across two channels: colour is status.
+    #[test]
+    fn rail_colour_carries_status() {
+        let spec = StepperSpec::new(vec![StepperStep::new("a", "One")]);
+        assert_eq!(spec.rail_token(StepStatus::Complete), spec.accent_token());
+        assert_eq!(spec.rail_token(StepStatus::Running), spec.accent_token());
+        assert_eq!(spec.rail_token(StepStatus::Failed), spec.danger_token());
+        assert_eq!(spec.rail_token(StepStatus::Pending), spec.rail_pending_token());
+    }
+
+    /// …and length is position, so a complete current step is a long accent
+    /// dash while a complete step behind it is a short one.
+    #[test]
+    fn rail_length_carries_position() {
+        let spec = StepperSpec::new(vec![StepperStep::new("a", "One")]);
+        assert_eq!(
+            spec.rail_segment_width_rem(false) * 2.0,
+            spec.rail_segment_width_rem(true)
+        );
     }
 }

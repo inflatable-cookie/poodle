@@ -12,8 +12,10 @@
     "status": "matrix-only",
     "coveredPackages": [
       "poodle-specs",
+      "poodle-node",
+      "poodle-render",
       "poodle-gpui",
-      "poodle-gpui-components",
+      "poodle-gpui-node-backend",
       "poodle-gpui-preview"
     ],
     "evidenceArtifacts": [

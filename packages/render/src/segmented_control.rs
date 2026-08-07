@@ -141,15 +141,24 @@ pub fn segmented_control(
                 s.descriptor.layout.width = LayoutSizing::Grow;
             }
             if is_enabled {
-                // Old tier: pointer cursor and hover fill on every enabled
-                // segment, whether or not a change handler is wired.
+                // Old tier: pointer cursor on every enabled segment, whether or
+                // not a change handler is wired.
                 s.descriptor.cursor = CursorHint::Pointer;
-                s.hover = Some(StylePatch {
-                    background: Some(hover_fill),
-                    border_color: None,
-                    text_color: None,
-                    opacity: None,
-                });
+                // Hover fill is UNSELECTED-only. The contract's selected state
+                // is "accent background, inverse text, inset highlight shadow",
+                // and a hover patch replaces the background outright — so
+                // hovering the selected segment used to wipe the accent and
+                // paint it the neutral hover fill instead. Svelte has no
+                // `:hover` rule for segments at all, so nothing is owed to the
+                // selected one here.
+                if !is_selected {
+                    s.hover = Some(StylePatch {
+                        background: Some(hover_fill),
+                        border_color: None,
+                        text_color: None,
+                        opacity: None,
+                    });
+                }
             }
         }
         // Old tier: every segment stays focusable. A disabled option is
@@ -305,7 +314,8 @@ mod tests {
         // No change handler wired: the old tier still shows the affordances.
         let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
         let node = segmented_control(&spec, &theme, None);
-        for label in ["Grid", "List", "Table"] {
+        // "Grid" is the selected segment and is deliberately excluded below.
+        for label in ["List", "Table"] {
             let seg = find_segment(&node, label);
             assert_eq!(seg.style.descriptor.cursor, CursorHint::Pointer, "{label}");
             assert_eq!(
@@ -321,6 +331,34 @@ mod tests {
             assert!(seg.interaction.focusable, "{label}");
             assert!(seg.interaction.on_activate.is_none(), "{label}");
         }
+    }
+
+    #[test]
+    fn hovering_the_selected_segment_keeps_its_accent_fill() {
+        // Regression: the hover patch was applied to every enabled segment,
+        // including the selected one. A patch replaces the background outright,
+        // so hovering the selected segment swapped its accent fill for the
+        // neutral hover fill and the selection visually vanished.
+        let theme = theme();
+        let accent = theme.resolve_color("color.accent.base");
+
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let node = segmented_control(&spec, &theme, None);
+
+        let selected = find_segment(&node, "Grid");
+        assert_eq!(selected.style.descriptor.background, Some(accent));
+        assert!(
+            selected.style.hover.is_none(),
+            "the selected segment must not carry a hover patch that would \
+             replace its accent fill"
+        );
+        // The affordance still exists everywhere it does not conflict.
+        assert!(find_segment(&node, "List").style.hover.is_some());
+        assert_eq!(
+            selected.style.descriptor.cursor,
+            CursorHint::Pointer,
+            "the selected segment is still clickable"
+        );
     }
 
     #[test]

@@ -107,11 +107,36 @@ fn swatch(option: &ThemeOption, theme: &dyn ThemeProvider, w: f32, h: f32, selec
     ))
 }
 
+/// Host callbacks. `on_change` fires with the chosen theme's value;
+/// `on_open_change` fires with the open state the trigger is moving **to**,
+/// since `ThemeSelectSpec::is_open` is controlled by the host.
+#[derive(Default)]
+pub struct ThemeSelectHandlers {
+    pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
 pub fn theme_select(
     spec: &ThemeSelectSpec,
     theme: &dyn ThemeProvider,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
+    theme_select_with_handlers(
+        spec,
+        theme,
+        ThemeSelectHandlers {
+            on_change,
+            ..ThemeSelectHandlers::default()
+        },
+    )
+}
+
+pub fn theme_select_with_handlers(
+    spec: &ThemeSelectSpec,
+    theme: &dyn ThemeProvider,
+    handlers: ThemeSelectHandlers,
+) -> Node {
+    let on_change = handlers.on_change;
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let trigger_h = rem_to_px(match effective_size {
         ControlSize::Xs => 1.5,
@@ -147,6 +172,19 @@ pub fn theme_select(
         s.descriptor.background = Some(surface);
     }
     all_corners(&mut trigger, radius);
+    // Contract §States: "open | click trigger | popover grid of swatch tiles".
+    // `is_open` is controlled, so the trigger reports the state it is moving to
+    // and the host flips the spec.
+    if !spec.is_disabled {
+        trigger.id = Some("theme-select-trigger".to_string());
+        trigger.style.descriptor.cursor = CursorHint::Pointer;
+        trigger.interaction.focusable = true;
+        if let Some(handler) = &handlers.on_open_change {
+            let handler = Arc::clone(handler);
+            let next = !spec.is_open;
+            trigger.interaction.on_activate = Some(Arc::new(move || handler(next)));
+        }
+    }
 
     let mut trigger = trigger;
     if let Some(current) = spec.current_option() {
@@ -165,10 +203,13 @@ pub fn theme_select(
     let mut root = Node::container();
     {
         let s = &mut root.style;
-        // The old GPUI root is a horizontal row: the open surface sits beside
-        // the trigger rather than becoming a second block below it.
         s.descriptor.layout.direction = LayoutDirection::Row;
     }
+    // Contract §2: the root is the `position: relative` anchor its surface
+    // hangs from. The old GPUI tier laid the open surface out beside the
+    // trigger as an ordinary flow sibling, which pushed the trigger around and
+    // let neighbouring controls collide with it.
+    root.position = NodePosition::Relative;
     let mut root = root.child(trigger);
 
     // ── Popover grid (rendered inline when open) ────────────────────────
@@ -184,6 +225,11 @@ pub fn theme_select(
         for option in spec.themes.iter() {
             let selected = spec.is_selected(option);
             let mut tile = Node::container();
+            // Stable per-option id. Backends that dispatch by id (Jetstream
+            // routes on `token_key`) need it to reach the tile at all, and
+            // GPUI needs identity that survives a rebuild between a click's
+            // press and release.
+            tile.id = Some(format!("theme-select-tile-{}", option.value));
             {
                 let s = &mut tile.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
@@ -235,6 +281,17 @@ pub fn theme_select(
             pad.bottom = rem_to_px(0.5);
         }
         all_corners(&mut panel, surface_radius);
+        // Anchored bottom-start with the reference's 0.5rem offset
+        // (`use:anchored={{ placement: "bottom-start", offset: 8 }}`). Absolute,
+        // so opening the picker never reflows the trigger or its neighbours.
+        // Painting it above later siblings is the backend's job — GPUI's host
+        // deferres it, the web target portals it.
+        panel.position = NodePosition::Absolute {
+            top: Some(trigger_h + rem_to_px(0.5)),
+            left: Some(0.0),
+            right: None,
+            bottom: None,
+        };
         root = root.child(panel.child(grid));
     }
 
