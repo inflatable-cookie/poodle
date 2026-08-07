@@ -768,20 +768,28 @@ probe-only is the "it compiles" drift the handoff warned against.
   edge comes from the last `on_drop_hover` the host recorded. That is the same
   live-hover-over-snapshot trade the old tier made, and it is why both handlers
   exist.
-  Tree's focused capture is 0.9648%, from two recipe divergences that are NOT
-  raster and are not yet reconciled:
-  1. **Focus ring expression.** The old tier painted the ring through gpui's
-     `.focus()` pseudo-state, so it appeared only on real keyboard focus and
-     never in a screenshot. `poodle-render` paints it from `spec.focused_value`
-     unconditionally, and `TreePreviewState::new()` seeds that value, so the
-     ring is always on in a capture. The vocabulary has no focus-visible
-     channel — `sidebar_nav` reaches for `style.active` and calls it
-     focus-visible, which maps to gpui's *pressed* state, so that is likely
-     mis-modelled too. Worth one decision across both.
-  2. **Depth guide lines** render segmented per row rather than as one
-     continuous rule per level, plus a small vertical offset.
-  Neither blocks the migration; both are named rather than filed under the
-  deferred raster bucket, because neither is raster.
+  Tree's focused capture is now exact. Two divergences were investigated and
+  resolved in opposite directions — the contract decided both:
+  1. **Focus ring expression — the render tier was right, the old tier was
+     not.** The old tier painted the ring through gpui's `.focus()`
+     pseudo-state, so it appeared only on real keyboard focus and never in a
+     screenshot; `poodle-render` paints it from `spec.focused_value`. The tree
+     contract §"Roving tabindex" is explicit: "the Rust runtimes track it via
+     `focused_value` on the spec (the host app owns + mutates it) and render a
+     focus ring on that node." So the shared recipe already matched the
+     contract and the baseline was stale. No focus-visible vocabulary channel
+     is needed for this.
+  2. **Depth guide lines rendered segmented**, and this was a real defect with
+     a shared cause. The row carried an always-on 1px border (transparent
+     unless focused) to avoid layout jitter. A border insets the row's content
+     box, so every indent cell was 2px shorter than the row pitch and the
+     ancestor guides broke into stubs — and every row was 2px too tall. The
+     contract draws the ring as an `outline`
+     (`tree.css .tree__item:focus-visible > .tree__row`), which does not
+     participate in layout, so the faithful mapping is an absolutely-inset
+     overlay, not a border. Same shape as the SidebarNav ring fix above.
+  With both settled, the tree baseline was refreshed for those two recorded
+  reasons and the slug is exact.
 - [ ] ~~Wave 46 Tree — PARKED~~ (superseded by the entry above; kept for the
   record of what the blocking shape was). Every other
   in-scope specimen is migrated; Tree is the last one, and it is parked on
@@ -1020,31 +1028,32 @@ Remaining wave:
 
 ## Next Task
 
-`g12.019` is complete: `packages/gpui/components` (170 files, 44,796 lines) is
-deleted, and Poodle has one component implementation behind thin per-target
-backends. Deletion log:
-`docs/logs/2026-08/07-gpui-components-tier-deleted.md`. Wave log:
-`docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.
+`g12.019` is complete. `packages/gpui/components` — 170 files, 44,796 lines, the
+last duplicate component tier — is deleted, and every Poodle target renders one
+implementation (`poodle-render` emitting `poodle-node` trees) through a thin
+per-target backend.
 
-Final gate: **136 compared, 96 exact, 39 failing**, every failure a named
-residual or a deliberately-excluded slug. That is down from 86 failing before
-the stale chrome baselines were refreshed.
+Gate after the follow-ups: **136 compared, 98 exact, 37 failing**, every failure
+a named residual in the bucket below. Down from 86 failing before the stale
+chrome baselines were refreshed.
 
-Follow-ups, none blocking:
+Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` (deletion,
+probe mining, retired gates) and
+`docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md` (the migration waves).
 
-1. **Tree's 0.9648% residual**, which is not raster: the render tier paints the
-   focus ring from `spec.focused_value` unconditionally where the old tier used
-   gpui's `.focus()` pseudo-state, and depth guides render segmented rather than
-   continuous. `sidebar_nav` uses `style.active` (gpui's *pressed* state) and
-   calls it focus-visible, so deciding how the vocabulary expresses
-   focus-visible covers both.
-2. **First clean comparison for `block-editor` and `log-list`**, both gated for
-   the first time this batch and excluded from the refresh. `log-list`'s
-   baseline captured the placeholder string Wave 45 replaced with real rows, so
-   it is definitionally obsolete.
-3. **Prune `check:jetstream` / `test:jetstream`** in `tasks/effigy.tasks.toml` —
-   they point at `packages/jetstream/components`, deleted in `ee704699`. Broken
-   before this lane; same root cause as the recorded `docs:check` papercut.
+Open, and none of it blocking this card:
+
+1. **`effigy test:jetstream-a11y` fails on 151 unnamed `TextInput` nodes** across
+   13 specimens. `poodle_render::text_input` names its root only when
+   `spec.aria_label` is set. Pre-existing but previously invisible: `ci:native`
+   died at `drift:clicks` — an orphaned gate, now retired — long before reaching
+   the audit, so the count silently regressed from zero. It is the last thing
+   between `ci:native` and green. Held under `g12.015`; recorded in
+   `PAPERCUTS.md`.
+2. **`block-editor` retains 0.0602%** in its own per-block toolbars (TypeSelect
+   labels, `+`, `Select…`), which is the deferred text-raster bucket.
+3. The deferred text/icon/animation raster bucket below is unchanged and still
+   deliberately deferred.
 
 ### Deferred residual bucket (unchanged)
 

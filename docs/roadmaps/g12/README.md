@@ -233,18 +233,15 @@ last duplicate component tier — is deleted. Every Poodle target now renders on
 implementation (`poodle-render` emitting `poodle-node` trees) through a thin
 per-target backend.
 
-Final native visual gate: 136 compared, 96 exact, 39 failing, every failure a
-named residual or a slug deliberately held back from the baseline refresh.
-Probe tests were mined into `packages/render/src/presentation.rs` (98 → 109
-render tests) before the tier went, and the handler-drift gate was repointed at
-`poodle-render` rather than dropped with its old subject.
+Final native visual gate: 136 compared, 98 exact, 37 failing, every failure a
+named residual. Probe tests were mined into `packages/render/src/presentation.rs`
+(98 → 109 render tests) before the tier went; the handler-drift gate was
+repointed at `poodle-render` rather than dropped with its old subject, and the
+orphaned `drift:clicks` was retired.
 
-Follow-ups, none blocking: Tree's 0.9648% residual (focus-ring expression and
-guide-line rendering — not raster, and it wants one decision on how the
-vocabulary expresses focus-visible, which `sidebar_nav` gets wrong the same
-way); a first clean comparison for `block-editor` and `log-list`; and pruning
-`check:jetstream` / `test:jetstream`, which point at a package deleted in
-`ee704699`.
+Next up, not part of this card: `effigy test:jetstream-a11y` fails on 151
+unnamed `TextInput` nodes — pre-existing, and unmasked now that `ci:native` gets
+past its dead tasks. It is the last thing between `ci:native` and green.
 
 Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` and
 `docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.

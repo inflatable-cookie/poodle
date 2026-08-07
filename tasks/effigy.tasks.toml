@@ -125,8 +125,13 @@
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
-# tracks the conversion sweep — see docs/roadmaps/g12/017.
-"drift:clicks" = "bun packages/jetstream/preview/scripts/click-test-drift.ts"
+# `drift:clicks` is retired: it proved a real pointer gesture reached every
+# Jetstream builder, but its subject — `poodle-jetstream-components` and its
+# `click_probe` tests — was deleted in `ee704699` when Jetstream moved onto
+# `poodle-render` nodes. The adapter that replaced it lives in the sibling
+# jetstream repo, which is outside this repo's boundary, so the gate has
+# nothing here to watch. GPUI's `drift:handlers` survives and now covers the
+# shared `poodle-render` handlers both targets render.
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -163,10 +168,11 @@
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
   { run = "cargo test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
-"check:jetstream" = "cargo check -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
-# Render probes and click probes: layout, token resolution and interaction, all
-# CPU-only. These existed and nothing ran them in CI.
-"test:jetstream" = "cargo test -p poodle-jetstream-components --manifest-path packages/jetstream/components/Cargo.toml"
+# `check:jetstream` and `test:jetstream` are gone: they drove
+# `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
+# `poodle-render` nodes. The render probes they ran live in
+# `cargo test -p poodle-render`, which `ci:rust` already runs; the click probes
+# are `drift:clicks` above.
 # The adapter crate: theme/token resolution and the layout mapping. Nothing ran
 # these, and `full_parity_component_counts` had been failing since the
 # workstation category was folded into composites.
@@ -177,10 +183,7 @@
 # that it would only have reported a number.
 "ci:native" = [
   { task = "drift:handlers" },
-  { task = "drift:clicks" },
   { task = "check:gpui" },
-  { task = "check:jetstream" },
-  { task = "test:jetstream" },
   { task = "test:jetstream-adapter" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },

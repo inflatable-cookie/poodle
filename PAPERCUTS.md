@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-07 — `effigy test:jetstream-a11y` reports 151 unnamed `TextInput`
+  nodes across 13 specimens (text-input x22, field x17, form-layout x17, …).
+  `poodle_render::text_input` names its root only when `spec.aria_label` is set
+  and these specimens do not set one. Pre-existing and previously invisible:
+  `ci:native` died at `drift:clicks` — whose subject was deleted in `ee704699` —
+  long before reaching the audit, so the count silently regressed from zero.
+  Now unmasked, and the last thing between `ci:native` and green.
+
 - 2026-08-07 — The GPUI preview's icon set (`packages/gpui/preview/assets/icons/`,
   56 files) has no media transport glyphs, so `play`, `pause`, `volume-2`,
   `volume-x`, `maximize-2` and `minimize-2` resolve to nothing in AudioPlayer

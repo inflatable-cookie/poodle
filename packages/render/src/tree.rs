@@ -269,13 +269,6 @@ fn render_row(
     let is_selected = spec.is_selected(&node.value);
     let is_focused = m.focused.as_deref() == Some(node.value.as_str());
 
-    // Uniform 1px border (transparent unless focused) — app-driven focus
-    // ring with no layout jitter between focused and unfocused rows.
-    let ring_color = if is_focused {
-        m.focus_ring
-    } else {
-        with_alpha(m.focus_ring, 0.0)
-    };
 
     let mut row = Node::container();
     // Contract: rows are treeitems carrying their depth so a screen reader
@@ -299,8 +292,6 @@ fn render_row(
         c.top_right = m.row_radius;
         c.bottom_right = m.row_radius;
         c.bottom_left = m.row_radius;
-        s.descriptor.border.width = 1.0;
-        s.descriptor.border.color = ring_color;
     }
 
     // Modifier-aware selection wins over the plain one — a node wires either
@@ -514,6 +505,37 @@ fn render_row(
     if is_selected {
         row.style.descriptor.background =
             Some(with_alpha(m.selected_fill, m.selected_fill.3 * 0.10));
+    }
+
+    // Focus ring. The contract draws it as an `outline` (tree.css
+    // `.tree__item:focus-visible > .tree__row`), which does not participate in
+    // layout — so it is an absolutely-inset overlay here, not a border. A
+    // border on the row insets its content box by 1px, which shortened every
+    // indent cell by 2px and broke the ancestor guide lines into stubs.
+    //
+    // Contract §"Roving tabindex": the Rust runtimes track focus via
+    // `focused_value` on the spec (the host owns it) and render the ring on
+    // that node, rather than through a host focus pseudo-state.
+    if is_focused {
+        let mut ring = Node::container();
+        {
+            let s = &mut ring.style;
+            s.descriptor.border.width = 1.0;
+            s.descriptor.border.color = m.focus_ring;
+            let c = &mut s.descriptor.corner_radii;
+            c.top_left = m.row_radius;
+            c.top_right = m.row_radius;
+            c.bottom_right = m.row_radius;
+            c.bottom_left = m.row_radius;
+        }
+        ring.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(0.0),
+        };
+        row.position = NodePosition::Relative;
+        row = row.child(ring);
     }
 
     // Drop indicator (contract §8): an accent line at the row top/bottom for

@@ -4,7 +4,29 @@ use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_log_list;
 
-use poodle_specs::{LogFilter, LogListSpec};
+use poodle_specs::{LogEntry, LogFilter, LogLevel, LogListSpec, StreamLogEntry};
+
+/// Stream rows for the specimen. `LogListSpec` carries the entries themselves
+/// since g12.019 — it used to take only a count, and the renderer drew a
+/// placeholder line instead of rows.
+fn stream_entries(count: usize) -> Vec<LogEntry> {
+    const MESSAGES: [(LogLevel, &str); 4] = [
+        (LogLevel::Info, "Server started on port 3000"),
+        (LogLevel::Warn, "Cache miss for key 'user:42'"),
+        (LogLevel::Error, "Failed to connect to database: timeout"),
+        (LogLevel::Info, "Retrying connection (attempt 2/3)"),
+    ];
+    (0..count)
+        .map(|i| {
+            let (level, message) = MESSAGES[i % MESSAGES.len()];
+            LogEntry::Stream(StreamLogEntry::new(
+                format!("10:23:{:02}", i),
+                level,
+                message,
+            ))
+        })
+        .collect()
+}
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -13,7 +35,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group("With entries", secondary,
             js_log_list(
                 &LogListSpec::new()
-                    .with_entry_count(8)
+                    .with_entries(stream_entries(8))
                     .with_auto_scroll(true),
                 theme,
             )
@@ -21,7 +43,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group("Filtered to errors", secondary,
             js_log_list(
                 &LogListSpec::new()
-                    .with_entry_count(12)
+                    .with_entries(stream_entries(12))
                     .with_filter_level("error"),
                 theme,
             )
