@@ -49,6 +49,23 @@ describe("SplitView collapse toggles", () => {
     expect(getByRole("button", { name: "Expand primary" })).toBeTruthy();
     expect(queryByRole("button", { name: "Expand secondary" })).toBeNull();
   });
+
+  it("a hidden pane is absent without being a collapse", () => {
+    const { container } = render(SplitView, {
+      props: {
+        showCollapsePrimary: true,
+        showCollapseSecondary: true,
+        primaryHidden: true,
+        primary: () => {},
+        secondary: () => {},
+      },
+    });
+    const root = container.querySelector(".poodle-split-view")!;
+
+    expect(root.hasAttribute("data-primary-collapsed")).toBe(false);
+    const primaryPane = container.querySelector(".poodle-split-view__pane--primary")!;
+    expect(primaryPane.getAttribute("style")).toContain("flex-basis: 0px");
+  });
 });
 
 describe("SplitView toggle visibility", () => {

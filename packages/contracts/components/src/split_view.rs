@@ -20,6 +20,11 @@ pub struct SplitViewSpec {
     pub secondary_size: Option<f32>,
     pub is_primary_collapsed: bool,
     pub is_secondary_collapsed: bool,
+    /// Takes zero space without being a collapse: no toggle, no collapsed
+    /// data attribute. For panes that are absent rather than user-collapsed.
+    pub is_primary_hidden: bool,
+    /// See `is_primary_hidden`.
+    pub is_secondary_hidden: bool,
     /// When true the divider cannot be dragged and the split renders
     /// in a non-interactive state. Collapse toggles (if shown) are
     /// disabled as well.
@@ -81,6 +86,8 @@ impl SplitViewSpec {
             secondary_size: None,
             is_primary_collapsed: false,
             is_secondary_collapsed: false,
+            is_primary_hidden: false,
+            is_secondary_hidden: false,
             is_disabled: false,
             show_collapse_primary: false,
             show_collapse_secondary: false,

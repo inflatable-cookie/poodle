@@ -26,6 +26,11 @@
     secondarySize?: number | null;
     primaryCollapsed?: boolean | undefined;
     secondaryCollapsed?: boolean | undefined;
+    /** Takes zero space without being a collapse: no toggle, no collapsed
+     * data attribute. For panes that are absent rather than user-collapsed. */
+    primaryHidden?: boolean;
+    /** See `primaryHidden`. */
+    secondaryHidden?: boolean;
     primaryCollapsedSize?: number | null;
     secondaryCollapsedSize?: number | null;
     collapsePrimaryBelowSize?: number | null;
@@ -66,6 +71,8 @@
     secondarySize = null,
     primaryCollapsed = $bindable<boolean | undefined>(undefined),
     secondaryCollapsed = $bindable<boolean | undefined>(undefined),
+    primaryHidden = false,
+    secondaryHidden = false,
     primaryCollapsedSize = null,
     secondaryCollapsedSize = null,
     collapsePrimaryBelowSize = null,
@@ -128,6 +135,11 @@
   const isSecondaryCollapsed = $derived(
     hasControlledSecondaryCollapsed ? secondaryCollapsed === true : uncontrolledSecondaryCollapsed,
   );
+  // Hidden panes take no space but are not collapses: they get no toggle and
+  // no collapsed data attribute, so hover-reveal never pins a pill for a pane
+  // nobody collapsed.
+  const isPrimaryGone = $derived(isPrimaryCollapsed || primaryHidden);
+  const isSecondaryGone = $derived(isSecondaryCollapsed || secondaryHidden);
 
   const isPrimaryRailed = $derived(isPrimaryCollapsed && primaryCollapsedSize != null);
   const isSecondaryRailed = $derived(
@@ -141,11 +153,11 @@
    * pill must stay centered on the seam regardless.
    */
   const seamPosition = $derived(
-    isPrimaryCollapsed
+    isPrimaryGone
       ? primaryCollapsedSize != null
         ? `${primaryCollapsedSize}px`
         : "0px"
-      : isSecondaryCollapsed
+      : isSecondaryGone
         ? secondaryCollapsedSize != null
           ? `calc(100% - ${secondaryCollapsedSize}px)`
           : "100%"
@@ -155,30 +167,30 @@
   );
 
   const primaryFlex = $derived(
-    isPrimaryCollapsed
+    isPrimaryGone
       ? primaryCollapsedSize != null
         ? `0 0 ${primaryCollapsedSize}px`
         : "0 0 0"
       : primarySize != null
         ? `0 0 ${primarySize}px`
-        : secondarySize != null || isSecondaryCollapsed
+        : secondarySize != null || isSecondaryGone
           ? "1 1 0"
           : `0 0 ${currentRatio * 100}%`,
   );
   const secondaryFlex = $derived(
-    isSecondaryCollapsed
+    isSecondaryGone
       ? secondaryCollapsedSize != null
         ? `0 0 ${secondaryCollapsedSize}px`
         : "0 0 0"
       : "1 1 0",
   );
   const primaryMinStyle = $derived(
-    minPrimarySize != null && !isPrimaryCollapsed
+    minPrimarySize != null && !isPrimaryGone
       ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minPrimarySize}px`
       : "",
   );
   const secondaryMinStyle = $derived(
-    minSecondarySize != null && !isSecondaryCollapsed
+    minSecondarySize != null && !isSecondaryGone
       ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minSecondarySize}px`
       : "",
   );
@@ -355,7 +367,7 @@
     class="poodle-split-view__pane poodle-split-view__pane--primary"
     style="flex: {primaryFlex}; overflow: hidden; {primaryMinStyle}"
   >
-    {#if !isPrimaryCollapsed || isPrimaryRailed}
+    {#if !isPrimaryGone || isPrimaryRailed}
       {@render primary?.()}
     {/if}
   </div>
@@ -381,7 +393,7 @@
     class="poodle-split-view__pane poodle-split-view__pane--secondary"
     style="flex: {secondaryFlex}; overflow: hidden; {secondaryMinStyle}"
   >
-    {#if !isSecondaryCollapsed || isSecondaryRailed}
+    {#if !isSecondaryGone || isSecondaryRailed}
       {@render secondary?.()}
     {/if}
   </div>

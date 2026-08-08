@@ -58,6 +58,7 @@ Updated: 2026-07-10
 | `primarySize` | `number \| null` | `null` | no | fixed primary pane size in px; when set, primary uses fixed flex and secondary fills remaining space |
 | `secondarySize` | `number \| null` | `null` | no | fixed secondary pane size in px; when set, secondary uses fixed flex and primary fills remaining space |
 | `primaryCollapsed` | `boolean` | `false` | no | collapse state for primary pane |
+| `primaryHidden` / `secondaryHidden` | `boolean` | `false` | no | pane takes zero space without being a collapse: no toggle, no collapsed data attribute — for panes that are absent, not user-collapsed |
 | `secondaryCollapsed` | `boolean` | `false` | no | collapse state for secondary pane |
 | `primaryCollapsedSize` | `number \| null` | `null` | no | rail-collapse: when primary is collapsed, pin it to this pixel size with content mounted instead of hiding it |
 | `secondaryCollapsedSize` | `number \| null` | `null` | no | rail-collapse: when secondary is collapsed, pin it to this pixel size with content mounted instead of hiding it |
@@ -111,7 +112,8 @@ is open, and a collapsed pane's expand toggle always renders. With both panes
 collapsed both expand toggles stay — a collapse pair is never unrecoverable.
 A fully collapsed pane anchors its toggles to the viewport edge: the pill
 peeks inward, flat side flush with the edge, rather than hanging half out of
-view.
+view. Hidden panes (`primaryHidden`/`secondaryHidden`) are absent, not
+collapsed: they render no toggle and never pin the pill under hover-reveal.
 
 Toggle reveal: with `toggleVisibility="hover"` the pill rests at opacity 0
 and is revealed by the pointer entering the seam — the resize handle's grab
