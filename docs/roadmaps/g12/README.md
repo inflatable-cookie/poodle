@@ -2,8 +2,12 @@
 
 **Status: active.** The React parity program (`001`–`008`) and
 the bounded work through `018` are complete. `017` remains
-native-interaction evidence with its IME follow-up unpromoted. `019` (GPUI
-node backend) is in progress; Batch A and Batch B waves 1–2 are complete.
+native-interaction evidence; its IME follow-up is still unpromoted, and its
+"headless GPUI click driver is blocked" note is superseded — the driver works
+(see that card). `019` (GPUI node backend) is **complete** as of 2026-08-07:
+all batches landed, the old GPUI tier is deleted, and `ci:native` is green with
+`drift:events` and a zero-unnamed accessibility audit added since. The
+wave-by-wave narrative below is kept as history.
 Wave 3's TextInput/Field and static Button/IconButton slices through the
 header/list family plus its FormActions/Button-label slice are pixel-green; its
 AlertDialog/ConfirmAction trigger slice is pixel-green; its Tooltip/Popover

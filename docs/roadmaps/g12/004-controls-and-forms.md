@@ -49,7 +49,8 @@ Depends on: `g12.003`
   reorder, add/remove/toggle-direction. 6/6 probes (open, direction
   toggle, add via nested Select, Alt+ArrowUp reorder, remove, outside
   dismiss with correctly stacked dismiss layers).
-- [ ] Wave 4c: FormActions (needs Menu — overlay batch)
+- [x] Wave 4c: FormActions (Menu landed; `FormActions.tsx` is exported from
+      `@poodle/react` and registered in the preview gallery)
 
 ## Notes
 

@@ -103,6 +103,10 @@ Updated: 2026-07-10
 | fixed-secondary | `secondarySize` is set | secondary pane uses fixed pixel flex, primary fills remaining space |
 | disabled | `disabled=true` | resize handle and collapse toggles non-interactive |
 
+Toggle visibility: an open pane's collapse toggle renders while its sibling
+is open, and a collapsed pane's expand toggle always renders. With both panes
+collapsed both expand toggles stay — a collapse pair is never unrecoverable.
+
 ### Component States
 
 Internal state: `uncontrolledRatio`, `dragMousePos` for resize tracking.
@@ -415,6 +419,7 @@ None.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | The zero-footprint seam (`divider` prop, default off) is Svelte-only; React and the natives still paint the divider line | the seam behavior was proven in the Svelte host first | pending review | port to the other runtimes when one is next touched |
+| The both-collapsed expand-toggle rule is Svelte-only; other runtimes hide both toggles when both panes are collapsed | the trap was proven against the Svelte host | pending review | port with the seam work |
 
 ## 12. Specimen Definitions
 

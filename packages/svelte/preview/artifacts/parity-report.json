@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T12:43:23.673Z",
+  "generatedAt": "2026-08-08T08:28:25.213Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -148,8 +148,10 @@
       "status": "matrix-only",
       "coveredPackages": [
         "poodle-specs",
+        "poodle-node",
+        "poodle-render",
         "poodle-gpui",
-        "poodle-gpui-components",
+        "poodle-gpui-node-backend",
         "poodle-gpui-preview"
       ],
       "evidenceArtifacts": [

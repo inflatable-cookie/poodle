@@ -87,21 +87,28 @@ a `taffy::Style` and carries no position.
 
 ## Not Done, And Why
 
-### A headless click driver for GPUI
+### A headless click driver for GPUI — SOLVED (2026-08-08)
 
-Blocked at both levels, and worth recording so nobody spends the afternoon
-again:
+This section recorded the driver as blocked at both levels. It is not, and the
+note is kept rather than deleted because the *reasoning* was sound and the
+conclusion still wrong.
 
-- `Window::dispatch_event` is public but returns a **private type**, so it
-  cannot be called from outside `gpui`. In-process synthesis is closed.
-- `CGEvent.postToPid` posts without needing accessibility permission, and the
-  window is found at its real origin — but the events never reach GPUI's run
-  loop. A click on a theme swatch changed 0 of 6,459,616 pixels. Activating the
-  app first changed nothing.
+What was tried and failed: `Window::dispatch_event` is public but returns a
+private type, so in-process synthesis is closed; `CGEvent.postToPid` posts
+without accessibility permission but its events never reach GPUI's run loop.
 
-Driving a real GPUI click appears to need a change in `gpui` itself. Until then
-"this component is interactive" is verified by the handler gate and by running
-the preview, not by an automated click.
+What works: posting `NSEvent`s to the app's own event queue
+(`NSApplication::postEvent`) from inside the process, with a **calibration
+pass** — two probe moves whose observed `window.mouse_position()` solves the
+affine transform between posted and observed coordinates. The preview's
+`--click X,Y[,N]`, `--drag`, `--type` and `--key cmd-v` are all built on it, and
+this campaign used them to prove caret placement, drag-selection, clipboard
+round-trips, word-select and slider scrubbing.
+
+Two caveats worth carrying: a lone `--click` can land before hover registers,
+because gpui gates mouse-down on the last painted frame's `hitbox.is_hovered`;
+and coordinates are window-logical, so they must be read from an element's own
+printed bounds rather than measured off a screenshot.
 
 ### Jetstream interaction — decided
 

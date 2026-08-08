@@ -347,7 +347,9 @@
 
     {#if hasToggles}
       <div class="poodle-split-view__toggles">
-        {#if showCollapsePrimary && !isSecondaryCollapsed}
+        <!-- A collapsed pane's expand toggle must survive the other pane
+             collapsing too; hiding both strands the pair with no way back. -->
+        {#if showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed)}
           <CollapseToggle
             direction={beforeDirection}
             collapsed={isPrimaryCollapsed}
@@ -356,7 +358,7 @@
             onToggle={toggleCollapsePrimary}
           />
         {/if}
-        {#if showCollapseSecondary && !isPrimaryCollapsed}
+        {#if showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed)}
           <CollapseToggle
             direction={afterDirection}
             collapsed={isSecondaryCollapsed}
