@@ -98,26 +98,26 @@
      seam and let them peek inward, flat side against the viewport edge.
      When both panes are collapsed the seam sits on the primary edge, so the
      secondary rule must not win that tie. */
-  .poodle-split-view[data-orientation="horizontal"][data-primary-collapsed] .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="horizontal"][data-primary-collapsed] > .poodle-split-view__toggles {
     left: 0;
     transform: translate(0, -50%);
     border-radius: 0 var(--poodle-radius-pill) var(--poodle-radius-pill) 0;
   }
 
-  .poodle-split-view[data-orientation="horizontal"][data-secondary-collapsed]:not([data-primary-collapsed]) .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="horizontal"][data-secondary-collapsed]:not([data-primary-collapsed]) > .poodle-split-view__toggles {
     left: auto;
     right: 0;
     transform: translate(0, -50%);
     border-radius: var(--poodle-radius-pill) 0 0 var(--poodle-radius-pill);
   }
 
-  .poodle-split-view[data-orientation="vertical"][data-primary-collapsed] .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="vertical"][data-primary-collapsed] > .poodle-split-view__toggles {
     top: 0;
     transform: translate(-50%, 0);
     border-radius: 0 0 var(--poodle-radius-pill) var(--poodle-radius-pill);
   }
 
-  .poodle-split-view[data-orientation="vertical"][data-secondary-collapsed]:not([data-primary-collapsed]) .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="vertical"][data-secondary-collapsed]:not([data-primary-collapsed]) > .poodle-split-view__toggles {
     top: auto;
     bottom: 0;
     transform: translate(-50%, 0);

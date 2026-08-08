@@ -26,12 +26,12 @@ Updated: 2026-07-10
   ├── [PrimaryPane .split-view__pane--primary]  <div>
   │     └── (snippet: primary)
   ├── [Divider .split-view__divider]  <div>
-  │     ├── [ResizeHandle]  ResizeHandle primitive
-  │     └── [Toggles .split-view__toggles]  <div> (optional)
-  │           ├── [CollapseToggle: primary]  CollapseToggle primitive (optional)
-  │           └── [CollapseToggle: secondary]  CollapseToggle primitive (optional)
-  └── [SecondaryPane .split-view__pane--secondary]  <div>
-        └── (snippet: secondary)
+  │     └── [ResizeHandle]  ResizeHandle primitive
+  ├── [SecondaryPane .split-view__pane--secondary]  <div>
+  │     └── (snippet: secondary)
+  └── [Toggles .split-view__toggles]  <div> (optional)
+        ├── [CollapseToggle: primary]  CollapseToggle primitive (optional)
+        └── [CollapseToggle: secondary]  CollapseToggle primitive (optional)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -284,7 +284,7 @@ Pane `flex` and `overflow` are applied via inline style:
 |----------|-------|
 | flex-direction | `column` |
 | top | `50%` |
-| left | `50%` |
+| left | `var(--poodle-split-seam, 50%)` |
 | transform | `translate(-50%, -50%)` |
 
 #### Toggles Vertical
@@ -292,9 +292,16 @@ Pane `flex` and `overflow` are applied via inline style:
 | Property | Value |
 |----------|-------|
 | flex-direction | `row` |
-| top | `50%` |
+| top | `var(--poodle-split-seam, 50%)` |
 | left | `50%` |
 | transform | `translate(-50%, -50%)` |
+
+The toggles are a direct child of the root, positioned along
+`--poodle-split-seam` — a CSS length the component computes from the ratio
+and collapse state — never against the divider box, which a collapsed or
+hidden sibling pane can leave degenerate. Fully collapsed panes anchor the
+pill to the viewport edge instead (flat side out; see Toggle visibility in
+§4).
 
 ### Composed Primitives
 
