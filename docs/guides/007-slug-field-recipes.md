@@ -21,7 +21,7 @@ rules.
 ```svelte
 <script lang="ts">
   import { Field, TextInput, type InputValidationStatus, type ValidationResult } from "@inflatable-cookie/poodle-svelte";
-  import { slugify, isReservedSlug, isValidSlugFormat } from "@decodelabs/underlay/patterns";
+  import { slugify, isReservedSlug, isValidSlugFormat } from "@inflatable-cookie/underlay/patterns";
 
   let title = "";
   let slug = "";
