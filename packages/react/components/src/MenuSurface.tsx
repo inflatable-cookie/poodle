@@ -5,9 +5,9 @@ import {
   menuNavigableItems,
   type AnchorTarget,
   type OverlaySurfaceGeometryChangeHandler,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/menu-surface.css";
+import "@inflatable-cookie/poodle-styles/menu-surface.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";

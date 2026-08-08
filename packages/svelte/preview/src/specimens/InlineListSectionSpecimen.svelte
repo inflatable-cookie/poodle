@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton, InlineListSection, Pill, Text } from "@poodle/svelte";
+  import { IconButton, InlineListSection, Pill, Text } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const versions = [

@@ -17,7 +17,7 @@ Primary repos: `poodle`
 - [ ] write contract for MarkdownEditor: source text binding, toolbar actions
   (bold, italic, heading, link, image, list, code, quote), preview toggle,
   split-view mode, image upload integration
-- [ ] implement MarkdownEditor composite in `@poodle/svelte`
+- [ ] implement MarkdownEditor composite in `@inflatable-cookie/poodle-svelte`
 - [ ] implement toolbar with Poodle IconButton and ToggleGroup components
 - [ ] implement markdown preview rendering with sanitization
 - [ ] implement split-view mode (edit + preview side by side)

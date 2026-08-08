@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/box.css";
+  import "@inflatable-cookie/poodle-styles/box.css";
   import type { Snippet } from "svelte";
 
   import { joinStyles, overflowValue, scaleToSpace } from "./internal";

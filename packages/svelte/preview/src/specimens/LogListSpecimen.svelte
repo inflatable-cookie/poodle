@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { LogList } from "@poodle/svelte";
-  import type { LogEntry, LogFilter } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { LogList } from "@inflatable-cookie/poodle-svelte";
+  import type { LogEntry, LogFilter } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const now = Date.now();

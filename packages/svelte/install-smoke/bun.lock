@@ -3,10 +3,10 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@poodle/install-smoke",
+      "name": "@inflatable-cookie/poodle-install-smoke",
       "dependencies": {
-        "@poodle/svelte": "file:../components",
-        "@poodle/svelte-tokens": "file:../tokens",
+        "@inflatable-cookie/poodle-svelte": "file:../components",
+        "@inflatable-cookie/poodle-svelte-tokens": "file:../tokens",
         "svelte": "^5.56.8",
       },
       "devDependencies": {
@@ -30,9 +30,9 @@
 
     "@oxc-project/types": ["@oxc-project/types@0.142.0", "", {}, "sha512-7W+2q5AKQVU36fkaryontrHn3YDt1RyUYXatw9i5H8ocYe2sPKSFB6eS8WNPeRKiN1qAWWZUPm7gwFzJGrccqQ=="],
 
-    "@poodle/svelte": ["@poodle/svelte@file:../components", { "dependencies": { "marked": "^18.0.0" }, "peerDependencies": { "@poodle/icons-lucide": "0.0.0", "@poodle/svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@poodle/icons-lucide", "@poodle/svelte-tokens"] }],
+    "@inflatable-cookie/poodle-svelte": ["@inflatable-cookie/poodle-svelte@file:../components", { "dependencies": { "marked": "^18.0.0" }, "peerDependencies": { "@inflatable-cookie/poodle-icons-lucide": "0.0.0", "@inflatable-cookie/poodle-svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@inflatable-cookie/poodle-icons-lucide", "@inflatable-cookie/poodle-svelte-tokens"] }],
 
-    "@poodle/svelte-tokens": ["@poodle/svelte-tokens@file:../tokens", {}],
+    "@inflatable-cookie/poodle-svelte-tokens": ["@inflatable-cookie/poodle-svelte-tokens@file:../tokens", {}],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.2.2", "", { "os": "android", "cpu": "arm64" }, "sha512-l7x215OGvo1s52JWmR8U/DAVzEDWBCIbTm28aeJV/WDTSHgcKXaZTuBT0hJMs5NggilfJTW3clZVvd24yfKJxA=="],
 
@@ -164,6 +164,6 @@
 
     "zimmerframe": ["zimmerframe@1.1.4", "", {}, "sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ=="],
 
-    "@poodle/svelte/@poodle/svelte-tokens": ["@poodle/svelte-tokens@file:../tokens", {}],
+    "@inflatable-cookie/poodle-svelte/@inflatable-cookie/poodle-svelte-tokens": ["@inflatable-cookie/poodle-svelte-tokens@file:../tokens", {}],
   }
 }

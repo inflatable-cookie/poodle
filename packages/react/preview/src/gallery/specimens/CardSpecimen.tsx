@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Card } from "@poodle/react";
+import { Card } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

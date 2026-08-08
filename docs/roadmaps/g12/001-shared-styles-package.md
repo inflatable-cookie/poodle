@@ -8,7 +8,7 @@ Depends on: g11.008 (all appearance CSS is recipe-hooked and class-addressed)
 
 One styling source for every web framework. React parity would otherwise
 duplicate 132 component stylesheets and drift. All component CSS moves to
-`packages/styles` (`@poodle/styles`): plain global CSS, unique `poodle-*`
+`packages/styles` (`@inflatable-cookie/poodle-styles`): plain global CSS, unique `poodle-*`
 class names, recipe hooks, zero framework coupling.
 
 ## Why this is safe
@@ -20,12 +20,12 @@ Playwright verified identical computed styles after extraction.
 
 ## Batches
 
-- [x] 1. Create `packages/styles` (`@poodle/styles`, css-only, no JS).
+- [x] 1. Create `packages/styles` (`@inflatable-cookie/poodle-styles`, css-only, no JS).
   Move the 13 already-extracted css files; rewrite Svelte imports.
 - [x] 2. Extract the remaining 113 `<style>` blocks with the batch-5
   extractor (unwrap `:global`, kebab-case filenames), straight into
-  `@poodle/styles`; add the import line to each component.
-- [x] 3. React pilot consumes `@poodle/styles` (delete its css copies).
+  `@inflatable-cookie/poodle-styles`; add the import line to each component.
+- [x] 3. React pilot consumes `@inflatable-cookie/poodle-styles` (delete its css copies).
 - [x] 4. Verify: svelte preview builds; Playwright computed-style sample
   across families; recipe-hook cascade still works; consumer typechecks
   (underlay, acme-admin, dairy) and one consumer visual smoke.
@@ -34,7 +34,7 @@ Playwright verified identical computed styles after extraction.
 
 ## Completion Notes (2026-07-13)
 
-126 stylesheets now live in `@poodle/styles`; every Svelte component and
+126 stylesheets now live in `@inflatable-cookie/poodle-styles`; every Svelte component and
 the React pilot import from it. Found and fixed en route:
 
 - **EditableList unstyled since the batch-5 extraction** — its `<style>`
@@ -50,7 +50,7 @@ the React pilot import from it. Found and fixed en route:
 Verified: svelte + react previews build; Playwright styling sample across
 newly-extracted families green; recipe cascade live through the shared
 css; underlay + acme-admin typecheck; acme-admin production build resolves
-`@poodle/styles` through the `file:` link (bun nests workspace deps inside
+`@inflatable-cookie/poodle-styles` through the `file:` link (bun nests workspace deps inside
 the snapshot).
 
 ## Non-Goals

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { SidebarNav } from "@poodle/react";
+import { SidebarNav } from "@inflatable-cookie/poodle-react";
 import { allComponents, componentsByTag, findComponent } from "./registry";
 import { CatalogueLanding } from "./CatalogueLanding";
 import { ComponentPage } from "./ComponentPage";

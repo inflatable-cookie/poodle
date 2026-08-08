@@ -1,4 +1,4 @@
-import { Button, DetailItem, DetailSection } from "@poodle/react";
+import { Button, DetailItem, DetailSection } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

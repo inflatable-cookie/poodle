@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import "@poodle/styles/stepper.css";
+import "@inflatable-cookie/poodle-styles/stepper.css";
 
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";

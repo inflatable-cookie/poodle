@@ -88,7 +88,7 @@ scroll back through the turn that produced it.
 
 ### Shared Types
 
-Defined in `@poodle/headless` (`agent-plan.ts`), mirrored in
+Defined in `@inflatable-cookie/poodle-headless` (`agent-plan.ts`), mirrored in
 `poodle-headless::agent_plan` (snake_case).
 
 ```typescript

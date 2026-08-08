@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { TextInput, Field, Eyebrow, Surface } from "@poodle/svelte";
-  import type { InputValidationStatus, ValidationState } from "@poodle/svelte";
+  import { TextInput, Field, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import type { InputValidationStatus, ValidationState } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let name = $state("");

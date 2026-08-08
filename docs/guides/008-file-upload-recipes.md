@@ -15,7 +15,7 @@ owned by the host app.
 
 ```svelte
 <script lang="ts">
-  import { FileUpload, type FileUploadItem } from "@poodle/svelte";
+  import { FileUpload, type FileUploadItem } from "@inflatable-cookie/poodle-svelte";
 
   let files: FileUploadItem[] = [];
 
@@ -36,7 +36,7 @@ owned by the host app.
 
 ```svelte
 <script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FileUpload

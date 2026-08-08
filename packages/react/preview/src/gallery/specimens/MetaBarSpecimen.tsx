@@ -1,4 +1,4 @@
-import { Code, MetaBar, MetaItem, Pill } from "@poodle/react";
+import { Code, MetaBar, MetaItem, Pill } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function MetaBarSpecimen() {

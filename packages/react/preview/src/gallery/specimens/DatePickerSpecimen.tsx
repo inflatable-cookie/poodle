@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatePicker } from "@poodle/react";
+import { DatePicker } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

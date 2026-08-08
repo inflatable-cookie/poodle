@@ -107,7 +107,7 @@ Machine-backed (g11 extraction sweep): runs the shared
 
 ### Composition
 
-- Composes: `Card` primitive from `@poodle/svelte` (interactive, selected)
+- Composes: `Card` primitive from `@inflatable-cookie/poodle-svelte` (interactive, selected)
 - Parent expectations: settings panels, list-view pickers, mode selectors
 - Resizing rules: cards distribute evenly until they hit `min-width`, then wrap
 

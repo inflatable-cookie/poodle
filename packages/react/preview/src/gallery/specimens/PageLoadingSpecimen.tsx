@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { PageLoading, Button } from "@poodle/react";
+import { PageLoading, Button } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const inlineShellStyle = {

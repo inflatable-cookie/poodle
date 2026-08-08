@@ -19,7 +19,7 @@ Primary repos: `poodle`
 - [ ] create `docs/specs/underlay-parity-gap-register.json` with structured
   entries for each identified gap
 - [ ] classify each gap as new-component, feature-extension, or pattern-only
-- [ ] assign target layer: `@poodle/svelte`
+- [ ] assign target layer: `@inflatable-cookie/poodle-svelte`
 - [ ] define contract requirements: new contract, contract amendment, or
   implementation-only
 - [ ] identify shared patterns that multiple new components will need (e.g.,

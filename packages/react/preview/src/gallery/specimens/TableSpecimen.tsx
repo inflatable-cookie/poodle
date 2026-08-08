@@ -1,4 +1,4 @@
-import { Table, type TableColumn, type TableRow } from "@poodle/react";
+import { Table, type TableColumn, type TableRow } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

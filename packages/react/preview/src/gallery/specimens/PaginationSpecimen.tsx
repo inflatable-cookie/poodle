@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pagination } from "@poodle/react";
+import { Pagination } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

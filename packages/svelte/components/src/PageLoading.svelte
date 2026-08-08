@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/page-loading.css";
+  import "@inflatable-cookie/poodle-styles/page-loading.css";
   import { default as Progress } from "./Progress.svelte";
   import { default as Spinner } from "./Spinner.svelte";
 

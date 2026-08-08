@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Code, Eyebrow, Field, Surface, TokenInput } from "@poodle/svelte";
+  import { Code, Eyebrow, Field, Surface, TokenInput } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let tags = $state(["ifrs", "tax", "audit"]);

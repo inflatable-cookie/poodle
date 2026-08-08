@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@poodle/svelte";
+  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

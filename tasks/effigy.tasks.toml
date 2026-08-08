@@ -47,7 +47,7 @@
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
-# @poodle/headless machines (which test:core covers).
+# @inflatable-cookie/poodle-headless machines (which test:core covers).
 "test:components" = "bunx vitest run"
 "test:svelte-pack-install" = "bun test/package-install/svelte-preview.ts"
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
@@ -100,7 +100,7 @@
 # component whose specimen opens the overlay cannot claim the excuse.
 "drift:roles" = "bun --cwd packages/svelte/preview scripts/contract-role-drift.ts"
 
-# Svelte type gate over @poodle/svelte. Driven through the install-smoke consumer
+# Svelte type gate over @inflatable-cookie/poodle-svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks
 # the WHOLE linked component package, not just what the smoke app imports
 # (verified: an error planted in an unimported component fails this). install-smoke

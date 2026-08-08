@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { HoverCard } from "@poodle/svelte";
+  import { HoverCard } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

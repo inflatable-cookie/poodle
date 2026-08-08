@@ -51,10 +51,10 @@ Every anchored overlay surface **must**:
 
 | Layer | Surface |
 |-------|---------|
-| `@poodle/headless` | `resolveOverlayPosition`, `resolveClipRect`, `isAnchorClipped`, `observeAnchorMovement`, `resolvePortalTarget`, `pointAnchor`, `layerContains` |
-| `@poodle/svelte` | `anchored` action (`use:anchored={{ anchor, placement, offset }}`) |
-| `@poodle/react` | `<AnchoredSurface anchor={…} placement={…} offset={…}>` |
-| `@poodle/styles` | `anchored-surface.css` — the shared `position: fixed` shell and the `data-anchor-hidden` rule |
+| `@inflatable-cookie/poodle-headless` | `resolveOverlayPosition`, `resolveClipRect`, `isAnchorClipped`, `observeAnchorMovement`, `resolvePortalTarget`, `pointAnchor`, `layerContains` |
+| `@inflatable-cookie/poodle-svelte` | `anchored` action (`use:anchored={{ anchor, placement, offset }}`) |
+| `@inflatable-cookie/poodle-react` | `<AnchoredSurface anchor={…} placement={…} offset={…}>` |
+| `@inflatable-cookie/poodle-styles` | `anchored-surface.css` — the shared `position: fixed` shell and the `data-anchor-hidden` rule |
 
 Both framework primitives take the same options, so a contract describes the
 behaviour once:

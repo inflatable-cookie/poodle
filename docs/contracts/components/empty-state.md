@@ -262,7 +262,7 @@ None.
 - `visual` snippet overrides the default icon when present
 - `actions` snippet renders conditionally when present
 - `ariaLabel` on `<section>` falls back to `title` when null
-- `Icon` imported from `@poodle/svelte`
+- `Icon` imported from `@inflatable-cookie/poodle-svelte`
 - `EmptyStateVariant` and `EmptyStateSize` types imported from shared `types.ts`
 
 ## 10. GPUI Notes

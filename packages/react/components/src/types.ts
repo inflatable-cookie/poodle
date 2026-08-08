@@ -1,5 +1,5 @@
 /**
- * Shared prop types for `@poodle/react`. Shapes mirror the Svelte package's
+ * Shared prop types for `@inflatable-cookie/poodle-react`. Shapes mirror the Svelte package's
  * `types.ts` (interface-invariance rule, g11.001) with React idioms:
  * `Snippet` becomes `ReactNode`. Grows per conversion batch.
  */
@@ -18,14 +18,14 @@ import type {
   DockExternalDropContext as HeadlessDockExternalDropContext,
   DockExternalDropEligibilityContext as HeadlessDockExternalDropEligibilityContext,
   DockExternalDropTarget as HeadlessDockExternalDropTarget,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type {
   OverlaySurfaceGeometry,
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
@@ -207,7 +207,7 @@ export type ActiveSort = {
 };
 
 // ── FilterBuilder ──────────────────────────────────────────────────────────
-// Mirrors @poodle/svelte's FilterBuilder type model verbatim (React keeps its own
+// Mirrors @inflatable-cookie/poodle-svelte's FilterBuilder type model verbatim (React keeps its own
 // copy, same as OrderBy). Generic filter-expression model — no app vocabulary,
 // no evaluation.
 export type FilterCombinator = "and" | "or";
@@ -701,7 +701,7 @@ export type PanelTabItem = {
 /**
  * DockRegion external-drag types.
  *
- * Re-exported from `@poodle/headless` rather than redeclared: the session
+ * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: the session
  * ordering these describe is run by `createDockExternalDragController` there,
  * and a second declaration here would be a second thing to keep in step.
  * `PanelTabItem` and `DockEdge` are the concrete arguments in this target.
@@ -709,7 +709,7 @@ export type PanelTabItem = {
 export type {
   DockExternalDragCancelReason,
   DockExternalDragController,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type DockExternalDragPrepareContext =
   HeadlessDockExternalDragPrepareContext<PanelTabItem, DockEdge>;
@@ -851,7 +851,7 @@ export type RefOption = {
 /**
  * Agent transcript types.
  *
- * Re-exported from `@poodle/headless` rather than redeclared: grouping,
+ * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: grouping,
  * windowing and the Rust mirror all key off these shapes, and a second
  * declaration here would be a second thing to keep in step.
  */
@@ -873,4 +873,4 @@ export type {
   TranscriptRole,
   TranscriptToolCall,
   TranscriptToolRun,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";

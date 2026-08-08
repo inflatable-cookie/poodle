@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/svelte";
+  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let filter: TriStateValue = $state("default");

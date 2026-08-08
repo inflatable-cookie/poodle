@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatDateTimeLabel, monthAnchorIso, normalizeDateTimeValue, todayIsoDate, layerContains } from "@poodle/headless";
+import { formatDateTimeLabel, monthAnchorIso, normalizeDateTimeValue, todayIsoDate, layerContains } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/date-time-picker.css";
+import "@inflatable-cookie/poodle-styles/date-time-picker.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Calendar } from "./Calendar";

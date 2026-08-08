@@ -1,4 +1,4 @@
-import { resolveOverlayPosition as resolveCore, type RectLike } from "@poodle/headless";
+import { resolveOverlayPosition as resolveCore, type RectLike } from "@inflatable-cookie/poodle-headless";
 
 import type { OverlayPlacement } from "./types";
 

@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 
-import "@poodle/styles/time-input.css";
+import "@inflatable-cookie/poodle-styles/time-input.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

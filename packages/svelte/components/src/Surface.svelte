@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/surface.css";
+  import "@inflatable-cookie/poodle-styles/surface.css";
   import type { Snippet } from "svelte";
 
   import { joinStyles } from "./internal";

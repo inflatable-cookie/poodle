@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { Button, CommandPalette, UiPresentationProvider } from "@poodle/react";
-import type { CommandActionItem } from "@poodle/react";
+import { Button, CommandPalette, UiPresentationProvider } from "@inflatable-cookie/poodle-react";
+import type { CommandActionItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

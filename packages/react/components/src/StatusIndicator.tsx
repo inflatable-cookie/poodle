@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import "@poodle/styles/status-indicator.css";
+import "@inflatable-cookie/poodle-styles/status-indicator.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";

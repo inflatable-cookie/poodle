@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Stepper, type StepperStep } from "@poodle/svelte";
+  import { Stepper, type StepperStep } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

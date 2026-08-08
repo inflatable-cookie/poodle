@@ -1,4 +1,4 @@
-import "@poodle/styles/status-bar.css";
+import "@inflatable-cookie/poodle-styles/status-bar.css";
 
 import type { ReactNode } from "react";
 

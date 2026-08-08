@@ -8,7 +8,7 @@ Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `026
 
 Define the target architecture for splitting Poodle into a framework-agnostic
 headless behavior layer and per-framework styled layers, without breaking the
-17 local consumer apps that link `@poodle/svelte` by `file:` path.
+17 local consumer apps that link `@inflatable-cookie/poodle-svelte` by `file:` path.
 
 This is the master spec for the g11 headless-core runway (`g11.002` through
 `g11.007`). Promote settled outcomes into `docs/architecture/` and
@@ -17,8 +17,8 @@ architecture.
 
 ## Current Reality (evidence, 2026-07-10)
 
-- `@poodle/svelte` has **no Bits dependency**. External deps are `svelte`,
-  `marked`, and `@poodle/svelte-tokens`. Focus, portal, and dismissal behavior
+- `@inflatable-cookie/poodle-svelte` has **no Bits dependency**. External deps are `svelte`,
+  `marked`, and `@inflatable-cookie/poodle-svelte-tokens`. Focus, portal, and dismissal behavior
   already live in `packages/svelte/components/src/internal` and sibling
   modules. Spec `028`'s Ownership Rule ("Bits remains an implementation
   substrate") is stale and superseded in part by this spec.
@@ -53,14 +53,14 @@ Mitosis may be revisited for *styled shells only* via the bounded spike in
 
 ## Decision: Package Shape
 
-- `packages/core` → `@poodle/headless` (working name; confirm in `g11.003`):
+- `packages/core` → `@inflatable-cookie/poodle-headless` (working name; confirm in `g11.003`):
   framework-free TS. Machines + shared machinery. Zero Svelte/React/Vue
   imports, zero DOM-framework assumptions beyond standard DOM APIs.
 - Shared machinery modules inside core, built before component machines:
   focus management (trap, roving tabindex, restore), dismissable-layer stack,
   anchor positioning (wrap Floating UI; do not rewrite), presence/animation
   states, typeahead, id/aria wiring.
-- `@poodle/svelte` keeps its exact public surface and becomes the Svelte
+- `@inflatable-cookie/poodle-svelte` keeps its exact public surface and becomes the Svelte
   adapter + styled layer over core.
 
 ## Decision: Design Flexibility Via Slot Recipes
@@ -148,7 +148,7 @@ Build list for `g11.003`, from the pilot specs:
 
 ## Resolved: Package Shape And Adapter Model (g11.003)
 
-- Package: `packages/core` → `@poodle/headless`. Source-consumed
+- Package: `packages/core` → `@inflatable-cookie/poodle-headless`. Source-consumed
   (`exports` → `./src/index.ts`) like the sibling Svelte packages. Token
   types stay out of core; core is behavior-only.
 - Core runtime: **pure functions, no interpreter/store.** Per component: a
@@ -157,10 +157,10 @@ Build list for `g11.003`, from the pilot specs:
   (Svelte 5 runes) and execute effect intents. Callbacks are effects
   (`emitValueChange`, `emitOpenChange`, ...). ~15-line adapters per
   component; direct blueprint for the Rust port.
-- Dependency wiring: `@poodle/svelte` depends on `@poodle/headless` via
+- Dependency wiring: `@inflatable-cookie/poodle-svelte` depends on `@inflatable-cookie/poodle-headless` via
   `workspace:*`. Verified against a real consumer (`soundcheck`): consumer
   `bun install` over the `file:` link succeeds, and imports resolve through
-  `components/node_modules/@poodle/headless` → live workspace symlink.
+  `components/node_modules/@inflatable-cookie/poodle-headless` → live workspace symlink.
   **Do not use `file:../../core` for the internal dep** — bun snapshots
   `file:` deps into its store, which shadowed live core source during
   development (stale-copy bug, caught in g11.003).

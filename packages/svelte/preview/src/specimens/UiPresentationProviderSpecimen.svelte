@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@poodle/svelte";
+  import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const options = [

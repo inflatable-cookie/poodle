@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { CardRadioGroup } from "@poodle/svelte";
-  import type { CardRadioItem } from "@poodle/svelte";
+  import { CardRadioGroup } from "@inflatable-cookie/poodle-svelte";
+  import type { CardRadioItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

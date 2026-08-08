@@ -28,8 +28,8 @@ projects, categories, and scheduled-task list/detail/edit pages.
 
 ```svelte
 <script lang="ts">
-  import { PageHeader } from "@poodle/svelte";
-  import { Breadcrumbs, Code, MetaBar, MetaItem, Pill } from "@poodle/svelte";
+  import { PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Breadcrumbs, Code, MetaBar, MetaItem, Pill } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <div class="detail-page__header">
@@ -63,8 +63,8 @@ projects, categories, and scheduled-task list/detail/edit pages.
 
 ```svelte
 <script lang="ts">
-  import { FilterToolbar, ListContainer } from "@poodle/svelte";
-  import { Button, Field, TextInput, Select } from "@poodle/svelte";
+  import { FilterToolbar, ListContainer } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Field, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ListContainer
@@ -103,8 +103,8 @@ surface rather than a CRUD browse page.
 
 ```svelte
 <script lang="ts">
-  import { MetricTile, NavCard, PageHeader } from "@poodle/svelte";
-  import { Callout, Grid } from "@poodle/svelte";
+  import { MetricTile, NavCard, PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Callout, Grid } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PageHeader
@@ -163,7 +163,7 @@ Use `Tabs` directly. Keep mount policy app-owned.
 
 ```svelte
 <script lang="ts">
-  import { Tabs } from "@poodle/svelte";
+  import { Tabs } from "@inflatable-cookie/poodle-svelte";
 
   let activeTab = "details";
 </script>

@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { IconButton } from "@poodle/react";
+import { IconButton } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

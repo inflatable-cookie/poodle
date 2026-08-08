@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Breadcrumbs, type BreadcrumbItem } from "@poodle/svelte";
+  import { Breadcrumbs, type BreadcrumbItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

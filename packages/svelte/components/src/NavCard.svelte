@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/nav-card.css";
+  import "@inflatable-cookie/poodle-styles/nav-card.css";
   import type { Snippet } from "svelte";
   import { getUiPresentation } from "./presentation";
 

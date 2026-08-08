@@ -1,4 +1,4 @@
-import { Tooltip, Button } from "@poodle/react";
+import { Tooltip, Button } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

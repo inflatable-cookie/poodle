@@ -1,4 +1,4 @@
-import "@poodle/svelte-tokens/styles.css";
+import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
 // All theme layers in one aggregate — the selector offers every registered theme.
 import "../../../tokens/artifacts/css/poodle-themes.css";
 import "../../../tokens/artifacts/css/poodle-density-comfortable.css";

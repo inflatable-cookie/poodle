@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Icon, IconProvider } from "@poodle/svelte";
-  import type { IconSet, IconNodes } from "@poodle/svelte";
+  import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
+  import type { IconSet, IconNodes } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/metric-tile.css";
+  import "@inflatable-cookie/poodle-styles/metric-tile.css";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation } from "./presentation";
 

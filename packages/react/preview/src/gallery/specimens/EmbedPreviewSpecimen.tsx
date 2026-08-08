@@ -1,5 +1,5 @@
-import { EmbedPreview } from "@poodle/react";
-import type { ParsedEmbed } from "@poodle/react";
+import { EmbedPreview } from "@inflatable-cookie/poodle-react";
+import type { ParsedEmbed } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function EmbedPreviewSpecimen() {

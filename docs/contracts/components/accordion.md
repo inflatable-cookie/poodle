@@ -101,7 +101,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (shared `toggleGroupTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Accordion reuses the ToggleGroup machine: open values are a selection over
 items. `selectionMode` maps directly; `collapsible` maps to

@@ -32,7 +32,7 @@ Updated: 2026-07-10
 
 ## Composition
 
-- Composes: `EmptyState` from composites, `Button` from `@poodle/svelte`
+- Composes: `EmptyState` from composites, `Button` from `@inflatable-cookie/poodle-svelte`
 - Uses `svelte:boundary` with `onerror` handler to catch child errors
 - Retry button resets the error state and re-renders children
 

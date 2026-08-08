@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SidebarNav } from "@poodle/svelte";
-  import type { SidebarNavGroup } from "@poodle/svelte";
+  import { SidebarNav } from "@inflatable-cookie/poodle-svelte";
+  import type { SidebarNavGroup } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Eyebrow, Surface } from "@poodle/react";
+import { Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 
 export interface SpecimenGroupProps {
   label: string;

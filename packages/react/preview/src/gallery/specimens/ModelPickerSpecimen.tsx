@@ -4,7 +4,7 @@ import {
   type ModelCapabilityAxis,
   type ModelOption,
   type ModelSelection,
-} from "@poodle/react";
+} from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

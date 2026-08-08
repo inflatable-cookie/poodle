@@ -28,7 +28,7 @@ function entry(displayName: string, tag: ComponentTag, description: string, hasS
   return {
     slug: slug(displayName),
     displayName,
-    packageName: "@poodle/react",
+    packageName: "@inflatable-cookie/poodle-react",
     tag,
     description,
     hasSpecimen,

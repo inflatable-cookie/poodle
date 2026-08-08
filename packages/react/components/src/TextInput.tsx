@@ -8,9 +8,9 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { isValidSlugFormat, slugify, validationStatusToState } from "@poodle/headless";
+import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/text-input.css";
+import "@inflatable-cookie/poodle-styles/text-input.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

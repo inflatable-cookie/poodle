@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/pagination-summary.css";
+  import "@inflatable-cookie/poodle-styles/pagination-summary.css";
   let {
     currentPage = 1,
     totalPages = 1,

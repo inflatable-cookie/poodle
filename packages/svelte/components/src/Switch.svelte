@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/switch.css";
-  import { switchTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/switch.css";
+  import { switchTransition } from "@inflatable-cookie/poodle-headless";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {

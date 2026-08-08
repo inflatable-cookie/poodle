@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Grid, Icon, NavCard } from "@poodle/react";
+import { Grid, Icon, NavCard } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eyebrow, MarkdownEditor } from "@poodle/react";
+import { Eyebrow, MarkdownEditor } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const compactContent =

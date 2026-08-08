@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/pill.css";
+  import "@inflatable-cookie/poodle-styles/pill.css";
   import type { Snippet } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

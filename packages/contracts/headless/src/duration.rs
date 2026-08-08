@@ -1,7 +1,7 @@
 //! Duration entry machinery (DurationInput).
 //!
 //! Contract: `docs/contracts/components/duration-input.md`, "Behavior Machine",
-//! which names `@poodle/headless`' `duration.ts` as the authority. This is a
+//! which names `@inflatable-cookie/poodle-headless`' `duration.ts` as the authority. This is a
 //! faithful port of `packages/core/src/duration.ts` — same carry rules, same
 //! clamps, same swallowed carries at the hour bound — so the web and Rust
 //! targets cannot drift on what a keystroke means.

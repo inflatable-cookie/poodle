@@ -1,4 +1,4 @@
-import { EmptyState, Button, Icon } from "@poodle/react";
+import { EmptyState, Button, Icon } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function EmptyStateSpecimen() {

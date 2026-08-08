@@ -1,4 +1,4 @@
-import { AgentTranscript, type TranscriptItem } from "@poodle/react";
+import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-react";
 
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";

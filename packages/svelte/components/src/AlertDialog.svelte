@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/alert-dialog.css";
+  import "@inflatable-cookie/poodle-styles/alert-dialog.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";

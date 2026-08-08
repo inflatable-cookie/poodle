@@ -92,6 +92,6 @@ export function overflowValue(mode: OverflowMode): string {
 
 // Focus and index-navigation helpers moved to the headless core; re-exported
 // so existing internal imports keep working.
-export { findNextEnabledIndex, firstEnabledIndex, getFocusableElements } from "@poodle/headless";
+export { findNextEnabledIndex, firstEnabledIndex, getFocusableElements } from "@inflatable-cookie/poodle-headless";
 
-export { menuNavigableItems } from "@poodle/headless";
+export { menuNavigableItems } from "@inflatable-cookie/poodle-headless";

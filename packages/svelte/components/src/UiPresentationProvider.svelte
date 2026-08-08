@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/ui-presentation-provider.css";
+  import "@inflatable-cookie/poodle-styles/ui-presentation-provider.css";
   import type { Snippet } from "svelte";
   import {
     controlHeightRem,

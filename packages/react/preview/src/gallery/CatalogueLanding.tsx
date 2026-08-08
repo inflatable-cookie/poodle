@@ -1,4 +1,4 @@
-import { Eyebrow } from "@poodle/react";
+import { Eyebrow } from "@inflatable-cookie/poodle-react";
 import { componentsByTag, type ComponentEntry } from "./registry";
 
 export interface CatalogueLandingProps {

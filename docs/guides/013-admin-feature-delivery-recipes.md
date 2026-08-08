@@ -38,8 +38,8 @@ list/detail/edit/tasks routes plus the user and media detail flows.
 
 ```svelte
 <script lang="ts">
-  import { FilterToolbar, ListContainer, PageHeader } from "@poodle/svelte";
-  import { Button, Code, Field, MetaBar, MetaItem, Pill, TextInput, Tabs } from "@poodle/svelte";
+  import { FilterToolbar, ListContainer, PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Code, Field, MetaBar, MetaItem, Pill, TextInput, Tabs } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ListContainer title="Projects" state="ready" currentPage={page} totalPages={totalPages} totalItems={totalItems}>

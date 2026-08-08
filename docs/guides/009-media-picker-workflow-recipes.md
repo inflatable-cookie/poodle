@@ -17,7 +17,7 @@ callback-driven media-library orchestration into the Poodle composite.
 
 ```svelte
 <script lang="ts">
-  import { MediaPicker, type MediaPickerItem } from "@poodle/svelte";
+  import { MediaPicker, type MediaPickerItem } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   let items: MediaPickerItem[] = [];

@@ -93,7 +93,7 @@ modal vs non-modal posture.
 ### Behavior Machine
 
 Behavior classification: machine-backed (`modalTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Modal overlay machine shared by Dialog, AlertDialog (which composes Dialog),
 and Drawer.

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Drawer, Button, Eyebrow, Surface } from "@poodle/svelte";
+  import { Drawer, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
 
   let rightOpen = $state(false);
   let leftOpen = $state(false);

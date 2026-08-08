@@ -1,5 +1,5 @@
 //! RefSelectSpec — version-control ref chooser, Rust mirror of the
-//! `@poodle/svelte` RefSelect type model and `ref-select-model.ts` logic.
+//! `@inflatable-cookie/poodle-svelte` RefSelect type model and `ref-select-model.ts` logic.
 //!
 //! Contract: `docs/contracts/components/ref-select.md`.
 //!

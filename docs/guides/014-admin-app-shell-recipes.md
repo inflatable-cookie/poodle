@@ -29,8 +29,8 @@ account layout, and public project-detail layout.
 
 ```svelte
 <script lang="ts">
-  import { ToastHost } from "@poodle/svelte";
-  import { Button, Card, Drawer, ScrollShell, Separator } from "@poodle/svelte";
+  import { ToastHost } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Card, Drawer, ScrollShell, Separator } from "@inflatable-cookie/poodle-svelte";
 
   let mobileNavOpen = false;
   let contextPanelOpen = false;

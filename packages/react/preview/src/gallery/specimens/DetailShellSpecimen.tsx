@@ -1,4 +1,4 @@
-import { Button, DetailItem, DetailSection, DetailShell, PageHeader, Pill, Region, Separator } from "@poodle/react";
+import { Button, DetailItem, DetailSection, DetailShell, PageHeader, Pill, Region, Separator } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function DetailShellSpecimen() {

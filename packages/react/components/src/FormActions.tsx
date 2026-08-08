@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import "@poodle/styles/form-actions.css";
+import "@inflatable-cookie/poodle-styles/form-actions.css";
 
 import { IconButton } from "./IconButton";
 import { Menu } from "./Menu";

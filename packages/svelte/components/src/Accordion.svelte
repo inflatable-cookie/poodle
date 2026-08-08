@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/accordion.css";
-  import { toggleGroupTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/accordion.css";
+  import { toggleGroupTransition } from "@inflatable-cookie/poodle-headless";
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button, UiPresentationProvider } from "@poodle/svelte";
-  import { CommandPalette } from "@poodle/svelte";
+  import { Button, UiPresentationProvider } from "@inflatable-cookie/poodle-svelte";
+  import { CommandPalette } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

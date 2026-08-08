@@ -30,7 +30,7 @@ Updated: 2026-07-10
 
 ## Composition
 
-- Composes: `Button`, `Code`, `Dialog` from `@poodle/svelte`
+- Composes: `Button`, `Code`, `Dialog` from `@inflatable-cookie/poodle-svelte`
 - Trigger button only renders when `value` is non-null
 - Value is serialized via `JSON.stringify` with 2-space indentation
 

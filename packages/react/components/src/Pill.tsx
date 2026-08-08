@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@poodle/styles/pill.css";
+import "@inflatable-cookie/poodle-styles/pill.css";
 
 import { usePillContext } from "./pill-context";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

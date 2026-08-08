@@ -13,7 +13,7 @@ export type UnderlayAdoptionSurfaceProof = {
 };
 
 export type UnderlayZeroLeakProof = {
-  packageName: "@poodle/bridge-underlay";
+  packageName: "@inflatable-cookie/poodle-bridge-underlay";
   proofVersion: 1;
   zeroLeakRules: readonly string[];
   directPoodleImportsAllowedInApps: false;
@@ -42,7 +42,7 @@ export const underlayRemainingAdoptionFriction = [
 ] as const;
 
 export const underlayZeroLeakProof: UnderlayZeroLeakProof = {
-  packageName: "@poodle/bridge-underlay",
+  packageName: "@inflatable-cookie/poodle-bridge-underlay",
   proofVersion: 1,
   zeroLeakRules: underlayZeroLeakRules,
   directPoodleImportsAllowedInApps: false,

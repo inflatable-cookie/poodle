@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RadioGroup, type RadioGroupOption } from "@poodle/svelte";
+  import { RadioGroup, type RadioGroupOption } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

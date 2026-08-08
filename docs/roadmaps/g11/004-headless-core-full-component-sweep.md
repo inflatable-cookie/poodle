@@ -9,7 +9,7 @@ Updated: 2026-07-10
 
 Move every behavioral component onto core machines, wave by wave, writing the
 machine spec into each component's contract as it goes. End state: all
-interaction logic lives in `@poodle/headless`; `@poodle/svelte` components are
+interaction logic lives in `@inflatable-cookie/poodle-headless`; `@inflatable-cookie/poodle-svelte` components are
 adapter + recipe shells.
 
 ## What Gets A Machine
@@ -224,7 +224,7 @@ open. 121 core tests green.
     194 core tests.
 
   **The extraction-debt register is empty.** Every behavioral component in
-  `@poodle/svelte` now runs on `@poodle/headless` machines or machinery.
+  `@inflatable-cookie/poodle-svelte` now runs on `@inflatable-cookie/poodle-headless` machines or machinery.
 
   **Runtime verification (2026-07-10, headless Playwright against the vite
   dev server — the browser-pane outage does not block runtime checks):**

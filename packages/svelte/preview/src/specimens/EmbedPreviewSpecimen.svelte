@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EmbedPreview } from "@poodle/svelte";
-  import type { ParsedEmbed } from "@poodle/svelte";
+  import { EmbedPreview } from "@inflatable-cookie/poodle-svelte";
+  import type { ParsedEmbed } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const youtubeParsed: ParsedEmbed = {

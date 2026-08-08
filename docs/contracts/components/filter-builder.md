@@ -99,8 +99,8 @@ the `is` prefix (brevity convention); the Rust spec keeps `is_disabled`/`is_comp
 
 ### Shared Types
 
-Defined in `@poodle/svelte` `types.ts` and re-exported from the package root;
-redefined identically in `@poodle/react`; mirrored in `poodle-specs` (snake_case).
+Defined in `@inflatable-cookie/poodle-svelte` `types.ts` and re-exported from the package root;
+redefined identically in `@inflatable-cookie/poodle-react`; mirrored in `poodle-specs` (snake_case).
 
 ```typescript
 type FilterCombinator = "and" | "or";
@@ -219,7 +219,7 @@ differs from the current operand's kind. Incomplete drafts are never emitted.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Like `OrderBy`, the popover open/dismiss uses the shared dismissable-layer stack
-and the draft/clause logic is plain component state; there is no `@poodle/headless`
+and the draft/clause logic is plain component state; there is no `@inflatable-cookie/poodle-headless`
 state machine and no conformance vectors. The pure model helpers
 (`defaultOperatorsForKind`, `isClauseComplete`, `clauseLabel`, …) are the
 cross-renderer semantic reference and live in `filter-builder-model.ts` (TS) and
@@ -227,7 +227,7 @@ as methods on `FilterBuilderSpec` (Rust).
 
 #### Machinery Dependencies
 
-Dismissable layer (`registerDismissLayer` from `@poodle/headless`), presentation
+Dismissable layer (`registerDismissLayer` from `@inflatable-cookie/poodle-headless`), presentation
 context (size/density), id wiring for the dialog surface. No focus trap, no
 roving tabindex.
 
@@ -345,7 +345,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 ## 9. Svelte Notes
 
 - owns its open state and anchored panel surface directly (mirrors `OrderBy`)
-- imports `registerDismissLayer` from `@poodle/headless`; dismiss on outside
+- imports `registerDismissLayer` from `@inflatable-cookie/poodle-headless`; dismiss on outside
   interact / Escape via a `$effect` guarded by `open`
 - size/density resolve via `getUiPresentation` + `resolveSemanticControlSize`
 - controlled/uncontrolled via `$bindable(value)` + a `sync()` that writes `value`

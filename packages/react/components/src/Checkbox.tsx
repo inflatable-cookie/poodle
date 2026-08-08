@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
-import { checkboxParts, checkboxTransition, type CheckboxContext } from "@poodle/headless";
+import { checkboxParts, checkboxTransition, type CheckboxContext } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/checkbox.css";
+import "@inflatable-cookie/poodle-styles/checkbox.css";
 
 import { Icon } from "./Icon";
 import { reactifyPart } from "./parts";

@@ -18,17 +18,17 @@ Primary repos: `poodle`
 
 - [ ] amend TextInput contract: add `prefix` and `suffix` slot definitions,
   `asyncValidate` callback prop, `showCharCount` with `maxLength`
-- [ ] implement TextInput prefix/suffix slots in `@poodle/svelte`
+- [ ] implement TextInput prefix/suffix slots in `@inflatable-cookie/poodle-svelte`
 - [ ] implement TextInput async validation with debounce and loading indicator
 - [ ] implement TextInput character count display
 - [ ] write contract for InlineEditableField: display mode, edit mode, save/
   cancel, validation, escape-to-cancel
-- [ ] implement InlineEditableField composite in `@poodle/svelte`
+- [ ] implement InlineEditableField composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for SlugField: source text binding, slug preview,
   manual override, validation
-- [ ] implement SlugField composite in `@poodle/svelte`
+- [ ] implement SlugField composite in `@inflatable-cookie/poodle-svelte`
 - [ ] amend Field contract: add `span` prop for CSS grid column spanning
-- [ ] implement Field grid-spanning in `@poodle/svelte`
+- [ ] implement Field grid-spanning in `@inflatable-cookie/poodle-svelte`
 - [ ] create specimens for InlineEditableField and SlugField
 - [ ] update TextInput and Field specimens with new features
 - [ ] register new components in component-registry.ts and specimen registry

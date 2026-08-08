@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Surface } from "@poodle/react";
+import { Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const copyStyle: CSSProperties = {

@@ -5,7 +5,7 @@
     themes,
     densityModes,
     controlSizes,
-  } from "@poodle/svelte-tokens";
+  } from "@inflatable-cookie/poodle-svelte-tokens";
   import {
     Pill,
     Tabs,
@@ -13,7 +13,7 @@
     UiPresentationProvider,
     type TabItem,
     type IconSet,
-  } from "@poodle/svelte";
+  } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { onMount } from "svelte";
 

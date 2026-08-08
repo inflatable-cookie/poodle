@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Calendar, type DateRangeValue } from "@poodle/react";
+import { Calendar, type DateRangeValue } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

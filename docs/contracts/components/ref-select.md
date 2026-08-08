@@ -95,8 +95,8 @@ far heavier than a toolbar dropdown.
 
 ### Shared Types
 
-Defined in `@poodle/svelte` `types.ts`, re-exported from the package root,
-redefined identically in `@poodle/react`, mirrored in `poodle-specs` (snake_case).
+Defined in `@inflatable-cookie/poodle-svelte` `types.ts`, re-exported from the package root,
+redefined identically in `@inflatable-cookie/poodle-react`, mirrored in `poodle-specs` (snake_case).
 
 ```typescript
 type RefKind = "branch" | "tag" | "commit";
@@ -240,7 +240,7 @@ hidden), so a keyboard user can type immediately.
 ## 9. Svelte Notes
 
 - owns its open state and anchored surface directly (mirrors `ModelPicker`)
-- `registerDismissLayer` from `@poodle/headless`
+- `registerDismissLayer` from `@inflatable-cookie/poodle-headless`
 - arrow-key roving is a plain `keydown` handler shared by the search field and
   the option rows
 - pure logic from `./ref-select-model`

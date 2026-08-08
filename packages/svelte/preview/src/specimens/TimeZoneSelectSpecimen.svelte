@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeZoneSelect, Eyebrow, Surface } from "@poodle/svelte";
+  import { TimeZoneSelect, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let zone = $state("");

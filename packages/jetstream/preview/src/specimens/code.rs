@@ -19,7 +19,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let primary = resolve_color(theme, "color.text.primary");
 
-    let ts_source = "import { Button } from \"@poodle/svelte\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
+    let ts_source = "import { Button } from \"@inflatable-cookie/poodle-svelte\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
     let css_source = ".button {\n  display: inline-flex;\n  align-items: center;\n  border-radius: var(--poodle-radius-control);\n  background: var(--poodle-color-accent-base);\n}";
 
     div().flex_col().gap(24.0)

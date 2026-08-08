@@ -6,7 +6,7 @@
 
 import { getContext, setContext } from "svelte";
 import { get, writable, type Writable } from "svelte/store";
-import { applyThemeAttributes, themeOptions, type ThemeOption } from "@poodle/svelte-tokens";
+import { applyThemeAttributes, themeOptions, type ThemeOption } from "@inflatable-cookie/poodle-svelte-tokens";
 
 const THEME_CONTROLLER_KEY = Symbol("poodle-theme-controller");
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte";
+  import { Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
   let {
     label,
     /** When true, renders without Surface wrapper — for components that are surfaces themselves. */

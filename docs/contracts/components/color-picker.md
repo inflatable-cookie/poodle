@@ -115,7 +115,7 @@ Updated: 2026-07-10
 
 Behavior classification: machine-backed via core machinery
 
-All color conversion math lives in `@poodle/headless` (`color.ts`,
+All color conversion math lives in `@inflatable-cookie/poodle-headless` (`color.ts`,
 promoted wholesale from the Svelte color-utils module): hex validation and
 normalization, hex/RGB/HSL/HSV conversions in both directions. Internal
 model uses HSV for the gradient pad; HSL/RGB/hex for display and I/O.

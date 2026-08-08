@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EmptyState } from "@poodle/svelte";
-  import { Button, Icon } from "@poodle/svelte";
+  import { EmptyState } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Icon } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

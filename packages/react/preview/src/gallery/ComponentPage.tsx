@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { Pill, Separator } from "@poodle/react";
+import { Pill, Separator } from "@inflatable-cookie/poodle-react";
 import type { ComponentEntry } from "./registry";
 import { componentDocsMap } from "./component-docs";
 import { UsageDocs } from "./UsageDocs";

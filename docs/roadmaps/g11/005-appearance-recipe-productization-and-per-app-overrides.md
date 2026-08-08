@@ -30,7 +30,7 @@ rebuilding the suite" deliverable.
 
 ## Deliverables
 
-1. recipe format + registration/override API in `@poodle/svelte` (or core if
+1. recipe format + registration/override API in `@inflatable-cookie/poodle-svelte` (or core if
    the format is framework-free data — decide, record)
 2. default recipes for all components migrated to core so far
 3. override docs + a worked example: one consumer app (suggest `soundcheck` or

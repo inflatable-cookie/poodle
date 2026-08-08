@@ -1,4 +1,4 @@
-import "@poodle/styles/embed-input.css";
+import "@inflatable-cookie/poodle-styles/embed-input.css";
 
 import { useEffect, useRef, useState } from "react";
 

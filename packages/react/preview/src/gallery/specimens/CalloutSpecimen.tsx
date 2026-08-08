@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Callout } from "@poodle/react";
+import { Callout } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

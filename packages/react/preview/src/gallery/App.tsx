@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Pill, Tabs, IconProvider, UiPresentationProvider, type IconSet, type TabItem } from "@poodle/react";
-import { applyThemeAttributes, cssVars, themes, densityModes, controlSizes } from "@poodle/svelte-tokens";
+import { Pill, Tabs, IconProvider, UiPresentationProvider, type IconSet, type TabItem } from "@inflatable-cookie/poodle-react";
+import { applyThemeAttributes, cssVars, themes, densityModes, controlSizes } from "@inflatable-cookie/poodle-svelte-tokens";
 import iconNodes from "lucide-static/icon-nodes.json";
 
 import { DisplayControls } from "./DisplayControls";

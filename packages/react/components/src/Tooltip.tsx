@@ -10,9 +10,9 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@poodle/headless";
+import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/tooltip.css";
+import "@inflatable-cookie/poodle-styles/tooltip.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import type { OverlayPlacement } from "./types";

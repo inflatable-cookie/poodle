@@ -1,11 +1,11 @@
-import "@poodle/styles/agent-question-record.css";
+import "@inflatable-cookie/poodle-styles/agent-question-record.css";
 
 import {
   answeredQuestionSummary,
   isChosenOption,
   type AgentQuestionAnswer,
   type AgentQuestionItem,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 import { Eyebrow } from "./Eyebrow";
 import { Icon } from "./Icon";

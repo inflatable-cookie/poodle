@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Calendar } from "@poodle/svelte";
-  import type { DateRangeValue } from "@poodle/svelte";
+  import { Calendar } from "@inflatable-cookie/poodle-svelte";
+  import type { DateRangeValue } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

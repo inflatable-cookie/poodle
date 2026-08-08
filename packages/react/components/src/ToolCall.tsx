@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import "@poodle/styles/tool-call.css";
+import "@inflatable-cookie/poodle-styles/tool-call.css";
 
 import { Code } from "./Code";
 import { Icon } from "./Icon";

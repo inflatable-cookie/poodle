@@ -27,7 +27,7 @@ public seams that hamstring consumers:
 This is a new sequencing era, not an incidental follow-up to GPUI hardening.
 The work spans:
 
-- nearly the entire `@poodle/svelte` public surface
+- nearly the entire `@inflatable-cookie/poodle-svelte` public surface
 - `underlay` wrapper and editor ownership boundaries
 - six Underlay-root consumer app families
 - direct desktop consumers outside the Underlay rollout path
@@ -306,8 +306,8 @@ The public dispatcher audit is effectively closed. Next waves should focus on:
 - Underlay first for any component it wraps, shapes, or normalizes
 - do not update one app in a root and leave sibling packages stale without an
   explicit note
-- when a root still uses `@poodle/svelte-primitives` /
-  `@poodle/svelte-composites`, treat import-shape cleanup as part of the same
+- when a root still uses `@inflatable-cookie/poodle-svelte-primitives` /
+  `@inflatable-cookie/poodle-svelte-composites`, treat import-shape cleanup as part of the same
   modernization conversation if the affected component is touched there
 - if a direct desktop app uses a component without Underlay in front of it,
   update that app in the same wave rather than deferring indefinitely
@@ -364,9 +364,9 @@ Known highest-priority consumer surfaces from current local scan:
 
 Known import-shape diversity that may need cleanup during rollout:
 
-- `@poodle/svelte`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-composites`
+- `@inflatable-cookie/poodle-svelte`
+- `@inflatable-cookie/poodle-svelte-primitives`
+- `@inflatable-cookie/poodle-svelte-composites`
 
 ## Wave 1 Inventory Baseline
 
@@ -492,8 +492,8 @@ Implication:
 
 - `TextInput` is likely a deeper internal modernization with a smaller public
   contract rewrite than `Select`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-composites`
+- `@inflatable-cookie/poodle-svelte-primitives`
+- `@inflatable-cookie/poodle-svelte-composites`
 
 ## Next Task
 

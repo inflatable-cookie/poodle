@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte";
+  import { Eyebrow } from "@inflatable-cookie/poodle-svelte";
   import { componentsByTag, type ComponentEntry } from "../component-registry";
 let { components = [] }: { components?: ComponentEntry[] } = $props();
   let groups = $derived(componentsByTag());</script>

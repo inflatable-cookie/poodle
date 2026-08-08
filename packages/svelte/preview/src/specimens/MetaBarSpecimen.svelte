@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Code, MetaBar, MetaItem, Pill } from "@poodle/svelte";
+  import { Code, MetaBar, MetaItem, Pill } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

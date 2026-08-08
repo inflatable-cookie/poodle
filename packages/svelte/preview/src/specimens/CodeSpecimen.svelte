@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Code } from "@poodle/svelte";
+  import { Code } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  const tsExample = `import { Button } from "@poodle/svelte";
+  const tsExample = `import { Button } from "@inflatable-cookie/poodle-svelte";
 
 function handleClick(event: MouseEvent): void {
   console.log("Button clicked", event);

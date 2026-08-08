@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
-import { Code } from "@poodle/react";
+import { Code } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
-const tsExample = `import { Button } from "@poodle/svelte";
+const tsExample = `import { Button } from "@inflatable-cookie/poodle-svelte";
 
 function handleClick(event: MouseEvent): void {
   console.log("Button clicked", event);

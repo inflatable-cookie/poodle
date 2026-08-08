@@ -45,8 +45,8 @@ of merely improving the old preview counts.
 
 As of this baseline, the parity artifact should reflect:
 
-- `@poodle/svelte`: `83/83` directly previewed exports
-- `@poodle/svelte-workstation`: `14/14` directly previewed exports
+- `@inflatable-cookie/poodle-svelte`: `83/83` directly previewed exports
+- `@inflatable-cookie/poodle-svelte-workstation`: `14/14` directly previewed exports
 
 These counts are evidence that the rebuilt demo is now a full public-surface
 comparison target rather than a mostly coherent workflow shell with remaining

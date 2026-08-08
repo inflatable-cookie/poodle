@@ -62,7 +62,7 @@ they drive the same hash-routed specimens as the Svelte preview.
     `parity:report` + `accessibility:report` — React-pathed artifacts
     that reuse the canonical cross-runtime contract-parity data
     (imported from the Svelte preview, no fork) with a
-    `frameworks: [@poodle/react, @poodle/svelte]` field. `bun run
+    `frameworks: [@inflatable-cookie/poodle-react, @inflatable-cookie/poodle-svelte]` field. `bun run
     reports` runs all three.
-- [ ] Docs closeout: README/consumer notes for `@poodle/react`,
+- [ ] Docs closeout: README/consumer notes for `@inflatable-cookie/poodle-react`,
   update g12 README runway.

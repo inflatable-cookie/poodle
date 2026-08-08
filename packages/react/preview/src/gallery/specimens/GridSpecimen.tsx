@@ -1,4 +1,4 @@
-import { Grid, Surface } from "@poodle/react";
+import { Grid, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const cellText = { margin: 0, fontSize: "0.875rem" } as const;

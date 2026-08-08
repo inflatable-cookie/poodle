@@ -64,7 +64,7 @@ jobs:
         run: bun run --cwd packages/core test
       - name: component + parity tests (svelte + react)
         run: bunx vitest run
-      # Type gate over @poodle/svelte. install-smoke is outside the root
+      # Type gate over @inflatable-cookie/poodle-svelte. install-smoke is outside the root
       # workspace on purpose (it proves a real consumer install), so it installs
       # its own deps; svelte-check then covers the whole linked component
       # package. Errors fail, pre-existing a11y warnings do not.

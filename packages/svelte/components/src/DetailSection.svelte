@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/detail-section.css";
+  import "@inflatable-cookie/poodle-styles/detail-section.css";
   import type { Snippet } from "svelte";
   import { getUiPresentation } from "./presentation";
   import type { ControlDensity } from "./types";

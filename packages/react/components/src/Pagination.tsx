@@ -1,7 +1,7 @@
 import { useId, type ChangeEvent } from "react";
-import { buildVisiblePages, canRequestPage } from "@poodle/headless";
+import { buildVisiblePages, canRequestPage } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/pagination.css";
+import "@inflatable-cookie/poodle-styles/pagination.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

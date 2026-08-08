@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { DockRegion } from "@poodle/svelte";
-  import type { PanelTabItem, DockEdge } from "@poodle/svelte";
+  import { DockRegion } from "@inflatable-cookie/poodle-svelte";
+  import type { PanelTabItem, DockEdge } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
-  import { folder, code, list as listIcon, terminal } from "@poodle/icons-lucide";
+  import { folder, code, list as listIcon, terminal } from "@inflatable-cookie/poodle-icons-lucide";
 
   // ── Static dock state ──────────────────────────────────────────────
 

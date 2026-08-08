@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import "@poodle/styles/time-ago.css";
+import "@inflatable-cookie/poodle-styles/time-ago.css";
 
 import { Tooltip } from "./Tooltip";
 

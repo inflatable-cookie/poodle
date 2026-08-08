@@ -26,7 +26,7 @@
     "artifactsSource": "packages/svelte/preview/artifacts/parity-report.json",
     "packages": [
       {
-        "packageName": "@poodle/svelte",
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportCount": 183,
         "previewedCount": 183,
         "contractOnlyCount": 0,

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CardToggleGroup } from "@poodle/react";
-import type { CardToggleItem } from "@poodle/react";
+import { CardToggleGroup } from "@inflatable-cookie/poodle-react";
+import type { CardToggleItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

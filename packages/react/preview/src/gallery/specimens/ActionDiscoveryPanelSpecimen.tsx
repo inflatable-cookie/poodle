@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { ActionDiscoveryPanel } from "@poodle/react";
+import { ActionDiscoveryPanel } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -25,7 +25,7 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   optional region role), NavCard (anchor-or-button dual root, badge,
   arrow), MetricTile (sparkline path built from data, trend arrow +
   label), CardRadioGroup + CardToggleGroup (both drive
-  toggleGroupTransition from @poodle/headless; roving tabindex, arrow
+  toggleGroupTransition from @inflatable-cookie/poodle-headless; roving tabindex, arrow
   nav skipping disabled, toggle group supports allowDeactivation),
   StatusBar. Verified 28/28. 91/132.
 - [x] Wave 4: toolbars + bars — Toolbar (getFocusableElements arrow
@@ -47,7 +47,7 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   status region), InlineListSection (generic render-prop list, framed
   Card wrap), ListContainer (PageHeader + state switch + built-in
   pagination), ResizeHandle (resizeAxisPosition/resizeDragDelta/
-  resizeKeydownStep from @poodle/headless; window listener pair attached
+  resizeKeydownStep from @inflatable-cookie/poodle-headless; window listener pair attached
   per drag). Verified 30/30. 106/132.
 - [x] Wave 5b: heavy pickers — ColorPicker (HSV state + pinned-hex model
   over the headless color converters; gradient pad with pointer capture
@@ -74,7 +74,7 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   via pending ref), BlockEditor (block CRUD, move up/down, HTML5 drag
   reorder, type-change + add-after Selects with custom trigger,
   typePicker/addPicker/block render props). marked@^18 added to
-  @poodle/react deps. Verified 18/18. 117/132.
+  @inflatable-cookie/poodle-react deps. Verified 18/18. 117/132.
 - [x] Wave 8 (partial): workstation + detail — SplitView (controlled/
   uncontrolled ratio + collapse pairs, rail-collapse with hysteresis,
   edge auto-collapse, ResizeHandle + CollapseToggle composition; drag

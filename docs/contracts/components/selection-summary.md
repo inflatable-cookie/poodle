@@ -272,7 +272,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
 - Uses `Icon` primitive with `name="x"` for the remove icon
 - Uses `TextLink` for the trailing clear action
-- Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte`
+- Imports `getUiPresentation` and `resolveSemanticControlSize` from `@inflatable-cookie/poodle-svelte`
 
 ## 10. GPUI Notes
 

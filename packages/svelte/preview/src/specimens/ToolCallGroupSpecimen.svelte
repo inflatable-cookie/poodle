@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ToolCallGroup, type TranscriptToolCall } from "@poodle/svelte";
+  import { ToolCallGroup, type TranscriptToolCall } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

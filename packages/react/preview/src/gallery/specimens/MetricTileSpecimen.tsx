@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { MetricTile } from "@poodle/react";
+import { MetricTile } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

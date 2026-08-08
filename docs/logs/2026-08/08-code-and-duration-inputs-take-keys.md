@@ -42,7 +42,7 @@ containing one still closes on the second press.
 
 ## DurationInput
 
-The contract names `@poodle/headless`' `duration.ts` as the authority for
+The contract names `@inflatable-cookie/poodle-headless`' `duration.ts` as the authority for
 segment semantics, and `poodle-headless` had no equivalent. `duration.rs` is a
 faithful port of `packages/core/src/duration.ts` — not a reimplementation from
 the prose, because the interesting behaviour is not in the prose:

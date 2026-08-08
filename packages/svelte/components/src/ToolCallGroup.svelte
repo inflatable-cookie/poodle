@@ -1,7 +1,7 @@
 <script lang="ts">
-  import "@poodle/styles/tool-call-group.css";
+  import "@inflatable-cookie/poodle-styles/tool-call-group.css";
 
-  import { toolRunStatus } from "@poodle/headless";
+  import { toolRunStatus } from "@inflatable-cookie/poodle-headless";
 
   import Icon from "./Icon.svelte";
   import ToolCall from "./ToolCall.svelte";

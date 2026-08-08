@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@poodle/react";
+import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const fileItems: MenuItem[] = [

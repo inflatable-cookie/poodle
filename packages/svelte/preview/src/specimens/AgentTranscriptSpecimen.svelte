@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AgentTranscript, type TranscriptItem } from "@poodle/svelte";
+  import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

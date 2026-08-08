@@ -3,10 +3,10 @@
   "artifact": "packages/react/preview/artifacts/accessibility-report.json",
   "previewBasePath": "/",
   "frameworks": [
-    "@poodle/react",
-    "@poodle/svelte"
+    "@inflatable-cookie/poodle-react",
+    "@inflatable-cookie/poodle-svelte"
   ],
-  "sharedContractNote": "@poodle/react is a reference-faithful re-implementation of the same component contracts as @poodle/svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+  "sharedContractNote": "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
   "automatedBoundary": [
     "Every docs section must have a machine-readable accessibility audit target.",
     "Each target must list audit-area status, automated checks, manual checks, and stable review routes.",
@@ -103,7 +103,7 @@
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "auditAreas": {
@@ -172,7 +172,7 @@
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "auditAreas": {
@@ -229,7 +229,7 @@
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "auditAreas": {
@@ -286,7 +286,7 @@
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "auditAreas": {
@@ -343,7 +343,7 @@
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "auditAreas": {
@@ -412,7 +412,7 @@
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "auditAreas": {
@@ -469,7 +469,7 @@
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
       "layer": "components",
-      "packageName": "@poodle/svelte + @poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte + @inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "auditAreas": {
@@ -526,7 +526,7 @@
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "auditAreas": {
@@ -583,7 +583,7 @@
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
       "layer": "components",
-      "packageName": "@poodle/svelte",
+      "packageName": "@inflatable-cookie/poodle-svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "auditAreas": {
@@ -640,7 +640,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@poodle/svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "auditAreas": {
@@ -693,7 +693,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@poodle/svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "auditAreas": {

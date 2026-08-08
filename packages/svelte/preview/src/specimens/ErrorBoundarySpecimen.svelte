@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ErrorBoundary, Surface, Text } from "@poodle/svelte";
+  import { Button, ErrorBoundary, Surface, Text } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let shouldThrow = $state(true);

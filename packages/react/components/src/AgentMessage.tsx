@@ -1,8 +1,8 @@
 import { Fragment, type ReactNode, useMemo } from "react";
 
-import "@poodle/styles/agent-message.css";
+import "@inflatable-cookie/poodle-styles/agent-message.css";
 
-import { blocksFromMarked, type MarkedToken, type MdBlock, type MdInline } from "@poodle/headless";
+import { blocksFromMarked, type MarkedToken, type MdBlock, type MdInline } from "@inflatable-cookie/poodle-headless";
 import { marked } from "marked";
 
 import { Code } from "./Code";

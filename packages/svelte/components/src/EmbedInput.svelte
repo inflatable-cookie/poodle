@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/embed-input.css";
+  import "@inflatable-cookie/poodle-styles/embed-input.css";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as Pill } from "./Pill.svelte";
 

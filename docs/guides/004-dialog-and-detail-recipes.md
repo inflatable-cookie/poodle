@@ -23,8 +23,8 @@ detail pages and modal forms without recreating old app-shell helpers.
 
 ```svelte
 <script lang="ts">
-  import { FormDialog } from "@poodle/svelte";
-  import { Field, TextInput, Select } from "@poodle/svelte";
+  import { FormDialog } from "@inflatable-cookie/poodle-svelte";
+  import { Field, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   let submitting = false;
@@ -131,9 +131,9 @@ detail-page updates app-owned.
 
 ```svelte
 <script lang="ts">
-  import { PageHeader } from "@poodle/svelte";
-  import { Card, Code, DetailItem, MetaBar, MetaItem, Pill, Tabs } from "@poodle/svelte";
-  import { DetailSection } from "@poodle/svelte";
+  import { PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Card, Code, DetailItem, MetaBar, MetaItem, Pill, Tabs } from "@inflatable-cookie/poodle-svelte";
+  import { DetailSection } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PageHeader title="Marketing site rebuild" backHref="/projects" backLabel="Back to projects">

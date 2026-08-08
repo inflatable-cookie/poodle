@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/icon.css";
+  import "@inflatable-cookie/poodle-styles/icon.css";
   import { fromStore } from "svelte/store";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
@@ -10,9 +10,9 @@
 
   /**
    * The icon to display. Accepts:
-   * - An `IconNodes` array (e.g. from `@poodle/icons-lucide` or `lucide-static/icon-nodes.json`)
+   * - An `IconNodes` array (e.g. from `@inflatable-cookie/poodle-icons-lucide` or `lucide-static/icon-nodes.json`)
    * - A string name resolved from the `IconProvider` icon set, or lazily
-   *   auto-imported from `@poodle/icons-lucide`
+   *   auto-imported from `@inflatable-cookie/poodle-icons-lucide`
    */
   let {
     icon = null,

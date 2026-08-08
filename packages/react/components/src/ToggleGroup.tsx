@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@poodle/headless";
+import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/toggle-group.css";
+import "@inflatable-cookie/poodle-styles/toggle-group.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, ToggleGroupOption } from "./types";

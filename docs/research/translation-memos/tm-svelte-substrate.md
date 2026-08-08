@@ -145,7 +145,7 @@ Poodle Tokens (styling)
 **Option A: Wrapped Compound (Recommended)**
 ```svelte
 <script>
-  import { Dialog } from "@poodle/svelte";
+  import { Dialog } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Dialog.Root>

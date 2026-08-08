@@ -1,8 +1,8 @@
-import "@poodle/styles/resize-handle.css";
+import "@inflatable-cookie/poodle-styles/resize-handle.css";
 
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 
-import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@poodle/headless";
+import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@inflatable-cookie/poodle-headless";
 
 import type { SplitOrientation } from "./types";
 

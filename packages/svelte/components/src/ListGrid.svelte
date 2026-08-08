@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/list-grid.css";
+  import "@inflatable-cookie/poodle-styles/list-grid.css";
   import type { Snippet } from "svelte";
 
   type ListGridVariant = "default" | "compact";

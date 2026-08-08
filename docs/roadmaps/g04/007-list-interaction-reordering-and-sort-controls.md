@@ -17,13 +17,13 @@ Primary repos: `poodle`
 
 - [ ] write contract for ReorderableList: items array, drag handles, drop
   indicators, onReorder callback, keyboard reorder support
-- [ ] implement ReorderableList composite in `@poodle/svelte`
+- [ ] implement ReorderableList composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for AutonomousList: items with add/remove/reorder, inline
   editing, empty state, max items
-- [ ] implement AutonomousList composite in `@poodle/svelte`
+- [ ] implement AutonomousList composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for OrderBy: sort fields, active sort, direction toggle,
   multi-sort, reset
-- [ ] implement OrderBy composite in `@poodle/svelte`
+- [ ] implement OrderBy composite in `@inflatable-cookie/poodle-svelte`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

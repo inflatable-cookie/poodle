@@ -1,4 +1,4 @@
-import "@poodle/styles/split-button.css";
+import "@inflatable-cookie/poodle-styles/split-button.css";
 
 import {
   useEffect,
@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { menuNavigableItems, registerDismissLayer, layerContains } from "@poodle/headless";
+import { menuNavigableItems, registerDismissLayer, layerContains } from "@inflatable-cookie/poodle-headless";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Spinner } from "./Spinner";

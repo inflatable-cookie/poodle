@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { MediaPicker } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
-  import type { MediaPickerItem } from "@poodle/svelte";
+  import { MediaPicker } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
+  import type { MediaPickerItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

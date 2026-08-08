@@ -1,5 +1,5 @@
 //! AgentChatInputSpec — the agent composer model, Rust mirror of the
-//! `@poodle/svelte` AgentChatInput type model and `agent-chat-input-model.ts`
+//! `@inflatable-cookie/poodle-svelte` AgentChatInput type model and `agent-chat-input-model.ts`
 //! logic.
 //!
 //! Contract: `docs/contracts/components/agent-chat-input.md`.

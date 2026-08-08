@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.designtokens.org/TR/2025.10/format/",
-  "name": "@poodle/tokens",
+  "name": "@inflatable-cookie/poodle-tokens",
   "version": "0.0.0",
   "canonicalFormat": "W3C DTCG 2025.10",
   "artifactBaseline": "Style Dictionary 4.x target shapes with bootstrap local emission script",

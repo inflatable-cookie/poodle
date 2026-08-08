@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/field-set.css";
+  import "@inflatable-cookie/poodle-styles/field-set.css";
   import type { Snippet } from "svelte";
   import { scaleToSpace } from "./internal";
   import type { SpaceScale } from "./types";

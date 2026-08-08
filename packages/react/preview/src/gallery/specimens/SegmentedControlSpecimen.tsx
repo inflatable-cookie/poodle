@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SegmentedControl, type SegmentedControlOption } from "@poodle/react";
+import { SegmentedControl, type SegmentedControlOption } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { ToastHost, type ToastHostStoreItem } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   type ToneSeed = "info" | "success" | "warning" | "error";

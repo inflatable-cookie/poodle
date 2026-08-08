@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Eyebrow, Surface } from "@poodle/react";
+import { Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 
 const container: CSSProperties = {
   display: "flex",

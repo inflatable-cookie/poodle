@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte";
+  import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

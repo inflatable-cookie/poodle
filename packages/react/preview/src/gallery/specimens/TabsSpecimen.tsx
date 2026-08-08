@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Tabs, type TabItem } from "@poodle/react";
+import { Tabs, type TabItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

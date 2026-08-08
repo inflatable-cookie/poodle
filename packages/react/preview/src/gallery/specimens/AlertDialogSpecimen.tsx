@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/react";
+import { AlertDialog, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 
 const rowStyle: CSSProperties = { display: "flex", alignItems: "center", gap: "0.75rem" };
 const hintStyle: CSSProperties = { margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" };

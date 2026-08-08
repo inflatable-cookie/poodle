@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { DataTable, Pill } from "@poodle/react";
-import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/react";
+import { DataTable, Pill } from "@inflatable-cookie/poodle-react";
+import type { TableColumn, TableFilters, TablePagination, TableRow } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

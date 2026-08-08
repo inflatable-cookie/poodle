@@ -1,4 +1,4 @@
-import { PageHeader, IconButton, MetaBar, Pill, TimeAgo } from "@poodle/react";
+import { PageHeader, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

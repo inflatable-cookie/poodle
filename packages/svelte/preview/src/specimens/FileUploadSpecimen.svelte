@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte";
-  import type { FileUploadItem } from "@poodle/svelte";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@inflatable-cookie/poodle-svelte";
+  import type { FileUploadItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

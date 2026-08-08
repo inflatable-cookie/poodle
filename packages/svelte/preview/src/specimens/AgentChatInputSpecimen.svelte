@@ -10,7 +10,7 @@
     type ModelCapabilityAxis,
     type ModelOption,
     type ModelSelection,
-  } from "@poodle/svelte";
+  } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -1,8 +1,8 @@
 {
-  "name": "@poodle/styles",
+  "name": "@inflatable-cookie/poodle-styles",
   "version": "0.1.0",
   "private": true,
-  "description": "Framework-neutral component stylesheets: unique poodle-* classes, data-attribute states, recipe hooks. Consumed by @poodle/svelte and @poodle/react.",
+  "description": "Framework-neutral component stylesheets: unique poodle-* classes, data-attribute states, recipe hooks. Consumed by @inflatable-cookie/poodle-svelte and @inflatable-cookie/poodle-react.",
   "exports": {
     "./*": "./src/*"
   },

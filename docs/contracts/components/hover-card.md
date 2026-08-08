@@ -91,7 +91,7 @@ OverlayPlacement:
 ### Behavior Machine
 
 Behavior classification: machine-backed (`hoverTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Hover-intent machine shared by Tooltip and HoverCard.
 

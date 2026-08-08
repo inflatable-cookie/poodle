@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Box } from "@poodle/react";
+import { Box } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const outlineStyle: CSSProperties = {

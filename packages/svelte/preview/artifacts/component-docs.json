@@ -69,7 +69,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Accordion } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"one\", title: \"Section One\", content: \"Content for section one.\" },\n    { value: \"two\", title: \"Section Two\", content: \"Content for section two.\" },\n  ];\n</script>\n\n<Accordion {items} selectionMode=\"single\" collapsible onValueChange={(value) => console.log(value)}>\n  {#snippet children(item)}\n    <p>{item.label} content.</p>\n  {/snippet}\n</Accordion>"
+    "usage": "<script lang=\"ts\">\n  import { Accordion } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"one\", title: \"Section One\", content: \"Content for section one.\" },\n    { value: \"two\", title: \"Section Two\", content: \"Content for section two.\" },\n  ];\n</script>\n\n<Accordion {items} selectionMode=\"single\" collapsible onValueChange={(value) => console.log(value)}>\n  {#snippet children(item)}\n    <p>{item.label} content.</p>\n  {/snippet}\n</Accordion>"
   },
   "alert-dialog": {
     "props": [
@@ -177,7 +177,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AlertDialog } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<AlertDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Delete item?\"\n  description=\"This action cannot be undone.\"\n  tone=\"danger\"\n  onConfirm={async () => {\n    await deleteItem();\n  }}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AlertDialog } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n</script>\n\n<AlertDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Delete item?\"\n  description=\"This action cannot be undone.\"\n  tone=\"danger\"\n  onConfirm={async () => {\n    await deleteItem();\n  }}\n/>"
   },
   "audio-player": {
     "props": [
@@ -220,7 +220,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AudioPlayer } from \"@poodle/svelte\";\n</script>\n\n<AudioPlayer src=\"/audio/podcast-episode.mp3\" showSpeedControl />"
+    "usage": "<script lang=\"ts\">\n  import { AudioPlayer } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AudioPlayer src=\"/audio/podcast-episode.mp3\" showSpeedControl />"
   },
   "block-editor": {
     "props": [
@@ -312,7 +312,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { BlockEditor } from \"@poodle/svelte\";\n\n  let blocks = [{ id: \"intro\", type: \"paragraph\", data: { text: \"Start writing...\" } }];\n</script>\n\n<BlockEditor {blocks} mode=\"single\" onChange={(nextBlocks) => (blocks = nextBlocks)} />"
+    "usage": "<script lang=\"ts\">\n  import { BlockEditor } from \"@inflatable-cookie/poodle-svelte\";\n\n  let blocks = [{ id: \"intro\", type: \"paragraph\", data: { text: \"Start writing...\" } }];\n</script>\n\n<BlockEditor {blocks} mode=\"single\" onChange={(nextBlocks) => (blocks = nextBlocks)} />"
   },
   "box": {
     "props": [
@@ -372,7 +372,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Box } from \"@poodle/svelte\";\n</script>\n\n<Box padding=\"md\" width=\"100%\">\n  <p>Contained content with padding.</p>\n</Box>"
+    "usage": "<script lang=\"ts\">\n  import { Box } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Box padding=\"md\" width=\"100%\">\n  <p>Contained content with padding.</p>\n</Box>"
   },
   "breadcrumbs": {
     "props": [
@@ -427,7 +427,7 @@
         "description": "Called when a callback-driven breadcrumb item is activated."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Breadcrumbs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"projects\", label: \"Projects\" },\n    { value: \"poodle\", label: \"Poodle\", current: true },\n  ];\n</script>\n\n<Breadcrumbs {items} onNavigate={(value) => console.log(value)} />"
+    "usage": "<script lang=\"ts\">\n  import { Breadcrumbs } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"projects\", label: \"Projects\" },\n    { value: \"poodle\", label: \"Poodle\", current: true },\n  ];\n</script>\n\n<Breadcrumbs {items} onNavigate={(value) => console.log(value)} />"
   },
   "bulk-action-bar": {
     "props": [
@@ -516,7 +516,7 @@
         "description": "Called when the select-all control is triggered."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { BulkActionBar } from \"@poodle/svelte\";\n\n  const actions = [\n    { id: \"delete\", label: \"Delete\", tone: \"danger\" },\n    { id: \"archive\", label: \"Archive\" },\n  ];\n</script>\n\n<BulkActionBar\n  selectionCount={3}\n  totalCount={50}\n  {actions}\n  showSelectAll\n  onAction={(id) => console.log(id)}\n  onClear={() => console.log(\"clear\")}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { BulkActionBar } from \"@inflatable-cookie/poodle-svelte\";\n\n  const actions = [\n    { id: \"delete\", label: \"Delete\", tone: \"danger\" },\n    { id: \"archive\", label: \"Archive\" },\n  ];\n</script>\n\n<BulkActionBar\n  selectionCount={3}\n  totalCount={50}\n  {actions}\n  showSelectAll\n  onAction={(id) => console.log(id)}\n  onClear={() => console.log(\"clear\")}\n/>"
   },
   "button": {
     "props": [
@@ -701,7 +701,7 @@
         "description": "Called when toggle state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Button variant=\"primary\" tone=\"default\" leadingIcon=\"plus\" onClick={() => console.log(\"clicked\")}>\n  Create Item\n</Button>"
+    "usage": "<script lang=\"ts\">\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Button variant=\"primary\" tone=\"default\" leadingIcon=\"plus\" onClick={() => console.log(\"clicked\")}>\n  Create Item\n</Button>"
   },
   "calendar": {
     "props": [
@@ -786,7 +786,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Calendar } from \"@poodle/svelte\";\n\n  let selectedDate: string | null = null;\n</script>\n\n<Calendar bind:value={selectedDate} weekStartsOn=\"monday\" locale=\"en-US\" />\n\n<!-- Range mode -->\n<Calendar mode=\"range\" ariaLabel=\"Select a date range\" />"
+    "usage": "<script lang=\"ts\">\n  import { Calendar } from \"@inflatable-cookie/poodle-svelte\";\n\n  let selectedDate: string | null = null;\n</script>\n\n<Calendar bind:value={selectedDate} weekStartsOn=\"monday\" locale=\"en-US\" />\n\n<!-- Range mode -->\n<Calendar mode=\"range\" ariaLabel=\"Select a date range\" />"
   },
   "callout": {
     "props": [
@@ -872,7 +872,7 @@
         "description": "Called when the dismiss control is activated."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Callout } from \"@poodle/svelte\";\n</script>\n\n<Callout\n  tone=\"warning\"\n  title=\"Heads up\"\n  message=\"This message can be dismissed.\"\n  dismissible\n  onDismiss={() => console.log(\"dismissed\")}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { Callout } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Callout\n  tone=\"warning\"\n  title=\"Heads up\"\n  message=\"This message can be dismissed.\"\n  dismissible\n  onDismiss={() => console.log(\"dismissed\")}\n/>"
   },
   "card": {
     "props": [
@@ -932,7 +932,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Card } from \"@poodle/svelte\";\n</script>\n\n<Card variant=\"default\" layout=\"vertical\">\n  {#snippet header()}Project Alpha{/snippet}\n  <p>A brief description of the project and its current status.</p>\n  {#snippet footer()}Updated 2 hours ago{/snippet}\n</Card>"
+    "usage": "<script lang=\"ts\">\n  import { Card } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Card variant=\"default\" layout=\"vertical\">\n  {#snippet header()}Project Alpha{/snippet}\n  <p>A brief description of the project and its current status.</p>\n  {#snippet footer()}Updated 2 hours ago{/snippet}\n</Card>"
   },
   "card-radio-group": {
     "props": [
@@ -998,7 +998,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CardRadioGroup } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"basic\", label: \"Basic\", description: \"For personal use\" },\n    { value: \"pro\", label: \"Pro\", description: \"For teams\" },\n  ];\n\n  let plan = \"basic\";\n</script>\n\n<CardRadioGroup {items} bind:value={plan} columns={2} />"
+    "usage": "<script lang=\"ts\">\n  import { CardRadioGroup } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"basic\", label: \"Basic\", description: \"For personal use\" },\n    { value: \"pro\", label: \"Pro\", description: \"For teams\" },\n  ];\n\n  let plan = \"basic\";\n</script>\n\n<CardRadioGroup {items} bind:value={plan} columns={2} />"
   },
   "checkbox": {
     "props": [
@@ -1089,7 +1089,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Checkbox } from \"@poodle/svelte\";\n\n  let agreed = false;\n</script>\n\n<Checkbox label=\"I agree to the terms\" bind:checked={agreed} selectedColor=\"#22c55e\" />"
+    "usage": "<script lang=\"ts\">\n  import { Checkbox } from \"@inflatable-cookie/poodle-svelte\";\n\n  let agreed = false;\n</script>\n\n<Checkbox label=\"I agree to the terms\" bind:checked={agreed} selectedColor=\"#22c55e\" />"
   },
   "code": {
     "props": [
@@ -1162,7 +1162,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Code } from \"@poodle/svelte\";\n\n  const source = `function greet(name: string) {\n  return \\`Hello, \\${name}!\\`;\n}`;\n</script>\n\n<Code {source} language=\"typescript\" showLineNumbers />"
+    "usage": "<script lang=\"ts\">\n  import { Code } from \"@inflatable-cookie/poodle-svelte\";\n\n  const source = `function greet(name: string) {\n  return \\`Hello, \\${name}!\\`;\n}`;\n</script>\n\n<Code {source} language=\"typescript\" showLineNumbers />"
   },
   "collapse-toggle": {
     "props": [
@@ -1217,7 +1217,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CollapseToggle } from \"@poodle/svelte\";\n\n  let collapsed = false;\n</script>\n\n<CollapseToggle {collapsed} direction=\"left\" ariaLabel=\"Toggle sidebar\" onToggle={(next) => (collapsed = next)} />"
+    "usage": "<script lang=\"ts\">\n  import { CollapseToggle } from \"@inflatable-cookie/poodle-svelte\";\n\n  let collapsed = false;\n</script>\n\n<CollapseToggle {collapsed} direction=\"left\" ariaLabel=\"Toggle sidebar\" onToggle={(next) => (collapsed = next)} />"
   },
   "collapsible": {
     "props": [
@@ -1293,7 +1293,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Collapsible } from \"@poodle/svelte\";\n</script>\n\n<Collapsible title=\"Advanced options\" description=\"Configure additional settings\">\n  <p>Advanced configuration fields go here.</p>\n</Collapsible>"
+    "usage": "<script lang=\"ts\">\n  import { Collapsible } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Collapsible title=\"Advanced options\" description=\"Configure additional settings\">\n  <p>Advanced configuration fields go here.</p>\n</Collapsible>"
   },
   "color-picker": {
     "props": [
@@ -1384,7 +1384,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ColorPicker } from \"@poodle/svelte\";\n\n  let color = \"#6366f1\";\n  const swatches = [\"#ef4444\", \"#f59e0b\", \"#10b981\", \"#3b82f6\", \"#8b5cf6\"];\n</script>\n\n<ColorPicker\n  value={color}\n  onChange={(nextColor) => (color = nextColor)}\n  {swatches}\n  showAlpha\n/>"
+    "usage": "<script lang=\"ts\">\n  import { ColorPicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let color = \"#6366f1\";\n  const swatches = [\"#ef4444\", \"#f59e0b\", \"#10b981\", \"#3b82f6\", \"#8b5cf6\"];\n</script>\n\n<ColorPicker\n  value={color}\n  onChange={(nextColor) => (color = nextColor)}\n  {swatches}\n  showAlpha\n/>"
   },
   "command-palette": {
     "props": [
@@ -1478,7 +1478,7 @@
         "description": "Called when the active (highlighted) item changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { CommandPalette } from \"@poodle/svelte\";\n\n  let open = false;\n  let query = \"\";\n  const items = [\n    { id: \"new-file\", title: \"New File\", shortcut: \"Ctrl+N\" },\n    { id: \"open-file\", title: \"Open File\", shortcut: \"Ctrl+O\" },\n  ];\n</script>\n\n<CommandPalette\n  {open}\n  {query}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  onQueryChange={(nextQuery) => (query = nextQuery)}\n  {items}\n  onCommandSelect={(id) => handleCommand(id)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CommandPalette } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n  let query = \"\";\n  const items = [\n    { id: \"new-file\", title: \"New File\", shortcut: \"Ctrl+N\" },\n    { id: \"open-file\", title: \"Open File\", shortcut: \"Ctrl+O\" },\n  ];\n</script>\n\n<CommandPalette\n  {open}\n  {query}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  onQueryChange={(nextQuery) => (query = nextQuery)}\n  {items}\n  onCommandSelect={(id) => handleCommand(id)}\n/>"
   },
   "confirm-action": {
     "props": [
@@ -1548,7 +1548,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ConfirmAction, Button } from \"@poodle/svelte\";\n</script>\n\n<ConfirmAction\n  title=\"Delete this record?\"\n  description=\"This action is permanent and cannot be undone.\"\n  tone=\"danger\"\n  triggerLabel=\"Delete\"\n  onConfirm={() => deleteRecord()}\n>\n  {#snippet trigger()}\n    <Button variant=\"ghost\" tone=\"danger\">Delete</Button>\n  {/snippet}\n</ConfirmAction>"
+    "usage": "<script lang=\"ts\">\n  import { ConfirmAction, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ConfirmAction\n  title=\"Delete this record?\"\n  description=\"This action is permanent and cannot be undone.\"\n  tone=\"danger\"\n  triggerLabel=\"Delete\"\n  onConfirm={() => deleteRecord()}\n>\n  {#snippet trigger()}\n    <Button variant=\"ghost\" tone=\"danger\">Delete</Button>\n  {/snippet}\n</ConfirmAction>"
   },
   "context-menu": {
     "props": [
@@ -1619,7 +1619,7 @@
         "description": "Called when a menu item is selected."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ContextMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"copy\", label: \"Copy\" },\n    { value: \"paste\", label: \"Paste\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<ContextMenu {items} onAction={(value) => handleAction(value)}>\n  <div>Right-click me</div>\n</ContextMenu>"
+    "usage": "<script lang=\"ts\">\n  import { ContextMenu } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"copy\", label: \"Copy\" },\n    { value: \"paste\", label: \"Paste\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<ContextMenu {items} onAction={(value) => handleAction(value)}>\n  <div>Right-click me</div>\n</ContextMenu>"
   },
   "data-table": {
     "props": [
@@ -1857,7 +1857,7 @@
         "description": "Called when the requested page size changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { DataTable } from \"@poodle/svelte\";\n\n  const columns = [\n    { id: \"name\", label: \"Name\", sortable: true },\n    { id: \"email\", label: \"Email\" },\n    { id: \"role\", label: \"Role\" },\n  ];\n\n  const rows = [\n    { id: \"1\", cells: { name: \"Alice\", email: \"alice@example.com\", role: \"Admin\" } },\n    { id: \"2\", cells: { name: \"Bob\", email: \"bob@example.com\", role: \"Editor\" } },\n  ];\n</script>\n\n<DataTable {columns} {rows} selectable showColumnVisibility showExport />"
+    "usage": "<script lang=\"ts\">\n  import { DataTable } from \"@inflatable-cookie/poodle-svelte\";\n\n  const columns = [\n    { id: \"name\", label: \"Name\", sortable: true },\n    { id: \"email\", label: \"Email\" },\n    { id: \"role\", label: \"Role\" },\n  ];\n\n  const rows = [\n    { id: \"1\", cells: { name: \"Alice\", email: \"alice@example.com\", role: \"Admin\" } },\n    { id: \"2\", cells: { name: \"Bob\", email: \"bob@example.com\", role: \"Editor\" } },\n  ];\n</script>\n\n<DataTable {columns} {rows} selectable showColumnVisibility showExport />"
   },
   "date-picker": {
     "props": [
@@ -1953,7 +1953,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DatePicker } from \"@poodle/svelte\";\n\n  let date: string | null = null;\n</script>\n\n<DatePicker\n  value={date}\n  onValueChange={(nextValue) => (date = nextValue)}\n  placeholder=\"Pick a date\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DatePicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let date: string | null = null;\n</script>\n\n<DatePicker\n  value={date}\n  onValueChange={(nextValue) => (date = nextValue)}\n  placeholder=\"Pick a date\"\n/>"
   },
   "date-range-picker": {
     "props": [
@@ -2049,7 +2049,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DateRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: null, end: null };\n</script>\n\n<DateRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date range\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DateRangePicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let range = { start: null, end: null };\n</script>\n\n<DateRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date range\"\n/>"
   },
   "date-time-picker": {
     "props": [
@@ -2145,7 +2145,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DateTimePicker } from \"@poodle/svelte\";\n\n  let dateTime = { date: null, time: null };\n</script>\n\n<DateTimePicker\n  value={dateTime}\n  onValueChange={(nextValue) => (dateTime = nextValue)}\n  placeholder=\"Select date and time\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DateTimePicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let dateTime = { date: null, time: null };\n</script>\n\n<DateTimePicker\n  value={dateTime}\n  onValueChange={(nextValue) => (dateTime = nextValue)}\n  placeholder=\"Select date and time\"\n/>"
   },
   "date-time-range-picker": {
     "props": [
@@ -2241,7 +2241,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DateTimeRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: { date: null, time: null }, end: { date: null, time: null } };\n</script>\n\n<DateTimeRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date and time range\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DateTimeRangePicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let range = { start: { date: null, time: null }, end: { date: null, time: null } };\n</script>\n\n<DateTimeRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date and time range\"\n/>"
   },
   "detail-item": {
     "props": [
@@ -2315,7 +2315,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DetailItem } from \"@poodle/svelte\";\n</script>\n\n<DetailItem label=\"Email\" value=\"alice@example.com\" />\n<DetailItem label=\"Role\" value=\"Administrator\" />\n<DetailItem label=\"Notes\" emptyText=\"No notes provided\" />"
+    "usage": "<script lang=\"ts\">\n  import { DetailItem } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<DetailItem label=\"Email\" value=\"alice@example.com\" />\n<DetailItem label=\"Role\" value=\"Administrator\" />\n<DetailItem label=\"Notes\" emptyText=\"No notes provided\" />"
   },
   "detail-section": {
     "props": [
@@ -2361,7 +2361,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DetailSection, DetailItem } from \"@poodle/svelte\";\n</script>\n\n<DetailSection title=\"Account Information\" description=\"Basic account details\">\n  <DetailItem label=\"Name\" value=\"Alice Johnson\" />\n  <DetailItem label=\"Email\" value=\"alice@example.com\" />\n</DetailSection>"
+    "usage": "<script lang=\"ts\">\n  import { DetailSection, DetailItem } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<DetailSection title=\"Account Information\" description=\"Basic account details\">\n  <DetailItem label=\"Name\" value=\"Alice Johnson\" />\n  <DetailItem label=\"Email\" value=\"alice@example.com\" />\n</DetailSection>"
   },
   "detail-shell": {
     "props": [
@@ -2417,7 +2417,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DetailShell, DetailSection } from \"@poodle/svelte\";\n</script>\n\n<DetailShell title=\"User Profile\" state=\"ready\">\n  <DetailSection title=\"Overview\">\n    <p>User profile content goes here.</p>\n  </DetailSection>\n</DetailShell>"
+    "usage": "<script lang=\"ts\">\n  import { DetailShell, DetailSection } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<DetailShell title=\"User Profile\" state=\"ready\">\n  <DetailSection title=\"Overview\">\n    <p>User profile content goes here.</p>\n  </DetailSection>\n</DetailShell>"
   },
   "dialog": {
     "props": [
@@ -2567,7 +2567,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Dialog, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Dialog</Button>\n\n<Dialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Edit Settings\"\n  description=\"Update your preferences below.\"\n  showCloseButton\n  width=\"lg\"\n>\n  <p>Dialog content here.</p>\n  {#snippet actions()}\n    <Button variant=\"secondary\" onClick={() => (open = false)}>Cancel</Button>\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Dialog>\n\n<!-- Bare mode: no padding, consumer controls all layout -->\n<Dialog open={open} onOpenChange={(nextOpen) => (open = nextOpen)} bare width=\"sm\">\n  <div style=\"padding: 2rem;\">Custom bare content</div>\n</Dialog>"
+    "usage": "<script lang=\"ts\">\n  import { Dialog, Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Dialog</Button>\n\n<Dialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Edit Settings\"\n  description=\"Update your preferences below.\"\n  showCloseButton\n  width=\"lg\"\n>\n  <p>Dialog content here.</p>\n  {#snippet actions()}\n    <Button variant=\"secondary\" onClick={() => (open = false)}>Cancel</Button>\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Dialog>\n\n<!-- Bare mode: no padding, consumer controls all layout -->\n<Dialog open={open} onOpenChange={(nextOpen) => (open = nextOpen)} bare width=\"sm\">\n  <div style=\"padding: 2rem;\">Custom bare content</div>\n</Dialog>"
   },
   "dock-region": {
     "props": [
@@ -2685,7 +2685,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DockRegion } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"explorer\", label: \"Explorer\", icon: \"folder\" },\n    { id: \"search\", label: \"Search\", icon: \"search\" },\n  ];\n</script>\n\n<DockRegion edge=\"left\" {items} value=\"explorer\">\n  {#snippet children(activeItem)}\n    {#if activeItem?.id === \"explorer\"}\n      <p>File explorer content</p>\n    {:else}\n      <p>Search panel content</p>\n    {/if}\n  {/snippet}\n</DockRegion>"
+    "usage": "<script lang=\"ts\">\n  import { DockRegion } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { id: \"explorer\", label: \"Explorer\", icon: \"folder\" },\n    { id: \"search\", label: \"Search\", icon: \"search\" },\n  ];\n</script>\n\n<DockRegion edge=\"left\" {items} value=\"explorer\">\n  {#snippet children(activeItem)}\n    {#if activeItem?.id === \"explorer\"}\n      <p>File explorer content</p>\n    {:else}\n      <p>Search panel content</p>\n    {/if}\n  {/snippet}\n</DockRegion>"
   },
   "drawer": {
     "props": [
@@ -2785,7 +2785,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Drawer, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Drawer</Button>\n\n<Drawer open={open} onOpenChange={(nextOpen) => (open = nextOpen)} edge=\"right\" title=\"Item Details\">\n  <p>Detail content goes here.</p>\n  {#snippet actions()}\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Drawer>"
+    "usage": "<script lang=\"ts\">\n  import { Drawer, Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Drawer</Button>\n\n<Drawer open={open} onOpenChange={(nextOpen) => (open = nextOpen)} edge=\"right\" title=\"Item Details\">\n  <p>Detail content goes here.</p>\n  {#snippet actions()}\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Drawer>"
   },
   "duration-input": {
     "props": [
@@ -2870,7 +2870,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DurationInput } from \"@poodle/svelte\";\n\n  let hours = 1;\n  let minutes = 30;\n  let seconds = 0;\n</script>\n\n<DurationInput bind:hours bind:minutes bind:seconds showSeconds={false} />"
+    "usage": "<script lang=\"ts\">\n  import { DurationInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let hours = 1;\n  let minutes = 30;\n  let seconds = 0;\n</script>\n\n<DurationInput bind:hours bind:minutes bind:seconds showSeconds={false} />"
   },
   "editable-label": {
     "props": [
@@ -2971,7 +2971,7 @@
         "description": "Called when the edit is cancelled."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { EditableLabel } from \"@poodle/svelte\";\n\n  let name = \"Untitled Document\";\n</script>\n\n<EditableLabel\n  value={name}\n  activationMode=\"doubleClick\"\n  showEditIcon\n  onCommit={({ value }) => {\n    name = value;\n    saveName(value);\n  }}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { EditableLabel } from \"@inflatable-cookie/poodle-svelte\";\n\n  let name = \"Untitled Document\";\n</script>\n\n<EditableLabel\n  value={name}\n  activationMode=\"doubleClick\"\n  showEditIcon\n  onCommit={({ value }) => {\n    name = value;\n    saveName(value);\n  }}\n/>"
   },
   "editable-list": {
     "props": [
@@ -3152,7 +3152,7 @@
         "description": "Called when the cancel action is triggered."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { EditableList } from \"@poodle/svelte\";\n\n  let items = [\n    { id: \"1\", label: \"First item\" },\n    { id: \"2\", label: \"Second item\" },\n  ];\n</script>\n\n<EditableList bind:items editable addLabel=\"Add step\" addPlaceholder=\"New step\" />"
+    "usage": "<script lang=\"ts\">\n  import { EditableList } from \"@inflatable-cookie/poodle-svelte\";\n\n  let items = [\n    { id: \"1\", label: \"First item\" },\n    { id: \"2\", label: \"Second item\" },\n  ];\n</script>\n\n<EditableList bind:items editable addLabel=\"Add step\" addPlaceholder=\"New step\" />"
   },
   "embed-input": {
     "props": [
@@ -3234,7 +3234,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { EmbedInput } from \"@poodle/svelte\";\n\n  let url = \"\";\n  let parsed = null;\n</script>\n\n<EmbedInput\n  value={url}\n  onValueChange={(nextValue) => (url = nextValue)}\n  onParse={(nextParsed) => (parsed = nextParsed)}\n  placeholder=\"Paste a YouTube or Vimeo URL...\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { EmbedInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let url = \"\";\n  let parsed = null;\n</script>\n\n<EmbedInput\n  value={url}\n  onValueChange={(nextValue) => (url = nextValue)}\n  onParse={(nextParsed) => (parsed = nextParsed)}\n  placeholder=\"Paste a YouTube or Vimeo URL...\"\n/>"
   },
   "embed-preview": {
     "props": [
@@ -3271,7 +3271,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { EmbedPreview } from \"@poodle/svelte\";\n\n  export let parsed;\n</script>\n\n<EmbedPreview {parsed} aspectRatio={16/9} />"
+    "usage": "<script lang=\"ts\">\n  import { EmbedPreview } from \"@inflatable-cookie/poodle-svelte\";\n\n  export let parsed;\n</script>\n\n<EmbedPreview {parsed} aspectRatio={16/9} />"
   },
   "empty-state": {
     "props": [
@@ -3323,7 +3323,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { EmptyState } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<EmptyState title=\"No results found\" message=\"Try adjusting your search or filters.\" size=\"compact\">\n  {#snippet visual()}\n    <Search size={16} />\n  {/snippet}\n  {#snippet actions()}\n    <Button variant=\"secondary\">Clear filters</Button>\n  {/snippet}\n</EmptyState>"
+    "usage": "<script lang=\"ts\">\n  import { EmptyState } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<EmptyState title=\"No results found\" message=\"Try adjusting your search or filters.\" size=\"compact\">\n  {#snippet visual()}\n    <Search size={16} />\n  {/snippet}\n  {#snippet actions()}\n    <Button variant=\"secondary\">Clear filters</Button>\n  {/snippet}\n</EmptyState>"
   },
   "eyebrow": {
     "props": [
@@ -3341,7 +3341,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Eyebrow } from \"@poodle/svelte\";\n</script>\n\n<Eyebrow>Featured</Eyebrow>"
+    "usage": "<script lang=\"ts\">\n  import { Eyebrow } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Eyebrow>Featured</Eyebrow>"
   },
   "field": {
     "props": [
@@ -3423,7 +3423,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Field } from \"@poodle/svelte\";\n\n  let email = \"\";\n</script>\n\n<Field id=\"email\" label=\"Email address\" description=\"We'll never share your email.\" required>\n  <input id=\"email\" type=\"email\" bind:value={email} />\n</Field>\n\n<!-- With progressive-disclosure hint -->\n<Field id=\"slug\" label=\"URL Slug\" hint=\"A URL-friendly identifier. Lowercase letters, numbers, and hyphens only.\">\n  <input id=\"slug\" type=\"text\" />\n</Field>"
+    "usage": "<script lang=\"ts\">\n  import { Field } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n</script>\n\n<Field id=\"email\" label=\"Email address\" description=\"We'll never share your email.\" required>\n  <input id=\"email\" type=\"email\" bind:value={email} />\n</Field>\n\n<!-- With progressive-disclosure hint -->\n<Field id=\"slug\" label=\"URL Slug\" hint=\"A URL-friendly identifier. Lowercase letters, numbers, and hyphens only.\">\n  <input id=\"slug\" type=\"text\" />\n</Field>"
   },
   "field-set": {
     "props": [
@@ -3459,7 +3459,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FieldSet, Field, TextInput } from \"@poodle/svelte\";\n</script>\n\n<FieldSet legend=\"Address\" columns={2}>\n  <Field id=\"street\" label=\"Street\" span=\"full\">\n    <TextInput id=\"street\" />\n  </Field>\n  <Field id=\"city\" label=\"City\">\n    <TextInput id=\"city\" />\n  </Field>\n  <Field id=\"zip\" label=\"ZIP Code\">\n    <TextInput id=\"zip\" />\n  </Field>\n</FieldSet>"
+    "usage": "<script lang=\"ts\">\n  import { FieldSet, Field, TextInput } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<FieldSet legend=\"Address\" columns={2}>\n  <Field id=\"street\" label=\"Street\" span=\"full\">\n    <TextInput id=\"street\" />\n  </Field>\n  <Field id=\"city\" label=\"City\">\n    <TextInput id=\"city\" />\n  </Field>\n  <Field id=\"zip\" label=\"ZIP Code\">\n    <TextInput id=\"zip\" />\n  </Field>\n</FieldSet>"
   },
   "file-upload": {
     "props": [
@@ -3564,7 +3564,7 @@
         "description": "Called when a file is removed."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { DEFAULT_COMPRESSION, FileUpload } from \"@poodle/svelte\";\n\n  let files = [];\n</script>\n\n<FileUpload\n  accept=\"image/*,.pdf\"\n  multiple\n  maxSize={5242880}\n  compress\n  compressionOptions={DEFAULT_COMPRESSION}\n  bind:files\n  onUpload={(selectedFiles) => console.log(selectedFiles)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DEFAULT_COMPRESSION, FileUpload } from \"@inflatable-cookie/poodle-svelte\";\n\n  let files = [];\n</script>\n\n<FileUpload\n  accept=\"image/*,.pdf\"\n  multiple\n  maxSize={5242880}\n  compress\n  compressionOptions={DEFAULT_COMPRESSION}\n  bind:files\n  onUpload={(selectedFiles) => console.log(selectedFiles)}\n/>"
   },
   "filter-toolbar": {
     "props": [
@@ -3648,7 +3648,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FilterToolbar, Button, Select } from \"@poodle/svelte\";\n</script>\n\n<FilterToolbar ariaLabel=\"User filters\" collapsible>\n  {#snippet actions()}\n    <Button variant=\"ghost\" size=\"sm\">Reset</Button>\n  {/snippet}\n\n  <Select options={[{ value: \"admin\", label: \"Admin\" }, { value: \"user\", label: \"User\" }]} placeholder=\"Role\" />\n</FilterToolbar>"
+    "usage": "<script lang=\"ts\">\n  import { FilterToolbar, Button, Select } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<FilterToolbar ariaLabel=\"User filters\" collapsible>\n  {#snippet actions()}\n    <Button variant=\"ghost\" size=\"sm\">Reset</Button>\n  {/snippet}\n\n  <Select options={[{ value: \"admin\", label: \"Admin\" }, { value: \"user\", label: \"User\" }]} placeholder=\"Role\" />\n</FilterToolbar>"
   },
   "form-actions": {
     "props": [
@@ -3676,7 +3676,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FormActions } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const dangerItems = [\n    {\n      label: \"Discard draft\",\n      onSelect: () => console.log(\"discard\"),\n    },\n  ];\n</script>\n\n<FormActions align=\"end\" {dangerItems}>\n  <Button variant=\"secondary\">Back</Button>\n  <Button variant=\"primary\">Save</Button>\n  {#snippet danger()}\n    <Button variant=\"ghost\" tone=\"danger\">Discard draft</Button>\n  {/snippet}\n</FormActions>"
+    "usage": "<script lang=\"ts\">\n  import { FormActions } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  const dangerItems = [\n    {\n      label: \"Discard draft\",\n      onSelect: () => console.log(\"discard\"),\n    },\n  ];\n</script>\n\n<FormActions align=\"end\" {dangerItems}>\n  <Button variant=\"secondary\">Back</Button>\n  <Button variant=\"primary\">Save</Button>\n  {#snippet danger()}\n    <Button variant=\"ghost\" tone=\"danger\">Discard draft</Button>\n  {/snippet}\n</FormActions>"
   },
   "form-dialog": {
     "props": [
@@ -3802,7 +3802,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FormDialog } from \"@poodle/svelte\";\n\n  let open = false;\n  let submitting = false;\n</script>\n\n<FormDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Create User\"\n  subtitle=\"Invite a new teammate.\"\n  {submitting}\n  onSubmit={() => {\n    submitting = true;\n  }}\n>\n  {#snippet body(submitting)}\n    <input type=\"text\" placeholder=\"Name\" />\n    <input type=\"email\" placeholder=\"Email\" disabled={submitting} />\n  {/snippet}\n</FormDialog>"
+    "usage": "<script lang=\"ts\">\n  import { FormDialog } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n  let submitting = false;\n</script>\n\n<FormDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Create User\"\n  subtitle=\"Invite a new teammate.\"\n  {submitting}\n  onSubmit={() => {\n    submitting = true;\n  }}\n>\n  {#snippet body(submitting)}\n    <input type=\"text\" placeholder=\"Name\" />\n    <input type=\"email\" placeholder=\"Email\" disabled={submitting} />\n  {/snippet}\n</FormDialog>"
   },
   "form-layout": {
     "props": [
@@ -3848,7 +3848,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FormLayout } from \"@poodle/svelte\";\n  import { Field, Button } from \"@poodle/svelte\";\n</script>\n\n<FormLayout columns={2} description=\"Enter your details below.\">\n  <Field id=\"first\" label=\"First Name\" required>\n    <input id=\"first\" type=\"text\" />\n  </Field>\n  <Field id=\"last\" label=\"Last Name\" required>\n    <input id=\"last\" type=\"text\" />\n  </Field>\n  {#snippet actions()}\n    <Button variant=\"primary\">Submit</Button>\n  {/snippet}\n</FormLayout>"
+    "usage": "<script lang=\"ts\">\n  import { FormLayout } from \"@inflatable-cookie/poodle-svelte\";\n  import { Field, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<FormLayout columns={2} description=\"Enter your details below.\">\n  <Field id=\"first\" label=\"First Name\" required>\n    <input id=\"first\" type=\"text\" />\n  </Field>\n  <Field id=\"last\" label=\"Last Name\" required>\n    <input id=\"last\" type=\"text\" />\n  </Field>\n  {#snippet actions()}\n    <Button variant=\"primary\">Submit</Button>\n  {/snippet}\n</FormLayout>"
   },
   "grid": {
     "props": [
@@ -3896,7 +3896,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Grid } from \"@poodle/svelte\";\n</script>\n\n<Grid columns=\"1fr 1fr 1fr\" gap=\"lg\" padding=\"md\">\n  <div>Column 1</div>\n  <div>Column 2</div>\n  <div>Column 3</div>\n</Grid>"
+    "usage": "<script lang=\"ts\">\n  import { Grid } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Grid columns=\"1fr 1fr 1fr\" gap=\"lg\" padding=\"md\">\n  <div>Column 1</div>\n  <div>Column 2</div>\n  <div>Column 3</div>\n</Grid>"
   },
   "hover-card": {
     "props": [
@@ -3954,7 +3954,7 @@
         "description": "Called when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { HoverCard } from \"@poodle/svelte\";\n</script>\n\n<HoverCard placement=\"top\">\n  {#snippet trigger()}\n    <a href=\"/profile\">@alice</a>\n  {/snippet}\n  <div>\n    <strong>Alice Johnson</strong>\n    <p>Software Engineer</p>\n  </div>\n</HoverCard>"
+    "usage": "<script lang=\"ts\">\n  import { HoverCard } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<HoverCard placement=\"top\">\n  {#snippet trigger()}\n    <a href=\"/profile\">@alice</a>\n  {/snippet}\n  <div>\n    <strong>Alice Johnson</strong>\n    <p>Software Engineer</p>\n  </div>\n</HoverCard>"
   },
   "icon": {
     "props": [
@@ -3962,7 +3962,7 @@
         "name": "icon",
         "type": "IconNodes | string | null",
         "required": true,
-        "description": "The icon to display. Pass an IconNodes array (from @poodle/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals."
+        "description": "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals."
       },
       {
         "name": "name",
@@ -3997,7 +3997,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<!-- Tree-shakeable: import individual icons from @poodle/icons-lucide -->\n<script lang=\"ts\">\n  import { Icon } from \"@poodle/svelte\";\n  import { search, heart, star } from \"@poodle/icons-lucide\";\n</script>\n\n<Icon icon={search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={heart} size=\"sm\" />\n<Icon icon={star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or built-in internals -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Bulk icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@poodle/svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
+    "usage": "<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-icons-lucide -->\n<script lang=\"ts\">\n  import { Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { search, heart, star } from \"@inflatable-cookie/poodle-icons-lucide\";\n</script>\n\n<Icon icon={search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={heart} size=\"sm\" />\n<Icon icon={star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or built-in internals -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Bulk icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
   },
   "icon-provider": {
     "props": [
@@ -4015,7 +4015,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { IconProvider, Icon } from \"@poodle/svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<!-- All 1700+ Lucide icons available by name within the provider -->\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n  <Icon icon=\"shield-check\" />\n</IconProvider>"
+    "usage": "<script lang=\"ts\">\n  import { IconProvider, Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<!-- All 1700+ Lucide icons available by name within the provider -->\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n  <Icon icon=\"shield-check\" />\n</IconProvider>"
   },
   "icon-button": {
     "props": [
@@ -4132,7 +4132,7 @@
         "description": "Called when toggle state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@poodle/svelte\";\n  import { trash2, plus, settings } from \"@poodle/icons-lucide\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
+    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@inflatable-cookie/poodle-svelte\";\n  import { trash2, plus, settings } from \"@inflatable-cookie/poodle-icons-lucide\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
   },
   "list-card": {
     "props": [
@@ -4278,7 +4278,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ListCard } from \"@poodle/svelte\";\n</script>\n\n<ListCard title=\"Alice Johnson\" subtitle=\"Software Engineer\" meta=\"Active\" href=\"/team/alice\" onClick={() => console.log(\"open\")}>\n  {#snippet leading()}\n    <img src=\"/avatars/alice.jpg\" alt=\"Alice\" />\n  {/snippet}\n</ListCard>"
+    "usage": "<script lang=\"ts\">\n  import { ListCard } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ListCard title=\"Alice Johnson\" subtitle=\"Software Engineer\" meta=\"Active\" href=\"/team/alice\" onClick={() => console.log(\"open\")}>\n  {#snippet leading()}\n    <img src=\"/avatars/alice.jpg\" alt=\"Alice\" />\n  {/snippet}\n</ListCard>"
   },
   "list-card-counter": {
     "props": [
@@ -4315,7 +4315,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ListCardCounter } from \"@poodle/svelte\";\n  import { messageSquare } from \"lucide-svelte\";\n</script>\n\n<ListCardCounter icon={messageSquare} count={12} tooltip=\"12 comments\" href=\"/comments\" />"
+    "usage": "<script lang=\"ts\">\n  import { ListCardCounter } from \"@inflatable-cookie/poodle-svelte\";\n  import { messageSquare } from \"lucide-svelte\";\n</script>\n\n<ListCardCounter icon={messageSquare} count={12} tooltip=\"12 comments\" href=\"/comments\" />"
   },
   "log-list": {
     "props": [
@@ -4472,7 +4472,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { LogList, type LogEntry, type LogFilter } from \"@poodle/svelte\";\n\n  const filters: LogFilter[] = [\n    {\n      field: \"action\",\n      label: \"Action\",\n      type: \"select\",\n      options: [\n        { value: \"create\", label: \"Create\" },\n        { value: \"update\", label: \"Update\" },\n        { value: \"delete\", label: \"Delete\" },\n      ],\n    },\n  ];\n\n  const entries: LogEntry[] = [\n    {\n      id: \"1\",\n      occurredAt: new Date().toISOString(),\n      actor: { id: \"u-1\", name: \"Alice Johnson\" },\n      action: \"create\",\n      resourceType: \"project\",\n      resourceId: \"project-1\",\n      resourceLabel: \"Launch Plan\",\n    },\n  ];\n\n  let filterValues = {};\n</script>\n\n<LogList\n  {entries}\n  {filters}\n  {filterValues}\n  onFilterChange={(field, value) => {\n    filterValues = { ...filterValues, [field]: value };\n  }}\n  getActorHref={(actor) => `/users/${actor.id}`}\n  getResourceHref={(resourceType, resourceId) => `/${resourceType}/${resourceId}`}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { LogList, type LogEntry, type LogFilter } from \"@inflatable-cookie/poodle-svelte\";\n\n  const filters: LogFilter[] = [\n    {\n      field: \"action\",\n      label: \"Action\",\n      type: \"select\",\n      options: [\n        { value: \"create\", label: \"Create\" },\n        { value: \"update\", label: \"Update\" },\n        { value: \"delete\", label: \"Delete\" },\n      ],\n    },\n  ];\n\n  const entries: LogEntry[] = [\n    {\n      id: \"1\",\n      occurredAt: new Date().toISOString(),\n      actor: { id: \"u-1\", name: \"Alice Johnson\" },\n      action: \"create\",\n      resourceType: \"project\",\n      resourceId: \"project-1\",\n      resourceLabel: \"Launch Plan\",\n    },\n  ];\n\n  let filterValues = {};\n</script>\n\n<LogList\n  {entries}\n  {filters}\n  {filterValues}\n  onFilterChange={(field, value) => {\n    filterValues = { ...filterValues, [field]: value };\n  }}\n  getActorHref={(actor) => `/users/${actor.id}`}\n  getResourceHref={(resourceType, resourceId) => `/${resourceType}/${resourceId}`}\n/>"
   },
   "markdown-editor": {
     "props": [
@@ -4539,7 +4539,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@poodle/svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@inflatable-cookie/poodle-svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
   },
   "media-picker": {
     "props": [
@@ -4616,7 +4616,7 @@
         "description": "Called when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", label: \"hero.jpg\", thumbnailUrl: \"/images/hero.jpg\", kind: \"image\" },\n    { id: \"2\", label: \"logo.png\", thumbnailUrl: \"/images/logo.png\", kind: \"image\" },\n  ];\n</script>\n\n<MediaPicker\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  {items}\n  accept=\"image/*\"\n  onSelect={(item) => console.log(item)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", label: \"hero.jpg\", thumbnailUrl: \"/images/hero.jpg\", kind: \"image\" },\n    { id: \"2\", label: \"logo.png\", thumbnailUrl: \"/images/logo.png\", kind: \"image\" },\n  ];\n</script>\n\n<MediaPicker\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  {items}\n  accept=\"image/*\"\n  onSelect={(item) => console.log(item)}\n/>"
   },
   "media-browse-panel": {
     "props": [
@@ -4688,7 +4688,7 @@
         "description": "Called when the load-more action is triggered."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaBrowsePanel, type MediaPickerItem } from \"@poodle/svelte\";\n\n  const items: MediaPickerItem[] = [\n    { id: \"1\", label: \"Hero banner\", kind: \"image\", meta: \"Image\" },\n    { id: \"2\", label: \"Launch trailer\", kind: \"video\", meta: \"Video\" },\n  ];\n</script>\n\n<MediaBrowsePanel\n  {items}\n  hasMore\n  onSelect={(item) => console.log(item)}\n  onLoadMore={() => console.log(\"load more\")}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MediaBrowsePanel, type MediaPickerItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: MediaPickerItem[] = [\n    { id: \"1\", label: \"Hero banner\", kind: \"image\", meta: \"Image\" },\n    { id: \"2\", label: \"Launch trailer\", kind: \"video\", meta: \"Video\" },\n  ];\n</script>\n\n<MediaBrowsePanel\n  {items}\n  hasMore\n  onSelect={(item) => console.log(item)}\n  onLoadMore={() => console.log(\"load more\")}\n/>"
   },
   "media-preview": {
     "props": [
@@ -4788,7 +4788,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MediaPreview } from \"@poodle/svelte\";\n</script>\n\n<MediaPreview\n  title=\"Sunset at the Beach\"\n  eyebrow=\"Photography\"\n  description=\"A beautiful sunset captured at the coast.\"\n  kind=\"image\"\n  aspectRatio=\"landscape\"\n>\n  {#snippet mediaContent()}\n    <img src=\"/photos/sunset.jpg\" alt=\"Sunset\" />\n  {/snippet}\n</MediaPreview>"
+    "usage": "<script lang=\"ts\">\n  import { MediaPreview } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MediaPreview\n  title=\"Sunset at the Beach\"\n  eyebrow=\"Photography\"\n  description=\"A beautiful sunset captured at the coast.\"\n  kind=\"image\"\n  aspectRatio=\"landscape\"\n>\n  {#snippet mediaContent()}\n    <img src=\"/photos/sunset.jpg\" alt=\"Sunset\" />\n  {/snippet}\n</MediaPreview>"
   },
   "media-thumbnail": {
     "props": [
@@ -4860,7 +4860,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MediaThumbnail } from \"@poodle/svelte\";\n</script>\n\n<MediaThumbnail kind=\"video\" aspectRatio=\"landscape\" badge=\"HD\" meta=\"3:24\">\n  <img src=\"/thumbnails/video-preview.jpg\" alt=\"Video preview\" />\n</MediaThumbnail>"
+    "usage": "<script lang=\"ts\">\n  import { MediaThumbnail } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MediaThumbnail kind=\"video\" aspectRatio=\"landscape\" badge=\"HD\" meta=\"3:24\">\n  <img src=\"/thumbnails/video-preview.jpg\" alt=\"Video preview\" />\n</MediaThumbnail>"
   },
   "menu": {
     "props": [
@@ -4925,7 +4925,7 @@
         "description": "Fires when a menu item is selected."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Menu } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"edit\", label: \"Edit\" },\n    { value: \"duplicate\", label: \"Duplicate\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<Menu {items} onAction={(value) => console.log(value)}>\n  {#snippet trigger()}\n    <Button variant=\"secondary\">Actions</Button>\n  {/snippet}\n</Menu>"
+    "usage": "<script lang=\"ts\">\n  import { Menu } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"edit\", label: \"Edit\" },\n    { value: \"duplicate\", label: \"Duplicate\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<Menu {items} onAction={(value) => console.log(value)}>\n  {#snippet trigger()}\n    <Button variant=\"secondary\">Actions</Button>\n  {/snippet}\n</Menu>"
   },
   "menubar": {
     "props": [
@@ -4986,7 +4986,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Menubar } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"file\", label: \"File\", items: [\n      { value: \"new\", label: \"New\" },\n      { value: \"open\", label: \"Open\" },\n    ]},\n    { value: \"edit\", label: \"Edit\", items: [\n      { value: \"undo\", label: \"Undo\" },\n      { value: \"redo\", label: \"Redo\" },\n    ]},\n  ];\n</script>\n\n<Menubar {items} onAction={(value) => console.log(value)} />"
+    "usage": "<script lang=\"ts\">\n  import { Menubar } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"file\", label: \"File\", items: [\n      { value: \"new\", label: \"New\" },\n      { value: \"open\", label: \"Open\" },\n    ]},\n    { value: \"edit\", label: \"Edit\", items: [\n      { value: \"undo\", label: \"Undo\" },\n      { value: \"redo\", label: \"Redo\" },\n    ]},\n  ];\n</script>\n\n<Menubar {items} onAction={(value) => console.log(value)} />"
   },
   "navigation-menu": {
     "props": [
@@ -5046,7 +5046,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NavigationMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"components\", label: \"Components\" },\n  ];\n\n  let active = \"components\";\n</script>\n\n<NavigationMenu {items} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => { if (value) active = value; }}>\n  {#snippet children(activeValue, activeItem)}\n    <p>Active section: {activeItem?.label ?? activeValue}</p>\n  {/snippet}\n</NavigationMenu>"
+    "usage": "<script lang=\"ts\">\n  import { NavigationMenu } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"components\", label: \"Components\" },\n  ];\n\n  let active = \"components\";\n</script>\n\n<NavigationMenu {items} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => { if (value) active = value; }}>\n  {#snippet children(activeValue, activeItem)}\n    <p>Active section: {activeItem?.label ?? activeValue}</p>\n  {/snippet}\n</NavigationMenu>"
   },
   "meta-bar": {
     "props": [
@@ -5070,7 +5070,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MetaBar, MetaItem } from \"@poodle/svelte\";\n</script>\n\n<MetaBar ariaLabel=\"Document metadata\">\n  <MetaItem label=\"Status\">Published</MetaItem>\n  <MetaItem label=\"Author\">Alice</MetaItem>\n  <MetaItem>3 min read</MetaItem>\n</MetaBar>"
+    "usage": "<script lang=\"ts\">\n  import { MetaBar, MetaItem } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MetaBar ariaLabel=\"Document metadata\">\n  <MetaItem label=\"Status\">Published</MetaItem>\n  <MetaItem label=\"Author\">Alice</MetaItem>\n  <MetaItem>3 min read</MetaItem>\n</MetaBar>"
   },
   "meta-item": {
     "props": [
@@ -5094,7 +5094,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MetaItem } from \"@poodle/svelte\";\n</script>\n\n<MetaItem label=\"Updated\">March 30, 2026</MetaItem>"
+    "usage": "<script lang=\"ts\">\n  import { MetaItem } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MetaItem label=\"Updated\">March 30, 2026</MetaItem>"
   },
   "meter": {
     "props": [
@@ -5143,7 +5143,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Meter } from \"@poodle/svelte\";\n</script>\n\n<Meter value={72} min={0} max={100} low={25} high={75} optimum={50} ariaLabel=\"Disk usage\" />"
+    "usage": "<script lang=\"ts\">\n  import { Meter } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Meter value={72} min={0} max={100} low={25} high={75} optimum={50} ariaLabel=\"Disk usage\" />"
   },
   "metric-tile": {
     "props": [
@@ -5186,7 +5186,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MetricTile } from \"@poodle/svelte\";\n</script>\n\n<MetricTile label=\"Revenue\" value=\"$48,200\" trend=\"up\" trendLabel=\"+12.5%\" sparklineData={[20, 35, 28, 42, 48]} />"
+    "usage": "<script lang=\"ts\">\n  import { MetricTile } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MetricTile label=\"Revenue\" value=\"$48,200\" trend=\"up\" trendLabel=\"+12.5%\" sparklineData={[20, 35, 28, 42, 48]} />"
   },
   "nav-card": {
     "props": [
@@ -5240,7 +5240,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
+    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
   },
   "number-input": {
     "props": [
@@ -5421,7 +5421,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NumberInput } from \"@poodle/svelte\";\n\n  let quantity: number | null = 1;\n</script>\n\n<NumberInput id=\"quantity\" bind:value={quantity} min={0} max={100} step={1} showSteppers />"
+    "usage": "<script lang=\"ts\">\n  import { NumberInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let quantity: number | null = 1;\n</script>\n\n<NumberInput id=\"quantity\" bind:value={quantity} min={0} max={100} step={1} showSteppers />"
   },
   "order-by": {
     "props": [
@@ -5494,7 +5494,7 @@
         "description": "Called when the sort configuration changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { OrderBy, type OrderByValue } from \"@poodle/svelte\";\n\n  const fields = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"date\", label: \"Date\", defaultDirection: \"desc\" },\n    { key: \"priority\", label: \"Priority\" },\n  ];\n\n  let value: OrderByValue = [];\n</script>\n\n<OrderBy {fields} {value} onChange={(nextValue) => (value = nextValue)} />"
+    "usage": "<script lang=\"ts\">\n  import { OrderBy, type OrderByValue } from \"@inflatable-cookie/poodle-svelte\";\n\n  const fields = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"date\", label: \"Date\", defaultDirection: \"desc\" },\n    { key: \"priority\", label: \"Priority\" },\n  ];\n\n  let value: OrderByValue = [];\n</script>\n\n<OrderBy {fields} {value} onChange={(nextValue) => (value = nextValue)} />"
   },
   "page-header": {
     "props": [
@@ -5586,7 +5586,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { PageHeader } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<PageHeader\n  section=\"Catalog\"\n  title=\"All Products\"\n  count={42}\n  subtitle=\"Manage your product listings\"\n  backHref=\"/dashboard\"\n  backLabel=\"Back to dashboard\"\n  bannerMessage=\"Some products are currently hidden.\"\n  bannerTone=\"info\"\n>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"primary\" leadingIcon=\"plus\">Add Product</Button>\n  </svelte:fragment>\n</PageHeader>"
+    "usage": "<script lang=\"ts\">\n  import { PageHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<PageHeader\n  section=\"Catalog\"\n  title=\"All Products\"\n  count={42}\n  subtitle=\"Manage your product listings\"\n  backHref=\"/dashboard\"\n  backLabel=\"Back to dashboard\"\n  bannerMessage=\"Some products are currently hidden.\"\n  bannerTone=\"info\"\n>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"primary\" leadingIcon=\"plus\">Add Product</Button>\n  </svelte:fragment>\n</PageHeader>"
   },
   "page-loading": {
     "props": [
@@ -5641,7 +5641,7 @@
         "description": "Called when the cancel button is clicked."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { PageLoading } from \"@poodle/svelte\";\n</script>\n\n<PageLoading visible presentation=\"inline\" message=\"Loading your data...\" />\n\n<PageLoading visible message=\"Loading your data...\" canCancel onCancel={() => abortRequest()} />"
+    "usage": "<script lang=\"ts\">\n  import { PageLoading } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<PageLoading visible presentation=\"inline\" message=\"Loading your data...\" />\n\n<PageLoading visible message=\"Loading your data...\" canCancel onCancel={() => abortRequest()} />"
   },
   "list-container": {
     "props": [
@@ -5805,7 +5805,7 @@
         "description": "Called when the built-in pagination requests a different page."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ListContainer } from \"@poodle/svelte\";\n  import { Button, Field, TextInput, Select } from \"@poodle/svelte\";\n\n  let page = 1;\n</script>\n\n<ListContainer\n  title=\"Workflow incidents\"\n  subtitle=\"Monitor, filter, and page through operational events.\"\n  currentPage={page}\n  totalPages={12}\n  totalItems={120}\n  pageSize={10}\n  onPageChange={(nextPage) => (page = nextPage)}\n>\n  {#snippet actions()}\n    <Button>Add incident</Button>\n  {/snippet}\n\n  {#snippet filters()}\n    <Field label=\"Search\">\n      <TextInput type=\"search\" placeholder=\"Search incidents\" />\n    </Field>\n  {/snippet}\n\n  <div>Your list content goes here.</div>\n</ListContainer>"
+    "usage": "<script lang=\"ts\">\n  import { ListContainer } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button, Field, TextInput, Select } from \"@inflatable-cookie/poodle-svelte\";\n\n  let page = 1;\n</script>\n\n<ListContainer\n  title=\"Workflow incidents\"\n  subtitle=\"Monitor, filter, and page through operational events.\"\n  currentPage={page}\n  totalPages={12}\n  totalItems={120}\n  pageSize={10}\n  onPageChange={(nextPage) => (page = nextPage)}\n>\n  {#snippet actions()}\n    <Button>Add incident</Button>\n  {/snippet}\n\n  {#snippet filters()}\n    <Field label=\"Search\">\n      <TextInput type=\"search\" placeholder=\"Search incidents\" />\n    </Field>\n  {/snippet}\n\n  <div>Your list content goes here.</div>\n</ListContainer>"
   },
   "pagination": {
     "props": [
@@ -5950,7 +5950,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Pagination } from \"@poodle/svelte\";\n\n  let page = 1;\n  let limit = 25;\n</script>\n\n<!-- Basic numbered pagination -->\n<Pagination currentPage={page} totalPages={10} onPageChange={(nextPage) => (page = nextPage)} />\n\n<!-- Simple variant with page size selector -->\n<Pagination\n  {page}\n  {limit}\n  total={248}\n  variant=\"simple\"\n  showLimitSelector\n  limitOptions={[10, 25, 50, 100]}\n  onPageChange={(nextPage) => (page = nextPage)}\n  onLimitChange={(nextLimit) => { limit = nextLimit; page = 1; }}\n/>\n\n<!-- Standalone (no container chrome) -->\n<Pagination currentPage={1} totalPages={10} standalone />"
+    "usage": "<script lang=\"ts\">\n  import { Pagination } from \"@inflatable-cookie/poodle-svelte\";\n\n  let page = 1;\n  let limit = 25;\n</script>\n\n<!-- Basic numbered pagination -->\n<Pagination currentPage={page} totalPages={10} onPageChange={(nextPage) => (page = nextPage)} />\n\n<!-- Simple variant with page size selector -->\n<Pagination\n  {page}\n  {limit}\n  total={248}\n  variant=\"simple\"\n  showLimitSelector\n  limitOptions={[10, 25, 50, 100]}\n  onPageChange={(nextPage) => (page = nextPage)}\n  onLimitChange={(nextLimit) => { limit = nextLimit; page = 1; }}\n/>\n\n<!-- Standalone (no container chrome) -->\n<Pagination currentPage={1} totalPages={10} standalone />"
   },
   "pagination-summary": {
     "props": [
@@ -5987,7 +5987,7 @@
         "description": "Fires when the page changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { PaginationSummary } from \"@poodle/svelte\";\n</script>\n\n<PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />"
+    "usage": "<script lang=\"ts\">\n  import { PaginationSummary } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />"
   },
   "picker-shell": {
     "props": [
@@ -6081,7 +6081,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { PickerShell } from \"@poodle/svelte\";\n</script>\n\n<PickerShell title=\"Select Items\" description=\"Browse and pick items\" resultCount={42} selectionCount={3}>\n  {#snippet toolbar()}\n    <input type=\"search\" placeholder=\"Search...\" />\n  {/snippet}\n  <p>Item list goes here.</p>\n</PickerShell>"
+    "usage": "<script lang=\"ts\">\n  import { PickerShell } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<PickerShell title=\"Select Items\" description=\"Browse and pick items\" resultCount={42} selectionCount={3}>\n  {#snippet toolbar()}\n    <input type=\"search\" placeholder=\"Search...\" />\n  {/snippet}\n  <p>Item list goes here.</p>\n</PickerShell>"
   },
   "pill": {
     "props": [
@@ -6135,7 +6135,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@poodle/svelte\";\n</script>\n\n<Pill tone=\"success\" appearance=\"solid\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
+    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Pill tone=\"success\" appearance=\"solid\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
   },
   "code-input": {
     "props": [
@@ -6250,7 +6250,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@poodle/svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
   },
   "password-requirements": {
     "props": [
@@ -6299,7 +6299,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { PasswordRequirements } from \"@poodle/svelte\";\n\n  let password = \"\";\n\n  const requirements = {\n    minLength: 12,\n    requireMixedCase: true,\n    requireDigit: true,\n    requireSpecial: true,\n    description: \"Use a long password with varied character types.\"\n  };\n</script>\n\n<PasswordRequirements\n  {password}\n  {requirements}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { PasswordRequirements } from \"@inflatable-cookie/poodle-svelte\";\n\n  let password = \"\";\n\n  const requirements = {\n    minLength: 12,\n    requireMixedCase: true,\n    requireDigit: true,\n    requireSpecial: true,\n    description: \"Use a long password with varied character types.\"\n  };\n</script>\n\n<PasswordRequirements\n  {password}\n  {requirements}\n/>"
   },
   "popover": {
     "props": [
@@ -6363,7 +6363,7 @@
         "description": "Fires when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@poodle/svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
+    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
   },
   "progress": {
     "props": [
@@ -6412,7 +6412,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Progress } from \"@poodle/svelte\";\n</script>\n\n<Progress value={65} max={100} size=\"sm\" ariaLabel=\"Upload progress\" />\n<Progress indeterminate ariaLabel=\"Loading...\" />"
+    "usage": "<script lang=\"ts\">\n  import { Progress } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Progress value={65} max={100} size=\"sm\" ariaLabel=\"Upload progress\" />\n<Progress indeterminate ariaLabel=\"Loading...\" />"
   },
   "radio-group": {
     "props": [
@@ -6497,7 +6497,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { RadioGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"sm\", label: \"Small\" },\n    { value: \"md\", label: \"Medium\" },\n    { value: \"lg\", label: \"Large\" },\n  ];\n\n  let size = \"md\";\n</script>\n\n<RadioGroup {options} value={size} orientation=\"vertical\" selectedColor=\"#22c55e\" onValueChange={(value) => (size = value)} />"
+    "usage": "<script lang=\"ts\">\n  import { RadioGroup } from \"@inflatable-cookie/poodle-svelte\";\n\n  const options = [\n    { value: \"sm\", label: \"Small\" },\n    { value: \"md\", label: \"Medium\" },\n    { value: \"lg\", label: \"Large\" },\n  ];\n\n  let size = \"md\";\n</script>\n\n<RadioGroup {options} value={size} orientation=\"vertical\" selectedColor=\"#22c55e\" onValueChange={(value) => (size = value)} />"
   },
   "range-slider": {
     "props": [
@@ -6588,7 +6588,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { RangeSlider } from \"@poodle/svelte\";\n\n  let priceRange: [number, number] = [20, 80];\n</script>\n\n<RangeSlider bind:value={priceRange} min={0} max={100} step={5} />"
+    "usage": "<script lang=\"ts\">\n  import { RangeSlider } from \"@inflatable-cookie/poodle-svelte\";\n\n  let priceRange: [number, number] = [20, 80];\n</script>\n\n<RangeSlider bind:value={priceRange} min={0} max={100} step={5} />"
   },
   "rating": {
     "props": [
@@ -6661,7 +6661,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Rating } from \"@poodle/svelte\";\n\n  let stars: number | null = 3.5;\n</script>\n\n<Rating bind:value={stars} max={5} step={0.5} allowClear />"
+    "usage": "<script lang=\"ts\">\n  import { Rating } from \"@inflatable-cookie/poodle-svelte\";\n\n  let stars: number | null = 3.5;\n</script>\n\n<Rating bind:value={stars} max={5} step={0.5} allowClear />"
   },
   "region": {
     "props": [
@@ -6686,7 +6686,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Region } from \"@poodle/svelte\";\n</script>\n\n<Region label=\"Sidebar\" color=\"blue\" minHeight=\"200px\" />"
+    "usage": "<script lang=\"ts\">\n  import { Region } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Region label=\"Sidebar\" color=\"blue\" minHeight=\"200px\" />"
   },
   "relation-picker": {
     "props": [
@@ -6814,7 +6814,7 @@
         "description": "Called when the drill-down context changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { RelationPicker } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n\n  let selected: string[] = [];\n</script>\n\n<RelationPicker\n  title=\"Select Users\"\n  {items}\n  selectedIds={selected}\n  onSelectionChange={(nextSelected) => (selected = nextSelected)}\n  onConfirm={(nextSelected) => save(nextSelected)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { RelationPicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n\n  let selected: string[] = [];\n</script>\n\n<RelationPicker\n  title=\"Select Users\"\n  {items}\n  selectedIds={selected}\n  onSelectionChange={(nextSelected) => (selected = nextSelected)}\n  onConfirm={(nextSelected) => save(nextSelected)}\n/>"
   },
   "resize-handle": {
     "props": [
@@ -6878,7 +6878,7 @@
         "description": "Called when resized via keyboard step."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ResizeHandle } from \"@poodle/svelte\";\n</script>\n\n<ResizeHandle orientation=\"horizontal\" ariaLabel=\"Resize sidebar\" ariaValueNow={50} />"
+    "usage": "<script lang=\"ts\">\n  import { ResizeHandle } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ResizeHandle orientation=\"horizontal\" ariaLabel=\"Resize sidebar\" ariaValueNow={50} />"
   },
   "scroll-shell": {
     "props": [
@@ -6926,7 +6926,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ScrollShell } from \"@poodle/svelte\";\n</script>\n\n<ScrollShell direction=\"vertical\" padding=\"md\" style=\"max-height: 300px;\">\n  <p>Long scrollable content goes here...</p>\n</ScrollShell>"
+    "usage": "<script lang=\"ts\">\n  import { ScrollShell } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ScrollShell direction=\"vertical\" padding=\"md\" style=\"max-height: 300px;\">\n  <p>Long scrollable content goes here...</p>\n</ScrollShell>"
   },
   "segmented-control": {
     "props": [
@@ -6999,7 +6999,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { SegmentedControl } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"list\", label: \"List\" },\n    { value: \"grid\", label: \"Grid\" },\n    { value: \"board\", label: \"Board\" },\n  ];\n\n  let view = \"list\";\n</script>\n\n<SegmentedControl {options} value={view} onValueChange={(value) => (view = value)} />"
+    "usage": "<script lang=\"ts\">\n  import { SegmentedControl } from \"@inflatable-cookie/poodle-svelte\";\n\n  const options = [\n    { value: \"list\", label: \"List\" },\n    { value: \"grid\", label: \"Grid\" },\n    { value: \"board\", label: \"Board\" },\n  ];\n\n  let view = \"list\";\n</script>\n\n<SegmentedControl {options} value={view} onValueChange={(value) => (view = value)} />"
   },
   "select": {
     "props": [
@@ -7163,7 +7163,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Select } from \"@poodle/svelte\";\n\n  const fruits = [\n    { value: \"apple\", label: \"Apple\" },\n    { value: \"banana\", label: \"Banana\" },\n    { value: \"cherry\", label: \"Cherry\" },\n  ];\n</script>\n\n<!-- Native (default) -->\n<Select options={fruits} placeholder=\"Choose a fruit\" />\n\n<!-- Custom dropdown with rich options -->\n<Select options={fruits} native={false} placeholder=\"Choose...\" />\n\n<!-- Searchable -->\n<Select options={fruits} searchable placeholder=\"Search fruits...\" />\n\n<!-- Freeform autocomplete -->\n<Select options={fruits} searchable freeform placeholder=\"Type or pick...\" />\n\n<!-- Custom rendering with snippets -->\n<Select options={fruits} native={false} placeholder=\"Choose a fruit\">\n  {#snippet trigger({ selectedOption, placeholder })}\n    <span>{selectedOption?.label ?? placeholder}</span>\n  {/snippet}\n\n  {#snippet option({ option, selected })}\n    <span>{option.label}{selected ? \" ✓\" : \"\"}</span>\n  {/snippet}\n</Select>"
+    "usage": "<script lang=\"ts\">\n  import { Select } from \"@inflatable-cookie/poodle-svelte\";\n\n  const fruits = [\n    { value: \"apple\", label: \"Apple\" },\n    { value: \"banana\", label: \"Banana\" },\n    { value: \"cherry\", label: \"Cherry\" },\n  ];\n</script>\n\n<!-- Native (default) -->\n<Select options={fruits} placeholder=\"Choose a fruit\" />\n\n<!-- Custom dropdown with rich options -->\n<Select options={fruits} native={false} placeholder=\"Choose...\" />\n\n<!-- Searchable -->\n<Select options={fruits} searchable placeholder=\"Search fruits...\" />\n\n<!-- Freeform autocomplete -->\n<Select options={fruits} searchable freeform placeholder=\"Type or pick...\" />\n\n<!-- Custom rendering with snippets -->\n<Select options={fruits} native={false} placeholder=\"Choose a fruit\">\n  {#snippet trigger({ selectedOption, placeholder })}\n    <span>{selectedOption?.label ?? placeholder}</span>\n  {/snippet}\n\n  {#snippet option({ option, selected })}\n    <span>{option.label}{selected ? \" ✓\" : \"\"}</span>\n  {/snippet}\n</Select>"
   },
   "selection-summary": {
     "props": [
@@ -7218,7 +7218,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { SelectionSummary } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n</script>\n\n<SelectionSummary {items} maxVisibleItems={3} onRemove={(id) => deselect(id)} onClear={clearAll} />"
+    "usage": "<script lang=\"ts\">\n  import { SelectionSummary } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n</script>\n\n<SelectionSummary {items} maxVisibleItems={3} onRemove={(id) => deselect(id)} onClear={clearAll} />"
   },
   "separator": {
     "props": [
@@ -7243,7 +7243,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Separator } from \"@poodle/svelte\";\n</script>\n\n<p>Section one content</p>\n<Separator />\n<p>Section two content</p>"
+    "usage": "<script lang=\"ts\">\n  import { Separator } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<p>Section one content</p>\n<Separator />\n<p>Section two content</p>"
   },
   "sidebar-nav": {
     "props": [
@@ -7292,7 +7292,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@poodle/svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => (active = value)} />"
+    "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@inflatable-cookie/poodle-svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => (active = value)} />"
   },
   "skeleton": {
     "props": [
@@ -7335,7 +7335,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Skeleton } from \"@poodle/svelte\";\n</script>\n\n<Skeleton shape=\"circle\" width=\"48px\" height=\"48px\" />\n<Skeleton shape=\"line\" lines={3} />"
+    "usage": "<script lang=\"ts\">\n  import { Skeleton } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Skeleton shape=\"circle\" width=\"48px\" height=\"48px\" />\n<Skeleton shape=\"line\" lines={3} />"
   },
   "spinner": {
     "props": [
@@ -7390,7 +7390,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Spinner } from \"@poodle/svelte\";\n</script>\n\n<Spinner variant=\"ring\" sizeRole=\"chrome\" tone=\"current\" />\n<Spinner variant=\"grid\" size=\"lg\" tone=\"accent\" ariaLabel=\"Loading logs\" />"
+    "usage": "<script lang=\"ts\">\n  import { Spinner } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Spinner variant=\"ring\" sizeRole=\"chrome\" tone=\"current\" />\n<Spinner variant=\"grid\" size=\"lg\" tone=\"accent\" ariaLabel=\"Loading logs\" />"
   },
   "slider": {
     "props": [
@@ -7475,7 +7475,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Slider } from \"@poodle/svelte\";\n\n  let volume = 50;\n</script>\n\n<Slider bind:value={volume} min={0} max={100} ariaLabel=\"Volume\" />"
+    "usage": "<script lang=\"ts\">\n  import { Slider } from \"@inflatable-cookie/poodle-svelte\";\n\n  let volume = 50;\n</script>\n\n<Slider bind:value={volume} min={0} max={100} ariaLabel=\"Volume\" />"
   },
   "spacer": {
     "props": [
@@ -7494,7 +7494,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Spacer } from \"@poodle/svelte\";\n</script>\n\n<div style=\"display: flex;\">\n  <span>Left</span>\n  <Spacer />\n  <span>Right</span>\n</div>"
+    "usage": "<script lang=\"ts\">\n  import { Spacer } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<div style=\"display: flex;\">\n  <span>Left</span>\n  <Spacer />\n  <span>Right</span>\n</div>"
   },
   "split-button": {
     "props": [
@@ -7584,7 +7584,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { SplitButton } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"save-draft\", label: \"Save as Draft\" },\n    { value: \"schedule\", label: \"Schedule\" },\n  ];\n</script>\n\n<SplitButton type=\"submit\" variant=\"primary\" {items} onClick={() => publish()} onAction={(value) => handleAction(value)}>\n  Publish\n</SplitButton>"
+    "usage": "<script lang=\"ts\">\n  import { SplitButton } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"save-draft\", label: \"Save as Draft\" },\n    { value: \"schedule\", label: \"Schedule\" },\n  ];\n</script>\n\n<SplitButton type=\"submit\" variant=\"primary\" {items} onClick={() => publish()} onAction={(value) => handleAction(value)}>\n  Publish\n</SplitButton>"
   },
   "split-view": {
     "props": [
@@ -7712,7 +7712,7 @@
         "description": "Called when the secondary pane collapse state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { SplitView } from \"@poodle/svelte\";\n</script>\n\n<SplitView orientation=\"horizontal\" defaultRatio={0.3} showCollapsePrimary>\n  {#snippet primary()}\n    <p>Sidebar content</p>\n  {/snippet}\n  {#snippet secondary()}\n    <p>Main content</p>\n  {/snippet}\n</SplitView>"
+    "usage": "<script lang=\"ts\">\n  import { SplitView } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<SplitView orientation=\"horizontal\" defaultRatio={0.3} showCollapsePrimary>\n  {#snippet primary()}\n    <p>Sidebar content</p>\n  {/snippet}\n  {#snippet secondary()}\n    <p>Main content</p>\n  {/snippet}\n</SplitView>"
   },
   "stack": {
     "props": [
@@ -7772,7 +7772,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Stack, Button } from \"@poodle/svelte\";\n</script>\n\n<Stack direction=\"row\" gap=\"sm\" align=\"center\">\n  <Button variant=\"primary\">Save</Button>\n  <Button variant=\"secondary\">Cancel</Button>\n</Stack>"
+    "usage": "<script lang=\"ts\">\n  import { Stack, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Stack direction=\"row\" gap=\"sm\" align=\"center\">\n  <Button variant=\"primary\">Save</Button>\n  <Button variant=\"secondary\">Cancel</Button>\n</Stack>"
   },
   "status-bar": {
     "props": [
@@ -7824,7 +7824,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { StatusBar } from \"@poodle/svelte\";\n</script>\n\n<StatusBar summary=\"3 items selected\">\n  {#snippet leading()}Ready{/snippet}\n  {#snippet trailing()}Ln 42, Col 8{/snippet}\n</StatusBar>"
+    "usage": "<script lang=\"ts\">\n  import { StatusBar } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<StatusBar summary=\"3 items selected\">\n  {#snippet leading()}Ready{/snippet}\n  {#snippet trailing()}Ln 42, Col 8{/snippet}\n</StatusBar>"
   },
   "status-indicator": {
     "props": [
@@ -7854,7 +7854,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { StatusIndicator } from \"@poodle/svelte\";\n</script>\n\n<StatusIndicator status=\"success\" label=\"Online\" />\n<StatusIndicator status=\"danger\" label=\"Offline\" />\n<StatusIndicator status=\"warning\">Degraded</StatusIndicator>"
+    "usage": "<script lang=\"ts\">\n  import { StatusIndicator } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<StatusIndicator status=\"success\" label=\"Online\" />\n<StatusIndicator status=\"danger\" label=\"Offline\" />\n<StatusIndicator status=\"warning\">Degraded</StatusIndicator>"
   },
   "surface": {
     "props": [
@@ -7902,7 +7902,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Surface } from \"@poodle/svelte\";\n</script>\n\n<Surface tone=\"panel\" border=\"subtle\" padding=\"lg\" elevated>\n  <p>Content in an elevated panel surface.</p>\n</Surface>"
+    "usage": "<script lang=\"ts\">\n  import { Surface } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Surface tone=\"panel\" border=\"subtle\" padding=\"lg\" elevated>\n  <p>Content in an elevated panel surface.</p>\n</Surface>"
   },
   "switch": {
     "props": [
@@ -8023,7 +8023,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Switch } from \"@poodle/svelte\";\n\n  let notifications = true;\n</script>\n\n<Switch\n  label=\"Enable notifications\"\n  bind:checked={notifications}\n  onColor=\"#22c55e\"\n  offColor=\"#cbd5e1\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { Switch } from \"@inflatable-cookie/poodle-svelte\";\n\n  let notifications = true;\n</script>\n\n<Switch\n  label=\"Enable notifications\"\n  bind:checked={notifications}\n  onColor=\"#22c55e\"\n  offColor=\"#cbd5e1\"\n/>"
   },
   "table": {
     "props": [
@@ -8060,7 +8060,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Table } from \"@poodle/svelte\";\n\n  const columns = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"email\", label: \"Email\" },\n  ];\n  const rows = [\n    { name: \"Alice\", email: \"alice@example.com\" },\n    { name: \"Bob\", email: \"bob@example.com\" },\n  ];\n</script>\n\n<Table {columns} {rows} caption=\"Team members\" />"
+    "usage": "<script lang=\"ts\">\n  import { Table } from \"@inflatable-cookie/poodle-svelte\";\n\n  const columns = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"email\", label: \"Email\" },\n  ];\n  const rows = [\n    { name: \"Alice\", email: \"alice@example.com\" },\n    { name: \"Bob\", email: \"bob@example.com\" },\n  ];\n</script>\n\n<Table {columns} {rows} caption=\"Team members\" />"
   },
   "tabs": {
     "props": [
@@ -8172,7 +8172,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Tabs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"overview\", label: \"Overview\" },\n    { value: \"settings\", label: \"Settings\", count: 3, separator: true },\n  ];\n</script>\n\n<Tabs {items} defaultValue=\"overview\" historyKey=\"tab\">\n  {#snippet children(activeValue)}\n    {#if activeValue === \"overview\"}\n      <p>Overview content here.</p>\n    {:else}\n      <p>Settings content here.</p>\n    {/if}\n  {/snippet}\n</Tabs>"
+    "usage": "<script lang=\"ts\">\n  import { Tabs } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"overview\", label: \"Overview\" },\n    { value: \"settings\", label: \"Settings\", count: 3, separator: true },\n  ];\n</script>\n\n<Tabs {items} defaultValue=\"overview\" historyKey=\"tab\">\n  {#snippet children(activeValue)}\n    {#if activeValue === \"overview\"}\n      <p>Overview content here.</p>\n    {:else}\n      <p>Settings content here.</p>\n    {/if}\n  {/snippet}\n</Tabs>"
   },
   "text-input": {
     "props": [
@@ -8428,7 +8428,7 @@
         "description": "Fires when the input loses focus."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@poodle/svelte\";\n\n  let email = \"\";\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  validate={validateEmail}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  validate={validateEmail}\n/>"
   },
   "time-ago": {
     "props": [
@@ -8477,7 +8477,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { TimeAgo } from \"@poodle/svelte\";\n</script>\n\n<TimeAgo datetime={new Date(\"2026-03-20T12:00:00Z\")} live />"
+    "usage": "<script lang=\"ts\">\n  import { TimeAgo } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<TimeAgo datetime={new Date(\"2026-03-20T12:00:00Z\")} live />"
   },
   "time-input": {
     "props": [
@@ -8562,7 +8562,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { TimeInput } from \"@poodle/svelte\";\n\n  let time = \"09:00\";\n</script>\n\n<TimeInput id=\"start-time\" bind:value={time} min=\"08:00\" max=\"18:00\" step={60} />"
+    "usage": "<script lang=\"ts\">\n  import { TimeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let time = \"09:00\";\n</script>\n\n<TimeInput id=\"start-time\" bind:value={time} min=\"08:00\" max=\"18:00\" step={60} />"
   },
   "time-zone-select": {
     "props": [
@@ -8659,7 +8659,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { TimeZoneSelect } from \"@poodle/svelte\";\n\n  let tz = \"America/New_York\";\n</script>\n\n<TimeZoneSelect id=\"tz\" value={tz} placeholder=\"Select time zone\" onValueChange={(value) => (tz = value)} />"
+    "usage": "<script lang=\"ts\">\n  import { TimeZoneSelect } from \"@inflatable-cookie/poodle-svelte\";\n\n  let tz = \"America/New_York\";\n</script>\n\n<TimeZoneSelect id=\"tz\" value={tz} placeholder=\"Select time zone\" onValueChange={(value) => (tz = value)} />"
   },
   "toast-stack": {
     "props": [
@@ -8707,7 +8707,7 @@
         "description": "Called when a toast action button is clicked."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ToastStack } from \"@poodle/svelte\";\n\n  let toasts = [\n    { id: \"1\", title: \"Saved\", description: \"Your changes have been saved.\" },\n  ];\n</script>\n\n<ToastStack items={toasts} onDismiss={(id) => { toasts = toasts.filter(t => t.id !== id); }} />"
+    "usage": "<script lang=\"ts\">\n  import { ToastStack } from \"@inflatable-cookie/poodle-svelte\";\n\n  let toasts = [\n    { id: \"1\", title: \"Saved\", description: \"Your changes have been saved.\" },\n  ];\n</script>\n\n<ToastStack items={toasts} onDismiss={(id) => { toasts = toasts.filter(t => t.id !== id); }} />"
   },
   "toast-host": {
     "props": [
@@ -8784,7 +8784,7 @@
         "description": "Called when a toast action button is clicked."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { writable } from \"svelte/store\";\n  import { ToastHost, type ToastHostStoreItem } from \"@poodle/svelte\";\n\n  const toasts = writable<ToastHostStoreItem[]>([\n    { id: \"1\", variant: \"success\", title: \"Saved\", message: \"Your settings were updated.\" },\n    { id: \"2\", variant: \"error\", message: \"Publishing failed.\" },\n  ]);\n\n  const store = {\n    toasts,\n    dismiss(id: string) {\n      toasts.update((items) => items.filter((item) => item.id !== id));\n    }\n  };\n</script>\n\n<ToastHost {store} />"
+    "usage": "<script lang=\"ts\">\n  import { writable } from \"svelte/store\";\n  import { ToastHost, type ToastHostStoreItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const toasts = writable<ToastHostStoreItem[]>([\n    { id: \"1\", variant: \"success\", title: \"Saved\", message: \"Your settings were updated.\" },\n    { id: \"2\", variant: \"error\", message: \"Publishing failed.\" },\n  ]);\n\n  const store = {\n    toasts,\n    dismiss(id: string) {\n      toasts.update((items) => items.filter((item) => item.id !== id));\n    }\n  };\n</script>\n\n<ToastHost {store} />"
   },
   "toggle-group": {
     "props": [
@@ -8851,7 +8851,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ToggleGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"left\", label: \"Left\" },\n    { value: \"center\", label: \"Center\" },\n    { value: \"right\", label: \"Right\" },\n  ];\n</script>\n\n<ToggleGroup {options} defaultValue=\"left\" ariaLabel=\"Text alignment\" onValueChange={(value) => console.log(value)} />"
+    "usage": "<script lang=\"ts\">\n  import { ToggleGroup } from \"@inflatable-cookie/poodle-svelte\";\n\n  const options = [\n    { value: \"left\", label: \"Left\" },\n    { value: \"center\", label: \"Center\" },\n    { value: \"right\", label: \"Right\" },\n  ];\n</script>\n\n<ToggleGroup {options} defaultValue=\"left\" ariaLabel=\"Text alignment\" onValueChange={(value) => console.log(value)} />"
   },
   "toolbar": {
     "props": [
@@ -8893,7 +8893,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Toolbar } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Toolbar ariaLabel=\"Formatting\">\n  <Button variant=\"ghost\">Bold</Button>\n  <Button variant=\"ghost\">Italic</Button>\n</Toolbar>"
+    "usage": "<script lang=\"ts\">\n  import { Toolbar } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Toolbar ariaLabel=\"Formatting\">\n  <Button variant=\"ghost\">Bold</Button>\n  <Button variant=\"ghost\">Italic</Button>\n</Toolbar>"
   },
   "tooltip": {
     "props": [
@@ -8941,7 +8941,7 @@
         "description": "Called when the tooltip open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Tooltip } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Tooltip content=\"Save your work\" placement=\"top\" onOpenChange={(open) => console.log(open)}>\n  <Button>Save</Button>\n</Tooltip>"
+    "usage": "<script lang=\"ts\">\n  import { Tooltip } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Tooltip content=\"Save your work\" placement=\"top\" onOpenChange={(open) => console.log(open)}>\n  <Button>Save</Button>\n</Tooltip>"
   },
   "tri-state-switch": {
     "props": [
@@ -9014,7 +9014,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { TriStateSwitch } from \"@poodle/svelte\";\n\n  let filter = \"default\";\n</script>\n\n<TriStateSwitch value={filter} ariaLabel=\"Include archived items\" excludedColor=\"#ef4444\" includedColor=\"#22c55e\" onValueChange={(value) => (filter = value)} />"
+    "usage": "<script lang=\"ts\">\n  import { TriStateSwitch } from \"@inflatable-cookie/poodle-svelte\";\n\n  let filter = \"default\";\n</script>\n\n<TriStateSwitch value={filter} ariaLabel=\"Include archived items\" excludedColor=\"#ef4444\" includedColor=\"#22c55e\" onValueChange={(value) => (filter = value)} />"
   },
   "ui-presentation-provider": {
     "props": [
@@ -9038,7 +9038,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { UiPresentationProvider, Button, Select } from \"@poodle/svelte\";\n</script>\n\n<UiPresentationProvider density=\"compact\" sizeScale=\"sm\">\n  <Button>Compact small button</Button>\n  <Select id=\"demo\" options={[{ value: \"a\", label: \"Alpha\" }]} />\n</UiPresentationProvider>"
+    "usage": "<script lang=\"ts\">\n  import { UiPresentationProvider, Button, Select } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<UiPresentationProvider density=\"compact\" sizeScale=\"sm\">\n  <Button>Compact small button</Button>\n  <Select id=\"demo\" options={[{ value: \"a\", label: \"Alpha\" }]} />\n</UiPresentationProvider>"
   },
   "video-player": {
     "props": [
@@ -9099,7 +9099,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { VideoPlayer } from \"@poodle/svelte\";\n</script>\n\n<VideoPlayer src=\"/videos/intro.mp4\" poster=\"/images/poster.jpg\" showCaptions />"
+    "usage": "<script lang=\"ts\">\n  import { VideoPlayer } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<VideoPlayer src=\"/videos/intro.mp4\" poster=\"/images/poster.jpg\" showCaptions />"
   },
   "date-time-zone-picker": {
     "props": [
@@ -9201,7 +9201,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { DateTimeZonePicker } from \"@poodle/svelte\";\n\n  let meeting = { date: null, time: null, timeZone: \"America/New_York\" };\n</script>\n\n<DateTimeZonePicker\n  value={meeting}\n  onValueChange={(nextValue) => (meeting = nextValue)}\n  placeholder=\"Pick date, time & zone\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DateTimeZonePicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let meeting = { date: null, time: null, timeZone: \"America/New_York\" };\n</script>\n\n<DateTimeZonePicker\n  value={meeting}\n  onValueChange={(nextValue) => (meeting = nextValue)}\n  placeholder=\"Pick date, time & zone\"\n/>"
   },
   "action-discovery-panel": {
     "props": [
@@ -9262,7 +9262,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"copy\", title: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", title: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} onItemSelect={(id) => console.log(id)} />"
+    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { id: \"copy\", title: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", title: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} onItemSelect={(id) => console.log(id)} />"
   },
   "app-header": {
     "props": [
@@ -9306,7 +9306,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<AppHeader title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
+    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AppHeader title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
   },
   "nav-card-grid": {
     "props": [
@@ -9360,6 +9360,6 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
+    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
   }
 }

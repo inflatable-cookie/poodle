@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { EmbedInput, Field, resolveEmbedParseState } from "@poodle/react";
-import type { ParsedEmbed } from "@poodle/react";
+import { EmbedInput, Field, resolveEmbedParseState } from "@inflatable-cookie/poodle-react";
+import type { ParsedEmbed } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,4 +1,4 @@
-import { Region, Stack } from "@poodle/react";
+import { Region, Stack } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function RegionSpecimen() {

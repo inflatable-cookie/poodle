@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OrderBy, type OrderByValue, type SortField } from "@poodle/react";
+import { OrderBy, type OrderByValue, type SortField } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

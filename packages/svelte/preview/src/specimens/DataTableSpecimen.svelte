@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { DataTable } from "@poodle/svelte";
-  import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte";
-  import { Pill } from "@poodle/svelte";
+  import { DataTable } from "@inflatable-cookie/poodle-svelte";
+  import type { TableColumn, TableFilters, TablePagination, TableRow } from "@inflatable-cookie/poodle-svelte";
+  import { Pill } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

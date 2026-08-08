@@ -1,5 +1,5 @@
 //! ModelPickerSpec — generic model + capability-axis selection model, Rust
-//! mirror of the `@poodle/svelte` ModelPicker type model and
+//! mirror of the `@inflatable-cookie/poodle-svelte` ModelPicker type model and
 //! `model-picker-model.ts` logic.
 //!
 //! Contract: `docs/contracts/components/model-picker.md`.

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { normalizeToast, reconcileToastTimers } from "@poodle/headless";
+import { normalizeToast, reconcileToastTimers } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/toast-host.css";
+import "@inflatable-cookie/poodle-styles/toast-host.css";
 
 import { ToastStack } from "./ToastStack";
 import type {

@@ -1,4 +1,4 @@
-import { Pill } from "@poodle/react";
+import { Pill } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -175,7 +175,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ```svelte
 <script lang="ts">
-  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte";
+  import { LogList, type LogEntry, type LogFilter } from "@inflatable-cookie/poodle-svelte";
 
   const filters: LogFilter[] = [
     {
@@ -220,7 +220,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ```svelte
 <script lang="ts">
-  import { LogList } from "@poodle/svelte";
+  import { LogList } from "@inflatable-cookie/poodle-svelte";
 
   const entries = [
     { id: "1", level: "info", message: "Server started", timestamp: Date.now() },

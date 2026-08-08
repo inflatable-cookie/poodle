@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EditableList, type EditableListItemLike } from "@poodle/react";
+import { EditableList, type EditableListItemLike } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

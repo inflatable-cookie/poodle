@@ -229,7 +229,7 @@ Layer 2 - Forms
 **Svelte (using formsnap or similar):**
 ```svelte
 <script>
-  import { Form } from '@poodle/svelte';
+  import { Form } from '@inflatable-cookie/poodle-svelte';
   
   const schema = z.object({
     email: z.string().email(),

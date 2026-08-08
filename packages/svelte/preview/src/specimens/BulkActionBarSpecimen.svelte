@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BulkActionBar, type BulkAction } from "@poodle/svelte";
+  import { BulkActionBar, type BulkAction } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

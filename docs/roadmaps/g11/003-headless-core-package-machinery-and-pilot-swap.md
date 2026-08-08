@@ -15,7 +15,7 @@ with zero consumer churn.
 
 ## Scope
 
-1. Package scaffold: `packages/core` → `@poodle/headless` (confirm name here;
+1. Package scaffold: `packages/core` → `@inflatable-cookie/poodle-headless` (confirm name here;
    record in spec `062`). Plain TS, no framework deps. Unit-testable with
    `bun test` or `vitest` — machines are pure, so tests are cheap; write them.
 2. Shared machinery, extracted/ported from
@@ -30,7 +30,7 @@ with zero consumer churn.
 3. Pilot machines per the `g11.002` specs: tabs, popover, checkbox, each with
    prop getters emitting ARIA + `data-scope`/`data-part`/`data-state`.
 4. Svelte adapter: minimal glue (`useMachine`-equivalent for Svelte 5 runes)
-   inside `@poodle/svelte`; core added as a dependency of the components
+   inside `@inflatable-cookie/poodle-svelte`; core added as a dependency of the components
    package.
 5. Swap `Tabs.svelte`, `Popover.svelte` (or nearest existing overlay if no
    standalone Popover), and `Checkbox.svelte` internals onto core. Public
@@ -70,7 +70,7 @@ this milestone silently.
 
 Shipped:
 
-- `packages/core` → `@poodle/headless`: pure transition functions + part
+- `packages/core` → `@inflatable-cookie/poodle-headless`: pure transition functions + part
   attribute getters, no interpreter (decision recorded in spec `062`).
   Machinery: `nav` (roving index), `dom/focus`, `dom/dismiss`
   (dismissable-layer stack with pure `resolveDismiss`), `dom/id`.

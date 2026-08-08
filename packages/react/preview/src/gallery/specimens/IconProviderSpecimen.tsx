@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Icon, IconProvider, type IconSet } from "@poodle/react";
+import { Icon, IconProvider, type IconSet } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import iconNodes from "lucide-static/icon-nodes.json";
 

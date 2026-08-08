@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/select.css";
+  import "@inflatable-cookie/poodle-styles/select.css";
   import {
     filterSelectGroups,
     flattenSelectOptions,
@@ -7,7 +7,7 @@
     layerContains,
     registerDismissLayer,
     selectOpenHighlightIndex,
-  } from "@poodle/headless";
+  } from "@inflatable-cookie/poodle-headless";
   import type { Snippet } from "svelte";
 
   import { anchored } from "./anchored";

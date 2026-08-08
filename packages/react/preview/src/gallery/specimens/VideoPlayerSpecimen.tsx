@@ -1,4 +1,4 @@
-import { VideoPlayer } from "@poodle/react";
+import { VideoPlayer } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function VideoPlayerSpecimen() {

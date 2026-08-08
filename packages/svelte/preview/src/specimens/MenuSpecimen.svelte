@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@poodle/svelte";
+  import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fileItems: MenuItem[] = [

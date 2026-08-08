@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/toast-stack.css";
+  import "@inflatable-cookie/poodle-styles/toast-stack.css";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

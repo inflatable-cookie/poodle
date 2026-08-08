@@ -177,7 +177,7 @@ None. EmbedPreview is a pure display component.
 
 ### Composition
 
-- Composes: `Skeleton` and `TextLink` from `@poodle/svelte`
+- Composes: `Skeleton` and `TextLink` from `@inflatable-cookie/poodle-svelte`
 - Parent expectations: media embed forms, content editors, paired with
   EmbedInput
 - Child expectations: none (self-contained display)
@@ -321,7 +321,7 @@ None.
 ## 9. Svelte Notes
 
 - Scoped CSS classes use the `.poodle-embed-preview*` prefix
-- Uses `Skeleton` from `@poodle/svelte` for the loading state; the fallback link is the `TextLink` primitive (`.poodle-text-link`), not a bare `<a>`
+- Uses `Skeleton` from `@inflatable-cookie/poodle-svelte` for the loading state; the fallback link is the `TextLink` primitive (`.poodle-text-link`), not a bare `<a>`
 - Raw embed code rendered via `{@html parsed.originalEmbed}`; `trustedHtml`
   renders the caller-provided sanitized HTML in the same container
 - Aspect ratio applied via inline `style` attribute on the container

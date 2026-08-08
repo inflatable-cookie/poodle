@@ -1,4 +1,4 @@
-import { Separator } from "@poodle/react";
+import { Separator } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function SeparatorSpecimen() {

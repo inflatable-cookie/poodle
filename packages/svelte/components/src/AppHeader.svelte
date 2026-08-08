@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/app-header.css";
+  import "@inflatable-cookie/poodle-styles/app-header.css";
   import type { Snippet } from "svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

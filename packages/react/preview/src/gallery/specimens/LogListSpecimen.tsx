@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties } from "react";
-import { Button, LogList } from "@poodle/react";
-import type { LogEntry, LogFilter } from "@poodle/react";
+import { Button, LogList } from "@inflatable-cookie/poodle-react";
+import type { LogEntry, LogFilter } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const now = Date.now();

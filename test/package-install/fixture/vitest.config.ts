@@ -10,7 +10,7 @@ export default defineConfig({
     conditions: ["browser"],
   },
   ssr: {
-    noExternal: [/^@poodle\//],
+    noExternal: [/^@inflatable-cookie\/poodle-/],
   },
   test: {
     environment: "happy-dom",

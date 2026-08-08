@@ -35,7 +35,7 @@ function entry(
   return {
     slug: slug(displayName),
     displayName,
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     tag,
     description,
     hasSpecimen,

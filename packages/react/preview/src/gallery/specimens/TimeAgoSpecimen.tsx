@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { TimeAgo } from "@poodle/react";
+import { TimeAgo } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const rowStyle: CSSProperties = {

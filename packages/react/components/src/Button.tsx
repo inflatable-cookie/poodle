@@ -1,6 +1,6 @@
 import { useState, type FocusEvent, type MouseEvent, type ReactNode } from "react";
 
-import "@poodle/styles/button.css";
+import "@inflatable-cookie/poodle-styles/button.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";

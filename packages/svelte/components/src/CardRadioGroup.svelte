@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/card-radio-group.css";
-  import { menuListNavigate, toggleGroupTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/card-radio-group.css";
+  import { menuListNavigate, toggleGroupTransition } from "@inflatable-cookie/poodle-headless";
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";

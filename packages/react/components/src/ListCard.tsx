@@ -1,4 +1,4 @@
-import "@poodle/styles/list-card.css";
+import "@inflatable-cookie/poodle-styles/list-card.css";
 
 import {
   useEffect,
@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { menuNavigableItems, registerDismissLayer, pointAnchor } from "@poodle/headless";
+import { menuNavigableItems, registerDismissLayer, pointAnchor } from "@inflatable-cookie/poodle-headless";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

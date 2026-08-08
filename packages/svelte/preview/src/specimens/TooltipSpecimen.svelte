@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tooltip, Button } from "@poodle/svelte";
+  import { Tooltip, Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

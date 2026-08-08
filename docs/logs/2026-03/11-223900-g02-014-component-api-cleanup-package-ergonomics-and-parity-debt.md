@@ -10,7 +10,7 @@ Owner: Poodle Core
 - tightened the JS-side public package boundary by giving the Svelte packages
   explicit `svelte` entry points, explicit `./types` subpaths where applicable,
   and constrained `files` lists instead of leaving the package surface implicit
-- added local token wrapper modules so `@poodle/svelte-tokens` exposes generated
+- added local token wrapper modules so `@inflatable-cookie/poodle-svelte-tokens` exposes generated
   themes and metadata through package-owned paths rather than repo reach-through
 - added package readmes for the Svelte and GPUI token layers and revised the
   Svelte package readmes to distinguish public entry points, stability notes,

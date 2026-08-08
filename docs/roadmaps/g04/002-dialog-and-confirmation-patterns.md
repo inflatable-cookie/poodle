@@ -19,13 +19,13 @@ Primary repos: `poodle`
 
 - [ ] write contract for AlertDialog: title, description, confirm/cancel labels,
   tone (danger/warning), async confirm handler
-- [ ] implement AlertDialog primitive in `@poodle/svelte`
+- [ ] implement AlertDialog primitive in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for FormDialog: extends Dialog with form props, field
   layout, submit/cancel, validation state
-- [ ] implement FormDialog composite in `@poodle/svelte`
+- [ ] implement FormDialog composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for ConfirmAction: trigger element, confirmation popover or
   inline prompt, confirm/cancel, loading state
-- [ ] implement ConfirmAction composite in `@poodle/svelte`
+- [ ] implement ConfirmAction composite in `@inflatable-cookie/poodle-svelte`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@poodle/styles/field.css";
+import "@inflatable-cookie/poodle-styles/field.css";
 
 import { Icon } from "./Icon";
 import { Popover } from "./Popover";

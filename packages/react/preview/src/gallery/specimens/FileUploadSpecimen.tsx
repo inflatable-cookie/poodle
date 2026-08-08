@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/react";
-import type { FileUploadItem } from "@poodle/react";
+import { DEFAULT_COMPRESSION, FileUpload } from "@inflatable-cookie/poodle-react";
+import type { FileUploadItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SplitButton, Eyebrow, Surface, type MenuItem } from "@poodle/react";
+import { SplitButton, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 export function SplitButtonSpecimen() {

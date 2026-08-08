@@ -106,7 +106,7 @@ keeps `is_virtualized` / `is_auto_scroll`.
 
 ### Shared Types
 
-Defined in `@poodle/headless` (`agent-transcript.ts`), re-exported from the
+Defined in `@inflatable-cookie/poodle-headless` (`agent-transcript.ts`), re-exported from the
 component packages, mirrored in `poodle-headless::agent_transcript` (snake_case).
 
 ```typescript
@@ -217,7 +217,7 @@ type TranscriptBlock =
 
 ### Behavior Machine
 
-Grouping, windowing and the anchoring predicate live in `@poodle/headless`
+Grouping, windowing and the anchoring predicate live in `@inflatable-cookie/poodle-headless`
 `agent-transcript.ts`, mirrored in `poodle-headless::agent_transcript`, with
 shared vectors in `packages/contracts/headless/vectors/agent-transcript.json`
 run by both runtimes.

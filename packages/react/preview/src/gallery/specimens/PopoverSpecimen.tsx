@@ -1,4 +1,4 @@
-import { Popover, Button } from "@poodle/react";
+import { Popover, Button } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function PopoverSpecimen() {

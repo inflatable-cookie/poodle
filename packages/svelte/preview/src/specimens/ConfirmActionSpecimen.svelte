@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ConfirmAction } from "@poodle/svelte";
-  import { Button, IconButton } from "@poodle/svelte";
+  import { ConfirmAction } from "@inflatable-cookie/poodle-svelte";
+  import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let lastAction = $state("");

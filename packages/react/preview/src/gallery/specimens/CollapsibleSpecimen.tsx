@@ -1,4 +1,4 @@
-import { Collapsible } from "@poodle/react";
+import { Collapsible } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

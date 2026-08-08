@@ -293,7 +293,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 
 ## 9. Svelte Notes
 
-- Composes `Dialog`, `Tabs`, `TextInput`, `FileUpload` from `@poodle/svelte`
+- Composes `Dialog`, `Tabs`, `TextInput`, `FileUpload` from `@inflatable-cookie/poodle-svelte`
 - Wraps content in `UiPresentationProvider` with resolved size and density
 - `filteredItems` reactive statement filters by label case-insensitively
 - Selecting an item calls both `onSelect` and `onOpenChange(false)` so the host

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import "@poodle/styles/agent-plan.css";
+  import "@inflatable-cookie/poodle-styles/agent-plan.css";
 
-  import { canDecidePlan, planStatusLabel, type AgentPlanStatus } from "@poodle/headless";
+  import { canDecidePlan, planStatusLabel, type AgentPlanStatus } from "@inflatable-cookie/poodle-headless";
 
   import AgentMessage from "./AgentMessage.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

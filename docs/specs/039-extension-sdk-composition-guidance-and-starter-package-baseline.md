@@ -33,9 +33,9 @@ to sound more “SDK-like”.
 
 The current extension-facing surface is:
 
-- `@poodle/svelte-tokens`
-- `@poodle/svelte`
-- `@poodle/svelte-workstation`
+- `@inflatable-cookie/poodle-svelte-tokens`
+- `@inflatable-cookie/poodle-svelte`
+- `@inflatable-cookie/poodle-svelte-workstation`
 - bridge-owned adapter packages such as `packages/bridges/underlay`
 - contract docs under `docs/contracts/`
 - normative specs under `docs/specs/`

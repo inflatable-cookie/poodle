@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MediaThumbnail } from "@poodle/svelte";
+  import { MediaThumbnail } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

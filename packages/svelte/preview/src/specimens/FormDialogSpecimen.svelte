@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FormDialog } from "@poodle/svelte";
-  import { Button, TextInput, Field, Select, FormActions } from "@poodle/svelte";
+  import { FormDialog } from "@inflatable-cookie/poodle-svelte";
+  import { Button, TextInput, Field, Select, FormActions } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let basicOpen: boolean | null = $state(null);

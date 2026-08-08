@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { Button, MediaBrowsePanel } from "@poodle/react";
-import type { MediaPickerItem } from "@poodle/react";
+import { Button, MediaBrowsePanel } from "@inflatable-cookie/poodle-react";
+import type { MediaPickerItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

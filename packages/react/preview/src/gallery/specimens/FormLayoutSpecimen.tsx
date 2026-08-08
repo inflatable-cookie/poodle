@@ -1,4 +1,4 @@
-import { FormLayout, Field, TextInput, Select, Checkbox, Button, type SelectOption } from "@poodle/react";
+import { FormLayout, Field, TextInput, Select, Checkbox, Button, type SelectOption } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const roleOptions: SelectOption[] = [

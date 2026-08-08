@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Stack, TextInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte";
+  import { Eyebrow, Grid, Stack, TextInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@inflatable-cookie/poodle-svelte";
   let {
     activePanelId = "token-summary-section",
     matchingTokenCount = 0,
@@ -48,7 +48,7 @@
   </Stack>
 
   <Stack gap="md">
-    <span class="poodle-hint">@poodle/svelte-tokens</span>
+    <span class="poodle-hint">@inflatable-cookie/poodle-svelte-tokens</span>
     <span class="poodle-path">packages/tokens/artifacts/css/</span>
     <span class="poodle-path">packages/tokens/artifacts/ts/</span>
   </Stack>

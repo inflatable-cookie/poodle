@@ -1,4 +1,4 @@
-import { AudioPlayer } from "@poodle/react";
+import { AudioPlayer } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

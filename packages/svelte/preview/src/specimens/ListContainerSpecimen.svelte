@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FilterToolbar, ListContainer } from "@poodle/svelte";
-  import { Button, IconButton, Pill, TextInput, Select } from "@poodle/svelte";
+  import { FilterToolbar, ListContainer } from "@inflatable-cookie/poodle-svelte";
+  import { Button, IconButton, Pill, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   type QueueItem = {

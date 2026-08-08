@@ -1,5 +1,5 @@
 //! FilterBuilderSpec — generic filter-expression model, Rust mirror of the
-//! `@poodle/svelte` FilterBuilder type model + `filter-builder-model.ts` logic.
+//! `@inflatable-cookie/poodle-svelte` FilterBuilder type model + `filter-builder-model.ts` logic.
 //!
 //! Contract: `docs/contracts/components/filter-builder.md`.
 //!

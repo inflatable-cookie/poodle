@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { HoverCard } from "@poodle/react";
+import { HoverCard } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const triggerLink: CSSProperties = {

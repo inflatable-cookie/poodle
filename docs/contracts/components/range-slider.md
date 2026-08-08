@@ -102,7 +102,7 @@ where I pressed" at all, so the track was inert.
 ### Behavior Machine
 
 Behavior classification: machine-backed (`rangeSliderTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Two-thumb variant of the Slider machine; native range inputs provide
 interaction.

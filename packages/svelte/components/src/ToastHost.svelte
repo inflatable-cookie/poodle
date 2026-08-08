@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/toast-host.css";
-  import { normalizeToast, reconcileToastTimers } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/toast-host.css";
+  import { normalizeToast, reconcileToastTimers } from "@inflatable-cookie/poodle-headless";
   import type { Readable } from "svelte/store";
 
   import { default as ToastStack } from "./ToastStack.svelte";

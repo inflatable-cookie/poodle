@@ -1,4 +1,4 @@
-import { Progress } from "@poodle/react";
+import { Progress } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

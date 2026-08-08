@@ -1,4 +1,4 @@
-import "@poodle/styles/action-discovery-panel.css";
+import "@inflatable-cookie/poodle-styles/action-discovery-panel.css";
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 

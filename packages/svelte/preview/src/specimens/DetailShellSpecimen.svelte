@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DetailShell, DetailSection, PageHeader } from "@poodle/svelte";
-  import { Button, Pill, DetailItem, Region, Separator } from "@poodle/svelte";
+  import { DetailShell, DetailSection, PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Pill, DetailItem, Region, Separator } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

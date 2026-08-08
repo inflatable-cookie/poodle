@@ -21,7 +21,7 @@ Use `MediaPicker` when the host already owns the local items and upload queue.
 
 ```svelte
 <script lang="ts">
-  import { MediaPicker, type MediaPickerItem } from "@poodle/svelte";
+  import { MediaPicker, type MediaPickerItem } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   let items: MediaPickerItem[] = [];
@@ -48,7 +48,7 @@ wrapper.
 
 ```svelte
 <script lang="ts">
-  import { MediaBrowsePanel, type MediaBrowseItem } from "@poodle/svelte";
+  import { MediaBrowsePanel, type MediaBrowseItem } from "@inflatable-cookie/poodle-svelte";
   import UploadWorkflowStatus from "$lib/media/UploadWorkflowStatus.svelte";
 
   let items: MediaBrowseItem[] = [];
@@ -77,7 +77,7 @@ Use `MediaThumbnail` and `MediaPreview` directly for read-only media framing.
 
 ```svelte
 <script lang="ts">
-  import { MediaPreview, MediaThumbnail } from "@poodle/svelte";
+  import { MediaPreview, MediaThumbnail } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MediaThumbnail src={media.thumbnailUrl} alt={media.title} aspectRatio="landscape" />

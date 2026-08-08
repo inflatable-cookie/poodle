@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Checkbox, Switch } from "../src";
 
-// Interaction wiring: the @poodle/headless machines have their own suite; these
+// Interaction wiring: the @inflatable-cookie/poodle-headless machines have their own suite; these
 // assert the React binding actually drives a click through to the documented
 // callback (the machine -> DOM -> event round trip).
 describe("react interaction", () => {

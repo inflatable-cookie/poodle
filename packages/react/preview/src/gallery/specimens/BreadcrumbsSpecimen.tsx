@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Breadcrumbs, type BreadcrumbItem } from "@poodle/react";
+import { Breadcrumbs, type BreadcrumbItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

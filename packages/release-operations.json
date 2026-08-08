@@ -66,7 +66,7 @@
   },
   "packages": [
     {
-      "name": "@poodle/tokens",
+      "name": "@inflatable-cookie/poodle-tokens",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "artifact-backed",
@@ -75,7 +75,7 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
-      "name": "@poodle/svelte-tokens",
+      "name": "@inflatable-cookie/poodle-svelte-tokens",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
@@ -84,7 +84,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/svelte",
+      "name": "@inflatable-cookie/poodle-svelte",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -93,7 +93,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/icons-lucide",
+      "name": "@inflatable-cookie/poodle-icons-lucide",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
@@ -102,7 +102,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/headless",
+      "name": "@inflatable-cookie/poodle-headless",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -111,7 +111,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/styles",
+      "name": "@inflatable-cookie/poodle-styles",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
@@ -120,7 +120,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/react",
+      "name": "@inflatable-cookie/poodle-react",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -129,7 +129,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/bridge-underlay",
+      "name": "@inflatable-cookie/poodle-bridge-underlay",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "proof-backed",
@@ -138,7 +138,7 @@
       "removalGate": "bridge-proof-preserving"
     },
     {
-      "name": "@poodle/svelte-preview",
+      "name": "@inflatable-cookie/poodle-svelte-preview",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "tooling-owned",

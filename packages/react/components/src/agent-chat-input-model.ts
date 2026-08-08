@@ -1,5 +1,5 @@
 // AgentChatInput pure model. Renderer-neutral logic: submit gating, key-gesture
-// intent and context-budget maths. Mirrors @poodle/svelte's copy verbatim
+// intent and context-budget maths. Mirrors @inflatable-cookie/poodle-svelte's copy verbatim
 // (React keeps its own, same as FilterBuilder); the Rust spec (`poodle-specs::agent_chat_input`)
 // re-implements the same semantics.
 

@@ -95,7 +95,7 @@ Updated: 2026-07-10
 Behavior classification: machine-backed via shared machinery
 
 Machine-backed (g11 extraction sweep): runs `editLabelTransition` in
-`@poodle/headless` — view/editing states, start-edit guards (disabled,
+`@inflatable-cookie/poodle-headless` — view/editing states, start-edit guards (disabled,
 programmatic activation), commit trims the draft and reports
 `{ value, previousValue }`, cancel restores. Focus/select-on-focus are
 effect intents the adapter executes. Bonus hardening: commit/cancel are

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/meta-bar.css";
+  import "@inflatable-cookie/poodle-styles/meta-bar.css";
   import type { Snippet } from "svelte";
   import { setPillContext } from "./pill-context";
 

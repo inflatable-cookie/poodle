@@ -17,10 +17,10 @@ Primary repos: `poodle`
 
 - [ ] amend Skeleton contract: add preset prop with values like `table-row`,
   `card`, `list-item`, `detail-section`, `avatar-line`
-- [ ] implement Skeleton presets in `@poodle/svelte`
+- [ ] implement Skeleton presets in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for PageLoading: full-viewport overlay, spinner or progress
   bar, status message, cancel option
-- [ ] implement PageLoading composite in `@poodle/svelte`
+- [ ] implement PageLoading composite in `@inflatable-cookie/poodle-svelte`
 - [ ] update Skeleton specimen with preset examples
 - [ ] create PageLoading specimen
 - [ ] register PageLoading in component-registry.ts and specimen registry

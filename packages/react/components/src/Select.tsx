@@ -15,9 +15,9 @@ import {
   layerContains,
   registerDismissLayer,
   selectOpenHighlightIndex,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/select.css";
+import "@inflatable-cookie/poodle-styles/select.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";

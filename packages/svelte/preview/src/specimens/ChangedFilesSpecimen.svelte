@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChangedFiles, type ChangedFile } from "@poodle/svelte";
+  import { ChangedFiles, type ChangedFile } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

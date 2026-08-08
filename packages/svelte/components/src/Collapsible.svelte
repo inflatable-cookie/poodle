@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/collapsible.css";
-  import { disclosureTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/collapsible.css";
+  import { disclosureTransition } from "@inflatable-cookie/poodle-headless";
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 

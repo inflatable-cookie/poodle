@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import * as lucideIcons from "@poodle/icons-lucide";
+import * as lucideIcons from "@inflatable-cookie/poodle-icons-lucide";
 
 import type { IconNodeElement, IconNodes, IconSet } from "./types";
 
@@ -12,7 +12,7 @@ export function useIconSet(): IconSet {
 }
 
 /**
- * Icon resolution for `@poodle/react`. Mirrors the Svelte package's
+ * Icon resolution for `@inflatable-cookie/poodle-react`. Mirrors the Svelte package's
  * `icon-registry.ts` — the alias table must stay identical (edit both).
  */
 

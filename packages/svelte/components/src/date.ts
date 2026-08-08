@@ -1,6 +1,6 @@
 /**
  * Date and time utilities, now provided by the headless core; re-exported
- * here so the public `@poodle/svelte` surface and internal imports are
+ * here so the public `@inflatable-cookie/poodle-svelte` surface and internal imports are
  * unchanged. The value types remain exported from ./types (which re-uses
  * the core shapes structurally).
  */
@@ -37,4 +37,4 @@ export {
   dayDeltaForWeekBoundary,
   daysBetween,
   type CalendarDay,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";

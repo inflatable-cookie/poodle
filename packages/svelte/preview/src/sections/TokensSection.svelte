@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { cssVars } from "@poodle/svelte-tokens";
-  import { Surface } from "@poodle/svelte";
+  import { cssVars } from "@inflatable-cookie/poodle-svelte-tokens";
+  import { Surface } from "@inflatable-cookie/poodle-svelte";
   import TokenToolsPanel from "../components/TokenToolsPanel.svelte";
   let { liveTokenValues = {} }: { liveTokenValues?: Partial<Record<string, string>> } = $props();
   type SemanticTokenPath = keyof typeof cssVars;

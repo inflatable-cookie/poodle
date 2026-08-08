@@ -32,7 +32,7 @@ formatDisplayDateTime(value: Date | string | number | null | undefined, locale?:
 ## 4. Example
 
 ```ts
-import { formatDisplayDate, formatDisplayDateTime } from "@poodle/svelte";
+import { formatDisplayDate, formatDisplayDateTime } from "@inflatable-cookie/poodle-svelte";
 
 formatDisplayDate("2026-04-08T10:15:00Z");
 formatDisplayDateTime("2026-04-08T10:15:00Z");

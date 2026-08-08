@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Icon, IconProvider } from "@poodle/svelte";
-  import type { IconSet } from "@poodle/svelte";
+  import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
+  import type { IconSet } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
-  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
+  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@inflatable-cookie/poodle-icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
@@ -34,7 +34,7 @@
 <SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="poodle-hint">
-      Import individual icons from <code>@poodle/icons-lucide</code>.
+      Import individual icons from <code>@inflatable-cookie/poodle-icons-lucide</code>.
       Only the icons you use are included in the bundle.
     </p>
     <div class="poodle-size-row">
@@ -48,7 +48,7 @@
       {/each}
     </div>
     <div class="poodle-code-hint">
-      <code>import {"{"} star, heart, settings {"}"} from "@poodle/icons-lucide";</code>
+      <code>import {"{"} star, heart, settings {"}"} from "@inflatable-cookie/poodle-icons-lucide";</code>
       <br />
       <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
     </div>

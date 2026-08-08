@@ -14,7 +14,7 @@ Mitosis-compiled) from evidence instead of promise.
 
 ## Scope
 
-1. **React adapter pilot**: `@poodle/react` with the machine-subscription
+1. **React adapter pilot**: `@inflatable-cookie/poodle-react` with the machine-subscription
    hook + styled shells for a bounded component set (suggest: Button, Tabs,
    Dialog, Select, Checkbox — one from each difficulty class). Recipes and
    tokens shared; only the shell templates are per-framework.
@@ -57,12 +57,12 @@ Mitosis-compiled) from evidence instead of promise.
 
 ## Completion Notes (2026-07-10)
 
-**React pilot shipped** (`packages/react` → `@poodle/react` +
-`@poodle/react-preview`): Button (styled-only class), Checkbox (simple
+**React pilot shipped** (`packages/react` → `@inflatable-cookie/poodle-react` +
+`@inflatable-cookie/poodle-react-preview`): Button (styled-only class), Checkbox (simple
 machine), Tabs (moderate machine) — one per difficulty class. Tokens ship
 as plain CSS so they imported unchanged; component CSS was extracted
 mechanically from the Svelte shells by script; machines imported directly
-from `@poodle/headless`.
+from `@inflatable-cookie/poodle-headless`.
 
 Measured cost:
 
@@ -80,7 +80,7 @@ Measured cost:
 recorded in spec 062). Spike evidence (two shells authored in `.lite.tsx`,
 compiled to both targets):
 
-- compilation works and `@poodle/headless` imports pass through cleanly —
+- compilation works and `@inflatable-cookie/poodle-headless` imports pass through cleanly —
   the machine layer composes with Mitosis in principle
 - disqualifying: the Svelte target emits legacy Svelte 4 (`export let`,
   `on:` events, no runes) — it would reintroduce the exact public seams

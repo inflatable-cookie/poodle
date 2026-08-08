@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type FormEvent } from "react";
-import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@poodle/headless";
+import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/slider.css";
+import "@inflatable-cookie/poodle-styles/slider.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

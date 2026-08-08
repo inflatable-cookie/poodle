@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Region, Stack } from "@poodle/svelte";
+  import { Region, Stack } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

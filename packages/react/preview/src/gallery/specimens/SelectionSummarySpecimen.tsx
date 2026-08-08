@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SelectionSummary, type SelectionSummaryItem } from "@poodle/react";
+import { SelectionSummary, type SelectionSummaryItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

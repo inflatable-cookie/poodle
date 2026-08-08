@@ -17,9 +17,9 @@ import {
   treeSiblingReorderTarget,
   treeToggleCheck,
   treeVirtualWindow,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/tree.css";
+import "@inflatable-cookie/poodle-styles/tree.css";
 
 import { Checkbox } from "./Checkbox";
 import { Icon } from "./Icon";

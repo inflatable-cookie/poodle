@@ -1,6 +1,6 @@
 # Underlay Bridge
 
-**Package:** `@poodle/bridge-underlay` (internal — not for public release)
+**Package:** `@inflatable-cookie/poodle-bridge-underlay` (internal — not for public release)
 **Status:** active · internal adoption artifact
 **Updated:** 2026-04-23
 
@@ -11,7 +11,7 @@ app-facing surface fully Underlay-owned.
 ## Who This Is For
 
 This package is for the **Underlay team**, not for Underlay app developers.
-App code never imports from `@poodle/bridge-underlay` directly.
+App code never imports from `@inflatable-cookie/poodle-bridge-underlay` directly.
 
 The dependency shape is:
 
@@ -20,7 +20,7 @@ Underlay App Code
     ↓  imports from
 @underlay/ui/*  (Underlay-owned wrappers)
     ↓  internally consumes
-@poodle/bridge-underlay  (token aliases, wrapper policies, proof artifacts)
+@inflatable-cookie/poodle-bridge-underlay  (token aliases, wrapper policies, proof artifacts)
     ↓  resolves values from
 Poodle Tokens / Components
 ```
@@ -49,7 +49,7 @@ customization.
 Add to the Underlay internal adapter package (not to app code):
 
 ```sh
-bun add @poodle/bridge-underlay
+bun add @inflatable-cookie/poodle-bridge-underlay
 ```
 
 ### 2. Import the CSS alias layer
@@ -57,7 +57,7 @@ bun add @poodle/bridge-underlay
 In the Underlay adapter's entry stylesheet (loaded once at app root):
 
 ```css
-@import "@poodle/bridge-underlay/css/poodle-to-underlay.css";
+@import "@inflatable-cookie/poodle-bridge-underlay/css/poodle-to-underlay.css";
 ```
 
 This file:
@@ -75,7 +75,7 @@ Use the theme map to translate an Underlay theme identifier into the Poodle
 data attributes that drive CSS custom property resolution:
 
 ```typescript
-import { underlayThemeMap } from "@poodle/bridge-underlay/theme-map";
+import { underlayThemeMap } from "@inflatable-cookie/poodle-bridge-underlay/theme-map";
 
 function applyUnderlayTheme(el: HTMLElement, underlayThemeId: string) {
   const mapping = underlayThemeMap.find(m => m.underlayThemeId === underlayThemeId);
@@ -101,7 +101,7 @@ Density and control-size are applied the same way using `underlayDensityModeMap`
 and `underlayControlSizeMap`:
 
 ```typescript
-import { underlayDensityModeMap } from "@poodle/bridge-underlay/theme-map";
+import { underlayDensityModeMap } from "@inflatable-cookie/poodle-bridge-underlay/theme-map";
 
 const densityMapping = underlayDensityModeMap.find(m => m.underlayModeId === "underlay-compact");
 el.setAttribute(densityMapping.selector, "");  // activates Poodle density mode
@@ -115,7 +115,7 @@ The token map records the current set of `--underlay-*` aliases and the Poodle
 semantic token they resolve to.
 
 ```typescript
-import { underlayTokenMap, type UnderlayBridgeToken } from "@poodle/bridge-underlay/token-map";
+import { underlayTokenMap, type UnderlayBridgeToken } from "@inflatable-cookie/poodle-bridge-underlay/token-map";
 
 // underlayTokenMap: UnderlayBridgeToken[]
 // Each entry:
@@ -155,7 +155,7 @@ The component wrappers module defines the current set of approved wrapper
 policies. Each wrapper must follow the zero-leak rules.
 
 ```typescript
-import { underlayWrapperPolicies, underlayZeroLeakRules } from "@poodle/bridge-underlay/component-wrappers";
+import { underlayWrapperPolicies, underlayZeroLeakRules } from "@inflatable-cookie/poodle-bridge-underlay/component-wrappers";
 ```
 
 ### Zero-leak rules (non-negotiable)
@@ -190,7 +190,7 @@ Underlay-owned import path. App code never sees Poodle:
 
 <script lang="ts">
   // Underlay-owned prop names — NOT Poodle names
-  import { Button as PoodleButton } from "@poodle/svelte";  // internal use only
+  import { Button as PoodleButton } from "@inflatable-cookie/poodle-svelte";  // internal use only
   import type { HTMLButtonAttributes } from "svelte/elements";
 
   // Underlay prop surface
@@ -225,7 +225,7 @@ App code:
 ```svelte
 <!-- ❌ Wrong — leaks Poodle into app code -->
 <script>
-  import { Button } from "@poodle/svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 <Button variant="solid" size="md" on:click={save}>Save</Button>
 ```
@@ -257,7 +257,7 @@ teaching app code about Poodle types:
 import {
   buildNightfireBlockEditorBridge,
   toPoodleEditorBlocks,
-} from "@poodle/bridge-underlay/nightfire-block-editor";
+} from "@inflatable-cookie/poodle-bridge-underlay/nightfire-block-editor";
 
 const bridge = buildNightfireBlockEditorBridge({
   typeOptions: editorTypeOptions,
@@ -312,7 +312,7 @@ import {
   underlayZeroLeakProof,
   validateUnderlayZeroLeakProof,
   type UnderlayZeroLeakProof,
-} from "@poodle/bridge-underlay/zero-leak-proof";
+} from "@inflatable-cookie/poodle-bridge-underlay/zero-leak-proof";
 
 // Validate at build time or in tests
 validateUnderlayZeroLeakProof();  // throws if invariants are violated
@@ -363,12 +363,12 @@ before the bridge posture is considered fully hardened:
 
 | Import path | What it provides |
 |---|---|
-| `@poodle/bridge-underlay` | Re-exports everything from all subpaths |
-| `@poodle/bridge-underlay/token-map` | `underlayTokenMap`, `canonicalTokenFamilies`, `UnderlayBridgeToken` |
-| `@poodle/bridge-underlay/theme-map` | `underlayThemeMap`, `underlayDensityModeMap`, `underlayControlSizeMap`, `canonicalPoodleThemes` |
-| `@poodle/bridge-underlay/component-wrappers` | `underlayWrapperPolicies`, `underlayZeroLeakRules`, `UnderlayWrapperPolicy` |
-| `@poodle/bridge-underlay/nightfire-block-editor` | Nightfire block envelope and type-picker mapping helpers for Poodle `BlockEditor` |
-| `@poodle/bridge-underlay/zero-leak-proof` | `underlayZeroLeakProof`, `validateUnderlayZeroLeakProof`, proof types |
+| `@inflatable-cookie/poodle-bridge-underlay` | Re-exports everything from all subpaths |
+| `@inflatable-cookie/poodle-bridge-underlay/token-map` | `underlayTokenMap`, `canonicalTokenFamilies`, `UnderlayBridgeToken` |
+| `@inflatable-cookie/poodle-bridge-underlay/theme-map` | `underlayThemeMap`, `underlayDensityModeMap`, `underlayControlSizeMap`, `canonicalPoodleThemes` |
+| `@inflatable-cookie/poodle-bridge-underlay/component-wrappers` | `underlayWrapperPolicies`, `underlayZeroLeakRules`, `UnderlayWrapperPolicy` |
+| `@inflatable-cookie/poodle-bridge-underlay/nightfire-block-editor` | Nightfire block envelope and type-picker mapping helpers for Poodle `BlockEditor` |
+| `@inflatable-cookie/poodle-bridge-underlay/zero-leak-proof` | `underlayZeroLeakProof`, `validateUnderlayZeroLeakProof`, proof types |
 
 ---
 

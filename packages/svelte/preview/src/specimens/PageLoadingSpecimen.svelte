@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageLoading } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { PageLoading } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let showIndeterminate = $state(false);

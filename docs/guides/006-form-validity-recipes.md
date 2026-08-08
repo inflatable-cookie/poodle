@@ -20,8 +20,8 @@ or section-level validity logic across multiple fields.
 
 ```svelte
 <script lang="ts">
-  import { Button, Field, TextInput } from "@poodle/svelte";
-  import type { InputValidationStatus } from "@poodle/svelte";
+  import { Button, Field, TextInput } from "@inflatable-cookie/poodle-svelte";
+  import type { InputValidationStatus } from "@inflatable-cookie/poodle-svelte";
 
   let name = "";
   let slug = "";

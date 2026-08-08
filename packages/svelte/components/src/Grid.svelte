@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/grid.css";
+  import "@inflatable-cookie/poodle-styles/grid.css";
   import type { Snippet } from "svelte";
 
   import { joinStyles, scaleToSpace } from "./internal";

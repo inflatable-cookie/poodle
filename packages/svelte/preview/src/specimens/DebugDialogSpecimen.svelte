@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DebugDialog } from "@poodle/svelte";
+  import { DebugDialog } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const value = {

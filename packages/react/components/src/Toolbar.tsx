@@ -1,8 +1,8 @@
-import "@poodle/styles/toolbar.css";
+import "@inflatable-cookie/poodle-styles/toolbar.css";
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
 
-import { getFocusableElements } from "@poodle/headless";
+import { getFocusableElements } from "@inflatable-cookie/poodle-headless";
 
 import { controlHeightRem, resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";

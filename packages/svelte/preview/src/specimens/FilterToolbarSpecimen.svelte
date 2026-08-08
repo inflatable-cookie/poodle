@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FilterToolbar } from "@poodle/svelte";
-  import { Select, TextInput, Button, IconButton, type SelectOption } from "@poodle/svelte";
+  import { FilterToolbar } from "@inflatable-cookie/poodle-svelte";
+  import { Select, TextInput, Button, IconButton, type SelectOption } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 

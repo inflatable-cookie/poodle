@@ -13,7 +13,7 @@ import {
   pointAnchor,
   registerDismissLayer,
   type MenuEvent as MenuMachineEvent,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 import { MenuSurface, type MenuSurfaceHandle } from "./MenuSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

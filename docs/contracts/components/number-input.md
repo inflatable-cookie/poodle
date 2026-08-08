@@ -21,7 +21,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 ## Public Contract
 
 - Component name: `NumberInput`
-- Import: `@poodle/svelte`
+- Import: `@inflatable-cookie/poodle-svelte`
 
 ## Core Props
 
@@ -45,7 +45,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 
 Behavior classification: machine-backed via core machinery
 
-Value semantics from `@poodle/headless`: `parseNumberish` (numeric
+Value semantics from `@inflatable-cookie/poodle-headless`: `parseNumberish` (numeric
 coercion; empty and non-finite become null), `parseStep` (invalid or
 non-positive steps fall back to 1), `clampNullable` (optional min/max
 bounds), `validationStatusToState`. Increment/decrement, commit-on-blur,
@@ -65,7 +65,7 @@ and async validation orchestration stay adapter-side.
 
 ```svelte
 <script lang="ts">
-  import { NumberInput } from "@poodle/svelte";
+  import { NumberInput } from "@inflatable-cookie/poodle-svelte";
 
   let quantity: number | null = 1;
   let formYear = "2026";

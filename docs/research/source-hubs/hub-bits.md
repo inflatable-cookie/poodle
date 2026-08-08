@@ -261,7 +261,7 @@ Bits UI components accept standard `class` props, making Poodle token integratio
 ```svelte
 <script>
   import { Button } from "bits-ui";
-  import { tokens } from "@poodle/tokens/svelte";
+  import { tokens } from "@inflatable-cookie/poodle-tokens/svelte";
 </script>
 
 <Button.Root 

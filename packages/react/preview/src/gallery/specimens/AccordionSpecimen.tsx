@@ -1,4 +1,4 @@
-import { Accordion, type AccordionItem } from "@poodle/react";
+import { Accordion, type AccordionItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

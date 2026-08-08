@@ -65,9 +65,9 @@ The current release posture is:
 
 ### Preview Channel Public-Intent Packages
 
-- `@poodle/svelte-tokens`
-- `@poodle/svelte`
-- `@poodle/svelte-workstation`
+- `@inflatable-cookie/poodle-svelte-tokens`
+- `@inflatable-cookie/poodle-svelte`
+- `@inflatable-cookie/poodle-svelte-workstation`
 - `poodle-gpui-tokens`
 - `poodle-gpui-primitives`
 - `poodle-gpui-composites`
@@ -75,9 +75,9 @@ The current release posture is:
 
 ### Internal Packages
 
-- `@poodle/tokens`
-- `@poodle/bridge-underlay`
-- `@poodle/svelte-preview`
+- `@inflatable-cookie/poodle-tokens`
+- `@inflatable-cookie/poodle-bridge-underlay`
+- `@inflatable-cookie/poodle-svelte-preview`
 
 ## Consumption Rule
 

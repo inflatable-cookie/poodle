@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Popover, type OverlaySurfaceGeometryChangeHandler } from "@poodle/svelte";
+  import { Popover, type OverlaySurfaceGeometryChangeHandler } from "@inflatable-cookie/poodle-svelte";
 
   interface Props {
     onSurfaceGeometryChange: OverlaySurfaceGeometryChangeHandler;

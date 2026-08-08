@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/resize-handle.css";
-  import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/resize-handle.css";
+  import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@inflatable-cookie/poodle-headless";
   import type { SplitOrientation } from "./types";
 
   let {

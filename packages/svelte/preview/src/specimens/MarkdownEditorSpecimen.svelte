@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MarkdownEditor, Eyebrow } from "@poodle/svelte";
+  import { MarkdownEditor, Eyebrow } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let content = $state(`# Hello World

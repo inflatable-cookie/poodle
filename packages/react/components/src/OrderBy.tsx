@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type DragEvent, type MouseEvent } from "react";
-import { layerContains, registerDismissLayer } from "@poodle/headless";
+import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/order-by.css";
+import "@inflatable-cookie/poodle-styles/order-by.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { IconButton } from "./IconButton";

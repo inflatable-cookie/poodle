@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/selection-summary.css";
+  import "@inflatable-cookie/poodle-styles/selection-summary.css";
   import { default as Icon } from "./Icon.svelte";
   import { default as TextLink } from "./TextLink.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/ref-select.css";
-  import { layerContains, registerDismissLayer } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/ref-select.css";
+  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
   import { tick } from "svelte";
 
   import { anchored } from "./anchored";

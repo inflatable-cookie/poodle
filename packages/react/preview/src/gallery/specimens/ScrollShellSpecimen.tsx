@@ -1,4 +1,4 @@
-import { ScrollShell, Surface } from "@poodle/react";
+import { ScrollShell, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function ScrollShellSpecimen() {

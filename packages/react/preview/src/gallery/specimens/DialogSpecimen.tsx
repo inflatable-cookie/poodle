@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Button, Checkbox, Dialog, Eyebrow, Field, Pill, Select, Surface, TextInput } from "@poodle/react";
+import { Button, Checkbox, Dialog, Eyebrow, Field, Pill, Select, Surface, TextInput } from "@inflatable-cookie/poodle-react";
 
 const WIDTHS = ["sm", "md", "lg", "xl"] as const;
 type DialogWidth = (typeof WIDTHS)[number];

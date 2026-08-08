@@ -1,4 +1,4 @@
-import { Avatar, Stack } from "@poodle/react";
+import { Avatar, Stack } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function AvatarSpecimen() {

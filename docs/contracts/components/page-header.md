@@ -445,7 +445,7 @@ grid-column span.
 ## 9. Svelte Notes
 
 - Uses Svelte 5 `$props()` syntax with `Props` interface
-- Composes `Callout` and `Icon` primitives from `@poodle/svelte` for banner shortcut and back link arrow
+- Composes `Callout` and `Icon` primitives from `@inflatable-cookie/poodle-svelte` for banner shortcut and back link arrow
 - `primaryTitle` derived as `title ?? section ?? ""`
 - `hasSectionTitleSplit` derived as `Boolean(section && title)`
 - Heading tag is dynamic via `<svelte:element this={headingTag}>`

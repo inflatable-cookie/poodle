@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/icon-button.css";
-  import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/icon-button.css";
+  import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-headless";
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { StatusBar } from "@poodle/react";
+import { StatusBar } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

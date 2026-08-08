@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { TimeInput, Eyebrow, Surface } from "@poodle/react";
+import { TimeInput, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const specimenStyle: CSSProperties = {

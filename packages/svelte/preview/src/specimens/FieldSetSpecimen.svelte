@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte";
+  import { FieldSet, Field, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

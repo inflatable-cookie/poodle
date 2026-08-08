@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RefSelect, type RefOption } from "@poodle/svelte";
+  import { RefSelect, type RefOption } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -12,9 +12,9 @@ import {
   codeSelectionRange,
   codeSlotSelection,
   sanitizeCodeValue,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/code-input.css";
+import "@inflatable-cookie/poodle-styles/code-input.css";
 
 import { Field } from "./Field";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

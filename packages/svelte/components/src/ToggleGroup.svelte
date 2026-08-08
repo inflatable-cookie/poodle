@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/toggle-group.css";
-  import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/toggle-group.css";
+  import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@inflatable-cookie/poodle-headless";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

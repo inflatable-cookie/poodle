@@ -1,4 +1,4 @@
-import { Toolbar, Button, IconButton, Separator } from "@poodle/react";
+import { Toolbar, Button, IconButton, Separator } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

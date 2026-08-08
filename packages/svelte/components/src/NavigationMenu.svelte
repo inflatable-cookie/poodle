@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/navigation-menu.css";
-  import { registerDismissLayer } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/navigation-menu.css";
+  import { registerDismissLayer } from "@inflatable-cookie/poodle-headless";
   import type { Snippet } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";

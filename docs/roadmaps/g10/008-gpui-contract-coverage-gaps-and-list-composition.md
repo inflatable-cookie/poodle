@@ -18,7 +18,7 @@ contract deliberately scopes specimens.
   `docs/contracts/components/list-card-counter.md` states it has no standalone
   specimen; it is shown **inside** the List card specimen
   (`packages/svelte/preview/src/specimens/ListCardSpecimen.svelte`). It is a
-  **composition helper** for `ListCard` footers, exported from `@poodle/svelte`.
+  **composition helper** for `ListCard` footers, exported from `@inflatable-cookie/poodle-svelte`.
 - **ListGrid** — **public** layout primitive (exported, documented in
   `docs/guides/013-admin-feature-delivery-recipes.md`). It is **not** internal;
   the gap is **no dedicated Svelte preview specimen** (only parity/registry

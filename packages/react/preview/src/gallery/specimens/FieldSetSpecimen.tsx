@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { FieldSet, Field, TextInput, Select } from "@poodle/react";
+import { FieldSet, Field, TextInput, Select } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const formSectionsStyle: CSSProperties = {

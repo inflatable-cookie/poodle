@@ -1,5 +1,5 @@
-import { Eyebrow, Slider, TextInput, ToggleGroup, type ToggleGroupOption } from "@poodle/react";
-import { themes, densityModes, controlSizes } from "@poodle/svelte-tokens";
+import { Eyebrow, Slider, TextInput, ToggleGroup, type ToggleGroupOption } from "@inflatable-cookie/poodle-react";
+import { themes, densityModes, controlSizes } from "@inflatable-cookie/poodle-svelte-tokens";
 
 export interface DisplayControlsProps {
   theme: string;

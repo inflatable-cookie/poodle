@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { TextInput, Field, Eyebrow, Surface } from "@poodle/react";
-import type { InputValidationStatus, ValidationResult, ValidationState } from "@poodle/react";
+import { TextInput, Field, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
+import type { InputValidationStatus, ValidationResult, ValidationState } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const specimenStyle: CSSProperties = {

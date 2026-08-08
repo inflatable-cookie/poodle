@@ -3,14 +3,14 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/drawer.css";
+  import "@inflatable-cookie/poodle-styles/drawer.css";
   import {
     getFocusableElements,
     modalTransition,
     registerDismissLayer,
     trapFocusKeydown,
     type ModalEvent,
-  } from "@poodle/headless";
+  } from "@inflatable-cookie/poodle-headless";
   import { onDestroy, tick, type Snippet } from "svelte";
   import { fade } from "svelte/transition";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

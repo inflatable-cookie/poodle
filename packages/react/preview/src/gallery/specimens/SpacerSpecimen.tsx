@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Spacer, Stack, Surface } from "@poodle/react";
+import { Spacer, Stack, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const spanStyle: CSSProperties = { fontSize: "0.875rem", whiteSpace: "nowrap" };

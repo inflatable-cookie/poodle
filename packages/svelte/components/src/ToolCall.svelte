@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/tool-call.css";
+  import "@inflatable-cookie/poodle-styles/tool-call.css";
 
   import Code from "./Code.svelte";
   import Icon from "./Icon.svelte";

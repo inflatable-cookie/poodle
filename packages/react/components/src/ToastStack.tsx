@@ -1,4 +1,4 @@
-import "@poodle/styles/toast-stack.css";
+import "@inflatable-cookie/poodle-styles/toast-stack.css";
 
 import { Button } from "./Button";
 import { Icon } from "./Icon";

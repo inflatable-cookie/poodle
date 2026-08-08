@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte";
+  import { Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">

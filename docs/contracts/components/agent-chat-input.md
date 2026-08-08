@@ -117,8 +117,8 @@ Follows Poodle conventions: `camelCase` multi-word props, `on*` handler props,
 
 ### Shared Types
 
-Defined in `@poodle/svelte` `types.ts`, re-exported from the package root,
-redefined identically in `@poodle/react`, mirrored in `poodle-specs` (snake_case).
+Defined in `@inflatable-cookie/poodle-svelte` `types.ts`, re-exported from the package root,
+redefined identically in `@inflatable-cookie/poodle-react`, mirrored in `poodle-specs` (snake_case).
 
 ```typescript
 type AgentChatStatus = "idle" | "busy" | "questioning";
@@ -184,7 +184,7 @@ text and the measured editor height.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Submit gating, auto-grow measurement and key handling are plain component logic.
-There is no `@poodle/headless` machine and no conformance vectors. The pure
+There is no `@inflatable-cookie/poodle-headless` machine and no conformance vectors. The pure
 helpers (`canSubmit`, `contextPercentage`, `actionIcon`, `resolveSubmitIntent`)
 are the cross-renderer semantic reference and live in `agent-chat-input-model.ts`
 (TS) and as methods on `AgentChatInputSpec` (Rust).

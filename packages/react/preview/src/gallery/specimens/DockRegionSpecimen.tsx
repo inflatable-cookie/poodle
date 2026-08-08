@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { DockRegion } from "@poodle/react";
-import type { PanelTabItem, DockEdge } from "@poodle/react";
+import { DockRegion } from "@inflatable-cookie/poodle-react";
+import type { PanelTabItem, DockEdge } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

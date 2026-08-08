@@ -1,4 +1,4 @@
-import "@poodle/styles/sidebar-nav.css";
+import "@inflatable-cookie/poodle-styles/sidebar-nav.css";
 
 import { useState } from "react";
 

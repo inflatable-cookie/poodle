@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/spacer.css";
+  import "@inflatable-cookie/poodle-styles/spacer.css";
   import { joinStyles } from "./internal";
 
   interface Props {

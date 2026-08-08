@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { CardToggleGroup } from "@poodle/svelte";
-  import type { CardToggleItem } from "@poodle/svelte";
+  import { CardToggleGroup } from "@inflatable-cookie/poodle-svelte";
+  import type { CardToggleItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

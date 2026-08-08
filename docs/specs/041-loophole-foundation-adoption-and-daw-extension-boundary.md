@@ -22,9 +22,9 @@ of Poodle foundations.
 
 The current allowed Loophole adoption layers are:
 
-- `@poodle/svelte-tokens`
-- `@poodle/svelte`
-- `@poodle/svelte-workstation`
+- `@inflatable-cookie/poodle-svelte-tokens`
+- `@inflatable-cookie/poodle-svelte`
+- `@inflatable-cookie/poodle-svelte-workstation`
 
 These packages are sufficient for a first foundation adoption proof when the
 downstream app still owns:

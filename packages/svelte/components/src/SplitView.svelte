@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/split-view.css";
+  import "@inflatable-cookie/poodle-styles/split-view.css";
   import type { Snippet } from "svelte";
 
   import { default as CollapseToggle } from "./CollapseToggle.svelte";

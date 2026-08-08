@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import "@poodle/styles/agent-transcript.css";
+import "@inflatable-cookie/poodle-styles/agent-transcript.css";
 
 import {
   groupTranscriptItems,
   isPinnedToBottom,
   transcriptWindow,
   type TranscriptBlock,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 import { AgentMessage } from "./AgentMessage";
 import { AgentQuestionRecord } from "./AgentQuestionRecord";

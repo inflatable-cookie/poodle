@@ -1,4 +1,4 @@
-import { DateTimeRangePicker } from "@poodle/react";
+import { DateTimeRangePicker } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

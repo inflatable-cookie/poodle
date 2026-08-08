@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Icon, IconProvider, type IconSet } from "@poodle/react";
+import { Icon, IconProvider, type IconSet } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 import iconNodes from "lucide-static/icon-nodes.json";
@@ -112,7 +112,7 @@ export function IconSpecimen() {
     >
       <SpecimenGroup label="Direct import — tree-shakeable">
         <p style={hint}>
-          Import individual icons from <code style={hintCode}>@poodle/icons-lucide</code>.
+          Import individual icons from <code style={hintCode}>@inflatable-cookie/poodle-icons-lucide</code>.
           Only the icons you use are included in the bundle.
         </p>
         <div style={sizeRow}>
@@ -126,7 +126,7 @@ export function IconSpecimen() {
           ))}
         </div>
         <div style={codeHint}>
-          <code>{'import { star, heart, settings } from "@poodle/icons-lucide";'}</code>
+          <code>{'import { star, heart, settings } from "@inflatable-cookie/poodle-icons-lucide";'}</code>
           <br />
           <code>{'<Icon icon={star} size="lg" />'}</code>
         </div>

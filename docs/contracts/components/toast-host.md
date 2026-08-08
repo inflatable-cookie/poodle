@@ -104,7 +104,7 @@ internally but can be configured via `autoDismissMs` and `stickyTones`.
 ### Behavior Machine
 
 Behavior classification: machine-backed (toast machinery in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Pure host machinery; the adapter owns real timers and the store
 subscription.

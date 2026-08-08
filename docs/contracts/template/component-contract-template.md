@@ -102,7 +102,7 @@ Use a state machine diagram when:
 
 Required for every behavioral component; styled-only components state
 `Behavior classification: styled-only (no machine)` here instead. This section
-is the source of truth for the headless core (`@poodle/headless` TS machines
+is the source of truth for the headless core (`@inflatable-cookie/poodle-headless` TS machines
 and the Rust mirror). Rules: transitions are pure; side effects appear only in
 the Effects table as named intents; every ARIA/data attribute the machine owns
 appears in the Part Attribute Output table as a function of machine state and

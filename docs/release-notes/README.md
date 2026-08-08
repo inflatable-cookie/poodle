@@ -21,4 +21,4 @@ exists yet.
 ## Versions
 
 - [0.1.0](0.1.0.md) — 2026-07-24 — first documented preview release (12-theme
-  set, ThemeSelect, FilterBuilder, `@poodle/react`; theme id renames)
+  set, ThemeSelect, FilterBuilder, `@inflatable-cookie/poodle-react`; theme id renames)

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { IconButton, InlineListSection, Pill, Text } from "@poodle/react";
+import { IconButton, InlineListSection, Pill, Text } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const row: CSSProperties = {

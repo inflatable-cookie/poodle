@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Text, TextLink } from "@poodle/react";
+import { Text, TextLink } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const rowStyle: CSSProperties = {

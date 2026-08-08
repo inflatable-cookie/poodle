@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { AppHeader, Button, IconButton, Menubar } from "@poodle/react";
-import type { MenubarItem } from "@poodle/react";
+import { AppHeader, Button, IconButton, Menubar } from "@inflatable-cookie/poodle-react";
+import type { MenubarItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CardRadioGroup } from "@poodle/react";
-import type { CardRadioItem } from "@poodle/react";
+import { CardRadioGroup } from "@inflatable-cookie/poodle-react";
+import type { CardRadioItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

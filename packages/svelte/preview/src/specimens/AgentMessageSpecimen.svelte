@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AgentMessage } from "@poodle/svelte";
+  import { AgentMessage } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

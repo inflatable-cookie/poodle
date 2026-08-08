@@ -89,7 +89,7 @@ index are required.
 ### Behavior Machine
 
 Behavior classification: machine-backed (`menuTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Menu overlay machine shared by Menu and ContextMenu. Item navigation is
 core machinery (`menuListNavigate`, `menuNavigableItems`,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/progress.css";
+  import "@inflatable-cookie/poodle-styles/progress.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlSize, SemanticControlSizeRole } from "./types";
 

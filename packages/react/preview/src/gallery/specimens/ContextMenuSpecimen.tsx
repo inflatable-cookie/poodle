@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { ContextMenu } from "@poodle/react";
-import type { MenuItem } from "@poodle/react";
+import { ContextMenu } from "@inflatable-cookie/poodle-react";
+import type { MenuItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

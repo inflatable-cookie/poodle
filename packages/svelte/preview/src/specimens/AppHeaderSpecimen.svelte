@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button, IconButton, Menubar } from "@poodle/svelte";
-  import { AppHeader } from "@poodle/svelte";
+  import { Button, IconButton, Menubar } from "@inflatable-cookie/poodle-svelte";
+  import { AppHeader } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

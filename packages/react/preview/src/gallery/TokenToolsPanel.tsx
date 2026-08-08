@@ -9,7 +9,7 @@ import {
   type TabItem,
   type TableColumn,
   type TableRow,
-} from "@poodle/react";
+} from "@inflatable-cookie/poodle-react";
 
 type PanelId = "token-summary-section" | "token-inspector";
 
@@ -61,7 +61,7 @@ export function TokenToolsPanel({
       </Stack>
 
       <Stack gap="md">
-        <span className="poodle-hint">@poodle/svelte-tokens</span>
+        <span className="poodle-hint">@inflatable-cookie/poodle-svelte-tokens</span>
         <span className="poodle-path">packages/tokens/artifacts/css/</span>
         <span className="poodle-path">packages/tokens/artifacts/ts/</span>
       </Stack>

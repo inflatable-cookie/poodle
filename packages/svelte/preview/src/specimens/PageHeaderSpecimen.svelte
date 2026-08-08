@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageHeader } from "@poodle/svelte";
-  import { IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte";
+  import { PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

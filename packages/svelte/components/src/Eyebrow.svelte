@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/eyebrow.css";
+  import "@inflatable-cookie/poodle-styles/eyebrow.css";
   import type { Snippet } from "svelte";
 
   interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/audio-player.css";
+  import "@inflatable-cookie/poodle-styles/audio-player.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,

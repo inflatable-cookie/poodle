@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import "@poodle/styles/eyebrow.css";
+import "@inflatable-cookie/poodle-styles/eyebrow.css";
 
 export interface EyebrowProps {
   as?: "span" | "p" | "h2" | "h3" | "h4";

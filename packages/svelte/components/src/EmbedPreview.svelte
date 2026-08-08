@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/embed-preview.css";
+  import "@inflatable-cookie/poodle-styles/embed-preview.css";
   import { default as Skeleton } from "./Skeleton.svelte";
   import { default as TextLink } from "./TextLink.svelte";
 

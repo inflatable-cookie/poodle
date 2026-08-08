@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EditableList } from "@poodle/svelte";
-  import type { EditableListItem } from "@poodle/svelte";
+  import { EditableList } from "@inflatable-cookie/poodle-svelte";
+  import type { EditableListItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Meter } from "@poodle/svelte";
+  import { Meter } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

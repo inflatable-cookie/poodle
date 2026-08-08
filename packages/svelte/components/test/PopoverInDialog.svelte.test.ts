@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
-import { resolveLayerZIndex } from "@poodle/headless";
+import { resolveLayerZIndex } from "@inflatable-cookie/poodle-headless";
 
 import Harness from "./PopoverInDialogHarness.svelte";
 

@@ -19,29 +19,29 @@ mkdirSync(consumerRoot);
 
 const packages = [
   {
-    name: "@poodle/headless",
+    name: "@inflatable-cookie/poodle-headless",
     directory: "packages/core",
-    filename: "poodle-headless-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-headless-0.1.0.tgz",
   },
   {
-    name: "@poodle/styles",
+    name: "@inflatable-cookie/poodle-styles",
     directory: "packages/styles",
-    filename: "poodle-styles-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-styles-0.1.0.tgz",
   },
   {
-    name: "@poodle/svelte-tokens",
+    name: "@inflatable-cookie/poodle-svelte-tokens",
     directory: "packages/svelte/tokens",
-    filename: "poodle-svelte-tokens-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-svelte-tokens-0.1.0.tgz",
   },
   {
-    name: "@poodle/icons-lucide",
+    name: "@inflatable-cookie/poodle-icons-lucide",
     directory: "packages/svelte/icons-lucide",
-    filename: "poodle-icons-lucide-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-icons-lucide-0.1.0.tgz",
   },
   {
-    name: "@poodle/svelte",
+    name: "@inflatable-cookie/poodle-svelte",
     directory: "packages/svelte/components",
-    filename: "poodle-svelte-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-svelte-0.1.0.tgz",
   },
 ] as const;
 
@@ -91,7 +91,7 @@ const tarballDependencies = Object.fromEntries(
   ]),
 );
 const consumerManifest = {
-  name: "@poodle/packed-install-proof",
+  name: "@inflatable-cookie/poodle-packed-install-proof",
   private: true,
   type: "module",
   dependencies: {

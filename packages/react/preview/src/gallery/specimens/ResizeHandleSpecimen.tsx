@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { ResizeHandle } from "@poodle/react";
+import { ResizeHandle } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const rowStyle: CSSProperties = {

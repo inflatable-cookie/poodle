@@ -1,4 +1,4 @@
-import { Meter } from "@poodle/react";
+import { Meter } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

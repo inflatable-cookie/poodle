@@ -1,4 +1,4 @@
-import { DebugDialog } from "@poodle/react";
+import { DebugDialog } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function DebugDialogSpecimen() {

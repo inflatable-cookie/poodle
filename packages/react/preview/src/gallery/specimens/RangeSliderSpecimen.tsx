@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RangeSlider } from "@poodle/react";
+import { RangeSlider } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

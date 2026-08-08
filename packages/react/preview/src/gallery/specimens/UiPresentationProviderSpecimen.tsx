@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@poodle/react";
+import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const controls: CSSProperties = {

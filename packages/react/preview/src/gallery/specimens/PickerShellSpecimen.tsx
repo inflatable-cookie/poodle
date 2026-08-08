@@ -1,4 +1,4 @@
-import { PickerShell, Surface, UiPresentationProvider } from "@poodle/react";
+import { PickerShell, Surface, UiPresentationProvider } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

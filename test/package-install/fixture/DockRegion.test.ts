@@ -1,18 +1,18 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
-import { DockRegion } from "@poodle/svelte";
+import { DockRegion } from "@inflatable-cookie/poodle-svelte";
 import type {
   DockExternalDragSource,
   PanelTabItem,
-} from "@poodle/svelte";
+} from "@inflatable-cookie/poodle-svelte";
 
 const items: PanelTabItem[] = [
   { value: "explorer", label: "Explorer" },
   { value: "inspector", label: "Inspector" },
 ];
 
-describe("packed @poodle/svelte", () => {
+describe("packed @inflatable-cookie/poodle-svelte", () => {
   it("mounts the public drag seam and keeps local reorder", async () => {
     const onReorder = vi.fn();
     const end = vi.fn();

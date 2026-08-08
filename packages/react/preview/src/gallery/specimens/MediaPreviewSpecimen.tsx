@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { MediaPreview } from "@poodle/react";
+import { MediaPreview } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/popover.css";
+  import "@inflatable-cookie/poodle-styles/popover.css";
   import {
     createInstanceId,
     getFocusableElements,
@@ -10,7 +10,7 @@
     type PopoverContext,
     type PopoverEvent,
     type OverlaySurfaceGeometryChangeHandler,
-  } from "@poodle/headless";
+  } from "@inflatable-cookie/poodle-headless";
   import { tick, type Snippet } from "svelte";
 
   import { anchored } from "./anchored";

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Spinner } from "@poodle/react";
+import { Spinner } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

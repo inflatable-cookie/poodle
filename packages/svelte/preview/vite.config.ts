@@ -9,7 +9,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@poodle/svelte": fileURLToPath(new URL("../components/src/index.ts", import.meta.url)),
+      "@inflatable-cookie/poodle-svelte": fileURLToPath(new URL("../components/src/index.ts", import.meta.url)),
     },
   },
   server: {

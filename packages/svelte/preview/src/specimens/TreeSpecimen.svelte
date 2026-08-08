@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Tree, ContextMenu } from "@poodle/svelte";
-  import type { TreeNode, MenuItem } from "@poodle/svelte";
+  import { Tree, ContextMenu } from "@inflatable-cookie/poodle-svelte";
+  import type { TreeNode, MenuItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

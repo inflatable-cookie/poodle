@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/breadcrumbs.css";
+  import "@inflatable-cookie/poodle-styles/breadcrumbs.css";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

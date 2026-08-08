@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { CollapseToggle } from "@poodle/react";
+import { CollapseToggle } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

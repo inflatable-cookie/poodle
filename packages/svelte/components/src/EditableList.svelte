@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
-  import "@poodle/styles/editable-list.css";
-  import { applyReorder, listReorderKeyIntent } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/editable-list.css";
+  import { applyReorder, listReorderKeyIntent } from "@inflatable-cookie/poodle-headless";
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@poodle/styles/stack.css";
+import "@inflatable-cookie/poodle-styles/stack.css";
 
 import { alignItemsValue, justifyContentValue, overflowValue, scaleToSpace } from "./internal";
 import type { LayoutAlign, LayoutJustify, OverflowMode, SpaceScale } from "./types";

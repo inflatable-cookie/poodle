@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/password-requirements.css";
+  import "@inflatable-cookie/poodle-styles/password-requirements.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlSize, SemanticControlSizeRole, PasswordRequirementsPolicy } from "./types";
 

@@ -1,4 +1,4 @@
-import "@poodle/styles/block-editor.css";
+import "@inflatable-cookie/poodle-styles/block-editor.css";
 
 import { useState, type ChangeEvent, type DragEvent as ReactDragEvent, type ReactNode } from "react";
 

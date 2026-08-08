@@ -95,7 +95,7 @@ are required.
 ### Behavior Machine
 
 Behavior classification: machine-backed (shared `singleSelectTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Same machine as RadioGroup: single-select over options with per-option and
 group disabled guards; `SELECT` sets `value` and emits

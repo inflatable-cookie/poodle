@@ -414,13 +414,13 @@ None.
 - uses callback props for ratio and collapse-state change requests
 - `bind:this={container}` on root for computing raw ratio from mouse position
 - `rawRatio()` converts mouse position to ratio using container bounding rect
-- primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte`
+- primary/secondary collapse toggles use `CollapseToggle` from `@inflatable-cookie/poodle-svelte`
 - resize callbacks handled via `ResizeHandle` `onResizeStart` / `onResizeMove` / `onResizeStep`
 - pane content conditionally rendered: `{#if !primaryCollapsed}` / `{#if !secondaryCollapsed}`;
   with a rail-collapse size configured the content stays mounted while railed
 - `SplitOrientation`, `CollapseDirection`, `ControlSize`, `SemanticControlSizeRole`,
-  `ControlDensity` types imported from `@poodle/svelte`
-- `ResizeHandle` and `CollapseToggle` imported from `@poodle/svelte`
+  `ControlDensity` types imported from `@inflatable-cookie/poodle-svelte`
+- `ResizeHandle` and `CollapseToggle` imported from `@inflatable-cookie/poodle-svelte`
 - `data-primary-collapsed` and `data-secondary-collapsed` use `|| undefined` to
   omit the attribute when false
 - `data-toggle-visibility` is always written (both values are meaningful), so

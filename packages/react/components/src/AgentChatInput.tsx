@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-import "@poodle/styles/agent-chat-input.css";
+import "@inflatable-cookie/poodle-styles/agent-chat-input.css";
 
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";

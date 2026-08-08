@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DetailItem, DetailSection, DetailSectionGroup } from "@poodle/svelte";
+  import { DetailItem, DetailSection, DetailSectionGroup } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Region, SplitView } from "@poodle/react";
+import { Region, SplitView } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const frameStyle: CSSProperties = {

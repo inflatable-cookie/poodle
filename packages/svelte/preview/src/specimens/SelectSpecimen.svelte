@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@poodle/svelte";
+  import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fruitOptions: SelectOption[] = [

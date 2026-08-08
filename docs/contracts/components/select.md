@@ -184,7 +184,7 @@ The component automatically determines whether to render a native `<select>` or 
 
 Behavior classification: machine-backed via core machinery
 
-Select composes `@poodle/headless` machinery; lazy loading, query state,
+Select composes `@inflatable-cookie/poodle-headless` machinery; lazy loading, query state,
 freeform mode, and native-mode delegation stay adapter-side.
 
 - Option lists: `flattenSelectOptions` (grouped or flat),

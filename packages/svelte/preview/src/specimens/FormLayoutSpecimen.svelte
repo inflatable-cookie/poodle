@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FormLayout } from "@poodle/svelte";
+  import { FormLayout } from "@inflatable-cookie/poodle-svelte";
   import {
     Eyebrow,
     Field,
@@ -8,7 +8,7 @@
     Checkbox,
     Button,
     type SelectOption,
-  } from "@poodle/svelte";
+  } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const roleOptions: SelectOption[] = [

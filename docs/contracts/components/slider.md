@@ -82,7 +82,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (`sliderTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Keyboard and pointer interaction come from the native range input; the
 machine owns value normalization and the change/commit split.

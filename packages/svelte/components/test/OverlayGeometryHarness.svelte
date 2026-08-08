@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { OverlaySurfaceGeometryChangeHandler } from "@poodle/headless";
+  import type { OverlaySurfaceGeometryChangeHandler } from "@inflatable-cookie/poodle-headless";
 
   import Menu from "../src/Menu.svelte";
   import Popover from "../src/Popover.svelte";

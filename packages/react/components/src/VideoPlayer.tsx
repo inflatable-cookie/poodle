@@ -1,4 +1,4 @@
-import "@poodle/styles/video-player.css";
+import "@inflatable-cookie/poodle-styles/video-player.css";
 
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 

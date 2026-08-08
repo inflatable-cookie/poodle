@@ -12,7 +12,7 @@ exclude = [
   "docs/**", "dist/**", "node_modules/**", "**/assets/**", "**/artifacts/**",
   "**/*.json", "**/preview/**", "**/scripts/**",
   # Complex interactive component shells. Behavioural logic is extracted to
-  # @poodle/headless / poodle-specs and (for Svelte) CSS is extracted to a
+  # @inflatable-cookie/poodle-headless / poodle-specs and (for Svelte) CSS is extracted to a
   # co-located .css file; the residual is cohesive markup + machine-wiring +
   # a11y attributes that does not decompose without harming clarity.
   "**/ColorPicker.svelte", "**/Tabs.svelte", "**/RelationPicker.svelte", "**/BlockEditor.svelte", "**/DockRegion.svelte",

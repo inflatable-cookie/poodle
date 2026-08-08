@@ -124,7 +124,7 @@ DateRangeValue: { start: string | null; end: string | null }
 
 Behavior classification: machine-backed via core machinery
 
-All date and time math lives in `@poodle/headless` (`date.ts`), promoted
+All date and time math lives in `@inflatable-cookie/poodle-headless` (`date.ts`), promoted
 wholesale from the Svelte date module: ISO parse/format, day/month
 arithmetic (`addMonths` anchors to the 1st — month paging semantics),
 comparison, range normalization (endpoints ordered), calendar-grid

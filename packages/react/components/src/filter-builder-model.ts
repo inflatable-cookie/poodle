@@ -1,4 +1,4 @@
-// FilterBuilder pure model — mirrors @poodle/svelte's filter-builder-model.ts
+// FilterBuilder pure model — mirrors @inflatable-cookie/poodle-svelte's filter-builder-model.ts
 // verbatim (React keeps its own copy, same as OrderBy). No app vocabulary, no
 // expression evaluation.
 

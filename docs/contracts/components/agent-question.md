@@ -95,7 +95,7 @@ with the composer's existing stop action.
 
 ### Shared Types
 
-Defined in `@poodle/headless` (`agent-question.ts`), mirrored in
+Defined in `@inflatable-cookie/poodle-headless` (`agent-question.ts`), mirrored in
 `poodle-headless::agent_question` (snake_case).
 
 ```typescript

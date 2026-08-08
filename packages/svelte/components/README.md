@@ -1,20 +1,20 @@
 # Poodle Svelte Components
 
 Unified Svelte component library for Poodle. All components in a single
-`@poodle/svelte` package.
+`@inflatable-cookie/poodle-svelte` package.
 
 ## Public Surface
 
 All components are exported from the package root:
 
 ```ts
-import { Button, Dialog, DataTable } from "@poodle/svelte";
+import { Button, Dialog, DataTable } from "@inflatable-cookie/poodle-svelte";
 ```
 
 Types are available from the root or the `/types` subpath:
 
 ```ts
-import type { ControlSize, ControlDensity, SelectOption } from "@poodle/svelte";
+import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cookie/poodle-svelte";
 ```
 
 ## Stability Notes

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/file-upload.css";
+  import "@inflatable-cookie/poodle-styles/file-upload.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";

@@ -255,9 +255,9 @@ pub struct BackgroundColors {
 ## Shared Styles Package (`packages/styles`)
 
 Added g12.001 (2026-07-13). All component stylesheets live in
-`@poodle/styles` — plain global CSS, one kebab-case file per component,
+`@inflatable-cookie/poodle-styles` — plain global CSS, one kebab-case file per component,
 unique `poodle-*` classes, data-attribute states, recipe hooks. Both web
-frameworks import from it (`import "@poodle/styles/button.css"`), so React
+frameworks import from it (`import "@inflatable-cookie/poodle-styles/button.css"`), so React
 parity never duplicates styling and the Svelte implementation remains the
 single visual proof reference. Svelte components carry no `<style>` blocks.
 

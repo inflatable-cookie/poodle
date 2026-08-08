@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RangeSlider } from "@poodle/svelte";
+  import { RangeSlider } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

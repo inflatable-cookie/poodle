@@ -16,7 +16,7 @@ Key package groups:
 - `packages/contracts/*`
   shared renderer-agnostic crates such as `poodle-specs`, `poodle-workstation`, and `poodle-tokens`
 - `packages/svelte/*`
-  published web packages such as `@poodle/svelte`, `@poodle/svelte-tokens`, `@poodle/icons-lucide`, and the docs or preview app
+  published web packages such as `@inflatable-cookie/poodle-svelte`, `@inflatable-cookie/poodle-svelte-tokens`, `@inflatable-cookie/poodle-icons-lucide`, and the docs or preview app
 - `packages/gpui/*`
   native GPUI adapter, renderable components, and preview app
 - `packages/jetstream/*`
@@ -74,7 +74,7 @@ That runs docs lint, parity and accessibility artifact generation, and the Svelt
 
 ## Naming
 
-Current package and crate namespaces use `poodle` and `@poodle/*`.
+Current package and crate namespaces use `poodle` and `@inflatable-cookie/poodle-*`.
 Historical `pug` and `flint` references should be treated as migration leftovers unless they appear in explicit rename handoff docs.
 
 ## Next Task

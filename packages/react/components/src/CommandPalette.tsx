@@ -1,8 +1,8 @@
-import "@poodle/styles/command-palette.css";
+import "@inflatable-cookie/poodle-styles/command-palette.css";
 
 import { useEffect, useRef, useState } from "react";
 
-import { trapFocusKeydown } from "@poodle/headless";
+import { trapFocusKeydown } from "@inflatable-cookie/poodle-headless";
 
 import { ActionDiscoveryPanel, type ActionDiscoveryPanelHandle } from "./ActionDiscoveryPanel";
 import { Icon } from "./Icon";

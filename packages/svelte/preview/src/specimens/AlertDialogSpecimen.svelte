@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/svelte";
+  import { AlertDialog, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
 
   let dangerOpen = $state(false);
   let warningOpen = $state(false);

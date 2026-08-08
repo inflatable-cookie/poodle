@@ -103,7 +103,7 @@ then stop at Poodle's planning gate.
 
 ## Result
 
-- `@poodle/headless` now owns immutable geometry payloads, equality, copied
+- `@inflatable-cookie/poodle-headless` now owns immutable geometry payloads, equality, copied
   viewport rectangles, and opt-in observation lifecycle.
 - Svelte `anchored` and React `AnchoredSurface` report initial positioning,
   movement, placement, hidden/zero-area visibility, and teardown.
@@ -125,8 +125,8 @@ Evidence:
 
 | Package | SHA-256 |
 | --- | --- |
-| `@poodle/headless@0.1.0` | `1e1e79d83230f01387b0a213c51a448b5f2fa4ec4d3db0ec00bf50c9c343aa31` |
-| `@poodle/styles@0.1.0` | `6c2eebebd784f8ea9fa0081dc6167b64b3ee44d360f772306dc53813c969c0df` |
-| `@poodle/svelte-tokens@0.1.0` | `59630dfacfcd802b221dfb6368a38b8f7f4217129a5f8482e1d2983648b8c175` |
-| `@poodle/icons-lucide@0.1.0` | `88df4087c5cb2403b8da308cc59ad392d94be0fc16d81a72fa556e1f24cb8e70` |
-| `@poodle/svelte@0.1.0` | `9dc95956d5f5133eff6d457dd2e8efd64dab61a76e159b4ba3f05eeacf5e9ddb` |
+| `@inflatable-cookie/poodle-headless@0.1.0` | `1e1e79d83230f01387b0a213c51a448b5f2fa4ec4d3db0ec00bf50c9c343aa31` |
+| `@inflatable-cookie/poodle-styles@0.1.0` | `6c2eebebd784f8ea9fa0081dc6167b64b3ee44d360f772306dc53813c969c0df` |
+| `@inflatable-cookie/poodle-svelte-tokens@0.1.0` | `59630dfacfcd802b221dfb6368a38b8f7f4217129a5f8482e1d2983648b8c175` |
+| `@inflatable-cookie/poodle-icons-lucide@0.1.0` | `88df4087c5cb2403b8da308cc59ad392d94be0fc16d81a72fa556e1f24cb8e70` |
+| `@inflatable-cookie/poodle-svelte@0.1.0` | `9dc95956d5f5133eff6d457dd2e8efd64dab61a76e159b4ba3f05eeacf5e9ddb` |

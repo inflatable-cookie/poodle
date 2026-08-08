@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { FilterToolbar, Select, TextInput, Button, IconButton, type SelectOption } from "@poodle/react";
+import { FilterToolbar, Select, TextInput, Button, IconButton, type SelectOption } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 import { SpecimenGroup } from "../SpecimenGroup";
 

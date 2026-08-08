@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/segmented-control.css";
-  import { singleSelectTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/segmented-control.css";
+  import { singleSelectTransition } from "@inflatable-cookie/poodle-headless";
 
   import Icon from "./Icon.svelte";
   import {

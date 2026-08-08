@@ -1,4 +1,4 @@
-import { Stack, Text } from "@poodle/react";
+import { Stack, Text } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function TextSpecimen() {

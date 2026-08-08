@@ -1,4 +1,4 @@
-import "@poodle/styles/scroll-shell.css";
+import "@inflatable-cookie/poodle-styles/scroll-shell.css";
 
 import type { CSSProperties, ReactNode, UIEvent } from "react";
 

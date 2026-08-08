@@ -8,9 +8,9 @@ import {
   ratingSelectValue,
   resolveRatingStep,
   trimRatingFraction,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/rating.css";
+import "@inflatable-cookie/poodle-styles/rating.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

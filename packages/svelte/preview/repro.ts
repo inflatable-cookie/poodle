@@ -1,8 +1,8 @@
-import "@poodle/svelte-tokens/styles.css";
+import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
 import "../../../tokens/artifacts/css/poodle-themes.css";
 
 import { mount } from "svelte";
-import { AgentTranscript, type TranscriptItem } from "@poodle/svelte";
+import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-svelte";
 
 // Nucleus-like: long assistant messages (300-800px rendered) with short tool
 // rows between — real heights far above the 120px estimate.

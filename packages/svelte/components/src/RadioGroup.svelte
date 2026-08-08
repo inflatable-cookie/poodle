@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/radio-group.css";
-  import { singleSelectTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/radio-group.css";
+  import { singleSelectTransition } from "@inflatable-cookie/poodle-headless";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";

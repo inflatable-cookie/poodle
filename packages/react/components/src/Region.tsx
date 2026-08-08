@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import "@poodle/styles/region.css";
+import "@inflatable-cookie/poodle-styles/region.css";
 
 export interface RegionProps {
   label?: string;

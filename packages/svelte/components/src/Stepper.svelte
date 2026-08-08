@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/stepper.css";
+  import "@inflatable-cookie/poodle-styles/stepper.css";
 
   import Icon from "./Icon.svelte";
   import Spinner from "./Spinner.svelte";

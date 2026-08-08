@@ -43,7 +43,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Accordion } from "@poodle/svelte";
+  import { Accordion } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "one", title: "Section One", content: "Content for section one." },
@@ -82,7 +82,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { AlertDialog } from "@poodle/svelte";
+  import { AlertDialog } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
 </script>
@@ -111,7 +111,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AudioPlayer } from "@poodle/svelte";
+  import { AudioPlayer } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <AudioPlayer src="/audio/podcast-episode.mp3" showSpeedControl />`,
@@ -139,7 +139,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { BlockEditor } from "@poodle/svelte";
+  import { BlockEditor } from "@inflatable-cookie/poodle-svelte";
 
   let blocks = [{ id: "intro", type: "paragraph", data: { text: "Start writing..." } }];
 </script>
@@ -163,7 +163,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Box } from "@poodle/svelte";
+  import { Box } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Box padding="md" width="100%">
@@ -186,7 +186,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onNavigate", payload: "(value: string) => void", description: "Called when a callback-driven breadcrumb item is activated." },
     ],
     usage: `<script lang="ts">
-  import { Breadcrumbs } from "@poodle/svelte";
+  import { Breadcrumbs } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "home", label: "Home" },
@@ -219,7 +219,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onSelectAll", payload: "() => void", description: "Called when the select-all control is triggered." },
     ],
     usage: `<script lang="ts">
-  import { BulkActionBar } from "@poodle/svelte";
+  import { BulkActionBar } from "@inflatable-cookie/poodle-svelte";
 
   const actions = [
     { id: "delete", label: "Delete", tone: "danger" },
@@ -276,7 +276,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onPressedChange", payload: "(pressed: boolean) => void", description: "Called when toggle state changes." },
     ],
     usage: `<script lang="ts">
-  import { Button } from "@poodle/svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Button variant="primary" tone="default" leadingIcon="plus" onClick={() => console.log("clicked")}>
@@ -303,7 +303,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Calendar } from "@poodle/svelte";
+  import { Calendar } from "@inflatable-cookie/poodle-svelte";
 
   let selectedDate: string | null = null;
 </script>
@@ -336,7 +336,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onDismiss", payload: "() => void", description: "Called when the dismiss control is activated." },
     ],
     usage: `<script lang="ts">
-  import { Callout } from "@poodle/svelte";
+  import { Callout } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Callout
@@ -365,7 +365,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Card } from "@poodle/svelte";
+  import { Card } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Card variant="default" layout="vertical">
@@ -392,7 +392,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { CardRadioGroup } from "@poodle/svelte";
+  import { CardRadioGroup } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "basic", label: "Basic", description: "For personal use" },
@@ -424,7 +424,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { CardToggleGroup } from "@poodle/svelte";
+  import { CardToggleGroup } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "pending", label: "Pending", description: "Waiting for review", count: 42 },
@@ -457,7 +457,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Checkbox } from "@poodle/svelte";
+  import { Checkbox } from "@inflatable-cookie/poodle-svelte";
 
   let agreed = false;
 </script>
@@ -482,7 +482,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Code } from "@poodle/svelte";
+  import { Code } from "@inflatable-cookie/poodle-svelte";
 
   const source = \`function greet(name: string) {
   return \\\`Hello, \\\${name}!\\\`;
@@ -506,7 +506,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { CollapseToggle } from "@poodle/svelte";
+  import { CollapseToggle } from "@inflatable-cookie/poodle-svelte";
 
   let collapsed = false;
 </script>
@@ -533,7 +533,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Collapsible } from "@poodle/svelte";
+  import { Collapsible } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Collapsible title="Advanced options" description="Configure additional settings">
@@ -561,7 +561,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { ColorPicker } from "@poodle/svelte";
+  import { ColorPicker } from "@inflatable-cookie/poodle-svelte";
 
   let color = "#6366f1";
   const swatches = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"];
@@ -598,7 +598,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onActiveChange", payload: "(id: string | null) => void", description: "Called when the active (highlighted) item changes." },
     ],
     usage: `<script lang="ts">
-  import { CommandPalette } from "@poodle/svelte";
+  import { CommandPalette } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   let query = "";
@@ -636,7 +636,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { ConfirmAction, Button } from "@poodle/svelte";
+  import { ConfirmAction, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ConfirmAction
@@ -671,7 +671,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onAction", payload: "(value: string) => void", description: "Called when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { ContextMenu } from "@poodle/svelte";
+  import { ContextMenu } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "copy", label: "Copy" },
@@ -735,7 +735,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onLimitChange", payload: "({ limit: number }) => void", description: "Called when the requested page size changes." },
     ],
     usage: `<script lang="ts">
-  import { DataTable } from "@poodle/svelte";
+  import { DataTable } from "@inflatable-cookie/poodle-svelte";
 
   const columns = [
     { id: "name", label: "Name", sortable: true },
@@ -774,7 +774,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DatePicker } from "@poodle/svelte";
+  import { DatePicker } from "@inflatable-cookie/poodle-svelte";
 
   let date: string | null = null;
 </script>
@@ -808,7 +808,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DateRangePicker } from "@poodle/svelte";
+  import { DateRangePicker } from "@inflatable-cookie/poodle-svelte";
 
   let range = { start: null, end: null };
 </script>
@@ -842,7 +842,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DateTimePicker } from "@poodle/svelte";
+  import { DateTimePicker } from "@inflatable-cookie/poodle-svelte";
 
   let dateTime = { date: null, time: null };
 </script>
@@ -876,7 +876,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DateTimeRangePicker } from "@poodle/svelte";
+  import { DateTimeRangePicker } from "@inflatable-cookie/poodle-svelte";
 
   let range = { start: { date: null, time: null }, end: { date: null, time: null } };
 </script>
@@ -907,7 +907,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailItem } from "@poodle/svelte";
+  import { DetailItem } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DetailItem label="Email" value="alice@example.com" />
@@ -929,7 +929,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailSection, DetailItem } from "@poodle/svelte";
+  import { DetailSection, DetailItem } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DetailSection title="Account Information" description="Basic account details">
@@ -954,7 +954,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailShell, DetailSection } from "@poodle/svelte";
+  import { DetailShell, DetailSection } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DetailShell title="User Profile" state="ready">
@@ -996,7 +996,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Dialog, Button } from "@poodle/svelte";
+  import { Dialog, Button } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
 </script>
@@ -1050,7 +1050,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DockRegion } from "@poodle/svelte";
+  import { DockRegion } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { id: "explorer", label: "Explorer", icon: "folder" },
@@ -1092,7 +1092,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Drawer, Button } from "@poodle/svelte";
+  import { Drawer, Button } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
 </script>
@@ -1126,7 +1126,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { DurationInput } from "@poodle/svelte";
+  import { DurationInput } from "@inflatable-cookie/poodle-svelte";
 
   let hours = 1;
   let minutes = 30;
@@ -1159,7 +1159,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onCancel", payload: "() => void", description: "Called when the edit is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { EditableLabel } from "@poodle/svelte";
+  import { EditableLabel } from "@inflatable-cookie/poodle-svelte";
 
   let name = "Untitled Document";
 </script>
@@ -1213,7 +1213,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onCancel", payload: "() => void", description: "Called when the cancel action is triggered." },
     ],
     usage: `<script lang="ts">
-  import { EditableList } from "@poodle/svelte";
+  import { EditableList } from "@inflatable-cookie/poodle-svelte";
 
   let items = [
     { id: "1", label: "First item" },
@@ -1244,7 +1244,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { EmbedInput } from "@poodle/svelte";
+  import { EmbedInput } from "@inflatable-cookie/poodle-svelte";
 
   let url = "";
   let parsed = null;
@@ -1269,7 +1269,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { EmbedPreview } from "@poodle/svelte";
+  import { EmbedPreview } from "@inflatable-cookie/poodle-svelte";
 
   export let parsed;
 </script>
@@ -1292,8 +1292,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { EmptyState } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { EmptyState } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <EmptyState title="No results found" message="Try adjusting your search or filters." size="compact">
@@ -1315,7 +1315,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Eyebrow } from "@poodle/svelte";
+  import { Eyebrow } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Eyebrow>Featured</Eyebrow>`,
@@ -1341,7 +1341,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Field } from "@poodle/svelte";
+  import { Field } from "@inflatable-cookie/poodle-svelte";
 
   let email = "";
 </script>
@@ -1368,7 +1368,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FieldSet, Field, TextInput } from "@poodle/svelte";
+  import { FieldSet, Field, TextInput } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FieldSet legend="Address" columns={2}>
@@ -1407,7 +1407,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onRemove", payload: "(item: FileUploadItem) => void", description: "Called when a file is removed." },
     ],
     usage: `<script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@inflatable-cookie/poodle-svelte";
 
   let files = [];
 </script>
@@ -1459,7 +1459,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onRemoveAttachment", payload: "(id: string) => void", description: "Fired from an attachment chip's remove button." },
     ],
     usage: `<script lang="ts">
-  import { AgentChatInput, ModelPicker } from "@poodle/svelte";
+  import { AgentChatInput, ModelPicker } from "@inflatable-cookie/poodle-svelte";
 
   let message = $state("");
   let status = $state<"idle" | "busy">("idle");
@@ -1500,7 +1500,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onChange", payload: "(value: ModelSelection) => void", description: "Called when the model or any axis changes. The payload is already normalised, so axes scoped out of the selected model never leak." },
     ],
     usage: `<script lang="ts">
-  import { ModelPicker, type ModelCapabilityAxis, type ModelOption, type ModelSelection } from "@poodle/svelte";
+  import { ModelPicker, type ModelCapabilityAxis, type ModelOption, type ModelSelection } from "@inflatable-cookie/poodle-svelte";
 
   const models: ModelOption[] = [
     // Each model names the axis keys it exposes; a binding overrides the levels.
@@ -1556,7 +1556,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onSearchChange", payload: "(query: string) => void", description: "Fired on every keystroke in the search field, for host-driven querying. Fires whether or not searchValue is supplied." },
     ],
     usage: `<script lang="ts">
-  import { RefSelect, type RefOption } from "@poodle/svelte";
+  import { RefSelect, type RefOption } from "@inflatable-cookie/poodle-svelte";
 
   const refs: RefOption[] = [
     { value: "main", label: "main", kind: "branch", description: "a1b2c3d", group: "Branches" },
@@ -1589,7 +1589,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onChange", payload: "(value: FilterExpression) => void", description: "Called on every committed mutation (add, update, remove, clear, combinator change). Never fired for an in-progress draft." },
     ],
     usage: `<script lang="ts">
-  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@poodle/svelte";
+  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@inflatable-cookie/poodle-svelte";
 
   const fields: FilterFieldDefinition[] = [
     { key: "format", label: "Format", kind: "multi-enum", options: [
@@ -1627,7 +1627,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FilterToolbar, Button, Select } from "@poodle/svelte";
+  import { FilterToolbar, Button, Select } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FilterToolbar ariaLabel="User filters" collapsible>
@@ -1653,8 +1653,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormActions } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { FormActions } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 
   const dangerItems = [
     {
@@ -1701,7 +1701,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormDialog } from "@poodle/svelte";
+  import { FormDialog } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   let submitting = false;
@@ -1738,8 +1738,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormLayout } from "@poodle/svelte";
-  import { Field, Button } from "@poodle/svelte";
+  import { FormLayout } from "@inflatable-cookie/poodle-svelte";
+  import { Field, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FormLayout columns={2} description="Enter your details below.">
@@ -1769,7 +1769,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Grid } from "@poodle/svelte";
+  import { Grid } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Grid columns="1fr 1fr 1fr" gap="lg" padding="md">
@@ -1796,7 +1796,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { HoverCard } from "@poodle/svelte";
+  import { HoverCard } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <HoverCard placement="top">
@@ -1812,7 +1812,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   icon: {
     props: [
-      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @poodle/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
+      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
@@ -1821,10 +1821,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [],
-    usage: `<!-- Tree-shakeable: import individual icons from @poodle/icons-lucide -->
+    usage: `<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-icons-lucide -->
 <script lang="ts">
-  import { Icon } from "@poodle/svelte";
-  import { search, heart, star } from "@poodle/icons-lucide";
+  import { Icon } from "@inflatable-cookie/poodle-svelte";
+  import { search, heart, star } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <Icon icon={search} size="lg" ariaLabel="Search" />
@@ -1836,7 +1836,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <!-- Bulk icon set via provider -->
 <script lang="ts">
-  import { Icon, IconProvider } from "@poodle/svelte";
+  import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1855,7 +1855,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { IconProvider, Icon } from "@poodle/svelte";
+  import { IconProvider, Icon } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1896,8 +1896,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onPressedChange", payload: "(pressed: boolean) => void", description: "Called when toggle state changes." },
     ],
     usage: `<script lang="ts">
-  import { IconButton } from "@poodle/svelte";
-  import { trash2, plus, settings } from "@poodle/icons-lucide";
+  import { IconButton } from "@inflatable-cookie/poodle-svelte";
+  import { trash2, plus, settings } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <!-- Direct import (tree-shakeable) -->
@@ -1940,7 +1940,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { ListCard } from "@poodle/svelte";
+  import { ListCard } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" href="/team/alice" onClick={() => console.log("open")}>
@@ -1961,7 +1961,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { ListCardCounter } from "@poodle/svelte";
+  import { ListCardCounter } from "@inflatable-cookie/poodle-svelte";
   import { messageSquare } from "lucide-svelte";
 </script>
 
@@ -1999,7 +1999,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte";
+  import { LogList, type LogEntry, type LogFilter } from "@inflatable-cookie/poodle-svelte";
 
   const filters: LogFilter[] = [
     {
@@ -2057,7 +2057,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MarkdownEditor } from "@poodle/svelte";
+  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
 
   let content = "# Hello World\n\nStart writing here...";
 </script>
@@ -2089,7 +2089,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { MediaPicker } from "@poodle/svelte";
+  import { MediaPicker } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   const items = [
@@ -2125,7 +2125,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onLoadMore", payload: "() => void", description: "Called when the load-more action is triggered." },
     ],
     usage: `<script lang="ts">
-  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte";
+  import { MediaBrowsePanel, type MediaPickerItem } from "@inflatable-cookie/poodle-svelte";
 
   const items: MediaPickerItem[] = [
     { id: "1", label: "Hero banner", kind: "image", meta: "Image" },
@@ -2164,7 +2164,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaPreview } from "@poodle/svelte";
+  import { MediaPreview } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MediaPreview
@@ -2202,7 +2202,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaThumbnail } from "@poodle/svelte";
+  import { MediaThumbnail } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MediaThumbnail kind="video" aspectRatio="landscape" badge="HD" meta="3:24">
@@ -2228,8 +2228,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { Menu } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { Menu } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "edit", label: "Edit" },
@@ -2261,7 +2261,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Menubar } from "@poodle/svelte";
+  import { Menubar } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "file", label: "File", items: [
@@ -2294,7 +2294,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { NavigationMenu } from "@poodle/svelte";
+  import { NavigationMenu } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "home", label: "Home" },
@@ -2320,7 +2320,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MetaBar, MetaItem } from "@poodle/svelte";
+  import { MetaBar, MetaItem } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MetaBar ariaLabel="Document metadata">
@@ -2340,7 +2340,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MetaItem } from "@poodle/svelte";
+  import { MetaItem } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MetaItem label="Updated">March 30, 2026</MetaItem>`,
@@ -2359,7 +2359,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Meter } from "@poodle/svelte";
+  import { Meter } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Meter value={72} min={0} max={100} low={25} high={75} optimum={50} ariaLabel="Disk usage" />`,
@@ -2377,7 +2377,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MetricTile } from "@poodle/svelte";
+  import { MetricTile } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <MetricTile label="Revenue" value="$48,200" trend="up" trendLabel="+12.5%" sparklineData={[20, 35, 28, 42, 48]} />`,
@@ -2398,7 +2398,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { NavCard } from "@poodle/svelte";
+  import { NavCard } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <NavCard title="Dashboard" description="View your analytics" href="/dashboard" badge="New">
@@ -2441,7 +2441,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { NumberInput } from "@poodle/svelte";
+  import { NumberInput } from "@inflatable-cookie/poodle-svelte";
 
   let quantity: number | null = 1;
 </script>
@@ -2469,7 +2469,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onChange", payload: "(value: OrderByValue) => void", description: "Called when the sort configuration changes." },
     ],
     usage: `<script lang="ts">
-  import { OrderBy, type OrderByValue } from "@poodle/svelte";
+  import { OrderBy, type OrderByValue } from "@inflatable-cookie/poodle-svelte";
 
   const fields = [
     { key: "name", label: "Name" },
@@ -2505,8 +2505,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PageHeader } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { PageHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PageHeader
@@ -2540,7 +2540,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onCancel", payload: "() => void", description: "Called when the cancel button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { PageLoading } from "@poodle/svelte";
+  import { PageLoading } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PageLoading visible presentation="inline" message="Loading your data..." />
@@ -2585,8 +2585,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onPageChange", payload: "(page: number) => void", description: "Called when the built-in pagination requests a different page." },
     ],
     usage: `<script lang="ts">
-  import { ListContainer } from "@poodle/svelte";
-  import { Button, Field, TextInput, Select } from "@poodle/svelte";
+  import { ListContainer } from "@inflatable-cookie/poodle-svelte";
+  import { Button, Field, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
 
   let page = 1;
 </script>
@@ -2643,7 +2643,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Pagination } from "@poodle/svelte";
+  import { Pagination } from "@inflatable-cookie/poodle-svelte";
 
   let page = 1;
   let limit = 25;
@@ -2680,7 +2680,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pageChange", payload: "{ page: number }", description: "Fires when the page changes." },
     ],
     usage: `<script lang="ts">
-  import { PaginationSummary } from "@poodle/svelte";
+  import { PaginationSummary } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />`,
@@ -2709,7 +2709,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PickerShell } from "@poodle/svelte";
+  import { PickerShell } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PickerShell title="Select Items" description="Browse and pick items" resultCount={42} selectionCount={3}>
@@ -2737,7 +2737,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Pill } from "@poodle/svelte";
+  import { Pill } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Pill tone="success" appearance="solid">Active</Pill>
@@ -2768,7 +2768,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { CodeInput } from "@poodle/svelte";
+  import { CodeInput } from "@inflatable-cookie/poodle-svelte";
 
   let code = "";
 </script>
@@ -2796,7 +2796,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { PasswordRequirements } from "@poodle/svelte";
+  import { PasswordRequirements } from "@inflatable-cookie/poodle-svelte";
 
   let password = "";
 
@@ -2833,7 +2833,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Popover, Button } from "@poodle/svelte";
+  import { Popover, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Popover placement="bottom-start" onOpenChange={(open) => console.log(open)}>
@@ -2859,7 +2859,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Progress } from "@poodle/svelte";
+  import { Progress } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Progress value={65} max={100} size="sm" ariaLabel="Upload progress" />
@@ -2885,7 +2885,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { RadioGroup } from "@poodle/svelte";
+  import { RadioGroup } from "@inflatable-cookie/poodle-svelte";
 
   const options = [
     { value: "sm", label: "Small" },
@@ -2919,7 +2919,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { RangeSlider } from "@poodle/svelte";
+  import { RangeSlider } from "@inflatable-cookie/poodle-svelte";
 
   let priceRange: [number, number] = [20, 80];
 </script>
@@ -2944,7 +2944,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Rating } from "@poodle/svelte";
+  import { Rating } from "@inflatable-cookie/poodle-svelte";
 
   let stars: number | null = 3.5;
 </script>
@@ -2961,7 +2961,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Region } from "@poodle/svelte";
+  import { Region } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Region label="Sidebar" color="blue" minHeight="200px" />`,
@@ -2996,7 +2996,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onDrillContext", payload: "(context: DrillDownContext) => void", description: "Called when the drill-down context changes." },
     ],
     usage: `<script lang="ts">
-  import { RelationPicker } from "@poodle/svelte";
+  import { RelationPicker } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -3034,7 +3034,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onResizeStep", payload: "(delta: number) => void", description: "Called when resized via keyboard step." },
     ],
     usage: `<script lang="ts">
-  import { ResizeHandle } from "@poodle/svelte";
+  import { ResizeHandle } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ResizeHandle orientation="horizontal" ariaLabel="Resize sidebar" ariaValueNow={50} />`,
@@ -3054,7 +3054,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { ScrollShell } from "@poodle/svelte";
+  import { ScrollShell } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ScrollShell direction="vertical" padding="md" style="max-height: 300px;">
@@ -3111,7 +3111,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { SegmentedControl } from "@poodle/svelte";
+  import { SegmentedControl } from "@inflatable-cookie/poodle-svelte";
 
   const options = [
     { value: "list", label: "List" },
@@ -3159,7 +3159,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Select } from "@poodle/svelte";
+  import { Select } from "@inflatable-cookie/poodle-svelte";
 
   const fruits = [
     { value: "apple", label: "Apple" },
@@ -3206,7 +3206,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { SelectionSummary } from "@poodle/svelte";
+  import { SelectionSummary } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -3227,7 +3227,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Separator } from "@poodle/svelte";
+  import { Separator } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <p>Section one content</p>
@@ -3248,7 +3248,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { SidebarNav } from "@poodle/svelte";
+  import { SidebarNav } from "@inflatable-cookie/poodle-svelte";
 
   const groups = [
     {
@@ -3287,8 +3287,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Tree } from "@poodle/svelte";
-  import type { TreeNode } from "@poodle/svelte";
+  import { Tree } from "@inflatable-cookie/poodle-svelte";
+  import type { TreeNode } from "@inflatable-cookie/poodle-svelte";
 
   const nodes: TreeNode[] = [
     {
@@ -3327,7 +3327,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Skeleton } from "@poodle/svelte";
+  import { Skeleton } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Skeleton shape="circle" width="48px" height="48px" />
@@ -3348,7 +3348,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Spinner } from "@poodle/svelte";
+  import { Spinner } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Spinner variant="ring" sizeRole="chrome" tone="current" />
@@ -3374,7 +3374,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Slider } from "@poodle/svelte";
+  import { Slider } from "@inflatable-cookie/poodle-svelte";
 
   let volume = 50;
 </script>
@@ -3390,7 +3390,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Spacer } from "@poodle/svelte";
+  import { Spacer } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <div style="display: flex;">
@@ -3421,7 +3421,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { SplitButton } from "@poodle/svelte";
+  import { SplitButton } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "save-draft", label: "Save as Draft" },
@@ -3463,7 +3463,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onSecondaryCollapsedChange", payload: "(isCollapsed: boolean) => void", description: "Called when the secondary pane collapse state changes." },
     ],
     usage: `<script lang="ts">
-  import { SplitView } from "@poodle/svelte";
+  import { SplitView } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <SplitView orientation="horizontal" defaultRatio={0.3} showCollapsePrimary>
@@ -3492,7 +3492,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Stack, Button } from "@poodle/svelte";
+  import { Stack, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Stack direction="row" gap="sm" align="center">
@@ -3516,7 +3516,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusBar } from "@poodle/svelte";
+  import { StatusBar } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <StatusBar summary="3 items selected">
@@ -3536,7 +3536,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusIndicator } from "@poodle/svelte";
+  import { StatusIndicator } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <StatusIndicator status="success" label="Online" />
@@ -3558,7 +3558,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Surface } from "@poodle/svelte";
+  import { Surface } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Surface tone="panel" border="subtle" padding="lg" elevated>
@@ -3591,7 +3591,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Switch } from "@poodle/svelte";
+  import { Switch } from "@inflatable-cookie/poodle-svelte";
 
   let notifications = true;
 </script>
@@ -3615,7 +3615,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Table } from "@poodle/svelte";
+  import { Table } from "@inflatable-cookie/poodle-svelte";
 
   const columns = [
     { key: "name", label: "Name" },
@@ -3657,7 +3657,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Tabs } from "@poodle/svelte";
+  import { Tabs } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { value: "overview", label: "Overview" },
@@ -3728,7 +3728,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { TextInput } from "@poodle/svelte";
+  import { TextInput } from "@inflatable-cookie/poodle-svelte";
 
   let email = "";
   async function validateEmail(value: string) {
@@ -3761,7 +3761,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TimeAgo } from "@poodle/svelte";
+  import { TimeAgo } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <TimeAgo datetime={new Date("2026-03-20T12:00:00Z")} live />`,
@@ -3786,7 +3786,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TimeInput } from "@poodle/svelte";
+  import { TimeInput } from "@inflatable-cookie/poodle-svelte";
 
   let time = "09:00";
 </script>
@@ -3796,7 +3796,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "theme-select": {
     props: [
-      { name: "themes", type: "ThemeOption[]", default: "controller list", description: "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @poodle/svelte-tokens for the full Poodle set." },
+      { name: "themes", type: "ThemeOption[]", default: "controller list", description: "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @inflatable-cookie/poodle-svelte-tokens for the full Poodle set." },
       { name: "value", type: "string", default: "controller / uncontrolled", description: "Controlled current theme value. Omit to use the theme controller (if present) or internal state." },
       { name: "columns", type: "number", default: "3", description: "Swatch-tile columns in the popover grid." },
       { name: "showLabel", type: "boolean", default: "true", description: "Show the current theme name in the trigger." },
@@ -3812,8 +3812,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   // With the modular controller — reads all Poodle themes, applies + persists.
-  import { ThemeSelect, createThemeController } from "@poodle/svelte";
-  import "@poodle/svelte-tokens/themes.css"; // load every theme layer
+  import { ThemeSelect, createThemeController } from "@inflatable-cookie/poodle-svelte";
+  import "@inflatable-cookie/poodle-svelte-tokens/themes.css"; // load every theme layer
 
   createThemeController(); // in a root component; ThemeSelect auto-wires
 </script>
@@ -3845,7 +3845,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TimeZoneSelect } from "@poodle/svelte";
+  import { TimeZoneSelect } from "@inflatable-cookie/poodle-svelte";
 
   let tz = "America/New_York";
 </script>
@@ -3867,7 +3867,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onAction", payload: "(id: string) => void", description: "Called when a toast action button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { ToastStack } from "@poodle/svelte";
+  import { ToastStack } from "@inflatable-cookie/poodle-svelte";
 
   let toasts = [
     { id: "1", title: "Saved", description: "Your changes have been saved." },
@@ -3897,7 +3897,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { writable } from "svelte/store";
-  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte";
+  import { ToastHost, type ToastHostStoreItem } from "@inflatable-cookie/poodle-svelte";
 
   const toasts = writable<ToastHostStoreItem[]>([
     { id: "1", variant: "success", title: "Saved", message: "Your settings were updated." },
@@ -3932,7 +3932,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { ToggleGroup } from "@poodle/svelte";
+  import { ToggleGroup } from "@inflatable-cookie/poodle-svelte";
 
   const options = [
     { value: "left", label: "Left" },
@@ -3957,8 +3957,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Toolbar } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { Toolbar } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Toolbar ariaLabel="Formatting">
@@ -3982,8 +3982,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the tooltip open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Tooltip } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { Tooltip } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Tooltip content="Save your work" placement="top" onOpenChange={(open) => console.log(open)}>
@@ -4008,7 +4008,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TriStateSwitch } from "@poodle/svelte";
+  import { TriStateSwitch } from "@inflatable-cookie/poodle-svelte";
 
   let filter = "default";
 </script>
@@ -4026,7 +4026,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { UiPresentationProvider, Button, Select } from "@poodle/svelte";
+  import { UiPresentationProvider, Button, Select } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <UiPresentationProvider density="compact" sizeScale="sm">
@@ -4050,7 +4050,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { VideoPlayer } from "@poodle/svelte";
+  import { VideoPlayer } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,
@@ -4079,7 +4079,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DateTimeZonePicker } from "@poodle/svelte";
+  import { DateTimeZonePicker } from "@inflatable-cookie/poodle-svelte";
 
   let meeting = { date: null, time: null, timeZone: "America/New_York" };
 </script>
@@ -4105,7 +4105,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Avatar } from "@poodle/svelte";
+  import { Avatar } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Avatar initials="TA" ariaLabel="Tom Adams" tone="accent" />`,
@@ -4125,7 +4125,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { DebugDialog } from "@poodle/svelte";
+  import { DebugDialog } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DebugDialog value={{ id: "asset_42", status: "ready" }} title="Asset payload" />`,
@@ -4145,7 +4145,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailSectionGroup, DetailSection, DetailItem } from "@poodle/svelte";
+  import { DetailSectionGroup, DetailSection, DetailItem } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DetailSectionGroup ariaLabel="Project metadata">
@@ -4166,7 +4166,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { ErrorBoundary } from "@poodle/svelte";
+  import { ErrorBoundary } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ErrorBoundary title="Panel failed">
@@ -4190,7 +4190,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { InlineListSection, Text } from "@poodle/svelte";
+  import { InlineListSection, Text } from "@inflatable-cookie/poodle-svelte";
 
   const versions = [{ name: "Version 1" }];
 </script>
@@ -4218,7 +4218,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { ListGrid, Surface } from "@poodle/svelte";
+  import { ListGrid, Surface } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <ListGrid minItemWidth={16}>
@@ -4243,7 +4243,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Text } from "@poodle/svelte";
+  import { Text } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Text tone="secondary" size="sm">Supporting copy.</Text>`,
@@ -4265,7 +4265,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Text, TextLink } from "@poodle/svelte";
+  import { Text, TextLink } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Text>
@@ -4296,7 +4296,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TokenInput } from "@poodle/svelte";
+  import { TokenInput } from "@inflatable-cookie/poodle-svelte";
 
   let tags = ["draft"];
 </script>
@@ -4319,7 +4319,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { ActionDiscoveryPanel } from "@poodle/svelte";
+  import { ActionDiscoveryPanel } from "@inflatable-cookie/poodle-svelte";
 
   const items = [
     { id: "copy", title: "Copy", shortcut: "Cmd+C" },
@@ -4344,8 +4344,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { AppHeader } from "@poodle/svelte";
-  import { Button } from "@poodle/svelte";
+  import { AppHeader } from "@inflatable-cookie/poodle-svelte";
+  import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <AppHeader title="My App" subtitle="Dashboard">

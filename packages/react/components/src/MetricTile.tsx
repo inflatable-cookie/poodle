@@ -1,4 +1,4 @@
-import "@poodle/styles/metric-tile.css";
+import "@inflatable-cookie/poodle-styles/metric-tile.css";
 
 import { Icon } from "./Icon";
 import { useUiPresentation } from "./presentation";

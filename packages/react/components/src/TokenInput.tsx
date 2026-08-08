@@ -1,7 +1,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
-import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@poodle/headless";
+import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/token-input.css";
+import "@inflatable-cookie/poodle-styles/token-input.css";
 
 import { Icon } from "./Icon";
 import { Pill } from "./Pill";

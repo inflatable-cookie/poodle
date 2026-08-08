@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { StatusIndicator } from "@poodle/react";
+import { StatusIndicator } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

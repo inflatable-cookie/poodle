@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { BlockEditor } from "@poodle/svelte";
-  import type { BlockTypeDefinition, BlockTypeGroup, EditorBlock } from "@poodle/svelte";
+  import { BlockEditor } from "@inflatable-cookie/poodle-svelte";
+  import type { BlockTypeDefinition, BlockTypeGroup, EditorBlock } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const blockTypes: BlockTypeDefinition[] = [

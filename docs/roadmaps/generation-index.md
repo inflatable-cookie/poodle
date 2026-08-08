@@ -6,7 +6,7 @@
   - Status: active
   - Range: `001` to `019` on disk
   - Notes: React full parity (`001`–`008`) is complete — all 132 components
-    ported to `@poodle/react` against a single shared stylesheet, with a
+    ported to `@inflatable-cookie/poodle-react` against a single shared stylesheet, with a
     full per-component preview gallery mirroring the Svelte preview's slugs.
     Web verification and native hardening through `g12.015` are complete.
     `g12.016` completed the public DockRegion drag extension and exact preview

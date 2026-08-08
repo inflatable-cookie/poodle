@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/react";
+import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const itemStyle = { display: "flex", alignItems: "center", gap: "0.75rem" } as const;

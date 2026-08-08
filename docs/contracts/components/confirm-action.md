@@ -141,7 +141,7 @@ component-owned behavioral logic; no separate machine is warranted.
 
 ### Composition
 
-- composes: `AlertDialog` and `Button` from `@poodle/svelte`
+- composes: `AlertDialog` and `Button` from `@inflatable-cookie/poodle-svelte`
 - parent expectations: toolbars, list item actions, settings forms
 - child expectations: AlertDialog primitive, Button primitive, optional body
   content via `children` snippet
@@ -189,14 +189,14 @@ None.
 
 ## 9. Svelte Notes
 
-- composes `AlertDialog` and `Button` from `@poodle/svelte`
+- composes `AlertDialog` and `Button` from `@inflatable-cookie/poodle-svelte`
 - `open` is passed straight through to AlertDialog
 - handles `openChange` from AlertDialog to sync internal open state
 - trigger tone derivation: `tone === "danger" ? "danger" : "default"`
 - custom trigger wrapper `<span>` receives `data-size` and `data-density`
   resolved from `resolveSemanticControlSize` and `getUiPresentation`
 - `AlertDialogTone`, `ControlSize`, `SemanticControlSizeRole`, `ControlDensity`
-  types imported from `@poodle/svelte`
+  types imported from `@inflatable-cookie/poodle-svelte`
 - size resolves via `resolveSemanticControlSize` with `sizeRole="control"`
 
 ## 10. GPUI Notes

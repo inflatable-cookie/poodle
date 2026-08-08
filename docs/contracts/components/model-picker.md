@@ -116,8 +116,8 @@ documented without the `is` prefix; the Rust spec keeps `is_disabled`.
 
 ### Shared Types
 
-Defined in `@poodle/svelte` `types.ts`, re-exported from the package root,
-redefined identically in `@poodle/react`, mirrored in `poodle-specs` (snake_case).
+Defined in `@inflatable-cookie/poodle-svelte` `types.ts`, re-exported from the package root,
+redefined identically in `@inflatable-cookie/poodle-react`, mirrored in `poodle-specs` (snake_case).
 
 ```typescript
 type ModelOption = {
@@ -305,7 +305,7 @@ every label truncate at once. Hosts that know better override with `control`.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Like `FilterBuilder` and `OrderBy`, the popover uses the shared dismissable-layer
-stack and the selection is plain component state; there is no `@poodle/headless`
+stack and the selection is plain component state; there is no `@inflatable-cookie/poodle-headless`
 machine and no conformance vectors. The pure helpers (`applicableAxes`,
 `resolveSelection`, `axisSummary`, `summaryText`, `modelLabel`,
 `axisControlKind`) live in `model-picker-model.ts` (TS) and as methods on
@@ -313,7 +313,7 @@ machine and no conformance vectors. The pure helpers (`applicableAxes`,
 
 #### Machinery Dependencies
 
-Dismissable layer (`registerDismissLayer` from `@poodle/headless`), presentation
+Dismissable layer (`registerDismissLayer` from `@inflatable-cookie/poodle-headless`), presentation
 context (size/density), id wiring for the dialog surface. No focus trap.
 
 ## 5. Events
@@ -458,7 +458,7 @@ adjust them. Escape or an outside interaction dismisses.
 ## 9. Svelte Notes
 
 - owns its open state and anchored panel surface directly (mirrors `FilterBuilder`)
-- `registerDismissLayer` from `@poodle/headless`; dismiss on outside interact /
+- `registerDismissLayer` from `@inflatable-cookie/poodle-headless`; dismiss on outside interact /
   Escape via a `$effect` guarded by `open`
 - size/density resolve via `getUiPresentation` + `resolveSemanticControlSize`
 - controlled/uncontrolled via `$bindable(value)` plus a `sync()` that writes

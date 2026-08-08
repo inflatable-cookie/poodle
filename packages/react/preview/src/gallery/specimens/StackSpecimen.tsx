@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Stack, Surface } from "@poodle/react";
+import { Stack, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const itemStyle: CSSProperties = {

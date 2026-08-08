@@ -1,4 +1,4 @@
-import "@poodle/styles/media-picker.css";
+import "@inflatable-cookie/poodle-styles/media-picker.css";
 
 import { useState } from "react";
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
-import "@poodle/styles/agent-question.css";
+import "@inflatable-cookie/poodle-styles/agent-question.css";
 
 import {
   canSubmitQuestion,
@@ -12,7 +12,7 @@ import {
   toggleQuestionSelection,
   type AgentQuestionAnswer,
   type AgentQuestionItem,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 import { Checkbox } from "./Checkbox";
 import { Eyebrow } from "./Eyebrow";

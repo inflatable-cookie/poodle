@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { MediaThumbnail } from "@poodle/react";
+import { MediaThumbnail } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const gridStyle: CSSProperties = {

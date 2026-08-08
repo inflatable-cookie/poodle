@@ -14,7 +14,7 @@ consumers, making this a safe restructuring.
 
 ## Goals
 
-- merge the legacy split Svelte packages into `@poodle/svelte`
+- merge the legacy split Svelte packages into `@inflatable-cookie/poodle-svelte`
 - consolidate contracts under `docs/contracts/components/`
 - unify preview app into a single Components section with tag-based filtering
 - merge Rust contract crates (packages/contracts/primitives and composites)
@@ -30,10 +30,10 @@ consumers, making this a safe restructuring.
 
 ### Batch 4.1 — Merge Svelte Packages
 
-- [x] create packages/svelte/components/ with merged package.json as @poodle/svelte
+- [x] create packages/svelte/components/ with merged package.json as @inflatable-cookie/poodle-svelte
 - [x] move all .svelte files from primitives/src/ and composites/src/
 - [x] merge index.ts exports and types.ts
-- [x] update all specimen imports to @poodle/svelte
+- [x] update all specimen imports to @inflatable-cookie/poodle-svelte
 - [x] update preview package.json dependency
 - [x] remove old primitives/ and composites/ packages
 
@@ -66,7 +66,7 @@ consumers, making this a safe restructuring.
 
 ## Exit Criteria
 
-- single @poodle/svelte package with all components
+- single @inflatable-cookie/poodle-svelte package with all components
 - single docs/contracts/components/ directory
 - single Components section in preview with tag filtering
 - single Rust contract crate

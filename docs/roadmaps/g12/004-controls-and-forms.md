@@ -50,7 +50,7 @@ Depends on: `g12.003`
   toggle, add via nested Select, Alt+ArrowUp reorder, remove, outside
   dismiss with correctly stacked dismiss layers).
 - [x] Wave 4c: FormActions (Menu landed; `FormActions.tsx` is exported from
-      `@poodle/react` and registered in the preview gallery)
+      `@inflatable-cookie/poodle-react` and registered in the preview gallery)
 
 ## Notes
 

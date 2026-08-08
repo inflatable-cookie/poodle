@@ -6,9 +6,9 @@ import {
   normalizeDateTimeRangeValue,
   todayIsoDate,
   layerContains,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/date-time-range-picker.css";
+import "@inflatable-cookie/poodle-styles/date-time-range-picker.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Calendar } from "./Calendar";

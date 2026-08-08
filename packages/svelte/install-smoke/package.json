@@ -1,5 +1,5 @@
 {
-  "name": "@poodle/install-smoke",
+  "name": "@inflatable-cookie/poodle-install-smoke",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,8 +7,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@poodle/svelte": "file:../components",
-    "@poodle/svelte-tokens": "file:../tokens",
+    "@inflatable-cookie/poodle-svelte": "file:../components",
+    "@inflatable-cookie/poodle-svelte-tokens": "file:../tokens",
     "svelte": "^5.56.8"
   },
   "devDependencies": {

@@ -17,10 +17,10 @@ Primary repos: `poodle`
 
 - [ ] write contract for AudioPlayer: src, play/pause, seek bar, volume,
   duration display, playback speed, waveform visualization (optional)
-- [ ] implement AudioPlayer primitive in `@poodle/svelte`
+- [ ] implement AudioPlayer primitive in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for VideoPlayer: src, play/pause, seek bar, volume,
   fullscreen, aspect ratio, poster image, captions/subtitles
-- [ ] implement VideoPlayer primitive in `@poodle/svelte`
+- [ ] implement VideoPlayer primitive in `@inflatable-cookie/poodle-svelte`
 - [ ] create specimens for AudioPlayer and VideoPlayer
 - [ ] register in component-registry.ts and specimen registry
 

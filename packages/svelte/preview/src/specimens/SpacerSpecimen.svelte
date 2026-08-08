@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Spacer, Stack, Surface } from "@poodle/svelte";
+  import { Spacer, Stack, Surface } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
-import { BlockEditor, type BlockTypeDefinition, type BlockTypeGroup, type EditorBlock } from "@poodle/react";
+import { BlockEditor, type BlockTypeDefinition, type BlockTypeGroup, type EditorBlock } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const blockTypes: BlockTypeDefinition[] = [

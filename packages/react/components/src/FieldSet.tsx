@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@poodle/styles/field-set.css";
+import "@inflatable-cookie/poodle-styles/field-set.css";
 
 import { scaleToSpace } from "./internal";
 import type { SpaceScale } from "./types";

@@ -255,7 +255,7 @@ Four root-cause classes, none of which the structural gates could see:
 Cross-cutting lesson: a `.poodle-meta-bar .poodle-code--inline` rule tied
 on specificity (0-2-0) with `.poodle-code--inline[data-size="sm"]`, so the
 winner came down to stylesheet **import order** — which differs between the
-two apps. That one was a genuine consumer-facing bug in `@poodle/styles`,
+two apps. That one was a genuine consumer-facing bug in `@inflatable-cookie/poodle-styles`,
 not a preview artifact, and no amount of DOM-level checking would have
 caught it.
 

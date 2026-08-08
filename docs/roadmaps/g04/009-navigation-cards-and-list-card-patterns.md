@@ -16,13 +16,13 @@ Primary repos: `poodle`
 
 - [ ] write contract for NavCard: title, description, icon, href/onClick, badge,
   disabled state, hover/focus styling
-- [ ] implement NavCard composite in `@poodle/svelte`
+- [ ] implement NavCard composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for NavCardGrid: items array, column config, responsive
   breakpoints, gap
-- [ ] implement NavCardGrid composite in `@poodle/svelte`
+- [ ] implement NavCardGrid composite in `@inflatable-cookie/poodle-svelte`
 - [ ] write contract for ListCard: title, subtitle, metadata slots, leading
   icon/avatar, trailing action, click handler
-- [ ] implement ListCard composite in `@poodle/svelte`
+- [ ] implement ListCard composite in `@inflatable-cookie/poodle-svelte`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

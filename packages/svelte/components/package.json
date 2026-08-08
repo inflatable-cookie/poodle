@@ -1,5 +1,5 @@
 {
-  "name": "@poodle/svelte",
+  "name": "@inflatable-cookie/poodle-svelte",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -30,10 +30,10 @@
     "svelte": ">=5.38.6 <6"
   },
   "dependencies": {
-    "@poodle/headless": "0.1.0",
-    "@poodle/icons-lucide": "0.1.0",
-    "@poodle/styles": "0.1.0",
-    "@poodle/svelte-tokens": "0.1.0",
+    "@inflatable-cookie/poodle-headless": "0.1.0",
+    "@inflatable-cookie/poodle-icons-lucide": "0.1.0",
+    "@inflatable-cookie/poodle-styles": "0.1.0",
+    "@inflatable-cookie/poodle-svelte-tokens": "0.1.0",
     "marked": "^18.0.0"
   }
 }

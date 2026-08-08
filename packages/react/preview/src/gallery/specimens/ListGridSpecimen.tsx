@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Button, IconButton, ListGrid, Surface } from "@poodle/react";
+import { Button, IconButton, ListGrid, Surface } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const tileTitle: CSSProperties = { margin: "0 0 0.25rem", fontSize: "0.875rem", fontWeight: 600 };

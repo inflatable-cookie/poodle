@@ -8,10 +8,10 @@ Promoted from: `docs/specs/062-headless-core-and-dual-layer-strategy.md` (g11.00
 
 Poodle is a dual-layer system:
 
-- `packages/core` → `@poodle/headless`: framework-free TypeScript behavior —
+- `packages/core` → `@inflatable-cookie/poodle-headless`: framework-free TypeScript behavior —
   component state machines, shared interaction machinery, and domain math.
   No framework imports; DOM APIs only in the thin `dom/` machinery modules.
-- Framework layers (`@poodle/svelte` today; future adapters) own rendering,
+- Framework layers (`@inflatable-cookie/poodle-svelte` today; future adapters) own rendering,
   reactivity, effect execution, and styling. They consume core; they do not
   duplicate behavior.
 

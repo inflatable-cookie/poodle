@@ -1,4 +1,4 @@
-import "@poodle/styles/breadcrumbs.css";
+import "@inflatable-cookie/poodle-styles/breadcrumbs.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

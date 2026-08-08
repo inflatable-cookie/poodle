@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Reuses the canonical (Svelte-authored) cross-runtime accessibility audit
-// data; @poodle/react shares the same contracts. Emits a React-pathed artifact.
+// data; @inflatable-cookie/poodle-react shares the same contracts. Emits a React-pathed artifact.
 import {
   accessibilityAuditBoundary,
   accessibilityAuditTargets,
@@ -29,9 +29,9 @@ const report = {
   generatedAt: new Date().toISOString(),
   artifact: "packages/react/preview/artifacts/accessibility-report.json",
   previewBasePath: "/",
-  frameworks: ["@poodle/react", "@poodle/svelte"],
+  frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],
   sharedContractNote:
-    "@poodle/react is a reference-faithful re-implementation of the same component contracts as @poodle/svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
   automatedBoundary: accessibilityAuditBoundary.automated,
   manualBoundary: accessibilityAuditBoundary.manual,
   summary: {

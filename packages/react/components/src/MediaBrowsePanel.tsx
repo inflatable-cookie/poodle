@@ -1,4 +1,4 @@
-import "@poodle/styles/media-browse-panel.css";
+import "@inflatable-cookie/poodle-styles/media-browse-panel.css";
 
 import { Button } from "./Button";
 import { Callout } from "./Callout";

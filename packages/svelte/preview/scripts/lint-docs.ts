@@ -330,7 +330,7 @@ function validateSveltePackageSurface(
 
 function validatePackageSurfaceCoverage(
   packagePath: string,
-  packageName: "@poodle/svelte" | "@poodle/svelte" | "@poodle/svelte",
+  packageName: "@inflatable-cookie/poodle-svelte" | "@inflatable-cookie/poodle-svelte" | "@inflatable-cookie/poodle-svelte",
   errors: string[],
 ): void {
   const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
@@ -3085,7 +3085,7 @@ const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
 // Unified package — README surface validation skipped (130+ exports)
-validatePackageSurfaceCoverage("packages/svelte/components", "@poodle/svelte", errors);
+validatePackageSurfaceCoverage("packages/svelte/components", "@inflatable-cookie/poodle-svelte", errors);
 validateDocsCatalog(errors);
 validateParityCoverage(errors);
 validateAccessibilityAudit(errors);

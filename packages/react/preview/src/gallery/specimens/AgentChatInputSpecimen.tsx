@@ -10,7 +10,7 @@ import {
   type ModelOption,
   type ModelSelection,
   type RefOption,
-} from "@poodle/react";
+} from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

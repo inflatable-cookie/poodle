@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SplitButton, Eyebrow, Surface } from "@poodle/svelte";
-  import type { MenuItem } from "@poodle/svelte";
+  import { SplitButton, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = $state("");

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Grid, Icon, NavCard } from "@poodle/svelte";
-  import { house, layers, slidersHorizontal, fileText } from "@poodle/icons-lucide";
+  import { Grid, Icon, NavCard } from "@inflatable-cookie/poodle-svelte";
+  import { house, layers, slidersHorizontal, fileText } from "@inflatable-cookie/poodle-icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

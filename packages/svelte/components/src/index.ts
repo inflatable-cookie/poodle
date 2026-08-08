@@ -141,7 +141,7 @@ export type {
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 // --- Composites ---
 export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";

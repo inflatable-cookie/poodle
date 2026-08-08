@@ -1,4 +1,4 @@
-import "@poodle/styles/surface.css";
+import "@inflatable-cookie/poodle-styles/surface.css";
 
 import type { ReactNode } from "react";
 

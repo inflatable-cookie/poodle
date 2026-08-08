@@ -1,8 +1,8 @@
-import "@poodle/styles/card-toggle-group.css";
+import "@inflatable-cookie/poodle-styles/card-toggle-group.css";
 
 import { useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
-import { menuListNavigate, toggleGroupTransition } from "@poodle/headless";
+import { menuListNavigate, toggleGroupTransition } from "@inflatable-cookie/poodle-headless";
 
 import { Card } from "./Card";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

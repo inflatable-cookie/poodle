@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormDialog, Button, TextInput, Field, Select, FormActions } from "@poodle/react";
+import { FormDialog, Button, TextInput, Field, Select, FormActions } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 const roleOptions = [

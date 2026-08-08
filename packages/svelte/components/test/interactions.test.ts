@@ -6,7 +6,7 @@ import DockRegion from "../src/DockRegion.svelte";
 import Switch from "../src/Switch.svelte";
 import Tabs from "../src/Tabs.svelte";
 
-// Interaction wiring: the @poodle/headless machines have their own suite; these
+// Interaction wiring: the @inflatable-cookie/poodle-headless machines have their own suite; these
 // assert the Svelte binding actually drives a click through to the documented
 // callback (the machine -> DOM -> event round trip).
 describe("svelte interaction", () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NumberInput } from "@poodle/react";
+import { NumberInput } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

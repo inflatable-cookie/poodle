@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/tri-state-switch.css";
-  import { singleSelectTransition } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/tri-state-switch.css";
+  import { singleSelectTransition } from "@inflatable-cookie/poodle-headless";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

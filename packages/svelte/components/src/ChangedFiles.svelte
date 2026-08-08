@@ -1,12 +1,12 @@
 <script lang="ts">
-  import "@poodle/styles/changed-files.css";
+  import "@inflatable-cookie/poodle-styles/changed-files.css";
 
   import {
     buildChangedFileTree,
     changedFileScopes,
     changedFilesTotals,
     type ChangedFileNode,
-  } from "@poodle/headless";
+  } from "@inflatable-cookie/poodle-headless";
 
   import Button from "./Button.svelte";
   import Icon from "./Icon.svelte";

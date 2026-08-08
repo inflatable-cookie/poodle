@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NavigationMenu, type NavigationMenuItem } from "@poodle/svelte";
+  import { NavigationMenu, type NavigationMenuItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

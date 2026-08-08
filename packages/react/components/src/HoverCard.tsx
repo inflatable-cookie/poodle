@@ -8,9 +8,9 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@poodle/headless";
+import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/hover-card.css";
+import "@inflatable-cookie/poodle-styles/hover-card.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import type { OverlayPlacement } from "./types";

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ToastHost, Button, type ToastHostStoreItem } from "@poodle/react";
+import { ToastHost, Button, type ToastHostStoreItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 type ToneSeed = "info" | "success" | "warning" | "error";

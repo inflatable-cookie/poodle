@@ -1,5 +1,5 @@
 // RefSelect pure model. Renderer-neutral logic: query filtering, kind glyphs and
-// group-heading runs. This copy mirrors @poodle/svelte's verbatim (React keeps
+// group-heading runs. This copy mirrors @inflatable-cookie/poodle-svelte's verbatim (React keeps
 // its own, same as FilterBuilder); the Rust spec (`poodle-specs::ref_select`)
 // re-implements the same semantics.
 //

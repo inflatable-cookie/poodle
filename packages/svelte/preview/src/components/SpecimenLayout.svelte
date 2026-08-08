@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte";
+  import { Surface, Tabs, getUiPresentation, type TabItem } from "@inflatable-cookie/poodle-svelte";
   import type { Snippet } from "svelte";
 
   let {

@@ -25,5 +25,5 @@ ListCardCounter.
 ## Verification
 
 Headless Playwright against the React preview: 17 styling probes green
-(shared `@poodle/styles` addressing) + lucide icon nodes render. Preview
-builds; `@poodle/react` typechecks.
+(shared `@inflatable-cookie/poodle-styles` addressing) + lucide icon nodes render. Preview
+builds; `@inflatable-cookie/poodle-react` typechecks.

@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Cross-runtime CONTRACT parity data is canonically authored in the Svelte
-// preview. @poodle/react is a reference-faithful re-implementation of the same
+// preview. @inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same
 // contracts, so the suite-level parity posture applies to it too. We reuse the
 // canonical data (no fork, no drift) and emit a React-pathed artifact.
 import { docsFamilies, docsSections } from "../../../svelte/preview/src/catalog";
@@ -105,9 +105,9 @@ const report = {
   generatedAt: new Date().toISOString(),
   artifact: "packages/react/preview/artifacts/parity-report.json",
   previewBasePath: "/",
-  frameworks: ["@poodle/react", "@poodle/svelte"],
+  frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],
   sharedContractNote:
-    "@poodle/react is a reference-faithful re-implementation of the same component contracts as @poodle/svelte, running the same @poodle/headless machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte, running the same @inflatable-cookie/poodle-headless machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
   automatedBoundary: previewHarnessBoundary.automated,
   manualBoundary: previewHarnessBoundary.manual,
   summary: {
@@ -127,7 +127,7 @@ const report = {
     acceptanceHarness: gpuiCrossRuntimeParity.acceptanceHarness,
   },
   packageSurfaceCoverage: {
-    summary: ["@poodle/svelte"].map((packageName) => {
+    summary: ["@inflatable-cookie/poodle-svelte"].map((packageName) => {
       const entries = packageSurfaceCoverage.filter((entry) => entry.packageName === packageName);
       return {
         packageName,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NumberInput } from "@poodle/svelte";
+  import { NumberInput } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

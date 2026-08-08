@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactNode } from "react";
 
-import "@poodle/styles/list-card-counter.css";
+import "@inflatable-cookie/poodle-styles/list-card-counter.css";
 
 import { Icon } from "./Icon";
 import { Tooltip } from "./Tooltip";

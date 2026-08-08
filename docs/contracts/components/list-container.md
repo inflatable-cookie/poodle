@@ -188,8 +188,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 ### Composition
 
 - Composes: `Callout`, `Pagination`, `PaginationSummary` from
-  `@poodle/svelte`; `EmptyState` and `PageHeader` from
-  `@poodle/svelte`
+  `@inflatable-cookie/poodle-svelte`; `EmptyState` and `PageHeader` from
+  `@inflatable-cookie/poodle-svelte`
 - Parent expectations: list pages, admin browse views, content libraries
 - Child expectations: host provides filters, batch strip, and content
 - Resizing rules: caller content is fully responsible for row/card/grid
@@ -249,7 +249,7 @@ None.
 ## 9. Svelte Notes
 
 - Composes `Callout`, `Pagination`, `PaginationSummary` from
-  `@poodle/svelte` and `EmptyState`, `PageHeader` from
+  `@inflatable-cookie/poodle-svelte` and `EmptyState`, `PageHeader` from
   local composites
 - PageHeader rendering branches on `breadcrumbs` and `actions` snippet
   presence to avoid empty wrapper output

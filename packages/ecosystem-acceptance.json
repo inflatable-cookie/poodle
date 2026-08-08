@@ -8,10 +8,10 @@
       "adoptionModel": "internal acceptance harness",
       "status": "baseline",
       "coveredPackages": [
-        "@poodle/svelte-tokens",
-        "@poodle/svelte",
-        "@poodle/icons-lucide",
-        "@poodle/svelte-preview"
+        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-svelte",
+        "@inflatable-cookie/poodle-icons-lucide",
+        "@inflatable-cookie/poodle-svelte-preview"
       ],
       "evidenceArtifacts": [
         "packages/svelte/preview/artifacts/parity-report.json",
@@ -44,9 +44,9 @@
       "adoptionModel": "bridge-mediated",
       "status": "proof-backed",
       "coveredPackages": [
-        "@poodle/bridge-underlay",
-        "@poodle/svelte-tokens",
-        "@poodle/svelte"
+        "@inflatable-cookie/poodle-bridge-underlay",
+        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-svelte"
       ],
       "evidenceArtifacts": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
@@ -75,9 +75,9 @@
       "adoptionModel": "direct package consumption",
       "status": "proof-backed",
       "coveredPackages": [
-        "@poodle/svelte-tokens",
-        "@poodle/svelte",
-        "@poodle/icons-lucide"
+        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-svelte",
+        "@inflatable-cookie/poodle-icons-lucide"
       ],
       "evidenceArtifacts": [
         "packages/svelte/components/README.md",

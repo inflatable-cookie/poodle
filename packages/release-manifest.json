@@ -8,7 +8,7 @@
   },
   "packages": [
     {
-      "name": "@poodle/tokens",
+      "name": "@inflatable-cookie/poodle-tokens",
       "path": "packages/tokens",
       "kind": "source-of-truth",
       "language": "typescript",
@@ -16,7 +16,7 @@
       "channel": "internal"
     },
     {
-      "name": "@poodle/svelte-tokens",
+      "name": "@inflatable-cookie/poodle-svelte-tokens",
       "path": "packages/svelte/tokens",
       "kind": "runtime-package",
       "language": "typescript",
@@ -24,7 +24,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/svelte",
+      "name": "@inflatable-cookie/poodle-svelte",
       "path": "packages/svelte/components",
       "kind": "runtime-package",
       "language": "typescript",
@@ -32,7 +32,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/icons-lucide",
+      "name": "@inflatable-cookie/poodle-icons-lucide",
       "path": "packages/svelte/icons-lucide",
       "kind": "runtime-package",
       "language": "typescript",
@@ -40,7 +40,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/headless",
+      "name": "@inflatable-cookie/poodle-headless",
       "path": "packages/core",
       "kind": "runtime-package",
       "language": "typescript",
@@ -48,7 +48,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/styles",
+      "name": "@inflatable-cookie/poodle-styles",
       "path": "packages/styles",
       "kind": "runtime-package",
       "language": "typescript",
@@ -56,7 +56,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/react",
+      "name": "@inflatable-cookie/poodle-react",
       "path": "packages/react/components",
       "kind": "runtime-package",
       "language": "typescript",
@@ -64,7 +64,7 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/bridge-underlay",
+      "name": "@inflatable-cookie/poodle-bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",
       "language": "typescript",
@@ -72,7 +72,7 @@
       "channel": "internal"
     },
     {
-      "name": "@poodle/svelte-preview",
+      "name": "@inflatable-cookie/poodle-svelte-preview",
       "path": "packages/svelte/preview",
       "kind": "tooling",
       "language": "typescript",

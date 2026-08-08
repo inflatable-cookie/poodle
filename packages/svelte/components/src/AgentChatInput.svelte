@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/agent-chat-input.css";
+  import "@inflatable-cookie/poodle-styles/agent-chat-input.css";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";

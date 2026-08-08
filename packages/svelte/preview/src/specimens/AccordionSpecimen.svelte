@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Accordion, type AccordionItem } from "@poodle/svelte";
+  import { Accordion, type AccordionItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

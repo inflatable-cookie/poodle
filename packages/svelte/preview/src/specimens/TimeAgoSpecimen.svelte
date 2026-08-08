@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeAgo } from "@poodle/svelte";
+  import { TimeAgo } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const now = Date.now();

@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Button, FilterToolbar, IconButton, ListContainer, Pill, Select, TextInput } from "@poodle/react";
+import { Button, FilterToolbar, IconButton, ListContainer, Pill, Select, TextInput } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 type QueueItem = {

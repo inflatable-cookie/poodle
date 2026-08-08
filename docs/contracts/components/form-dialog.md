@@ -168,7 +168,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Composition
 
-- composes: `Dialog` and `Button` from `@poodle/svelte`,
+- composes: `Dialog` and `Button` from `@inflatable-cookie/poodle-svelte`,
   `FormLayout` from composites
 - parent expectations: any view needing a modal form (user creation, settings
   edit, etc.)
@@ -230,8 +230,8 @@ None.
 ## 9. Svelte Notes
 
 - uses callback props for `onSubmit`, `onCancel`, and `onOpenChange`
-- composes `Dialog`, `Button` from `@poodle/svelte` and `FormLayout`
-  from `@poodle/svelte`
+- composes `Dialog`, `Button` from `@inflatable-cookie/poodle-svelte` and `FormLayout`
+  from `@inflatable-cookie/poodle-svelte`
 - submit button text switches between `submitLabel` and `"Submitting..."`
 - cancel handler closes through `onOpenChange(false)` and only mutates local
   state when the component is actually uncontrolled

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Separator } from "@poodle/svelte";
+  import { Eyebrow, Separator } from "@inflatable-cookie/poodle-svelte";
   import type { ComponentDocs } from "../component-docs";
 let { docs }: { docs: ComponentDocs } = $props();
   function formatDefault(val: string | undefined): string {

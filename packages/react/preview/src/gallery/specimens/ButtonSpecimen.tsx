@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@poodle/react";
+import { Button } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

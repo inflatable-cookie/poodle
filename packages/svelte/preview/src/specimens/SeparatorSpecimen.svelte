@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Separator } from "@poodle/svelte";
+  import { Separator } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

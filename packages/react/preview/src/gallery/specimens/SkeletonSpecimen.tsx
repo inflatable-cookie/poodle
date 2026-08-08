@@ -1,4 +1,4 @@
-import { Skeleton } from "@poodle/react";
+import { Skeleton } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 export function SkeletonSpecimen() {

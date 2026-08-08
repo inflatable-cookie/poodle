@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@poodle/react";
+import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const fruitOptions: SelectOption[] = [

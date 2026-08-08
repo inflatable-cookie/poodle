@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import "@poodle/styles/spinner.css";
+import "@inflatable-cookie/poodle-styles/spinner.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, SemanticControlSizeRole, SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";

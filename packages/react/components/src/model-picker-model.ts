@@ -1,6 +1,6 @@
 // ModelPicker pure model. Renderer-neutral logic: per-model axis resolution,
 // defaults, selection normalisation and trigger-summary text. This
-// copy mirrors @poodle/svelte's verbatim (React keeps its own, same as
+// copy mirrors @inflatable-cookie/poodle-svelte's verbatim (React keeps its own, same as
 // FilterBuilder); the Rust spec (`poodle-specs::model_picker`) re-implements the
 // same semantics.
 //

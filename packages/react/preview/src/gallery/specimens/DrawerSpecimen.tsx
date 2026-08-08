@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Drawer, Button, Eyebrow, Surface } from "@poodle/react";
+import { Drawer, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 
 export function DrawerSpecimen() {
   const [rightOpen, setRightOpen] = useState(false);

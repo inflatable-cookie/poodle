@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
-import { toggleGroupTransition } from "@poodle/headless";
+import { toggleGroupTransition } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/accordion.css";
+import "@inflatable-cookie/poodle-styles/accordion.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

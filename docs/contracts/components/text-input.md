@@ -206,7 +206,7 @@ The built-in trailing indicators (`pending-indicator`, `valid-indicator`, `inval
 
 Behavior classification: machine-backed via core machinery
 
-Value semantics from `@poodle/headless`: `slugify` / `isValidSlugFormat`
+Value semantics from `@inflatable-cookie/poodle-headless`: `slugify` / `isValidSlugFormat`
 (slug mode normalization and format validation) and
 `validationStatusToState` (validation status to visual state mapping).
 Debounce, async validation orchestration, and submit/cancel/clear event

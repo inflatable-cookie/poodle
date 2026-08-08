@@ -15,14 +15,14 @@ import type {
   DockExternalDropContext as HeadlessDockExternalDropContext,
   DockExternalDropEligibilityContext as HeadlessDockExternalDropEligibilityContext,
   DockExternalDropTarget as HeadlessDockExternalDropTarget,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type {
   OverlaySurfaceGeometry,
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type IconProp = IconNodes | string;
 
@@ -418,7 +418,7 @@ export type ThemeSwatch = {
 };
 
 /** A selectable theme: `data-theme` value + label + preview swatch. Matches
- * `themeOptions()` from `@poodle/svelte-tokens`. */
+ * `themeOptions()` from `@inflatable-cookie/poodle-svelte-tokens`. */
 export type ThemeOption = {
   value: string;
   label: string;
@@ -832,7 +832,7 @@ export type PanelTabItem = {
 /**
  * DockRegion external-drag types.
  *
- * Re-exported from `@poodle/headless` rather than redeclared: the session
+ * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: the session
  * ordering these describe is run by `createDockExternalDragController` there,
  * and a second declaration here would be a second thing to keep in step.
  * `PanelTabItem` and `DockEdge` are the concrete arguments in this target.
@@ -840,7 +840,7 @@ export type PanelTabItem = {
 export type {
   DockExternalDragCancelReason,
   DockExternalDragController,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export type DockExternalDragPrepareContext =
   HeadlessDockExternalDragPrepareContext<PanelTabItem, DockEdge>;
@@ -1027,7 +1027,7 @@ export type RefOption = {
 /**
  * Agent transcript types.
  *
- * Re-exported from `@poodle/headless` rather than redeclared: grouping,
+ * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: grouping,
  * windowing and the Rust mirror all key off these shapes, and a second
  * declaration here would be a second thing to keep in step.
  */
@@ -1053,4 +1053,4 @@ export type {
   TranscriptRole,
   TranscriptToolCall,
   TranscriptToolRun,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";

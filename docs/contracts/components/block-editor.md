@@ -184,7 +184,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Composition
 
-- Composes: `Icon`, `Select`, `UiPresentationProvider` from `@poodle/svelte`
+- Composes: `Icon`, `Select`, `UiPresentationProvider` from `@inflatable-cookie/poodle-svelte`
 - Both the type-switch and add-block controls use Select with `variant="ghost"` and `native={false}`
 - `blockTypeItems` can drive those built-in controls with either flat or grouped
   options; `blockTypes` remains the flat convenience input
@@ -436,7 +436,7 @@ are currently unused by the root itself.
 
 - Uses `createEventDispatcher` for `change` event
 - Wraps in `UiPresentationProvider` to propagate resolved size and density to child controls
-- Composes `Icon`, `Select`, and `UiPresentationProvider` from `@poodle/svelte`
+- Composes `Icon`, `Select`, and `UiPresentationProvider` from `@inflatable-cookie/poodle-svelte`
 - Block type options are derived from `blockTypes` prop, mapped to `SelectOption[]` with `value`, `label`, and `icon`
 - Type-switch per block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, bound to `block.type`
 - Add-block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, `value={null}`, and a trigger slot containing a plus icon styled as a tool button; selecting a value calls `addBlock(value, index)`

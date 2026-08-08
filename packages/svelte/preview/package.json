@@ -1,5 +1,5 @@
 {
-  "name": "@poodle/svelte-preview",
+  "name": "@inflatable-cookie/poodle-svelte-preview",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,10 +18,10 @@
     "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
-    "@poodle/icons-lucide": "workspace:*",
-    "@poodle/svelte": "workspace:*",
+    "@inflatable-cookie/poodle-icons-lucide": "workspace:*",
+    "@inflatable-cookie/poodle-svelte": "workspace:*",
     "lucide-static": "^0.577.0",
-    "@poodle/svelte-tokens": "workspace:*",
+    "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
     "svelte": "^5.56.8"
   },
   "devDependencies": {

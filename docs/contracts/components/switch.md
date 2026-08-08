@@ -89,7 +89,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (`switchTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Checkbox semantics without the mixed state: single implicit state, value in
 context.

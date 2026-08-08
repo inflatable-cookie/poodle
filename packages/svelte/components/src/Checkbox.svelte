@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@poodle/styles/checkbox.css";
-  import { checkboxParts, checkboxTransition, type CheckboxContext } from "@poodle/headless";
+  import "@inflatable-cookie/poodle-styles/checkbox.css";
+  import { checkboxParts, checkboxTransition, type CheckboxContext } from "@inflatable-cookie/poodle-headless";
 
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

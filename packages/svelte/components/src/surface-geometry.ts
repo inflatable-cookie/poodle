@@ -3,7 +3,7 @@ import {
   observeOverlaySurfaceGeometry,
   type OverlayPlacement,
   type OverlaySurfaceGeometryChangeHandler,
-} from "@poodle/headless";
+} from "@inflatable-cookie/poodle-headless";
 
 export interface SurfaceGeometryOptions {
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | null;

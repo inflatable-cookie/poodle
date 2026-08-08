@@ -6,12 +6,12 @@
     ThemeSelect,
     ToggleGroup,
     type ToggleGroupOption,
-  } from "@poodle/svelte";
+  } from "@inflatable-cookie/poodle-svelte";
   import {
     densityModes,
     controlSizes,
     themeOptions,
-  } from "@poodle/svelte-tokens";
+  } from "@inflatable-cookie/poodle-svelte-tokens";
   let {
     theme,
     density,

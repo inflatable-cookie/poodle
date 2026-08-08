@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import "@poodle/styles/calendar.css";
+  import "@inflatable-cookie/poodle-styles/calendar.css";
   import { tick } from "svelte";
 
   import {

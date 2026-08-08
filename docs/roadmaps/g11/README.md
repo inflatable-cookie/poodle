@@ -55,7 +55,7 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
 
 - extract Poodle's in-house behavioral logic (Bits is already gone from the
   dependency tree) into a framework-free state-machine core
-- keep the `@poodle/svelte` public surface stable for the 17 source-linked
+- keep the `@inflatable-cookie/poodle-svelte` public surface stable for the 17 source-linked
   consumer apps; interface-invariant swaps by default, g11.001 wave process
   when a surface must change
 - productize the appearance-recipe layer so apps can restyle per-app without
@@ -70,7 +70,7 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
   process, validation posture, and audited consumer rollout
 - `g11.002` complete — headless machine-spec format and pilot contracts
   (template extension + tabs/popover/checkbox machine specs)
-- `g11.003` complete — `@poodle/headless` core package, shared machinery,
+- `g11.003` complete — `@inflatable-cookie/poodle-headless` core package, shared machinery,
   pilot swap (Tabs/Popover/Checkbox) runtime-verified, consumer matrix clean
 - `g11.004` complete — full component sweep onto core: 4 waves + long-tail
   classification; machine model promoted to architecture 006
@@ -79,7 +79,7 @@ defined in `docs/specs/062-headless-core-and-dual-layer-strategy.md`:
 - `g11.006` complete — `poodle-headless` crate (11 machines, 41 shared
   conformance vectors green on both runtimes); GPUI dialog/drawer/menu run
   machine-guarded handlers
-- `g11.007` complete — React pilot (`@poodle/react`, 268 LOC of shells,
+- `g11.007` complete — React pilot (`@inflatable-cookie/poodle-react`, 268 LOC of shells,
   browser-verified on shared machines); Mitosis rejected for shells too
   (Svelte-4 output, dropped types — evidence in the roadmap file)
 

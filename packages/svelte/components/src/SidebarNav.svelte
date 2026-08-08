@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/sidebar-nav.css";
+  import "@inflatable-cookie/poodle-styles/sidebar-nav.css";
   import type {
     ControlDensity,
     ControlSize,

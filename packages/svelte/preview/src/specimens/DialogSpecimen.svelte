@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface, Popover } from "@poodle/svelte";
+  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface, Popover } from "@inflatable-cookie/poodle-svelte";
 
   // One $state rune puts the whole file in runes mode, where plain `let`
   // stops being reactive — every flag here must be $state or its dialog

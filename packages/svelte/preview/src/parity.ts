@@ -1,4 +1,4 @@
-import { controlSizes, densityModes, themes } from "@poodle/svelte-tokens";
+import { controlSizes, densityModes, themes } from "@inflatable-cookie/poodle-svelte-tokens";
 import { docsSections } from "./catalog";
 
 export type ThemeName = keyof typeof themes;
@@ -38,7 +38,7 @@ export type SectionParityTarget = {
   reviewRoutes: ReviewRoutePreset[];
 };
 
-export type PublicSveltePackageName = "@poodle/svelte";
+export type PublicSveltePackageName = "@inflatable-cookie/poodle-svelte";
 
 export type PackageSurfaceCoverageStatus = "previewed" | "contract-only";
 
@@ -420,7 +420,7 @@ export const previewHarnessBoundary = {
 
 const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["form-suite"],
@@ -439,7 +439,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -447,7 +447,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Menu", "Skeleton", "StatusIndicator", "Tabs", "Toolbar"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -468,7 +468,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -476,7 +476,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Drawer", "Popover", "SegmentedControl", "Stepper", "Table"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -494,7 +494,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -568,7 +568,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "helper",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -599,7 +599,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["table-suite"],
@@ -607,7 +607,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["DataTable", "FilterToolbar"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["browse-suite"],
@@ -615,7 +615,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["EmptyState", "ListContainer"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["detail-suite"],
@@ -623,7 +623,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["DetailSection", "DetailShell", "PageHeader"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -631,7 +631,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["DetailSectionGroup"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["picker-suite", "detail-suite"],
@@ -639,7 +639,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["PickerShell", "RelationPicker", "SelectionSummary"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["media-suite"],
@@ -647,7 +647,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["MediaPreview", "MediaThumbnail"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -655,7 +655,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ToastStack"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["command-suite"],
@@ -663,7 +663,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ActionDiscoveryPanel", "CommandPalette"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["workspace-suite"],
@@ -671,7 +671,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["AppHeader", "DockRegion", "SplitView"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -701,7 +701,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "helper",
     status: "previewed",
     sectionIds: ["workspace-suite"],
@@ -709,7 +709,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["parseWorkspaceLayoutSnapshot", "serializeWorkspaceLayoutSnapshot"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "helper",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -717,7 +717,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["detectParsedEmbed", "getProviderAccent", "getThumbnailUrl", "lookupMeta", "parseEmbed", "renderEmbed", "resolveEmbedParseState"],
   },
   {
-    packageName: "@poodle/svelte",
+    packageName: "@inflatable-cookie/poodle-svelte",
     kind: "helper",
     status: "previewed",
     sectionIds: ["media-suite"],

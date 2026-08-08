@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@poodle/styles/menu-surface.css";
+  import "@inflatable-cookie/poodle-styles/menu-surface.css";
   import {
     menuItemHasSubmenu,
     menuListCanActivate,
@@ -7,7 +7,7 @@
     menuNavigableItems,
     type AnchorTarget,
     type OverlaySurfaceGeometryChangeHandler,
-  } from "@poodle/headless";
+  } from "@inflatable-cookie/poodle-headless";
   import { tick } from "svelte";
 
   import MenuSurface from "./MenuSurface.svelte";

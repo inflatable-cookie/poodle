@@ -6,7 +6,7 @@ Updated: 2026-07-29
 ## 1. Purpose
 
 - Component name: `DockRegion`
-- Layer: `composite` (implemented in `@poodle/svelte`)
+- Layer: `composite` (implemented in `@inflatable-cookie/poodle-svelte`)
 - Summary: a collapsible dock area that hosts panel tabs and one active panel
   body, or stacks multiple fixed panels, within a workstation layout
 - In scope: edge placement, static/flexible sizing modes, collapse/expand with
@@ -183,7 +183,7 @@ their ordering:
 | `canDrop` | external `dragover` and again at `drop` | synchronous eligibility; only `DataTransfer.types` is portable during dragover |
 | `drop` | `drop`, only when the drop-time eligibility check passes | read and accept the public host payload |
 
-That ordering lives in `createDockExternalDragController` in `@poodle/headless`,
+That ordering lives in `createDockExternalDragController` in `@inflatable-cookie/poodle-headless`,
 not in either web target. It is subtle enough — a preparation that resolves
 after the drag already started must cancel rather than write, and a pointer
 released without a drag must still cancel — that two implementations would be
@@ -651,7 +651,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 ## 10. Svelte Notes
 
-- Composes Tabs (`variant="strip"`) and CollapseToggle from `@poodle/svelte`
+- Composes Tabs (`variant="strip"`) and CollapseToggle from `@inflatable-cookie/poodle-svelte`
 - Does NOT use PanelTabs, PanelHeader, or PanelSurface
 - CollapseToggle is only rendered when `collapsible=true`; in all four flexible
   postures (expanded, collapsed icon-strip left/right, collapsed icon-strip

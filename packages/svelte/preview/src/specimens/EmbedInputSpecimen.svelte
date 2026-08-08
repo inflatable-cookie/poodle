@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { EmbedInput, resolveEmbedParseState } from "@poodle/svelte";
-  import { Field } from "@poodle/svelte";
-  import type { ParsedEmbed } from "@poodle/svelte";
+  import { EmbedInput, resolveEmbedParseState } from "@inflatable-cookie/poodle-svelte";
+  import { Field } from "@inflatable-cookie/poodle-svelte";
+  import type { ParsedEmbed } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

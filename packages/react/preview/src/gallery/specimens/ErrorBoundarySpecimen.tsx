@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Button, ErrorBoundary, Surface, Text } from "@poodle/react";
+import { Button, ErrorBoundary, Surface, Text } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 
 // React error boundaries only catch errors thrown by a descendant component

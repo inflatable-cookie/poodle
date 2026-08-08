@@ -86,7 +86,7 @@ Closed, pending-open, and open states are required.
 ### Behavior Machine
 
 Behavior classification: machine-backed (`hoverTransition` in
-`@poodle/headless`)
+`@inflatable-cookie/poodle-headless`)
 
 Hover-intent machine shared by Tooltip and HoverCard.
 

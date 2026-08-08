@@ -7,9 +7,9 @@
       "status": "docs-backed",
       "audience": "teams importing Poodle packages directly",
       "packageEntryPoints": [
-        "@poodle/svelte-tokens",
-        "@poodle/svelte",
-        "@poodle/icons-lucide"
+        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-svelte",
+        "@inflatable-cookie/poodle-icons-lucide"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -38,7 +38,7 @@
       "status": "proof-backed",
       "audience": "teams preserving an existing app-local API while adopting Poodle internally",
       "packageEntryPoints": [
-        "@poodle/bridge-underlay"
+        "@inflatable-cookie/poodle-bridge-underlay"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -66,9 +66,9 @@
       "status": "proof-backed",
       "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
       "packageEntryPoints": [
-        "@poodle/svelte-tokens",
-        "@poodle/svelte",
-        "@poodle/icons-lucide"
+        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-svelte",
+        "@inflatable-cookie/poodle-icons-lucide"
       ],
       "exampleSectionIds": [
         "command-suite",
@@ -95,7 +95,7 @@
       "status": "preview-backed",
       "audience": "evaluators and adopters learning the system before direct integration",
       "packageEntryPoints": [
-        "@poodle/svelte-preview"
+        "@inflatable-cookie/poodle-svelte-preview"
       ],
       "exampleSectionIds": [
         "catalog-hub",

@@ -19,10 +19,10 @@ also use [Guides Index](./README.md), especially
 ### 1. Install packages
 
 ```bash
-bun add @poodle/svelte-tokens @poodle/svelte @poodle/icons-lucide
+bun add @inflatable-cookie/poodle-svelte-tokens @inflatable-cookie/poodle-svelte @inflatable-cookie/poodle-icons-lucide
 ```
 
-`@poodle/svelte-tokens` provides the CSS custom properties and theme helpers, `@poodle/svelte` provides the full Svelte component surface, and `@poodle/icons-lucide` provides tree-shakeable icon imports.
+`@inflatable-cookie/poodle-svelte-tokens` provides the CSS custom properties and theme helpers, `@inflatable-cookie/poodle-svelte` provides the full Svelte component surface, and `@inflatable-cookie/poodle-icons-lucide` provides tree-shakeable icon imports.
 
 ### 2. Import the token stylesheet
 
@@ -30,14 +30,14 @@ In your app's entry point (e.g. `+layout.svelte` or `App.svelte`), import the to
 
 ```svelte
 <script>
-  import "@poodle/svelte-tokens/styles.css";
+  import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
 </script>
 ```
 
 If you prefer the legacy CSS subpath, that remains available too:
 
 ```css
-@import "@poodle/svelte-tokens/css/poodle-tokens.css";
+@import "@inflatable-cookie/poodle-svelte-tokens/css/poodle-tokens.css";
 ```
 
 This loads the full set of CSS custom properties (`--poodle-*`) that all components resolve their visual properties from.
@@ -48,7 +48,7 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
 
 ```svelte
 <script>
-  import { applyThemeAttributes } from "@poodle/svelte-tokens/runtime";
+  import { applyThemeAttributes } from "@inflatable-cookie/poodle-svelte-tokens/runtime";
   import { onMount } from "svelte";
 
   let shell;
@@ -79,8 +79,8 @@ Or simply apply the data attributes in your HTML:
 
 ```svelte
 <script>
-  import { Button, TextInput, Field, Select } from "@poodle/svelte";
-  import { search } from "@poodle/icons-lucide";
+  import { Button, TextInput, Field, Select } from "@inflatable-cookie/poodle-svelte";
+  import { search } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <Button variant="primary" onClick={() => console.log("clicked")}>
@@ -97,31 +97,31 @@ Or simply apply the data attributes in your HTML:
 ## Package Architecture
 
 ```
-@poodle/svelte-tokens       — CSS custom properties, theme/density/size helpers
-@poodle/svelte              — unified Svelte component package
-@poodle/icons-lucide         — 1700+ tree-shakeable Lucide icon exports
+@inflatable-cookie/poodle-svelte-tokens       — CSS custom properties, theme/density/size helpers
+@inflatable-cookie/poodle-svelte              — unified Svelte component package
+@inflatable-cookie/poodle-icons-lucide         — 1700+ tree-shakeable Lucide icon exports
 ```
 
 ### Dependency graph
 
 ```
-@poodle/svelte-tokens
+@inflatable-cookie/poodle-svelte-tokens
     ↑
-@poodle/svelte (depends on tokens)
+@inflatable-cookie/poodle-svelte (depends on tokens)
 
-@poodle/icons-lucide (standalone — no dependency on other Poodle packages)
+@inflatable-cookie/poodle-icons-lucide (standalone — no dependency on other Poodle packages)
 ```
 
 ### Import entry points
 
 | Package | Import | Purpose |
 |---------|--------|---------|
-| `@poodle/svelte` | Default | All components |
-| `@poodle/svelte/types` | Type-only | TypeScript types |
-| `@poodle/svelte-tokens` | Default | Token values and metadata |
-| `@poodle/svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
-| `@poodle/svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
-| `@poodle/icons-lucide` | Named exports | Individual icon data |
+| `@inflatable-cookie/poodle-svelte` | Default | All components |
+| `@inflatable-cookie/poodle-svelte/types` | Type-only | TypeScript types |
+| `@inflatable-cookie/poodle-svelte-tokens` | Default | Token values and metadata |
+| `@inflatable-cookie/poodle-svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
+| `@inflatable-cookie/poodle-svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
+| `@inflatable-cookie/poodle-icons-lucide` | Named exports | Individual icon data |
 
 ---
 
@@ -255,7 +255,7 @@ baseline without hard-coding every child:
 
 ```svelte
 <script>
-  import { UiPresentationProvider, Toolbar, Button } from "@poodle/svelte";
+  import { UiPresentationProvider, Toolbar, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <UiPresentationProvider density="compact" sizeScale="sm">
@@ -417,12 +417,12 @@ Poodle uses a layered icon system with three consumption patterns.
 
 ### Pattern 1: Direct import (tree-shakeable)
 
-Import individual icons from `@poodle/icons-lucide`. Only icons you use end up in the bundle:
+Import individual icons from `@inflatable-cookie/poodle-icons-lucide`. Only icons you use end up in the bundle:
 
 ```svelte
 <script>
-  import { Icon } from "@poodle/svelte";
-  import { search, heart, settings, trash2 } from "@poodle/icons-lucide";
+  import { Icon } from "@inflatable-cookie/poodle-svelte";
+  import { search, heart, settings, trash2 } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <Icon icon={search} size="lg" />
@@ -458,7 +458,7 @@ For scenarios where you need the full icon catalogue available by name (e.g., CM
 
 ```svelte
 <script>
-  import { Icon, IconProvider } from "@poodle/svelte";
+  import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -480,8 +480,8 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 
 ```svelte
 <script>
-  import { Button, IconButton } from "@poodle/svelte";
-  import { save, trash2, plus } from "@poodle/icons-lucide";
+  import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
+  import { save, trash2, plus } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <Button variant="primary" leadingIcon={save}>Save</Button>
@@ -517,7 +517,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Checkbox } from "@poodle/svelte";
+  import { Field, TextInput, Select, Checkbox } from "@inflatable-cookie/poodle-svelte";
 
   let name = "";
   let role = "";
@@ -610,8 +610,8 @@ For multi-field forms, use `FormLayout` from composites:
 
 ```svelte
 <script>
-  import { FormLayout } from "@poodle/svelte";
-  import { Field, TextInput, Select, Button } from "@poodle/svelte";
+  import { FormLayout } from "@inflatable-cookie/poodle-svelte";
+  import { Field, TextInput, Select, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FormLayout columns={2}>
@@ -647,7 +647,7 @@ Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend
 
 ```svelte
 <script>
-  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte";
+  import { FieldSet, Field, TextInput, Select } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <FieldSet legend="Contact Information">
@@ -688,7 +688,7 @@ Flex container with direction and gap control:
 
 ```svelte
 <script>
-  import { Stack, Button } from "@poodle/svelte";
+  import { Stack, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Stack direction="vertical" gap="md">
@@ -709,7 +709,7 @@ CSS Grid layout container:
 
 ```svelte
 <script>
-  import { Grid, Surface } from "@poodle/svelte";
+  import { Grid, Surface } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Grid columns={3} gap="md">
@@ -745,7 +745,7 @@ Flex-aware spacer element that pushes siblings apart.
 
 ```svelte
 <script>
-  import { Dialog, Button } from "@poodle/svelte";
+  import { Dialog, Button } from "@inflatable-cookie/poodle-svelte";
   let open = false;
 </script>
 
@@ -808,8 +808,8 @@ Positioned floating content anchored to a trigger:
 
 ```svelte
 <script>
-  import { Table } from "@poodle/svelte";
-  import type { TableColumn, TableRow } from "@poodle/svelte";
+  import { Table } from "@inflatable-cookie/poodle-svelte";
+  import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },
@@ -832,8 +832,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { DataTable } from "@poodle/svelte";
-  import type { TableColumn, TableRow } from "@poodle/svelte";
+  import { DataTable } from "@inflatable-cookie/poodle-svelte";
+  import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <DataTable
@@ -850,8 +850,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { Tabs } from "@poodle/svelte";
-  import type { TabItem } from "@poodle/svelte";
+  import { Tabs } from "@inflatable-cookie/poodle-svelte";
+  import type { TabItem } from "@inflatable-cookie/poodle-svelte";
 
   const tabs: TabItem[] = [
     { value: "general", label: "General" },
@@ -880,8 +880,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Breadcrumbs } from "@poodle/svelte";
-  import type { BreadcrumbItem } from "@poodle/svelte";
+  import { Breadcrumbs } from "@inflatable-cookie/poodle-svelte";
+  import type { BreadcrumbItem } from "@inflatable-cookie/poodle-svelte";
 
   const items: BreadcrumbItem[] = [
     { value: "home", label: "Home", href: "/" },
@@ -897,7 +897,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Pagination } from "@poodle/svelte";
+  import { Pagination } from "@inflatable-cookie/poodle-svelte";
   let page = 1;
 </script>
 
@@ -912,8 +912,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Menu, Button } from "@poodle/svelte";
-  import type { MenuItem } from "@poodle/svelte";
+  import { Menu, Button } from "@inflatable-cookie/poodle-svelte";
+  import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
 
   const items: MenuItem[] = [
     { value: "edit", label: "Edit", shortcutLabel: "⌘E" },
@@ -938,7 +938,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Callout } from "@poodle/svelte";
+  import { Callout } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Callout tone="info">This is an informational message.</Callout>
@@ -965,8 +965,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { ToastStack } from "@poodle/svelte";
-  import type { ToastItem } from "@poodle/svelte";
+  import { ToastStack } from "@inflatable-cookie/poodle-svelte";
+  import type { ToastItem } from "@inflatable-cookie/poodle-svelte";
 
   let toasts: ToastItem[] = [];
 
@@ -1086,8 +1086,8 @@ Grouped options:
 
 ```svelte
 <script>
-  import { PageHeader, DetailShell, DetailSection, DetailItem } from "@poodle/svelte";
-  import { Breadcrumbs } from "@poodle/svelte";
+  import { PageHeader, DetailShell, DetailSection, DetailItem } from "@inflatable-cookie/poodle-svelte";
+  import { Breadcrumbs } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <PageHeader title="User Details">
@@ -1122,8 +1122,8 @@ Grouped options:
 
 ```svelte
 <script>
-  import { CommandPalette } from "@poodle/svelte";
-  import type { CommandActionItem } from "@poodle/svelte";
+  import { CommandPalette } from "@inflatable-cookie/poodle-svelte";
+  import type { CommandActionItem } from "@inflatable-cookie/poodle-svelte";
 
   let open = false;
   const actions: CommandActionItem[] = [
@@ -1162,7 +1162,7 @@ import type {
   DateRangeValue,
   DateTimeValue,
   OverlayPlacement,
-} from "@poodle/svelte";
+} from "@inflatable-cookie/poodle-svelte";
 
 // Composite types
 import type {
@@ -1173,10 +1173,10 @@ import type {
   WorkspaceLayoutSnapshot,
   DockEdge,
   PanelTabItem,
-} from "@poodle/svelte";
+} from "@inflatable-cookie/poodle-svelte";
 
 // Icon types
-import type { IconNodes, IconNodeElement, IconSet } from "@poodle/svelte";
+import type { IconNodes, IconNodeElement, IconSet } from "@inflatable-cookie/poodle-svelte";
 ```
 
 ### Key type definitions
@@ -1226,7 +1226,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Surface, Stack } from "@poodle/svelte";
+  import { Surface, Stack } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <div data-theme="eclipse" data-density="compact">
@@ -1242,8 +1242,8 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Button, Stack } from "@poodle/svelte";
-  import { FormLayout } from "@poodle/svelte";
+  import { Field, TextInput, Select, Button, Stack } from "@inflatable-cookie/poodle-svelte";
+  import { FormLayout } from "@inflatable-cookie/poodle-svelte";
 
   let name = "";
   let email = "";
@@ -1295,8 +1295,8 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Toolbar, IconButton, Separator } from "@poodle/svelte";
-  import { bold, italic, underline, link, image } from "@poodle/icons-lucide";
+  import { Toolbar, IconButton, Separator } from "@inflatable-cookie/poodle-svelte";
+  import { bold, italic, underline, link, image } from "@inflatable-cookie/poodle-icons-lucide";
 </script>
 
 <Toolbar>
@@ -1313,7 +1313,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { AlertDialog, Button } from "@poodle/svelte";
+  import { AlertDialog, Button } from "@inflatable-cookie/poodle-svelte";
   let showConfirm = false;
 </script>
 

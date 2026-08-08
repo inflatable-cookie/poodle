@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { layerContains, registerDismissLayer } from "@poodle/headless";
+import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
 
-import "@poodle/styles/theme-select.css";
+import "@inflatable-cookie/poodle-styles/theme-select.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";

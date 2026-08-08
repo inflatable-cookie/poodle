@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PasswordRequirements, TextInput, type PasswordRequirementsPolicy } from "@poodle/react";
+import { PasswordRequirements, TextInput, type PasswordRequirementsPolicy } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -283,7 +283,7 @@ None.
 - Grid uses `grid-template-rows: auto` instead of explicit row template
 - State fallback shows `stateTitle` and optional `stateMessage` when no `stateContent` snippet is provided. **Known Svelte gap:** the current Svelte build falls back to a single flat `"Picker state"` literal and renders no message fallback, rather than the per-state fallback copy the contract requires in §3/§4 (`"Loading results"`/`"Something went wrong"`/`"Nothing here yet"`/`"No results"` + matching messages). The shared Rust `PickerShellSpec` (`effective_state_title()`/`effective_state_message()`) already implements the contract behavior; Svelte must be brought up to match — the contract is authoritative here and is intentionally left unweakened.
 - Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
-- Imports `Spinner` from `@poodle/svelte`
+- Imports `Spinner` from `@inflatable-cookie/poodle-svelte`
 
 ## 10. GPUI Notes
 

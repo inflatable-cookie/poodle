@@ -125,22 +125,22 @@ components with no capture failures or baseline writes.
 FieldSet is now node-backed with an exact focused capture. ThemeSelect is also
 node-backed with an exact focused capture.
 
-**React parity: COMPLETE.** All 132 components ported to `@poodle/react` and
+**React parity: COMPLETE.** All 132 components ported to `@inflatable-cookie/poodle-react` and
 Playwright-verified against the Svelte preview. The React preview is a full
 per-component gallery matching the Svelte preview (shell, controls, Tokens
 inspector, usage docs, 131/131 specimen slugs) plus docs / parity /
-accessibility report generators. `@poodle/react` has a consumer README
+accessibility report generators. `@inflatable-cookie/poodle-react` has a consumer README
 (`packages/react/components/README.md`). Docs and parity data are authored
 canonically in the Svelte preview and re-exported live into React — no fork.
 
-Goal: `@poodle/react` grows from the 3-component pilot (g11.007) to full
+Goal: `@inflatable-cookie/poodle-react` grows from the 3-component pilot (g11.007) to full
 library parity (132 components), as a strategic second web target — no
 consuming app yet, so the acceptance bar is the React preview plus
 interaction verification, not a consumer rollout.
 
 Decisions inherited from g11.007:
 
-- Hand-written TSX shells (~90 LOC each) over `@poodle/headless` machines.
+- Hand-written TSX shells (~90 LOC each) over `@inflatable-cookie/poodle-headless` machines.
   Mitosis rejected twice (spec 062); no compiler layer.
 - Tokens, recipes, and the contrast axis are plain CSS — shared unchanged.
 - The Svelte implementation remains the visual proof reference.
@@ -148,7 +148,7 @@ Decisions inherited from g11.007:
 Runway:
 
 - `001-shared-styles-package.md` — extract every remaining Svelte
-  `<style>` block and move all component CSS to `@poodle/styles`, imported
+  `<style>` block and move all component CSS to `@inflatable-cookie/poodle-styles`, imported
   by both frameworks. Single styling source; React never duplicates CSS.
 - `002-react-infra-and-conversion-playbook.md` — React preview harness
   (hash-routed specimens like the Svelte preview), shared type strategy,
@@ -163,7 +163,7 @@ Runway:
   component render at the wrong size; the ListCard `data-size` bug proved
   it. **Complete** — 256/256 sweep pairs and 180/180 axis pairs green,
   after 14 divergences found and fixed across specimens, shells and
-  `@poodle/styles`.
+  `@inflatable-cookie/poodle-styles`.
 - `010-agent-composer.md` — the agent composer family across all four
   targets: `Meter shape="ring"`, `ModelPicker` (model + host-declared
   capability axes in one popover) and `AgentChatInput`. **Complete.**
@@ -225,7 +225,7 @@ Runway:
   Tabs/TabStrip, Breadcrumbs, TextLink, and SelectionSummary with exact focused
   captures and zero old-tier constructor sites.**
 
-- Ongoing: `check:svelte` (svelte-check over `@poodle/svelte`, driven
+- Ongoing: `check:svelte` (svelte-check over `@inflatable-cookie/poodle-svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
   `ci-web.yml`. Added after five type errors in `Rating.svelte` were found
   from a consumer repo rather than from Poodle's own gates.

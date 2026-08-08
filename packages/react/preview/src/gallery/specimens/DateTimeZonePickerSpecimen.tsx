@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { DateTimeZonePicker } from "@poodle/react";
+import { DateTimeZonePicker } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

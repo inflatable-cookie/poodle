@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Checkbox } from "@poodle/react";
+import { Checkbox } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

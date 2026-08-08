@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { Surface, Tabs, type TabItem } from "@poodle/react";
-import type { ControlDensity, ControlSize } from "@poodle/react";
+import { Surface, Tabs, type TabItem } from "@inflatable-cookie/poodle-react";
+import type { ControlDensity, ControlSize } from "@inflatable-cookie/poodle-react";
 
 const CONTROL_SIZES: ControlSize[] = ["xs", "sm", "md", "lg", "xl"];
 const CONTROL_DENSITIES: ControlDensity[] = ["compact", "default", "comfortable"];

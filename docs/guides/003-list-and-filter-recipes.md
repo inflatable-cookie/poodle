@@ -23,14 +23,14 @@ pagination placement. Render the actual list or grid in the default slot.
 
 ```svelte
 <script lang="ts">
-  import { ListContainer, FilterToolbar } from "@poodle/svelte";
+  import { ListContainer, FilterToolbar } from "@inflatable-cookie/poodle-svelte";
   import {
     Button,
     Field,
     IconButton,
     TextInput,
     Select
-  } from "@poodle/svelte";
+  } from "@inflatable-cookie/poodle-svelte";
 
   let collapsed = false;
 </script>
@@ -162,7 +162,7 @@ evaluation or serialization of the expression.
 
 ```svelte
 <script lang="ts">
-  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@poodle/svelte";
+  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from "@inflatable-cookie/poodle-svelte";
 
   const fields: FilterFieldDefinition[] = [
     { key: "format", label: "Format", kind: "multi-enum", options: [
