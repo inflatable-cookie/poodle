@@ -4,8 +4,8 @@
 
   import { default as Button } from "./Button.svelte";
   import { default as Dialog } from "./Dialog.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   import { default as FormLayout } from "./FormLayout.svelte";
 

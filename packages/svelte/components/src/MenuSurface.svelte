@@ -11,10 +11,10 @@
   import { tick } from "svelte";
 
   import MenuSurface from "./MenuSurface.svelte";
-  import { anchored } from "./anchored.ts";
-  import { surfaceGeometry } from "./surface-geometry.ts";
+  import { anchored } from "./anchored";
+  import { surfaceGeometry } from "./surface-geometry";
 
-  import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types.ts";
+  import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
   interface Props {
     items?: MenuItem[];

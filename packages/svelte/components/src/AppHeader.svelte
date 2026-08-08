@@ -2,8 +2,8 @@
   import "@poodle/styles/app-header.css";
   import type { Snippet } from "svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
     title?: string | null;

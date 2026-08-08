@@ -20,7 +20,32 @@ use crate::presentation::{
     code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px, resolve_semantic_size,
 };
 
+/// Host callbacks.
+///
+/// `on_value_change` reports the sanitized code on every keystroke;
+/// `on_complete` fires the moment it reaches `length`, which is the whole point
+/// of a one-time-code field — the host submits without a button.
+#[derive(Default)]
+pub struct CodeInputHandlers {
+    pub on_value_change: Option<poodle_node::TextChangeHandler>,
+    pub on_complete: Option<poodle_node::TextChangeHandler>,
+}
+
 pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
+    code_input_with_handlers(spec, theme, CodeInputHandlers::default())
+}
+
+/// Render a code input that can actually be typed into.
+///
+/// The contract's web target hides a real `<input>` behind the slots and lets
+/// the browser own typing. There is no such input here, so the slot row itself
+/// takes focus and the keys, and the slots stay pure visuals — the same
+/// division, reached differently.
+pub fn code_input_with_handlers(
+    spec: &CodeInputSpec,
+    theme: &dyn ThemeProvider,
+    handlers: CodeInputHandlers,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let validation = spec.effective_validation_state();
     let is_invalid = validation == ValidationState::Invalid;
@@ -136,6 +161,60 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
         row = row.child(slot.child(value));
     }
 
+    // Keys land on the slot row, not on any one slot: the value is one string
+    // and the active slot is derived from its length, so there is nothing
+    // per-slot to dispatch to.
+    if !spec.is_disabled
+        && (handlers.on_value_change.is_some() || handlers.on_complete.is_some())
+    {
+        row.interaction.focusable = true;
+        let value = spec.current_value().to_string();
+        let length = spec.length;
+        let numbers_only = spec.numbers_only;
+        let on_value_change = handlers.on_value_change.clone();
+        let on_complete = handlers.on_complete.clone();
+        row.interaction.on_edit_key = Some(std::sync::Arc::new(move |key: &str, _mods| {
+            let Some(next) =
+                poodle_headless::text_input::code_transition(&value, key, length, numbers_only)
+            else {
+                return;
+            };
+            if next == value {
+                return;
+            }
+            if let Some(handler) = &on_value_change {
+                handler(&next);
+            }
+            // Completion is a distinct event, and it fires on the transition
+            // *into* a full code — not on every keystroke that leaves it full,
+            // which a full code cannot produce anyway.
+            if next.chars().count() == length {
+                if let Some(handler) = &on_complete {
+                    handler(&next);
+                }
+            }
+        }));
+        // Paste arrives as content rather than a keystroke, and a one-time code
+        // is far more often pasted than typed.
+        let paste_value = spec.current_value().to_string();
+        let on_value_change = handlers.on_value_change.clone();
+        let on_complete = handlers.on_complete;
+        row.interaction.on_edit_insert = Some(std::sync::Arc::new(move |text: &str| {
+            let next = poodle_headless::text_input::code_paste(text, length, numbers_only);
+            if next == paste_value {
+                return;
+            }
+            if let Some(handler) = &on_value_change {
+                handler(&next);
+            }
+            if next.chars().count() == length {
+                if let Some(handler) = &on_complete {
+                    handler(&next);
+                }
+            }
+        }));
+    }
+
     let mut outer = Node::container();
     {
         let s = &mut outer.style;
@@ -181,4 +260,119 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
         }
     }
     outer
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn typed(spec: &CodeInputSpec, key: &str) -> (Vec<String>, Vec<String>) {
+        let changes = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let completes = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let c = std::sync::Arc::clone(&changes);
+        let k = std::sync::Arc::clone(&completes);
+        let node = code_input_with_handlers(
+            spec,
+            &theme(),
+            CodeInputHandlers {
+                on_value_change: Some(std::sync::Arc::new(move |v: &str| {
+                    c.lock().unwrap().push(v.to_string())
+                })),
+                on_complete: Some(std::sync::Arc::new(move |v: &str| {
+                    k.lock().unwrap().push(v.to_string())
+                })),
+            },
+        );
+        let row = node
+            .find(&|n| n.interaction.on_edit_key.is_some())
+            .expect("something takes the keys");
+        (row.interaction.on_edit_key.as_ref().unwrap())(key, poodle_node::NodeModifiers::default());
+        let changes = changes.lock().unwrap().clone();
+        let completes = completes.lock().unwrap().clone();
+        (changes, completes)
+    }
+
+    /// The row takes focus and the keys; the slots stay visuals. Focusing a
+    /// slot would mean six focus stops for one value.
+    #[test]
+    fn the_slot_row_takes_the_keys_and_no_slot_does() {
+        let node = code_input_with_handlers(
+            &CodeInputSpec::new().with_length(4),
+            &theme(),
+            CodeInputHandlers {
+                on_value_change: Some(std::sync::Arc::new(|_| {})),
+                ..CodeInputHandlers::default()
+            },
+        );
+        fn count_keys(n: &Node) -> usize {
+            usize::from(n.interaction.on_edit_key.is_some())
+                + n.children.iter().map(count_keys).sum::<usize>()
+        }
+        assert_eq!(count_keys(&node), 1);
+    }
+
+    #[test]
+    fn a_digit_appends_and_the_last_one_completes() {
+        let spec = CodeInputSpec::new().with_length(4).with_value("12");
+        let (changes, completes) = typed(&spec, "3");
+        assert_eq!(changes, vec!["123".to_string()]);
+        assert!(completes.is_empty(), "three of four is not complete");
+
+        let spec = CodeInputSpec::new().with_length(4).with_value("123");
+        let (changes, completes) = typed(&spec, "4");
+        assert_eq!(changes, vec!["1234".to_string()]);
+        assert_eq!(completes, vec!["1234".to_string()]);
+    }
+
+    /// A key that changes nothing reports nothing — a full code must not
+    /// re-fire `onComplete` on every further keypress.
+    #[test]
+    fn keys_that_change_nothing_report_nothing() {
+        let spec = CodeInputSpec::new().with_length(4).with_value("1234");
+        let (changes, completes) = typed(&spec, "5");
+        assert!(changes.is_empty() && completes.is_empty());
+
+        let spec = CodeInputSpec::new().with_length(4);
+        let (changes, _) = typed(&spec, "backspace");
+        assert!(changes.is_empty(), "backspace on an empty code");
+    }
+
+    #[test]
+    fn a_disabled_code_input_takes_no_keys() {
+        let node = code_input_with_handlers(
+            &CodeInputSpec::new().with_length(4).with_disabled(true),
+            &theme(),
+            CodeInputHandlers {
+                on_value_change: Some(std::sync::Arc::new(|_| {})),
+                ..CodeInputHandlers::default()
+            },
+        );
+        assert!(node.find(&|n| n.interaction.on_edit_key.is_some()).is_none());
+    }
+
+    /// Paste is how a one-time code usually arrives, and it completes too.
+    #[test]
+    fn pasting_a_code_fills_it_and_completes() {
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = code_input_with_handlers(
+            &CodeInputSpec::new().with_length(6),
+            &theme(),
+            CodeInputHandlers {
+                on_complete: Some(std::sync::Arc::new(move |v: &str| {
+                    sink.lock().unwrap().push(v.to_string())
+                })),
+                ..CodeInputHandlers::default()
+            },
+        );
+        let row = node
+            .find(&|n| n.interaction.on_edit_insert.is_some())
+            .expect("paste target");
+        (row.interaction.on_edit_insert.as_ref().unwrap())("123-456");
+        assert_eq!(*seen.lock().unwrap(), vec!["123456".to_string()]);
+    }
 }

@@ -7,10 +7,10 @@
     type RangeSliderContext,
   } from "@poodle/headless";
 
-  import { joinStyles } from "./internal.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { joinStyles } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
 
   interface Props {
     size?: ControlSize | null;

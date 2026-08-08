@@ -2,14 +2,14 @@
   import "@poodle/styles/toggle-group.css";
   import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     ToggleGroupOption,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     value?: string | string[] | null | undefined;

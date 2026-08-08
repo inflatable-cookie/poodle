@@ -1,7 +1,7 @@
 <script lang="ts">
   import { default as Select } from "./Select.svelte";
-  import { defaultTimeZoneOptions } from "./date.ts";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types.ts";
+  import { defaultTimeZoneOptions } from "./date";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
 
   interface Props {
     id?: string;

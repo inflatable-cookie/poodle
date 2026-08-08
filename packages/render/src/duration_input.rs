@@ -11,7 +11,13 @@
 //! aligns with the field rather than the labels. Focus tracking + keyboard
 //! ±1 / onChange are host-owned; hover renders the accent-12% band.
 
+use std::sync::Arc;
+
 use poodle_adapter::ThemeProvider;
+use poodle_headless::duration::{
+    adjust_duration_segment, duration_total_seconds, type_duration_digit, DurationSegment,
+    DurationValue,
+};
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, StylePatch,
 };
@@ -61,7 +67,30 @@ fn label_font_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Host callback. `on_change` reports every segment plus the total, after the
+/// carry rules have been applied — the payload the contract documents.
+#[derive(Default)]
+pub struct DurationInputHandlers {
+    #[allow(clippy::type_complexity)]
+    pub on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
+}
+
 pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> Node {
+    duration_input_with_handlers(spec, theme, DurationInputHandlers::default())
+}
+
+/// Render a duration input whose segments take keys.
+///
+/// Each segment is separately focusable, which is what the contract's Tab and
+/// Shift+Tab rows describe: focus moves between segments, and the arrows and
+/// digits act on whichever holds it. The carry rules come from
+/// `poodle_headless::duration`, a port of the same `duration.ts` the web target
+/// uses, so a keystroke cannot mean two different things on two targets.
+pub fn duration_input_with_handlers(
+    spec: &DurationInputSpec,
+    theme: &dyn ThemeProvider,
+    handlers: DurationInputHandlers,
+) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
@@ -103,10 +132,14 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
     let segment_radius = rem_to_px(0.1875); // Contract: 0.1875rem
     let label_gap = rem_to_px(0.125); // label→field gap inside a segment
 
+    // The segments' keys act on this, so it has to be parsed before the
+    // builder closes over it.
+    let current_value = parse_duration_value(spec.value.as_deref());
+
     // ── Segment builder ──
     // Column of label + field. Typography is inherited from the preview's
     // Inter root, matching the old GPUI tier.
-    let build_segment = |unit_label: &str, value_text: &str| -> Node {
+    let build_segment = |unit_label: &str, value_text: &str, unit: Option<DurationSegment>| -> Node {
         // Label: per-size font, secondary, line-height 1, tracking 0.05em.
         let mut label = Node::text(unit_label);
         {
@@ -153,6 +186,44 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
             s.descriptor.corner_radii.top_right = segment_radius;
             s.descriptor.corner_radii.bottom_right = segment_radius;
             s.descriptor.corner_radii.bottom_left = segment_radius;
+        }
+        // Keys act on the focused segment. Disabled inputs stay inert, and a
+        // segment with no handler stays a plain visual rather than advertising
+        // a focus stop that does nothing.
+        if let (Some(unit), Some(on_change), false) =
+            (unit, handlers.on_change.clone(), spec.is_disabled)
+        {
+            seg.interaction.focusable = true;
+            let current = current_value;
+            let max_hours = spec.max_hours;
+            seg.interaction.on_edit_key = Some(Arc::new(move |key: &str, _mods| {
+                let next = match key {
+                    "up" => adjust_duration_segment(current, unit, 1, max_hours),
+                    "down" => adjust_duration_segment(current, unit, -1, max_hours),
+                    key => {
+                        let mut chars = key.chars();
+                        match (chars.next(), chars.next()) {
+                            (Some(c), None) if c.is_ascii_digit() => type_duration_digit(
+                                current,
+                                unit,
+                                c.to_digit(10).expect("checked ascii digit"),
+                                max_hours,
+                            ),
+                            // Not ours: Tab and Enter have to reach the host.
+                            _ => return,
+                        }
+                    }
+                };
+                if next == current {
+                    return;
+                }
+                on_change(
+                    next.hours,
+                    next.minutes,
+                    next.seconds,
+                    duration_total_seconds(next),
+                );
+            }));
         }
         seg.child(label).child(field)
     };
@@ -239,14 +310,18 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
 
     // Hours segment / separator / minutes.
     segments = segments
-        .child(build_segment("H", &hours_str))
+        .child(build_segment("H", &hours_str, Some(DurationSegment::Hours)))
         .child(build_separator())
-        .child(build_segment("M", &minutes_str));
+        .child(build_segment("M", &minutes_str, Some(DurationSegment::Minutes)));
 
     // Optional seconds
     if spec.show_seconds {
         segments = segments.child(build_separator());
-        segments = segments.child(build_segment("S", &seconds_str));
+        segments = segments.child(build_segment(
+            "S",
+            &seconds_str,
+            Some(DurationSegment::Seconds),
+        ));
     }
     root = root.child(segments);
 
@@ -274,6 +349,16 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
 }
 
 /// Parse a duration string "HH:MM:SS" or "HH:MM" into display strings.
+/// The same parse as `parse_duration`, as numbers the carry rules can use.
+fn parse_duration_value(value: Option<&str>) -> DurationValue {
+    let (h, m, sec) = parse_duration(value);
+    DurationValue {
+        hours: h.trim().parse().unwrap_or(0),
+        minutes: m.trim().parse().unwrap_or(0),
+        seconds: sec.trim().parse().unwrap_or(0),
+    }
+}
+
 fn parse_duration(value: Option<&str>) -> (String, String, String) {
     match value {
         Some(s) => {
@@ -284,5 +369,96 @@ fn parse_duration(value: Option<&str>) -> (String, String, String) {
             (hours.to_string(), minutes.to_string(), seconds.to_string())
         }
         None => ("00".to_string(), "00".to_string(), "00".to_string()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    type Reports = std::sync::Arc<std::sync::Mutex<Vec<(u32, u32, u32, u32)>>>;
+
+    fn armed(spec: &DurationInputSpec) -> (Node, Reports) {
+        let seen: Reports = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = duration_input_with_handlers(
+            spec,
+            &theme(),
+            DurationInputHandlers {
+                on_change: Some(Arc::new(move |h, m, s, total| {
+                    sink.lock().unwrap().push((h, m, s, total))
+                })),
+            },
+        );
+        (node, seen)
+    }
+
+    /// Segments in tree order: hours, minutes, seconds.
+    fn segments(node: &Node) -> Vec<&Node> {
+        fn walk<'a>(n: &'a Node, out: &mut Vec<&'a Node>) {
+            if n.interaction.on_edit_key.is_some() {
+                out.push(n);
+            }
+            for c in &n.children {
+                walk(c, out);
+            }
+        }
+        let mut out = Vec::new();
+        walk(node, &mut out);
+        out
+    }
+
+    #[test]
+    fn every_segment_is_its_own_focus_stop() {
+        let (node, _) = armed(&DurationInputSpec::new().with_show_seconds(true));
+        let segs = segments(&node);
+        assert_eq!(segs.len(), 3, "hours, minutes, seconds");
+        assert!(segs.iter().all(|s| s.interaction.focusable));
+
+        let (node, _) = armed(&DurationInputSpec::new().with_show_seconds(false));
+        assert_eq!(segments(&node).len(), 2, "no seconds segment to focus");
+    }
+
+    /// The arrows carry between segments, which is the whole reason the rules
+    /// are shared with the web target rather than reimplemented.
+    #[test]
+    fn arrow_up_on_minutes_carries_into_hours() {
+        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:59:00"));
+        let minutes = segments(&node)[1];
+        (minutes.interaction.on_edit_key.as_ref().unwrap())("up", poodle_node::NodeModifiers::default());
+        assert_eq!(
+            seen.lock().unwrap().last().copied(),
+            Some((1, 0, 0, 3600)),
+            "59 minutes + 1 is one hour, and the total comes with it"
+        );
+    }
+
+    #[test]
+    fn digits_shift_into_the_focused_segment() {
+        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
+        let minutes = segments(&node)[1];
+        (minutes.interaction.on_edit_key.as_ref().unwrap())("5", poodle_node::NodeModifiers::default());
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 45, 0, 2700)));
+    }
+
+    /// Tab and Enter have to reach the host, so a segment must not claim them.
+    #[test]
+    fn keys_that_are_not_ours_pass_through() {
+        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
+        let minutes = segments(&node)[1];
+        for key in ["tab", "enter", "escape", "left"] {
+            (minutes.interaction.on_edit_key.as_ref().unwrap())(key, poodle_node::NodeModifiers::default());
+        }
+        assert!(seen.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_disabled_duration_input_takes_no_keys() {
+        let (node, _) = armed(&DurationInputSpec::new().with_disabled(true));
+        assert!(segments(&node).is_empty());
     }
 }

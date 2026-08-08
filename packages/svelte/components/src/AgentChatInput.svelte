@@ -5,21 +5,21 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Meter } from "./Meter.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import {
     actionIcon,
     actionState,
     canSubmit as canSubmitGate,
     contextPercentage,
     resolveSubmitIntent,
-  } from "./agent-chat-input-model.ts";
+  } from "./agent-chat-input-model";
   import type {
     AgentChatAttachment,
     AgentChatStatus,
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     value?: string;

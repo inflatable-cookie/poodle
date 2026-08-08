@@ -6,9 +6,9 @@
   import "@poodle/styles/pagination.css";
   import { buildVisiblePages, canRequestPage } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface PaginationControllerLike {
     currentPage: number;

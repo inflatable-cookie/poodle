@@ -1,28 +1,135 @@
-import type {
-  DockEdge,
-  DockExternalDragCancelReason,
-  DockExternalDragPreparation,
-  DockExternalDragPrepareContext,
-  DockExternalDragSource,
-  PanelTabItem,
-} from "./types.ts";
+/**
+ * DockRegion external drag — the host-owned drag session, framework-free.
+ *
+ * Contract: `docs/contracts/components/dock-region.md` §5.
+ *
+ * A panel can be dragged out of the dock into something Poodle knows nothing
+ * about (another window, another app). The host writes its own payload, so the
+ * component's job is only to run the session in the right order and to
+ * guarantee that a preparation which never starts is always cancelled — a host
+ * that allocates on `prepare` must not leak when the pointer is released
+ * without a drag.
+ *
+ * Lives here rather than in a framework package because the ordering is subtle
+ * and identical everywhere: two copies would be two things to keep in step, and
+ * the second one would drift.
+ */
 
-type ExternalPreparationState = {
-  panel: PanelTabItem;
-  sourceEdge: DockEdge;
-  source: DockExternalDragSource;
-  context: DockExternalDragPrepareContext;
+export type DockEdgeLike = "left" | "right" | "top" | "bottom";
+
+export type DockPanelLike = {
+  value: string;
+  [key: string]: unknown;
+};
+
+export type DockExternalDragCancelReason =
+  | "superseded"
+  | "pointer-released"
+  | "pointer-cancelled"
+  | "not-ready"
+  | "unmounted";
+
+export type DockExternalDragPrepareContext<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  panel: Panel;
+  sourceEdge: Edge;
+  event: PointerEvent;
+  signal: AbortSignal;
+};
+
+export type DockExternalDragStartContext<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  panel: Panel;
+  sourceEdge: Edge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDragEndContext<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  panel: Panel;
+  sourceEdge: Edge;
+  event: DragEvent;
+  dropEffect: DataTransfer["dropEffect"];
+};
+
+export type DockExternalDragCancelContext<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  panel: Panel;
+  sourceEdge: Edge;
+  reason: DockExternalDragCancelReason;
+};
+
+export type DockExternalDragPreparation<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  start: (context: DockExternalDragStartContext<Panel, Edge>) => void;
+  end?: (context: DockExternalDragEndContext<Panel, Edge>) => void | Promise<void>;
+  cancel?: (context: DockExternalDragCancelContext<Panel, Edge>) => void | Promise<void>;
+};
+
+export type DockExternalDragSource<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  prepare: (
+    context: DockExternalDragPrepareContext<Panel, Edge>,
+  ) =>
+    | DockExternalDragPreparation<Panel, Edge>
+    | null
+    | Promise<DockExternalDragPreparation<Panel, Edge> | null>;
+  onPrepareError?: (
+    error: unknown,
+    context: DockExternalDragPrepareContext<Panel, Edge>,
+  ) => void;
+};
+
+export type DockExternalDropEligibilityContext<Edge extends string = DockEdgeLike> = {
+  phase: "over" | "drop";
+  targetEdge: Edge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDropContext<Edge extends string = DockEdgeLike> = {
+  targetEdge: Edge;
+  event: DragEvent;
+  dataTransfer: DataTransfer;
+};
+
+export type DockExternalDropTarget<Edge extends string = DockEdgeLike> = {
+  canDrop: (context: DockExternalDropEligibilityContext<Edge>) => boolean;
+  drop: (context: DockExternalDropContext<Edge>) => void | Promise<void>;
+};
+
+type ExternalPreparationState<Panel extends DockPanelLike, Edge extends string> = {
+  panel: Panel;
+  sourceEdge: Edge;
+  source: DockExternalDragSource<Panel, Edge>;
+  context: DockExternalDragPrepareContext<Panel, Edge>;
   controller: AbortController;
   status: "pending" | "ready" | "started";
-  preparation: DockExternalDragPreparation | null;
+  preparation: DockExternalDragPreparation<Panel, Edge> | null;
   cancelReason: DockExternalDragCancelReason | null;
   removePointerListeners: () => void;
 };
 
-type DockExternalDragAccessors = {
-  source: () => DockExternalDragSource | null;
-  panel: (panelId: string) => PanelTabItem | undefined;
-  edge: () => DockEdge;
+export type DockExternalDragAccessors<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+> = {
+  source: () => DockExternalDragSource<Panel, Edge> | null;
+  panel: (panelId: string) => Panel | undefined;
+  edge: () => Edge;
 };
 
 export type DockExternalDragController = {
@@ -33,20 +140,21 @@ export type DockExternalDragController = {
   activePanelId: () => string | null;
 };
 
-function isPromiseLike<T>(
-  value: T | Promise<T>,
-): value is Promise<T> {
+function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
   return typeof (value as Promise<T> | null)?.then === "function";
 }
 
-export function createDockExternalDragController(
-  accessors: DockExternalDragAccessors,
+export function createDockExternalDragController<
+  Panel extends DockPanelLike = DockPanelLike,
+  Edge extends string = DockEdgeLike,
+>(
+  accessors: DockExternalDragAccessors<Panel, Edge>,
 ): DockExternalDragController {
-  let state: ExternalPreparationState | null = null;
+  let state: ExternalPreparationState<Panel, Edge> | null = null;
 
   function cancelResult(
-    current: ExternalPreparationState,
-    preparation: DockExternalDragPreparation,
+    current: ExternalPreparationState<Panel, Edge>,
+    preparation: DockExternalDragPreparation<Panel, Edge>,
     reason: DockExternalDragCancelReason,
   ): void {
     void preparation.cancel?.({
@@ -72,8 +180,8 @@ export function createDockExternalDragController(
   }
 
   function settle(
-    current: ExternalPreparationState,
-    preparation: DockExternalDragPreparation | null,
+    current: ExternalPreparationState<Panel, Edge>,
+    preparation: DockExternalDragPreparation<Panel, Edge> | null,
   ): void {
     if (!preparation) {
       if (state === current) {
@@ -84,11 +192,7 @@ export function createDockExternalDragController(
     }
 
     if (state !== current || current.controller.signal.aborted) {
-      cancelResult(
-        current,
-        preparation,
-        current.cancelReason ?? "superseded",
-      );
+      cancelResult(current, preparation, current.cancelReason ?? "superseded");
       return;
     }
 
@@ -97,7 +201,7 @@ export function createDockExternalDragController(
   }
 
   function fail(
-    current: ExternalPreparationState,
+    current: ExternalPreparationState<Panel, Edge>,
     error: unknown,
   ): void {
     if (state !== current || current.controller.signal.aborted) return;
@@ -116,13 +220,13 @@ export function createDockExternalDragController(
     cancel("superseded");
 
     const controller = new AbortController();
-    const context: DockExternalDragPrepareContext = {
+    const context: DockExternalDragPrepareContext<Panel, Edge> = {
       panel,
       sourceEdge: accessors.edge(),
       event,
       signal: controller.signal,
     };
-    const current: ExternalPreparationState = {
+    const current: ExternalPreparationState<Panel, Edge> = {
       panel,
       sourceEdge: context.sourceEdge,
       source,
@@ -161,9 +265,9 @@ export function createDockExternalDragController(
     }
 
     let result:
-      | DockExternalDragPreparation
+      | DockExternalDragPreparation<Panel, Edge>
       | null
-      | Promise<DockExternalDragPreparation | null>;
+      | Promise<DockExternalDragPreparation<Panel, Edge> | null>;
     try {
       result = source.prepare(context);
     } catch (error) {
@@ -192,9 +296,7 @@ export function createDockExternalDragController(
       !event.dataTransfer
     ) {
       if (current && current.status !== "started") {
-        cancel(
-          current.panel.value === panelId ? "not-ready" : "superseded",
-        );
+        cancel(current.panel.value === panelId ? "not-ready" : "superseded");
       }
       return false;
     }

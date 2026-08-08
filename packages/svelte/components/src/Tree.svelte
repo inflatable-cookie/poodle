@@ -20,7 +20,7 @@
     ControlSize,
     SemanticControlSizeRole,
     TreeNode,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     nodes?: TreeNode[];

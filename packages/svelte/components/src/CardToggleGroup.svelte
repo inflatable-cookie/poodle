@@ -4,13 +4,13 @@
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     CardToggleItem,
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface CardSnippetProps {
     item: CardToggleItem;

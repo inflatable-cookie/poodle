@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 
-import type { PillSize } from "./types.ts";
+import type { PillSize } from "./types";
 
 export type PillTypography = "label" | "inherit";
 

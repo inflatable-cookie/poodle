@@ -140,7 +140,8 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     // not rendered at exactly that size — the header's contrast control moved a
     // fraction of the distance the pointer did. It also makes pressing the
     // track jump the value there, which a delta can never do.
-    let scrub_handler: Option<Arc<dyn Fn(f32) + Send + Sync>> = if handlers.change.is_none() {
+    let scrub_handler: Option<Arc<dyn Fn(f32, poodle_node::ScrubPhase) + Send + Sync>> =
+        if handlers.change.is_none() {
         None
     } else {
         let min = spec.min;
@@ -153,7 +154,9 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
             disabled: false,
         };
         let on_change = handlers.change.clone();
-        Some(Arc::new(move |fraction: f32| {
+        // A single-thumb slider treats press and drag identically: there is
+        // only one thing the pointer can be moving.
+        Some(Arc::new(move |fraction: f32, _phase| {
             let raw = min + (max - min) * fraction as f64;
             let (_, effects) = poodle_headless::slider::slider_transition(
                 context,

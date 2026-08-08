@@ -6,14 +6,14 @@
   import "@poodle/styles/tri-state-switch.css";
   import { singleSelectTransition } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     TriStateValue,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     value?: TriStateValue;

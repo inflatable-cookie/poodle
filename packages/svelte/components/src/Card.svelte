@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/card.css";
   import type { Snippet } from "svelte";
-  import { getUiPresentation } from "./presentation.ts";
-  import type { ControlDensity, CardVariant } from "./types.ts";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity, CardVariant } from "./types";
 
   interface Props {
     class?: string;

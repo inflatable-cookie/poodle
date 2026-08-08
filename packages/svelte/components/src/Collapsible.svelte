@@ -9,9 +9,9 @@
   import { slide } from "svelte/transition";
 
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface TriggerSnippetProps {
     isOpen: boolean;

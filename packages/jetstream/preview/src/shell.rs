@@ -389,7 +389,33 @@ pub enum ShellAction {
     TreeToggle(String),
     TreeCheck(String),
     TreeMenu(String),
+    StepperToggleCollapse,
     None,
+}
+
+/// The nearest `token_key` at or above the hit node.
+///
+/// A component's id sits on the container it treats as the control — the
+/// Stepper's summary row, a tree row — but `hit_test` returns the *deepest*
+/// node under the cursor, which is the label or glyph inside it. Reading only
+/// the hit node's own key means clicking the middle of a control does nothing
+/// and only its padding works, which is the same class of lie as a handler
+/// that is stored and never attached.
+pub fn activation_token(
+    tree: &jetstream_ui::UiTree,
+    node_id: jetstream_ui::UiNodeId,
+) -> Option<String> {
+    // Validate the id once, then walk raw indices: ancestors are alive by
+    // construction if their child is.
+    tree.get(node_id)?;
+    let mut idx = node_id.index;
+    loop {
+        let node = tree.nodes.get(idx)?;
+        if let Some(key) = &node.style.token_key {
+            return Some(key.clone());
+        }
+        idx = node.parent?;
+    }
 }
 
 /// Parse a node's token_key into a ShellAction.
@@ -445,6 +471,9 @@ pub fn parse_action(token_key: Option<&str>) -> ShellAction {
     if let Some(value) = key.strip_prefix("tree:") {
         return ShellAction::TreeSelect(value.to_string());
     }
+    if key == "poodle-stepper-summary" {
+        return ShellAction::StepperToggleCollapse;
+    }
     if let Some(probe_name) = key.strip_prefix("probe:") {
         let idx = match probe_name {
             "disabled" => 0,
@@ -456,4 +485,153 @@ pub fn parse_action(token_key: Option<&str>) -> ShellAction {
     }
 
     ShellAction::None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::app_state::AppState;
+    use jetstream_ui::GameUi;
+
+    /// A real pointer gesture on the Stepper summary, through the real layout.
+    ///
+    /// The whole point of g12.017 was that a pointing-hand cursor promising a
+    /// click is worse than no affordance at all, so this drives the path the
+    /// window driver drives: materialise the specimen, hit-test the pixel the
+    /// user would press, read the node's `token_key`, and route it. Asserting
+    /// `parse_action("poodle-stepper-summary")` alone would pass even if the
+    /// render crate stopped emitting the id.
+    /// Diagnostic: which keyed controls the pointer can actually reach.
+    ///
+    /// For every node carrying a `token_key`, press its centre and see what
+    /// the dispatcher resolves. Three outcomes: the hit *is* the keyed node
+    /// (worked before the ancestor walk), the walk recovers it (was dead in
+    /// the middle), or another keyed node shadows it (a nesting bug).
+    #[test]
+    #[ignore = "diagnostic — run with --ignored to survey click reachability"]
+    fn survey_click_reachability() {
+        std::thread::Builder::new()
+            .stack_size(32 * 1024 * 1024)
+            .spawn(reachability_body)
+            .expect("spawn")
+            .join()
+            .expect("survey panicked");
+    }
+
+    fn reachability_body() {
+        let state = AppState::new();
+        let theme = poodle_jetstream::JetstreamThemeProvider::from_theme(
+            &poodle_tokens::themes::ECLIPSE,
+        );
+        let mut ui = GameUi::with_text(1400.0, 2400.0);
+        ui.render_immediate(&build_shell(&state, &theme));
+
+        let keyed: Vec<(usize, String)> = ui
+            .tree
+            .nodes
+            .iter()
+            .enumerate()
+            .filter(|(_, n)| n.alive)
+            .filter_map(|(i, n)| n.style.token_key.clone().map(|k| (i, k)))
+            .collect();
+
+        let (mut direct, mut recovered, mut shadowed, mut unreachable) = (0, 0, 0, 0);
+        for (idx, key) in &keyed {
+            let rect = ui.tree.nodes[*idx].computed_rect;
+            if rect.width <= 0.0 || rect.height <= 0.0 {
+                unreachable += 1;
+                continue;
+            }
+            let (x, y) = (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
+            let Some(hit) = ui.tree.hit_test(x, y) else {
+                unreachable += 1;
+                continue;
+            };
+            let own = ui.tree.get(hit).and_then(|n| n.style.token_key.clone());
+            match (own.as_deref(), activation_token(&ui.tree, hit).as_deref()) {
+                (Some(o), _) if o == key => direct += 1,
+                (None, Some(w)) if w == key => {
+                    recovered += 1;
+                    println!("  recovered: {key}");
+                }
+                (_, Some(w)) => {
+                    shadowed += 1;
+                    println!("  shadowed: {key} -> {w}");
+                }
+                _ => unreachable += 1,
+            }
+        }
+        println!(
+            "keyed={} direct={direct} recovered-by-walk={recovered} shadowed={shadowed} unreachable={unreachable}",
+            keyed.len()
+        );
+    }
+
+    /// `GameUi` materialisation recurses deep enough to blow a test thread's
+    /// 2 MB stack; the preview binary gets 8 MB. Run the body somewhere with
+    /// room rather than shrinking the scene until it fits.
+    #[test]
+    fn clicking_the_stepper_summary_folds_and_unfolds_the_track() {
+        std::thread::Builder::new()
+            .stack_size(32 * 1024 * 1024)
+            .spawn(summary_click_body)
+            .expect("spawn")
+            .join()
+            .expect("the click path panicked");
+    }
+
+    fn summary_click_body() {
+        let mut state = AppState::new();
+        assert!(state.stepper_collapsed, "the specimen starts folded");
+
+        let theme = poodle_jetstream::JetstreamThemeProvider::from_theme(
+            &poodle_tokens::themes::ECLIPSE,
+        );
+        let scene = jetstream_poodle::to_js_el(
+            &crate::specimens::stepper::render(&state, &theme).0,
+        );
+
+        let mut ui = GameUi::with_text(1200.0, 2400.0);
+        ui.render_immediate(&scene);
+
+        // The summary is the first node the render crate ids; find it by that
+        // id rather than by a coordinate guess, then press its centre.
+        let summary = ui
+            .tree
+            .nodes
+            .iter()
+            .find(|n| n.style.token_key.as_deref() == Some("poodle-stepper-summary"))
+            .expect("the collapsible group renders a summary row");
+        let rect = summary.computed_rect;
+        let (x, y) = (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
+
+        let hit = ui.tree.hit_test(x, y).expect("the summary is hit-testable");
+        assert!(
+            ui.tree.get(hit).and_then(|n| n.style.token_key.clone()).is_none(),
+            "the deepest hit is an unkeyed child — the reason activation walks up"
+        );
+        let token = activation_token(&ui.tree, hit);
+        assert!(
+            matches!(parse_action(token.as_deref()), ShellAction::StepperToggleCollapse),
+            "pressing the summary must route to the collapse toggle, got {token:?}"
+        );
+
+        state.toggle_stepper_collapsed();
+        assert!(!state.stepper_collapsed);
+
+        // …and the unfolded render really grows the step rows back.
+        let expanded = jetstream_poodle::to_js_el(
+            &crate::specimens::stepper::render(&state, &theme).0,
+        );
+        let mut ui = GameUi::with_text(1200.0, 2400.0);
+        ui.render_immediate(&expanded);
+        let expanded_nodes = ui.tree.nodes.len();
+
+        let mut ui = GameUi::with_text(1200.0, 2400.0);
+        ui.render_immediate(&scene);
+        assert!(
+            expanded_nodes > ui.tree.nodes.len(),
+            "unfolding must add the step rows, not just flip a chevron"
+        );
+    }
 }

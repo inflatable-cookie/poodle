@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import type { IconSet } from "./icon-registry.ts";
+  import type { IconSet } from "./icon-registry";
 
-  import { setIconSet } from "./icon-registry.ts";
+  import { setIconSet } from "./icon-registry";
 
   // A complete icon set mapping kebab-case names to SVG node arrays.
   // Any icon set in this format works — lucide-static/icon-nodes.json,

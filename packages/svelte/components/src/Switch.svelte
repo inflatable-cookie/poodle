@@ -2,13 +2,13 @@
   import "@poodle/styles/switch.css";
   import { switchTransition } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     SwitchTone,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     id?: string | undefined;

@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/detail-section.css";
   import type { Snippet } from "svelte";
-  import { getUiPresentation } from "./presentation.ts";
-  import type { ControlDensity } from "./types.ts";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity } from "./types";
 
   interface Props {
     density?: ControlDensity | null;

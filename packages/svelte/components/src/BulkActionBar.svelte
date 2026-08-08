@@ -3,7 +3,7 @@
   import type { Component } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
     BulkAction,
@@ -11,7 +11,7 @@
     ControlSize,
     IconProp,
     SemanticControlSizeRole
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     selectionCount?: number;

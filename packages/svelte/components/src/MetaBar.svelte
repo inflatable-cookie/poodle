@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/meta-bar.css";
   import type { Snippet } from "svelte";
-  import { setPillContext } from "./pill-context.ts";
+  import { setPillContext } from "./pill-context";
 
   interface Props {
     ariaLabel?: string | null;

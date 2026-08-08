@@ -76,8 +76,11 @@ pub struct StepperSpec {
     ///
     /// Vertical only — see [`StepperSpec::shows_summary`].
     pub collapsible: bool,
-    /// Current collapse state; inert unless [`StepperSpec::shows_summary`].
-    pub is_collapsed: bool,
+    /// Controlled collapse state; inert unless [`StepperSpec::shows_summary`].
+    pub is_collapsed: Option<bool>,
+    /// Collapse state when `is_collapsed` is unset, mirroring the
+    /// `value`/`default_value` pair above.
+    pub default_collapsed: bool,
 }
 
 impl Default for StepperSpec {
@@ -95,7 +98,8 @@ impl Default for StepperSpec {
             density: ControlDensity::Default,
             orientation: Orientation::Horizontal,
             collapsible: false,
-            is_collapsed: false,
+            is_collapsed: None,
+            default_collapsed: false,
         }
     }
 }
@@ -164,7 +168,12 @@ impl StepperSpec {
     }
 
     pub fn with_collapsed(mut self, is_collapsed: bool) -> Self {
-        self.is_collapsed = is_collapsed;
+        self.is_collapsed = Some(is_collapsed);
+        self
+    }
+
+    pub fn with_default_collapsed(mut self, default_collapsed: bool) -> Self {
+        self.default_collapsed = default_collapsed;
         self
     }
 
@@ -179,7 +188,7 @@ impl StepperSpec {
 
     /// Whether the step list is omitted.
     pub fn is_collapsed_now(&self) -> bool {
-        self.shows_summary() && self.is_collapsed
+        self.shows_summary() && self.is_collapsed.unwrap_or(self.default_collapsed)
     }
 
     /// Steps that have finished — the numerator of the summary's `n/m`.

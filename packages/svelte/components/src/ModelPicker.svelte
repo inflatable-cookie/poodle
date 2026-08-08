@@ -7,11 +7,11 @@
   import { layerContains, registerDismissLayer } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { anchored } from "./anchored.ts";
+  import { anchored } from "./anchored";
   import { default as Icon } from "./Icon.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as Switch } from "./Switch.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import {
     applicableAxes,
     axisControlKind,
@@ -21,7 +21,7 @@
     modelLabel,
     resolveSelection,
     summaryText,
-  } from "./model-picker-model.ts";
+  } from "./model-picker-model";
   import type {
     ControlDensity,
     ControlSize,
@@ -30,7 +30,7 @@
     ModelOption,
     ModelSelection,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     models?: ModelOption[];

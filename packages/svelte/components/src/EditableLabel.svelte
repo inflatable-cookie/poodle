@@ -3,9 +3,9 @@
   import { editLabelTransition, type EditLabelEvent } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";
 
   interface Props {
     size?: ControlSize | null;

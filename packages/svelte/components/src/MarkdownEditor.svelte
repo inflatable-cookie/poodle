@@ -6,12 +6,12 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     value?: string | undefined;

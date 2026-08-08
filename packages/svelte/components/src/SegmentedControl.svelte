@@ -11,14 +11,14 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation.ts";
+  } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     SegmentedControlOption,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     value?: string | null | undefined;

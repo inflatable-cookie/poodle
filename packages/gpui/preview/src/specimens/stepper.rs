@@ -1,4 +1,6 @@
-use crate::app_state::AppState;
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Stepper};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
@@ -97,35 +99,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .into_any_element(),
         ))
+        // Live: clicking the summary really folds and unfolds the track. The
+        // key reads "expanded" rather than "collapsed" so the unset default
+        // starts collapsed, which is the state worth showing first.
         .child(group(
             theme,
             "Collapsed",
             div()
                 .max_w(px(480.0))
-                .child(Stepper::from_spec(
-                    StepperSpec::new(lane.clone())
-                        .with_orientation(Orientation::Vertical)
-                        .with_collapsible(true)
-                        .with_collapsed(true)
-                        .with_value("record")
-                        .with_aria_label("Lane progress"),
-                    theme,
-                ))
-                .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Collapsed, expanded",
-            div()
-                .max_w(px(480.0))
-                .child(Stepper::from_spec(
-                    StepperSpec::new(lane)
-                        .with_orientation(Orientation::Vertical)
-                        .with_collapsible(true)
-                        .with_value("record")
-                        .with_aria_label("Lane progress, expanded"),
-                    theme,
-                ))
+                .child(
+                    Stepper::from_spec(
+                        StepperSpec::new(lane)
+                            .with_orientation(Orientation::Vertical)
+                            .with_collapsible(true)
+                            .with_collapsed(!state.specimens.is_on("stepper.expanded"))
+                            .with_value("record")
+                            .with_aria_label("Lane progress"),
+                        theme,
+                    )
+                    .on_collapsed_change({
+                        let events = state.node_events.clone();
+                        Arc::new(move |_collapsed| {
+                            events
+                                .lock()
+                                .unwrap()
+                                .push(NodeSpecimenEvent::Toggle("stepper.expanded".to_string()));
+                        })
+                    }),
+                )
                 .into_any_element(),
         ))
         .child(group(

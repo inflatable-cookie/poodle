@@ -1,8 +1,8 @@
-export type { TransitionResult, PartAttrs, AttrValue } from "./machine.ts";
+export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 
-export { findNextEnabledIndex, firstEnabledIndex } from "./nav.ts";
+export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
-export { getFocusableElements, trapFocusKeydown } from "./dom/focus.ts";
+export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
 
 export {
   disclosureTransition,
@@ -10,13 +10,13 @@ export {
   type DisclosureEvent,
   type DisclosureEffect,
   type DisclosureResult,
-} from "./disclosure.ts";
+} from "./disclosure";
 
 export {
   buildVisiblePages,
   canRequestPage,
   type VisiblePage,
-} from "./pagination.ts";
+} from "./pagination";
 
 export {
   validationStatusToState,
@@ -27,7 +27,7 @@ export {
   isValidSlugFormat,
   type InputValidationStatus,
   type ValidationState,
-} from "./input.ts";
+} from "./input";
 
 export {
   hoverTransition,
@@ -36,7 +36,7 @@ export {
   type HoverEvent,
   type HoverEffect,
   type HoverResult,
-} from "./hover.ts";
+} from "./hover";
 
 export {
   menuTransition,
@@ -51,7 +51,7 @@ export {
   type MenuEvent,
   type MenuEffect,
   type MenuResult,
-} from "./menu.ts";
+} from "./menu";
 
 export {
   modalTransition,
@@ -60,14 +60,14 @@ export {
   type ModalEvent,
   type ModalEffect,
   type ModalResult,
-} from "./modal.ts";
+} from "./modal";
 export {
   layerContains,
   registerDismissLayer,
   resolveDismiss,
   type DismissLayer,
-} from "./dom/dismiss.ts";
-export { createInstanceId } from "./dom/id.ts";
+} from "./dom/dismiss";
+export { createInstanceId } from "./dom/id";
 export {
   copyOverlayViewportRect,
   equalOverlaySurfaceGeometry,
@@ -78,7 +78,7 @@ export {
   type OverlaySurfaceGeometryObserver,
   type OverlaySurfaceGeometryObserverOptions,
   type OverlayViewportRect,
-} from "./dom/overlay-geometry.ts";
+} from "./dom/overlay-geometry";
 export {
   anchorElement,
   clipsOverflow,
@@ -98,7 +98,7 @@ export {
   type AnchorViewport,
   type ClipRect,
   type VirtualAnchor,
-} from "./dom/anchor.ts";
+} from "./dom/anchor";
 
 export {
   checkboxTransition,
@@ -110,7 +110,7 @@ export {
   type CheckboxResult,
   type CheckboxPartProps,
   type CheckboxParts,
-} from "./checkbox.ts";
+} from "./checkbox";
 
 export {
   popoverTransition,
@@ -123,7 +123,7 @@ export {
   type PopoverResult,
   type PopoverPartProps,
   type PopoverParts,
-} from "./popover.ts";
+} from "./popover";
 
 export {
   switchTransition,
@@ -132,7 +132,7 @@ export {
   type SwitchEvent,
   type SwitchEffect,
   type SwitchResult,
-} from "./switch.ts";
+} from "./switch";
 
 export {
   singleSelectTransition,
@@ -141,7 +141,7 @@ export {
   type SingleSelectEvent,
   type SingleSelectEffect,
   type SingleSelectResult,
-} from "./single-select.ts";
+} from "./single-select";
 
 export {
   editLabelTransition,
@@ -152,7 +152,7 @@ export {
   type EditLabelEffect,
   type EditLabelResult,
   type ListReorderIntent,
-} from "./edit.ts";
+} from "./edit";
 
 export {
   sanitizeCodeValue,
@@ -160,14 +160,14 @@ export {
   codeSelectionRange,
   codeSlotSelection,
   codeInsertReplacement,
-} from "./code-input.ts";
+} from "./code-input";
 
 export {
   mergeTokens,
   splitTokenInput,
   tokenBackspaceRemoves,
   type TokenSplit,
-} from "./token.ts";
+} from "./token";
 
 export {
   resolveRatingStep,
@@ -179,14 +179,14 @@ export {
   ratingPointerValue,
   ratingSelectValue,
   ratingKeyboardStep,
-} from "./rating.ts";
+} from "./rating";
 
 export {
   resizeAxisPosition,
   resizeDragDelta,
   resizeKeydownStep,
   type ResizeOrientation,
-} from "./resize.ts";
+} from "./resize";
 
 export {
   canDecidePlan,
@@ -196,7 +196,7 @@ export {
   type AgentPlanStatus,
   type AgentPlanSettledStatus,
   type AgentPlanDecision,
-} from "./agent-plan.ts";
+} from "./agent-plan";
 
 export {
   submitsOnSelect,
@@ -217,7 +217,7 @@ export {
   type QuestionProgressState,
   type QuestionProgress,
   type AnsweredQuestion,
-} from "./agent-question.ts";
+} from "./agent-question";
 
 export {
   groupTranscriptItems,
@@ -245,7 +245,7 @@ export {
   type ChangedFilesTotals,
   type ChangedFileNode,
   type TranscriptWindow,
-} from "./agent-transcript.ts";
+} from "./agent-transcript";
 
 export {
   blocksFromMarked,
@@ -254,7 +254,7 @@ export {
   type MdBlock,
   type MdInline,
   type MarkedToken,
-} from "./markdown-blocks.ts";
+} from "./markdown-blocks";
 
 export {
   flattenVisibleTreeRows,
@@ -272,7 +272,7 @@ export {
   type TreeCheckState,
   type TreeKeyIntent,
   type TreeVirtualWindow,
-} from "./tree.ts";
+} from "./tree";
 
 export {
   toggleGroupTransition,
@@ -282,7 +282,7 @@ export {
   type ToggleGroupEvent,
   type ToggleGroupEffect,
   type ToggleGroupResult,
-} from "./toggle-group.ts";
+} from "./toggle-group";
 
 export {
   sliderTransition,
@@ -300,7 +300,7 @@ export {
   type RangeSliderEvent,
   type RangeSliderEffect,
   type RangeSliderResult,
-} from "./slider.ts";
+} from "./slider";
 
 export {
   resolveOverlayPosition,
@@ -309,11 +309,11 @@ export {
   type RectLike,
   type ViewportSize,
   type OverlayPosition,
-} from "./position.ts";
+} from "./position";
 
-export * from "./date.ts";
+export * from "./date";
 
-export * from "./color.ts";
+export * from "./color";
 
 export {
   durationTotalSeconds,
@@ -322,7 +322,7 @@ export {
   padDurationSegment,
   type DurationValue,
   type DurationSegment,
-} from "./duration.ts";
+} from "./duration";
 
 export {
   isSelectOptionDisabled,
@@ -332,7 +332,7 @@ export {
   selectOpenHighlightIndex,
   type SelectOptionLike,
   type SelectGroupLike,
-} from "./select.ts";
+} from "./select";
 
 export {
   resolveToastTone,
@@ -343,7 +343,7 @@ export {
   type ToastHostInput,
   type NormalizedToast,
   type ToastTimerPlan,
-} from "./toast.ts";
+} from "./toast";
 
 export {
   tabsTransition,
@@ -366,4 +366,22 @@ export {
   type TabsTooltipEvent,
   type TabsTooltipEffect,
   type TabsPartProps,
-} from "./tabs.ts";
+} from "./tabs";
+
+export {
+  createDockExternalDragController,
+  type DockEdgeLike,
+  type DockPanelLike,
+  type DockExternalDragAccessors,
+  type DockExternalDragCancelContext,
+  type DockExternalDragCancelReason,
+  type DockExternalDragController,
+  type DockExternalDragEndContext,
+  type DockExternalDragPreparation,
+  type DockExternalDragPrepareContext,
+  type DockExternalDragSource,
+  type DockExternalDragStartContext,
+  type DockExternalDropContext,
+  type DockExternalDropEligibilityContext,
+  type DockExternalDropTarget,
+} from "./dock-external-drag";

@@ -12,11 +12,11 @@
   } from "@poodle/headless";
   import { tick } from "svelte";
 
-  import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal.ts";
-  import { anchored } from "./anchored.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
+  import { anchored } from "./anchored";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
 
   interface Props {
     value?: string | null;

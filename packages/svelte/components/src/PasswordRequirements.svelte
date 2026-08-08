@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/password-requirements.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlSize, SemanticControlSizeRole, PasswordRequirementsPolicy } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole, PasswordRequirementsPolicy } from "./types";
 
   interface Props {
     password?: string;

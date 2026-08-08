@@ -51,6 +51,40 @@ from someone who assumed it worked.
   behind to rot back to dead.
 - The contracts say what is true per target rather than repeating a posture.
 
+## Found Later: The Preview Shell Did Not Bubble
+
+Retiring the Jetstream components tier left the preview with no consumer of
+`Node.interaction.on_activate` at all. Jetstream's only remaining route is by
+node id — `poodle_node::Node.id` → `JsEl.id` → `style.token_key` →
+`UiTree::hit_test` → `shell::parse_action`.
+
+`handle_activation` read the **hit** node's own `token_key` and nothing else.
+But `hit_test` returns the deepest node under the cursor, and a component puts
+its id on the container it treats as the control, not on the glyph inside it.
+So a keyed control was inert wherever it had a child and clickable only on its
+padding.
+
+That reads as flakiness rather than breakage, which is why it survived: whether
+a click worked depended on whether a text node happened to span the point you
+pressed. A sidebar row with a long label was dead on its own label and alive in
+the whitespace beside it; a short label left the centre on bare padding and
+worked fine.
+
+`shell::activation_token` walks to the nearest keyed ancestor. Surveying the
+default shell — `cargo test --lib survey_click_reachability -- --ignored` in
+`packages/jetstream/preview` — found **26 controls the walk recovers**: the
+three top-level nav tabs, the theme-select trigger, and every sidebar row whose
+label reaches the row centre. The two reported as shadowed (`sidebar`,
+`content`) are scroll-state containers rather than click targets, so resolving
+to a child is correct for them.
+
+GPUI is unaffected: its node backend does read `on_activate`.
+
+Two notes for anyone writing a hit-test test: `GameUi` materialisation
+overflows a 2 MB test-thread stack, so spawn the body with a bigger
+`stack_size`; and resolved geometry is `node.computed_rect` — `node.layout` is
+a `taffy::Style` and carries no position.
+
 ## Not Done, And Why
 
 ### A headless click driver for GPUI

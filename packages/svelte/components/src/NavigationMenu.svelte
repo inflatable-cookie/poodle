@@ -7,10 +7,10 @@
   import { registerDismissLayer } from "@poodle/headless";
   import type { Snippet } from "svelte";
 
-  import { findNextEnabledIndex, firstEnabledIndex } from "./internal.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
 
   interface Props {
     value?: string | null;

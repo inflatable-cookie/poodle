@@ -4,13 +4,14 @@
 //! current one is exactly what position-derived state cannot express, and it is
 //! why `status` is a property of the step.
 
+use crate::app_state::AppState;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_stepper;
 
 use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep, Orientation};
 
-pub fn render(theme: &JetstreamThemeProvider) -> El {
+pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // The Soundcheck arrangement this design came from.
@@ -76,25 +77,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             el = el.w(320.0);
             el
         }))
+        // Live: the shell routes a click on the summary's node id back into
+        // `AppState::toggle_stepper_collapsed`, so this really folds.
         .child(group("Collapsed", secondary, {
-            js_stepper(
-                &StepperSpec::new(lane.clone())
-                    .with_orientation(Orientation::Vertical)
-                    .with_collapsible(true)
-                    .with_collapsed(true)
-                    .with_value("record")
-                    .with_aria_label("Lane progress"),
-                theme,
-            )
-            .w(480.0)
-        }))
-        .child(group("Collapsed, expanded", secondary, {
             js_stepper(
                 &StepperSpec::new(lane)
                     .with_orientation(Orientation::Vertical)
                     .with_collapsible(true)
+                    .with_collapsed(state.stepper_collapsed)
                     .with_value("record")
-                    .with_aria_label("Lane progress, expanded"),
+                    .with_aria_label("Lane progress"),
                 theme,
             )
             .w(480.0)

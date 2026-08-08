@@ -5,7 +5,7 @@ import type {
   OverflowMode,
   ScrollDirection,
   SpaceScale,
-} from "./types.ts";
+} from "./types";
 
 export function joinStyles(parts: Array<string | null | undefined | false>): string {
   return parts.filter(Boolean).join("; ");

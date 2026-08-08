@@ -9,12 +9,12 @@
   import { default as Select } from "./Select.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   import { default as PickerShell } from "./PickerShell.svelte";
   import { default as SelectionSummary } from "./SelectionSummary.svelte";
@@ -27,7 +27,7 @@
     PickerItem,
     PickerVariant,
     SelectionMode,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     title?: string;

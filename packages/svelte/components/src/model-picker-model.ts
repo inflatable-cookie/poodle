@@ -12,7 +12,7 @@ import type {
   ModelCapabilityAxis,
   ModelOption,
   ModelSelection,
-} from "./types.ts";
+} from "./types";
 
 /** Merge a binding over the shared axis definition. Only the keys the binding
  * sets are overridden, so a provider can swap the level set while inheriting

@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/resize-handle.css";
   import { resizeAxisPosition, resizeDragDelta, resizeKeydownStep } from "@poodle/headless";
-  import type { SplitOrientation } from "./types.ts";
+  import type { SplitOrientation } from "./types";
 
   let {
     orientation = "horizontal",

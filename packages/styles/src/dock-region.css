@@ -83,10 +83,11 @@
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  /* Compact hosts (panel grids) need a working strip, not a banner: the
-     2.75rem default leaves a dead band around tab-height content. */
+  /* Compact hosts (panel grids) want a working strip, not a banner: hug the
+     tab height instead of enforcing the roomy default. */
   .poodle-dock-region[data-density="compact"] .poodle-dock-region__strip[data-orientation="horizontal"] {
-    min-height: 2rem;
+    min-height: 0;
+    padding-right: 0;
   }
 
   .poodle-dock-region__tabs {

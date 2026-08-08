@@ -8,9 +8,9 @@
     type DurationSegment,
   } from "@poodle/headless";
 
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface DurationInputChange {
     hours: number;

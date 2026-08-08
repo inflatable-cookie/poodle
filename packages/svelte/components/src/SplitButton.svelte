@@ -3,13 +3,13 @@
   import { registerDismissLayer, layerContains } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
-  import { menuNavigableItems } from "./internal.ts";
+  import { menuNavigableItems } from "./internal";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation.ts";
-  import { anchored } from "./anchored.ts";
+  } from "./presentation";
+  import { anchored } from "./anchored";
   import { default as Spinner } from "./Spinner.svelte";
 
   import type {
@@ -19,7 +19,7 @@
     ControlSize,
     MenuItem,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     variant?: ButtonVariant;

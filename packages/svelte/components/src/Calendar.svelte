@@ -21,10 +21,10 @@
     normalizeDateRange,
     parseIsoDate,
     todayIsoDate,
-  } from "./date.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types.ts";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
   interface Props {
     mode?: "single" | "range";

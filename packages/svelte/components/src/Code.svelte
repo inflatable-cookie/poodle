@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@poodle/styles/code.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   let {
     source = "",

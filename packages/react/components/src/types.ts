@@ -6,6 +6,20 @@
 
 import type { ReactNode } from "react";
 
+// Generic in the panel and edge types; this target binds them to its own
+// `PanelTabItem` / `DockEdge` further down.
+import type {
+  DockExternalDragCancelContext as HeadlessDockExternalDragCancelContext,
+  DockExternalDragEndContext as HeadlessDockExternalDragEndContext,
+  DockExternalDragPreparation as HeadlessDockExternalDragPreparation,
+  DockExternalDragPrepareContext as HeadlessDockExternalDragPrepareContext,
+  DockExternalDragSource as HeadlessDockExternalDragSource,
+  DockExternalDragStartContext as HeadlessDockExternalDragStartContext,
+  DockExternalDropContext as HeadlessDockExternalDropContext,
+  DockExternalDropEligibilityContext as HeadlessDockExternalDropEligibilityContext,
+  DockExternalDropTarget as HeadlessDockExternalDropTarget,
+} from "@poodle/headless";
+
 export type {
   OverlaySurfaceGeometry,
   OverlaySurfaceGeometryChange,
@@ -666,6 +680,12 @@ export type DockSizing = "static" | "flexible";
 export type PanelDragData = {
   panelId: string;
   sourceEdge: DockEdge;
+  /**
+   * Identifies the exact drag-source zone. Edges are too coarse when a host
+   * maps several regions onto one edge (two "top" docks): without this, a
+   * cross-region drop looks same-edge and is ignored.
+   */
+  sourceZone?: string;
 };
 
 export type PanelTabItem = {
@@ -674,6 +694,36 @@ export type PanelTabItem = {
   icon?: IconProp | null;
   closable?: boolean;
 };
+
+/**
+ * DockRegion external-drag types.
+ *
+ * Re-exported from `@poodle/headless` rather than redeclared: the session
+ * ordering these describe is run by `createDockExternalDragController` there,
+ * and a second declaration here would be a second thing to keep in step.
+ * `PanelTabItem` and `DockEdge` are the concrete arguments in this target.
+ */
+export type {
+  DockExternalDragCancelReason,
+  DockExternalDragController,
+} from "@poodle/headless";
+
+export type DockExternalDragPrepareContext =
+  HeadlessDockExternalDragPrepareContext<PanelTabItem, DockEdge>;
+export type DockExternalDragStartContext =
+  HeadlessDockExternalDragStartContext<PanelTabItem, DockEdge>;
+export type DockExternalDragEndContext =
+  HeadlessDockExternalDragEndContext<PanelTabItem, DockEdge>;
+export type DockExternalDragCancelContext =
+  HeadlessDockExternalDragCancelContext<PanelTabItem, DockEdge>;
+export type DockExternalDragPreparation =
+  HeadlessDockExternalDragPreparation<PanelTabItem, DockEdge>;
+export type DockExternalDragSource =
+  HeadlessDockExternalDragSource<PanelTabItem, DockEdge>;
+export type DockExternalDropEligibilityContext =
+  HeadlessDockExternalDropEligibilityContext<DockEdge>;
+export type DockExternalDropContext = HeadlessDockExternalDropContext<DockEdge>;
+export type DockExternalDropTarget = HeadlessDockExternalDropTarget<DockEdge>;
 
 // ---------------------------------------------------------------------------
 // ModelPicker

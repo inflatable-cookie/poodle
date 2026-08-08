@@ -4,9 +4,9 @@
 
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Menu } from "./Menu.svelte";
-  import { getUiPresentation } from "./presentation.ts";
+  import { getUiPresentation } from "./presentation";
 
-  import type { ControlDensity, FormActionAlign, FormActionDangerItem, MenuItem } from "./types.ts";
+  import type { ControlDensity, FormActionAlign, FormActionDangerItem, MenuItem } from "./types";
 
   let {
     align = "end",

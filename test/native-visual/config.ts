@@ -90,6 +90,11 @@ export const SKIPPED: Record<string, string> = {
   // is genuinely still moving. The others above are reasoned; this one was
   // caught by the two-agreeing-captures rule.
   progress: "indeterminate bar — no two consecutive captures agree",
+  // Also measured: its loading state pulses a dot grid. Three captures in a
+  // row gave 132px and 32px of drift, and the first and third agreed by
+  // coincidence — which is precisely how the two-agreeing-captures rule gets
+  // fooled into blessing a moving frame.
+  "picker-shell": "pulsing loading dots — consecutive captures disagree",
 };
 
 /** Every component slug the GPUI preview can route to. */

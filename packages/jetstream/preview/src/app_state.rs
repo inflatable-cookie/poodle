@@ -462,6 +462,9 @@ pub struct AppState {
     pub tree: TreePreviewState,
     /// Interactive state for the Tabs specimen (reorderable instance).
     pub tabs: TabsPreviewState,
+    /// Collapse state for the Stepper specimen's collapsible group. Starts
+    /// folded — that is the state the variant exists to show.
+    pub stepper_collapsed: bool,
 }
 
 impl AppState {
@@ -486,6 +489,7 @@ impl AppState {
             reset_content_scroll: true,
             tree: TreePreviewState::new(),
             tabs: TabsPreviewState::new(),
+            stepper_collapsed: true,
         }
     }
 
@@ -762,6 +766,12 @@ impl AppState {
     /// Toggle busy state.
     pub fn toggle_busy(&mut self) {
         self.busy = !self.busy;
+        self.dirty = true;
+    }
+
+    /// Fold or unfold the Stepper specimen's collapsible group.
+    pub fn toggle_stepper_collapsed(&mut self) {
+        self.stepper_collapsed = !self.stepper_collapsed;
         self.dirty = true;
     }
 

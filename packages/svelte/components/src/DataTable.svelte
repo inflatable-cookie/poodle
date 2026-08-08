@@ -10,8 +10,8 @@
   import { default as Popover } from "./Popover.svelte";
   import { default as Select } from "./Select.svelte";
   import { default as TextInput } from "./TextInput.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
   import type {
     TableCellValue,
@@ -21,7 +21,7 @@
     TableRow,
     TableRowAction,
     TableSortDirection,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     ariaLabel?: string;

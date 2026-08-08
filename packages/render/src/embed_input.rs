@@ -4,9 +4,12 @@
 //! Ported from: `packages/jetstream/components/src/embed_input.rs`.
 //!
 //! Composes the real `text_input` primitive (multiline, rows=3) and the real
-//! `pill` provider chip — no hand-styled fakes. Debounced parse /
-//! onValueChange / onParse are host concerns (the spec pre-resolves parse
-//! state here).
+//! `pill` provider chip — no hand-styled fakes.
+//!
+//! `onValueChange` is the component's: it owns the nested field, so it is the
+//! only layer that can see an edit. Debouncing and `onParse` stay the host's —
+//! the host does the parsing, and the spec arrives with the result already
+//! resolved.
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
@@ -14,9 +17,24 @@ use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
 
 use crate::pill::pill;
 use crate::presentation::rem_to_px;
-use crate::text_input::text_input;
+use crate::text_input::{text_input, text_input_with_change};
+
+/// Host callbacks. `on_value_change` reports the URL as it is typed.
+#[derive(Default)]
+pub struct EmbedInputHandlers {
+    pub on_value_change: Option<poodle_node::TextChangeHandler>,
+}
 
 pub fn embed_input(spec: &EmbedInputSpec, theme: &dyn ThemeProvider) -> Node {
+    embed_input_with_handlers(spec, theme, EmbedInputHandlers::default())
+}
+
+/// Render an embed input whose field reports what is typed into it.
+pub fn embed_input_with_handlers(
+    spec: &EmbedInputSpec,
+    theme: &dyn ThemeProvider,
+    handlers: EmbedInputHandlers,
+) -> Node {
     // Status colors split per contract: error = text-danger, success = text-success.
     let danger_color = theme.resolve_color("color.status.danger");
     let success_color = theme.resolve_color("color.status.success");
@@ -37,7 +55,7 @@ pub fn embed_input(spec: &EmbedInputSpec, theme: &dyn ThemeProvider) -> Node {
         .placeholder
         .clone()
         .unwrap_or_else(|| String::from("Paste a URL or embed code..."));
-    let field = text_input(
+    let field = text_input_with_change(
         &TextInputSpec::new()
             .with_id("embed-input")
             .with_input_type("multiline")
@@ -53,7 +71,7 @@ pub fn embed_input(spec: &EmbedInputSpec, theme: &dyn ThemeProvider) -> Node {
             ))
             .with_density(spec.density),
         theme,
-        None,
+        handlers.on_value_change,
     );
 
     let mut wrapper = Node::container();

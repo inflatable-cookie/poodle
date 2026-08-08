@@ -8,9 +8,9 @@
   } from "@poodle/headless";
 
   import AgentMessage from "./AgentMessage.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
     /** Raw markdown of the plan that was decided. */

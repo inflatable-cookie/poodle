@@ -453,7 +453,7 @@ pub fn render_specimen(
         "state-tile" => Some(el(state_tile::render(theme))),
         "status-indicator" => Some(el(status_indicator::render(theme))),
         "surface" => Some(el(surface::render(theme))),
-        "stepper" => Some(el(stepper::render(theme))),
+        "stepper" => Some(el(stepper::render(state, theme))),
         "agent-transcript" => Some(el(agent_transcript::render(theme))),
         "agent-question" => Some(el(agent_question::render(theme))),
         "switch" => Some(el(switch::render(theme))),

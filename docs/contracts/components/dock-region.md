@@ -96,6 +96,7 @@ Updated: 2026-07-29
 | `canAcceptPanel` | `(panelId: string, sourceEdge: DockEdge) => boolean \| null` | `null` | no | cross-region drop validation |
 | `externalDragSource` | `DockExternalDragSource \| null` | `null` | no | prepares and writes a host-owned external payload without exposing host protocol types |
 | `externalDropTarget` | `DockExternalDropTarget \| null` | `null` | no | synchronously decides external eligibility and receives an accepted external drop |
+| `dragZoneId` | `string \| null` | `null` | no | exact drop-zone identity for the same-zone drop guard; defaults to `edge`. Hosts mapping several regions onto one edge must pass a per-region id, or cross-region drops read as same-zone and are ignored |
 
 ### PanelTabItem
 
@@ -181,14 +182,28 @@ their ordering:
 | `canDrop` | external `dragover` and again at `drop` | synchronous eligibility; only `DataTransfer.types` is portable during dragover |
 | `drop` | `drop`, only when the drop-time eligibility check passes | read and accept the public host payload |
 
+That ordering lives in `createDockExternalDragController` in `@poodle/headless`,
+not in either web target. It is subtle enough — a preparation that resolves
+after the drag already started must cancel rather than write, and a pointer
+released without a drag must still cancel — that two implementations would be
+two things to keep in step, and the second would drift.
+
 ### PanelDragData
 
 ```ts
 type PanelDragData = {
   panelId: string;
   sourceEdge: DockEdge;
+  /** The source region's `dragZoneId`, falling back to its edge. */
+  sourceZone?: string;
 };
 ```
+
+`sourceZone` is optional so a payload written by an older build still parses;
+a receiver missing it falls back to `sourceEdge`, which is the pre-`dragZoneId`
+behaviour. Every region writes it on every drag it starts — the strip and the
+stacked list both — because the payload can be read by a region that is not the
+one it came from.
 
 ### External Drag Types
 
@@ -334,6 +349,9 @@ writes `DataTransfer`; it runs synchronously inside the browser's native
 - If preparation is absent or pending at `dragstart`, no external payload is
   written. Tabs' own same-region reorder payload and visual state remain active
 - Poodle-local drop validation uses `canAcceptPanel` (checked on `drop`)
+- A drop back onto the source zone is ignored in flexible sizing (same-strip
+  reorder owns it). Zone identity is `dragZoneId` when set, else the edge;
+  the payload carries `sourceZone` so two regions on one edge stay distinct
 - External drop validation uses `externalDropTarget.canDrop` during `dragover`
   and again during `drop`; its result drives the same drop-zone affordance
 - Visual feedback: dashed accent-colored border overlay during drag-over
@@ -477,8 +495,8 @@ When flexible and expanded, each edge gets a single border on its inner side:
 | `display` | `flex` |
 | `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-sm)` |
-| `padding-right` | `0.5rem` |
-| `min-height` | `2.75rem`; `2rem` when the root is `data-density="compact"` |
+| `padding-right` | `0.5rem`; `0` when the root is `data-density="compact"` |
+| `min-height` | `2.75rem`; `0` (hugs the tabs) when the root is `data-density="compact"` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 
 #### `.dock-region__tabs`
@@ -688,7 +706,8 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Collapsed strip sizing differs by edge | side docks use vertical tabs, top/bottom keep horizontal | allowed | consistent behavior per edge type |
-| `externalDragSource` and `externalDropTarget` are Svelte/web-only | they expose native HTML `PointerEvent`, `DragEvent`, and `DataTransfer`; native hosts already own equivalent renderer event-loop integration | accepted | do not copy browser callbacks into `DockRegionSpec` |
+| `externalDragSource` and `externalDropTarget` are web-only — Svelte and React both have them, GPUI and Jetstream do not | they expose native HTML `PointerEvent`, `DragEvent`, and `DataTransfer`; native hosts already own equivalent renderer event-loop integration | accepted | do not copy browser callbacks into `DockRegionSpec` |
+| Panel drag (reorder and cross-region drop) is web-only; the natives draw the drop zone but run no gesture | drag-with-payload is not in the native event vocabulary — see the module docs on `packages/render/src/dock_region.rs` | accepted | `drag_zone_id` is on `DockRegionSpec` for surface parity and is read by nothing until that gesture exists |
 | No context menu event | not implemented in current iteration | deferred | add in future workspace milestone |
 
 ## 13. Specimen Definitions

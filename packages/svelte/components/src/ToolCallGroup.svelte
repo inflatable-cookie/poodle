@@ -9,14 +9,14 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation.ts";
+  } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
     TranscriptToolCall,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     id: string;

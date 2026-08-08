@@ -8,6 +8,7 @@ import {
   useState,
   type DragEvent as ReactDragEvent,
   type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 
@@ -78,6 +79,11 @@ export interface TabsProps {
   historyKey?: string | null;
   onValueChange?: ((value: string) => void) | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
+  // Forwarded so a host (DockRegion) can run its own drag session on top of
+  // the reorder plumbing; the tab still reorders locally either way.
+  onDragPrepare?: ((value: string, event: ReactPointerEvent) => void) | undefined;
+  onDragStart?: ((value: string, event: ReactDragEvent) => void) | undefined;
+  onDragEnd?: ((value: string, event: ReactDragEvent) => void) | undefined;
   onClose?: ((value: string) => void) | undefined;
   children?: (value: string) => ReactNode;
   actions?: ReactNode;
@@ -119,6 +125,9 @@ export function Tabs({
   historyKey = null,
   onValueChange = undefined,
   onReorder = undefined,
+  onDragPrepare = undefined,
+  onDragStart = undefined,
+  onDragEnd = undefined,
   onClose = undefined,
   children,
   actions,
@@ -426,10 +435,25 @@ export function Tabs({
 
   // ── Reorder (drag-and-drop DOM plumbing; final reorder routes through the machine) ──
 
+  // The dragged tab's value, kept for `onDragEnd`: dragend fires after the
+  // index state has been reset, so reading it back from `dragSourceIndex`
+  // would report nothing.
+  const dragSourceValue = useRef<string | null>(null);
+
+  function handleDragPrepare(event: ReactPointerEvent, item: TabItem): void {
+    if (!reorderable || event.button !== 0 || item.disabled === true) return;
+    if (currentValue !== item.value) {
+      send({ type: "SELECT", value: item.value });
+    }
+    onDragPrepare?.(item.value, event);
+  }
+
   function handleDragStart(event: ReactDragEvent, index: number): void {
     const result = startDrag(event.nativeEvent, index, reorderable);
     if (result.dragSourceIndex !== null) {
       setDragSourceIndex(result.dragSourceIndex);
+      dragSourceValue.current = renderedItems[index].value;
+      onDragStart?.(dragSourceValue.current, event);
     }
   }
 
@@ -449,7 +473,11 @@ export function Tabs({
     setDropTargetIndex(null);
   }
 
-  function handleDragEnd(): void {
+  function handleDragEnd(event: ReactDragEvent): void {
+    if (dragSourceValue.current) {
+      onDragEnd?.(dragSourceValue.current, event);
+      dragSourceValue.current = null;
+    }
     setDragSourceIndex(null);
     setDropTargetIndex(null);
   }
@@ -590,11 +618,7 @@ export function Tabs({
                     if (isVertical) scheduleTooltip(index);
                   }}
                   onBlur={() => hasTooltips && dismissTooltip()}
-                  onPointerDown={(event) => {
-                    if (reorderable && event.button === 0 && item.disabled !== true && currentValue !== item.value) {
-                      send({ type: "SELECT", value: item.value });
-                    }
-                  }}
+                  onPointerDown={(event) => handleDragPrepare(event, item)}
                   onClick={() => send({ type: "SELECT", value: item.value })}
                   onKeyDown={(event) => {
                     if (event.key === "Escape" && hasTooltips) dismissTooltip();

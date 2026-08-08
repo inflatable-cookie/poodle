@@ -79,6 +79,21 @@ pub enum NodeKind {
     Input { value: String, placeholder: String },
 }
 
+/// Which part of a scrub gesture an event belongs to.
+///
+/// A single fraction cannot say *which* of a two-thumb control the pointer is
+/// moving. The press is where that gets decided — after it, the gesture stays
+/// with whatever the press chose, or a thumb dragged past its partner would
+/// hand the gesture over mid-drag.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum ScrubPhase {
+    /// The pointer went down (or a click landed) at this fraction.
+    #[default]
+    Press,
+    /// The pointer moved while the gesture is held.
+    Drag,
+}
+
 /// How far a pointer selection reaches out from where it landed.
 ///
 /// A backend knows the click count; only the component knows what a "word" is,
@@ -508,7 +523,10 @@ pub struct Interaction {
     /// Prefer this over [`Self::on_drag`] for value controls: a delta needs the
     /// component to guess its own rendered length, which it cannot know, and
     /// that guess is wrong whenever the control is not its natural size.
-    pub on_scrub: Option<Arc<dyn Fn(f32) + Send + Sync>>,
+    ///
+    /// The [`ScrubPhase`] separates the press from the moves that follow, which
+    /// is what lets a two-thumb control decide once which thumb it is moving.
+    pub on_scrub: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>>,
     /// Activation that needs the modifier state — multi-select lists, where
     /// Shift extends the range and the platform accel toggles one item. When
     /// set the backend calls this INSTEAD of `on_activate`, so a node wires

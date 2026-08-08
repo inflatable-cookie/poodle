@@ -3,9 +3,9 @@
 
   import { default as AlertDialog } from "./AlertDialog.svelte";
   import { default as Button } from "./Button.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
     title: string;

@@ -4,9 +4,9 @@
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
-  import type { SidebarNavGroup, SidebarNavItem } from "./types.ts";
+  import type { SidebarNavGroup, SidebarNavItem } from "./types";
 
   interface Props {
     groups?: SidebarNavGroup[];

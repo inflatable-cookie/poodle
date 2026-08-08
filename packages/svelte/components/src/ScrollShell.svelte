@@ -1,9 +1,9 @@
 <script lang="ts">
   import "@poodle/styles/scroll-shell.css";
   import type { Snippet } from "svelte";
-  import { joinStyles, overflowForDirection, scaleToSpace } from "./internal.ts";
+  import { joinStyles, overflowForDirection, scaleToSpace } from "./internal";
 
-  import type { ScrollDirection, SpaceScale } from "./types.ts";
+  import type { ScrollDirection, SpaceScale } from "./types";
 
   interface Props {
     direction?: ScrollDirection;

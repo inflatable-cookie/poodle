@@ -2,9 +2,9 @@
   import "@poodle/styles/surface.css";
   import type { Snippet } from "svelte";
 
-  import { joinStyles } from "./internal.ts";
+  import { joinStyles } from "./internal";
 
-  import type { SpaceScale, SurfaceBorder, SurfaceTone } from "./types.ts";
+  import type { SpaceScale, SurfaceBorder, SurfaceTone } from "./types";
 
   let {
     tone = "panel",

@@ -11,8 +11,8 @@
   } from "@poodle/headless";
   import { onDestroy, type Snippet } from "svelte";
 
-  import { anchored } from "./anchored.ts";
-  import type { OverlayPlacement } from "./types.ts";
+  import { anchored } from "./anchored";
+  import type { OverlayPlacement } from "./types";
 
   interface Props {
     content: string;

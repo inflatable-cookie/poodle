@@ -10,8 +10,8 @@
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Field } from "./Field.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   interface Props {
     id?: string | null;

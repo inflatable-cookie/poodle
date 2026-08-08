@@ -11,9 +11,9 @@
   import {
     getUiPresentation,
     resolveSemanticControlSize,
-  } from "./presentation.ts";
+  } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import { anchored } from "./anchored.ts";
+  import { anchored } from "./anchored";
   import type {
     ButtonTone,
     ButtonVariant,
@@ -22,7 +22,7 @@
     IconProp,
     OverlayPlacement,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     variant?: ButtonVariant;

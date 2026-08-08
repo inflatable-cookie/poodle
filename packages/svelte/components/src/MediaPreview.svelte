@@ -4,9 +4,9 @@
   import { default as Card } from "./Card.svelte";
   import { default as MediaThumbnail } from "./MediaThumbnail.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { AspectRatio, CardVariant, ControlDensity, ControlSize, MediaKind, MediaState, SemanticControlSizeRole } from "./types.ts";
+  import type { AspectRatio, CardVariant, ControlDensity, ControlSize, MediaKind, MediaState, SemanticControlSizeRole } from "./types";
 
   interface Props {
     title: string;

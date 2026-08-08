@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@poodle/styles/meter.css";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
 
   let {
     value = 0,

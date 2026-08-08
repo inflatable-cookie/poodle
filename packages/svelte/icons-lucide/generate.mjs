@@ -85,10 +85,10 @@ for (const name of iconNames) {
   const ident = toIdentifier(name);
   const nodesJson = JSON.stringify(nodes);
 
-  const content = `import type { IconNodes } from "../types.ts";\n\nexport const ${ident}: IconNodes = ${nodesJson};\n`;
+  const content = `import type { IconNodes } from "../types";\n\nexport const ${ident}: IconNodes = ${nodesJson};\n`;
 
   writeFileSync(resolve(iconsDir, `${name}.ts`), content);
-  indexExports.push(`export { ${ident} } from "./icons/${name}.ts";`);
+  indexExports.push(`export { ${ident} } from "./icons/${name}";`);
 }
 
 // Write barrel index
@@ -97,7 +97,7 @@ const indexContent = `// Auto-generated — do not edit. Run \`node generate.mjs
 // ${iconNames.length} Lucide icons available as tree-shakeable exports.
 // Each export is an IconNodes array: [tag, attrs][].
 
-export type { IconNodes, IconNodeElement } from "./types.ts";
+export type { IconNodes, IconNodeElement } from "./types";
 
 ${indexExports.join("\n")}
 `;

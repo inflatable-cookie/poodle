@@ -1,15 +1,15 @@
 <script lang="ts">
   import "@poodle/styles/toolbar.css";
   import type { Snippet } from "svelte";
-  import { getFocusableElements } from "./internal.ts";
-  import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getFocusableElements } from "./internal";
+  import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     Orientation,
     SemanticControlSizeRole,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     orientation?: Orientation;

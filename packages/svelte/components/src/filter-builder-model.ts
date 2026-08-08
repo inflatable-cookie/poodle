@@ -12,7 +12,7 @@ import type {
   FilterOperandKind,
   FilterOperatorDefinition,
   FilterOption,
-} from "./types.ts";
+} from "./types";
 
 /** Standard operator set for each field kind. A field definition may restrict or
  * relabel these via `field.operators`. Operator keys are stable identifiers; the

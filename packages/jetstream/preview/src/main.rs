@@ -867,8 +867,9 @@ impl PreviewState {
     }
 
     fn handle_activation(&mut self, node_id: UiNodeId) {
-        let token_key = self.game_ui.tree.get(node_id)
-            .and_then(|n| n.style.token_key.clone());
+        // Nearest keyed ancestor, not just the hit node: ids live on the
+        // control's container and the hit lands on the glyph inside it.
+        let token_key = shell::activation_token(&self.game_ui.tree, node_id);
 
         // Any left-click outside the tree context menu dismisses it.
         let is_menu_click = token_key
@@ -985,6 +986,9 @@ impl PreviewState {
             }
             shell::ShellAction::TreeCheck(value) => {
                 self.app.tree_check(&value);
+            }
+            shell::ShellAction::StepperToggleCollapse => {
+                self.app.toggle_stepper_collapsed();
             }
             shell::ShellAction::TreeMenu(action) => match action.as_str() {
                 "rename" => self.app.tree_menu_rename(),

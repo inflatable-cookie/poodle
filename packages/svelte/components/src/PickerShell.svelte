@@ -4,7 +4,7 @@
 
   import { default as Spinner } from "./Spinner.svelte";
 
-  import type { BrowseState, PickerVariant } from "./types.ts";
+  import type { BrowseState, PickerVariant } from "./types";
 
   interface Props {
     title: string;

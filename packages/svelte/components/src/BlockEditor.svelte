@@ -6,7 +6,7 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as Select } from "./Select.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     BlockEditorMode,
     BlockTypeGroup,
@@ -17,9 +17,9 @@
     SelectItems,
     SelectOption,
     SelectOptionGroup,
-  } from "./types.ts";
+  } from "./types";
 
-  import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types.ts";
+  import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types";
 
   interface TypePickerSnippetProps {
     block: EditorBlock;

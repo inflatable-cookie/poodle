@@ -13,8 +13,8 @@
   } from "@poodle/headless";
   import { tick, type Snippet } from "svelte";
 
-  import { anchored } from "./anchored.ts";
-  import type { OverlayPlacement, PopoverInitialFocus } from "./types.ts";
+  import { anchored } from "./anchored";
+  import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
   interface Props {
     open?: boolean | null;

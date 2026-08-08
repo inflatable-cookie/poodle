@@ -59,6 +59,22 @@ Updated: 2026-07-10
 - the lower <= upper invariant is always preserved; if a thumb is dragged past
   the other, it clamps to the other thumb's position
 
+### Pointer
+
+- pressing anywhere on the track moves the **nearer** thumb to that position
+- a drag keeps the thumb the press chose, even once it passes its partner — the
+  clamp above applies, but the gesture never transfers to the other thumb
+
+On the web both fall out of the two overlapping native range inputs. The Rust
+targets have no native input, so a single grab overlay spanning the track
+reports the pointer's position as a fraction (`Interaction::on_scrub`) and the
+component picks the thumb on the press.
+
+The fraction matters: an earlier implementation converted pixel *deltas* using a
+fixed 10rem track width, so any range slider not rendered at exactly 160px
+tracked the pointer at the wrong rate — and a delta cannot express "jump to
+where I pressed" at all, so the track was inert.
+
 ### CSS Custom Properties
 
 | Var | Description |

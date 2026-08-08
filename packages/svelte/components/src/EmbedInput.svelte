@@ -3,9 +3,9 @@
   import { default as TextInput } from "./TextInput.svelte";
   import { default as Pill } from "./Pill.svelte";
 
-  import { resolveEmbedParseState } from "./embed-input.ts";
-  import type { EmbedParseState } from "./embed-input.ts";
-  import type { ControlDensity, ControlSize, ParsedEmbed, SemanticControlSizeRole } from "./types.ts";
+  import { resolveEmbedParseState } from "./embed-input";
+  import type { EmbedParseState } from "./embed-input";
+  import type { ControlDensity, ControlSize, ParsedEmbed, SemanticControlSizeRole } from "./types";
 
   let {
     id = "embed-input",

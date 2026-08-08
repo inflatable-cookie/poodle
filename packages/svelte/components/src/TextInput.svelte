@@ -6,7 +6,7 @@
 
   import { default as Icon } from "./Icon.svelte";
   import { default as Spinner } from "./Spinner.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
@@ -16,7 +16,7 @@
     TextInputValidationChange,
     ValidationResult,
     ValidationState,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     id?: string;

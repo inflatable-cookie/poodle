@@ -2,10 +2,10 @@
   import "@poodle/styles/dock-region.css";
   import { onDestroy, tick, type Snippet } from "svelte";
 
-  import { createDockExternalDragController } from "./dock-external-drag.ts";
+  import { createDockExternalDragController } from "@poodle/headless";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as Tabs } from "./Tabs.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
@@ -20,7 +20,7 @@
     SemanticControlSizeRole,
     TabItem,
     TabVariant,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     edge?: DockEdge;
@@ -38,6 +38,8 @@
     ariaLabel?: string | null;
     canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
     externalDragSource?: DockExternalDragSource | null;
+    /** Distinguishes drop zones that share an edge; defaults to `edge`. */
+    dragZoneId?: string | null;
     externalDropTarget?: DockExternalDropTarget | null;
     onValueChange?: ((value: string) => void) | undefined;
     onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
@@ -64,6 +66,7 @@
     ariaLabel = null,
     canAcceptPanel = null,
     externalDragSource = null,
+    dragZoneId = null,
     externalDropTarget = null,
     onValueChange = undefined,
     onCollapsedChange = undefined,
@@ -75,6 +78,7 @@
   }: Props = $props();
 
   const PANEL_DRAG_TYPE = "application/x-poodle-panel-drag";
+  const dropZoneId = $derived(dragZoneId ?? edge);
 
   const uiPresentation = getUiPresentation();
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
@@ -189,7 +193,11 @@
       return;
     }
 
-    const data: PanelDragData = { panelId, sourceEdge: edge };
+    const data: PanelDragData = {
+      panelId,
+      sourceEdge: edge,
+      sourceZone: dropZoneId,
+    };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
   }
@@ -257,7 +265,7 @@
       return;
     }
 
-    if (data.sourceEdge === edge && sizing === "flexible") return;
+    if ((data.sourceZone ?? data.sourceEdge) === dropZoneId && sizing === "flexible") return;
     if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
 
     onPanelDrop?.({ panel: data, targetEdge: edge });
@@ -271,7 +279,15 @@
       return;
     }
 
-    const data: PanelDragData = { panelId: items[index].value, sourceEdge: edge };
+    // The stack path stamps the zone too. Its own reorder uses
+    // `dragSourceIndex` and never reads this, but the payload can land in
+    // another region — a stacked panel dragged onto a flexible region sharing
+    // its edge is exactly the drop `dragZoneId` exists to let through.
+    const data: PanelDragData = {
+      panelId: items[index].value,
+      sourceEdge: edge,
+      sourceZone: dropZoneId,
+    };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
   }

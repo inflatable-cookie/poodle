@@ -6339,6 +6339,7 @@ impl IntoElement for Pagination {
 pub(crate) struct Stepper {
     spec: StepperSpec,
     theme: GpuiThemeProvider,
+    handlers: poodle_render::StepperHandlers,
 }
 
 impl Stepper {
@@ -6346,7 +6347,16 @@ impl Stepper {
         Self {
             spec,
             theme: theme.clone(),
+            handlers: poodle_render::StepperHandlers::default(),
         }
+    }
+
+    pub(crate) fn on_collapsed_change(
+        mut self,
+        handler: Arc<dyn Fn(bool) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_collapsed_change = Some(handler);
+        self
     }
 }
 
@@ -6357,7 +6367,7 @@ impl IntoElement for Stepper {
         poodle_gpui_node_backend::to_gpui(&poodle_render::stepper(
             &self.spec,
             &self.theme,
-            poodle_render::StepperHandlers::default(),
+            self.handlers,
         ))
     }
 }

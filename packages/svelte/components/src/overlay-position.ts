@@ -1,6 +1,6 @@
 import { resolveOverlayPosition as resolveCore, type RectLike } from "@poodle/headless";
 
-import type { OverlayPlacement } from "./types.ts";
+import type { OverlayPlacement } from "./types";
 
 type OverlayPosition = {
   placement: OverlayPlacement;

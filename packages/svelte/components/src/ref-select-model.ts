@@ -6,7 +6,7 @@
 // Poodle knows the shape of a ref, never git itself: no fetching, no parsing, no
 // ahead/behind maths.
 
-import type { RefKind, RefOption } from "./types.ts";
+import type { RefKind, RefOption } from "./types";
 
 /** Default glyph per ref kind. Unknown kinds fall back to the branch glyph — a
  * host inventing its own kind still gets something sensible. */

@@ -1,6 +1,15 @@
 import "@poodle/styles/dock-region.css";
 
-import { useEffect, useRef, useState, type DragEvent as ReactDragEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type DragEvent as ReactDragEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
+
+import { createDockExternalDragController } from "@poodle/headless";
 
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";
@@ -10,6 +19,8 @@ import type {
   DockCollapsedPosture,
   DockEdge,
   DockEmphasis,
+  DockExternalDragSource,
+  DockExternalDropTarget,
   DockSizing,
   PanelDragData,
   PanelTabItem,
@@ -33,6 +44,10 @@ export interface DockRegionProps {
   value?: string | null;
   ariaLabel?: string | null;
   canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
+  externalDragSource?: DockExternalDragSource | null;
+  /** Distinguishes drop zones that share an edge; defaults to `edge`. */
+  dragZoneId?: string | null;
+  externalDropTarget?: DockExternalDropTarget | null;
   onValueChange?: ((value: string) => void) | undefined;
   onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
   onClose?: ((value: string) => void) | undefined;
@@ -59,6 +74,9 @@ export function DockRegion({
   value = null,
   ariaLabel = null,
   canAcceptPanel = null,
+  externalDragSource = null,
+  dragZoneId = null,
+  externalDropTarget = null,
   onValueChange = undefined,
   onCollapsedChange = undefined,
   onClose = undefined,
@@ -67,6 +85,7 @@ export function DockRegion({
   panel,
   children,
 }: DockRegionProps) {
+  const dropZoneId = dragZoneId ?? edge;
   const isVerticalEdge = edge === "left" || edge === "right";
   const activeItem = items.find((item) => item.value === value) ?? items[0] ?? null;
   const collapseDirection = ({ left: "left", right: "right", top: "up", bottom: "down" } as const)[edge];
@@ -129,6 +148,30 @@ export function DockRegion({
   const dragSourceIndex = useRef(-1);
   const [dragSourceState, setDragSourceState] = useState(-1);
 
+  // The controller holds a live drag session, so it must survive re-renders —
+  // rebuilding it would drop a pending preparation on the floor and leak
+  // whatever the host allocated in `prepare`. Latest props reach it through
+  // accessor refs rather than by reconstruction.
+  const externalDragSourceRef = useRef(externalDragSource);
+  externalDragSourceRef.current = externalDragSource;
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const edgeRef = useRef(edge);
+  edgeRef.current = edge;
+
+  const externalDragRef = useRef<ReturnType<typeof createDockExternalDragController> | null>(null);
+  if (externalDragRef.current === null) {
+    externalDragRef.current = createDockExternalDragController<PanelTabItem, DockEdge>({
+      source: () => externalDragSourceRef.current,
+      panel: (panelId) => itemsRef.current.find((item) => item.value === panelId),
+      edge: () => edgeRef.current,
+    });
+  }
+  const externalDrag = externalDragRef.current;
+
+  // Unmounting mid-preparation is a cancel, not a silent drop.
+  useEffect(() => () => externalDrag.cancel("unmounted"), [externalDrag]);
+
   function handleValueChange(nextValue: string): void {
     onValueChange?.(nextValue);
     if (collapsed) {
@@ -140,26 +183,49 @@ export function DockRegion({
     onCollapsedChange?.(!collapsed);
   }
 
-  function handleStripDragStart(event: ReactDragEvent): void {
+  // Driven by Tabs' own per-tab drag events rather than a wrapper listener
+  // sniffing `[role='tab']` out of the DOM: the panel is handed over directly,
+  // and the vertical strip gets the same treatment as the horizontal one.
+  function handleTabDragStart(panelId: string, event: ReactDragEvent): void {
     if (!event.dataTransfer) return;
+    if (externalDragSource) {
+      externalDrag.start(panelId, event.nativeEvent);
+      return;
+    }
 
-    const target = event.target as HTMLElement;
-    const tab = target.querySelector?.("[role='tab']") ?? target.closest?.("[role='tab']");
-    if (!tab) return;
-
-    const tabId = tab.getAttribute("id") ?? "";
-    const item = items.find((entry) => tabId.endsWith(`-${entry.value}`));
-    if (!item) return;
-
-    const data: PanelDragData = { panelId: item.value, sourceEdge: edge };
+    const data: PanelDragData = {
+      panelId,
+      sourceEdge: edge,
+      sourceZone: dropZoneId,
+    };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleTabDragEnd(panelId: string, event: ReactDragEvent): void {
+    externalDrag.end(panelId, event.nativeEvent);
+  }
+
+  function canAcceptExternalDrop(phase: "over" | "drop", event: ReactDragEvent): boolean {
+    if (!externalDropTarget || !event.dataTransfer) return false;
+    return externalDropTarget.canDrop({
+      phase,
+      targetEdge: edge,
+      event: event.nativeEvent,
+      dataTransfer: event.dataTransfer,
+    });
   }
 
   function handleRegionDragOver(event: ReactDragEvent): void {
-    if (!event.dataTransfer?.types.includes(PANEL_DRAG_TYPE)) return;
+    const hasPoodlePanel = event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
+    const acceptsExternal = !hasPoodlePanel && canAcceptExternalDrop("over", event);
+    if (!hasPoodlePanel && !acceptsExternal) return;
+
     event.preventDefault();
     setIsDragOver(true);
-    event.dataTransfer.dropEffect = "move";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
   }
 
   function handleRegionDragLeave(event: ReactDragEvent): void {
@@ -170,11 +236,24 @@ export function DockRegion({
   }
 
   function handleRegionDrop(event: ReactDragEvent): void {
-    event.preventDefault();
     setIsDragOver(false);
 
     const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
-    if (!raw) return;
+    if (!raw) {
+      // Not a Poodle panel — offer it to the host before letting it fall
+      // through to the page.
+      if (!canAcceptExternalDrop("drop", event) || !event.dataTransfer) return;
+
+      event.preventDefault();
+      void externalDropTarget?.drop({
+        targetEdge: edge,
+        event: event.nativeEvent,
+        dataTransfer: event.dataTransfer,
+      });
+      return;
+    }
+
+    event.preventDefault();
 
     let data: PanelDragData;
     try {
@@ -183,7 +262,10 @@ export function DockRegion({
       return;
     }
 
-    if (data.sourceEdge === edge && sizing === "flexible") return;
+    // Zone, not edge: a host can map several regions onto one edge, and
+    // comparing edges reads those cross-region drops as same-zone. A legacy
+    // payload with no zone falls back to its edge.
+    if ((data.sourceZone ?? data.sourceEdge) === dropZoneId && sizing === "flexible") return;
     if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
 
     onPanelDrop?.({ panel: data, targetEdge: edge });
@@ -193,7 +275,15 @@ export function DockRegion({
     if (!event.dataTransfer) return;
     dragSourceIndex.current = index;
     setDragSourceState(index);
-    const data: PanelDragData = { panelId: items[index].value, sourceEdge: edge };
+    if (externalDragSource) {
+      externalDrag.start(items[index].value, event.nativeEvent);
+      return;
+    }
+    const data: PanelDragData = {
+      panelId: items[index].value,
+      sourceEdge: edge,
+      sourceZone: dropZoneId,
+    };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
   }
@@ -235,7 +325,11 @@ export function DockRegion({
     onPanelDrop?.({ panel: data, targetEdge: edge });
   }
 
-  function handleStackDragEnd(): void {
+  function handleStackDragEnd(event: ReactDragEvent): void {
+    const panelId = externalDrag.activePanelId();
+    if (panelId) {
+      externalDrag.end(panelId, event.nativeEvent);
+    }
     setIsDragOver(false);
     dragSourceIndex.current = -1;
     setDragSourceState(-1);
@@ -257,6 +351,9 @@ export function DockRegion({
       onValueChange={handleValueChange}
       onReorder={(next) => onReorder?.(next)}
       onClose={(next) => onClose?.(next)}
+      onDragPrepare={(panelId, event) => externalDrag.prepare(panelId, event.nativeEvent)}
+      onDragStart={handleTabDragStart}
+      onDragEnd={handleTabDragEnd}
     />
   );
 
@@ -286,6 +383,8 @@ export function DockRegion({
               draggable="true"
               role="group"
               aria-label={item.label ?? `Panel ${index + 1}`}
+              onPointerDown={(event: ReactPointerEvent) =>
+                externalDrag.prepare(items[index].value, event.nativeEvent)}
               onDragStart={(event) => handleStackItemDragStart(event, index)}
               onDragOver={(event) => handleStackItemDragOver(event, index)}
               onDragLeave={() => setDropInsertIndex(-1)}
@@ -324,7 +423,6 @@ export function DockRegion({
           className="poodle-dock-region__strip"
           data-orientation="horizontal"
           data-compact={isCompact || undefined}
-          onDragStart={handleStripDragStart}
         >
           <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
             {stripTabs("horizontal", isCompact)}
@@ -344,7 +442,6 @@ export function DockRegion({
             className="poodle-dock-region__strip"
             data-orientation="horizontal"
             data-compact={isCompact || undefined}
-            onDragStart={handleStripDragStart}
           >
             <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
               {stripTabs("horizontal", isCompact)}

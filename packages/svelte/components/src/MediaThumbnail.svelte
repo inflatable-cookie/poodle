@@ -8,9 +8,9 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation.ts";
+  } from "./presentation";
 
-  import type { AspectRatio, MediaKind, MediaState } from "./types.ts";
+  import type { AspectRatio, MediaKind, MediaState } from "./types";
 
   interface Props {
     kind?: MediaKind;

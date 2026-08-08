@@ -222,6 +222,51 @@ pub fn word_range_at(value: &str, index: usize) -> (usize, usize) {
 mod tests {
 
     #[test]
+    fn digits_fill_slots_left_to_right_and_stop_at_the_length() {
+        let mut value = String::new();
+        for key in ["1", "2", "3", "4"] {
+            value = code_transition(&value, key, 3, true).expect("digits are ours");
+        }
+        assert_eq!(value, "123", "the fourth digit has nowhere to go");
+    }
+
+    /// Consumed, not forwarded: a letter in a digits-only code must not fall
+    /// through to whatever handles plain keys.
+    #[test]
+    fn letters_are_swallowed_by_a_numbers_only_code() {
+        assert_eq!(code_transition("12", "a", 6, true).as_deref(), Some("12"));
+        assert_eq!(code_transition("12", "a", 6, false).as_deref(), Some("12a"));
+    }
+
+    #[test]
+    fn backspace_removes_the_last_slot_and_is_inert_when_empty() {
+        assert_eq!(code_transition("123", "backspace", 6, true).as_deref(), Some("12"));
+        assert_eq!(code_transition("", "backspace", 6, true).as_deref(), Some(""));
+    }
+
+    /// Escape only claims the key when there is something to clear, so an empty
+    /// code still lets a dialog close on Escape.
+    #[test]
+    fn escape_clears_a_filled_code_and_passes_through_an_empty_one() {
+        assert_eq!(code_transition("123", "escape", 6, true).as_deref(), Some(""));
+        assert_eq!(code_transition("", "escape", 6, true), None);
+    }
+
+    #[test]
+    fn multi_character_keys_are_not_ours() {
+        assert_eq!(code_transition("1", "enter", 6, true), None);
+        assert_eq!(code_transition("1", "tab", 6, true), None);
+        assert_eq!(code_transition("1", "left", 6, true), None);
+    }
+
+    #[test]
+    fn paste_sanitizes_and_clamps_like_typing() {
+        assert_eq!(code_paste("12-34-56-78", 6, true), "123456");
+        assert_eq!(code_paste("ab12", 6, true), "12");
+        assert_eq!(code_paste("ab12", 6, false), "ab12");
+    }
+
+    #[test]
     fn insert_replaces_the_selection_and_leaves_the_caret_after_the_text() {
         let outcome = insert_transition("hello", EditState { anchor: 1, head: 4 }, "EY");
         assert_eq!(outcome.value.as_deref(), Some("hEYo"));
@@ -398,4 +443,66 @@ mod tests {
         let (value, _) = type_keys("héllo", &[("home", false, false), ("right", false, false), ("delete", false, false)]);
         assert_eq!(value, "hllo");
     }
+}
+
+// ── Slotted codes ───────────────────────────────────────────────────
+//
+// A code input is one value shown across N slots. The contract's web target
+// hides a real `<input>` behind the slots and lets the browser own typing; the
+// Rust targets have no such input, so the same rules live here — once, for
+// every target — rather than in each backend's key handler.
+
+/// What a keystroke does to a slotted code.
+///
+/// Returns the new value, or `None` when the key is not ours (so the host's
+/// submit/cancel handling still sees it). A key that *is* ours but changes
+/// nothing — backspace on an empty code, a digit when every slot is full —
+/// returns the value unchanged, because it was still consumed.
+pub fn code_transition(
+    value: &str,
+    key: &str,
+    length: usize,
+    numbers_only: bool,
+) -> Option<String> {
+    let mut chars: Vec<char> = value
+        .chars()
+        .filter(|c| !numbers_only || c.is_ascii_digit())
+        .take(length)
+        .collect();
+
+    match key {
+        "backspace" => {
+            chars.pop();
+            Some(chars.into_iter().collect())
+        }
+        // Clearing the whole code is worth a key of its own: with no caret to
+        // hold down backspace against, six presses is the alternative.
+        "escape" if !chars.is_empty() => Some(String::new()),
+        _ => {
+            let mut typed = key.chars();
+            let (Some(c), None) = (typed.next(), typed.next()) else {
+                return None;
+            };
+            if numbers_only && !c.is_ascii_digit() {
+                // Consumed deliberately: a letter typed into a digits-only code
+                // must not fall through and trigger a submit.
+                return Some(chars.into_iter().collect());
+            }
+            if chars.len() < length {
+                chars.push(c);
+            }
+            Some(chars.into_iter().collect())
+        }
+    }
+}
+
+/// Distribute pasted text into a code, replacing whatever was there.
+///
+/// Paste is the reason this component exists — one-time codes arrive on the
+/// clipboard — so it sanitizes and clamps the same way typing does.
+pub fn code_paste(text: &str, length: usize, numbers_only: bool) -> String {
+    text.chars()
+        .filter(|c| !numbers_only || c.is_ascii_digit())
+        .take(length)
+        .collect()
 }

@@ -1,4 +1,4 @@
-import type { OverlayPlacement, RectLike } from "../position.ts";
+import type { OverlayPlacement, RectLike } from "../position";
 
 export interface OverlayViewportRect {
   x: number;

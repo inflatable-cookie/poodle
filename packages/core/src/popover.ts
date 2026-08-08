@@ -8,7 +8,7 @@
  * delta until the shared anchor-positioning service lands).
  */
 
-import type { PartAttrs, TransitionResult } from "./machine.ts";
+import type { PartAttrs, TransitionResult } from "./machine";
 
 export type PopoverState = "closed" | "open";
 

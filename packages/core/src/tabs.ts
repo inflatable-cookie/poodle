@@ -9,8 +9,8 @@
  * overflow measurement are adapter effects that re-enter via SELECT.
  */
 
-import type { PartAttrs, TransitionResult } from "./machine.ts";
-import { findNextEnabledIndex, firstEnabledIndex } from "./nav.ts";
+import type { PartAttrs, TransitionResult } from "./machine";
+import { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
 export interface TabsItem {
   value: string;

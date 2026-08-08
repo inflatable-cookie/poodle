@@ -5,7 +5,7 @@
 <script lang="ts">
   import { layerContains } from "@poodle/headless";
   import "@poodle/styles/color-picker.css";
-  import { anchored } from "./anchored.ts";
+  import { anchored } from "./anchored";
   import { default as Slider } from "./Slider.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";
   import { default as NumberInput } from "./NumberInput.svelte";
@@ -18,10 +18,10 @@
     hslToHsv,
     isValidHex,
     normalizeHex,
-  } from "./color-utils.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  } from "./color-utils";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ColorInputMode, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import type { ColorInputMode, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
     size?: ControlSize | null;

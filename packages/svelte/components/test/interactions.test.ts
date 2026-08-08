@@ -82,6 +82,7 @@ describe("svelte interaction", () => {
     ).toEqual({
       panelId: "inspector",
       sourceEdge: "left",
+      sourceZone: "left",
     });
   });
 });

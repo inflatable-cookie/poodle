@@ -10,7 +10,7 @@
  * adapter-side.
  */
 
-import type { TransitionResult } from "./machine.ts";
+import type { TransitionResult } from "./machine";
 
 // ── Edit-label machine ──
 

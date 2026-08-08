@@ -7,7 +7,7 @@
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
-  } from "./presentation.ts";
+  } from "./presentation";
 
   import type {
     ControlDensity,
@@ -15,7 +15,7 @@
     Orientation,
     SemanticControlSizeRole,
     StepperStep,
-  } from "./types.ts";
+  } from "./types";
 
   interface Props {
     steps?: StepperStep[];
@@ -56,7 +56,7 @@
   }: Props = $props();
 
   let uncontrolledValue = $state<string | null>(null);
-  let uncontrolledCollapsed = $state(defaultCollapsed);
+  let uncontrolledCollapsed = $state(false);
   let seededDefaultValue = $state(false);
   const uiPresentation = getUiPresentation();
 
@@ -65,6 +65,7 @@
       // Falling back to the first step matters: a stepper with no current step
       // renders every row as "not here", which is never what a wizard means.
       uncontrolledValue = defaultValue ?? steps[0]?.value ?? null;
+      uncontrolledCollapsed = defaultCollapsed;
       seededDefaultValue = true;
     }
   });
@@ -210,7 +211,6 @@
             class="poodle-stepper__trigger"
             disabled={isStepDisabled(step)}
             aria-current={currentValue === step.value ? "step" : undefined}
-            aria-invalid={step.status === "failed" ? true : undefined}
             aria-label={`${step.label}${statusSuffix(step.status)}${step.description ? `. ${step.description}` : ""}`}
             onclick={() => selectStep(step)}
             onkeydown={(event) => moveFocus(event, index)}

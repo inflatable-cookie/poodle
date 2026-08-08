@@ -9,13 +9,13 @@
 //! `poodle_headless::slider::range_slider_transition` — the same machine the
 //! web target drives.
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeDragEvent,
-    NodeDragPhase, NodePosition, ShadowValue,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ScrubPhase,
+    ShadowValue,
 };
 use poodle_specs::{ControlSize, RangeSliderSpec};
 
@@ -27,11 +27,6 @@ use crate::presentation::{rem_to_px, resolve_semantic_size};
 pub struct RangeSliderHandlers {
     pub on_change: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
     pub on_value_commit: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
-}
-
-/// Fixed reference track width (matches the reference tier's layout budget).
-fn track_w() -> f32 {
-    rem_to_px(10.0)
 }
 
 /// Thumb diameter in rem per the contract §8 size table (same as Slider).
@@ -133,10 +128,11 @@ pub fn range_slider(
         }
         thumb
     };
-    let mut thumb_lo = make_thumb();
-    let mut thumb_hi = make_thumb();
+    let thumb_lo = make_thumb();
+    let thumb_hi = make_thumb();
 
     // One shared pair of values, so dragging either thumb reports both.
+    let mut scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = None;
     {
         use poodle_headless::slider::{
             range_slider_transition, RangeSliderContext, RangeSliderEffect, RangeSliderEvent,
@@ -155,45 +151,86 @@ pub fn range_slider(
                 step: spec.step,
                 disabled: false,
             };
-            let units_per_px = (spec.max - spec.min) / track_w().max(1.0) as f64;
 
-            let arm = |thumb: RangeThumb,
-                       low: Arc<AtomicU64>,
-                       high: Arc<AtomicU64>,
-                       on_change: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
-                       on_value_commit: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>|
-             -> Arc<dyn Fn(&NodeDragEvent) + Send + Sync> {
-                Arc::new(move |event: &NodeDragEvent| {
+            // Which thumb this gesture owns: 0 = undecided, 1 = lower,
+            // 2 = upper. Decided on the press and held for the rest, so a thumb
+            // dragged past its partner keeps the gesture instead of handing it
+            // over halfway.
+            let active = Arc::new(AtomicU8::new(0));
+            // gpui delivers a click at the END of a drag as well as for a bare
+            // press, so a press arriving after moves is a release, not a new
+            // gesture — it must not re-pick the thumb from where the pointer
+            // happens to have stopped.
+            let dragged = Arc::new(AtomicBool::new(false));
+
+            let min = spec.min;
+            let max = spec.max;
+            let on_change = handlers.on_change.clone();
+            let on_value_commit = handlers.on_value_commit.clone();
+
+            let scrub: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync> =
+                Arc::new(move |fraction: f32, phase: ScrubPhase| {
                     let live = (
                         f64::from_bits(low.load(Ordering::SeqCst)),
                         f64::from_bits(high.load(Ordering::SeqCst)),
                     );
+                    let raw = min + (max - min) * fraction as f64;
+
+                    let thumb = match phase {
+                        ScrubPhase::Press => {
+                            if dragged.swap(false, Ordering::SeqCst) {
+                                // The click that ends a drag. The value is
+                                // already where the drag left it.
+                                return;
+                            }
+                            // Nearest thumb wins the press, which is also what
+                            // makes clicking the track move something sensible.
+                            let thumb = if (raw - live.0).abs() <= (live.1 - raw).abs() {
+                                RangeThumb::Lower
+                            } else {
+                                RangeThumb::Upper
+                            };
+                            active.store(
+                                match thumb {
+                                    RangeThumb::Lower => 1,
+                                    RangeThumb::Upper => 2,
+                                },
+                                Ordering::SeqCst,
+                            );
+                            thumb
+                        }
+                        ScrubPhase::Drag => {
+                            dragged.store(true, Ordering::SeqCst);
+                            match active.load(Ordering::SeqCst) {
+                                2 => RangeThumb::Upper,
+                                1 => RangeThumb::Lower,
+                                // A drag with no press before it (the press was
+                                // swallowed): fall back to nearest, once.
+                                _ => {
+                                    let thumb = if (raw - live.0).abs() <= (live.1 - raw).abs() {
+                                        RangeThumb::Lower
+                                    } else {
+                                        RangeThumb::Upper
+                                    };
+                                    active.store(
+                                        match thumb {
+                                            RangeThumb::Lower => 1,
+                                            RangeThumb::Upper => 2,
+                                        },
+                                        Ordering::SeqCst,
+                                    );
+                                    thumb
+                                }
+                            }
+                        }
+                    };
+
                     let context = RangeSliderContext {
                         value: live,
                         ..context
                     };
-
-                    let (raw, machine_event): (f64, fn(RangeThumb, f64) -> RangeSliderEvent) =
-                        match event.phase {
-                            NodeDragPhase::Start => return,
-                            NodeDragPhase::Move => (
-                                match thumb {
-                                    RangeThumb::Lower => live.0,
-                                    RangeThumb::Upper => live.1,
-                                } + event.delta_x as f64 * units_per_px,
-                                |thumb, raw| RangeSliderEvent::Input { thumb, raw },
-                            ),
-                            NodeDragPhase::End => (
-                                match thumb {
-                                    RangeThumb::Lower => live.0,
-                                    RangeThumb::Upper => live.1,
-                                },
-                                |thumb, raw| RangeSliderEvent::Commit { thumb, raw },
-                            ),
-                        };
-
                     let (next, effects) =
-                        range_slider_transition(context, machine_event(thumb, raw));
+                        range_slider_transition(context, RangeSliderEvent::Input { thumb, raw });
                     low.store(next.value.0.to_bits(), Ordering::SeqCst);
                     high.store(next.value.1.to_bits(), Ordering::SeqCst);
 
@@ -211,23 +248,8 @@ pub fn range_slider(
                             }
                         }
                     }
-                })
-            };
-
-            thumb_lo.interaction.on_drag = Some(arm(
-                RangeThumb::Lower,
-                Arc::clone(&low),
-                Arc::clone(&high),
-                handlers.on_change.clone(),
-                handlers.on_value_commit.clone(),
-            ));
-            thumb_hi.interaction.on_drag = Some(arm(
-                RangeThumb::Upper,
-                low,
-                high,
-                handlers.on_change,
-                handlers.on_value_commit,
-            ));
+                });
+            scrub_handler = Some(scrub);
         }
     }
 
@@ -268,12 +290,32 @@ pub fn range_slider(
         c.bottom_right = pill;
         c.bottom_left = pill;
     }
-    let track = track
+    let mut track = track
         .child(seg_lo)
         .child(seg_fill)
         .child(seg_hi)
         .child(low_thumb_layer)
         .child(high_thumb_layer);
+
+    // The scrub belongs to a full-width grab overlay, not to either thumb: the
+    // fraction is measured across whichever node carries it, and a fraction
+    // measured across a thumb's own few pixels is meaningless. It also makes
+    // the track clickable, which a per-thumb delta could never be. Same shape
+    // as Slider's, and as ResizeHandle's contract putting the grab area on an
+    // overlay rather than the visible line.
+    if let Some(handler) = &scrub_handler {
+        let mut grab = Node::container();
+        grab.style.fill_width = true;
+        grab.position = NodePosition::Absolute {
+            top: Some(-thumb_r),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(-thumb_r),
+        };
+        grab.style.descriptor.cursor = CursorHint::Pointer;
+        grab.interaction.on_scrub = Some(Arc::clone(handler));
+        track = track.child(grab);
+    }
 
     let mut el = Node::container();
     {
@@ -295,4 +337,110 @@ pub fn range_slider(
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::RangeSliderSpec;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> RangeSliderSpec {
+        RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0)
+    }
+
+    /// Records every `(low, high)` the component reports.
+    fn armed() -> (Node, std::sync::Arc<std::sync::Mutex<Vec<(f64, f64)>>>) {
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = range_slider(
+            &spec(),
+            &theme(),
+            RangeSliderHandlers {
+                on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
+                ..RangeSliderHandlers::default()
+            },
+        );
+        (node, seen)
+    }
+
+    fn scrub(node: &Node) -> Arc<dyn Fn(f32, ScrubPhase) + Send + Sync> {
+        Arc::clone(
+            node.find(&|n| n.interaction.on_scrub.is_some())
+                .expect("something carries the scrub")
+                .interaction
+                .on_scrub
+                .as_ref()
+                .unwrap(),
+        )
+    }
+
+    /// The fraction is measured across whichever node carries the handler, so
+    /// it has to be the full-width grab area. On a thumb it would be measured
+    /// across that thumb's own few pixels and jump wildly.
+    #[test]
+    fn the_grab_overlay_carries_the_scrub_and_the_thumbs_do_not() {
+        let (node, _) = armed();
+        let carrier = node
+            .find(&|n| n.interaction.on_scrub.is_some())
+            .expect("grab area");
+        assert!(carrier.style.fill_width, "the scrub must span the track");
+        assert!(
+            matches!(carrier.position, NodePosition::Absolute { .. }),
+            "the grab area is an overlay, not a layout participant"
+        );
+        // Exactly one node scrubs: two would fight over the same gesture.
+        fn count_scrubs(node: &Node) -> usize {
+            usize::from(node.interaction.on_scrub.is_some())
+                + node.children.iter().map(count_scrubs).sum::<usize>()
+        }
+        assert_eq!(count_scrubs(&node), 1);
+    }
+
+    /// Pressing the track moves the *nearer* thumb there — the behaviour a
+    /// delta could not express at all, because a delta has no idea where the
+    /// press landed.
+    #[test]
+    fn pressing_the_track_moves_the_nearest_thumb_to_the_press() {
+        let (node, seen) = armed();
+        scrub(&node)(0.1, ScrubPhase::Press);
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((10.0, 80.0)));
+
+        let (node, seen) = armed();
+        scrub(&node)(0.9, ScrubPhase::Press);
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((20.0, 90.0)));
+    }
+
+    /// Once the press has chosen a thumb, the gesture keeps it. Dragging the
+    /// lower thumb up past the upper must not silently hand the drag over.
+    #[test]
+    fn a_drag_keeps_the_thumb_the_press_chose() {
+        let (node, seen) = armed();
+        let scrub = scrub(&node);
+        scrub(0.1, ScrubPhase::Press); // grabs the lower thumb
+        scrub(0.5, ScrubPhase::Drag);
+        scrub(0.95, ScrubPhase::Drag); // past the upper thumb
+        let last = seen.lock().unwrap().last().copied().unwrap();
+        assert_eq!(
+            last.0, 80.0,
+            "the lower thumb keeps the gesture, clamped at its partner"
+        );
+    }
+
+    /// gpui delivers a click at the end of a drag as well as for a bare press.
+    /// Treating that as a new press would re-pick a thumb from wherever the
+    /// pointer stopped and move it again.
+    #[test]
+    fn the_click_that_ends_a_drag_changes_nothing() {
+        let (node, seen) = armed();
+        let scrub = scrub(&node);
+        scrub(0.1, ScrubPhase::Press);
+        scrub(0.4, ScrubPhase::Drag);
+        let after_drag = seen.lock().unwrap().last().copied().unwrap();
+        scrub(0.4, ScrubPhase::Press); // the release click
+        assert_eq!(seen.lock().unwrap().last().copied(), Some(after_drag));
+    }
 }

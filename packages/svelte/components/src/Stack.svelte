@@ -8,9 +8,9 @@
     justifyContentValue,
     overflowValue,
     scaleToSpace,
-  } from "./internal.ts";
+  } from "./internal";
 
-  import type { LayoutAlign, LayoutJustify, OverflowMode, SpaceScale } from "./types.ts";
+  import type { LayoutAlign, LayoutJustify, OverflowMode, SpaceScale } from "./types";
 
   let {
     direction = "column",

@@ -3,8 +3,8 @@
   import { checkboxParts, checkboxTransition, type CheckboxContext } from "@poodle/headless";
 
   import { default as Icon } from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types.ts";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
     id?: string | undefined;

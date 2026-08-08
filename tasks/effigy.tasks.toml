@@ -122,6 +122,11 @@
 # attached neither — the builders type-checked and nothing happened when you
 # clicked. Runs in ci:native.
 "drift:handlers" = "bun packages/gpui/preview/scripts/dead-handler-drift.ts"
+# The other direction, and the rule `drift:clicks` used to cover from the far
+# end: a contract that documents events must have somewhere to send them. An
+# AlertDialog rendering Confirm and Cancel that no host can wire looks finished
+# and is not. Carries a ratchet — the known-gap list can only shrink.
+"drift:events" = "bun packages/gpui/preview/scripts/inert-component-drift.ts"
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
@@ -131,7 +136,9 @@
 # `poodle-render` nodes. The adapter that replaced it lives in the sibling
 # jetstream repo, which is outside this repo's boundary, so the gate has
 # nothing here to watch. GPUI's `drift:handlers` survives and now covers the
-# shared `poodle-render` handlers both targets render.
+# shared `poodle-render` handlers both targets render, and `drift:events`
+# recovers the half of its rule that was genuinely lost: a control that is
+# rendered but that no host can reach.
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
@@ -183,6 +190,7 @@
 # that it would only have reported a number.
 "ci:native" = [
   { task = "drift:handlers" },
+  { task = "drift:events" },
   { task = "check:gpui" },
   { task = "test:jetstream-adapter" },
   { task = "test:jetstream-a11y" },

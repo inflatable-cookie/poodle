@@ -1,4 +1,4 @@
-import type { MediaUploadWorkflowStep } from "./types.ts";
+import type { MediaUploadWorkflowStep } from "./types";
 
 export type MediaWorkflowPaginationParams = {
   cursor?: string;

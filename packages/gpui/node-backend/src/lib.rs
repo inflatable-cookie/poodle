@@ -23,7 +23,7 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU64, Ordering, AtomicUsize};
 use std::time::Duration;
 
 use gpui::{
@@ -37,7 +37,7 @@ use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
     FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
-    NodePoint, NodePosition, NodeRole, SelectGranularity, StylePatch, TextAlign,
+    NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
 /// sRGB passthrough — the exact conversion the old GPUI tier performed.
@@ -73,6 +73,21 @@ static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 /// single frame, so it never crosses a rebuild.
 pub fn reset_element_ids() {
     NEXT_ID.store(0, Ordering::Relaxed);
+    NEXT_GESTURE_ID.store(0, Ordering::Relaxed);
+}
+
+/// Per-frame counter for gesture-drag identities.
+///
+/// Reset with the element ids, so a node gets the same gesture id on every
+/// frame: the tree is walked in the same order each time, and a drag begun on
+/// one frame has to still recognise itself on the next.
+static NEXT_GESTURE_ID: AtomicUsize = AtomicUsize::new(0);
+
+fn next_gesture_id() -> String {
+    format!(
+        "gesture-{}",
+        NEXT_GESTURE_ID.fetch_add(1, Ordering::Relaxed)
+    )
 }
 
 fn element_id(node: &Node) -> ElementId {
@@ -133,6 +148,14 @@ pub fn to_gpui(node: &Node) -> AnyElement {
                 } else {
                     value.clone()
                 };
+                // A multi-line value is not this element's job: `shape_line`
+                // shapes exactly one line and *panics* on a newline, and a
+                // markdown body wants wrapping anyway. Fall back to the plain
+                // wrapped text child, which is what these fields rendered
+                // before the caret existed — no caret, but no lost content.
+                if display.contains('\n') {
+                    return build_box(node, div().child(display));
+                }
                 let text_color = node
                     .style
                     .descriptor
@@ -1008,11 +1031,15 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
         let last: Rc<RefCell<Option<(f32, f32)>>> = Rc::new(RefCell::new(None));
         let last_move = last.clone();
         let mv = handler.clone();
+        let gesture_id = next_gesture_id();
         el = el
-            .on_drag(NodeGestureDrag, |_, _, _window, cx| {
+            .on_drag(NodeGestureDrag(gesture_id.clone()), |_, _, _window, cx| {
                 cx.new(|_| EmptyDragPreview)
             })
             .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
+                if event.drag(cx).0 != gesture_id {
+                    return;
+                }
                 let pos: (f32, f32) = (event.event.position.x.into(), event.event.position.y.into());
                 let mut last = last_move.borrow_mut();
                 match *last {
@@ -1046,6 +1073,7 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
         let track_press = track.clone();
         let press = handler.clone();
         let mv = handler.clone();
+        let gesture_id = next_gesture_id();
         el = el
             .child(
                 gpui::canvas(
@@ -1063,18 +1091,24 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
             // and a press-without-drag is exactly the track-click case.
             .on_click(move |event: &ClickEvent, _window, cx| {
                 if let Some(bounds) = *track_press.borrow() {
-                    press(scrub_fraction(event.position().x.into(), bounds));
+                    press(
+                        scrub_fraction(event.position().x.into(), bounds),
+                        ScrubPhase::Press,
+                    );
                     cx.refresh_windows();
                 }
             })
-            .on_drag(NodeGestureDrag, |_, _, _window, cx| {
+            .on_drag(NodeGestureDrag(gesture_id.clone()), |_, _, _window, cx| {
                 cx.new(|_| EmptyDragPreview)
             })
             .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
-                mv(scrub_fraction(
-                    event.event.position.x.into(),
-                    event.bounds,
-                ));
+                if event.drag(cx).0 != gesture_id {
+                    return;
+                }
+                mv(
+                    scrub_fraction(event.event.position.x.into(), event.bounds),
+                    ScrubPhase::Drag,
+                );
                 cx.refresh_windows();
             });
     }
@@ -1215,10 +1249,15 @@ fn scrub_fraction(x: f32, bounds: gpui::Bounds<gpui::Pixels>) -> f32 {
     ((x - left) / width).clamp(0.0, 1.0)
 }
 
-/// Marker payload for gesture drags (scrub, resize) — distinct from
+/// Payload for gesture drags (scrub, resize) — distinct from
 /// `NodeDragPayload`, so a scrub never lands in a drop zone.
-#[derive(Clone, Copy, Debug)]
-struct NodeGestureDrag;
+///
+/// It carries the originating element's id because `on_drag_move` is dispatched
+/// by drag *type*: every gesture-draggable node in the window hears every
+/// gesture drag. Two range sliders on one page both moved from a single drag
+/// until each listener started checking that the gesture began on itself.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct NodeGestureDrag(String);
 
 /// The dragged node's opaque id, carried through gpui's drag channel.
 #[derive(Clone, Debug)]

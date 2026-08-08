@@ -5,7 +5,7 @@
 <script lang="ts">
   import { layerContains } from "@poodle/headless";
   import "@poodle/styles/date-time-zone-picker.css";
-  import { anchored } from "./anchored.ts";
+  import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
   import { default as TimeInput } from "./TimeInput.svelte";
   import { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
@@ -14,10 +14,10 @@
     monthAnchorIso,
     normalizeZonedDateTimeValue,
     todayIsoDate,
-  } from "./date.ts";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation.ts";
+  } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption, ZonedDateTimeValue } from "./types.ts";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption, ZonedDateTimeValue } from "./types";
 
   interface Props {
     value?: ZonedDateTimeValue | null | undefined;
