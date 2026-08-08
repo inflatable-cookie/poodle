@@ -428,6 +428,10 @@ export type ThemeOption = {
 
 export type SplitOrientation = "horizontal" | "vertical";
 
+/** When a SplitView shows its collapse-toggle pill: always, or only while the
+ * pointer is on the seam / a toggle holds focus. */
+export type SplitToggleVisibility = "always" | "hover";
+
 export type BreadcrumbItem = {
   value: string;
   label: string;

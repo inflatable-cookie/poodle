@@ -65,6 +65,7 @@ Updated: 2026-07-10
 | `collapseSecondaryBelowSize` | `number \| null` | `null` | no | during divider drag, request secondary collapse when its pixel size would drop below this value |
 | `showCollapsePrimary` | `boolean` | `false` | no | show collapse toggle for primary pane |
 | `showCollapseSecondary` | `boolean` | `false` | no | show collapse toggle for secondary pane |
+| `toggleVisibility` | `"always" \| "hover"` | `"always"` | no | when the collapse-toggle pill is visible; `"hover"` reveals it only on the seam (see Toggle reveal below) |
 | `divider` | `boolean` | `false` | no | paint the visible divider line; off by default since pane borders read as the separator and the resize grab area is an overlay with no layout footprint |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name (defaults to "Split view") |
 | `disabled` | `boolean` | `false` | no | disables resize and collapse interactions |
@@ -102,6 +103,8 @@ Updated: 2026-07-10
 | fixed-primary | `primarySize` is set | primary pane uses fixed pixel flex, secondary fills remaining space |
 | fixed-secondary | `secondarySize` is set | secondary pane uses fixed pixel flex, primary fills remaining space |
 | disabled | `disabled=true` | resize handle and collapse toggles non-interactive |
+| toggles-hidden | `toggleVisibility="hover"`, pointer off the seam, no focus in the pill, neither pane collapsed | toggle pill at opacity 0 and non-interactive; still mounted and in the accessibility tree |
+| toggles-revealed | `toggleVisibility="hover"` and any of: pointer over the divider, pointer over the pill, focus inside the pill, either pane collapsed | toggle pill at full opacity and interactive |
 
 Toggle visibility: an open pane's collapse toggle renders while its sibling
 is open, and a collapsed pane's expand toggle always renders. With both panes
@@ -109,6 +112,17 @@ collapsed both expand toggles stay — a collapse pair is never unrecoverable.
 A fully collapsed pane anchors its toggles to the viewport edge: the pill
 peeks inward, flat side flush with the edge, rather than hanging half out of
 view.
+
+Toggle reveal: with `toggleVisibility="hover"` the pill rests at opacity 0
+and is revealed by the pointer entering the seam — the resize handle's grab
+area or the pill itself — or by focus landing inside it. It is never
+unmounted: the buttons stay in the DOM and the accessibility tree so `Tab`
+reaches them, and `:focus-within` brings them back on screen when it does.
+While hidden the pill takes no pointer events, so it cannot swallow clicks
+aimed at pane content; the grab strip underneath is what triggers the reveal.
+A collapsed pane overrides the mode and pins the pill visible: its expand
+toggle is the only way back, and a collapsed pane leaves the seam on the
+container edge with nothing left to hover toward.
 
 ### Component States
 
@@ -198,6 +212,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `data-size` | root `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
 | `data-density` | root `<div>` | `"compact"`, `"default"`, `"comfortable"` |
 | `data-divider` | root `<div>` | `"line"` when the `divider` prop is true; absent otherwise (zero-footprint seam) |
+| `data-toggle-visibility` | root `<div>` | `"always"`, `"hover"` |
 
 ### Root (`.split-view`)
 
@@ -269,6 +284,10 @@ Pane `flex` and `overflow` are applied via inline style:
 | Property | Value |
 |----------|-------|
 | position | `absolute` |
+| z-index | `2` |
+| `--poodle-split-toggles-reveal` | `1` |
+| `--poodle-split-toggles-state-opacity` | `1` |
+| opacity | `calc(var(--poodle-split-toggles-reveal) * var(--poodle-split-toggles-state-opacity))` |
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `center` |
@@ -302,6 +321,35 @@ and collapse state — never against the divider box, which a collapsed or
 hidden sibling pane can leave degenerate. Fully collapsed panes anchor the
 pill to the viewport edge instead (flat side out; see Toggle visibility in
 §4).
+
+`z-index: 2` puts the pill above the divider (`z-index: 1`) and above the
+resize handle's grab overlay nested inside it. Without it the handle's
+`0.5rem` hit strip runs down the middle of the pill and swallows the clicks,
+leaving the toggles reachable only by aiming either side of the seam line.
+
+Reveal and disabled dim are separate axes that both land on `opacity`, so
+they compose through the two custom properties above rather than overriding
+one declaration — otherwise whichever selector is more specific silently
+wins and a disabled hover-reveal split shows its dimmed pill permanently.
+
+#### Toggles Hover Reveal (`[data-toggle-visibility="hover"]`)
+
+| Selector | Declarations |
+|----------|--------------|
+| `[data-toggle-visibility="hover"] .split-view__toggles` | `--poodle-split-toggles-reveal: 0`; `pointer-events: none`; `transition: opacity 120ms ease` |
+| …`.split-view__divider:hover ~ .split-view__toggles`, …`.split-view__divider:hover .split-view__toggles`, …`.split-view__toggles:hover`, …`.split-view__toggles:focus-within` | `--poodle-split-toggles-reveal: 1`; `pointer-events: auto` |
+| `[data-toggle-visibility="hover"][data-primary-collapsed] .split-view__toggles`, `[data-toggle-visibility="hover"][data-secondary-collapsed] .split-view__toggles` | `--poodle-split-toggles-reveal: 1`; `pointer-events: auto` |
+| `@media (prefers-reduced-motion: reduce)` | `transition: none` |
+
+Two reveal selectors cover the two anatomies: the sibling combinator for the
+toggles as a root sibling of the divider (Svelte), the descendant form for
+the toggles nested inside it (React).
+
+#### Toggles Disabled
+
+| Selector | Declarations |
+|----------|--------------|
+| `.split-view[data-disabled] > .split-view__toggles` | `--poodle-split-toggles-state-opacity: var(--poodle-state-opacity-disabled)` |
 
 ### Composed Primitives
 
@@ -342,6 +390,10 @@ reset do not apply to that pane.
 | primary collapse | `showCollapsePrimary=true` AND secondary is not collapsed |
 | secondary collapse | `showCollapseSecondary=true` AND primary is not collapsed |
 
+These rules decide what is *rendered*. `toggleVisibility` is a separate,
+purely presentational axis on top: it never removes a toggle from the DOM or
+the accessibility tree, it only decides whether the rendered pill is painted.
+
 ### Toggle Direction By Orientation
 
 | Orientation | Primary Toggle Direction | Secondary Toggle Direction |
@@ -369,6 +421,9 @@ None.
 - `ResizeHandle` and `CollapseToggle` imported from `@poodle/svelte`
 - `data-primary-collapsed` and `data-secondary-collapsed` use `|| undefined` to
   omit the attribute when false
+- `data-toggle-visibility` is always written (both values are meaningful), so
+  it does not take the `|| undefined` treatment
+- hover reveal is entirely CSS: no pointer listeners, no reactive state
 
 ## 10. GPUI Notes
 
@@ -383,6 +438,11 @@ None.
   than one resizable split give each a distinct `with_id`.
 - keyboard resizing is not implemented (no focus/key routing yet); collapse
   state and orientation semantics are.
+- `toggle_visibility` is honoured through the shared render tier
+  (`poodle_render::split_view`): the toggle cluster rests at
+  `opacity: 0` with a hover `StylePatch` restoring `1.0`. Opacity is
+  paint-only in the backend, so the cluster still hit-tests while invisible —
+  its own bounds are the reveal region.
 
 ## 10a. Jetstream Notes
 
@@ -397,6 +457,9 @@ None.
   the immediate-mode build never sees and the host (who laid the split out)
   already has — it applies `ratio += delta / extent` and clamps. Emitting a
   ratio from a guessed extent would be worse than an honest delta.
+- `toggle_visibility` is honoured through the same shared render tier as GPUI;
+  `jetstream-poodle` maps the hover `StylePatch`'s `opacity` onto the
+  element's hover override.
 
 ## 11. Parity Checklist
 
@@ -410,6 +473,8 @@ None.
 - [ ] rail-collapse semantics match (`*CollapsedSize`, `collapse*BelowSize`,
       preserved ratio, mounted content, no ratio emission while railed)
 - [ ] collapse toggle visibility rules match
+- [ ] `toggleVisibility` semantics match (hidden until the seam is hovered,
+      never unmounted, collapsed panes pin the pill visible)
 - [ ] fixed-size pane allocation matches
 - [ ] ratio clamping to [0.05, 0.95] matches
 
@@ -430,6 +495,8 @@ None.
 |-------|-------------|-----------------|-----------|
 | The zero-footprint seam (`divider` prop, default off) is Svelte-only; React and the natives still paint the divider line | the seam behavior was proven in the Svelte host first | pending review | port to the other runtimes when one is next touched |
 | The both-collapsed expand-toggle rule is Svelte-only; other runtimes hide both toggles when both panes are collapsed | the trap was proven against the Svelte host | pending review | port with the seam work |
+| The natives' hover-reveal zone is the toggle cluster's own bounds, not the divider's grab strip — the pointer must reach the pill rather than the seam around it | the shared render tier has no absolute positioning for the cluster, so it sits inline beside the handle rather than overlaying it; there is no "hovering a sibling reveals me" primitive in the node vocabulary | pending review | widen when the node vocabulary gains group-hover |
+| The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no accessibility/focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |
 
 ## 12. Specimen Definitions
 
@@ -444,3 +511,9 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Vertical split | `orientation="vertical"`, primary snippet with "Primary pane", secondary snippet with "Secondary pane" | Two stacked panes divided by a horizontal divider; resizable vertically |
+
+### Group: Toggle Visibility
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Hover-revealed toggles | `toggleVisibility="hover"`, `showCollapsePrimary`, `showCollapseSecondary` | No pill at rest; moving the pointer onto the seam fades it in, and it is clickable across its whole width rather than either side of the line |

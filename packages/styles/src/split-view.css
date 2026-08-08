@@ -58,6 +58,21 @@
 
   .poodle-split-view__toggles {
     position: absolute;
+    /* Above the divider (z-index: 1) and the resize handle's grab overlay
+       nested inside it. Without this the handle's 0.5rem hit strip runs down
+       the middle of the pill and swallows the clicks, so the toggles are only
+       reachable by aiming either side of the seam line. The rule holds for
+       both anatomies: as a root sibling of the divider it outranks the whole
+       divider subtree, and nested inside the divider it outranks the hit
+       strip's z-index: 1 within that stacking context. */
+    z-index: 2;
+    /* Reveal and disabled-dim are separate axes that both land on opacity, so
+       they multiply through custom properties rather than fighting over the
+       one declaration — otherwise the more specific of the two silently wins
+       and a disabled hover-reveal split shows its dimmed pill permanently. */
+    --poodle-split-toggles-reveal: 1;
+    --poodle-split-toggles-state-opacity: 1;
+    opacity: calc(var(--poodle-split-toggles-reveal) * var(--poodle-split-toggles-state-opacity));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,8 +104,47 @@
     flex-direction: row;
   }
 
+  /* Hover-reveal variant. The pill is chrome, not content: it stays out of the
+     way until the pointer reaches the seam — the handle's grab strip or the
+     pill itself. `pointer-events: none` while hidden keeps an invisible pill
+     from eating clicks meant for pane content; the grab strip underneath is
+     what reveals it, and once revealed the pill takes its own hover. */
+  .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__toggles {
+    --poodle-split-toggles-reveal: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+  }
+
+  /* Two reveal selectors for the two anatomies: `~` for the toggles as a root
+     sibling of the divider (Svelte), descendant for the toggles nested inside
+     it (React). `:focus-within` is the keyboard route in — without it a
+     tab-focused toggle would be invisible. */
+  .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__divider:hover ~ .poodle-split-view__toggles,
+  .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__divider:hover .poodle-split-view__toggles,
+  .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__toggles:hover,
+  .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__toggles:focus-within {
+    --poodle-split-toggles-reveal: 1;
+    pointer-events: auto;
+  }
+
+  /* A collapsed pane's expand toggle is its only way back, and a collapsed
+     pane leaves the seam on the container edge where there is barely anything
+     left to hover. Pin the pill visible — the same "a collapse pair is never
+     unrecoverable" rule the toggle-visibility logic enforces. */
+  .poodle-split-view[data-toggle-visibility="hover"][data-primary-collapsed] .poodle-split-view__toggles,
+  .poodle-split-view[data-toggle-visibility="hover"][data-secondary-collapsed] .poodle-split-view__toggles {
+    --poodle-split-toggles-reveal: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .poodle-split-view[data-toggle-visibility="hover"] .poodle-split-view__toggles {
+      transition: none;
+    }
+  }
+
   .poodle-split-view[data-disabled] > .poodle-split-view__toggles {
-    opacity: var(--poodle-state-opacity-disabled);
+    --poodle-split-toggles-state-opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* A fully collapsed pane puts the divider seam on the container edge; a

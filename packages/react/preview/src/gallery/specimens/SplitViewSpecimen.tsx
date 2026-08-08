@@ -95,7 +95,29 @@ export function SplitViewSpecimen() {
         </div>
       </SpecimenGroup>
 
-      {/* 4. Nested splits (IDE-style layout) */}
+      {/* 4. Hover-revealed toggles */}
+      <SpecimenGroup label="Hover-revealed toggles (move the pointer onto the seam)">
+        <div style={frameStyle}>
+          <SplitView
+            orientation="horizontal"
+            toggleVisibility="hover"
+            showCollapsePrimary
+            showCollapseSecondary
+            primary={
+              <div className="poodle-specimen__fill" style={fillStyle}>
+                <Region label="Primary" color="blue" />
+              </div>
+            }
+            secondary={
+              <div className="poodle-specimen__fill" style={fillStyle}>
+                <Region label="Secondary" color="green" />
+              </div>
+            }
+          />
+        </div>
+      </SpecimenGroup>
+
+      {/* 5. Nested splits (IDE-style layout) */}
       <SpecimenGroup label="Nested splits (IDE-style layout)">
         <div style={frameTallStyle}>
           <SplitView
@@ -130,7 +152,7 @@ export function SplitViewSpecimen() {
         </div>
       </SpecimenGroup>
 
-      {/* 5. Disabled */}
+      {/* 6. Disabled */}
       <SpecimenGroup label="Disabled">
         <div style={frameStyle}>
           <SplitView

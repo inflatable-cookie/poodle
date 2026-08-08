@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::{rem_to_px, size_font_rem};
 use crate::compat::js_split_view;
 
-use poodle_specs::{ControlSize, SplitOrientation, SplitViewSpec};
+use poodle_specs::{ControlSize, SplitOrientation, SplitToggleVisibility, SplitViewSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -84,6 +84,25 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     Some(
                         div().grow().bg(bg).border_1().border_color(border).p(pad)
                             .child(label("Bottom pane").text_color(secondary).text_size(font_size))
+                    ),
+                )
+            )
+        ))
+        .child(group("Hover-revealed toggles (pointer onto the seam)", secondary,
+            div().h(h_short).child(
+                js_split_view(
+                    &SplitViewSpec::new(SplitOrientation::Horizontal)
+                        .with_show_collapse_primary(true)
+                        .with_show_collapse_secondary(true)
+                        .with_toggle_visibility(SplitToggleVisibility::Hover),
+                    theme,
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Primary").text_color(text_primary).text_size(font_size))
+                    ),
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Secondary").text_color(secondary).text_size(font_size))
                     ),
                 )
             )

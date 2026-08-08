@@ -11,6 +11,7 @@ import type {
   ControlSize,
   SemanticControlSizeRole,
   SplitOrientation,
+  SplitToggleVisibility,
 } from "./types";
 
 export interface SplitViewProps {
@@ -31,6 +32,12 @@ export interface SplitViewProps {
   collapseSecondaryBelowSize?: number | null;
   showCollapsePrimary?: boolean;
   showCollapseSecondary?: boolean;
+  /** When the collapse toggles are visible. `"always"` keeps the pill on
+   * screen; `"hover"` reveals it only while the pointer is on the seam (the
+   * resize grab strip or the pill itself) or a toggle holds focus. A collapsed
+   * pane's expand toggle stays visible in either mode — hiding it would leave
+   * the pane unrecoverable. */
+  toggleVisibility?: SplitToggleVisibility;
   ariaLabel?: string | null;
   disabled?: boolean;
   size?: ControlSize | null;
@@ -63,6 +70,7 @@ export function SplitView({
   collapseSecondaryBelowSize = null,
   showCollapsePrimary = false,
   showCollapseSecondary = false,
+  toggleVisibility = "always",
   ariaLabel = null,
   disabled = false,
   size = null,
@@ -270,6 +278,7 @@ export function SplitView({
       data-orientation={orientation}
       data-primary-collapsed={isPrimaryCollapsed || undefined}
       data-secondary-collapsed={isSecondaryCollapsed || undefined}
+      data-toggle-visibility={toggleVisibility}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       aria-label={ariaLabel ?? "Split view"}

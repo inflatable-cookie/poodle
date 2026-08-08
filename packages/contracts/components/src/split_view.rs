@@ -1,4 +1,4 @@
-use crate::composite_types::SplitOrientation;
+use crate::composite_types::{SplitOrientation, SplitToggleVisibility};
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -30,6 +30,10 @@ pub struct SplitViewSpec {
     /// When true the split renders a collapse-toggle affordance on
     /// the secondary side of the divider.
     pub show_collapse_secondary: bool,
+    /// When the collapse-toggle pill is visible. `Hover` keeps it out of the
+    /// way until the pointer reaches the seam; a collapsed pane's expand
+    /// toggle stays visible regardless, since it is the only way back.
+    pub toggle_visibility: SplitToggleVisibility,
     /// When true the divider paints a visible line. Default false: pane
     /// borders read as the separator and the resize handle's grab area is an
     /// overlay with no layout footprint either way.
@@ -80,6 +84,7 @@ impl SplitViewSpec {
             is_disabled: false,
             show_collapse_primary: false,
             show_collapse_secondary: false,
+            toggle_visibility: SplitToggleVisibility::Always,
             divider: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
@@ -145,6 +150,21 @@ impl SplitViewSpec {
     pub fn with_show_collapse_secondary(mut self, show: bool) -> Self {
         self.show_collapse_secondary = show;
         self
+    }
+
+    pub fn with_toggle_visibility(mut self, visibility: SplitToggleVisibility) -> Self {
+        self.toggle_visibility = visibility;
+        self
+    }
+
+    /// The toggle cluster's resting opacity: hidden when the split reveals its
+    /// toggles on hover and neither pane is collapsed. A collapsed pane keeps
+    /// its expand toggle on screen — with the pane gone there is no seam left
+    /// to hover toward, so hiding it would strand the pane.
+    pub fn toggles_hidden_until_hover(&self) -> bool {
+        self.toggle_visibility == SplitToggleVisibility::Hover
+            && !self.is_primary_collapsed
+            && !self.is_secondary_collapsed
     }
 
     pub fn current_ratio(&self) -> f32 {

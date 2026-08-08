@@ -11,6 +11,7 @@
     ControlSize,
     SemanticControlSizeRole,
     SplitOrientation,
+    SplitToggleVisibility,
   } from "./types";
 
   interface Props {
@@ -31,6 +32,12 @@
     collapseSecondaryBelowSize?: number | null;
     showCollapsePrimary?: boolean;
     showCollapseSecondary?: boolean;
+    /** When the collapse toggles are visible. `"always"` keeps the pill on
+     * screen; `"hover"` reveals it only while the pointer is on the seam (the
+     * resize grab strip or the pill itself) or a toggle holds focus. A
+     * collapsed pane's expand toggle stays visible in either mode — hiding it
+     * would leave the pane unrecoverable. */
+    toggleVisibility?: SplitToggleVisibility;
     /** Show the visible divider line. Default off: the pane borders already
      * read as the separator, and the resize handle's grab area is an overlay
      * that costs no layout space either way. */
@@ -65,6 +72,7 @@
     collapseSecondaryBelowSize = null,
     showCollapsePrimary = false,
     showCollapseSecondary = false,
+    toggleVisibility = "always",
     divider = false,
     ariaLabel = null,
     disabled = false,
@@ -335,6 +343,7 @@
   data-primary-collapsed={isPrimaryCollapsed || undefined}
   data-secondary-collapsed={isSecondaryCollapsed || undefined}
   data-divider={divider ? "line" : undefined}
+  data-toggle-visibility={toggleVisibility}
   data-disabled={disabled || undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}

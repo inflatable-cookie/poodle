@@ -528,6 +528,9 @@ export type BulkAction = {
 export type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
 export type PickerVariant = "inline" | "popover" | "modal";
 export type SplitOrientation = "horizontal" | "vertical";
+/** When a SplitView shows its collapse-toggle pill: always, or only while the
+ * pointer is on the seam / a toggle holds focus. */
+export type SplitToggleVisibility = "always" | "hover";
 export type CalloutAnnounceMode = "none" | "polite" | "assertive";
 
 export type ParsedEmbed = {

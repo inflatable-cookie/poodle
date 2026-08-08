@@ -16,6 +16,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    StylePatch,
 };
 use poodle_specs::{
     CollapseDirection, CollapseToggleSpec, Orientation, ResizeHandleSpec, SplitOrientation,
@@ -212,6 +213,22 @@ pub fn split_view(
             ));
         }
 
+        // Hover-reveal: the cluster rests at opacity 0 and its own hover
+        // brings it back. Opacity is paint-only in both backends, so the
+        // cluster still hit-tests while invisible — the reveal region is the
+        // pill's own bounds, which is the seam. A collapsed pane opts out
+        // (`toggles_hidden_until_hover`): its expand toggle is the only way
+        // back and must not need a hover to be found.
+        if spec.toggles_hidden_until_hover() {
+            cluster.style.descriptor.opacity = 0.0;
+            cluster.style.hover = Some(StylePatch {
+                background: None,
+                border_color: None,
+                text_color: None,
+                opacity: Some(1.0),
+            });
+        }
+
         centered(cluster_dir).child(handle).child(cluster)
     } else {
         handle
@@ -248,4 +265,69 @@ pub fn split_view(
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::SplitToggleVisibility;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn toggling_spec() -> SplitViewSpec {
+        SplitViewSpec::new(SplitOrientation::Horizontal)
+            .with_show_collapse_primary(true)
+            .with_show_collapse_secondary(true)
+    }
+
+    /// The toggle cluster is the divider's second child (the handle is first).
+    fn cluster(node: &Node) -> &Node {
+        let divider = &node.children[1];
+        &divider.children[1]
+    }
+
+    fn render(spec: &SplitViewSpec) -> Node {
+        split_view(spec, &theme(), None, None, SplitViewHandlers::default())
+    }
+
+    #[test]
+    fn always_visibility_leaves_the_cluster_opaque_and_unpatched() {
+        let node = render(&toggling_spec());
+        let cluster = cluster(&node);
+        assert_eq!(cluster.style.descriptor.opacity, 1.0);
+        assert!(cluster.style.hover.is_none());
+    }
+
+    #[test]
+    fn hover_visibility_rests_the_cluster_at_zero_and_reveals_on_hover() {
+        let spec = toggling_spec().with_toggle_visibility(SplitToggleVisibility::Hover);
+        let node = render(&spec);
+        let cluster = cluster(&node);
+        assert_eq!(cluster.style.descriptor.opacity, 0.0);
+        assert_eq!(
+            cluster.style.hover.expect("hover patch").opacity,
+            Some(1.0)
+        );
+    }
+
+    #[test]
+    fn a_collapsed_pane_keeps_its_expand_toggle_visible_under_hover_visibility() {
+        // The expand toggle is the only way back; hiding it behind a hover on
+        // a seam that has been pushed to the container edge strands the pane.
+        for spec in [
+            toggling_spec()
+                .with_toggle_visibility(SplitToggleVisibility::Hover)
+                .with_primary_collapsed(true),
+            toggling_spec()
+                .with_toggle_visibility(SplitToggleVisibility::Hover)
+                .with_secondary_collapsed(true),
+        ] {
+            let node = render(&spec);
+            let cluster = cluster(&node);
+            assert_eq!(cluster.style.descriptor.opacity, 1.0);
+            assert!(cluster.style.hover.is_none());
+        }
+    }
 }

@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{SplitOrientation, SplitViewSpec};
+use poodle_specs::{SplitOrientation, SplitToggleVisibility, SplitViewSpec};
 
 /// The specimen frames are full-width inside the preview's content column, so
 /// this is the axis extent the divider's pixel deltas are measured against.
@@ -197,6 +197,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                         .with_primary(region("Top", 220.0))
                         .with_secondary(region("Bottom", 280.0)),
+                    ),
+                ),
+        )
+        // --- Hover-revealed toggles ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Hover-revealed toggles (pointer onto the seam)"),
+                    theme,
+                ))
+                .child(
+                    frame(160.0).child(
+                        SplitView::from_spec(
+                            SplitViewSpec::new(SplitOrientation::Horizontal)
+                                .with_default_ratio(0.35)
+                                .with_show_collapse_primary(true)
+                                .with_show_collapse_secondary(true)
+                                .with_toggle_visibility(SplitToggleVisibility::Hover),
+                            theme,
+                        )
+                        .with_primary(region("Primary", 220.0))
+                        .with_secondary(region("Secondary", 140.0)),
                     ),
                 ),
         )

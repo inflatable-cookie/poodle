@@ -24,6 +24,8 @@ Svelte implements the full prop surface (orientation, ratio/defaultRatio, min/fi
 - [x] FIXED **Toggles surface styling** — added the toggle cluster `padding: 0.125rem`, `border-radius: var(--poodle-radius-pill)`, `background` color-mix (panel 92% / elevated), and `box-shadow` ring (`:389-396`) to contract §8.
 - [x] FIXED **`pointer-events` rule** — Svelte's `.toggles` has **no** pointer-events rule (`:383-397`); dropped the phantom rows from contract.
 - [x] FIXED **`z-index: 1`** — Svelte omits it; dropped from contract. Added `justify-content: center` to match Svelte (`:387`).
+- [x] FIXED **Toggles sat under the resize handle's grab overlay** — the divider carries `z-index: 1` and the handle's `0.5rem` `__hit` strip runs down the middle of the pill, so every click landing on the seam line hit the drag handle instead of the toggle. Confirmed by probe: with `z-index: auto` on the toggles, a 9-point column down the pill's centre returns `HANDLE` at every point; with `z-index: 2` it returns `toggles` at every point, and a dead-centre click collapses the pane. Contract §8 gained the `z-index: 2` row and its rationale.
+- [x] ADDED **`toggleVisibility`** — `"always" | "hover"`. Hover mode rests the pill at opacity 0 and reveals it from the seam (divider hover, pill hover, or `:focus-within`); it never unmounts the buttons. A collapsed pane pins the pill visible, extending the existing "a collapse pair is never unrecoverable" rule. Reveal and disabled-dim compose through `--poodle-split-toggles-reveal` × `--poodle-split-toggles-state-opacity` rather than racing on `opacity`.
 - Flex table, drag thresholds (2%/98%), rail hysteresis (+8px), clamping [0.05, 0.95], toggle visibility rules, toggle direction by orientation — all match. No behavioral divergence.
 
 ## GPUI gap (vs Svelte + contract)
@@ -36,6 +38,9 @@ GPUI renders panes with ratio/fixed/min allocation, collapse hiding, a divider w
 - [x] FIXED **No ResizeHandle composition** — divider now embeds `ResizeHandle::from_spec` (orientation inverse of split axis, `aria_value_now=ratio`, disabled forwarded), giving separator semantics + the keyboard-resizable affordance.
 - [ ] **No rail-collapse / drag-to-collapse** — `*CollapsedSize`, `collapse*BelowSize`, 2%/98% thresholds, preserved ratio are not implemented. **Spec gap**: `SplitViewSpec` has no `primary_collapsed_size` / `secondary_collapsed_size` / `collapse_*_below_size` fields. Out of scope this pass (additive spec expansion + drag lifecycle); the drag/threshold logic lives in the preview event loop.
 - [ ] **No fixed-collapsed (railed) content mounting** — collapsed panes are still dropped; coupled to the rail-collapse spec gap above (needs `*CollapsedSize` to know the pinned size).
+- [x] ADDED **`toggle_visibility`** — honoured through the shared `poodle_render::split_view`: `Hover` rests the toggle cluster at `opacity: 0` with a hover `StylePatch` restoring `1.0`, and a collapsed pane opts out via `SplitViewSpec::toggles_hidden_until_hover`. Opacity is paint-only in the backend, so the cluster still hit-tests while invisible.
+- [ ] **Hover-reveal zone is the cluster, not the seam** — the cluster sits inline beside the handle (immediate-mode has no absolute centering), and the node vocabulary has no group-hover, so the pointer must reach the pill rather than the grab strip around it. Recorded as a Known Delta.
+- [ ] **No `:focus-within` equivalent** — a keyboard-focused toggle is not revealed. Recorded as a Known Delta; coupled to the missing focus routing above.
 - accepted: no ARIA exposure (gpui has no accessibility API); drag physics platform-owned. Two-way toggle + keyboard-resizable separator now provided by the composed primitives.
 
 ## Jetstream gap (vs Svelte + contract)
@@ -52,9 +57,10 @@ Jetstream composes the real `js_resize_handle` and maps orientation correctly (`
 
 ## Specimen parity
 
-- Svelte covers: Basic horizontal, Basic vertical, Horizontal w/ collapse toggles, Vertical w/ collapse toggles, **Nested splits (IDE)**, **Disabled**. Six groups.
-- GPUI covers: all six matching groups (Basic h/v, h/v collapse toggles, Nested, Disabled) — full group parity, though the toggles are hand-built and collapse is one-way.
-- Jetstream covers: Horizontal split, Vertical split, **Horizontal + Vertical collapse-toggle groups**, Primary-only. Collapse toggles now render via the composed `js_collapse_toggle`. Still missing vs GPUI: **Nested splits**, **Disabled** (lower priority — no spec gap).
+- Svelte covers: Basic horizontal, Basic vertical, Horizontal w/ collapse toggles, Vertical w/ collapse toggles, **Hover-revealed toggles**, **Nested splits (IDE)**, **Disabled**. Seven groups. React mirrors all seven.
+- GPUI covers: all seven matching groups (Basic h/v, h/v collapse toggles, Hover-revealed, Nested, Disabled) — full group parity, though the toggles are hand-built and collapse is one-way.
+- Jetstream covers: Horizontal split, Vertical split, **Horizontal + Vertical collapse-toggle groups**, **Hover-revealed toggles**, Primary-only. Collapse toggles now render via the composed `js_collapse_toggle`. Still missing vs GPUI: **Nested splits**, **Disabled** (lower priority — no spec gap).
+- Neither native visual baseline moved: both snapshots clip above the new group (Jetstream's fixed 900×640 viewport, GPUI's window screenshot), and a hover-reveal specimen renders at rest anyway. The reveal is proved by `poodle-render` unit tests on the node tree instead.
 
 ## Notes
 

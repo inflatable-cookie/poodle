@@ -50,3 +50,43 @@ describe("SplitView collapse toggles", () => {
     expect(queryByRole("button", { name: "Expand secondary" })).toBeNull();
   });
 });
+
+describe("SplitView toggle visibility", () => {
+  function renderSplit(props: Record<string, unknown>) {
+    const { container } = render(SplitView, {
+      props: {
+        showCollapsePrimary: true,
+        showCollapseSecondary: true,
+        primary: () => {},
+        secondary: () => {},
+        ...props,
+      },
+    });
+    return container.querySelector(".poodle-split-view") as HTMLElement;
+  }
+
+  it("defaults to always-visible toggles", () => {
+    expect(renderSplit({}).dataset.toggleVisibility).toBe("always");
+  });
+
+  it("marks the root for hover reveal when asked", () => {
+    expect(renderSplit({ toggleVisibility: "hover" }).dataset.toggleVisibility).toBe("hover");
+  });
+
+  it("still renders the toggles in hover mode — the reveal is presentational", () => {
+    // Hover reveal must not unmount the buttons: they stay in the a11y tree
+    // and reachable by Tab, which is what :focus-within brings back on screen.
+    const { getByRole } = render(SplitView, {
+      props: {
+        showCollapsePrimary: true,
+        showCollapseSecondary: true,
+        toggleVisibility: "hover",
+        primary: () => {},
+        secondary: () => {},
+      },
+    });
+
+    expect(getByRole("button", { name: "Collapse primary" })).toBeTruthy();
+    expect(getByRole("button", { name: "Collapse secondary" })).toBeTruthy();
+  });
+});

@@ -314,8 +314,8 @@ pub use composite_types::{
     DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout, FormFieldState, FormSectionSpec,
     FormStatusSummary, MediaKind, MediaState, MinColumnWidth, PanelTabItem, ParsedEmbed,
     PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
-    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableFilter, TablePagination,
-    TableRowSpec, TableSortDirection, ValidationSummaryEntry,
+    SelectionSummaryItem, SplitOrientation, SplitToggleVisibility, TableColumnSpec, TableFilter,
+    TablePagination, TableRowSpec, TableSortDirection, ValidationSummaryEntry,
 };
 pub use confirm_action::ConfirmActionSpec;
 pub use data_table::DataTableSpec;
