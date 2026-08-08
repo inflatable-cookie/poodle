@@ -106,6 +106,9 @@ Updated: 2026-07-10
 Toggle visibility: an open pane's collapse toggle renders while its sibling
 is open, and a collapsed pane's expand toggle always renders. With both panes
 collapsed both expand toggles stay — a collapse pair is never unrecoverable.
+A fully collapsed pane anchors its toggles to the viewport edge: the pill
+peeks inward, flat side flush with the edge, rather than hanging half out of
+view.
 
 ### Component States
 

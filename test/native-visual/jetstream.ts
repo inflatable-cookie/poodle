@@ -8,8 +8,9 @@ import { repoRoot } from "./config";
 /**
  * Jetstream native visual gate — the headless one.
  *
- *   bun test/native-visual/jetstream.ts            # diff against baselines
- *   bun test/native-visual/jetstream.ts --update   # (re)write baselines
+ *   bun test/native-visual/jetstream.ts                  # diff against baselines
+ *   bun test/native-visual/jetstream.ts --update         # (re)write baselines
+ *   bun test/native-visual/jetstream.ts --slug=button    # one component
  *
  * Where the GPUI gate opens a window per component and screenshots it through
  * the macOS window server, this renders every specimen offscreen on a headless
@@ -31,22 +32,49 @@ import { repoRoot } from "./config";
  * retry loop. A difference means the render changed.
  */
 
+/**
+ * Specimens whose render depends on the wall clock, so a byte-exact gate would
+ * fail on a date change rather than on a code change.
+ *
+ * The GPUI gate carries the same idea for `time-ago`. `calendar` earns it the
+ * same way: `poodle_render::calendar` reads `SystemTime::now()` to draw the
+ * today border, so its baseline expires at midnight. Making `today` injectable
+ * is the real fix and is recorded as a papercut — Svelte reads the clock too,
+ * so it is a contract decision, not a local one.
+ */
+const SKIPPED: Record<string, string> = {
+  calendar: "today border reads the system clock — the baseline expires at midnight",
+};
+
 const SNAP_OUT = "/tmp/poodle-specimens";
 const BASELINE_DIR = "packages/jetstream/preview/baselines";
 const OUT_DIR = "test/native-visual/out-jetstream";
 const PREVIEW_CWD = "packages/jetstream/preview";
 
 const update = process.argv.includes("--update");
+/**
+ * Comma-separated slugs, or null for everything.
+ *
+ * A filtered sweep skips the two non-component chrome pages as well, so
+ * checking one component costs one render rather than 138.
+ */
+const slugs =
+  process.argv.find((a) => a.startsWith("--slug="))?.slice("--slug=".length) ?? null;
 
 function runSweep(): void {
   rmSync(SNAP_OUT, { recursive: true, force: true });
-  const proc = Bun.spawnSync(["cargo", "run", "--quiet", "--bin", "snap", "--", "specimens"], {
+  const args = ["cargo", "run", "--quiet", "--bin", "snap", "--", "specimens"];
+  if (slugs) args.push(`--slug=${slugs}`);
+  // stderr is inherited rather than piped: `snap` names each specimen as it
+  // renders, and swallowing that made the render phase a silent ~80s block in
+  // which a stall and normal progress looked the same.
+  const proc = Bun.spawnSync(args, {
     cwd: path.join(repoRoot, PREVIEW_CWD),
     stdout: "ignore",
-    stderr: "pipe",
+    stderr: "inherit",
   });
   if (!proc.success) {
-    throw new Error(`snap sweep failed:\n${proc.stderr.toString().split("\n").slice(-20).join("\n")}`);
+    throw new Error("snap sweep failed — see the render output above");
   }
 }
 
@@ -56,7 +84,9 @@ mkdirSync(baselineDir, { recursive: true });
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
-console.log(`jetstream visual gate${update ? " (writing baselines)" : ""} — rendering offscreen…`);
+console.log(
+  `jetstream visual gate${update ? " (writing baselines)" : ""}${slugs ? ` — ${slugs}` : ""} — rendering offscreen…`,
+);
 runSweep();
 
 const rendered = readdirSync(SNAP_OUT).filter((f) => f.endsWith(".png")).sort();
@@ -66,7 +96,13 @@ let ok = 0;
 let fresh = 0;
 const failed: string[] = [];
 
+let skipped = 0;
 for (const file of rendered) {
+  const slug = file.replace(/\.png$/, "");
+  if (slug in SKIPPED) {
+    skipped += 1;
+    continue;
+  }
   const shot = readFileSync(path.join(SNAP_OUT, file));
   const baseline = path.join(baselineDir, file);
 
@@ -103,7 +139,10 @@ for (const file of rendered) {
   ok++;
 }
 
-console.log(`\ncompared ${rendered.length} specimens, ${failed.length} failing`);
+console.log(
+  `\ncompared ${rendered.length - skipped} specimens, ${failed.length} failing` +
+    (skipped ? `, ${skipped} skipped (${Object.keys(SKIPPED).join(", ")})` : ""),
+);
 if (fresh > 0) console.log(`${fresh} baseline(s) written for the first time — commit them.`);
 if (failed.length > 0) {
   console.log(`diffs in ${OUT_DIR}/`);

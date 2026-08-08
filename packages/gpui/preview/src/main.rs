@@ -1412,6 +1412,13 @@ struct CliArgs {
     /// Print every specimen-state entry whose key starts with this, after the
     /// clicks land. Turns "is this component interactive" into an assertion.
     print_state: Option<String>,
+    /// How long a synthetic click holds the button down, in milliseconds.
+    ///
+    /// Non-zero by default: a real click always outlives at least one
+    /// repaint, and a driver that never does cannot see a bug that only
+    /// appears when a press spans frames. `--hold 0` restores the old
+    /// single-frame behaviour for runs that only need speed.
+    hold_ms: u64,
 }
 
 fn parse_cli_args() -> CliArgs {
@@ -1427,6 +1434,7 @@ fn parse_cli_args() -> CliArgs {
     let mut screenshot = None;
     let mut clicks: Vec<DriverAction> = Vec::new();
     let mut print_state = None;
+    let mut hold_ms: u64 = 120;
 
     let mut i = 1;
     while i < args.len() {
@@ -1581,6 +1589,16 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            // `--hold 0` collapses a click back into one frame.
+            "--hold" => {
+                if let Some(val) = args.get(i + 1) {
+                    match val.trim().parse::<u64>() {
+                        Ok(ms) => hold_ms = ms,
+                        Err(_) => eprintln!("--hold expects milliseconds, got {val:?}"),
+                    }
+                    i += 1;
+                }
+            }
             "--print-state" => {
                 if let Some(val) = args.get(i + 1) {
                     print_state = Some(val.clone());
@@ -1604,6 +1622,7 @@ fn parse_cli_args() -> CliArgs {
         screenshot,
         clicks,
         print_state,
+        hold_ms,
     }
 }
 
@@ -1728,10 +1747,20 @@ enum DriverAction {
 /// The move comes first: hit testing keys off the last known pointer
 /// position, so a down with no preceding move lands on a window that thinks
 /// the pointer is somewhere else.
-fn dispatch_click(window: &mut Window, position: Point<Pixels>, click_count: isize) {
+/// Press: move the pointer there, then hold the button down.
+///
+/// Split from the release so a rebuild can happen *while the button is down*,
+/// which is what every real click does. Posting both in one frame made the
+/// driver blind to state keyed on the press surviving a repaint — it passed
+/// the node-backend's id-stability bug in both the broken and fixed states.
+fn dispatch_press(window: &mut Window, position: Point<Pixels>, click_count: isize) {
     use objc2_app_kit::NSEventType;
     post_mouse_event(window, NSEventType::MouseMoved, position);
     post_mouse_event_counted(window, NSEventType::LeftMouseDown, position, click_count);
+}
+
+fn dispatch_release(window: &mut Window, position: Point<Pixels>, click_count: isize) {
+    use objc2_app_kit::NSEventType;
     post_mouse_event_counted(window, NSEventType::LeftMouseUp, position, click_count);
 }
 
@@ -2129,6 +2158,7 @@ fn schedule_interaction(
     cx: &mut App,
     clicks: Vec<DriverAction>,
     print_state: Option<String>,
+    hold_ms: u64,
 ) {
     window
         .spawn(cx, async move |cx| {
@@ -2166,11 +2196,37 @@ fn schedule_interaction(
             }
 
             for action in clicks {
+                // A click is two events with a repaint between them. The hold
+                // is awaited outside `cx.update`, so the window rebuilds while
+                // the button is down.
+                if let DriverAction::Click(position, count) = &action {
+                    let position = calibration.apply(*position);
+                    let count = *count;
+                    cx.update(|window, _cx| {
+                        dispatch_press(window, position, count);
+                        window.refresh();
+                        post_frame_flush(window);
+                    })
+                    .ok();
+                    if hold_ms > 0 {
+                        cx.background_executor()
+                            .timer(std::time::Duration::from_millis(hold_ms))
+                            .await;
+                    }
+                    cx.update(|window, _cx| {
+                        dispatch_release(window, position, count);
+                        window.refresh();
+                        post_frame_flush(window);
+                    })
+                    .ok();
+                    cx.background_executor()
+                        .timer(std::time::Duration::from_millis(150))
+                        .await;
+                    continue;
+                }
                 cx.update(|window, _cx| {
                     match &action {
-                        DriverAction::Click(position, count) => {
-                            dispatch_click(window, calibration.apply(*position), *count);
-                        }
+                        DriverAction::Click(..) => unreachable!("handled above"),
                         DriverAction::Drag(from, to) => {
                             dispatch_drag(
                                 window,
@@ -2278,7 +2334,13 @@ fn main() {
                 // frame, which is what put a `segmented-control` baseline into
                 // the repo with its selected segment barely visible.
                 if !cli.clicks.is_empty() || cli.print_state.is_some() {
-                    schedule_interaction(window, cx, cli.clicks.clone(), cli.print_state.clone());
+                    schedule_interaction(
+                        window,
+                        cx,
+                        cli.clicks.clone(),
+                        cli.print_state.clone(),
+                        cli.hold_ms,
+                    );
                 } else if screenshot_mode {
                     // A centered screenshot window can open under the physical
                     // pointer and freeze an arbitrary hover state into the

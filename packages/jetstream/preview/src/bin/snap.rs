@@ -332,9 +332,13 @@ fn snapshot_opts(
     println!("wrote {path}");
 }
 
-/// Render every registered specimen to /tmp/poodle-specimens/{slug}.png for
-/// batch visual triage against the Svelte reference.
-fn snap_all_specimens() {
+/// Render registered specimens to /tmp/poodle-specimens/{slug}.png for batch
+/// visual triage against the Svelte reference.
+///
+/// `only` narrows the sweep to named slugs. Checking one component otherwise
+/// renders all 138, which is the difference between a few seconds and the whole
+/// sweep on every iteration.
+fn snap_all_specimens(only: &[String]) {
     use poodle_jetstream_preview::{app_state::AppState, component_registry, specimens};
     std::fs::create_dir_all("/tmp/poodle-specimens").ok();
     let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
@@ -343,6 +347,9 @@ fn snap_all_specimens() {
     let mut done = 0;
     for entry in component_registry::ALL_COMPONENTS {
         if !entry.has_specimen {
+            continue;
+        }
+        if !only.is_empty() && !only.iter().any(|slug| slug == entry.slug) {
             continue;
         }
         let Some(specimen) = specimens::render_specimen(entry.slug, &theme, &state) else {
@@ -359,7 +366,18 @@ fn snap_all_specimens() {
         let path = format!("/tmp/poodle-specimens/{}.png", entry.slug);
         snapshot(&scene, 900, 640, &path);
         done += 1;
+        // Streamed so the runner's ~80s render phase is not a silent block:
+        // a stalled specimen should be visible while it is stalling.
+        eprintln!("snap: {done} {}", entry.slug);
     }
+    // The two chrome pages below are not per-component, so a filtered sweep
+    // skips them: rendering them for a one-slug check is most of the cost the
+    // filter exists to avoid, and the runner would compare them anyway.
+    if !only.is_empty() {
+        eprintln!("snap: rendered {done} of {} requested specimen(s)", only.len());
+        return;
+    }
+
     // Landing catalogue page (default state = no active component).
     let landing = specimens::build_content(&state, &theme);
     let landing_scene = ui_element::div()
@@ -398,7 +416,18 @@ fn snap_all_specimens() {
 
 fn main() {
     if std::env::args().any(|a| a == "specimens") {
-        snap_all_specimens();
+        // `--slug=a,b` narrows the sweep; absent, everything renders.
+        let only: Vec<String> = std::env::args()
+            .find_map(|a| a.strip_prefix("--slug=").map(str::to_string))
+            .map(|list| {
+                list.split(',')
+                    .map(str::trim)
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_string)
+                    .collect()
+            })
+            .unwrap_or_default();
+        snap_all_specimens(&only);
         return;
     }
     let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);

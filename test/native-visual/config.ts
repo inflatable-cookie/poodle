@@ -95,6 +95,10 @@ export const SKIPPED: Record<string, string> = {
   // coincidence — which is precisely how the two-agreeing-captures rule gets
   // fooled into blessing a moving frame.
   "picker-shell": "pulsing loading dots — consecutive captures disagree",
+  // Latent rather than observed: its baseline was refreshed today, so it
+  // passes today and fails tomorrow. `poodle_render::calendar` reads
+  // `SystemTime::now()` for the today border.
+  calendar: "today border reads the system clock — the baseline expires at midnight",
 };
 
 /** Every component slug the GPUI preview can route to. */

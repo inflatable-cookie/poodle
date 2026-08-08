@@ -96,7 +96,16 @@ for (const [index, slug] of slugs.entries()) {
   // Relaunching immediately after the previous window closed makes captures
   // time out that succeed fine when run by hand; give the window server a beat.
   if (index > 0) await Bun.sleep(1000);
+
+  // Announced *before* the capture, so a stalled slug is visible while it is
+  // stalling. Progress used to print only every tenth success, which meant a
+  // focused run said nothing at all between the header and the verdict — a
+  // capture that hangs and one that is merely slow looked identical for 90
+  // seconds. Naming the slug first is what tells them apart.
+  process.stdout.write(`  → ${index + 1}/${slugs.length} ${slug}\n`);
+  const startedAt = Date.now();
   const capture = await captureSlugStable(slug, axis, shot);
+  const took = (Date.now() - startedAt) / 1000;
 
   if (!capture.ok) {
     results.push({ slug, status: "failed", detail: capture.reason });
@@ -148,7 +157,10 @@ for (const [index, slug] of slugs.entries()) {
   }
 
   results.push({ slug, status: "ok" });
-  if ((index + 1) % 10 === 0) console.log(`  … ${index + 1}/${slugs.length}`);
+  // Duration on the success line: a slug that takes markedly longer than its
+  // neighbours is the first sign of a capture going wrong, and it is invisible
+  // if only failures print.
+  console.log(`  ✓ ${slug} (${took.toFixed(1)}s)`);
 }
 
 const failed = results.filter((r) => r.status === "failed");

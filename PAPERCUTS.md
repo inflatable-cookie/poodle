@@ -7,25 +7,22 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-08 — `poodle_render::calendar` reads `SystemTime::now()` directly to
+  draw the today border, so every pixel baseline containing a Calendar expires
+  at midnight. Both native gates now skip it, which costs the whole specimen's
+  coverage for one border. Svelte reads the clock the same way
+  (`todayIsoDate()`), so making `today` injectable is a contract decision
+  across all targets, not a local fix.
+
 - 2026-08-06 — `effigy doctor` reports the repo's `isolation` manifest key as
   unsupported, so routine health checks cannot go green on the checked-in
   manifest. Align the manifest schema or update Effigy's accepted config keys.
 
-- 2026-08-06 — The Jetstream visual runner has no focused `--slug` filter, so
-  a one-component recipe check renders and compares all 138 specimens. Add the
-  same slug selection surface as the native GPUI gate.
-
 - 2026-08-06 — `effigy graph explore` can panic at `snippets.rs:210` while
-  truncating a Unicode-bearing result. Truncate on character boundaries so
-  normal component-flow queries return a JSON envelope instead of aborting.
-
-- 2026-08-06 — Focused native-visual runs can stay silent for more than 90
-  seconds after the batch header. Emit per-slug start/capture progress so a
-  slow capture is distinguishable from a hung driver.
-
-- 2026-08-07 — The in-process click driver (`--click`) posts mouse-down and
-  mouse-up inside a single frame, so it cannot catch a bug that only appears
-  when a click spans frames — which every real click does. It passed the
-  node-backend id-stability bug (see g12.019) in both the broken and fixed
-  states. Give it an optional inter-event delay, or a separate down/up pair, so
-  a press that outlives a rebuild is exercised.
+  truncating a Unicode-bearing result. **Fixed in the effigy working tree**
+  (`crates/effigy-codegraph/src/query/snippets.rs`) on 2026-08-08: the cut point
+  now walks back to a char boundary, and the ellipsis is only appended when it
+  fits inside the limit. Two tests added; 55 crate tests and clippy pass.
+  Uncommitted there, and the installed binary at `.local-install/bin/effigy` is
+  **not** rebuilt — this stays open until effigy releases and the install is
+  refreshed.
