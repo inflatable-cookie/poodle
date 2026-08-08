@@ -84,6 +84,7 @@ Updated: 2026-07-29
 | `edge` | `DockEdge` | `"left"` | no | dock placement: `"left" \| "right" \| "top" \| "bottom"` |
 | `sizing` | `DockSizing` | `"flexible"` | no | `"static"` for fixed stacked panels, `"flexible"` for tabbed/collapsible |
 | `collapsible` | `boolean` | `false` | no | when true, renders the CollapseToggle in all flexible-mode postures; when false, no collapse affordance is shown |
+| `showCollapseToggle` | `boolean` | `true` | no | set false when a divider-level control (e.g. SplitView pills) already owns collapse, so the strip does not duplicate it; collapse state rendering is unaffected |
 | `collapsed` | `boolean` | `false` | no | collapse state (flexible mode only); meaningful only when `collapsible=true` |
 | `collapsedPosture` | `DockCollapsedPosture` | `"icon-strip"` | no | `"hidden"` or `"icon-strip"` |
 | `emphasis` | `DockEmphasis` | `"standard"` | no | `"standard" \| "quiet" \| "strong"` |

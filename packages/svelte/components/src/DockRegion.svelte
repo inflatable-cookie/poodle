@@ -26,6 +26,10 @@
     edge?: DockEdge;
     sizing?: DockSizing;
     collapsible?: boolean;
+    /** Show the strip's own collapse toggle. Hosts with divider-level
+     * collapse controls (e.g. SplitView pills) set this false to avoid a
+     * redundant affordance. Collapse state rendering is unaffected. */
+    showCollapseToggle?: boolean;
     collapsed?: boolean;
     collapsedPosture?: DockCollapsedPosture;
     emphasis?: DockEmphasis;
@@ -54,6 +58,7 @@
     edge = "left",
     sizing = "flexible",
     collapsible = false,
+    showCollapseToggle = true,
     collapsed = false,
     collapsedPosture = "icon-strip",
     emphasis = "standard",
@@ -393,7 +398,7 @@
       {/each}
     </div>
   {:else if showHidden}
-    {#if collapsible}
+    {#if collapsible && showCollapseToggle}
       <div class="poodle-dock-region__edge-toggle">
         <CollapseToggle
           {collapsed}
@@ -405,7 +410,7 @@
     {/if}
   {:else if showIconStrip && isVerticalEdge}
     <div class="poodle-dock-region__strip" data-orientation="vertical">
-      {#if collapsible}
+      {#if collapsible && showCollapseToggle}
         <CollapseToggle
           {collapsed}
           direction={collapseDirection}
@@ -457,7 +462,7 @@
           onDragEnd={handleTabDragEnd}
         />
       </div>
-      {#if collapsible}
+      {#if collapsible && showCollapseToggle}
         <CollapseToggle
           {collapsed}
           direction={collapseDirection}
@@ -492,7 +497,7 @@
           onDragEnd={handleTabDragEnd}
         />
       </div>
-      {#if collapsible}
+      {#if collapsible && showCollapseToggle}
         <CollapseToggle
           {collapsed}
           direction={collapseDirection}

@@ -41,6 +41,10 @@ pub struct DockRegionSpec {
     pub is_collapsed: bool,
     /// When true, renders the CollapseToggle; when false, no collapse affordance.
     pub is_collapsible: bool,
+    /// When true the strip renders its own CollapseToggle. Hosts with
+    /// divider-level collapse controls set false to avoid a redundant
+    /// affordance. Collapse state rendering is unaffected.
+    pub show_collapse_toggle: bool,
     pub collapsed_posture: DockCollapsedPosture,
     pub emphasis: DockEmphasis,
     pub tabs_placement: DockTabsPlacement,
@@ -72,6 +76,7 @@ impl DockRegionSpec {
             sizing: DockSizing::Flexible,
             is_collapsed: false,
             is_collapsible: false,
+            show_collapse_toggle: true,
             collapsed_posture: DockCollapsedPosture::IconStrip,
             emphasis: DockEmphasis::Standard,
             tabs_placement: DockTabsPlacement::Edge,
