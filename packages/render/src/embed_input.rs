@@ -17,7 +17,7 @@ use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
 
 use crate::pill::pill;
 use crate::presentation::rem_to_px;
-use crate::text_input::{text_input, text_input_with_change};
+use crate::text_input::text_input_with_change;
 
 /// Host callbacks. `on_value_change` reports the URL as it is typed.
 #[derive(Default)]
@@ -61,7 +61,10 @@ pub fn embed_input_with_handlers(
             .with_input_type("multiline")
             .with_rows(3)
             .with_value(spec.value.clone())
-            .with_placeholder(placeholder)
+            .with_placeholder(placeholder.clone())
+            // The composite's own label, when a host wrapped it in a Field,
+            // reaches the root rather than this nested field.
+            .with_aria_label("Embed URL")
             .with_disabled(spec.is_disabled)
             // The nested field inherits the composite's axes; without this it
             // always rendered at the default size whatever the host asked for.

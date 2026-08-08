@@ -63,7 +63,13 @@ fn picker_footer(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn search_field(placeholder: &str, theme: &JetstreamThemeProvider) -> El {
-    js_text_input(&TextInputSpec::new().with_placeholder(placeholder), theme)
+    js_text_input(
+        &TextInputSpec::new()
+            .with_placeholder(placeholder)
+            // The panel's search field has no visible label beside it.
+            .with_aria_label(placeholder),
+        theme,
+    )
 }
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {

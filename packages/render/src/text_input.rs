@@ -177,7 +177,16 @@ pub fn text_input_with_handlers(
     // target-independent layer can do that. The component supplies the index
     // and the colours; the backend supplies the pixels, and decides when to
     // draw them at all — it is the only thing that knows what holds focus.
-    let mut value = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
+    // A text node, not a nested input: the field root already carries the
+    // TextInput role and the accessible name, and an input inside an input is
+    // one control announced twice. The caret channel is what makes the backend
+    // measure it.
+    let display: String = if current_value.is_empty() {
+        spec.placeholder.as_deref().unwrap_or("").to_string()
+    } else {
+        current_value.to_string()
+    };
+    let mut value = Node::text(display);
     // Derived from the field's id, because the backend caches this node's
     // *measured* line under it to answer "which character did I click?".
     value.id = Some(format!("{field_id}-value"));
@@ -433,12 +442,13 @@ fn affix(
 #[cfg(test)]
 mod tests {
 
-    /// The value is a single input node carrying its caret, not a stack of
-    /// text runs. Runs positioned the caret without measuring anything, which
-    /// is why they could not answer a click: `closest_index_for_x` needs one
-    /// shaped line, not a boundary between two.
+    /// The value is a single text node carrying its caret, not a stack of
+    /// text runs and not a nested input. Runs positioned the caret without
+    /// measuring anything, which is why they could not answer a click:
+    /// `closest_index_for_x` needs one shaped line, not a boundary between
+    /// two. A nested input would announce the field twice.
     #[test]
-    fn the_value_is_one_input_node_carrying_the_caret_and_its_colors() {
+    fn the_value_is_one_text_node_carrying_the_caret_and_its_colors() {
         let theme = theme();
         let node = text_input_with_handlers(
             &TextInputSpec::new()
@@ -451,10 +461,16 @@ mod tests {
         let value = node
             .find(&|n| n.id.as_deref() == Some("poodle-input-stock-value"))
             .expect("the value node is keyed off the field id");
-        let NodeKind::Input { value: text, .. } = &value.kind else {
-            panic!("the value node must be an input");
+        let NodeKind::Text { content } = &value.kind else {
+            panic!("the value node is text, so the field root is the only input");
         };
-        assert_eq!(text, "hello");
+        assert_eq!(content, "hello");
+        // Exactly one node in the tree carries the TextInput role.
+        fn count_inputs(n: &Node) -> usize {
+            usize::from(matches!(n.kind, NodeKind::Input { .. }))
+                + n.children.iter().map(count_inputs).sum::<usize>()
+        }
+        assert_eq!(count_inputs(&node), 1);
         let caret = value.caret.expect("the value node carries the caret");
         assert_eq!(caret.selection, (1, 4));
     }

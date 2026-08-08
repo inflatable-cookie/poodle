@@ -136,6 +136,8 @@ pub fn ref_select(
                 search = search.with_value(query.clone());
             }
             search.placeholder = Some(spec.search_placeholder.clone());
+            // A search field inside a panel has no visible label of its own.
+            search.aria_label = Some("Search references".to_string());
             panel = panel.child(text_input(&search, theme, None));
         }
 

@@ -308,6 +308,9 @@ pub fn editable_list(
         let input = text_input(
             &TextInputSpec::new()
                 .with_placeholder(spec.placeholder.clone())
+                // The add row's field sits next to an Add button with no
+                // visible label of its own.
+                .with_aria_label("New item")
                 .with_size(effective_size)
                 .with_density(density)
                 .with_disabled(is_unavailable),

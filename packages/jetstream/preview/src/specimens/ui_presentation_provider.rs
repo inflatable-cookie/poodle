@@ -47,6 +47,7 @@ fn scoped_controls(
         .child(div().w(160.0).child(js_text_input(
             &TextInputSpec::new()
                 .with_default_value(text.to_string())
+                .with_aria_label(text.to_string())
                 .with_size(resolved)
                 .with_density(density),
             theme,

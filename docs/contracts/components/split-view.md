@@ -65,6 +65,7 @@ Updated: 2026-07-10
 | `collapseSecondaryBelowSize` | `number \| null` | `null` | no | during divider drag, request secondary collapse when its pixel size would drop below this value |
 | `showCollapsePrimary` | `boolean` | `false` | no | show collapse toggle for primary pane |
 | `showCollapseSecondary` | `boolean` | `false` | no | show collapse toggle for secondary pane |
+| `divider` | `boolean` | `false` | no | paint the visible divider line; off by default since pane borders read as the separator and the resize grab area is an overlay with no layout footprint |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name (defaults to "Split view") |
 | `disabled` | `boolean` | `false` | no | disables resize and collapse interactions |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
@@ -189,6 +190,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `data-has-toggles` | divider `<div>` | present when true |
 | `data-size` | root `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
 | `data-density` | root `<div>` | `"compact"`, `"default"`, `"comfortable"` |
+| `data-divider` | root `<div>` | `"line"` when the `divider` prop is true; absent otherwise (zero-footprint seam) |
 
 ### Root (`.split-view`)
 
@@ -245,14 +247,14 @@ Pane `flex` and `overflow` are applied via inline style:
 
 | Property | Value |
 |----------|-------|
-| width | `var(--poodle-resize-handle-thickness, 0.125rem)` |
+| width | `0` by default; `var(--poodle-resize-handle-thickness, 0.125rem)` with `data-divider="line"` |
 | height | `100%` |
 
 #### Divider Vertical (`[data-orientation="vertical"]`)
 
 | Property | Value |
 |----------|-------|
-| height | `var(--poodle-resize-handle-thickness, 0.125rem)` |
+| height | `0` by default; `var(--poodle-resize-handle-thickness, 0.125rem)` with `data-divider="line"` |
 | width | `100%` |
 
 ### Toggles (`.split-view__toggles`)
@@ -407,6 +409,12 @@ None.
 
 - [ ] drag physics and resize cadence stay internal
 - [ ] animation/transition approach may differ
+
+## 11a. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| The zero-footprint seam (`divider` prop, default off) is Svelte-only; React and the natives still paint the divider line | the seam behavior was proven in the Svelte host first | pending review | port to the other runtimes when one is next touched |
 
 ## 12. Specimen Definitions
 

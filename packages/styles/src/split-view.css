@@ -44,6 +44,17 @@
     height: var(--poodle-resize-handle-thickness, 0.125rem);
   }
 
+  /* Default seam: no layout footprint and no painted line. The pane borders
+     already read as the separator and the handle's grab area is an overlay;
+     `divider` opts back into the line for borderless panes. */
+  .poodle-split-view:not([data-divider="line"]) .poodle-split-view__divider[data-orientation="horizontal"] {
+    width: 0;
+  }
+
+  .poodle-split-view:not([data-divider="line"]) .poodle-split-view__divider[data-orientation="vertical"] {
+    height: 0;
+  }
+
   .poodle-split-view__toggles {
     position: absolute;
     display: flex;

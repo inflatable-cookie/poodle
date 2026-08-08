@@ -105,7 +105,18 @@ pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>)
     }
     el = el.child(header);
 
-    if let Some(control_el) = control {
+    if let Some(mut control_el) = control {
+        // The contract's anatomy calls the label the "accessible naming anchor
+        // for the slotted control", which the web target spells `<label for>`.
+        // There is no `for` here, so the equivalent is to name the control from
+        // the label — otherwise a field renders visible text next to a control
+        // a screen reader announces as an unnamed text input.
+        //
+        // Only when the control has no name of its own: an explicit
+        // `aria_label` is more specific than the visible label and must win.
+        if control_el.a11y.label.is_none() && !spec.label.is_empty() {
+            control_el.a11y.label = Some(spec.label.clone());
+        }
         el = el.child(control_el);
     }
 

@@ -85,11 +85,13 @@ pub fn time_field_with_change(
         el.interaction.on_text_change = on_change;
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    // Named whether or not the host supplied one. A time field composed into a
+    // date-time picker has no visible label of its own, and "unnamed text
+    // input" is all a screen reader can say about it otherwise.
+    el.a11y.label = Some(match spec.aria_label.as_deref() {
+        Some(label) if !label.is_empty() => label.to_string(),
+        _ => "Time".to_string(),
+    });
     el
 }
 

@@ -373,6 +373,8 @@ fn build_search(
         .with_size_role(spec.size_role)
         .with_density(spec.density)
         .with_placeholder(spec.search_placeholder.clone())
+        // The panel's search field carries no visible label.
+        .with_aria_label("Search relations")
         .with_show_clear_button(true);
     if !spec.query.is_empty() {
         search_spec = search_spec.with_value(spec.query.clone());

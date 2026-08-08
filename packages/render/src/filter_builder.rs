@@ -99,6 +99,9 @@ fn operand_editor(
             text_input(
                 &TextInputSpec::new()
                     .with_value(value)
+                    // The clause's own field/operator selects sit beside it,
+                    // not as its label.
+                    .with_aria_label("Filter value")
                     .with_size(size)
                     .with_density(density)
                     .with_disabled(disabled),

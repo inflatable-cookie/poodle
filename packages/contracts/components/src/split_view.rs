@@ -30,6 +30,10 @@ pub struct SplitViewSpec {
     /// When true the split renders a collapse-toggle affordance on
     /// the secondary side of the divider.
     pub show_collapse_secondary: bool,
+    /// When true the divider paints a visible line. Default false: pane
+    /// borders read as the separator and the resize handle's grab area is an
+    /// overlay with no layout footprint either way.
+    pub divider: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -76,6 +80,7 @@ impl SplitViewSpec {
             is_disabled: false,
             show_collapse_primary: false,
             show_collapse_secondary: false,
+            divider: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,

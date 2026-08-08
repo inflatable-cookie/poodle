@@ -31,6 +31,10 @@
     collapseSecondaryBelowSize?: number | null;
     showCollapsePrimary?: boolean;
     showCollapseSecondary?: boolean;
+    /** Show the visible divider line. Default off: the pane borders already
+     * read as the separator, and the resize handle's grab area is an overlay
+     * that costs no layout space either way. */
+    divider?: boolean;
     ariaLabel?: string | null;
     disabled?: boolean;
     size?: ControlSize | null;
@@ -61,6 +65,7 @@
     collapseSecondaryBelowSize = null,
     showCollapsePrimary = false,
     showCollapseSecondary = false,
+    divider = false,
     ariaLabel = null,
     disabled = false,
     size = null,
@@ -309,6 +314,7 @@
   data-orientation={orientation}
   data-primary-collapsed={isPrimaryCollapsed || undefined}
   data-secondary-collapsed={isSecondaryCollapsed || undefined}
+  data-divider={divider ? "line" : undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
   aria-label={ariaLabel ?? "Split view"}

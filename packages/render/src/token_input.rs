@@ -116,9 +116,14 @@ pub fn token_input(
     if let Some(max) = spec.max_length {
         draft = draft.with_max_length(max);
     }
-    if let Some(aria) = &spec.aria_label {
-        draft = draft.with_aria_label(aria.clone());
-    }
+    // The draft field needs a name whether or not the host supplied one: it is
+    // the only thing here you can type into, and the committed tokens beside it
+    // are not its label. Without this it is announced as an unnamed text input.
+    draft = draft.with_aria_label(
+        spec.aria_label
+            .clone()
+            .unwrap_or_else(|| "Add token".to_string()),
+    );
     // The draft sits inline in the wrap row and grows to fill trailing space.
     let mut draft_slot = Node::container();
     {

@@ -109,7 +109,37 @@ fn element_id(node: &Node) -> ElementId {
 pub fn to_gpui(node: &Node) -> AnyElement {
     match &node.kind {
         NodeKind::Container => build_box(node, div()),
-        NodeKind::Text { content } => build_box(node, div().child(content.clone())),
+        NodeKind::Text { content } => {
+            // A text node carrying a caret is a field's value: the component
+            // draws it as text so it stays a single node in the accessibility
+            // tree (an input nested inside an input is one control announced
+            // twice), and the caret channel is what asks for measurement.
+            if node.caret.is_some() && !content.contains('\n') {
+                let text_color = node
+                    .style
+                    .descriptor
+                    .text_color
+                    .map(color)
+                    .unwrap_or_else(gpui::white);
+                let id = element_id_string(node);
+                let focused = is_focused(&id) || FOCUS_SCOPE.with(|f| f.get());
+                let caret = node.caret.expect("checked above");
+                return build_box(
+                    node,
+                    div().child(input_text::input_text(
+                        id,
+                        content.clone(),
+                        content.clone(),
+                        text_color,
+                        Some(caret.selection),
+                        color(caret.caret_color),
+                        color(caret.selection_color),
+                        focused,
+                    )),
+                );
+            }
+            build_box(node, div().child(content.clone()))
+        }
         // GPUI has no native button element; the old tier's buttons are styled
         // divs too, so the label-child div is the faithful mapping. Same for
         // Input: a real GPUI text field is an `Editor` entity, which a pure
@@ -867,79 +897,82 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
             });
         }
     }
-    if let NodeKind::Input { .. } = &node.kind {
-        let edit_key = node.interaction.on_edit_key.clone();
-
-        // Click to place the caret, drag to select. Both are the same
-        // question — "which character is under this x?" — answered from the
-        // last painted line, because only a painted line has been measured.
-        if let Some(select) = node.interaction.on_select_range.clone() {
-            let id = element_id_string(node);
-            let down_id = id.clone();
-            let down_select = select.clone();
-            el = el.on_mouse_down(
-                MouseButton::Left,
-                move |event: &MouseDownEvent, _window, cx| {
-                    let Some(index) = input_text::char_index_for_position(&down_id, event.position)
-                    else {
-                        return;
-                    };
-                    // Click count is the backend's to know; what a "word" is
-                    // is not, so the granularity is named rather than resolved.
-                    let granularity = match event.click_count {
-                        0 | 1 => SelectGranularity::Character,
-                        2 => SelectGranularity::Word,
-                        _ => SelectGranularity::Line,
-                    };
-                    if granularity != SelectGranularity::Character {
-                        down_select(index, index, granularity);
-                        cx.refresh_windows();
-                        return;
-                    }
-                    if event.modifiers.shift {
-                        // Shift-click extends from wherever the drag anchor is.
-                        if let Some(anchor) = input_text::drag_anchor(&down_id) {
-                            down_select(anchor, index, granularity);
-                            cx.refresh_windows();
-                            return;
-                        }
-                    }
-                    input_text::begin_select(&down_id, index);
-                    down_select(index, index, granularity);
-                    cx.refresh_windows();
-                },
-            );
-
-            let move_id = id.clone();
-            el = el.on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
-                let Some(anchor) = input_text::drag_anchor(&move_id) else {
-                    return;
-                };
-                if !event.dragging() {
-                    return;
-                }
-                let Some(index) = input_text::char_index_for_position(&move_id, event.position)
+    // Pointer selection is keyed on the channel, not on the node's kind: a
+    // field's value is a *text* node carrying a caret, so that the field root
+    // stays the only input in the accessibility tree.
+    // Click to place the caret, drag to select. Both are the same
+    // question — "which character is under this x?" — answered from the
+    // last painted line, because only a painted line has been measured.
+    if let Some(select) = node.interaction.on_select_range.clone() {
+        let id = element_id_string(node);
+        let down_id = id.clone();
+        let down_select = select.clone();
+        el = el.on_mouse_down(
+            MouseButton::Left,
+            move |event: &MouseDownEvent, _window, cx| {
+                let Some(index) = input_text::char_index_for_position(&down_id, event.position)
                 else {
                     return;
                 };
-                if index != anchor {
-                    select(anchor, index, SelectGranularity::Character);
+                // Click count is the backend's to know; what a "word" is
+                // is not, so the granularity is named rather than resolved.
+                let granularity = match event.click_count {
+                    0 | 1 => SelectGranularity::Character,
+                    2 => SelectGranularity::Word,
+                    _ => SelectGranularity::Line,
+                };
+                if granularity != SelectGranularity::Character {
+                    down_select(index, index, granularity);
                     cx.refresh_windows();
+                    return;
                 }
-            });
+                if event.modifiers.shift {
+                    // Shift-click extends from wherever the drag anchor is.
+                    if let Some(anchor) = input_text::drag_anchor(&down_id) {
+                        down_select(anchor, index, granularity);
+                        cx.refresh_windows();
+                        return;
+                    }
+                }
+                input_text::begin_select(&down_id, index);
+                down_select(index, index, granularity);
+                cx.refresh_windows();
+            },
+        );
 
-            // `_out` as well: a drag that ends past the field's edge must still
-            // end, or the next unrelated move keeps extending the selection.
-            el = el.on_mouse_up(MouseButton::Left, move |_event: &MouseUpEvent, _window, _cx| {
+        let move_id = id.clone();
+        el = el.on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
+            let Some(anchor) = input_text::drag_anchor(&move_id) else {
+                return;
+            };
+            if !event.dragging() {
+                return;
+            }
+            let Some(index) = input_text::char_index_for_position(&move_id, event.position)
+            else {
+                return;
+            };
+            if index != anchor {
+                select(anchor, index, SelectGranularity::Character);
+                cx.refresh_windows();
+            }
+        });
+
+        // `_out` as well: a drag that ends past the field's edge must still
+        // end, or the next unrelated move keeps extending the selection.
+        el = el.on_mouse_up(MouseButton::Left, move |_event: &MouseUpEvent, _window, _cx| {
+            input_text::end_select();
+        });
+        el = el.on_mouse_up_out(
+            MouseButton::Left,
+            move |_event: &MouseUpEvent, _window, _cx| {
                 input_text::end_select();
-            });
-            el = el.on_mouse_up_out(
-                MouseButton::Left,
-                move |_event: &MouseUpEvent, _window, _cx| {
-                    input_text::end_select();
-                },
-            );
-        }
+            },
+        );
+    }
+
+    if let NodeKind::Input { .. } = &node.kind {
+        let edit_key = node.interaction.on_edit_key.clone();
 
         let submit = node.interaction.on_submit.clone();
         let cancel = node.interaction.on_cancel.clone();
