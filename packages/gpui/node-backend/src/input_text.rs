@@ -23,6 +23,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
+use poodle_headless::text_input::{coalesces, EditSnapshot, EditState};
+
 use gpui::{
     fill, point, px, relative, size, App, Bounds, Element, ElementId, GlobalElementId, Hsla,
     LayoutId, PaintQuad, Pixels, Point, ShapedLine, Style, TextRun, Window,
@@ -56,6 +58,136 @@ thread_local! {
     /// How far each focused field has scrolled its text left to keep the caret
     /// visible. Cleared on blur, so a field re-read from the start.
     static SCROLL: RefCell<HashMap<String, Pixels>> = RefCell::new(HashMap::new());
+    /// Undo history per field: the snapshots, and where in them we are.
+    ///
+    /// Backend-side because it is ephemeral UI state, the same class as the
+    /// blink phase above — it belongs to the field while it is on screen and
+    /// means nothing afterwards. Keeping it here also means every field gets
+    /// undo without its host storing anything.
+    static HISTORY: RefCell<HashMap<String, History>> = RefCell::new(HashMap::new());
+    /// The range currently being composed by an input method, as character
+    /// indices. `None` means no composition is in progress.
+    static MARKED: RefCell<HashMap<String, (usize, usize)>> = RefCell::new(HashMap::new());
+}
+
+pub(crate) fn marked_range(id: &str) -> Option<(usize, usize)> {
+    MARKED.with(|m| m.borrow().get(id).copied())
+}
+
+pub(crate) fn set_marked(id: &str, range: (usize, usize)) {
+    MARKED.with(|m| {
+        m.borrow_mut().insert(id.to_string(), range);
+    });
+}
+
+pub(crate) fn clear_marked(id: &str) {
+    MARKED.with(|m| {
+        m.borrow_mut().remove(id);
+    });
+}
+
+/// Where a character range sits on screen, for an IME candidate window.
+pub(crate) fn bounds_for_chars(id: &str, from: usize, to: usize) -> Option<Bounds<Pixels>> {
+    MEASURED.with(|m| {
+        let m = m.borrow();
+        let measured = m.get(id)?;
+        let x0 = measured
+            .line
+            .x_for_index(byte_for_char(&measured.text, from));
+        let x1 = measured.line.x_for_index(byte_for_char(&measured.text, to));
+        Some(Bounds::from_corners(
+            gpui::point(measured.origin_x + x0, measured.bounds.top()),
+            gpui::point(measured.origin_x + x1, measured.bounds.bottom()),
+        ))
+    })
+}
+
+#[derive(Default)]
+pub(crate) struct History {
+    entries: Vec<EditSnapshot>,
+    /// Index of the entry currently on screen.
+    cursor: usize,
+    /// Whether the entry at `cursor` was created by a typing run still in
+    /// progress.
+    ///
+    /// Without this, the first keystroke of a run coalesces into the entry
+    /// holding the *pre-edit* state and destroys it, so a whole run collapses
+    /// to one entry and there is nothing left to undo to. The first change
+    /// pushes and opens the run; the rest replace.
+    run_open: bool,
+}
+
+/// History is keyed by the *value* node's id — the node that paints, and so
+/// the only one that sees an edit's result. The field root, where keystrokes
+/// land, derives it with this helper so exactly one place knows the shape.
+pub(crate) fn history_key(field_id: &str) -> String {
+    format!("{field_id}-value")
+}
+
+/// Record what a field currently holds, if it changed.
+///
+/// Called from paint, which is the only place that sees the *result* of an
+/// edit: the backend forwards a keystroke and the component computes the new
+/// value, so the new value only arrives on the next frame.
+pub(crate) fn record(id: &str, value: &str, selection: (usize, usize)) {
+    let snapshot = EditSnapshot {
+        value: value.to_string(),
+        state: EditState {
+            anchor: selection.0,
+            head: selection.1,
+        },
+    };
+    HISTORY.with(|h| {
+        let mut h = h.borrow_mut();
+        let history = h.entry(id.to_string()).or_default();
+        let current = history.entries.get(history.cursor).cloned();
+        if let Some(current) = current {
+            if current == snapshot {
+                return;
+            }
+            // A fresh edit after undoing discards the redo tail, which is what
+            // every editor does — the branch you abandoned is gone.
+            history.entries.truncate(history.cursor + 1);
+            let continues = coalesces(&current, &snapshot);
+            if history.run_open && continues {
+                history.entries[history.cursor] = snapshot;
+                return;
+            }
+            history.run_open = continues;
+        }
+        history.entries.push(snapshot);
+        history.cursor = history.entries.len() - 1;
+    });
+}
+
+/// Step back one entry, returning what to restore.
+pub(crate) fn undo(id: &str) -> Option<EditSnapshot> {
+    HISTORY.with(|h| {
+        let mut h = h.borrow_mut();
+        let history = h.get_mut(id)?;
+        history.run_open = false;
+        if history.cursor == 0 {
+            return None;
+        }
+        history.cursor -= 1;
+        history.entries.get(history.cursor).cloned()
+    })
+}
+
+/// Step forward again after an undo.
+pub(crate) fn redo(id: &str) -> Option<EditSnapshot> {
+    HISTORY.with(|h| {
+        let mut h = h.borrow_mut();
+        let history = h.get_mut(id)?;
+        // Stepping through history ends any run, so typing after an undo starts
+        // a new entry rather than rewriting the one just restored.
+        history.run_open = false;
+        if history.cursor + 1 >= history.entries.len() {
+            return None;
+        }
+        history.cursor += 1;
+        history.entries.get(history.cursor).cloned()
+    })
 }
 
 /// Character index -> byte offset, clamped to the string.
@@ -102,10 +234,16 @@ pub(crate) fn forget(id: &str) {
     SCROLL.with(|s| {
         s.borrow_mut().remove(id);
     });
+    MARKED.with(|m| {
+        m.borrow_mut().remove(id);
+    });
 }
 
 pub(crate) struct InputText {
     pub id: String,
+    /// Platform text services (dead keys, IME) for this field, registered while
+    /// it holds focus. `None` for a field with no edit channels.
+    pub ime: Option<crate::ime::NodeInputHandler>,
     /// The text to draw: the value, or the placeholder when the value is empty.
     pub display: String,
     /// The value itself, which is what selection indices count into. Differs
@@ -234,6 +372,9 @@ impl Element for InputText {
                 (end, start)
             };
             if start == end {
+                // Measured against the value, which is empty when the
+                // placeholder is showing — so the caret sits at the start of
+                // the prompt rather than somewhere inside it.
                 let x = line.x_for_index(byte_for_char(&self.value, start));
                 // Restart the blink whenever the value or the caret moved, so
                 // typing never hides the caret mid-keystroke.
@@ -315,6 +456,17 @@ impl Element for InputText {
             window.request_animation_frame();
         }
 
+        if let Some(selection) = self.selection {
+            record(&self.id, &self.value, selection);
+        }
+
+        // Platform text input, registered every frame while focused — gpui
+        // collects handlers per frame, and only accepts them during paint.
+        if self.focused {
+            if let (Some(handler), Some(focus)) = (self.ime.take(), super::focused_handle()) {
+                window.handle_input(&focus, handler, cx);
+            }
+        }
         MEASURED.with(|m| {
             m.borrow_mut().insert(
                 self.id.clone(),
@@ -343,6 +495,7 @@ pub(crate) fn input_text(
 ) -> InputText {
     InputText {
         id,
+        ime: None,
         display,
         value,
         color,

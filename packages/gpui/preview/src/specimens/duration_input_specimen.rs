@@ -1,4 +1,4 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{DurationInput, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
@@ -11,6 +11,40 @@ use poodle_specs::{DurationInputSpec, EyebrowSpec, ValidationState};
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
+
+    // Segment edits are host state, like every other value on this page: the
+    // component reports hours/minutes/seconds after carry and the host stores
+    // the formatted result.
+    let stored = |key: &str, fallback: &str| {
+        state
+            .specimens
+            .text
+            .get(key)
+            .cloned()
+            .unwrap_or_else(|| fallback.to_string())
+    };
+    macro_rules! live_duration {
+        ($builder:expr, $key:literal, $seconds:expr) => {{
+            let queue = std::sync::Arc::clone(&state.node_events);
+            let show_seconds = $seconds;
+            $builder.on_change(std::sync::Arc::new(
+                move |h: u32, m: u32, sec: u32, _total: u32| {
+                    let value = if show_seconds {
+                        format!("{h:02}:{m:02}:{sec:02}")
+                    } else {
+                        format!("{h:02}:{m:02}")
+                    };
+                    queue
+                        .lock()
+                        .unwrap()
+                        .push(NodeSpecimenEvent::SetText {
+                            key: $key.to_string(),
+                            value,
+                        });
+                },
+            ))
+        }};
+    }
 
     let examples = div()
         .flex()
@@ -33,13 +67,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(4.0))
                         .child(
-                            DurationInput::from_spec(
-                                DurationInputSpec::new()
-                                    .with_value("01:30:00")
-                                    .with_show_seconds(true),
-                                theme,
-                            )
-                            .with_id("duration-full"),
+                            live_duration!(
+                                DurationInput::from_spec(
+                                    DurationInputSpec::new()
+                                        .with_value(stored("duration-full", "01:30:00"))
+                                        .with_show_seconds(true),
+                                    theme,
+                                )
+                                .with_id("duration-full"),
+                                "duration-full",
+                                true
+                            ),
                         )
                         .child(
                             div()
@@ -60,13 +98,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    DurationInput::from_spec(
-                        DurationInputSpec::new()
-                            .with_value("02:45")
-                            .with_show_seconds(false),
-                        theme,
-                    )
-                    .with_id("duration-hm"),
+                    live_duration!(
+                        DurationInput::from_spec(
+                            DurationInputSpec::new()
+                                .with_value(stored("duration-hm", "02:45"))
+                                .with_show_seconds(false),
+                            theme,
+                        )
+                        .with_id("duration-hm"),
+                        "duration-hm",
+                        false
+                    ),
                 ),
         )
         // --- Empty / zero (default zero display) ---

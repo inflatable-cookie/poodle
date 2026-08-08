@@ -11,6 +11,13 @@ path = "src/lib.rs"
 [dependencies]
 gpui = "0.2.2"
 poodle-node = { path = "../../contracts/node" }
+# Undo coalescing only. The backend owns the history *storage* because history
+# is ephemeral per-field UI state and only the backend persists anything across
+# frames — but what counts as one undoable step is a text-editing rule, and a
+# rule duplicated per backend is the drift this layer exists to prevent.
+# `poodle-headless` is pure (no gpui, no engine), so this stays a contracts
+# dependency rather than a widening of the interpreter's surface.
+poodle-headless = { path = "../../contracts/headless" }
 
 [package.metadata.poodle]
 public-intent = true

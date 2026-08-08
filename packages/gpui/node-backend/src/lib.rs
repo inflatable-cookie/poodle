@@ -22,6 +22,7 @@
 //! (`poodle-render::color`); nodes carry final values.
 
 use std::cell::RefCell;
+use std::sync::Arc;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering, AtomicUsize};
 use std::time::Duration;
@@ -124,19 +125,41 @@ pub fn to_gpui(node: &Node) -> AnyElement {
                 let id = element_id_string(node);
                 let focused = is_focused(&id) || FOCUS_SCOPE.with(|f| f.get());
                 let caret = node.caret.expect("checked above");
-                return build_box(
-                    node,
-                    div().child(input_text::input_text(
-                        id,
-                        content.clone(),
-                        content.clone(),
-                        text_color,
-                        Some(caret.selection),
-                        color(caret.caret_color),
-                        color(caret.selection_color),
-                        focused,
-                    )),
+                let value_for_ime = if caret.showing_placeholder {
+                    String::new()
+                } else {
+                    content.clone()
+                };
+                let ime = crate::ime::NodeInputHandler {
+                    id: id.clone(),
+                    value: value_for_ime,
+                    selection: caret.selection,
+                    insert: node.interaction.on_edit_insert.clone(),
+                    select: node.interaction.on_select_range.clone().map(|handler| {
+                        Arc::new(move |a: usize, b: usize| {
+                            handler(a, b, SelectGranularity::Character)
+                        }) as Arc<dyn Fn(usize, usize) + Send + Sync>
+                    }),
+                };
+                let mut element = input_text::input_text(
+                    id,
+                    content.clone(),
+                    // The value is empty whenever the placeholder is what is on
+                    // screen; the caret and the history both count into the
+                    // value, never the prompt.
+                    if caret.showing_placeholder {
+                        String::new()
+                    } else {
+                        content.clone()
+                    },
+                    text_color,
+                    Some(caret.selection),
+                    color(caret.caret_color),
+                    color(caret.selection_color),
+                    focused,
                 );
+                element.ime = Some(ime);
+                return build_box(node, div().child(element));
             }
             build_box(node, div().child(content.clone()))
         }
@@ -841,6 +864,18 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
                         states.insert(id.clone(), now) != Some(now)
                     });
                     if changed {
+                        // The value node draws the caret but the *root* holds
+                        // focus, and the platform input handler must be
+                        // registered against the handle that is actually
+                        // focused. Recording it here is what lets the two meet.
+                        FOCUSED_FIELD.with(|f| {
+                            let mut f = f.borrow_mut();
+                            if now {
+                                *f = Some(id.clone());
+                            } else if f.as_deref() == Some(id.as_str()) {
+                                *f = None;
+                            }
+                        });
                         if !now {
                             // A stale measured line must not answer clicks on
                             // whatever takes this id next.
@@ -971,7 +1006,16 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
         );
     }
 
-    if let NodeKind::Input { .. } = &node.kind {
+    // Keyed on the channels, not on `NodeKind::Input`. CodeInput puts its key
+    // handler on the slot *row* and DurationInput on each segment — both plain
+    // containers — so gating this on the input kind meant neither ever received
+    // a keystroke, while their component-level tests (which call the handler
+    // directly) passed.
+    if node.interaction.on_edit_key.is_some()
+        || node.interaction.on_edit_insert.is_some()
+        || node.interaction.on_submit.is_some()
+        || node.interaction.on_cancel.is_some()
+    {
         let edit_key = node.interaction.on_edit_key.clone();
 
         let submit = node.interaction.on_submit.clone();
@@ -980,6 +1024,11 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
         // `App` reaches it directly. (IME still needs an `EntityInputHandler`,
         // which a `&Node -> AnyElement` backend has no entity to hang on.)
         let insert = node.interaction.on_edit_insert.clone();
+        // Undo needs the *value* node's id, because that is what paint records
+        // history under; the keys arrive at the focusable root above it.
+        let value_id = input_text::history_key(&element_id_string(node));
+        let text_change = node.interaction.on_text_change.clone();
+        let select_range = node.interaction.on_select_range.clone();
         let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {
             let NodeKind::Input { value, .. } = &node.kind else {
                 return None;
@@ -992,6 +1041,29 @@ fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
             el = el.on_key_down(move |event: &KeyDownEvent, _window, cx| {
                 let key = event.keystroke.key.as_str();
                 let accel = event.keystroke.modifiers.platform;
+                if accel && key == "z" {
+                    // Undo restores a whole snapshot rather than replaying an
+                    // edit, so it reports the value and the caret together.
+                    let restored = if event.keystroke.modifiers.shift {
+                        input_text::redo(&value_id)
+                    } else {
+                        input_text::undo(&value_id)
+                    };
+                    if let Some(snapshot) = restored {
+                        if let Some(change) = &text_change {
+                            change(&snapshot.value);
+                        }
+                        if let Some(select) = &select_range {
+                            select(
+                                snapshot.state.anchor,
+                                snapshot.state.head,
+                                SelectGranularity::Character,
+                            );
+                        }
+                        cx.refresh_windows();
+                    }
+                    return;
+                }
                 if accel && matches!(key, "c" | "x" | "v") {
                     match key {
                         "c" | "x" => {
@@ -1317,10 +1389,18 @@ impl gpui::Render for EmptyDragPreview {
 thread_local! {
     /// Whether the subtree currently being built sits inside a focused node.
     static FOCUS_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// The id of the node that currently holds focus, if any.
+    static FOCUSED_FIELD: RefCell<Option<String>> = const { RefCell::new(None) };
     static FOCUS_HANDLES: RefCell<std::collections::HashMap<String, gpui::FocusHandle>> =
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
+}
+
+/// The focus handle of whatever holds focus right now.
+pub(crate) fn focused_handle() -> Option<gpui::FocusHandle> {
+    let id = FOCUSED_FIELD.with(|f| f.borrow().clone())?;
+    focus_handle_for(&id)
 }
 
 fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
@@ -1467,6 +1547,7 @@ where
 // accessibility upstream work deliberately. The channels are walked (read)
 // here so the omission is a decision, not a drift.
 
+mod ime;
 mod input_text;
 
 #[cfg(test)]

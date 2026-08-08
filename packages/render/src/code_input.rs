@@ -29,6 +29,9 @@ use crate::presentation::{
 pub struct CodeInputHandlers {
     pub on_value_change: Option<poodle_node::TextChangeHandler>,
     pub on_complete: Option<poodle_node::TextChangeHandler>,
+    /// Where the caret moved to, as character indices. Host state on the Rust
+    /// targets, the same as `TextInputHandlers::on_selection_change`.
+    pub on_selection_change: Option<std::sync::Arc<dyn Fn(usize, usize) + Send + Sync>>,
 }
 
 pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
@@ -93,7 +96,10 @@ pub fn code_input_with_handlers(
 
     // The old tier keeps the component label, slot row, and supporting copy
     // in one column. Keeping that wrapper is part of the visual contract.
-    let active_idx = chars.len().min(spec.length.saturating_sub(1));
+    // The active slot follows the caret, not the value length: clicking slot 1
+    // of a filled code has to highlight slot 1.
+    let (caret_start, caret_end) = spec.selection_range();
+    let active_idx = caret_start.min(spec.length.saturating_sub(1));
 
     // ── Visual slots ──
     for i in 0..spec.length {
@@ -158,6 +164,21 @@ pub fn code_input_with_handlers(
             s.text_align = Some(TextAlign::Center);
         }
 
+        // Clicking a slot puts the caret there — and selects that character
+        // when the slot is filled, so the next keystroke replaces it in place.
+        // The rule is `code_slot_selection`, shared with the web target.
+        if !spec.is_disabled {
+            if let Some(on_selection_change) = handlers.on_selection_change.clone() {
+                let filled = chars.len();
+                slot.style.descriptor.cursor = poodle_node::CursorHint::Pointer;
+                slot.interaction.on_activate = Some(std::sync::Arc::new(move || {
+                    let (start, end) =
+                        poodle_headless::text_input::code_slot_selection(i, filled);
+                    on_selection_change(start, end);
+                }));
+            }
+        }
+
         row = row.child(slot.child(value));
     }
 
@@ -173,24 +194,36 @@ pub fn code_input_with_handlers(
         let numbers_only = spec.numbers_only;
         let on_value_change = handlers.on_value_change.clone();
         let on_complete = handlers.on_complete.clone();
+        let selection = (caret_start, caret_end);
+        let on_selection_change = handlers.on_selection_change.clone();
         row.interaction.on_edit_key = Some(std::sync::Arc::new(move |key: &str, _mods| {
-            let Some(next) =
-                poodle_headless::text_input::code_transition(&value, key, length, numbers_only)
-            else {
+            let Some((next, next_selection)) = poodle_headless::text_input::code_transition(
+                &value,
+                selection,
+                key,
+                length,
+                numbers_only,
+            ) else {
                 return;
             };
-            if next == value {
-                return;
-            }
-            if let Some(handler) = &on_value_change {
-                handler(&next);
-            }
-            // Completion is a distinct event, and it fires on the transition
-            // *into* a full code — not on every keystroke that leaves it full,
-            // which a full code cannot produce anyway.
-            if next.chars().count() == length {
-                if let Some(handler) = &on_complete {
+            if next != value {
+                if let Some(handler) = &on_value_change {
                     handler(&next);
+                }
+                // Completion is a distinct event, and it fires on the
+                // transition *into* a full code — not on every keystroke that
+                // leaves it full.
+                if next.chars().count() == length {
+                    if let Some(handler) = &on_complete {
+                        handler(&next);
+                    }
+                }
+            }
+            // Reported even when the value did not change: the arrows move the
+            // caret and nothing else.
+            if next_selection != selection {
+                if let Some(handler) = &on_selection_change {
+                    handler(next_selection.0, next_selection.1);
                 }
             }
         }));
@@ -285,6 +318,7 @@ mod tests {
                 on_complete: Some(std::sync::Arc::new(move |v: &str| {
                     k.lock().unwrap().push(v.to_string())
                 })),
+                ..CodeInputHandlers::default()
             },
         );
         let row = node
@@ -328,17 +362,67 @@ mod tests {
         assert_eq!(completes, vec!["1234".to_string()]);
     }
 
-    /// A key that changes nothing reports nothing — a full code must not
-    /// re-fire `onComplete` on every further keypress.
+    /// A key that changes nothing reports nothing.
     #[test]
     fn keys_that_change_nothing_report_nothing() {
-        let spec = CodeInputSpec::new().with_length(4).with_value("1234");
-        let (changes, completes) = typed(&spec, "5");
-        assert!(changes.is_empty() && completes.is_empty());
-
         let spec = CodeInputSpec::new().with_length(4);
         let (changes, _) = typed(&spec, "backspace");
         assert!(changes.is_empty(), "backspace on an empty code");
+
+        // A letter in a digits-only code is consumed and discarded.
+        let spec = CodeInputSpec::new().with_length(4).with_value("12");
+        let (changes, _) = typed(&spec, "q");
+        assert!(changes.is_empty(), "a letter cannot enter a digits-only code");
+    }
+
+    /// A full code keeps its caret on the last slot, so a further digit
+    /// *replaces* that slot — the web target's rule, ported rather than
+    /// reinvented. It reports a change, and completion again, because the code
+    /// is still full and its value is different.
+    #[test]
+    fn typing_into_a_full_code_overwrites_the_last_slot() {
+        let spec = CodeInputSpec::new().with_length(4).with_value("1234");
+        let (changes, completes) = typed(&spec, "5");
+        assert_eq!(changes, vec!["1235".to_string()]);
+        assert_eq!(completes, vec!["1235".to_string()]);
+    }
+
+    /// Clicking a filled slot selects that character, so the next keystroke
+    /// replaces it in place rather than appending.
+    #[test]
+    fn clicking_a_filled_slot_selects_its_character() {
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = code_input_with_handlers(
+            &CodeInputSpec::new().with_length(4).with_value("12"),
+            &theme(),
+            CodeInputHandlers {
+                on_selection_change: Some(std::sync::Arc::new(move |a, b| {
+                    sink.lock().unwrap().push((a, b))
+                })),
+                ..CodeInputHandlers::default()
+            },
+        );
+        fn slots<'a>(n: &'a Node, out: &mut Vec<&'a Node>) {
+            if n.interaction.on_activate.is_some() {
+                out.push(n);
+            }
+            for c in &n.children {
+                slots(c, out);
+            }
+        }
+        let mut found = Vec::new();
+        slots(&node, &mut found);
+        assert_eq!(found.len(), 4, "every slot is clickable");
+
+        (found[1].interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().last().copied(), Some((1, 2)), "filled");
+        (found[3].interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(
+            seen.lock().unwrap().last().copied(),
+            Some((2, 2)),
+            "past the value: collapsed at the end"
+        );
     }
 
     #[test]

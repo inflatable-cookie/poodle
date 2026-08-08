@@ -126,6 +126,26 @@
     isSecondaryCollapsed && secondaryCollapsedSize != null,
   );
 
+  /**
+   * The seam's position along the split axis, as a CSS length against the
+   * split root. The toggle pill anchors to the root, never the divider box:
+   * a collapsed or hidden sibling can leave the divider degenerate, and the
+   * pill must stay centered on the seam regardless.
+   */
+  const seamPosition = $derived(
+    isPrimaryCollapsed
+      ? primaryCollapsedSize != null
+        ? `${primaryCollapsedSize}px`
+        : "0px"
+      : isSecondaryCollapsed
+        ? secondaryCollapsedSize != null
+          ? `calc(100% - ${secondaryCollapsedSize}px)`
+          : "100%"
+        : primarySize != null
+          ? `${primarySize}px`
+          : `${currentRatio * 100}%`,
+  );
+
   const primaryFlex = $derived(
     isPrimaryCollapsed
       ? primaryCollapsedSize != null
@@ -315,8 +335,10 @@
   data-primary-collapsed={isPrimaryCollapsed || undefined}
   data-secondary-collapsed={isSecondaryCollapsed || undefined}
   data-divider={divider ? "line" : undefined}
+  data-disabled={disabled || undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  style={`--poodle-split-seam: ${seamPosition}`}
   aria-label={ariaLabel ?? "Split view"}
   bind:this={container}
 >
@@ -344,31 +366,6 @@
       onResizeEnd={handleResizeEnd}
       onResizeStep={handleResizeStep}
     />
-
-    {#if hasToggles}
-      <div class="poodle-split-view__toggles">
-        <!-- A collapsed pane's expand toggle must survive the other pane
-             collapsing too; hiding both strands the pair with no way back. -->
-        {#if showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed)}
-          <CollapseToggle
-            direction={beforeDirection}
-            collapsed={isPrimaryCollapsed}
-            {disabled}
-            ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
-            onToggle={toggleCollapsePrimary}
-          />
-        {/if}
-        {#if showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed)}
-          <CollapseToggle
-            direction={afterDirection}
-            collapsed={isSecondaryCollapsed}
-            {disabled}
-            ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
-            onToggle={toggleCollapseSecondary}
-          />
-        {/if}
-      </div>
-    {/if}
   </div>
 
   <div
@@ -379,4 +376,32 @@
       {@render secondary?.()}
     {/if}
   </div>
+
+  <!-- The pill anchors to the split root along a computed seam position, so
+       it stays centered on the seam even when a pane's collapse leaves the
+       divider box degenerate. -->
+  {#if hasToggles}
+    <div class="poodle-split-view__toggles">
+      <!-- A collapsed pane's expand toggle must survive the other pane
+           collapsing too; hiding both strands the pair with no way back. -->
+      {#if showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed)}
+        <CollapseToggle
+          direction={beforeDirection}
+          collapsed={isPrimaryCollapsed}
+          {disabled}
+          ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
+          onToggle={toggleCollapsePrimary}
+        />
+      {/if}
+      {#if showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed)}
+        <CollapseToggle
+          direction={afterDirection}
+          collapsed={isSecondaryCollapsed}
+          {disabled}
+          ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
+          onToggle={toggleCollapseSecondary}
+        />
+      {/if}
+    </div>
+  {/if}
 </div>

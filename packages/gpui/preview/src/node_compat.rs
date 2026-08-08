@@ -3776,6 +3776,9 @@ pub(crate) struct CodeInput {
     spec: CodeInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_complete: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
 }
 
 impl CodeInput {
@@ -3784,6 +3787,9 @@ impl CodeInput {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
+            on_complete: None,
+            on_selection_change: None,
         }
     }
 
@@ -3806,24 +3812,34 @@ impl CodeInput {
         self.with_density(density)
     }
 
-    // Code entry wiring remains host-owned; keep the preview call shape while
-    // the node renderer supplies the deterministic slot surface.
-    pub(crate) fn on_change<F>(self, _handler: F) -> Self
-    where
-        F: Fn(&str, &mut Window, &mut App) + 'static,
-    {
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_change = Some(handler);
         self
     }
 
-    pub(crate) fn on_complete<F>(self, _handler: F) -> Self
-    where
-        F: Fn(&str, &mut Window, &mut App) + 'static,
-    {
+    pub(crate) fn on_complete(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_complete = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.on_selection_change = Some(handler);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::code_input(&self.spec, &self.theme);
+        let mut node = poodle_render::code_input_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::CodeInputHandlers {
+                on_value_change: self.on_change,
+                on_complete: self.on_complete,
+                on_selection_change: self.on_selection_change,
+            },
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-code-input-{id}"));
         }
@@ -4220,6 +4236,8 @@ pub(crate) struct DurationInput {
     spec: DurationInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    #[allow(clippy::type_complexity)]
+    on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
 }
 
 impl DurationInput {
@@ -4228,6 +4246,7 @@ impl DurationInput {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
         }
     }
 
@@ -4246,8 +4265,23 @@ impl DurationInput {
         self
     }
 
+    #[allow(clippy::type_complexity)]
+    pub(crate) fn on_change(
+        mut self,
+        handler: Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>,
+    ) -> Self {
+        self.on_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::duration_input(&self.spec, &self.theme);
+        let mut node = poodle_render::duration_input_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::DurationInputHandlers {
+                on_change: self.on_change,
+            },
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-duration-input-{id}"));
         }

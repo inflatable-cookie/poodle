@@ -221,42 +221,193 @@ pub fn word_range_at(value: &str, index: usize) -> (usize, usize) {
 #[cfg(test)]
 mod tests {
 
+    /// Clicking a filled slot selects its character; clicking past the value
+    /// collapses at the end, so typing appends rather than overwriting nothing.
     #[test]
-    fn digits_fill_slots_left_to_right_and_stop_at_the_length() {
-        let mut value = String::new();
-        for key in ["1", "2", "3", "4"] {
-            value = code_transition(&value, key, 3, true).expect("digits are ours");
+    fn slot_clicks_select_a_filled_character_and_collapse_past_the_end() {
+        assert_eq!(code_slot_selection(1, 4), (1, 2));
+        assert_eq!(code_slot_selection(3, 4), (3, 4));
+        // At or past the value length: collapsed.
+        assert_eq!(code_slot_selection(4, 4), (4, 4));
+        assert_eq!(code_slot_selection(5, 4), (4, 4));
+        assert_eq!(code_slot_selection(0, 0), (0, 0));
+    }
+
+    #[test]
+    fn typing_over_a_selected_slot_replaces_it_in_place() {
+        // "1234", slot 1 selected -> typing 9 gives "1934", caret after it.
+        assert_eq!(
+            code_insert_replacement("1234", "9", (1, 2), 4, true),
+            Some(("1934".to_string(), 2))
+        );
+    }
+
+    #[test]
+    fn typing_at_the_end_appends_and_stops_at_the_length() {
+        assert_eq!(
+            code_insert_replacement("123", "4", (3, 3), 4, true),
+            Some(("1234".to_string(), 3))
+        );
+        // Full: the value cannot grow, and the caret stays on the last slot.
+        assert_eq!(
+            code_insert_replacement("1234", "9", (4, 4), 4, true),
+            Some(("1234".to_string(), 3))
+        );
+    }
+
+    #[test]
+    fn a_paste_overwrites_from_the_selection_and_clamps() {
+        assert_eq!(
+            code_insert_replacement("123456", "99", (1, 2), 6, true),
+            Some(("199456".to_string(), 3))
+        );
+    }
+
+    #[test]
+    fn sanitized_away_input_reports_nothing() {
+        assert_eq!(code_insert_replacement("12", "a", (2, 2), 6, true), None);
+        assert_eq!(
+            code_insert_replacement("12", "a", (2, 2), 6, false),
+            Some(("12a".to_string(), 3))
+        );
+    }
+
+    fn snap(value: &str, head: usize) -> EditSnapshot {
+        EditSnapshot {
+            value: value.to_string(),
+            state: EditState { anchor: head, head },
         }
-        assert_eq!(value, "123", "the fourth digit has nowhere to go");
+    }
+
+    /// A run of typing is one undo step, not one per keystroke.
+    #[test]
+    fn consecutive_typing_coalesces_into_one_step() {
+        assert!(coalesces(&snap("ab", 2), &snap("abc", 3)));
+        assert!(coalesces(&snap("", 0), &snap("a", 1)));
+        // Typing in the middle still coalesces, as long as the caret follows.
+        assert!(coalesces(&snap("ac", 1), &snap("abc", 2)));
+    }
+
+    #[test]
+    fn deletions_and_pastes_each_begin_a_new_step() {
+        // Shrinking.
+        assert!(!coalesces(&snap("abc", 3), &snap("ab", 2)));
+        // More than one character at once — a paste.
+        assert!(!coalesces(&snap("a", 1), &snap("abcd", 4)));
+        // Same length, different content.
+        assert!(!coalesces(&snap("abc", 3), &snap("abd", 3)));
+    }
+
+    /// A caret that jumped means the user went somewhere else; the previous run
+    /// is finished even though the next edit is still a single insertion.
+    #[test]
+    fn a_moved_caret_breaks_the_run() {
+        // Typed at 1 while the previous caret was at 3.
+        assert!(!coalesces(&snap("abc", 3), &snap("axbc", 2)));
+        // Insertion at the caret, but the caret did not advance with it.
+        assert!(!coalesces(&snap("ab", 2), &snap("abc", 1)));
+    }
+
+    /// Replacing a selection is destructive, so it starts its own step even
+    /// when the result happens to be one character longer.
+    #[test]
+    fn replacing_a_selection_begins_a_new_step() {
+        let selected = EditSnapshot {
+            value: "abc".into(),
+            state: EditState { anchor: 0, head: 2 },
+        };
+        assert!(!coalesces(&selected, &snap("abcd", 4)));
+    }
+
+    fn typed_code(start: &str, keys: &[&str], length: usize) -> (String, (usize, usize)) {
+        let mut value = start.to_string();
+        let n = value.chars().count();
+        let mut sel = (n, n);
+        for key in keys {
+            if let Some((next, next_sel)) = code_transition(&value, sel, key, length, true) {
+                value = next;
+                sel = next_sel;
+            }
+        }
+        (value, sel)
+    }
+
+    /// Filling left to right, and then what a *further* digit does — which is
+    /// not what it looks like. `codeInsertReplacement` caps the caret at
+    /// `length - 1`, so once the code is full the caret sits on the last slot
+    /// and the next digit **replaces** it. Surprising, and it is the web
+    /// target's behaviour; the Rust port follows it rather than inventing a
+    /// second rule.
+    #[test]
+    fn digits_fill_left_to_right_then_overwrite_the_last_slot() {
+        let (value, sel) = typed_code("", &["1", "2", "3"], 3);
+        assert_eq!((value.as_str(), sel), ("123", (2, 2)));
+        let (value, _) = typed_code("", &["1", "2", "3", "4"], 3);
+        assert_eq!(value, "124");
+    }
+
+    /// The whole point of the caret: typing over a selected slot replaces that
+    /// slot rather than appending.
+    #[test]
+    fn typing_into_a_selected_slot_replaces_it() {
+        let (value, sel) = code_transition("1234", (1, 2), "9", 4, true).expect("ours");
+        assert_eq!(value, "1934");
+        assert_eq!(sel, (2, 2));
     }
 
     /// Consumed, not forwarded: a letter in a digits-only code must not fall
     /// through to whatever handles plain keys.
     #[test]
     fn letters_are_swallowed_by_a_numbers_only_code() {
-        assert_eq!(code_transition("12", "a", 6, true).as_deref(), Some("12"));
-        assert_eq!(code_transition("12", "a", 6, false).as_deref(), Some("12a"));
+        assert_eq!(
+            code_transition("12", (2, 2), "a", 6, true).map(|(v, _)| v).as_deref(),
+            Some("12")
+        );
+        assert_eq!(
+            code_transition("12", (2, 2), "a", 6, false).map(|(v, _)| v).as_deref(),
+            Some("12a")
+        );
     }
 
     #[test]
-    fn backspace_removes_the_last_slot_and_is_inert_when_empty() {
-        assert_eq!(code_transition("123", "backspace", 6, true).as_deref(), Some("12"));
-        assert_eq!(code_transition("", "backspace", 6, true).as_deref(), Some(""));
+    fn backspace_removes_before_the_caret_and_is_inert_at_the_start() {
+        let (value, sel) = code_transition("123", (3, 3), "backspace", 6, true).expect("ours");
+        assert_eq!((value.as_str(), sel), ("12", (2, 2)));
+        // Mid-code, not just at the end.
+        let (value, sel) = code_transition("123", (2, 2), "backspace", 6, true).expect("ours");
+        assert_eq!((value.as_str(), sel), ("13", (1, 1)));
+        // A selected slot is what gets removed.
+        let (value, sel) = code_transition("123", (0, 1), "backspace", 6, true).expect("ours");
+        assert_eq!((value.as_str(), sel), ("23", (0, 0)));
+        let (value, _) = code_transition("", (0, 0), "backspace", 6, true).expect("ours");
+        assert_eq!(value, "");
+    }
+
+    #[test]
+    fn arrows_move_the_caret_without_touching_the_value() {
+        let (value, sel) = code_transition("1234", (2, 2), "left", 4, true).expect("ours");
+        assert_eq!((value.as_str(), sel), ("1234", (1, 1)));
+        let (_, sel) = code_transition("1234", (0, 0), "left", 4, true).expect("ours");
+        assert_eq!(sel, (0, 0), "clamped at the first slot");
+        let (_, sel) = code_transition("12", (0, 0), "right", 4, true).expect("ours");
+        assert_eq!(sel, (1, 1));
     }
 
     /// Escape only claims the key when there is something to clear, so an empty
     /// code still lets a dialog close on Escape.
     #[test]
     fn escape_clears_a_filled_code_and_passes_through_an_empty_one() {
-        assert_eq!(code_transition("123", "escape", 6, true).as_deref(), Some(""));
-        assert_eq!(code_transition("", "escape", 6, true), None);
+        assert_eq!(
+            code_transition("123", (3, 3), "escape", 6, true).map(|(v, _)| v).as_deref(),
+            Some("")
+        );
+        assert!(code_transition("", (0, 0), "escape", 6, true).is_none());
     }
 
     #[test]
     fn multi_character_keys_are_not_ours() {
-        assert_eq!(code_transition("1", "enter", 6, true), None);
-        assert_eq!(code_transition("1", "tab", 6, true), None);
-        assert_eq!(code_transition("1", "left", 6, true), None);
+        assert!(code_transition("1", (1, 1), "enter", 6, true).is_none());
+        assert!(code_transition("1", (1, 1), "tab", 6, true).is_none());
     }
 
     #[test]
@@ -445,6 +596,56 @@ mod tests {
     }
 }
 
+// ── Undo ────────────────────────────────────────────────────────────
+//
+// History is *ephemeral UI state*, like a blink phase or a scroll offset — it
+// belongs to the field while it is on screen and means nothing once it is
+// gone. So the backend keeps the stack, and this layer owns the only part that
+// is a text-editing decision: what counts as one undoable step.
+
+/// A value and where the caret was in it.
+#[derive(Clone, PartialEq, Eq, Debug, Default)]
+pub struct EditSnapshot {
+    pub value: String,
+    pub state: EditState,
+}
+
+/// Whether `next` should replace the top of the stack rather than push a new
+/// entry.
+///
+/// Undoing one character at a time is nobody's idea of undo, so a continuous
+/// run of typing collapses into a single step. A run ends when the edit stops
+/// being "more text arriving at the caret": a deletion, a paste, or a caret
+/// that jumped somewhere else all begin a new one.
+pub fn coalesces(previous: &EditSnapshot, next: &EditSnapshot) -> bool {
+    let prev_len = previous.value.chars().count();
+    let next_len = next.value.chars().count();
+
+    // Only growth coalesces, and only one character at a time — a paste
+    // arriving as a single larger jump is its own step, because undoing it
+    // whole is what a user expects.
+    if next_len != prev_len + 1 {
+        return false;
+    }
+    // Typing collapses a selection, so the previous step having one means this
+    // edit replaced something: a destructive change worth its own entry.
+    if previous.state.anchor != previous.state.head {
+        return false;
+    }
+    // The insertion has to be *at* the previous caret, and leave the caret just
+    // after it. Otherwise the caret moved between keystrokes and the run broke.
+    if next.state.anchor != next.state.head || next.state.head != previous.state.head + 1 {
+        return false;
+    }
+    // Everything before the caret must be unchanged, and everything after it.
+    let cut = previous.state.head;
+    let prev_before: String = previous.value.chars().take(cut).collect();
+    let next_before: String = next.value.chars().take(cut).collect();
+    let prev_after: String = previous.value.chars().skip(cut).collect();
+    let next_after: String = next.value.chars().skip(cut + 1).collect();
+    prev_before == next_before && prev_after == next_after
+}
+
 // ── Slotted codes ───────────────────────────────────────────────────
 //
 // A code input is one value shown across N slots. The contract's web target
@@ -452,48 +653,132 @@ mod tests {
 // Rust targets have no such input, so the same rules live here — once, for
 // every target — rather than in each backend's key handler.
 
-/// What a keystroke does to a slotted code.
+/// What a keystroke does to a slotted code, at the caret.
 ///
-/// Returns the new value, or `None` when the key is not ours (so the host's
-/// submit/cancel handling still sees it). A key that *is* ours but changes
-/// nothing — backspace on an empty code, a digit when every slot is full —
-/// returns the value unchanged, because it was still consumed.
+/// Returns the new value and caret, or `None` when the key is not ours (so the
+/// host's submit/cancel handling still sees it). A key that *is* ours but
+/// changes nothing returns the state unchanged, because it was still consumed.
+///
+/// Deletion follows the web target, which leaves backspace to the browser's
+/// native `<input>`: remove the selection if there is one, otherwise the
+/// character before the caret, shifting the rest left.
 pub fn code_transition(
     value: &str,
+    selection: (usize, usize),
     key: &str,
     length: usize,
     numbers_only: bool,
-) -> Option<String> {
-    let mut chars: Vec<char> = value
+) -> Option<(String, (usize, usize))> {
+    let chars: Vec<char> = value
         .chars()
         .filter(|c| !numbers_only || c.is_ascii_digit())
         .take(length)
         .collect();
+    let len = chars.len();
+    let (start, end) = (selection.0.min(len), selection.1.min(len).max(selection.0.min(len)));
+
+    let splice = |from: usize, to: usize| -> String {
+        chars
+            .iter()
+            .take(from)
+            .chain(chars.iter().skip(to))
+            .collect()
+    };
 
     match key {
         "backspace" => {
-            chars.pop();
-            Some(chars.into_iter().collect())
+            if start != end {
+                Some((splice(start, end), (start, start)))
+            } else if start == 0 {
+                // Consumed but inert: nothing before the caret to remove.
+                Some((chars.into_iter().collect(), (0, 0)))
+            } else {
+                Some((splice(start - 1, start), (start - 1, start - 1)))
+            }
         }
-        // Clearing the whole code is worth a key of its own: with no caret to
-        // hold down backspace against, six presses is the alternative.
-        "escape" if !chars.is_empty() => Some(String::new()),
+        "delete" => {
+            if start != end {
+                Some((splice(start, end), (start, start)))
+            } else if start >= len {
+                Some((chars.into_iter().collect(), (start, start)))
+            } else {
+                Some((splice(start, start + 1), (start, start)))
+            }
+        }
+        "left" => Some((chars.into_iter().collect(), {
+            let at = start.saturating_sub(1);
+            (at, at)
+        })),
+        "right" => Some((chars.into_iter().collect(), {
+            let at = (end + 1).min(length.saturating_sub(1)).min(len);
+            (at, at)
+        })),
+        "home" => Some((chars.into_iter().collect(), (0, 0))),
+        "end" => Some((chars.into_iter().collect(), (len, len))),
+        // Clearing the whole code is worth a key of its own: with a fixed
+        // number of slots, the alternative is one backspace per slot.
+        "escape" if len > 0 => Some((String::new(), (0, 0))),
         _ => {
+            let current: String = chars.into_iter().collect();
             let mut typed = key.chars();
-            let (Some(c), None) = (typed.next(), typed.next()) else {
+            let (Some(_), None) = (typed.next(), typed.next()) else {
                 return None;
             };
-            if numbers_only && !c.is_ascii_digit() {
-                // Consumed deliberately: a letter typed into a digits-only code
-                // must not fall through and trigger a submit.
-                return Some(chars.into_iter().collect());
+            match code_insert_replacement(&current, key, (start, end), length, numbers_only) {
+                Some((next, caret)) => Some((next, (caret, caret))),
+                // Sanitized away — a letter in a digits-only code. Consumed
+                // deliberately, so it cannot fall through and submit.
+                None => Some((current, (start, end))),
             }
-            if chars.len() < length {
-                chars.push(c);
-            }
-            Some(chars.into_iter().collect())
         }
     }
+}
+
+/// What clicking slot `index` selects.
+///
+/// A faithful port of `codeSlotSelection` in `packages/core/src/code-input.ts`,
+/// which the contract names as the authority: clicking a **filled** slot
+/// selects that character so the next keystroke replaces it in place, while
+/// clicking past the end of the value collapses at the end.
+pub fn code_slot_selection(index: usize, value_len: usize) -> (usize, usize) {
+    let start = index.min(value_len);
+    let end = if index < value_len { index + 1 } else { start };
+    (start, end)
+}
+
+/// Typing into a code with a selection: overwrite from `start`, extending the
+/// replaced span to cover what was inserted, capped to `length`.
+///
+/// Ported from `codeInsertReplacement`. Returns `None` when the sanitized input
+/// is empty — a letter typed into a digits-only code changes nothing, and the
+/// caller decides whether to swallow the key.
+pub fn code_insert_replacement(
+    value: &str,
+    data: &str,
+    selection: (usize, usize),
+    length: usize,
+    numbers_only: bool,
+) -> Option<(String, usize)> {
+    let next: String = data
+        .chars()
+        .filter(|c| !numbers_only || c.is_ascii_digit())
+        .collect();
+    if next.is_empty() {
+        return None;
+    }
+
+    let chars: Vec<char> = value.chars().collect();
+    let (start, end) = selection;
+    let start = start.min(chars.len());
+    let replacement_end = end.max((start + next.chars().count()).min(chars.len()));
+
+    let mut out: String = chars.iter().take(start).collect();
+    out.push_str(&next);
+    out.extend(chars.iter().skip(replacement_end));
+    let out: String = out.chars().take(length).collect();
+
+    let caret = (start + next.chars().count()).min(length.saturating_sub(1));
+    Some((out, caret))
 }
 
 /// Distribute pasted text into a code, replacing whatever was there.

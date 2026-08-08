@@ -86,6 +86,14 @@ requestAnimationFrame timing stay adapter-side.
   digit
 - Clicking any slot focuses the real input and moves the caret
 - Clicking a filled slot selects that character so typing replaces it in place
+
+On the Rust targets there is no hidden input to own the caret, so the host does:
+`selectionStart` and `selectionEnd` are controlled props (**Rust targets
+only**), reported back through `onSelectionChange`. The slot-click and
+overwrite rules themselves are shared — `codeSlotSelection` and
+`codeInsertReplacement` in `@poodle/headless`, ported verbatim to
+`poodle_headless::text_input` — so a click cannot mean two different things on
+two targets.
 - The component composes its own `Field` wrapper so callers can use `label`,
   `hint`, and `error` directly
 - `validationState` accepts the full `ValidationState` union, but only the

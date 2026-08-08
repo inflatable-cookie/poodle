@@ -1,4 +1,4 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{CodeInput, Eyebrow};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
@@ -27,6 +27,42 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_default();
     let completed = state.specimens.is_on("code-input-complete");
 
+    // The caret is host state on the Rust targets, exactly like the value: the
+    // web target's hidden `<input>` owns it and there is none here.
+    let caret = |key: &str| state.specimens.carets.get(key).copied().unwrap_or_default();
+
+    /// Wire a code input's three channels onto the specimen event queue.
+    macro_rules! live_code {
+        ($builder:expr, $key:literal) => {{
+            let queue = std::sync::Arc::clone(&state.node_events);
+            let selection_queue = std::sync::Arc::clone(&state.node_events);
+            let complete_queue = std::sync::Arc::clone(&state.node_events);
+            $builder
+                .on_change(std::sync::Arc::new(move |val: &str| {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: $key.to_string(),
+                        value: val.to_string(),
+                    });
+                }))
+                .on_selection_change(std::sync::Arc::new(move |start: usize, end: usize| {
+                    selection_queue
+                        .lock()
+                        .unwrap()
+                        .push(NodeSpecimenEvent::SetCaret {
+                            key: $key.to_string(),
+                            start,
+                            end,
+                        });
+                }))
+                .on_complete(std::sync::Arc::new(move |_val: &str| {
+                    complete_queue
+                        .lock()
+                        .unwrap()
+                        .push(NodeSpecimenEvent::Toggle("code-input-complete".to_string()));
+                }))
+        }};
+    }
+
     let examples = div()
         .flex()
         .flex_col()
@@ -42,28 +78,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("6-digit code"),
                     theme,
                 ))
-                .child(
+                .child(live_code!(
                     CodeInput::from_spec(
                         CodeInputSpec::new()
                             .with_value(&code_value)
+                            .with_selection(caret("code-input-code").0, caret("code-input-code").1)
                             .with_aria_label("Verification code"),
                         theme,
-                    )
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("code-input-code".to_string(), val.to_string());
-                        cx.notify();
-                    }))
-                    .on_complete(cx.listener(|this, _val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("code-input-complete".to_string(), true);
-                        cx.notify();
-                    })),
-                )
+                    ),
+                    "code-input-code"
+                ))
                 .child(
                     div()
                         .text_size(px(12.0))
@@ -160,23 +184,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("4-digit masked"),
                     theme,
                 ))
-                .child(
+                .child(live_code!(
                     CodeInput::from_spec(
                         CodeInputSpec::new()
                             .with_length(4)
                             .with_value(&pin_value)
+                            .with_selection(caret("code-input-pin").0, caret("code-input-pin").1)
                             .with_mask(true)
                             .with_aria_label("PIN"),
                         theme,
-                    )
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state
-                            .specimens
-                            .text
-                            .insert("code-input-pin".to_string(), val.to_string());
-                        cx.notify();
-                    })),
-                ),
+                    ),
+                    "code-input-pin"
+                )),
         )
         // --- With error ---
         .child(

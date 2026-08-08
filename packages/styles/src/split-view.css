@@ -2,6 +2,7 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-split-view {
+    position: relative;
     display: flex;
     min-height: 0;
     min-width: 0;
@@ -71,34 +72,39 @@
     box-shadow: var(--poodle-recipe-split-view-toggles-shadow, 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent));
   }
 
-  .poodle-split-view__divider[data-orientation="horizontal"] .poodle-split-view__toggles {
+  /* The pill anchors to the split root along --poodle-split-seam (computed by
+     the component from ratio and collapse state), so it stays centered on the
+     seam even when the divider box is degenerate. */
+  .poodle-split-view[data-orientation="horizontal"] > .poodle-split-view__toggles {
     top: 50%;
-    left: 50%;
+    left: var(--poodle-split-seam, 50%);
     transform: translate(-50%, -50%);
     flex-direction: column;
   }
 
-  .poodle-split-view__divider[data-orientation="vertical"] .poodle-split-view__toggles {
-    top: 50%;
+  .poodle-split-view[data-orientation="vertical"] > .poodle-split-view__toggles {
+    top: var(--poodle-split-seam, 50%);
     left: 50%;
     transform: translate(-50%, -50%);
     flex-direction: row;
   }
 
-  .poodle-split-view__divider[data-disabled] .poodle-split-view__toggles {
+  .poodle-split-view[data-disabled] > .poodle-split-view__toggles {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* A fully collapsed pane puts the divider seam on the container edge; a
      centred pill would hang halfway out of view. Anchor the toggles to the
-     seam and let them peek inward, flat side against the viewport edge. */
+     seam and let them peek inward, flat side against the viewport edge.
+     When both panes are collapsed the seam sits on the primary edge, so the
+     secondary rule must not win that tie. */
   .poodle-split-view[data-orientation="horizontal"][data-primary-collapsed] .poodle-split-view__toggles {
     left: 0;
     transform: translate(0, -50%);
     border-radius: 0 var(--poodle-radius-pill) var(--poodle-radius-pill) 0;
   }
 
-  .poodle-split-view[data-orientation="horizontal"][data-secondary-collapsed] .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="horizontal"][data-secondary-collapsed]:not([data-primary-collapsed]) .poodle-split-view__toggles {
     left: auto;
     right: 0;
     transform: translate(0, -50%);
@@ -111,7 +117,7 @@
     border-radius: 0 0 var(--poodle-radius-pill) var(--poodle-radius-pill);
   }
 
-  .poodle-split-view[data-orientation="vertical"][data-secondary-collapsed] .poodle-split-view__toggles {
+  .poodle-split-view[data-orientation="vertical"][data-secondary-collapsed]:not([data-primary-collapsed]) .poodle-split-view__toggles {
     top: auto;
     bottom: 0;
     transform: translate(-50%, 0);

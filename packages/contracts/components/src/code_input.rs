@@ -16,6 +16,15 @@ pub struct CodeInputSpec {
     pub hint: Option<String>,
     pub error: Option<String>,
     pub mask: bool,
+    /// Caret/selection across the slots, as character indices into the value.
+    ///
+    /// **Rust targets only.** The web target hides a real `<input>` behind the
+    /// slots and lets the browser own the caret; with no such input the host
+    /// owns it, the same way it owns `TextInputSpec::selection_start`.
+    /// `selection_start == selection_end` is a plain caret; a one-wide range is
+    /// a selected slot, which is what clicking a filled slot produces.
+    pub selection_start: usize,
+    pub selection_end: usize,
     /// When true (default), the value sanitizes to digits only. Set false to
     /// allow arbitrary alphanumeric characters. Mirrors the Svelte
     /// `numbersOnly` prop.
@@ -40,6 +49,8 @@ impl Default for CodeInputSpec {
             hint: None,
             error: None,
             mask: false,
+            selection_start: 0,
+            selection_end: 0,
             numbers_only: true,
             is_disabled: false,
             aria_label: None,
@@ -111,6 +122,27 @@ impl CodeInputSpec {
             .filter(|c| !self.numbers_only || c.is_ascii_digit())
             .take(self.length)
             .collect()
+    }
+
+    /// Where the caret sits, clamped to the sanitized value.
+    ///
+    /// Defaults to the first empty slot, which is where typing lands in a code
+    /// nobody has clicked into — the behaviour before a caret existed.
+    pub fn selection_range(&self) -> (usize, usize) {
+        let len = self.sanitized_chars().len();
+        let default = len.min(self.length.saturating_sub(1));
+        if self.selection_start == 0 && self.selection_end == 0 && len > 0 {
+            return (default, default);
+        }
+        let start = self.selection_start.min(len);
+        let end = self.selection_end.min(len).max(start);
+        (start, end)
+    }
+
+    pub fn with_selection(mut self, start: usize, end: usize) -> Self {
+        self.selection_start = start;
+        self.selection_end = end;
+        self
     }
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {

@@ -181,7 +181,18 @@ pub fn text_input_with_handlers(
     // TextInput role and the accessible name, and an input inside an input is
     // one control announced twice. The caret channel is what makes the backend
     // measure it.
-    let display: String = if current_value.is_empty() {
+    // The node draws the placeholder when the value is empty, and *says so* via
+    // the caret channel. Without that flag the two are indistinguishable one
+    // layer down: selection indices counted into the placeholder, and undo
+    // recorded it as a value — so undoing an empty field typed the placeholder
+    // into the field for real.
+    //
+    // A flag rather than a separate placeholder node: an absolutely-positioned
+    // sibling renders correctly in GPUI and overlaps in Jetstream, and the
+    // vocabulary is meant to describe intent, not to encode one backend's
+    // layout quirks.
+    let showing_placeholder = current_value.is_empty();
+    let display: String = if showing_placeholder {
         spec.placeholder.as_deref().unwrap_or("").to_string()
     } else {
         current_value.to_string()
@@ -200,6 +211,8 @@ pub fn text_input_with_handlers(
         s.min_width = Some(0.0);
     }
     let mut value_caret = None;
+    let mut value_select: Option<Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync>> =
+        None;
     if !spec.is_disabled {
         let caret_color = if spec.is_read_only {
             // Read-only fields still select and still show where the selection
@@ -213,13 +226,16 @@ pub fn text_input_with_handlers(
             caret_color,
             with_alpha(selection_fill, selection_fill.3 * SELECTION_ALPHA),
         );
+        if let Some(caret) = &mut value.caret {
+            caret.showing_placeholder = showing_placeholder;
+        }
         value_caret = value.caret;
         if let Some(on_selection_change) = handlers.on_selection_change.clone() {
             // The backend names the granularity because it counts the clicks;
             // resolving it needs to know what a word is, which is a text rule
             // and therefore shared, not per-backend.
             let text = spec.current_value().to_string();
-            value.interaction.on_select_range = Some(Arc::new(
+            let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> = Arc::new(
                 move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
                     let (start, end) = match granularity {
                         poodle_node::SelectGranularity::Character => (start, end),
@@ -232,7 +248,9 @@ pub fn text_input_with_handlers(
                     };
                     on_selection_change(start, end);
                 },
-            ));
+            );
+            value.interaction.on_select_range = Some(Arc::clone(&handler));
+            value_select = Some(handler);
         }
     }
     inner = inner.child(value);
@@ -392,6 +410,11 @@ pub fn text_input_with_handlers(
         // key events arrive at the focusable root, and copy/cut need to know
         // what is selected without hunting through the subtree for it.
         root.caret = value_caret;
+        // The root also reports selection, which the pointer path never uses
+        // (it has no measured text of its own) — undo does, because restoring a
+        // snapshot moves the caret as well as the value, and undo arrives as a
+        // keystroke at the focusable root.
+        root.interaction.on_select_range = value_select.clone();
         root.interaction.on_text_change = on_change;
         // Focus is reported by the backend, which is the only thing that knows
         // it. An earlier pass latched this on activation, so it could report a
@@ -508,9 +531,17 @@ mod tests {
         assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 5)));
         select(2, 2, poodle_node::SelectGranularity::Line);
         assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 5)));
+        // The root carries the same channel — undo restores a caret and arrives
+        // as a keystroke there — but it never resolves a pointer position,
+        // because only the value node's text is measured. Same handler, so a
+        // report from either reaches the same host.
         assert!(
-            node.interaction.on_select_range.is_none(),
-            "the field root must not hit-test characters"
+            node.interaction.on_select_range.is_some(),
+            "the root reports selection for undo"
+        );
+        assert!(
+            node.caret.is_some() && value.caret.is_some(),
+            "both carry the caret: the root for clipboard, the value node to draw it"
         );
     }
 

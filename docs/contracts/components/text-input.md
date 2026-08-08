@@ -300,8 +300,33 @@ because the text comes from outside the tree; the shared edit model owns where
 a paste lands. A multi-line paste collapses to one line, as `<input>` does, and
 copying an empty selection leaves the clipboard alone.
 
-IME and dead keys are **not** implemented: they need a platform input handler
-bound to an entity, which a `Node -> element` backend has none of.
+A focused field registers a platform text input handler, so macOS text services
+(dead keys, IME composition, the character palette, the candidate window) have
+something to talk to.
+
+This section previously said that was impossible without an entity. It was
+wrong: `Window::handle_input` takes `impl InputHandler`, a plain public trait
+with no entity requirement — `ElementInputHandler` is merely the entity-backed
+implementation gpui ships.
+
+The handler speaks **UTF-16**, because that is what the platform speaks. That
+makes three encodings in play — characters in the vocabulary, bytes in the text
+system, UTF-16 at this boundary — and every conversion is confined to one file.
+
+Composition state (the marked range) is backend-owned per field, like the caret
+blink and the undo history.
+
+### Undo (Rust targets)
+
+`accel+Z` steps back, `accel+shift+Z` forward. A continuous run of typing is
+**one** step — undoing a character at a time is nobody's idea of undo — and a
+run ends at a deletion, a paste, or a caret that moved somewhere else. Editing
+after an undo discards the redo tail.
+
+History is *ephemeral UI state*, like the blink phase: the backend keeps it for
+as long as the field is on screen and no host stores anything. What counts as
+one step is shared (`poodle_headless::text_input::coalesces`), so the rule
+cannot drift between targets.
 
 ### Keyboard
 

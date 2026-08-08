@@ -130,6 +130,14 @@ pub struct NodeCaret {
     pub caret_color: ColorValue,
     /// Selected-text wash, resolved by the component from tokens.
     pub selection_color: ColorValue,
+    /// Whether the text being drawn is the field's *placeholder* rather than
+    /// its value.
+    ///
+    /// The two look identical to a backend otherwise, and treating a
+    /// placeholder as a value is silently wrong in both directions: a caret
+    /// positions itself inside prompt text, and anything recording the value
+    /// records the prompt.
+    pub showing_placeholder: bool,
 }
 
 /// Horizontal text alignment.
@@ -739,6 +747,7 @@ impl Node {
             selection: selection_range,
             caret_color,
             selection_color,
+            showing_placeholder: false,
         });
         self
     }
