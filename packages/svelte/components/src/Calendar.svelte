@@ -38,6 +38,8 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    /** Overrides the current date; omit to read the clock. */
+    today?: string | null;
     onValueChange?: ((value: string | DateRangeValue) => void) | undefined;
     onMonthChange?: ((month: string) => void) | undefined;
   }
@@ -56,6 +58,7 @@
     size = null,
     sizeRole = "control",
     density = null,
+    today = null,
     onValueChange = undefined,
     onMonthChange = undefined,
   }: Props = $props();
@@ -97,7 +100,7 @@
   });
   const currentMonth = $derived(monthAnchorIso(hasControlledVisibleMonth ? visibleMonth ?? uncontrolledMonth : uncontrolledMonth));
   const currentMonthDate = $derived(parseIsoDate(currentMonth) ?? parseIsoDate(todayIsoDate())!);
-  const weeks = $derived(buildCalendarWeeks(currentMonth, weekStartsOn));
+  const weeks = $derived(buildCalendarWeeks(currentMonth, weekStartsOn, today ?? todayIsoDate()));
   const weekdayLabels = $derived(getWeekdayLabels(weekStartsOn, locale));
   const monthLabel = $derived(formatMonthLabel(currentMonth, locale));
   const monthName = $derived(

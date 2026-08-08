@@ -412,13 +412,21 @@ export function startOfWeek(date: Date, weekStartsOn: CalendarWeekStart): Date {
   return addDays(date, -weekdayOffset(date.getUTCDay(), weekStartsOn));
 }
 
+/**
+ * `today` overrides what the grid treats as the current date.
+ *
+ * Reading the clock inside a pure builder makes every consumer's output change
+ * at midnight — which is invisible until something compares renders, and then
+ * shows up as a pixel baseline that expires overnight. Callers that want the
+ * real date simply omit it.
+ */
 export function buildCalendarWeeks(
   visibleMonth: string,
-  weekStartsOn: CalendarWeekStart
+  weekStartsOn: CalendarWeekStart,
+  today: string = todayIsoDate()
 ): CalendarDay[][] {
-  const monthDate = startOfMonth(parseIsoDate(visibleMonth) ?? parseIsoDate(todayIsoDate())!);
+  const monthDate = startOfMonth(parseIsoDate(visibleMonth) ?? parseIsoDate(today)!);
   const firstVisibleDay = startOfWeek(monthDate, weekStartsOn);
-  const today = todayIsoDate();
   const weeks: CalendarDay[][] = [];
 
   for (let weekIndex = 0; weekIndex < 6; weekIndex += 1) {

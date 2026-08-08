@@ -32,20 +32,6 @@ import { repoRoot } from "./config";
  * retry loop. A difference means the render changed.
  */
 
-/**
- * Specimens whose render depends on the wall clock, so a byte-exact gate would
- * fail on a date change rather than on a code change.
- *
- * The GPUI gate carries the same idea for `time-ago`. `calendar` earns it the
- * same way: `poodle_render::calendar` reads `SystemTime::now()` to draw the
- * today border, so its baseline expires at midnight. Making `today` injectable
- * is the real fix and is recorded as a papercut — Svelte reads the clock too,
- * so it is a contract decision, not a local one.
- */
-const SKIPPED: Record<string, string> = {
-  calendar: "today border reads the system clock — the baseline expires at midnight",
-};
-
 const SNAP_OUT = "/tmp/poodle-specimens";
 const BASELINE_DIR = "packages/jetstream/preview/baselines";
 const OUT_DIR = "test/native-visual/out-jetstream";
@@ -96,13 +82,7 @@ let ok = 0;
 let fresh = 0;
 const failed: string[] = [];
 
-let skipped = 0;
 for (const file of rendered) {
-  const slug = file.replace(/\.png$/, "");
-  if (slug in SKIPPED) {
-    skipped += 1;
-    continue;
-  }
   const shot = readFileSync(path.join(SNAP_OUT, file));
   const baseline = path.join(baselineDir, file);
 
@@ -139,10 +119,7 @@ for (const file of rendered) {
   ok++;
 }
 
-console.log(
-  `\ncompared ${rendered.length - skipped} specimens, ${failed.length} failing` +
-    (skipped ? `, ${skipped} skipped (${Object.keys(SKIPPED).join(", ")})` : ""),
-);
+console.log(`\ncompared ${rendered.length} specimens, ${failed.length} failing`);
 if (fresh > 0) console.log(`${fresh} baseline(s) written for the first time — commit them.`);
 if (failed.length > 0) {
   console.log(`diffs in ${OUT_DIR}/`);

@@ -25,6 +25,12 @@ pub struct CalendarSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Overrides the current date, as `YYYY-MM-DD`.
+    ///
+    /// `None` reads the clock. Set it and the render is deterministic — which
+    /// is what a pixel baseline needs, since a calendar that reads the clock
+    /// produces a baseline that expires at midnight.
+    pub today: Option<String>,
 }
 
 impl Default for CalendarSpec {
@@ -43,6 +49,7 @@ impl Default for CalendarSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            today: None,
         }
     }
 }
@@ -104,5 +111,21 @@ impl CalendarSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+
+    /// Pin what the calendar treats as today, as `YYYY-MM-DD`.
+    pub fn with_today(mut self, today: impl Into<String>) -> Self {
+        self.today = Some(today.into());
+        self
+    }
+
+    /// `(year, month, day)` for the pinned date, when one is set and parses.
+    pub fn today_ymd(&self) -> Option<(i32, u32, u32)> {
+        let raw = self.today.as_deref()?;
+        let mut parts = raw.split('-');
+        let year = parts.next()?.parse().ok()?;
+        let month = parts.next()?.parse().ok()?;
+        let day = parts.next()?.parse().ok()?;
+        (1..=12).contains(&month).then_some((year, month, day))
     }
 }

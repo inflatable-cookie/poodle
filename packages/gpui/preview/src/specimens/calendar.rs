@@ -63,7 +63,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new();
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12");
                     spec.aria_label = Some("Select a date".to_string());
                     if let Some(ref date) = selected_date {
                         spec.value = Some(date.clone());
@@ -97,7 +97,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new();
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12");
                     spec.default_value = Some("2026-03-14".to_string());
                     spec.aria_label = Some("Calendar with default".to_string());
                     Calendar::from_spec(spec, theme).with_id("preselected")
@@ -125,7 +125,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                     };
 
-                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
                     spec.range_value =
                         Some(DateRangeValue::new(eff_start.clone(), eff_end.clone()));
                     spec.visible_month = Some("2026-03".to_string());
@@ -157,7 +157,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
                     spec.default_range_value = DateRangeValue::new(
                         Some("2026-03-05".to_string()),
                         Some("2026-03-12".to_string()),
@@ -178,7 +178,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new();
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12");
                     spec.default_value = Some("2026-03-01".to_string());
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled calendar".to_string());
@@ -196,7 +196,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled range calendar".to_string());
                     Calendar::from_spec(spec, theme).with_id("range-disabled")
@@ -210,7 +210,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "calendar",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            let mut spec = CalendarSpec::new();
+            let mut spec = CalendarSpec::new().with_today("2026-03-12");
             spec.default_value = Some("2026-03-14".to_string());
             spec.aria_label = Some("Calendar".to_string());
             Calendar::from_spec(spec, theme)
@@ -219,7 +219,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
-            let mut spec = CalendarSpec::new();
+            let mut spec = CalendarSpec::new().with_today("2026-03-12");
             spec.default_value = Some("2026-03-14".to_string());
             spec.aria_label = Some("Calendar".to_string());
             Calendar::from_spec(spec, theme)

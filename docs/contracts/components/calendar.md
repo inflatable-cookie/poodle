@@ -66,6 +66,7 @@ Updated: 2026-07-10
 | `defaultValue` | `string \| DateRangeValue \| null` | `null` | no | uncontrolled initial value |
 | `visibleMonth` | `string \| null` | `null` | no | visible month (ISO `YYYY-MM`); when supplied, the host owns updates through `onMonthChange` |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | first day of the week |
+| `today` | `string \| null` | `null` | no | overrides the current date (`YYYY-MM-DD`); omit to read the clock. Pinning it makes the render deterministic — a calendar that reads the clock draws a different today border after midnight, which silently expires any pixel baseline containing one |
 | `locale` | `string` | `"en-US"` | no | locale for month and weekday formatting |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |

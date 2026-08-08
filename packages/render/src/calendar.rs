@@ -244,11 +244,19 @@ pub fn calendar(
     // ── Today ─────────────────────────────────────────────────────────────────
 
     let today_day: Option<u32> = {
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let (ty, tm, td) = days_to_ymd((now / 86400) as i64);
+        // `spec.today` pins the date. Without it the clock decides, and a
+        // component that reads the clock renders differently at midnight —
+        // which is invisible until a pixel baseline expires overnight.
+        let (ty, tm, td) = match spec.today_ymd() {
+            Some(pinned) => pinned,
+            None => {
+                let now = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                days_to_ymd((now / 86400) as i64)
+            }
+        };
         if ty == year && tm == month {
             Some(td)
         } else {
