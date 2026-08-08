@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { layerContains } from "@inflatable-cookie/poodle-headless";
-  import "@inflatable-cookie/poodle-styles/color-picker.css";
+  import { layerContains } from "@inflatable-cookie/poodle-core";
+  import "@inflatable-cookie/poodle-core/styles/color-picker.css";
   import { anchored } from "./anchored";
   import { default as Slider } from "./Slider.svelte";
   import { default as SegmentedControl } from "./SegmentedControl.svelte";

@@ -8,9 +8,8 @@
       "adoptionModel": "internal acceptance harness",
       "status": "baseline",
       "coveredPackages": [
-        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-core",
         "@inflatable-cookie/poodle-svelte",
-        "@inflatable-cookie/poodle-icons-lucide",
         "@inflatable-cookie/poodle-svelte-preview"
       ],
       "evidenceArtifacts": [
@@ -45,7 +44,7 @@
       "status": "proof-backed",
       "coveredPackages": [
         "@inflatable-cookie/poodle-bridge-underlay",
-        "@inflatable-cookie/poodle-svelte-tokens",
+        "@inflatable-cookie/poodle-core",
         "@inflatable-cookie/poodle-svelte"
       ],
       "evidenceArtifacts": [
@@ -75,9 +74,8 @@
       "adoptionModel": "direct package consumption",
       "status": "proof-backed",
       "coveredPackages": [
-        "@inflatable-cookie/poodle-svelte-tokens",
-        "@inflatable-cookie/poodle-svelte",
-        "@inflatable-cookie/poodle-icons-lucide"
+        "@inflatable-cookie/poodle-core",
+        "@inflatable-cookie/poodle-svelte"
       ],
       "evidenceArtifacts": [
         "packages/svelte/components/README.md",
@@ -148,7 +146,7 @@
       "primaryEvidence": [
         "packages/tokens/schema/",
         "packages/tokens/artifacts/",
-        "packages/svelte/tokens/"
+        "packages/core/src/tokens/"
       ]
     },
     {
@@ -159,7 +157,7 @@
         "docs/contracts/",
         "packages/contracts/",
         "packages/svelte/components/",
-        "packages/svelte/icons-lucide/"
+        "packages/core/src/icons/"
       ]
     },
     {

@@ -3,13 +3,13 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/menubar.css";
+  import "@inflatable-cookie/poodle-core/styles/menubar.css";
   import {
     menuListCanActivate,
     menuListNavigate,
     registerDismissLayer,
     layerContains,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";

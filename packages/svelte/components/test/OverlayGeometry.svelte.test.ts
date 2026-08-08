@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { OverlaySurfaceGeometryChange } from "@inflatable-cookie/poodle-headless";
+import type { OverlaySurfaceGeometryChange } from "@inflatable-cookie/poodle-core";
 
 import Harness from "./OverlayGeometryHarness.svelte";
 

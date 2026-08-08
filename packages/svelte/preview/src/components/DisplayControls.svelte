@@ -11,7 +11,7 @@
     densityModes,
     controlSizes,
     themeOptions,
-  } from "@inflatable-cookie/poodle-svelte-tokens";
+  } from "@inflatable-cookie/poodle-core/tokens";
   let {
     theme,
     density,

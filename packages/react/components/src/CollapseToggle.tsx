@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/collapse-toggle.css";
+import "@inflatable-cookie/poodle-core/styles/collapse-toggle.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

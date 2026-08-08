@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Surface } from "@inflatable-cookie/poodle-react";
-import { cssVars } from "@inflatable-cookie/poodle-svelte-tokens";
+import { cssVars } from "@inflatable-cookie/poodle-core/tokens";
 
 import { TokenToolsPanel } from "./TokenToolsPanel";
 

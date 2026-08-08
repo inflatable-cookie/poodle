@@ -640,7 +640,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "auditAreas": {
@@ -693,7 +693,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "auditAreas": {

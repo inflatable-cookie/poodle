@@ -7,9 +7,8 @@
       "status": "docs-backed",
       "audience": "teams importing Poodle packages directly",
       "packageEntryPoints": [
-        "@inflatable-cookie/poodle-svelte-tokens",
-        "@inflatable-cookie/poodle-svelte",
-        "@inflatable-cookie/poodle-icons-lucide"
+        "@inflatable-cookie/poodle-core",
+        "@inflatable-cookie/poodle-svelte"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -25,7 +24,7 @@
       "evidencePaths": [
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "packages/svelte/components/README.md",
-        "packages/svelte/icons-lucide/package.json"
+        "packages/core/package.json"
       ],
       "blockers": [
         "This is a composition baseline, not a generated app template or proof of GPUI parity."
@@ -66,9 +65,8 @@
       "status": "proof-backed",
       "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
       "packageEntryPoints": [
-        "@inflatable-cookie/poodle-svelte-tokens",
-        "@inflatable-cookie/poodle-svelte",
-        "@inflatable-cookie/poodle-icons-lucide"
+        "@inflatable-cookie/poodle-core",
+        "@inflatable-cookie/poodle-svelte"
       ],
       "exampleSectionIds": [
         "command-suite",
@@ -142,7 +140,7 @@
       "startPaths": [
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "packages/svelte/components/README.md",
-        "packages/svelte/icons-lucide/package.json"
+        "packages/core/package.json"
       ],
       "primaryReferenceShapeId": "direct-svelte-consumer",
       "nonGoals": [

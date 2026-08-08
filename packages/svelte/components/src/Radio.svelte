@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/radio.css";
-  import { switchTransition } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/radio.css";
+  import { switchTransition } from "@inflatable-cookie/poodle-core";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {

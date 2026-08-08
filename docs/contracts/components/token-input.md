@@ -109,7 +109,7 @@ Behavior classification: machine-backed via shared machinery
 Machine-backed via core machinery (g11 extraction sweep): token merging
 with dedupe (`mergeTokens`), separator-driven splitting with remainder
 (`splitTokenInput`), and the backspace-removes-last-chip guard
-(`tokenBackspaceRemoves`) live in `@inflatable-cookie/poodle-headless`. Token
+(`tokenBackspaceRemoves`) live in `@inflatable-cookie/poodle-core`. Token
 resolution/rejection hooks stay adapter-side (app-defined); the pointer
 listener is local focus routing.
 

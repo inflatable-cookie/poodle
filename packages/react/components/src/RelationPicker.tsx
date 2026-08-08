@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/relation-picker.css";
+import "@inflatable-cookie/poodle-core/styles/relation-picker.css";
 
 import { Fragment, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 

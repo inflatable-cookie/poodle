@@ -5,7 +5,7 @@
     type MenuEvent as MenuMachineEvent,
     layerContains,
     pointAnchor,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { tick, type Snippet } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

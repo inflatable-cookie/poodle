@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/menubar.css";
+import "@inflatable-cookie/poodle-core/styles/menubar.css";
 
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -10,7 +10,7 @@ import {
   menuNavigableItems,
   registerDismissLayer,
   layerContains,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

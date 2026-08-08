@@ -14,7 +14,7 @@
  * produce, in both languages. The contract states the supported subset; anything
  * outside it degrades to text rather than being silently dropped.
  *
- * This module stays dependency-free — `@inflatable-cookie/poodle-headless` has no runtime deps and
+ * This module stays dependency-free — `@inflatable-cookie/poodle-core` has no runtime deps and
  * should keep none. `MarkedToken` is structural, so the component packages own
  * the `marked` dependency and pass `marked.lexer(src)` output in.
  */

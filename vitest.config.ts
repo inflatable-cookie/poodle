@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 // Component-shell smoke tests for the Svelte and React implementations.
 // Verifies the machine -> DOM wiring per framework: components mount, contract
 // anatomy/classes are present, and stateful controls react to interaction.
-// Pure state-machine logic lives in @inflatable-cookie/poodle-headless (its own suite); these
+// Pure state-machine logic lives in @inflatable-cookie/poodle-core (its own suite); these
 // tests cover the framework binding those machines to real DOM.
 export default defineConfig({
   test: {
@@ -21,7 +21,7 @@ export default defineConfig({
         },
       },
       {
-        // Headless DOM geometry: the parts of @inflatable-cookie/poodle-headless that read layout
+        // Headless DOM geometry: the parts of @inflatable-cookie/poodle-core that read layout
         // and computed style. The rest of the core suite is pure and runs under
         // `bun test`, which has no DOM at all.
         test: {

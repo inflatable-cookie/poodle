@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/spacer.css";
+import "@inflatable-cookie/poodle-core/styles/spacer.css";
 
 export interface SpacerProps {
   grow?: number;

@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/meter.css";
+import "@inflatable-cookie/poodle-core/styles/meter.css";
 
 import type { CSSProperties } from "react";
 

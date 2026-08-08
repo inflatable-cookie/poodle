@@ -30,10 +30,7 @@
     "svelte": ">=5.38.6 <6"
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-headless": "0.1.0",
-    "@inflatable-cookie/poodle-icons-lucide": "0.1.0",
-    "@inflatable-cookie/poodle-styles": "0.1.0",
-    "@inflatable-cookie/poodle-svelte-tokens": "0.1.0",
+    "@inflatable-cookie/poodle-core": "0.1.0",
     "marked": "^18.0.0"
   }
 }

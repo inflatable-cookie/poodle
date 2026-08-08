@@ -15,9 +15,9 @@ import {
   registerDismissLayer,
   type MenuEvent as MenuMachineEvent,
   type OverlaySurfaceGeometryChangeHandler,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/menu.css";
+import "@inflatable-cookie/poodle-core/styles/menu.css";
 
 import { MenuSurface, type MenuSurfaceHandle } from "./MenuSurface";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

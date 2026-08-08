@@ -1,12 +1,12 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/duration-input.css";
+  import "@inflatable-cookie/poodle-core/styles/duration-input.css";
   import {
     adjustDurationSegment,
     durationTotalSeconds,
     padDurationSegment,
     setDurationSegment,
     type DurationSegment,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

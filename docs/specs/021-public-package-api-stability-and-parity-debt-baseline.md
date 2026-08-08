@@ -16,11 +16,11 @@ block adoption.
 Only these package entry points count as intentionally public in the current
 baseline:
 
-- `@inflatable-cookie/poodle-svelte-tokens`
-- `@inflatable-cookie/poodle-svelte-tokens/runtime`
-- `@inflatable-cookie/poodle-svelte-tokens/css`
-- `@inflatable-cookie/poodle-svelte-tokens/themes`
-- `@inflatable-cookie/poodle-svelte-tokens/metadata`
+- `@inflatable-cookie/poodle-core/tokens`
+- `@inflatable-cookie/poodle-core/tokens/runtime`
+- `@inflatable-cookie/poodle-core/tokens/css`
+- `@inflatable-cookie/poodle-core/tokens/themes`
+- `@inflatable-cookie/poodle-core/tokens/metadata`
 - `@inflatable-cookie/poodle-svelte`
 - `@inflatable-cookie/poodle-svelte/types`
 - `@inflatable-cookie/poodle-svelte-workstation`

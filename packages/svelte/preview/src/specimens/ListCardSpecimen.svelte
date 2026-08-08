@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ContextMenu, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@inflatable-cookie/poodle-svelte";
-  import { folder, layers, grid2x2 } from "@inflatable-cookie/poodle-icons-lucide";
+  import { folder, layers, grid2x2 } from "@inflatable-cookie/poodle-core/icons";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

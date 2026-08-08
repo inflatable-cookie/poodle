@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/agent-question.css";
+  import "@inflatable-cookie/poodle-core/styles/agent-question.css";
 
   import {
     canSubmitQuestion,
@@ -11,7 +11,7 @@
     toggleQuestionSelection,
     type AgentQuestionAnswer,
     type AgentQuestionItem,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import Checkbox from "./Checkbox.svelte";
   import Eyebrow from "./Eyebrow.svelte";

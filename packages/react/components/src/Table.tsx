@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/table.css";
+import "@inflatable-cookie/poodle-core/styles/table.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, TableColumn, TableRow } from "./types";

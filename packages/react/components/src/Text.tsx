@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/text.css";
+import "@inflatable-cookie/poodle-core/styles/text.css";
 
 export interface TextProps {
   as?: "p" | "span" | "div";

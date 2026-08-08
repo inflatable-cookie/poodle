@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/meta-item.css";
+import "@inflatable-cookie/poodle-core/styles/meta-item.css";
 
 export interface MetaItemProps {
   label?: string | null;

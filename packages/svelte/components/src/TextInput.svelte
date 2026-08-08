@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/text-input.css";
-  import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/text-input.css";
+  import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable-cookie/poodle-core";
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 

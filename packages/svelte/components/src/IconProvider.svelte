@@ -8,7 +8,7 @@
   // Any icon set in this format works — lucide-static/icon-nodes.json,
   // a Phosphor equivalent, or a custom set.
   // String-based icon lookups resolve from this set first. If not found
-  // and @inflatable-cookie/poodle-icons-lucide is installed, icons are lazily auto-imported.
+  // and @inflatable-cookie/poodle-core/icons is installed, icons are lazily auto-imported.
   interface Props {
     icons: IconSet;
     children?: Snippet;

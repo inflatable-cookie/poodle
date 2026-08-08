@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/editable-label.css";
-  import { editLabelTransition, type EditLabelEvent } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/editable-label.css";
+  import { editLabelTransition, type EditLabelEvent } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

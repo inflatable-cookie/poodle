@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/media-picker.css";
+  import "@inflatable-cookie/poodle-core/styles/media-picker.css";
   import { default as Dialog } from "./Dialog.svelte";
   import { default as FileUpload } from "./FileUpload.svelte";
   import { default as Tabs } from "./Tabs.svelte";

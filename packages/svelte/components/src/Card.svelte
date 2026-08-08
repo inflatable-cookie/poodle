@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/card.css";
+  import "@inflatable-cookie/poodle-core/styles/card.css";
   import type { Snippet } from "svelte";
   import { getUiPresentation } from "./presentation";
   import type { ControlDensity, CardVariant } from "./types";

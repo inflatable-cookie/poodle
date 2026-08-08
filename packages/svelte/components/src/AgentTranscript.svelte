@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/agent-transcript.css";
+  import "@inflatable-cookie/poodle-core/styles/agent-transcript.css";
   import { tick } from "svelte";
 
   import {
@@ -7,7 +7,7 @@
     isPinnedToBottom,
     transcriptWindow,
     type TranscriptBlock,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import AgentMessage from "./AgentMessage.svelte";
   import AgentPlanRecord from "./AgentPlanRecord.svelte";

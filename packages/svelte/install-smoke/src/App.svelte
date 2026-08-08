@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MetricTile } from "@inflatable-cookie/poodle-svelte";
   import { Button, Pill } from "@inflatable-cookie/poodle-svelte";
-  import { applyThemeAttributes } from "@inflatable-cookie/poodle-svelte-tokens/runtime";
+  import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens/runtime";
   import { onMount } from "svelte";
 
   let shell: HTMLDivElement | null = null;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/rating.css";
+  import "@inflatable-cookie/poodle-core/styles/rating.css";
   import {
     normalizeRatingValue,
     ratingFillRatio,
@@ -9,7 +9,7 @@
     resolveRatingStep,
     clampRatingDisplayValue,
     trimRatingFraction,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

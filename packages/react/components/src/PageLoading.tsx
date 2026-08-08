@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/page-loading.css";
+import "@inflatable-cookie/poodle-core/styles/page-loading.css";
 
 import { Progress } from "./Progress";
 import { Spinner } from "./Spinner";

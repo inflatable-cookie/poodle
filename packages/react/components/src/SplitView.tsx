@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/split-view.css";
+import "@inflatable-cookie/poodle-core/styles/split-view.css";
 
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 

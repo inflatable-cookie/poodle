@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 import { writable, type Readable, type Writable } from "svelte/store";
-import * as lucideIcons from "@inflatable-cookie/poodle-icons-lucide";
+import * as lucideIcons from "@inflatable-cookie/poodle-core/icons";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,7 +65,7 @@ function kebabToCamel(name: string): string {
 }
 
 /**
- * Resolve a single built-in icon from `@inflatable-cookie/poodle-icons-lucide`.
+ * Resolve a single built-in icon from `@inflatable-cookie/poodle-core/icons`.
  *
  * This remains a public helper for compatibility with existing primitive
  * internals, but resolution is now synchronous so source-linked consumers do

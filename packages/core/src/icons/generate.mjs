@@ -46,7 +46,7 @@ const allNodes = JSON.parse(readFileSync(rawPath, "utf-8"));
 const iconNames = Object.keys(allNodes).sort();
 
 // Clean and recreate output directory
-const iconsDir = resolve(__dirname, "src", "icons");
+const iconsDir = resolve(__dirname, "icons");
 rmSync(iconsDir, { recursive: true, force: true });
 mkdirSync(iconsDir, { recursive: true });
 
@@ -102,7 +102,7 @@ export type { IconNodes, IconNodeElement } from "./types";
 ${indexExports.join("\n")}
 `;
 
-writeFileSync(resolve(__dirname, "src", "index.ts"), indexContent);
+writeFileSync(resolve(__dirname, "index.ts"), indexContent);
 
 // Write types file
 const typesContent = `/** A single SVG child element: [tagName, attributes]. */
@@ -112,7 +112,7 @@ export type IconNodeElement = [string, Record<string, string>];
 export type IconNodes = IconNodeElement[];
 `;
 
-writeFileSync(resolve(__dirname, "src", "types.ts"), typesContent);
+writeFileSync(resolve(__dirname, "types.ts"), typesContent);
 
 console.log(`Generated ${iconNames.length} icon modules in src/icons/`);
 console.log(`Generated src/index.ts barrel export`);

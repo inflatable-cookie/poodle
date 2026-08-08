@@ -1,7 +1,7 @@
 <script lang="ts">
   import AgentChatInput from "../src/AgentChatInput.svelte";
   import AgentPlan from "../src/AgentPlan.svelte";
-  import type { AgentPlanStatus } from "@inflatable-cookie/poodle-headless";
+  import type { AgentPlanStatus } from "@inflatable-cookie/poodle-core";
 
   interface Props {
     plan: string;

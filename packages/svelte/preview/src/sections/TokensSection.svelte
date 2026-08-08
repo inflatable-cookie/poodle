@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { cssVars } from "@inflatable-cookie/poodle-svelte-tokens";
+  import { cssVars } from "@inflatable-cookie/poodle-core/tokens";
   import { Surface } from "@inflatable-cookie/poodle-svelte";
   import TokenToolsPanel from "../components/TokenToolsPanel.svelte";
   let { liveTokenValues = {} }: { liveTokenValues?: Partial<Record<string, string>> } = $props();

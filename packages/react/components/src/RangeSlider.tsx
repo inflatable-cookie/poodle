@@ -4,9 +4,9 @@ import {
   rangeSliderTransition,
   safeSliderMax,
   type RangeSliderContext,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/range-slider.css";
+import "@inflatable-cookie/poodle-core/styles/range-slider.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

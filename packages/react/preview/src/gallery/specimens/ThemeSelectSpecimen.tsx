@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ThemeSelect } from "@inflatable-cookie/poodle-react";
-import { themeOptions } from "@inflatable-cookie/poodle-svelte-tokens";
+import { themeOptions } from "@inflatable-cookie/poodle-core/tokens";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/pagination.css";
-  import { buildVisiblePages, canRequestPage } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/pagination.css";
+  import { buildVisiblePages, canRequestPage } from "@inflatable-cookie/poodle-core";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 

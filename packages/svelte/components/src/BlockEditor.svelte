@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/block-editor.css";
+  import "@inflatable-cookie/poodle-core/styles/block-editor.css";
   import type { Snippet } from "svelte";
   import { tick } from "svelte";
 

@@ -5,9 +5,9 @@ import {
   padDurationSegment,
   setDurationSegment,
   type DurationSegment,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/duration-input.css";
+import "@inflatable-cookie/poodle-core/styles/duration-input.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

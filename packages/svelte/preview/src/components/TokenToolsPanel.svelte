@@ -48,7 +48,7 @@
   </Stack>
 
   <Stack gap="md">
-    <span class="poodle-hint">@inflatable-cookie/poodle-svelte-tokens</span>
+    <span class="poodle-hint">@inflatable-cookie/poodle-core/tokens</span>
     <span class="poodle-path">packages/tokens/artifacts/css/</span>
     <span class="poodle-path">packages/tokens/artifacts/ts/</span>
   </Stack>

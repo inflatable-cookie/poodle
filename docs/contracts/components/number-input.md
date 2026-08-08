@@ -45,7 +45,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 
 Behavior classification: machine-backed via core machinery
 
-Value semantics from `@inflatable-cookie/poodle-headless`: `parseNumberish` (numeric
+Value semantics from `@inflatable-cookie/poodle-core`: `parseNumberish` (numeric
 coercion; empty and non-finite become null), `parseStep` (invalid or
 non-positive steps fall back to 1), `clampNullable` (optional min/max
 bounds), `validationStatusToState`. Increment/decrement, commit-on-blur,

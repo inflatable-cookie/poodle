@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/page-header.css";
+  import "@inflatable-cookie/poodle-core/styles/page-header.css";
   import type { Snippet } from "svelte";
 
   import { default as Callout } from "./Callout.svelte";

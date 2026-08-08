@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/field.css";
+  import "@inflatable-cookie/poodle-core/styles/field.css";
   import type { Snippet } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Popover } from "./Popover.svelte";

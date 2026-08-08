@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/audio-player.css";
+import "@inflatable-cookie/poodle-core/styles/audio-player.css";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 

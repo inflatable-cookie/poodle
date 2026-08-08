@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/bulk-action-bar.css";
+import "@inflatable-cookie/poodle-core/styles/bulk-action-bar.css";
 
 import { isValidElement, type ReactNode } from "react";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/relation-picker.css";
+  import "@inflatable-cookie/poodle-core/styles/relation-picker.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";

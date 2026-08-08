@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/text-link.css";
+  import "@inflatable-cookie/poodle-core/styles/text-link.css";
   import type { Snippet } from "svelte";
 
   interface Props {

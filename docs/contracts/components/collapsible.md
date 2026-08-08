@@ -89,7 +89,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (`disclosureTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 - Context: `open` (controllable), `disabled`
 - Events: `TOGGLE` (trigger click), `SET_OPEN` (programmatic, silent)

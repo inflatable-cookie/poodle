@@ -19,24 +19,9 @@ mkdirSync(consumerRoot);
 
 const packages = [
   {
-    name: "@inflatable-cookie/poodle-headless",
+    name: "@inflatable-cookie/poodle-core",
     directory: "packages/core",
-    filename: "inflatable-cookie-poodle-headless-0.1.0.tgz",
-  },
-  {
-    name: "@inflatable-cookie/poodle-styles",
-    directory: "packages/styles",
-    filename: "inflatable-cookie-poodle-styles-0.1.0.tgz",
-  },
-  {
-    name: "@inflatable-cookie/poodle-svelte-tokens",
-    directory: "packages/svelte/tokens",
-    filename: "inflatable-cookie-poodle-svelte-tokens-0.1.0.tgz",
-  },
-  {
-    name: "@inflatable-cookie/poodle-icons-lucide",
-    directory: "packages/svelte/icons-lucide",
-    filename: "inflatable-cookie-poodle-icons-lucide-0.1.0.tgz",
+    filename: "inflatable-cookie-poodle-core-0.1.0.tgz",
   },
   {
     name: "@inflatable-cookie/poodle-svelte",

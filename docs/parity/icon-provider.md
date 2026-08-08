@@ -17,7 +17,7 @@
 IconProvider is a pure context boundary with no DOM output, no tokens, no states. Props and anatomy match. The one documentation divergence is reconciled:
 
 - [x] FIXED Contract §9 said "Uses `setIconRegistry(registry)`" / "Import `setIconRegistry`". Svelte actually uses `setIconSet` (`IconProvider.svelte:5,22`; defined in `icon-registry.ts`). Contract §9 repointed to `setIconSet` (and `import { setIconSet } from './icon-registry'`).
-- [x] FIXED Svelte prop is `icons: IconSet` (already matched contract §3). Added §9 notes for the empty-set seed + `$effect` sync and the string-based lazy auto-import from `@inflatable-cookie/poodle-icons-lucide`.
+- [x] FIXED Svelte prop is `icons: IconSet` (already matched contract §3). Added §9 notes for the empty-set seed + `$effect` sync and the string-based lazy auto-import from `@inflatable-cookie/poodle-core/icons`.
 
 ## GPUI gap (vs Svelte + contract)
 

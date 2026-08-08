@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/color-picker.css";
+import "@inflatable-cookie/poodle-core/styles/color-picker.css";
 
 import {
   useEffect,
@@ -20,7 +20,7 @@ import {
   normalizeHex,
   rgbToHsv,
   layerContains,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { NumberInput } from "./NumberInput";

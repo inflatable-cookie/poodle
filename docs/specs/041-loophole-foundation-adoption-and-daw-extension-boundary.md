@@ -22,7 +22,7 @@ of Poodle foundations.
 
 The current allowed Loophole adoption layers are:
 
-- `@inflatable-cookie/poodle-svelte-tokens`
+- `@inflatable-cookie/poodle-core/tokens`
 - `@inflatable-cookie/poodle-svelte`
 - `@inflatable-cookie/poodle-svelte-workstation`
 

@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
-import { singleSelectTransition } from "@inflatable-cookie/poodle-headless";
+import { singleSelectTransition } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/segmented-control.css";
+import "@inflatable-cookie/poodle-core/styles/segmented-control.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";

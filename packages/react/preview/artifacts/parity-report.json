@@ -6,7 +6,7 @@
     "@inflatable-cookie/poodle-react",
     "@inflatable-cookie/poodle-svelte"
   ],
-  "sharedContractNote": "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte, running the same @inflatable-cookie/poodle-headless machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+  "sharedContractNote": "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte, running the same @inflatable-cookie/poodle-core machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
   "automatedBoundary": [
     "catalog registration and section-to-family coverage",
     "stable preview route generation for repeat review",
@@ -2997,7 +2997,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "harnessCoverage": {
@@ -3056,7 +3056,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "harnessCoverage": {

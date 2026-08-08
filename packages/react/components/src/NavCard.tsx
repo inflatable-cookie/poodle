@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/nav-card.css";
+import "@inflatable-cookie/poodle-core/styles/nav-card.css";
 
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 

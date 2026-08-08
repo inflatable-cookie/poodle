@@ -57,7 +57,7 @@ the full Poodle theme set + DOM application.
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `themes` | `ThemeOption[]` | controller's list | no | theme catalogue. Falls back to the theme controller's list, then empty. Use `themeOptions()` from `@inflatable-cookie/poodle-svelte-tokens` for the full Poodle set |
+| `themes` | `ThemeOption[]` | controller's list | no | theme catalogue. Falls back to the theme controller's list, then empty. Use `themeOptions()` from `@inflatable-cookie/poodle-core/tokens` for the full Poodle set |
 | `value` | `string \| undefined` | controller / uncontrolled | no | controlled current theme value. Omit to use the controller (if present) or internal state |
 | `columns` | `number` | `3` | no | swatch-tile grid columns |
 | `showLabel` | `boolean` | `true` | no | show the current theme name in the trigger |
@@ -75,7 +75,7 @@ type ThemeSwatch = { canvas: string; surface: string; accent: string; text: stri
 type ThemeOption = { value: string; label: string; description?: string; swatch: ThemeSwatch };
 ```
 
-`themeOptions()` (from `@inflatable-cookie/poodle-svelte-tokens`) returns every registered Poodle
+`themeOptions()` (from `@inflatable-cookie/poodle-core/tokens`) returns every registered Poodle
 theme as a `ThemeOption`, with swatch colors resolved from the theme's token
 overrides (falling back to the base semantic value).
 
@@ -105,7 +105,7 @@ persists it (localStorage). It is framework-specific:
 `ThemeSelect` auto-consumes the controller when present. The controller reads
 `themeOptions()` by default, so it serves the full Poodle theme set with zero
 per-app wiring. Consuming apps load the theme CSS layers once — import
-`@inflatable-cookie/poodle-svelte-tokens/themes.css` (every theme in one aggregate).
+`@inflatable-cookie/poodle-core/tokens/themes.css` (every theme in one aggregate).
 
 ## 5. States
 
@@ -158,7 +158,7 @@ Anatomy token-target column.
 
 ## 9. Svelte Notes
 
-- owns open state + anchored popover; `registerDismissLayer` from `@inflatable-cookie/poodle-headless`
+- owns open state + anchored popover; `registerDismissLayer` from `@inflatable-cookie/poodle-core`
 - size/density via `getUiPresentation` + `resolveSemanticControlSize`
 - controller via `getThemeController()` context; falls back to props
 - swatch colors applied inline (`style="background:…"`) — per-theme literals

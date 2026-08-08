@@ -75,15 +75,6 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
-      "name": "@inflatable-cookie/poodle-svelte-tokens",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "artifact-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
       "name": "@inflatable-cookie/poodle-svelte",
       "channel": "preview",
       "publicIntent": true,
@@ -93,28 +84,10 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@inflatable-cookie/poodle-icons-lucide",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "artifact-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "@inflatable-cookie/poodle-headless",
+      "name": "@inflatable-cookie/poodle-core",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "@inflatable-cookie/poodle-styles",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "artifact-backed",
       "requiresReleaseNotes": true,
       "requiresDeprecationRecord": true,
       "removalGate": "successor-and-generation-delay"

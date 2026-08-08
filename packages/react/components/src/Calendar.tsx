@@ -14,9 +14,9 @@ import {
   normalizeDateRange,
   parseIsoDate,
   todayIsoDate,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/calendar.css";
+import "@inflatable-cookie/poodle-core/styles/calendar.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {

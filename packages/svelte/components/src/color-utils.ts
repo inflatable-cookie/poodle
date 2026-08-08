@@ -20,4 +20,4 @@ export {
   type RgbColor,
   type HslColor,
   type HsvColor,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";

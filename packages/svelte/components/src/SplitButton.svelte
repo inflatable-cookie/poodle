@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/split-button.css";
-  import { registerDismissLayer, layerContains } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/split-button.css";
+  import { registerDismissLayer, layerContains } from "@inflatable-cookie/poodle-core";
   import { tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";

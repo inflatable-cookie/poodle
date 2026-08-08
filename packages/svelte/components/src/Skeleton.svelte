@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/skeleton.css";
-  import { pxToRem } from "@inflatable-cookie/poodle-svelte-tokens";
+  import "@inflatable-cookie/poodle-core/styles/skeleton.css";
+  import { pxToRem } from "@inflatable-cookie/poodle-core/tokens";
   import type { SkeletonShape, SkeletonPreset } from "./types";
 
   let {

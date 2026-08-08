@@ -65,7 +65,7 @@ The current release posture is:
 
 ### Preview Channel Public-Intent Packages
 
-- `@inflatable-cookie/poodle-svelte-tokens`
+- `@inflatable-cookie/poodle-core/tokens`
 - `@inflatable-cookie/poodle-svelte`
 - `@inflatable-cookie/poodle-svelte-workstation`
 - `poodle-gpui-tokens`

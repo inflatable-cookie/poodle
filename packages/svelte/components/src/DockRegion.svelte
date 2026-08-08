@@ -1,8 +1,8 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/dock-region.css";
+  import "@inflatable-cookie/poodle-core/styles/dock-region.css";
   import { onDestroy, tick, type Snippet } from "svelte";
 
-  import { createDockExternalDragController } from "@inflatable-cookie/poodle-headless";
+  import { createDockExternalDragController } from "@inflatable-cookie/poodle-core";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { default as Tabs } from "./Tabs.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

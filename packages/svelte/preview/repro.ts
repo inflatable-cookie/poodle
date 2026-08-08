@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
 import "../../../tokens/artifacts/css/poodle-themes.css";
 
 import { mount } from "svelte";

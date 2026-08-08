@@ -107,7 +107,7 @@ const report = {
   previewBasePath: "/",
   frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],
   sharedContractNote:
-    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte, running the same @inflatable-cookie/poodle-headless machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte, running the same @inflatable-cookie/poodle-core machines. Suite-level parity data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
   automatedBoundary: previewHarnessBoundary.automated,
   manualBoundary: previewHarnessBoundary.manual,
   summary: {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T16:51:25.730Z",
+  "generatedAt": "2026-08-08T22:10:50.831Z",
   "artifact": "packages/svelte/preview/artifacts/accessibility-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -635,7 +635,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "auditAreas": {
@@ -688,7 +688,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@inflatable-cookie/poodle-svelte-tokens",
+      "packageName": "@inflatable-cookie/poodle-core/tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "auditAreas": {

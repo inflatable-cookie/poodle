@@ -1,7 +1,7 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/agent-message.css";
+  import "@inflatable-cookie/poodle-core/styles/agent-message.css";
 
-  import { blocksFromMarked, type MarkedToken, type MdBlock, type MdInline } from "@inflatable-cookie/poodle-headless";
+  import { blocksFromMarked, type MarkedToken, type MdBlock, type MdInline } from "@inflatable-cookie/poodle-core";
   import { marked } from "marked";
 
   import Code from "./Code.svelte";

@@ -184,7 +184,7 @@ text and the measured editor height.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Submit gating, auto-grow measurement and key handling are plain component logic.
-There is no `@inflatable-cookie/poodle-headless` machine and no conformance vectors. The pure
+There is no `@inflatable-cookie/poodle-core` machine and no conformance vectors. The pure
 helpers (`canSubmit`, `contextPercentage`, `actionIcon`, `resolveSubmitIntent`)
 are the cross-renderer semantic reference and live in `agent-chat-input-model.ts`
 (TS) and as methods on `AgentChatInputSpec` (Rust).

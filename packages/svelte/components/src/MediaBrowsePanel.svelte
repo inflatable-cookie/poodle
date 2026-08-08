@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/media-browse-panel.css";
+  import "@inflatable-cookie/poodle-core/styles/media-browse-panel.css";
   import { default as Button } from "./Button.svelte";
   import { default as Callout } from "./Callout.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";

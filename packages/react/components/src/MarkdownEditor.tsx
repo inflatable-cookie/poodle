@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/markdown-editor.css";
+import "@inflatable-cookie/poodle-core/styles/markdown-editor.css";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 

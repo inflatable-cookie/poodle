@@ -4,12 +4,12 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/filter-builder.css";
+  import "@inflatable-cookie/poodle-core/styles/filter-builder.css";
   // Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
   // clause pills — single CSS source, no visual fork. The pills render inline in
   // the trigger block rather than via the SelectionSummary section component.
-  import "@inflatable-cookie/poodle-styles/selection-summary.css";
-  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/selection-summary.css";
+  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
   import { anchored } from "./anchored";

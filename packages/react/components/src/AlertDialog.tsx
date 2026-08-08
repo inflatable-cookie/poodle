@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/alert-dialog.css";
+import "@inflatable-cookie/poodle-core/styles/alert-dialog.css";
 
 import { Button } from "./Button";
 import { Dialog } from "./Dialog";

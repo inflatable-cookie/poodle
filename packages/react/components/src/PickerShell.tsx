@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/picker-shell.css";
+import "@inflatable-cookie/poodle-core/styles/picker-shell.css";
 
 import type { ReactNode } from "react";
 

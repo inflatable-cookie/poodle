@@ -1,5 +1,5 @@
 <script lang="ts" generics="T">
-  import "@inflatable-cookie/poodle-styles/inline-list-section.css";
+  import "@inflatable-cookie/poodle-core/styles/inline-list-section.css";
   import type { Snippet } from "svelte";
 
   import { default as Card } from "./Card.svelte";

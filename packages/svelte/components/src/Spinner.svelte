@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/spinner.css";
+  import "@inflatable-cookie/poodle-core/styles/spinner.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";

@@ -16,14 +16,6 @@
       "channel": "internal"
     },
     {
-      "name": "@inflatable-cookie/poodle-svelte-tokens",
-      "path": "packages/svelte/tokens",
-      "kind": "runtime-package",
-      "language": "typescript",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
       "name": "@inflatable-cookie/poodle-svelte",
       "path": "packages/svelte/components",
       "kind": "runtime-package",
@@ -32,24 +24,8 @@
       "channel": "preview"
     },
     {
-      "name": "@inflatable-cookie/poodle-icons-lucide",
-      "path": "packages/svelte/icons-lucide",
-      "kind": "runtime-package",
-      "language": "typescript",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "@inflatable-cookie/poodle-headless",
+      "name": "@inflatable-cookie/poodle-core",
       "path": "packages/core",
-      "kind": "runtime-package",
-      "language": "typescript",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "@inflatable-cookie/poodle-styles",
-      "path": "packages/styles",
       "kind": "runtime-package",
       "language": "typescript",
       "publicIntent": true,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/status-indicator.css";
+  import "@inflatable-cookie/poodle-core/styles/status-indicator.css";
   import type { Snippet } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

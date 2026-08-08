@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
-import { switchTransition } from "@inflatable-cookie/poodle-headless";
+import { switchTransition } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/switch.css";
+import "@inflatable-cookie/poodle-core/styles/switch.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

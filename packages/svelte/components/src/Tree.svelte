@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/tree.css";
+  import "@inflatable-cookie/poodle-core/styles/tree.css";
   import {
     findTreeNode,
     flattenVisibleTreeRows,
@@ -10,7 +10,7 @@
     treeSiblingReorderTarget,
     treeToggleCheck,
     treeVirtualWindow,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { untrack } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";

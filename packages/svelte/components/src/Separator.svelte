@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/separator.css";
+  import "@inflatable-cookie/poodle-core/styles/separator.css";
   import type { Orientation, SeparatorTone } from "./types";
 
   interface Props {

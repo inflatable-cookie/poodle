@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import "@inflatable-cookie/poodle-styles/code.css";
+import "@inflatable-cookie/poodle-core/styles/code.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

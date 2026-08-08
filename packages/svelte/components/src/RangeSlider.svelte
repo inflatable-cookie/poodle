@@ -1,11 +1,11 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/range-slider.css";
+  import "@inflatable-cookie/poodle-core/styles/range-slider.css";
   import {
     normalizeRangeValue,
     rangeSliderTransition,
     safeSliderMax,
     type RangeSliderContext,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import { joinStyles } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

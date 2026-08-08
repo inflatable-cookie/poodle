@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/pagination-summary.css";
+import "@inflatable-cookie/poodle-core/styles/pagination-summary.css";
 
 export interface PaginationSummaryProps {
   currentPage?: number;

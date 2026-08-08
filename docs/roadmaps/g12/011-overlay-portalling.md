@@ -26,7 +26,7 @@ affected. `Dialog` was the only thing in the library that portalled.
 
 ## What Shipped
 
-**Core (`@inflatable-cookie/poodle-headless`), `src/dom/anchor.ts`:**
+**Core (`@inflatable-cookie/poodle-core`), `src/dom/anchor.ts`:**
 
 - `resolvePortalTarget` — theme-root-aware mount point (explicit
   `[data-poodle-theme-root]`, else nearest `[data-theme]`, never `<html>`,
@@ -50,7 +50,7 @@ listener wiring is a thin DOM binding over it.
   offset, matchWidth, minWidth, onPlacement }}`
 - `@inflatable-cookie/poodle-react` — `<AnchoredSurface>`, same options, `tag="span"` for inline
   bubbles
-- `@inflatable-cookie/poodle-styles` — `anchored-surface.css`: the shared `position: fixed` shell
+- `@inflatable-cookie/poodle-core/styles` — `anchored-surface.css`: the shared `position: fixed` shell
   plus the `data-anchor-hidden` rule
 
 **Migrated — 23 in all, both web frameworks:** Popover, Select, ModelPicker, RefSelect,

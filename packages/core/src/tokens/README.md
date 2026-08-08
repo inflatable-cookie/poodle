@@ -4,14 +4,14 @@ Public Svelte-facing token surface for emitted Poodle token artifacts.
 
 ## Public Surface
 
-- root import: `@inflatable-cookie/poodle-svelte-tokens`
-- runtime helpers: `@inflatable-cookie/poodle-svelte-tokens/runtime`
-- CSS helper exports: `@inflatable-cookie/poodle-svelte-tokens/css`
-- CSS asset export: `@inflatable-cookie/poodle-svelte-tokens/styles.css`
-- legacy-compatible CSS asset export: `@inflatable-cookie/poodle-svelte-tokens/css/poodle-tokens.css`
-- generated themes: `@inflatable-cookie/poodle-svelte-tokens/themes`
-- generated metadata: `@inflatable-cookie/poodle-svelte-tokens/metadata`
-- relative-unit helpers: `@inflatable-cookie/poodle-svelte-tokens/units`
+- root import: `@inflatable-cookie/poodle-core/tokens`
+- runtime helpers: `@inflatable-cookie/poodle-core/tokens/runtime`
+- CSS helper exports: `@inflatable-cookie/poodle-core/tokens/css`
+- CSS asset export: `@inflatable-cookie/poodle-core/tokens/styles.css`
+- legacy-compatible CSS asset export: `@inflatable-cookie/poodle-core/tokens/css/poodle-tokens.css`
+- generated themes: `@inflatable-cookie/poodle-core/tokens/themes`
+- generated metadata: `@inflatable-cookie/poodle-core/tokens/metadata`
+- relative-unit helpers: `@inflatable-cookie/poodle-core/tokens/units`
 
 ## Stability Notes
 

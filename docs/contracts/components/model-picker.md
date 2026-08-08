@@ -305,7 +305,7 @@ every label truncate at once. Hosts that know better override with `control`.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Like `FilterBuilder` and `OrderBy`, the popover uses the shared dismissable-layer
-stack and the selection is plain component state; there is no `@inflatable-cookie/poodle-headless`
+stack and the selection is plain component state; there is no `@inflatable-cookie/poodle-core`
 machine and no conformance vectors. The pure helpers (`applicableAxes`,
 `resolveSelection`, `axisSummary`, `summaryText`, `modelLabel`,
 `axisControlKind`) live in `model-picker-model.ts` (TS) and as methods on
@@ -313,7 +313,7 @@ machine and no conformance vectors. The pure helpers (`applicableAxes`,
 
 #### Machinery Dependencies
 
-Dismissable layer (`registerDismissLayer` from `@inflatable-cookie/poodle-headless`), presentation
+Dismissable layer (`registerDismissLayer` from `@inflatable-cookie/poodle-core`), presentation
 context (size/density), id wiring for the dialog surface. No focus trap.
 
 ## 5. Events
@@ -458,7 +458,7 @@ adjust them. Escape or an outside interaction dismisses.
 ## 9. Svelte Notes
 
 - owns its open state and anchored panel surface directly (mirrors `FilterBuilder`)
-- `registerDismissLayer` from `@inflatable-cookie/poodle-headless`; dismiss on outside interact /
+- `registerDismissLayer` from `@inflatable-cookie/poodle-core`; dismiss on outside interact /
   Escape via a `$effect` guarded by `open`
 - size/density resolve via `getUiPresentation` + `resolveSemanticControlSize`
 - controlled/uncontrolled via `$bindable(value)` plus a `sync()` that writes

@@ -61,7 +61,7 @@ export function TokenToolsPanel({
       </Stack>
 
       <Stack gap="md">
-        <span className="poodle-hint">@inflatable-cookie/poodle-svelte-tokens</span>
+        <span className="poodle-hint">@inflatable-cookie/poodle-core/tokens</span>
         <span className="poodle-path">packages/tokens/artifacts/css/</span>
         <span className="poodle-path">packages/tokens/artifacts/ts/</span>
       </Stack>

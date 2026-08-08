@@ -1,8 +1,8 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/list-card.css";
+  import "@inflatable-cookie/poodle-core/styles/list-card.css";
   import { tick, type Snippet } from "svelte";
 
-  import { registerDismissLayer, pointAnchor } from "@inflatable-cookie/poodle-headless";
+  import { registerDismissLayer, pointAnchor } from "@inflatable-cookie/poodle-core";
 
   import { menuNavigableItems } from "./internal";
   import { anchored } from "./anchored";

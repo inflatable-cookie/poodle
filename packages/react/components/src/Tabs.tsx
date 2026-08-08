@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/tabs.css";
+import "@inflatable-cookie/poodle-core/styles/tabs.css";
 
 import {
   Fragment,
@@ -18,7 +18,7 @@ import {
   tabsTransition,
   type TabsContext as HeadlessTabsContext,
   type TabsEvent as HeadlessTabsEvent,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/picker-shell.css";
+  import "@inflatable-cookie/poodle-core/styles/picker-shell.css";
   import type { Snippet } from "svelte";
 
   import { default as Spinner } from "./Spinner.svelte";

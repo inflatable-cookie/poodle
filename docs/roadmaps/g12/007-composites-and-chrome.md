@@ -25,7 +25,7 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   optional region role), NavCard (anchor-or-button dual root, badge,
   arrow), MetricTile (sparkline path built from data, trend arrow +
   label), CardRadioGroup + CardToggleGroup (both drive
-  toggleGroupTransition from @inflatable-cookie/poodle-headless; roving tabindex, arrow
+  toggleGroupTransition from @inflatable-cookie/poodle-core; roving tabindex, arrow
   nav skipping disabled, toggle group supports allowDeactivation),
   StatusBar. Verified 28/28. 91/132.
 - [x] Wave 4: toolbars + bars — Toolbar (getFocusableElements arrow
@@ -47,7 +47,7 @@ pieces, and detail shells. Same playbook as prior batches (roadmap 002).
   status region), InlineListSection (generic render-prop list, framed
   Card wrap), ListContainer (PageHeader + state switch + built-in
   pagination), ResizeHandle (resizeAxisPosition/resizeDragDelta/
-  resizeKeydownStep from @inflatable-cookie/poodle-headless; window listener pair attached
+  resizeKeydownStep from @inflatable-cookie/poodle-core; window listener pair attached
   per drag). Verified 30/30. 106/132.
 - [x] Wave 5b: heavy pickers — ColorPicker (HSV state + pinned-hex model
   over the headless color converters; gradient pad with pointer capture

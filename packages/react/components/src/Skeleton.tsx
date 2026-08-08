@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import "@inflatable-cookie/poodle-styles/skeleton.css";
+import "@inflatable-cookie/poodle-core/styles/skeleton.css";
 
 import type { SkeletonPreset, SkeletonShape } from "./types";
 

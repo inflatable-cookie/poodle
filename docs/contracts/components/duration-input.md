@@ -82,7 +82,7 @@ Updated: 2026-07-10
 
 Behavior classification: machine-backed via core machinery
 
-Segment semantics live in `@inflatable-cookie/poodle-headless` (`duration.ts`):
+Segment semantics live in `@inflatable-cookie/poodle-core` (`duration.ts`):
 `adjustDurationSegment` (±step with carry/borrow seconds → minutes →
 hours; hours clamp to `[0, maxHours]`, carries at the bound are
 swallowed), `setDurationSegment` (direct entry clamped per segment),

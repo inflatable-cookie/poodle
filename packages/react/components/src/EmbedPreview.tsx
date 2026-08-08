@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/embed-preview.css";
+import "@inflatable-cookie/poodle-core/styles/embed-preview.css";
 
 import type { CSSProperties } from "react";
 

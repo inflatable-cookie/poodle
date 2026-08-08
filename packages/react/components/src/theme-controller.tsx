@@ -12,7 +12,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { applyThemeAttributes, themeOptions } from "@inflatable-cookie/poodle-svelte-tokens";
+import { applyThemeAttributes, themeOptions } from "@inflatable-cookie/poodle-core/tokens";
 import type { ThemeOption } from "./types";
 
 export interface ThemeController {

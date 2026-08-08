@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/time-ago.css";
+  import "@inflatable-cookie/poodle-core/styles/time-ago.css";
   import { default as Tooltip } from "./Tooltip.svelte";
 
   let {

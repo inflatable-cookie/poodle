@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/avatar.css";
+import "@inflatable-cookie/poodle-core/styles/avatar.css";
 
 export interface AvatarProps {
   src?: string | null;

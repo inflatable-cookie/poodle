@@ -1,5 +1,5 @@
 {
-  "name": "@inflatable-cookie/poodle-headless",
+  "name": "@inflatable-cookie/poodle-core",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,42 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./styles/*": "./src/styles/*",
+    "./icons": "./src/icons/index.ts",
+    "./icons/*": "./src/icons/icons/*.ts",
+    "./tokens": {
+      "svelte": "./src/tokens/index.ts",
+      "default": "./src/tokens/index.ts"
+    },
+    "./tokens/runtime": "./src/tokens/runtime.ts",
+    "./tokens/css": "./src/tokens/css.ts",
+    "./tokens/styles.css": "./src/tokens/generated/css/poodle-tokens.css",
+    "./tokens/css/poodle-tokens.css": "./src/tokens/generated/css/poodle-tokens.css",
+    "./tokens/themes.css": "./src/tokens/generated/css/poodle-themes.css",
+    "./tokens/themes": "./src/tokens/themes.ts",
+    "./tokens/metadata": "./src/tokens/metadata.ts",
+    "./tokens/units": "./src/tokens/units.ts",
+    "./tokens/theme-iceberg.css": "./src/tokens/generated/css/poodle-theme-iceberg.css",
+    "./tokens/theme-eclipse.css": "./src/tokens/generated/css/poodle-theme-eclipse.css",
+    "./tokens/theme-graphite.css": "./src/tokens/generated/css/poodle-theme-graphite.css",
+    "./tokens/theme-midnight.css": "./src/tokens/generated/css/poodle-theme-midnight.css",
+    "./tokens/theme-nord.css": "./src/tokens/generated/css/poodle-theme-nord.css",
+    "./tokens/theme-rose.css": "./src/tokens/generated/css/poodle-theme-rose.css",
+    "./tokens/theme-forest.css": "./src/tokens/generated/css/poodle-theme-forest.css",
+    "./tokens/theme-solarized.css": "./src/tokens/generated/css/poodle-theme-solarized.css",
+    "./tokens/theme-hornet.css": "./src/tokens/generated/css/poodle-theme-hornet.css",
+    "./tokens/theme-cobalt.css": "./src/tokens/generated/css/poodle-theme-cobalt.css",
+    "./tokens/theme-clay.css": "./src/tokens/generated/css/poodle-theme-clay.css",
+    "./tokens/theme-meadow.css": "./src/tokens/generated/css/poodle-theme-meadow.css",
+    "./tokens/density-compact.css": "./src/tokens/generated/css/poodle-density-compact.css",
+    "./tokens/density-default.css": "./src/tokens/generated/css/poodle-density-default.css",
+    "./tokens/density-comfortable.css": "./src/tokens/generated/css/poodle-density-comfortable.css",
+    "./tokens/control-size-xs.css": "./src/tokens/generated/css/poodle-control-size-xs.css",
+    "./tokens/control-size-sm.css": "./src/tokens/generated/css/poodle-control-size-sm.css",
+    "./tokens/control-size-md.css": "./src/tokens/generated/css/poodle-control-size-md.css",
+    "./tokens/control-size-lg.css": "./src/tokens/generated/css/poodle-control-size-lg.css",
+    "./tokens/control-size-xl.css": "./src/tokens/generated/css/poodle-control-size-xl.css"
   },
   "files": [
     "src",
@@ -25,6 +60,7 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
+    "lucide-static": "^0.577.0",
     "marked": "^18.0.0"
   }
 }

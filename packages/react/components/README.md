@@ -2,7 +2,7 @@
 
 `@inflatable-cookie/poodle-react` — the full Poodle component library for React. All 132
 components in a single package, as hand-written TSX shells over the shared
-`@inflatable-cookie/poodle-headless` state machines. Same contracts, tokens, recipes, and CSS as
+`@inflatable-cookie/poodle-core` state machines. Same contracts, tokens, recipes, and CSS as
 `@inflatable-cookie/poodle-svelte`; the Svelte implementation stays the visual proof reference.
 
 ## Public Surface
@@ -22,26 +22,26 @@ Three things wire a consuming app up.
 
 **1. Load the token CSS** once, at the app entry — semantic tokens plus the
 theme / density / control-size layers you use (published by
-`@inflatable-cookie/poodle-svelte-tokens`, the shared token package):
+`@inflatable-cookie/poodle-core/tokens`, the shared token package):
 
 ```ts
-import "@inflatable-cookie/poodle-svelte-tokens/styles.css";        // semantic token definitions
-import "@inflatable-cookie/poodle-svelte-tokens/theme-eclipse.css"; // + theme-iceberg / theme-graphite
-import "@inflatable-cookie/poodle-svelte-tokens/density-default.css";
-import "@inflatable-cookie/poodle-svelte-tokens/control-size-md.css";
+import "@inflatable-cookie/poodle-core/tokens/styles.css";        // semantic token definitions
+import "@inflatable-cookie/poodle-core/tokens/theme-eclipse.css"; // + theme-iceberg / theme-graphite
+import "@inflatable-cookie/poodle-core/tokens/density-default.css";
+import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
 ```
 
 Component CSS ships with the components — each imports its own
-`@inflatable-cookie/poodle-styles/<name>.css`, so your bundler pulls it in automatically when you
+`@inflatable-cookie/poodle-core/styles/<name>.css`, so your bundler pulls it in automatically when you
 import the component. You never import component stylesheets by hand.
 
 **2. Set the active theme / density / size** on a root element with
-`applyThemeAttributes` from `@inflatable-cookie/poodle-svelte-tokens` (it stamps the
+`applyThemeAttributes` from `@inflatable-cookie/poodle-core/tokens` (it stamps the
 `data-theme` / `data-density` / `data-control-size` attributes the token CSS
 keys off):
 
 ```ts
-import { applyThemeAttributes } from "@inflatable-cookie/poodle-svelte-tokens";
+import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens";
 applyThemeAttributes(document.documentElement, {
   theme: "eclipse",
   density: "default",
@@ -51,7 +51,7 @@ applyThemeAttributes(document.documentElement, {
 
 **3. Wrap the tree** in `UiPresentationProvider` (app-wide density + size
 defaults). Add `IconProvider` if you want string icon names resolved from a
-full icon set — otherwise the icons bundled in `@inflatable-cookie/poodle-icons-lucide` cover the
+full icon set — otherwise the icons bundled in `@inflatable-cookie/poodle-core/icons` cover the
 common names:
 
 ```tsx
@@ -68,7 +68,7 @@ import iconNodes from "lucide-static/icon-nodes.json";
 ## Coming from `@inflatable-cookie/poodle-svelte`
 
 The two packages are interface-invariant — same component names, same prop
-names, same behavior (they run the same `@inflatable-cookie/poodle-headless` machines). Only the
+names, same behavior (they run the same `@inflatable-cookie/poodle-core` machines). Only the
 framework idioms differ:
 
 | Svelte | React |
@@ -101,7 +101,7 @@ bun run --cwd packages/react/preview reports   # docs + parity + accessibility a
 - Release channel is **preview / experimental** — no published version yet;
   consumers link it by `file:` in the monorepo.
 - `@inflatable-cookie/poodle-svelte` remains canon. React tracks it: shared contracts, shared
-  `@inflatable-cookie/poodle-headless` machines, shared `@inflatable-cookie/poodle-styles` CSS and tokens, and
+  `@inflatable-cookie/poodle-core` machines, shared `@inflatable-cookie/poodle-core/styles` CSS and tokens, and
   live-re-exported docs / parity data.
 - Row rendering, async data policy, ranking, and workflow orchestration stay
   host-owned semantics, same as the Svelte package.

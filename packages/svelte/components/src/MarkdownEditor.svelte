@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/markdown-editor.css";
+  import "@inflatable-cookie/poodle-core/styles/markdown-editor.css";
   import { tick } from "svelte";
   import { marked } from "marked";
 

@@ -83,7 +83,7 @@ Behavior classification: machine-backed via shared machinery
 Machine-backed via core machinery (g11 extraction sweep): axis position,
 drag-delta tracking, and keyboard step resolution (`resizeAxisPosition`,
 `resizeDragDelta`, `resizeKeydownStep` — ±8px arrows along the axis,
-saturating Home/End) live in `@inflatable-cookie/poodle-headless`. Window move/up listeners
+saturating Home/End) live in `@inflatable-cookie/poodle-core`. Window move/up listeners
 stay adapter-side (drag-gesture effects).
 
 ## 5. Callbacks

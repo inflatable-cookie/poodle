@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/selection-summary.css";
+import "@inflatable-cookie/poodle-core/styles/selection-summary.css";
 
 import { Icon } from "./Icon";
 import { TextLink } from "./TextLink";

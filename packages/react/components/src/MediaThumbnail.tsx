@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/media-thumbnail.css";
+import "@inflatable-cookie/poodle-core/styles/media-thumbnail.css";
 
 import type { CSSProperties, ReactNode } from "react";
 

@@ -183,7 +183,7 @@ their ordering:
 | `canDrop` | external `dragover` and again at `drop` | synchronous eligibility; only `DataTransfer.types` is portable during dragover |
 | `drop` | `drop`, only when the drop-time eligibility check passes | read and accept the public host payload |
 
-That ordering lives in `createDockExternalDragController` in `@inflatable-cookie/poodle-headless`,
+That ordering lives in `createDockExternalDragController` in `@inflatable-cookie/poodle-core`,
 not in either web target. It is subtle enough — a preparation that resolves
 after the drag already started must cancel rather than write, and a pointer
 released without a drag must still cancel — that two implementations would be

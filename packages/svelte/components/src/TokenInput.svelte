@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/token-input.css";
-  import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/token-input.css";
+  import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-core";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Icon } from "./Icon.svelte";

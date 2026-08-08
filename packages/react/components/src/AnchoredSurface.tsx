@@ -10,7 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import "@inflatable-cookie/poodle-styles/anchored-surface.css";
+import "@inflatable-cookie/poodle-core/styles/anchored-surface.css";
 import {
   anchorElement,
   createInstanceId,
@@ -24,7 +24,7 @@ import {
   type AnchorTarget,
   type OverlaySurfaceGeometryChangeHandler,
   type OverlaySurfaceGeometryObserver,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import type { OverlayPlacement } from "./types";
 

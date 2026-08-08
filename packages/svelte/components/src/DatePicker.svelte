@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { layerContains } from "@inflatable-cookie/poodle-headless";
-  import "@inflatable-cookie/poodle-styles/date-picker.css";
+  import { layerContains } from "@inflatable-cookie/poodle-core";
+  import "@inflatable-cookie/poodle-core/styles/date-picker.css";
   import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, todayIsoDate } from "./date";

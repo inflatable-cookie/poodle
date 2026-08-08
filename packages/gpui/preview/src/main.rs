@@ -614,7 +614,7 @@ impl PreviewRoot {
                                     div()
                                         .text_sm()
                                         .text_color(color_to_hsla(text_secondary))
-                                        .child("@inflatable-cookie/poodle-svelte-tokens"),
+                                        .child("@inflatable-cookie/poodle-core/tokens"),
                                 )
                                 .child(
                                     div()

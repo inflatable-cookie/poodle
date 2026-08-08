@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/anchored-surface.css";
+import "@inflatable-cookie/poodle-core/styles/anchored-surface.css";
 import {
   anchorElement,
   createInstanceId,
@@ -12,7 +12,7 @@ import {
   resolvePortalTarget,
   type AnchorTarget,
   type OverlaySurfaceGeometryChangeHandler,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import type { OverlayPlacement } from "./types";
 

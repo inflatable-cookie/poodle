@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/filter-toolbar.css";
+  import "@inflatable-cookie/poodle-core/styles/filter-toolbar.css";
   import type { Snippet } from "svelte";
 
   import { default as CollapseToggle } from "./CollapseToggle.svelte";

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Poodle React component pilot: styled shells over @inflatable-cookie/poodle-headless machines, sharing tokens and recipes with the Svelte layer.",
+  "description": "Poodle React component pilot: styled shells over @inflatable-cookie/poodle-core machines, sharing tokens and recipes with the Svelte layer.",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -19,10 +19,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-headless": "workspace:*",
-    "@inflatable-cookie/poodle-icons-lucide": "workspace:*",
-    "@inflatable-cookie/poodle-styles": "workspace:*",
-    "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
+    "@inflatable-cookie/poodle-core": "workspace:*",
     "marked": "^18.0.0"
   },
   "poodleRelease": {

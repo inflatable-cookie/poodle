@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/list-card-counter.css";
+  import "@inflatable-cookie/poodle-core/styles/list-card-counter.css";
   import { default as Icon } from "./Icon.svelte";
   import type { IconProp } from "./types";
   import { default as Tooltip } from "./Tooltip.svelte";

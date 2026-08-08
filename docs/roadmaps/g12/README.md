@@ -140,7 +140,7 @@ interaction verification, not a consumer rollout.
 
 Decisions inherited from g11.007:
 
-- Hand-written TSX shells (~90 LOC each) over `@inflatable-cookie/poodle-headless` machines.
+- Hand-written TSX shells (~90 LOC each) over `@inflatable-cookie/poodle-core` machines.
   Mitosis rejected twice (spec 062); no compiler layer.
 - Tokens, recipes, and the contrast axis are plain CSS — shared unchanged.
 - The Svelte implementation remains the visual proof reference.
@@ -148,7 +148,7 @@ Decisions inherited from g11.007:
 Runway:
 
 - `001-shared-styles-package.md` — extract every remaining Svelte
-  `<style>` block and move all component CSS to `@inflatable-cookie/poodle-styles`, imported
+  `<style>` block and move all component CSS to `@inflatable-cookie/poodle-core/styles`, imported
   by both frameworks. Single styling source; React never duplicates CSS.
 - `002-react-infra-and-conversion-playbook.md` — React preview harness
   (hash-routed specimens like the Svelte preview), shared type strategy,
@@ -163,7 +163,7 @@ Runway:
   component render at the wrong size; the ListCard `data-size` bug proved
   it. **Complete** — 256/256 sweep pairs and 180/180 axis pairs green,
   after 14 divergences found and fixed across specimens, shells and
-  `@inflatable-cookie/poodle-styles`.
+  `@inflatable-cookie/poodle-core/styles`.
 - `010-agent-composer.md` — the agent composer family across all four
   targets: `Meter shape="ring"`, `ModelPicker` (model + host-declared
   capability axes in one popover) and `AgentChatInput`. **Complete.**

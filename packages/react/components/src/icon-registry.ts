@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import * as lucideIcons from "@inflatable-cookie/poodle-icons-lucide";
+import * as lucideIcons from "@inflatable-cookie/poodle-core/icons";
 
 import type { IconNodeElement, IconNodes, IconSet } from "./types";
 

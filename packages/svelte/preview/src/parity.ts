@@ -1,4 +1,4 @@
-import { controlSizes, densityModes, themes } from "@inflatable-cookie/poodle-svelte-tokens";
+import { controlSizes, densityModes, themes } from "@inflatable-cookie/poodle-core/tokens";
 import { docsSections } from "./catalog";
 
 export type ThemeName = keyof typeof themes;

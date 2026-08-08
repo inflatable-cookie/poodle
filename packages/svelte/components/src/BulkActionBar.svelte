@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/bulk-action-bar.css";
+  import "@inflatable-cookie/poodle-core/styles/bulk-action-bar.css";
   import type { Component } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";

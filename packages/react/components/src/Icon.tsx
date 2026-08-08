@@ -1,6 +1,6 @@
 import { createElement } from "react";
 
-import "@inflatable-cookie/poodle-styles/icon.css";
+import "@inflatable-cookie/poodle-core/styles/icon.css";
 
 import { resolveIconNodes, useIconSet } from "./icon-registry";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

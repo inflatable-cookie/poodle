@@ -24,7 +24,7 @@
       "evidencePaths": [
         "packages/tokens/schema/",
         "packages/tokens/artifacts/",
-        "packages/svelte/tokens/",
+        "packages/core/src/tokens/",
         "packages/contracts/tokens/"
       ]
     },

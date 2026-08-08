@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/action-discovery-panel.css";
+  import "@inflatable-cookie/poodle-core/styles/action-discovery-panel.css";
   import { default as Eyebrow } from "./Eyebrow.svelte";
   import { default as ListCard } from "./ListCard.svelte";
   import { default as Skeleton } from "./Skeleton.svelte";

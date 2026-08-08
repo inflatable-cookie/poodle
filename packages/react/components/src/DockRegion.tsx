@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/dock-region.css";
+import "@inflatable-cookie/poodle-core/styles/dock-region.css";
 
 import {
   useEffect,
@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { createDockExternalDragController } from "@inflatable-cookie/poodle-headless";
+import { createDockExternalDragController } from "@inflatable-cookie/poodle-core";
 
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";

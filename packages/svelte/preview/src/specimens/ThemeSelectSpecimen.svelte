@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ThemeSelect } from "@inflatable-cookie/poodle-svelte";
-  import { themeOptions } from "@inflatable-cookie/poodle-svelte-tokens";
+  import { themeOptions } from "@inflatable-cookie/poodle-core/tokens";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

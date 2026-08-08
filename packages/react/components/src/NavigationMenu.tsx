@@ -1,8 +1,8 @@
-import "@inflatable-cookie/poodle-styles/navigation-menu.css";
+import "@inflatable-cookie/poodle-core/styles/navigation-menu.css";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
-import { findNextEnabledIndex, firstEnabledIndex, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
+import { findNextEnabledIndex, firstEnabledIndex, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";

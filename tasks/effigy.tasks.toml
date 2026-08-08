@@ -47,7 +47,7 @@
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
-# @inflatable-cookie/poodle-headless machines (which test:core covers).
+# @inflatable-cookie/poodle-core machines (which test:core covers).
 "test:components" = "bunx vitest run"
 "test:svelte-pack-install" = "bun test/package-install/svelte-preview.ts"
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also

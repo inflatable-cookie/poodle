@@ -94,7 +94,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (shared `singleSelectTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 - Context: `value` (controllable), `options` (per-option `disabled`, group
   `disabled` folds in), `disabled`

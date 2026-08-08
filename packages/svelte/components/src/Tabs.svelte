@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/tabs.css";
+  import "@inflatable-cookie/poodle-core/styles/tabs.css";
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import {
@@ -11,7 +11,7 @@
     tabsTransition,
     type TabsContext as HeadlessTabsContext,
     type TabsEvent as HeadlessTabsEvent,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";

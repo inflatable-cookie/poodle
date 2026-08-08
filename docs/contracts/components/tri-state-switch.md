@@ -88,7 +88,7 @@ required. Exactly one of three states is always selected.
 ### Behavior Machine
 
 Behavior classification: machine-backed (shared `singleSelectTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 Single-select machine over the fixed option order
 `excluded / default / included`.

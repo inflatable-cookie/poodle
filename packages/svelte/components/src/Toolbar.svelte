@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/toolbar.css";
+  import "@inflatable-cookie/poodle-core/styles/toolbar.css";
   import type { Snippet } from "svelte";
   import { getFocusableElements } from "./internal";
   import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation";

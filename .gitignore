@@ -93,3 +93,9 @@ packages/gpui/preview/baselines/
 packages/jetstream/preview/baselines/
 test/native-visual/out/
 test/native-visual/out-jetstream/
+
+# Generated Lucide icon modules in poodle-core — run
+# `node packages/core/src/icons/generate.mjs` to rebuild.
+packages/core/src/icons/icons/
+packages/core/src/icons/index.ts
+packages/core/src/icons/types.ts

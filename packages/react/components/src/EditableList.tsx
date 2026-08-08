@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
-import { applyReorder, listReorderKeyIntent } from "@inflatable-cookie/poodle-headless";
+import { applyReorder, listReorderKeyIntent } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/editable-list.css";
+import "@inflatable-cookie/poodle-core/styles/editable-list.css";
 
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/command-palette.css";
-  import { trapFocusKeydown } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/command-palette.css";
+  import { trapFocusKeydown } from "@inflatable-cookie/poodle-core";
   import { onDestroy, tick } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";

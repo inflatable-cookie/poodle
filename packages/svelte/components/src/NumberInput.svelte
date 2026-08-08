@@ -1,11 +1,11 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/number-input.css";
+  import "@inflatable-cookie/poodle-core/styles/number-input.css";
   import {
     clampNullable,
     parseNumberish,
     parseStep,
     validationStatusToState,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import { default as Icon } from "./Icon.svelte";
   import { formatNumber, snapToStep } from "./internal";

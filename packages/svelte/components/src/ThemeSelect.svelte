@@ -9,8 +9,8 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/theme-select.css";
-  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/theme-select.css";
+  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
   import { get } from "svelte/store";
 

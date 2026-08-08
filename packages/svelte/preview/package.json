@@ -18,10 +18,9 @@
     "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-icons-lucide": "workspace:*",
+    "@inflatable-cookie/poodle-core": "workspace:*",
     "@inflatable-cookie/poodle-svelte": "workspace:*",
     "lucide-static": "^0.577.0",
-    "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
     "svelte": "^5.56.8"
   },
   "devDependencies": {

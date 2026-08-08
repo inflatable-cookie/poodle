@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FocusEvent } from "react";
-import { clampNullable, parseNumberish, parseStep, validationStatusToState } from "@inflatable-cookie/poodle-headless";
+import { clampNullable, parseNumberish, parseStep, validationStatusToState } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/number-input.css";
+import "@inflatable-cookie/poodle-core/styles/number-input.css";
 
 import { Icon } from "./Icon";
 import { formatNumber, snapToStep } from "./internal";

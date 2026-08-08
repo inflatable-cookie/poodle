@@ -1,11 +1,11 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/agent-plan-record.css";
+  import "@inflatable-cookie/poodle-core/styles/agent-plan-record.css";
 
   import {
     planRecordSummary,
     planStatusLabel,
     type AgentPlanSettledStatus,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
 
   import AgentMessage from "./AgentMessage.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

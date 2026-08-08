@@ -1,4 +1,4 @@
-import { defaultTimeZoneOptions } from "@inflatable-cookie/poodle-headless";
+import { defaultTimeZoneOptions } from "@inflatable-cookie/poodle-core";
 
 import { Select } from "./Select";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";

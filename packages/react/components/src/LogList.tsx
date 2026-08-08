@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/log-list.css";
+import "@inflatable-cookie/poodle-core/styles/log-list.css";
 
 import { Button } from "./Button";
 import { Field } from "./Field";

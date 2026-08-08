@@ -1,11 +1,11 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
-import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
+import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/filter-builder.css";
+import "@inflatable-cookie/poodle-core/styles/filter-builder.css";
 // Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
 // clause pills — single CSS source, no visual fork. Pills render inline in the
 // trigger block rather than via the SelectionSummary section component.
-import "@inflatable-cookie/poodle-styles/selection-summary.css";
+import "@inflatable-cookie/poodle-core/styles/selection-summary.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";

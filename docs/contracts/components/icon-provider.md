@@ -111,7 +111,7 @@ visual output.
 - `icons` prop is reactive; the icon set updates if the prop changes
 - Import: `import { setIconSet } from './icon-registry'`
 - String-based icon lookups resolve from this set first; if not found and
-  `@inflatable-cookie/poodle-icons-lucide` is installed, icons are lazily auto-imported
+  `@inflatable-cookie/poodle-core/icons` is installed, icons are lazily auto-imported
   (implementation detail beyond the contract surface)
 
 ## 10. GPUI Notes

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/menu.css";
+  import "@inflatable-cookie/poodle-core/styles/menu.css";
   import {
     layerContains,
     menuTransition,
     registerDismissLayer,
     type MenuEvent as MenuMachineEvent,
     type OverlaySurfaceGeometryChangeHandler,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { tick, type Snippet } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";

@@ -183,7 +183,7 @@ inserted. For example, with `siblingCount=1` and `currentPage=5` of 20 pages:
 ### Behavior Machine
 
 Behavior classification: machine-backed (pagination machinery in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 - `buildVisiblePages(page, count, siblings)`: first/last always visible,
   sibling window around the current page, ellipsis for gaps greater than

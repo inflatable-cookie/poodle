@@ -117,7 +117,7 @@ Normalisations that exist purely to keep the two in step, and must not be
 
 ### Shared Types
 
-Defined in `@inflatable-cookie/poodle-headless` (`markdown-blocks.ts`), mirrored in
+Defined in `@inflatable-cookie/poodle-core` (`markdown-blocks.ts`), mirrored in
 `poodle-markdown` (Rust).
 
 ```typescript
@@ -160,7 +160,7 @@ type MdBlock =
 
 ### Behavior Machine
 
-Parsing and plain-text extraction live in `@inflatable-cookie/poodle-headless`
+Parsing and plain-text extraction live in `@inflatable-cookie/poodle-core`
 `markdown-blocks.ts`, mirrored in `poodle-markdown`.
 
 Parsing is derived from `markdown`, never cached across changes. A streaming

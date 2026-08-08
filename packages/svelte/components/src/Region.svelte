@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/region.css";
+  import "@inflatable-cookie/poodle-core/styles/region.css";
   interface Props {
     label?: string;
     color?: string | null;

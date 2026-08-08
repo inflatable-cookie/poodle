@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/password-requirements.css";
+import "@inflatable-cookie/poodle-core/styles/password-requirements.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlSize, PasswordRequirementsPolicy, SemanticControlSizeRole } from "./types";

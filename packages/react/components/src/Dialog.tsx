@@ -13,9 +13,9 @@ import {
   registerDismissLayer,
   trapFocusKeydown,
   type ModalEvent,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/dialog.css";
+import "@inflatable-cookie/poodle-core/styles/dialog.css";
 
 import { IconButton } from "./IconButton";
 import { ThemePortal } from "./portal";

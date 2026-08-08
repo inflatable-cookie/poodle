@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/box.css";
+import "@inflatable-cookie/poodle-core/styles/box.css";
 
 import { overflowValue, scaleToSpace } from "./internal";
 import type { OverflowMode, SpaceScale } from "./types";

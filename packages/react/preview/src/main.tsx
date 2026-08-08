@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
 // All theme layers in one aggregate — the selector offers every registered theme.
 import "../../../tokens/artifacts/css/poodle-themes.css";
 import "../../../tokens/artifacts/css/poodle-density-comfortable.css";

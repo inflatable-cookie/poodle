@@ -112,7 +112,7 @@ export function IconSpecimen() {
     >
       <SpecimenGroup label="Direct import — tree-shakeable">
         <p style={hint}>
-          Import individual icons from <code style={hintCode}>@inflatable-cookie/poodle-icons-lucide</code>.
+          Import individual icons from <code style={hintCode}>@inflatable-cookie/poodle-core/icons</code>.
           Only the icons you use are included in the bundle.
         </p>
         <div style={sizeRow}>
@@ -126,7 +126,7 @@ export function IconSpecimen() {
           ))}
         </div>
         <div style={codeHint}>
-          <code>{'import { star, heart, settings } from "@inflatable-cookie/poodle-icons-lucide";'}</code>
+          <code>{'import { star, heart, settings } from "@inflatable-cookie/poodle-core/icons";'}</code>
           <br />
           <code>{'<Icon icon={star} size="lg" />'}</code>
         </div>

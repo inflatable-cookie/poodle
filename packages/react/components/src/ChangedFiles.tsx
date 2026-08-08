@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 
-import "@inflatable-cookie/poodle-styles/changed-files.css";
+import "@inflatable-cookie/poodle-core/styles/changed-files.css";
 
 import {
   buildChangedFileTree,
   changedFileScopes,
   changedFilesTotals,
   type ChangedFileNode,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 import { Button } from "./Button";
 import { Icon } from "./Icon";

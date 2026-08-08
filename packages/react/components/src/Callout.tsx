@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/callout.css";
+import "@inflatable-cookie/poodle-core/styles/callout.css";
 
 import type { ReactNode } from "react";
 

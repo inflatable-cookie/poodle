@@ -3962,7 +3962,7 @@
         "name": "icon",
         "type": "IconNodes | string | null",
         "required": true,
-        "description": "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals."
+        "description": "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-core/icons or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals."
       },
       {
         "name": "name",
@@ -3997,7 +3997,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-icons-lucide -->\n<script lang=\"ts\">\n  import { Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { search, heart, star } from \"@inflatable-cookie/poodle-icons-lucide\";\n</script>\n\n<Icon icon={search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={heart} size=\"sm\" />\n<Icon icon={star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or built-in internals -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Bulk icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
+    "usage": "<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-core/icons -->\n<script lang=\"ts\">\n  import { Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { search, heart, star } from \"@inflatable-cookie/poodle-core/icons\";\n</script>\n\n<Icon icon={search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={heart} size=\"sm\" />\n<Icon icon={star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or built-in internals -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Bulk icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
   },
   "icon-provider": {
     "props": [
@@ -4132,7 +4132,7 @@
         "description": "Called when toggle state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@inflatable-cookie/poodle-svelte\";\n  import { trash2, plus, settings } from \"@inflatable-cookie/poodle-icons-lucide\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
+    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@inflatable-cookie/poodle-svelte\";\n  import { trash2, plus, settings } from \"@inflatable-cookie/poodle-core/icons\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
   },
   "list-card": {
     "props": [

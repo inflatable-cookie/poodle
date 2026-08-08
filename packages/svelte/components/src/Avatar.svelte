@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/avatar.css";
+  import "@inflatable-cookie/poodle-core/styles/avatar.css";
   interface Props {
     src?: string | null;
     alt?: string | null;

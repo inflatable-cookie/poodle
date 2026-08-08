@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/log-list.css";
+  import "@inflatable-cookie/poodle-core/styles/log-list.css";
   import type { Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";

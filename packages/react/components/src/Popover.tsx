@@ -9,9 +9,9 @@ import {
   type PopoverContext,
   type PopoverEvent,
   type OverlaySurfaceGeometryChangeHandler,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/popover.css";
+import "@inflatable-cookie/poodle-core/styles/popover.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { reactifyPart } from "./parts";

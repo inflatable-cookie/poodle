@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/list-grid.css";
+import "@inflatable-cookie/poodle-core/styles/list-grid.css";
 
 export interface ListGridProps {
   variant?: "default" | "compact";

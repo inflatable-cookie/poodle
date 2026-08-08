@@ -5,9 +5,9 @@ import {
   registerDismissLayer,
   trapFocusKeydown,
   type ModalEvent,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/drawer.css";
+import "@inflatable-cookie/poodle-core/styles/drawer.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";

@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/form-dialog.css";
+import "@inflatable-cookie/poodle-core/styles/form-dialog.css";
 
 import { useState, type CSSProperties, type ReactNode } from "react";
 

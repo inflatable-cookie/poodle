@@ -3,12 +3,12 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/hover-card.css";
+  import "@inflatable-cookie/poodle-core/styles/hover-card.css";
   import {
     hoverTransition,
     type HoverEvent as HoverMachineEvent,
     type HoverState,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { onDestroy, type Snippet } from "svelte";
 
   import { anchored } from "./anchored";

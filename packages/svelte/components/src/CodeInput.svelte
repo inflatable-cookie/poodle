@@ -1,12 +1,12 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/code-input.css";
+  import "@inflatable-cookie/poodle-core/styles/code-input.css";
   import {
     clampCodePosition,
     codeInsertReplacement,
     codeSelectionRange,
     codeSlotSelection,
     sanitizeCodeValue,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Field } from "./Field.svelte";

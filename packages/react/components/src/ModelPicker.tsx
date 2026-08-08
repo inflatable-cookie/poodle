@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-headless";
+import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/model-picker.css";
+import "@inflatable-cookie/poodle-core/styles/model-picker.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Icon } from "./Icon";

@@ -86,7 +86,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (shared `switchTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 Radio reuses the switch machine: single implicit state, checked value in
 context, `TOGGLE { nextChecked }` from the native change event, disabled

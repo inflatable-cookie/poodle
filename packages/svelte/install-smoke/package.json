@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@inflatable-cookie/poodle-svelte": "file:../components",
-    "@inflatable-cookie/poodle-svelte-tokens": "file:../tokens",
+    "@inflatable-cookie/poodle-core": "file:../../core",
     "svelte": "^5.56.8"
   },
   "devDependencies": {
@@ -16,5 +16,9 @@
     "svelte-check": "^4.7.4",
     "typescript": "^5.9.2",
     "vite": "^8.2.0"
+  },
+  "overrides": {
+    "@inflatable-cookie/poodle-core": "file:../../core",
+    "@inflatable-cookie/poodle-svelte": "file:../components"
   }
 }

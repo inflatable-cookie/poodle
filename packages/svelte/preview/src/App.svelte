@@ -5,7 +5,7 @@
     themes,
     densityModes,
     controlSizes,
-  } from "@inflatable-cookie/poodle-svelte-tokens";
+  } from "@inflatable-cookie/poodle-core/tokens";
   import {
     Pill,
     Tabs,

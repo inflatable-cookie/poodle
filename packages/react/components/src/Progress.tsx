@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/progress.css";
+import "@inflatable-cookie/poodle-core/styles/progress.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlSize, SemanticControlSizeRole } from "./types";

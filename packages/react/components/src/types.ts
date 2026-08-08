@@ -18,14 +18,14 @@ import type {
   DockExternalDropContext as HeadlessDockExternalDropContext,
   DockExternalDropEligibilityContext as HeadlessDockExternalDropEligibilityContext,
   DockExternalDropTarget as HeadlessDockExternalDropTarget,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 export type {
   OverlaySurfaceGeometry,
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
@@ -701,7 +701,7 @@ export type PanelTabItem = {
 /**
  * DockRegion external-drag types.
  *
- * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: the session
+ * Re-exported from `@inflatable-cookie/poodle-core` rather than redeclared: the session
  * ordering these describe is run by `createDockExternalDragController` there,
  * and a second declaration here would be a second thing to keep in step.
  * `PanelTabItem` and `DockEdge` are the concrete arguments in this target.
@@ -709,7 +709,7 @@ export type PanelTabItem = {
 export type {
   DockExternalDragCancelReason,
   DockExternalDragController,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 export type DockExternalDragPrepareContext =
   HeadlessDockExternalDragPrepareContext<PanelTabItem, DockEdge>;
@@ -851,7 +851,7 @@ export type RefOption = {
 /**
  * Agent transcript types.
  *
- * Re-exported from `@inflatable-cookie/poodle-headless` rather than redeclared: grouping,
+ * Re-exported from `@inflatable-cookie/poodle-core` rather than redeclared: grouping,
  * windowing and the Rust mirror all key off these shapes, and a second
  * declaration here would be a second thing to keep in step.
  */
@@ -873,4 +873,4 @@ export type {
   TranscriptRole,
   TranscriptToolCall,
   TranscriptToolRun,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";

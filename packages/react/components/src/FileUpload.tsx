@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/file-upload.css";
+import "@inflatable-cookie/poodle-core/styles/file-upload.css";
 
 import {
   forwardRef,

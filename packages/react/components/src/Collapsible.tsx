@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
-import { disclosureTransition } from "@inflatable-cookie/poodle-headless";
+import { disclosureTransition } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/collapsible.css";
+import "@inflatable-cookie/poodle-core/styles/collapsible.css";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";

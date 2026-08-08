@@ -3,14 +3,14 @@
 </script>
 
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/dialog.css";
+  import "@inflatable-cookie/poodle-core/styles/dialog.css";
   import {
     getFocusableElements,
     modalTransition,
     registerDismissLayer,
     trapFocusKeydown,
     type ModalEvent,
-  } from "@inflatable-cookie/poodle-headless";
+  } from "@inflatable-cookie/poodle-core";
   import { onDestroy, tick, type Snippet } from "svelte";
   import { portal } from "./portal";
   import { default as IconButton } from "./IconButton.svelte";

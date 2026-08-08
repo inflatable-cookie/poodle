@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/scroll-shell.css";
+  import "@inflatable-cookie/poodle-core/styles/scroll-shell.css";
   import type { Snippet } from "svelte";
   import { joinStyles, overflowForDirection, scaleToSpace } from "./internal";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/stack.css";
+  import "@inflatable-cookie/poodle-core/styles/stack.css";
   import type { Snippet } from "svelte";
 
   import {

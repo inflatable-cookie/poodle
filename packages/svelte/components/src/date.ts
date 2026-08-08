@@ -37,4 +37,4 @@ export {
   dayDeltaForWeekBoundary,
   daysBetween,
   type CalendarDay,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";

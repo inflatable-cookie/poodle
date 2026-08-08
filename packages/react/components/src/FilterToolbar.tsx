@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/filter-toolbar.css";
+import "@inflatable-cookie/poodle-core/styles/filter-toolbar.css";
 
 import { useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 

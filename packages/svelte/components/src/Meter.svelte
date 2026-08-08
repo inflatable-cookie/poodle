@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/meter.css";
+  import "@inflatable-cookie/poodle-core/styles/meter.css";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlSize, SemanticControlSizeRole } from "./types";
 

@@ -1,6 +1,6 @@
 import type { CSSProperties, MouseEvent, ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/data-table.css";
+import "@inflatable-cookie/poodle-core/styles/data-table.css";
 
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";

@@ -1812,7 +1812,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   icon: {
     props: [
-      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
+      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-core/icons or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
@@ -1821,10 +1821,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [],
-    usage: `<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-icons-lucide -->
+    usage: `<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-core/icons -->
 <script lang="ts">
   import { Icon } from "@inflatable-cookie/poodle-svelte";
-  import { search, heart, star } from "@inflatable-cookie/poodle-icons-lucide";
+  import { search, heart, star } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <Icon icon={search} size="lg" ariaLabel="Search" />
@@ -1897,7 +1897,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { trash2, plus, settings } from "@inflatable-cookie/poodle-icons-lucide";
+  import { trash2, plus, settings } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <!-- Direct import (tree-shakeable) -->
@@ -3796,7 +3796,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "theme-select": {
     props: [
-      { name: "themes", type: "ThemeOption[]", default: "controller list", description: "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @inflatable-cookie/poodle-svelte-tokens for the full Poodle set." },
+      { name: "themes", type: "ThemeOption[]", default: "controller list", description: "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @inflatable-cookie/poodle-core/tokens for the full Poodle set." },
       { name: "value", type: "string", default: "controller / uncontrolled", description: "Controlled current theme value. Omit to use the theme controller (if present) or internal state." },
       { name: "columns", type: "number", default: "3", description: "Swatch-tile columns in the popover grid." },
       { name: "showLabel", type: "boolean", default: "true", description: "Show the current theme name in the trigger." },
@@ -3813,7 +3813,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     usage: `<script lang="ts">
   // With the modular controller — reads all Poodle themes, applies + persists.
   import { ThemeSelect, createThemeController } from "@inflatable-cookie/poodle-svelte";
-  import "@inflatable-cookie/poodle-svelte-tokens/themes.css"; // load every theme layer
+  import "@inflatable-cookie/poodle-core/tokens/themes.css"; // load every theme layer
 
   createThemeController(); // in a root component; ThemeSelect auto-wires
 </script>

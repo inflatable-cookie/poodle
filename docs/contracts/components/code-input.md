@@ -67,7 +67,7 @@ Behavior classification: machine-backed via shared machinery
 Machine-backed via core machinery (g11 extraction sweep): sanitization,
 caret-position clamping into the filled prefix, slot-click selection, and
 insert-replacement math (overwrite + caret advance, length-capped) live in
-`@inflatable-cookie/poodle-headless` `code-input.ts`. Selection-range DOM calls and
+`@inflatable-cookie/poodle-core` `code-input.ts`. Selection-range DOM calls and
 requestAnimationFrame timing stay adapter-side.
 
 ## 5. Behavior
@@ -91,7 +91,7 @@ On the Rust targets there is no hidden input to own the caret, so the host does:
 `selectionStart` and `selectionEnd` are controlled props (**Rust targets
 only**), reported back through `onSelectionChange`. The slot-click and
 overwrite rules themselves are shared — `codeSlotSelection` and
-`codeInsertReplacement` in `@inflatable-cookie/poodle-headless`, ported verbatim to
+`codeInsertReplacement` in `@inflatable-cookie/poodle-core`, ported verbatim to
 `poodle_headless::text_input` — so a click cannot mean two different things on
 two targets.
 - The component composes its own `Field` wrapper so callers can use `label`,

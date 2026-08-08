@@ -27,10 +27,11 @@
       "version": "0.0.0",
     },
     "packages/core": {
-      "name": "@inflatable-cookie/poodle-headless",
+      "name": "@inflatable-cookie/poodle-core",
       "version": "0.1.0",
       "devDependencies": {
         "@types/bun": "^1.3.14",
+        "lucide-static": "^0.577.0",
         "marked": "^18.0.0",
       },
     },
@@ -38,10 +39,7 @@
       "name": "@inflatable-cookie/poodle-react",
       "version": "0.1.0",
       "dependencies": {
-        "@inflatable-cookie/poodle-headless": "workspace:*",
-        "@inflatable-cookie/poodle-icons-lucide": "workspace:*",
-        "@inflatable-cookie/poodle-styles": "workspace:*",
-        "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
+        "@inflatable-cookie/poodle-core": "workspace:*",
         "marked": "^18.0.0",
       },
       "devDependencies": {
@@ -58,8 +56,8 @@
       "name": "@inflatable-cookie/poodle-react-preview",
       "version": "0.0.0",
       "dependencies": {
+        "@inflatable-cookie/poodle-core": "workspace:*",
         "@inflatable-cookie/poodle-react": "workspace:*",
-        "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
         "lucide-static": "^0.577.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
@@ -72,38 +70,23 @@
         "vite": "^8.2.0",
       },
     },
-    "packages/styles": {
-      "name": "@inflatable-cookie/poodle-styles",
-      "version": "0.1.0",
-    },
     "packages/svelte/components": {
       "name": "@inflatable-cookie/poodle-svelte",
       "version": "0.1.0",
       "dependencies": {
-        "@inflatable-cookie/poodle-headless": "0.1.0",
-        "@inflatable-cookie/poodle-icons-lucide": "0.1.0",
-        "@inflatable-cookie/poodle-styles": "0.1.0",
-        "@inflatable-cookie/poodle-svelte-tokens": "0.1.0",
+        "@inflatable-cookie/poodle-core": "0.1.0",
         "marked": "^18.0.0",
       },
       "peerDependencies": {
         "svelte": ">=5.38.6 <6",
       },
     },
-    "packages/svelte/icons-lucide": {
-      "name": "@inflatable-cookie/poodle-icons-lucide",
-      "version": "0.1.0",
-      "dependencies": {
-        "lucide-static": "^0.577.0",
-      },
-    },
     "packages/svelte/preview": {
       "name": "@inflatable-cookie/poodle-svelte-preview",
       "version": "0.0.0",
       "dependencies": {
-        "@inflatable-cookie/poodle-icons-lucide": "workspace:*",
+        "@inflatable-cookie/poodle-core": "workspace:*",
         "@inflatable-cookie/poodle-svelte": "workspace:*",
-        "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
         "lucide-static": "^0.577.0",
         "svelte": "^5.56.8",
       },
@@ -113,10 +96,6 @@
         "typescript": "^5.9.2",
         "vite": "^8.2.0",
       },
-    },
-    "packages/svelte/tokens": {
-      "name": "@inflatable-cookie/poodle-svelte-tokens",
-      "version": "0.1.0",
     },
     "packages/tokens": {
       "name": "@inflatable-cookie/poodle-tokens",
@@ -218,21 +197,15 @@
 
     "@inflatable-cookie/poodle-bridge-underlay": ["@inflatable-cookie/poodle-bridge-underlay@workspace:packages/bridges/underlay"],
 
-    "@inflatable-cookie/poodle-headless": ["@inflatable-cookie/poodle-headless@workspace:packages/core"],
-
-    "@inflatable-cookie/poodle-icons-lucide": ["@inflatable-cookie/poodle-icons-lucide@workspace:packages/svelte/icons-lucide"],
+    "@inflatable-cookie/poodle-core": ["@inflatable-cookie/poodle-core@workspace:packages/core"],
 
     "@inflatable-cookie/poodle-react": ["@inflatable-cookie/poodle-react@workspace:packages/react/components"],
 
     "@inflatable-cookie/poodle-react-preview": ["@inflatable-cookie/poodle-react-preview@workspace:packages/react/preview"],
 
-    "@inflatable-cookie/poodle-styles": ["@inflatable-cookie/poodle-styles@workspace:packages/styles"],
-
     "@inflatable-cookie/poodle-svelte": ["@inflatable-cookie/poodle-svelte@workspace:packages/svelte/components"],
 
     "@inflatable-cookie/poodle-svelte-preview": ["@inflatable-cookie/poodle-svelte-preview@workspace:packages/svelte/preview"],
-
-    "@inflatable-cookie/poodle-svelte-tokens": ["@inflatable-cookie/poodle-svelte-tokens@workspace:packages/svelte/tokens"],
 
     "@inflatable-cookie/poodle-tokens": ["@inflatable-cookie/poodle-tokens@workspace:packages/tokens"],
 

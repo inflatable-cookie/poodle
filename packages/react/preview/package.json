@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@inflatable-cookie/poodle-react": "workspace:*",
-    "@inflatable-cookie/poodle-svelte-tokens": "workspace:*",
+    "@inflatable-cookie/poodle-core": "workspace:*",
     "lucide-static": "^0.577.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

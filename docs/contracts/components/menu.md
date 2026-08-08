@@ -103,7 +103,7 @@ Open/closed state and current highlighted item index are required.
 ### Behavior Machine
 
 Behavior classification: machine-backed (`menuTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 Menu overlay machine shared by Menu and ContextMenu. Item navigation is
 core machinery (`menuListNavigate`, `menuNavigableItems`,

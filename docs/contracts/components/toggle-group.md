@@ -85,7 +85,7 @@ Updated: 2026-07-10
 ### Behavior Machine
 
 Behavior classification: machine-backed (`toggleGroupTransition` in
-`@inflatable-cookie/poodle-headless`)
+`@inflatable-cookie/poodle-core`)
 
 - Context: `value: string | string[] | null` (controllable), `options`,
   `selectionMode: single | multiple`, `allowDeactivation`, `disabled`

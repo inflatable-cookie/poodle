@@ -240,7 +240,7 @@ hidden), so a keyboard user can type immediately.
 ## 9. Svelte Notes
 
 - owns its open state and anchored surface directly (mirrors `ModelPicker`)
-- `registerDismissLayer` from `@inflatable-cookie/poodle-headless`
+- `registerDismissLayer` from `@inflatable-cookie/poodle-core`
 - arrow-key roving is a plain `keydown` handler shared by the search field and
   the option rows
 - pure logic from `./ref-select-model`

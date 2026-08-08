@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactNode } from "react";
 
-import "@inflatable-cookie/poodle-styles/text-link.css";
+import "@inflatable-cookie/poodle-core/styles/text-link.css";
 
 export interface TextLinkProps {
   href?: string | null;

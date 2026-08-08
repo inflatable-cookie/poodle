@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/button.css";
+  import "@inflatable-cookie/poodle-core/styles/button.css";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";

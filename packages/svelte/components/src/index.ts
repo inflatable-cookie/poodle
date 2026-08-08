@@ -141,7 +141,7 @@ export type {
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
-} from "@inflatable-cookie/poodle-headless";
+} from "@inflatable-cookie/poodle-core";
 
 // --- Composites ---
 export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
@@ -324,6 +324,7 @@ export type {
   SortField,
   SortDirection,
   SplitOrientation,
+  SplitToggleVisibility,
   ThemeOption,
   ThemeSwatch,
   // Composite types

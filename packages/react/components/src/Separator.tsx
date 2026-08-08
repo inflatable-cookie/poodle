@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/separator.css";
+import "@inflatable-cookie/poodle-core/styles/separator.css";
 
 import type { SeparatorTone } from "./types";
 

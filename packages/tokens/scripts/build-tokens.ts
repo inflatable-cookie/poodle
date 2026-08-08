@@ -70,7 +70,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const tokensDir = path.resolve(scriptDir, "..");
 const schemaDir = path.join(tokensDir, "schema");
 const artifactDir = path.join(tokensDir, "artifacts");
-const svelteTokensGeneratedDir = path.resolve(tokensDir, "../svelte/tokens/src/generated");
+const svelteTokensGeneratedDir = path.resolve(tokensDir, "../core/src/tokens/generated");
 
 function readJson<T>(filePath: string): T {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;

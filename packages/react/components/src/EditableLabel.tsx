@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { editLabelTransition, type EditLabelEvent } from "@inflatable-cookie/poodle-headless";
+import { editLabelTransition, type EditLabelEvent } from "@inflatable-cookie/poodle-core";
 
-import "@inflatable-cookie/poodle-styles/editable-label.css";
+import "@inflatable-cookie/poodle-core/styles/editable-label.css";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";

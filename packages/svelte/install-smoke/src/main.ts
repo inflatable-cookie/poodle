@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
 import App from "./App.svelte";
 
 new App({

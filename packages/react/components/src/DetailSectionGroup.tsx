@@ -1,4 +1,4 @@
-import "@inflatable-cookie/poodle-styles/detail-section-group.css";
+import "@inflatable-cookie/poodle-core/styles/detail-section-group.css";
 
 import type { CSSProperties, ReactNode } from "react";
 

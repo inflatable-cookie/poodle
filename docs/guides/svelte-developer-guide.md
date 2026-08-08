@@ -19,10 +19,10 @@ also use [Guides Index](./README.md), especially
 ### 1. Install packages
 
 ```bash
-bun add @inflatable-cookie/poodle-svelte-tokens @inflatable-cookie/poodle-svelte @inflatable-cookie/poodle-icons-lucide
+bun add @inflatable-cookie/poodle-core/tokens @inflatable-cookie/poodle-svelte @inflatable-cookie/poodle-core/icons
 ```
 
-`@inflatable-cookie/poodle-svelte-tokens` provides the CSS custom properties and theme helpers, `@inflatable-cookie/poodle-svelte` provides the full Svelte component surface, and `@inflatable-cookie/poodle-icons-lucide` provides tree-shakeable icon imports.
+`@inflatable-cookie/poodle-core/tokens` provides the CSS custom properties and theme helpers, `@inflatable-cookie/poodle-svelte` provides the full Svelte component surface, and `@inflatable-cookie/poodle-core/icons` provides tree-shakeable icon imports.
 
 ### 2. Import the token stylesheet
 
@@ -30,14 +30,14 @@ In your app's entry point (e.g. `+layout.svelte` or `App.svelte`), import the to
 
 ```svelte
 <script>
-  import "@inflatable-cookie/poodle-svelte-tokens/styles.css";
+  import "@inflatable-cookie/poodle-core/tokens/styles.css";
 </script>
 ```
 
 If you prefer the legacy CSS subpath, that remains available too:
 
 ```css
-@import "@inflatable-cookie/poodle-svelte-tokens/css/poodle-tokens.css";
+@import "@inflatable-cookie/poodle-core/tokens/css/poodle-tokens.css";
 ```
 
 This loads the full set of CSS custom properties (`--poodle-*`) that all components resolve their visual properties from.
@@ -48,7 +48,7 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
 
 ```svelte
 <script>
-  import { applyThemeAttributes } from "@inflatable-cookie/poodle-svelte-tokens/runtime";
+  import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens/runtime";
   import { onMount } from "svelte";
 
   let shell;
@@ -80,7 +80,7 @@ Or simply apply the data attributes in your HTML:
 ```svelte
 <script>
   import { Button, TextInput, Field, Select } from "@inflatable-cookie/poodle-svelte";
-  import { search } from "@inflatable-cookie/poodle-icons-lucide";
+  import { search } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <Button variant="primary" onClick={() => console.log("clicked")}>
@@ -97,19 +97,19 @@ Or simply apply the data attributes in your HTML:
 ## Package Architecture
 
 ```
-@inflatable-cookie/poodle-svelte-tokens       — CSS custom properties, theme/density/size helpers
+@inflatable-cookie/poodle-core/tokens       — CSS custom properties, theme/density/size helpers
 @inflatable-cookie/poodle-svelte              — unified Svelte component package
-@inflatable-cookie/poodle-icons-lucide         — 1700+ tree-shakeable Lucide icon exports
+@inflatable-cookie/poodle-core/icons         — 1700+ tree-shakeable Lucide icon exports
 ```
 
 ### Dependency graph
 
 ```
-@inflatable-cookie/poodle-svelte-tokens
+@inflatable-cookie/poodle-core/tokens
     ↑
 @inflatable-cookie/poodle-svelte (depends on tokens)
 
-@inflatable-cookie/poodle-icons-lucide (standalone — no dependency on other Poodle packages)
+@inflatable-cookie/poodle-core/icons (standalone — no dependency on other Poodle packages)
 ```
 
 ### Import entry points
@@ -118,10 +118,10 @@ Or simply apply the data attributes in your HTML:
 |---------|--------|---------|
 | `@inflatable-cookie/poodle-svelte` | Default | All components |
 | `@inflatable-cookie/poodle-svelte/types` | Type-only | TypeScript types |
-| `@inflatable-cookie/poodle-svelte-tokens` | Default | Token values and metadata |
-| `@inflatable-cookie/poodle-svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
-| `@inflatable-cookie/poodle-svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
-| `@inflatable-cookie/poodle-icons-lucide` | Named exports | Individual icon data |
+| `@inflatable-cookie/poodle-core/tokens` | Default | Token values and metadata |
+| `@inflatable-cookie/poodle-core/tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
+| `@inflatable-cookie/poodle-core/tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
+| `@inflatable-cookie/poodle-core/icons` | Named exports | Individual icon data |
 
 ---
 
@@ -417,12 +417,12 @@ Poodle uses a layered icon system with three consumption patterns.
 
 ### Pattern 1: Direct import (tree-shakeable)
 
-Import individual icons from `@inflatable-cookie/poodle-icons-lucide`. Only icons you use end up in the bundle:
+Import individual icons from `@inflatable-cookie/poodle-core/icons`. Only icons you use end up in the bundle:
 
 ```svelte
 <script>
   import { Icon } from "@inflatable-cookie/poodle-svelte";
-  import { search, heart, settings, trash2 } from "@inflatable-cookie/poodle-icons-lucide";
+  import { search, heart, settings, trash2 } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <Icon icon={search} size="lg" />
@@ -481,7 +481,7 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 ```svelte
 <script>
   import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { save, trash2, plus } from "@inflatable-cookie/poodle-icons-lucide";
+  import { save, trash2, plus } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <Button variant="primary" leadingIcon={save}>Save</Button>
@@ -1296,7 +1296,7 @@ interface MenuItem {
 ```svelte
 <script>
   import { Toolbar, IconButton, Separator } from "@inflatable-cookie/poodle-svelte";
-  import { bold, italic, underline, link, image } from "@inflatable-cookie/poodle-icons-lucide";
+  import { bold, italic, underline, link, image } from "@inflatable-cookie/poodle-core/icons";
 </script>
 
 <Toolbar>

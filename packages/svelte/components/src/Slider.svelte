@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "@inflatable-cookie/poodle-styles/slider.css";
-  import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@inflatable-cookie/poodle-headless";
+  import "@inflatable-cookie/poodle-core/styles/slider.css";
+  import { normalizeSliderValue, safeSliderMax, sliderTransition, type SliderContext } from "@inflatable-cookie/poodle-core";
 
   import { joinStyles } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
