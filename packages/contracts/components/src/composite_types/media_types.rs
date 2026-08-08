@@ -246,6 +246,18 @@ pub enum SplitOrientation {
     Vertical,
 }
 
+/// When a `SplitView` shows its collapse-toggle pill.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum SplitToggleVisibility {
+    /// The pill is always on screen.
+    #[default]
+    Always,
+    /// The pill is revealed only while the pointer is on the seam. A collapsed
+    /// pane's expand toggle stays visible either way — hiding the only way
+    /// back would strand the pane.
+    Hover,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DockEdge {
     Left,
