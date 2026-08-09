@@ -5,6 +5,7 @@
  */
 
 import type { ReactNode } from "react";
+import type { IconNodes } from "@inflatable-cookie/poodle-core/icons";
 
 // Generic in the panel and edge types; this target binds them to its own
 // `PanelTabItem` / `DockEdge` further down.
@@ -41,9 +42,7 @@ export type StatusTone =
 export type SeparatorTone = "subtle" | "default";
 export type SkeletonShape = "line" | "block" | "circle";
 
-export type IconNodeElement = [string, Record<string, string>];
-export type IconNodes = IconNodeElement[];
-export type IconSet = Record<string, IconNodes>;
+export type { IconNodeElement, IconNodes, IconSet } from "@inflatable-cookie/poodle-core/icons";
 export type IconProp = IconNodes | string;
 
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";

@@ -52,7 +52,7 @@ import { trendingDown } from "./icons/trending-down";
 import { trendingUp } from "./icons/trending-up";
 import { triangleAlert } from "./icons/triangle-alert";
 import { x } from "./icons/x";
-import type { IconSet } from "./types";
+import type { IconNodeElement, IconNodes, IconSet } from "./types";
 
 export type { IconNodeElement, IconNodes, IconSet } from "./types";
 export { createIconSet } from "./types";
@@ -174,3 +174,51 @@ export const defaultLucideIconSet: IconSet = {
   "triangle-alert": triangleAlert,
   x,
 };
+
+/** Legacy and shorthand names mapped to their canonical Lucide names. */
+const iconAliases: Readonly<Record<string, string>> = {
+  "alert-circle": "circle-alert",
+  "alert-triangle": "triangle-alert",
+  "check-square": "square-check",
+  "check-circle": "circle-check",
+  "circle-help": "circle-question-mark",
+  edit: "pencil",
+  "file-question": "file-question-mark",
+  filter: "list-filter",
+  "more-horizontal": "ellipsis",
+  "more-vertical": "ellipsis-vertical",
+  "help-circle": "circle-question-mark",
+  package: "package-icon",
+  "pause-circle": "circle-pause",
+  unlock: "lock-open",
+};
+
+const reportedMissingIcons = new Set<string>();
+
+function reportMissingIcon(name: string): IconNodes {
+  if (!reportedMissingIcons.has(name)) {
+    reportedMissingIcons.add(name);
+    console.error(
+      `[Poodle] Unresolved icon "${name}". Add it to the nearest IconProvider set or pass IconNodes directly.`,
+    );
+  }
+  return defaultLucideIconSet["circle-x"];
+}
+
+/** Resolve direct icon nodes or a name against an operator set and Poodle's
+ * scoped Lucide defaults. */
+export function resolveIconNodes(
+  ref: IconNodes | string | null | undefined,
+  iconSet?: IconSet | null,
+): IconNodeElement[] {
+  if (!ref) return [];
+  if (Array.isArray(ref)) return ref;
+
+  const canonical = iconAliases[ref] ?? ref;
+  if (iconSet && canonical in iconSet) return iconSet[canonical];
+  if (iconSet && ref in iconSet) return iconSet[ref];
+  if (canonical in defaultLucideIconSet) return defaultLucideIconSet[canonical];
+  if (ref in defaultLucideIconSet) return defaultLucideIconSet[ref];
+
+  return reportMissingIcon(ref);
+}

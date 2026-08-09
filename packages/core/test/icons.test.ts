@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   createIconSet,
   defaultLucideIconSet,
+  resolveIconNodes,
   search,
   x,
 } from "../src/icons";
@@ -19,6 +20,40 @@ describe("icon catalogue boundary", () => {
   test("createIconSet types selected named imports without copying them", () => {
     const icons = { search, x };
     expect(createIconSet(icons)).toBe(icons);
+  });
+
+  test("resolves every legacy alias through an operator icon set", () => {
+    const expectedAliases = {
+      "alert-circle": "circle-alert",
+      "alert-triangle": "triangle-alert",
+      "check-square": "square-check",
+      "check-circle": "circle-check",
+      "circle-help": "circle-question-mark",
+      edit: "pencil",
+      "file-question": "file-question-mark",
+      filter: "list-filter",
+      "more-horizontal": "ellipsis",
+      "more-vertical": "ellipsis-vertical",
+      "help-circle": "circle-question-mark",
+      package: "package-icon",
+      "pause-circle": "circle-pause",
+      unlock: "lock-open",
+    };
+
+    for (const [legacyName, canonicalName] of Object.entries(expectedAliases)) {
+      const nodes = [["path", { d: canonicalName }]] as never;
+      expect(resolveIconNodes(legacyName, { [canonicalName]: nodes })).toBe(nodes);
+    }
+  });
+
+  test("keeps direct nodes and operator icons ahead of scoped defaults", () => {
+    const direct = [["path", { d: "direct" }]] as never;
+    const override = [["path", { d: "override" }]] as never;
+
+    expect(resolveIconNodes(direct)).toBe(direct);
+    expect(resolveIconNodes("search", { search: override })).toBe(override);
+    expect(resolveIconNodes("search")).toBe(search);
+    expect(resolveIconNodes(null)).toEqual([]);
   });
 
   test("the build helper extracts and serializes only requested catalogue names", () => {
