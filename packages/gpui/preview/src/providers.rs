@@ -47,14 +47,16 @@ impl IntoElement for IconProvider {
 /// density from their own specs rather than an ambient cascade, so the
 /// provider paints nothing.
 pub(crate) struct UiPresentationProvider {
-    #[allow(dead_code)]
-    spec: UiPresentationProviderSpec,
+    _spec: UiPresentationProviderSpec,
     child: Option<AnyElement>,
 }
 
 impl UiPresentationProvider {
     pub(crate) fn from_spec(spec: UiPresentationProviderSpec) -> Self {
-        Self { spec, child: None }
+        Self {
+            _spec: spec,
+            child: None,
+        }
     }
 
     pub(crate) fn with_child(mut self, child: impl IntoElement) -> Self {

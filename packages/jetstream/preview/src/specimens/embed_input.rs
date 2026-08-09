@@ -171,7 +171,7 @@ fn provider_header_row(text_secondary: ColorValue, border: ColorValue, font: f32
         )
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "provider rows keep resolved Jetstream style values explicit")]
 fn provider_row(
     provider: &str,
     patterns: &str,

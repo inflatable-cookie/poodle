@@ -55,6 +55,8 @@ pub use style_map::{
 };
 pub use theme::JetstreamThemeProvider;
 
+use std::sync::LazyLock;
+
 use poodle_adapter::{AdapterManifest, RenderTarget};
 
 /// Represents a Jetstream UI widget type that a spec maps to.
@@ -121,9 +123,8 @@ impl JetstreamAdapter {
     }
 }
 
-/// Primitive spec type names supported by the Jetstream adapter (64 — full parity).
+/// Primitive spec type names supported by the Jetstream adapter (60 — full parity).
 /// Note: AccordionItemSpec is a sub-spec of AccordionSpec, not independently rendered.
-#[allow(dead_code)]
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Structural
     "BoxSpec",
@@ -194,8 +195,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "DateTimeRangePickerSpec",
 ];
 
-/// Composite spec type names supported by the Jetstream adapter (47 — full parity).
-#[allow(dead_code)]
+/// Composite spec type names supported by the Jetstream adapter (48 — full parity).
 const SUPPORTED_COMPOSITES: &[&str] = &[
     // Form and validation
     "FormShellSpec",
@@ -252,7 +252,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
 ];
 
 /// Workstation spec type names supported by the Jetstream adapter (13 — full parity).
-#[allow(dead_code)]
 const SUPPORTED_WORKSTATION: &[&str] = &[
     "ActionDiscoveryPanelSpec",
     "AppHeaderSpec",
@@ -269,13 +268,30 @@ const SUPPORTED_WORKSTATION: &[&str] = &[
     "WorkspaceShellSpec",
 ];
 
+fn supported_components() -> &'static [&'static str] {
+    static ALL: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
+        SUPPORTED_PRIMITIVES
+            .iter()
+            .chain(SUPPORTED_COMPOSITES)
+            .chain(SUPPORTED_WORKSTATION)
+            .copied()
+            .fold(Vec::new(), |mut components, component| {
+                if !components.contains(&component) {
+                    components.push(component);
+                }
+                components
+            })
+    });
+    ALL.as_slice()
+}
+
 impl AdapterManifest for JetstreamAdapter {
     fn name(&self) -> &str {
         "Jetstream"
     }
 
     fn supported_components(&self) -> &[&str] {
-        SUPPORTED_PRIMITIVES
+        supported_components()
     }
 
     fn unsupported_components(&self) -> &[(&str, &str)] {
@@ -305,6 +321,7 @@ mod tests {
     fn jetstream_adapter_reports_name_and_manifest() {
         let adapter = JetstreamAdapter::new(JetstreamThemeProvider::default());
         assert_eq!(adapter.name(), "Jetstream");
+        assert_eq!(adapter.supported_components(), supported_components());
         assert_eq!(adapter.unsupported_components().len(), 0);
     }
 

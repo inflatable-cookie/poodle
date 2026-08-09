@@ -482,7 +482,7 @@ impl Element for InputText {
 }
 
 /// Convenience for the backend: build the element from a node's input kind.
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "the backend constructor mirrors the resolved input node contract")]
 pub(crate) fn input_text(
     id: String,
     display: String,

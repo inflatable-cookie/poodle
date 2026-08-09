@@ -16,6 +16,10 @@ use crate::color::{hex_color, mix_srgb, with_alpha, WHITE};
 use crate::presentation::rem_to_px;
 
 /// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`.
+#[expect(
+    clippy::approx_constant,
+    reason = "0.7071 is a design-token font metric, not an approximation of FRAC_1_SQRT_2"
+)]
 fn pill_metrics(size: PillSize, typography: InlineTypographyMode) -> (f32, f32, f32, f32, f32) {
     match (typography, size) {
         (InlineTypographyMode::Inherit, PillSize::Xs) => (2.4444, 1.5556, 0.7778, 0.1111, 0.5786),

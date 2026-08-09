@@ -171,7 +171,7 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     root
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "trigger rendering keeps resolved state and token metrics explicit")]
 fn build_trigger(
     display_text: &str,
     display_color: ColorValue,
@@ -277,7 +277,7 @@ fn build_trigger(
     el
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "panel rendering keeps resolved state and token metrics explicit")]
 fn build_panel(
     spec: &SelectSpec,
     theme: &dyn ThemeProvider,

@@ -9,7 +9,6 @@ mod contract_usage_docs;
 mod node_compat;
 mod providers;
 mod specimens;
-#[allow(dead_code)]
 mod style_bridge;
 mod token_view;
 mod usage_docs_view;
@@ -254,7 +253,7 @@ impl PreviewRoot {
 
     /// Display controls bar — theme, density, size, treatment toggle groups + catalogue search.
     /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments, reason = "the preview control bar keeps resolved theme values explicit")]
     fn render_display_controls(
         &self,
         text_secondary: poodle_tokens::typed::ColorValue,
@@ -471,7 +470,7 @@ impl PreviewRoot {
 
     /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
     /// Matches Svelte: each button is a separate pill with its own border.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments, reason = "toggle groups keep preview state and resolved theme values explicit")]
     fn render_toggle_group(
         &self,
         label: &'static str,
@@ -890,7 +889,7 @@ impl PreviewRoot {
     }
 
     /// Landing page grid showing all components as cards.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments, reason = "the catalogue layout keeps viewport and resolved theme values explicit")]
     fn render_catalogue_landing(
         &self,
         groups: &[component_registry::ComponentGroup],

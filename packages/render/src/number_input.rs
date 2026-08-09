@@ -28,7 +28,7 @@ pub struct NumberInputHandlers {
 
 /// A boxed prefix/suffix affix: bordered box with surface bg + muted text,
 /// full control height.
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "affix rendering keeps resolved token metrics explicit")]
 fn affix_box(
     text: &str,
     text_color: ColorValue,

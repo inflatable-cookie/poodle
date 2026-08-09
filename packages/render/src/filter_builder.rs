@@ -66,7 +66,7 @@ fn row(gap: f32) -> Node {
 }
 
 /// Operand editor for a draft clause, chosen by the operator's operand kind.
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments, reason = "operand rendering keeps contract state and handlers explicit")]
 fn operand_editor(
     theme: &dyn ThemeProvider,
     field: &FilterFieldDefinition,

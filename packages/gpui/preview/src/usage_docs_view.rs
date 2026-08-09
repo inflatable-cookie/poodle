@@ -3,7 +3,7 @@ use poodle_adapter::ThemeProvider;
 use crate::node_compat::{Code, Separator};
 use poodle_specs::{CodeSpec, SeparatorSpec};
 
-use crate::contract_usage_docs::{ContractUsageDocs, UsageEvent, UsageProp, UsageSlot};
+use crate::contract_usage_docs::ContractUsageDocs;
 use crate::style_bridge::color_to_hsla;
 
 pub fn render_usage_docs(
@@ -308,6 +308,3 @@ impl<'a> UsageDocsView<'a> {
         div().w(width).flex_none().px(px(12.0)).py(px(8.0))
     }
 }
-
-#[allow(dead_code)]
-fn _type_anchor(_: (&UsageProp, &UsageSlot, &UsageEvent)) {}

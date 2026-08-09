@@ -12,8 +12,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition,
-    ShadowLayer, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ShadowLayer,
+    StylePatch,
 };
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 
@@ -479,10 +479,6 @@ pub fn list_card(
     }
     el
 }
-
-// Silence unused-import lint when hex sash isn't exercised.
-#[allow(unused)]
-fn _t(_: ColorValue) {}
 
 #[cfg(test)]
 mod tests {

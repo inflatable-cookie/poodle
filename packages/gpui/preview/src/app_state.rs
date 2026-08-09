@@ -327,12 +327,10 @@ impl SpecimenState {
         self.toggles.get(key).copied().unwrap_or(false)
     }
 
-    #[allow(dead_code)]
     pub fn selected(&self, key: &str) -> usize {
         self.selections.get(key).copied().unwrap_or(0)
     }
 
-    #[allow(dead_code)]
     pub fn select(&mut self, key: &str, idx: usize) {
         self.selections.insert(key.to_string(), idx);
     }
@@ -575,8 +573,6 @@ pub struct AppState {
     pub active_component_slug: Option<String>,
     pub active_token_panel: TokenPanel,
     pub token_inspector_query: String,
-    #[allow(dead_code)]
-    pub debug_clicks: u32,
     pub specimens: SpecimenState,
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
@@ -610,7 +606,6 @@ impl AppState {
             active_component_slug: None,
             active_token_panel: TokenPanel::Summary,
             token_inspector_query: String::new(),
-            debug_clicks: 0,
             specimens: SpecimenState::new(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),

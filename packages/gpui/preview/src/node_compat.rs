@@ -3869,7 +3869,7 @@ pub(crate) struct DurationInput {
     spec: DurationInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    #[allow(clippy::type_complexity)]
+    #[expect(clippy::type_complexity, reason = "the callback mirrors the four-part duration contract")]
     on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
 }
 
@@ -3898,7 +3898,6 @@ impl DurationInput {
         self
     }
 
-    #[allow(clippy::type_complexity)]
     pub(crate) fn on_change(
         mut self,
         handler: Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>,
@@ -5606,7 +5605,7 @@ impl DetailShell {
         self
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "retained for parity with the state-content compatibility contract")]
     pub(crate) fn with_state_content(mut self, content: impl IntoCompatNode) -> Self {
         self.state_content = Some(content.into_compat_node());
         self
@@ -6332,7 +6331,7 @@ impl LogList {
         }
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "retained for hosts that wire the optional clear-filters event")]
     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_clear_filters = Some(handler);
         self

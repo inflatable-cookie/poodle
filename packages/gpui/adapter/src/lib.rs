@@ -46,6 +46,8 @@ pub use style_map::{
 };
 pub use theme::GpuiThemeProvider;
 
+use std::sync::LazyLock;
+
 use poodle_adapter::{AdapterManifest, RenderTarget};
 pub use poodle_specs::FieldRelationships;
 
@@ -97,8 +99,6 @@ impl GpuiAdapter {
 
 /// Primitive spec type names supported by the GPUI adapter.
 ///
-/// This list grows as g07.002–006 milestones implement each category.
-/// Initially empty — populated as rendering implementations land.
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // g07.002 — structural and layout
     "BoxSpec",
@@ -168,8 +168,6 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
 
 /// Composite spec type names supported by the GPUI adapter.
 ///
-/// Populated in g07.007–009.
-#[allow(dead_code)]
 const SUPPORTED_COMPOSITES: &[&str] = &[
     // g07.007 — form, validation, and remediation
     "FormShellSpec",
@@ -216,7 +214,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
 /// Was `SUPPORTED_WORKSTATION` against the retired `poodle-workstation` crate;
 /// the seven specs that existed only there had no component, contract or Svelte
 /// counterpart and are gone with it.
-#[allow(dead_code)]
 const SUPPORTED_SHELL: &[&str] = &[
     "ActionDiscoveryPanelSpec",
     "AppHeaderSpec",
@@ -232,16 +229,25 @@ const SUPPORTED_SHELL: &[&str] = &[
 /// components are unsupported. This list documents any intentional gaps.
 const UNSUPPORTED_COMPONENTS: &[(&str, &str)] = &[];
 
+fn supported_components() -> &'static [&'static str] {
+    static ALL: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
+        SUPPORTED_PRIMITIVES
+            .iter()
+            .chain(SUPPORTED_COMPOSITES)
+            .chain(SUPPORTED_SHELL)
+            .copied()
+            .collect()
+    });
+    ALL.as_slice()
+}
+
 impl AdapterManifest for GpuiAdapter {
     fn name(&self) -> &str {
         "GPUI"
     }
 
     fn supported_components(&self) -> &[&str] {
-        // Concatenate all three layers. In a real implementation this would
-        // be a static slice built at compile time. For now we return the
-        // primitives list (which will grow across g07 milestones).
-        SUPPORTED_PRIMITIVES
+        supported_components()
     }
 
     fn unsupported_components(&self) -> &[(&str, &str)] {
@@ -266,6 +272,10 @@ mod tests {
     fn gpui_adapter_reports_name_and_manifest() {
         let adapter = GpuiAdapter::new(GpuiThemeProvider::default());
         assert_eq!(adapter.name(), "GPUI");
+        assert_eq!(
+            adapter.supported_components().len(),
+            SUPPORTED_PRIMITIVES.len() + SUPPORTED_COMPOSITES.len() + SUPPORTED_SHELL.len()
+        );
         assert_eq!(adapter.unsupported_components().len(), 0);
     }
 
