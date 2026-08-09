@@ -1,5 +1,4 @@
 {
-  "generatedAt": "2026-07-25T22:14:44.089Z",
   "artifact": "packages/react/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "frameworks": [
@@ -153,8 +152,10 @@
       "status": "matrix-only",
       "coveredPackages": [
         "poodle-specs",
+        "poodle-node",
+        "poodle-render",
         "poodle-gpui",
-        "poodle-gpui-components",
+        "poodle-gpui-node-backend",
         "poodle-gpui-preview"
       ],
       "evidenceArtifacts": [
@@ -181,10 +182,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 173,
-        "componentCount": 136,
+        "exportCount": 183,
+        "componentCount": 146,
         "helperCount": 37,
-        "previewedCount": 173,
+        "previewedCount": 183,
         "contractOnlyCount": 0
       }
     ],
@@ -221,6 +222,84 @@
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentMessage",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentPlan",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentPlanRecord",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentQuestion",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentQuestionRecord",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentTranscript",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -416,6 +495,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "ChangedFiles",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2095,6 +2187,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "Stepper",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "Surface",
         "kind": "component",
         "status": "previewed",
@@ -2299,6 +2404,32 @@
         ],
         "sectionTitles": [
           "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "ToolCall",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "ToolCallGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {

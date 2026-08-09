@@ -23,7 +23,6 @@ function countAreaStatus(areaName: AccessibilityAreaName): Record<string, number
 }
 
 const report = {
-  generatedAt: new Date().toISOString(),
   artifact: "packages/svelte/preview/artifacts/accessibility-report.json",
   previewBasePath: "/",
   automatedBoundary: accessibilityAuditBoundary.automated,

@@ -45,6 +45,7 @@ coverage/
 
 # Cache
 .cache/
+.svelte-check/
 .parcel-cache/
 .eslintcache
 .stylelintcache

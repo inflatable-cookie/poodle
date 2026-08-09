@@ -26,7 +26,6 @@ function countAreaStatus(areaName: AccessibilityAreaName): Record<string, number
 }
 
 const report = {
-  generatedAt: new Date().toISOString(),
   artifact: "packages/react/preview/artifacts/accessibility-report.json",
   previewBasePath: "/",
   frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],

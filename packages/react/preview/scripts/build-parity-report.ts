@@ -102,7 +102,6 @@ const gpuiCrossRuntimeParity = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParity
 };
 
 const report = {
-  generatedAt: new Date().toISOString(),
   artifact: "packages/react/preview/artifacts/parity-report.json",
   previewBasePath: "/",
   frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],

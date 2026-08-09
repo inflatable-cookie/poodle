@@ -18,9 +18,9 @@ Choose the runtime used by your application:
 - [Application pattern recipes](guides/README.md) — forms, lists, dialogs,
   media workflows, and admin shells
 
-Poodle is currently a pre-1.0 source preview. Public-intent packages are still
-private and are consumed through workspace or file dependencies rather than a
-public registry.
+Poodle is currently a pre-1.0 source preview. Public-intent packages are not
+published yet and are consumed through workspace or file dependencies rather
+than a public registry.
 
 ## Understand the System
 

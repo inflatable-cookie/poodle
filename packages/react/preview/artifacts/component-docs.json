@@ -1652,7 +1652,7 @@
         "name": "items",
         "type": "MenuItem[]",
         "default": "[]",
-        "description": "Array of menu items to display."
+        "description": "Array of menu items to display. Items with a non-empty children array render as cascading submenu flyouts."
       },
       {
         "name": "open",
@@ -3644,6 +3644,453 @@
     ],
     "usage": "<script lang=\"ts\">\n  import { DEFAULT_COMPRESSION, FileUpload } from \"@inflatable-cookie/poodle-svelte\";\n\n  let files = [];\n</script>\n\n<FileUpload\n  accept=\"image/*,.pdf\"\n  multiple\n  maxSize={5242880}\n  compress\n  compressionOptions={DEFAULT_COMPRESSION}\n  bind:files\n  onUpload={(selectedFiles) => console.log(selectedFiles)}\n/>"
   },
+  "agent-chat-input": {
+    "props": [
+      {
+        "name": "value",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Message text. Bindable; submitting never clears it — the host decides."
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "default": "\"Send a message\"",
+        "description": "Editor placeholder."
+      },
+      {
+        "name": "status",
+        "type": "\"idle\" | \"busy\"",
+        "default": "\"idle\"",
+        "description": "Busy flips the action button to stop and routes activations to onStop."
+      },
+      {
+        "name": "submitOnEnter",
+        "type": "boolean",
+        "default": "true",
+        "description": "When false only Cmd/Ctrl+Enter submits; bare Enter inserts a newline."
+      },
+      {
+        "name": "minRows",
+        "type": "number",
+        "default": "2",
+        "description": "Editor floor in text rows."
+      },
+      {
+        "name": "maxRows",
+        "type": "number",
+        "default": "12",
+        "description": "Editor ceiling in text rows; beyond it the editor scrolls."
+      },
+      {
+        "name": "maxLength",
+        "type": "number | null",
+        "default": "null",
+        "description": "Native maxlength on the editor."
+      },
+      {
+        "name": "allowEmptySubmit",
+        "type": "boolean",
+        "default": "false",
+        "description": "Keep the action button enabled with an empty editor."
+      },
+      {
+        "name": "attachments",
+        "type": "AgentChatAttachment[]",
+        "default": "[]",
+        "description": "Pending attachment chips (id, label, kind, icon, disabled)."
+      },
+      {
+        "name": "contextUsed",
+        "type": "number | null",
+        "default": "null",
+        "description": "Consumed context budget, in the host's own unit."
+      },
+      {
+        "name": "contextLimit",
+        "type": "number | null",
+        "default": "null",
+        "description": "Total context budget. When null the context ring is not rendered."
+      },
+      {
+        "name": "contextWarnAt",
+        "type": "number",
+        "default": "0.8",
+        "description": "Fraction of contextLimit at which the ring switches to the warning tone."
+      },
+      {
+        "name": "contextLabel",
+        "type": "string",
+        "default": "\"Context used\"",
+        "description": "Accessible name for the context ring; the percentage is appended."
+      },
+      {
+        "name": "toolbarDividers",
+        "type": "boolean",
+        "default": "true",
+        "description": "Hairline dividers between leading toolbar children."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"control\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Message\"",
+        "description": "Accessible label for the editor."
+      },
+      {
+        "name": "submitLabel",
+        "type": "string",
+        "default": "\"Send\"",
+        "description": "Accessible name for the action button while idle."
+      },
+      {
+        "name": "stopLabel",
+        "type": "string",
+        "default": "\"Stop\"",
+        "description": "Accessible name for the action button while busy."
+      },
+      {
+        "name": "readOnly",
+        "type": "boolean",
+        "default": "false",
+        "description": "Editor is not editable; submitting still works."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables the editor, action button and attachment removal."
+      }
+    ],
+    "slots": [
+      {
+        "name": "toolbar",
+        "description": "Leading toolbar controls — canonically a ModelPicker."
+      },
+      {
+        "name": "footer",
+        "description": "Secondary bar under the composer (scope, branch, status rows)."
+      }
+    ],
+    "events": [
+      {
+        "name": "onSubmit",
+        "payload": "(value: string) => void",
+        "description": "Fired on a valid submit gesture. Never while busy, and never when the editor is empty unless allowEmptySubmit."
+      },
+      {
+        "name": "onStop",
+        "payload": "() => void",
+        "description": "Fired from the action button while busy, and on Escape while busy."
+      },
+      {
+        "name": "onValueChange",
+        "payload": "(value: string) => void",
+        "description": "Fired on every edit."
+      },
+      {
+        "name": "onRemoveAttachment",
+        "payload": "(id: string) => void",
+        "description": "Fired from an attachment chip's remove button."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { AgentChatInput, ModelPicker } from \"@inflatable-cookie/poodle-svelte\";\n\n  let message = $state(\"\");\n  let status = $state<\"idle\" | \"busy\">(\"idle\");\n</script>\n\n<AgentChatInput\n  bind:value={message}\n  {status}\n  contextUsed={64000}\n  contextLimit={200000}\n  onSubmit={(text) => send(text)}\n  onStop={() => abort()}\n>\n  {#snippet toolbar()}\n    <ModelPicker {models} {axes} bind:value={selection} emphasis=\"subdued\" />\n  {/snippet}\n</AgentChatInput>"
+  },
+  "model-picker": {
+    "props": [
+      {
+        "name": "models",
+        "type": "ModelOption[]",
+        "default": "[]",
+        "description": "Host-supplied model list (value, label, description, badge, group, disabled, axes). A model's mark is either `icon` (a name from the icon registry) or `image: { src, alt? }` (any image URL — provider logo, data URI, asset path), which wins when both are set. A model's `axes` lists the axis keys it exposes, optionally as bindings that override the shared definition; omit to inherit every axis, `[]` to expose none."
+      },
+      {
+        "name": "axes",
+        "type": "ModelCapabilityAxis[]",
+        "default": "[]",
+        "description": "Capability axes declared once by key: single-select level sets or boolean toggles. The key is what lands in the selection, so a cross-provider list keeps `selection.axes.effort` stable while each model supplies its own levels."
+      },
+      {
+        "name": "value",
+        "type": "ModelSelection",
+        "default": "first enabled model + axis defaults",
+        "description": "Controlled selection: model plus its applicable axis values. Hosts update it from onChange."
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "default": "\"Select model\"",
+        "description": "Trigger label when no model is selected."
+      },
+      {
+        "name": "showAxisSummary",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether the trigger shows the axis summary (joined with ·) beside the model label."
+      },
+      {
+        "name": "showModelDescriptions",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether option descriptions render in the panel."
+      },
+      {
+        "name": "variant",
+        "type": "\"bare\" | \"outlined\"",
+        "default": "\"bare\"",
+        "description": "Borderless inline trigger (composer toolbars) or the standard bordered control."
+      },
+      {
+        "name": "emphasis",
+        "type": "\"default\" | \"subdued\"",
+        "default": "\"default\"",
+        "description": "Subdued dims the trigger so the picker recedes beside a more important control — its home inside AgentChatInput. Hover, focus and the open state restore full strength."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"control\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Model\"",
+        "description": "Accessible label for the trigger and dialog."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the picker is disabled."
+      }
+    ],
+    "slots": [],
+    "events": [
+      {
+        "name": "onChange",
+        "payload": "(value: ModelSelection) => void",
+        "description": "Called when the model or any axis changes. The payload is already normalised, so axes scoped out of the selected model never leak."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { ModelPicker, type ModelCapabilityAxis, type ModelOption, type ModelSelection } from \"@inflatable-cookie/poodle-svelte\";\n\n  const models: ModelOption[] = [\n    // Each model names the axis keys it exposes; a binding overrides the levels.\n    { value: \"atlas-pro\", label: \"Atlas Pro\", badge: \"1M\", axes: [\"effort\", \"fast\", \"context\"] },\n    { value: \"atlas\", label: \"Atlas\", axes: [\"effort\", \"fast\"] },\n    { value: \"corvid-1\", label: \"Corvid 1\", axes: [\n      { key: \"effort\", options: [\n        { value: \"minimal\", label: \"Minimal\" },\n        { value: \"deep\", label: \"Deep\" },\n      ], defaultValue: \"minimal\" },\n    ] },\n  ];\n\n  const axes: ModelCapabilityAxis[] = [\n    { key: \"effort\", label: \"Effort\", kind: \"select\", defaultValue: \"medium\", options: [\n      { value: \"low\", label: \"Low\" },\n      { value: \"medium\", label: \"Medium\" },\n      { value: \"high\", label: \"High\" },\n    ] },\n    { key: \"fast\", label: \"Fast mode\", kind: \"toggle\", onLabel: \"Fast\", offLabel: \"Normal\" },\n    { key: \"context\", label: \"Context window\", kind: \"select\", options: [\n      { value: \"200k\", label: \"200K\" },\n      { value: \"1m\", label: \"1M\" },\n    ] },\n  ];\n\n  let value: ModelSelection = { model: \"atlas-pro\", axes: {} };\n</script>\n\n<ModelPicker {models} {axes} {value} onChange={(next) => (value = next)} />"
+  },
+  "ref-select": {
+    "props": [
+      {
+        "name": "refs",
+        "type": "RefOption[]",
+        "default": "[]",
+        "description": "Host-supplied refs (value, label, kind, description, icon, group, disabled). Poodle knows the shape of a ref, never git itself."
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Selected ref. Bindable."
+      },
+      {
+        "name": "currentRef",
+        "type": "string | null",
+        "default": "null",
+        "description": "The checked-out ref, marked in the list. Often equals value, but a host browsing another ref keeps the marker where it belongs."
+      },
+      {
+        "name": "currentLabel",
+        "type": "string",
+        "default": "\"current\"",
+        "description": "Marker text on the checked-out ref."
+      },
+      {
+        "name": "searchable",
+        "type": "boolean",
+        "default": "true",
+        "description": "Render the search field."
+      },
+      {
+        "name": "searchValue",
+        "type": "string | null",
+        "default": "null",
+        "description": "Controlled query. When supplied the component stops filtering — the host owns which refs to pass."
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "default": "false",
+        "description": "Show the loading footer; suppresses the empty message, since results may still be arriving."
+      },
+      {
+        "name": "emptyLabel",
+        "type": "string",
+        "default": "\"No refs found\"",
+        "description": "Empty-state text."
+      },
+      {
+        "name": "variant",
+        "type": "\"bare\" | \"outlined\"",
+        "default": "\"bare\"",
+        "description": "Borderless inline trigger (composer footers) or the standard bordered control."
+      },
+      {
+        "name": "emphasis",
+        "type": "\"default\" | \"subdued\"",
+        "default": "\"default\"",
+        "description": "Subdued dims the trigger so it recedes in a composer footer; hover, focus and open restore it."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Ref\"",
+        "description": "Accessible name for the trigger and dialog."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the control is disabled."
+      }
+    ],
+    "slots": [],
+    "events": [
+      {
+        "name": "onChange",
+        "payload": "(value: string) => void",
+        "description": "Fired when a ref is chosen. Choosing closes the popover — selecting a ref is the terminal action."
+      },
+      {
+        "name": "onSearchChange",
+        "payload": "(query: string) => void",
+        "description": "Fired on every keystroke in the search field, for host-driven querying. Fires whether or not searchValue is supplied."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { RefSelect, type RefOption } from \"@inflatable-cookie/poodle-svelte\";\n\n  const refs: RefOption[] = [\n    { value: \"main\", label: \"main\", kind: \"branch\", description: \"a1b2c3d\", group: \"Branches\" },\n    { value: \"v1.4.0\", label: \"v1.4.0\", kind: \"tag\", group: \"Tags\" },\n  ];\n\n  let value = $state(\"main\");\n</script>\n\n<RefSelect {refs} bind:value currentRef=\"main\" emphasis=\"subdued\" />"
+  },
+  "filter-builder": {
+    "props": [
+      {
+        "name": "fields",
+        "type": "FilterFieldDefinition[]",
+        "default": "[]",
+        "description": "Host-supplied filter fields the user can choose from (key, label, kind, options, operators, allowMultiple)."
+      },
+      {
+        "name": "value",
+        "type": "FilterExpression",
+        "default": "{ combinator: \"and\", clauses: [] }",
+        "description": "Controlled expression: combinator plus committed clauses. Hosts update it from onChange."
+      },
+      {
+        "name": "maxClauses",
+        "type": "number | null",
+        "default": "null",
+        "description": "Optional cap on the number of active clauses; hides the add row when reached."
+      },
+      {
+        "name": "compact",
+        "type": "boolean",
+        "default": "false",
+        "description": "Hides the static \"Filter\" label in the trigger."
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether the reset (clear-all) button is rendered."
+      },
+      {
+        "name": "showPills",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether active clauses render as external editable/removable pills."
+      },
+      {
+        "name": "showCombinator",
+        "type": "boolean",
+        "default": "false",
+        "description": "Show the Match all / Match any root-combinator toggle (only with 2+ clauses). Off by default — most filter sets are AND-only."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"control\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Filter\"",
+        "description": "Accessible label for the filter control."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the filter control is disabled."
+      }
+    ],
+    "slots": [],
+    "events": [
+      {
+        "name": "onChange",
+        "payload": "(value: FilterExpression) => void",
+        "description": "Called on every committed mutation (add, update, remove, clear, combinator change). Never fired for an in-progress draft."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { FilterBuilder, type FilterExpression, type FilterFieldDefinition } from \"@inflatable-cookie/poodle-svelte\";\n\n  const fields: FilterFieldDefinition[] = [\n    { key: \"format\", label: \"Format\", kind: \"multi-enum\", options: [\n      { value: \"clap\", label: \"CLAP\" },\n      { value: \"vst3\", label: \"VST3\" },\n    ] },\n    { key: \"hidden\", label: \"Hidden\", kind: \"boolean\" },\n    { key: \"tag-count\", label: \"Tag count\", kind: \"number\" },\n  ];\n\n  let value: FilterExpression = { combinator: \"and\", clauses: [] };\n</script>\n\n<FilterBuilder {fields} {value} onChange={(next) => (value = next)} />"
+  },
   "filter-toolbar": {
     "props": [
       {
@@ -4058,7 +4505,7 @@
         "name": "icon",
         "type": "IconNodes | string | null",
         "required": true,
-        "description": "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-core/icons or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals."
+        "description": "The icon to display. Pass IconNodes from a generated application set, or a string name resolved from an IconProvider set and then Poodle's default Lucide set."
       },
       {
         "name": "name",
@@ -4093,7 +4540,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-core/icons -->\n<script lang=\"ts\">\n  import { Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { search, heart, star } from \"@inflatable-cookie/poodle-core/icons\";\n</script>\n\n<Icon icon={search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={heart} size=\"sm\" />\n<Icon icon={star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or built-in internals -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Bulk icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
+    "usage": "<!-- Generate from icons.json with bun x poodle-icons -->\n<script lang=\"ts\">\n  import { Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { icons } from \"$lib/icons.generated\";\n</script>\n\n<Icon icon={icons.search} size=\"lg\" ariaLabel=\"Search\" />\n<Icon icon={icons.heart} size=\"sm\" />\n<Icon icon={icons.star} size=\"xl\" />\n\n<!-- String name: resolves from IconProvider or Poodle's default Lucide set -->\n<Icon icon=\"chevron-down\" sizeRole=\"chrome\" />\n\n<!-- Application icon set via provider -->\n<script lang=\"ts\">\n  import { Icon, IconProvider } from \"@inflatable-cookie/poodle-svelte\";\n  import { icons } from \"$lib/icons.generated\";\n</script>\n\n<IconProvider {icons}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n</IconProvider>"
   },
   "icon-provider": {
     "props": [
@@ -4101,7 +4548,7 @@
         "name": "icons",
         "type": "IconSet",
         "required": true,
-        "description": "A complete icon set mapping kebab-case names to SVG node arrays. Any icon set in this format works — lucide-static/icon-nodes.json, a Phosphor equivalent, or a custom set. String-based icon lookups resolve from this set first, then fall back to the 35 built-in internal icons."
+        "description": "An application icon set mapping names to SVG node arrays. String lookups resolve from this set first, then Poodle's scoped default Lucide set. Missing names report an error and render a visible error glyph."
       }
     ],
     "slots": [
@@ -4111,7 +4558,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { IconProvider, Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import iconNodes from \"lucide-static/icon-nodes.json\";\n</script>\n\n<!-- All 1700+ Lucide icons available by name within the provider -->\n<IconProvider icons={iconNodes}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n  <Icon icon=\"shield-check\" />\n</IconProvider>"
+    "usage": "<script lang=\"ts\">\n  import { IconProvider, Icon } from \"@inflatable-cookie/poodle-svelte\";\n  import { icons } from \"$lib/icons.generated\";\n</script>\n\n<IconProvider {icons}>\n  <Icon icon=\"rocket\" />\n  <Icon icon=\"flame\" />\n  <Icon icon=\"shield-check\" />\n</IconProvider>"
   },
   "icon-button": {
     "props": [
@@ -4194,6 +4641,18 @@
         "description": "ID of an element that describes the button."
       },
       {
+        "name": "expanded",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Optional expanded state for disclosure or popover triggers."
+      },
+      {
+        "name": "controls",
+        "type": "string | null",
+        "default": "null",
+        "description": "ID of the surface controlled by the button."
+      },
+      {
         "name": "type",
         "type": "HTMLButtonElement[\"type\"]",
         "default": "\"button\"",
@@ -4228,7 +4687,7 @@
         "description": "Called when toggle state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@inflatable-cookie/poodle-svelte\";\n  import { trash2, plus, settings } from \"@inflatable-cookie/poodle-core/icons\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
+    "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@inflatable-cookie/poodle-svelte\";\n  import { icons } from \"$lib/icons.generated\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={icons[\"trash-2\"]} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={icons.plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name from Poodle's default Lucide set -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
   },
   "list-card": {
     "props": [
@@ -4994,7 +5453,7 @@
         "name": "items",
         "type": "MenuItem[]",
         "default": "[]",
-        "description": "Array of menu items to display."
+        "description": "Array of menu items to display. Items with a non-empty children array render as cascading submenu flyouts."
       },
       {
         "name": "open",
@@ -5592,6 +6051,18 @@
         "type": "boolean",
         "default": "false",
         "description": "Collapses long trigger summaries after the first two items."
+      },
+      {
+        "name": "triggerVariant",
+        "type": "\"summary\" | \"icon\"",
+        "default": "\"summary\"",
+        "description": "Renders either the full summary trigger or a single sort IconButton with editing in the popover."
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether to show the clear action in the summary trigger or icon-trigger popover."
       },
       {
         "name": "ariaLabel",
@@ -6234,6 +6705,18 @@
         "type": "boolean",
         "default": "false",
         "description": "Whether the pill uses muted styling."
+      },
+      {
+        "name": "dot",
+        "type": "boolean",
+        "default": "false",
+        "description": "Renders a leading status dot filled with the tone's status color."
+      },
+      {
+        "name": "title",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional native tooltip on the pill root."
       },
       {
         "name": "ariaLabel",
@@ -7048,6 +7531,109 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { ScrollShell } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ScrollShell direction=\"vertical\" padding=\"md\" style=\"max-height: 300px;\">\n  <p>Long scrollable content goes here...</p>\n</ScrollShell>"
   },
+  "stepper": {
+    "props": [
+      {
+        "name": "steps",
+        "type": "StepperStep[]",
+        "default": "[]",
+        "description": "Ordered step list. Each step carries its own status; status is never derived from position."
+      },
+      {
+        "name": "value",
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable current step value. Leave undefined for uncontrolled mode."
+      },
+      {
+        "name": "defaultValue",
+        "type": "string | null",
+        "default": "null",
+        "description": "Initial current step for uncontrolled mode; falls back to the first step."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"control\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override for horizontal spacing."
+      },
+      {
+        "name": "orientation",
+        "type": "\"horizontal\" | \"vertical\"",
+        "default": "\"horizontal\"",
+        "description": "Axis the steps flow along. Vertical stacks the steps as rows in the same shared track."
+      },
+      {
+        "name": "collapsible",
+        "type": "boolean",
+        "default": "false",
+        "description": "Renders the summary row as a disclosure trigger. Vertical only — a horizontal stepper is already one line."
+      },
+      {
+        "name": "collapsed",
+        "type": "boolean | undefined",
+        "default": "undefined",
+        "description": "Bindable collapse state. Leave undefined for uncontrolled mode."
+      },
+      {
+        "name": "defaultCollapsed",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial collapse state for uncontrolled mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether every step is disabled."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible name for the navigation landmark."
+      },
+      {
+        "name": "rerunLabel",
+        "type": "string",
+        "default": "\"Re-run step\"",
+        "description": "Accessible name for the re-run control, suffixed with the step label."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a step is selected."
+      },
+      {
+        "name": "onRerun",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "When supplied, completed steps render a re-run control. Re-running is deliberate and separate from navigation."
+      },
+      {
+        "name": "onCollapsedChange",
+        "type": "((collapsed: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the summary row toggles; carries the new collapse state."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<Stepper\n  steps={[\n    { value: \"read\", label: \"Read source\", status: \"complete\" },\n    { value: \"gate\", label: \"Quality gate\", status: \"failed\" },\n    { value: \"apply\", label: \"Apply changes\", status: \"pending\" },\n  ]}\n  ariaLabel=\"Pipeline steps\"\n  onRerun={(value) => rerun(value)}\n/>"
+  },
   "segmented-control": {
     "props": [
       {
@@ -7497,7 +8083,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Tree } from \"@inflatable-cookie/poodle-svelte\";\n  import type { TreeNode } from \"@inflatable-cookie/poodle-svelte\";\n\n  const nodes: TreeNode[] = [\n    {\n      value: \"src\",\n      label: \"src\",\n      icon: \"folder\",\n      children: [\n        { value: \"src/index.ts\", label: \"index.ts\", icon: \"file\" },\n      ],\n    },\n    { value: \"README.md\", label: \"README.md\", icon: \"file\" },\n  ];\n\n  let selected = $state<string[]>([]);\n  let expanded = $state<string[]>([\"src\"]);\n</script>\n\n<Tree\n  {nodes}\n  ariaLabel=\"Project files\"\n  bind:selectedValues={selected}\n  bind:expandedValues={expanded}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { Tree } from \"@inflatable-cookie/poodle-svelte\";\n  import type { TreeNode } from \"@inflatable-cookie/poodle-svelte\";\n\n  const nodes: TreeNode[] = [\n    {\n      value: \"src\",\n      label: \"src\",\n      endLabel: \"1\",\n      icon: \"folder\",\n      children: [\n        { value: \"src/index.ts\", label: \"index.ts\", icon: \"file\" },\n      ],\n    },\n    { value: \"README.md\", label: \"README.md\", icon: \"file\" },\n  ];\n\n  let selected = $state<string[]>([]);\n  let expanded = $state<string[]>([\"src\"]);\n</script>\n\n<Tree\n  {nodes}\n  ariaLabel=\"Project files\"\n  bind:selectedValues={selected}\n  bind:expandedValues={expanded}\n/>"
   },
   "skeleton": {
     "props": [
@@ -8364,6 +8950,18 @@
         "type": "((value: string) => void) | undefined",
         "default": "undefined",
         "description": "Called when a tab close button is requested."
+      },
+      {
+        "name": "onDragStart",
+        "type": "((value: string, event: DragEvent) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a reorderable tab starts dragging."
+      },
+      {
+        "name": "onDragEnd",
+        "type": "((value: string, event: DragEvent) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a reorderable tab drag ends."
       }
     ],
     "slots": [
@@ -8470,6 +9068,12 @@
         "type": "string | undefined",
         "default": "undefined",
         "description": "Native autocapitalize attribute."
+      },
+      {
+        "name": "autocorrect",
+        "type": "\"on\" | \"off\" | undefined",
+        "default": "undefined",
+        "description": "Native autocorrection attribute."
       },
       {
         "name": "enterKeyHint",
@@ -8768,6 +9372,73 @@
     "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { TimeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let time = \"09:00\";\n</script>\n\n<TimeInput id=\"start-time\" bind:value={time} min=\"08:00\" max=\"18:00\" step={60} />"
+  },
+  "theme-select": {
+    "props": [
+      {
+        "name": "themes",
+        "type": "ThemeOption[]",
+        "default": "controller list",
+        "description": "Theme catalogue (value, label, swatch). Falls back to the theme controller's list, then empty. Use themeOptions() from @inflatable-cookie/poodle-core/tokens for the full Poodle set."
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "default": "controller / uncontrolled",
+        "description": "Controlled current theme value. Omit to use the theme controller (if present) or internal state."
+      },
+      {
+        "name": "columns",
+        "type": "number",
+        "default": "3",
+        "description": "Swatch-tile columns in the popover grid."
+      },
+      {
+        "name": "showLabel",
+        "type": "boolean",
+        "default": "true",
+        "description": "Show the current theme name in the trigger."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"control\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Theme\"",
+        "description": "Accessible label for the theme control."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the theme control is disabled."
+      }
+    ],
+    "slots": [],
+    "events": [
+      {
+        "name": "onChange",
+        "payload": "(value: string) => void",
+        "description": "Called when a theme is selected (fires alongside the controlled value / controller update)."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  // With the modular controller — reads all Poodle themes, applies + persists.\n  import { ThemeSelect, createThemeController } from \"@inflatable-cookie/poodle-svelte\";\n  import \"@inflatable-cookie/poodle-core/tokens/themes.css\"; // load every theme layer\n\n  createThemeController(); // in a root component; ThemeSelect auto-wires\n</script>\n\n<ThemeSelect />\n\n<!-- Standalone (no controller): -->\n<!-- <ThemeSelect themes={themeOptions()} value={theme} onChange={(v) => (theme = v)} /> -->"
   },
   "time-zone-select": {
     "props": [

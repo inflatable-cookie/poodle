@@ -1,5 +1,4 @@
 {
-  "generatedAt": "2026-08-09T12:02:24.266Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -176,14 +175,6 @@
   },
   "packageSurfaceCoverage": {
     "summary": [
-      {
-        "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 183,
-        "componentCount": 146,
-        "helperCount": 37,
-        "previewedCount": 183,
-        "contractOnlyCount": 0
-      },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportCount": 183,

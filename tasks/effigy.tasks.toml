@@ -20,6 +20,7 @@
 "react:build" = "bun run --cwd packages/react/preview build"
 "react:run" = "bun run --cwd packages/react/preview dev"
 "react:preview" = [{ task = "react:run" }]
+"react:docs" = "bun run --cwd packages/react/preview docs:export"
 "react:reports" = "bun run --cwd packages/react/preview reports"
 
 # GPUI native preview (macOS)
@@ -38,8 +39,12 @@
 "report:parity" = [
   { task = "tokens:build" },
   { run = "bun run --cwd packages/svelte/preview parity:report" },
+  { run = "bun run --cwd packages/react/preview parity:report" },
 ]
-"report:accessibility" = "bun run --cwd packages/svelte/preview accessibility:report"
+"report:accessibility" = [
+  { run = "bun run --cwd packages/svelte/preview accessibility:report" },
+  { run = "bun run --cwd packages/react/preview accessibility:report" },
+]
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows (.github/workflows/ci-*.yml) mirror
@@ -156,6 +161,7 @@
   { task = "test:components" },
   { task = "check:svelte" },
   { task = "docs:lint" },
+  { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
 ]
@@ -203,6 +209,7 @@
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
   { task = "docs:lint" },
+  { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
   { task = "docs:build" },
