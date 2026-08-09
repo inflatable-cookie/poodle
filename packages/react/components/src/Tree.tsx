@@ -160,7 +160,6 @@ export function Tree({
       renameInputRef.current.focus();
       renameInputRef.current.select();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingValue, nodes]);
 
   function setEditing(next: string | null): void {

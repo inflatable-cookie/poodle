@@ -260,7 +260,6 @@ export function Select({
     if (!open && !freeform) {
       setQuery(stateRef.current.hasSelection ? (stateRef.current.selectedOption?.label ?? "") : "");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, freeform, currentValue, flatOptions.length]);
 
   // clamp highlight
@@ -282,7 +281,6 @@ export function Select({
   // lazy initial load
   useEffect(() => {
     if (isLazy && loadState === "idle") void startLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLazy, loadState]);
 
   // dismiss layer while open
@@ -294,7 +292,6 @@ export function Select({
       dismissOnOutsideInteract: true,
       onDismiss: () => setOpen(false),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, rootElement]);
 
   function renderOption(option: SelectOption, flatIdx: number) {

@@ -112,7 +112,6 @@ export function NavigationMenu({
       dismissOnOutsideInteract: true,
       onDismiss: () => setValue(null),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue]);
 
   return (

@@ -421,7 +421,6 @@ export function Tabs({
     historyReady.current = true;
 
     return () => window.removeEventListener("popstate", handlePopState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyKey]);
 
   useEffect(() => {
@@ -430,7 +429,6 @@ export function Tabs({
       replaceUrlTabParam(currentValue);
       lastSyncedValue.current = currentValue;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyKey, currentValue]);
 
   // ── Reorder (drag-and-drop DOM plumbing; final reorder routes through the machine) ──

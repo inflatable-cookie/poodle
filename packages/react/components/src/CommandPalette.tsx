@@ -130,7 +130,6 @@ export function CommandPalette({
     if (enabledItems.length === 0 && activeId !== null) {
       setActive(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, items, activeId]);
 
   function close(): void {
@@ -176,7 +175,6 @@ export function CommandPalette({
 
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   if (!open) {

@@ -151,7 +151,6 @@ export function ColorPicker({
       lastSyncedValue.current = currentValue;
       syncFromHex(currentValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue]);
 
   useEffect(() => {
@@ -341,7 +340,6 @@ export function ColorPicker({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeydown);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const alphaField = (suffix: string) => (

@@ -133,7 +133,6 @@ export function Calendar({
       if (currentRangeValue.end) setFocusIso(currentRangeValue.end);
       else if (currentRangeValue.start) setFocusIso(currentRangeValue.start);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, currentSingleValue, currentRangeValue.start, currentRangeValue.end]);
 
   useEffect(() => {

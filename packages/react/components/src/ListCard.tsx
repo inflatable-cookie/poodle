@@ -282,7 +282,6 @@ export function ListCard({
       dismissOnOutsideInteract: true,
       onDismiss: () => closeContextMenu(),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextMenuOpen]);
 
   const rootStyle: CSSProperties | undefined =

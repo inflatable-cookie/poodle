@@ -161,7 +161,6 @@ export function RelationPicker({
 
     lastDrillContextKey.current = drillContextKey;
     onDrillContext?.(drillContext);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drillContextKey]);
 
   // Load drill-down items when the level or its search changes.
@@ -195,7 +194,6 @@ export function RelationPicker({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drillDepth, drillSearchQuery, drillContextKey, drillDown]);
 
   // Load final items when drill-down completes.
@@ -219,7 +217,6 @@ export function RelationPicker({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasDrillCompleted, drillContextKey, currentQuery, drillDown]);
 
   function drillSelect(item: DrillDownItem): void {
@@ -295,7 +292,6 @@ export function RelationPicker({
 
       return changed ? nextLabels : prev;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeItems, providedSelectedItems]);
 
   const filteredItems = activeItems.filter((item) =>

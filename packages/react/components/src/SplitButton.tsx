@@ -100,7 +100,6 @@ export function SplitButton({
       pendingMenuFocus.current = false;
       itemRefs.current[highlightRef.current]?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
   function openMenu(): void {
@@ -163,7 +162,6 @@ export function SplitButton({
         }
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
 

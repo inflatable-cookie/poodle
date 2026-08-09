@@ -240,7 +240,6 @@ export function TextInput({
         commitValue(generatedSlug, { markSlugEdited: false, immediate: true });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSlug, source, generatedSlug, userEditedSlug, currentValue]);
 
   function buildValidationKey(inputValue: string, context: unknown): string {
@@ -322,7 +321,6 @@ export function TextInput({
     ) {
       triggerValidation(currentValue, false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue, validate]);
 
   // re-validate on context change
@@ -333,7 +331,6 @@ export function TextInput({
         triggerValidation(currentValue, false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextKey, validate]);
 
   // emit validation snapshot changes
@@ -347,7 +344,6 @@ export function TextInput({
         message: internalValidationMessage,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validate, internalValidationStatus, internalValidationMessage]);
 
   // reset when validator removed
