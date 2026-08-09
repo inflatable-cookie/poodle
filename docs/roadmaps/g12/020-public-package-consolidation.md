@@ -49,13 +49,22 @@ one of them uses `poodle-svelte`, and none uses `headless`, `styles`, `tokens`
 or `icons` without it. The base packages have never been installed on their
 own.
 
-### The apparent cost is not a cost
+### The dependency cost is not a cost — the payload cost was not measured
 
 Folding `icons-lucide` into core looked like it would force `lucide-static` on
 every consumer. It does not: the icon modules are generated and gitignored,
 and `lucide-static` is referenced only by `generate.mjs`, never by anything
 under `src`. It was a build-time dependency declared as a runtime one, and is
 now a `devDependency` of core.
+
+**Amended 2026-08-09.** That is true of the dependency and says nothing about
+the payload, which this card did not measure and which reads here as though
+icons were free. They are not: the catalogue is 245 KB gzipped, 84% of the
+`poodle-core` tarball, and a namespace import in `icon-registry.ts` defeats
+tree-shaking so all 1,703 reach every consumer bundle. Card 021 removes the
+catalogue. Consolidating the icons out of `packages/svelte/` was still correct
+— they are framework-agnostic and were misfiled — but core was the wrong
+destination.
 
 ## Landed Shape
 

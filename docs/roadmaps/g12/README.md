@@ -212,6 +212,14 @@ Runway:
 - `018-public-overlay-geometry-observation.md` — explicit immutable viewport
   snapshots for built-in Popover/Menu surfaces across Svelte and React, without
   public DOM or host-runtime coupling. **Complete; requested by Longhorn.**
+- `020-public-package-consolidation.md` — six publish-intent npm packages to
+  three, grouped by framework binding: `poodle-core`, `poodle-svelte`,
+  `poodle-react`. **Complete.**
+- `021-icon-catalogue-boundary.md` — `poodle-core` stops vendoring the 1,703
+  Lucide icons. Measured: 84% of the tarball, 8% of it used, and a namespace
+  import in `icon-registry.ts` puts all of them in every consumer bundle.
+  Poodle keeps the twelve its own components need. **Ready; blocks Longhorn's
+  first publication.**
 - `019-gpui-node-backend.md` — the symmetric GPUI half of the
   Poodle↔Jetstream inversion: a Node → GPUI interpreter crate, GPUI preview
   migration onto `poodle-render` nodes, then deletion of
