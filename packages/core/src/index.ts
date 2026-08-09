@@ -2,6 +2,31 @@ export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
+export {
+  SEGMENTED_AXIS_MAX_OPTIONS,
+  applicableAxes,
+  axesForModel,
+  axisAccepts,
+  axisControlKind,
+  axisDefaultValue,
+  axisSummaryFragment,
+  axisValue,
+  groupHeadingFor,
+  initialSelection,
+  modelLabel,
+  resolveSelection,
+  summaryText,
+  type ModelAxisBinding,
+  type ModelAxisKind,
+  type ModelAxisOption,
+  type ModelAxisRef,
+  type ModelAxisValue,
+  type ModelCapabilityAxis,
+  type ModelImage,
+  type ModelOption,
+  type ModelSelection,
+} from "./model-picker";
+
 export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
 
 export {

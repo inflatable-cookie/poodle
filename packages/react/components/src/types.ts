@@ -732,83 +732,17 @@ export type DockExternalDropTarget = HeadlessDockExternalDropTarget<DockEdge>;
 // ModelPicker
 // ---------------------------------------------------------------------------
 
-/** One selectable engine/model. Poodle knows nothing about what a model *is* —
- * labels, descriptions, badges and grouping are all host vocabulary. */
-export type ModelOption = {
-  value: string;
-  label: string;
-  description?: string;
-  badge?: string;
-  icon?: string;
-  group?: string;
-  disabled?: boolean;
-  /** Arbitrary image (a provider logo, say) shown in place of `icon`. Takes
-   * precedence over `icon` when both are set. */
-  image?: ModelImage;
-  /** Which capability axes this model exposes, by key, in display order. Each
-   * entry is either an axis key or a binding that overrides parts of the shared
-   * definition for this model (different levels, a different default). Omit to
-   * inherit every declared axis — the single-provider case. */
-  axes?: ModelAxisRef[];
-};
-
-/** An image source for a model row. `alt` defaults to `""`: the model label sits
- * beside it, so the image is decorative unless the host says otherwise. */
-export type ModelImage = { src: string; alt?: string };
-
-export type ModelAxisKind = "select" | "toggle";
-
-export type ModelAxisOption = {
-  value: string;
-  label: string;
-  description?: string;
-  disabled?: boolean;
-};
-
-/** A host-declared capability axis, keyed. The key is what lands in
- * `ModelSelection.axes`, so hosts can read `selection.axes.effort` across
- * providers whose level sets differ. */
-export type ModelCapabilityAxis = {
-  key: string;
-  label: string;
-  kind: ModelAxisKind;
-  description?: string;
-  /** `select` axes only. */
-  options?: ModelAxisOption[];
-  /** Control shape for a `select` axis. `auto` (the default) uses a
-   * SegmentedControl up to three options and a vertical list beyond that. */
-  control?: "auto" | "segmented" | "list";
-  /** Applied when the axis has no value for the selected model. */
-  defaultValue?: ModelAxisValue;
-  /** Trigger-summary labels for a `toggle` axis. */
-  onLabel?: string;
-  offLabel?: string;
-  /** Default true. */
-  showInSummary?: boolean;
-  disabled?: boolean;
-};
-
-/** A model's reference to a declared axis, overriding any part of it for that
- * model. Everything but `key` is optional and falls back to the shared
- * definition. */
-export type ModelAxisBinding = {
-  key: string;
-  label?: string;
-  description?: string;
-  options?: ModelAxisOption[];
-  control?: "auto" | "segmented" | "list";
-  defaultValue?: ModelAxisValue;
-  onLabel?: string;
-  offLabel?: string;
-  showInSummary?: boolean;
-  disabled?: boolean;
-};
-
-export type ModelAxisRef = string | ModelAxisBinding;
-
-export type ModelAxisValue = string | boolean;
-
-export type ModelSelection = { model: string; axes: Record<string, ModelAxisValue> };
+export type {
+  ModelAxisBinding,
+  ModelAxisKind,
+  ModelAxisOption,
+  ModelAxisRef,
+  ModelAxisValue,
+  ModelCapabilityAxis,
+  ModelImage,
+  ModelOption,
+  ModelSelection,
+} from "@inflatable-cookie/poodle-core";
 
 // ---------------------------------------------------------------------------
 // AgentChatInput
