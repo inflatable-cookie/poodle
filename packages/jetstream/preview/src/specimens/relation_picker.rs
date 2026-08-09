@@ -7,9 +7,9 @@
 //! the shared `PickerShell` / `SelectionSummary` / `Select` composites — no
 //! hand-rolled boxes.
 
+use crate::compat::js_relation_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_relation_picker;
 
 use poodle_specs::{
     BrowseState, ControlDensity, ControlSize, DrillDownConfig, DrillDownItem, DrillDownLeafGroup,

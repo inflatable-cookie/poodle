@@ -1,8 +1,8 @@
 //! LogList specimen — timestamped log viewer.
 
+use crate::compat::js_log_list;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_log_list;
 
 use poodle_specs::{LogEntry, LogFilter, LogLevel, LogListSpec, StreamLogEntry};
 
@@ -31,24 +31,32 @@ fn stream_entries(count: usize) -> Vec<LogEntry> {
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
-        .child(group("With entries", secondary,
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "With entries",
+            secondary,
             js_log_list(
                 &LogListSpec::new()
                     .with_entries(stream_entries(8))
                     .with_auto_scroll(true),
                 theme,
-            )
+            ),
         ))
-        .child(group("Filtered to errors", secondary,
+        .child(group(
+            "Filtered to errors",
+            secondary,
             js_log_list(
                 &LogListSpec::new()
                     .with_entries(stream_entries(12))
                     .with_filter_level("error"),
                 theme,
-            )
+            ),
         ))
-        .child(group("Audit toolbar + pagination", secondary,
+        .child(group(
+            "Audit toolbar + pagination",
+            secondary,
             js_log_list(
                 &LogListSpec::new()
                     .with_filter(
@@ -63,21 +71,27 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_page_size(20)
                     .with_total(85),
                 theme,
-            )
+            ),
         ))
-        .child(group("Loading", secondary,
-            js_log_list(&LogListSpec::new().with_loading(true), theme)
+        .child(group(
+            "Loading",
+            secondary,
+            js_log_list(&LogListSpec::new().with_loading(true), theme),
         ))
-        .child(group("Error", secondary,
+        .child(group(
+            "Error",
+            secondary,
             js_log_list(
                 &LogListSpec::new().with_error("Failed to load audit entries"),
                 theme,
-            )
+            ),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

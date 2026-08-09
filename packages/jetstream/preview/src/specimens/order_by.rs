@@ -1,8 +1,8 @@
 //! OrderBy specimen — sort control with active/inactive fields.
 
+use crate::compat::js_order_by;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_order_by;
 
 use poodle_specs::{
     ControlDensity, ControlSize, OrderByField, OrderBySpec, OrderByTriggerVariant, SortDirection,

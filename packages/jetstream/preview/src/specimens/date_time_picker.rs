@@ -5,9 +5,9 @@
 //! resolve from `DateTimePickerSpec` + tokens. Specimens render static state,
 //! so the open flag is seeded directly on the spec (`spec.open`).
 
+use crate::compat::js_date_time_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_date_time_picker;
 
 use poodle_specs::{ControlDensity, ControlSize, DateTimePickerSpec, DateTimeValue};
 

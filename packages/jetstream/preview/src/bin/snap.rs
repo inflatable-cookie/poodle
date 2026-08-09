@@ -8,19 +8,19 @@
 //!
 //! Run: `cargo run --bin snap` → writes /tmp/poodle-snap-*.png
 
-use jetstream_ui::*;
-use jetstream_ui::ui_element::{self, JsEl};
-use jetstream_renderer::ui_pass::UiPass;
+use glam::Mat4;
 use jetstream_renderer::camera::CameraGpu;
 use jetstream_renderer::pipeline::create_sprite_pipeline;
 use jetstream_renderer::shader::create_sprite_shader;
 use jetstream_renderer::sprite::{QUAD_INDICES, QUAD_VERTICES};
 use jetstream_renderer::texture::GpuTexture;
-use glam::Mat4;
+use jetstream_renderer::ui_pass::UiPass;
+use jetstream_ui::ui_element::{self, JsEl};
+use jetstream_ui::*;
 use wgpu::util::DeviceExt;
 
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_preview::jsx::{elevation_overlay, elevation_dialog, resolve_color};
+use poodle_jetstream_preview::jsx::{elevation_dialog, elevation_overlay, resolve_color};
 
 fn headless_device() -> (wgpu::Device, wgpu::Queue) {
     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
@@ -85,13 +85,23 @@ fn snapshot_opts(
     if let Some((hx, hy, pressed)) = hover {
         ui.set_pointer_state(hx, hy, pressed);
     }
-    let cmds = collect_draw_commands(&ui.tree, &ui.focus, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)));
+    let cmds = collect_draw_commands(
+        &ui.tree,
+        &ui.focus,
+        &poodle_jetstream_preview::theme_bridge::build_draw_theme(
+            &JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE),
+        ),
+    );
     let quads = convert_draw_commands_scaled(&cmds, 1.0);
 
     // Offscreen target.
     let tex = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("snap_tex"),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
@@ -116,7 +126,12 @@ fn snapshot_opts(
                 view: &view,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.92, g: 0.93, b: 0.95, a: 1.0 }),
+                    load: wgpu::LoadOp::Clear(wgpu::Color {
+                        r: 0.92,
+                        g: 0.93,
+                        b: 0.95,
+                        a: 1.0,
+                    }),
                     store: wgpu::StoreOp::Store,
                 },
             })],
@@ -126,7 +141,15 @@ fn snapshot_opts(
             multiview_mask: None,
         });
     }
-    ui_pass.encode(&device, &queue, &mut encoder, &view, &quads, w as f32, h as f32);
+    ui_pass.encode(
+        &device,
+        &queue,
+        &mut encoder,
+        &view,
+        &quads,
+        w as f32,
+        h as f32,
+    );
     queue.submit(std::iter::once(encoder.finish()));
 
     // ── Text pass (glyphs) — mirrors the preview's render_all_text at 1× scale ──
@@ -137,8 +160,13 @@ fn snapshot_opts(
         let camera = CameraGpu::from_matrix(&device, ortho);
         let shader = create_sprite_shader(&device);
         let tex_bgl = GpuTexture::bind_group_layout(&device);
-        let pipeline =
-            create_sprite_pipeline(&device, &shader, format, &camera.bind_group_layout, &tex_bgl);
+        let pipeline = create_sprite_pipeline(
+            &device,
+            &shader,
+            format,
+            &camera.bind_group_layout,
+            &tex_bgl,
+        );
         let vbo = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("snap_text_vbo"),
             contents: bytemuck::cast_slice(QUAD_VERTICES),
@@ -174,9 +202,17 @@ fn snapshot_opts(
             if instances.is_empty() {
                 continue;
             }
-            let Some(atlas) = atlases.get_mut(size) else { continue };
+            let Some(atlas) = atlases.get_mut(size) else {
+                continue;
+            };
             let atlas_tex = GpuTexture::from_rgba8(
-                &device, &queue, &atlas.pixels, atlas.width, atlas.height, "snap_atlas", &tex_bgl,
+                &device,
+                &queue,
+                &atlas.pixels,
+                atlas.width,
+                atlas.height,
+                "snap_atlas",
+                &tex_bgl,
             );
             atlas.mark_clean();
             let ibuf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -216,14 +252,22 @@ fn snapshot_opts(
         }
 
         // ── Icon pass — SVG icons rasterized + drawn as tinted quads ──
-        let icon_cmds = collect_icon_commands(&ui.tree, &poodle_jetstream_preview::theme_bridge::build_draw_theme(&JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)), 1.0);
+        let icon_cmds = collect_icon_commands(
+            &ui.tree,
+            &poodle_jetstream_preview::theme_bridge::build_draw_theme(
+                &JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE),
+            ),
+            1.0,
+        );
         if !icon_cmds.is_empty() {
             let mut icon_cache = IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../../gpui/preview/assets/icons"
             ));
-            let mut groups: std::collections::HashMap<(String, u32), Vec<jetstream_renderer::sprite::SpriteInstance>> =
-                std::collections::HashMap::new();
+            let mut groups: std::collections::HashMap<
+                (String, u32),
+                Vec<jetstream_renderer::sprite::SpriteInstance>,
+            > = std::collections::HashMap::new();
             for c in &icon_cmds {
                 groups.entry((c.name.clone(), c.size_px)).or_default().push(
                     jetstream_renderer::sprite::SpriteInstance {
@@ -247,13 +291,15 @@ fn snapshot_opts(
                 else {
                     continue;
                 };
-                let itex = GpuTexture::from_rgba8(&device, &queue, &pixels, iw, ih, "snap_icon", &tex_bgl);
+                let itex =
+                    GpuTexture::from_rgba8(&device, &queue, &pixels, iw, ih, "snap_icon", &tex_bgl);
                 let ibuf2 = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     label: Some("snap_icon_instances"),
                     contents: bytemuck::cast_slice(&instances),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
-                let mut enc = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+                let mut enc =
+                    device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
                 {
                     let mut pass = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("snap_icon_pass"),
@@ -261,7 +307,10 @@ fn snapshot_opts(
                             depth_slice: None,
                             view: &view,
                             resolve_target: None,
-                            ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Load,
+                                store: wgpu::StoreOp::Store,
+                            },
                         })],
                         depth_stencil_attachment: None,
                         timestamp_writes: None,
@@ -307,13 +356,19 @@ fn snapshot_opts(
                 rows_per_image: Some(h),
             },
         },
-        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
     );
     queue.submit(std::iter::once(enc2.finish()));
 
     let slice = staging.slice(..);
     let (tx, rx) = std::sync::mpsc::channel();
-    slice.map_async(wgpu::MapMode::Read, move |r| { let _ = tx.send(r); });
+    slice.map_async(wgpu::MapMode::Read, move |r| {
+        let _ = tx.send(r);
+    });
     let _ = device.poll(wgpu::PollType::wait_indefinitely());
     rx.recv().unwrap().unwrap();
 
@@ -324,7 +379,11 @@ fn snapshot_opts(
         let row = &data[(y * padded) as usize..(y * padded + w * bpp) as usize];
         for x in 0..w {
             let p = (x * bpp) as usize;
-            img.put_pixel(x, y, image::Rgba([row[p], row[p + 1], row[p + 2], row[p + 3]]));
+            img.put_pixel(
+                x,
+                y,
+                image::Rgba([row[p], row[p + 1], row[p + 2], row[p + 3]]),
+            );
         }
     }
     img.save(path).unwrap();
@@ -373,7 +432,10 @@ fn snap_all_specimens(only: &[String]) {
     // skips them: rendering them for a one-slug check is most of the cost the
     // filter exists to avoid, and the runner would compare them anyway.
     if !only.is_empty() {
-        eprintln!("snap: rendered {done} of {} requested specimen(s)", only.len());
+        eprintln!(
+            "snap: rendered {done} of {} requested specimen(s)",
+            only.len()
+        );
         return;
     }
 
@@ -386,7 +448,12 @@ fn snap_all_specimens(only: &[String]) {
         .flex_col()
         .bg(canvas)
         .child(landing);
-    snapshot(&landing_scene, 1200, 1400, "/tmp/poodle-specimens/_landing.png");
+    snapshot(
+        &landing_scene,
+        1200,
+        1400,
+        "/tmp/poodle-specimens/_landing.png",
+    );
 
     // Specimen page with view tabs (checkbox has Sizes + Densities sections).
     {
@@ -403,7 +470,12 @@ fn snap_all_specimens(only: &[String]) {
             .flex_col()
             .bg(canvas)
             .child(page);
-        snapshot(&scene, 1100, 900, "/tmp/poodle-specimens/_specimen-page.png");
+        snapshot(
+            &scene,
+            1100,
+            900,
+            "/tmp/poodle-specimens/_specimen-page.png",
+        );
     }
 
     // Full app shell (header chrome + sidebar + landing).
@@ -437,7 +509,8 @@ fn main() {
     // token elevation dialog / old shadow_md preset — to compare elevation rendering.
     let card = |label_shadow: i32| -> JsEl {
         let base = ui_element::div()
-            .w(170.0).h(90.0)
+            .w(170.0)
+            .h(90.0)
             .bg(panel)
             .rounded(12.0)
             .border(1.0)
@@ -452,11 +525,13 @@ fn main() {
 
     // Comparison row (shadows overlap — for relative hierarchy).
     let scene = ui_element::div()
-        .w(820.0).h(260.0)
+        .w(820.0)
+        .h(260.0)
         .flex_row()
         .items_center()
         .gap(30.0)
-        .pl(30.0).pr(30.0)
+        .pl(30.0)
+        .pr(30.0)
         .child(card(0)) // flat
         .child(card(1)) // elevation.overlay (token)
         .child(card(2)) // elevation.dialog (token)
@@ -465,7 +540,8 @@ fn main() {
 
     // Single isolated overlay card (no neighbour overlap) — clean shadow inspection.
     let solo = ui_element::div()
-        .w(420.0).h(300.0)
+        .w(420.0)
+        .h(300.0)
         .flex_row()
         .items_center()
         .justify_center()
@@ -474,22 +550,34 @@ fn main() {
 
     // Focus-ring test: two input-like focusable boxes; focus the first.
     let input_color = resolve_color(&theme, "color.background.input");
-    let field = || ui_element::div()
-        .w(220.0).h(40.0)
-        .bg(input_color)
-        .rounded(8.0)
-        .border(1.0)
-        .border_color(border)
-        .focusable();
+    let field = || {
+        ui_element::div()
+            .w(220.0)
+            .h(40.0)
+            .bg(input_color)
+            .rounded(8.0)
+            .border(1.0)
+            .border_color(border)
+            .focusable()
+    };
     let focus_scene = ui_element::div()
-        .w(540.0).h(120.0)
+        .w(540.0)
+        .h(120.0)
         .flex_row()
         .items_center()
         .gap(40.0)
         .pl(30.0)
-        .child(field())  // focused → should show focus ring
+        .child(field()) // focused → should show focus ring
         .child(field()); // unfocused → plain border
-    snapshot_opts(&focus_scene, 540, 120, "/tmp/poodle-snap-focus.png", true, None, 0.0);
+    snapshot_opts(
+        &focus_scene,
+        540,
+        120,
+        "/tmp/poodle-snap-focus.png",
+        true,
+        None,
+        0.0,
+    );
 
     // Gradient test: linear (white→transparent over red) + radial (cyan center → transparent).
     use glam::Vec4;
@@ -502,20 +590,34 @@ fn main() {
     // Layered like the color-picker saturation square: hue bg on parent, white→transparent
     // gradient on a child overlay (no bg) that composites over it.
     let lin_overlay = ui_element::div()
-        .absolute().inset_0()
+        .absolute()
+        .inset_0()
         .bg_gradient_linear(90.0, vec![(white.into(), 0.0), (white_t.into(), 1.0)]);
     let lin = ui_element::div()
-        .w(240.0).h(140.0).rounded(10.0)
-        .relative().overflow_hidden()
+        .w(240.0)
+        .h(140.0)
+        .rounded(10.0)
+        .relative()
+        .overflow_hidden()
         .bg(red)
         .child(lin_overlay); // expect: left=white → right=red
     let rad = ui_element::div()
-        .w(240.0).h(140.0).rounded(10.0)
+        .w(240.0)
+        .h(140.0)
+        .rounded(10.0)
         .bg(dark)
-        .bg_gradient_radial([0.3, 0.3], 0.75, vec![(cyan.into(), 0.0), (cyan_t.into(), 1.0)]); // cyan blob top-left
+        .bg_gradient_radial(
+            [0.3, 0.3],
+            0.75,
+            vec![(cyan.into(), 0.0), (cyan_t.into(), 1.0)],
+        ); // cyan blob top-left
     let grad_scene = ui_element::div()
-        .w(580.0).h(200.0)
-        .flex_row().items_center().gap(40.0).pl(30.0)
+        .w(580.0)
+        .h(200.0)
+        .flex_row()
+        .items_center()
+        .gap(40.0)
+        .pl(30.0)
         .child(lin)
         .child(rad);
     snapshot(&grad_scene, 580, 200, "/tmp/poodle-snap-gradient.png");
@@ -524,31 +626,62 @@ fn main() {
     // transparent + transparent→black overlays) and rainbow hue strip exercise gradients.
     let panel = resolve_color(&theme, "color.background.panel");
     let cp = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_color_picker(
-        &poodle_specs::ColorPickerSpec::new().with_value("#6366f1").with_open(true),
+        &poodle_specs::ColorPickerSpec::new()
+            .with_value("#6366f1")
+            .with_open(true),
         &theme,
     ));
     let cp_scene = ui_element::div()
-        .w(560.0).h(360.0).p(24.0).bg(panel).flex_row()
+        .w(560.0)
+        .h(360.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_row()
         .child(cp);
     snapshot(&cp_scene, 560, 360, "/tmp/poodle-snap-colorpicker.png");
 
     // Progress (determinate + indeterminate) — gradient fill bars (no bg → were invisible
     // before the gate fix).
-    let mk_prog = |spec| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_progress(spec, &theme));
+    let mk_prog = |spec| {
+        poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_progress(
+            spec, &theme,
+        ))
+    };
     let prog_scene = ui_element::div()
-        .w(420.0).h(120.0).p(24.0).bg(panel).flex_col().gap(20.0)
-        .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new().with_value(0.6))))
-        .child(ui_element::div().w(360.0).child(mk_prog(&poodle_specs::ProgressSpec::new())));
+        .w(420.0)
+        .h(120.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(20.0)
+        .child(
+            ui_element::div()
+                .w(360.0)
+                .child(mk_prog(&poodle_specs::ProgressSpec::new().with_value(0.6))),
+        )
+        .child(
+            ui_element::div()
+                .w(360.0)
+                .child(mk_prog(&poodle_specs::ProgressSpec::new())),
+        );
     snapshot(&prog_scene, 420, 120, "/tmp/poodle-snap-progress.png");
 
     // Text scene — sizes + weights + color, the canonical text-pass verification target.
     let ink = resolve_color(&theme, "color.text.primary");
     let muted = resolve_color(&theme, "color.text.tertiary");
     let row = |s: &str, size: f32, weight: u16, c: glam::Vec4| {
-        ui_element::label(s).text_size(size).text_weight(weight).text_color(c)
+        ui_element::label(s)
+            .text_size(size)
+            .text_weight(weight)
+            .text_color(c)
     };
     let text_scene = ui_element::div()
-        .w(460.0).h(200.0).p(24.0).bg(panel).flex_col().gap(12.0)
+        .w(460.0)
+        .h(200.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(12.0)
         .child(row("Heading 24 / 700", 24.0, 700, ink))
         .child(row("Body 16 / 400 — the quick brown fox", 16.0, 400, ink))
         .child(row("Medium 14 / 500", 14.0, 500, ink))
@@ -559,9 +692,19 @@ fn main() {
     use jetstream_ui::FontFamily;
     let s = "iiii MMMM 0000 — code()";
     let fam_scene = ui_element::div()
-        .w(460.0).h(120.0).p(24.0).bg(panel).flex_col().gap(16.0)
+        .w(460.0)
+        .h(120.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(16.0)
         .child(ui_element::label(s).text_size(18.0).text_color(ink)) // sans (default)
-        .child(ui_element::label(s).text_size(18.0).text_color(ink).font_family(FontFamily::Mono));
+        .child(
+            ui_element::label(s)
+                .text_size(18.0)
+                .text_color(ink)
+                .font_family(FontFamily::Mono),
+        );
     snapshot(&fam_scene, 460, 120, "/tmp/poodle-snap-fontfamily.png");
 
     // Real component spot-check: code block should render its source in mono.
@@ -573,16 +716,41 @@ fn main() {
         &theme,
     ));
     let code_scene = ui_element::div()
-        .w(460.0).h(160.0).p(24.0).bg(panel).flex_col().gap(10.0)
-        .child(ui_element::label("Source (expect monospace):").text_size(13.0).text_color(muted))
+        .w(460.0)
+        .h(160.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(10.0)
+        .child(
+            ui_element::label("Source (expect monospace):")
+                .text_size(13.0)
+                .text_color(muted),
+        )
         .child(code);
     snapshot(&code_scene, 460, 160, "/tmp/poodle-snap-code.png");
 
     // Letter-spacing: same eyebrow label normal vs 0.12em tracked (contract eyebrow value).
     let ls_scene = ui_element::div()
-        .w(460.0).h(120.0).p(24.0).bg(panel).flex_col().gap(18.0)
-        .child(ui_element::label("SECTION TITLE").text_size(13.0).text_weight(600).text_color(muted))
-        .child(ui_element::label("SECTION TITLE").text_size(13.0).text_weight(600).text_color(muted).letter_spacing_em(0.12));
+        .w(460.0)
+        .h(120.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(18.0)
+        .child(
+            ui_element::label("SECTION TITLE")
+                .text_size(13.0)
+                .text_weight(600)
+                .text_color(muted),
+        )
+        .child(
+            ui_element::label("SECTION TITLE")
+                .text_size(13.0)
+                .text_weight(600)
+                .text_color(muted)
+                .letter_spacing_em(0.12),
+        );
     snapshot(&ls_scene, 460, 120, "/tmp/poodle-snap-letterspacing.png");
 
     // Real component spot-check: eyebrow (uppercased + 0.12em tracked from its spec).
@@ -591,7 +759,11 @@ fn main() {
         &theme,
     ));
     let eb_scene = ui_element::div()
-        .w(460.0).h(90.0).p(24.0).bg(panel).flex_col()
+        .w(460.0)
+        .h(90.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
         .child(eb);
     snapshot(&eb_scene, 460, 90, "/tmp/poodle-snap-eyebrow.png");
 
@@ -600,15 +772,31 @@ fn main() {
     let surface = resolve_color(&theme, "color.background.surface");
     let row_hov = || {
         ui_element::div()
-            .w(400.0).h(48.0).rounded(8.0).bg(surface)
+            .w(400.0)
+            .h(48.0)
+            .rounded(8.0)
+            .bg(surface)
             .hover(move |s| s.bg(accent))
     };
     let hov_scene = ui_element::div()
-        .w(460.0).h(160.0).p(24.0).bg(panel).flex_col().gap(16.0)
-        .child(row_hov())  // y≈24..72 — pointer here → hover bg
+        .w(460.0)
+        .h(160.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(16.0)
+        .child(row_hov()) // y≈24..72 — pointer here → hover bg
         .child(row_hov()); // y≈88..136 — untouched
     // Pointer at (230, 48): over the first row.
-    snapshot_opts(&hov_scene, 460, 160, "/tmp/poodle-snap-hover.png", false, Some((230.0, 48.0, false)), 0.0);
+    snapshot_opts(
+        &hov_scene,
+        460,
+        160,
+        "/tmp/poodle-snap-hover.png",
+        false,
+        Some((230.0, 48.0, false)),
+        0.0,
+    );
 
     // Real component spot-check: menu (items call .hover(|s| s.bg(hover))); pointer over
     // the 2nd item should show the hover fill.
@@ -622,21 +810,44 @@ fn main() {
         &theme,
     ));
     let menu_scene = ui_element::div()
-        .w(320.0).h(180.0).p(20.0).bg(panel).flex_col().items_start()
+        .w(320.0)
+        .h(180.0)
+        .p(20.0)
+        .bg(panel)
+        .flex_col()
+        .items_start()
         .child(menu);
     // Pointer over the 2nd item ("Open…") — items start ~y20, ~32px each → ~y 68.
-    snapshot_opts(&menu_scene, 320, 180, "/tmp/poodle-snap-menuhover.png", false, Some((160.0, 68.0, false)), 0.0);
+    snapshot_opts(
+        &menu_scene,
+        320,
+        180,
+        "/tmp/poodle-snap-menuhover.png",
+        false,
+        Some((160.0, 68.0, false)),
+        0.0,
+    );
 
     // Border styles: solid / dashed / dotted (contract drop-zone / underline frames).
     use jetstream_ui::ui_element::BorderStyle;
     let bbox = |style| {
         ui_element::div()
-            .w(130.0).h(80.0).rounded(10.0)
+            .w(130.0)
+            .h(80.0)
+            .rounded(10.0)
             .bg(surface)
-            .border(2.0).border_color(accent).border_style(style)
+            .border(2.0)
+            .border_color(accent)
+            .border_style(style)
     };
     let border_scene = ui_element::div()
-        .w(520.0).h(140.0).p(24.0).bg(panel).flex_row().items_center().gap(24.0)
+        .w(520.0)
+        .h(140.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_row()
+        .items_center()
+        .gap(24.0)
         .child(bbox(BorderStyle::Solid))
         .child(bbox(BorderStyle::Dashed))
         .child(bbox(BorderStyle::Dotted));
@@ -648,65 +859,157 @@ fn main() {
         &theme,
     ));
     let es_scene = ui_element::div()
-        .w(420.0).h(200.0).p(24.0).bg(panel).flex_col()
+        .w(420.0)
+        .h(200.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
         .child(es);
     snapshot(&es_scene, 420, 200, "/tmp/poodle-snap-emptystate.png");
 
     // Multi-layer shadow: single token layer vs a 3-layer contract stack.
     use jetstream_ui::ui_element::BoxShadow;
     let blk = |a: f32| Vec4::new(0.0, 0.0, 0.0, a);
-    let single = ui_element::div().w(180.0).h(110.0).rounded(12.0).bg(panel)
+    let single = ui_element::div()
+        .w(180.0)
+        .h(110.0)
+        .rounded(12.0)
+        .bg(panel)
         .shadow(0.0, 8.0, 16.0, -2.0, blk(0.18));
-    let stacked = ui_element::div().w(180.0).h(110.0).rounded(12.0).bg(panel)
+    let stacked = ui_element::div()
+        .w(180.0)
+        .h(110.0)
+        .rounded(12.0)
+        .bg(panel)
         .shadow_layers(vec![
-            BoxShadow { offset_x: 0.0, offset_y: 1.0, blur: 2.0, spread: 0.0, color: blk(0.20) , inset: false },
-            BoxShadow { offset_x: 0.0, offset_y: 6.0, blur: 14.0, spread: -2.0, color: blk(0.16) , inset: false },
-            BoxShadow { offset_x: 0.0, offset_y: 18.0, blur: 36.0, spread: -6.0, color: blk(0.18) , inset: false },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: 1.0,
+                blur: 2.0,
+                spread: 0.0,
+                color: blk(0.20),
+                inset: false,
+            },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: 6.0,
+                blur: 14.0,
+                spread: -2.0,
+                color: blk(0.16),
+                inset: false,
+            },
+            BoxShadow {
+                offset_x: 0.0,
+                offset_y: 18.0,
+                blur: 36.0,
+                spread: -6.0,
+                color: blk(0.18),
+                inset: false,
+            },
         ]);
     let ml_scene = ui_element::div()
-        .w(520.0).h(220.0).flex_row().items_center().justify_center().gap(60.0)
+        .w(520.0)
+        .h(220.0)
+        .flex_row()
+        .items_center()
+        .justify_center()
+        .gap(60.0)
         .bg(Vec4::new(0.92, 0.93, 0.95, 1.0))
         .child(single)
         .child(stacked);
     snapshot(&ml_scene, 520, 220, "/tmp/poodle-snap-multilayer.png");
 
     // Inset shadows: hard inner ring (selection ring) + soft inner shadow.
-    let ring = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+    let ring = ui_element::div()
+        .w(160.0)
+        .h(90.0)
+        .rounded(10.0)
+        .bg(surface)
         .shadow_layers(vec![BoxShadow {
-            offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: 2.5, color: accent, inset: true,
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: 2.5,
+            color: accent,
+            inset: true,
         }]);
-    let inner = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+    let inner = ui_element::div()
+        .w(160.0)
+        .h(90.0)
+        .rounded(10.0)
+        .bg(surface)
         .shadow_layers(vec![BoxShadow {
-            offset_x: 0.0, offset_y: 0.0, blur: 14.0, spread: 0.0, color: blk(0.55), inset: true,
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 14.0,
+            spread: 0.0,
+            color: blk(0.55),
+            inset: true,
         }]);
     // Offset highlight: inset 0 1px 0 white@45% (top inner highlight, à la button).
-    let hilite = ui_element::div().w(160.0).h(90.0).rounded(10.0).bg(surface)
+    let hilite = ui_element::div()
+        .w(160.0)
+        .h(90.0)
+        .rounded(10.0)
+        .bg(surface)
         .shadow_layers(vec![BoxShadow {
-            offset_x: 0.0, offset_y: 3.0, blur: 0.0, spread: 0.0,
-            color: Vec4::new(1.0, 1.0, 1.0, 0.6), inset: true,
+            offset_x: 0.0,
+            offset_y: 3.0,
+            blur: 0.0,
+            spread: 0.0,
+            color: Vec4::new(1.0, 1.0, 1.0, 0.6),
+            inset: true,
         }]);
     let inset_scene = ui_element::div()
-        .w(640.0).h(150.0).p(24.0).bg(panel).flex_row().items_center().gap(36.0)
+        .w(640.0)
+        .h(150.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_row()
+        .items_center()
+        .gap(36.0)
         .child(ring)
         .child(inner)
         .child(hilite);
     snapshot(&inset_scene, 640, 150, "/tmp/poodle-snap-inset.png");
 
     // Real component spot-check: list-card highlighted → inset accent ring.
-    let lc = |hl: bool| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_list_card(
-        &poodle_specs::ListCardSpec::new().with_title("Project Alpha").with_highlighted(hl),
-        &theme,
-    ));
+    let lc = |hl: bool| {
+        poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_list_card(
+            &poodle_specs::ListCardSpec::new()
+                .with_title("Project Alpha")
+                .with_highlighted(hl),
+            &theme,
+        ))
+    };
     let lc_scene = ui_element::div()
-        .w(460.0).h(200.0).p(24.0).bg(panel).flex_col().gap(16.0)
-        .child(lc(true))   // highlighted → inset accent ring
+        .w(460.0)
+        .h(200.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
+        .gap(16.0)
+        .child(lc(true)) // highlighted → inset accent ring
         .child(lc(false)); // resting
     snapshot(&lc_scene, 460, 200, "/tmp/poodle-snap-listcard.png");
 
     // Grayscale filter: same accent box in color vs fully desaturated.
-    let gbox = |g: f32| ui_element::div().w(150.0).h(90.0).rounded(10.0).bg(accent).grayscale(g);
+    let gbox = |g: f32| {
+        ui_element::div()
+            .w(150.0)
+            .h(90.0)
+            .rounded(10.0)
+            .bg(accent)
+            .grayscale(g)
+    };
     let gray_scene = ui_element::div()
-        .w(420.0).h(140.0).p(24.0).bg(panel).flex_row().items_center().gap(40.0)
+        .w(420.0)
+        .h(140.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_row()
+        .items_center()
+        .gap(40.0)
         .child(gbox(0.0))
         .child(gbox(1.0));
     snapshot(&gray_scene, 420, 140, "/tmp/poodle-snap-grayscale.png");
@@ -725,16 +1028,31 @@ fn main() {
         &theme,
     ));
     let tabs_scene = ui_element::div()
-        .w(460.0).h(110.0).p(24.0).bg(panel).flex_col()
+        .w(460.0)
+        .h(110.0)
+        .p(24.0)
+        .bg(panel)
+        .flex_col()
         .child(tabs);
     snapshot(&tabs_scene, 460, 110, "/tmp/poodle-snap-tabsdrop.png");
 
     // Button treatment shadows: primary (inset highlight + drop) / secondary (highlight) / ghost.
     use poodle_specs::ButtonVariant;
-    let mkbtn = |v: ButtonVariant| poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_button(
-        &poodle_specs::ButtonSpec::new().with_label("Save").with_variant(v), &theme));
+    let mkbtn = |v: ButtonVariant| {
+        poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_button(
+            &poodle_specs::ButtonSpec::new()
+                .with_label("Save")
+                .with_variant(v),
+            &theme,
+        ))
+    };
     let btn_scene = ui_element::div()
-        .w(460.0).h(110.0).p(24.0).flex_row().items_center().gap(20.0)
+        .w(460.0)
+        .h(110.0)
+        .p(24.0)
+        .flex_row()
+        .items_center()
+        .gap(20.0)
         .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
         .child(mkbtn(ButtonVariant::Primary))
         .child(mkbtn(ButtonVariant::Secondary))
@@ -743,9 +1061,15 @@ fn main() {
 
     // Treatment spot-check: switch (track inset highlight + thumb outset drop), on light bg.
     let sw = poodle_jetstream_preview::jsx::jel(poodle_jetstream_preview::compat::js_switch(
-        &poodle_specs::SwitchSpec::new().with_checked(true), &theme));
+        &poodle_specs::SwitchSpec::new().with_checked(true),
+        &theme,
+    ));
     let sw_scene = ui_element::div()
-        .w(300.0).h(100.0).p(28.0).flex_row().items_center()
+        .w(300.0)
+        .h(100.0)
+        .p(28.0)
+        .flex_row()
+        .items_center()
         .bg(Vec4::new(0.90, 0.91, 0.93, 1.0))
         .child(sw);
     snapshot(&sw_scene, 300, 100, "/tmp/poodle-snap-switch.png");
@@ -758,7 +1082,12 @@ fn main() {
         vec![poodle_jetstream_preview::nel::div().w(180.0).h(70.0)],
     ));
     let card_scene = ui_element::div()
-        .w(320.0).h(180.0).p(36.0).flex_row().items_center().justify_center()
+        .w(320.0)
+        .h(180.0)
+        .p(36.0)
+        .flex_row()
+        .items_center()
+        .justify_center()
         .bg(Vec4::new(0.91, 0.92, 0.94, 1.0))
         .child(card);
     snapshot(&card_scene, 320, 180, "/tmp/poodle-snap-card.png");
@@ -771,7 +1100,11 @@ fn main() {
         ui_element::div().w(40.0).h(40.0).bg(c)
     };
     let color_scene = ui_element::div()
-        .w(200.0).h(50.0).flex_row().gap(8.0).p(5.0)
+        .w(200.0)
+        .h(50.0)
+        .flex_row()
+        .gap(8.0)
+        .p(5.0)
         .child(swatch("color.background.canvas"))
         .child(swatch("color.background.surface"))
         .child(swatch("color.background.panel"))
@@ -788,10 +1121,26 @@ fn main() {
             &theme,
         ));
         ui_element::div()
-            .w(160.0).h(160.0).flex_row().items_center().justify_center()
+            .w(160.0)
+            .h(160.0)
+            .flex_row()
+            .items_center()
+            .justify_center()
             .bg(Vec4::new(0.10, 0.11, 0.13, 1.0))
             .child(sp)
     };
-    snapshot_at(&spinner_scene(), 160, 160, "/tmp/poodle-snap-spin-t0.png", 0.001);
-    snapshot_at(&spinner_scene(), 160, 160, "/tmp/poodle-snap-spin-t02.png", 0.2);
+    snapshot_at(
+        &spinner_scene(),
+        160,
+        160,
+        "/tmp/poodle-snap-spin-t0.png",
+        0.001,
+    );
+    snapshot_at(
+        &spinner_scene(),
+        160,
+        160,
+        "/tmp/poodle-snap-spin-t02.png",
+        0.2,
+    );
 }

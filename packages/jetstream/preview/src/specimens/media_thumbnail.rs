@@ -1,8 +1,8 @@
 //! MediaThumbnail specimen — framed media preview with state posture.
 
+use crate::compat::js_media_thumbnail;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_media_thumbnail;
 
 use poodle_specs::{
     AspectRatio, MediaFit, MediaFrameWidth, MediaKind, MediaPresentation, MediaState,

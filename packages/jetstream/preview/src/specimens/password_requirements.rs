@@ -1,9 +1,9 @@
 //! PasswordRequirements specimen — met/unmet rules, all met, none met,
 //! mixed, loading, error, empty, and the size ladder.
 
+use crate::compat::js_password_requirements;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_password_requirements;
 
 use poodle_specs::{ControlSize, PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
@@ -100,9 +100,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Empty (no policy)",
             secondary,
-            div()
-                .w(320.0)
-                .child(js_password_requirements(&PasswordRequirementsSpec::new(), theme)),
+            div().w(320.0).child(js_password_requirements(
+                &PasswordRequirementsSpec::new(),
+                theme,
+            )),
         ))
         // Size ladder — xs → xl.
         .child(group("Sizes", secondary, size_ladder))

@@ -1,9 +1,9 @@
 //! PageHeader specimen — page-level title and action region.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::{js_page_header, js_page_header_with_slots};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, PageHeaderSpec, StatusTone};
 

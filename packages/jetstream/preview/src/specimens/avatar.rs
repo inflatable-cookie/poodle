@@ -4,9 +4,9 @@
 //! resolves the fallback (initials → image when `src` set), shape, tone, and
 //! size from tokens. No hand-rolled circles.
 
+use crate::compat::js_avatar;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_avatar;
 
 use poodle_specs::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 
@@ -94,23 +94,33 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             row(vec![
                 js_avatar(
-                    &AvatarSpec::new().with_initials("XS").with_size(AvatarSize::Xs),
+                    &AvatarSpec::new()
+                        .with_initials("XS")
+                        .with_size(AvatarSize::Xs),
                     theme,
                 ),
                 js_avatar(
-                    &AvatarSpec::new().with_initials("SM").with_size(AvatarSize::Sm),
+                    &AvatarSpec::new()
+                        .with_initials("SM")
+                        .with_size(AvatarSize::Sm),
                     theme,
                 ),
                 js_avatar(
-                    &AvatarSpec::new().with_initials("MD").with_size(AvatarSize::Md),
+                    &AvatarSpec::new()
+                        .with_initials("MD")
+                        .with_size(AvatarSize::Md),
                     theme,
                 ),
                 js_avatar(
-                    &AvatarSpec::new().with_initials("LG").with_size(AvatarSize::Lg),
+                    &AvatarSpec::new()
+                        .with_initials("LG")
+                        .with_size(AvatarSize::Lg),
                     theme,
                 ),
                 js_avatar(
-                    &AvatarSpec::new().with_initials("XL").with_size(AvatarSize::Xl),
+                    &AvatarSpec::new()
+                        .with_initials("XL")
+                        .with_size(AvatarSize::Xl),
                     theme,
                 ),
             ]),

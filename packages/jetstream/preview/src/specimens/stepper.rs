@@ -5,11 +5,13 @@
 //! why `status` is a property of the step.
 
 use crate::app_state::AppState;
+use crate::compat::js_stepper;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_stepper;
 
-use poodle_specs::{ControlDensity, ControlSize, StepStatus, StepperSpec, StepperStep, Orientation};
+use poodle_specs::{
+    ControlDensity, ControlSize, Orientation, StepStatus, StepperSpec, StepperStep,
+};
 
 pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -60,12 +62,16 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     div()
         .flex_col()
         .gap(24.0)
-        .child(group("Default", secondary, js_stepper(
-            &StepperSpec::new(wizard.clone())
-                .with_value("categories")
-                .with_aria_label("DAW sync steps"),
-            theme,
-        )))
+        .child(group(
+            "Default",
+            secondary,
+            js_stepper(
+                &StepperSpec::new(wizard.clone())
+                    .with_value("categories")
+                    .with_aria_label("DAW sync steps"),
+                theme,
+            ),
+        ))
         .child(group("Vertical", secondary, {
             let mut el = js_stepper(
                 &StepperSpec::new(wizard.clone())
@@ -103,28 +109,46 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             )
             .w(480.0)
         }))
-        .child(group("Working", secondary, js_stepper(
-            &StepperSpec::new(working)
-                .with_value("extract")
-                .with_aria_label("Import progress"),
-            theme,
-        )))
-        .child(group("Failed", secondary, js_stepper(
-            &StepperSpec::new(failed)
-                .with_value("gate")
-                .with_aria_label("Pipeline steps"),
-            theme,
-        )))
-        .child(group("Re-run", secondary, js_stepper(
-            &StepperSpec::new(completed)
-                .with_value("read")
-                .with_show_rerun(true)
-                .with_aria_label("Completed pipeline"),
-            theme,
-        )))
+        .child(group(
+            "Working",
+            secondary,
+            js_stepper(
+                &StepperSpec::new(working)
+                    .with_value("extract")
+                    .with_aria_label("Import progress"),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Failed",
+            secondary,
+            js_stepper(
+                &StepperSpec::new(failed)
+                    .with_value("gate")
+                    .with_aria_label("Pipeline steps"),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Re-run",
+            secondary,
+            js_stepper(
+                &StepperSpec::new(completed)
+                    .with_value("read")
+                    .with_show_rerun(true)
+                    .with_aria_label("Completed pipeline"),
+                theme,
+            ),
+        ))
         .child(group("Sizes", secondary, {
             let mut column = div().flex_col().gap(8.0);
-            for size in [ControlSize::Xs, ControlSize::Sm, ControlSize::Md, ControlSize::Lg, ControlSize::Xl] {
+            for size in [
+                ControlSize::Xs,
+                ControlSize::Sm,
+                ControlSize::Md,
+                ControlSize::Lg,
+                ControlSize::Xl,
+            ] {
                 column = column.child(js_stepper(
                     &StepperSpec::new(wizard.clone())
                         .with_value("categories")
@@ -137,7 +161,11 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
         }))
         .child(group("Densities", secondary, {
             let mut column = div().flex_col().gap(8.0);
-            for density in [ControlDensity::Compact, ControlDensity::Default, ControlDensity::Comfortable] {
+            for density in [
+                ControlDensity::Compact,
+                ControlDensity::Default,
+                ControlDensity::Comfortable,
+            ] {
                 column = column.child(js_stepper(
                     &StepperSpec::new(wizard.clone())
                         .with_value("categories")
@@ -148,13 +176,17 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             }
             column
         }))
-        .child(group("Disabled", secondary, js_stepper(
-            &StepperSpec::new(wizard)
-                .with_value("categories")
-                .with_disabled(true)
-                .with_aria_label("Disabled steps"),
-            theme,
-        )))
+        .child(group(
+            "Disabled",
+            secondary,
+            js_stepper(
+                &StepperSpec::new(wizard)
+                    .with_value("categories")
+                    .with_disabled(true)
+                    .with_aria_label("Disabled steps"),
+                theme,
+            ),
+        ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {

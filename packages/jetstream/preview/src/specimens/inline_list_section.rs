@@ -5,12 +5,12 @@
 //! empty state, and an unframed (no-card) variant. Rows compose real `js_text` +
 //! `js_pill`; header actions are real `js_icon_button`s — no hand-rolled boxes.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_icon_button;
 use crate::compat::js_inline_list_section;
 use crate::compat::js_pill;
 use crate::compat::js_text;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonVariant, IconButtonSpec, InlineListSectionSpec, PillSpec, PillTone, TextSpec, TextWeight,
@@ -42,9 +42,13 @@ fn row(name: &str, status: &str, theme: &JetstreamThemeProvider) -> El {
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(20.0)
+    div()
+        .flex_col()
+        .gap(20.0)
         // -- Framed — count pill and header action --
-        .child(group("Framed — count pill and header action", secondary,
+        .child(group(
+            "Framed — count pill and header action",
+            secondary,
             js_inline_list_section(
                 &InlineListSectionSpec::new("Versions").with_count("3"),
                 theme,
@@ -63,7 +67,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // -- Header actions (no count) --
-        .child(group("Header actions (no count)", secondary,
+        .child(group(
+            "Header actions (no count)",
+            secondary,
             js_inline_list_section(
                 &InlineListSectionSpec::new("Usages"),
                 theme,
@@ -81,7 +87,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // -- Empty state --
-        .child(group("Empty state", secondary,
+        .child(group(
+            "Empty state",
+            secondary,
             js_inline_list_section(
                 &InlineListSectionSpec::new("Aliases").with_empty_message("No aliases yet."),
                 theme,
@@ -90,7 +98,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // -- Unframed (no card) --
-        .child(group("Unframed (no card)", secondary,
+        .child(group(
+            "Unframed (no card)",
+            secondary,
             js_inline_list_section(
                 &InlineListSectionSpec::new("References")
                     .with_count("2")
@@ -106,7 +116,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

@@ -7,9 +7,9 @@
 //! `js_card_toggle_group`. The spec carries no `columns`/`count` fields, so those
 //! are not exercised here (shared-spec gap noted in the parity doc).
 
+use crate::compat::js_card_toggle_group;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_card_toggle_group;
 
 use poodle_specs::{CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize};
 
@@ -93,7 +93,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             theme,
         ));
     }
-    root = root.child(group("Sizes (xs / sm / md / lg / xl)", secondary, sizes_row));
+    root = root.child(group(
+        "Sizes (xs / sm / md / lg / xl)",
+        secondary,
+        sizes_row,
+    ));
 
     // --- Densities (compact / default / comfortable) ---
     let mut densities_row = div().flex_col().gap(12.0);

@@ -1,8 +1,8 @@
 //! ModelPicker specimen — combined model + capability-axis picker.
 
+use crate::compat::js_model_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_model_picker;
 
 use poodle_specs::{
     ControlDensity, ControlSize, ModelAxisBinding, ModelAxisControl, ModelAxisOption,
@@ -186,7 +186,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_model_picker(&base().with_variant(ModelPickerVariant::Outlined), theme),
         ))
-
         .child(group(
             "No model selected",
             secondary,

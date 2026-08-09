@@ -15,7 +15,7 @@ use jetstream_renderer::camera::CameraGpu;
 use jetstream_renderer::pipeline::create_sprite_pipeline;
 use jetstream_renderer::shader::create_sprite_shader;
 use jetstream_renderer::sprite::{
-    SpriteInstance, QUAD_INDICES as SPRITE_QUAD_INDICES, QUAD_VERTICES as SPRITE_QUAD_VERTICES,
+    QUAD_INDICES as SPRITE_QUAD_INDICES, QUAD_VERTICES as SPRITE_QUAD_VERTICES, SpriteInstance,
 };
 use jetstream_renderer::texture::GpuTexture;
 use jetstream_renderer::ui_pass::UiPass;
@@ -187,21 +187,21 @@ impl PreviewState {
             &texture_bgl,
         );
 
-        let text_quad_vbo =
-            gpu.device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("text_quad_vbo"),
-                    contents: bytemuck::cast_slice(SPRITE_QUAD_VERTICES),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
+        let text_quad_vbo = gpu
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("text_quad_vbo"),
+                contents: bytemuck::cast_slice(SPRITE_QUAD_VERTICES),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
-        let text_quad_ibo =
-            gpu.device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("text_quad_ibo"),
-                    contents: bytemuck::cast_slice(SPRITE_QUAD_INDICES),
-                    usage: wgpu::BufferUsages::INDEX,
-                });
+        let text_quad_ibo = gpu
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("text_quad_ibo"),
+                contents: bytemuck::cast_slice(SPRITE_QUAD_INDICES),
+                usage: wgpu::BufferUsages::INDEX,
+            });
 
         let text_instance_capacity = MAX_TEXT_INSTANCES;
         let text_instance_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
@@ -248,7 +248,12 @@ impl PreviewState {
         };
 
         // Initial build
-        log::info!("Scale factor: {}, logical: {}×{}", scale_factor, logical_w, logical_h);
+        log::info!(
+            "Scale factor: {}, logical: {}×{}",
+            scale_factor,
+            logical_w,
+            logical_h
+        );
         state.rebuild_shell();
         state
     }
@@ -297,9 +302,7 @@ impl PreviewState {
 
         // Pre-create glyph atlases.
         let scale = self.game_ui.scale_factor;
-        let all_logical_sizes: &[f32] = &[
-            9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0,
-        ];
+        let all_logical_sizes: &[f32] = &[9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0];
         if let Some(ref mut atlases) = self.game_ui.text_atlases {
             for &sz in all_logical_sizes {
                 let _ = atlases.get_or_create(sz);
@@ -324,11 +327,8 @@ impl PreviewState {
     /// visible text gets shaped by cosmic-text, making scroll fast.
     fn rebuild_text_cache(&mut self) {
         let scale = self.game_ui.scale_factor;
-        let draw_commands = collect_draw_commands(
-            &self.game_ui.tree,
-            &self.game_ui.focus,
-            &self.draw_theme,
-        );
+        let draw_commands =
+            collect_draw_commands(&self.game_ui.tree, &self.game_ui.focus, &self.draw_theme);
         let clip_groups = group_by_clip_rect(&draw_commands);
         let phys_w = self.game_ui.screen_width * scale;
         let phys_h = self.game_ui.screen_height * scale;
@@ -338,7 +338,8 @@ impl PreviewState {
             let scissor = group.scissor_physical(scale, phys_w, phys_h);
 
             // Viewport-cull: skip text commands outside the clip rect.
-            let visible_commands: Vec<&UiDrawCommand> = group.commands
+            let visible_commands: Vec<&UiDrawCommand> = group
+                .commands
                 .iter()
                 .filter(|cmd| {
                     if cmd.text.is_none() {
@@ -394,11 +395,7 @@ impl PreviewState {
         }
     }
 
-
-    fn update_and_render(
-        &mut self,
-        frame: &jetstream_platform::PlatformFrame<'_>,
-    ) -> ControlFlow {
+    fn update_and_render(&mut self, frame: &jetstream_platform::PlatformFrame<'_>) -> ControlFlow {
         // Handle window resize.
         // frame.window_width/height are already logical pixels.
         let logical_w = frame.window_width as f32;
@@ -617,7 +614,9 @@ impl PreviewState {
         }
 
         // Process UI input (keyboard/gamepad via InputSystem)
-        let ui_events = self.game_ui.process_input(&self.input, self.mouse_x, self.mouse_y);
+        let ui_events = self
+            .game_ui
+            .process_input(&self.input, self.mouse_x, self.mouse_y);
 
         // Record the pointer so `.hover()` / `.active()` style overrides render this
         // frame (collect_draw_commands reads the hovered/pressed node off the tree).
@@ -670,7 +669,10 @@ impl PreviewState {
         for event in &frame.events {
             if let jetstream_platform::PlatformEvent::AccessibilityAction(request) = event {
                 let mut ui_events = Vec::new();
-                if self.game_ui.handle_accessibility_action(request, &mut ui_events) {
+                if self
+                    .game_ui
+                    .handle_accessibility_action(request, &mut ui_events)
+                {
                     self.app.dirty = true;
                 }
             }
@@ -718,17 +720,16 @@ impl PreviewState {
         // ── Render ──
         if let Some(surface_view) = frame.surface_view {
             let scale = frame.scale_factor as f32;
-            let draw_commands = collect_draw_commands(
-                &self.game_ui.tree,
-                &self.game_ui.focus,
-                &self.draw_theme,
-            );
+            let draw_commands =
+                collect_draw_commands(&self.game_ui.tree, &self.game_ui.focus, &self.draw_theme);
 
-            let mut encoder = frame.gpu.device.create_command_encoder(
-                &wgpu::CommandEncoderDescriptor {
-                    label: Some("poodle_preview_encoder"),
-                },
-            );
+            let mut encoder =
+                frame
+                    .gpu
+                    .device
+                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                        label: Some("poodle_preview_encoder"),
+                    });
 
             // 1) Clear pass
             {
@@ -777,9 +778,8 @@ impl PreviewState {
 
             // 3) Text sprite passes — use cached instances (no cosmic-text per frame)
             // Pre-ensure all atlas textures exist.
-            let font_sizes_needed: Vec<f32> = self.cached_text.iter()
-                .map(|(_, sz, _)| *sz)
-                .collect();
+            let font_sizes_needed: Vec<f32> =
+                self.cached_text.iter().map(|(_, sz, _)| *sz).collect();
             for sz in &font_sizes_needed {
                 self.ensure_atlas_texture(frame.gpu, *sz);
             }
@@ -793,12 +793,15 @@ impl PreviewState {
                 // Upload instances — need to reborrow self mutably.
                 if instances.len() > self.text_instance_capacity {
                     self.text_instance_capacity = instances.len().next_power_of_two();
-                    self.text_instance_buffer = frame.gpu.device.create_buffer(&wgpu::BufferDescriptor {
-                        label: Some("text_instance_buffer"),
-                        size: (self.text_instance_capacity * std::mem::size_of::<SpriteInstance>()) as u64,
-                        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-                        mapped_at_creation: false,
-                    });
+                    self.text_instance_buffer =
+                        frame.gpu.device.create_buffer(&wgpu::BufferDescriptor {
+                            label: Some("text_instance_buffer"),
+                            size: (self.text_instance_capacity
+                                * std::mem::size_of::<SpriteInstance>())
+                                as u64,
+                            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                            mapped_at_creation: false,
+                        });
                 }
                 frame.gpu.queue.write_buffer(
                     &self.text_instance_buffer,
@@ -806,11 +809,18 @@ impl PreviewState {
                     bytemuck::cast_slice(instances),
                 );
 
-                if let Some(atlas_idx) = self.text_atlas_textures
+                if let Some(atlas_idx) = self
+                    .text_atlas_textures
                     .iter()
                     .position(|(s, _)| (*s - scaled_size).abs() < 0.5)
                 {
-                    self.render_text_batch(frame.gpu, surface_view, instance_count, atlas_idx, scissor);
+                    self.render_text_batch(
+                        frame.gpu,
+                        surface_view,
+                        instance_count,
+                        atlas_idx,
+                        scissor,
+                    );
                 }
             }
 
@@ -931,18 +941,16 @@ impl PreviewState {
                     self.app.set_section(section);
                 }
             }
-            shell::ShellAction::SelectSidebarItem(idx) => {
-                match self.app.section {
-                    Section::Demo => {
-                        if let Some(&screen) = DemoScreen::ALL.get(idx) {
-                            self.app.set_demo_screen(screen);
-                        }
-                    }
-                    _ => {
-                        self.app.set_active_component(Some(idx));
+            shell::ShellAction::SelectSidebarItem(idx) => match self.app.section {
+                Section::Demo => {
+                    if let Some(&screen) = DemoScreen::ALL.get(idx) {
+                        self.app.set_demo_screen(screen);
                     }
                 }
-            }
+                _ => {
+                    self.app.set_active_component(Some(idx));
+                }
+            },
             shell::ShellAction::SelectTheme(idx) => {
                 if let Some(&preset) = ThemePreset::ALL.get(idx) {
                     self.app.set_theme(preset);
@@ -965,14 +973,12 @@ impl PreviewState {
                     self.app.set_control_size(size);
                 }
             }
-            shell::ShellAction::ToggleProbe(idx) => {
-                match idx {
-                    0 => self.app.toggle_disabled(),
-                    1 => self.app.toggle_invalid(),
-                    2 => self.app.toggle_busy(),
-                    _ => {}
-                }
-            }
+            shell::ShellAction::ToggleProbe(idx) => match idx {
+                0 => self.app.toggle_disabled(),
+                1 => self.app.toggle_invalid(),
+                2 => self.app.toggle_busy(),
+                _ => {}
+            },
             shell::ShellAction::TreeSelect(value) => {
                 self.app.tree.select_only(&value);
                 self.app.dirty = true;
@@ -999,18 +1005,16 @@ impl PreviewState {
     /// Upload GPU textures for all physical-sized atlases that don't yet have
     /// a corresponding GPU texture, or re-upload any atlas whose pixel data
     /// has changed (dirty flag from dynamic glyph rasterization).
-    fn sync_atlas_textures(
-        &mut self,
-        gpu: &jetstream_platform::GpuContext,
-    ) {
+    fn sync_atlas_textures(&mut self, gpu: &jetstream_platform::GpuContext) {
         let scale = self.game_ui.scale_factor;
-        let all_logical_sizes: &[f32] = &[
-            9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0,
-        ];
+        let all_logical_sizes: &[f32] = &[9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0];
         if let Some(ref mut atlases) = self.game_ui.text_atlases {
             for &sz in all_logical_sizes {
                 let phys = (sz * scale).round().max(1.0);
-                let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - phys).abs() < 0.5);
+                let existing_idx = self
+                    .text_atlas_textures
+                    .iter()
+                    .position(|(s, _)| (*s - phys).abs() < 0.5);
                 if let Some(atlas) = atlases.get_mut(phys)
                     && (atlas.dirty || existing_idx.is_none())
                 {
@@ -1029,7 +1033,10 @@ impl PreviewState {
                     } else {
                         log::info!(
                             "Uploaded atlas {}px (logical {}pt) — {}×{}",
-                            phys, sz, atlas.width, atlas.height,
+                            phys,
+                            sz,
+                            atlas.width,
+                            atlas.height,
                         );
                         self.text_atlas_textures.push((phys, gpu_tex));
                     }
@@ -1039,15 +1046,13 @@ impl PreviewState {
         }
     }
 
-
     /// Ensure a GPU texture exists for the given scaled font size, creating it
     /// from the TextAtlasSet if needed. Also re-uploads if the atlas is dirty.
-    fn ensure_atlas_texture(
-        &mut self,
-        gpu: &jetstream_platform::GpuContext,
-        scaled_size: f32,
-    ) {
-        let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - scaled_size).abs() < 0.5);
+    fn ensure_atlas_texture(&mut self, gpu: &jetstream_platform::GpuContext, scaled_size: f32) {
+        let existing_idx = self
+            .text_atlas_textures
+            .iter()
+            .position(|(s, _)| (*s - scaled_size).abs() < 0.5);
 
         if let Some(ref mut atlases) = self.game_ui.text_atlases
             && let Some(atlas) = atlases.get_mut(scaled_size)
@@ -1068,7 +1073,9 @@ impl PreviewState {
                 } else {
                     log::info!(
                         "Uploaded new text atlas: {}px ({}×{})",
-                        scaled_size, atlas.width, atlas.height,
+                        scaled_size,
+                        atlas.width,
+                        atlas.height,
                     );
                     self.text_atlas_textures.push((scaled_size, gpu_tex));
                 }
@@ -1154,7 +1161,9 @@ impl PreviewState {
         }
 
         for (key, instances) in groups {
-            let Some(tex) = self.icon_textures.get(&key) else { continue };
+            let Some(tex) = self.icon_textures.get(&key) else {
+                continue;
+            };
             if instances.len() > self.text_instance_capacity {
                 continue; // absurd icon count; skip rather than realloc mid-pass
             }
@@ -1211,17 +1220,17 @@ impl PreviewState {
     ) {
         let atlas_texture = &self.text_atlas_textures[atlas_idx].1;
 
-        let mut encoder =
-            gpu.device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("text_encoder"),
-                });
+        let mut encoder = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("text_encoder"),
+            });
 
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("text_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                        depth_slice: None,
+                    depth_slice: None,
                     view: surface_view,
                     resolve_target: None,
                     ops: wgpu::Operations {
@@ -1232,7 +1241,7 @@ impl PreviewState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
-                    multiview_mask: None,
+                multiview_mask: None,
             });
 
             if let Some([sx, sy, sw, sh]) = scissor {
@@ -1245,11 +1254,7 @@ impl PreviewState {
             pass.set_vertex_buffer(0, self.text_quad_vbo.slice(..));
             pass.set_vertex_buffer(1, self.text_instance_buffer.slice(..));
             pass.set_index_buffer(self.text_quad_ibo.slice(..), wgpu::IndexFormat::Uint16);
-            pass.draw_indexed(
-                0..SPRITE_QUAD_INDICES.len() as u32,
-                0,
-                0..instance_count,
-            );
+            pass.draw_indexed(0..SPRITE_QUAD_INDICES.len() as u32, 0, 0..instance_count);
         }
 
         gpu.queue.submit(std::iter::once(encoder.finish()));
@@ -1330,7 +1335,8 @@ impl PreviewState {
             let instance_count = instances.len() as u32;
             self.upload_text_instances(gpu, &instances);
 
-            if let Some(atlas_idx) = self.text_atlas_textures
+            if let Some(atlas_idx) = self
+                .text_atlas_textures
                 .iter()
                 .position(|(s, _)| (*s - *scaled_size).abs() < 0.5)
             {
@@ -1381,25 +1387,22 @@ impl PreviewState {
         let readback_view = readback_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         // Re-render the current frame into the readback texture at 1× scale.
-        let draw_commands = collect_draw_commands(
-            &self.game_ui.tree,
-            &self.game_ui.focus,
-            &self.draw_theme,
-        );
+        let draw_commands =
+            collect_draw_commands(&self.game_ui.tree, &self.game_ui.focus, &self.draw_theme);
         let quad_instances = convert_draw_commands_scaled(&draw_commands, 1.0);
 
-        let mut encoder =
-            gpu.device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("screenshot_encoder"),
-                });
+        let mut encoder = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("screenshot_encoder"),
+            });
 
         // Clear.
         {
             let _clear = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("screenshot_clear"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                        depth_slice: None,
+                    depth_slice: None,
                     view: &readback_view,
                     resolve_target: None,
                     ops: wgpu::Operations {
@@ -1410,7 +1413,7 @@ impl PreviewState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
-                    multiview_mask: None,
+                multiview_mask: None,
             });
         }
 
@@ -1439,11 +1442,11 @@ impl PreviewState {
         // The next frame's resize handler will correct this if needed.
 
         // Copy texture → staging buffer.
-        let mut encoder =
-            gpu.device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("screenshot_copy_encoder"),
-                });
+        let mut encoder = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("screenshot_copy_encoder"),
+            });
 
         let staging_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("screenshot_staging"),
@@ -1530,13 +1533,8 @@ impl PreviewState {
                 } else {
                     filename
                 };
-                match image::save_buffer(
-                    &path,
-                    &rgba_data,
-                    width,
-                    height,
-                    image::ColorType::Rgba8,
-                ) {
+                match image::save_buffer(&path, &rgba_data, width, height, image::ColorType::Rgba8)
+                {
                     Ok(()) => log::info!("Screenshot saved: {path}"),
                     Err(e) => log::error!("Failed to save screenshot: {e}"),
                 }
@@ -1546,9 +1544,6 @@ impl PreviewState {
         }
     }
 }
-
-
-
 
 fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();

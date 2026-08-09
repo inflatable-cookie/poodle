@@ -5,9 +5,9 @@
 //! `DatePickerSpec` + tokens. Specimens render static state, so the open flag
 //! is seeded directly on the spec.
 
+use crate::compat::js_date_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_date_picker;
 
 use poodle_specs::{ControlDensity, ControlSize, DatePickerSpec};
 
@@ -100,7 +100,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
-    let mut spec = DatePickerSpec::new().with_size(size).with_default_value("2026-03-14");
+    let mut spec = DatePickerSpec::new()
+        .with_size(size)
+        .with_default_value("2026-03-14");
     spec.aria_label = Some("Date picker".to_string());
     js_date_picker(&spec, theme)
 }

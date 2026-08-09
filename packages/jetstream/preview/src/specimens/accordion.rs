@@ -1,8 +1,8 @@
 //! Accordion specimen.
 
+use crate::compat::js_accordion;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_accordion;
 
 use poodle_specs::{
     AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
@@ -145,7 +145,9 @@ fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, labe
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

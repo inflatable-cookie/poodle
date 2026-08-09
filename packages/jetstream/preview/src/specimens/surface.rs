@@ -1,9 +1,9 @@
 //! Surface specimen — themed containers across tone, border, and padding.
 
+use crate::compat::js_surface;
+use crate::compat::{rem_to_px, size_font_rem};
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::{rem_to_px, size_font_rem};
-use crate::compat::js_surface;
 
 use poodle_specs::{
     ControlSize, PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone,
@@ -29,7 +29,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_border(SurfaceBorder::Subtle)
                     .with_padding(PaddingScale::Md),
                 theme,
-                vec![body("Panel surface with subtle border — the standard container.")],
+                vec![body(
+                    "Panel surface with subtle border — the standard container.",
+                )],
             ),
         ))
         // --- Tone: Canvas ---
@@ -42,7 +44,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_border(SurfaceBorder::Subtle)
                     .with_padding(PaddingScale::Md),
                 theme,
-                vec![body("Canvas surface sits behind panels as a background layer.")],
+                vec![body(
+                    "Canvas surface sits behind panels as a background layer.",
+                )],
             ),
         ))
         // --- Tone: Elevated ---
@@ -136,7 +140,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_label("Account settings")
                     .with_padding(PaddingScale::Md),
                 theme,
-                vec![body("Surface as a semantic region with an accessible label.")],
+                vec![body(
+                    "Surface as a semantic region with an accessible label.",
+                )],
             ),
         ))
 }

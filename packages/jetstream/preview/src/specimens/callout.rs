@@ -3,12 +3,14 @@
 //! prop, dismissible (with the x control), without-title, density, sizes, and a
 //! real action button. Every visual resolves from `CallOutSpec` + tokens.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_callout;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ButtonSpec, ButtonVariant, CallOutSpec, ControlDensity, ControlSize, StatusTone};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, CallOutSpec, ControlDensity, ControlSize, StatusTone,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -116,7 +118,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

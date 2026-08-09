@@ -4,9 +4,9 @@
 //! from `CalendarSpec` + tokens. Specimens render static state, so selection
 //! and range fields are seeded directly on the spec.
 
+use crate::compat::js_calendar;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_calendar;
 
 use poodle_specs::{CalendarMode, CalendarSpec, ControlDensity, ControlSize, DateRangeValue};
 
@@ -53,7 +53,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_calendar(
                 &{
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.range_value = Some(DateRangeValue::new(
                         Some("2026-03-10".to_string()),
                         Some("2026-03-20".to_string()),
@@ -71,7 +73,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_calendar(
                 &{
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.default_range_value = DateRangeValue::new(
                         Some("2026-03-05".to_string()),
                         Some("2026-03-12".to_string()),
@@ -105,7 +109,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_calendar(
                 &{
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled range calendar".to_string());
                     spec
@@ -148,7 +154,9 @@ fn sized_calendar(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
 }
 
 fn dense_calendar(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
-    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_density(density);
+    let mut spec = CalendarSpec::new()
+        .with_today("2026-03-12")
+        .with_density(density);
     spec.default_value = Some("2026-03-14".to_string());
     spec.visible_month = Some("2026-03".to_string());
     spec.aria_label = Some("Calendar".to_string());

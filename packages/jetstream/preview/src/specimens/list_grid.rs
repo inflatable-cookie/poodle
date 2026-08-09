@@ -6,13 +6,13 @@
 //! components (`js_list_card` / `js_button` / `js_icon_button` / `js_text`) —
 //! no hand-rolled boxes.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_icon_button;
 use crate::compat::js_list_card;
 use crate::compat::js_list_grid;
 use crate::compat::js_text;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, IconButtonSpec, LeadingShape, ListCardSpec, ListGridSpec,
@@ -24,7 +24,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 
     let tile = |title: &str, subtitle: &str| {
         js_list_card(
-            &ListCardSpec::new().with_title(title).with_subtitle(subtitle),
+            &ListCardSpec::new()
+                .with_title(title)
+                .with_subtitle(subtitle),
             theme,
         )
     };
@@ -123,21 +125,29 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         &ListGridSpec::new().with_min_item_width_em(16.0),
         theme,
         Some(empty_header),
-        vec![div()
-            .flex_row()
-            .items_center()
-            .justify_center()
-            .pt(resolve_px(theme, "space.stack.lg"))
-            .pb(resolve_px(theme, "space.stack.lg"))
-            .child(js_text(
-                &TextSpec::new("No items yet \u{2014} add one to populate the grid.")
-                    .with_tone(TextTone::Secondary),
-                theme,
-            ))],
+        vec![
+            div()
+                .flex_row()
+                .items_center()
+                .justify_center()
+                .pt(resolve_px(theme, "space.stack.lg"))
+                .pb(resolve_px(theme, "space.stack.lg"))
+                .child(js_text(
+                    &TextSpec::new("No items yet \u{2014} add one to populate the grid.")
+                        .with_tone(TextTone::Secondary),
+                    theme,
+                )),
+        ],
     );
 
-    div().flex_col().gap(24.0)
-        .child(group("Default — wrap grid (min 14em)", secondary, default_grid))
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "Default — wrap grid (min 14em)",
+            secondary,
+            default_grid,
+        ))
         .child(group("With header actions", secondary, with_actions))
         .child(group("Compact — single column", secondary, compact_grid))
         .child(group("With ListCards (min 16em)", secondary, with_cards))
@@ -145,7 +155,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

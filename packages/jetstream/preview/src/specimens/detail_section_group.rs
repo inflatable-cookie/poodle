@@ -5,11 +5,11 @@
 //! variants. Sections are real `js_detail_section` composites holding real
 //! `js_detail_item` rows — no hand-coded chrome.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_detail_item;
 use crate::compat::js_detail_section;
 use crate::compat::js_detail_section_group;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ControlDensity, DetailItemLayout, DetailItemSpec, DetailSectionGroupLayout,
@@ -42,21 +42,42 @@ fn section(title: &str, a: (&str, &str), b: (&str, &str), theme: &JetstreamTheme
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // --- Grid layout (default auto-fit) ---
-        .child(group("Grid layout", secondary,
+        .child(group(
+            "Grid layout",
+            secondary,
             js_detail_section_group(
                 &DetailSectionGroupSpec::new().with_aria_label("Project metadata"),
                 theme,
                 vec![
-                    section("General", ("Owner", "Platform"), ("Status", "Active"), theme),
-                    section("Runtime", ("Region", "eu-west-1"), ("Tier", "Production"), theme),
-                    section("Policy", ("Retention", "90 days"), ("Review", "Required"), theme),
+                    section(
+                        "General",
+                        ("Owner", "Platform"),
+                        ("Status", "Active"),
+                        theme,
+                    ),
+                    section(
+                        "Runtime",
+                        ("Region", "eu-west-1"),
+                        ("Tier", "Production"),
+                        theme,
+                    ),
+                    section(
+                        "Policy",
+                        ("Retention", "90 days"),
+                        ("Review", "Required"),
+                        theme,
+                    ),
                 ],
-            )
+            ),
         ))
         // --- Stack layout (single column) ---
-        .child(group("Stack layout", secondary,
+        .child(group(
+            "Stack layout",
+            secondary,
             js_detail_section_group(
                 &DetailSectionGroupSpec::new()
                     .with_layout(DetailSectionGroupLayout::Stack)
@@ -66,10 +87,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     section("Access", ("Role", "Editor"), ("Scope", "Workspace"), theme),
                     section("Billing", ("Plan", "Team"), ("Renewal", "Monthly"), theme),
                 ],
-            )
+            ),
         ))
         // --- Column cap (maxColumns = 2) ---
-        .child(group("Column cap (maxColumns = 2)", secondary,
+        .child(group(
+            "Column cap (maxColumns = 2)",
+            secondary,
             js_detail_section_group(
                 &DetailSectionGroupSpec::new()
                     .with_min_column_width("10rem")
@@ -81,14 +104,22 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     cap_section("Three", theme),
                     cap_section("Four", theme),
                 ],
-            )
+            ),
         ))
         // --- Density variants ---
-        .child(group("Density variants", secondary,
-            div().flex_col().gap(16.0)
+        .child(group(
+            "Density variants",
+            secondary,
+            div()
+                .flex_col()
+                .gap(16.0)
                 .child(density_demo("Compact", ControlDensity::Compact, theme))
                 .child(density_demo("Default", ControlDensity::Default, theme))
-                .child(density_demo("Comfortable", ControlDensity::Comfortable, theme))
+                .child(density_demo(
+                    "Comfortable",
+                    ControlDensity::Comfortable,
+                    theme,
+                )),
         ))
 }
 
@@ -106,7 +137,9 @@ fn cap_section(title: &str, theme: &JetstreamThemeProvider) -> El {
 
 fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
     let muted = resolve_color(theme, "color.text.muted");
-    div().flex_col().gap(4.0)
+    div()
+        .flex_col()
+        .gap(4.0)
         .child(label(name).text_color(muted).text_size(11.0))
         .child(js_detail_section_group(
             &DetailSectionGroupSpec::new()
@@ -121,7 +154,9 @@ fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvi
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

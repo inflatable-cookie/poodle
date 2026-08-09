@@ -1,8 +1,8 @@
 //! Menu specimen — vertical menus with different item sets.
 
+use crate::compat::js_menu;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_menu;
 
 use poodle_specs::{MenuEntry, MenuItemKind, MenuSpec};
 
@@ -39,24 +39,34 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         MenuEntry::new("theme-light", "Light Theme").with_kind(MenuItemKind::Radio),
     ];
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // Basic menu
-        .child(group("Basic", secondary,
-            js_menu(&MenuSpec::new(basic_items), theme)
+        .child(group(
+            "Basic",
+            secondary,
+            js_menu(&MenuSpec::new(basic_items), theme),
         ))
         // Extended menu
-        .child(group("Extended items", secondary,
-            js_menu(&MenuSpec::new(extended_items), theme)
+        .child(group(
+            "Extended items",
+            secondary,
+            js_menu(&MenuSpec::new(extended_items), theme),
         ))
         // Open state — the panel and its items only exist here, so this is the
         // only specimen that can show, or verify, the menu's actual content.
-        .child(group("Open state", secondary,
-            js_menu(&MenuSpec::new(open_items).with_open(true), theme)
+        .child(group(
+            "Open state",
+            secondary,
+            js_menu(&MenuSpec::new(open_items).with_open(true), theme),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

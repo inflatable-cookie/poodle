@@ -5,6 +5,7 @@
 
 pub mod accordion;
 pub mod action_discovery_panel;
+pub mod agent_chat_input;
 pub mod alert_dialog;
 pub mod app_header;
 pub mod audio_player;
@@ -23,6 +24,7 @@ pub mod card_radio_group;
 pub mod card_toggle_group;
 pub mod checkbox;
 pub mod code;
+pub mod code_input;
 pub mod collapse_toggle;
 pub mod collapsible;
 pub mod color_picker;
@@ -30,11 +32,11 @@ pub mod command_palette;
 pub mod confirm_action;
 pub mod context_menu;
 pub mod data_table;
-pub mod debug_dialog;
 pub mod date_picker;
 pub mod date_range_picker;
 pub mod date_time_picker;
 pub mod date_time_range_picker;
+pub mod debug_dialog;
 pub mod detail_item;
 pub mod detail_section;
 pub mod detail_section_group;
@@ -53,6 +55,7 @@ pub mod eyebrow;
 pub mod field;
 pub mod field_set;
 pub mod file_upload;
+pub mod filter_builder;
 pub mod filter_toolbar;
 pub mod floating_overlay;
 pub mod form_actions;
@@ -72,24 +75,20 @@ pub mod list_container;
 pub mod list_grid;
 pub mod log_list;
 pub mod markdown_editor;
-pub mod meta_bar;
-pub mod meta_item;
 pub mod media_browse_panel;
 pub mod media_picker;
 pub mod media_preview;
 pub mod media_thumbnail;
 pub mod menu;
 pub mod menubar;
+pub mod meta_bar;
+pub mod meta_item;
 pub mod meter;
 pub mod metric_tile;
+pub mod model_picker;
 pub mod nav_card;
 pub mod navigation_menu;
 pub mod number_input;
-pub mod agent_chat_input;
-pub mod filter_builder;
-pub mod model_picker;
-pub mod ref_select;
-pub mod theme_select;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;
@@ -98,17 +97,21 @@ pub mod pagination_summary;
 pub mod password_requirements;
 pub mod picker_shell;
 pub mod pill;
-pub mod code_input;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
 pub mod range_slider;
 pub mod rating;
+pub mod ref_select;
 pub mod region;
 pub mod relation_picker;
 pub mod remediation_banner;
+pub mod theme_select;
 // reorderable_list merged into editable_list on the contract side.
 // pub mod reorderable_list;
+pub mod agent_question;
+pub mod agent_transcript;
+pub mod date_time_zone_picker;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod segmented_control;
@@ -126,10 +129,8 @@ pub mod split_view;
 pub mod stack;
 pub mod state_tile;
 pub mod status_indicator;
-pub mod surface;
-pub mod agent_question;
-pub mod agent_transcript;
 pub mod stepper;
+pub mod surface;
 pub mod switch;
 pub mod tab_strip;
 pub mod table;
@@ -151,14 +152,13 @@ pub mod tri_state_switch;
 pub mod ui_presentation_provider;
 pub mod validation_summary;
 pub mod video_player;
-pub mod date_time_zone_picker;
 
+use crate::jsx::*;
 use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::jsx::*;
 
-use crate::app_state::{AppState, Section};
 use crate::app_state::SpecimenView;
+use crate::app_state::{AppState, Section};
 use crate::component_registry::{self, ComponentEntry};
 
 // ── Content routing ──
@@ -179,12 +179,14 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
             // Placeholder until demo screens are implemented as real components
             let text_secondary = resolve_color(theme, "color.text.secondary");
             label("Demo screens — coming soon")
-                .text_color(text_secondary).text_size(13.0)
+                .text_color(text_secondary)
+                .text_size(13.0)
         }
         Section::Tokens => {
             let text_secondary = resolve_color(theme, "color.text.secondary");
             label("Token inspector — coming soon")
-                .text_color(text_secondary).text_size(13.0)
+                .text_color(text_secondary)
+                .text_size(13.0)
         }
     }
 }
@@ -247,27 +249,41 @@ fn build_specimen_page(
 
     // Hero header
     page = page.child(
-        div().flex_col().p(20.0).gap(8.0)
-            .bg(bg_elevated).border_1().border_color(border).rounded(8.0)
+        div()
+            .flex_col()
+            .p(20.0)
+            .gap(8.0)
+            .bg(bg_elevated)
+            .border_1()
+            .border_color(border)
+            .rounded(8.0)
             .child(
-                div().flex_row().gap(8.0).items_center()
+                div()
+                    .flex_row()
+                    .gap(8.0)
+                    .items_center()
                     .child(
                         label(entry.tag.label())
-                            .px(8.0).py(2.0).rounded(4.0)
+                            .px(8.0)
+                            .py(2.0)
+                            .rounded(4.0)
                             .bg(tint(accent, 0.20))
-                            .text_color(accent).text_size(10.0)
+                            .text_color(accent)
+                            .text_size(10.0),
                     )
                     .child(
                         label(entry.display_name)
-                            .text_color(text_primary).text_size(20.0)
+                            .text_color(text_primary)
+                            .text_size(20.0),
                     )
                     .child(div().grow())
-                    .child(crate::shell::build_state_probes(state, theme))
+                    .child(crate::shell::build_state_probes(state, theme)),
             )
             .child(
                 label(entry.description)
-                    .text_color(text_secondary).text_size(13.0)
-            )
+                    .text_color(text_secondary)
+                    .text_size(13.0),
+            ),
     );
 
     // Specimen section — filtered to the active Examples/Sizes/Densities view,
@@ -300,18 +316,24 @@ fn build_specimen_page(
             )));
         }
         section = section.child(
-            div().flex_col().p(24.0).gap(12.0)
-                .bg(bg_elevated).border_1().border_color(border).rounded(8.0)
+            div()
+                .flex_col()
+                .p(24.0)
+                .gap(12.0)
+                .bg(bg_elevated)
+                .border_1()
+                .border_color(border)
+                .rounded(8.0)
                 .child(filtered),
         );
         page = page.child(section);
     } else {
         page = page.child(
-            div().flex_col().gap(8.0)
-                .child(
-                    label(format!("{} — specimen coming soon", entry.display_name))
-                        .text_color(text_secondary).text_size(13.0)
-                )
+            div().flex_col().gap(8.0).child(
+                label(format!("{} — specimen coming soon", entry.display_name))
+                    .text_color(text_secondary)
+                    .text_size(13.0),
+            ),
         );
     }
 

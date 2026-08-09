@@ -18,14 +18,13 @@
 //!         └── Content...
 //! ```
 
-use jetstream_ui::ui_element::*;
 use jetstream_ui::Color;
+use jetstream_ui::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use crate::jsx::*;
 use poodle_specs::{
-    EyebrowSpec, PillSpec, TabDefinition, TabVariant, TabsSpec, ToggleGroupOption,
-    ToggleGroupSpec,
+    EyebrowSpec, PillSpec, TabDefinition, TabVariant, TabsSpec, ToggleGroupOption, ToggleGroupSpec,
 };
 
 use crate::app_state::*;
@@ -38,13 +37,18 @@ pub fn build_shell(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
     let bg_surface = resolve_color(theme, "color.background.surface");
     let border = resolve_color(theme, "color.border.subtle");
 
-    div().flex_col().grow().bg(bg_panel)
+    div()
+        .flex_col()
+        .grow()
+        .bg(bg_panel)
         .child(build_tab_bar(state, theme, bg_surface, border))
         .child(build_controls_bar(state, theme, bg_surface, border))
         .child(
-            div().flex_row().grow()
+            div()
+                .flex_row()
+                .grow()
                 .child(build_sidebar(state, theme, bg_surface, border))
-                .child(build_content_area(state, theme))
+                .child(build_content_area(state, theme)),
         )
 }
 
@@ -82,15 +86,41 @@ fn build_tab_bar(
         theme,
     ));
 
-    let summary = div().flex_row().gap(8.0).items_center()
-        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.theme_preset.label()), theme)))
-        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.density.label()), theme)))
-        .child(crate::jsx::jel(crate::compat::js_pill(&PillSpec::new().with_label(state.control_size.label()), theme)));
-
-    div().flex_row().w_full().px(12.0).py(8.0).gap(16.0)
+    let summary = div()
+        .flex_row()
+        .gap(8.0)
         .items_center()
-        .bg(bg_surface).border_1().border_color(border)
-        .child(label("Poodle").text_color(text_primary).text_size(15.0).text_weight(700).pr(8.0).pl(4.0))
+        .child(crate::jsx::jel(crate::compat::js_pill(
+            &PillSpec::new().with_label(state.theme_preset.label()),
+            theme,
+        )))
+        .child(crate::jsx::jel(crate::compat::js_pill(
+            &PillSpec::new().with_label(state.density.label()),
+            theme,
+        )))
+        .child(crate::jsx::jel(crate::compat::js_pill(
+            &PillSpec::new().with_label(state.control_size.label()),
+            theme,
+        )));
+
+    div()
+        .flex_row()
+        .w_full()
+        .px(12.0)
+        .py(8.0)
+        .gap(16.0)
+        .items_center()
+        .bg(bg_surface)
+        .border_1()
+        .border_color(border)
+        .child(
+            label("Poodle")
+                .text_color(text_primary)
+                .text_size(15.0)
+                .text_weight(700)
+                .pr(8.0)
+                .pl(4.0),
+        )
         .child(nav)
         .child(div().grow())
         .child(summary)
@@ -105,9 +135,16 @@ fn build_controls_bar(
 ) -> JsEl {
     let text_secondary = resolve_color(theme, "color.text.secondary");
 
-    let mut bar = div().flex_row().w_full().px(16.0).py(10.0).gap(20.0)
+    let mut bar = div()
+        .flex_row()
+        .w_full()
+        .px(16.0)
+        .py(10.0)
+        .gap(20.0)
         .items_center()
-        .bg(bg_surface).border_1().border_color(border);
+        .bg(bg_surface)
+        .border_1()
+        .border_color(border);
 
     // Theme / density / size — real Eyebrow + ToggleGroup components (the
     // Svelte DisplayControls uses exactly these). Option activation routes via
@@ -117,9 +154,14 @@ fn build_controls_bar(
             .iter()
             .map(|&o| ToggleGroupOption::new(o, o))
             .collect();
-        div().flex_col().gap(4.0)
+        div()
+            .flex_col()
+            .gap(4.0)
             .flex_shrink_0()
-            .child(crate::jsx::jel(crate::compat::js_eyebrow(&EyebrowSpec::default().with_content(eyebrow), theme)))
+            .child(crate::jsx::jel(crate::compat::js_eyebrow(
+                &EyebrowSpec::default().with_content(eyebrow),
+                theme,
+            )))
             .child(crate::jsx::jel(crate::compat::js_toggle_group(
                 &ToggleGroupSpec::new(opts)
                     .with_value(vec![active.to_string()])
@@ -130,7 +172,9 @@ fn build_controls_bar(
 
     // Theme picker — the real ThemeSelect, matching the Svelte preview, rather
     // than one toggle button per theme.
-    let theme_group = div().flex_col().gap(4.0)
+    let theme_group = div()
+        .flex_col()
+        .gap(4.0)
         .flex_shrink_0()
         .child(crate::jsx::jel(crate::compat::js_eyebrow(
             &EyebrowSpec::default().with_content("Theme"),
@@ -153,13 +197,16 @@ fn build_controls_bar(
 
     // Contrast group — a real engine slider driving the oklch neutral-contrast
     // axis (mirrors the Svelte preview's CONTRAST control; 0.5 = library default).
-    let contrast_group = div().flex_col().gap(4.0)
+    let contrast_group = div()
+        .flex_col()
+        .gap(4.0)
         .flex_shrink_0()
         .child(label("CONTRAST").text_color(text_secondary).text_size(9.0))
         .child(
             slider(state.contrast, 0.0, 1.0)
                 .id("contrast")
-                .w(140.0).h(14.0)
+                .w(140.0)
+                .h(14.0)
                 .rounded(999.0)
                 // The "CONTRAST" caption beside it is a sibling, not a label,
                 // so a screen reader reaches the slider with nothing to say.
@@ -170,14 +217,22 @@ fn build_controls_bar(
 
     // Search group — filters the sidebar + catalogue by name (Svelte parity).
     let bg_canvas = resolve_color(theme, "color.background.canvas");
-    let search_group = div().flex_col().gap(4.0)
+    let search_group = div()
+        .flex_col()
+        .gap(4.0)
         .flex_shrink_0()
         .child(label("SEARCH").text_color(text_secondary).text_size(9.0))
         .child(
-            div().flex_row().items_center().gap(6.0)
-                .h(28.0).pl(8.0).pr(8.0)
+            div()
+                .flex_row()
+                .items_center()
+                .gap(6.0)
+                .h(28.0)
+                .pl(8.0)
+                .pr(8.0)
                 .bg(bg_canvas)
-                .border_1().border_color(border)
+                .border_1()
+                .border_color(border)
                 .rounded(8.0)
                 // Decorative: the field beside it is already named "Search",
                 // so announcing this too would just repeat the word.
@@ -209,7 +264,10 @@ fn build_controls_bar(
 /// State-probe toggles (disabled/invalid/busy) — shown on the specimen page,
 /// not in the global bar (the Svelte preview has no global STATE group).
 pub(crate) fn build_state_probes(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
-    div().flex_row().gap(12.0).items_center()
+    div()
+        .flex_row()
+        .gap(12.0)
+        .items_center()
         .child(build_probe_toggle("disabled", state.disabled, theme))
         .child(build_probe_toggle("invalid", state.invalid, theme))
         .child(build_probe_toggle("busy", state.busy, theme))
@@ -224,17 +282,30 @@ fn build_probe_toggle(name: &str, checked: bool, theme: &JetstreamThemeProvider)
 
     let indicator = if checked { "✓ " } else { "○ " };
     let display = format!("{indicator}{name}");
-    let text_color = if checked { text_primary } else { text_secondary };
-    let btn_bg: Option<Color> = if checked { Some(tint(accent, 0.14).into()) } else { None };
+    let text_color = if checked {
+        text_primary
+    } else {
+        text_secondary
+    };
+    let btn_bg: Option<Color> = if checked {
+        Some(tint(accent, 0.14).into())
+    } else {
+        None
+    };
     let btn_border = if checked { accent } else { border };
 
     button(&display)
         .id(format!("probe:{name}"))
-        .h(24.0).px(6.0)
-        .items_center().justify_center()
+        .h(24.0)
+        .px(6.0)
+        .items_center()
+        .justify_center()
         .rounded(4.0)
-        .bg_opt(btn_bg).border_1().border_color(btn_border)
-        .text_color(text_color).text_size(10.0)
+        .bg_opt(btn_bg)
+        .border_1()
+        .border_color(btn_border)
+        .text_color(text_color)
+        .text_size(10.0)
         .focusable()
 }
 
@@ -249,19 +320,30 @@ fn build_sidebar(
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let mut sidebar = div().flex_col().w(224.0).flex_shrink_0().self_stretch()
-        .py(4.0).gap(1.0)
+    let mut sidebar = div()
+        .flex_col()
+        .w(224.0)
+        .flex_shrink_0()
+        .self_stretch()
+        .py(4.0)
+        .gap(1.0)
         .overflow_scroll()
         .id("sidebar")
-        .bg(bg_surface).border_1().border_color(border);
+        .bg(bg_surface)
+        .border_1()
+        .border_color(border);
 
     match state.section {
         Section::Demo => {
             for (i, &screen) in DemoScreen::ALL.iter().enumerate() {
                 let is_active = state.active_demo_screen == screen;
                 sidebar = sidebar.child(build_sidebar_item(
-                    screen.label(), &format!("sidebar:{i}"), is_active,
-                    text_primary, text_secondary, accent,
+                    screen.label(),
+                    &format!("sidebar:{i}"),
+                    is_active,
+                    text_primary,
+                    text_secondary,
+                    accent,
                 ));
             }
         }
@@ -291,8 +373,12 @@ fn build_sidebar(
                 }
                 let is_active = active_idx == Some(i);
                 sidebar = sidebar.child(build_sidebar_item(
-                    entry.display_name, &format!("sidebar:{i}"), is_active,
-                    text_primary, text_secondary, accent,
+                    entry.display_name,
+                    &format!("sidebar:{i}"),
+                    is_active,
+                    text_primary,
+                    text_secondary,
+                    accent,
                 ));
             }
         }
@@ -310,22 +396,38 @@ fn build_sidebar_item(
     text_secondary: glam::Vec4,
     accent: glam::Vec4,
 ) -> JsEl {
-    let item_bg: Option<Color> = if is_active { Some(tint(accent, 0.14).into()) } else { None };
-    let item_text = if is_active { text_primary } else { text_secondary };
+    let item_bg: Option<Color> = if is_active {
+        Some(tint(accent, 0.14).into())
+    } else {
+        None
+    };
+    let item_text = if is_active {
+        text_primary
+    } else {
+        text_secondary
+    };
 
     button(name)
         .id(id)
-        .flex_row().h(34.0).self_stretch().px(14.0)
-        .items_center().justify_start()
+        .flex_row()
+        .h(34.0)
+        .self_stretch()
+        .px(14.0)
+        .items_center()
+        .justify_start()
         .rounded(6.0)
         .bg(item_bg.unwrap_or(Color::TRANSPARENT))
-        .text_color(item_text).text_size(13.0)
+        .text_color(item_text)
+        .text_size(13.0)
         .focusable()
 }
 
 /// Content area with specimen or landing page.
 fn build_content_area(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
-    div().flex_col().grow().p(16.0)
+    div()
+        .flex_col()
+        .grow()
+        .p(16.0)
         .overflow_scroll()
         .id("content")
         .child(specimens::build_content(state, theme))
@@ -478,9 +580,8 @@ mod tests {
 
     fn reachability_body() {
         let state = AppState::new();
-        let theme = poodle_jetstream::JetstreamThemeProvider::from_theme(
-            &poodle_tokens::themes::ECLIPSE,
-        );
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let mut ui = GameUi::with_text(1400.0, 2400.0);
         ui.render_immediate(&build_shell(&state, &theme));
 
@@ -542,12 +643,10 @@ mod tests {
         let mut state = AppState::new();
         assert!(state.stepper_collapsed, "the specimen starts folded");
 
-        let theme = poodle_jetstream::JetstreamThemeProvider::from_theme(
-            &poodle_tokens::themes::ECLIPSE,
-        );
-        let scene = jetstream_poodle::to_js_el(
-            &crate::specimens::stepper::render(&state, &theme).0,
-        );
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let scene =
+            jetstream_poodle::to_js_el(&crate::specimens::stepper::render(&state, &theme).0);
 
         let mut ui = GameUi::with_text(1200.0, 2400.0);
         ui.render_immediate(&scene);
@@ -565,12 +664,18 @@ mod tests {
 
         let hit = ui.tree.hit_test(x, y).expect("the summary is hit-testable");
         assert!(
-            ui.tree.get(hit).and_then(|n| n.style.token_key.clone()).is_none(),
+            ui.tree
+                .get(hit)
+                .and_then(|n| n.style.token_key.clone())
+                .is_none(),
             "the deepest hit is an unkeyed child — the reason activation walks up"
         );
         let token = activation_token(&ui.tree, hit);
         assert!(
-            matches!(parse_action(token.as_deref()), ShellAction::StepperToggleCollapse),
+            matches!(
+                parse_action(token.as_deref()),
+                ShellAction::StepperToggleCollapse
+            ),
             "pressing the summary must route to the collapse toggle, got {token:?}"
         );
 
@@ -578,9 +683,8 @@ mod tests {
         assert!(!state.stepper_collapsed);
 
         // …and the unfolded render really grows the step rows back.
-        let expanded = jetstream_poodle::to_js_el(
-            &crate::specimens::stepper::render(&state, &theme).0,
-        );
+        let expanded =
+            jetstream_poodle::to_js_el(&crate::specimens::stepper::render(&state, &theme).0);
         let mut ui = GameUi::with_text(1200.0, 2400.0);
         ui.render_immediate(&expanded);
         let expanded_nodes = ui.tree.nodes.len();

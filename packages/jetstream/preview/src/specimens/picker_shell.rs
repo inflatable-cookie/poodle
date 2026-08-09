@@ -7,14 +7,14 @@
 //! footers are the real `js_form_actions` primitive with `js_button` actions, and
 //! the selection summary is the real `js_selection_summary` — no hand-rolled boxes.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_form_actions;
 use crate::compat::js_picker_shell;
 use crate::compat::js_selection_summary;
 use crate::compat::js_text;
 use crate::compat::js_text_input;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     BrowseState, ButtonSpec, ButtonVariant, FormActionsSpec, PickerShellSpec, PickerVariant,
@@ -75,9 +75,13 @@ fn search_field(placeholder: &str, theme: &JetstreamThemeProvider) -> El {
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // --- Inline variant (ready): search + result rows + result count ---
-        .child(group("Inline variant (ready)", secondary,
+        .child(group(
+            "Inline variant (ready)",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Select a component")
                     .with_description("Browse and select from available components.")
@@ -88,7 +92,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 Some(search_field("Search components...", theme)),
                 None,
                 Some(
-                    div().flex_col()
+                    div()
+                        .flex_col()
                         .child(result_row("Button", "Primitive", theme))
                         .child(result_row("Checkbox", "Primitive", theme))
                         .child(result_row("Select", "Primitive", theme))
@@ -100,7 +105,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Loading ---
-        .child(group("Loading", secondary,
+        .child(group(
+            "Loading",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Select an item")
                     .with_variant(PickerVariant::Inline)
@@ -115,7 +122,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- No results ---
-        .child(group("No results", secondary,
+        .child(group(
+            "No results",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Select an item")
                     .with_variant(PickerVariant::Inline)
@@ -132,7 +141,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Multiple selection: selection summary + selected rows ---
-        .child(group("Multiple selection", secondary,
+        .child(group(
+            "Multiple selection",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Select components")
                     .with_variant(PickerVariant::Inline)
@@ -151,7 +162,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     theme,
                 )),
                 Some(
-                    div().flex_col()
+                    div()
+                        .flex_col()
                         .child(result_row("Button", "Selected", theme))
                         .child(result_row("Dialog", "Selected", theme))
                         .child(result_row("Table", "", theme)),
@@ -161,7 +173,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Popover variant: search + body + footer ---
-        .child(group("Popover variant", secondary,
+        .child(group(
+            "Popover variant",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Add component")
                     .with_description("Pick a component to insert.")
@@ -173,7 +187,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 Some(search_field("Search components...", theme)),
                 None,
                 Some(
-                    div().flex_col()
+                    div()
+                        .flex_col()
                         .child(result_row("Button", "Primitive", theme))
                         .child(result_row("Checkbox", "Primitive", theme))
                         .child(result_row("Select", "Primitive", theme)),
@@ -183,7 +198,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Modal variant: search + body + footer ---
-        .child(group("Modal variant", secondary,
+        .child(group(
+            "Modal variant",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Select a relation")
                     .with_description("Choose one or more related records.")
@@ -195,7 +212,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 Some(search_field("Search records...", theme)),
                 None,
                 Some(
-                    div().flex_col()
+                    div()
+                        .flex_col()
                         .child(result_row("Acme Corp", "Selected", theme))
                         .child(result_row("Globex", "Selected", theme))
                         .child(result_row("Initech", "", theme)),
@@ -205,7 +223,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Error ---
-        .child(group("Error", secondary,
+        .child(group(
+            "Error",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Search media")
                     .with_variant(PickerVariant::Inline)
@@ -220,7 +240,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         // --- Empty ---
-        .child(group("Empty", secondary,
+        .child(group(
+            "Empty",
+            secondary,
             js_picker_shell(
                 &PickerShellSpec::new("Choose item")
                     .with_variant(PickerVariant::Inline)
@@ -236,7 +258,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

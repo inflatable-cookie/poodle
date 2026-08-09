@@ -1,8 +1,8 @@
 //! MediaPicker specimen — media asset selection dialog (single-select).
 
+use crate::compat::js_media_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_media_picker;
 
 use poodle_specs::{MediaKind, MediaPickerItem, MediaPickerSpec, MediaPickerTab};
 

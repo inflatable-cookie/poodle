@@ -19,8 +19,8 @@
 //!   cargo run --bin a11y -- --roles # per-slug role breakdown
 //!   cargo run --bin a11y -- --slug=checkbox
 
-use jetstream_ui::accesskit::Role;
 use jetstream_ui::GameUi;
+use jetstream_ui::accesskit::Role;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_preview::{app_state::AppState, component_registry, specimens};
 
@@ -142,16 +142,10 @@ fn main() {
                 *roles.entry(node.role()).or_default() += 1;
             }
             if as_json {
-                let mut names: Vec<String> =
-                    roles.keys().map(|r| format!("{r:?}")).collect();
+                let mut names: Vec<String> = roles.keys().map(|r| format!("{r:?}")).collect();
                 names.sort();
-                let quoted: Vec<String> =
-                    names.iter().map(|n| format!("\"{n}\"")).collect();
-                census.push(format!(
-                    "  \"{}\": [{}]",
-                    entry.slug,
-                    quoted.join(", ")
-                ));
+                let quoted: Vec<String> = names.iter().map(|n| format!("\"{n}\"")).collect();
+                census.push(format!("  \"{}\": [{}]", entry.slug, quoted.join(", ")));
             }
             if !show_roles {
                 continue;
@@ -199,7 +193,10 @@ fn main() {
     let total: usize = findings.iter().map(|f| f.count).sum();
     println!("\n{total} unnamed element(s) whose role needs a name:");
     for finding in &findings {
-        println!("  {:28} {:?} x{}", finding.slug, finding.role, finding.count);
+        println!(
+            "  {:28} {:?} x{}",
+            finding.slug, finding.role, finding.count
+        );
     }
     std::process::exit(1);
 }

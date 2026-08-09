@@ -10,9 +10,9 @@
 //! the icons below render. This specimen shows real `js_icon`s inside a labeled
 //! "provider scope" and states the boundary is non-visual.
 
+use crate::compat::js_icon;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_icon;
 
 use poodle_specs::IconSpec;
 

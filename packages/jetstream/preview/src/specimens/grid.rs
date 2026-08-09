@@ -3,10 +3,10 @@
 //! Covers all three contract §13 groups with real `js_surface` children:
 //! Three columns, Mixed column widths, Auto-fit responsive.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_grid;
 use crate::compat::js_surface;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
 
@@ -57,7 +57,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_columns("1fr 2fr")
                     .with_gap(PaddingScale::Md),
                 theme,
-                vec![surface_md("Sidebar (1fr)"), surface_md("Main content (2fr)")],
+                vec![
+                    surface_md("Sidebar (1fr)"),
+                    surface_md("Main content (2fr)"),
+                ],
             ),
         ))
         // Auto-fit responsive — repeat(auto-fit, minmax(8rem, 1fr)), gap sm.

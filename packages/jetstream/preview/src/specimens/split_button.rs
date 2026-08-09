@@ -4,9 +4,9 @@
 //! (items + separator), loading, disabled, and the size grid. Every example
 //! is a real `js_split_button` resolving all visuals from tokens.
 
+use crate::compat::js_split_button;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_split_button;
 
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, SplitButtonSpec, SplitMenuItem};
 
@@ -55,41 +55,150 @@ fn split(
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // ── Primary variant ──
-        .child(group("Primary variant", secondary,
-            split(theme, ButtonVariant::Primary, ButtonTone::Default, "Save", save_items())
+        .child(group(
+            "Primary variant",
+            secondary,
+            split(
+                theme,
+                ButtonVariant::Primary,
+                ButtonTone::Default,
+                "Save",
+                save_items(),
+            ),
         ))
         // ── Secondary variant ──
-        .child(group("Secondary variant", secondary,
-            split(theme, ButtonVariant::Secondary, ButtonTone::Default, "Export", export_items())
+        .child(group(
+            "Secondary variant",
+            secondary,
+            split(
+                theme,
+                ButtonVariant::Secondary,
+                ButtonTone::Default,
+                "Export",
+                export_items(),
+            ),
         ))
         // ── Ghost variant ──
-        .child(group("Ghost variant", secondary,
-            split(theme, ButtonVariant::Ghost, ButtonTone::Default, "Share", export_items())
+        .child(group(
+            "Ghost variant",
+            secondary,
+            split(
+                theme,
+                ButtonVariant::Ghost,
+                ButtonTone::Default,
+                "Share",
+                export_items(),
+            ),
         ))
         // ── Variant × tone matrix ──
-        .child(group("Variant × tone (default / danger / success)", secondary,
-            div().flex_col().gap(8.0)
-                .child(div().flex_row().gap(8.0).items_center()
-                    .child(split(theme, ButtonVariant::Primary, ButtonTone::Default, "Primary", save_items()))
-                    .child(split(theme, ButtonVariant::Primary, ButtonTone::Danger, "Danger", delete_items()))
-                    .child(split(theme, ButtonVariant::Primary, ButtonTone::Success, "Success", save_items())))
-                .child(div().flex_row().gap(8.0).items_center()
-                    .child(split(theme, ButtonVariant::Secondary, ButtonTone::Default, "Secondary", save_items()))
-                    .child(split(theme, ButtonVariant::Secondary, ButtonTone::Danger, "Danger", delete_items()))
-                    .child(split(theme, ButtonVariant::Secondary, ButtonTone::Success, "Success", save_items())))
-                .child(div().flex_row().gap(8.0).items_center()
-                    .child(split(theme, ButtonVariant::Ghost, ButtonTone::Default, "Ghost", save_items()))
-                    .child(split(theme, ButtonVariant::Ghost, ButtonTone::Danger, "Danger", delete_items()))
-                    .child(split(theme, ButtonVariant::Ghost, ButtonTone::Success, "Success", save_items())))
+        .child(group(
+            "Variant × tone (default / danger / success)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(8.0)
+                .child(
+                    div()
+                        .flex_row()
+                        .gap(8.0)
+                        .items_center()
+                        .child(split(
+                            theme,
+                            ButtonVariant::Primary,
+                            ButtonTone::Default,
+                            "Primary",
+                            save_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Primary,
+                            ButtonTone::Danger,
+                            "Danger",
+                            delete_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Primary,
+                            ButtonTone::Success,
+                            "Success",
+                            save_items(),
+                        )),
+                )
+                .child(
+                    div()
+                        .flex_row()
+                        .gap(8.0)
+                        .items_center()
+                        .child(split(
+                            theme,
+                            ButtonVariant::Secondary,
+                            ButtonTone::Default,
+                            "Secondary",
+                            save_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Secondary,
+                            ButtonTone::Danger,
+                            "Danger",
+                            delete_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Secondary,
+                            ButtonTone::Success,
+                            "Success",
+                            save_items(),
+                        )),
+                )
+                .child(
+                    div()
+                        .flex_row()
+                        .gap(8.0)
+                        .items_center()
+                        .child(split(
+                            theme,
+                            ButtonVariant::Ghost,
+                            ButtonTone::Default,
+                            "Ghost",
+                            save_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Ghost,
+                            ButtonTone::Danger,
+                            "Danger",
+                            delete_items(),
+                        ))
+                        .child(split(
+                            theme,
+                            ButtonVariant::Ghost,
+                            ButtonTone::Success,
+                            "Success",
+                            save_items(),
+                        )),
+                ),
         ))
         // ── Danger tone ──
-        .child(group("Danger tone", secondary,
-            split(theme, ButtonVariant::Secondary, ButtonTone::Danger, "Delete", delete_items())
+        .child(group(
+            "Danger tone",
+            secondary,
+            split(
+                theme,
+                ButtonVariant::Secondary,
+                ButtonTone::Danger,
+                "Delete",
+                delete_items(),
+            ),
         ))
         // ── Dropdown menu open ──
-        .child(group("Dropdown menu open (items + separator)", secondary,
+        .child(group(
+            "Dropdown menu open (items + separator)",
+            secondary,
             js_split_button(
                 &SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
@@ -97,10 +206,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_items(save_items())
                     .with_open(true),
                 theme,
-            )
+            ),
         ))
         // ── Loading state ──
-        .child(group("Loading state (spinner in primary half)", secondary,
+        .child(group(
+            "Loading state (spinner in primary half)",
+            secondary,
             js_split_button(
                 &SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
@@ -108,10 +219,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_items(save_items())
                     .with_loading(true),
                 theme,
-            )
+            ),
         ))
         // ── Disabled ──
-        .child(group("Disabled", secondary,
+        .child(group(
+            "Disabled",
+            secondary,
             js_split_button(
                 &SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
@@ -119,16 +232,21 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_items(save_items())
                     .with_disabled(true),
                 theme,
-            )
+            ),
         ))
         // ── Sizes (xs–xl) ──
-        .child(group("Sizes (xs–xl)", secondary,
-            div().flex_row().gap(8.0).items_center()
+        .child(group(
+            "Sizes (xs–xl)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
                 .child(size_btn(theme, ControlSize::Xs))
                 .child(size_btn(theme, ControlSize::Sm))
                 .child(size_btn(theme, ControlSize::Md))
                 .child(size_btn(theme, ControlSize::Lg))
-                .child(size_btn(theme, ControlSize::Xl))
+                .child(size_btn(theme, ControlSize::Xl)),
         ))
 }
 
@@ -144,7 +262,9 @@ fn size_btn(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

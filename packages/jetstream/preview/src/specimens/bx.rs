@@ -3,10 +3,10 @@
 //! All groups are spec-driven: dimensions and overflow resolve through the
 //! `BoxSpec` / `js_box` path, not hand-coded wrappers.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_box;
 use crate::compat::{rem_to_px, size_font_rem};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{BoxSpec, ControlSize, Overflow, PaddingScale};
 
@@ -35,9 +35,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             frame(js_box(
                 &BoxSpec::new(),
                 theme,
-                vec![label("Flush content")
-                    .text_color(text_primary)
-                    .text_size(body_font)],
+                vec![
+                    label("Flush content")
+                        .text_color(text_primary)
+                        .text_size(body_font),
+                ],
             )),
         ))
         .child(group(
@@ -46,9 +48,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             frame(js_box(
                 &BoxSpec::new().with_padding(PaddingScale::Md),
                 theme,
-                vec![label("Content inside a padded box")
-                    .text_color(text_primary)
-                    .text_size(body_font)],
+                vec![
+                    label("Content inside a padded box")
+                        .text_color(text_primary)
+                        .text_size(body_font),
+                ],
             )),
         ))
         .child(group(
@@ -57,9 +61,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             frame(js_box(
                 &BoxSpec::new().with_padding(PaddingScale::Lg),
                 theme,
-                vec![label("Large padded box")
-                    .text_color(text_primary)
-                    .text_size(body_font)],
+                vec![
+                    label("Large padded box")
+                        .text_color(text_primary)
+                        .text_size(body_font),
+                ],
             )),
         ))
         .child(group(
@@ -71,9 +77,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_width("12rem")
                     .with_height("6rem"),
                 theme,
-                vec![label("Fixed 12x6rem")
-                    .text_color(text_primary)
-                    .text_size(body_font)],
+                vec![
+                    label("Fixed 12x6rem")
+                        .text_color(text_primary)
+                        .text_size(body_font),
+                ],
             )),
         ))
         .child(group(
@@ -86,9 +94,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_height("3rem")
                     .with_overflow(Overflow::Hidden),
                 theme,
-                vec![label("This long line is clipped by the box boundary")
-                    .text_color(text_primary)
-                    .text_size(body_font)],
+                vec![
+                    label("This long line is clipped by the box boundary")
+                        .text_color(text_primary)
+                        .text_size(body_font),
+                ],
             )),
         ))
 }

@@ -7,10 +7,10 @@
 //! collapse (§8 Responsive Swap) is a host/preview-loop concern with no El
 //! channel, so the inline danger group + overflow trigger both render.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::{js_form_actions, js_form_actions_full};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, FormActionAlign, FormActionDangerItem,
@@ -21,40 +21,72 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Action button helpers (real js_button instances).
-    let secondary_btn =
-        |label: &str| js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label(label), theme);
-    let primary_btn =
-        |label: &str| js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label(label), theme);
-    let ghost_btn =
-        |label: &str| js_button(&ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label(label), theme);
+    let secondary_btn = |label: &str| {
+        js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_label(label),
+            theme,
+        )
+    };
+    let primary_btn = |label: &str| {
+        js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_label(label),
+            theme,
+        )
+    };
+    let ghost_btn = |label: &str| {
+        js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label(label),
+            theme,
+        )
+    };
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // ── End-aligned (default) ───────────────────────────────────────
-        .child(group("End-aligned (default)", secondary,
-            js_form_actions(&FormActionsSpec::new(), theme, vec![
-                secondary_btn("Cancel"),
-                primary_btn("Save changes"),
-            ])
+        .child(group(
+            "End-aligned (default)",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new(),
+                theme,
+                vec![secondary_btn("Cancel"), primary_btn("Save changes")],
+            ),
         ))
         // ── Start-aligned ───────────────────────────────────────────────
-        .child(group("Start-aligned", secondary,
-            js_form_actions(&FormActionsSpec::new().with_align(FormActionAlign::Start), theme, vec![
-                secondary_btn("Back"),
-                primary_btn("Continue"),
-            ])
+        .child(group(
+            "Start-aligned",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new().with_align(FormActionAlign::Start),
+                theme,
+                vec![secondary_btn("Back"), primary_btn("Continue")],
+            ),
         ))
         // ── Space between (danger-tone primary + primary) ───────────────
-        .child(group("Space between", secondary,
-            js_form_actions(&FormActionsSpec::new().with_align(FormActionAlign::Between), theme, vec![
-                js_button(
-                    &ButtonSpec::new()
-                        .with_variant(ButtonVariant::Primary)
-                        .with_tone(ButtonTone::Danger)
-                        .with_label("Delete"),
-                    theme,
-                ),
-                primary_btn("Save"),
-            ])
+        .child(group(
+            "Space between",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new().with_align(FormActionAlign::Between),
+                theme,
+                vec![
+                    js_button(
+                        &ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_tone(ButtonTone::Danger)
+                            .with_label("Delete"),
+                        theme,
+                    ),
+                    primary_btn("Save"),
+                ],
+            ),
         ))
         // ── Responsive danger actions (inline danger group + overflow) ──
         // `dangerItems` on the spec turns on the ghost ellipsis overflow
@@ -62,7 +94,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         // danger ghost button is the `__danger` group content. Both render
         // together — the El render-immediate model has no container-query
         // channel for the width-driven swap.
-        .child(group("Responsive danger actions (overflow)", secondary,
+        .child(group(
+            "Responsive danger actions (overflow)",
+            secondary,
             js_form_actions_full(
                 &FormActionsSpec::new()
                     .with_danger_item(FormActionDangerItem::new("Discard draft"))
@@ -76,47 +110,78 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     theme,
                 )],
                 vec![secondary_btn("Cancel"), primary_btn("Save changes")],
-            )
+            ),
         ))
         // ── Submitting (loading primary, disabled cancel) ───────────────
-        .child(group("Submitting", secondary,
-            js_form_actions(&FormActionsSpec::new(), theme, vec![
-                js_button(
-                    &ButtonSpec::new()
-                        .with_variant(ButtonVariant::Secondary)
-                        .with_label("Cancel")
-                        .with_disabled(true),
-                    theme,
-                ),
-                js_button(
-                    &ButtonSpec::new()
-                        .with_variant(ButtonVariant::Primary)
-                        .with_label("Saving\u{2026}")
-                        .with_loading(true),
-                    theme,
-                ),
-            ])
+        .child(group(
+            "Submitting",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new(),
+                theme,
+                vec![
+                    js_button(
+                        &ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label("Cancel")
+                            .with_disabled(true),
+                        theme,
+                    ),
+                    js_button(
+                        &ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Saving\u{2026}")
+                            .with_loading(true),
+                        theme,
+                    ),
+                ],
+            ),
         ))
         // ── Density ladder (compact / default / comfortable) ────────────
-        .child(group("Density ladder", secondary,
-            div().flex_col().gap(12.0)
-                .child(density_row(theme, secondary, "Compact", ControlDensity::Compact))
-                .child(density_row(theme, secondary, "Default", ControlDensity::Default))
-                .child(density_row(theme, secondary, "Comfortable", ControlDensity::Comfortable))
+        .child(group(
+            "Density ladder",
+            secondary,
+            div()
+                .flex_col()
+                .gap(12.0)
+                .child(density_row(
+                    theme,
+                    secondary,
+                    "Compact",
+                    ControlDensity::Compact,
+                ))
+                .child(density_row(
+                    theme,
+                    secondary,
+                    "Default",
+                    ControlDensity::Default,
+                ))
+                .child(density_row(
+                    theme,
+                    secondary,
+                    "Comfortable",
+                    ControlDensity::Comfortable,
+                )),
         ))
         // ── Footer-embedded (showTopSeparation=false) ───────────────────
-        .child(group("Footer-embedded (no top separation)", secondary,
-            js_form_actions(&FormActionsSpec::new().with_top_separation(false), theme, vec![
-                ghost_btn("Cancel"),
-                primary_btn("Save changes"),
-            ])
+        .child(group(
+            "Footer-embedded (no top separation)",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new().with_top_separation(false),
+                theme,
+                vec![ghost_btn("Cancel"), primary_btn("Save changes")],
+            ),
         ))
         // ── Bordered separation (showTopBorder=true) ────────────────────
-        .child(group("Bordered separation", secondary,
-            js_form_actions(&FormActionsSpec::new().with_top_border(true), theme, vec![
-                secondary_btn("Cancel"),
-                primary_btn("Save changes"),
-            ])
+        .child(group(
+            "Bordered separation",
+            secondary,
+            js_form_actions(
+                &FormActionsSpec::new().with_top_border(true),
+                theme,
+                vec![secondary_btn("Cancel"), primary_btn("Save changes")],
+            ),
         ))
 }
 
@@ -129,18 +194,34 @@ fn density_row(
     label_text: &str,
     density: ControlDensity,
 ) -> El {
-    div().flex_col().gap(4.0)
+    div()
+        .flex_col()
+        .gap(4.0)
         .child(label(label_text).text_color(text_secondary).text_size(11.0))
-        .child(
-            js_form_actions(&FormActionsSpec::new().with_density(density), theme, vec![
-                js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Cancel"), theme),
-                js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save changes"), theme),
-            ])
-        )
+        .child(js_form_actions(
+            &FormActionsSpec::new().with_density(density),
+            theme,
+            vec![
+                js_button(
+                    &ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Cancel"),
+                    theme,
+                ),
+                js_button(
+                    &ButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Save changes"),
+                    theme,
+                ),
+            ],
+        ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

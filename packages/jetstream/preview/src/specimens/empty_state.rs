@@ -1,39 +1,49 @@
 //! EmptyState specimen — placeholder for empty content areas.
 
+use crate::compat::js_empty_state;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_empty_state;
 
 use poodle_specs::{ButtonVariant, EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // Neutral variant (default)
-        .child(group("Neutral variant", secondary,
-            js_empty_state(&EmptyStateSpec::new("Nothing here yet"), theme)
+        .child(group(
+            "Neutral variant",
+            secondary,
+            js_empty_state(&EmptyStateSpec::new("Nothing here yet"), theme),
         ))
         // Search variant
-        .child(group("Search variant", secondary,
+        .child(group(
+            "Search variant",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("No results")
                     .with_variant(EmptyStateVariant::Search)
                     .with_message("Try adjusting your search or filters."),
                 theme,
-            )
+            ),
         ))
         // FirstRun variant
-        .child(group("First-run variant", secondary,
+        .child(group(
+            "First-run variant",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("Get started")
                     .with_variant(EmptyStateVariant::FirstRun)
                     .with_message("Create your first item to begin."),
                 theme,
-            )
+            ),
         ))
         // With single action
-        .child(group("With action", secondary,
+        .child(group(
+            "With action",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("No items")
                     .with_message("Create an item to get started.")
@@ -42,10 +52,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_variant(ButtonVariant::Primary),
                     ]),
                 theme,
-            )
+            ),
         ))
         // With multiple actions
-        .child(group("Multiple actions", secondary,
+        .child(group(
+            "Multiple actions",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("Nothing found")
                     .with_message("Adjust your search or clear all filters.")
@@ -55,30 +67,36 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_variant(ButtonVariant::Primary),
                     ]),
                 theme,
-            )
+            ),
         ))
         // Compact mode
-        .child(group("Compact", secondary,
+        .child(group(
+            "Compact",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("No results")
                     .with_variant(EmptyStateVariant::Search)
                     .with_compact(true),
                 theme,
-            )
+            ),
         ))
         // Compact with message
-        .child(group("Compact with message", secondary,
+        .child(group(
+            "Compact with message",
+            secondary,
             js_empty_state(
                 &EmptyStateSpec::new("No results")
                     .with_message("Try a different search term.")
                     .with_compact(true),
                 theme,
-            )
+            ),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

@@ -23,7 +23,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_col()
                 .gap(6.0)
-                .child(row("2026-03-23T10:58:00Z", "2 minutes ago", secondary, theme))
+                .child(row(
+                    "2026-03-23T10:58:00Z",
+                    "2 minutes ago",
+                    secondary,
+                    theme,
+                ))
                 .child(row("2026-03-23T08:00:00Z", "3 hours ago", secondary, theme))
                 .child(row("2026-03-21T11:00:00Z", "2 days ago", secondary, theme)),
         ))
@@ -40,7 +45,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_col()
                 .gap(6.0)
-                .child(row_long("2026-03-23T10:58:00Z", "2 minutes", secondary, theme))
+                .child(row_long(
+                    "2026-03-23T10:58:00Z",
+                    "2 minutes",
+                    secondary,
+                    theme,
+                ))
                 .child(row_long("2026-03-21T11:00:00Z", "2 days", secondary, theme)),
         ))
         // Static — live updates off (computed once).
@@ -75,12 +85,20 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 /// A short-form TimeAgo with a caption describing the expected relative text.
-fn row(timestamp: &str, caption: &str, text_secondary: ColorValue, theme: &JetstreamThemeProvider) -> El {
+fn row(
+    timestamp: &str,
+    caption: &str,
+    text_secondary: ColorValue,
+    theme: &JetstreamThemeProvider,
+) -> El {
     div()
         .flex_row()
         .gap(8.0)
         .items_center()
-        .child(js_time_ago(&TimeAgoSpec::new().with_timestamp(timestamp), theme))
+        .child(js_time_ago(
+            &TimeAgoSpec::new().with_timestamp(timestamp),
+            theme,
+        ))
         .child(
             label(format!("({caption})"))
                 .text_color(text_secondary)
@@ -100,7 +118,9 @@ fn row_long(
         .gap(8.0)
         .items_center()
         .child(js_time_ago(
-            &TimeAgoSpec::new().with_timestamp(timestamp).with_short(false),
+            &TimeAgoSpec::new()
+                .with_timestamp(timestamp)
+                .with_short(false),
             theme,
         ))
         .child(

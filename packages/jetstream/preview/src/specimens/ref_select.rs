@@ -1,8 +1,8 @@
 //! RefSelect specimen — version-control ref chooser.
 
+use crate::compat::js_ref_select;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_ref_select;
 
 use poodle_specs::{
     ControlDensity, ControlSize, RefKind, RefOption, RefSelectEmphasis, RefSelectSpec,
@@ -75,7 +75,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "No matches",
             secondary,
             js_ref_select(
-                &RefSelectSpec::new().with_search_value("nothing-matches").with_open(true),
+                &RefSelectSpec::new()
+                    .with_search_value("nothing-matches")
+                    .with_open(true),
                 theme,
             ),
         ))
@@ -97,7 +99,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "No selection",
             secondary,
-            js_ref_select(&RefSelectSpec::new().with_refs(refs()).with_current_ref("main"), theme),
+            js_ref_select(
+                &RefSelectSpec::new()
+                    .with_refs(refs())
+                    .with_current_ref("main"),
+                theme,
+            ),
         ))
         .child(group(
             "Disabled",

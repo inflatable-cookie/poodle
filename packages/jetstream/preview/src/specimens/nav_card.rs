@@ -5,9 +5,9 @@
 //! (icon glyph stands in for the host `icon()` snippet), so each specimen card
 //! varies the spec rather than passing separate elements.
 
+use crate::compat::js_nav_card;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_nav_card;
 
 use poodle_specs::{ControlDensity, NavCardSpec};
 

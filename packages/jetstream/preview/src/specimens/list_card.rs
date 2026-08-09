@@ -7,27 +7,33 @@
 //! `js_icon`), matching the GPUI specimen's `with_leading` / `with_trailing` /
 //! `with_footer` compositions.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_icon;
-use crate::compat::{js_list_card, js_list_card_with_slots};
 use crate::compat::js_list_card_counter;
 use crate::compat::js_pill;
+use crate::compat::{js_list_card, js_list_card_with_slots};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, IconSize, IconSpec, LeadingFill, LeadingShape,
-    ListCardCounterSpec, ListCardLayout, ListCardSpec, PillAppearance, PillSize, PillSpec, PillTone,
-    SelectionIndicator,
+    ListCardCounterSpec, ListCardLayout, ListCardSpec, PillAppearance, PillSize, PillSpec,
+    PillTone, SelectionIndicator,
 };
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // -- Interactive list cards (interactive + disabled) --
-        .child(group("Interactive list cards", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Interactive list cards",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("design-system-v2.figma")
@@ -54,8 +60,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Rounded-square leading (thumbnails) --
-        .child(group("Rounded-square leading (thumbnails)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Rounded-square leading (thumbnails)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("hero-banner.png")
@@ -76,8 +86,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- With badges (header-accessories slot) --
-        .child(group("With badges", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "With badges",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
                         .with_title("API integration guide")
@@ -129,8 +143,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- With footer counters (footer slot) --
-        .child(group("With footer counters", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "With footer counters",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
                         .with_title("Design system")
@@ -147,10 +165,22 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         theme,
                     )],
                     Some(
-                        div().flex_row().items_center().gap(12.0)
-                            .child(js_list_card_counter(&ListCardCounterSpec::new("file-text", 24), theme))
-                            .child(js_list_card_counter(&ListCardCounterSpec::new("image", 8), theme))
-                            .child(js_list_card_counter(&ListCardCounterSpec::new("folder", 3), theme)),
+                        div()
+                            .flex_row()
+                            .items_center()
+                            .gap(12.0)
+                            .child(js_list_card_counter(
+                                &ListCardCounterSpec::new("file-text", 24),
+                                theme,
+                            ))
+                            .child(js_list_card_counter(
+                                &ListCardCounterSpec::new("image", 8),
+                                theme,
+                            ))
+                            .child(js_list_card_counter(
+                                &ListCardCounterSpec::new("folder", 3),
+                                theme,
+                            )),
                     ),
                     None,
                     None,
@@ -166,9 +196,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     None,
                     Vec::new(),
                     Some(
-                        div().flex_row().items_center().gap(12.0)
-                            .child(js_list_card_counter(&ListCardCounterSpec::new("file-text", 6), theme))
-                            .child(js_list_card_counter(&ListCardCounterSpec::new("image", 42), theme)),
+                        div()
+                            .flex_row()
+                            .items_center()
+                            .gap(12.0)
+                            .child(js_list_card_counter(
+                                &ListCardCounterSpec::new("file-text", 6),
+                                theme,
+                            ))
+                            .child(js_list_card_counter(
+                                &ListCardCounterSpec::new("image", 42),
+                                theme,
+                            )),
                     ),
                     None,
                     None,
@@ -176,8 +215,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- With trailing (exclusive trailing lane; replaces meta + actions) --
-        .child(group("With trailing (exclusive lane)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "With trailing (exclusive lane)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
                         .with_title("API Server")
@@ -218,8 +261,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- With actions (action-trigger lane, composed with meta) --
-        .child(group("With actions", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "With actions",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
                         .with_title("invoice-2024-q4.pdf")
@@ -230,15 +277,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     None,
                     Vec::new(),
                     None,
-                    Some(
-                        js_button(
-                            &ButtonSpec::new()
-                                .with_label("Download")
-                                .with_variant(ButtonVariant::Secondary)
-                                .with_size(ControlSize::Sm),
-                            theme,
-                        ),
-                    ),
+                    Some(js_button(
+                        &ButtonSpec::new()
+                            .with_label("Download")
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_size(ControlSize::Sm),
+                        theme,
+                    )),
                     None,
                     None,
                 ))
@@ -252,8 +297,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     Vec::new(),
                     None,
                     Some(
-                        div().flex_row().items_center().gap(4.0)
-                            .child(js_icon(&IconSpec::new("download").with_size(IconSize::Sm), theme))
+                        div()
+                            .flex_row()
+                            .items_center()
+                            .gap(4.0)
+                            .child(js_icon(
+                                &IconSpec::new("download").with_size(IconSize::Sm),
+                                theme,
+                            ))
                             .child(js_button(
                                 &ButtonSpec::new()
                                     .with_label("Sign")
@@ -267,8 +318,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- With corner (header-accessories corner slot, tertiary color) --
-        .child(group("With corner (header-corner slot)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "With corner (header-corner slot)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
                         .with_title("Pipeline config")
@@ -282,9 +337,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     None,
                     None,
                     // Corner: supplementary header-corner content (tertiary color).
-                    Some(div().flex_row().items_center().gap(4.0)
-                        .child(js_icon(&IconSpec::new("git-branch").with_size(IconSize::Sm), theme))
-                        .child(label("v2.1"))),
+                    Some(
+                        div()
+                            .flex_row()
+                            .items_center()
+                            .gap(4.0)
+                            .child(js_icon(
+                                &IconSpec::new("git-branch").with_size(IconSize::Sm),
+                                theme,
+                            ))
+                            .child(label("v2.1")),
+                    ),
                 ))
                 .child(js_list_card_with_slots(
                     &ListCardSpec::new()
@@ -304,14 +367,26 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     None,
                     None,
                     None,
-                    Some(div().flex_row().items_center().gap(4.0)
-                        .child(js_icon(&IconSpec::new("clock").with_size(IconSize::Sm), theme))
-                        .child(label("2d"))),
+                    Some(
+                        div()
+                            .flex_row()
+                            .items_center()
+                            .gap(4.0)
+                            .child(js_icon(
+                                &IconSpec::new("clock").with_size(IconSize::Sm),
+                                theme,
+                            ))
+                            .child(label("2d")),
+                    ),
                 )),
         ))
         // -- Solid fill with accent colors --
-        .child(group("Solid fill with accent colors", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Solid fill with accent colors",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Design Tokens")
@@ -341,8 +416,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Not live (dashed border, interactive) --
-        .child(group("Not live (reduced opacity, interactive)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Not live (reduced opacity, interactive)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Unpublished Draft")
@@ -360,8 +439,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Corner sash badges --
-        .child(group("Corner sash badges", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Corner sash badges",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Free tier plan")
@@ -393,8 +476,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Selectable (multi-select) --
-        .child(group("Selectable (multi-select)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Selectable (multi-select)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Alice Chen")
@@ -420,8 +507,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Reorder handle --
-        .child(group("Reorder handle", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Reorder handle",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("design-system")
@@ -438,8 +529,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Link roots (href) --
-        .child(group("Link roots (href)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Link roots (href)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Billing settings")
@@ -457,8 +552,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Highlighted (accent emphasis) --
-        .child(group("Highlighted (accent emphasis)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Highlighted (accent emphasis)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Active selection")
@@ -479,7 +578,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Active: the card you are currently on --
-        .child(group("Active card", secondary,
+        .child(group(
+            "Active card",
+            secondary,
             div()
                 .flex_col()
                 .gap(8.0)
@@ -511,8 +612,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Selection indicator (checkbox) --
-        .child(group("Selection indicator (checkbox)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Selection indicator (checkbox)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Selected row")
@@ -532,8 +637,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Layout (default / compact / stacked) --
-        .child(group("Layout (default / compact / stacked)", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Layout (default / compact / stacked)",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Default layout")
@@ -565,8 +674,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Leading size offset --
-        .child(group("Leading size offset", secondary,
-            div().flex_col().gap(6.0)
+        .child(group(
+            "Leading size offset",
+            secondary,
+            div()
+                .flex_col()
+                .gap(6.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
                         .with_title("Default leading")
@@ -592,7 +705,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )),
         ))
         // -- Static list card --
-        .child(group("Static list card", secondary,
+        .child(group(
+            "Static list card",
+            secondary,
             js_list_card(
                 &ListCardSpec::new()
                     .with_title("System Configuration")
@@ -604,7 +719,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

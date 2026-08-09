@@ -1,8 +1,8 @@
 //! FileUpload specimen — dropzone states + populated file list.
 
+use crate::compat::js_file_upload;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_file_upload;
 
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec, FileUploadStatus};
 
@@ -81,7 +81,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Dragging over",
             secondary,
-            wrap(js_file_upload(&FileUploadSpec::new().with_dragging(true), theme)),
+            wrap(js_file_upload(
+                &FileUploadSpec::new().with_dragging(true),
+                theme,
+            )),
         ))
         // Size + density
         .child(group(
@@ -108,7 +111,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Disabled",
             secondary,
-            wrap(js_file_upload(&FileUploadSpec::new().with_disabled(true), theme)),
+            wrap(js_file_upload(
+                &FileUploadSpec::new().with_disabled(true),
+                theme,
+            )),
         ))
 }
 

@@ -1,9 +1,9 @@
 //! PageLoading specimen — inline + overlay presentation, indeterminate,
 //! determinate, cancel control, and the size ladder.
 
+use crate::compat::js_page_loading;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_page_loading;
 
 use poodle_specs::{ControlSize, PageLoadingPresentation, PageLoadingSpec};
 

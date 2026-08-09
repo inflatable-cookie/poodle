@@ -11,9 +11,9 @@
 //! `relative().min_h(...)` container that confines the scrim to that group's
 //! region (the same posture as the GPUI specimen's `div().relative()`).
 
+use crate::compat::js_command_palette;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_command_palette;
 
 use poodle_specs::{
     CommandActionItem, CommandPaletteSpec, ControlDensity, ControlSize, DiscoveryState,
@@ -101,12 +101,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     root = root.child(group_open(
         "Open / ready",
         secondary,
-        js_command_palette(&open_state_spec(actions.clone(), "", DiscoveryState::Ready), theme),
+        js_command_palette(
+            &open_state_spec(actions.clone(), "", DiscoveryState::Ready),
+            theme,
+        ),
     ));
     root = root.child(group_open(
         "Open / loading",
         secondary,
-        js_command_palette(&open_state_spec(actions.clone(), "", DiscoveryState::Loading), theme),
+        js_command_palette(
+            &open_state_spec(actions.clone(), "", DiscoveryState::Loading),
+            theme,
+        ),
     ));
     root = root.child(group_open(
         "Open / no-results",
@@ -119,12 +125,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     root = root.child(group_open(
         "Open / empty",
         secondary,
-        js_command_palette(&open_state_spec(Vec::new(), "", DiscoveryState::Empty), theme),
+        js_command_palette(
+            &open_state_spec(Vec::new(), "", DiscoveryState::Empty),
+            theme,
+        ),
     ));
     root = root.child(group_open(
         "Open / error",
         secondary,
-        js_command_palette(&open_state_spec(actions.clone(), "", DiscoveryState::Error), theme),
+        js_command_palette(
+            &open_state_spec(actions.clone(), "", DiscoveryState::Error),
+            theme,
+        ),
     ));
 
     // ── Sizes (xs–xl): one open palette per intrinsic size ──

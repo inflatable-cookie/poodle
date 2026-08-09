@@ -8,9 +8,9 @@
 //! leading check indicator — plus the size and density matrices. All real
 //! `js_context_menu` instances.
 
+use crate::compat::js_context_menu;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_context_menu;
 
 use poodle_specs::{ContextMenuSpec, ControlDensity, ControlSize, MenuEntry, MenuItemKind};
 
@@ -63,7 +63,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut size_row = div().flex_row().flex_wrap().gap(16.0);
     for (name, size) in sizes {
         size_row = size_row.child(
-            div().flex_col().gap(4.0)
+            div()
+                .flex_col()
+                .gap(4.0)
                 .child(label(name).text_color(secondary).text_size(11.0))
                 .child(js_context_menu(
                     &ContextMenuSpec::new(matrix_items()).with_size(size),
@@ -81,7 +83,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut density_row = div().flex_row().flex_wrap().gap(16.0);
     for (name, density) in densities {
         density_row = density_row.child(
-            div().flex_col().gap(4.0)
+            div()
+                .flex_col()
+                .gap(4.0)
                 .child(label(name).text_color(secondary).text_size(11.0))
                 .child(js_context_menu(
                     &ContextMenuSpec::new(matrix_items()).with_density(density),
@@ -90,19 +94,31 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         );
     }
 
-    div().flex_col().gap(24.0)
-        .child(group("Editing menu — shortcuts, separators, disabled", secondary,
-            js_context_menu(&ContextMenuSpec::new(editing_items), theme)
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "Editing menu — shortcuts, separators, disabled",
+            secondary,
+            js_context_menu(&ContextMenuSpec::new(editing_items), theme),
         ))
-        .child(group("Danger + checkbox/radio items", secondary,
-            js_context_menu(&ContextMenuSpec::new(mixed_items), theme)
+        .child(group(
+            "Danger + checkbox/radio items",
+            secondary,
+            js_context_menu(&ContextMenuSpec::new(mixed_items), theme),
         ))
         .child(group("Sizes (xs → xl)", secondary, size_row))
-        .child(group("Densities (compact / default / comfortable)", secondary, density_row))
+        .child(group(
+            "Densities (compact / default / comfortable)",
+            secondary,
+            density_row,
+        ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

@@ -6,9 +6,9 @@
 //! sections all resolve from `DateTimeRangePickerSpec` + tokens. Specimens
 //! render static state, so the open flag is seeded directly on the spec.
 
+use crate::compat::js_date_time_range_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_date_time_range_picker;
 
 use poodle_specs::{
     ControlDensity, ControlSize, DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue,
@@ -57,12 +57,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(400.0).child(js_date_time_range_picker(
                 &{
-                    let mut spec = DateTimeRangePickerSpec::new().with_default_value(
-                        DateTimeRangeValue::new(
+                    let mut spec =
+                        DateTimeRangePickerSpec::new().with_default_value(DateTimeRangeValue::new(
                             DateTimeValue::new(Some("2026-03-10".into()), Some("09:00".into())),
                             DateTimeValue::new(Some("2026-03-14".into()), Some("17:00".into())),
-                        ),
-                    );
+                        ));
                     spec.open = Some(true);
                     spec.aria_label = Some("Open range picker".to_string());
                     spec
@@ -126,7 +125,9 @@ fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
         .with_size(size)
         .with_default_value(default_range());
     spec.aria_label = Some("Date time range".to_string());
-    div().w(400.0).child(js_date_time_range_picker(&spec, theme))
+    div()
+        .w(400.0)
+        .child(js_date_time_range_picker(&spec, theme))
 }
 
 fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
@@ -134,7 +135,9 @@ fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
         .with_density(density)
         .with_default_value(default_range());
     spec.aria_label = Some("Date time range".to_string());
-    div().w(400.0).child(js_date_time_range_picker(&spec, theme))
+    div()
+        .w(400.0)
+        .child(js_date_time_range_picker(&spec, theme))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {

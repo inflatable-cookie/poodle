@@ -6,10 +6,9 @@
 //! presentation. Every panel is rendered by the real `js_action_discovery_panel`
 //! resolving values from the token system; the bordered frame uses token colors.
 
+use crate::compat::js_action_discovery_panel;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_action_discovery_panel;
-
 
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, ControlDensity,
@@ -84,9 +83,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         ActionDiscoverySection::new(
             "tools",
             "Tools",
-            vec![
-                CommandActionItem::new("lint", "Run Linter").with_shortcut("\u{21E7}\u{2318}L"),
-            ],
+            vec![CommandActionItem::new("lint", "Run Linter").with_shortcut("\u{21E7}\u{2318}L")],
         ),
     ]);
 

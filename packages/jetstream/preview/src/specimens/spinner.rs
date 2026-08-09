@@ -63,10 +63,22 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     }
 
     // ── Tones (ring) ──
-    let tones_row = div().flex_row().gap(16.0).items_center()
-        .child(js_spinner(&SpinnerSpec::new().with_tone(SpinnerTone::Current), theme))
-        .child(js_spinner(&SpinnerSpec::new().with_tone(SpinnerTone::Accent), theme))
-        .child(js_spinner(&SpinnerSpec::new().with_tone(SpinnerTone::Muted), theme));
+    let tones_row = div()
+        .flex_row()
+        .gap(16.0)
+        .items_center()
+        .child(js_spinner(
+            &SpinnerSpec::new().with_tone(SpinnerTone::Current),
+            theme,
+        ))
+        .child(js_spinner(
+            &SpinnerSpec::new().with_tone(SpinnerTone::Accent),
+            theme,
+        ))
+        .child(js_spinner(
+            &SpinnerSpec::new().with_tone(SpinnerTone::Muted),
+            theme,
+        ));
 
     // ── Context tones: spinners hosted inside bordered surface chips ──
     // Jetstream has no CSS inheritance, so `current` always resolves to
@@ -86,7 +98,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             .bg(surface)
             .child(inner)
     };
-    let context_row = div().flex_row().gap(rem_to_px(0.75)).items_center()
+    let context_row = div()
+        .flex_row()
+        .gap(rem_to_px(0.75))
+        .items_center()
         .child(chip(js_spinner(
             &SpinnerSpec::new()
                 .with_variant(SpinnerVariant::Ring)
@@ -106,7 +121,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             theme,
         )));
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         .child(group("Ring", secondary, ring_row))
         .child(group("CLI grid", secondary, grid_row))
         .child(group("CLI grid (mixed tones)", secondary, mixed_grid))
@@ -115,7 +132,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

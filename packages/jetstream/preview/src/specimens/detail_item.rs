@@ -7,11 +7,11 @@
 //! tokens (`js_detail_item` / `js_detail_item_with_slots`, `js_button`,
 //! `js_pill`) — no hand-coded chrome.
 
+use crate::compat::js_button;
+use crate::compat::js_pill;
+use crate::compat::{js_detail_item, js_detail_item_with_slots};
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_button;
-use crate::compat::{js_detail_item, js_detail_item_with_slots};
-use crate::compat::js_pill;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout,
@@ -122,7 +122,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 
 fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
     let muted = resolve_color(theme, "color.text.muted");
-    div().flex_col().gap(4.0)
+    div()
+        .flex_col()
+        .gap(4.0)
         .child(label(name).text_color(muted).text_size(11.0))
         .child(js_detail_item_with_slots(
             &DetailItemSpec::new("Storage")
@@ -143,7 +145,9 @@ fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvi
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

@@ -4,16 +4,15 @@
 //! wrapping a real `js_text_input`, and actions are real `js_button`s. All visual
 //! values resolve from tokens via the component specs.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_field;
-use crate::compat::js_text_input;
 use crate::compat::js_form_layout;
+use crate::compat::js_text_input;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, FieldSpec, FormLayoutSpec, TextInputSpec, ValidationState,
 };
-
 
 /// Real Field (label + control) wrapping a real TextInput, all token-resolved.
 fn field(id: &str, lbl: &str, placeholder: &str, theme: &JetstreamThemeProvider) -> El {
@@ -52,7 +51,10 @@ fn field_invalid(
 
 /// Real action button (Cancel = secondary, Save = primary).
 fn action_button(lbl: &str, variant: ButtonVariant, theme: &JetstreamThemeProvider) -> El {
-    js_button(&ButtonSpec::new().with_label(lbl).with_variant(variant), theme)
+    js_button(
+        &ButtonSpec::new().with_label(lbl).with_variant(variant),
+        theme,
+    )
 }
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {

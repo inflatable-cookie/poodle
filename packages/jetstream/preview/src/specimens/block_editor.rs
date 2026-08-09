@@ -14,13 +14,11 @@
 //! channel; the faithful equivalent is the spec block path, which is what these
 //! groups exercise. Editing / add / remove / reorder are preview-event-loop bound.
 
+use crate::compat::js_block_editor;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_block_editor;
 
-use poodle_specs::{
-    BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock,
-};
+use poodle_specs::{BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -65,12 +63,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     "Each block renders by type. The per-block toolbar carries a ghost \
                      TypeSelect plus add/move/remove controls.",
                 ),
-                EditorBlock::new("b3", "quote")
-                    .with_content("\"Pure shell components let consumers own the block vocabulary.\""),
-                EditorBlock::new("b4", "code")
-                    .with_content("const blocks: EditorBlock[] = [];"),
-                EditorBlock::new("b5", "list")
-                    .with_content("First item\nSecond item\nThird item"),
+                EditorBlock::new("b3", "quote").with_content(
+                    "\"Pure shell components let consumers own the block vocabulary.\"",
+                ),
+                EditorBlock::new("b4", "code").with_content("const blocks: EditorBlock[] = [];"),
+                EditorBlock::new("b5", "list").with_content("First item\nSecond item\nThird item"),
             ]),
         theme,
     );
@@ -103,23 +100,35 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         theme,
     );
 
-    div().flex_col().gap(24.0)
-        .child(group("Default blocks (heading / paragraph / quote / code)", secondary,
-            div().w(560.0).child(default_editor)
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "Default blocks (heading / paragraph / quote / code)",
+            secondary,
+            div().w(560.0).child(default_editor),
         ))
-        .child(group("Consumer-driven block types", secondary,
-            div().w(560.0).child(consumer_editor)
+        .child(group(
+            "Consumer-driven block types",
+            secondary,
+            div().w(560.0).child(consumer_editor),
         ))
-        .child(group("Single posture (multi-block controls hidden)", secondary,
-            div().w(560.0).child(single_editor)
+        .child(group(
+            "Single posture (multi-block controls hidden)",
+            secondary,
+            div().w(560.0).child(single_editor),
         ))
-        .child(group("Disabled", secondary,
-            div().w(560.0).child(disabled_editor)
+        .child(group(
+            "Disabled",
+            secondary,
+            div().w(560.0).child(disabled_editor),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

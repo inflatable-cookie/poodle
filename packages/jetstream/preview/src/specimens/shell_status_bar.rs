@@ -75,7 +75,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     ));
 
     // With chrome: 94% panel bg + border-top.
-    let chrome_spec = ShellStatusBarSpec::new().with_summary("Ready").with_chrome(true);
+    let chrome_spec = ShellStatusBarSpec::new()
+        .with_summary("Ready")
+        .with_chrome(true);
     root = root.child(group(
         "With chrome",
         secondary,

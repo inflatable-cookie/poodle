@@ -8,9 +8,9 @@
 //! affordance, overflow chrome, and reorder handles are out of scope, so none are
 //! drawn. Keyboard nav / selection commit are preview-event-loop bound.
 
+use crate::compat::js_tab_strip;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_tab_strip;
 
 use poodle_specs::{ControlDensity, ControlSize, Orientation, TabStripItem, TabStripSpec};
 
@@ -41,15 +41,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .flex_col()
         .child(horizontal)
         .child(
-            div()
-                .p(16.0)
-                .bg(bg_surface)
-                .min_h(48.0)
-                .child(
-                    label("Host-owned panel: main.rs")
-                        .text_size(13.0)
-                        .text_color(secondary),
-                ),
+            div().p(16.0).bg(bg_surface).min_h(48.0).child(
+                label("Host-owned panel: main.rs")
+                    .text_size(13.0)
+                    .text_color(secondary),
+            ),
         );
 
     // ── 2. DISABLED ITEMS — dimmed, skipped by arrow nav ────────────────
@@ -113,7 +109,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut size_col = div().flex_col().gap(12.0);
     for (name, size) in sizes {
         size_col = size_col.child(
-            div().flex_col().gap(4.0)
+            div()
+                .flex_col()
+                .gap(4.0)
                 .child(label(name).text_color(secondary).text_size(11.0))
                 .child(js_tab_strip(
                     &TabStripSpec::new(matrix_items())
@@ -134,7 +132,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut density_col = div().flex_col().gap(12.0);
     for (name, density) in densities {
         density_col = density_col.child(
-            div().flex_col().gap(4.0)
+            div()
+                .flex_col()
+                .gap(4.0)
                 .child(label(name).text_color(secondary).text_size(11.0))
                 .child(js_tab_strip(
                     &TabStripSpec::new(matrix_items())
@@ -146,16 +146,36 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         );
     }
 
-    div().flex_col().gap(24.0)
-        .child(group("Horizontal — closable file tabs + host panel", secondary, horizontal_panel))
-        .child(group("Disabled items (dimmed, skipped by arrow keys)", secondary, disabled))
-        .child(group("Vertical — labels and close buttons stay visible", secondary, vertical_panel))
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "Horizontal — closable file tabs + host panel",
+            secondary,
+            horizontal_panel,
+        ))
+        .child(group(
+            "Disabled items (dimmed, skipped by arrow keys)",
+            secondary,
+            disabled,
+        ))
+        .child(group(
+            "Vertical — labels and close buttons stay visible",
+            secondary,
+            vertical_panel,
+        ))
         .child(group("Sizes (xs → xl)", secondary, size_col))
-        .child(group("Densities (compact / default / comfortable)", secondary, density_col))
+        .child(group(
+            "Densities (compact / default / comfortable)",
+            secondary,
+            density_col,
+        ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

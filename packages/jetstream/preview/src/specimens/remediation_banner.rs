@@ -1,11 +1,11 @@
 //! RemediationBanner specimen — dismissible fix suggestion banner.
 
+use crate::compat::js_remediation_banner;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_remediation_banner;
 
-use poodle_specs::{ButtonVariant, RemediationBannerSpec, RemediationAction};
 use poodle_specs::{AnnouncementMode, StatusTone};
+use poodle_specs::{ButtonVariant, RemediationAction, RemediationBannerSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -83,7 +83,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

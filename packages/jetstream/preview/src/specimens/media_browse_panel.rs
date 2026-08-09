@@ -6,9 +6,9 @@
 //! real `js_media_browse_panel`, which composes the real `js_media_thumbnail`
 //! (grid cards), `js_callout` (error), and `js_button` (load-more) internally.
 
+use crate::compat::js_media_browse_panel;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_media_browse_panel;
 
 use poodle_specs::{
     ControlDensity, ControlSize, MediaBrowseItem, MediaBrowsePanelSpec, SemanticControlSizeRole,
@@ -21,7 +21,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         MediaBrowseItem::new("1", "Hero banner", "image").with_meta("Image \u{2022} 1920 x 1080"),
         MediaBrowseItem::new("2", "Launch trailer", "video").with_meta("Video \u{2022} 3:42"),
         MediaBrowseItem::new("3", "Podcast intro", "audio").with_meta("Audio \u{2022} 1:18"),
-        MediaBrowseItem::new("4", "Quarterly report", "document").with_meta("Document \u{2022} PDF"),
+        MediaBrowseItem::new("4", "Quarterly report", "document")
+            .with_meta("Document \u{2022} PDF"),
     ];
 
     div()

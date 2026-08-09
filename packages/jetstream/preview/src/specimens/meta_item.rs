@@ -1,9 +1,9 @@
 //! MetaItem specimen — label/value pair for metadata rows.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_meta_item;
 use crate::compat::{rem_to_px, size_font_rem};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{ControlSize, InlineTypographyMode, MetaItemSpec};
 
@@ -12,30 +12,44 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let primary = resolve_color(theme, "color.text.primary");
 
-    div().flex_col().gap(24.0)
-        .child(group("With label + text value", secondary,
+    div()
+        .flex_col()
+        .gap(24.0)
+        .child(group(
+            "With label + text value",
+            secondary,
             js_meta_item(
                 &MetaItemSpec::new().with_label("Status"),
                 theme,
                 Some(label("Published").text_color(primary).text_size(body_font)),
-            )
+            ),
         ))
-        .child(group("Value only (no label)", secondary,
+        .child(group(
+            "Value only (no label)",
+            secondary,
             js_meta_item(
                 &MetaItemSpec::new(),
                 theme,
-                Some(label("Stem waveform").text_color(primary).text_size(body_font)),
-            )
+                Some(
+                    label("Stem waveform")
+                        .text_color(primary)
+                        .text_size(body_font),
+                ),
+            ),
         ))
-        .child(group("Label only (no value slot)", secondary,
-            js_meta_item(
-                &MetaItemSpec::new().with_label("Type"),
-                theme,
-                None,
-            )
+        .child(group(
+            "Label only (no value slot)",
+            secondary,
+            js_meta_item(&MetaItemSpec::new().with_label("Type"), theme, None),
         ))
-        .child(group("Multiple items side by side", secondary,
-            div().flex_row().gap(16.0).flex_wrap().items_center()
+        .child(group(
+            "Multiple items side by side",
+            secondary,
+            div()
+                .flex_row()
+                .gap(16.0)
+                .flex_wrap()
+                .items_center()
                 .child(js_meta_item(
                     &MetaItemSpec::new().with_label("Duration"),
                     theme,
@@ -50,10 +64,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     &MetaItemSpec::new().with_label("BPM"),
                     theme,
                     Some(label("128").text_color(primary).text_size(body_font)),
-                ))
+                )),
         ))
-        .child(group("Inherit typography", secondary,
-            div().flex_row().gap(8.0).items_center().text_size(20.0)
+        .child(group(
+            "Inherit typography",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
+                .text_size(20.0)
                 .child(label("Owner"))
                 .child(js_meta_item(
                     &MetaItemSpec::new()
@@ -62,12 +82,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     theme,
                     Some(label("Platform").text_color(primary).text_size(20.0)),
                 ))
-                .child(label("today"))
+                .child(label("today")),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

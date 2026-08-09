@@ -12,16 +12,16 @@
 //! resolving its chrome (panel-mix fill, border-subtle, radius.surface) and its
 //! size/density padding + gap from tokens.
 
-use crate::nel::*;
 use crate::compat::js_button;
 use crate::compat::js_icon_button;
 use crate::compat::js_separator;
+use crate::nel::*;
 
 use crate::compat::js_toolbar;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, Orientation,
-    RuleTone, SeparatorOrientation, SeparatorSpec, ToolbarSpec,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, Orientation, RuleTone,
+    SeparatorOrientation, SeparatorSpec, ToolbarSpec,
 };
 
 /// Ghost icon button used as a toolbar chrome action.
@@ -104,44 +104,48 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     .into_iter()
     .fold(sizes, |col, (size, name)| {
         col.child(
-            div().flex_row().gap(12.0).items_center().child(
-                label(name)
-                    .text_color(secondary)
-                    .text_size(11.0)
-                    .min_w(40.0),
-            )
-            .child(js_toolbar(
-                &ToolbarSpec::new()
-                    .with_size(size)
-                    .with_aria_label(format!("Toolbar {name}")),
-                theme,
-                vec![
-                    js_icon_button(
-                        &IconButtonSpec::new()
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_size(size)
-                            .with_icon("bold")
-                            .with_aria_label("Bold"),
-                        theme,
-                    ),
-                    js_icon_button(
-                        &IconButtonSpec::new()
-                            .with_variant(ButtonVariant::Ghost)
-                            .with_size(size)
-                            .with_icon("italic")
-                            .with_aria_label("Italic"),
-                        theme,
-                    ),
-                    divider(theme),
-                    js_button(
-                        &ButtonSpec::new()
-                            .with_variant(ButtonVariant::Secondary)
-                            .with_size(size)
-                            .with_label("Save"),
-                        theme,
-                    ),
-                ],
-            )),
+            div()
+                .flex_row()
+                .gap(12.0)
+                .items_center()
+                .child(
+                    label(name)
+                        .text_color(secondary)
+                        .text_size(11.0)
+                        .min_w(40.0),
+                )
+                .child(js_toolbar(
+                    &ToolbarSpec::new()
+                        .with_size(size)
+                        .with_aria_label(format!("Toolbar {name}")),
+                    theme,
+                    vec![
+                        js_icon_button(
+                            &IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size(size)
+                                .with_icon("bold")
+                                .with_aria_label("Bold"),
+                            theme,
+                        ),
+                        js_icon_button(
+                            &IconButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size(size)
+                                .with_icon("italic")
+                                .with_aria_label("Italic"),
+                            theme,
+                        ),
+                        divider(theme),
+                        js_button(
+                            &ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_size(size)
+                                .with_label("Save"),
+                            theme,
+                        ),
+                    ],
+                )),
         )
     });
 
@@ -156,29 +160,33 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     .into_iter()
     .fold(densities, |col, (density, name)| {
         col.child(
-            div().flex_row().gap(12.0).items_center().child(
-                label(name)
-                    .text_color(secondary)
-                    .text_size(11.0)
-                    .min_w(80.0),
-            )
-            .child(js_toolbar(
-                &ToolbarSpec::new()
-                    .with_density(density)
-                    .with_aria_label(format!("Toolbar {name}")),
-                theme,
-                vec![
-                    ib(theme, "bold", "Bold"),
-                    ib(theme, "italic", "Italic"),
-                    divider(theme),
-                    js_button(
-                        &ButtonSpec::new()
-                            .with_variant(ButtonVariant::Secondary)
-                            .with_label("Save"),
-                        theme,
-                    ),
-                ],
-            )),
+            div()
+                .flex_row()
+                .gap(12.0)
+                .items_center()
+                .child(
+                    label(name)
+                        .text_color(secondary)
+                        .text_size(11.0)
+                        .min_w(80.0),
+                )
+                .child(js_toolbar(
+                    &ToolbarSpec::new()
+                        .with_density(density)
+                        .with_aria_label(format!("Toolbar {name}")),
+                    theme,
+                    vec![
+                        ib(theme, "bold", "Bold"),
+                        ib(theme, "italic", "Italic"),
+                        divider(theme),
+                        js_button(
+                            &ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Save"),
+                            theme,
+                        ),
+                    ],
+                )),
         )
     });
 

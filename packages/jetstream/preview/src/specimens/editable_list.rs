@@ -6,9 +6,9 @@
 //! Windowed mode / long-list warning are feature-scope unbuilt in
 //! `js_editable_list` and are intentionally omitted.
 
+use crate::compat::js_editable_list;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_editable_list;
 
 use poodle_specs::{ControlDensity, ControlSize, EditableListSpec};
 
@@ -209,7 +209,10 @@ fn sizes_row(theme: &JetstreamThemeProvider) -> El {
 fn densities_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (density, _label) in DENSITIES {
-        col = col.child(sized_list(theme, EditableListSpec::new().with_density(*density)));
+        col = col.child(sized_list(
+            theme,
+            EditableListSpec::new().with_density(*density),
+        ));
     }
     col
 }

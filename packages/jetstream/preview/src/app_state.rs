@@ -3,7 +3,7 @@
 //! Mirrors the GPUI preview app's state structure: section navigation,
 //! theme preset, density, control size, and per-specimen interaction state.
 
-use poodle_specs::{reorder_nodes, DropPosition, TabDefinition, TreeNode, TreeSpec};
+use poodle_specs::{DropPosition, TabDefinition, TreeNode, TreeSpec, reorder_nodes};
 
 fn set_label(nodes: &mut [TreeNode], value: &str, label: &str) {
     for n in nodes.iter_mut() {
@@ -45,11 +45,7 @@ pub enum Section {
 }
 
 impl Section {
-    pub const ALL: &[Section] = &[
-        Section::Components,
-        Section::Demo,
-        Section::Tokens,
-    ];
+    pub const ALL: &[Section] = &[Section::Components, Section::Demo, Section::Tokens];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -159,7 +155,13 @@ pub enum ControlSize {
 }
 
 impl ControlSize {
-    pub const ALL: &[ControlSize] = &[ControlSize::Xl, ControlSize::Lg, ControlSize::Md, ControlSize::Sm, ControlSize::Xs];
+    pub const ALL: &[ControlSize] = &[
+        ControlSize::Xl,
+        ControlSize::Lg,
+        ControlSize::Md,
+        ControlSize::Sm,
+        ControlSize::Xs,
+    ];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -218,11 +220,14 @@ pub fn demo_file_tree() -> Vec<TreeNode> {
                     vec![
                         TreeNode::new("src/components/Button.svelte", "Button.svelte")
                             .with_icon("file"),
-                        TreeNode::new("src/components/Tree.svelte", "Tree.svelte").with_icon("file"),
+                        TreeNode::new("src/components/Tree.svelte", "Tree.svelte")
+                            .with_icon("file"),
                     ],
                 )
                 .with_icon("folder"),
-                TreeNode::new("src/lib", "lib").with_icon("folder").with_branch(true),
+                TreeNode::new("src/lib", "lib")
+                    .with_icon("folder")
+                    .with_branch(true),
                 TreeNode::new("src/index.ts", "index.ts").with_icon("file"),
             ],
         )
@@ -408,7 +413,12 @@ impl TabsPreviewState {
             .collect();
         let (reordered, _) = poodle_headless::tabs::apply_reorder(&items, from_idx, to_idx);
         let order: Vec<String> = reordered.into_iter().map(|item| item.value).collect();
-        self.tabs.sort_by_key(|t| order.iter().position(|v| *v == t.value).unwrap_or(usize::MAX));
+        self.tabs.sort_by_key(|t| {
+            order
+                .iter()
+                .position(|v| *v == t.value)
+                .unwrap_or(usize::MAX)
+        });
     }
 }
 
@@ -424,9 +434,7 @@ fn build_theme_options() -> Vec<poodle_specs::ThemeOption> {
     ThemePreset::ALL
         .iter()
         .map(|preset| {
-            let t = poodle_jetstream::JetstreamThemeProvider::from_theme(
-                preset.theme_definition(),
-            );
+            let t = poodle_jetstream::JetstreamThemeProvider::from_theme(preset.theme_definition());
             poodle_specs::ThemeOption::new(
                 preset.label(),
                 preset.label(),
@@ -513,8 +521,7 @@ impl AppState {
 
     /// Case-insensitive search filter over component display names.
     pub fn matches_search(&self, name: &str) -> bool {
-        self.search.is_empty()
-            || name.to_lowercase().contains(&self.search.to_lowercase())
+        self.search.is_empty() || name.to_lowercase().contains(&self.search.to_lowercase())
     }
 
     /// Current active component index for the active section.
@@ -631,8 +638,8 @@ impl AppState {
 
     /// Drop position for a drag onto `to`: into branches, after leaves.
     pub fn tree_drop_position(&self, to: &str) -> DropPosition {
-        let is_branch = find_node(&self.tree.nodes, to)
-            .is_some_and(|n| !n.children.is_empty() || n.is_branch);
+        let is_branch =
+            find_node(&self.tree.nodes, to).is_some_and(|n| !n.children.is_empty() || n.is_branch);
         if is_branch {
             DropPosition::Inside
         } else {
@@ -646,10 +653,15 @@ impl AppState {
             return;
         };
         let sibs = self.tree_spec().siblings_of(&focused);
-        let Some(step) = poodle_headless::tree::tree_sibling_reorder_target(&sibs, &focused, up) else {
+        let Some(step) = poodle_headless::tree::tree_sibling_reorder_target(&sibs, &focused, up)
+        else {
             return;
         };
-        let position = if step.before { DropPosition::Before } else { DropPosition::After };
+        let position = if step.before {
+            DropPosition::Before
+        } else {
+            DropPosition::After
+        };
         self.tree_reorder(&focused, &step.target, position);
     }
 
@@ -667,7 +679,7 @@ impl AppState {
     /// Apply a keyboard action to the Tree specimen, mirroring the Svelte/GPUI
     /// keyboard model via the shared spec navigation helpers.
     pub fn tree_key(&mut self, key: TreeKey) {
-        use poodle_headless::tree::{tree_keydown_intent, TreeKeyIntent, TreeKeyModifiers};
+        use poodle_headless::tree::{TreeKeyIntent, TreeKeyModifiers, tree_keydown_intent};
 
         let spec = self.tree_spec();
         let rows = spec.visible_rows();
@@ -714,18 +726,25 @@ impl AppState {
             &headless_rows,
             &focused,
             key_name,
-            TreeKeyModifiers { alt: false, shift: false },
+            TreeKeyModifiers {
+                alt: false,
+                shift: false,
+            },
             false,
             &expanded,
         );
 
         match intent {
-            Some(TreeKeyIntent::Focus { value: Some(next), .. }) => {
+            Some(TreeKeyIntent::Focus {
+                value: Some(next), ..
+            }) => {
                 self.tree.focused = Some(next);
             }
             Some(TreeKeyIntent::Expand { value }) => self.tree.toggle_expanded(&value),
             Some(TreeKeyIntent::Collapse { value }) => self.tree.toggle_expanded(&value),
-            Some(TreeKeyIntent::FocusParent { parent: Some(parent) }) => {
+            Some(TreeKeyIntent::FocusParent {
+                parent: Some(parent),
+            }) => {
                 self.tree.focused = Some(parent);
             }
             Some(TreeKeyIntent::Activate) => self.tree.select_only(&focused),

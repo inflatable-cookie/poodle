@@ -6,11 +6,10 @@
 //! states. Every group composes the real `js_embed_input` (which itself wraps
 //! the real `js_text_input` + `js_pill`) — no hand-rolled inputs or fakes.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_embed_input;
 use crate::compat::js_field;
-
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{EmbedInputSpec, FieldSpec, ParsedEmbed};
 
@@ -158,20 +157,34 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 }
 
 fn provider_header_row(text_secondary: ColorValue, border: ColorValue, font: f32) -> El {
-    div().flex_row().border_b_1().border_color(border)
+    div()
+        .flex_row()
+        .border_b_1()
+        .border_color(border)
         .child(
-            label("Provider").flex_1()
-                .px(rem_to_px(0.625)).py(rem_to_px(0.375))
-                .text_size(font).font_weight(600).text_color(text_secondary),
+            label("Provider")
+                .flex_1()
+                .px(rem_to_px(0.625))
+                .py(rem_to_px(0.375))
+                .text_size(font)
+                .font_weight(600)
+                .text_color(text_secondary),
         )
         .child(
-            label("Detected patterns").grow()
-                .px(rem_to_px(0.625)).py(rem_to_px(0.375))
-                .text_size(font).font_weight(600).text_color(text_secondary),
+            label("Detected patterns")
+                .grow()
+                .px(rem_to_px(0.625))
+                .py(rem_to_px(0.375))
+                .text_size(font)
+                .font_weight(600)
+                .text_color(text_secondary),
         )
 }
 
-#[expect(clippy::too_many_arguments, reason = "provider rows keep resolved Jetstream style values explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "provider rows keep resolved Jetstream style values explicit"
+)]
 fn provider_row(
     provider: &str,
     patterns: &str,
@@ -186,21 +199,29 @@ fn provider_row(
     if !is_last {
         row = row.border_b_1().border_color(border);
     }
-    row
-        .child(
-            div().flex_1().px(rem_to_px(0.625)).py(rem_to_px(0.375))
-                .child(
-                    label(provider.to_string())
-                        .px(rem_to_px(0.25)).py(rem_to_px(0.0625))
-                        .rounded(radius).bg(tint(panel_bg, 0.9))
-                        .text_size(font).text_color(text_secondary),
-                ),
-        )
-        .child(
-            label(patterns.to_string()).grow()
-                .px(rem_to_px(0.625)).py(rem_to_px(0.375))
-                .text_size(font).text_color(text_secondary),
-        )
+    row.child(
+        div()
+            .flex_1()
+            .px(rem_to_px(0.625))
+            .py(rem_to_px(0.375))
+            .child(
+                label(provider.to_string())
+                    .px(rem_to_px(0.25))
+                    .py(rem_to_px(0.0625))
+                    .rounded(radius)
+                    .bg(tint(panel_bg, 0.9))
+                    .text_size(font)
+                    .text_color(text_secondary),
+            ),
+    )
+    .child(
+        label(patterns.to_string())
+            .grow()
+            .px(rem_to_px(0.625))
+            .py(rem_to_px(0.375))
+            .text_size(font)
+            .text_color(text_secondary),
+    )
 }
 
 fn state_row(
@@ -210,13 +231,22 @@ fn state_row(
     spec: EmbedInputSpec,
     theme: &JetstreamThemeProvider,
 ) -> El {
-    div().flex_col().gap(4.0)
-        .child(label(title.to_string()).text_size(font).font_weight(500).text_color(text_secondary))
+    div()
+        .flex_col()
+        .gap(4.0)
+        .child(
+            label(title.to_string())
+                .text_size(font)
+                .font_weight(500)
+                .text_color(text_secondary),
+        )
         .child(js_embed_input(&spec, theme))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

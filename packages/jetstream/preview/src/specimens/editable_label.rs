@@ -1,8 +1,8 @@
 //! EditableLabel specimen — display + editing modes, variants, sizes, densities.
 
+use crate::compat::js_editable_label;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_editable_label;
 
 use poodle_specs::{
     ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
@@ -120,14 +120,12 @@ fn sizes_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (size, label_text) in SIZES {
         col = col.child(
-            div().flex_col().gap(8.0).w(300.0).child(
-                js_editable_label(
-                    &EditableLabelSpec::new()
-                        .with_value(label_text.to_uppercase())
-                        .with_size(*size),
-                    theme,
-                ),
-            ),
+            div().flex_col().gap(8.0).w(300.0).child(js_editable_label(
+                &EditableLabelSpec::new()
+                    .with_value(label_text.to_uppercase())
+                    .with_size(*size),
+                theme,
+            )),
         );
     }
     col
@@ -137,14 +135,12 @@ fn densities_row(theme: &JetstreamThemeProvider) -> El {
     let mut col = div().flex_col().gap(12.0);
     for (density, _label_text) in DENSITIES {
         col = col.child(
-            div().flex_col().gap(8.0).w(300.0).child(
-                js_editable_label(
-                    &EditableLabelSpec::new()
-                        .with_value("Edit me")
-                        .with_density(*density),
-                    theme,
-                ),
-            ),
+            div().flex_col().gap(8.0).w(300.0).child(js_editable_label(
+                &EditableLabelSpec::new()
+                    .with_value("Edit me")
+                    .with_density(*density),
+                theme,
+            )),
         );
     }
     col

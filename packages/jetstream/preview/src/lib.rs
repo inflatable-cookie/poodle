@@ -3,9 +3,9 @@
 
 pub mod app_state;
 pub mod compat;
+pub mod component_registry;
 pub mod jsx;
 pub mod nel;
-pub mod component_registry;
 pub mod shell;
 pub mod specimens;
 pub mod theme_bridge;

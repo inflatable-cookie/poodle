@@ -9,16 +9,14 @@
 //! overrides) is exercised through the real component + tokens — no hand-rolled
 //! surface boxes, dividers, or raw padding.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_popover;
-use crate::compat::{rem_to_px, size_font_rem};
 use crate::compat::js_separator;
+use crate::compat::{rem_to_px, size_font_rem};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, PopoverSpec, RuleTone, SeparatorSpec,
-};
+use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, PopoverSpec, RuleTone, SeparatorSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -107,7 +105,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
 /// popover is render-only, so the open surface is shown inline rather than
 /// anchored by the trigger (placement/anchoring = preview-loop concern).
 fn trigger_and_surface(theme: &JetstreamThemeProvider, trigger_label: &str, surface: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(js_button(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Secondary)
@@ -118,7 +118,9 @@ fn trigger_and_surface(theme: &JetstreamThemeProvider, trigger_label: &str, surf
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

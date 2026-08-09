@@ -5,10 +5,10 @@
 //! separate component and out of scope here). Every region is the real
 //! `js_dock_region`; postures are driven entirely from `DockRegionSpec`.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_dock_region;
 use crate::compat::{rem_to_px, size_font_rem};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ControlSize, DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing,
@@ -175,7 +175,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_row()
                 .gap(12.0)
-                .child(emphasis_cell(theme, DockEmphasis::Quiet, "Quiet", body_font, text_primary))
+                .child(emphasis_cell(
+                    theme,
+                    DockEmphasis::Quiet,
+                    "Quiet",
+                    body_font,
+                    text_primary,
+                ))
                 .child(emphasis_cell(
                     theme,
                     DockEmphasis::Standard,

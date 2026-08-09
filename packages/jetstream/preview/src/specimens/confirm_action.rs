@@ -11,9 +11,9 @@
 //! so this specimen demonstrates the tone/open-state matrix that the component
 //! actually supports rather than faking the unsupported groups.
 
+use crate::compat::js_confirm_action;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_confirm_action;
 
 use poodle_specs::ConfirmActionSpec;
 use poodle_specs::StatusTone;

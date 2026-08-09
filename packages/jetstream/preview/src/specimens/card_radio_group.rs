@@ -1,8 +1,8 @@
 //! CardRadioGroup specimen — radio selection across styled cards.
 
+use crate::compat::js_card_radio_group;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_card_radio_group;
 
 use poodle_specs::CardRadioGroupSpec;
 use poodle_specs::{ChoiceOption, ControlDensity, ControlSize};
@@ -84,7 +84,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             theme,
         ));
     }
-    root = root.child(group("Sizes (xs / sm / md / lg / xl)", secondary, sizes_row));
+    root = root.child(group(
+        "Sizes (xs / sm / md / lg / xl)",
+        secondary,
+        sizes_row,
+    ));
 
     // --- Densities (compact / default / comfortable) ---
     let mut densities_row = div().flex_col().gap(12.0);

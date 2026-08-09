@@ -3,10 +3,10 @@
 //! Rendering only: selection state is shown, never driven. Answering a question
 //! is host-event-loop work, as with every native control here.
 
+use crate::compat::js_agent_question;
 use crate::nel::*;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_agent_question;
 
 use poodle_specs::AgentQuestionSpec;
 
@@ -24,9 +24,21 @@ fn placement() -> AgentQuestionItem {
         header: Some("Placement".to_string()),
         prompt: "Where should the question surface appear?".to_string(),
         options: vec![
-            option("inline", "Inline in the transcript", Some("A block in the conversation.")),
-            option("composer", "Anchored above the composer", Some("Pinned over the input.")),
-            option("modal", "Modal dialog", Some("Blocks the app until answered.")),
+            option(
+                "inline",
+                "Inline in the transcript",
+                Some("A block in the conversation."),
+            ),
+            option(
+                "composer",
+                "Anchored above the composer",
+                Some("Pinned over the input."),
+            ),
+            option(
+                "modal",
+                "Modal dialog",
+                Some("Blocks the app until answered."),
+            ),
         ],
         allow_multiple: false,
     }

@@ -1,14 +1,12 @@
 //! ListContainer specimen — paginated list with state handling.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::{js_list_container, js_list_container_with_slots};
 use crate::compat::{rem_to_px, size_font_rem};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, ListContainerSpec, ListContainerState,
-};
+use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, ListContainerSpec, ListContainerState};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -16,15 +14,33 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let text_primary = resolve_color(theme, "color.text.primary");
 
     let rows = || {
-        div().flex_col().gap(4.0)
-            .child(label("Item 1").text_color(text_primary).text_size(body_font))
-            .child(label("Item 2").text_color(text_primary).text_size(body_font))
-            .child(label("Item 3").text_color(text_primary).text_size(body_font))
+        div()
+            .flex_col()
+            .gap(4.0)
+            .child(
+                label("Item 1")
+                    .text_color(text_primary)
+                    .text_size(body_font),
+            )
+            .child(
+                label("Item 2")
+                    .text_color(text_primary)
+                    .text_size(body_font),
+            )
+            .child(
+                label("Item 3")
+                    .text_color(text_primary)
+                    .text_size(body_font),
+            )
     };
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // Ready with pagination summary + controls.
-        .child(group("Ready with pagination", secondary,
+        .child(group(
+            "Ready with pagination",
+            secondary,
             js_list_container(
                 &ListContainerSpec::new("Recent Projects")
                     .with_subtitle("Showing your most recent work.")
@@ -36,32 +52,44 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 Some(rows()),
                 None,
                 None,
-            )
+            ),
         ))
         // Ready with filters + batch slots.
-        .child(group("Filters and batch", secondary,
+        .child(group(
+            "Filters and batch",
+            secondary,
             js_list_container(
-                &ListContainerSpec::new("Team members")
-                    .with_eyebrow("Settings"),
+                &ListContainerSpec::new("Team members").with_eyebrow("Settings"),
                 theme,
                 Some(rows()),
-                Some(label("Filter toolbar").text_color(secondary).text_size(body_font)),
-                Some(label("3 selected").text_color(secondary).text_size(body_font)),
-            )
+                Some(
+                    label("Filter toolbar")
+                        .text_color(secondary)
+                        .text_size(body_font),
+                ),
+                Some(
+                    label("3 selected")
+                        .text_color(secondary)
+                        .text_size(body_font),
+                ),
+            ),
         ))
         // Ready with breadcrumbs + actions header slots (forwarded to PageHeader).
-        .child(group("Breadcrumbs and actions", secondary,
+        .child(group(
+            "Breadcrumbs and actions",
+            secondary,
             js_list_container_with_slots(
-                &ListContainerSpec::new("Team members")
-                    .with_eyebrow("Settings"),
+                &ListContainerSpec::new("Team members").with_eyebrow("Settings"),
                 theme,
                 Some(rows()),
                 None,
                 None,
                 // Breadcrumbs: host-composed trail forwarded into the PageHeader.
-                Some(label("Workspace / Settings / Team")
-                    .text_color(secondary)
-                    .text_size(body_font)),
+                Some(
+                    label("Workspace / Settings / Team")
+                        .text_color(secondary)
+                        .text_size(body_font),
+                ),
                 // Actions: a real primary Button in the header actions cluster.
                 Some(js_button(
                     &ButtonSpec::new()
@@ -70,9 +98,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_size(ControlSize::Sm),
                     theme,
                 )),
-            )
+            ),
         ))
-        .child(group("Empty", secondary,
+        .child(group(
+            "Empty",
+            secondary,
             js_list_container(
                 &ListContainerSpec::new("Assets")
                     .with_state(ListContainerState::Empty)
@@ -82,9 +112,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 None,
                 None,
                 None,
-            )
+            ),
         ))
-        .child(group("Loading", secondary,
+        .child(group(
+            "Loading",
+            secondary,
             js_list_container(
                 &ListContainerSpec::new("Search Results")
                     .with_state(ListContainerState::Loading)
@@ -93,9 +125,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 None,
                 None,
                 None,
-            )
+            ),
         ))
-        .child(group("Error", secondary,
+        .child(group(
+            "Error",
+            secondary,
             js_list_container(
                 &ListContainerSpec::new("Reports")
                     .with_state(ListContainerState::Error)
@@ -104,12 +138,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 None,
                 None,
                 None,
-            )
+            ),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

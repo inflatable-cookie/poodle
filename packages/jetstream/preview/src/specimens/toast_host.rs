@@ -22,22 +22,30 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     ]);
 
     // Remaining anchors so all four corners are demonstrated.
-    let bottom_start = ToastStackSpec::new().with_toasts(vec![Toast::new("bs-1", "Sync delayed")
-        .with_tone(ToastTone::Warning)
-        .with_message("Background sync is running behind.")]);
-    let top_end = ToastStackSpec::new().with_toasts(vec![Toast::new("te-1", "Update applied")
-        .with_tone(ToastTone::Success)
-        .with_message("You are on the latest version.")]);
+    let bottom_start = ToastStackSpec::new().with_toasts(vec![
+        Toast::new("bs-1", "Sync delayed")
+            .with_tone(ToastTone::Warning)
+            .with_message("Background sync is running behind."),
+    ]);
+    let top_end = ToastStackSpec::new().with_toasts(vec![
+        Toast::new("te-1", "Update applied")
+            .with_tone(ToastTone::Success)
+            .with_message("You are on the latest version."),
+    ]);
     // Contract §12 "Top-Start Placement": single info toast.
-    let top_start = ToastStackSpec::new().with_toasts(vec![Toast::new("ts-1", "Heads up")
-        .with_tone(ToastTone::Info)
-        .with_message("Anchored to the top-left corner.")]);
+    let top_start = ToastStackSpec::new().with_toasts(vec![
+        Toast::new("ts-1", "Heads up")
+            .with_tone(ToastTone::Info)
+            .with_message("Anchored to the top-left corner."),
+    ]);
 
     // Contract §12 "With Action": toast carrying an action affordance.
-    let with_action = ToastStackSpec::new().with_toasts(vec![Toast::new("act-1", "Publishing failed")
-        .with_tone(ToastTone::Danger)
-        .with_message("We could not publish your changes.")
-        .with_action_label("Retry")]);
+    let with_action = ToastStackSpec::new().with_toasts(vec![
+        Toast::new("act-1", "Publishing failed")
+            .with_tone(ToastTone::Danger)
+            .with_message("We could not publish your changes.")
+            .with_action_label("Retry"),
+    ]);
 
     let anchored = |placement: ToastHostPlacement, stack: &ToastStackSpec| {
         // `position: fixed` is not representable in a specimen; the host's

@@ -6,12 +6,11 @@
 //! `js_detail_item` components and the header action is a real `js_button` —
 //! no hand-coded chrome.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_detail_item;
 use crate::compat::js_detail_section;
-
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout, DetailItemSpec,
@@ -33,32 +32,53 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let text_primary = resolve_color(theme, "color.text.primary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // --- With title, description and rows ---
-        .child(group("With title and rows", secondary,
+        .child(group(
+            "With title and rows",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new()
                     .with_title("Project details")
                     .with_description("Core metadata for this project."),
                 theme,
                 vec![
-                    js_detail_item(&DetailItemSpec::new("Name").with_value("Poodle Design System"), theme),
-                    js_detail_item(&DetailItemSpec::new("Owner").with_value("Clay + Aura"), theme),
-                    js_detail_item(&DetailItemSpec::new("Created").with_value("March 2025"), theme),
+                    js_detail_item(
+                        &DetailItemSpec::new("Name").with_value("Poodle Design System"),
+                        theme,
+                    ),
+                    js_detail_item(
+                        &DetailItemSpec::new("Owner").with_value("Clay + Aura"),
+                        theme,
+                    ),
+                    js_detail_item(
+                        &DetailItemSpec::new("Created").with_value("March 2025"),
+                        theme,
+                    ),
                     js_detail_item(&DetailItemSpec::new("Status").with_value("Active"), theme),
                 ],
                 None,
-            )
+            ),
         ))
         // --- With trailing header actions ---
-        .child(group("With actions", secondary,
+        .child(group(
+            "With actions",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new().with_title("Billing"),
                 theme,
                 vec![
                     js_detail_item(&DetailItemSpec::new("Plan").with_value("Pro"), theme),
-                    js_detail_item(&DetailItemSpec::new("Billing cycle").with_value("Monthly"), theme),
-                    js_detail_item(&DetailItemSpec::new("Next invoice").with_value("April 1, 2026"), theme),
+                    js_detail_item(
+                        &DetailItemSpec::new("Billing cycle").with_value("Monthly"),
+                        theme,
+                    ),
+                    js_detail_item(
+                        &DetailItemSpec::new("Next invoice").with_value("April 1, 2026"),
+                        theme,
+                    ),
                 ],
                 Some(js_button(
                     &ButtonSpec::new()
@@ -67,10 +87,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_label("Edit"),
                     theme,
                 )),
-            )
+            ),
         ))
         // --- DetailItem with description ---
-        .child(group("DetailItem with description", secondary,
+        .child(group(
+            "DetailItem with description",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new().with_title("Configuration"),
                 theme,
@@ -90,10 +112,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ),
                 ],
                 None,
-            )
+            ),
         ))
         // --- Two-column body ---
-        .child(group("Two-column details", secondary,
+        .child(group(
+            "Two-column details",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new()
                     .with_title("Runtime summary")
@@ -107,23 +131,30 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     col_item("Displays", "2", theme),
                 ],
                 None,
-            )
+            ),
         ))
         // --- Description only (no title) ---
-        .child(group("Description only (no title)", secondary,
+        .child(group(
+            "Description only (no title)",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new()
                     .with_description("A section header carried by description text alone."),
                 theme,
                 vec![
-                    js_detail_item(&DetailItemSpec::new("Region").with_value("eu-west-1"), theme),
+                    js_detail_item(
+                        &DetailItemSpec::new("Region").with_value("eu-west-1"),
+                        theme,
+                    ),
                     js_detail_item(&DetailItemSpec::new("Zone").with_value("eu-west-1a"), theme),
                 ],
                 None,
-            )
+            ),
         ))
         // --- Empty body, no separator ---
-        .child(group("Empty body, no separator", secondary,
+        .child(group(
+            "Empty body, no separator",
+            secondary,
             js_detail_section(
                 &DetailSectionSpec::new()
                     .with_title("Empty Section")
@@ -131,20 +162,30 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 theme,
                 vec![label("No rows yet.").text_color(text_primary)],
                 None,
-            )
+            ),
         ))
         // --- Density variants ---
-        .child(group("Density variants", secondary,
-            div().flex_col().gap(16.0)
+        .child(group(
+            "Density variants",
+            secondary,
+            div()
+                .flex_col()
+                .gap(16.0)
                 .child(density_demo("Compact", ControlDensity::Compact, theme))
                 .child(density_demo("Default", ControlDensity::Default, theme))
-                .child(density_demo("Comfortable", ControlDensity::Comfortable, theme))
+                .child(density_demo(
+                    "Comfortable",
+                    ControlDensity::Comfortable,
+                    theme,
+                )),
         ))
 }
 
 fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
     let muted = resolve_color(theme, "color.text.muted");
-    div().flex_col().gap(4.0)
+    div()
+        .flex_col()
+        .gap(4.0)
         .child(label(name).text_color(muted).text_size(11.0))
         .child(js_detail_section(
             &DetailSectionSpec::new()
@@ -164,7 +205,9 @@ fn density_demo(name: &str, density: ControlDensity, theme: &JetstreamThemeProvi
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

@@ -1,8 +1,8 @@
 //! MediaPreview specimen — Card-composed media preview surface.
 
+use crate::compat::js_media_preview;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_media_preview;
 
 use poodle_specs::{
     AspectRatio, CardVariant, ControlDensity, ControlSize, MediaKind, MediaPreviewSpec, MediaState,
@@ -138,7 +138,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(12.0)
                 .child(density_preview(theme, ControlDensity::Compact, "compact"))
                 .child(density_preview(theme, ControlDensity::Default, "default"))
-                .child(density_preview(theme, ControlDensity::Comfortable, "comfortable")),
+                .child(density_preview(
+                    theme,
+                    ControlDensity::Comfortable,
+                    "comfortable",
+                )),
         ))
 }
 

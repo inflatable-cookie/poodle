@@ -1,10 +1,10 @@
 //! AgentChatInput specimen — agent composer with a model picker in the toolbar,
 //! a context ring and the submit/stop action.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_agent_chat_input;
 use crate::compat::js_model_picker;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlDensity, ControlSize,
@@ -112,7 +112,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 theme,
                 vec![picker(theme, ControlSize::Md)],
                 vec![
-                    label("Current checkout").text_color(secondary).text_size(13.0),
+                    label("Current checkout")
+                        .text_color(secondary)
+                        .text_size(13.0),
                     label("main").text_color(secondary).text_size(13.0),
                 ],
             ),
@@ -176,7 +178,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .into_iter()
                 .map(|density| {
                     js_agent_chat_input(
-                        &base().with_density(density).with_context(40_000.0, 200_000.0),
+                        &base()
+                            .with_density(density)
+                            .with_context(40_000.0, 200_000.0),
                         theme,
                         vec![picker(theme, ControlSize::Md)],
                         Vec::new(),

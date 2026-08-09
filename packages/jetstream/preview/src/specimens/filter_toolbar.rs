@@ -4,13 +4,13 @@
 //! (js_text_input / js_select / js_icon_button / js_button), mirroring the
 //! Svelte FilterToolbarSpecimen — no stand-in label chips.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_filter_toolbar;
 use crate::compat::js_icon_button;
 use crate::compat::js_select;
 use crate::compat::js_text_input;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ChoiceOption, ControlDensity, ControlSize, FilterToolbarSpec,
@@ -43,7 +43,11 @@ fn owner_options() -> Vec<ChoiceOption> {
     ]
 }
 
-fn search(theme: &JetstreamThemeProvider, size: Option<ControlSize>, density: Option<ControlDensity>) -> El {
+fn search(
+    theme: &JetstreamThemeProvider,
+    size: Option<ControlSize>,
+    density: Option<ControlDensity>,
+) -> El {
     let mut spec = TextInputSpec::new()
         .with_input_type("search")
         .with_placeholder("Search…")

@@ -14,9 +14,9 @@
 //! - With item-detail row: `with_item_detail` renders the highlighted
 //!   label:value row ahead of the body (contract §2/§8 item-detail).
 
+use crate::compat::{js_alert_dialog, js_alert_dialog_working};
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::{js_alert_dialog, js_alert_dialog_working};
 
 use poodle_specs::{AlertDialogSpec, AlertDialogTone};
 

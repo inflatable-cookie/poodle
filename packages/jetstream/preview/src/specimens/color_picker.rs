@@ -7,9 +7,9 @@
 //! `NumberInput`s, and the preset swatch grid) — all from `js_color_picker`,
 //! no hand-rolled boxes.
 
+use crate::compat::js_color_picker;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_color_picker;
 
 use poodle_specs::{ColorInputMode, ColorPickerSpec, ControlDensity, ControlSize};
 
@@ -103,7 +103,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         "Disabled",
         secondary,
         js_color_picker(
-            &ColorPickerSpec::new().with_value("#22c55e").with_disabled(true),
+            &ColorPickerSpec::new()
+                .with_value("#22c55e")
+                .with_disabled(true),
             theme,
         ),
     ));

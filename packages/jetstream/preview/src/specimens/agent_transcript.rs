@@ -4,6 +4,7 @@
 //! newest call is invisible in the visible row, so the collapsed toggle is the
 //! only thing that can carry it.
 
+use crate::compat::js_agent_transcript;
 use crate::nel::*;
 use poodle_headless::agent_question::{
     AgentQuestionAnswer, AgentQuestionItem, AgentQuestionOption, AgentQuestionOutcome,
@@ -13,7 +14,6 @@ use poodle_headless::agent_transcript::{
     TranscriptChangedFiles, TranscriptItem, TranscriptMessage, TranscriptToolCall,
 };
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_agent_transcript;
 
 use poodle_specs::AgentTranscriptSpec;
 
@@ -48,12 +48,31 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         TranscriptItem::ChangedFiles(TranscriptChangedFiles {
             id: "diff".to_string(),
             files: vec![
-                ChangedFile { path: "cp-api/crates/latex/src/lexer.rs".into(), additions: 271, deletions: 10, status: None },
-                ChangedFile { path: "cp-api/tools/export_fixture.rs".into(), additions: 89, deletions: 1, status: None },
-                ChangedFile { path: "cp-docs/book-port.md".into(), additions: 15, deletions: 5, status: None },
+                ChangedFile {
+                    path: "cp-api/crates/latex/src/lexer.rs".into(),
+                    additions: 271,
+                    deletions: 10,
+                    status: None,
+                },
+                ChangedFile {
+                    path: "cp-api/tools/export_fixture.rs".into(),
+                    additions: 89,
+                    deletions: 1,
+                    status: None,
+                },
+                ChangedFile {
+                    path: "cp-docs/book-port.md".into(),
+                    additions: 15,
+                    deletions: 5,
+                    status: None,
+                },
             ],
         }),
-        call("t6", "jq -r .body_html /tmp/g0216.json", ToolCallStatus::Success),
+        call(
+            "t6",
+            "jq -r .body_html /tmp/g0216.json",
+            ToolCallStatus::Success,
+        ),
         TranscriptItem::Activity(TranscriptActivity {
             id: "act".to_string(),
             label: "Working for 1h 1m".to_string(),
@@ -79,9 +98,21 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 header: Some("Placement".to_string()),
                 prompt: "Where should the question surface appear?".to_string(),
                 options: vec![
-                    AgentQuestionOption { value: "inline".into(), label: "Inline in the transcript".into(), description: None },
-                    AgentQuestionOption { value: "composer".into(), label: "Anchored above the composer".into(), description: None },
-                    AgentQuestionOption { value: "modal".into(), label: "Modal dialog".into(), description: None },
+                    AgentQuestionOption {
+                        value: "inline".into(),
+                        label: "Inline in the transcript".into(),
+                        description: None,
+                    },
+                    AgentQuestionOption {
+                        value: "composer".into(),
+                        label: "Anchored above the composer".into(),
+                        description: None,
+                    },
+                    AgentQuestionOption {
+                        value: "modal".into(),
+                        label: "Modal dialog".into(),
+                        description: None,
+                    },
                 ],
                 allow_multiple: false,
             },
@@ -134,9 +165,24 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     TranscriptChangedFiles {
                         id: "tree".to_string(),
                         files: vec![
-                            ChangedFile { path: "app/src/lib/editor/machine.ts".into(), additions: 12, deletions: 3, status: None },
-                            ChangedFile { path: "app/src/lib/editor/view.ts".into(), additions: 4, deletions: 0, status: None },
-                            ChangedFile { path: "docs/notes.md".into(), additions: 1, deletions: 1, status: None },
+                            ChangedFile {
+                                path: "app/src/lib/editor/machine.ts".into(),
+                                additions: 12,
+                                deletions: 3,
+                                status: None,
+                            },
+                            ChangedFile {
+                                path: "app/src/lib/editor/view.ts".into(),
+                                additions: 4,
+                                deletions: 0,
+                                status: None,
+                            },
+                            ChangedFile {
+                                path: "docs/notes.md".into(),
+                                additions: 1,
+                                deletions: 1,
+                                status: None,
+                            },
                         ],
                     },
                 )])

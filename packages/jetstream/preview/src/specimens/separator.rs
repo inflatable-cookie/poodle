@@ -1,9 +1,9 @@
 //! Separator specimen — orientation, tone, and decorative/semantic modes.
 
+use crate::compat::js_separator;
+use crate::compat::{rem_to_px, size_font_rem};
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::{rem_to_px, size_font_rem};
-use crate::compat::js_separator;
 
 use poodle_specs::{ControlSize, RuleTone, SeparatorOrientation, SeparatorSpec};
 
@@ -76,25 +76,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Decorative",
             secondary,
-            div()
-                .flex_col()
-                .self_stretch()
-                .child(js_separator(
-                    &SeparatorSpec::new().with_decorative(true),
-                    theme,
-                )),
+            div().flex_col().self_stretch().child(js_separator(
+                &SeparatorSpec::new().with_decorative(true),
+                theme,
+            )),
         ))
         // --- Semantic (decorative=false → role=separator) ---
         .child(group(
             "Semantic (decorative=false)",
             secondary,
-            div()
-                .flex_col()
-                .self_stretch()
-                .child(js_separator(
-                    &SeparatorSpec::new().with_decorative(false),
-                    theme,
-                )),
+            div().flex_col().self_stretch().child(js_separator(
+                &SeparatorSpec::new().with_decorative(false),
+                theme,
+            )),
         ))
 }
 

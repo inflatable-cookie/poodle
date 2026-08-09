@@ -7,11 +7,11 @@
 //! composed via `js_app_header_with_slots`; action / utility clusters are real
 //! `js_button` / `js_icon_button` rows. Zero hand-rolled boxes.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::{js_app_header, js_app_header_with_slots};
 use crate::compat::js_button;
 use crate::compat::js_icon_button;
+use crate::compat::{js_app_header, js_app_header_with_slots};
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     AppHeaderSpec, ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec,
@@ -69,9 +69,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let accent = resolve_color(theme, "color.accent.base");
     let text_primary = resolve_color(theme, "color.text.primary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // Full app-window header: title + ghost-button menu nav + 3 utility icons.
-        .child(group("Full app window header (title + menubar + utility)", secondary,
+        .child(group(
+            "Full app window header (title + menubar + utility)",
+            secondary,
             js_app_header_with_slots(
                 &AppHeaderSpec::new()
                     .with_title("Poodle Studio")
@@ -79,31 +83,51 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("Application header"),
                 theme,
                 None,
-                Some(ghost_actions(theme, &["File", "Edit", "View", "Help"], ControlSize::Sm)),
-                Some(utility_icons(theme, &["search", "bell", "settings"], ControlSize::Sm)),
-            )
+                Some(ghost_actions(
+                    theme,
+                    &["File", "Edit", "View", "Help"],
+                    ControlSize::Sm,
+                )),
+                Some(utility_icons(
+                    theme,
+                    &["search", "bell", "settings"],
+                    ControlSize::Sm,
+                )),
+            ),
         ))
         // Title + actions + utility.
-        .child(group("With title, actions, and utility", secondary,
+        .child(group(
+            "With title, actions, and utility",
+            secondary,
             js_app_header_with_slots(
                 &AppHeaderSpec::new().with_title("My Application"),
                 theme,
                 None,
                 Some(ghost_actions(theme, &["New", "Open"], ControlSize::Sm)),
                 Some(utility_icons(theme, &["settings"], ControlSize::Sm)),
-            )
+            ),
         ))
         // Title only — default identity region, no slots.
-        .child(group("Title only", secondary,
-            js_app_header(&AppHeaderSpec::new().with_title("Poodle Workstation"), theme)
+        .child(group(
+            "Title only",
+            secondary,
+            js_app_header(
+                &AppHeaderSpec::new().with_title("Poodle Workstation"),
+                theme,
+            ),
         ))
         // Custom identity slot: swatch + label replaces the default title group.
-        .child(group("Custom identity slot", secondary,
+        .child(group(
+            "Custom identity slot",
+            secondary,
             js_app_header_with_slots(
                 &AppHeaderSpec::new().with_aria_label("Custom identity header"),
                 theme,
                 Some(
-                    div().flex_row().items_center().gap(8.0)
+                    div()
+                        .flex_row()
+                        .items_center()
+                        .gap(8.0)
                         .child(div().w(20.0).h(20.0).rounded(4.0).bg(accent))
                         .child(
                             label("Poodle Studio")
@@ -114,43 +138,124 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 ),
                 None,
                 Some(utility_icons(theme, &["bell", "user"], ControlSize::Sm)),
-            )
+            ),
         ))
         // Density ladder — region gaps tighten/loosen, height unchanged.
-        .child(group("Density ladder", secondary,
-            div().flex_col().gap(16.0)
-                .child(ladder("COMPACT", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Compact), theme)))
-                .child(ladder("DEFAULT", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Default), theme)))
-                .child(ladder("COMFORTABLE", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_density(ControlDensity::Comfortable), theme)))
+        .child(group(
+            "Density ladder",
+            secondary,
+            div()
+                .flex_col()
+                .gap(16.0)
+                .child(ladder(
+                    "COMPACT",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_density(ControlDensity::Compact),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "DEFAULT",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_density(ControlDensity::Default),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "COMFORTABLE",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_density(ControlDensity::Comfortable),
+                        theme,
+                    ),
+                )),
         ))
         // Size ladder — shell height + title font scale xs..xl.
-        .child(group("Size ladder", secondary,
-            div().flex_col().gap(16.0)
-                .child(ladder("XS", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Xs), theme)))
-                .child(ladder("SM", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Sm), theme)))
-                .child(ladder("MD", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Md), theme)))
-                .child(ladder("LG", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Lg), theme)))
-                .child(ladder("XL", secondary,
-                    demo_header(AppHeaderSpec::new().with_title("My Application").with_size(ControlSize::Xl), theme)))
+        .child(group(
+            "Size ladder",
+            secondary,
+            div()
+                .flex_col()
+                .gap(16.0)
+                .child(ladder(
+                    "XS",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_size(ControlSize::Xs),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "SM",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_size(ControlSize::Sm),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "MD",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_size(ControlSize::Md),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "LG",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_size(ControlSize::Lg),
+                        theme,
+                    ),
+                ))
+                .child(ladder(
+                    "XL",
+                    secondary,
+                    demo_header(
+                        AppHeaderSpec::new()
+                            .with_title("My Application")
+                            .with_size(ControlSize::Xl),
+                        theme,
+                    ),
+                )),
         ))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }
 
 /// A ladder entry: a bold muted label above a single header instance.
 fn ladder(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
-        .child(label(title).text_color(text_secondary).text_size(11.0).text_weight(700))
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(
+            label(title)
+                .text_color(text_secondary)
+                .text_size(11.0)
+                .text_weight(700),
+        )
         .child(content)
 }

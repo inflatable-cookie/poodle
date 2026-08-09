@@ -5,9 +5,9 @@
 //! loading (spinner), and disabled. Every example is a real `js_icon_button`
 //! resolving all visuals from tokens.
 
+use crate::compat::js_icon_button;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_icon_button;
 
 use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec};
 
@@ -32,47 +32,151 @@ fn ib(
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    div().flex_col().gap(24.0)
+    div()
+        .flex_col()
+        .gap(24.0)
         // ── Variants (ghost / primary / secondary) ──
-        .child(group("Variants (ghost / primary / secondary)", secondary,
-            div().flex_row().gap(8.0).items_center()
-                .child(ib(theme, ButtonVariant::Ghost, ButtonTone::Default, "x", "Close"))
-                .child(ib(theme, ButtonVariant::Primary, ButtonTone::Default, "plus", "Add"))
-                .child(ib(theme, ButtonVariant::Secondary, ButtonTone::Default, "settings", "Settings"))
+        .child(group(
+            "Variants (ghost / primary / secondary)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
+                .child(ib(
+                    theme,
+                    ButtonVariant::Ghost,
+                    ButtonTone::Default,
+                    "x",
+                    "Close",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Primary,
+                    ButtonTone::Default,
+                    "plus",
+                    "Add",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Secondary,
+                    ButtonTone::Default,
+                    "settings",
+                    "Settings",
+                )),
         ))
         // ── Variant × tone: default ──
-        .child(group("Default tone", secondary,
-            div().flex_row().gap(8.0).items_center()
-                .child(ib(theme, ButtonVariant::Ghost, ButtonTone::Default, "search", "Search"))
-                .child(ib(theme, ButtonVariant::Primary, ButtonTone::Default, "check", "Confirm"))
-                .child(ib(theme, ButtonVariant::Secondary, ButtonTone::Default, "filter", "Filter"))
+        .child(group(
+            "Default tone",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
+                .child(ib(
+                    theme,
+                    ButtonVariant::Ghost,
+                    ButtonTone::Default,
+                    "search",
+                    "Search",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Primary,
+                    ButtonTone::Default,
+                    "check",
+                    "Confirm",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Secondary,
+                    ButtonTone::Default,
+                    "filter",
+                    "Filter",
+                )),
         ))
         // ── Variant × tone: danger ──
-        .child(group("Danger tone (ghost / primary / secondary)", secondary,
-            div().flex_row().gap(8.0).items_center()
-                .child(ib(theme, ButtonVariant::Ghost, ButtonTone::Danger, "trash-2", "Delete"))
-                .child(ib(theme, ButtonVariant::Primary, ButtonTone::Danger, "trash-2", "Delete"))
-                .child(ib(theme, ButtonVariant::Secondary, ButtonTone::Danger, "trash-2", "Delete"))
+        .child(group(
+            "Danger tone (ghost / primary / secondary)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
+                .child(ib(
+                    theme,
+                    ButtonVariant::Ghost,
+                    ButtonTone::Danger,
+                    "trash-2",
+                    "Delete",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Primary,
+                    ButtonTone::Danger,
+                    "trash-2",
+                    "Delete",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Secondary,
+                    ButtonTone::Danger,
+                    "trash-2",
+                    "Delete",
+                )),
         ))
         // ── Variant × tone: success ──
-        .child(group("Success tone (ghost / primary / secondary)", secondary,
-            div().flex_row().gap(8.0).items_center()
-                .child(ib(theme, ButtonVariant::Ghost, ButtonTone::Success, "check", "Approve"))
-                .child(ib(theme, ButtonVariant::Primary, ButtonTone::Success, "check", "Approve"))
-                .child(ib(theme, ButtonVariant::Secondary, ButtonTone::Success, "check", "Approve"))
+        .child(group(
+            "Success tone (ghost / primary / secondary)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
+                .child(ib(
+                    theme,
+                    ButtonVariant::Ghost,
+                    ButtonTone::Success,
+                    "check",
+                    "Approve",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Primary,
+                    ButtonTone::Success,
+                    "check",
+                    "Approve",
+                ))
+                .child(ib(
+                    theme,
+                    ButtonVariant::Secondary,
+                    ButtonTone::Success,
+                    "check",
+                    "Approve",
+                )),
         ))
         // ── Sizes (xs–xl) ──
-        .child(group("Sizes (xs–xl)", secondary,
-            div().flex_row().gap(8.0).items_center()
+        .child(group(
+            "Sizes (xs–xl)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
                 .child(size_btn(theme, ControlSize::Xs))
                 .child(size_btn(theme, ControlSize::Sm))
                 .child(size_btn(theme, ControlSize::Md))
                 .child(size_btn(theme, ControlSize::Lg))
-                .child(size_btn(theme, ControlSize::Xl))
+                .child(size_btn(theme, ControlSize::Xl)),
         ))
         // ── Pressed / active (toggle state) ──
-        .child(group("Pressed (toggle on)", secondary,
-            div().flex_row().gap(8.0).items_center()
+        .child(group(
+            "Pressed (toggle on)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
                 .child(js_icon_button(
                     &IconButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
@@ -97,11 +201,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_aria_label("Italic")
                         .with_pressed(false),
                     theme,
-                ))
+                )),
         ))
         // ── Loading (spinner replaces glyph) ──
-        .child(group("Loading (spinner)", secondary,
-            div().flex_row().gap(8.0).items_center()
+        .child(group(
+            "Loading (spinner)",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
                 .child(js_icon_button(
                     &IconButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
@@ -117,11 +226,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_aria_label("Refresh")
                         .with_loading(true),
                     theme,
-                ))
+                )),
         ))
         // ── Disabled ──
-        .child(group("Disabled", secondary,
-            div().flex_row().gap(8.0).items_center()
+        .child(group(
+            "Disabled",
+            secondary,
+            div()
+                .flex_row()
+                .gap(8.0)
+                .items_center()
                 .child(js_icon_button(
                     &IconButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
@@ -145,7 +259,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_aria_label("Settings")
                         .with_disabled(true),
                     theme,
-                ))
+                )),
         ))
 }
 
@@ -161,7 +275,9 @@ fn size_btn(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {
-    div().flex_col().gap(8.0)
+    div()
+        .flex_col()
+        .gap(8.0)
         .child(label(title).text_color(text_secondary).text_size(11.0))
         .child(content)
 }

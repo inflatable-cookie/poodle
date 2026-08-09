@@ -10,9 +10,9 @@
 //! via `RemediationAction`. The specimen adds no chrome beyond the eyebrow group
 //! label.
 
+use crate::compat::js_inline_remediation;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_inline_remediation;
 
 use poodle_specs::{ButtonVariant, InlineRemediationSpec, RemediationAction, StatusTone};
 

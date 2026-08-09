@@ -93,9 +93,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             group(
                 "Narrow and long values",
                 secondary,
-                div()
-                    .max_w(288.0)
-                    .child(js_token_input(&long_tags, theme)),
+                div().max_w(288.0).child(js_token_input(&long_tags, theme)),
             ),
         )
         .child(group(
@@ -134,7 +132,12 @@ fn sizes(theme: &JetstreamThemeProvider) -> El {
                 .flex_row()
                 .gap(12.0)
                 .items_center()
-                .child(label(name).text_color(secondary).text_size(11.0).min_w(40.0))
+                .child(
+                    label(name)
+                        .text_color(secondary)
+                        .text_size(11.0)
+                        .min_w(40.0),
+                )
                 .child(
                     div()
                         .grow()
@@ -165,7 +168,12 @@ fn densities(theme: &JetstreamThemeProvider) -> El {
                 .flex_row()
                 .gap(12.0)
                 .items_center()
-                .child(label(name).text_color(secondary).text_size(11.0).min_w(80.0))
+                .child(
+                    label(name)
+                        .text_color(secondary)
+                        .text_size(11.0)
+                        .min_w(80.0),
+                )
                 .child(
                     div()
                         .grow()

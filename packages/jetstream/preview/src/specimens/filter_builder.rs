@@ -1,8 +1,8 @@
 //! FilterBuilder specimen — filter-clause builder with editable pills.
 
+use crate::compat::js_filter_builder;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use crate::compat::js_filter_builder;
 
 use poodle_specs::{
     ControlDensity, ControlSize, FilterBuilderSpec, FilterClause, FilterCombinator, FilterDraft,
@@ -11,11 +11,13 @@ use poodle_specs::{
 
 fn fields() -> Vec<FilterFieldDefinition> {
     vec![
-        FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(vec![
-            FilterOption::new("clap", "CLAP"),
-            FilterOption::new("vst3", "VST3"),
-            FilterOption::new("lv2", "LV2"),
-        ]),
+        FilterFieldDefinition::new("format", "Format", FilterFieldKind::MultiEnum).with_options(
+            vec![
+                FilterOption::new("clap", "CLAP"),
+                FilterOption::new("vst3", "VST3"),
+                FilterOption::new("lv2", "LV2"),
+            ],
+        ),
         FilterFieldDefinition::new("hidden", "Hidden", FilterFieldKind::Boolean),
         FilterFieldDefinition::new("tag-count", "Tag count", FilterFieldKind::Number),
         FilterFieldDefinition::new("name", "Name", FilterFieldKind::Text),
@@ -33,7 +35,12 @@ fn value() -> FilterExpression {
                 FilterOperand::Options(vec!["clap".into(), "vst3".into()]),
             ),
             FilterClause::new("hidden-1", "hidden", "is", FilterOperand::Boolean(false)),
-            FilterClause::new("tag-count-1", "tag-count", "gte", FilterOperand::Number(3.0)),
+            FilterClause::new(
+                "tag-count-1",
+                "tag-count",
+                "gte",
+                FilterOperand::Number(3.0),
+            ),
         ],
     }
 }
@@ -41,7 +48,12 @@ fn value() -> FilterExpression {
 fn single() -> FilterExpression {
     FilterExpression {
         combinator: FilterCombinator::And,
-        clauses: vec![FilterClause::new("hidden-1", "hidden", "is", FilterOperand::Boolean(false))],
+        clauses: vec![FilterClause::new(
+            "hidden-1",
+            "hidden",
+            "is",
+            FilterOperand::Boolean(false),
+        )],
     }
 }
 
@@ -93,7 +105,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Empty (open)",
             secondary,
             js_filter_builder(
-                &FilterBuilderSpec::new().with_fields(fields()).with_open(true),
+                &FilterBuilderSpec::new()
+                    .with_fields(fields())
+                    .with_open(true),
                 theme,
             ),
         ))

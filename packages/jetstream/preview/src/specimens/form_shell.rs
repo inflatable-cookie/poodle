@@ -11,12 +11,12 @@
 //! from the spec's token methods inside the component — the specimen adds no
 //! chrome of its own beyond the eyebrow group label.
 
-use crate::nel::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_button;
 use crate::compat::js_field;
 use crate::compat::js_form_shell;
 use crate::compat::js_text_input;
+use crate::nel::*;
+use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
     ButtonSpec, ButtonVariant, FieldSpec, FormActionAlign, FormFieldState, FormSectionSpec,
@@ -110,7 +110,11 @@ fn shell(
         Some(js_text_input(&email_input_spec, theme)),
     );
 
-    let account_slot = div().flex_col().gap(12.0).child(name_slot).child(email_slot);
+    let account_slot = div()
+        .flex_col()
+        .gap(12.0)
+        .child(name_slot)
+        .child(email_slot);
 
     // ── Profile section slot (real Field + TextInput) ────────
     let bio_slot = js_field(
@@ -196,8 +200,7 @@ fn busy_spec() -> FormShellSpec {
         .with_fields(vec![
             FormFieldState::new("fs-name", "Full name")
                 .with_validation_state(ValidationState::Valid),
-            FormFieldState::new("fs-email", "Email")
-                .with_validation_state(ValidationState::Valid),
+            FormFieldState::new("fs-email", "Email").with_validation_state(ValidationState::Valid),
             FormFieldState::new("fs-bio", "Bio"),
         ])
 }
