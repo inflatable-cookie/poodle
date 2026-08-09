@@ -5,6 +5,21 @@
   "license": "MIT",
   "type": "module",
   "description": "Poodle Svelte component library.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inflatable-cookie/poodle.git",
+    "directory": "packages/svelte/components"
+  },
+  "homepage": "https://github.com/inflatable-cookie/poodle#readme",
+  "bugs": {
+    "url": "https://github.com/inflatable-cookie/poodle/issues"
+  },
+  "keywords": [
+    "components",
+    "design-system",
+    "svelte",
+    "ui"
+  ],
   "svelte": "./src/index.ts",
   "exports": {
     ".": {
@@ -20,7 +35,8 @@
   },
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "poodleRelease": {
     "publicIntent": true,
@@ -32,6 +48,6 @@
   },
   "dependencies": {
     "@inflatable-cookie/poodle-core": "0.1.0",
-    "marked": "^18.0.0"
+    "marked": "^18.0.9"
   }
 }

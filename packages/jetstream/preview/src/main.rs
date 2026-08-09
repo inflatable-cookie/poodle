@@ -3,10 +3,10 @@
 //!
 //! Run with: `cargo run -p poodle-jetstream-preview`
 
-use poodle_jetstream_preview::{app_state, component_registry, shell, specimens, theme_bridge};
+use poodle_jetstream_preview::{app_state, shell, theme_bridge};
 use theme_bridge::build_draw_theme;
 
-use glam::{Mat4, Vec4};
+use glam::Mat4;
 use jetstream_platform::{
     ControlFlow, KeyCode, MouseButton as PlatMouseButton, Platform, PlatformConfig, PlatformEvent,
     VSyncMode, WindowConfig,
@@ -20,7 +20,6 @@ use jetstream_renderer::sprite::{
 use jetstream_renderer::texture::GpuTexture;
 use jetstream_renderer::ui_pass::UiPass;
 use jetstream_ui::*;
-use poodle_adapter::ThemeProvider;
 use wgpu::util::DeviceExt;
 
 use app_state::{AppState, ControlSize, DemoScreen, Density, Section, ThemePreset};

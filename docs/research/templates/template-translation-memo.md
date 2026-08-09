@@ -50,15 +50,15 @@ This memo synthesizes findings from:
 
 ## Action Items
 
-- [ ] Update architecture document: [link]
-- [ ] Update roadmap: [link]
-- [ ] Create/Update spec: [link]
+- [ ] Update architecture document: `<path>`
+- [ ] Update roadmap: `<path>`
+- [ ] Create or update spec: `<path>`
 - [ ] Notify stakeholders: [who]
 
 ---
 
 ## Related
 
-- Architecture: [../../architecture/...]()
-- Roadmap: [../../roadmaps/...]()
-- Research: [../...]()
+- Architecture: `../../architecture/<document>.md`
+- Roadmap: `../../roadmaps/<generation>/<card>.md`
+- Research: `../<area>/<document>.md`

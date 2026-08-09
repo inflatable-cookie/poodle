@@ -47,7 +47,7 @@ describe("Dialog controlled open", () => {
  */
 describe("write-back versus the close-veto", () => {
   it("a host can still refuse the close by re-asserting open", async () => {
-    let open = $state(true);
+    let open = true;
     const seen: boolean[] = [];
 
     render(Dialog, {

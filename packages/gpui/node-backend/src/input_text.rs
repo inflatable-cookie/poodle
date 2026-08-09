@@ -506,8 +506,8 @@ pub(crate) fn input_text(
     }
 }
 
-/// Shared drag-select state: which field is mid-drag, and the anchor the drag
-/// started from. Selection needs an anchor that survives across move events.
+// Shared drag-select state: which field is mid-drag, and the anchor the drag
+// started from. Selection needs an anchor that survives across move events.
 thread_local! {
     static SELECTING: RefCell<Option<(String, usize)>> = const { RefCell::new(None) };
 }

@@ -5,6 +5,10 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Generated Poodle token bindings for multi-renderer consumers."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "design-tokens", "ui"]
 
 [lib]
 path = "src/lib.rs"

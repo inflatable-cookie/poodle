@@ -61,12 +61,12 @@ Brief description of the domain being researched and what Poodle decisions it in
 
 ## Related
 
-- Source hub: [../source-hubs/...]()
-- Value track: [../value-tracks/...]()
-- Milestone: [../../roadmaps/...]()
+- Source hub: `../source-hubs/<system>.md`
+- Related value track: `../value-tracks/<track>.md`
+- Milestone: `../../roadmaps/<generation>/<card>.md`
 
 ---
 
-## Next Task
+## Follow-up
 
 Clear next step for this research.

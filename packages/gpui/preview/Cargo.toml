@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Native macOS preview application for the Poodle design system, rendered via GPUI."
+publish = false
 
 [[bin]]
 name = "poodle-preview"
@@ -44,6 +45,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 [package.metadata.poodle]
-public-intent = true
-channel = "preview"
-stability = "pre-release"
+public-intent = false
+channel = "internal"
+stability = "internal-tooling"

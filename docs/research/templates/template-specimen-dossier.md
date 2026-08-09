@@ -48,5 +48,5 @@ Specific takeaways applicable to Poodle's design.
 
 ## Related
 
-- Value track: [../value-tracks/...]()
-- Source hub: [../source-hubs/...]()
+- Value track: `../value-tracks/<track>.md`
+- Source hub: `../source-hubs/<system>.md`

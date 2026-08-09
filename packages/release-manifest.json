@@ -130,10 +130,10 @@
     {
       "name": "poodle-gpui-preview",
       "path": "packages/gpui/preview",
-      "kind": "native-preview",
+      "kind": "tooling",
       "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
+      "publicIntent": false,
+      "channel": "internal"
     },
     {
       "name": "poodle-jetstream",
@@ -146,10 +146,10 @@
     {
       "name": "poodle-jetstream-preview",
       "path": "packages/jetstream/preview",
-      "kind": "native-preview",
+      "kind": "tooling",
       "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
+      "publicIntent": false,
+      "channel": "internal"
     },
     {
       "name": "poodle-node",

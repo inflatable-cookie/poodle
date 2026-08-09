@@ -1,7 +1,7 @@
 # Research Master Index
 
-Status: active
-Updated: 2026-03-11
+Status: reference
+Updated: 2026-08-09
 
 ## Research Program Overview
 
@@ -173,9 +173,9 @@ Research now supports:
 
 ---
 
-## Next Task
+## Current Use
 
-1. Review translation memos with stakeholders
-2. Begin g01.002 token schema implementation
-3. Create first component contracts using research findings
-4. Plan Phase 3 research as g01 implementation progresses
+This index preserves the original research programme. The implementation work
+it informed is complete through `g12`; use current architecture, specs, and
+component contracts for package behavior. Reopen a research track only when a
+new decision needs evidence, then promote the result into an authority document.

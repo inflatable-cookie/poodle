@@ -23,16 +23,6 @@ pub fn docs_tree() -> Vec<TreeNode> {
     ]
 }
 
-fn set_label(nodes: &mut [TreeNode], value: &str, label: &str) {
-    for n in nodes.iter_mut() {
-        if n.value == value {
-            n.label = label.to_string();
-            return;
-        }
-        set_label(&mut n.children, value, label);
-    }
-}
-
 fn remove_node(nodes: Vec<TreeNode>, value: &str) -> Vec<TreeNode> {
     nodes
         .into_iter()
@@ -411,14 +401,6 @@ impl TreePreviewState {
         self.editing_value = Some(value.to_string());
         self.editing_text = label.to_string();
     }
-    pub fn cancel_rename(&mut self) {
-        self.editing_value = None;
-    }
-    pub fn commit_rename(&mut self, text: &str) {
-        if let Some(value) = self.editing_value.take() {
-            set_label(&mut self.rename_nodes, &value, text);
-        }
-    }
     pub fn delete_node(&mut self, value: &str) {
         self.rename_nodes = remove_node(std::mem::take(&mut self.rename_nodes), value);
     }
@@ -534,9 +516,6 @@ pub enum TreeEvent {
         value: String,
         label: String,
     },
-    RenameChange(String),
-    RenameCommit(String),
-    RenameCancel,
     OpenMenu {
         value: String,
         x: i32,
@@ -743,9 +722,6 @@ impl AppState {
                     TreeEvent::RenameStart { value, label } => {
                         self.tree.start_rename(&value, &label)
                     }
-                    TreeEvent::RenameChange(text) => self.tree.editing_text = text,
-                    TreeEvent::RenameCommit(text) => self.tree.commit_rename(&text),
-                    TreeEvent::RenameCancel => self.tree.cancel_rename(),
                     TreeEvent::OpenMenu { value, x, y } => self.tree.open_menu(&value, x, y),
                     TreeEvent::SetDrop { value, position } => {
                         self.tree.set_drop(&value, position)

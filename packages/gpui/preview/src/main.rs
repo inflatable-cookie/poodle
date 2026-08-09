@@ -190,7 +190,7 @@ impl PreviewRoot {
         &self,
         _text_secondary: poodle_tokens::typed::ColorValue,
         _accent: poodle_tokens::typed::ColorValue,
-        cx: &mut Context<Self>,
+        _cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let active_value = self.state.section.label();
         let nav_sections = [Section::Components, Section::Tokens, Section::Treatments];
@@ -565,7 +565,7 @@ impl PreviewRoot {
             .child(section_content)
     }
 
-    fn render_tokens_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+    fn render_tokens_section(&self, available_h: Pixels, _cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let text_primary = theme.resolve_color("color.text.primary");
         let text_secondary = theme.resolve_color("color.text.secondary");

@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Button, Checkbox, Dialog, Eyebrow, Field, Pill, Select, Surface, TextInput } from "@inflatable-cookie/poodle-react";
+import { Button, Checkbox, Dialog, Eyebrow, Field, Pill, Popover, Select, Surface, TextInput } from "@inflatable-cookie/poodle-react";
 
 const WIDTHS = ["sm", "md", "lg", "xl"] as const;
 type DialogWidth = (typeof WIDTHS)[number];
@@ -49,6 +49,7 @@ export function DialogSpecimen() {
   const [wideOpen, setWideOpen] = useState(false);
   const [scrollableOpen, setScrollableOpen] = useState(false);
   const [widthOpenMap, setWidthOpenMap] = useState<Record<string, boolean>>({});
+  const [overlayInDialogOpen, setOverlayInDialogOpen] = useState(false);
 
   const setWidthOpen = (w: string, open: boolean) => setWidthOpenMap((prev) => ({ ...prev, [w]: open }));
 
@@ -56,6 +57,13 @@ export function DialogSpecimen() {
     <>
       <Surface tone="panel" border="subtle" padding="md">
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
+            <Eyebrow>Popover inside a dialog</Eyebrow>
+            <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
+              Open dialog
+            </Button>
+          </div>
+
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
             <Eyebrow>Informational</Eyebrow>
             <Button variant="secondary" onClick={() => setBasicOpen(true)}>
@@ -348,6 +356,20 @@ export function DialogSpecimen() {
         actions={<Button onClick={() => setWideOpen(false)}>Done</Button>}
       >
         <p>This dialog cannot be dismissed by clicking the backdrop or pressing Escape.</p>
+      </Dialog>
+
+      <Dialog open={overlayInDialogOpen} title="Settings" showCloseButton onOpenChange={setOverlayInDialogOpen}>
+        <Field label="Model">
+          <Popover
+            ariaLabel="Model settings"
+            trigger={<Button variant="secondary">Opus 5 · Medium</Button>}
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "14rem" }}>
+              <strong>Opus 5</strong>
+              <span>Reasoning depth. Higher costs more time and tokens.</span>
+            </div>
+          </Popover>
+        </Field>
       </Dialog>
     </>
   );

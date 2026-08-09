@@ -135,6 +135,41 @@ export function ListCardSpecimen() {
           </div>
         </SpecimenGroup>
 
+        <SpecimenGroup label="Highlighted card">
+          <div className="poodle-specimen__stack" style={stack}>
+            <ListCard title="Highlighted row" subtitle="Accent gradient and inset ring" interactive highlighted />
+            <ListCard
+              title="Highlighted and selected"
+              subtitle="Both at once"
+              interactive
+              selectable
+              selected
+              highlighted
+            />
+            <ListCard title="Ordinary row" subtitle="For comparison" interactive />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Active card">
+          <div className="poodle-specimen__stack" style={stack}>
+            <ListCard
+              title="a private consumer Build Test"
+              subtitle="Registered 28/07/2026 16:35"
+              interactive
+              active
+            />
+            <ListCard title="a private consumer Build Test" subtitle="Registered 28/07/2026 16:35" interactive />
+            <ListCard
+              title="Active and selected"
+              subtitle="Both states at once"
+              interactive
+              selectable
+              selected
+              active
+            />
+          </div>
+        </SpecimenGroup>
+
         <SpecimenGroup label="Selectable cards">
           <div className="poodle-specimen__stack" style={stack}>
             <ListCard

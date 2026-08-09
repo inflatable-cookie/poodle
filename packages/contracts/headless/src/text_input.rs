@@ -16,14 +16,6 @@ pub struct EditState {
 }
 
 impl EditState {
-    fn at_end(value: &str) -> Self {
-        let n = value.chars().count();
-        Self {
-            anchor: n,
-            head: n,
-        }
-    }
-
     fn range(self) -> (usize, usize) {
         (self.anchor.min(self.head), self.anchor.max(self.head))
     }

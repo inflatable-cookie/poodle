@@ -5,15 +5,19 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Jetstream rendering adapter for Poodle — maps shared contract specs and resolved styles to Jetstream UiTree nodes."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "renderer", "ui"]
 
 [dependencies]
-poodle-adapter = { path = "../../contracts/adapter" }
-poodle-headless = { path = "../../contracts/headless" }
-poodle-events = { path = "../../contracts/events" }
-poodle-layout = { path = "../../contracts/layout" }
-poodle-specs = { path = "../../contracts/components" }
-poodle-style = { path = "../../contracts/style" }
-poodle-tokens = { path = "../../contracts/tokens" }
+poodle-adapter = { version = "0.1.0", path = "../../contracts/adapter" }
+poodle-headless = { version = "0.1.0", path = "../../contracts/headless" }
+poodle-events = { version = "0.1.0", path = "../../contracts/events" }
+poodle-layout = { version = "0.1.0", path = "../../contracts/layout" }
+poodle-specs = { version = "0.1.0", path = "../../contracts/components" }
+poodle-style = { version = "0.1.0", path = "../../contracts/style" }
+poodle-tokens = { version = "0.1.0", path = "../../contracts/tokens" }
 taffy = "0.9"
 glam = "0.29"
 

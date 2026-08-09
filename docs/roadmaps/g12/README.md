@@ -1,6 +1,6 @@
 # g12 — React Full Parity And Web Verification Depth
 
-**Status: active.** The React parity program (`001`–`008`) and
+**Status: completed.** The React parity program (`001`–`008`) and
 the bounded work through `018` are complete. `017` remains
 native-interaction evidence; its IME follow-up is still unpromoted, and its
 "headless GPUI click driver is blocked" note is superseded — the driver works
@@ -18,8 +18,8 @@ Checkbox/Switch/TriStateSwitch family is pixel-green and click-proven; the
 RadioGroup sites are pixel-green and selection-proven; all 18
 Pagination/Stepper sites are pixel-green, with Pagination navigation and
 controlled limit state click-proven. Wave 3 is complete after the final Field
-site moved to shared render nodes with exact pixels. Wave 4 has started: all
-29 standalone Pill sites and all 43 standalone ListCard sites are node-backed,
+site moved to shared render nodes with exact pixels. Wave 4 continued with all
+29 standalone Pill sites and all 43 standalone ListCard sites became node-backed,
 handler-proven, and pixel-green; the ListCard slice also migrated its seven
 embedded Pill sites. The final embedded ListCard and six Pill sites are now
 node-backed and pixel-green too, leaving both old-tier censuses at zero.
@@ -218,27 +218,27 @@ Runway:
 - `021-icon-catalogue-boundary.md` — `poodle-core` stops vendoring the 1,703
   Lucide icons. Measured: 84% of the tarball, 8% of it used, and a namespace
   import in `icon-registry.ts` puts all of them in every consumer bundle.
-  Poodle keeps the twelve its own components need. **Ready; blocks Longhorn's
-  first publication.**
+  Poodle keeps the icons its own components need and exposes explicit catalogue
+  generation for operators. **Complete.**
 - `019-gpui-node-backend.md` — the symmetric GPUI half of the
   Poodle↔Jetstream inversion: a Node → GPUI interpreter crate, GPUI preview
   migration onto `poodle-render` nodes, then deletion of
   `packages/gpui/components` — the last duplicate component tier. Verified by
-  the g12.014 native visual gate held at zero diff. **In progress; Batch A
-  and Batch B waves 1–2 complete; Wave 3's old Button census is zero and the
+  the g12.014 native visual gate held at zero diff. **Complete.** Batch A
+  and Batch B waves 1–2 completed; Wave 3's old Button census reached zero and the
   32-site Checkbox/Switch/TriStateSwitch family is node-backed, pixel-green,
   and click-proven; the 18-site Pagination/Stepper family is node-backed and
   pixel-green; Waves 3–4 are complete; Wave 5's first 93 constructor sites are
   node-backed and pixel-green; Waves 6–10 cover CodeInput/TokenInput/FileUpload,
   Tabs/TabStrip, Breadcrumbs, TextLink, and SelectionSummary with exact focused
-  captures and zero old-tier constructor sites.**
+  captures and zero old-tier constructor sites.
 
 - Ongoing: `check:svelte` (svelte-check over `@inflatable-cookie/poodle-svelte`, driven
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
   `ci-web.yml`. Added after five type errors in `Rating.svelte` were found
   from a consumer repo rather than from Poodle's own gates.
 
-## Next Task
+## Closeout
 
 ``019-gpui-node-backend.md`` is COMPLETE. `packages/gpui/components` — 170 files, 44,796 lines, the
 last duplicate component tier — is deleted. Every Poodle target now renders one
@@ -251,9 +251,9 @@ named residual. Probe tests were mined into `packages/render/src/presentation.rs
 repointed at `poodle-render` rather than dropped with its old subject, and the
 orphaned `drift:clicks` was retired.
 
-Next up, not part of this card: `effigy test:jetstream-a11y` fails on 151
-unnamed `TextInput` nodes — pre-existing, and unmasked now that `ci:native` gets
-past its dead tasks. It is the last thing between `ci:native` and green.
+The follow-up accessibility gap is closed: `ci:native` audits 135 specimens and
+20,644 nodes, and every role that requires an accessible name has one. The
+generation has no remaining release blocker.
 
 Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` and
 `docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.

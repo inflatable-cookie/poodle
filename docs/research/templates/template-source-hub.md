@@ -60,11 +60,11 @@ Brief description of what external system this hub documents and what Poodle dec
 
 ## Related
 
-- Value track: [../value-tracks/...]()
-- Milestone: [../../roadmaps/...]()
+- Value track: `../value-tracks/<track>.md`
+- Milestone: `../../roadmaps/<generation>/<card>.md`
 
 ---
 
-## Next Task
+## Follow-up
 
 Clear next step for this research.

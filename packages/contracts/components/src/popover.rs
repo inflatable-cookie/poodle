@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
+use crate::types::{OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
 
 /// Default surface min-width in rem (contract §7 / §8 `14rem`).
 pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;

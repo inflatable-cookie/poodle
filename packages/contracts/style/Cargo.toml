@@ -5,13 +5,17 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Resolved style descriptor IR for Poodle multi-renderer targets."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "styles", "ui"]
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-poodle-tokens = { path = "../tokens" }
-poodle-layout = { path = "../layout" }
+poodle-tokens = { version = "0.1.0", path = "../tokens" }
+poodle-layout = { version = "0.1.0", path = "../layout" }
 
 [package.metadata.poodle]
 public-intent = true

@@ -5,6 +5,10 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Renderer-agnostic semantic event types for Poodle multi-renderer targets."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "events", "ui"]
 
 [lib]
 path = "src/lib.rs"

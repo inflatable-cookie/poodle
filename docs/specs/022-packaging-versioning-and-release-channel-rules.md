@@ -65,19 +65,22 @@ The current release posture is:
 
 ### Preview Channel Public-Intent Packages
 
-- `@inflatable-cookie/poodle-core/tokens`
+- `@inflatable-cookie/poodle-core`
 - `@inflatable-cookie/poodle-svelte`
-- `@inflatable-cookie/poodle-svelte-workstation`
-- `poodle-gpui-tokens`
-- `poodle-gpui-primitives`
-- `poodle-gpui-composites`
-- `poodle-gpui-workstation`
+- `@inflatable-cookie/poodle-react`
+- Rust contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`,
+  `poodle-layout`, `poodle-markdown`, `poodle-node`, `poodle-specs`,
+  `poodle-style`, and `poodle-tokens`
+- Rust renderers: `poodle-render`, `poodle-gpui`,
+  `poodle-gpui-node-backend`, and `poodle-jetstream`
 
 ### Internal Packages
 
 - `@inflatable-cookie/poodle-tokens`
 - `@inflatable-cookie/poodle-bridge-underlay`
 - `@inflatable-cookie/poodle-svelte-preview`
+- `poodle-gpui-preview`
+- `poodle-jetstream-preview`
 
 ## Consumption Rule
 
@@ -102,13 +105,12 @@ Each release-capable tranche should document:
 
 - `packages/release-manifest.json`
 - `packages/release-operations.json`
-- `packages/svelte/tokens/package.json`
+- `packages/core/package.json`
 - `packages/svelte/components/package.json`
-- `packages/svelte/components/package.json`
-- `packages/svelte/workstation/package.json`
+- `packages/react/components/package.json`
 - `packages/svelte/preview/package.json`
 - `packages/bridges/underlay/package.json`
-- `packages/gpui/tokens/Cargo.toml`
-- `packages/gpui/primitives/Cargo.toml`
-- `packages/gpui/composites/Cargo.toml`
-- `packages/gpui/workstation/Cargo.toml`
+- `packages/contracts/*/Cargo.toml`
+- `packages/render/Cargo.toml`
+- `packages/gpui/*/Cargo.toml`
+- `packages/jetstream/*/Cargo.toml`

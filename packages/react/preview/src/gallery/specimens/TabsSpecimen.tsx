@@ -43,6 +43,13 @@ const detailTabs: TabItem[] = [
   { value: "versions", label: "Versions", count: 3 },
 ];
 
+const shedItems: TabItem[] = [
+  { value: "screens", label: "Screens", icon: "monitor", count: 12 },
+  { value: "components", label: "Components", icon: "box", count: 12 },
+  { value: "assets", label: "Assets", icon: "image", count: 375 },
+  { value: "info", label: "Info", icon: "info" },
+];
+
 const frameStyle: CSSProperties = {
   border: "0.0625rem solid var(--poodle-color-border-subtle)",
   borderRadius: "var(--poodle-radius-surface)",
@@ -116,6 +123,22 @@ export function TabsSpecimen() {
       )}
     >
       <div className="poodle-specimen">
+        <SpecimenGroup label="Graded overflow (drag the handle)">
+          <div
+            style={{
+              resize: "horizontal",
+              overflow: "auto",
+              minWidth: "12rem",
+              maxWidth: "48rem",
+              width: "34rem",
+              border: "1px dashed var(--poodle-color-border-subtle)",
+              padding: "0.5rem",
+            }}
+          >
+            <Tabs items={shedItems} overflowStrategy="shed" collapseWhenOverflow ariaLabel="Graded overflow" />
+          </div>
+        </SpecimenGroup>
+
         <SpecimenGroup label="Text variant (default, with indicator line)">
           <Tabs items={basicTabs} defaultValue="overview" ariaLabel="Section tabs">
             {(activeValue) => (

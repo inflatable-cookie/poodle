@@ -13,7 +13,7 @@
         "@sveltejs/vite-plugin-svelte": "^7.2.0",
         "svelte-check": "^4.7.4",
         "typescript": "^5.9.2",
-        "vite": "^8.2.0",
+        "vite": "^8.2.1",
       },
     },
   },
@@ -176,7 +176,7 @@
 
     "zimmerframe": ["zimmerframe@1.1.4", "", {}, "sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ=="],
 
-    "@inflatable-cookie/poodle-svelte/@inflatable-cookie/poodle-core": ["@inflatable-cookie/poodle-core@file:../../core", {}],
+    "@inflatable-cookie/poodle-svelte/@inflatable-cookie/poodle-core": ["@inflatable-cookie/poodle-core@file:../../core", { "devDependencies": { "@types/bun": "^1.3.14", "marked": "^18.0.0" } }],
 
     "svelte/magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
   }

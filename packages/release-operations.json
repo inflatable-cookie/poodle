@@ -202,12 +202,12 @@
     },
     {
       "name": "poodle-gpui-preview",
-      "channel": "preview",
-      "publicIntent": true,
+      "channel": "internal",
+      "publicIntent": false,
       "changeControl": "tooling-owned",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
     },
     {
       "name": "poodle-jetstream",
@@ -220,12 +220,12 @@
     },
     {
       "name": "poodle-jetstream-preview",
-      "channel": "preview",
-      "publicIntent": true,
+      "channel": "internal",
+      "publicIntent": false,
       "changeControl": "tooling-owned",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
     },
     {
       "name": "poodle-node",

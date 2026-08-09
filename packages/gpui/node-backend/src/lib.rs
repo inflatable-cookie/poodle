@@ -1381,15 +1381,15 @@ impl gpui::Render for EmptyDragPreview {
 }
 
 
-/// The id `element_id` would assign, as a string, for keying editor state.
+// The id `element_id` would assign, as a string, for keying editor state.
 // Focus handles we own, so we can ask "is this node focused?" — gpui's
 // auto-created handle lives in element state it never hands back. Created
 // lazily in the paint pass (which has an `App`) and used from the next build
 // onward; keyed by element id, like every other per-node cache here.
 thread_local! {
-    /// Whether the subtree currently being built sits inside a focused node.
+    // Whether the subtree currently being built sits inside a focused node.
     static FOCUS_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
-    /// The id of the node that currently holds focus, if any.
+    // The id of the node that currently holds focus, if any.
     static FOCUSED_FIELD: RefCell<Option<String>> = const { RefCell::new(None) };
     static FOCUS_HANDLES: RefCell<std::collections::HashMap<String, gpui::FocusHandle>> =
         RefCell::new(std::collections::HashMap::new());

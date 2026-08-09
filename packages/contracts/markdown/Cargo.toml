@@ -5,6 +5,10 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Poodle shared markdown block model: normalises pulldown-cmark into the same blocks the web target derives from marked, so every renderer shows the same document."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "markdown", "ui"]
 
 [lib]
 path = "src/lib.rs"

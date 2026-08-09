@@ -5,6 +5,21 @@
   "license": "MIT",
   "type": "module",
   "description": "Poodle React component pilot: styled shells over @inflatable-cookie/poodle-core machines, sharing tokens and recipes with the Svelte layer.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inflatable-cookie/poodle.git",
+    "directory": "packages/react/components"
+  },
+  "homepage": "https://github.com/inflatable-cookie/poodle#readme",
+  "bugs": {
+    "url": "https://github.com/inflatable-cookie/poodle/issues"
+  },
+  "keywords": [
+    "components",
+    "design-system",
+    "react",
+    "ui"
+  ],
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -13,15 +28,16 @@
   },
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "workspace:*",
-    "marked": "^18.0.0"
+    "@inflatable-cookie/poodle-core": "0.1.0",
+    "marked": "^18.0.9"
   },
   "poodleRelease": {
     "publicIntent": true,

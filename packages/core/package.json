@@ -5,6 +5,21 @@
   "license": "MIT",
   "type": "module",
   "description": "Poodle framework-free headless behavior core: component state machines, prop getters, and shared interaction machinery.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inflatable-cookie/poodle.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/inflatable-cookie/poodle#readme",
+  "bugs": {
+    "url": "https://github.com/inflatable-cookie/poodle/issues"
+  },
+  "keywords": [
+    "design-system",
+    "headless",
+    "ui",
+    "typescript"
+  ],
   "bin": {
     "poodle-icons": "./src/icons/build.mjs"
   },
@@ -55,7 +70,8 @@
   },
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "test": "bun test",
@@ -68,6 +84,6 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
-    "marked": "^18.0.0"
+    "marked": "^18.0.9"
   }
 }

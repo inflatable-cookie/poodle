@@ -19,14 +19,10 @@
 //! ```
 
 use jetstream_ui::ui_element::*;
-use poodle_jetstream::JetstreamThemeProvider;
 use jetstream_ui::Color;
+use poodle_jetstream::JetstreamThemeProvider;
+
 use crate::jsx::*;
-
-
-
-
-
 use poodle_specs::{
     EyebrowSpec, PillSpec, TabDefinition, TabVariant, TabsSpec, ToggleGroupOption,
     ToggleGroupSpec,
@@ -217,44 +213,6 @@ pub(crate) fn build_state_probes(state: &AppState, theme: &JetstreamThemeProvide
         .child(build_probe_toggle("disabled", state.disabled, theme))
         .child(build_probe_toggle("invalid", state.invalid, theme))
         .child(build_probe_toggle("busy", state.busy, theme))
-}
-
-/// A labeled toggle group (eyebrow label + row of buttons).
-fn build_toggle_group(
-    eyebrow: &str,
-    id_prefix: &str,
-    options: &[&str],
-    active: usize,
-    theme: &JetstreamThemeProvider,
-) -> JsEl {
-    let text_primary = resolve_color(theme, "color.text.primary");
-    let text_secondary = resolve_color(theme, "color.text.secondary");
-    let accent = resolve_color(theme, "color.accent.base");
-    let border = resolve_color(theme, "color.border.subtle");
-    let bg_canvas = resolve_color(theme, "color.background.canvas");
-
-    let mut row = div().flex_row().gap(2.0);
-    for (i, &option) in options.iter().enumerate() {
-        let is_active = i == active;
-        let btn_bg = if is_active { tint(accent, 0.22) } else { tint(bg_canvas, 0.88) };
-        let btn_border = if is_active { tint(accent, 0.56) } else { border };
-        let btn_text = if is_active { text_primary } else { text_secondary };
-
-        row = row.child(
-            button(option)
-                .id(format!("{id_prefix}:{option}"))
-                .h(26.0).px(8.0)
-                .items_center().justify_center()
-                .rounded(4.0)
-                .bg(btn_bg).border_1().border_color(btn_border)
-                .text_color(btn_text).text_size(10.0)
-                .focusable()
-        );
-    }
-
-    div().flex_col().gap(4.0)
-        .child(label(eyebrow).text_color(text_secondary).text_size(9.0))
-        .child(row)
 }
 
 /// A single state probe toggle (checkbox-style button).

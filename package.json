@@ -1,5 +1,6 @@
 {
   "name": "poodle",
+  "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -13,16 +14,16 @@
     "packages/react/preview"
   ],
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/svelte": "^5.4.2",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.9.5",
     "@types/pngjs": "^6.0.5",
-    "axe-core": "^4.12.1",
-    "happy-dom": "^20.11.1",
+    "axe-core": "^4.13.0",
+    "happy-dom": "^20.11.2",
     "pixelmatch": "^7.2.0",
-    "playwright": "^1.62.0",
+    "playwright": "^1.62.1",
     "pngjs": "^7.0.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -31,5 +32,12 @@
   },
   "scripts": {
     "test:components": "vitest run"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2",
+    "nanoid": "^3.3.16",
+    "picomatch": "^4.0.5",
+    "postcss": "^8.5.26",
+    "vite": "^8.2.1"
   }
 }

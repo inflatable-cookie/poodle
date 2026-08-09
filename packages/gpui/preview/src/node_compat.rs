@@ -1,8 +1,9 @@
-//! Preview-local redirects for leaf constructors during g12.019 Batch B.
+//! Preview component facades backed by the shared render tree.
 //!
-//! Specimens keep their existing `Type::from_spec(spec, theme)` call shape,
-//! but these leaves now render through `poodle-render` and the GPUI node
-//! backend. The module disappears with the old component tier in Batch C.
+//! Specimens use a compact `Type::from_spec(spec, theme)` call shape while
+//! rendering through `poodle-render` and the GPUI node backend. This module
+//! owns preview-only event wiring and slots; public component behavior remains
+//! in the shared contracts and renderer.
 
 use std::rc::Rc;
 use std::sync::Arc;
@@ -36,7 +37,7 @@ use poodle_specs::{
     PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
     PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
     RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec, ResizeHandleSpec,
-    ScrollShellSpec, SelectSpec, SelectionSummarySpec, SemanticControlSizeRole, SeparatorSpec,
+    ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
     ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
     StackSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec, TableSpec,
     SplitOrientation, SplitViewSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec,
@@ -215,26 +216,12 @@ pub(crate) struct MetaBar {
 }
 
 impl MetaBar {
-    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(MetaBarSpec::new(), theme)
-    }
-
     pub(crate) fn from_spec(spec: MetaBarSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
             children: Vec::new(),
         }
-    }
-
-    pub(crate) fn aria_label(mut self, value: impl Into<String>) -> Self {
-        self.spec.aria_label = Some(value.into());
-        self
-    }
-
-    pub(crate) fn show_separators(mut self, value: bool) -> Self {
-        self.spec.show_separators = value;
-        self
     }
 
     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> Self {
@@ -479,11 +466,6 @@ impl FilterToolbar {
         self
     }
 
-    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
-        self.on_toggle = Some(handler);
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         poodle_render::filter_toolbar(
             &self.spec,
@@ -719,10 +701,6 @@ pub(crate) struct EditableLabel {
 }
 
 impl EmbedPreview {
-    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(EmbedPreviewSpec::new(), theme)
-    }
-
     pub(crate) fn from_spec(spec: EmbedPreviewSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -750,10 +728,6 @@ impl IntoElement for EmbedPreview {
 }
 
 impl MediaThumbnail {
-    pub(crate) fn new(kind: poodle_specs::MediaKind, theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(MediaThumbnailSpec::new(kind), theme)
-    }
-
     pub(crate) fn from_spec(spec: MediaThumbnailSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -781,14 +755,6 @@ impl IntoElement for MediaThumbnail {
 }
 
 impl MediaPreview {
-    pub(crate) fn new(
-        kind: poodle_specs::MediaKind,
-        title: impl Into<String>,
-        theme: &GpuiThemeProvider,
-    ) -> Self {
-        Self::from_spec(MediaPreviewSpec::new(kind, title), theme)
-    }
-
     pub(crate) fn from_spec(spec: MediaPreviewSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -892,21 +858,6 @@ impl MediaPicker {
         self
     }
 
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_size_role(mut self, role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = role;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         poodle_render::media_picker(
             &self.spec,
@@ -935,15 +886,6 @@ impl DataTable {
         self
     }
 
-    pub(crate) fn on_row_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_row_select = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_select_all(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_select_all = Some(handler);
-        self
-    }
 }
 
 impl AgentQuestion {
@@ -960,10 +902,6 @@ impl AgentQuestion {
         self
     }
 
-    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_dismiss = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for AgentQuestion {
@@ -1032,20 +970,6 @@ impl MediaBrowsePanel {
         }
     }
 
-    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_select = Some(handler);
-        self
-    }
-
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
 }
 
 impl IntoElement for MediaBrowsePanel {
@@ -1096,16 +1020,6 @@ impl ToastStack {
         }
     }
 
-    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_dismiss = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_action = Some(handler);
-        self
-    }
-
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
         self.spec.size = size;
         self
@@ -1144,15 +1058,6 @@ impl ToastHost {
         self
     }
 
-    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_dismiss = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_action = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for ToastHost {
@@ -1198,10 +1103,6 @@ impl ActionDiscoveryPanel {
         self
     }
 
-    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_select = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for ActionDiscoveryPanel {
@@ -1225,15 +1126,6 @@ impl BulkActionBar {
         }
     }
 
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
 }
 
 impl IntoElement for BulkActionBar {
@@ -1308,20 +1200,11 @@ impl FilterBuilder {
         self
     }
 
-    pub(crate) fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = size_role;
-        self
-    }
-
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
         self.spec.density = density;
         self
     }
 
-    pub(crate) fn on_reset(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_reset = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for FilterBuilder {
@@ -1355,20 +1238,6 @@ impl MarkdownEditor {
         self
     }
 
-    pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = size_role;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
 }
 
 impl IntoElement for MarkdownEditor {
@@ -1500,26 +1369,6 @@ impl RelationPicker {
         }
     }
 
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_size_role(mut self, role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = role;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
-
-    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_select = Some(handler);
-        self
-    }
-
     pub(crate) fn on_drill_enter(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_drill_enter = Some(handler);
         self
@@ -1530,15 +1379,6 @@ impl RelationPicker {
         self
     }
 
-    pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_confirm = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_cancel = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for RelationPicker {
@@ -1576,23 +1416,8 @@ impl EditableLabel {
         self
     }
 
-    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_cancel = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_edit_start(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.handlers.on_edit_start = Some(handler);
-        self
-    }
-
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
         self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_size_role(mut self, role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = role;
         self
     }
 
@@ -1705,16 +1530,6 @@ impl Drawer {
         self
     }
 
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         poodle_render::drawer(
             &self.spec,
@@ -1761,10 +1576,6 @@ impl IntoElement for MediaPicker {
 }
 
 impl Region {
-    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(RegionSpec::new(), theme)
-    }
-
     pub(crate) fn from_spec(spec: RegionSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -1792,10 +1603,6 @@ impl IntoElement for Region {
 }
 
 impl ScrollShell {
-    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(ScrollShellSpec::new(), theme)
-    }
-
     pub(crate) fn from_spec(spec: ScrollShellSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -1872,48 +1679,13 @@ impl FormDialog {
         self
     }
 
-    pub(crate) fn disabled(mut self, value: bool) -> Self {
-        self.spec.is_disabled = value;
-        self
-    }
-
     pub(crate) fn error_message(mut self, value: impl Into<String>) -> Self {
         self.spec.error = Some(value.into());
         self
     }
 
-    pub(crate) fn success_message(mut self, value: impl Into<String>) -> Self {
-        self.spec.success = Some(value.into());
-        self
-    }
-
-    pub(crate) fn aria_label(mut self, value: impl Into<String>) -> Self {
-        self.spec.aria_label = Some(value.into());
-        self
-    }
-
-    pub(crate) fn width(mut self, value: poodle_specs::DialogWidth) -> Self {
-        self.spec.width = Some(value);
-        self
-    }
-
-    pub(crate) fn size(mut self, value: ControlSize) -> Self {
-        self.spec.size = value;
-        self
-    }
-
-    pub(crate) fn density(mut self, value: ControlDensity) -> Self {
-        self.spec.density = value;
-        self
-    }
-
     pub(crate) fn bare(mut self, value: bool) -> Self {
         self.spec.is_bare = value;
-        self
-    }
-
-    pub(crate) fn columns(mut self, value: u32) -> Self {
-        self.spec.columns = value;
         self
     }
 
@@ -1958,10 +1730,6 @@ impl IntoElement for FormDialog {
 }
 
 impl PickerShell {
-    pub(crate) fn new(title: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(PickerShellSpec::new(title), theme)
-    }
-
     pub(crate) fn from_spec(spec: PickerShellSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
@@ -1983,11 +1751,6 @@ impl PickerShell {
         self.with_toolbar(search)
     }
 
-    pub(crate) fn with_selection(mut self, selection: impl IntoCompatNode) -> Self {
-        self.selection = Some(selection.into_compat_node());
-        self
-    }
-
     pub(crate) fn with_body(mut self, body: impl IntoCompatNode) -> Self {
         self.body = Some(body.into_compat_node());
         self
@@ -1997,18 +1760,9 @@ impl PickerShell {
         self.with_body(results)
     }
 
-    pub(crate) fn with_state_content(mut self, content: impl IntoCompatNode) -> Self {
-        self.state_content = Some(content.into_compat_node());
-        self
-    }
-
     pub(crate) fn with_footer(mut self, footer: impl IntoCompatNode) -> Self {
         self.footer = Some(footer.into_compat_node());
         self
-    }
-
-    pub(crate) fn with_actions(self, actions: impl IntoCompatNode) -> Self {
-        self.with_footer(actions)
     }
 
     fn into_node(self) -> poodle_node::Node {
@@ -2253,11 +2007,6 @@ impl FormShell {
         self
     }
 
-    pub(crate) fn with_empty_section_slot(mut self) -> Self {
-        self.section_slots.push(None);
-        self
-    }
-
     pub(crate) fn with_action(mut self, action: impl IntoCompatNode) -> Self {
         self.actions.push(action.into_compat_node());
         self
@@ -2359,16 +2108,6 @@ impl Toolbar {
         }
     }
 
-    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
-
     pub(crate) fn child(mut self, child: impl IntoCompatNode) -> Self {
         self.children.push(child.into_compat_node());
         self
@@ -2417,16 +2156,6 @@ impl OrderBy {
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
         self.spec.density = density;
-        self
-    }
-
-    pub(crate) fn on_direction_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_direction_toggle = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_remove = Some(handler);
         self
     }
 
@@ -2527,11 +2256,6 @@ impl RefSelect {
         self
     }
 
-    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_change = Some(handler);
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         poodle_render::ref_select(&self.spec, &self.theme, self.on_change)
     }
@@ -2617,11 +2341,6 @@ impl NavCard {
 
     pub(crate) fn with_icon(mut self, icon: impl IntoCompatNode) -> Self {
         self.icon = Some(icon.into_compat_node());
-        self
-    }
-
-    pub(crate) fn on_click(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_click = Some(handler);
         self
     }
 
@@ -3648,31 +3367,6 @@ impl Select {
         self
     }
 
-    pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
-        self
-    }
-
-    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_toggle = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_change = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_clear = Some(handler);
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::select(
             &self.spec,
@@ -3793,11 +3487,6 @@ impl CodeInput {
         }
     }
 
-    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.id_suffix = Some(id.into());
-        self
-    }
-
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
         self.spec.size = size;
         self
@@ -3870,14 +3559,6 @@ impl TokenInput {
         }
     }
 
-    pub(crate) fn on_remove<F>(mut self, handler: F) -> Self
-    where
-        F: Fn(&str) + Send + Sync + 'static,
-    {
-        self.on_remove = Some(Arc::new(handler));
-        self
-    }
-
     fn into_node(self) -> poodle_node::Node {
         poodle_render::token_input(&self.spec, &self.theme, self.on_remove)
     }
@@ -3906,19 +3587,6 @@ impl FileUpload {
             id_suffix: None,
             on_remove: None,
         }
-    }
-
-    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.id_suffix = Some(id.into());
-        self
-    }
-
-    pub(crate) fn on_remove<F>(mut self, handler: F) -> Self
-    where
-        F: Fn(&str) + Send + Sync + 'static,
-    {
-        self.on_remove = Some(Arc::new(handler));
-        self
     }
 
     fn into_node(self) -> poodle_node::Node {
@@ -3958,20 +3626,11 @@ impl Breadcrumbs {
         self
     }
 
-    pub(crate) fn with_size_role(mut self, role: SemanticControlSizeRole) -> Self {
-        self.spec.size_role = role;
-        self
-    }
-
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
         self.spec.density = density;
         self
     }
 
-    pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_navigate = Some(handler);
-        self
-    }
 }
 
 impl IntoElement for Breadcrumbs {
@@ -4007,10 +3666,6 @@ impl TextLink {
         }
     }
 
-    pub(crate) fn on_click(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_click = Some(handler);
-        self
-    }
 }
 
 pub(crate) struct SelectionSummary {
@@ -4106,11 +3761,6 @@ impl Tabs {
         self
     }
 
-    pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_close = Some(handler);
-        self
-    }
-
     pub(crate) fn with_content(
         mut self,
         value: impl Into<String>,
@@ -4118,16 +3768,6 @@ impl Tabs {
     ) -> Self {
         self.content
             .push((value.into(), content.into_any_element()));
-        self
-    }
-
-    pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
         self
     }
 
@@ -4196,13 +3836,6 @@ impl TabStrip {
 
     pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.on_close = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_reorder<F>(self, _handler: F) -> Self
-    where
-        F: Fn(&str, i32) + Send + Sync + 'static,
-    {
         self
     }
 
@@ -4316,18 +3949,8 @@ impl NumberInput {
         }
     }
 
-    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.id_suffix = Some(id.into());
-        self
-    }
-
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
         self.spec.size = size;
-        self
-    }
-
-    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
         self
     }
 
@@ -6623,11 +6246,6 @@ impl DockRegion {
 
     pub(crate) fn on_tab_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.on_tab_change = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_collapse_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
-        self.on_collapse_toggle = Some(handler);
         self
     }
 

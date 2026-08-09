@@ -5,13 +5,17 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Contract-backed component specs for Poodle multi-renderer targets."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["components", "design-system", "ui"]
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-poodle-tokens = { path = "../tokens" }
-poodle-headless = { path = "../headless" }
+poodle-tokens = { version = "0.1.0", path = "../tokens" }
+poodle-headless = { version = "0.1.0", path = "../headless" }
 
 [package.metadata.poodle]
 public-intent = true

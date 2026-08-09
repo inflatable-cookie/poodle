@@ -862,7 +862,7 @@ mod tests {
     #[test]
     fn dialog_and_drawer_keep_native_dismissal_posture_explicit() {
         let dialog = DialogSpec::new()
-            .with_kind(DialogKind::AlertDialog)
+            .with_role(DialogKind::AlertDialog)
             .with_default_open(true)
             .with_title("Delete review");
         let drawer = DrawerSpec::new()

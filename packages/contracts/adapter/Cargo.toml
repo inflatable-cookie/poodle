@@ -5,15 +5,19 @@ edition = "2021"
 license = "MIT"
 rust-version = "1.95"
 description = "Renderer adapter traits for Poodle multi-renderer targets."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+readme = "README.md"
+keywords = ["design-system", "renderer", "ui"]
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-poodle-events = { path = "../events" }
-poodle-layout = { path = "../layout" }
-poodle-style = { path = "../style" }
-poodle-tokens = { path = "../tokens" }
+poodle-events = { version = "0.1.0", path = "../events" }
+poodle-layout = { version = "0.1.0", path = "../layout" }
+poodle-style = { version = "0.1.0", path = "../style" }
+poodle-tokens = { version = "0.1.0", path = "../tokens" }
 
 [package.metadata.poodle]
 public-intent = true

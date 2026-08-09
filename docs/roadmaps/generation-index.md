@@ -3,19 +3,19 @@
 ## Active Execution Track
 
 - `g12`
-  - Status: active
+  - Status: completed
   - Range: `001` to `019` on disk
   - Notes: React full parity (`001`–`008`) is complete — all 132 components
     ported to `@inflatable-cookie/poodle-react` against a single shared stylesheet, with a
     full per-component preview gallery mirroring the Svelte preview's slugs.
     Web verification and native hardening through `g12.015` are complete.
     `g12.016` completed the public DockRegion drag extension and exact preview
-    artifact checkpoint requested by Longhorn. `g12.017` remains interaction
-    evidence with its IME follow-up unpromoted. `g12.018` completed public
-    built-in overlay geometry requested by Longhorn. `g12.019` (GPUI node
-    backend: Node → GPUI interpreter, preview migration, deletion of the
-    duplicate `packages/gpui/components` tier) is in progress. Batch A is
-    complete; Batch B waves 1–2 are complete and Wave 3's standalone
+    artifact checkpoint requested by Longhorn. `g12.017` recorded interaction
+    evidence, with its IME follow-up left unpromoted. `g12.018` completed public
+    overlay geometry requested by Longhorn. `g12.019` completed the GPUI node
+    backend, preview migration, and deletion of the duplicate
+    `packages/gpui/components` tier. Batch A and Batch B waves 1–2 are
+    complete; Batch B Wave 3's standalone
     TextInput/Field migration is pixel-green. The first static embedded
     Button/IconButton and static header/list slices are also pixel-green. The
     FormActions/Button-label slice is pixel-green. The
@@ -207,7 +207,8 @@ When roadmap files disagree:
 
 1. treat this index as the top-level source of truth
 2. treat `docs/roadmaps/README.md` as the entrypoint
-3. treat `g12` as the active generation until it is explicitly closed
+3. treat `g12` as complete; open a new generation only after an explicit
+   maintainer sequencing decision
 
 ## Rollover policy
 
@@ -229,7 +230,7 @@ generation:
 If that cleanup has not happened, stay in the current generation and finish the
 closeout there first.
 
-## Next Task
+## Current Release Posture
 
 ``g12.019`` is COMPLETE. `packages/gpui/components` — 170 files, 44,796 lines, the
 last duplicate component tier — is deleted. Every Poodle target now renders one
@@ -242,9 +243,10 @@ named residual. Probe tests were mined into `packages/render/src/presentation.rs
 repointed at `poodle-render` rather than dropped with its old subject, and the
 orphaned `drift:clicks` was retired.
 
-Next up, not part of this card: `effigy test:jetstream-a11y` fails on 151
-unnamed `TextInput` nodes — pre-existing, and unmasked now that `ci:native` gets
-past its dead tasks. It is the last thing between `ci:native` and green.
+`effigy ci:native` and `effigy test:jetstream-a11y` are green. The Jetstream
+audit covers 135 specimens and 20,644 nodes; every role that requires an
+accessible name has one. Public-release hardening now owns the live queue
+outside this completed generation.
 
 Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` and
 `docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.
