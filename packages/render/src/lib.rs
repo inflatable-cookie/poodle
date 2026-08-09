@@ -54,6 +54,7 @@ pub mod date_picker;
 pub mod date_range_picker;
 pub mod date_time_picker;
 pub mod date_time_range_picker;
+mod date_time_trigger;
 pub mod date_time_zone_picker;
 pub mod debug_dialog;
 pub mod detail_item;

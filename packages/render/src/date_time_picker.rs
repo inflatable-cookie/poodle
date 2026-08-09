@@ -8,22 +8,15 @@
 //! Display text (contract §4): complete value → "date time"; partial → the
 //! prompt for the missing part; empty → placeholder.
 
-use std::sync::Arc;
-
 use poodle_adapter::ThemeProvider;
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole, StylePatch,
-};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeFieldSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
-use crate::color::{mix_linear, mix_srgb, with_alpha};
+use crate::color::{mix_linear, with_alpha};
 use crate::date_picker::DatePickerHandlers;
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
-};
+use crate::date_time_trigger::{date_time_trigger, DateTimeTrigger};
+use crate::presentation::rem_to_px;
 use crate::time_field::time_field;
 
 pub fn date_time_picker(
@@ -31,26 +24,10 @@ pub fn date_time_picker(
     theme: &dyn ThemeProvider,
     handlers: DatePickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = theme.resolve_space("size.control.height")
-        + rem_to_px(size_height_offset_rem(effective_size));
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = theme.resolve_space("space.inline.md")
-        + rem_to_px(size_padding_x_offset_rem(effective_size));
     let inline_gap = theme.resolve_space("space.inline.sm");
-    let icon_size = theme.resolve_space("size.icon.sm");
-
-    let fill = theme.resolve_color("color.background.surface");
     let elevated = theme.resolve_color("color.background.elevated");
     let border_color = theme.resolve_color("color.border.default");
-    let accent = theme.resolve_color("color.accent.base");
-    let radius = theme.resolve_radius("radius.control");
-    let text_color = theme.resolve_color("color.text.primary");
     let muted = theme.resolve_color("color.text.secondary");
-    let icon_muted = theme.resolve_color("color.icon.muted");
-
-    // Hover: color-mix(surface 86%, elevated).
-    let hover_bg = mix_srgb(fill, elevated, 0.14);
 
     // ── Display text (contract §4) ──
     let val = spec.current_value();
@@ -61,57 +38,21 @@ pub fn date_time_picker(
         (None, Some(t)) => format!("Select date {}", t),
         (None, None) => spec.placeholder.clone(),
     };
-    let display_color = if has_value { text_color } else { muted };
-
-    let mut trigger = Node::container();
-    {
-        let s = &mut trigger.style;
-        s.fill_width = true;
-        s.descriptor.background = Some(fill);
-        s.descriptor.border.width = 1.0;
-        s.descriptor.border.color = if spec.current_open() {
-            accent
-        } else {
-            border_color
-        };
-        s.descriptor.corner_radii.top_left = radius;
-        s.descriptor.corner_radii.top_right = radius;
-        s.descriptor.corner_radii.bottom_right = radius;
-        s.descriptor.corner_radii.bottom_left = radius;
-        s.descriptor.layout.height = LayoutSizing::Fixed(height);
-        let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = pad_x;
-        pad.right = pad_x;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = inline_gap;
-    }
-    trigger.interaction.focusable = true;
-
-    let mut value_label = Node::text(&display);
-    value_label.style.descriptor.text_color = Some(display_color);
-    value_label.style.text_size = Some(font_size);
-    value_label.style.descriptor.layout.width = LayoutSizing::Grow;
-    // Disclosure chevron (contract §2 Indicator; text-secondary, per-size).
-    let mut chevron = Node::icon("chevron-down", icon_size);
-    chevron.style.descriptor.text_color = Some(icon_muted);
-    let mut trigger = trigger.child(value_label).child(chevron);
-
-    if !spec.is_disabled {
-        trigger.style.descriptor.cursor = CursorHint::Pointer;
-        trigger.style.hover = Some(StylePatch {
-            background: Some(hover_bg),
-            border_color: None,
-            text_color: None,
-            opacity: None,
-        });
-
-        if let Some(handler) = &handlers.on_toggle {
-            let handler = Arc::clone(handler);
-            trigger.interaction.on_activate = Some(Arc::new(move || handler()));
-        }
-    }
+    let trigger = date_time_trigger(
+        theme,
+        DateTimeTrigger {
+            display: &display,
+            has_value,
+            open: spec.current_open(),
+            disabled: spec.is_disabled,
+            size: spec.size,
+            size_role: spec.size_role,
+            indicator: "chevron-down",
+            elevated,
+            border_color,
+            on_toggle: handlers.on_toggle.as_ref(),
+        },
+    );
 
     // ── Root wrapper: contract §7/§8 min-width 16rem ──
     let mut root = Node::container();
