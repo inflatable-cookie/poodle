@@ -341,71 +341,17 @@ export type ActiveSort = {
 };
 
 // ── FilterBuilder ──────────────────────────────────────────────────────────
-// Generic, renderer-neutral filter-expression model. Poodle understands fields,
-// operators, operands and a single root AND/OR combinator. It never understands
-// application vocabulary (formats, tags, vendors) and never evaluates the
-// expression — the host owns evaluation and serialization.
-
-export type FilterCombinator = "and" | "or";
-
-export type FilterFieldKind = "boolean" | "enum" | "multi-enum" | "text" | "number" | "range";
-
-export type FilterOperandKind = "none" | "text" | "number" | "boolean" | "options" | "range";
-
-/** Discriminated operand payload. Never collapse to `unknown` — cross-renderer
- * semantics stay explicit. */
-export type FilterOperand =
-  | { kind: "none" }
-  | { kind: "text"; value: string }
-  | { kind: "number"; value: number }
-  | { kind: "boolean"; value: boolean }
-  | { kind: "options"; values: string[] }
-  | { kind: "range"; min: number | null; max: number | null };
-
-export type FilterOption = {
-  value: string;
-  label: string;
-  disabled?: boolean;
-  group?: string;
-};
-
-export type FilterOperatorDefinition = {
-  key: string;
-  label: string;
-  operandKind: FilterOperandKind;
-};
-
-export type FilterFieldDefinition = {
-  key: string;
-  label: string;
-  kind: FilterFieldKind;
-  /** Restrict or relabel the standard operators for this field's kind. */
-  operators?: FilterOperatorDefinition[];
-  /** Options for `enum` / `multi-enum` fields. */
-  options?: FilterOption[];
-  /** Operator key selected by default when a draft for this field opens. */
-  defaultOperator?: string;
-  /** Whether the same field may hold more than one active clause. Default false. */
-  allowMultiple?: boolean;
-  disabled?: boolean;
-};
-
-/** A committed clause. `id` is a stable, opaque UI identity (required because a
- * field with `allowMultiple` may hold several clauses). */
-export type FilterClause = {
-  id: string;
-  key: string;
-  operator: string;
-  operand: FilterOperand;
-};
-
-/** The controlled value. A flat clause list under one root combinator — v1 has
- * no nested Boolean groups, but the shape stays forward-compatible with a future
- * grouped-node model. */
-export type FilterExpression = {
-  combinator: FilterCombinator;
-  clauses: FilterClause[];
-};
+export type {
+  FilterClause,
+  FilterCombinator,
+  FilterExpression,
+  FilterFieldDefinition,
+  FilterFieldKind,
+  FilterOperand,
+  FilterOperandKind,
+  FilterOperatorDefinition,
+  FilterOption,
+} from "@inflatable-cookie/poodle-core";
 
 // ── ThemeSelect ─────────────────────────────────────────────────────────────
 /** Representative colors for a theme's mini preview swatch. */

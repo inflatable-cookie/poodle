@@ -3,6 +3,27 @@ export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
 export {
+  clauseLabel,
+  cloneOperand,
+  defaultOperatorsForKind,
+  emptyOperand,
+  findOperator,
+  isClauseComplete,
+  isOperandValid,
+  resolveDefaultOperator,
+  resolveOperators,
+  type FilterClause,
+  type FilterCombinator,
+  type FilterExpression,
+  type FilterFieldDefinition,
+  type FilterFieldKind,
+  type FilterOperand,
+  type FilterOperandKind,
+  type FilterOperatorDefinition,
+  type FilterOption,
+} from "./filter-builder";
+
+export {
   SEGMENTED_AXIS_MAX_OPTIONS,
   applicableAxes,
   axesForModel,
