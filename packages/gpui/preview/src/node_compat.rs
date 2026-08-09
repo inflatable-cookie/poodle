@@ -667,6 +667,8 @@ pub(crate) struct BulkActionBar {
 pub(crate) struct AgentChatInput {
     spec: AgentChatInputSpec,
     theme: GpuiThemeProvider,
+    question_children: Vec<poodle_node::Node>,
+    plan_children: Vec<poodle_node::Node>,
     toolbar_children: Vec<poodle_node::Node>,
     footer_children: Vec<poodle_node::Node>,
     handlers: poodle_render::AgentChatInputHandlers,
@@ -1147,10 +1149,22 @@ impl AgentChatInput {
         Self {
             spec,
             theme: theme.clone(),
+            question_children: Vec::new(),
+            plan_children: Vec::new(),
             toolbar_children: Vec::new(),
             footer_children: Vec::new(),
             handlers: poodle_render::AgentChatInputHandlers::default(),
         }
+    }
+
+    pub(crate) fn question_child(mut self, child: impl IntoCompatNode) -> Self {
+        self.question_children.push(child.into_compat_node());
+        self
+    }
+
+    pub(crate) fn plan_child(mut self, child: impl IntoCompatNode) -> Self {
+        self.plan_children.push(child.into_compat_node());
+        self
     }
 
     pub(crate) fn toolbar_child(mut self, child: impl IntoCompatNode) -> Self {
@@ -1181,6 +1195,8 @@ impl IntoElement for AgentChatInput {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_chat_input(
             &self.spec,
             &self.theme,
+            self.question_children,
+            self.plan_children,
             self.toolbar_children,
             self.footer_children,
             self.handlers,

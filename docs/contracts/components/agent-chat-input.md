@@ -1,7 +1,7 @@
 # AgentChatInput
 
 Status: detailed contract
-Updated: 2026-07-24
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -12,10 +12,10 @@ Updated: 2026-07-24
   ring, and a single action button that flips between submit and stop
 - In scope: controlled/uncontrolled message text, image attachments shown as
   thumbnail tiles, auto-grow between a row floor
-  and ceiling, Enter/Shift+Enter/modifier submit semantics, `idle` vs `busy`
-  status, submit ↔ stop action, attachment chips with removal, a context-usage
-  ring driven by used/limit, a host-composed toolbar region, an optional footer
-  region
+  and ceiling, Enter/Shift+Enter/modifier submit semantics, idle, busy,
+  questioning, and plan-review states, submit ↔ stop action, attachment chips
+  with removal, a context-usage ring driven by used/limit, host-composed
+  question, plan, toolbar, and footer regions
 - Out of scope: the conversation transcript, streaming/token plumbing, model
   invocation, file upload transport, lightbox/expanded attachment previews, slash-command or
   mention autocomplete, prompt history navigation, vendor vocabulary
@@ -51,6 +51,8 @@ region takes any Poodle control.
 |------|----------|-------------|---------------|
 | Root | yes | layout wrapper stacking the field over the footer; carries `data-size`, `data-density`, `data-status`, `data-disabled` | — |
 | Field | yes | the composer block: rounded, bordered panel holding attachments, editor and toolbar, sitting two steps up the background ladder so it reads as a distinct block against the page; shows the focus ring when focus is inside | `--poodle-radius-surface`, `--poodle-color-background-panel`, `--poodle-color-border-default`, `--poodle-color-accent-focusRing` |
+| Question | no | host-composed `AgentQuestion`, rendered first in the field while `status="questioning"` | inherited component tokens |
+| Plan | no | host-composed `AgentPlan`, rendered first in the field while `status="reviewing-plan"` | inherited component tokens |
 | Attachments | no | horizontal wrapping chip list of pending attachments | `--poodle-space-inline-sm` |
 | Attachment | no | one pending attachment; carries `data-kind` and `data-variant`. `chip`: optional icon + label + remove. `thumbnail` (when `thumbnailUrl` is set): a square image tile with the remove control floated over its corner — an image says more than its filename does | `--poodle-color-background-elevated`, `--poodle-color-border-subtle`, `--poodle-radius-control` |
 | Attachment Thumb | no | the tile image, `object-fit: cover`, square at the size ladder's thumbnail edge | `--poodle-radius-control` |
@@ -105,14 +107,14 @@ every other interactive part reuses a Poodle primitive.
 
 | Slot | Renderer form | Purpose |
 |------|---------------|---------|
-| `question` | Svelte `Snippet`, React `ReactNode` | live `AgentQuestion` region above the editor while `questioning` |
-| `plan` | Svelte `Snippet`, React `ReactNode` | plan-review region above the editor while `reviewing-plan` |
+| `question` | Svelte `Snippet`, React `ReactNode`, native child vector | live `AgentQuestion` region above the editor while `questioning` |
+| `plan` | Svelte `Snippet`, React `ReactNode`, native child vector | plan-review region above the editor while `reviewing-plan` |
 | `toolbar` | Svelte `Snippet`, React `ReactNode` | leading toolbar controls (canonically a `ModelPicker`, which should be passed `emphasis="subdued"` here so it does not compete with the editor) |
 | `footer` | Svelte `Snippet`, React `ReactNode` | the secondary bar under the composer (scope/branch/status rows) |
 
-Native targets take `toolbar` and `footer` as child element vectors
-(`js_agent_chat_input(spec, theme, toolbar_children, footer_children)`). Their
-question and plan composition delta is recorded in §12.
+Native targets take all four slots as child element vectors:
+`js_agent_chat_input(spec, theme, question_children, plan_children,
+toolbar_children, footer_children)`.
 
 ### Naming Rules
 
@@ -440,8 +442,11 @@ spacing — never the field's vertical padding or the action box.
 - theme access via `GpuiThemeProvider`; all dimensions/colors resolved from tokens
 - the render is a faithful function of the full spec state: `AgentChatInputSpec`
   carries `value`, `status`, `attachments` and the context budget, so the native
-  render shows the same attachment chips, editor text (or placeholder), toolbar
-  children, context ring and submit/stop button state as the web
+  render shows the active question or plan region, attachment chips, editor
+  text (or state-specific placeholder), toolbar children, context ring and
+  submit/stop button state as the web
+- `question_child` and `plan_child` accept host-rendered regions; the shared
+  renderer seats only the region selected by `status`
 - text editing itself is host-owned: the native editor part renders the current
   value as text, and keystroke handling lives in the host event loop
 - editor auto-grow is approximated from the value's line count clamped between
@@ -463,6 +468,10 @@ spacing — never the field's vertical padding or the action box.
       from `contextWarnAt`
 - [ ] disabled suppresses editing, submitting and attachment removal
 - [ ] `readOnly` blocks editing but not submitting
+- [ ] `questioning` seats only the question region, uses the question
+      placeholder, and admits a selected-option submit through
+      `questionCanSubmit`
+- [ ] `reviewing-plan` seats only the plan region and uses the plan placeholder
 - [ ] no vendor vocabulary anywhere in the component
 
 ### Tier 2: Visual Parity
@@ -492,6 +501,8 @@ spacing — never the field's vertical padding or the action box.
   derivation the control uses to pick its icon. It never fires while inert.
 - `on_remove_attachment` carries the attachment's id. `onValueChange` is typed;
   no route.
+- `js_agent_chat_input` accepts question, plan, toolbar, and footer child
+  vectors. The shared renderer selects the question or plan region from status.
 
 ## 12. Known Deltas
 
@@ -500,7 +511,6 @@ spacing — never the field's vertical padding or the action box.
 | GPUI/Jetstream render the editor as static text and don't drive keystrokes | shared render-only posture across all native components; text input is host-event-loop work | accepted | host wires editing |
 | Native auto-grow is line-count based, not text-measurement based | neither native runtime measures wrapped text during spec resolution | accepted | revisit if a measurement API lands |
 | Native context ring inherits Meter's ring delta (no swept arc) | see `meter.md` §12 | accepted | tracked on the Meter contract |
-| Native renderers carry question/plan status, placeholder, and submit-gating semantics but do not embed question/plan child regions inside the composer | the shared native renderer predates both composition slots | open | add question/plan child vectors before a native host adopts embedded review surfaces |
 | Action button is a bespoke `<button>`, not `IconButton` | circular accent treatment plus dual-state semantics are composer-specific; every other control reuses a primitive | accepted (by design) | promote to an `IconButton` variant if a second consumer needs it |
 
 ## 13. Approval And Adoption Notes
@@ -518,4 +528,5 @@ a `ModelPicker` in the toolbar; empty (submit disabled); composing (submit
 enabled); busy (stop state); with attachments; with a footer bar; context ring
 below the warn threshold; context ring above it; no context ring; disabled;
 read-only; `submitOnEnter=false`; grown editor at the `maxRows` ceiling;
-`allowEmptySubmit`; full size ladder; density variants.
+`allowEmptySubmit`; questioning with an embedded `AgentQuestion`; reviewing a
+plan with an embedded `AgentPlan`; full size ladder; density variants.

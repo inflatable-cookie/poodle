@@ -13,7 +13,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeKind,
 };
-use poodle_specs::{AgentChatInputSpec, MeterShape, MeterSpec};
+use poodle_specs::{AgentChatInputSpec, AgentChatStatus, MeterShape, MeterSpec};
 
 use crate::color::with_alpha;
 use crate::meter::meter;
@@ -33,6 +33,8 @@ pub struct AgentChatInputHandlers {
 pub fn agent_chat_input(
     spec: &AgentChatInputSpec,
     theme: &dyn ThemeProvider,
+    question_children: Vec<Node>,
+    plan_children: Vec<Node>,
     toolbar_children: Vec<Node>,
     footer_children: Vec<Node>,
     handlers: AgentChatInputHandlers,
@@ -97,6 +99,20 @@ pub fn agent_chat_input(
         s.descriptor.background = Some(surface);
     }
     all_radius(&mut field, field_radius);
+
+    let attention_region = |children: Vec<Node>| {
+        let mut region = Node::container();
+        region.style.descriptor.layout.direction = LayoutDirection::Column;
+        region.style.fill_width = true;
+        region.children(children)
+    };
+
+    if spec.status == AgentChatStatus::Questioning && !question_children.is_empty() {
+        field = field.child(attention_region(question_children));
+    }
+    if spec.status == AgentChatStatus::ReviewingPlan && !plan_children.is_empty() {
+        field = field.child(attention_region(plan_children));
+    }
 
     // Attachment chips.
     if !spec.attachments.is_empty() {
@@ -330,4 +346,46 @@ pub fn agent_chat_input(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeKind;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn has_text(node: &Node, expected: &str) -> bool {
+        node.find(&|child| matches!(&child.kind, NodeKind::Text { content } if content == expected))
+            .is_some()
+    }
+
+    fn render_with_status(status: AgentChatStatus) -> Node {
+        agent_chat_input(
+            &AgentChatInputSpec::new().with_status(status),
+            &theme(),
+            vec![Node::text("question region")],
+            vec![Node::text("plan region")],
+            Vec::new(),
+            Vec::new(),
+            AgentChatInputHandlers::default(),
+        )
+    }
+
+    #[test]
+    fn attention_regions_follow_status_and_stay_inside_the_field() {
+        let question = render_with_status(AgentChatStatus::Questioning);
+        assert!(has_text(&question.children[0], "question region"));
+        assert!(!has_text(&question, "plan region"));
+
+        let plan = render_with_status(AgentChatStatus::ReviewingPlan);
+        assert!(has_text(&plan.children[0], "plan region"));
+        assert!(!has_text(&plan, "question region"));
+
+        let idle = render_with_status(AgentChatStatus::Idle);
+        assert!(!has_text(&idle, "question region"));
+        assert!(!has_text(&idle, "plan region"));
+    }
 }

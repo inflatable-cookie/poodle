@@ -1,15 +1,16 @@
 //! AgentChatInput specimen — agent composer with a model picker in the toolbar,
 //! a context ring and the submit/stop action.
 
-use crate::compat::js_agent_chat_input;
-use crate::compat::js_model_picker;
+use crate::compat::{js_agent_chat_input, js_agent_plan, js_agent_question, js_model_picker};
 use crate::nel::*;
+use poodle_headless::agent_plan::AgentPlanStatus;
+use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
-    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlDensity, ControlSize,
-    ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerEmphasis,
-    ModelPickerSpec, ModelSelection,
+    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, AgentPlanSpec, AgentQuestionSpec,
+    ControlDensity, ControlSize, ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption,
+    ModelPickerEmphasis, ModelPickerSpec, ModelSelection,
 };
 
 fn picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
@@ -47,6 +48,39 @@ fn base() -> AgentChatInputSpec {
     AgentChatInputSpec::new().with_placeholder("Ask for follow-up changes or attach images")
 }
 
+fn question(theme: &JetstreamThemeProvider) -> El {
+    let item = AgentQuestionItem {
+        id: "placement".to_string(),
+        header: Some("Placement".to_string()),
+        prompt: "Where should the question surface appear?".to_string(),
+        options: vec![
+            AgentQuestionOption {
+                value: "composer".to_string(),
+                label: "Anchored above the composer".to_string(),
+                description: Some("Pinned over the input.".to_string()),
+            },
+            AgentQuestionOption {
+                value: "inline".to_string(),
+                label: "Inline in the transcript".to_string(),
+                description: Some("A block in the conversation.".to_string()),
+            },
+        ],
+        allow_multiple: false,
+    };
+    js_agent_question(
+        &AgentQuestionSpec::new(vec![item]).with_selections(vec!["composer".to_string()]),
+        theme,
+    )
+}
+
+fn plan(theme: &JetstreamThemeProvider) -> El {
+    js_agent_plan(
+        &AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the bounded change.")
+            .with_status(AgentPlanStatus::Pending),
+        theme,
+    )
+}
+
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
@@ -59,12 +93,40 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_agent_chat_input(
                 &base().with_context(64_000.0, 200_000.0),
                 theme,
+                Vec::new(),
+                Vec::new(),
                 // Three controls, so the hairline dividers between them render.
                 vec![
                     picker(theme, ControlSize::Md),
                     label("Full access").text_color(secondary).text_size(13.0),
                     label("Build").text_color(secondary).text_size(13.0),
                 ],
+                Vec::new(),
+            ),
+        ))
+        .child(group(
+            "Questioning",
+            secondary,
+            js_agent_chat_input(
+                &base()
+                    .with_status(AgentChatStatus::Questioning)
+                    .with_question_can_submit(true),
+                theme,
+                vec![question(theme)],
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ),
+        ))
+        .child(group(
+            "Reviewing plan",
+            secondary,
+            js_agent_chat_input(
+                &base().with_status(AgentChatStatus::ReviewingPlan),
+                theme,
+                Vec::new(),
+                vec![plan(theme)],
+                Vec::new(),
                 Vec::new(),
             ),
         ))
@@ -76,6 +138,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value("Summarise the release notes and open a PR")
                     .with_context(64_000.0, 200_000.0),
                 theme,
+                Vec::new(),
+                Vec::new(),
                 vec![picker(theme, ControlSize::Md)],
                 Vec::new(),
             ),
@@ -89,6 +153,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_status(AgentChatStatus::Busy)
                     .with_context(172_000.0, 200_000.0),
                 theme,
+                Vec::new(),
+                Vec::new(),
                 vec![picker(theme, ControlSize::Md)],
                 Vec::new(),
             ),
@@ -110,6 +176,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ])
                     .with_context(22_000.0, 200_000.0),
                 theme,
+                Vec::new(),
+                Vec::new(),
                 vec![picker(theme, ControlSize::Md)],
                 vec![
                     label("Current checkout")
@@ -129,6 +197,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 theme,
                 Vec::new(),
                 Vec::new(),
+                Vec::new(),
+                Vec::new(),
             ),
         ))
         .child(group(
@@ -140,6 +210,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_disabled(true)
                     .with_context(10_000.0, 200_000.0),
                 theme,
+                Vec::new(),
+                Vec::new(),
                 Vec::new(),
                 Vec::new(),
             ),
@@ -160,6 +232,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     js_agent_chat_input(
                         &base().with_size(size).with_context(40_000.0, 200_000.0),
                         theme,
+                        Vec::new(),
+                        Vec::new(),
                         vec![picker(theme, size)],
                         Vec::new(),
                     )
@@ -182,6 +256,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_density(density)
                             .with_context(40_000.0, 200_000.0),
                         theme,
+                        Vec::new(),
+                        Vec::new(),
                         vec![picker(theme, ControlSize::Md)],
                         Vec::new(),
                     )

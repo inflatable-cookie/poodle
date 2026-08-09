@@ -5,11 +5,13 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_headless::agent_plan::AgentPlanStatus;
+use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_node::Node;
 use poodle_specs::{
-    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlSize, EyebrowSpec,
-    ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerEmphasis,
-    ModelPickerSpec, ModelSelection,
+    AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, AgentPlanSpec, AgentQuestionSpec,
+    ControlSize, EyebrowSpec, ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption,
+    ModelPickerEmphasis, ModelPickerSpec, ModelSelection,
 };
 
 fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> Node {
@@ -54,6 +56,41 @@ fn demo_spec() -> AgentChatInputSpec {
     AgentChatInputSpec::new().with_placeholder("Ask for follow-up changes or attach images")
 }
 
+fn question_node(theme: &GpuiThemeProvider) -> Node {
+    let item = AgentQuestionItem {
+        id: "placement".to_string(),
+        header: Some("Placement".to_string()),
+        prompt: "Where should the question surface appear?".to_string(),
+        options: vec![
+            AgentQuestionOption {
+                value: "composer".to_string(),
+                label: "Anchored above the composer".to_string(),
+                description: Some("Pinned over the input.".to_string()),
+            },
+            AgentQuestionOption {
+                value: "inline".to_string(),
+                label: "Inline in the transcript".to_string(),
+                description: Some("A block in the conversation.".to_string()),
+            },
+        ],
+        allow_multiple: false,
+    };
+    poodle_render::agent_question(
+        &AgentQuestionSpec::new(vec![item]).with_selections(vec!["composer".to_string()]),
+        theme,
+        poodle_render::AgentQuestionHandlers::default(),
+    )
+}
+
+fn plan_node(theme: &GpuiThemeProvider) -> Node {
+    poodle_render::agent_plan(
+        &AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the bounded change.")
+            .with_status(AgentPlanStatus::Pending),
+        theme,
+        poodle_render::AgentPlanHandlers::default(),
+    )
+}
+
 fn section(title: &str, theme: &GpuiThemeProvider, content: AnyElement) -> Div {
     div()
         .flex()
@@ -81,6 +118,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .toolbar_child(toolbar_text(theme, "Full access"))
                 .toolbar_child(toolbar_text(theme, "Build"))
                 .into_any_element(),
+        ))
+        .child(section(
+            "Questioning",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec()
+                    .with_status(AgentChatStatus::Questioning)
+                    .with_question_can_submit(true),
+                theme,
+            )
+            .question_child(question_node(theme))
+            .into_any_element(),
+        ))
+        .child(section(
+            "Reviewing plan",
+            theme,
+            AgentChatInput::from_spec(
+                demo_spec().with_status(AgentChatStatus::ReviewingPlan),
+                theme,
+            )
+            .plan_child(plan_node(theme))
+            .into_any_element(),
         ))
         .child(section(
             "Composing (submit enabled)",

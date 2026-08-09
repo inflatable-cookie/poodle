@@ -30,17 +30,31 @@ pub fn js_action_discovery_panel(
 pub fn js_agent_chat_input(
     spec: &AgentChatInputSpec,
     theme: &JetstreamThemeProvider,
+    question_children: Vec<El>,
+    plan_children: Vec<El>,
     toolbar_children: Vec<El>,
     footer_children: Vec<El>,
 ) -> El {
+    let question_children: Vec<Node> = question_children.into_iter().map(Node::from).collect();
+    let plan_children: Vec<Node> = plan_children.into_iter().map(Node::from).collect();
     let toolbar_children: Vec<Node> = toolbar_children.into_iter().map(Node::from).collect();
     let footer_children: Vec<Node> = footer_children.into_iter().map(Node::from).collect();
     El(pr::agent_chat_input(
         spec,
         theme,
+        question_children,
+        plan_children,
         toolbar_children,
         footer_children,
         pr::AgentChatInputHandlers::default(),
+    ))
+}
+
+pub fn js_agent_plan(spec: &AgentPlanSpec, theme: &JetstreamThemeProvider) -> El {
+    El(pr::agent_plan(
+        spec,
+        theme,
+        pr::AgentPlanHandlers::default(),
     ))
 }
 
