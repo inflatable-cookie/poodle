@@ -10,7 +10,7 @@ tags: [coordination, handoff, g12.019, gpui]
 
 This thread continued `g12.019`, the GPUI half of Poodle's renderer inversion:
 move the GPUI preview from the duplicate
-`/Users/tom/Dev/projects/poodle/packages/gpui/components` tier to
+`/Users/example/Dev/projects/poodle/packages/gpui/components` tier to
 `poodle-render` Nodes interpreted by the GPUI node backend. Waves 1–39 were
 already present in the working tree when this thread resumed. Wave 40 moved
 EditableLabel across the same seam and added the missing host-edit interaction
@@ -18,7 +18,7 @@ contract for submit and cancel.
 
 The intended end state is one canonical component implementation with thin
 backends, followed by deletion of
-`/Users/tom/Dev/projects/poodle/packages/gpui/components` after the preview
+`/Users/example/Dev/projects/poodle/packages/gpui/components` after the preview
 and native gate prove the migration.
 
 ## Why It Matters
@@ -32,7 +32,7 @@ Poodle ↔ Jetstream inversion.
 ## Current State
 
 - Done so far:
-  - Batch A's `/Users/tom/Dev/projects/poodle/packages/gpui/node-backend/`
+  - Batch A's `/Users/example/Dev/projects/poodle/packages/gpui/node-backend/`
     interpreter is present and tested.
   - Batch B Waves 1–39 are recorded in the roadmap and use preview-local node
     compatibility wrappers for the migrated families.
@@ -50,7 +50,7 @@ Poodle ↔ Jetstream inversion.
     DockRegion, IconProvider, UiPresentationProvider, plus the nondeterministic
     AudioPlayer, VideoPlayer, and TimeAgo paths.
   - Batch C is not started: remove the dependency, delete
-    `/Users/tom/Dev/projects/poodle/packages/gpui/components`, port mined
+    `/Users/example/Dev/projects/poodle/packages/gpui/components`, port mined
     probes, log the deletion, and leave
     the permitted Jetstream roadmap pointer.
   - EditableLabel's lightweight node input still lacks native editor/IME,
@@ -58,13 +58,13 @@ Poodle ↔ Jetstream inversion.
     as an explicit backend risk; do not silently claim full native editing.
   - Active spec lane: none. The canonical execution surface is the promoted
     roadmap; there is no separate ready batch card under
-    `/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/`.
+    `/Users/example/Dev/projects/poodle/docs/roadmaps/g12/`.
 - Canonical refs:
-  - [`/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md)
-  - [`/Users/tom/Dev/projects/poodle/docs/roadmaps/generation-index.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/generation-index.md)
-  - [`/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md`](/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md)
-  - [`/Users/tom/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md`](/Users/tom/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md)
-  - Prior lane handoff: [`/Users/tom/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md`](/Users/tom/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md)
+  - [`/Users/example/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md)
+  - [`/Users/example/Dev/projects/poodle/docs/roadmaps/generation-index.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/generation-index.md)
+  - [`/Users/example/Dev/projects/poodle/docs/contracts/001-working-rules.md`](/Users/example/Dev/projects/poodle/docs/contracts/001-working-rules.md)
+  - [`/Users/example/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md`](/Users/example/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md)
+  - Prior lane handoff: [`/Users/example/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md`](/Users/example/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md)
 - Remaining continuation envelope: continue Batch B one bounded composite at a
   time. LogList is the next practical candidate if its shared `LogEntry`
   metadata contract is promoted first. BlockEditor, Tree, SplitView, and
@@ -74,19 +74,19 @@ Poodle ↔ Jetstream inversion.
   operator explicitly requested a fresh thread handoff. Nothing is committed;
   preserve the current dirty tree and ask before committing or publishing.
 - Key files:
-  - [`/Users/tom/Dev/projects/poodle/packages/contracts/node/src/lib.rs`](/Users/tom/Dev/projects/poodle/packages/contracts/node/src/lib.rs)
-  - [`/Users/tom/Dev/projects/poodle/packages/gpui/node-backend/src/lib.rs`](/Users/tom/Dev/projects/poodle/packages/gpui/node-backend/src/lib.rs)
-  - [`/Users/tom/Dev/projects/poodle/packages/render/src/editable_label.rs`](/Users/tom/Dev/projects/poodle/packages/render/src/editable_label.rs)
-  - [`/Users/tom/Dev/projects/poodle/packages/gpui/preview/src/node_compat.rs`](/Users/tom/Dev/projects/poodle/packages/gpui/preview/src/node_compat.rs)
-  - [`/Users/tom/Dev/projects/poodle/packages/gpui/preview/src/specimens/editable_label.rs`](/Users/tom/Dev/projects/poodle/packages/gpui/preview/src/specimens/editable_label.rs)
-  - [`/Users/tom/Dev/projects/poodle/PAPERCUTS.md`](/Users/tom/Dev/projects/poodle/PAPERCUTS.md)
+  - [`/Users/example/Dev/projects/poodle/packages/contracts/node/src/lib.rs`](/Users/example/Dev/projects/poodle/packages/contracts/node/src/lib.rs)
+  - [`/Users/example/Dev/projects/poodle/packages/gpui/node-backend/src/lib.rs`](/Users/example/Dev/projects/poodle/packages/gpui/node-backend/src/lib.rs)
+  - [`/Users/example/Dev/projects/poodle/packages/render/src/editable_label.rs`](/Users/example/Dev/projects/poodle/packages/render/src/editable_label.rs)
+  - [`/Users/example/Dev/projects/poodle/packages/gpui/preview/src/node_compat.rs`](/Users/example/Dev/projects/poodle/packages/gpui/preview/src/node_compat.rs)
+  - [`/Users/example/Dev/projects/poodle/packages/gpui/preview/src/specimens/editable_label.rs`](/Users/example/Dev/projects/poodle/packages/gpui/preview/src/specimens/editable_label.rs)
+  - [`/Users/example/Dev/projects/poodle/PAPERCUTS.md`](/Users/example/Dev/projects/poodle/PAPERCUTS.md)
 
 ## Boundaries
 
 - Stay inside `g12.019` and the Poodle repository. Do not modify the sibling
   Jetstream repository; the eventual one-line pointer is the only permitted
   cross-repo change.
-- Do not delete `/Users/tom/Dev/projects/poodle/packages/gpui/components` until
+- Do not delete `/Users/example/Dev/projects/poodle/packages/gpui/components` until
   every in-scope specimen is migrated, the native gate has been run, and the
   deletion is logged.
 - Do not update baselines, raise tolerance, or chase text/icon raster parity;
@@ -96,17 +96,17 @@ Poodle ↔ Jetstream inversion.
   another backend.
 - Preserve unrelated work in the dirty tree, especially the Agent Plan files
   and broad existing
-  `/Users/tom/Dev/projects/poodle/packages/render/src/lib.rs` module/export
+  `/Users/example/Dev/projects/poodle/packages/render/src/lib.rs` module/export
   churn. Do not
   reset, checkout, or clean the workspace to make the audit easier.
-- Follow [`/Users/tom/Dev/projects/poodle/AGENTS.md`](/Users/tom/Dev/projects/poodle/AGENTS.md): use Effigy where it covers the job, group changes into meaningful waves, use `apply_patch`, and run `git diff --check`.
+- Follow [`/Users/example/Dev/projects/poodle/AGENTS.md`](/Users/example/Dev/projects/poodle/AGENTS.md): use Effigy where it covers the job, group changes into meaningful waves, use `apply_patch`, and run `git diff --check`.
 
 ## Important Context
 
 - Planning lineage: this is `g12.019`, promoted from the Batch B handoff at
-  [`/Users/tom/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md`](/Users/tom/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-b-handoff.md). The roadmap's Decision Log says the old GPUI tier is the recipe reference; reconcile shared render recipes to axis-faithful token behavior rather than re-baselining the old tier.
+  [`/Users/example/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-batch-b-handoff.md`](/Users/example/Dev/projects/poodle/docs/logs/2026-08/05-225348-gpui-node-backend-b-handoff.md). The roadmap's Decision Log says the old GPUI tier is the recipe reference; reconcile shared render recipes to axis-faithful token behavior rather than re-baselining the old tier.
 - Spec-to-canonical relationship: component contracts under
-  `/Users/tom/Dev/projects/poodle/docs/contracts/components/` and the shared
+  `/Users/example/Dev/projects/poodle/docs/contracts/components/` and the shared
   specs crates define semantics; `poodle-render` emits Nodes; the GPUI backend
   owns dispatch, shaping, and platform mapping. The preview wrapper is only a
   migration seam, not a new public component tier.
@@ -134,8 +134,8 @@ Poodle ↔ Jetstream inversion.
   roadmap, not raw type names alone. The current working tree has roughly 307
   changed/untracked paths, many unrelated to this lane.
 - Known validation friction is already recorded in
-  [`/Users/tom/Dev/projects/poodle/PAPERCUTS.md`](/Users/tom/Dev/projects/poodle/PAPERCUTS.md): `effigy docs:check` aborts because
-  `/Users/tom/Dev/projects/poodle/packages/jetstream/components/Cargo.toml` is
+  [`/Users/example/Dev/projects/poodle/PAPERCUTS.md`](/Users/example/Dev/projects/poodle/PAPERCUTS.md): `effigy docs:check` aborts because
+  `/Users/example/Dev/projects/poodle/packages/jetstream/components/Cargo.toml` is
   absent; `effigy doctor` also
   reports the unsupported `isolation` manifest key and existing scan findings.
   These are not reasons to alter the GPUI migration.
@@ -145,7 +145,7 @@ Poodle ↔ Jetstream inversion.
 Start with an audit, not a reset:
 
 1. Read this handoff, the canonical roadmap, the prior handoff, and
-   [`/Users/tom/Dev/projects/poodle/AGENTS.md`](/Users/tom/Dev/projects/poodle/AGENTS.md); inspect `git status --short` and `git diff --check`.
+   [`/Users/example/Dev/projects/poodle/AGENTS.md`](/Users/example/Dev/projects/poodle/AGENTS.md); inspect `git status --short` and `git diff --check`.
 2. Review the Wave 40 diff in the five key code files above. Confirm the new
    submit/cancel handlers are additive, disabled inputs stay inert, and the
    preview event queue is the only state bridge. Re-run the focused EditableLabel
@@ -163,12 +163,12 @@ Start with an audit, not a reset:
 
 ## Completion Protocol
 
-1. Update [`/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md) with the wave proof, constructor census, residuals, and next parked shape.
-2. Keep [`/Users/tom/Dev/projects/poodle/docs/roadmaps/generation-index.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/generation-index.md), [`/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/README.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/README.md), [`/Users/tom/Dev/projects/poodle/docs/roadmaps/README.md`](/Users/tom/Dev/projects/poodle/docs/roadmaps/README.md), and [`/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md`](/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md) current.
+1. Update [`/Users/example/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/g12/019-gpui-node-backend.md) with the wave proof, constructor census, residuals, and next parked shape.
+2. Keep [`/Users/example/Dev/projects/poodle/docs/roadmaps/generation-index.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/generation-index.md), [`/Users/example/Dev/projects/poodle/docs/roadmaps/g12/README.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/g12/README.md), [`/Users/example/Dev/projects/poodle/docs/roadmaps/README.md`](/Users/example/Dev/projects/poodle/docs/roadmaps/README.md), and [`/Users/example/Dev/projects/poodle/docs/contracts/001-working-rules.md`](/Users/example/Dev/projects/poodle/docs/contracts/001-working-rules.md) current.
 3. Record the bounded batch in
-   `/Users/tom/Dev/projects/poodle/docs/logs/2026-08/` and leave one clear next
+   `/Users/example/Dev/projects/poodle/docs/logs/2026-08/` and leave one clear next
    task. No batch card currently exists under
-   `/Users/tom/Dev/projects/poodle/docs/roadmaps/g12/`.
+   `/Users/example/Dev/projects/poodle/docs/roadmaps/g12/`.
 4. Validation before handoff onward: `git diff --check`, render tests,
    `effigy gpui:test`, `effigy gpui:build`, `effigy drift:handlers`, and the
    native gate. Report the known docs/doctor failures honestly.

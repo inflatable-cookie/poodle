@@ -159,10 +159,10 @@ Consumer posture:
 
 | Posture | Repositories |
 | --- | --- |
-| generated application set + root provider | nucleus, loophole, soundcheck, jetstream, figmatic, underlay-reference, compli-me, composer, finch, acowtancy/dairy |
+| generated application set + root provider | nucleus, loophole, soundcheck, jetstream, figmatic, underlay-reference, compli-me, composer, finch, private-consumer/dairy |
 | generated direct library nodes | underlay |
 | host sets cover reusable library names | soundcheck-library |
-| default set already covers production use; no wiring added | contact-patch, songsprout, acowtancy/froyo, acowtancy/cream |
+| default set already covers production use; no wiring added | contact-patch, songsprout, private-consumer/froyo, private-consumer/cream |
 
 Measured results:
 

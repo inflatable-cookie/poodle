@@ -74,7 +74,7 @@ GPUI changes vs what can be done today.
 
 ## Findings
 
-Audited `/Users/tom/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gpui-0.2.2/src`
+Audited `/Users/example/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gpui-0.2.2/src`
 on 2026-04-17. GPUI is on the latest published crates.io release (0.2.2, Oct 22 2025).
 
 ### What GPUI 0.2.2 actually exposes

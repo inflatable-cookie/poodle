@@ -93,8 +93,8 @@ directly, so it is probably clean — but check rather than assume.
 
 Sixteen repositories under `~/Dev/projects`: nucleus, loophole, soundcheck,
 soundcheck-library, jetstream, figmatic, underlay, underlay-reference,
-compli-me, composer, contact-patch, songsprout, finch, acowtancy/dairy,
-acowtancy/froyo, acowtancy/cream.
+compli-me, composer, contact-patch, songsprout, finch, private-consumer/dairy,
+private-consumer/froyo, private-consumer/cream.
 
 All are clean and green as of 2026-08-09. Each pins Poodle by `file:` today —
 leave those pins alone. A separate thread owns the move to published versions.

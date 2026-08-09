@@ -81,7 +81,7 @@ Default stance:
   - likely child packages: `cp-admin`, `cp-front`
 - `compli-me`
   - likely child packages: `admin`, `front`
-- `acowtancy`
+- `private-consumer`
   - known child packages with Poodle deps: `dairy`, `cream`, `froyo`
 - `songsprout`
   - known child packages with Poodle deps: `greenhouse`, `bloom`
@@ -167,7 +167,7 @@ Current execution state:
 - `Select`
   - Poodle component, docs, and specimen moved to the callback-first Svelte 5 surface
   - consumer rollout completed across `underlay`, `underlay-reference`,
-    `contact-patch`, `songsprout`, `loophole/composer`, and `acowtancy/dairy`
+    `contact-patch`, `songsprout`, `loophole/composer`, and `private-consumer/dairy`
 - `TextInput`
   - Poodle component, docs, guide examples, and specimen moved to bindable
     value plus callback props (`onValueChange`, `onValidationChange`,
@@ -176,7 +176,7 @@ Current execution state:
   - non-`dairy` consumer rollout completed across `underlay`,
     `underlay-reference`, `contact-patch`, `songsprout`, and
     `loophole/composer`
-  - `acowtancy/dairy` remains the open `TextInput` batch because it still has
+  - `private-consumer/dairy` remains the open `TextInput` batch because it still has
     the largest concentration of app-owned wrappers and Nightfire/editor forms
 
 ### Wave 2 — Overlay And Menu Primitives
@@ -385,7 +385,7 @@ Measured as files with actual component usage, not just package installation.
 | `underlay-reference` | 15 | 9 | `acme-admin`, `acme-front`, `acme-ui` all in play |
 | `contact-patch` | 5 | 4 | Mostly `cp-admin`; account/media/user flows |
 | `compli-me` | 9 | 6 | `admin` plus `front` auth pages |
-| `acowtancy` | 69 | 29 | Biggest hotspot by far: `dairy` and `froyo` forms, selectors, Nightfire editors |
+| `private-consumer` | 69 | 29 | Biggest hotspot by far: `dairy` and `froyo` forms, selectors, Nightfire editors |
 | `songsprout` | 10 | 1 | `greenhouse` and `bloom`; mostly auth and media edit |
 | `loophole/composer` | 6 | 6 | `composer-admin` editing/detail flows |
 | `finch/app-electron` | 0 | 0 | Direct Poodle user, but not of these two components in current scan |
@@ -394,7 +394,7 @@ Measured as files with actual component usage, not just package installation.
 
 ### Hotspots
 
-- `acowtancy/dairy`
+- `private-consumer/dairy`
   - dominant heavy consumer for both components
   - forms, filters, relation selectors, Nightfire question editors
 - `underlay`
@@ -437,7 +437,7 @@ Measured as files with actual component usage, not just package installation.
   validation ergonomics
 - Underlay must lead the rollout for both components because its auth/pattern
   surfaces feed multiple app families
-- `acowtancy/dairy` should be treated as the downstream proving ground after
+- `private-consumer/dairy` should be treated as the downstream proving ground after
   Underlay because it carries the highest real usage density
 
 ## Wave 1 Target Posture
@@ -642,7 +642,7 @@ Status: consumer rollout closed for the audited stale Poodle contract set.
   - `underlay-reference`
   - `contact-patch`
   - `compli-me`
-  - `acowtancy/dairy`
+  - `private-consumer/dairy`
   - `songsprout`
   - `loophole/composer`
   - `finch/app-electron`
@@ -667,7 +667,7 @@ expected to compile cleanly:
 
 These remain outside the Poodle consumer-contract closeout itself:
 
-- `acowtancy/dairy`
+- `private-consumer/dairy`
   - pre-existing exported-type failures in:
     - `src/lib/forms/learning/activity-form/inline-create.ts`
     - `src/lib/nightfire/questions/editors/index.ts`

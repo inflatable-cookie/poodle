@@ -33,7 +33,7 @@ This generation turns that into a systematic program:
    - `underlay-reference`
    - `contact-patch`
    - `compli-me`
-   - `acowtancy`
+   - `private-consumer`
    - `songsprout`
    - `loophole/composer`
 3. Direct desktop adopters:

@@ -46,17 +46,17 @@ was aiming at. It also unlocks deleting ~½ of the GPUI package tree.
   planning decision.
 - Key artifacts (absolute paths):
   - Reference implementation of a node backend:
-    `/Users/tom/Dev/projects/jetstream/crates/jetstream-poodle/src/lib.rs`
+    `/Users/example/Dev/projects/jetstream/crates/jetstream-poodle/src/lib.rs`
     (~600 lines; the complete vocabulary walk: kinds, layout channels,
     per-side borders, gradients, shadow layers, hover/active patches,
     positions/overlay, a11y roles, interaction closures, animations).
-  - The vocabulary: `/Users/tom/Dev/projects/poodle/packages/contracts/node/src/lib.rs`.
-  - Canonical components: `/Users/tom/Dev/projects/poodle/packages/render/src/`.
-  - The tier to delete: `/Users/tom/Dev/projects/poodle/packages/gpui/components/`
-    (170 files); its consumer `/Users/tom/Dev/projects/poodle/packages/gpui/preview/`
+  - The vocabulary: `/Users/example/Dev/projects/poodle/packages/contracts/node/src/lib.rs`.
+  - Canonical components: `/Users/example/Dev/projects/poodle/packages/render/src/`.
+  - The tier to delete: `/Users/example/Dev/projects/poodle/packages/gpui/components/`
+    (170 files); its consumer `/Users/example/Dev/projects/poodle/packages/gpui/preview/`
     (152 files, macOS-only, gpui 0.2.2 from crates.io).
   - Migration playbook from the Jetstream side (reusable shape):
-    `/Users/tom/Dev/projects/poodle/packages/jetstream/preview/src/{nel.rs,compat.rs,jsx.rs}` —
+    `/Users/example/Dev/projects/poodle/packages/jetstream/preview/src/{nel.rs,compat.rs,jsx.rs}` —
     chrome shim + generated `js_*`-style compat wrappers + framework-side
     helpers, one adapter conversion at the specimen dispatch boundary.
 

@@ -67,7 +67,7 @@ Nothing is committed. Working tree contains:
 
 ## Boundaries
 
-- Never modify the sibling Jetstream repo (`/Users/tom/Dev/projects/jetstream`);
+- Never modify the sibling Jetstream repo (`/Users/example/Dev/projects/jetstream`);
   reading `crates/jetstream-poodle/src/lib.rs` as the transcription reference
   is required.
 - Do NOT delete `packages/gpui/components` until every specimen is migrated
