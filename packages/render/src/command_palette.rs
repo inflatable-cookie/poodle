@@ -256,7 +256,7 @@ pub fn command_palette_with_handlers(
     // Live count / active / state message — matches Svelte `paletteStatus`.
     // Contract: the result-count line is a `status`, so a search that
     // narrows to nothing is announced rather than silently emptying.
-    let mut status = Node::text(&palette_status(spec));
+    let mut status = Node::text(palette_status(spec));
     status.a11y.role = Some(NodeRole::Status);
     status.style.text_size = Some(rem_to_px(0.75));
     status.style.descriptor.text_color = Some(text_secondary);

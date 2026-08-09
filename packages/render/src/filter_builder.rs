@@ -314,7 +314,7 @@ pub fn filter_builder(
     }
     if !(spec.show_pills && spec.has_value()) {
         let is_placeholder = !spec.has_value();
-        let mut summary = Node::text(&spec.summary_text());
+        let mut summary = Node::text(spec.summary_text());
         summary.style.descriptor.text_color =
             Some(if is_placeholder { muted } else { text_primary });
         summary.style.text_size = Some(summary_font);
@@ -377,7 +377,7 @@ pub fn filter_builder(
         }
 
         if spec.show_pills {
-            let mut count = Node::text(&format!("{}", spec.active_count()));
+            let mut count = Node::text(format!("{}", spec.active_count()));
             {
                 let s = &mut count.style;
                 s.min_width = Some(rem_to_px(1.125));

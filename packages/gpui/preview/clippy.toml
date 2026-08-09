@@ -1,0 +1,4 @@
+# Compatibility wrappers mirror Poodle's callback-heavy handler contracts. A
+# single explicit `Option<Arc<dyn Fn(&str) + Send + Sync>>` is readable here but
+# sits just above Clippy's generic default complexity score.
+type-complexity-threshold = 400

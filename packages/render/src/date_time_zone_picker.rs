@@ -151,7 +151,7 @@ pub fn date_time_zone_picker(
     //    Fields → Time field + Time-zone field). ──
     if spec.current_open() {
         // Composed Calendar (single), seeded from the structured value's date.
-        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on.clone());
+        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
         if let Some(ref date) = value.date {
             cal_spec = cal_spec
                 .with_value(date.clone())

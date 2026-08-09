@@ -302,7 +302,7 @@ pub fn editable_list(
     // ── Add row (real text_input + primary button primitives) ──
     // Svelte: canAdd = editable && !disabled && under max.
     let can_add =
-        spec.is_editable && !is_unavailable && spec.max_items.map_or(true, |max| row_count < max);
+        spec.is_editable && !is_unavailable && spec.max_items.is_none_or(|max| row_count < max);
 
     if can_add {
         let input = text_input(
@@ -369,7 +369,7 @@ pub fn editable_list(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.main = MainAxisAlignment::End;
         }
-        let mut counter = Node::text(&format!("{}/{}", spec.item_count, max));
+        let mut counter = Node::text(format!("{}/{}", spec.item_count, max));
         counter.style.descriptor.text_color = Some(counter_color);
         counter.style.text_size = Some(label_px);
         root = root.child(counter_row.child(counter));

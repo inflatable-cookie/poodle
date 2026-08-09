@@ -318,7 +318,7 @@ fn build_sidebar_item(
         .flex_row().h(34.0).self_stretch().px(14.0)
         .items_center().justify_start()
         .rounded(6.0)
-        .bg(item_bg.map(Color::from).unwrap_or(Color::TRANSPARENT))
+        .bg(item_bg.unwrap_or(Color::TRANSPARENT))
         .text_color(item_text).text_size(13.0)
         .focusable()
 }
@@ -383,39 +383,39 @@ pub fn parse_action(token_key: Option<&str>) -> ShellAction {
         None => return ShellAction::None,
     };
 
-    if let Some(tab_name) = key.strip_prefix("tab:") {
-        if let Some(idx) = Section::ALL.iter().position(|s| s.label() == tab_name) {
-            return ShellAction::SelectTab(idx);
-        }
+    if let Some(tab_name) = key.strip_prefix("tab:")
+        && let Some(idx) = Section::ALL.iter().position(|s| s.label() == tab_name)
+    {
+        return ShellAction::SelectTab(idx);
     }
-    if let Some(idx_str) = key.strip_prefix("sidebar:") {
-        if let Ok(idx) = idx_str.parse::<usize>() {
-            return ShellAction::SelectSidebarItem(idx);
-        }
+    if let Some(idx_str) = key.strip_prefix("sidebar:")
+        && let Ok(idx) = idx_str.parse::<usize>()
+    {
+        return ShellAction::SelectSidebarItem(idx);
     }
     // ThemeSelect dispatches by node id, like every other Jetstream control.
     if key == "theme-select-trigger" {
         return ShellAction::ToggleThemeSelect;
     }
-    if let Some(name) = key.strip_prefix("theme-select-tile-") {
-        if let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name) {
-            return ShellAction::SelectTheme(idx);
-        }
+    if let Some(name) = key.strip_prefix("theme-select-tile-")
+        && let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name)
+    {
+        return ShellAction::SelectTheme(idx);
     }
-    if let Some(name) = key.strip_prefix("theme:") {
-        if let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name) {
-            return ShellAction::SelectTheme(idx);
-        }
+    if let Some(name) = key.strip_prefix("theme:")
+        && let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name)
+    {
+        return ShellAction::SelectTheme(idx);
     }
-    if let Some(name) = key.strip_prefix("density:") {
-        if let Some(idx) = Density::ALL.iter().position(|d| d.label() == name) {
-            return ShellAction::SelectDensity(idx);
-        }
+    if let Some(name) = key.strip_prefix("density:")
+        && let Some(idx) = Density::ALL.iter().position(|d| d.label() == name)
+    {
+        return ShellAction::SelectDensity(idx);
     }
-    if let Some(name) = key.strip_prefix("size:") {
-        if let Some(idx) = ControlSize::ALL.iter().position(|s| s.label() == name) {
-            return ShellAction::SelectSize(idx);
-        }
+    if let Some(name) = key.strip_prefix("size:")
+        && let Some(idx) = ControlSize::ALL.iter().position(|s| s.label() == name)
+    {
+        return ShellAction::SelectSize(idx);
     }
     if let Some(action) = key.strip_prefix("tree-menu:") {
         return ShellAction::TreeMenu(action.to_string());

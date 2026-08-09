@@ -135,7 +135,7 @@ pub fn date_picker(
 
     // ── Calendar surface when open (contract §2 Surface + composed Calendar) ──
     if spec.current_open() {
-        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on.clone());
+        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
         if let Some(val) = spec.current_value() {
             cal_spec = cal_spec.with_value(val).with_visible_month(val);
         }

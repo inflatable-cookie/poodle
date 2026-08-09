@@ -95,14 +95,16 @@ fn build_type_select(
         .map(|t| ChoiceOption::new(t.block_type.clone(), t.label.clone()))
         .collect();
 
-    let mut sel = SelectSpec::default();
-    sel.options = options;
-    sel.variant = SelectVariant::Ghost;
-    sel.menu_min_width = Some(String::from("10rem"));
-    sel.is_disabled = disabled;
-    sel.size = spec.size;
-    sel.size_role = spec.size_role;
-    sel.density = spec.density;
+    let mut sel = SelectSpec {
+        options,
+        variant: SelectVariant::Ghost,
+        menu_min_width: Some(String::from("10rem")),
+        is_disabled: disabled,
+        size: spec.size,
+        size_role: spec.size_role,
+        density: spec.density,
+        ..SelectSpec::default()
+    };
     if let Some(v) = value {
         sel.value = Some(v.to_string());
     }
@@ -115,14 +117,14 @@ fn build_type_select(
 /// `0.875rem`; heading/code use the GPUI sibling's display sizes.
 fn render_block_content(
     block: &EditorBlock,
-    content_x: f32,
-    content_y: f32,
+    content_padding: (f32, f32),
     text_primary: ColorValue,
     text_secondary: ColorValue,
     accent: ColorValue,
     code_bg: ColorValue,
     radius_control: f32,
 ) -> Node {
+    let (content_x, content_y) = content_padding;
     let body_size = rem_to_px(0.875); // contract input font-size
     let heading_size = rem_to_px(1.125);
     let code_size = rem_to_px(0.8125);
@@ -413,8 +415,7 @@ pub fn block_editor_with_children(
         }
         root = root.child(block_el.child(toolbar).child(render_block_content(
             block,
-            content_x,
-            content_y,
+            (content_x, content_y),
             text_primary,
             text_secondary,
             accent,

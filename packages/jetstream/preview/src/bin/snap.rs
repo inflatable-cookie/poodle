@@ -132,7 +132,7 @@ fn snapshot_opts(
     // ── Text pass (glyphs) — mirrors the preview's render_all_text at 1× scale ──
     // Same path the live app uses: per font size, rasterize into the atlas via
     // convert_text_commands, upload the atlas as a texture, draw the sprite instances.
-    if ui.text_atlases.is_some() {
+    if let Some(atlases) = ui.text_atlases.as_mut() {
         let ortho = Mat4::orthographic_rh(0.0, w as f32, h as f32, 0.0, -1.0, 1.0);
         let camera = CameraGpu::from_matrix(&device, ortho);
         let shader = create_sprite_shader(&device);
@@ -170,7 +170,6 @@ fn snapshot_opts(
             if filtered.is_empty() {
                 continue;
             }
-            let atlases = ui.text_atlases.as_mut().unwrap();
             let instances = convert_text_commands(&filtered, atlases, 1.0);
             if instances.is_empty() {
                 continue;
@@ -285,7 +284,7 @@ fn snapshot_opts(
     // Readback.
     let bpp = 4u32;
     let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
-    let padded = (w * bpp + align - 1) / align * align;
+    let padded = (w * bpp).div_ceil(align) * align;
     let staging = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("snap_staging"),
         size: (padded * h) as u64,

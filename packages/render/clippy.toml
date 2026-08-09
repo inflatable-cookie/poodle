@@ -1,0 +1,5 @@
+# Poodle exposes callback-heavy component handlers. A single explicit
+# `Option<Arc<dyn Fn(&str) + Send + Sync>>` is readable at the declaration site
+# but sits just above Clippy's generic default score. Keep the threshold narrow;
+# multi-argument event callbacks should still use named aliases when flagged.
+type-complexity-threshold = 400

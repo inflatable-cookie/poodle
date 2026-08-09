@@ -131,7 +131,7 @@ pub fn date_range_picker(
     if spec.current_open() {
         let mut cal_spec = CalendarSpec::new()
             .with_mode(CalendarMode::Range)
-            .with_week_start(spec.week_starts_on.clone())
+            .with_week_start(spec.week_starts_on)
             .with_default_range_value(range.clone());
         // Anchor the visible month to the range start when present.
         if let Some(ref start) = range.start {

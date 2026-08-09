@@ -11,7 +11,7 @@ pub fn pagination_summary(spec: &PaginationSummarySpec, theme: &dyn ThemeProvide
     let font_size = theme.resolve_space("typography.body.size");
 
     // Built in the spec so all three targets say the same thing (contract §7).
-    let mut label = Node::text(&spec.summary_text());
+    let mut label = Node::text(spec.summary_text());
     label.style.descriptor.text_color = Some(text_color);
     label.style.text_size = Some(font_size);
     label

@@ -3,9 +3,14 @@
 //! Contract: `docs/contracts/components/list-card.md`
 //! Ported from: `packages/jetstream/components/src/list_card.rs`.
 //!
-//! Anatomy (contract §2): `[sash?] [selection?] [leading?] [body(header(title
-//! + accessories/badges) / subtitle / footer?)] [meta?] [actions?]
-//! [trailing?] [handle?]`. Host-snippet slots arrive through
+//! Anatomy (contract §2):
+//!
+//! ```text
+//! [sash?] [selection?] [leading?] [body(header(title + accessories/badges) /
+//! subtitle / footer?)] [meta?] [actions?] [trailing?] [handle?]
+//! ```
+//!
+//! Host-snippet slots arrive through
 //! [`ListCardSlots`]; `trailing` is exclusive and replaces meta + actions.
 
 use std::sync::Arc;
@@ -245,7 +250,7 @@ pub fn list_card(
     let has_trailing = slots.trailing.is_some();
 
     let meta_el = (!has_trailing)
-        .then(|| spec.meta.as_ref())
+        .then_some(spec.meta.as_ref())
         .flatten()
         .map(|m| {
             let mut meta = Node::text(m);

@@ -102,7 +102,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut sizes_col = div().flex_col().gap(16.0);
     for &(key, size) in sizes {
         sizes_col = sizes_col
-            .child(label(&format!("size = {}", key)).text_color(secondary).text_size(11.0))
+            .child(label(format!("size = {}", key)).text_color(secondary).text_size(11.0))
             .child(js_data_table(
                 &DataTableSpec::new(columns(), rows())
                     .with_aria_label(format!("Data table at {}", key))
@@ -114,7 +114,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let mut density_col = div().flex_col().gap(16.0);
     for &(key, density) in densities {
         density_col = density_col
-            .child(label(&format!("density = {}", key)).text_color(secondary).text_size(11.0))
+            .child(label(format!("density = {}", key)).text_color(secondary).text_size(11.0))
             .child(js_data_table(
                 &DataTableSpec::new(columns(), rows())
                     .with_aria_label(format!("Data table at {}", key))

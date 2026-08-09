@@ -144,7 +144,7 @@ pub fn date_time_range_picker(
         // Composed Calendar in range mode, seeded from the start/end dates.
         let mut cal_spec = CalendarSpec::new()
             .with_mode(CalendarMode::Range)
-            .with_week_start(spec.week_starts_on.clone());
+            .with_week_start(spec.week_starts_on);
         cal_spec.range_value = Some(DateRangeValue::new(
             val.start.date.clone(),
             val.end.date.clone(),

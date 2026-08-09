@@ -71,7 +71,6 @@ fn label_font_rem(size: ControlSize) -> f32 {
 /// carry rules have been applied — the payload the contract documents.
 #[derive(Default)]
 pub struct DurationInputHandlers {
-    #[expect(clippy::type_complexity, reason = "the public callback mirrors the four-part duration contract")]
     pub on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
 }
 

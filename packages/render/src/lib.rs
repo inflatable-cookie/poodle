@@ -318,7 +318,7 @@ pub use tool_call::tool_call;
 pub use tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 pub use toolbar::toolbar;
 pub use tooltip::tooltip;
-pub use tree::{tree, TreeHandlers};
+pub use tree::{tree, TreeDropHandler, TreeHandlers, TreeKeyHandler};
 pub use tri_state_switch::tri_state_switch;
 pub use validation_summary::validation_summary;
 pub use video_player::video_player;

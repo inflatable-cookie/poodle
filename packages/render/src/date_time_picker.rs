@@ -127,7 +127,7 @@ pub fn date_time_picker(
     //    Time Section). Composes the real calendar + time_field primitives. ──
     if spec.current_open() {
         // Composed Calendar (single), seeded from the picker's date.
-        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on.clone());
+        let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
         if let Some(ref date) = val.date {
             cal_spec = cal_spec
                 .with_value(date.clone())

@@ -29,6 +29,12 @@ use crate::color::with_alpha;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::spinner::spinner;
 
+/// Host callback for keyboard commands on a focused tree row.
+pub type TreeKeyHandler = Arc<dyn Fn(&str, NodeKey, NodeModifiers) + Send + Sync>;
+
+/// Host callback for drag-over and reorder events between tree rows.
+pub type TreeDropHandler = Arc<dyn Fn(&str, &str, DropEdge) + Send + Sync>;
+
 /// Host callbacks: select, expand-toggle and check, each carrying the node's
 /// value.
 #[derive(Default)]
@@ -46,12 +52,12 @@ pub struct TreeHandlers {
     /// reports the key and the row it landed on; resolving it into a focus
     /// move, an expand, or a rename is the host's job, because only the host
     /// knows the flattened visible order.
-    pub on_key: Option<Arc<dyn Fn(&str, NodeKey, NodeModifiers) + Send + Sync>>,
+    pub on_key: Option<TreeKeyHandler>,
     /// A drag is hovering `over`, landing at `edge`. Drives the drop
     /// indicator; `dragged` is the row the gesture started on.
-    pub on_drag_over: Option<Arc<dyn Fn(&str, &str, DropEdge) + Send + Sync>>,
+    pub on_drag_over: Option<TreeDropHandler>,
     /// A drag was released: move `dragged` to `edge` of `over`.
-    pub on_reorder: Option<Arc<dyn Fn(&str, &str, DropEdge) + Send + Sync>>,
+    pub on_reorder: Option<TreeDropHandler>,
 }
 
 /// Tree-specific row height (denser than SidebarNav); density never alters it.

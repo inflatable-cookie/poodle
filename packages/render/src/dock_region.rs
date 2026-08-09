@@ -155,9 +155,7 @@ pub fn dock_region(
                     Some(if is_active { accent } else { text_muted });
                 tab_btn = tab_btn.child(glyph);
             }
-            if !compact {
-                tab_btn = tab_btn.child(Node::text(label.to_string()));
-            } else if icon.is_none() {
+            if !compact || icon.is_none() {
                 tab_btn = tab_btn.child(Node::text(label.to_string()));
             }
             let mut tab_btn = tab_btn;

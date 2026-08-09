@@ -26,22 +26,14 @@ fn all_corners(node: &mut Node, r: f32) {
 }
 
 fn abs_block(
-    top: Option<f32>,
-    left: Option<f32>,
-    right: Option<f32>,
-    bottom: Option<f32>,
+    position: NodePosition,
     w: f32,
     h: f32,
     radius: f32,
     bg: ColorValue,
 ) -> Node {
     let mut n = Node::container();
-    n.position = NodePosition::Absolute {
-        top,
-        left,
-        right,
-        bottom,
-    };
+    n.position = position;
     {
         let s = &mut n.style;
         // Explicit Row (see switch.rs).
@@ -76,30 +68,36 @@ fn swatch(option: &ThemeOption, theme: &dyn ThemeProvider, w: f32, h: f32, selec
     all_corners(&mut root, rem_to_px(0.375));
 
     root.child(abs_block(
-        None,
-        Some(rem_to_px(w * 0.14)),
-        None,
-        Some(0.0),
+        NodePosition::Absolute {
+            top: None,
+            left: Some(rem_to_px(w * 0.14)),
+            right: None,
+            bottom: Some(0.0),
+        },
         rem_to_px(w * 0.72),
         rem_to_px(h * 0.52),
         0.0,
         color(&option.swatch.surface),
     ))
     .child(abs_block(
-        Some(rem_to_px(h * 0.18)),
-        Some(rem_to_px(w * 0.16)),
-        None,
-        None,
+        NodePosition::Absolute {
+            top: Some(rem_to_px(h * 0.18)),
+            left: Some(rem_to_px(w * 0.16)),
+            right: None,
+            bottom: None,
+        },
         rem_to_px(h * 0.26),
         rem_to_px(h * 0.26),
         rem_to_px(h * 0.13),
         color(&option.swatch.accent),
     ))
     .child(abs_block(
-        Some(rem_to_px(h * 0.24)),
-        None,
-        Some(rem_to_px(w * 0.16)),
-        None,
+        NodePosition::Absolute {
+            top: Some(rem_to_px(h * 0.24)),
+            left: None,
+            right: Some(rem_to_px(w * 0.16)),
+            bottom: None,
+        },
         rem_to_px(w * 0.34),
         rem_to_px(0.125),
         rem_to_px(0.0625),
@@ -191,7 +189,7 @@ pub fn theme_select_with_handlers(
         trigger = trigger.child(swatch(current, theme, 1.25, 1.25, false));
     }
     if spec.show_label {
-        let mut label = Node::text(&spec.trigger_label());
+        let mut label = Node::text(spec.trigger_label());
         label.style.descriptor.text_color = Some(text_primary);
         label.style.text_size = Some(rem_to_px(0.8125));
         trigger = trigger.child(label);

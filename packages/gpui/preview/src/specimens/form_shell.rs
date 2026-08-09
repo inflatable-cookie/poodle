@@ -1,13 +1,13 @@
 //! FormShell specimen — exercises the GPUI `FormShell` composite across the
 //! contract's four lifecycle states (ready / blocked / busy / disabled).
 //!
-//! Every group builds a real `FormShell` from `FormShellSpec`: header
-//! (title + description), sectioned layout whose field slots host real `Field`
-//! + `TextInput` controls (the contract delegates field rendering to the host,
-//! referenced via `field_ids`), a form-level `StatusSummary` rendered as a real
-//! `Callout` (tone derived by `resolved_status_tone()`), and a footer
-//! `FormActions` row of real `Button`s. No hand-rolled chrome — all spacing,
-//! typography, and opacity resolve from the spec's token methods.
+//! Every group builds a real `FormShell` from `FormShellSpec`: header (title +
+//! description), sectioned layout whose field slots host real `Field` and
+//! `TextInput` controls, a form-level `StatusSummary` rendered as a real
+//! `Callout`, and a footer `FormActions` row of real `Button`s. The contract
+//! delegates field rendering to the host through `field_ids`; status tone comes
+//! from `resolved_status_tone()`. All spacing, typography, and opacity resolve
+//! from the spec's token methods.
 
 use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, Field, FormShell, IntoCompatNode, TextInput};

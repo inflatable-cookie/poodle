@@ -47,6 +47,8 @@ use poodle_specs::{
 };
 use poodle_tokens::typed::ColorValue;
 
+type OpenChangeHandler = Rc<dyn Fn(bool, &mut Window, &mut App)>;
+
 pub(crate) struct Eyebrow;
 
 impl Eyebrow {
@@ -3869,7 +3871,6 @@ pub(crate) struct DurationInput {
     spec: DurationInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    #[expect(clippy::type_complexity, reason = "the callback mirrors the four-part duration contract")]
     on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
 }
 
@@ -5062,7 +5063,7 @@ impl IntoElement for CommandPalette {
             .descriptor
             .background
             .map(poodle_gpui_node_backend::color)
-            .unwrap_or_else(|| gpui::transparent_black());
+            .unwrap_or_else(gpui::transparent_black);
         let mut backdrop = div()
             .id("poodle-cmd-palette-overlay")
             .absolute()
@@ -5182,7 +5183,7 @@ pub(crate) struct HoverCard {
     theme: GpuiThemeProvider,
     trigger: Option<AnyElement>,
     content: Option<poodle_node::Node>,
-    on_open_change: Option<Rc<dyn Fn(bool, &mut Window, &mut App)>>,
+    on_open_change: Option<OpenChangeHandler>,
 }
 
 impl HoverCard {
@@ -5245,7 +5246,7 @@ pub(crate) struct Tooltip {
     spec: TooltipSpec,
     theme: GpuiThemeProvider,
     trigger: Option<AnyElement>,
-    on_open_change: Option<Rc<dyn Fn(bool, &mut Window, &mut App)>>,
+    on_open_change: Option<OpenChangeHandler>,
 }
 
 impl Tooltip {
@@ -5299,7 +5300,7 @@ pub(crate) struct Popover {
     theme: GpuiThemeProvider,
     trigger: Option<poodle_node::Node>,
     content: Option<poodle_node::Node>,
-    on_open_change: Option<Rc<dyn Fn(bool, &mut Window, &mut App)>>,
+    on_open_change: Option<OpenChangeHandler>,
 }
 
 impl Popover {

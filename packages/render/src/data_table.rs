@@ -310,7 +310,7 @@ pub fn data_table(
             s.descriptor.border.color = border;
         }
         for filter in &spec.filters {
-            let mut chip = Node::text(&format!("{}: {}", filter.column_id, filter.value));
+            let mut chip = Node::text(format!("{}: {}", filter.column_id, filter.value));
             {
                 let s = &mut chip.style;
                 s.descriptor.text_color = Some(accent);

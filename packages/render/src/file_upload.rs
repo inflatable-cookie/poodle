@@ -320,7 +320,7 @@ fn file_item(
             poodle_specs::FileUploadStatus::Complete => " · Complete".to_string(),
             _ => String::new(),
         };
-        let mut line = Node::text(&format!("{}{}", item.formatted_size(), suffix));
+        let mut line = Node::text(format!("{}{}", item.formatted_size(), suffix));
         line.style.text_size = Some(rem_to_px(0.8125));
         line.style.descriptor.text_color = Some(size_color);
         line

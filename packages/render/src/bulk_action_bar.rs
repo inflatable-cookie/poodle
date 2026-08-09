@@ -179,14 +179,14 @@ pub fn bulk_action_bar(
         s.descriptor.layout.spacing.gap = summary_gap;
     }
 
-    let mut count = Node::text(&format!("{} selected", spec.selection_count));
+    let mut count = Node::text(format!("{} selected", spec.selection_count));
     count.style.descriptor.text_color = Some(text_primary);
     count.style.text_size = Some(summary_font);
     count.style.text_weight = Some(600);
     summary = summary.child(count);
 
     if let Some(total) = spec.total_count {
-        let mut of_total = Node::text(&format!("of {total}"));
+        let mut of_total = Node::text(format!("of {total}"));
         of_total.style.descriptor.text_color = Some(total_color);
         of_total.style.text_size = Some(summary_font);
         summary = summary.child(of_total);

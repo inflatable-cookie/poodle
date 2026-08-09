@@ -58,7 +58,7 @@ pub fn resize_handle(
                 text_color: None,
                 opacity: None,
             };
-            line.style.hover = Some(patch.clone());
+            line.style.hover = Some(patch);
             line.style.active = Some(patch);
         }
         line

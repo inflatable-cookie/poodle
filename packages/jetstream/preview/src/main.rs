@@ -571,7 +571,7 @@ impl PreviewState {
                                         self.game_ui.tree.hit_test(self.mouse_x, self.mouse_y)
                                     {
                                         let is_focusable = self.game_ui.tree.get(hit_id)
-                                            .map_or(false, |n| n.style.focusable);
+                                            .is_some_and(|n| n.style.focusable);
                                         if is_focusable {
                                             self.game_ui.focus.set_focus(Some(hit_id));
                                         } else {
@@ -585,35 +585,33 @@ impl PreviewState {
                     } else if matches!(button, PlatMouseButton::Right) && !pressed {
                         // Right-click: open the tree context menu for the node
                         // under the cursor.
-                        if self.app.is_tree_active() {
-                            if let Some(hit_id) =
+                        if self.app.is_tree_active()
+                            && let Some(hit_id) =
                                 self.game_ui.tree.hit_test(self.mouse_x, self.mouse_y)
+                        {
+                            let token = self
+                                .game_ui
+                                .tree
+                                .get(hit_id)
+                                .and_then(|n| n.style.token_key.clone());
+                            if let Some(value) =
+                                token.as_deref().and_then(|k| k.strip_prefix("tree:"))
                             {
-                                let token = self
-                                    .game_ui
-                                    .tree
-                                    .get(hit_id)
-                                    .and_then(|n| n.style.token_key.clone());
-                                if let Some(value) =
-                                    token.as_deref().and_then(|k| k.strip_prefix("tree:"))
-                                {
-                                    let (mx, my) = (self.mouse_x, self.mouse_y);
-                                    self.app.tree_open_menu(value, mx, my);
-                                }
+                                let (mx, my) = (self.mouse_x, self.mouse_y);
+                                self.app.tree_open_menu(value, mx, my);
                             }
                         }
                     }
                 }
-                PlatformEvent::MouseWheel { delta_x: _, delta_y } => {
+                PlatformEvent::MouseWheel { delta_x: _, delta_y }
                     // Suppress trackpad momentum after a navigation rebuild so
                     // that the newly-reset scroll position isn't immediately
                     // re-scrolled by lingering inertial events.
-                    if self.scroll_suppress_frames == 0 {
+                    if self.scroll_suppress_frames == 0 => {
                         let scroll_amount = -*delta_y as f32;
                         self.game_ui.scroll_at(self.mouse_x, self.mouse_y, scroll_amount);
                         self.text_cache_dirty = true;
                     }
-                }
                 _ => {}
             }
         }
@@ -862,7 +860,7 @@ impl PreviewState {
             .focus
             .focused()
             .and_then(|id| self.game_ui.tree.get(id))
-            .map_or(false, |n| matches!(n.widget, Widget::TextInput { .. }))
+            .is_some_and(|n| matches!(n.widget, Widget::TextInput { .. }))
     }
 
     fn handle_activation(&mut self, node_id: UiNodeId) {
@@ -873,7 +871,7 @@ impl PreviewState {
         // Any left-click outside the tree context menu dismisses it.
         let is_menu_click = token_key
             .as_deref()
-            .map_or(false, |k| k.starts_with("tree-menu:"));
+            .is_some_and(|k| k.starts_with("tree-menu:"));
         if self.app.tree.menu_value.is_some() && !is_menu_click {
             self.app.tree.close_menu();
             self.app.dirty = true;
@@ -1013,29 +1011,29 @@ impl PreviewState {
             for &sz in all_logical_sizes {
                 let phys = (sz * scale).round().max(1.0);
                 let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - phys).abs() < 0.5);
-                if let Some(atlas) = atlases.get_mut(phys) {
-                    if atlas.dirty || existing_idx.is_none() {
-                        let gpu_tex = GpuTexture::from_rgba8(
-                            &gpu.device,
-                            &gpu.queue,
-                            &atlas.pixels,
-                            atlas.width,
-                            atlas.height,
-                            &format!("font_atlas_{phys}px"),
-                            &self.texture_bgl,
+                if let Some(atlas) = atlases.get_mut(phys)
+                    && (atlas.dirty || existing_idx.is_none())
+                {
+                    let gpu_tex = GpuTexture::from_rgba8(
+                        &gpu.device,
+                        &gpu.queue,
+                        &atlas.pixels,
+                        atlas.width,
+                        atlas.height,
+                        &format!("font_atlas_{phys}px"),
+                        &self.texture_bgl,
+                    );
+                    if let Some(idx) = existing_idx {
+                        // Replace existing texture.
+                        self.text_atlas_textures[idx] = (phys, gpu_tex);
+                    } else {
+                        log::info!(
+                            "Uploaded atlas {}px (logical {}pt) — {}×{}",
+                            phys, sz, atlas.width, atlas.height,
                         );
-                        if let Some(idx) = existing_idx {
-                            // Replace existing texture.
-                            self.text_atlas_textures[idx] = (phys, gpu_tex);
-                        } else {
-                            log::info!(
-                                "Uploaded atlas {}px (logical {}pt) — {}×{}",
-                                phys, sz, atlas.width, atlas.height,
-                            );
-                            self.text_atlas_textures.push((phys, gpu_tex));
-                        }
-                        atlas.mark_clean();
+                        self.text_atlas_textures.push((phys, gpu_tex));
                     }
+                    atlas.mark_clean();
                 }
             }
         }
@@ -1051,30 +1049,30 @@ impl PreviewState {
     ) {
         let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - scaled_size).abs() < 0.5);
 
-        if let Some(ref mut atlases) = self.game_ui.text_atlases {
-            if let Some(atlas) = atlases.get_mut(scaled_size) {
-                let needs_upload = existing_idx.is_none() || atlas.dirty;
-                if needs_upload {
-                    let gpu_tex = GpuTexture::from_rgba8(
-                        &gpu.device,
-                        &gpu.queue,
-                        &atlas.pixels,
-                        atlas.width,
-                        atlas.height,
-                        &format!("font_atlas_{scaled_size}px"),
-                        &self.texture_bgl,
+        if let Some(ref mut atlases) = self.game_ui.text_atlases
+            && let Some(atlas) = atlases.get_mut(scaled_size)
+        {
+            let needs_upload = existing_idx.is_none() || atlas.dirty;
+            if needs_upload {
+                let gpu_tex = GpuTexture::from_rgba8(
+                    &gpu.device,
+                    &gpu.queue,
+                    &atlas.pixels,
+                    atlas.width,
+                    atlas.height,
+                    &format!("font_atlas_{scaled_size}px"),
+                    &self.texture_bgl,
+                );
+                if let Some(idx) = existing_idx {
+                    self.text_atlas_textures[idx] = (scaled_size, gpu_tex);
+                } else {
+                    log::info!(
+                        "Uploaded new text atlas: {}px ({}×{})",
+                        scaled_size, atlas.width, atlas.height,
                     );
-                    if let Some(idx) = existing_idx {
-                        self.text_atlas_textures[idx] = (scaled_size, gpu_tex);
-                    } else {
-                        log::info!(
-                            "Uploaded new text atlas: {}px ({}×{})",
-                            scaled_size, atlas.width, atlas.height,
-                        );
-                        self.text_atlas_textures.push((scaled_size, gpu_tex));
-                    }
-                    atlas.mark_clean();
+                    self.text_atlas_textures.push((scaled_size, gpu_tex));
                 }
+                atlas.mark_clean();
             }
         }
     }
@@ -1362,7 +1360,7 @@ impl PreviewState {
         let bpp: u32 = 4; // BGRA8 or RGBA8
         let unpadded_bytes_per_row = width * bpp;
         let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
-        let padded_bytes_per_row = (unpadded_bytes_per_row + align - 1) / align * align;
+        let padded_bytes_per_row = unpadded_bytes_per_row.div_ceil(align) * align;
 
         // Create an offscreen texture at logical dimensions (1× scale).
         let readback_texture = gpu.device.create_texture(&wgpu::TextureDescriptor {
@@ -1525,7 +1523,7 @@ impl PreviewState {
                 let filename = format!("poodle-preview-screenshot-{timestamp}.png");
 
                 let dir = std::path::Path::new("docs/screenshots");
-                let path = if dir.parent().map_or(false, |p| p.join("effigy.toml").exists()) {
+                let path = if dir.parent().is_some_and(|p| p.join("effigy.toml").exists()) {
                     // We're in the poodle repo root (or a child thereof).
                     let _ = std::fs::create_dir_all(dir);
                     dir.join(&filename).to_string_lossy().into_owned()

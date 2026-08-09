@@ -277,6 +277,12 @@ pub struct TreePreviewState {
     pub menu_pos: (f32, f32),
 }
 
+impl Default for TreePreviewState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TreePreviewState {
     pub fn new() -> Self {
         Self {
@@ -358,6 +364,12 @@ pub struct TabsPreviewState {
     pub drag_source: Option<String>,
     /// Tab under the cursor during a drag (drop-target ring).
     pub drop_target: Option<String>,
+}
+
+impl Default for TabsPreviewState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TabsPreviewState {
@@ -467,6 +479,12 @@ pub struct AppState {
     pub stepper_collapsed: bool,
 }
 
+impl Default for AppState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AppState {
     pub fn new() -> Self {
         Self {
@@ -524,7 +542,7 @@ impl AppState {
         if let Some(idx) = self.active_component() {
             crate::component_registry::ALL_COMPONENTS
                 .get(idx)
-                .map_or(false, |c| c.slug == "tree")
+                .is_some_and(|c| c.slug == "tree")
         } else {
             false
         }
@@ -614,7 +632,7 @@ impl AppState {
     /// Drop position for a drag onto `to`: into branches, after leaves.
     pub fn tree_drop_position(&self, to: &str) -> DropPosition {
         let is_branch = find_node(&self.tree.nodes, to)
-            .map_or(false, |n| !n.children.is_empty() || n.is_branch);
+            .is_some_and(|n| !n.children.is_empty() || n.is_branch);
         if is_branch {
             DropPosition::Inside
         } else {
