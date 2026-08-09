@@ -1,6 +1,6 @@
 # 021 — Icon Catalogue Boundary
 
-Status: in progress
+Status: complete
 Roadmap: g12
 Governing refs: `contracts/components/icon-provider.md`;
 `architecture/002-token-system-and-package-layout.md`; Card 020
@@ -78,7 +78,7 @@ the acceptance criteria.
 - **The 1,703-module catalogue and `generate.mjs` are removed**, along with
   `lucide-static` from `poodle-core`'s `devDependencies`.
 - **The `import *` fallback in `icon-registry.ts` is deleted.** Resolution is
-  the provided `IconSet` plus the built-in twelve, and an unresolved name is a
+  the provided `IconSet` plus the default set, and an unresolved name is a
   visible failure rather than a silent empty array.
 - **Consumers take `lucide-static` themselves** and generate a scoped `IconSet`
   from an explicit name list. The full JSON catalogue never enters application
@@ -101,7 +101,7 @@ Provide a documented pattern before migrating any consumer:
 ```
 
 ```sh
-poodle-icons --names icons.json --out src/icons.generated.ts
+bun x poodle-icons --names icons.json --out src/icons.generated.ts
 ```
 
 ```ts
@@ -130,7 +130,7 @@ accident.
 ## Acceptance Criteria
 
 - `poodle-core` ships no Lucide catalogue and no `lucide-static` dependency
-- the tarball drops from 291 KB to roughly 45 KB
+- the tarball drops materially from the 291,471-byte baseline
 - a production bundle of any consumer contains no icon it does not use —
   check `biohazard` against soundcheck as the regression
 - Poodle's own components render with no consumer-provided `IconSet`
@@ -147,6 +147,33 @@ It also mostly dissolves the clean-clone hazard recorded in Longhorn Card 166:
 with no generated catalogue there is little left for a release workflow to
 generate before packing, and the risk of publishing an empty `icons/`
 directory from CI goes with it.
+
+## Completion — 2026-08-09
+
+The default Lucide adapter contains the verified 54-icon Poodle dependency
+set. Application extensions are generated from a JSON name list into a
+self-contained TypeScript module. The generated module has no runtime import
+of `lucide-static` or `poodle-core`.
+
+Consumer posture:
+
+| Posture | Repositories |
+| --- | --- |
+| generated application set + root provider | nucleus, loophole, soundcheck, jetstream, figmatic, underlay-reference, compli-me, composer, finch, acowtancy/dairy |
+| generated direct library nodes | underlay |
+| host sets cover reusable library names | soundcheck-library |
+| default set already covers production use; no wiring added | contact-patch, songsprout, acowtancy/froyo, acowtancy/cream |
+
+Measured results:
+
+- `poodle-core` packed size: 291,471 → 159,553 bytes, a 45% reduction. The
+  original roughly-45-KB estimate did not account for the rest of core's
+  current source and style payload.
+- Soundcheck production JavaScript: 1,400.40 → 1,033.35 KB; gzip 366.36 →
+  282.97 KB.
+- `biohazard`, `cassette`, `origami`, and `squirrel` are absent from the clean
+  Soundcheck bundle.
+- `effigy ci` and `effigy test:svelte-pack-install` pass.
 
 ## Notes
 

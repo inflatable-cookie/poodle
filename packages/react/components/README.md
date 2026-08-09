@@ -53,12 +53,13 @@ applyThemeAttributes(document.documentElement, {
 defaults). Add `IconProvider` for application-owned string icon names. Poodle's
 scoped default Lucide set covers only component-owned chrome:
 
-```tsx
-import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
-import { UiPresentationProvider, IconProvider } from "@inflatable-cookie/poodle-react";
-import { rocket, "trash-2" as trash2 } from "lucide-static/icon-nodes.json";
+```sh
+bun x poodle-icons --names icons.json --out src/icons.generated.ts
+```
 
-const icons = createIconSet({ rocket, "trash-2": trash2 });
+```tsx
+import { UiPresentationProvider, IconProvider } from "@inflatable-cookie/poodle-react";
+import { icons } from "./icons.generated";
 
 <UiPresentationProvider density="default" sizeScale="md">
   <IconProvider icons={icons}>

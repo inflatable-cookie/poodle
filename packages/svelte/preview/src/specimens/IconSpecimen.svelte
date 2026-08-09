@@ -46,7 +46,7 @@
 <SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="poodle-hint">
-      Generate an application set with <code>poodle-icons</code>. The generated
+      Generate an application set with <code>bun x poodle-icons</code>. The generated
       module contains only the icons in its names file.
     </p>
     <div class="poodle-size-row">
@@ -60,7 +60,7 @@
       {/each}
     </div>
     <div class="poodle-code-hint">
-      <code>poodle-icons --names icons.json --out icons.generated.ts</code>
+      <code>bun x poodle-icons --names icons.json --out icons.generated.ts</code>
       <br />
       <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
     </div>

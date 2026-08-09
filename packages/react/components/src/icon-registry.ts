@@ -18,13 +18,18 @@ export function useIconSet(): IconSet {
 
 const aliases: Record<string, string> = {
   "alert-circle": "circle-alert",
+  "alert-triangle": "triangle-alert",
   "check-square": "square-check",
   "check-circle": "circle-check",
+  "circle-help": "circle-question-mark",
   "edit": "pencil",
+  "file-question": "file-question-mark",
   "filter": "list-filter",
   "more-horizontal": "ellipsis",
   "more-vertical": "ellipsis-vertical",
+  "help-circle": "circle-question-mark",
   "package": "package-icon",
+  "pause-circle": "circle-pause",
   "unlock": "lock-open",
 };
 

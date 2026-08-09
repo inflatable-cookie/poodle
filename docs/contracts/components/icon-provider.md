@@ -114,7 +114,7 @@ visual output.
   Lucide set required by component chrome
 - Unknown string names report an error and render the default error glyph;
   they never resolve to an empty node array
-- Application sets should be generated with `poodle-icons --names <names.json>
+- Application sets should be generated with `bun x poodle-icons --names <names.json>
   --out <icons.generated.ts>` from the consumer's `lucide-static` dependency;
   default or namespace catalogue imports defeat tree-shaking and are outside
   the supported pattern

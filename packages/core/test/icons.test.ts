@@ -27,7 +27,10 @@ describe("icon catalogue boundary", () => {
       ["x", "search", "search"],
     );
     expect(Object.keys(selected)).toEqual(["search", "x"]);
-    expect(renderIconSetModule(selected)).not.toContain("biohazard");
+    const generated = renderIconSetModule(selected);
+    expect(generated).not.toContain("biohazard");
+    expect(generated).not.toContain("@inflatable-cookie/poodle-core");
+    expect(generated).toContain('export const search = icons["search"];');
   });
 
   test("the build helper rejects unknown names", () => {

@@ -5,8 +5,8 @@
   import { setIconSet } from "./icon-registry";
 
   // An icon set mapping kebab-case names to SVG node arrays.
-  // Any icon set in this format works — lucide-static/icon-nodes.json,
-  // a Phosphor equivalent, or a custom set.
+  // Any icon set in this format works — a generated Lucide set, a Phosphor
+  // equivalent, or a custom set.
   // String lookups resolve from this set first, then Poodle's scoped default
   // Lucide set.
   interface Props {

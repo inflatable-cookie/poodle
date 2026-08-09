@@ -112,10 +112,10 @@ export function IconSpecimen() {
         </div>
       )}
     >
-      <SpecimenGroup label="Direct import — tree-shakeable">
+      <SpecimenGroup label="Generated application set">
         <p style={hint}>
-          Import named icon nodes from <code style={hintCode}>lucide-static/icon-nodes.json</code>.
-          Only the icons you use are included in the bundle.
+          Generate a static module from an application-owned name list. Only
+          those icons enter the runtime graph.
         </p>
         <div style={sizeRow}>
           {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
@@ -128,9 +128,9 @@ export function IconSpecimen() {
           ))}
         </div>
         <div style={codeHint}>
-          <code>{'import { star, heart, settings } from "lucide-static/icon-nodes.json";'}</code>
+          <code>{'import { icons } from "./icons.generated";'}</code>
           <br />
-          <code>{'<Icon icon={star} size="lg" />'}</code>
+          <code>{'<Icon icon={icons.star} size="lg" />'}</code>
         </div>
       </SpecimenGroup>
 
@@ -192,14 +192,13 @@ export function IconSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label={`All icons via IconProvider (${allIconNames.length})`}>
+      <SpecimenGroup label={`Preview catalogue (${allIconNames.length})`}>
         <p style={hint}>
-          Wrap your app (or a subtree) in <code style={hintCode}>&lt;IconProvider&gt;</code> with
-          a full icon set to enable string-based lookups for any icon.
-          Click any icon to copy its name.
+          This documentation-only browser loads the full catalogue. Applications
+          should provide their generated scoped set. Click any icon to copy its name.
         </p>
         <div style={codeHint}>
-          <code>{'import iconNodes from "lucide-static/icon-nodes.json";'}</code>
+          <code>{'import { icons } from "./icons.generated";'}</code>
           <br />
           <code>{"<IconProvider icons={iconNodes}> ... </IconProvider>"}</code>
         </div>

@@ -10,7 +10,7 @@
 
   /**
    * The icon to display. Accepts:
-   * - An `IconNodes` array from a named `lucide-static/icon-nodes.json` import
+   * - An `IconNodes` array from a generated application set
    * - A string name resolved from the `IconProvider` set, then Poodle's scoped
    *   default Lucide set
    */

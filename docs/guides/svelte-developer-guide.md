@@ -82,14 +82,13 @@ Or simply apply the data attributes in your HTML:
 ```svelte
 <script>
   import { Button, TextInput, Field, Select } from "@inflatable-cookie/poodle-svelte";
-  import { search } from "lucide-static/icon-nodes.json";
 </script>
 
 <Button variant="primary" onClick={() => console.log("clicked")}>
   Save Changes
 </Button>
 
-<Button variant="secondary" leadingIcon={search}>
+<Button variant="secondary" leadingIcon="search">
   Search
 </Button>
 ```
@@ -102,7 +101,7 @@ Or simply apply the data attributes in your HTML:
 @inflatable-cookie/poodle-core/tokens       — CSS custom properties, theme/density/size helpers
 @inflatable-cookie/poodle-svelte              — unified Svelte component package
 @inflatable-cookie/poodle-core/icons         — icon types, helper, and Poodle's scoped default Lucide set
-lucide-static/icon-nodes.json                — application-owned Lucide icon nodes
+lucide-static                               — application-owned Lucide source catalogue (build-time only)
 ```
 
 ### Dependency graph
@@ -125,7 +124,7 @@ lucide-static (application dependency)
 | `@inflatable-cookie/poodle-core/tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
 | `@inflatable-cookie/poodle-core/tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
 | `@inflatable-cookie/poodle-core/icons` | `createIconSet`, icon types, default set | Icon registry support |
-| `lucide-static/icon-nodes.json` | Named exports | Application icon data |
+| generated application module | `icons` | Scoped application icon data |
 
 ---
 
@@ -419,30 +418,31 @@ Components use snippets or slots for flexible composition, depending on the surf
 
 Poodle uses a layered icon system with three consumption patterns.
 
-### Pattern 1: Direct Lucide import (tree-shakeable)
+### Pattern 1: Generated application set
 
-Import named nodes from `lucide-static/icon-nodes.json`. Only named imports end
-up in the bundle:
+Keep the application names in a JSON array and generate a static module:
+
+```json
+["heart", "search", "settings", "trash-2"]
+```
+
+```sh
+bun x poodle-icons --names icons.json --out src/lib/icons.generated.ts
+```
 
 ```svelte
 <script>
   import { Icon } from "@inflatable-cookie/poodle-svelte";
-  import {
-    search,
-    heart,
-    settings,
-    "trash-2" as trash2,
-  } from "lucide-static/icon-nodes.json";
+  import { icons } from "$lib/icons.generated";
 </script>
 
-<Icon icon={search} size="lg" />
-<Icon icon={heart} size="sm" />
-<Icon icon={settings} size="xl" ariaLabel="Settings" />
+<Icon icon={icons.search} size="lg" />
+<Icon icon={icons.heart} size="sm" />
+<Icon icon={icons.settings} size="xl" ariaLabel="Settings" />
 ```
 
-This is the recommended approach for direct icon props. Each import is an
-`IconNodes` array. Kebab-case JSON keys use an import alias, as shown for
-`trash-2`.
+The generated module contains only those `IconNodes` arrays. Commit it, or run
+the generator before the application build.
 
 ### Pattern 2: String names from Poodle's default Lucide set
 
@@ -465,19 +465,8 @@ root:
 
 ```svelte
 <script>
-  import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
   import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
-  import {
-    rocket,
-    flame,
-    "shield-check" as shieldCheck,
-  } from "lucide-static/icon-nodes.json";
-
-  const icons = createIconSet({
-    rocket,
-    flame,
-    "shield-check": shieldCheck,
-  });
+  import { icons } from "$lib/icons.generated";
 </script>
 
 <IconProvider {icons}>
@@ -491,7 +480,7 @@ root:
 library or custom data. String lookups check the provider first, then Poodle's
 default Lucide set. Missing names log once and render a visible error glyph.
 
-Do not default-import or namespace-import `icon-nodes.json` and pick keys at
+Do not import `icon-nodes.json` into application source and pick keys at
 runtime. That retains the full Lucide catalogue in the production bundle.
 
 ### Using icons in components
@@ -501,12 +490,12 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 ```svelte
 <script>
   import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { save, "trash-2" as trash2, plus } from "lucide-static/icon-nodes.json";
+  import { icons } from "$lib/icons.generated";
 </script>
 
-<Button variant="primary" leadingIcon={save}>Save</Button>
-<Button variant="secondary" leadingIcon={plus}>Add Item</Button>
-<IconButton icon={trash2} ariaLabel="Delete" tone="danger" variant="ghost" />
+<Button variant="primary" leadingIcon={icons.save}>Save</Button>
+<Button variant="secondary" leadingIcon={icons.plus}>Add Item</Button>
+<IconButton icon={icons["trash-2"]} ariaLabel="Delete" tone="danger" variant="ghost" />
 
 <!-- Poodle's default Lucide names work without a provider -->
 <IconButton icon="search" ariaLabel="Search" variant="secondary" />
@@ -1316,16 +1305,16 @@ interface MenuItem {
 ```svelte
 <script>
   import { Toolbar, IconButton, Separator } from "@inflatable-cookie/poodle-svelte";
-  import { bold, italic, underline, link, image } from "lucide-static/icon-nodes.json";
+  import { icons } from "$lib/icons.generated";
 </script>
 
 <Toolbar>
-  <IconButton icon={bold} ariaLabel="Bold" />
-  <IconButton icon={italic} ariaLabel="Italic" />
-  <IconButton icon={underline} ariaLabel="Underline" />
+  <IconButton icon={icons.bold} ariaLabel="Bold" />
+  <IconButton icon={icons.italic} ariaLabel="Italic" />
+  <IconButton icon={icons.underline} ariaLabel="Underline" />
   <Separator orientation="vertical" />
-  <IconButton icon={link} ariaLabel="Insert Link" />
-  <IconButton icon={image} ariaLabel="Insert Image" />
+  <IconButton icon={icons.link} ariaLabel="Insert Link" />
+  <IconButton icon={icons.image} ariaLabel="Insert Image" />
 </Toolbar>
 ```
 

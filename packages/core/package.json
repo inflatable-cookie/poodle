@@ -16,7 +16,7 @@
     "./icons": "./src/icons/index.ts",
     "./icons/*": "./src/icons/icons/*.ts",
     "./icons/build": {
-      "types": "./src/icons/build.d.ts",
+      "types": "./src/icons/build.d.mts",
       "default": "./src/icons/build.mjs"
     },
     "./tokens": {
