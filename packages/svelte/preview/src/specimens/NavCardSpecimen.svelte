@@ -1,8 +1,10 @@
 <script lang="ts">
   import { Grid, Icon, NavCard } from "@inflatable-cookie/poodle-svelte";
-  import { house, layers, slidersHorizontal, fileText } from "@inflatable-cookie/poodle-core/icons";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  const [house, layers, slidersHorizontal, fileText] =
+    ["house", "layers", "sliders-horizontal", "file-text"] as const;
 
   let lastClick = $state("");
 </script>

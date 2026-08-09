@@ -19,10 +19,12 @@ also use [Guides Index](./README.md), especially
 ### 1. Install packages
 
 ```bash
-bun add @inflatable-cookie/poodle-core/tokens @inflatable-cookie/poodle-svelte @inflatable-cookie/poodle-core/icons
+bun add @inflatable-cookie/poodle-core @inflatable-cookie/poodle-svelte lucide-static
 ```
 
-`@inflatable-cookie/poodle-core/tokens` provides the CSS custom properties and theme helpers, `@inflatable-cookie/poodle-svelte` provides the full Svelte component surface, and `@inflatable-cookie/poodle-core/icons` provides tree-shakeable icon imports.
+`@inflatable-cookie/poodle-core/tokens` provides CSS custom properties and theme
+helpers, `@inflatable-cookie/poodle-svelte` provides the Svelte component
+surface, and `lucide-static` provides application-owned icon data.
 
 ### 2. Import the token stylesheet
 
@@ -80,7 +82,7 @@ Or simply apply the data attributes in your HTML:
 ```svelte
 <script>
   import { Button, TextInput, Field, Select } from "@inflatable-cookie/poodle-svelte";
-  import { search } from "@inflatable-cookie/poodle-core/icons";
+  import { search } from "lucide-static/icon-nodes.json";
 </script>
 
 <Button variant="primary" onClick={() => console.log("clicked")}>
@@ -99,7 +101,8 @@ Or simply apply the data attributes in your HTML:
 ```
 @inflatable-cookie/poodle-core/tokens       — CSS custom properties, theme/density/size helpers
 @inflatable-cookie/poodle-svelte              — unified Svelte component package
-@inflatable-cookie/poodle-core/icons         — 1700+ tree-shakeable Lucide icon exports
+@inflatable-cookie/poodle-core/icons         — icon types, helper, and Poodle's scoped default Lucide set
+lucide-static/icon-nodes.json                — application-owned Lucide icon nodes
 ```
 
 ### Dependency graph
@@ -109,7 +112,7 @@ Or simply apply the data attributes in your HTML:
     ↑
 @inflatable-cookie/poodle-svelte (depends on tokens)
 
-@inflatable-cookie/poodle-core/icons (standalone — no dependency on other Poodle packages)
+lucide-static (application dependency)
 ```
 
 ### Import entry points
@@ -121,7 +124,8 @@ Or simply apply the data attributes in your HTML:
 | `@inflatable-cookie/poodle-core/tokens` | Default | Token values and metadata |
 | `@inflatable-cookie/poodle-core/tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
 | `@inflatable-cookie/poodle-core/tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
-| `@inflatable-cookie/poodle-core/icons` | Named exports | Individual icon data |
+| `@inflatable-cookie/poodle-core/icons` | `createIconSet`, icon types, default set | Icon registry support |
+| `lucide-static/icon-nodes.json` | Named exports | Application icon data |
 
 ---
 
@@ -415,14 +419,20 @@ Components use snippets or slots for flexible composition, depending on the surf
 
 Poodle uses a layered icon system with three consumption patterns.
 
-### Pattern 1: Direct import (tree-shakeable)
+### Pattern 1: Direct Lucide import (tree-shakeable)
 
-Import individual icons from `@inflatable-cookie/poodle-core/icons`. Only icons you use end up in the bundle:
+Import named nodes from `lucide-static/icon-nodes.json`. Only named imports end
+up in the bundle:
 
 ```svelte
 <script>
   import { Icon } from "@inflatable-cookie/poodle-svelte";
-  import { search, heart, settings, trash2 } from "@inflatable-cookie/poodle-core/icons";
+  import {
+    search,
+    heart,
+    settings,
+    "trash-2" as trash2,
+  } from "lucide-static/icon-nodes.json";
 </script>
 
 <Icon icon={search} size="lg" />
@@ -430,17 +440,14 @@ Import individual icons from `@inflatable-cookie/poodle-core/icons`. Only icons 
 <Icon icon={settings} size="xl" ariaLabel="Settings" />
 ```
 
-This is the **recommended approach** for application code. Each icon is a standalone `IconNodes` array — an `[tagName, attributes][]` tuple describing SVG children.
+This is the recommended approach for direct icon props. Each import is an
+`IconNodes` array. Kebab-case JSON keys use an import alias, as shown for
+`trash-2`.
 
-Icon names use camelCase identifiers converted from Lucide's kebab-case names:
-- `arrow-down` → `arrowDown`
-- `circle-check` → `circleCheck`
-- `trash-2` → `trash2`
-- JS reserved words get an `Icon` suffix: `delete` → `deleteIcon`
+### Pattern 2: String names from Poodle's default Lucide set
 
-### Pattern 2: String names (built-in internals)
-
-35 icons are embedded directly in the framework for component chrome. These work with string names and require no imports or setup:
+Poodle ships a scoped 54-icon Lucide set for icons its own components can emit.
+These names require no application wiring:
 
 ```svelte
 <Icon icon="chevron-down" sizeRole="chrome" />
@@ -448,31 +455,44 @@ Icon names use camelCase identifiers converted from Lucide's kebab-case names:
 <Icon icon="x" />
 ```
 
-Built-in icons: `arrow-down`, `arrow-right`, `arrow-up`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-alert`, `circle-check`, `circle-x`, `columns-3`, `download`, `ellipsis`, `ellipsis-vertical`, `external-link`, `file-text`, `grip-vertical`, `image`, `inbox`, `info`, `list-filter`, `loader`, `lock-open`, `minus`, `music`, `pencil`, `play`, `plus`, `search`, `star`, `trending-down`, `trending-up`, `triangle-alert`, `x`.
+This is an implementation default, not an application catalogue. Application
+code should import or provide every icon it owns.
 
-Legacy aliases are supported: `edit` → `pencil`, `filter` → `list-filter`, `more-horizontal` → `ellipsis`, etc.
+### Pattern 3: Application set via IconProvider
 
-### Pattern 3: Bulk icon set via IconProvider
-
-For scenarios where you need the full icon catalogue available by name (e.g., CMS icon pickers, admin UIs):
+Assemble one set for application-owned string names and provide it near the app
+root:
 
 ```svelte
 <script>
+  import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
   import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
-  import iconNodes from "lucide-static/icon-nodes.json";
+  import {
+    rocket,
+    flame,
+    "shield-check" as shieldCheck,
+  } from "lucide-static/icon-nodes.json";
+
+  const icons = createIconSet({
+    rocket,
+    flame,
+    "shield-check": shieldCheck,
+  });
 </script>
 
-<IconProvider icons={iconNodes}>
-  <!-- All 1700+ Lucide icons available by string name -->
+<IconProvider {icons}>
   <Icon icon="rocket" />
   <Icon icon="flame" />
   <Icon icon="shield-check" />
 </IconProvider>
 ```
 
-`IconProvider` accepts any `Record<string, IconNodes>` — it doesn't have to be Lucide. You can pass a Phosphor equivalent, a custom icon set, or a filtered subset.
+`IconProvider` accepts any `Record<string, IconNodes>`; it can use another icon
+library or custom data. String lookups check the provider first, then Poodle's
+default Lucide set. Missing names log once and render a visible error glyph.
 
-String lookups check the `IconProvider` set first, then fall back to the 35 built-in internals.
+Do not default-import or namespace-import `icon-nodes.json` and pick keys at
+runtime. That retains the full Lucide catalogue in the production bundle.
 
 ### Using icons in components
 
@@ -481,14 +501,14 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 ```svelte
 <script>
   import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { save, trash2, plus } from "@inflatable-cookie/poodle-core/icons";
+  import { save, "trash-2" as trash2, plus } from "lucide-static/icon-nodes.json";
 </script>
 
 <Button variant="primary" leadingIcon={save}>Save</Button>
 <Button variant="secondary" leadingIcon={plus}>Add Item</Button>
 <IconButton icon={trash2} ariaLabel="Delete" tone="danger" variant="ghost" />
 
-<!-- String names also work for built-in icons -->
+<!-- Poodle's default Lucide names work without a provider -->
 <IconButton icon="search" ariaLabel="Search" variant="secondary" />
 ```
 
@@ -1296,7 +1316,7 @@ interface MenuItem {
 ```svelte
 <script>
   import { Toolbar, IconButton, Separator } from "@inflatable-cookie/poodle-svelte";
-  import { bold, italic, underline, link, image } from "@inflatable-cookie/poodle-core/icons";
+  import { bold, italic, underline, link, image } from "lucide-static/icon-nodes.json";
 </script>
 
 <Toolbar>

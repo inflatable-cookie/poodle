@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 import { writable, type Readable, type Writable } from "svelte/store";
-import * as lucideIcons from "@inflatable-cookie/poodle-core/icons";
+import { defaultLucideIconSet } from "@inflatable-cookie/poodle-core/icons";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,7 +18,7 @@ export type IconNodeElement = [string, Record<string, string>];
  */
 export type IconNodes = IconNodeElement[];
 
-/** A complete icon set: a map of kebab-case names to SVG node arrays. */
+/** An icon set: a map of kebab-case names to SVG node arrays. */
 export type IconSet = Record<string, IconNodes>;
 
 // ---------------------------------------------------------------------------
@@ -56,31 +56,16 @@ const aliases: Record<string, string> = {
   "unlock": "lock-open",
 };
 
-/**
- * Convert kebab-case icon name to camelCase export name.
- * e.g. "circle-check" → "circleCheck", "arrow-up" → "arrowUp"
- */
-function kebabToCamel(name: string): string {
-  return name.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
-}
+const reportedMissingIcons = new Set<string>();
 
-/**
- * Resolve a single built-in icon from `@inflatable-cookie/poodle-core/icons`.
- *
- * This remains a public helper for compatibility with existing primitive
- * internals, but resolution is now synchronous so source-linked consumers do
- * not rely on package-boundary async imports during rendering.
- */
-export function lazyResolveIcon(
-  name: string,
-  onLoaded?: () => void,
-): IconNodeElement[] {
-  const canonical = aliases[name] ?? name;
-  const exportName = kebabToCamel(canonical);
-  const iconModule = lucideIcons as unknown as Record<string, IconNodes>;
-  const nodes = iconModule[exportName] ?? [];
-  if (onLoaded) onLoaded();
-  return nodes;
+function reportMissingIcon(name: string): IconNodes {
+  if (!reportedMissingIcons.has(name)) {
+    reportedMissingIcons.add(name);
+    console.error(
+      `[Poodle] Unresolved icon "${name}". Add it to the nearest IconProvider set or pass IconNodes directly.`,
+    );
+  }
+  return defaultLucideIconSet["circle-x"];
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +77,8 @@ export function lazyResolveIcon(
  *
  * - If `ref` is an `IconNodes` array (array of arrays), returns it directly.
  * - If `ref` is a string, checks the context icon set first, then the
- *   built-in Poodle icon set.
- * - Returns an empty array if the icon is unknown.
+ *   scoped default Lucide set required by Poodle components.
+ * - Reports an unknown string and renders the default error glyph.
  */
 export function resolveIconNodes(
   ref: IconNodes | string | null | undefined,
@@ -112,5 +97,8 @@ export function resolveIconNodes(
   // Also check under the original name (icon sets may use either form)
   if (iconSet && ref in iconSet) return iconSet[ref];
 
-  return lazyResolveIcon(canonical);
+  if (canonical in defaultLucideIconSet) return defaultLucideIconSet[canonical];
+  if (ref in defaultLucideIconSet) return defaultLucideIconSet[ref];
+
+  return reportMissingIcon(ref);
 }

@@ -1,0 +1,3 @@
+import type { IconNodes } from "../types";
+
+export const plus: IconNodes = [["path",{"d":"M5 12h14"}],["path",{"d":"M12 5v14"}]];

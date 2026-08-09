@@ -1,7 +1,7 @@
 # IconProvider
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-09
 
 ## 1. Purpose
 
@@ -30,7 +30,7 @@ Updated: 2026-07-10
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `icons` | `IconSet` | — | yes | icon set instance providing name-to-SVG mappings |
+| `icons` | `IconSet` | — | yes | application icon set providing name-to-SVG mappings; merged over Poodle's scoped default Lucide set |
 
 ### Composition
 
@@ -110,9 +110,14 @@ visual output.
 - Renders only `children()` with no wrapper element
 - `icons` prop is reactive; the icon set updates if the prop changes
 - Import: `import { setIconSet } from './icon-registry'`
-- String-based icon lookups resolve from this set first; if not found and
-  `@inflatable-cookie/poodle-core/icons` is installed, icons are lazily auto-imported
-  (implementation detail beyond the contract surface)
+- String lookups resolve from this set first, then Poodle's scoped default
+  Lucide set required by component chrome
+- Unknown string names report an error and render the default error glyph;
+  they never resolve to an empty node array
+- Application sets should be generated with `poodle-icons --names <names.json>
+  --out <icons.generated.ts>` from the consumer's `lucide-static` dependency;
+  default or namespace catalogue imports defeat tree-shaking and are outside
+  the supported pattern
 
 ## 10. GPUI Notes
 
@@ -141,6 +146,7 @@ visual output.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | GPUI may use global registry instead of scoped context | GPUI's context model differs from Svelte | allowed | same functional result |
+| Poodle's web implementations include a scoped default Lucide set | Component-owned chrome must render without application wiring | allowed | application icon names remain provider-owned |
 
 ## 13. Approval And Adoption Notes
 

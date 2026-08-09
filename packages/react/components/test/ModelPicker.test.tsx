@@ -175,10 +175,10 @@ describe("ModelPicker (react)", () => {
     expect(surfaceOf(container).querySelectorAll(".poodle-model-picker__axis")).toHaveLength(2);
   });
 
-  it("renders an arbitrary image in place of a registry icon", () => {
+  it("renders an arbitrary image in place of a default Lucide icon", () => {
     const withImage: ModelOption[] = [
-      { value: "logo", label: "Logo", icon: "sparkles", image: { src: "/m.svg", alt: "Mark" } },
-      { value: "icon-only", label: "Icon only", icon: "sparkles" },
+      { value: "logo", label: "Logo", icon: "star", image: { src: "/m.svg", alt: "Mark" } },
+      { value: "icon-only", label: "Icon only", icon: "star" },
     ];
     const { container } = render(
       <ModelPicker models={withImage} axes={axes} value={{ model: "logo", axes: {} }} />,
@@ -195,7 +195,7 @@ describe("ModelPicker (react)", () => {
     fireEvent.click(triggerOf(container));
     const rows = surfaceOf(container).querySelectorAll(".poodle-model-picker__option");
     expect(rows[0].querySelector(".poodle-model-picker__option-image")).not.toBeNull();
-    // The icon-only model still renders a registry icon.
+    // The icon-only model still renders the default Lucide icon.
     expect(rows[1].querySelector(".poodle-model-picker__option-image")).toBeNull();
     expect(rows[1].querySelector(".poodle-model-picker__option-icon")).not.toBeNull();
   });

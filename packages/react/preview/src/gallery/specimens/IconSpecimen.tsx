@@ -6,14 +6,16 @@ import iconNodes from "lucide-static/icon-nodes.json";
 
 const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
 
-// The 35 built-in internal icons that work without an IconProvider
-const builtinNames = [
-  "arrow-down", "arrow-right", "arrow-up", "check", "chevron-down",
-  "chevron-left", "chevron-right", "chevron-up", "circle-alert",
-  "circle-check", "circle-x", "columns-3", "download", "ellipsis",
-  "ellipsis-vertical", "external-link", "file-text", "grip-vertical",
-  "image", "inbox", "info", "list-filter", "loader", "lock-open",
-  "minus", "music", "pencil", "play", "plus", "search", "star",
+// The scoped Lucide default required by Poodle's own component chrome.
+const defaultLucideNames = [
+  "arrow-down", "arrow-left", "arrow-right", "arrow-up", "arrow-up-down",
+  "bold", "check", "check-check", "chevron-down", "chevron-left",
+  "chevron-right", "chevron-up", "circle", "circle-x", "code", "columns-2",
+  "columns-3", "diff", "dot", "download", "ellipsis", "external-link", "eye",
+  "file", "file-pen", "file-text", "git-branch", "git-commit-horizontal",
+  "grip-vertical", "heading", "image", "inbox", "info", "italic", "link",
+  "list", "menu", "minus", "music", "pencil", "play", "plus", "quote",
+  "refresh-cw", "search", "square", "star", "tag", "terminal", "trash-2",
   "trending-down", "trending-up", "triangle-alert", "x",
 ];
 
@@ -112,7 +114,7 @@ export function IconSpecimen() {
     >
       <SpecimenGroup label="Direct import — tree-shakeable">
         <p style={hint}>
-          Import individual icons from <code style={hintCode}>@inflatable-cookie/poodle-core/icons</code>.
+          Import named icon nodes from <code style={hintCode}>lucide-static/icon-nodes.json</code>.
           Only the icons you use are included in the bundle.
         </p>
         <div style={sizeRow}>
@@ -126,7 +128,7 @@ export function IconSpecimen() {
           ))}
         </div>
         <div style={codeHint}>
-          <code>{'import { star, heart, settings } from "@inflatable-cookie/poodle-core/icons";'}</code>
+          <code>{'import { star, heart, settings } from "lucide-static/icon-nodes.json";'}</code>
           <br />
           <code>{'<Icon icon={star} size="lg" />'}</code>
         </div>
@@ -167,14 +169,13 @@ export function IconSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label={`Built-in internal icons (${builtinNames.length})`}>
+      <SpecimenGroup label={`Default Lucide icons (${defaultLucideNames.length})`}>
         <p style={hint}>
-          These icons are embedded in the framework and work with string names
-          without any <code style={hintCode}>IconProvider</code>. They cover component chrome
-          (chevrons, check, x, plus, etc.).
+          Poodle ships this scoped Lucide default so its component chrome works
+          without an <code style={hintCode}>IconProvider</code>. Application icons remain operator-owned.
         </p>
         <div style={iconGridCompact}>
-          {builtinNames.map((name) => (
+          {defaultLucideNames.map((name) => (
             <button
               key={name}
               style={copiedName === name ? iconCellCopied : iconCell}

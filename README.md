@@ -16,7 +16,7 @@ Key package groups:
 - `packages/contracts/*`
   shared renderer-agnostic crates such as `poodle-specs`, `poodle-workstation`, and `poodle-tokens`
 - `packages/svelte/*`
-  published web packages such as `@inflatable-cookie/poodle-svelte`, `@inflatable-cookie/poodle-core/tokens`, `@inflatable-cookie/poodle-core/icons`, and the docs or preview app
+  the published `@inflatable-cookie/poodle-svelte` package plus its docs and preview app; framework-free tokens, styles, and the scoped default Lucide set live in `poodle-core`
 - `packages/gpui/*`
   native GPUI adapter, renderable components, and preview app
 - `packages/jetstream/*`

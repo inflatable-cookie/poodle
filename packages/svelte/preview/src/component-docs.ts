@@ -1812,7 +1812,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   icon: {
     props: [
-      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @inflatable-cookie/poodle-core/icons or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
+      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array from a named lucide-static/icon-nodes.json import, or a string name resolved from an IconProvider set and then Poodle's default Lucide set." },
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
@@ -1821,26 +1821,29 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [],
-    usage: `<!-- Tree-shakeable: import individual icons from @inflatable-cookie/poodle-core/icons -->
+    usage: `<!-- Tree-shakeable: use named JSON imports -->
 <script lang="ts">
   import { Icon } from "@inflatable-cookie/poodle-svelte";
-  import { search, heart, star } from "@inflatable-cookie/poodle-core/icons";
+  import { search, heart, star } from "lucide-static/icon-nodes.json";
 </script>
 
 <Icon icon={search} size="lg" ariaLabel="Search" />
 <Icon icon={heart} size="sm" />
 <Icon icon={star} size="xl" />
 
-<!-- String name: resolves from IconProvider or built-in internals -->
+<!-- String name: resolves from IconProvider or Poodle's default Lucide set -->
 <Icon icon="chevron-down" sizeRole="chrome" />
 
-<!-- Bulk icon set via provider -->
+<!-- Application icon set via provider -->
 <script lang="ts">
+  import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
   import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
-  import iconNodes from "lucide-static/icon-nodes.json";
+  import { rocket, flame } from "lucide-static/icon-nodes.json";
+
+  const icons = createIconSet({ rocket, flame });
 </script>
 
-<IconProvider icons={iconNodes}>
+<IconProvider {icons}>
   <Icon icon="rocket" />
   <Icon icon="flame" />
 </IconProvider>`,
@@ -1848,19 +1851,25 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "icon-provider": {
     props: [
-      { name: "icons", type: "IconSet", required: true, description: "A complete icon set mapping kebab-case names to SVG node arrays. Any icon set in this format works — lucide-static/icon-nodes.json, a Phosphor equivalent, or a custom set. String-based icon lookups resolve from this set first, then fall back to the 35 built-in internal icons." },
+      { name: "icons", type: "IconSet", required: true, description: "An application icon set mapping names to SVG node arrays. String lookups resolve from this set first, then Poodle's scoped default Lucide set. Missing names report an error and render a visible error glyph." },
     ],
     slots: [
       { name: "children", description: "Snippet for child content. All descendant Icon components will resolve string names from this icon set." },
     ],
     events: [],
     usage: `<script lang="ts">
+  import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
   import { IconProvider, Icon } from "@inflatable-cookie/poodle-svelte";
-  import iconNodes from "lucide-static/icon-nodes.json";
+  import {
+    rocket,
+    flame,
+    "shield-check" as shieldCheck,
+  } from "lucide-static/icon-nodes.json";
+
+  const icons = createIconSet({ rocket, flame, "shield-check": shieldCheck });
 </script>
 
-<!-- All 1700+ Lucide icons available by name within the provider -->
-<IconProvider icons={iconNodes}>
+<IconProvider {icons}>
   <Icon icon="rocket" />
   <Icon icon="flame" />
   <Icon icon="shield-check" />
@@ -1897,14 +1906,14 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { trash2, plus, settings } from "@inflatable-cookie/poodle-core/icons";
+  import { "trash-2" as trash2, plus, settings } from "lucide-static/icon-nodes.json";
 </script>
 
 <!-- Direct import (tree-shakeable) -->
 <IconButton icon={trash2} ariaLabel="Delete item" variant="ghost" tone="danger" tooltip="Delete" />
 <IconButton icon={plus} ariaLabel="Add" variant="primary" />
 
-<!-- String name (built-in internals) -->
+<!-- String name from Poodle's default Lucide set -->
 <IconButton icon="search" ariaLabel="Search" variant="secondary" />`,
   },
 

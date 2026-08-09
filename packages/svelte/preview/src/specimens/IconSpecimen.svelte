@@ -2,11 +2,20 @@
   import { Icon, IconProvider } from "@inflatable-cookie/poodle-svelte";
   import type { IconSet } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
-  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@inflatable-cookie/poodle-core/icons";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
+  const catalogue = iconNodes as unknown as IconSet;
+  const heart = catalogue.heart;
+  const settings = catalogue.settings;
+  const zap = catalogue.zap;
+  const circleCheck = catalogue["circle-check"];
+  const info = catalogue.info;
+  const triangleAlert = catalogue["triangle-alert"];
+  const star = catalogue.star;
+  const search = catalogue.search;
+  const pencil = catalogue.pencil;
+  const allIconNames = Object.keys(catalogue).sort();
   const iconSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let copiedName = $state("");
@@ -19,23 +28,26 @@
     }, 1200);
   }
 
-  // The 35 built-in internal icons that work without an IconProvider
-  const builtinNames = [
-    "arrow-down", "arrow-right", "arrow-up", "check", "chevron-down",
-    "chevron-left", "chevron-right", "chevron-up", "circle-alert",
-    "circle-check", "circle-x", "columns-3", "download", "ellipsis",
-    "ellipsis-vertical", "external-link", "file-text", "grip-vertical",
-    "image", "inbox", "info", "list-filter", "loader", "lock-open",
-    "minus", "music", "pencil", "play", "plus", "search", "star",
-    "trending-down", "trending-up", "triangle-alert", "x",
+  // The scoped Lucide default required by Poodle's own component chrome.
+  const defaultLucideNames = [
+    "arrow-down", "arrow-left", "arrow-right", "arrow-up", "arrow-up-down",
+    "bold", "check", "check-check", "chevron-down", "chevron-left",
+    "chevron-right", "chevron-up", "circle", "circle-x", "code",
+    "columns-2", "columns-3", "diff", "dot", "download", "ellipsis",
+    "external-link", "eye", "file", "file-pen", "file-text", "git-branch",
+    "git-commit-horizontal", "grip-vertical", "heading", "image", "inbox",
+    "info", "italic", "link", "list", "menu", "minus", "music", "pencil",
+    "play", "plus", "quote", "refresh-cw", "search", "square", "star",
+    "tag", "terminal", "trash-2", "trending-down", "trending-up",
+    "triangle-alert", "x",
   ];
 </script>
 
 <SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="poodle-hint">
-      Import individual icons from <code>@inflatable-cookie/poodle-core/icons</code>.
-      Only the icons you use are included in the bundle.
+      Generate an application set with <code>poodle-icons</code>. The generated
+      module contains only the icons in its names file.
     </p>
     <div class="poodle-size-row">
       {#each iconSizes as size}
@@ -48,7 +60,7 @@
       {/each}
     </div>
     <div class="poodle-code-hint">
-      <code>import {"{"} star, heart, settings {"}"} from "@inflatable-cookie/poodle-core/icons";</code>
+      <code>poodle-icons --names icons.json --out icons.generated.ts</code>
       <br />
       <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
     </div>
@@ -89,14 +101,13 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Built-in internal icons ({builtinNames.length})">
+  <SpecimenGroup label="Default Lucide icons ({defaultLucideNames.length})">
     <p class="poodle-hint">
-      These icons are embedded in the framework and work with string names
-      without any <code>IconProvider</code>. They cover component chrome
-      (chevrons, check, x, plus, etc.).
+      Poodle ships this scoped Lucide default so its own component chrome works
+      without an <code>IconProvider</code>. Application icons remain operator-owned.
     </p>
     <div class="poodle-icon-grid poodle-icon-grid--compact">
-      {#each builtinNames as name}
+      {#each defaultLucideNames as name}
         <button
           class="poodle-icon-cell"
           class:poodle-copied={copiedName === name}

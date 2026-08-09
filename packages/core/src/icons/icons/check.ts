@@ -1,0 +1,3 @@
+import type { IconNodes } from "../types";
+
+export const check: IconNodes = [["path",{"d":"M20 6 9 17l-5-5"}]];

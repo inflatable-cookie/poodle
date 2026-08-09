@@ -50,16 +50,18 @@ applyThemeAttributes(document.documentElement, {
 ```
 
 **3. Wrap the tree** in `UiPresentationProvider` (app-wide density + size
-defaults). Add `IconProvider` if you want string icon names resolved from a
-full icon set — otherwise the icons bundled in `@inflatable-cookie/poodle-core/icons` cover the
-common names:
+defaults). Add `IconProvider` for application-owned string icon names. Poodle's
+scoped default Lucide set covers only component-owned chrome:
 
 ```tsx
+import { createIconSet } from "@inflatable-cookie/poodle-core/icons";
 import { UiPresentationProvider, IconProvider } from "@inflatable-cookie/poodle-react";
-import iconNodes from "lucide-static/icon-nodes.json";
+import { rocket, "trash-2" as trash2 } from "lucide-static/icon-nodes.json";
+
+const icons = createIconSet({ rocket, "trash-2": trash2 });
 
 <UiPresentationProvider density="default" sizeScale="md">
-  <IconProvider icons={iconNodes}>
+  <IconProvider icons={icons}>
     <App />
   </IconProvider>
 </UiPresentationProvider>;

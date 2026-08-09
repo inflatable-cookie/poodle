@@ -1,6 +1,6 @@
 # 021 — Icon Catalogue Boundary
 
-Status: ready
+Status: in progress
 Roadmap: g12
 Governing refs: `contracts/components/icon-provider.md`;
 `architecture/002-token-system-and-package-layout.md`; Card 020
@@ -18,7 +18,7 @@ icon and the registry that resolves one; it does not own a library of them.
 | --- | --- |
 | icons shipped in `poodle-core` | 1,703 |
 | distinct icons used across the sixteen consuming repositories | 134 (8%) |
-| icons Poodle's own components use | 12 |
+| icons Poodle's own components use | 54 |
 | raw on disk | 6.7 MB |
 | gzipped | 245 KB — **84% of the `poodle-core` tarball** |
 
@@ -60,18 +60,29 @@ contract type, and the GPUI and Jetstream tiers resolve through their own
 registries. Nothing here changes the component contract. What changes is that
 Poodle stops shipping a default catalogue behind that seam.
 
+## Corrected Internal Census
+
+The first census counted only literal `icon="name"` props and reported twelve.
+It missed literal `name="name"` uses plus bounded mappings in components such
+as MarkdownEditor, Callout, ToolCall, MediaThumbnail, RefSelect, and
+CollapseToggle. The verified default dependency set is 54 icons. Keeping only
+twelve would break Poodle components without consumer wiring, contradicting
+the acceptance criteria.
+
 ## Target
 
-- **`poodle-core` keeps the twelve icons its own components use** —
-  `arrow-up-down`, `check-check`, `chevron-left`, `chevron-right`, `columns-2`,
-  `diff`, `ellipsis`, `eye`, `pencil`, `refresh-cw`, `search`, `x` — exported
-  as a small default `IconSet` so components render with no consumer wiring.
+- **`poodle-core` keeps the 54 Lucide icons its own components can emit**, as
+  a scoped default `IconSet` so component chrome renders with no consumer
+  wiring. This is Poodle's default Lucide adapter, not a general built-in
+  catalogue.
 - **The 1,703-module catalogue and `generate.mjs` are removed**, along with
   `lucide-static` from `poodle-core`'s `devDependencies`.
 - **The `import *` fallback in `icon-registry.ts` is deleted.** Resolution is
   the provided `IconSet` plus the built-in twelve, and an unresolved name is a
   visible failure rather than a silent empty array.
-- **Consumers take `lucide-static` themselves** and pass an `IconSet`.
+- **Consumers take `lucide-static` themselves** and generate a scoped `IconSet`
+  from an explicit name list. The full JSON catalogue never enters application
+  source or the runtime module graph.
 
 ## The Risk Is Ergonomic, Not Technical
 
@@ -83,14 +94,29 @@ Two things make it tractable. The 134 names in use are already enumerated, so
 each application's set is derivable rather than discovered. And most
 applications need ten to thirty icons, not a catalogue.
 
-Provide a documented pattern — a helper that builds an `IconSet` from
-`lucide-static`'s `icon-nodes.json` given a list of names — before migrating
-any consumer. If the wiring is unpleasant, consumers will reach for the
-catalogue again and this reverts by accident.
+Provide a documented pattern before migrating any consumer:
+
+```json
+["search", "trash-2"]
+```
+
+```sh
+poodle-icons --names icons.json --out src/icons.generated.ts
+```
+
+```ts
+import { icons } from "./icons.generated";
+```
+
+The generated module contains only those node arrays. A runtime pick from a
+default JSON import does not tree-shake, and Vite cannot expose kebab-case JSON
+keys as named imports, so extraction must happen before bundling. If the wiring
+is unpleasant, consumers will reach for a catalogue again and this reverts by
+accident.
 
 ## Steps
 
-1. Add the twelve-icon built-in default and the `IconSet` helper.
+1. Add the 54-icon default Lucide set and the `IconSet` helper.
 2. Delete the `import *` fallback, the generated catalogue, `generate.mjs`, and
    the `lucide-static` devDependency.
 3. Make an unresolved icon name loud — the current `?? []` renders nothing and

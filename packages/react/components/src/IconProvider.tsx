@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import { IconSetContext } from "./icon-registry";
 import type { IconSet } from "./types";
 
-// A complete icon set mapping kebab-case names to SVG node arrays.
+// An icon set mapping kebab-case names to SVG node arrays.
 // Any icon set in this format works — lucide-static/icon-nodes.json,
 // a Phosphor equivalent, or a custom set.
-// String-based icon lookups resolve from this set first. If not found
-// and @inflatable-cookie/poodle-core/icons is installed, icons are lazily auto-imported.
+// String lookups resolve from this set first, then Poodle's scoped default
+// Lucide set.
 export interface IconProviderProps {
   icons: IconSet;
   children?: ReactNode;

@@ -1,0 +1,3 @@
+import type { IconNodes } from "../types";
+
+export const arrowUp: IconNodes = [["path",{"d":"m5 12 7-7 7 7"}],["path",{"d":"M12 19V5"}]];

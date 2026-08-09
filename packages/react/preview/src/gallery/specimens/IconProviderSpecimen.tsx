@@ -46,11 +46,12 @@ const label: CSSProperties = {
 export function IconProviderSpecimen() {
   return (
     <div className="poodle-specimen">
-      <SpecimenGroup label="Full Lucide set via IconProvider">
+      <SpecimenGroup label="Full Lucide set — catalogue tools only">
         <p style={hint}>
           Wrap a subtree in <code style={hintCode}>{"<IconProvider icons={iconNodes}>"}</code> to
           make all {Object.keys(iconNodes).length} Lucide icons available by name.
-          Icons resolve from this set first, then fall back to the 35 built-in internals.
+          This full-catalogue form is for icon browsers, not application bundles.
+          Icons resolve from this set first, then Poodle's default Lucide set.
         </p>
         <IconProvider icons={iconNodes as unknown as IconSet}>
           <div style={iconRow}>
@@ -81,10 +82,10 @@ export function IconProviderSpecimen() {
         </IconProvider>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Without IconProvider — built-in internals">
+      <SpecimenGroup label="Without IconProvider — default Lucide set">
         <p style={hint}>
-          Without any <code style={hintCode}>IconProvider</code>, string names resolve to the 35
-          built-in icons used for component chrome (chevrons, check, x, etc.).
+          Without any <code style={hintCode}>IconProvider</code>, Poodle's component-owned
+          string names resolve from its scoped 54-icon Lucide default.
         </p>
         <div style={iconRow}>
           <div style={labeledIcon}>

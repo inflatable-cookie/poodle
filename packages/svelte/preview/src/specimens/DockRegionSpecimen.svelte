@@ -3,7 +3,7 @@
   import type { PanelTabItem, DockEdge } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
-  import { folder, code, list as listIcon, terminal } from "@inflatable-cookie/poodle-core/icons";
+  const [folder, code, listIcon, terminal] = ["folder", "code", "list", "terminal"] as const;
 
   // ── Static dock state ──────────────────────────────────────────────
 

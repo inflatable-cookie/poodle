@@ -1,8 +1,10 @@
 <script lang="ts">
   import { IconButton } from "@inflatable-cookie/poodle-svelte";
-  import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@inflatable-cookie/poodle-core/icons";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  const [plus, settings, x, trash2, star, mapPin, ban, refreshCw] =
+    ["plus", "settings", "x", "trash-2", "star", "map-pin", "ban", "refresh-cw"] as const;
 
   let bold = $state(false);
   let italic = $state(false);

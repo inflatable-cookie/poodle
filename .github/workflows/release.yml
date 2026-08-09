@@ -1,0 +1,161 @@
+name: Release
+
+# Publishes poodle-core and poodle-svelte to npm.
+#
+# No NPM_TOKEN. Publication uses npm trusted publishing: npmjs.com is
+# configured to accept publishes for each package only from this repository and
+# this workflow file, and npm authenticates with a short-lived OIDC token minted
+# per run. Nothing long-lived is stored in GitHub, so there is no secret for a
+# compromised dependency to exfiltrate and nothing to rotate. Provenance
+# attestation comes with it rather than being a separate step.
+#
+# Before the first run, each package needs its trusted publisher configured at
+# npmjs.com -> package -> Settings -> Trusted Publisher, naming this repository
+# and `release.yml`. Until that exists the publish step fails closed.
+#
+# poodle-react is deliberately not published. It has no consumers, and the name
+# stays reserved under the claimed scope. When it does ship it ships at the
+# common version, not at 0.1.0 from a standing start.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Pack and verify without publishing
+        type: boolean
+        default: true
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: macos-latest
+    permissions:
+      contents: read
+      # Mints the OIDC token npm exchanges for publish rights. This is the
+      # whole reason no secret is needed.
+      id-token: write
+    steps:
+      # TODO harden: pin these to commit SHAs rather than tags. Tags are
+      # mutable and a compromised action is the other half of the supply-chain
+      # problem trusted publishing solves for tokens.
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs a recent npm; the one bundled with Node is
+      # usually older than the OIDC support.
+      - name: Use an npm that supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - run: bun install --frozen-lockfile
+
+      # A clean checkout has no generated token CSS -- it is gitignored. Packing
+      # without this step ships poodle-core with the token entries in its
+      # exports map pointing at files that do not exist, and nothing downstream
+      # would fail. See Longhorn Card 166.
+      - name: Generate design tokens
+        run: bun packages/tokens/scripts/build-tokens.ts
+
+      - name: Verify the working tree is complete
+        run: |
+          set -euo pipefail
+          missing=0
+          for file in \
+            packages/core/src/tokens/generated/css/poodle-tokens.css \
+            packages/core/src/tokens/generated/css/poodle-themes.css; do
+            if [ ! -s "$file" ]; then
+              echo "missing or empty after generation: $file"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      # Inlined rather than `effigy ci`. Effigy is a local binary, not a
+      # devDependency, and `effigy` on npm is an unrelated package -- calling it
+      # through bunx in a release workflow would fetch and execute a stranger's
+      # code, which is the exact class of problem trusted publishing exists to
+      # avoid. Keep in step with tasks/effigy.tasks.toml `ci`.
+      - name: Web gate
+        run: |
+          set -euo pipefail
+          bun run --cwd packages/core test
+          bunx vitest run
+          bun install --cwd packages/svelte/install-smoke
+          bun run --cwd packages/svelte/install-smoke check --threshold error
+          bun run --cwd packages/svelte/preview docs:lint
+          bun run --cwd packages/svelte/preview accessibility:report
+
+      - name: Rust contract crates
+        run: |
+          set -euo pipefail
+          for crate in headless markdown components layout style events adapter tokens; do
+            cargo test --manifest-path "packages/contracts/$crate/Cargo.toml"
+          done
+
+      - name: Packed-consumer install proof
+        run: bun test/package-install/svelte-preview.ts
+
+      # Contract 012 and the lockstep decision of 2026-08-09: every Rust crate
+      # and every TypeScript package across both repositories carries one
+      # version. On a tag push, that version is the tag.
+      - name: Versions agree with the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          status=0
+          for manifest in \
+            packages/core/package.json \
+            packages/svelte/components/package.json \
+            packages/react/components/package.json; do
+            version=$(node -p "require('./$manifest').version")
+            if [ "$version" != "$tag" ]; then
+              echo "$manifest is $version, tag is $tag"
+              status=1
+            fi
+          done
+          exit "$status"
+
+      - name: Pack and inspect
+        run: |
+          set -euo pipefail
+          mkdir -p .release
+          for dir in packages/core packages/svelte/components; do
+            (cd "$dir" && npm pack --pack-destination "$GITHUB_WORKSPACE/.release")
+          done
+          ls -l .release
+          for tarball in .release/*.tgz; do
+            echo "== $tarball"
+            tar -tzf "$tarball" | head -20
+          done
+
+      - name: Publish
+        if: ${{ github.event_name == 'push' || !inputs.dry-run }}
+        run: |
+          set -euo pipefail
+          for dir in packages/core packages/svelte/components; do
+            (cd "$dir" && npm publish --access public)
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packed-tarballs
+          path: .release/*.tgz

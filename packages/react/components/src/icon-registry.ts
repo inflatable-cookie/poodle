@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import * as lucideIcons from "@inflatable-cookie/poodle-core/icons";
+import { defaultLucideIconSet } from "@inflatable-cookie/poodle-core/icons";
 
 import type { IconNodeElement, IconNodes, IconSet } from "./types";
 
@@ -28,8 +28,16 @@ const aliases: Record<string, string> = {
   "unlock": "lock-open",
 };
 
-function kebabToCamel(name: string): string {
-  return name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+const reportedMissingIcons = new Set<string>();
+
+function reportMissingIcon(name: string): IconNodes {
+  if (!reportedMissingIcons.has(name)) {
+    reportedMissingIcons.add(name);
+    console.error(
+      `[Poodle] Unresolved icon "${name}". Add it to the nearest IconProvider set or pass IconNodes directly.`,
+    );
+  }
+  return defaultLucideIconSet["circle-x"];
 }
 
 export function resolveIconNodes(
@@ -43,6 +51,8 @@ export function resolveIconNodes(
   if (iconSet && canonical in iconSet) return iconSet[canonical];
   if (iconSet && ref in iconSet) return iconSet[ref];
 
-  const iconModule = lucideIcons as unknown as Record<string, IconNodes>;
-  return iconModule[kebabToCamel(canonical)] ?? [];
+  if (canonical in defaultLucideIconSet) return defaultLucideIconSet[canonical];
+  if (ref in defaultLucideIconSet) return defaultLucideIconSet[ref];
+
+  return reportMissingIcon(ref);
 }

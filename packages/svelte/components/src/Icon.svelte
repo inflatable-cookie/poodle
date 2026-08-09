@@ -10,9 +10,9 @@
 
   /**
    * The icon to display. Accepts:
-   * - An `IconNodes` array (e.g. from `@inflatable-cookie/poodle-core/icons` or `lucide-static/icon-nodes.json`)
-   * - A string name resolved from the `IconProvider` icon set, or lazily
-   *   auto-imported from `@inflatable-cookie/poodle-core/icons`
+   * - An `IconNodes` array from a named `lucide-static/icon-nodes.json` import
+   * - A string name resolved from the `IconProvider` set, then Poodle's scoped
+   *   default Lucide set
    */
   let {
     icon = null,
@@ -74,4 +74,3 @@
     {/if}
   {/each}
 </svg>
-
