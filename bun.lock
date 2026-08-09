@@ -60,7 +60,7 @@
       "dependencies": {
         "@inflatable-cookie/poodle-core": "workspace:*",
         "@inflatable-cookie/poodle-react": "workspace:*",
-        "lucide-static": "^1.30.0",
+        "lucide-static": "^1.31.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
       },
@@ -89,7 +89,7 @@
       "dependencies": {
         "@inflatable-cookie/poodle-core": "workspace:*",
         "@inflatable-cookie/poodle-svelte": "workspace:*",
-        "lucide-static": "^1.30.0",
+        "lucide-static": "^1.31.0",
         "svelte": "^5.56.8",
       },
       "devDependencies": {
@@ -352,7 +352,7 @@
 
     "locate-character": ["locate-character@3.0.0", "", {}, "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="],
 
-    "lucide-static": ["lucide-static@1.30.0", "", {}, "sha512-lgG5XTlCPG9OQABEVbhhvcG3N0T8SDFg8NFw34j71+VK8TSP6xMlfXLsuwXiHZvL+bDoA5J2gOebqRocl4WvTw=="],
+    "lucide-static": ["lucide-static@1.31.0", "", {}, "sha512-XFX9NO+gcLsOkXISmeQZYGJa2siGWZc/lgT/BK1b83h9RdOiz3cj1eQP5nWhELiB1KhW5ryk0nmMopOgm/CuSA=="],
 
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 
