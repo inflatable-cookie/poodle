@@ -1,22 +1,22 @@
 # Product Guardrails
 
 Status: active
+Updated: 2026-08-09
 Owner: Poodle core
 
-## Rules
-
-- Keep Poodle focused on reusable tokens, primitives, composites, and
-  cross-runtime contracts.
-- Do not smuggle app-specific DAW or Jetstream-local behavior into the shared
-  library surface.
-- Do not claim renderer parity from specimen output alone; parity needs
-  contract truth plus bounded proof.
-- Do not widen one implementation tranche into multi-seam cleanup without
-  freezing the next owner first.
-- When `g10` has more than one plausible next seam, stop and choose the next
-  owner explicitly instead of freewheeling across Jetstream and GPUI follow-up.
-
-## Next Task
-
-Use `docs/roadmaps/g12/README.md` to choose the next bounded owner. Keep host
-session policy outside Poodle.
+- Keep Poodle focused on reusable tokens, primitives, composites, workstation
+  shells, and cross-runtime contracts.
+- Keep product-specific DAW, admin, and Jetstream-local behavior in its owning
+  application or runtime.
+- Treat contracts as behavioral authority. Preview specimens and screenshots
+  are evidence, not proof by themselves.
+- Change observable behavior through the shared contract before changing one
+  renderer.
+- Put shared web behavior and styling in `poodle-core`; put shared native
+  component recipes in `poodle-render`.
+- Keep Underlay-facing integration behind Underlay-owned adapters and token
+  bridges.
+- Keep Bits Svelte and runtime engines as implementation details rather than
+  public Poodle contracts.
+- Freeze a bounded owner before widening a migration or parity tranche.
+- Record intentional runtime differences and validate them against the contract.

@@ -114,8 +114,3 @@ tree and event system.
 - `packages/svelte/components/src/BulkActionBar.svelte`
 - `packages/svelte/components/src/PaginationSummary.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this baseline into `g02.003` so list, grid, filter, search, and
-pagination depth reuse one browse and selection posture.

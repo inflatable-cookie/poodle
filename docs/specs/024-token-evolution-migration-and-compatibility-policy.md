@@ -187,8 +187,3 @@ on:
 - `packages/tokens/schema/metadata/deprecations.json`
 
 These files are now normative migration instruments, not bootstrap placeholders.
-
-## Next Task
-
-Use this policy while executing `g03.002`, so parity automation and regression
-evidence can classify token changes and downstream review scope consistently.

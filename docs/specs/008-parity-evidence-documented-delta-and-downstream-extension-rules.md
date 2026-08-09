@@ -205,9 +205,3 @@ The first surfaces proving this rule set are:
 - `docs/contracts/components/README.md`
 - `docs/contracts/workstation/README.md`
 - `docs/logs/2026-03/11-220500-g01-013-underlay-bridge-and-token-ingestion-baseline.md`
-
-## Next Task
-
-Use this baseline while executing `g02.001`, especially when the form-system
-depth starts turning contract intent into real implementation and parity
-evidence expectations become more concrete.

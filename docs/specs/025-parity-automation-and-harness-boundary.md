@@ -183,9 +183,3 @@ The current baseline now includes:
   are directly previewed versus only contract-backed today
 - a generated parity report artifact
 - root-level commands to regenerate the report and run the docs build against it
-
-## Next Task
-
-Use this baseline while executing `g03.003`, so contract linting and docs
-completeness checks can build on explicit parity registration instead of
-inferred review coverage.

@@ -1,163 +1,76 @@
 # poodle-jetstream
 
-Status: active
-Updated: 2026-04-23
+`poodle-jetstream` is Poodle's Jetstream adapter. It supplies the Jetstream
+theme provider and maps renderer-neutral layout and style values into
+Jetstream-compatible values.
 
-The canonical Jetstream adapter for Poodle. This crate bridges Poodle's
-renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
-`poodle-layout`) into the Jetstream game-engine UI runtime.
+The crate is a pre-1.0 source preview and is not published to crates.io.
 
-## What This Crate Owns
+## What It Owns
 
-- **`JetstreamThemeProvider`** — implements the `ThemeProvider` trait; resolves
-  semantic token paths to typed values (colors, spacing, radii, opacity) that
-  Jetstream component render functions consume
-- **`map_layout()`** — translates `LayoutIntent` from `poodle-layout` into a
-  `taffy::Style` for Taffy flexbox layout
-- **`map_style()`** — translates a `StyleDescriptor` into `JetstreamMappedStyle`
-- **`JetstreamAdapter`** / **`JetstreamTarget`** — adapter manifest and render
-  target, registering all 121 supported components and wiring specs to
-  `JetstreamNodeHandle` outputs
+- `JetstreamThemeProvider`, implementing Poodle's `ThemeProvider` contract
+- theme, density, control-size, contrast, and scale-factor resolution
+- `map_layout()` for Taffy layout
+- `map_style()` for Jetstream-compatible resolved styles
+- adapter metadata and target types
 
-## What This Crate Does NOT Own
+It does not implement components or own the engine widget tree.
+`poodle-render` produces `poodle-node` trees. The `jetstream-poodle` crate in
+the Jetstream repository converts those trees to `JsEl`.
 
-- Rendering, draw calls, and the widget tree — owned by `jetstream-runtime`
-- Event handling and input dispatch — owned by `jetstream-runtime`
-- Component render functions — owned by `poodle-render` (`Spec + Theme →
-  Node`); the Jetstream backend interprets nodes via `jetstream-poodle`
-- Token definitions and values — owned by `poodle-tokens`
-- Component spec structs — owned by `poodle-specs`
-
-## Component Pipeline
-
-```
-ComponentSpec (e.g. ButtonSpec)
-    + JetstreamThemeProvider (token resolution)
-        ↓ poodle_render::button(spec, theme, handlers) → poodle_node::Node
-        ↓ jetstream_poodle::to_js_el(&node) → JsEl
-        ↓ game_ui.render_immediate(&root_el)
-            (materialize JsEl tree → UiTree → Taffy layout → draw commands)
-```
-
-The adapter layer sits between the spec and the render function. It is not
-called directly by application code — application code renders components via
-`poodle-render` and converts once at the backend boundary with
-`jetstream-poodle`, passing in a `JetstreamThemeProvider`.
-
-## `JetstreamThemeProvider`
-
-### Construction
+## Theme Setup
 
 ```rust
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_tokens::{ThemeDefinition, DensityDefinition, ControlSizeDefinition};
 
-// Minimal — uses token defaults
-let theme = JetstreamThemeProvider::from_theme(&ThemeDefinition::Dark);
-
-// With density and control-size overrides
-let theme = JetstreamThemeProvider::from_theme(&ThemeDefinition::Dark)
-    .with_density(&DensityDefinition::Compact)
-    .with_control_size(&ControlSizeDefinition::Sm);
-
-// With DPI/zoom scaling
-let theme = JetstreamThemeProvider::from_theme(&ThemeDefinition::Dark)
-    .with_scale_factor(2.0);  // Retina / 200% zoom
+let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    .with_density(&poodle_tokens::density::DEFAULT)
+    .with_control_size(&poodle_tokens::density::CONTROL_SIZE_SM)
+    .with_contrast(0.5)
+    .with_scale_factor(1.0);
 ```
 
-### Token Resolution
+Theme and mode constants are generated from Poodle's canonical DTCG token
+schema. Components should resolve semantic tokens through the provider rather
+than introduce backend-only values.
 
-All values are resolved from the semantic token system — never hardcoded:
+## Component Flow
+
+```text
+poodle-specs + JetstreamThemeProvider
+                |
+          poodle-render
+                |
+           poodle-node
+                |
+       jetstream-poodle
+                |
+              JsEl
+                |
+       Jetstream runtime
+```
 
 ```rust
-use poodle_jetstream_components::theme_ext::*;
-
-// Color → glam::Vec4 (sRGB, 0.0..1.0 per channel)
-let fill = resolve_color(&theme, "color.background.surface");
-
-// Space / size / radius → f32 (logical pixels, post scale-factor)
-let height = resolve_px(&theme, "size.control.height.md");
-let radius = resolve_px(&theme, "radius.control");
-
-// Opacity → f32 (0.0..1.0)
-let dim = resolve_opacity(&theme, "state.opacity.disabled");
+let node = poodle_render::button(&spec, &theme, on_click);
+let element = jetstream_poodle::to_js_el(&node);
 ```
 
-Direct methods on the provider:
+Convert the completed node tree once at the engine boundary. Shared component
+composition belongs in `poodle-render`; widget materialization, layout, drawing,
+and input dispatch belong in Jetstream.
 
-| Method | Returns | Notes |
-|---|---|---|
-| `resolve_color(token)` | `ColorValue` (r,g,b,a as f32) | sRGB |
-| `resolve_linear_color(token)` | `glam::Vec4` | Linear-space, for sRGB surfaces |
-| `resolve_space(token)` | `f32` | Logical px, multiplied by scale_factor |
-| `resolve_radius(token)` | `f32` | Delegates to resolve_space |
-| `resolve_border_width(token)` | `f32` | Delegates to resolve_space |
-| `resolve_opacity(token)` | `f32` | 0.0..1.0 |
+## Style Mapping
 
-### Theme Variants
+`map_layout()` converts `poodle_layout::LayoutIntent` to `taffy::Style`.
+`map_style()` converts `poodle_style::StyleDescriptor` to
+`JetstreamMappedStyle`. Most application code renders components through
+`poodle-render` instead of calling these functions directly.
 
-| `ThemeDefinition` | Description |
-|---|---|
-| `ThemeDefinition::Dark` | Default dark theme |
-| `ThemeDefinition::Light` | Light theme |
-| `ThemeDefinition::LoopholeStudio` | Loophole Studio branded dark |
+## Related Packages
 
-## `map_layout()`
-
-Translates Poodle's `LayoutIntent` into a `taffy::Style` for Taffy flexbox.
-
-```rust
-use poodle_jetstream::map_layout;
-use poodle_layout::LayoutIntent;
-
-let style: taffy::Style = map_layout(&layout_intent);
-```
-
-Key mapping rules:
-
-- `LayoutSizing::Grow` on both axes → `flex_grow: 1` (fills remaining space)
-- `LayoutSizing::Grow` on one axis only → `flex_grow: 0`, relies on `align_self: Stretch`
-- `LayoutSizing::Fixed(n)` → explicit size, no grow, no shrink
-- `min_size` defaults to `0` (not `auto`) so containers can shrink past content size
-
-Component render functions call `map_layout` internally — application code
-rarely calls this directly.
-
-## Public Types
-
-| Type | Description |
-|---|---|
-| `JetstreamThemeProvider` | Token-resolving theme provider |
-| `JetstreamAdapter` | Adapter manifest; registers 121 supported components |
-| `JetstreamTarget` | Render target; associated type is `JetstreamNodeHandle` |
-| `JetstreamNodeHandle` | Per-node handle: `node_id`, `spec_type`, `widget_kind`, `mapped` style |
-| `JetstreamMappedStyle` | Resolved visual style ready for the runtime |
-| `JetstreamColor` | RGBA color value |
-| `JetstreamEdges` | Layout edges (top, right, bottom, left) |
-| `JetstreamBoxShadow` | Box shadow descriptor |
-| `WidgetKind` | Widget variant enum: Panel, Label, Button, Slider, ProgressBar, Image, List, TextInput |
-| `map_layout` | LayoutIntent → taffy::Style |
-| `map_style` | StyleDescriptor → JetstreamMappedStyle |
-
-## Dependencies
-
-```toml
-[dependencies]
-poodle-adapter    = { path = "../../contracts/adapter" }
-poodle-specs      = { path = "../../contracts/components" }
-poodle-tokens     = { path = "../../contracts/tokens" }
-poodle-layout     = { path = "../../contracts/layout" }
-poodle-style      = { path = "../../contracts/style" }
-poodle-events     = { path = "../../contracts/events" }
-taffy             = "0.9"
-glam              = "0.29"
-```
-
-## Related Crates
-
-- `poodle-render` — component render functions (`Spec + Theme → Node`)
-- `jetstream-poodle` (in the Jetstream repo) — the Node → JsEl backend
-- `poodle-specs` — component spec structs (`ButtonSpec`, `CheckboxSpec`, etc.)
-- `poodle-tokens` — token definitions and `ThemeDefinition`/`DensityDefinition`/`ControlSizeDefinition`
-- `poodle-adapter` — `ThemeProvider` trait definition
-- `jetstream-runtime` — `JsEl` builder and runtime rendering
+- `poodle-render` — shared Rust component implementation
+- `poodle-node` — renderer-neutral output tree and interaction vocabulary
+- `jetstream-poodle` — Node-to-`JsEl` backend in the Jetstream repository
+- `poodle-specs` — component inputs and state
+- `poodle-tokens` — generated themes and semantic token data
+- [Jetstream developer guide](../../../docs/guides/jetstream-developer-guide.md)

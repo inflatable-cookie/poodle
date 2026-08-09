@@ -2,6 +2,7 @@
 name = "poodle-render"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "The single Rust component implementation: Spec + Theme -> poodle-node trees, interpreted by per-backend adapters."
 

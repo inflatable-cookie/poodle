@@ -109,9 +109,3 @@ controlled or uncontrolled meaning as the shared contracts:
 - `docs/contracts/components/text-area.md`
 - `docs/contracts/components/search-field.md`
 - `docs/contracts/components/form-actions.md`
-
-## Next Task
-
-Carry this GPUI form-foundation baseline into `g04.005`, adding selection,
-value, feedback, and date-time primitives on top of the same crate and token
-posture.

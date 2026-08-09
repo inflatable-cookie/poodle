@@ -121,9 +121,3 @@ Those stay in host code or retained runtime/client helpers.
 - [Admin Feature Delivery Recipes](./013-admin-feature-delivery-recipes.md)
 - [List And Filter Recipes](./003-list-and-filter-recipes.md)
 - [Dialog And Detail Recipes](./004-dialog-and-detail-recipes.md)
-
-## Next Task
-
-Only add more shell guidance here when multiple apps converge on the same
-visible shell decision, instead of promoting host runtime or branding concerns
-into Poodle.

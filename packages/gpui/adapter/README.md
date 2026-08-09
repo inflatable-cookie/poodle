@@ -1,195 +1,71 @@
 # poodle-gpui
 
-Status: active
-Updated: 2026-04-23
+`poodle-gpui` is Poodle's GPUI adapter. It supplies the GPUI theme provider and
+maps renderer-neutral layout and style values into GPUI-compatible values.
 
-The canonical GPUI integration layer for Poodle. This crate bridges Poodle's
-renderer-agnostic contract crates (`poodle-specs`, `poodle-tokens`,
-`poodle-layout`) into the GPUI native rendering system.
+The crate is a pre-1.0 source preview and is not published to crates.io.
 
-## What This Crate Owns
+## What It Owns
 
-- **`GpuiThemeProvider`** — implements the `ThemeProvider` trait; resolves
-  semantic token paths to typed values (colors, spacing, radii, opacity) that
-  GPUI component structs consume
-- **`map_layout()`** — translates `LayoutIntent` from `poodle-layout` into a
-  `GpuiStyle` for GPUI-native layout
-- **`map_style()`** — translates a `StyleDescriptor` into a complete `GpuiStyle`
-- **`GpuiAdapter`** / renderer-facing support matrix — adapter manifest and parity
-  metadata, registering all 96 currently supported components
+- `GpuiThemeProvider`, implementing Poodle's `ThemeProvider` contract
+- theme, density, control-size, contrast, and scale-factor resolution
+- `map_layout()` and `map_style()` for shared layout and style descriptors
+- GPUI-compatible color, edge, radius, shadow, typography, and cursor types
 
-## What This Crate Does NOT Own
+It does not implement components. `poodle-render` produces `poodle-node` trees;
+`poodle-gpui-node-backend` interprets those trees as GPUI elements.
 
-- The GPUI rendering engine — owned by `gpui`
-- Component recipes — owned by `poodle-render`, which emits backend-neutral
-  `poodle-node` trees; `poodle-gpui-node-backend` interprets them as GPUI
-  elements (g12.019 replaced the hand-written `poodle-gpui-components` tier)
-- Token definitions and values — owned by `poodle-tokens`
-- Component spec structs — owned by `poodle-specs`
-
-## Component Pipeline
-
-```
-ComponentSpec (e.g. ButtonSpec)
-    + GpuiThemeProvider (token resolution)
-        ↓ Button::from_spec(spec, theme)
-            (GPUI component struct; implements IntoElement)
-        ↓ component.into_element()
-            (materializes to AnyElement → GPUI render tree → layout → draw)
-```
-
-Components are GPUI structs (not pure functions like in Jetstream). Each
-component type implements `IntoElement`, which GPUI calls during the render
-pass.
-
-## `GpuiThemeProvider`
-
-### Construction
+## Theme Setup
 
 ```rust
 use poodle_gpui::GpuiThemeProvider;
-use poodle_tokens::{ThemeDefinition, DensityDefinition, ControlSizeDefinition};
 
-// Minimal — uses token defaults
-let theme = GpuiThemeProvider::new();
-
-// With theme, density, and control-size overrides
 let theme = GpuiThemeProvider::new()
-    .with_theme(&ThemeDefinition::Dark)
-    .with_density(&DensityDefinition::Compact)
-    .with_control_size(&ControlSizeDefinition::Sm);
-
-// With DPI/zoom scaling
-let theme = GpuiThemeProvider::new()
-    .with_scale_factor(2.0);  // Retina / 200% zoom
+    .with_theme(&poodle_tokens::themes::ECLIPSE)
+    .with_density(&poodle_tokens::density::DEFAULT)
+    .with_control_size(&poodle_tokens::density::CONTROL_SIZE_SM)
+    .with_contrast(0.5)
+    .with_scale_factor(1.0);
 ```
 
-### Token Resolution
+Theme and mode constants are generated from Poodle's canonical DTCG token
+schema. Components should resolve semantic tokens through the provider rather
+than introduce local values.
 
-Token resolution follows a three-level priority chain:
+## Component Flow
 
-1. Theme/density/size overrides (checked first)
-2. Typed constant defaults (`poodle-tokens::typed`, light baseline)
-3. Direct hex/rgba parsing (for inline color values like `"#2d86f3"`)
-4. Safe fallback — black for colors, `0.0` for sizes
+```text
+poodle-specs + GpuiThemeProvider
+              |
+        poodle-render
+              |
+         poodle-node
+              |
+poodle-gpui-node-backend
+              |
+         GPUI element
+```
 
 ```rust
-use poodle_gpui_components::theme_ext::*;
-
-// Color → Hsla (GPUI's native color type)
-let fill   = resolve_color(&theme, "color.background.surface");
-let text   = resolve_color(&theme, "color.text.primary");
-let accent = resolve_color(&theme, "color.accent.base");
-
-// Space / size / radius → Pixels
-let height = resolve_px(&theme, "size.control.height.md");
-let radius = resolve_radius(&theme, "radius.control");
-
-// Opacity → f32
-let dim    = resolve_opacity(&theme, "state.opacity.disabled");
+let node = poodle_render::button(&spec, &theme, on_click);
+let element = poodle_gpui_node_backend::to_gpui(&node);
 ```
 
-Direct methods on `GpuiThemeProvider` (implementing `ThemeProvider`):
+Convert the completed node tree once at the GPUI boundary. Shared component
+composition belongs in `poodle-render`, not in this adapter or the backend.
 
-| Method | Return type | Notes |
-|---|---|---|
-| `resolve_color(token)` | `ColorValue` (r,g,b,a f32) | sRGB |
-| `resolve_space(token)` | `f32` | Logical px × scale_factor |
-| `resolve_radius(token)` | `f32` | Delegates to resolve_space |
-| `resolve_border_width(token)` | `f32` | Delegates to resolve_space |
-| `resolve_opacity(token)` | `f32` | 0.0..1.0 |
+## Style Mapping
 
-### Theme Variants
+`map_layout()` converts `poodle_layout::LayoutIntent` to `GpuiStyle`.
+`map_style()` converts `poodle_style::StyleDescriptor` to the same resolved
+style type. These functions support adapter and backend work; most application
+code renders components through `poodle-render` instead of calling them.
 
-| `ThemeDefinition` | Description |
-|---|---|
-| `ThemeDefinition::Dark` | Default dark theme |
-| `ThemeDefinition::Light` | Light theme |
-| `ThemeDefinition::LoopholeStudio` | Loophole Studio branded dark |
+## Related Packages
 
-## Style Mapping API
-
-### `map_layout()`
-
-Translates `LayoutIntent` (from `poodle-layout`) into `GpuiStyle`:
-
-```rust
-use poodle_gpui::{map_layout, GpuiStyle};
-use poodle_layout::LayoutIntent;
-
-let style: GpuiStyle = map_layout(&layout_intent);
-```
-
-### `map_style()`
-
-Main entry point for full style descriptor translation:
-
-```rust
-use poodle_gpui::{map_style, GpuiStyle};
-use poodle_style::StyleDescriptor;
-
-let style: GpuiStyle = map_style(&descriptor);
-```
-
-Additional mapping functions:
-
-| Function | Input | Output |
-|---|---|---|
-| `map_border(border)` | `&BorderDescriptor` | `(f32, GpuiColor)` |
-| `map_corner_radii(radii)` | `&CornerRadii` | `GpuiCornerRadii` |
-| `map_shadow(shadow)` | `&ShadowValue` | `GpuiShadow` |
-| `map_typography(typo)` | `&TypographyDescriptor` | `GpuiTypography` |
-| `map_cursor(hint)` | `&CursorHint` | `GpuiCursorStyle` |
-| `map_edges(edges)` | `&LayoutEdges` | `GpuiEdges` |
-
-## Public Types
-
-| Type | Description |
-|---|---|
-| `GpuiThemeProvider` | Token-resolving theme provider; implements `ThemeProvider` |
-| `GpuiAdapter` | Adapter manifest; `name()` → "GPUI" |
-| `GpuiStyle` | Complete resolved style (layout + visual + typography + focus-ring) |
-| `GpuiColor` | RGBA — r, g, b, a as f32 |
-| `GpuiEdges` | Layout edges (top, right, bottom, left) as f32 |
-| `GpuiCornerRadii` | Corner radii (top_left, top_right, bottom_right, bottom_left) as f32 |
-| `GpuiShadow` | Box shadow (offset_x, offset_y, blur: f32; color: GpuiColor) |
-| `GpuiTypography` | Typography (font_family, font_size, line_height, font_weight) |
-| `GpuiFontFamily` | Sans \| Mono |
-| `GpuiFlexDirection` | Row \| Column |
-| `GpuiJustifyContent` | Start \| Center \| End \| SpaceBetween |
-| `GpuiAlignItems` | Start \| Center \| End \| Stretch |
-| `GpuiOverflow` | Visible \| Hidden \| Scroll |
-| `GpuiLength` | Auto \| Definite(f32) |
-| `GpuiCursorStyle` | Arrow \| PointingHand \| IBeam \| NotAllowed \| OpenHand \| ClosedHand \| ResizeColumn \| ResizeRow |
-
-## Supported Components
-
-Current support matrix (g09.018): 96 components across primitives, composites,
-and shell surfaces. Full parity status in:
-
-```
-packages/gpui/cross-runtime-parity-report.json
-```
-
-5 documented intentional native deltas (table narration, overlay focus scope,
-media renderer, announcement timing, shell dock) with approved rationale.
-
-## Dependencies
-
-```toml
-[dependencies]
-poodle-adapter     = { path = "../../contracts/adapter" }
-poodle-specs       = { path = "../../contracts/components" }
-poodle-tokens      = { path = "../../contracts/tokens" }
-poodle-layout      = { path = "../../contracts/layout" }
-poodle-style       = { path = "../../contracts/style" }
-poodle-events      = { path = "../../contracts/events" }
-```
-
-## Related Crates
-
-- `poodle-gpui-components` — component structs (`Button`, `Checkbox`, etc.) implementing `IntoElement`
-- `poodle-specs` — component spec structs passed into component constructors
-- `poodle-tokens` — token definitions and `ThemeDefinition`/`DensityDefinition`/`ControlSizeDefinition`
-- `poodle-adapter` — `ThemeProvider` trait definition
-- Developer guide: `docs/guides/gpui-developer-guide.md`
+- `poodle-render` — shared Rust component implementation
+- `poodle-node` — renderer-neutral output tree and interaction vocabulary
+- `poodle-gpui-node-backend` — GPUI interpretation and input plumbing
+- `poodle-specs` — component inputs and state
+- `poodle-tokens` — generated themes and semantic token data
+- [GPUI developer guide](../../../docs/guides/gpui-developer-guide.md)

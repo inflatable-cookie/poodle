@@ -159,9 +159,3 @@ multiple apps.
 - [MediaBrowsePanel](../contracts/components/media-browse-panel.md)
 - [MediaPreview](../contracts/components/media-preview.md)
 - [MediaThumbnail](../contracts/components/media-thumbnail.md)
-
-## Next Task
-
-Add the next media recipe only when a genuinely generic media workflow seam is
-proven across multiple apps, instead of recreating app-specific library logic
-inside Poodle.

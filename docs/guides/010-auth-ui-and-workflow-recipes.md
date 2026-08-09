@@ -156,9 +156,3 @@ place outside Poodle.
 - [TextInput](../contracts/components/text-input.md)
 - [CodeInput](../contracts/components/code-input.md)
 - [PasswordRequirements](../contracts/components/password-requirements.md)
-
-## Next Task
-
-Add the next auth recipe only when a reusable host-side workflow seam is
-proven across multiple apps, instead of moving retained app orchestration into
-Poodle by convenience.

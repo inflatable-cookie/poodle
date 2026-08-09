@@ -95,7 +95,3 @@ GPUI must recreate equivalent shell hierarchy and utility meaning in the native 
 - `packages/svelte/workstation/src/WorkspaceShell.svelte`
 - `packages/svelte/workstation/src/ShellStatusBar.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this shell-depth baseline into `g02.010` and later workstation milestones so docking, split layouts, and persistence orchestration build on one explicit shell hierarchy.

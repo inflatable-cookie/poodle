@@ -100,8 +100,3 @@ Updated: 2026-04-11
 |-------|-------------|-----------------|-----------|
 | Overlaps with `MetricTile` visually | StateTile is the stripped-down shape (5 fields) while MetricTile (25 fields) carries interactive, formatting, and theme-override surface | allowed | both exist as different grain levels; consumers pick based on needs |
 | `trend` is a string rather than an enum | allows callers to pass domain-specific values like `"flat"` or locale tokens without contract churn | allowed | tighten to an enum if a shared vocabulary emerges |
-
-## Next Task
-
-Document when to reach for `StateTile` vs `MetricTile` in the component
-selection guide so callers don't default to the heavier one by mistake.

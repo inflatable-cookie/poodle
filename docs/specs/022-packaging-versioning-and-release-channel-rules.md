@@ -112,9 +112,3 @@ Each release-capable tranche should document:
 - `packages/gpui/primitives/Cargo.toml`
 - `packages/gpui/composites/Cargo.toml`
 - `packages/gpui/workstation/Cargo.toml`
-
-## Next Task
-
-Carry this baseline into `g03.011` and later operations work so preview,
-internal, and future stable channel language remain explicit instead of
-drifting into implied release promises.

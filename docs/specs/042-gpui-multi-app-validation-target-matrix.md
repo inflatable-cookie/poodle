@@ -82,9 +82,3 @@ The current seed baseline is:
 - `packages/gpui/tokens/multi-app-validation.json`
 - `packages/gpui/tokens/README.md`
 - `docs/roadmaps/g03/009-additional-gpui-app-adoption-and-multi-app-validation.md`
-
-## Next Task
-
-Use this matrix while executing `g03.010` and later adoption work, so future
-GPUI evidence can distinguish validated cross-app assumptions from token-only or
-contract-only optimism.

@@ -105,9 +105,3 @@ existing GPUI token and primitive baselines for at least:
 - `packages/gpui/composites/src/remediation_banner.rs`
 - `packages/gpui/composites/src/inline_remediation.rs`
 - `packages/gpui/composites/src/types.rs`
-
-## Next Task
-
-Carry this first GPUI composite baseline into `g04.008`, implementing the
-data, browse, detail, picker, and media composite parity tranche on top of the
-widened primitive and form-shell surface.

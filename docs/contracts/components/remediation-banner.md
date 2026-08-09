@@ -119,8 +119,3 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 |-------|-------------|-----------------|-----------|
 | Overlaps with `Callout` visually | RemediationBanner is distinguished by required actions and announce-default | allowed | both exist as complementary shapes |
 | GPUI does not emit aria-live | GPUI 0.2 has no ARIA surface | allowed | revisit with GPUI accessibility layer |
-
-## Next Task
-
-Implement `RemediationBannerSpec` in the GPUI composite renderer and wire the
-primary/secondary actions through to caller-supplied click handlers.

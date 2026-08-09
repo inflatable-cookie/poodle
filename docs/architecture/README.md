@@ -1,23 +1,25 @@
 # Architecture
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-08-09
 
-Architecture defines how Poodle is structured, where package ownership lives, and how Svelte, GPUI, Jetstream, tokens, and the Underlay bridge fit together.
+Architecture documents define Poodle's stable ownership and runtime boundaries.
+They explain the current system; milestone sequencing belongs in roadmaps.
 
-## Active Baseline
+## Start Here
 
-- `001-poodle-system-shape.md`
-- `002-token-system-and-package-layout.md`
-- `003-component-docs-ia-and-implementation-substrates.md`
-- `004-underlay-bridge-and-adapter-ownership.md`
-- `005-treatment-system-and-recipe-variables.md` *(retired — superseded by 007)*
+1. [System shape](001-poodle-system-shape.md) — contracts, web and native
+   renderer flows, parity, and application boundaries
+2. [Token system and package layout](002-token-system-and-package-layout.md) —
+   canonical token sources, generated artifacts, and consumer packages
+3. [Component docs and implementation substrates](003-component-docs-ia-and-implementation-substrates.md)
+   — documentation authority and implementation evidence
+4. [Underlay bridge and adapter ownership](004-underlay-bridge-and-adapter-ownership.md)
+   — separation between Poodle and Underlay-facing APIs
 
-## Working Rule
+## Additional Decisions
 
-Keep architecture focused on ownership, layering, package boundaries, renderer responsibilities, and bridge constraints.
-Push milestone sequencing and execution detail into `roadmaps/`.
-
-## Next Task
-
-Reconcile any architecture page that still assumes old repo names or superseded generation structure, then keep new structural changes landing here before they spread into roadmap prose.
+The numbered documents after the active baseline record narrower architectural
+decisions. Retired documents remain for traceability and state what superseded
+them. Consult the [roadmap index](../roadmaps/README.md) only when you need
+current delivery status.

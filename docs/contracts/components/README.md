@@ -189,8 +189,3 @@ Higher-order components should:
   card content outside the component contract itself
 - keep accessibility explicit for heading hierarchy, region labeling, empty
   states, and collection-browse shells in both Svelte and GPUI
-
-## Next Task
-
-Keep this index aligned with the actual contract files whenever components are
-added, promoted, or renamed so docs lint stays authoritative.

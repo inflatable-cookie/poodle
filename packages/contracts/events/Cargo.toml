@@ -2,6 +2,7 @@
 name = "poodle-events"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "Renderer-agnostic semantic event types for Poodle multi-renderer targets."
 

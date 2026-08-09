@@ -16,25 +16,45 @@ also use [Guides Index](./README.md), especially
 
 ## Quick Start
 
-### 1. Install packages
+### 1. Link packages
 
-```bash
-bun add @inflatable-cookie/poodle-core @inflatable-cookie/poodle-svelte lucide-static
+Poodle is currently a source preview; its npm packages are not published to a
+registry. Link them from a sibling checkout or workspace in your application's
+`package.json`:
+
+```json
+{
+  "dependencies": {
+    "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
+    "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components",
+    "lucide-static": "^0.577.0"
+  }
+}
 ```
+
+Then run `bun install` in the consuming application. Adjust the relative paths
+for a vendored checkout or monorepo workspace.
 
 `@inflatable-cookie/poodle-core/tokens` provides CSS custom properties and theme
 helpers, `@inflatable-cookie/poodle-svelte` provides the Svelte component
 surface, and `lucide-static` provides application-owned icon data.
 
-### 2. Import the token stylesheet
+### 2. Import token and mode stylesheets
 
 In your app's entry point (e.g. `+layout.svelte` or `App.svelte`), import the token CSS:
 
 ```svelte
 <script>
   import "@inflatable-cookie/poodle-core/tokens/styles.css";
+  import "@inflatable-cookie/poodle-core/tokens/themes.css";
+  import "@inflatable-cookie/poodle-core/tokens/density-default.css";
+  import "@inflatable-cookie/poodle-core/tokens/control-size-sm.css";
 </script>
 ```
+
+Import the modes your application can select. Use the aggregate `themes.css`
+for every theme, or a single `theme-<name>.css` export for one theme. Add each
+density and control-size stylesheet exposed by your UI.
 
 If you prefer the legacy CSS subpath, that remains available too:
 
@@ -42,7 +62,8 @@ If you prefer the legacy CSS subpath, that remains available too:
 @import "@inflatable-cookie/poodle-core/tokens/css/poodle-tokens.css";
 ```
 
-This loads the full set of CSS custom properties (`--poodle-*`) that all components resolve their visual properties from.
+These styles load the CSS custom properties (`--poodle-*`) and the selected
+mode overrides that components resolve their visual properties from.
 
 ### 3. Set theme attributes
 
@@ -225,13 +246,15 @@ Treatment tokens (interactive-state styling)
 
 ### Themes
 
-Three built-in themes, activated via `data-theme` attribute:
+Twelve generated themes are activated via `data-theme`:
 
 | Theme | Description |
 |-------|-------------|
-| `light` | Default neutral light theme |
-| `dark` | Dark neutral theme |
-| `loophole-studio` | Custom branded dark theme |
+| `iceberg` | Cool light theme |
+| `eclipse` | Neutral dark theme |
+| `graphite` | Graphite neutral theme |
+| `midnight`, `nord`, `rose`, `forest` | Additional authored palettes |
+| `solarized`, `hornet`, `cobalt`, `clay`, `meadow` | Additional authored palettes |
 
 Three density modes via `data-density`:
 

@@ -2,6 +2,7 @@
   "name": "@inflatable-cookie/poodle-core",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Poodle framework-free headless behavior core: component state machines, prop getters, and shared interaction machinery.",
   "bin": {

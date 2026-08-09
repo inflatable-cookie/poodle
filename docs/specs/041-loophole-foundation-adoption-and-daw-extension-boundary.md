@@ -116,8 +116,3 @@ The current `g03.008` seed baseline is:
 - `packages/svelte/workstation/README.md`
 - `docs/contracts/workstation/README.md`
 - `docs/roadmaps/g03/008-loophole-foundation-adoption-and-daw-extension-contract-proof.md`
-
-## Next Task
-
-Use this baseline while executing `g03.009`, so additional GPUI app validation
-can distinguish shared-shell defects from Loophole-specific DAW concerns.

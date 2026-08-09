@@ -102,8 +102,3 @@ The current seed baseline is:
 - `packages/g03-closeout.json`
 - `docs/roadmaps/g03/014-generation-closeout-and-next-program-cutover.md`
 - updated roadmap and generation-index surfaces marking `g03` complete
-
-## Next Task
-
-If a new generation is opened later, start from these explicit closeout
-artifacts rather than reopening `g03` by implication.

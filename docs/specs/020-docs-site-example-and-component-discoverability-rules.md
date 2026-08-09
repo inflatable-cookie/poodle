@@ -92,9 +92,3 @@ replace markdown authority.
 - `packages/svelte/preview/README.md`
 - `docs/contracts/README.md`
 - `docs/specs/README.md`
-
-## Next Task
-
-Carry this discoverability baseline through `g02.013` so the preview/docs
-surface becomes a credible internal review tool before downstream adoption
-starts in a later generation.

@@ -155,8 +155,3 @@ The current baseline is implemented through:
 - `packages/svelte/workstation/src/index.ts`
 - `packages/svelte/workstation/README.md`
 - `packages/svelte/preview/README.md`
-
-## Next Task
-
-Use this baseline while executing `g03.004`, so performance hardening does not
-reopen docs integrity, contract indexing, or publish-candidate expectations.

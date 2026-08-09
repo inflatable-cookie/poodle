@@ -116,9 +116,3 @@ The current seed baseline is:
 - lint validation that keeps the acceptance matrix present and internally
   coherent
 - `docs/roadmaps/g03/012-ecosystem-acceptance-suites-and-long-tail-regression-coverage.md`
-
-## Next Task
-
-Carry this baseline into `g03.013` so reference apps, onboarding material, and
-public-facing examples stay aligned with the actual acceptance posture instead
-of overstating maturity.

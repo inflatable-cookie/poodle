@@ -10,8 +10,8 @@ From the repository root:
 
 ```sh
 bun install
-bun run tokens:build
-bun run docs:dev
+effigy tokens:build
+effigy svelte:preview
 ```
 
 Then open `http://localhost:4173`.
@@ -19,8 +19,8 @@ Then open `http://localhost:4173`.
 To validate the docs baseline before a publish candidate:
 
 ```sh
-bun run docs:lint
-bun run docs:check
+effigy docs:lint
+effigy docs:check
 ```
 
 ## Scope
@@ -48,7 +48,7 @@ This writes:
 - `packages/svelte/preview/artifacts/parity-report.json`
 
 The parity artifact now also records which public exports from
-`@inflatable-cookie/poodle-svelte` and `@inflatable-cookie/poodle-svelte-workstation` are directly covered by preview sections versus still
+`@inflatable-cookie/poodle-svelte` exports are directly covered by preview sections versus still
 being contract-only, and it now includes a cross-runtime summary sourced from:
 
 - `packages/gpui/cross-runtime-parity-report.json`
@@ -73,9 +73,5 @@ delta register, and GPUI acceptance-harness alignment.
 - the current publish candidate is an internal static preview build, not yet a
   public docs-site deployment with versioned hosting or external release notes
 
-## Next Task
-
-Use this docs/preview surface while following the next `g04` adoption tranche,
-keeping preview examples and parity artifacts tied back to owning contracts,
-packages, and explicit GPUI deltas instead of treating section-specific demo
-glue as public starter code.
+Preview examples demonstrate component states and composition. Treat component
+contracts as normative; preview-only glue is not a public application API.

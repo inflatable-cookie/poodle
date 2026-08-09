@@ -101,8 +101,3 @@ The current structural baseline still allows these explicit deltas:
 - `docs/contracts/components/surface.md`
 - `docs/contracts/components/separator.md`
 - `docs/contracts/components/scroll-shell.md`
-
-## Next Task
-
-Carry this structural GPUI baseline into `g04.004`, adding action, text-entry,
-and field primitives on top of the same contract and token posture.

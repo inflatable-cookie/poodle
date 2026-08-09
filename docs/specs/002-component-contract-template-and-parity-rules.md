@@ -174,9 +174,3 @@ The first seed contracts proving this template are:
 
 - `docs/contracts/components/button.md`
 - `docs/contracts/workstation/panel-surface.md`
-
-## Next Task
-
-Use this spec together with `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`
-when `g02` starts turning the documented surface into deeper implementations
-and real parity review work.

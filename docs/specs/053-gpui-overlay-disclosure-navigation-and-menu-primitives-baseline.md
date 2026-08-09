@@ -130,9 +130,3 @@ to Poodle, but this baseline keeps genuine native deltas explicit:
 - `packages/gpui/primitives/src/navigation_menu.rs`
 - `packages/gpui/primitives/src/menubar.rs`
 - `packages/gpui/primitives/src/tab_strip.rs`
-
-## Next Task
-
-Carry this widened GPUI primitive baseline into `g04.007`, implementing the
-GPUI form, validation, and remediation composite parity tranche on top of the
-now-explicit primitive surface.

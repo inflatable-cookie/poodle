@@ -1,9 +1,12 @@
 # Poodle React Components
 
-`@inflatable-cookie/poodle-react` — the full Poodle component library for React. All 132
-components in a single package, as hand-written TSX shells over the shared
+`@inflatable-cookie/poodle-react` is Poodle's experimental React component
+package. It contains hand-written TSX shells over the shared
 `@inflatable-cookie/poodle-core` state machines. Same contracts, tokens, recipes, and CSS as
 `@inflatable-cookie/poodle-svelte`; the Svelte implementation stays the visual proof reference.
+
+This is a pre-1.0 source preview and is not published to a registry. Link the
+core and React packages through workspace or file dependencies.
 
 ## Public Surface
 
@@ -20,13 +23,22 @@ Peer dependencies: `react` and `react-dom` `>=18` (built and verified on 19).
 
 Three things wire a consuming app up.
 
+```json
+{
+  "dependencies": {
+    "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
+    "@inflatable-cookie/poodle-react": "file:../poodle/packages/react/components"
+  }
+}
+```
+
 **1. Load the token CSS** once, at the app entry — semantic tokens plus the
 theme / density / control-size layers you use (published by
 `@inflatable-cookie/poodle-core/tokens`, the shared token package):
 
 ```ts
-import "@inflatable-cookie/poodle-core/tokens/styles.css";        // semantic token definitions
-import "@inflatable-cookie/poodle-core/tokens/theme-eclipse.css"; // + theme-iceberg / theme-graphite
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/themes.css";
 import "@inflatable-cookie/poodle-core/tokens/density-default.css";
 import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
 ```
@@ -94,8 +106,7 @@ theme / density / size / contrast controls, a Tokens inspector, and per-componen
 usage docs.
 
 ```sh
-bun run --cwd packages/react/preview dev       # gallery on :4180
-bun run --cwd packages/react/preview reports   # docs + parity + accessibility artifacts
+effigy react:preview
 ```
 
 ## Stability

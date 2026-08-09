@@ -1,113 +1,101 @@
 # 001 Poodle Vision
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-08-09
 
 ## Purpose
 
-Poodle is a generalized UI system for teams that need the same documented
-component contract implemented in both Svelte and GPUI first, while keeping the
-door open for additional implementations later.
+Poodle is a generalized design system for teams that need the same UI language
+across Svelte, React, GPUI, and Jetstream applications.
 
-Its job is to make tokens, primitives, and reusable composites explicit enough
-that:
-
-- GPUI desktop apps can adopt them,
-- Svelte apps can adopt them,
-- future targets such as React or other desktop UI kits can adopt them without
-  forcing a redesign of the core contract,
-- Underlay can consume them internally without leaking Poodle into app code,
-- app-specific systems such as Loophole's DAW widgets can build above them
-  instead of re-inventing lower-level UI contracts.
+It turns component meaning, design tokens, themes, interaction rules, and
+accessibility expectations into explicit contracts. Each renderer stays
+idiomatic while operators receive consistent behavior and presentation.
 
 ## Core Promise
 
-Every Poodle component should be:
+Every Poodle component should:
 
-- documented before or alongside implementation,
-- defined by one contract,
-- implemented in Svelte and GPUI against the same semantic rules,
-- backed by one shared token vocabulary,
-- backed by theme definitions that can be translated into both Svelte and GPUI
-  consumers from the same source,
-- designed so additional implementation targets can be added later without
-  changing the semantic contract model,
-- explicit about intentional platform deltas.
+- have one renderer-neutral contract
+- use one generated semantic token vocabulary
+- preserve the same observable inputs, states, events, and behavior across
+  supported runtimes
+- state intentional runtime differences
+- remain reusable outside the application that first needed it
 
-## What Poodle Must Own
+Poodle does not pursue byte-for-byte or implementation-level sameness. Parity
+means semantic behavior, accessible operation, layout intent, and token use
+before rendering mechanics.
 
-- semantic design tokens
-- semantic theme definitions that are portable across framework runtimes
-- token artifact emission for CSS, TypeScript, and Rust consumers
-- an implementation-neutral contract model that is not tied only to Svelte or
-  GPUI internals
-- foundational UI primitives
-- reusable application/productivity composites
-- reusable workstation-shell composites
-- documentation, parity rules, and implementation guidance for both stacks
+## What Poodle Owns
 
-## What Poodle Must Not Own
+- W3C DTCG design-token sources and CSS, TypeScript, and Rust artifacts
+- portable theme, density, control-size, and appearance-treatment rules
+- framework-neutral component contracts
+- foundational controls and layout primitives
+- reusable application composites
+- general workstation and professional-tool shells
+- Svelte and React web implementations
+- a shared Rust renderer with GPUI and Jetstream backends
+- documentation, parity rules, examples, and migration guidance
 
-- Loophole-specific DAW widgets such as transport, timeline, mixer, automation,
-  or plugin panels as first-class core components
-- Underlay product-app APIs
-- Bits Svelte APIs as the public contract
-- browser-only shortcuts that cannot translate to GPUI
-- GPUI-only shortcuts that cannot translate back to Svelte
+## What Poodle Does Not Own
 
-## Ecosystem Posture
+- product-specific workflows, routing, persistence, or service calls
+- Loophole-specific DAW surfaces such as transport, timeline, mixer,
+  automation, or plugin panels
+- Underlay's application-facing APIs
+- Bits Svelte APIs as public Poodle contracts
+- renderer-only shortcuts that would silently change component semantics
+
+Applications should build domain surfaces from Poodle components rather than
+moving domain vocabulary into the design system.
+
+## Ecosystem Boundaries
 
 ### Underlay
 
-Underlay should be able to consume Poodle tokens and components through
-Underlay-owned bridges and wrappers. Underlay apps should not need to import or
-reason about Poodle directly.
+Underlay consumes Poodle behind Underlay-owned adapters and token bridges.
+Underlay applications continue to import Underlay APIs and do not need to know
+which Poodle components or tokens implement them.
 
-### Loophole
+### Loophole and other products
 
-Loophole-specific components should be built from Poodle tokens and Poodle
-sub-components, but they should live in Loophole-owned packages or repos rather
-than inside Poodle core.
+Product-specific components live with the product. They may compose Poodle
+tokens and components, but Poodle accepts them only when their semantics are
+general across products.
 
-### Svelte
+### Web renderers
 
-Bits Svelte can remain a useful implementation substrate where it improves
-quality or speed, but Poodle must define its own contract, docs, and token model.
+Svelte and React share framework-free behavior, styles, tokens, and contracts.
+Bits Svelte may support the Svelte implementation internally, but it does not
+define public naming or behavior.
 
-### GPUI
+### Native renderers
 
-GPUI implementations should be native GPUI components, not a lowest-common-
-denominator translation of the web implementation.
+GPUI and Jetstream share `poodle-render`, which produces renderer-neutral node
+trees. Backends interpret those nodes using native runtime capabilities.
+Renderer-specific input, lifecycle, and drawing remain in the backend.
 
 ## Success Criteria
 
-Poodle is successful when:
+Poodle succeeds when:
 
-- the same tokens exist in CSS, TypeScript, and Rust-friendly forms
-- one semantic theme definition can be emitted for both browser/Svelte and
-  GPUI/Rust consumers without downstream repos redefining the theme separately
-- new components are introduced through docs-first contracts
-- Svelte and GPUI implementations can be compared against one parity checklist
-- future implementations can be added later without rewriting token or contract
-  meaning
-- Underlay can adopt Poodle internally without breaking existing app APIs
-- Loophole can build higher-order DAW widgets without needing to redefine
-  buttons, panels, tabs, menus, forms, or layout semantics
+- an operator can choose a runtime and begin without learning repository
+  history
+- one token change generates aligned web and native artifacts
+- one contract can be verified across every supported renderer
+- a new renderer can reuse contracts and tokens without redefining them
+- applications keep their public APIs and domain logic outside Poodle
+- runtime differences are deliberate, bounded, and visible
+- packages can evolve through pre-1.0 preview into a documented public release
 
-## Failure Modes To Avoid
+## Failure Modes
 
-- turning Poodle into a Loophole-only repo
-- turning Poodle into a web-only component library
-- turning Poodle into a docs-only catalogue without implementation discipline
-- forcing downstream teams to hand-translate the same theme into CSS and Rust
-  separately
-- baking Svelte-specific or GPUI-specific assumptions into the canonical token
-  and contract layers
-- treating Bits or any other dependency as the contract source of truth
-- requiring downstream apps to learn Poodle-specific abstractions they should not
-  need
-
-## Next Task
-
-Translate this vision into package boundaries, token rules, and component-layer
-ownership in architecture.
+- becoming a component dump for one application
+- treating a preview gallery as proof of behavioral parity
+- duplicating native component recipes in each backend
+- duplicating web state or CSS in each framework
+- forcing downstream teams to translate themes by hand
+- exposing implementation dependencies as Poodle's public API
+- hiding release status or unsupported behavior from operators

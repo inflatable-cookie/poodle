@@ -73,9 +73,3 @@ or utility control surfaces so they do not remain contract-only exports.
 - `packages/svelte/components/src/Collapsible.svelte`
 - `packages/svelte/components/src/Accordion.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Use the disclosure primitives in the preview/docs shell and then reassess which
-remaining preview-only controls should be replaced by foundation primitives
-before widening the catalogue further.

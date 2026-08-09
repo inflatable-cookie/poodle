@@ -223,9 +223,3 @@ The first primitive contracts that explicitly exercise this baseline are:
 - `docs/contracts/workstation/split-view.md`
 - `docs/contracts/workstation/workspace-shell.md`
 - `docs/contracts/workstation/command-palette-shell.md`
-
-## Next Task
-
-Use this accessibility baseline with the harder `g02.011` and later work,
-especially now that advanced focus, keyboard, and state semantics have been
-made explicit for the broader catalogue.

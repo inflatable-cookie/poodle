@@ -1,0 +1,69 @@
+# Poodle Core
+
+`@inflatable-cookie/poodle-core` is Poodle's framework-free web package. It
+contains shared component behavior, generated design tokens, component CSS,
+and icon infrastructure used by the Svelte and React packages.
+
+This is a pre-1.0 source preview and is not published to a registry. Use a
+workspace or file dependency.
+
+## Public Surfaces
+
+| Import | Purpose |
+| --- | --- |
+| package root | State machines, prop getters, and shared interaction helpers |
+| `/styles/*` | Shared component CSS |
+| `/tokens` | Token values, paths, theme metadata, and helpers |
+| `/tokens/runtime` | `applyThemeAttributes()` and mode types |
+| `/tokens/styles.css` | Base token custom properties |
+| `/tokens/themes.css` | All generated theme selectors |
+| `/tokens/theme-<name>.css` | One generated theme |
+| `/tokens/density-<mode>.css` | One density mode |
+| `/tokens/control-size-<size>.css` | One control-size mode |
+| `/icons` | Icon types and Poodle's scoped default Lucide set |
+
+## Web Setup
+
+Import base tokens and the modes your application can select:
+
+```ts
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/themes.css";
+import "@inflatable-cookie/poodle-core/tokens/density-default.css";
+import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
+```
+
+```ts
+import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens/runtime";
+
+applyThemeAttributes(document.documentElement, {
+  theme: "eclipse",
+  density: "default",
+  controlSize: "md",
+});
+```
+
+Framework components import their own shared component styles. Application
+code normally does not import `/styles/*` directly.
+
+## Icons
+
+Poodle includes only the Lucide icons required by its components. Generate an
+application-owned set for additional names:
+
+```sh
+bun x poodle-icons --names icons.json --out src/icons.generated.ts
+```
+
+The generated module contains only the requested icon nodes. Merge it into the
+Svelte or React `IconProvider`; do not bundle Lucide's full catalogue at
+runtime.
+
+## Development
+
+Token artifacts originate in `packages/tokens/schema/`. Regenerate them from
+the repository root with `effigy tokens:build` and validate documentation with
+`effigy docs:check`.
+
+See the [token architecture](../../docs/architecture/002-token-system-and-package-layout.md)
+and [repository README](../../README.md) for the full system.

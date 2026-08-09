@@ -2,6 +2,7 @@
 name = "poodle-gpui-preview"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "Native macOS preview application for the Poodle design system, rendered via GPUI."
 

@@ -82,7 +82,3 @@ GPUI must recreate equivalent workflow structure and state in the native accessi
 - `packages/svelte/components/src/RelationPicker.svelte`
 - `packages/svelte/components/src/SelectionSummary.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this picker workflow baseline into `g02.006` and later milestones so media, embeds, and richer asset relations reuse one selection-workflow posture.

@@ -116,9 +116,3 @@ The first concrete evidence for this spec is:
 - `packages/svelte/components/src/SearchField.svelte`
 - `packages/svelte/components/src/FormActions.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this baseline into `g02.002` and later milestones so table filters,
-pickers, dialogs, and settings forms all reuse one field and action-row
-posture.

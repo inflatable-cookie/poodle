@@ -214,8 +214,3 @@ rotating, so nothing suggests a wait with a definite end.
 - [ ] accent/current/muted tone mapping matches
 - [ ] decorative vs announced semantics match
 - [ ] `xs | sm | md | lg | xl` size steps match in both ring and grid variants
-
-## Next Task
-
-Migrate ad hoc loading indicators in buttons, icon buttons, and loading
-surfaces onto this primitive so spinner styling and animation stay centralized.

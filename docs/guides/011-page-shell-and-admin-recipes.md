@@ -209,9 +209,3 @@ Those stay in host code or in a retained host runtime layer, not in Poodle.
 - [FormDialog](../contracts/components/form-dialog.md)
 - [MetaBar](../contracts/components/meta-bar.md)
 - [MetaItem](../contracts/components/meta-item.md)
-
-## Next Task
-
-Add the next page-shell recipe only when a real generic shell decision is
-proven in multiple apps, instead of recreating an Underlay-style wrapper layer
-inside Poodle.

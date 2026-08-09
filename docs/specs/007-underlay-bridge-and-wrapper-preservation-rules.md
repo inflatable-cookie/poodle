@@ -190,8 +190,3 @@ The first artifacts that explicitly exercise this baseline are:
 - `packages/bridges/underlay/ts/token-map.ts`
 - `packages/bridges/underlay/ts/theme-map.ts`
 - `packages/bridges/underlay/ts/component-wrappers.ts`
-
-## Next Task
-
-Use this bridge baseline while executing the later Underlay adoption tranche,
-especially when `g03.007` needs to preserve zero-leak posture.

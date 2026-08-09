@@ -178,9 +178,3 @@ The current `g03.006` seed baseline is:
 - `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md`
 - `docs/roadmaps/g03/006-extension-sdk-composition-guidance-and-starter-packages.md`
 - `packages/bridges/underlay/README.md`
-
-## Next Task
-
-Use this baseline while executing `g03.007` and `g03.008`, so bridge and
-downstream-adoption work inherits explicit package posture and starter-package
-rules instead of ad hoc wrapper choices.

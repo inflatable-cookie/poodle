@@ -264,8 +264,3 @@ only appear when they are the semantic source for a documented rule.
 - approvers:
 - downstream adopters:
 - future follow-up:
-
-## Next Task
-
-Copy this template into the correct contract layer and fill it out before
-starting implementation work for the component.

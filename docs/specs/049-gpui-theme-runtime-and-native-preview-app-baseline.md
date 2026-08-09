@@ -112,8 +112,3 @@ The current seed baseline is:
 - `packages/gpui/preview-app-baseline.json`
 - `packages/gpui/parity-priority-matrix.json`
 - `docs/roadmaps/g04/002-gpui-theme-runtime-token-application-and-native-preview-app-baseline.md`
-
-## Next Task
-
-Carry this baseline into `g04.003` so GPUI structural primitives land inside a
-real native review app and theme runtime rather than as isolated native widgets.

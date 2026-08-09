@@ -97,8 +97,3 @@ the native accessibility tree.
 - `docs/contracts/components/browse-search-shell.md`
 - `packages/svelte/components/src/FilterToolbar.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this browse-shell baseline into `g02.004` and beyond so detail, card,
-and navigation work composes onto a stable search-and-results posture.

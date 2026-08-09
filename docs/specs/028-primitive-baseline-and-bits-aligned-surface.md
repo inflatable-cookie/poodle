@@ -189,9 +189,3 @@ Not:
 - `docs/research/translation-memos/tm-svelte-substrate.md`
 - `packages/svelte/components/README.md`
 - `packages/svelte/components/src/index.ts`
-
-## Next Task
-
-Decide whether to widen the Poodle primitive contract catalogue beyond the current
-foundation baseline so more of the wider Bits surface becomes explicit rather
-than remaining implementation-only potential.

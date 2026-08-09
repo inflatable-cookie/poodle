@@ -225,8 +225,3 @@ Poodle may not say:
   on spec `026`
 - consumer compatibility rule → `docs/contracts/001-working-rules.md` if it
   proves durable beyond this program
-
-## Next Task
-
-Open `docs/roadmaps/g11/README.md` runway. First executable milestone:
-`g11.002` machine-spec format and pilot contracts.

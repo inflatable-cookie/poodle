@@ -485,7 +485,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(8.0)
                 .child(js_list_card(
                     &ListCardSpec::new()
-                        .with_title("Acowtancy Build Test")
+                        .with_title("a private consumer Build Test")
                         .with_subtitle("Registered 28/07/2026 16:35")
                         .with_interactive(true)
                         .with_active(true),
@@ -493,7 +493,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 ))
                 .child(js_list_card(
                     &ListCardSpec::new()
-                        .with_title("Acowtancy Build Test")
+                        .with_title("a private consumer Build Test")
                         .with_subtitle("Registered 28/07/2026 16:35")
                         .with_interactive(true),
                     theme,

@@ -90,9 +90,3 @@ Do not extend Poodle with app-specific validation rules or endpoint knowledge.
 
 - [TextInput](../contracts/components/text-input.md)
 - [Field](../contracts/components/field.md)
-
-## Next Task
-
-Add the next focused guide only when another repeated workflow stabilizes,
-especially table and picker recipes that replace retained Underlay workflow
-shells with direct Poodle composition.

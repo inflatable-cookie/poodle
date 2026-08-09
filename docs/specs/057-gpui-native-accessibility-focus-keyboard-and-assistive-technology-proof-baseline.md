@@ -133,9 +133,3 @@ Poodle may not say:
 - `packages/gpui/composites/README.md`
 - `packages/gpui/workstation/README.md`
 - `docs/roadmaps/g04/010-gpui-native-accessibility-focus-keyboard-and-assistive-technology-proof.md`
-
-## Next Task
-
-Carry this explicit native accessibility proof posture into `g04.011` so the
-cross-runtime parity report, intentional delta register, and acceptance-harness
-expansion build on named accessibility debt rather than implied readiness.

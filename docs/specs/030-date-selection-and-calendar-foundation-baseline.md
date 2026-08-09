@@ -86,9 +86,3 @@ need deliberate follow-up rather than incidental growth.
 - `docs/contracts/components/date-picker.md`
 - `docs/contracts/components/date-range-picker.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Keep the date-only baseline stable while deciding whether timezone-aware entry,
-range-plus-time selection, or relative-date preset helpers should become
-foundation surfaces or remain composite-owned workflows.

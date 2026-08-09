@@ -84,9 +84,3 @@ Poodle may not say:
 - `packages/shared-demo-app-audit.json`
 - `packages/svelte/preview/artifacts/parity-report.json`
 - `docs/roadmaps/g04/014-svelte-demo-app-rebuild-component-adoption-and-coverage-upgrade.md`
-
-## Next Task
-
-Carry this rebuilt Svelte target into `g04.015` and implement the same demo
-app in GPUI with side-by-side review against the Svelte shell, screens, and
-interaction posture.

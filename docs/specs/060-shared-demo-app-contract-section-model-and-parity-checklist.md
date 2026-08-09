@@ -143,8 +143,3 @@ Poodle may not say:
 - `packages/shared-demo-app-contract.json`
 - `packages/shared-demo-app-audit.json`
 - `docs/roadmaps/g04/013-cross-runtime-demo-app-contract-section-model-and-parity-checklist.md`
-
-## Next Task
-
-Carry this contract into `g04.014` and rebuild the Svelte demo app against the
-explicit screen model, shell regions, state matrix, and parity checklist.

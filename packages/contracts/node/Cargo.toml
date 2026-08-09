@@ -2,6 +2,7 @@
 name = "poodle-node"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "Poodle's render vocabulary — the node tree components emit and backends interpret."
 

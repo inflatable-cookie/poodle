@@ -1,43 +1,37 @@
 # Specs
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-08-09
 
-Specs hold normative repo-wide rules for contracts, artifacts, parity evidence, accessibility, packaging, and downstream adoption boundaries.
+Specs define repository-wide rules that are broader than one component:
+tokens, artifact generation, parity evidence, accessibility, packaging,
+migration, and downstream boundaries.
 
-## Use
+## When to Use a Spec
 
-- use specs when implementation work needs repo-wide rules instead of per-component semantics
-- use contracts for component-specific anatomy, props, behavior, and token semantics
-- use roadmaps for sequencing and milestone execution
+- Use a [component contract](../contracts/components/README.md) for one
+  component's inputs, behavior, accessibility, layout, and token use.
+- Use a spec when a rule applies across packages or component families.
+- Use [architecture](../architecture/README.md) for stable ownership and
+  layering decisions.
+- Use [roadmaps](../roadmaps/README.md) for delivery order and active work.
 
-## Active Spec Set
+The numbered files in this directory are the complete spec set. Earlier specs
+may describe the baseline that introduced a capability; later architecture or
+spec documents can supersede their implementation assumptions. Follow explicit
+supersession notices and prefer current architecture for package shape.
 
-The active spec set currently runs from `001` through `061`, including:
+Important current cross-cutting references include:
 
-- token source and artifact contracts
-- component contract template and parity rules
-- accessibility and assistive-technology baselines
-- product, workstation, and docs-surface rules
-- packaging, release, migration, and deprecation policy
-- GPUI baseline, parity, and acceptance-harness artifacts
-- shared demo-app contract and audit baselines
+- `001-token-source-and-artifact-contract.md`
+- `002-component-contract-template-and-parity-rules.md`
+- `003-accessibility-and-assistive-technology-baseline.md`
+- `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`
+- `021-public-package-api-stability-and-parity-debt-baseline.md`
+- `022-packaging-versioning-and-release-channel-rules.md`
+- `024-token-evolution-migration-and-compatibility-policy.md`
+- `044-deprecation-change-control-and-release-channel-operations.md`
+- `062-headless-core-and-dual-layer-strategy.md`
 
-The complete file list in this folder is the source of truth.
-
-The active strict-planning layer is:
-
-- `062-g10-strict-posture-and-next-boundary-gate.md`
-- `batch-cards/README.md`
-
-## Working Rule
-
-When a roadmap task touches emitted artifacts, runtime parity, packaging, or cross-component behavior, read the relevant spec first and treat it as normative.
-Before roadmap generation rollover, purge stale generation-specific
-strict-planning artifacts from the active tree so the next generation does not
-inherit dead planning debris. Repo-wide normative specs are not part of that
-purge unless they are actually superseded.
-
-## Next Task
-
-Keep the spec index synchronized with the actual spec corpus and the active roadmap program, especially when roadmap consolidation changes which spec families are still current versus purely historical.
+Specs are normative constraints, not task queues. Current execution status
+belongs in the roadmap.

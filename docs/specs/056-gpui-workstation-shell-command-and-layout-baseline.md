@@ -128,9 +128,3 @@ primitive, and composite baselines for at least:
 - `packages/gpui/workstation/src/action_discovery_panel.rs`
 - `packages/gpui/workstation/src/shell_status_bar.rs`
 - `packages/gpui/workstation/src/workspace_shell.rs`
-
-## Next Task
-
-Carry this first GPUI workstation baseline into `g04.010`, hardening native
-accessibility, focus, keyboard, and assistive-technology proof on top of the
-widened primitive, composite, and workstation surface.

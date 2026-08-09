@@ -207,9 +207,3 @@ root.
 - [OrderBy](../contracts/components/order-by.md)
 - [SelectionSummary](../contracts/components/selection-summary.md)
 - [PageHeader](../contracts/components/page-header.md)
-
-## Next Task
-
-Add the next browse-surface guide once the table-shell decision hardens in real
-app migration work, starting with `DataTable` plus `ListContainer` composition
-and then documenting when a page should stay table-first versus card/grid-first.

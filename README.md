@@ -1,143 +1,158 @@
 # Poodle
 
-Poodle is a multi-renderer design system with one shared contract surface and multiple runtime implementations.
-The repo currently ships and validates:
+Poodle is a contract-first design system for web and native applications. It
+provides the same component semantics, design tokens, themes, and interaction
+rules across Svelte, React, GPUI, and Jetstream.
 
-- shared Rust contract crates for tokens, layout, style, primitives, composites, and workstation surfaces
-- a Svelte package set and browser preview surface
-- a GPUI native adapter, component library, and preview app
-- a Jetstream adapter, component library, and preview app
-- an Underlay bridge for host adoption without leaking Poodle-specific APIs into app code
+Poodle is intended for teams that need one UI language across several
+renderers. Applications choose the runtime package they need; they do not need
+to understand the other implementations.
 
-## Repo Shape
+> **Project status:** Poodle is a pre-1.0 source preview. Its public-intent npm
+> packages and Rust crates are not published to a registry yet. They are
+> currently consumed through workspace or file dependencies. APIs may change
+> before the first public release.
 
-Key package groups:
+## Choose a Runtime
 
-- `packages/contracts/*`
-  shared renderer-agnostic crates such as `poodle-specs`, `poodle-workstation`, and `poodle-tokens`
-- `packages/svelte/*`
-  the published `@inflatable-cookie/poodle-svelte` package plus its docs and preview app; framework-free tokens, styles, and the scoped default Lucide set live in `poodle-core`
-- `packages/gpui/*`
-  native GPUI adapter, renderable components, and preview app
-- `packages/jetstream/*`
-  Jetstream adapter, renderable components, and preview app
-- `packages/bridges/underlay`
-  token and wrapper bridge for Underlay-hosted apps
-- `packages/tokens`
-  canonical token schema and artifact generation pipeline
+| Runtime | Use | Status | Start here |
+| --- | --- | --- | --- |
+| Svelte 5 | Web applications | Preview | [Svelte developer guide](docs/guides/svelte-developer-guide.md) |
+| React 18+ | Web applications | Experimental | [React package guide](packages/react/components/README.md) |
+| GPUI | Native Rust applications | Preview | [GPUI developer guide](docs/guides/gpui-developer-guide.md) |
+| Jetstream | Jetstream applications | Preview | [Jetstream developer guide](docs/guides/jetstream-developer-guide.md) |
 
-## Consuming Poodle
+The web packages are:
 
-Start with the developer guide for your target runtime:
+- `@inflatable-cookie/poodle-core` for framework-free state, tokens, styles,
+  and the default icon adapter
+- `@inflatable-cookie/poodle-svelte` for Svelte components
+- `@inflatable-cookie/poodle-react` for React components
 
-- **Svelte** — [docs/guides/svelte-developer-guide.md](docs/guides/svelte-developer-guide.md)
-- **GPUI** — [docs/guides/gpui-developer-guide.md](docs/guides/gpui-developer-guide.md)
-- **Jetstream** — [docs/guides/jetstream-developer-guide.md](docs/guides/jetstream-developer-guide.md)
+## How Poodle Works
 
-All components are defined by contracts in [docs/contracts/components/](docs/contracts/components/).
-The contract is the source of truth for every implementation.
+Every component starts with a renderer-neutral contract. The contract defines
+its inputs, states, events, accessibility behavior, layout, and token usage.
+Each runtime implements that contract using the same generated token data.
 
-## Canonical Docs
+```text
+component contracts + DTCG tokens
+             |
+       shared semantics
+        /           \
+Svelte / React    poodle-render (Rust)
+                       |
+                 poodle-node tree
+                  /           \
+          GPUI backend    Jetstream backend
+```
 
-Internal planning and architecture hierarchy:
+This split keeps parity focused on what operators and users can observe:
+meaning, state, behavior, keyboard support, and token usage. Rendering details
+remain native to each target.
 
-1. [docs/vision/001-poodle-vision.md](docs/vision/001-poodle-vision.md)
-2. [docs/architecture/001-poodle-system-shape.md](docs/architecture/001-poodle-system-shape.md)
-3. [docs/roadmaps/README.md](docs/roadmaps/README.md)
-4. [docs/specs/README.md](docs/specs/README.md)
+### Tokens and themes
 
-## Local Workflow
+Poodle's W3C DTCG token schema generates CSS, TypeScript, and Rust artifacts.
+Themes, density, and control size are independent axes. Web applications apply
+them with inherited attributes:
 
-Install dependencies and generate token artifacts:
+```html
+<main data-theme="eclipse" data-density="default" data-control-size="sm">
+  <!-- Poodle components inherit this configuration. -->
+</main>
+```
+
+The available themes are Iceberg, Eclipse, Graphite, Midnight, Nord, Rose,
+Forest, Solarized, Hornet, Cobalt, Clay, and Meadow. Density supports compact,
+default, and comfortable modes; control size runs from `xs` through `xl`.
+
+### Icons
+
+Lucide is the default icon source, not a built-in general catalogue. Poodle
+ships only the small Lucide set required by its own components. An application
+that needs more icons owns a list and generates a scoped module at build time:
+
+```sh
+bun x poodle-icons --names icons.json --out src/icons.generated.ts
+```
+
+This keeps the default dependency light while preserving familiar Lucide icon
+names. See the [Svelte icon setup](docs/guides/svelte-developer-guide.md#icons)
+for the provider pattern.
+
+### Application boundaries
+
+Poodle owns reusable primitives, composites, and general workstation shells.
+Product-specific screens and domain widgets stay in the application. Underlay
+integrations live behind Underlay-owned adapters so application code does not
+need to know that Poodle is underneath.
+
+## Explore the Repository
+
+```text
+packages/core/              shared web behavior, tokens, styles, and icons
+packages/svelte/            Svelte package and preview
+packages/react/             React package and preview
+packages/contracts/         renderer-neutral Rust contracts and node model
+packages/render/            shared Rust component implementation
+packages/gpui/              GPUI adapter, node backend, and preview
+packages/jetstream/         Jetstream adapter and preview
+packages/tokens/            canonical token schema and generated artifacts
+packages/bridges/underlay/  internal Underlay bridge
+docs/contracts/components/  component contracts
+docs/guides/                operator and integration guides
+```
+
+The [documentation index](docs/README.md) separates operator guides from
+architecture, contracts, and project history.
+
+## Work on Poodle Locally
+
+Poodle uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task
+runner. Bun is required for workspace hydration and web tooling; Rust 1.95 is
+required for native packages.
 
 ```sh
 bun install
-bun packages/tokens/scripts/build-tokens.ts
+effigy tokens:build
+effigy docs:dev
 ```
 
-`bun install` at the repo root is the canonical JS hydration step. Mounted
-consumer repos should hydrate the root workspace, not run separate
-package-local installs under `packages/svelte/*` unless a package explicitly
-documents that requirement.
+Useful preview tasks:
 
-Common repo tasks:
+```sh
+effigy svelte:preview
+effigy react:preview
+effigy gpui:preview
+effigy jetstream:preview
+```
+
+Before submitting a change, run the checks relevant to it. The broad repository
+check is:
 
 ```sh
 effigy health
-bun run --cwd packages/svelte/preview dev
-cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml
-cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml
 ```
 
-The default validation pass is `effigy health`.
-That runs docs lint, parity and accessibility artifact generation, and the Svelte production build.
+Use `effigy tasks` to see narrower validation and build tasks.
 
-## Naming
+## Documentation
 
-Current package and crate namespaces use `poodle` and `@inflatable-cookie/poodle-*`.
-Historical `pug` and `flint` references should be treated as migration leftovers unless they appear in explicit rename handoff docs.
+- [Documentation index](docs/README.md) — operator paths and project reference
+- [System architecture](docs/architecture/001-poodle-system-shape.md) — package
+  boundaries and renderer flow
+- [Token and package architecture](docs/architecture/002-token-system-and-package-layout.md)
+- [Component contracts](docs/contracts/components/README.md) — normative
+  component behavior
+- [Application recipes](docs/guides/README.md) — reusable composition patterns
+- [Contributing](CONTRIBUTING.md) — ownership rules and validation workflow
+- [Security policy](SECURITY.md) — private vulnerability reporting
 
-## Next Task
+Roadmaps, logs, specs, and research are kept in the repository for contributors
+and historical traceability. They are not required reading for adopting Poodle.
 
-Continue the next `g12.019` old-tier constructor wave. Wave 40 moved
-EditableLabel onto the node backend with queued text-change, submit, and cancel
-intents; its 0.5334% focused text-raster residual remains deferred. The
-DurationInput
-native-visual residual is parked at a deterministic 0.0033% until backend text
-parity is addressed. Meter, Rating, Table, PaginationSummary, ValidationSummary,
-Progress, EmptyState, ResizeHandle, MetaBar, MetaItem, NavCard, Callout,
-StatusBar, TextLink, Breadcrumbs, Tabs, TabStrip, CodeInput, TokenInput,
-FileUpload, SelectionSummary, PasswordRequirements, ErrorBoundary,
-InlineListSection, CollapseToggle, Toolbar, OrderBy, RefSelect, and PageHeader are now node-backed with zero old-tier
-constructor sites; NavCard, Callout, ErrorBoundary, InlineListSection, and
-CollapseToggle, and Toolbar are exact, while metadata/status,
-PasswordRequirements, OrderBy, RefSelect, and PageHeader text/icon differences
-remain deferred. PickerShell is now node-backed with aligned ready-body
-geometry; its 0.5576% focused text/control residual is deferred.
-The standalone FormActions specimen is now node-backed with an exact focused
-capture. FormDialog is now node-backed too; its remaining 0.1980% focused
-residual is deferred modal/text raster parity.
-AppHeader is now node-backed too, with an exact focused capture across its
-identity, action, and utility slots.
-FilterBuilder and MarkdownEditor are now node-backed through the shared
-renderers; MarkdownEditor preserves text/mode events through the node queue.
-Their focused residuals are 1.0752% and 0.2304% respectively and remain in
-the deferred text/layout-raster bucket.
-EditableList and RelationPicker are now node-backed too; their focused
-residuals are 0.0063% and 1.3903%, with RelationPicker's geometry delta
-deferred separately.
-FilterToolbar is now node-backed too, including its Select/TextInput child
-slots and action/secondary slots; its focused capture is exact. ModelPicker is
-now node-backed too; its model/axis panel geometry is aligned and the remaining
-0.2638% focused residual is deferred text/control raster parity. Its embedded
-AgentChatInput slots leave the same deferred 0.1210% trigger/control residual.
-FormLayout is now node-backed; its field/control geometry is aligned and the
-remaining 0.7501% focused residual is deferred text/button raster parity.
-FieldSet is now node-backed with an exact focused capture. ThemeSelect is also
-node-backed with an exact focused capture.
-FormDialog is now node-backed; its Dialog/FormLayout modal-stack geometry is
-aligned and the remaining 0.1980% focused diff is deferred modal/text raster
-parity.
-FormShell is now node-backed with section slots and action rows; its focused
-capture has only a deferred 0.0054% text/icon raster residual.
-MediaThumbnail, EmbedPreview, and MediaPreview are now node-backed as well;
-their focused geometry is aligned, with only 0.1492%, 0.2103%, and 0.1154%
-text/icon raster residuals deferred.
-CardRadioGroup, EmbedInput, and PageLoading are node-backed too; EmbedInput is
-focused exact, CardRadioGroup retains a 0.9761% selected-state/text residual,
-and PageLoading remains skipped by the native gate.
-MediaPicker is node-backed with aligned browse/upload geometry and a deferred
-0.5516% icon/text residual. DataTable, AgentQuestion, and AgentTranscript are
-node-backed too; AgentQuestion is exact, while DataTable retains a 0.7217%
-text/layout-raster residual and AgentTranscript a 0.0131% text-raster residual.
-SidebarNav and MediaBrowsePanel are node-backed too, with 0.2954% and 0.1829%
-text/icon residuals. ToastStack preserves its corner overlay and retains a
-deferred 1.1702% text/icon/animation-raster residual.
-ToastHost is node-backed too, preserving placement with a deferred 0.5661%
-text/icon/animation-raster residual.
-Dialog and Drawer are node-backed too; Dialog keeps custom header/footer slots,
-and both focused captures are exact.
-DebugDialog, ActionDiscoveryPanel, and BulkActionBar are node-backed too, with
-only the documented text/icon-raster residuals.
-AgentChatInput is node-backed with ModelPicker, toolbar, and footer slots; its
-0.1377% text/control-raster residual is deferred.
+## License
+
+Poodle is available under the [MIT License](LICENSE). Report security issues
+privately according to the [security policy](SECURITY.md).

@@ -104,9 +104,3 @@ The current seed baseline is:
 - lint validation that keeps the reference matrix present and internally
   coherent
 - `docs/roadmaps/g03/013-reference-apps-onboarding-depth-and-public-examples.md`
-
-## Next Task
-
-Carry this baseline into `g03.014` so generation closeout can summarize real
-adoption-facing assets and explicit remaining gaps instead of gesturing at
-unfinished starter or example work.

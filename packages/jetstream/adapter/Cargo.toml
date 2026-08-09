@@ -2,6 +2,7 @@
 name = "poodle-jetstream"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "Jetstream rendering adapter for Poodle — maps shared contract specs and resolved styles to Jetstream UiTree nodes."
 

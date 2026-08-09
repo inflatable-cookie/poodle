@@ -93,7 +93,3 @@ GPUI must recreate equivalent command-discovery meaning in the native accessibil
 - `packages/svelte/workstation/src/CommandPalette.svelte`
 - `packages/svelte/workstation/src/ActionDiscoveryPanel.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this command-discovery baseline into `g02.009` and later workstation milestones so deeper shell orchestration reuses one explicit launcher and action-discovery posture.

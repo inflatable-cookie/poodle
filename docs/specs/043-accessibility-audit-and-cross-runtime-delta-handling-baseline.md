@@ -86,9 +86,3 @@ The current seed baseline is:
 - `packages/svelte/preview/artifacts/accessibility-report.json`
 - `packages/gpui/native-accessibility-proof.json`
 - `docs/roadmaps/g03/010-accessibility-audit-and-assistive-technology-conformance.md`
-
-## Next Task
-
-Carry this baseline into `g03.011` so change-control and release-channel
-operations do not weaken accessibility audit posture or turn blocked native
-claims into implied release readiness.

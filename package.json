@@ -1,6 +1,7 @@
 {
   "name": "poodle",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "workspaces": [
     "packages/core",

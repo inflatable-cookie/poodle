@@ -163,8 +163,3 @@ surface without becoming visually noisy.
 - `packages/svelte/components/src/SelectionSummary.svelte`
 - `packages/svelte/components/src/MediaPreview.svelte`
 - `packages/svelte/preview/src/app.css`
-
-## Next Task
-
-Use this baseline while finishing the remaining workstation/docs polish and
-before translating any visual hierarchy decisions into GPUI.

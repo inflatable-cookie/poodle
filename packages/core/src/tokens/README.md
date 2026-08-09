@@ -8,6 +8,10 @@ Public Svelte-facing token surface for emitted Poodle token artifacts.
 - runtime helpers: `@inflatable-cookie/poodle-core/tokens/runtime`
 - CSS helper exports: `@inflatable-cookie/poodle-core/tokens/css`
 - CSS asset export: `@inflatable-cookie/poodle-core/tokens/styles.css`
+- aggregate theme CSS: `@inflatable-cookie/poodle-core/tokens/themes.css`
+- individual theme CSS: `@inflatable-cookie/poodle-core/tokens/theme-<name>.css`
+- density CSS: `@inflatable-cookie/poodle-core/tokens/density-<mode>.css`
+- control-size CSS: `@inflatable-cookie/poodle-core/tokens/control-size-<size>.css`
 - legacy-compatible CSS asset export: `@inflatable-cookie/poodle-core/tokens/css/poodle-tokens.css`
 - generated themes: `@inflatable-cookie/poodle-core/tokens/themes`
 - generated metadata: `@inflatable-cookie/poodle-core/tokens/metadata`
@@ -20,11 +24,9 @@ Public Svelte-facing token surface for emitted Poodle token artifacts.
   directly without workspace-only path assumptions
 - runtime helpers may set dataset attributes, but token naming remains owned by
   the canonical artifact set rather than ad hoc Svelte convenience APIs
-- this package is the strongest current public candidate in the JS layer, but
-  downstream adoption still remains gated until `g03`
+- this is a pre-1.0 source-preview surface; public registry publication has not
+  started
 
-## Next Task
-
-Use this package surface while executing `g02.016`, confirming which token
-entry points are stable enough to carry into the first downstream-adoption
-generation.
+The canonical token schema lives in `packages/tokens/schema/`. Rebuild all
+generated targets with `effigy tokens:build` rather than editing mirrored
+artifacts here.

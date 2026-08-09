@@ -72,7 +72,3 @@ GPUI must recreate equivalent state and announcement meaning in the native acces
 - `packages/svelte/components/src/Banner.svelte`
 - `packages/svelte/components/src/Skeleton.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this hardening baseline into `g02.008` and later milestones so command discovery, workspace shells, and accessibility review reuse one explicit remediation and notification posture.

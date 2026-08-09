@@ -2,6 +2,7 @@
 name = "poodle-gpui-node-backend"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 rust-version = "1.95"
 description = "GPUI backend for the Poodle render vocabulary: interprets poodle-node trees as GPUI elements."
 

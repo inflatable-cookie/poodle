@@ -115,8 +115,3 @@ type TabStripItem = {
 |-------|-------------|-----------------|-----------|
 | Overlaps with `Tabs` foundation | TabStrip is the strip-only primitive; Tabs adds panel coupling, variants, and activation modes | allowed | document selection guide — use Tabs by default, reach for TabStrip only when panels are host-owned |
 | No variant styling | Tabs carries the text/card/pill/strip/block variant system; TabStrip ships one default treatment | allowed | variants can migrate into TabStrip if needed |
-
-## Next Task
-
-Add a selection guide note to `tabs.md` pointing at TabStrip for the
-host-owned-panels scenario so the two are clearly differentiated.

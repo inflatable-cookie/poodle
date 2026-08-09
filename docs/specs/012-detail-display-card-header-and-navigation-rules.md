@@ -106,9 +106,3 @@ tree.
 - `packages/svelte/components/src/DetailSection.svelte`
 - `packages/svelte/components/src/DetailItem.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this detail-display baseline into `g02.005` and later milestones so
-pickers, relation flows, and media/detail surfaces compose onto stable local
-identity and readonly-detail rules.

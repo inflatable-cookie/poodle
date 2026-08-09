@@ -44,12 +44,18 @@ customization.
 
 ## Setup
 
-### 1. Install
+### 1. Link the internal package
 
-Add to the Underlay internal adapter package (not to app code):
+The bridge is private and is not published to a registry. Add it to the
+Underlay internal adapter workspace with a file or workspace dependency, not
+to application code:
 
-```sh
-bun add @inflatable-cookie/poodle-bridge-underlay
+```json
+{
+  "dependencies": {
+    "@inflatable-cookie/poodle-bridge-underlay": "file:../poodle/packages/bridges/underlay"
+  }
+}
 ```
 
 ### 2. Import the CSS alias layer
@@ -57,7 +63,7 @@ bun add @inflatable-cookie/poodle-bridge-underlay
 In the Underlay adapter's entry stylesheet (loaded once at app root):
 
 ```css
-@import "@inflatable-cookie/poodle-bridge-underlay/css/poodle-to-underlay.css";
+@import "../poodle/packages/bridges/underlay/css/poodle-to-underlay.css";
 ```
 
 This file:

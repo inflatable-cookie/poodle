@@ -944,7 +944,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         .gap(px(6.0))
                         .child(ListCard::from_spec(
                             ListCardSpec::new()
-                                .with_title("Acowtancy Build Test")
+                                .with_title("a private consumer Build Test")
                                 .with_subtitle("Registered 28/07/2026 16:35")
                                 .with_interactive(true)
                                 .with_active(true),
@@ -952,7 +952,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         ))
                         .child(ListCard::from_spec(
                             ListCardSpec::new()
-                                .with_title("Acowtancy Build Test")
+                                .with_title("a private consumer Build Test")
                                 .with_subtitle("Registered 28/07/2026 16:35")
                                 .with_interactive(true),
                             theme,

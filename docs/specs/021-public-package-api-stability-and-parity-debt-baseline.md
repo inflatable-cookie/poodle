@@ -144,9 +144,3 @@ Downstream adoption should remain blocked until all of the following are true:
 - `packages/gpui/primitives/README.md`
 - `packages/gpui/composites/README.md`
 - `packages/gpui/workstation/README.md`
-
-## Next Task
-
-Carry this baseline into `g03.011` and later operations work so package-surface
-integrity, parity debt, and release posture stay coupled as the public-intent
-surface evolves.

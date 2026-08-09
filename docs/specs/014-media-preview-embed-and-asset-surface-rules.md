@@ -71,7 +71,3 @@ GPUI must recreate equivalent meaning in the native accessibility tree even wher
 - `packages/svelte/components/src/MediaPreview.svelte`
 - `packages/svelte/components/src/EmbedShell.svelte`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this media and embed baseline into `g02.007` and later milestones so loading, remediation, and notification depth build on one explicit fallback posture.

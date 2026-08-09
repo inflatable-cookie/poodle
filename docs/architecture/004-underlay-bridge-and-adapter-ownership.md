@@ -1,166 +1,91 @@
-# 004 Underlay Bridge And Adapter Ownership
+# 004 Underlay Bridge and Adapter Ownership
 
 Status: active
-Updated: 2026-03-11
-Depends on: `001-poodle-system-shape.md`, `002-token-system-and-package-layout.md`, `003-component-docs-ia-and-implementation-substrates.md`
-
-## Purpose
-
-Freeze the ownership model for Underlay integration now that Poodle has explicit
-token, primitive, product-composite, and workstation-shell surfaces.
+Updated: 2026-08-09
+Depends on: [001 Poodle System Shape](001-poodle-system-shape.md),
+[002 Token System and Package Layout](002-token-system-and-package-layout.md)
 
 ## Core Rule
 
-Underlay remains the public framework surface for Underlay apps.
+Underlay remains the public framework surface for Underlay applications.
+Poodle may implement Underlay internals, but an application must not need to
+import Poodle, adopt Poodle prop names, or understand Poodle's component layers.
 
-Poodle may supply:
+## Bridge Ownership
 
-- canonical tokens
-- shared component contracts
-- internal implementation surfaces
-- and bridge helpers
+The Poodle-owned bridge lives at `packages/bridges/underlay/`. It contains:
 
-Poodle may not require Underlay apps to:
+- CSS variable and semantic token maps
+- theme and mode translation
+- compatibility wrapper helpers
+- zero-leak proof utilities
+- the Nightfire block-editor adapter
 
-- import Poodle directly
-- adopt Poodle prop names directly
-- think in Poodle component-layer taxonomy
-- or treat Poodle as the app-facing source of truth
+The bridge consumes emitted token and package surfaces. It does not redefine
+canonical token meaning or become a second component library.
 
-## Bridge Package Rule
+Underlay owns:
 
-The Poodle-owned Underlay bridge lives at:
+- application-facing component and token APIs
+- theme registration and runtime hooks
+- compatibility guarantees and deprecation policy
+- adoption and rollout sequencing
 
-```text
-packages/bridges/underlay/
-```
+Poodle owns:
 
-That package exists to define:
+- canonical token schema and generated artifacts
+- component contracts
+- Svelte, React, and native implementations
+- bridge-local mappings needed to preserve Underlay APIs
 
-- token-name mapping
-- theme and mode mapping
-- wrapper-preservation rules
-- and bridge-local helpers that Underlay can consume internally
+## Wrapper Preservation
 
-It does not become a second canonical token source or a shadow component
-library.
+An adapter may translate names, prop shapes, CSS variables, and composition
+syntax. It must preserve observable behavior, including:
 
-## Token Ingestion Rule
+- labels, roles, and state exposure
+- keyboard operation and focus restoration
+- dismissal and event timing
+- validation and announcement behavior
 
-The Underlay bridge may ingest only emitted token artifacts, not raw token
-schema files, as its normal runtime dependency.
+An accessibility or behavioral gap introduced by a wrapper is a bridge defect,
+not an acceptable downstream difference.
 
-That means the bridge should read from:
+## Token Ingestion
 
-- `packages/tokens/artifacts/css/`
-- `packages/tokens/artifacts/ts/`
+The bridge consumes generated artifacts or public core exports, never raw token
+schema as a runtime dependency. Poodle remains the token authority; Underlay
+maps those values into Underlay-owned names and application mechanisms.
 
-and map those artifacts into Underlay-owned names and application mechanisms.
+Application overrides use Underlay's supported surface. They must not fork
+Poodle theme files inside individual applications.
 
-The bridge must not:
+## Migration Pressure
 
-- redefine canonical token meaning
-- fork theme values
-- or become the place where semantic roles are renamed canonically
+Bridge work should make translation pressure explicit before replacing an
+existing wrapper:
 
-## Wrapper Preservation Rule
+- token-name and theme-registration differences
+- prop and composition translation
+- accessibility preservation
+- ownership of shell versus product behavior
+- release and compatibility expectations
 
-Underlay wrappers may adapt Poodle implementations internally, but they must
-preserve Underlay's public API surface.
-
-That includes:
-
-- Underlay-owned component names
-- Underlay-owned prop names
-- Underlay-owned composition patterns
-- Underlay-owned migration cadence
-
-Poodle components may sit underneath those wrappers where it helps.
-They may not become the new required import path for Underlay apps.
-
-## Ownership Split
-
-### Poodle Owns
-
-- canonical token schema
-- emitted token artifacts
-- canonical component contracts
-- Poodle Svelte and GPUI implementations
-- bridge package structure and baseline mapping rules
-
-### Underlay Owns
-
-- public app-facing APIs
-- app-facing theme registration and runtime hooks
-- rollout sequencing
-- compatibility wrappers
-- deprecation policy for existing Underlay surfaces
-
-### Shared Boundary
-
-- bridge-local token maps
-- wrapper-preservation rules
-- migration pressure-point documentation
-
-## Migration Pressure Rule
-
-The first bridge baseline must document where adoption pressure is likely to
-appear before implementation begins.
-
-Likely pressure points include:
-
-- token naming mismatches between Poodle semantic roles and Underlay runtime names
-- theme registration shape and CSS variable application order
-- wrapper prop translation for existing Underlay components
-- accessibility parity where Underlay wrappers compose Poodle primitives or
-  composites
-- shell versus product-surface layering in Underlay apps
-
-These are bridge concerns, not reasons to weaken the canonical Poodle contract.
-
-## Accessibility Rule
-
-Underlay bridge code must preserve accessibility semantics while adapting names
-or wrappers.
-
-The bridge may translate:
-
-- prop names
-- CSS variable names
-- wrapper composition
-
-It may not silently drop:
-
-- names/labels
-- roles
-- state exposure
-- keyboard behavior
-- focus restoration
-- or announcement behavior
-
-Any accessibility gap introduced by a wrapper is a bridge defect.
+If a mismatch is generic across consumers, improve Poodle or the bridge. If it
+is application vocabulary or workflow policy, keep it in the application.
 
 ## Package Shape
 
-The first bridge package shape is:
-
 ```text
 packages/bridges/underlay/
-  README.md
-  package.json
-  css/
-    poodle-to-underlay.css
-  ts/
-    index.ts
-    token-map.ts
-    theme-map.ts
-    component-wrappers.ts
+  css/poodle-to-underlay.css
+  ts/index.ts
+  ts/token-map.ts
+  ts/theme-map.ts
+  ts/component-wrappers.ts
+  ts/zero-leak-proof.ts
+  ts/nightfire-block-editor.ts
 ```
 
-This is intentionally small.
-The baseline should prove ownership and mapping posture before real adoption.
-
-## Next Task
-
-Use this ownership model during later `g02` and `g03` adoption work, especially
-where zero-leak wrapper preservation needs to stay intact.
+The package is internal infrastructure. It is not part of Poodle's public
+operator installation path.

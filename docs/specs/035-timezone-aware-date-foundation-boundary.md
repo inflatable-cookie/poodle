@@ -77,9 +77,3 @@ publishing workflows still need explicit later ownership decisions.
 - `docs/contracts/components/time-zone-select.md`
 - `docs/contracts/components/date-time-zone-picker.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Decide whether timezone-aware ranges should remain outside foundation, or
-whether the date family is now broad enough that widening further would be
-churn rather than progress.

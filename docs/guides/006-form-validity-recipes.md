@@ -101,8 +101,3 @@ framework-agnostic contract is clearly justified.
 
 - [Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md)
 - [Async Validation Recipes](./005-async-validation-recipes.md)
-
-## Next Task
-
-Add the next focused guide only when another repeated workflow decision is
-proven in real migrations, especially picker and table-shell composition.

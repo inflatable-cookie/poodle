@@ -122,8 +122,3 @@ native accessibility tree.
 - `packages/svelte/workstation/src/SplitView.svelte`
 - `packages/svelte/workstation/src/persistence.ts`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Carry this workstation orchestration baseline into `g02.011` and harden focus,
-keyboard, and state semantics consistently across the now-broader catalogue.

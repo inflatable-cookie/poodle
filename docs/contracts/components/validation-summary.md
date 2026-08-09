@@ -114,9 +114,3 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 |-------|-------------|-----------------|-----------|
 | Focus jump via href anchor is web-only | GPUI and Jetstream must emulate with imperative focus calls | allowed | document platform-specific focus move |
 | GPUI cannot emit aria-live | GPUI 0.2 has no ARIA surface | allowed | revisit with GPUI accessibility layer |
-
-## Next Task
-
-Implement `ValidationSummarySpec` in the GPUI composite renderer and wire it
-into `FormShell`'s submission-attempt flow so the summary appears after a
-failed submit.

@@ -71,8 +71,3 @@ outside this utility tranche.
 - `docs/contracts/components/rating.md`
 - `packages/svelte/components/README.md`
 - `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
-
-## Next Task
-
-Use this utility tranche alongside the dedicated navigation-family baseline,
-and keep widening only where the ownership line remains explicit.

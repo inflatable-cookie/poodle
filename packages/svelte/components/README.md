@@ -3,6 +3,33 @@
 Unified Svelte component library for Poodle. All components in a single
 `@inflatable-cookie/poodle-svelte` package.
 
+This package is a pre-1.0 source preview and is not published to a registry.
+Use a workspace or file dependency and pair it with
+`@inflatable-cookie/poodle-core` for tokens, styles, behavior, and icons.
+
+## Setup
+
+```json
+{
+  "dependencies": {
+    "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
+    "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components"
+  }
+}
+```
+
+Import the token stylesheet once at the application entry:
+
+```ts
+import "@inflatable-cookie/poodle-core/tokens/styles.css";
+import "@inflatable-cookie/poodle-core/tokens/themes.css";
+import "@inflatable-cookie/poodle-core/tokens/density-default.css";
+import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
+```
+
+Set `data-theme`, `data-density`, and `data-control-size` on an ancestor, then
+import components from the package root.
+
 ## Public Surface
 
 All components are exported from the package root:
@@ -26,8 +53,5 @@ import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cook
   of the public package contract for now
 - GPUI and Jetstream parity for this family is documented in contracts
 
-## Next Task
-
-Use this package surface while following the direct-consumer and shell-oriented
-onboarding lanes, keeping workflow orchestration host-owned and treating these
-components as reusable shells rather than app templates.
+See the [Svelte developer guide](../../../docs/guides/svelte-developer-guide.md)
+for themes, icon generation, component conventions, and application recipes.

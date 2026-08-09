@@ -71,9 +71,3 @@ still need higher-layer or future specialized contracts.
 - `docs/contracts/components/menubar.md`
 - `packages/svelte/components/README.md`
 - `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
-
-## Next Task
-
-Keep the navigation-family baseline stable while deciding whether deeper
-routing-aware navigation or native menu integration belongs in composites,
-workstation, or a future specialized tranche.

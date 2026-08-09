@@ -111,9 +111,3 @@ The current seed baseline is:
 - this normative spec
 - `packages/gpui/parity-priority-matrix.json`
 - `docs/roadmaps/g04/001-gpui-contract-audit-parity-priority-matrix-and-implementation-order.md`
-
-## Next Task
-
-Carry this baseline into `g04.002` so the GPUI preview app and theme runtime
-start from explicit side-by-side review targets instead of abstract native
-harness language.

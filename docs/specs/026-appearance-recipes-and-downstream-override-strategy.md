@@ -180,9 +180,3 @@ The current seed implementation proves this strategy on the Svelte side by:
 - `packages/svelte/workstation/src/SurfaceTabs.svelte`
 - `packages/svelte/preview/src/app.css`
 - `packages/svelte/preview/src/App.svelte`
-
-## Next Task
-
-Use this override strategy while the remaining hardening work continues, then
-return to `g03.003` so contract linting and docs completeness can build on a
-more stable public styling contract.

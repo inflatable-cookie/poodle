@@ -1,79 +1,43 @@
 # Poodle Guides
 
-Reusable implementation guidance for teams building applications and components
-with Poodle across all three implementation targets (Svelte, GPUI, Jetstream).
+Guides explain how to integrate Poodle and compose its components into stable
+application patterns. For exact component inputs, states, events, and
+accessibility behavior, use the [component contracts](../contracts/components/README.md).
 
-Contracts define what each component does. Guides explain how to integrate
-Poodle into an app, how to implement components for a given target, and how to
-compose components into stable application patterns without reintroducing
-wrapper churn or product-specific abstractions into the design system.
+## Runtime Guides
 
-## Developer Guides
+- [Svelte](svelte-developer-guide.md) — setup, tokens, themes, icons, and
+  component use
+- [React](../../packages/react/components/README.md) — current experimental
+  React surface
+- [GPUI](gpui-developer-guide.md) — Rust specs, shared rendering, and the GPUI
+  node backend
+- [Jetstream](jetstream-developer-guide.md) — Rust specs, shared rendering, and
+  the Jetstream node conversion boundary
 
-Start here if you are integrating Poodle into an application or implementing
-components for a runtime target:
+## Application Recipes
 
-1. [Svelte Developer Guide](./svelte-developer-guide.md)
-   End-to-end package setup, theming, and general component usage for Svelte
-   web applications.
-2. [GPUI Developer Guide](./gpui-developer-guide.md)
-   Cargo dependency setup, `GpuiThemeProvider`, component structs, token
-   resolution, and writing new GPUI components.
-3. [Jetstream Developer Guide](./jetstream-developer-guide.md)
-   Cargo dependency setup, `JetstreamThemeProvider`, `js_<component>()` render
-   functions, the `JsEl` fluent builder, and writing new Jetstream components.
+These recipes cover reusable application composition proven in downstream
+work. They use Svelte examples, but their ownership rules apply across runtimes.
 
-## Application Pattern Recipes
+1. [Form layout and fields](001-form-layout-and-field-recipes.md)
+2. [Action patterns](002-action-pattern-recipes.md)
+3. [Lists and filters](003-list-and-filter-recipes.md)
+4. [Dialogs and detail pages](004-dialog-and-detail-recipes.md)
+5. [Async validation](005-async-validation-recipes.md)
+6. [Form validity](006-form-validity-recipes.md)
+7. [Slug fields](007-slug-field-recipes.md)
+8. [File upload](008-file-upload-recipes.md)
+9. [Media picker workflows](009-media-picker-workflow-recipes.md)
+10. [Authentication UI](010-auth-ui-and-workflow-recipes.md)
+11. [Page shells and admin UI](011-page-shell-and-admin-recipes.md)
+12. [Media libraries and uploads](012-media-library-and-upload-recipes.md)
+13. [Admin feature delivery](013-admin-feature-delivery-recipes.md)
+14. [Admin application shells](014-admin-app-shell-recipes.md)
 
-Svelte-backed composition guidance for real application workflows:
+## Ownership Rule
 
-1. [Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md)
-   Default form composition rules, field messaging posture, and slug-input
-   composition.
-2. [Action Pattern Recipes](./002-action-pattern-recipes.md)
-   Save-intent actions, action menus, and grouped icon-action rules.
-3. [List And Filter Recipes](./003-list-and-filter-recipes.md)
-   List-page shell composition over `ListContainer` and `FilterToolbar`.
-4. [Dialog And Detail Recipes](./004-dialog-and-detail-recipes.md)
-   Modal form and readonly detail-page composition over Poodle-owned surfaces.
-5. [Async Validation Recipes](./005-async-validation-recipes.md)
-   `TextInput` async validation, `Field` messaging posture, and app-owned
-   validator composition.
-6. [Form Validity Recipes](./006-form-validity-recipes.md)
-   App-owned form-wide validity over Poodle field-level state and validation.
-7. [Slug Field Recipes](./007-slug-field-recipes.md)
-   App-owned slug generation, validation, and submit gating over `Field` and
-   `TextInput`.
-8. [File Upload Recipes](./008-file-upload-recipes.md)
-   Generic file intake in Poodle with app-owned upload orchestration.
-9. [Media Picker Workflow Recipes](./009-media-picker-workflow-recipes.md)
-   Lightweight selector posture for Poodle `MediaPicker` and the boundary for
-   heavier media-library workflow shells.
-10. [Auth UI And Workflow Recipes](./010-auth-ui-and-workflow-recipes.md)
-    Poodle-first auth page framing, one-time-code entry, and password-policy
-    checklist composition.
-11. [Page Shell And Admin Recipes](./011-page-shell-and-admin-recipes.md)
-    Poodle-first detail/list/header/tab composition for admin and back-office
-    apps.
-12. [Media Library And Upload Recipes](./012-media-library-and-upload-recipes.md)
-    Poodle-first media browse, upload, thumbnail, and picker-shell composition.
-13. [Admin Feature Delivery Recipes](./013-admin-feature-delivery-recipes.md)
-    Implementation-order guidance for real admin list/detail/edit flows using
-    Poodle-first UI composition.
-14. [Admin App Shell Recipes](./014-admin-app-shell-recipes.md)
-    Poodle-first sidebar, mobile header, toast host, and context-panel shell
-    composition.
-
-## Rules
-
-- Prefer adding a new focused guide over growing one catch-all recipes file.
-- Each guide should capture a stable, reusable decision proven in real app work.
-- If a pattern is generic and awkward, improve Poodle.
-- If a pattern is app vocabulary, keep it in app/shared code and document the
-  composition rule instead of adding a new canonical Poodle wrapper.
-
-## Next Task
-
-Add the next migration-backed guide family only when a new retained workflow
-boundary is proven in real app work instead of growing speculative picker or
-table recipes ahead of the migration line.
+Poodle owns reusable primitives, composites, and general workstation shells.
+Applications own product vocabulary, domain workflows, persistence, routing,
+and service orchestration. If a generic pattern is awkward in every app, fix
+Poodle; if it only makes sense in one product, keep it in that product.

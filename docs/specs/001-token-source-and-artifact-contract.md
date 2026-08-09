@@ -208,8 +208,3 @@ The first token implementation tranche is complete when:
 - at least one named semantic theme is emitted across CSS and Rust targets from
   the same source
 - Svelte and GPUI token consumer stubs can read emitted artifacts
-
-## Next Task
-
-Update `g01.002` and `g01.003` so their execution checklists and deliverables
-point directly to this spec and the concrete package layout.

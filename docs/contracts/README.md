@@ -5,8 +5,9 @@ Updated: 2026-04-11
 
 Contracts are the docs-first source of truth for Poodle components.
 
-Each component contract must describe one semantic component surface that both
-Svelte and GPUI implementations can satisfy against the same review checklist.
+Each component contract describes one semantic surface that Svelte, React,
+GPUI, and Jetstream implementations can satisfy against the same review
+checklist.
 
 ## Structure
 
@@ -203,7 +204,5 @@ contract references the rule rather than restating it:
 - `components/validation-summary.md`
 - `components/video-player.md`
 
-## Next Task
-
-Keep this top-level index aligned with the components contract folder whenever
-contract files are added, removed, or regrouped.
+This index is generated manually and must stay aligned when contract files are
+added, removed, or regrouped.

@@ -109,8 +109,3 @@ and async validation orchestration stay adapter-side.
   roadmap item started from.
 - No typing events — the runtime delivers pointer events only, so the host owns
   the editor and feeds the value back through the spec.
-
-## Next Task
-
-Keep all public docs, preview registry entries, and examples aligned to
-`NumberInput` only. `NumberEntry` should not reappear as a public Svelte name.

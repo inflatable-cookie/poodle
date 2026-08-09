@@ -115,9 +115,3 @@ Poodle may not say:
 - the suite is benchmarked comprehensively
 - GPUI render cost is proven acceptable without GPUI evidence
 - preview-build success proves runtime performance quality
-
-## Next Task
-
-Carry this baseline into `g03.006` and later adoption work so new preview,
-contract, or package-surface changes do not reintroduce avoidable repeated
-work.

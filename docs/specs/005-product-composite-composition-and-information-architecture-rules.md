@@ -189,8 +189,3 @@ The first contracts that explicitly exercise this baseline are:
 - `docs/contracts/components/detail-shell.md`
 - `docs/contracts/components/filter-toolbar.md`
 - `docs/contracts/components/empty-state.md`
-
-## Next Task
-
-Use this composite baseline while executing `g02.001` and later depth tranches,
-keeping the extension boundary clear as the catalogue expands.

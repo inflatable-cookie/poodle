@@ -210,8 +210,3 @@ The first contracts that explicitly exercise this baseline are:
 - `docs/contracts/workstation/split-view.md`
 - `docs/contracts/workstation/workspace-shell.md`
 - `docs/contracts/workstation/command-palette-shell.md`
-
-## Next Task
-
-Use this workstation baseline in later `g02` workstation depth tranches without
-reopening the shell semantics already closed in `g01`.

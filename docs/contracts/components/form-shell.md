@@ -150,8 +150,3 @@ Defined on `FormShellSpec`:
 |-------|-------------|-----------------|-----------|
 | Svelte equivalent may be `FormLayout` composite | Svelte's form composite landed under a different name; field-groupings and validation tracking overlap but the two are not literally identical | allowed | consolidate names in a future pass |
 | GPUI does not render per-field messages via aria-describedby | GPUI 0.2 has no ARIA surface | allowed | revisit when GPUI accessibility lands |
-
-## Next Task
-
-Wire `FormShellSpec` through the GPUI composite renderer so the sectioned
-layout, status summary, and submission gating render per this contract.

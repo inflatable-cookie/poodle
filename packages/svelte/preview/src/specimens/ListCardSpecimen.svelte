@@ -137,8 +137,8 @@
       <!-- Active is deliberately quieter than Selected: it is always on for one
            card in a list, where selection's full border and fill would shout
            permanently. The third card carries both, since they are orthogonal. -->
-      <ListCard title="Acowtancy Build Test" subtitle="Registered 28/07/2026 16:35" interactive active />
-      <ListCard title="Acowtancy Build Test" subtitle="Registered 28/07/2026 16:35" interactive />
+      <ListCard title="a private consumer Build Test" subtitle="Registered 28/07/2026 16:35" interactive active />
+      <ListCard title="a private consumer Build Test" subtitle="Registered 28/07/2026 16:35" interactive />
       <ListCard title="Active and selected" subtitle="Both states at once" interactive selectable selected active />
     </div>
   </SpecimenGroup>

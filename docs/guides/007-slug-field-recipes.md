@@ -107,9 +107,3 @@ rules.
 - entity-specific uniqueness endpoints
 - app vocabulary like `"module"`, `"pathway"`, or `"category"`
 - save-intent rules tied to slug validity
-
-## Next Task
-
-Add the next focused recipe for relation and picker-driven form fields so teams
-have the same level of migration-backed guidance for selector-heavy forms as
-they now do for async validation, form validity, and slug inputs.

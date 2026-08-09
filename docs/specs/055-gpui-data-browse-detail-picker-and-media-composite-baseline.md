@@ -114,9 +114,3 @@ token and primitive baselines for at least:
 - `packages/gpui/composites/src/selection_summary.rs`
 - `packages/gpui/composites/src/media_thumbnail.rs`
 - `packages/gpui/composites/src/media_preview.rs`
-
-## Next Task
-
-Carry this widened GPUI composite baseline into `g04.009`, implementing the
-workstation shell, command discovery, and layout orchestration tranche on top
-of the broadened primitive and composite surface.

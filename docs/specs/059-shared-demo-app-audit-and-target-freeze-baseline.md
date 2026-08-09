@@ -95,8 +95,3 @@ Poodle may not say:
 - `packages/svelte/preview/src/App.svelte`
 - `packages/svelte/preview/src/app.css`
 - `docs/roadmaps/g04/012-shared-demo-app-audit-gap-register-and-target-shape-freeze.md`
-
-## Next Task
-
-Carry this audit into `g04.013` and write the explicit cross-runtime demo-app
-contract, section model, and parity checklist for both Svelte and GPUI.

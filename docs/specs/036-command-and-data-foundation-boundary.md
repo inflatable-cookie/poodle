@@ -83,9 +83,3 @@ feature, not a hole: it keeps the primitive layer honest.
 - `docs/contracts/components/data-table.md`
 - `docs/contracts/workstation/command-palette.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Freeze the primitive widening for a moment and assess which remaining families
-are truly missing from foundation versus already properly owned in composites
-or workstation surfaces.

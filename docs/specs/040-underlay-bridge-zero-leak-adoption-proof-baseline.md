@@ -103,9 +103,3 @@ Poodle may not say:
 - Underlay production rollout is complete
 - zero accessibility risk remains without downstream wrapper evidence
 - Underlay apps can adopt Poodle directly
-
-## Next Task
-
-Use this baseline while executing `g03.008`, so Loophole and later app-facing
-adoption work inherits the same no-leak, wrapper-first posture where
-appropriate.

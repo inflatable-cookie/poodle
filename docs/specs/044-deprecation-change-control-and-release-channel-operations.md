@@ -124,9 +124,3 @@ The current seed baseline is:
 - `packages/release-operations.json`
 - release metadata in package manifests and `Cargo.toml`
 - lint validation that keeps those records aligned
-
-## Next Task
-
-Carry this baseline into `g03.012` so ecosystem acceptance and long-tail
-regression coverage can classify failures by change class and channel posture
-instead of treating all churn as equal.

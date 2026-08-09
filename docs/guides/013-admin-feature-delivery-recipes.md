@@ -438,9 +438,3 @@ Poodle.
 - [List And Filter Recipes](./003-list-and-filter-recipes.md)
 - [Dialog And Detail Recipes](./004-dialog-and-detail-recipes.md)
 - [Admin App Shell Recipes](./014-admin-app-shell-recipes.md)
-
-## Next Task
-
-Only add more admin-delivery guidance here when a repeated implementation order
-or page-shape decision shows up across multiple real apps, instead of turning
-this file into a generic project playbook.

@@ -127,8 +127,3 @@ Examples of unacceptable delta:
 - `packages/svelte/components/src/PickerShell.svelte`
 - `packages/svelte/components/src/RelationPicker.svelte`
 - `packages/svelte/components/src/ToastStack.svelte`
-
-## Next Task
-
-Carry this hardening baseline into `g02.012` so examples and docs-site work do
-not regress the now-explicit accessibility, focus, keyboard, and state rules.

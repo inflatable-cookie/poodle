@@ -126,9 +126,3 @@ value posture as Svelte:
 - `packages/gpui/primitives/src/time_field.rs`
 - `packages/gpui/primitives/src/date_time_picker.rs`
 - `packages/gpui/primitives/src/date_time_range_picker.rs`
-
-## Next Task
-
-Carry this widened GPUI primitive baseline into `g04.006`, adding overlay,
-disclosure, navigation, and menu primitives on top of the same crate and token
-posture.

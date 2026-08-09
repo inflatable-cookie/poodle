@@ -72,9 +72,3 @@ need future composite or specialized foundation decisions.
 - `docs/contracts/components/date-time-range-picker.md`
 - `docs/specs/031-time-aware-date-foundation-boundary.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Keep the range-plus-time baseline stable while deciding whether timezone-aware
-ranges belong in higher layers or whether widening the date family further
-would be justified.

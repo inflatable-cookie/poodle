@@ -1,22 +1,15 @@
 # Logs
 
 Status: active
-Updated: 2026-08-01
+Updated: 2026-08-09
 
-Logs record completed batches and decision evidence.
+Logs are dated records of completed work and validation evidence. They preserve
+why a change landed and what was true at that point in time.
 
-## Rule
+Use logs for historical investigation, not current onboarding or package API
+reference. Current authority lives in architecture, specs, and component
+contracts; active sequencing lives in roadmaps.
 
-- log by meaningful batch
-- keep logs factual
-- tie logs back to roadmap and architecture work
-
-## Current Evidence Window
-
-- `2026-07/29-public-dock-drag-extension-and-preview-artifact.md`
-- `2026-08/01-public-overlay-geometry-observation.md`
-- `2026-08/07-175745-gpui-node-backend-batch-b-handoff.md`
-
-## Next Task
-
-Add the next evidence log when a bounded Poodle card is promoted and completed.
+Logs are grouped by year and month. Each entry should describe one meaningful
+batch, link to its owning roadmap or decision where useful, and record concrete
+validation rather than future work.

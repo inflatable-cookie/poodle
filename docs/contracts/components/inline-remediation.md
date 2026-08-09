@@ -108,9 +108,3 @@ type RemediationAction = {
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Svelte uses `Callout` primitive for inline recovery | Svelte's primitive library already handles tone + title + message + action; InlineRemediation is a shape-layer convention rather than a new primitive | allowed | GPUI side may fold into Callout in a future pass |
-
-## Next Task
-
-Connect `InlineRemediationSpec` field-id references to parent FormShell field
-rendering so `aria-describedby` wires automatically between fields and their
-associated remediation.

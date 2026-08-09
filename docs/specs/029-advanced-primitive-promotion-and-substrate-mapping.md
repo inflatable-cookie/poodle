@@ -166,9 +166,3 @@ final substrate posture.
 - `docs/research/translation-memos/tm-svelte-substrate.md`
 - `docs/contracts/components/README.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Use this mapping while deciding whether the next tranche should cover
-deeper integration hardening, parity discipline, or a deliberate revisit of
-any still-ambiguous ownership boundaries.

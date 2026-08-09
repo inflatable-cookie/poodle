@@ -215,8 +215,3 @@ The first contracts that explicitly exercise this baseline are:
 - `docs/contracts/components/popover.md`
 - `docs/contracts/components/dialog.md`
 - `docs/contracts/components/drawer.md`
-
-## Next Task
-
-Use this overlay baseline in later `g02` composite and workstation depth work
-without reopening the already-frozen overlay semantics.

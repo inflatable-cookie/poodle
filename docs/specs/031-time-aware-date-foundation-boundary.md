@@ -80,9 +80,3 @@ decisions rather than incidental growth.
 - `docs/specs/030-date-selection-and-calendar-foundation-baseline.md`
 - `docs/specs/034-range-plus-time-foundation-boundary.md`
 - `packages/svelte/components/README.md`
-
-## Next Task
-
-Decide whether timezone-aware entry should remain composite-owned, or whether a
-small timezone-conscious foundation tranche is generalized enough to promote
-next.
