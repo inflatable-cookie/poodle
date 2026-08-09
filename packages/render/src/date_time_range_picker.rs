@@ -17,7 +17,7 @@ use poodle_specs::{
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
 use crate::date_picker::DatePickerHandlers;
-use crate::date_time_trigger::{date_time_trigger, DateTimeTrigger};
+use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
 use crate::time_field::time_field;
 
@@ -52,9 +52,9 @@ pub fn date_time_range_picker(
     } else {
         spec.placeholder.clone()
     };
-    let trigger = date_time_trigger(
+    let trigger = picker_trigger(
         theme,
-        DateTimeTrigger {
+        PickerTrigger {
             display: &display,
             has_value,
             open: spec.current_open(),
@@ -62,6 +62,7 @@ pub fn date_time_range_picker(
             size: spec.size,
             size_role: spec.size_role,
             indicator: "calendar",
+            indicator_size: None,
             elevated,
             border_color,
             on_toggle: handlers.on_toggle.as_ref(),

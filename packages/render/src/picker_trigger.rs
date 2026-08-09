@@ -13,7 +13,7 @@ use crate::presentation::{
     size_padding_x_offset_rem,
 };
 
-pub(crate) struct DateTimeTrigger<'a> {
+pub(crate) struct PickerTrigger<'a> {
     pub display: &'a str,
     pub has_value: bool,
     pub open: bool,
@@ -21,12 +21,13 @@ pub(crate) struct DateTimeTrigger<'a> {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub indicator: &'static str,
+    pub indicator_size: Option<f32>,
     pub elevated: ColorValue,
     pub border_color: ColorValue,
     pub on_toggle: Option<&'a Arc<dyn Fn() + Send + Sync>>,
 }
 
-pub(crate) fn date_time_trigger(theme: &dyn ThemeProvider, config: DateTimeTrigger<'_>) -> Node {
+pub(crate) fn picker_trigger(theme: &dyn ThemeProvider, config: PickerTrigger<'_>) -> Node {
     let effective_size = resolve_semantic_size(config.size, config.size_role);
     let height = theme.resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
@@ -34,7 +35,9 @@ pub(crate) fn date_time_trigger(theme: &dyn ThemeProvider, config: DateTimeTrigg
     let pad_x = theme.resolve_space("space.inline.md")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
     let inline_gap = theme.resolve_space("space.inline.sm");
-    let icon_size = theme.resolve_space("size.icon.sm");
+    let indicator_size = config
+        .indicator_size
+        .unwrap_or_else(|| theme.resolve_space("size.icon.sm"));
     let fill = theme.resolve_color("color.background.surface");
     let accent = theme.resolve_color("color.accent.base");
     let radius = theme.resolve_radius("radius.control");
@@ -76,7 +79,7 @@ pub(crate) fn date_time_trigger(theme: &dyn ThemeProvider, config: DateTimeTrigg
     value_label.style.descriptor.text_color = Some(display_color);
     value_label.style.text_size = Some(font_size);
     value_label.style.descriptor.layout.width = LayoutSizing::Grow;
-    let mut indicator = Node::icon(config.indicator, icon_size);
+    let mut indicator = Node::icon(config.indicator, indicator_size);
     indicator.style.descriptor.text_color = Some(icon_color);
     let mut trigger = trigger.child(value_label).child(indicator);
 
@@ -107,8 +110,8 @@ mod tests {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
-    fn config<'a>(theme: &dyn ThemeProvider, display: &'a str) -> DateTimeTrigger<'a> {
-        DateTimeTrigger {
+    fn config<'a>(theme: &dyn ThemeProvider, display: &'a str) -> PickerTrigger<'a> {
+        PickerTrigger {
             display,
             has_value: false,
             open: false,
@@ -116,6 +119,7 @@ mod tests {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             indicator: "calendar",
+            indicator_size: None,
             elevated: theme.resolve_color("color.background.elevated"),
             border_color: theme.resolve_color("color.border.default"),
             on_toggle: None,
@@ -125,13 +129,18 @@ mod tests {
     #[test]
     fn shared_trigger_preserves_metrics_and_indicator() {
         let theme = theme();
-        let trigger = date_time_trigger(&theme, config(&theme, "Choose a date"));
+        let mut trigger_config = config(&theme, "Choose a date");
+        trigger_config.indicator_size = Some(13.0);
+        let trigger = picker_trigger(&theme, trigger_config);
 
         assert_eq!(
             trigger.style.descriptor.layout.height,
             LayoutSizing::Fixed(36.0)
         );
-        assert!(trigger.has_text("calendar"));
+        let indicator = trigger
+            .find(&|node| matches!(&node.kind, NodeKind::Icon { name, .. } if name == "calendar"))
+            .expect("indicator");
+        assert!(matches!(&indicator.kind, NodeKind::Icon { size, .. } if *size == 13.0));
         let label = trigger
             .find(&|node| {
                 matches!(&node.kind, NodeKind::Text { content } if content == "Choose a date")
@@ -150,7 +159,7 @@ mod tests {
         trigger_config.has_value = true;
         trigger_config.open = true;
         trigger_config.disabled = true;
-        let trigger = date_time_trigger(&theme, trigger_config);
+        let trigger = picker_trigger(&theme, trigger_config);
 
         assert_eq!(
             trigger.style.descriptor.border.color,
