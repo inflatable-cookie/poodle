@@ -3,6 +3,19 @@ export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
 export {
+  actionIcon,
+  actionState,
+  canSubmit,
+  contextPercentage,
+  resolveSubmitIntent,
+  type AgentChatAttachment,
+  type ComposerKeyEvent,
+  type SubmitGate,
+  type SubmitIntent,
+  type SubmitIntentOptions,
+} from "./agent-chat-input";
+
+export {
   clauseLabel,
   cloneOperand,
   defaultOperatorsForKind,

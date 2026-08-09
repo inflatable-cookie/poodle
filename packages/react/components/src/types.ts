@@ -717,17 +717,7 @@ export type {
 
 export type AgentChatStatus = "idle" | "busy";
 
-export type AgentChatAttachment = {
-  id: string;
-  label: string;
-  /** Host-defined kind, surfaced as `data-kind` for styling hooks. */
-  kind?: string;
-  icon?: string;
-  /** Image source for a visual attachment. When set the chip is replaced by a
-   * thumbnail tile — an image says more than its filename does. */
-  thumbnailUrl?: string;
-  disabled?: boolean;
-};
+export type { AgentChatAttachment } from "@inflatable-cookie/poodle-core";
 
 // ---------------------------------------------------------------------------
 // RefSelect
