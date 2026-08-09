@@ -135,7 +135,7 @@
           <Button
             variant="secondary"
             size={resolvedSize}
-            icon="diff"
+            leadingIcon="diff"
             onClick={() => onOpenDiff?.(id)}
           >
             {openDiffLabel}

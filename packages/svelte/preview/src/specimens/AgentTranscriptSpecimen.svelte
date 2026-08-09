@@ -65,37 +65,37 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup title="A worked turn" description="Message, run, message, run, changed files, run, activity. The changed-files card splits the runs on either side of it.">
+  <SpecimenGroup label="A worked turn">
     <div style="height: 30rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={turn} virtualized={false} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Streaming" description="The last message carries its caret while tokens arrive.">
+  <SpecimenGroup label="Streaming">
     <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={streaming} virtualized={false} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="A run containing a failure" description="Collapsed, the run still advertises that something in it broke.">
+  <SpecimenGroup label="A run containing a failure">
     <div style="height: 14rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={withFailure} virtualized={false} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Empty">
+  <SpecimenGroup label="Empty">
     <div style="height: 10rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={[]} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Windowed" description="120 blocks of varying height. Scroll up and the jump-to-latest pill appears; following re-arms only when you return to the bottom.">
+  <SpecimenGroup label="Windowed">
     <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={long} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Unwindowed" description="The same content with every block rendered. The result must be identical — only the cost differs.">
+  <SpecimenGroup label="Unwindowed">
     <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={long} virtualized={false} />
     </div>

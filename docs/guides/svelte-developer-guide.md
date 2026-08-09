@@ -27,7 +27,7 @@ registry. Link them from a sibling checkout or workspace in your application's
   "dependencies": {
     "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
     "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components",
-    "lucide-static": "^0.577.0"
+    "lucide-static": "^1.30.0"
   }
 }
 ```

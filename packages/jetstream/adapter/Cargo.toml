@@ -18,6 +18,8 @@ poodle-layout = { version = "0.1.0", path = "../../contracts/layout" }
 poodle-specs = { version = "0.1.0", path = "../../contracts/components" }
 poodle-style = { version = "0.1.0", path = "../../contracts/style" }
 poodle-tokens = { version = "0.1.0", path = "../../contracts/tokens" }
+# These types cross the Jetstream adapter boundary and must match the sibling
+# Jetstream workspace. Upgrade them in both repositories as one migration.
 taffy = "0.9"
 glam = "0.29"
 

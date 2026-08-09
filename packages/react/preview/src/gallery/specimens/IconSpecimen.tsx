@@ -4,7 +4,17 @@ import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 import iconNodes from "lucide-static/icon-nodes.json";
 
-const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
+const catalogue = iconNodes as unknown as IconSet;
+const heart = catalogue.heart;
+const settings = catalogue.settings;
+const zap = catalogue.zap;
+const circleCheck = catalogue["circle-check"];
+const info = catalogue.info;
+const triangleAlert = catalogue["triangle-alert"];
+const star = catalogue.star;
+const search = catalogue.search;
+const pencil = catalogue.pencil;
+const allIconNames = Object.keys(catalogue).sort();
 
 // The scoped Lucide default required by Poodle's own component chrome.
 const defaultLucideNames = [
@@ -106,31 +116,31 @@ export function IconSpecimen() {
       showDensities={false}
       sizes={(size) => (
         <div style={sizeDemo}>
-          <Icon icon="star" size={size} />
-          <Icon icon="heart" size={size} />
-          <Icon icon="settings" size={size} />
+          <Icon icon={star} size={size} />
+          <Icon icon={heart} size={size} />
+          <Icon icon={settings} size={size} />
         </div>
       )}
     >
-      <SpecimenGroup label="Generated application set">
+      <SpecimenGroup label="Direct import — tree-shakeable">
         <p style={hint}>
-          Generate a static module from an application-owned name list. Only
-          those icons enter the runtime graph.
+          Generate an application set with <code style={hintCode}>bun x poodle-icons</code>. The generated
+          module contains only the icons in its names file.
         </p>
         <div style={sizeRow}>
           {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
             <div key={size} style={sizeDemo}>
               <span style={sizeLabel}>{size}</span>
-              <Icon icon="star" size={size} />
-              <Icon icon="heart" size={size} />
-              <Icon icon="settings" size={size} />
+              <Icon icon={star} size={size} />
+              <Icon icon={heart} size={size} />
+              <Icon icon={settings} size={size} />
             </div>
           ))}
         </div>
         <div style={codeHint}>
-          <code>{'import { icons } from "./icons.generated";'}</code>
+          <code>bun x poodle-icons --names icons.json --out icons.generated.ts</code>
           <br />
-          <code>{'<Icon icon={icons.star} size="lg" />'}</code>
+          <code>{'<Icon icon={star} size="lg" />'}</code>
         </div>
       </SpecimenGroup>
 
@@ -140,16 +150,16 @@ export function IconSpecimen() {
         </p>
         <div style={colorRow}>
           <span style={{ ...colorDemo, color: "var(--poodle-color-icon-primary)" }}>
-            <Icon icon="circle-check" /> Primary
+            <Icon icon={circleCheck} /> Primary
           </span>
           <span style={{ ...colorDemo, color: "var(--poodle-color-icon-muted)" }}>
-            <Icon icon="info" /> Muted
+            <Icon icon={info} /> Muted
           </span>
           <span style={{ ...colorDemo, color: "var(--poodle-color-accent-base)" }}>
-            <Icon icon="zap" /> Accent
+            <Icon icon={zap} /> Accent
           </span>
           <span style={{ ...colorDemo, color: "var(--poodle-color-status-danger)" }}>
-            <Icon icon="triangle-alert" /> Danger
+            <Icon icon={triangleAlert} /> Danger
           </span>
         </div>
       </SpecimenGroup>
@@ -161,17 +171,17 @@ export function IconSpecimen() {
         </p>
         <div style={colorRow}>
           <span style={colorDemo}>
-            <Icon icon="search" ariaLabel="Search" /> with ariaLabel (role="img")
+            <Icon icon={search} ariaLabel="Search" /> with ariaLabel (role="img")
           </span>
           <span style={colorDemo}>
-            <Icon icon="pencil" /> without ariaLabel (aria-hidden)
+            <Icon icon={pencil} /> without ariaLabel (aria-hidden)
           </span>
         </div>
       </SpecimenGroup>
 
       <SpecimenGroup label={`Default Lucide icons (${defaultLucideNames.length})`}>
         <p style={hint}>
-          Poodle ships this scoped Lucide default so its component chrome works
+          Poodle ships this scoped Lucide default so its own component chrome works
           without an <code style={hintCode}>IconProvider</code>. Application icons remain operator-owned.
         </p>
         <div style={iconGridCompact}>
@@ -192,17 +202,18 @@ export function IconSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label={`Preview catalogue (${allIconNames.length})`}>
+      <SpecimenGroup label={`All icons via IconProvider (${allIconNames.length})`}>
         <p style={hint}>
-          This documentation-only browser loads the full catalogue. Applications
-          should provide their generated scoped set. Click any icon to copy its name.
+          Wrap your app (or a subtree) in <code style={hintCode}>{"<IconProvider>"}</code> with
+          a full icon set to enable string-based lookups for any icon.
+          Click any icon to copy its name.
         </p>
         <div style={codeHint}>
-          <code>{'import { icons } from "./icons.generated";'}</code>
+          <code>import iconNodes from "lucide-static/icon-nodes.json";</code>
           <br />
           <code>{"<IconProvider icons={iconNodes}> ... </IconProvider>"}</code>
         </div>
-        <IconProvider icons={iconNodes as unknown as IconSet}>
+        <IconProvider icons={catalogue}>
           <div style={iconGrid}>
             {allIconNames.map((name) => (
               <button

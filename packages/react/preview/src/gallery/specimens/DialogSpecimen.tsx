@@ -359,7 +359,7 @@ export function DialogSpecimen() {
       </Dialog>
 
       <Dialog open={overlayInDialogOpen} title="Settings" showCloseButton onOpenChange={setOverlayInDialogOpen}>
-        <Field label="Model">
+        <Field id="dialog-model" label="Model">
           <Popover
             ariaLabel="Model settings"
             trigger={<Button variant="secondary">Opus 5 · Medium</Button>}

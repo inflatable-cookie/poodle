@@ -24,8 +24,8 @@ function recorder(): Recorder {
     events,
     preparation: {
       start: () => events.push("start"),
-      end: (ctx) => events.push(`end:${ctx.dropEffect}`),
-      cancel: (ctx) => events.push(`cancel:${ctx.reason}`),
+      end: (ctx) => { events.push(`end:${ctx.dropEffect}`); },
+      cancel: (ctx) => { events.push(`cancel:${ctx.reason}`); },
     },
   };
 }

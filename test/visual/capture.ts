@@ -142,7 +142,7 @@ export async function captureSpecimen(
 
     await page.setViewportSize({
       width: VIEWPORT.width,
-      height: Math.min(Math.max(specimenHeight + 200, VIEWPORT.height), 12_000),
+      height: Math.min(Math.max(specimenHeight + 200, VIEWPORT.height), 14_000),
     });
 
     // Snap the specimen to an integer y. A fractional origin rasterises text

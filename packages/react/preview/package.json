@@ -14,15 +14,15 @@
   "dependencies": {
     "@inflatable-cookie/poodle-react": "workspace:*",
     "@inflatable-cookie/poodle-core": "workspace:*",
-    "lucide-static": "^0.577.0",
+    "lucide-static": "^1.30.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "^5.7.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "typescript": "^7.0.2",
     "vite": "^8.2.1"
   }
 }

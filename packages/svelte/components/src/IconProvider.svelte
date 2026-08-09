@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
   import type { IconSet } from "./icon-registry";
 
   import { setIconSet } from "./icon-registry";
@@ -19,7 +19,7 @@
     children,
   }: Props = $props();
 
-  const iconSet = setIconSet({});
+  const iconSet = setIconSet(untrack(() => icons));
 
   $effect(() => {
     iconSet.set(icons);

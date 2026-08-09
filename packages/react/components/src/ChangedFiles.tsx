@@ -137,7 +137,7 @@ export function ChangedFiles({
 
         {showOpenDiff ? (
           <div className="poodle-changed-files__actions">
-            <Button variant="secondary" size={resolvedSize} icon="diff" onClick={() => onOpenDiff?.(id)}>
+            <Button variant="secondary" size={resolvedSize} leadingIcon="diff" onClick={() => onOpenDiff?.(id)}>
               {openDiffLabel}
             </Button>
           </div>

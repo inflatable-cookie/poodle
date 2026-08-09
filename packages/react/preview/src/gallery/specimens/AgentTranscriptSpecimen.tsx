@@ -54,34 +54,25 @@ export function AgentTranscriptSpecimen() {
         </div>
       )}
     >
-      <SpecimenGroup
-        title="A run containing a failure"
-        description="Collapsed, the run still advertises that something in it broke."
-      >
+      <SpecimenGroup label="A run containing a failure">
         <div style={{ ...frame, height: "14rem" }}>
           <AgentTranscript items={withFailure} virtualized={false} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup title="Empty">
+      <SpecimenGroup label="Empty">
         <div style={{ ...frame, height: "10rem" }}>
           <AgentTranscript items={[]} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup
-        title="Windowed"
-        description="120 blocks of varying height. Scroll up and the jump-to-latest pill appears; following re-arms only when you return to the bottom."
-      >
+      <SpecimenGroup label="Windowed">
         <div style={frame}>
           <AgentTranscript items={long} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup
-        title="Unwindowed"
-        description="The same content with every block rendered. The result must be identical — only the cost differs."
-      >
+      <SpecimenGroup label="Unwindowed">
         <div style={frame}>
           <AgentTranscript items={long} virtualized={false} />
         </div>

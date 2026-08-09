@@ -32,6 +32,8 @@ jetstream-platform = { path = "../../../../jetstream/crates/jetstream-platform" 
 jetstream-input = { path = "../../../../jetstream/crates/jetstream-input" }
 jetstream-text = { path = "../../../../jetstream/crates/jetstream-text" }
 
+# These runtime types must track the sibling Jetstream workspace exactly.
+# Duplicate versions resolve, then fail at call sites as distinct Rust types.
 glam = "0.29"
 # Must track the sibling jetstream workspace exactly. Two wgpu versions in one
 # graph do not conflict at resolve time — they fail at the call site, with every

@@ -150,7 +150,7 @@ export function blocksFromMarked(tokens: readonly MarkedToken[] | undefined): Md
           // An unannotated fence is `null`, not `""`, so the renderer can tell
           // "no language given" from "a language that happens to be empty" and
           // the Rust mirror has an `Option<String>` to match.
-          lang: token.lang ? token.lang.trim().split(/\s+/)[0] : null,
+          lang: token.lang ? (token.lang.trim().split(/\s+/)[0] ?? null) : null,
           value: token.text ?? "",
         });
         break;

@@ -20,13 +20,13 @@
   "dependencies": {
     "@inflatable-cookie/poodle-core": "workspace:*",
     "@inflatable-cookie/poodle-svelte": "workspace:*",
-    "lucide-static": "^0.577.0",
+    "lucide-static": "^1.30.0",
     "svelte": "^5.56.8"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
-    "@types/node": "^25.5.2",
-    "typescript": "^5.9.2",
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
     "vite": "^8.2.1"
   }
 }

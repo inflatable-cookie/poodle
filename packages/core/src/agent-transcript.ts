@@ -182,7 +182,9 @@ export function groupTranscriptItems(
 
 /** The call a collapsed run shows: the newest one. */
 export function toolRunLeadCall(run: TranscriptToolRun): TranscriptToolCall {
-  return run.calls[run.calls.length - 1];
+  const lead = run.calls[run.calls.length - 1];
+  if (!lead) throw new Error("A transcript tool run must contain at least one call");
+  return lead;
 }
 
 /** How many calls "+N previous tool calls" is offering. */
@@ -391,8 +393,10 @@ export function buildChangedFileTree(files: readonly ChangedFile[]): ChangedFile
 
       // Only directories collapse, and only through single children — a
       // directory with two entries is a real fork and has to render as one.
-      while (current.isDirectory && current.children.length === 1 && current.children[0].isDirectory) {
-        current = current.children[0];
+      while (current.isDirectory && current.children.length === 1) {
+        const onlyChild = current.children[0];
+        if (!onlyChild?.isDirectory) break;
+        current = onlyChild;
         label = `${label}/${current.label}`;
       }
 
