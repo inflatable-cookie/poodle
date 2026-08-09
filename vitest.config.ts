@@ -32,7 +32,6 @@ export default defineConfig({
         },
       },
       {
-        esbuild: { jsx: "automatic" },
         test: {
           name: "react-components",
           environment: "happy-dom",
@@ -56,9 +55,8 @@ export default defineConfig({
       {
         // Svelte <-> React parity: renders both implementations of a component in
         // one happy-dom process and diffs their emitted poodle-* anatomy classes.
-        // Needs both toolchains (svelte plugin + react jsx) in the same project.
+        // Needs the Svelte plugin and Vitest's JSX transform in the same project.
         plugins: [svelte()],
-        esbuild: { jsx: "automatic" },
         resolve: { conditions: ["browser"] },
         test: {
           name: "parity",
