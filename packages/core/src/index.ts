@@ -36,6 +36,18 @@ export {
   type FilterOption,
 } from "./filter-builder";
 
+export type {
+  DrillDownConfig,
+  DrillDownContext,
+  DrillDownItem,
+  DrillDownItemsFn,
+  DrillDownLevel,
+  DrillDownSearchFn,
+  PickerFilterConfig,
+  PickerFilterOption,
+  PickerItem,
+} from "./relation-picker";
+
 export {
   SEGMENTED_AXIS_MAX_OPTIONS,
   applicableAxes,
