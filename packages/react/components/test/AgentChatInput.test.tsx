@@ -20,6 +20,63 @@ describe("AgentChatInput (react)", () => {
     );
   });
 
+  it("hosts a live question and lets its selection enable an empty editor", () => {
+    const onSubmit = vi.fn();
+    const { container, rerender } = render(
+      <AgentChatInput
+        value=""
+        status="questioning"
+        question={<div data-testid="question">Choose a target</div>}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    expect(container.querySelector('[data-testid="question"]')).not.toBeNull();
+    expect(editorOf(container).placeholder).toBe(
+      "Type your own answer, or leave this blank to use the selected option",
+    );
+    expect(actionOf(container).disabled).toBe(true);
+
+    rerender(
+      <AgentChatInput
+        value=""
+        status="questioning"
+        question={<div data-testid="question">Choose a target</div>}
+        questionCanSubmit
+        onSubmit={onSubmit}
+      />,
+    );
+
+    expect(actionOf(container).disabled).toBe(false);
+    fireEvent.click(actionOf(container));
+    expect(onSubmit).toHaveBeenCalledWith("");
+  });
+
+  it("does not render the question region outside questioning status", () => {
+    const { container } = render(
+      <AgentChatInput value="" question={<div data-testid="question">Choose a target</div>} />,
+    );
+
+    expect(container.querySelector('[data-testid="question"]')).toBeNull();
+    expect(editorOf(container).placeholder).toBe("Send a message");
+  });
+
+  it("hosts plan review without changing ordinary submit gating", () => {
+    const { container } = render(
+      <AgentChatInput
+        value=""
+        status="reviewing-plan"
+        plan={<div data-testid="plan">Review this plan</div>}
+      />,
+    );
+
+    expect(container.querySelector('[data-testid="plan"]')).not.toBeNull();
+    expect(editorOf(container).placeholder).toBe(
+      "Describe what to change, or decide the plan above",
+    );
+    expect(actionOf(container).disabled).toBe(true);
+  });
+
   it("submits on Enter and inserts a newline on Shift+Enter", () => {
     const onSubmit = vi.fn();
     const { container } = render(<AgentChatInput value="ship it" onSubmit={onSubmit} />);

@@ -73,6 +73,9 @@ every other interactive part reuses a Poodle primitive.
 |------|------|---------|----------|-------|
 | `value` | `string` | `""` | no | message text; controlled when bound, otherwise component-owned |
 | `placeholder` | `string` | `"Send a message"` | no | editor placeholder |
+| `questionPlaceholder` | `string` | `"Type your own answer, or leave this blank to use the selected option"` | no | editor placeholder while `questioning` |
+| `questionCanSubmit` | `boolean` | `false` | no | enables an empty editor while `questioning` when the live question has a selection |
+| `planPlaceholder` | `string` | `"Describe what to change, or decide the plan above"` | no | editor placeholder while `reviewing-plan` |
 | `status` | `"idle" \| "busy" \| "questioning" \| "reviewing-plan"` | `"idle"` | no | `busy` flips the action button to stop; `questioning` renders the question region and blocks ordinary sending; `reviewing-plan` renders the plan region and keeps ordinary sending |
 | `disabled` | `boolean` | `false` | no | disables the editor, action button and attachment removal |
 | `readOnly` | `boolean` | `false` | no | editor is not editable; the action button still works (submit stays possible) |
@@ -102,11 +105,14 @@ every other interactive part reuses a Poodle primitive.
 
 | Slot | Renderer form | Purpose |
 |------|---------------|---------|
+| `question` | Svelte `Snippet`, React `ReactNode` | live `AgentQuestion` region above the editor while `questioning` |
+| `plan` | Svelte `Snippet`, React `ReactNode` | plan-review region above the editor while `reviewing-plan` |
 | `toolbar` | Svelte `Snippet`, React `ReactNode` | leading toolbar controls (canonically a `ModelPicker`, which should be passed `emphasis="subdued"` here so it does not compete with the editor) |
 | `footer` | Svelte `Snippet`, React `ReactNode` | the secondary bar under the composer (scope/branch/status rows) |
 
-Native targets take these as child element vectors instead
-(`js_agent_chat_input(spec, theme, toolbar_children, footer_children)`).
+Native targets take `toolbar` and `footer` as child element vectors
+(`js_agent_chat_input(spec, theme, toolbar_children, footer_children)`). Their
+question and plan composition delta is recorded in §12.
 
 ### Naming Rules
 
@@ -121,7 +127,7 @@ Defined in `@inflatable-cookie/poodle-svelte` `types.ts`, re-exported from the p
 redefined identically in `@inflatable-cookie/poodle-react`, mirrored in `poodle-specs` (snake_case).
 
 ```typescript
-type AgentChatStatus = "idle" | "busy" | "questioning";
+type AgentChatStatus = "idle" | "busy" | "questioning" | "reviewing-plan";
 
 type AgentChatAttachment = {
   id: string;
@@ -494,6 +500,7 @@ spacing — never the field's vertical padding or the action box.
 | GPUI/Jetstream render the editor as static text and don't drive keystrokes | shared render-only posture across all native components; text input is host-event-loop work | accepted | host wires editing |
 | Native auto-grow is line-count based, not text-measurement based | neither native runtime measures wrapped text during spec resolution | accepted | revisit if a measurement API lands |
 | Native context ring inherits Meter's ring delta (no swept arc) | see `meter.md` §12 | accepted | tracked on the Meter contract |
+| Native renderers carry question/plan status, placeholder, and submit-gating semantics but do not embed question/plan child regions inside the composer | the shared native renderer predates both composition slots | open | add question/plan child vectors before a native host adopts embedded review surfaces |
 | Action button is a bespoke `<button>`, not `IconButton` | circular accent treatment plus dual-state semantics are composer-specific; every other control reuses a primitive | accepted (by design) | promote to an `IconButton` variant if a second consumer needs it |
 
 ## 13. Approval And Adoption Notes

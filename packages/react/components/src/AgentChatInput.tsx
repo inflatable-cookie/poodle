@@ -31,6 +31,16 @@ import type {
 export interface AgentChatInputProps {
   value?: string;
   placeholder?: string;
+  /** Editor placeholder while a question is live; the editor is the override. */
+  questionPlaceholder?: string;
+  /** The question region. Host composes an `AgentQuestion` into it. */
+  question?: ReactNode;
+  /** Whether the live question could be answered from its own state alone. */
+  questionCanSubmit?: boolean;
+  /** Editor placeholder while a plan awaits a decision; the editor is the revise channel. */
+  planPlaceholder?: string;
+  /** The plan region. Host composes its plan review surface into it. */
+  plan?: ReactNode;
   status?: AgentChatStatus;
   disabled?: boolean;
   readOnly?: boolean;
@@ -62,6 +72,11 @@ export interface AgentChatInputProps {
 export function AgentChatInput({
   value,
   placeholder = "Send a message",
+  questionPlaceholder = "Type your own answer, or leave this blank to use the selected option",
+  question,
+  questionCanSubmit = false,
+  planPlaceholder = "Describe what to change, or decide the plan above",
+  plan,
   status = "idle",
   disabled = false,
   readOnly = false,
@@ -100,12 +115,21 @@ export function AgentChatInput({
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const isBusy = status === "busy";
-  const actionEnabled = canSubmitGate({
-    disabled,
-    isBusy,
-    value: effectiveValue,
-    allowEmptySubmit,
-  });
+  const isQuestioning = status === "questioning";
+  const isReviewingPlan = status === "reviewing-plan";
+  const actionEnabled = isQuestioning
+    ? !disabled && (effectiveValue.trim().length > 0 || questionCanSubmit)
+    : canSubmitGate({
+        disabled,
+        isBusy,
+        value: effectiveValue,
+        allowEmptySubmit,
+      });
+  const resolvedPlaceholder = isQuestioning
+    ? questionPlaceholder
+    : isReviewingPlan
+      ? planPlaceholder
+      : placeholder;
   const contextPercent = contextPercentage(contextUsed, contextLimit);
   const showContext = contextLimit !== null && contextLimit > 0;
   const contextHigh = contextLimit === null ? null : contextLimit * contextWarnAt;
@@ -201,6 +225,13 @@ export function AgentChatInput({
       data-disabled={disabled}
     >
       <div className="poodle-agent-chat-input__field">
+        {isQuestioning && question ? (
+          <div className="poodle-agent-chat-input__question">{question}</div>
+        ) : null}
+        {isReviewingPlan && plan ? (
+          <div className="poodle-agent-chat-input__plan">{plan}</div>
+        ) : null}
+
         {attachments.length > 0 ? (
           <ul className="poodle-agent-chat-input__attachments" aria-label="Attachments">
             {attachments.map((attachment) => (
@@ -246,7 +277,7 @@ export function AgentChatInput({
           ref={editorRef}
           className="poodle-agent-chat-input__editor"
           aria-label={ariaLabel}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           rows={minRows}
           maxLength={maxLength ?? undefined}
           disabled={disabled}

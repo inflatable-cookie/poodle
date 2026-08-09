@@ -189,7 +189,7 @@ pub fn agent_chat_input(
     // clamped row count.
     let is_empty = spec.value.is_empty();
     let mut editor = Node::text(if is_empty {
-        spec.placeholder.clone()
+        spec.effective_placeholder().to_string()
     } else {
         spec.value.clone()
     });

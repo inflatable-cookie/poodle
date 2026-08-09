@@ -16,6 +16,8 @@ pub enum AgentChatStatus {
     #[default]
     Idle,
     Busy,
+    Questioning,
+    ReviewingPlan,
 }
 
 impl AgentChatStatus {
@@ -23,6 +25,8 @@ impl AgentChatStatus {
         match self {
             AgentChatStatus::Idle => "idle",
             AgentChatStatus::Busy => "busy",
+            AgentChatStatus::Questioning => "questioning",
+            AgentChatStatus::ReviewingPlan => "reviewing-plan",
         }
     }
 
@@ -114,6 +118,9 @@ impl AgentChatAttachment {
 pub struct AgentChatInputSpec {
     pub value: String,
     pub placeholder: String,
+    pub question_placeholder: String,
+    pub question_can_submit: bool,
+    pub plan_placeholder: String,
     pub status: AgentChatStatus,
     pub is_disabled: bool,
     pub is_read_only: bool,
@@ -147,6 +154,10 @@ impl AgentChatInputSpec {
         Self {
             value: String::new(),
             placeholder: "Send a message".to_string(),
+            question_placeholder:
+                "Type your own answer, or leave this blank to use the selected option".to_string(),
+            question_can_submit: false,
+            plan_placeholder: "Describe what to change, or decide the plan above".to_string(),
             status: AgentChatStatus::Idle,
             is_disabled: false,
             is_read_only: false,
@@ -177,6 +188,21 @@ impl AgentChatInputSpec {
 
     pub fn with_placeholder(mut self, placeholder: impl Into<String>) -> Self {
         self.placeholder = placeholder.into();
+        self
+    }
+
+    pub fn with_question_placeholder(mut self, placeholder: impl Into<String>) -> Self {
+        self.question_placeholder = placeholder.into();
+        self
+    }
+
+    pub fn with_question_can_submit(mut self, can_submit: bool) -> Self {
+        self.question_can_submit = can_submit;
+        self
+    }
+
+    pub fn with_plan_placeholder(mut self, placeholder: impl Into<String>) -> Self {
+        self.plan_placeholder = placeholder.into();
         self
     }
 
@@ -282,10 +308,22 @@ impl AgentChatInputSpec {
         !self.value.trim().is_empty()
     }
 
+    pub fn effective_placeholder(&self) -> &str {
+        match self.status {
+            AgentChatStatus::Questioning => &self.question_placeholder,
+            AgentChatStatus::ReviewingPlan => &self.plan_placeholder,
+            AgentChatStatus::Idle | AgentChatStatus::Busy => &self.placeholder,
+        }
+    }
+
     /// Whether the action button is enabled. While busy it always is — stopping
     /// must never be blocked by an empty editor.
     pub fn can_submit(&self) -> bool {
-        !self.is_disabled && (self.is_busy() || self.has_text() || self.allow_empty_submit)
+        !self.is_disabled
+            && (self.is_busy()
+                || self.has_text()
+                || (self.status == AgentChatStatus::Questioning && self.question_can_submit)
+                || (self.status != AgentChatStatus::Questioning && self.allow_empty_submit))
     }
 
     /// Glyph for the action button.
@@ -570,6 +608,34 @@ mod tests {
             .with_value("hi")
             .with_disabled(true)
             .can_submit());
+        assert!(AgentChatInputSpec::new()
+            .with_status(AgentChatStatus::Questioning)
+            .with_question_can_submit(true)
+            .can_submit());
+        assert!(!AgentChatInputSpec::new()
+            .with_status(AgentChatStatus::Questioning)
+            .with_allow_empty_submit(true)
+            .can_submit());
+    }
+
+    #[test]
+    fn status_selects_the_editor_placeholder() {
+        let spec = AgentChatInputSpec::new()
+            .with_question_placeholder("Answer the question")
+            .with_plan_placeholder("Revise the plan");
+
+        assert_eq!(spec.effective_placeholder(), "Send a message");
+        assert_eq!(
+            spec.clone()
+                .with_status(AgentChatStatus::Questioning)
+                .effective_placeholder(),
+            "Answer the question"
+        );
+        assert_eq!(
+            spec.with_status(AgentChatStatus::ReviewingPlan)
+                .effective_placeholder(),
+            "Revise the plan"
+        );
     }
 
     #[test]

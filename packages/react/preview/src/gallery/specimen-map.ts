@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 
 import { AccordionSpecimen } from "./specimens/AccordionSpecimen";
 import { ActionDiscoveryPanelSpecimen } from "./specimens/ActionDiscoveryPanelSpecimen";
+import { AgentQuestionRecordSpecimen } from "./specimens/AgentQuestionRecordSpecimen";
+import { AgentQuestionSpecimen } from "./specimens/AgentQuestionSpecimen";
 import { AlertDialogSpecimen } from "./specimens/AlertDialogSpecimen";
 import { AppHeaderSpecimen } from "./specimens/AppHeaderSpecimen";
 import { AudioPlayerSpecimen } from "./specimens/AudioPlayerSpecimen";
@@ -114,6 +116,7 @@ import { SplitViewSpecimen } from "./specimens/SplitViewSpecimen";
 import { StackSpecimen } from "./specimens/StackSpecimen";
 import { StatusBarSpecimen } from "./specimens/StatusBarSpecimen";
 import { StatusIndicatorSpecimen } from "./specimens/StatusIndicatorSpecimen";
+import { StepperSpecimen } from "./specimens/StepperSpecimen";
 import { SurfaceSpecimen } from "./specimens/SurfaceSpecimen";
 import { SwitchSpecimen } from "./specimens/SwitchSpecimen";
 import { TableSpecimen } from "./specimens/TableSpecimen";
@@ -135,6 +138,7 @@ import { TreeSpecimen } from "./specimens/TreeSpecimen";
 import { TriStateSwitchSpecimen } from "./specimens/TriStateSwitchSpecimen";
 import { UiPresentationProviderSpecimen } from "./specimens/UiPresentationProviderSpecimen";
 import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
+import { allComponents } from "./registry";
 
 /**
  * Slug -> specimen component, mirroring the Svelte preview's specimens/registry.ts.
@@ -143,6 +147,8 @@ import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
 export const specimenMap: Record<string, ComponentType> = {
   "accordion": AccordionSpecimen,
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
+  "agent-question": AgentQuestionSpecimen,
+  "agent-question-record": AgentQuestionRecordSpecimen,
   "alert-dialog": AlertDialogSpecimen,
   "app-header": AppHeaderSpecimen,
   "audio-player": AudioPlayerSpecimen,
@@ -257,6 +263,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "stack": StackSpecimen,
   "status-bar": StatusBarSpecimen,
   "status-indicator": StatusIndicatorSpecimen,
+  "stepper": StepperSpecimen,
   "surface": SurfaceSpecimen,
   "switch": SwitchSpecimen,
   "table": TableSpecimen,
@@ -279,3 +286,21 @@ export const specimenMap: Record<string, ComponentType> = {
   "ui-presentation-provider": UiPresentationProviderSpecimen,
   "video-player": VideoPlayerSpecimen,
 };
+
+const missingSpecimens = allComponents
+  .filter((component) => component.hasSpecimen && specimenMap[component.slug] === undefined)
+  .map((component) => component.slug);
+const unknownSpecimens = Object.keys(specimenMap).filter(
+  (slug) => !allComponents.some((component) => component.slug === slug),
+);
+
+if (missingSpecimens.length > 0 || unknownSpecimens.length > 0) {
+  throw new Error(
+    [
+      missingSpecimens.length > 0 ? `Missing React specimens: ${missingSpecimens.join(", ")}` : "",
+      unknownSpecimens.length > 0 ? `Unknown React specimens: ${unknownSpecimens.join(", ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
+}

@@ -1,0 +1,134 @@
+import { useState } from "react";
+import { resolveQuestionAnswer } from "@inflatable-cookie/poodle-core";
+import {
+  AgentChatInput,
+  AgentQuestion,
+  type AgentQuestionAnswer,
+  type AgentQuestionItem,
+} from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
+
+const placement: AgentQuestionItem = {
+  id: "placement",
+  header: "Placement",
+  prompt: "When the agent needs an answer mid-turn, where should the question surface appear?",
+  options: [
+    {
+      value: "inline",
+      label: "Inline in the transcript",
+      description: "A block in the conversation, in sequence with messages and tool runs.",
+    },
+    {
+      value: "composer",
+      label: "Anchored above the composer",
+      description: "A card pinned over the input, always visible until answered.",
+    },
+    { value: "modal", label: "Modal dialog", description: "Blocks the app until answered." },
+  ],
+};
+
+const targets: AgentQuestionItem = {
+  id: "targets",
+  header: "Targets",
+  prompt: "Which targets should this ship to?",
+  allowMultiple: true,
+  options: [
+    { value: "svelte", label: "Svelte" },
+    { value: "react", label: "React" },
+    { value: "gpui", label: "GPUI" },
+    { value: "jetstream", label: "Jetstream" },
+  ],
+};
+
+const batch: AgentQuestionItem[] = [
+  placement,
+  targets,
+  { ...placement, id: "third", header: "Scale" },
+  { ...targets, id: "fourth", header: "Rollout" },
+];
+
+function answerSummary(answer: AgentQuestionAnswer | null): string {
+  if (!answer) return "no answer yet";
+  return `answered: ${answer.outcome} ${JSON.stringify(answer.values)}${answer.text}`;
+}
+
+export function AgentQuestionSpecimen() {
+  const [composerValue, setComposerValue] = useState("");
+  const [composerSelections, setComposerSelections] = useState<string[]>([]);
+  const [composerAnswer, setComposerAnswer] = useState<AgentQuestionAnswer | null>(null);
+  const [singleAnswer, setSingleAnswer] = useState<AgentQuestionAnswer | null>(null);
+  const [multiSelections, setMultiSelections] = useState<string[]>([]);
+  const [batchSelections, setBatchSelections] = useState<string[]>([]);
+  const [dismissedAnswer, setDismissedAnswer] = useState<AgentQuestionAnswer | null>(null);
+
+  return (
+    <SpecimenLayout
+      sizes={(size) => <AgentQuestion questions={[placement]} size={size} />}
+      densities={(density) => <AgentQuestion questions={[placement]} density={density} />}
+    >
+      <SpecimenGroup label="Hosted by the composer">
+        <AgentChatInput
+          value={composerValue}
+          status="questioning"
+          questionCanSubmit={composerSelections.length > 0}
+          question={
+            <AgentQuestion
+              questions={[placement]}
+              selections={composerSelections}
+              override={composerValue}
+              onSelectionChange={setComposerSelections}
+              onSubmit={(answer) => {
+                setComposerAnswer(answer);
+                setComposerValue("");
+                setComposerSelections([]);
+              }}
+            />
+          }
+          onValueChange={setComposerValue}
+          onSubmit={() => {
+            const answer = resolveQuestionAnswer(placement, composerSelections, composerValue);
+            if (answer) {
+              setComposerAnswer(answer);
+              setComposerValue("");
+              setComposerSelections([]);
+            }
+          }}
+        />
+        <p>{answerSummary(composerAnswer)}</p>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Single select">
+        <AgentQuestion questions={[placement]} onSubmit={setSingleAnswer} />
+        <p>{answerSummary(singleAnswer)}</p>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Multi select">
+        <AgentQuestion
+          questions={[targets]}
+          selections={multiSelections}
+          onSelectionChange={setMultiSelections}
+        />
+        <p>Selected: <strong>{multiSelections.join(", ") || "none"}</strong></p>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Batch">
+        <AgentQuestion
+          questions={batch}
+          activeIndex={1}
+          selections={batchSelections}
+          onSelectionChange={setBatchSelections}
+        />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Dismissible">
+        <AgentQuestion questions={[placement]} dismissible onSubmit={setDismissedAnswer} />
+        <p>{answerSummary(dismissedAnswer)}</p>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Without shortcuts">
+        <AgentQuestion questions={[placement]} showShortcuts={false} />
+      </SpecimenGroup>
+    </SpecimenLayout>
+  );
+}
