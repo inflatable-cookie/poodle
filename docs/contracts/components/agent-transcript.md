@@ -89,6 +89,7 @@ their absence keeps the DOM honest about what is happening.
 | `onChangedFilesToggle` | `((id: string) => void) \| null` | `null` | no | a changed-files card was opened or closed |
 | `onOpenDiff` | `((id: string) => void) \| null` | `null` | no | "Open diff" was used; the host owns what that means |
 | `onFileSelect` | `((path: string) => void) \| null` | `null` | no | a file in the tree was chosen |
+| `onOpenChild` | `((childId: string) => void) \| null` | `null` | no | a subagent group's click-through was used; the host owns child navigation |
 | `onScrollStateChange` | `((pinned: boolean) => void) \| null` | `null` | no | fires when following starts or stops |
 
 ### Slots / Children
@@ -278,6 +279,7 @@ rendered. Implementations must not let a measurement pass re-enter itself; see
 | `onChangedFilesToggle` | changed-files id | the file tree opened or closed |
 | `onOpenDiff` | changed-files id | "Open diff" used |
 | `onFileSelect` | file path | a file row chosen in the tree |
+| `onOpenChild` | subagent child id | a subagent group's "Open child work" action used |
 | `onScrollStateChange` | `pinned: boolean` | following started or stopped |
 
 ## 6. Accessibility

@@ -52,6 +52,8 @@
     onChangedFilesToggle?: ((id: string) => void) | undefined;
     onOpenDiff?: ((id: string) => void) | undefined;
     onFileSelect?: ((path: string) => void) | undefined;
+    /** Fired by a subagent group's click-through with the child's id. */
+    onOpenChild?: ((childId: string) => void) | undefined;
     onScrollStateChange?: ((pinned: boolean) => void) | undefined;
   }
 
@@ -76,6 +78,7 @@
     onChangedFilesToggle = undefined,
     onOpenDiff = undefined,
     onFileSelect = undefined,
+    onOpenChild = undefined,
     onScrollStateChange = undefined,
   }: Props = $props();
 
@@ -366,6 +369,7 @@
       detailLines={block.detailLines ?? []}
       size={resolvedSize}
       density={resolvedDensity}
+      onOpenChild={onOpenChild ? () => onOpenChild(block.subagent.id) : undefined}
     />
   {:else if block.kind === "changed-files"}
     <ChangedFiles

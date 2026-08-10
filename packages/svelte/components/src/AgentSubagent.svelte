@@ -124,15 +124,18 @@
       {/if}
       <!-- The click-through is the only control: it opens the child's work.
            There is no stop, cancel or steer — observation-only, because
-           controlling a provider-owned child is not the transcript's job. -->
-      <button
-        type="button"
-        class="poodle-agent-subagent__action"
-        data-kind="open"
-        onclick={() => onOpenChild?.()}
-      >
-        {openChildLabel}
-      </button>
+           controlling a provider-owned child is not the transcript's job.
+           A host that supplies no handler gets no dead button. -->
+      {#if onOpenChild}
+        <button
+          type="button"
+          class="poodle-agent-subagent__action"
+          data-kind="open"
+          onclick={() => onOpenChild()}
+        >
+          {openChildLabel}
+        </button>
+      {/if}
     </div>
   </div>
 {/if}

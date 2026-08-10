@@ -86,7 +86,7 @@ window on it, not its controller.
 | `size` | `ControlSize \| null` | `null` | no | explicit size override |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override |
 | `onToggle` | `((expanded: boolean) => void) \| null` | `null` | no | the disclosure was used |
-| `onOpenChild` | `(() => void) \| null` | `null` | no | the click-through was used; the host owns what "open" means |
+| `onOpenChild` | `(() => void) \| null` | `null` | no | the click-through was used; the host owns what "open" means. When unset, the open action does not render at all |
 
 ### Shared Types
 
