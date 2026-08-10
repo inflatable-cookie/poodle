@@ -23,6 +23,9 @@ Updated: 2026-08-10
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `points` | `EnvelopePoint[]` | `[]` | bindable ordered normalized points |
 | `step` | `number` | `0.01` | keyboard movement |
 | `disabled` | `boolean` | `false` | interaction guard |
@@ -64,6 +67,9 @@ surface. Point hit testing is core-owned normalized geometry.
 
 ## 8. Token Usage
 
+Size changes editor width and height. Density changes curve and point-control
+weight while normalized point geometry and hit-testing remain core-owned.
+
 `--poodle-recipe-envelope-editor-fill`, `-border`, `-grid`, `-curve`,
 `-point-fill`, `-point-border`, `-point-selected`, `-focus-ring`, and
 `-disabled-opacity`.
@@ -73,9 +79,20 @@ surface. Point hit testing is core-owned normalized geometry.
 The adapter owns pointer capture, snap callback invocation, and ARIA controls.
 `EnvelopeVisual` receives only `EnvelopeVisualState`.
 
+## 9a. React Notes
+
+The React shell runs the same point machine, snap hook, hit tests, and curve
+helper. `EnvelopeVisual` receives only `EnvelopeVisualState`.
+
 ## 10. GPUI Notes
 
-Out of scope for this phase.
+The adapter owns point hit testing, drag capture, focus, and key translation.
+The shared node builder consumes ordered point VisualState only.
+
+## 10a. Jetstream Notes
+
+Jetstream consumes the same Rust point machine, spec, and node builder. Point
+controls are exposed as individually named accessibility children.
 
 ## 11. Parity Checklist
 
@@ -85,8 +102,18 @@ Out of scope for this phase.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Web renders the exact sampled curve as SVG. Native renderers show the same
+ordered points and sampled monotonic curve as node segments; antialiasing and
+segment rasterization may differ.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide ADSR-like default, positive/negative curve amounts,
+selected and dragging points, add/remove, snapped movement, keyboard nudges,
+curve nudges, disabled state, and a flat-segment regression case.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 2 VisualState extension approved 2026-08-10.

@@ -25,6 +25,9 @@ the shared core formatter used by audio controls.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `value` | `number` | `0` | plain value |
 | `min` | `number` | `0` | normalization floor |
 | `max` | `number` | `1` | normalization ceiling |
@@ -62,6 +65,9 @@ control alignment.
 
 ## 8. Token Usage
 
+Size changes type scale and minimum width. Density changes inline and block
+padding without changing formatted content.
+
 `--poodle-recipe-value-readout-fill`, `-text`, `-border`, and
 `-disabled-opacity`.
 
@@ -70,9 +76,19 @@ control alignment.
 The shell computes text through core formatting and passes it beside
 VisualState to the display-only renderer.
 
+## 9a. React Notes
+
+React uses the same formatter and shared CSS. `ValueVisual` receives only
+VisualState plus already-formatted text.
+
 ## 10. GPUI Notes
 
-Out of scope for Phase 1. The core formatter is the conformance source.
+The Rust formatter is the native conformance source. The node builder receives
+only readout VisualState and formatted text.
+
+## 10a. Jetstream Notes
+
+Jetstream consumes the same native spec and node builder as GPUI.
 
 ## 11. Parity Checklist
 
@@ -82,8 +98,15 @@ Out of scope for Phase 1. The core formatter is the conformance source.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+None. Font rasterization is runtime-owned; text and token meaning are strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews show number, dB, Hz/kHz, percent, ratio, milliseconds, note
+name, and semitone formatting plus negative, boundary, and disabled states.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Shared formatter changes require golden-value updates.

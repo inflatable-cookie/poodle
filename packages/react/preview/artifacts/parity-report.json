@@ -182,10 +182,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 186,
-        "componentCount": 149,
+        "exportCount": 196,
+        "componentCount": 159,
         "helperCount": 37,
-        "previewedCount": 186,
+        "previewedCount": 196,
         "contractOnlyCount": 0
       }
     ],
@@ -296,6 +296,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AgentSubagent",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Agent transcript set: grouping, markdown blocks, tool runs and changed files previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "AgentTranscript",
         "kind": "component",
         "status": "previewed",
@@ -348,7 +361,33 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AudioMeter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "AudioPlayer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "AudioSwitch",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -920,6 +959,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "DragNumberField",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "Drawer",
         "kind": "component",
         "status": "previewed",
@@ -1011,6 +1063,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "EnvelopeEditor",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "ErrorBoundary",
         "kind": "component",
         "status": "previewed",
@@ -1025,6 +1090,19 @@
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "Eyebrow",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "Fader",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -1180,6 +1258,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "GainReductionMeter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "getProviderAccent",
         "kind": "helper",
         "status": "previewed",
@@ -1301,6 +1392,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "Knob",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -2603,7 +2707,33 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "ValueReadout",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "VideoPlayer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "XYPad",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

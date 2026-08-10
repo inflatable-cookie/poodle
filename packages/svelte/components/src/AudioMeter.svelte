@@ -5,8 +5,13 @@
     formatAudioValue, type AudioMeterContext, type MeterFeedFrame,
   } from "@inflatable-cookie/poodle-core";
   import AudioMeterVisual from "./audio/AudioMeterVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     context?: AudioMeterContext;
     rightContext?: AudioMeterContext | null;
     style?: "bar" | "segments";
@@ -16,11 +21,16 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     context = $bindable(createAudioMeterContext()),
     rightContext = $bindable(null),
     style = "segments", orientation = "vertical", segments = 20,
     ariaLabel = null,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const leftVisual = $derived(audioMeterVisualState(context));
   const rightVisual = $derived(rightContext === null ? null : audioMeterVisualState(rightContext));
@@ -53,6 +63,8 @@
   aria-valuetext={valueText}
   data-scope="audio-meter"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-orientation={orientation}
   data-channels={rightVisual === null ? "mono" : "stereo"}
 >

@@ -61,3 +61,12 @@
   transform: translate(-50%, -50%);
   cursor: move;
 }
+
+.poodle-envelope-editor[data-size="xs"] { min-width: 8rem; height: 6rem; }
+.poodle-envelope-editor[data-size="sm"] { min-width: 10rem; height: 8rem; }
+.poodle-envelope-editor[data-size="lg"] { min-width: 14rem; height: 12rem; }
+.poodle-envelope-editor[data-size="xl"] { min-width: 16rem; height: 14rem; }
+.poodle-envelope-editor[data-density="compact"] .poodle-envelope-editor-visual__curve { stroke-width: 1; }
+.poodle-envelope-editor[data-density="compact"] .poodle-envelope-editor__point-control { width: 1rem; height: 1rem; }
+.poodle-envelope-editor[data-density="comfortable"] .poodle-envelope-editor-visual__curve { stroke-width: 2; }
+.poodle-envelope-editor[data-density="comfortable"] .poodle-envelope-editor__point-control { width: 1.5rem; height: 1.5rem; }

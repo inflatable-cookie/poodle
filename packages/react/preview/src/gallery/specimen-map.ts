@@ -7,6 +7,8 @@ import { AgentQuestionSpecimen } from "./specimens/AgentQuestionSpecimen";
 import { AlertDialogSpecimen } from "./specimens/AlertDialogSpecimen";
 import { AppHeaderSpecimen } from "./specimens/AppHeaderSpecimen";
 import { AudioPlayerSpecimen } from "./specimens/AudioPlayerSpecimen";
+import { AudioMeterSpecimen } from "./specimens/AudioMeterSpecimen";
+import { AudioSwitchSpecimen } from "./specimens/AudioSwitchSpecimen";
 import { AvatarSpecimen } from "./specimens/AvatarSpecimen";
 import { BlockEditorSpecimen } from "./specimens/BlockEditorSpecimen";
 import { BoxSpecimen } from "./specimens/BoxSpecimen";
@@ -42,17 +44,20 @@ import { DetailShellSpecimen } from "./specimens/DetailShellSpecimen";
 import { DialogSpecimen } from "./specimens/DialogSpecimen";
 import { DockRegionSpecimen } from "./specimens/DockRegionSpecimen";
 import { DrawerSpecimen } from "./specimens/DrawerSpecimen";
+import { DragNumberFieldSpecimen } from "./specimens/DragNumberFieldSpecimen";
 import { DurationInputSpecimen } from "./specimens/DurationInputSpecimen";
 import { EditableLabelSpecimen } from "./specimens/EditableLabelSpecimen";
 import { EditableListSpecimen } from "./specimens/EditableListSpecimen";
 import { EmbedInputSpecimen } from "./specimens/EmbedInputSpecimen";
 import { EmbedPreviewSpecimen } from "./specimens/EmbedPreviewSpecimen";
 import { EmptyStateSpecimen } from "./specimens/EmptyStateSpecimen";
+import { EnvelopeEditorSpecimen } from "./specimens/EnvelopeEditorSpecimen";
 import { ErrorBoundarySpecimen } from "./specimens/ErrorBoundarySpecimen";
 import { EyebrowSpecimen } from "./specimens/EyebrowSpecimen";
 import { FieldSetSpecimen } from "./specimens/FieldSetSpecimen";
 import { FieldSpecimen } from "./specimens/FieldSpecimen";
 import { FileUploadSpecimen } from "./specimens/FileUploadSpecimen";
+import { FaderSpecimen } from "./specimens/FaderSpecimen";
 import { AgentChatInputSpecimen } from "./specimens/AgentChatInputSpecimen";
 import { AgentTranscriptSpecimen } from "./specimens/AgentTranscriptSpecimen";
 import { FilterBuilderSpecimen } from "./specimens/FilterBuilderSpecimen";
@@ -61,11 +66,13 @@ import { FormActionsSpecimen } from "./specimens/FormActionsSpecimen";
 import { FormDialogSpecimen } from "./specimens/FormDialogSpecimen";
 import { FormLayoutSpecimen } from "./specimens/FormLayoutSpecimen";
 import { GridSpecimen } from "./specimens/GridSpecimen";
+import { GainReductionMeterSpecimen } from "./specimens/GainReductionMeterSpecimen";
 import { HoverCardSpecimen } from "./specimens/HoverCardSpecimen";
 import { IconButtonSpecimen } from "./specimens/IconButtonSpecimen";
 import { IconProviderSpecimen } from "./specimens/IconProviderSpecimen";
 import { IconSpecimen } from "./specimens/IconSpecimen";
 import { InlineListSectionSpecimen } from "./specimens/InlineListSectionSpecimen";
+import { KnobSpecimen } from "./specimens/KnobSpecimen";
 import { ListCardSpecimen } from "./specimens/ListCardSpecimen";
 import { ListContainerSpecimen } from "./specimens/ListContainerSpecimen";
 import { ListGridSpecimen } from "./specimens/ListGridSpecimen";
@@ -138,9 +145,11 @@ import { TokenInputSpecimen } from "./specimens/TokenInputSpecimen";
 import { ToolbarSpecimen } from "./specimens/ToolbarSpecimen";
 import { TooltipSpecimen } from "./specimens/TooltipSpecimen";
 import { TreeSpecimen } from "./specimens/TreeSpecimen";
+import { ValueReadoutSpecimen } from "./specimens/ValueReadoutSpecimen";
 import { TriStateSwitchSpecimen } from "./specimens/TriStateSwitchSpecimen";
 import { UiPresentationProviderSpecimen } from "./specimens/UiPresentationProviderSpecimen";
 import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
+import { XYPadSpecimen } from "./specimens/XYPadSpecimen";
 import { allComponents } from "./registry";
 
 /**
@@ -155,6 +164,8 @@ export const specimenMap: Record<string, ComponentType> = {
   "alert-dialog": AlertDialogSpecimen,
   "app-header": AppHeaderSpecimen,
   "audio-player": AudioPlayerSpecimen,
+  "audio-meter": AudioMeterSpecimen,
+  "audio-switch": AudioSwitchSpecimen,
   "avatar": AvatarSpecimen,
   "block-editor": BlockEditorSpecimen,
   "box": BoxSpecimen,
@@ -190,17 +201,20 @@ export const specimenMap: Record<string, ComponentType> = {
   "dialog": DialogSpecimen,
   "dock-region": DockRegionSpecimen,
   "drawer": DrawerSpecimen,
+  "drag-number-field": DragNumberFieldSpecimen,
   "duration-input": DurationInputSpecimen,
   "editable-label": EditableLabelSpecimen,
   "editable-list": EditableListSpecimen,
   "embed-input": EmbedInputSpecimen,
   "embed-preview": EmbedPreviewSpecimen,
   "empty-state": EmptyStateSpecimen,
+  "envelope-editor": EnvelopeEditorSpecimen,
   "error-boundary": ErrorBoundarySpecimen,
   "eyebrow": EyebrowSpecimen,
   "field": FieldSpecimen,
   "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
+  "fader": FaderSpecimen,
   "agent-chat-input": AgentChatInputSpecimen,
   "agent-transcript": AgentTranscriptSpecimen,
   "filter-builder": FilterBuilderSpecimen,
@@ -209,11 +223,13 @@ export const specimenMap: Record<string, ComponentType> = {
   "form-dialog": FormDialogSpecimen,
   "form-layout": FormLayoutSpecimen,
   "grid": GridSpecimen,
+  "gain-reduction-meter": GainReductionMeterSpecimen,
   "hover-card": HoverCardSpecimen,
   "icon": IconSpecimen,
   "icon-button": IconButtonSpecimen,
   "icon-provider": IconProviderSpecimen,
   "inline-list-section": InlineListSectionSpecimen,
+  "knob": KnobSpecimen,
   "list-card": ListCardSpecimen,
   "list-card-counter": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
@@ -290,7 +306,9 @@ export const specimenMap: Record<string, ComponentType> = {
   "tree": TreeSpecimen,
   "tri-state-switch": TriStateSwitchSpecimen,
   "ui-presentation-provider": UiPresentationProviderSpecimen,
+  "value-readout": ValueReadoutSpecimen,
   "video-player": VideoPlayerSpecimen,
+  "xy-pad": XYPadSpecimen,
 };
 
 const missingSpecimens = allComponents

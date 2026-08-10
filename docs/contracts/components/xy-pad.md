@@ -23,6 +23,9 @@ Updated: 2026-08-10
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `x`, `y` | `number` | `0` | bindable axis values |
 | `minX`, `minY` | `number` | `0` | lower bounds |
 | `maxX`, `maxY` | `number` | `1` | upper bounds |
@@ -60,6 +63,9 @@ coordinates; x increases right and y increases upward.
 
 ## 8. Token Usage
 
+Size changes pad width and height. Density changes thumb weight without
+changing the two normalized axes or adapter-owned hit-testing.
+
 `--poodle-recipe-xy-pad-fill`, `-border`, `-grid`, `-trace`, `-thumb-fill`,
 `-thumb-border`, `-focus-ring`, and `-disabled-opacity`.
 
@@ -68,9 +74,20 @@ coordinates; x increases right and y increases upward.
 The root adapter owns pointer capture and child slider ARIA. `XYPadVisual`
 receives only VisualState.
 
+## 9a. React Notes
+
+React runs the same atomic two-axis machine and passes only VisualState to
+`XYPadVisual`; two hidden slider adapters own axis accessibility.
+
 ## 10. GPUI Notes
 
-Out of scope for this phase.
+The adapter maps pointer geometry before transition and exposes two slider
+accessibility children. The shared renderer consumes one atomic VisualState.
+
+## 10a. Jetstream Notes
+
+Jetstream uses the same Rust transition, spec, and node builder and preserves
+atomic pair effects.
 
 ## 11. Parity Checklist
 
@@ -80,8 +97,17 @@ Out of scope for this phase.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Runtime pointer capture differs. Axis laws, pair effects, reset, value text,
+and focus semantics are strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide centered/default, corners, independent nonlinear
+laws, coarse/fine drag, reset, automation state, keyboard axis bounds, and
+disabled groups.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 2 VisualState extension approved 2026-08-10.

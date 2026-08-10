@@ -27,6 +27,9 @@ stepped, or bipolar-center mapping.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `value` | `number` | `0` | bindable plain value |
 | `min` | `number` | `0` | lower plain bound |
 | `max` | `number` | `1` | upper plain bound |
@@ -75,6 +78,9 @@ technology. The entry uses a labelled text input.
 The standard renderer is an intrinsic square. Parent layout owns its label and
 optional readout.
 
+Size changes the square diameter across the `xs`–`xl` ladder. Density changes
+ring weight without changing hit-testing or value geometry.
+
 ## 8. Token Usage
 
 `--poodle-recipe-knob-track-fill`, `-track-border`, `-arc-fill`,
@@ -86,10 +92,22 @@ optional readout.
 The root adapter owns DOM events and ARIA. `KnobVisual` receives only
 VisualState. Styles live in `poodle-core/styles/knob.css`.
 
+## 9a. React Notes
+
+The React shell runs the same `knobTransition`, formatting, and hit-test
+helpers and shares `knob.css`. `KnobVisual` accepts only VisualState.
+
 ## 10. GPUI Notes
 
-Out of scope for Phase 1. A future adapter must consume the same machine and
-VisualState contract.
+The GPUI specimen drives the Rust knob machine and passes its serializable
+VisualState to the shared node renderer. The adapter owns pointer geometry,
+focus, keys, wheel intent, and accessibility exposure.
+
+## 10a. Jetstream Notes
+
+Jetstream consumes the same Rust machine, spec, and node builder as GPUI. Its
+adapter maps the slider role, formatted value, and gesture events into the
+runtime accessibility and input systems.
 
 ## 11. Parity Checklist
 
@@ -99,8 +117,17 @@ VisualState contract.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Native renderers use a token-themed ring plus position indicator because the
+shared node vocabulary has no conic-gradient primitive. Value, focus,
+interaction, and accessibility semantics remain strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide standalone groups for linear/default reset,
+logarithmic frequency, bipolar center, stepped values, fine drag, circular
+mode, disabled state, automation state, type-in, and the keyboard bounds.
+Each page also includes the full five-size and three-density matrices.
+
+## 14. Approval And Adoption Notes
 
 Phase 1 review in Loophole gates further audio-family work.

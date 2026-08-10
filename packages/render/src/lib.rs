@@ -23,7 +23,9 @@ pub mod agent_subagent;
 pub mod agent_transcript;
 pub mod alert_dialog;
 pub mod app_header;
+pub mod audio;
 pub mod audio_player;
+pub mod audio_specimens;
 pub mod avatar;
 pub mod badge;
 pub mod banner;
@@ -113,8 +115,8 @@ pub mod pagination;
 pub mod pagination_summary;
 pub mod password_requirements;
 pub mod picker_shell;
-pub mod pill;
 mod picker_trigger;
+pub mod pill;
 pub mod popover;
 pub mod presentation;
 pub mod progress;
@@ -182,6 +184,10 @@ pub use alert_dialog::{
     alert_dialog, alert_dialog_with_content, AlertDialogHandlers, DEFAULT_WORKING_LABEL,
 };
 pub use app_header::app_header;
+pub use audio::{
+    audio_meter, audio_switch, drag_number_field, envelope_editor, fader, gain_reduction_meter,
+    knob, value_readout, xy_pad,
+};
 pub use audio_player::audio_player;
 pub use avatar::avatar;
 pub use badge::badge;
@@ -305,7 +311,9 @@ pub use tab_strip::{tab_strip, TabStripHandlers};
 pub use table::table;
 pub use tabs::{tabs, TabHandler};
 pub use text::text;
-pub use text_input::{text_input, text_input_with_change, text_input_with_handlers, TextInputHandlers};
+pub use text_input::{
+    text_input, text_input_with_change, text_input_with_handlers, TextInputHandlers,
+};
 pub use text_link::text_link;
 pub use theme_select::{theme_select, theme_select_with_handlers, ThemeSelectHandlers};
 pub use time_ago::time_ago;

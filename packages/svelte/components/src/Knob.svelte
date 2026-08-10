@@ -8,8 +8,11 @@
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
   import KnobVisual from "./audio/KnobVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null; sizeRole?: SemanticControlSizeRole; density?: ControlDensity | null;
     value?: number; min?: number; max?: number; law?: AudioValueLaw;
     defaultValue?: number; dragMode?: "vertical" | "circular";
     dragSensitivity?: number; keyboardStep?: number; format?: AudioValueFormat;
@@ -19,12 +22,17 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     value = $bindable(0), min = 0, max = 1, law = { type: "linear" },
     defaultValue = 0, dragMode = "vertical", dragSensitivity = 160,
     keyboardStep = 0.01, format = { type: "number", decimals: 2 },
     automation = "none", disabled = false, ariaLabel = null,
     onValueChange, onValueCommit, onGestureBegin, onGestureEnd,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let machine = $state(createKnobContext());
   let root: HTMLDivElement;
@@ -107,6 +115,8 @@
   aria-disabled={disabled}
   data-scope="knob"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-state={visualState.drag === "none" ? "idle" : visualState.drag}
   onpointerdown={pointerDown}
   onpointermove={pointerMove}

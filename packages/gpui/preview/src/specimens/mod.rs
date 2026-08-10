@@ -39,6 +39,7 @@ mod toolbar;
 // ── Selection ─────────────────────────────────────────────
 mod agent_question;
 mod agent_transcript;
+mod audio_controls;
 mod checkbox;
 mod radio_group;
 mod range_slider;
@@ -328,6 +329,29 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             agent_transcript::render(state, cx),
         ),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
+        "knob" => specimen_card("Knob", theme, audio_controls::knob(theme)),
+        "fader" => specimen_card("Fader", theme, audio_controls::fader(theme)),
+        "audio-meter" => specimen_card("AudioMeter", theme, audio_controls::audio_meter(theme)),
+        "value-readout" => {
+            specimen_card("ValueReadout", theme, audio_controls::value_readout(theme))
+        }
+        "drag-number-field" => specimen_card(
+            "DragNumberField",
+            theme,
+            audio_controls::drag_number_field(theme),
+        ),
+        "envelope-editor" => specimen_card(
+            "EnvelopeEditor",
+            theme,
+            audio_controls::envelope_editor(theme),
+        ),
+        "xy-pad" => specimen_card("XYPad", theme, audio_controls::xy_pad(theme)),
+        "audio-switch" => specimen_card("AudioSwitch", theme, audio_controls::audio_switch(theme)),
+        "gain-reduction-meter" => specimen_card(
+            "GainReductionMeter",
+            theme,
+            audio_controls::gain_reduction_meter(theme),
+        ),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(state, cx)),
 
         // ── Date/Time ───────────────────────────────────────────

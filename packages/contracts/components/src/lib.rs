@@ -106,6 +106,7 @@ mod agent_question_record;
 mod agent_subagent;
 mod agent_transcript;
 mod app_header;
+mod audio;
 mod audio_player;
 mod block_editor;
 mod card_radio_group;
@@ -170,6 +171,10 @@ pub use agent_question_record::AgentQuestionRecordSpec;
 pub use agent_subagent::AgentSubagentSpec;
 pub use agent_transcript::AgentTranscriptSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
+pub use audio::{
+    AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, DragNumberFieldSpec, EnvelopeEditorSpec,
+    FaderSpec, GainReductionMeterSpec, KnobSpec, ValueReadoutSpec, XYPadSpec,
+};
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
 pub use banner::BannerSpec;

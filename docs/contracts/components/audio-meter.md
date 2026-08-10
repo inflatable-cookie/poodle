@@ -27,6 +27,9 @@ is distinct from the existing bounded-value `Meter`.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `context` | `AudioMeterContext` | new sample-peak context | bindable left/mono machine |
 | `rightContext` | `AudioMeterContext \| null` | `null` | bindable stereo channel |
 | `style` | `"bar" \| "segments"` | `"segments"` | themed drawing style |
@@ -63,6 +66,9 @@ selects the bar axis. Segment count changes renderer geometry only.
 
 ## 8. Token Usage
 
+Size changes meter length and channel thickness. Density changes channel and
+segment gaps; it never changes ballistics or feed integration.
+
 `--poodle-recipe-audio-meter-track-fill`, `-track-border`, `-bar-fill`,
 `-segment-off-fill`, `-segment-on-fill`, `-segment-warning-fill`,
 `-segment-clip-fill`, `-peak-fill`, `-clip-fill`, and `-disabled-opacity`.
@@ -72,10 +78,21 @@ selects the bar axis. Segment count changes renderer geometry only.
 `AudioMeterVisual` receives one channel VisualState. Stereo composes it twice.
 The root owns meter semantics and imperative feed handles.
 
+## 9a. React Notes
+
+The React component exposes the same `push` and `resetClip` imperative handle,
+uses the shared web integration core, and passes per-channel VisualState to
+`AudioMeterVisual`.
+
 ## 10. GPUI Notes
 
-Out of scope for Phase 1. Aggregate feed frames and VisualState port without
-DOM dependencies.
+Host state pushes aggregate frames through the Rust meter transition. The
+shared renderer consumes only the resulting per-channel VisualState.
+
+## 10a. Jetstream Notes
+
+Jetstream uses the same feed transition and node builder. Its preview clock
+pushes deterministic aggregate frames rather than audio-rate samples.
 
 ## 11. Parity Checklist
 
@@ -85,8 +102,19 @@ DOM dependencies.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Native meters use discrete token-themed segments for both display styles;
+native nodes have no CSS gradient primitive with equivalent stop semantics.
+Ballistics, thresholds, stereo composition, peak hold, and clip latch are
+strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide deterministic VU, PPM, sample-peak, and RMS groups;
+bar and segment styles; mono and stereo; vertical and horizontal orientation;
+peak hold; clipped/latched state; and manual clip reset evidence.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 1 review must exercise a real Loophole telemetry feed.

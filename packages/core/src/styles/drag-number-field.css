@@ -7,3 +7,9 @@
 .poodle-drag-number-field-visual[data-enabled="false"] { opacity: var(--poodle-recipe-drag-number-field-disabled-opacity, var(--poodle-state-opacity-disabled)); }
 .poodle-drag-number-field[aria-disabled="true"] { cursor: not-allowed; }
 .poodle-drag-number-field__entry { position: absolute; z-index: 2; inset: 0; width: 100%; border: 0.0625rem solid var(--poodle-recipe-drag-number-field-entry-border, var(--poodle-color-border-default)); border-radius: 0.25rem; color: var(--poodle-recipe-drag-number-field-entry-text, var(--poodle-color-text-primary)); background: var(--poodle-recipe-drag-number-field-entry-fill, var(--poodle-color-background-elevated)); font: inherit; text-align: right; }
+.poodle-drag-number-field[data-size="xs"] { min-width: 3rem; font-size: 0.75rem; }
+.poodle-drag-number-field[data-size="sm"] { min-width: 3.5rem; font-size: 0.875rem; }
+.poodle-drag-number-field[data-size="lg"] { min-width: 4.5rem; font-size: 1.125rem; }
+.poodle-drag-number-field[data-size="xl"] { min-width: 5rem; font-size: 1.25rem; }
+.poodle-drag-number-field[data-density="compact"] .poodle-drag-number-field-visual { padding: 0.125rem 0.25rem; }
+.poodle-drag-number-field[data-density="comfortable"] .poodle-drag-number-field-visual { padding: 0.375rem 0.5rem; }

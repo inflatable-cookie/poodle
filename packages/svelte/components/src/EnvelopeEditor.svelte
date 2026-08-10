@@ -11,8 +11,13 @@
     type EnvelopePoint,
   } from "@inflatable-cookie/poodle-core";
   import EnvelopeVisual from "./audio/EnvelopeVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     points?: EnvelopePoint[];
     step?: number;
     disabled?: boolean;
@@ -25,10 +30,15 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     points = $bindable([]), step = 0.01, disabled = false, ariaLabel = null,
     snapPoint = (point) => point, onPointsChange, onPointsCommit,
     onGestureBegin, onGestureEnd,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let root: HTMLDivElement;
   let machine = $state(createEnvelopeContext());
@@ -122,6 +132,8 @@
   aria-disabled={disabled}
   data-scope="envelope-editor"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   onpointerdown={pointerDown}
   onpointermove={(event) => { pointerMove(event); pointerHover(event); }}
   onpointerup={pointerEnd}

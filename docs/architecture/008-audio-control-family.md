@@ -1,6 +1,6 @@
 # 008 Audio Control Family
 
-Status: active
+Status: accepted
 Updated: 2026-08-10
 Depends on: `006-headless-core-and-machine-model.md`,
 `007-appearance-recipe-contract.md`
@@ -12,15 +12,38 @@ Audio controls are reusable Poodle primitives, not Loophole widgets.
 
 - `packages/core/src/audio/` owns framework-free laws, formatting, machines,
   hit-test math, meter integration, and serializable visual state.
-- `packages/svelte/components/` owns DOM event adaptation, accessibility, and
-  the standard token/recipe-themed renderers.
-- No new package is added in this phase. The proposed instrument package has
-  no independent runtime boundary until asset skins, host bindings, or a GPUI
-  backend exist.
+- `packages/svelte/components/` and `packages/react/components/` own DOM event
+  adaptation, accessibility, and thin standard token/recipe-themed shells over
+  the shared web cores.
+- `packages/contracts/headless/` owns the native equivalents of the audio laws,
+  formatting, machines, feed integration, hit-test math, and serializable
+  visual states.
+- `packages/contracts/components/` carries renderer-neutral native specs whose
+  public fields resolve to those visual states.
+- `packages/render/` consumes native visual states and emits `poodle-node`
+  trees. GPUI and Jetstream remain backend interpreters plus input, lifecycle,
+  hit-testing, and accessibility adapters; neither backend owns audio drawing
+  policy.
+- No new package is added. The proposed instrument package still has no
+  independent runtime boundary until asset skins or host bindings exist.
 
 The existing bounded-measurement `Meter` remains unchanged. The audio-domain
 component is named `AudioMeter`; it has temporal state and a feed protocol,
 which are outside the existing component's contract.
+
+## Presentation Axes
+
+Every audio component implements Poodle's two presentation axes. `size`
+accepts `xs`, `sm`, `md`, `lg`, or `xl`; `density` accepts `compact`,
+`default`, or `comfortable`. Null web props inherit `UiProvider` presentation.
+Native specs carry `size`, `size_role`, and `density` and resolve semantic size
+roles before building geometry.
+
+Size owns the component's main footprint and type scale. Density owns internal
+spacing or visual weight. Neither axis enters machine context or VisualState,
+changes value laws or meter ballistics, or moves hit-testing into the renderer.
+All four specimen systems expose complete size and density matrices for every
+audio component.
 
 ## Visual State Boundary
 
@@ -97,8 +120,10 @@ independent `AudioMeterVisualState` values. This preserves the RFC state shape
 without hiding machine access in drawing code.
 
 DOM adapters own pointer capture, wheel cancellation, focus, keyboard event
-translation, and ARIA. Core hit-test helpers operate on geometry values only.
-Later skins may replace renderer components without changing those paths.
+translation, and ARIA. Native adapters own the equivalent pointer, focus,
+keyboard, accessibility-tree, and host-lifecycle translation. Core hit-test
+helpers operate on geometry values only. Later skins may replace renderer
+components or node builders without changing those paths.
 
 ## Value Laws
 
@@ -172,9 +197,20 @@ normalization maps `0..maxReductionDb` to `0..1`; the standard renderer draws
 that magnitude from the zero end toward maximum reduction on an inverted
 meter axis. Gain reduction has no clip latch.
 
-## Appearance And Deferred Work
+## Runtime Parity And Appearance
 
 Standard renderers consume semantic tokens through complete
-`--poodle-recipe-<component>-...` hook sets. The asset-skin runtime, Tier 2
-custom renderer API, GPUI implementation, and host parameter binding remain
-deferred. Phase 2 controls build on this boundary after Phase 1 review.
+`--poodle-recipe-<component>-...` hook sets on web and the same semantic token
+meanings through `ThemeProvider` on native. Svelte and React share CSS and web
+machines. GPUI and Jetstream share Rust headless logic, specs, and node
+builders; runtime differences are limited to backend input and accessibility
+capabilities and must be recorded in each component contract.
+
+Every audio component ships a standalone specimen page in all four previews.
+The page must cover the contract's named states rather than merely prove the
+component can mount. Parity evidence includes web interaction tests, native
+headless/render tests, registry and adapter-manifest drift checks, preview
+builds, and the applicable accessibility/visual reports.
+
+The asset-skin runtime, Tier 2 custom renderer API, and host parameter binding
+remain deferred.

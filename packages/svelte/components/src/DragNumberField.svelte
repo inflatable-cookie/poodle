@@ -7,8 +7,11 @@
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
   import ValueVisual from "./audio/ValueVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null; sizeRole?: SemanticControlSizeRole; density?: ControlDensity | null;
     value?: number; min?: number; max?: number; step?: number;
     dragSensitivity?: number; format?: AudioValueFormat; disabled?: boolean;
     ariaLabel?: string | null; onValueChange?: (value: number) => void;
@@ -17,11 +20,16 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     value = $bindable(0), min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER,
     step = 1, dragSensitivity = 0.1, format = { type: "number", decimals: 2 },
     disabled = false, ariaLabel = null, onValueChange, onValueCommit,
     onGestureBegin, onGestureEnd,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const law = $derived<AudioValueLaw>({ type: "stepped", step });
   let machine = $state(createDragNumberContext());
@@ -88,6 +96,8 @@
   aria-disabled={disabled}
   data-scope="drag-number-field"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-state={visualState.drag === "none" ? "idle" : visualState.drag}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={(event) => pointerEnd(event, false)}
   onmouseenter={() => send({ type: "HOVER", value: true })} onmouseleave={() => send({ type: "HOVER", value: false })}

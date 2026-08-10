@@ -1,16 +1,15 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-09
+Updated: 2026-08-10
 
-Roadmaps record Poodle's executable milestone work. All generations through
-`g12` are complete. There is no active implementation generation while the
-repository is being prepared for its first public release.
+Roadmaps record Poodle's executable milestone work. Generations through `g13`
+are complete.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g09`, `g10`, `g11`, and `g12` are complete.
+- `g09`, `g10`, `g11`, `g12`, and `g13` are complete.
 - The GPUI node-backend migration is complete and the duplicate GPUI component
   tier has been removed.
 - Web, native, accessibility, visual-parity, and package-consumer gates are
@@ -35,6 +34,7 @@ operator guide for the present package shape.
 - `g10` — Jetstream feasibility and GPUI production hardening
 - `g11` — Svelte modernization and consumer rollout
 - `g12` — React parity, verification depth, native hardening, and package consolidation
+- `g13` — audio family parity across Svelte, React, GPUI, and Jetstream
 
 ## Rules
 

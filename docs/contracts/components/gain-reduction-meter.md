@@ -22,6 +22,9 @@ Updated: 2026-08-10
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `context` | `GainReductionMeterContext` | created default | bindable feed state |
 | `style` | `"bar" \| "segments"` | `"segments"` | standard renderer style |
 | `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | inverted display axis |
@@ -53,6 +56,9 @@ segment presentation.
 
 ## 8. Token Usage
 
+Size changes meter length and thickness. Density changes track padding and
+segment gaps without changing inverted-scale ballistics.
+
 `--poodle-recipe-gain-reduction-meter-fill`, `-border`, `-track`, `-active`,
 `-segment-off`, `-segment-on`, `-text`, and `-disabled-opacity`.
 
@@ -60,9 +66,20 @@ segment presentation.
 
 `GainReductionMeterVisual` receives only VisualState and display geometry.
 
+## 9a. React Notes
+
+React exposes the same `push` and `reset` imperative handle and passes only
+VisualState plus display geometry to its renderer.
+
 ## 10. GPUI Notes
 
-Out of scope for this phase.
+Host state pushes reduction frames through the Rust transition. The shared
+renderer receives only the resulting VisualState.
+
+## 10a. Jetstream Notes
+
+Jetstream uses the same Rust feed transition, spec, and node builder with a
+deterministic preview clock.
 
 ## 11. Parity Checklist
 
@@ -72,8 +89,18 @@ Out of scope for this phase.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Native uses discrete token-themed segments for both styles. Positive reduction
+magnitude, inverted direction, attack/release constants, and value text are
+strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide no reduction, attack, release, maximum reduction,
+bar and segment styles, vertical and horizontal orientation, invalid-frame
+rejection, disabled state, and reset evidence.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 2 VisualState extension approved 2026-08-10.

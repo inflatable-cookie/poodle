@@ -23,6 +23,9 @@ Updated: 2026-08-10
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `mode` | `"latch" \| "momentary" \| "multi"` | `"latch"` | activation semantics |
 | `state` | `number` | `0` | bindable discrete state |
 | `stateCount` | `number` | `2` | at least two states |
@@ -55,6 +58,9 @@ The standard renderer is an inline control. Labels remain parent-owned.
 
 ## 8. Token Usage
 
+Size changes the switch footprint and lamp/body scale. Density changes
+internal padding and gap without changing latch or momentary semantics.
+
 `--poodle-recipe-audio-switch-fill`, `-border`, `-handle`, `-active`,
 `-lamp-off`, `-lamp-on`, `-focus-ring`, and `-disabled-opacity`.
 
@@ -63,9 +69,20 @@ The standard renderer is an inline control. Labels remain parent-owned.
 The adapter owns button events and accessibility. `AudioSwitchVisual` receives
 only VisualState.
 
+## 9a. React Notes
+
+React runs the same switch transition and shared CSS. `AudioSwitchVisual`
+receives only VisualState.
+
 ## 10. GPUI Notes
 
-Out of scope for this phase.
+The adapter owns press/release/cancel and focus translation. The shared node
+builder consumes VisualState with lamp state distinct from selected state.
+
+## 10a. Jetstream Notes
+
+Jetstream consumes the same Rust transition, spec, and node builder and maps
+the result to button/toggle accessibility.
 
 ## 11. Parity Checklist
 
@@ -75,8 +92,18 @@ Out of scope for this phase.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Multi-state switches expose their current state through accessible label text
+because platform toggle roles are binary. Latch and momentary toggles use the
+native pressed/toggled channel.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide off/on latch, held/released momentary, three-state
+cycling with labels, lamp override independent of selection, pressed/focused,
+and disabled groups.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 2 VisualState extension approved 2026-08-10.

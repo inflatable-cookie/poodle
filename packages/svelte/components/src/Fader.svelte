@@ -8,8 +8,11 @@
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
   import FaderVisual from "./audio/FaderVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null; sizeRole?: SemanticControlSizeRole; density?: ControlDensity | null;
     value?: number; min?: number; max?: number; law?: AudioValueLaw;
     orientation?: "horizontal" | "vertical"; detents?: number[]; detentSnap?: number;
     defaultValue?: number; keyboardStep?: number; format?: AudioValueFormat;
@@ -19,12 +22,17 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     value = $bindable(0), min = 0, max = 1, law = { type: "linear" },
     orientation = "vertical", detents = [], detentSnap = 0.015,
     defaultValue = 0, keyboardStep = 0.01, format = { type: "number", decimals: 2 },
     automation = "none", disabled = false, ariaLabel = null,
     onValueChange, onValueCommit, onGestureBegin, onGestureEnd,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let machine = $state(createFaderContext());
   let root: HTMLDivElement;
@@ -86,6 +94,8 @@
   aria-disabled={disabled}
   data-scope="fader"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-orientation={orientation}
   data-state={visualState.drag === "none" ? "idle" : visualState.drag}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd}

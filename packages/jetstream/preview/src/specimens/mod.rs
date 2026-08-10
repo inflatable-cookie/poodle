@@ -111,6 +111,7 @@ pub mod theme_select;
 // pub mod reorderable_list;
 pub mod agent_question;
 pub mod agent_transcript;
+pub mod audio_controls;
 pub mod date_time_zone_picker;
 pub mod resize_handle;
 pub mod scroll_shell;
@@ -467,6 +468,15 @@ pub fn render_specimen(
         "sidebar-nav" => Some(el(sidebar_nav::render(theme))),
         "skeleton" => Some(el(skeleton::render(theme))),
         "slider" => Some(el(slider::render(theme))),
+        "knob" => Some(el(audio_controls::knob(theme))),
+        "fader" => Some(el(audio_controls::fader(theme))),
+        "audio-meter" => Some(el(audio_controls::audio_meter(theme))),
+        "value-readout" => Some(el(audio_controls::value_readout(theme))),
+        "drag-number-field" => Some(el(audio_controls::drag_number_field(theme))),
+        "envelope-editor" => Some(el(audio_controls::envelope_editor(theme))),
+        "xy-pad" => Some(el(audio_controls::xy_pad(theme))),
+        "audio-switch" => Some(el(audio_controls::audio_switch(theme))),
+        "gain-reduction-meter" => Some(el(audio_controls::gain_reduction_meter(theme))),
         "spacer" => Some(el(spacer::render(theme))),
         "spinner" => Some(el(spinner::render(theme))),
         "split-button" => Some(el(split_button::render(theme))),

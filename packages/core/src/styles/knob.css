@@ -1,9 +1,11 @@
 .poodle-knob {
+  --poodle-knob-size: 3rem;
+  --poodle-knob-ring: 0.25rem;
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: var(--poodle-knob-size);
+  height: var(--poodle-knob-size);
   touch-action: none;
   cursor: ns-resize;
   outline: none;
@@ -26,9 +28,16 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.25rem), #000 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 0.25rem), #000 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--poodle-knob-ring)), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--poodle-knob-ring)), #000 0);
 }
+
+.poodle-knob[data-size="xs"] { --poodle-knob-size: 2rem; }
+.poodle-knob[data-size="sm"] { --poodle-knob-size: 2.5rem; }
+.poodle-knob[data-size="lg"] { --poodle-knob-size: 3.5rem; }
+.poodle-knob[data-size="xl"] { --poodle-knob-size: 4rem; }
+.poodle-knob[data-density="compact"] { --poodle-knob-ring: 0.1875rem; }
+.poodle-knob[data-density="comfortable"] { --poodle-knob-ring: 0.3125rem; }
 
 .poodle-knob-visual__track {
   border: 0.0625rem solid var(--poodle-recipe-knob-track-border, var(--poodle-color-border-default));

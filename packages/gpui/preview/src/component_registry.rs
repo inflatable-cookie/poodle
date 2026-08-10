@@ -414,6 +414,51 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Single-thumb slider for selecting a numeric value.",
     },
     ComponentEntry {
+        slug: "knob",
+        display_name: "Knob",
+        description: "Audio rotary control with pluggable value laws and gesture semantics.",
+    },
+    ComponentEntry {
+        slug: "fader",
+        display_name: "Fader",
+        description: "Audio fader with detents and explicit gesture state.",
+    },
+    ComponentEntry {
+        slug: "envelope-editor",
+        display_name: "EnvelopeEditor",
+        description: "Editable normalized envelope with curved segments and snap hooks.",
+    },
+    ComponentEntry {
+        slug: "xy-pad",
+        display_name: "XYPad",
+        description: "Atomic two-axis audio value control with independent laws.",
+    },
+    ComponentEntry {
+        slug: "audio-switch",
+        display_name: "AudioSwitch",
+        description: "Latch, momentary, or multi-state audio switch with lamp state.",
+    },
+    ComponentEntry {
+        slug: "drag-number-field",
+        display_name: "DragNumberField",
+        description: "Numeric entry supporting pointer drag and direct type-in.",
+    },
+    ComponentEntry {
+        slug: "audio-meter",
+        display_name: "AudioMeter",
+        description: "Ballistic audio level meter with mono and stereo rendering.",
+    },
+    ComponentEntry {
+        slug: "value-readout",
+        display_name: "ValueReadout",
+        description: "Formatted read-only display for audio parameter values.",
+    },
+    ComponentEntry {
+        slug: "gain-reduction-meter",
+        display_name: "GainReductionMeter",
+        description: "Inverted meter for compressor and limiter gain reduction.",
+    },
+    ComponentEntry {
         slug: "spinner",
         display_name: "Spinner",
         description: "Animated loading indicator with ring and grid variants.",
@@ -785,7 +830,8 @@ pub static SHELLS: &[ComponentEntry] = &[
 pub fn component_tag(slug: &str) -> ComponentTag {
     match slug {
         "button" | "icon-button" | "split-button" | "checkbox" | "switch" | "tri-state-switch"
-        | "radio-group" | "segmented-control" | "toggle-group" => ComponentTag::Control,
+        | "radio-group" | "segmented-control" | "toggle-group" | "knob" | "fader"
+        | "envelope-editor" | "xy-pad" | "audio-switch" => ComponentTag::Control,
         "stepper" => ComponentTag::Navigation,
         "agent-transcript" => ComponentTag::Display,
         "agent-question" => ComponentTag::Input,
@@ -805,6 +851,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "code-input"
         | "editable-label"
         | "slider"
+        | "drag-number-field"
         | "range-slider"
         | "rating"
         | "file-upload"
@@ -830,6 +877,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "meta-bar"
         | "meta-item"
         | "embed-preview" => ComponentTag::Display,
+        "audio-meter" | "value-readout" | "gain-reduction-meter" => ComponentTag::Display,
         "dialog" | "alert-dialog" | "drawer" | "popover" | "hover-card" | "tooltip" | "menu"
         | "context-menu" | "menubar" | "confirm-action" | "form-dialog" | "command-palette" => {
             ComponentTag::Overlay

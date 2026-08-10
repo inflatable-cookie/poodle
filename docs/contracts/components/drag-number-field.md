@@ -26,6 +26,9 @@ using the shared audio formatter.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `value` | `number` | `0` | bindable plain value |
 | `min` | `number` | minimum safe integer | lower bound |
 | `max` | `number` | maximum safe integer | upper bound |
@@ -70,6 +73,9 @@ same footprint.
 
 ## 8. Token Usage
 
+Size changes type scale and minimum width. Density changes field padding;
+drag sensitivity and value laws remain core-owned and unchanged.
+
 `--poodle-recipe-drag-number-field-fill`, `-text`, `-border`, `-hover-fill`,
 `-drag-fill`, `-entry-fill`, `-entry-border`, `-entry-text`, `-focus-ring`, and
 `-disabled-opacity`.
@@ -79,9 +85,20 @@ same footprint.
 The adapter owns pointer capture and the conditional input. `ValueVisual`
 receives VisualState plus core-formatted text.
 
+## 9a. React Notes
+
+React runs the same drag-number machine and shared CSS. `ValueVisual` receives
+only VisualState and formatted text; the shell owns the conditional input.
+
 ## 10. GPUI Notes
 
-Out of scope for Phase 1. Native direct-entry affordances need later design.
+The adapter owns horizontal drag, focus, key translation, and native text
+entry. The shared node builder never parses text or reads machine context.
+
+## 10a. Jetstream Notes
+
+Jetstream uses the same Rust transition and spec. Direct entry is represented
+by the node input vocabulary and committed by the adapter.
 
 ## 11. Parity Checklist
 
@@ -91,8 +108,16 @@ Out of scope for Phase 1. Native direct-entry affordances need later design.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+IME and selection mechanics follow each runtime's native text input. Parsing,
+clamping, step behavior, callbacks, and accessible values remain strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide default, integer step, formatted dB, coarse/fine
+drag, direct-entry, keyboard bounds, negative range, and disabled groups.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 1 review in Loophole gates wider adoption.

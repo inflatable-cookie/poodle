@@ -1,6 +1,14 @@
 # Roadmap Generation Index
 
-## Active Execution Track
+## Latest Completed Track
+
+- `g13`
+  - Status: completed
+  - Range: `001`
+  - Notes: extends the nine-component audio family from its completed Svelte
+    delivery to full React, GPUI, and Jetstream contracts, specimens, shared
+    native implementation, accessibility, and parity evidence. Asset skins,
+    host parameter binding, and Phase 3 audio components remain out of scope.
 
 - `g12`
   - Status: completed

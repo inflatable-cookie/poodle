@@ -6,8 +6,11 @@
     type AudioValueFormat, type AudioValueLaw, type XYPadContext, type XYPadEffect,
   } from "@inflatable-cookie/poodle-core";
   import XYPadVisual from "./audio/XYPadVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null; sizeRole?: SemanticControlSizeRole; density?: ControlDensity | null;
     x?: number; y?: number; minX?: number; maxX?: number; minY?: number; maxY?: number;
     lawX?: AudioValueLaw; lawY?: AudioValueLaw; defaultX?: number; defaultY?: number;
     keyboardStepX?: number; keyboardStepY?: number; formatX?: AudioValueFormat; formatY?: AudioValueFormat;
@@ -17,6 +20,7 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     x = $bindable(0), y = $bindable(0), minX = 0, maxX = 1, minY = 0, maxY = 1,
     lawX = linearValueLaw, lawY = linearValueLaw, defaultX = 0, defaultY = 0,
     keyboardStepX = 0.01, keyboardStepY = 0.01,
@@ -24,6 +28,10 @@
     automation = "none", disabled = false, ariaLabel = null,
     onValueChange, onValueCommit, onGestureBegin, onGestureEnd,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let root: HTMLDivElement;
   let machine = $state(createXYPadContext());
@@ -88,6 +96,8 @@
   aria-disabled={disabled}
   data-scope="xy-pad"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   onpointerdown={pointerDown}
   onpointermove={pointerMove}
   onpointerup={pointerEnd}

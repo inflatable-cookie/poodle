@@ -9,3 +9,13 @@
 .poodle-gain-reduction-meter-visual__bar { position: absolute; top: 0; left: 0; right: 0; height: calc(var(--poodle-gain-reduction-value) * 100%); background: var(--poodle-recipe-gain-reduction-meter-active, var(--poodle-color-accent-base)); }
 .poodle-gain-reduction-meter-visual[data-orientation="horizontal"] .poodle-gain-reduction-meter-visual__bar { top: 0; bottom: 0; left: auto; right: 0; width: calc(var(--poodle-gain-reduction-value) * 100%); height: auto; }
 .poodle-gain-reduction-meter::after { color: var(--poodle-recipe-gain-reduction-meter-text, var(--poodle-color-text-secondary)); }
+.poodle-gain-reduction-meter[data-size="xs"] .poodle-gain-reduction-meter-visual { width: 0.875rem; height: 5.5rem; }
+.poodle-gain-reduction-meter[data-size="xs"] .poodle-gain-reduction-meter-visual[data-orientation="horizontal"] { width: 5.5rem; height: 0.875rem; }
+.poodle-gain-reduction-meter[data-size="sm"] .poodle-gain-reduction-meter-visual { width: 1rem; height: 6.75rem; }
+.poodle-gain-reduction-meter[data-size="sm"] .poodle-gain-reduction-meter-visual[data-orientation="horizontal"] { width: 6.75rem; height: 1rem; }
+.poodle-gain-reduction-meter[data-size="lg"] .poodle-gain-reduction-meter-visual { width: 1.5rem; height: 9.5rem; }
+.poodle-gain-reduction-meter[data-size="lg"] .poodle-gain-reduction-meter-visual[data-orientation="horizontal"] { width: 9.5rem; height: 1.5rem; }
+.poodle-gain-reduction-meter[data-size="xl"] .poodle-gain-reduction-meter-visual { width: 1.75rem; height: 11rem; }
+.poodle-gain-reduction-meter[data-size="xl"] .poodle-gain-reduction-meter-visual[data-orientation="horizontal"] { width: 11rem; height: 1.75rem; }
+.poodle-gain-reduction-meter[data-density="compact"] .poodle-gain-reduction-meter-visual { padding: 0.0625rem; }
+.poodle-gain-reduction-meter[data-density="comfortable"] .poodle-gain-reduction-meter-visual { padding: 0.25rem; }

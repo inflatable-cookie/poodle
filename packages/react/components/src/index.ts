@@ -47,6 +47,15 @@ export { ResizeHandle, type ResizeHandleProps } from "./ResizeHandle";
 export { resolveEmbedParseState, detectParsedEmbed, type EmbedParseState } from "./embed-input";
 export { ColorPicker, type ColorPickerProps } from "./ColorPicker";
 export { AudioPlayer, type AudioPlayerProps } from "./AudioPlayer";
+export { AudioMeter, type AudioMeterHandle, type AudioMeterProps } from "./AudioMeter";
+export { AudioSwitch, type AudioSwitchProps } from "./AudioSwitch";
+export { DragNumberField, type DragNumberFieldProps } from "./DragNumberField";
+export { EnvelopeEditor, type EnvelopeEditorProps } from "./EnvelopeEditor";
+export { Fader, type FaderProps } from "./Fader";
+export { GainReductionMeter, type GainReductionMeterHandle, type GainReductionMeterProps } from "./GainReductionMeter";
+export { Knob, type KnobProps } from "./Knob";
+export { ValueReadout, type ValueReadoutProps } from "./ValueReadout";
+export { XYPad, type XYPadProps } from "./XYPad";
 export {
   BlockEditor,
   type BlockEditorProps,

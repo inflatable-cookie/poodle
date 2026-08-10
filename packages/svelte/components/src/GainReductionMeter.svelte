@@ -5,8 +5,13 @@
     gainReductionMeterVisualState, type GainReductionFrame, type GainReductionMeterContext,
   } from "@inflatable-cookie/poodle-core";
   import GainReductionMeterVisual from "./audio/GainReductionMeterVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     context?: GainReductionMeterContext;
     style?: "bar" | "segments";
     orientation?: "horizontal" | "vertical";
@@ -15,9 +20,14 @@
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     context = $bindable(createGainReductionMeterContext()),
     style = "segments", orientation = "vertical", segments = 20, ariaLabel = "Gain reduction",
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const visualState = $derived(gainReductionMeterVisualState(context));
   const valueText = $derived(`${formatAudioValue(context.ballisticDb, { type: "db", decimals: 1 })} reduction`);
@@ -41,6 +51,8 @@
   aria-valuetext={valueText}
   data-scope="gain-reduction-meter"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-orientation={orientation}
 >
   <GainReductionMeterVisual {visualState} {style} {orientation} {segments} />

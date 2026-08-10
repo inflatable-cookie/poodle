@@ -5,17 +5,25 @@
     type AudioSwitchContext, type AudioSwitchEffect, type AudioSwitchMode,
   } from "@inflatable-cookie/poodle-core";
   import AudioSwitchVisual from "./audio/AudioSwitchVisual.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   interface Props {
+    size?: ControlSize | null; sizeRole?: SemanticControlSizeRole; density?: ControlDensity | null;
     mode?: AudioSwitchMode; state?: number; stateCount?: number; lampOn?: boolean | null;
     stateLabels?: string[]; disabled?: boolean; ariaLabel?: string | null;
     onStateChange?: (state: number) => void; onStateCommit?: (state: number) => void;
   }
 
   let {
+    size = null, sizeRole = "control", density = null,
     mode = "latch", state: currentState = $bindable(0), stateCount = 2, lampOn = null,
     stateLabels = [], disabled = false, ariaLabel = "Audio switch", onStateChange, onStateCommit,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let machine = $state(createAudioSwitchContext());
   let activePointer: number | null = null;
@@ -66,6 +74,8 @@
   disabled={disabled}
   data-scope="audio-switch"
   data-part="root"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-mode={mode}
   onpointerdown={pointerDown}
   onpointerup={pointerUp}

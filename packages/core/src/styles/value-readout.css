@@ -1,3 +1,9 @@
 .poodle-value-readout { display: inline-block; }
 .poodle-value-readout-visual { display: inline-block; min-width: 3.5rem; padding: 0.25rem 0.375rem; border: 0.0625rem solid var(--poodle-recipe-value-readout-border, var(--poodle-color-border-default)); border-radius: 0.25rem; color: var(--poodle-recipe-value-readout-text, var(--poodle-color-text-primary)); background: var(--poodle-recipe-value-readout-fill, var(--poodle-color-background-surface)); font-variant-numeric: tabular-nums; text-align: right; }
 .poodle-value-readout-visual[data-enabled="false"] { opacity: var(--poodle-recipe-value-readout-disabled-opacity, var(--poodle-state-opacity-disabled)); }
+.poodle-value-readout[data-size="xs"] .poodle-value-readout-visual { min-width: 2.75rem; font-size: 0.75rem; }
+.poodle-value-readout[data-size="sm"] .poodle-value-readout-visual { min-width: 3.125rem; font-size: 0.875rem; }
+.poodle-value-readout[data-size="lg"] .poodle-value-readout-visual { min-width: 4rem; font-size: 1.125rem; }
+.poodle-value-readout[data-size="xl"] .poodle-value-readout-visual { min-width: 4.5rem; font-size: 1.25rem; }
+.poodle-value-readout[data-density="compact"] .poodle-value-readout-visual { padding: 0.125rem 0.25rem; }
+.poodle-value-readout[data-density="comfortable"] .poodle-value-readout-visual { padding: 0.375rem 0.5rem; }

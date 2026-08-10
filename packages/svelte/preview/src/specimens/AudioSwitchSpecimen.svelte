@@ -1,13 +1,17 @@
 <script lang="ts">
   import { AudioSwitch } from "@inflatable-cookie/poodle-svelte";
-  let latch = $state(0);
-  let momentary = $state(0);
-  let mode = $state(1);
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
+  let latch = $state(0); let momentary = $state(0); let multi = $state(1);
 </script>
-
-<div class="specimen">
-  <label>Latch <AudioSwitch bind:state={latch} ariaLabel="Power" /></label>
-  <label>Momentary <AudioSwitch mode="momentary" bind:state={momentary} lampOn={momentary > 0} ariaLabel="Trigger" /></label>
-  <label>Multi <AudioSwitch mode="multi" bind:state={mode} stateCount={3} stateLabels={["Low", "Mid", "High"]} lampOn={mode === 2} ariaLabel="Range" /></label>
+<SpecimenLayout variantDirection="row"><div class="page">
+  <section><h3>Off / on latch</h3><div class="row"><AudioSwitch state={0} ariaLabel="Off latch" /><AudioSwitch bind:state={latch} ariaLabel="Interactive latch" /><AudioSwitch state={1} ariaLabel="On latch" /></div></section>
+  <section><h3>Held / released momentary</h3><AudioSwitch mode="momentary" bind:state={momentary} ariaLabel="Momentary trigger" /></section>
+  <section><h3>Three-state cycle with labels</h3><AudioSwitch mode="multi" bind:state={multi} stateCount={3} stateLabels={["Low", "Mid", "High"]} ariaLabel="Range" /></section>
+  <section><h3>Lamp override</h3><div class="row"><AudioSwitch state={0} lampOn={true} ariaLabel="Off with lamp" /><AudioSwitch state={1} lampOn={false} ariaLabel="On without lamp" /></div></section>
+  <section><h3>Pressed / focused</h3><AudioSwitch state={1} ariaLabel="Focus and press switch" /></section>
+  <section><h3>Disabled</h3><AudioSwitch state={1} disabled ariaLabel="Disabled switch" /></section>
 </div>
-<style>.specimen { display: flex; gap: 1.5rem; } label { display: grid; gap: 0.5rem; color: var(--poodle-color-text-secondary); }</style>
+  {#snippet sizes(size)}<AudioSwitch state={1} {size} ariaLabel={`Audio switch ${size} size`} />{/snippet}
+  {#snippet densities(density)}<AudioSwitch state={1} {density} ariaLabel={`Audio switch ${density} density`} />{/snippet}
+</SpecimenLayout>
+<style>.page { display: grid; gap: 1rem; } section { display: grid; gap: .5rem; } h3 { margin: 0; color: var(--poodle-color-text-secondary); font-size: .75rem; } .row { display: flex; gap: 1rem; flex-wrap: wrap; }</style>

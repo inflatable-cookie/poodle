@@ -27,6 +27,9 @@ detents, and explicit gesture state.
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
+| `size` | `ControlSize \| null` | `null` | explicit `xs`–`xl`; otherwise inherited |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic inherited-size offset |
+| `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `value` | `number` | `0` | bindable plain value |
 | `min` | `number` | `0` | lower plain bound |
 | `max` | `number` | `1` | upper plain bound |
@@ -70,6 +73,9 @@ Orientation is a geometry input. The parent owns overall track length.
 
 ## 8. Token Usage
 
+Size changes track length and cross-axis footprint. Density changes rail
+weight while preserving normalized value and hit-test geometry.
+
 `--poodle-recipe-fader-track-fill`, `-track-border`, `-fill-fill`,
 `-thumb-fill`, `-thumb-border`, `-thumb-shadow`, `-detent-fill`,
 `-entry-fill`, `-entry-border`, `-entry-text`, `-focus-ring`, and
@@ -80,10 +86,20 @@ Orientation is a geometry input. The parent owns overall track length.
 The root adapter owns pointer-axis mapping and ARIA. `FaderVisual` receives
 VisualState plus serializable orientation and detent geometry.
 
+## 9a. React Notes
+
+The React shell runs the same fader machine and shared CSS. `FaderVisual`
+receives only VisualState, orientation, and normalized detent positions.
+
 ## 10. GPUI Notes
 
-Out of scope for Phase 1. Gesture effects are preserved for the later host
-adapter.
+The adapter maps track-relative pointer positions before calling the Rust
+machine. The shared renderer receives VisualState and serializable geometry.
+
+## 10a. Jetstream Notes
+
+Jetstream uses the same Rust machine/spec/node builder and preserves paired
+gesture begin/end effects for host automation.
 
 ## 11. Parity Checklist
 
@@ -93,8 +109,17 @@ adapter.
 
 ## 12. Known Deltas
 
-Svelte only. React, GPUI, and Jetstream implementations are not included.
+Pointer capture mechanics are runtime-owned. Detent resolution, values,
+gesture effects, orientation, and accessible text are strict.
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All four previews provide standalone groups for vertical and horizontal
+orientation, linear/log/bipolar laws, detents, coarse/fine drag, automation
+touch state, type-in, disabled state, and keyboard bounds.
+
+## 14. Approval And Adoption Notes
+
+The specimen page includes the full five-size and three-density matrices.
 
 Phase 1 review in Loophole gates further audio-family work.
