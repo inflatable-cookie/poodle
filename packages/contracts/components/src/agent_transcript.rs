@@ -26,6 +26,7 @@ pub struct AgentTranscriptSpec {
     pub expanded_tool_runs: Vec<String>,
     pub expanded_tool_calls: Vec<String>,
     pub expanded_changed_files: Vec<String>,
+    pub expanded_subagent_groups: Vec<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -55,6 +56,7 @@ impl AgentTranscriptSpec {
             expanded_tool_runs: Vec::new(),
             expanded_tool_calls: Vec::new(),
             expanded_changed_files: Vec::new(),
+            expanded_subagent_groups: Vec::new(),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -95,6 +97,10 @@ impl AgentTranscriptSpec {
     }
     pub fn with_expanded_changed_files(mut self, ids: Vec<String>) -> Self {
         self.expanded_changed_files = ids;
+        self
+    }
+    pub fn with_expanded_subagent_groups(mut self, ids: Vec<String>) -> Self {
+        self.expanded_subagent_groups = ids;
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {

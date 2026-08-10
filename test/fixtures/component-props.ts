@@ -57,6 +57,16 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
     plan: "1. Add the component\n2. Wire the composer\n3. Run the gates",
     status: "accepted",
   },
+  // Running exercises the live side: spinner, activity line and disclosure.
+  AgentSubagent: {
+    item: {
+      id: "child-1",
+      label: "Scout",
+      status: "running",
+      activityLine: "Searching the parser crate for the drift",
+    },
+    detailLines: ["Searching the vectors", "Matching against the TS core"],
+  },
   AgentTranscript: {
     items: [
       { kind: "message", id: "m1", role: "assistant", markdown: "Checking the parser." },

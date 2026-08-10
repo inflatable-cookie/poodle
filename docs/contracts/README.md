@@ -54,6 +54,7 @@ contract references the rule rather than restating it:
 - `components/agent-plan.md`
 - `components/agent-question-record.md`
 - `components/agent-question.md`
+- `components/agent-subagent.md`
 - `components/agent-transcript.md`
 - `components/alert-dialog.md`
 - `components/app-header.md`

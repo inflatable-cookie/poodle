@@ -270,6 +270,14 @@ export {
 } from "./agent-plan";
 
 export {
+  isTerminalSubagentStatus,
+  subagentStatusLabel,
+  subagentStatusSpins,
+  type AgentSubagentStatus,
+  type AgentSubagentItem,
+} from "./agent-subagent";
+
+export {
   submitsOnSelect,
   toggleQuestionSelection,
   resolveQuestionAnswer,
@@ -310,6 +318,7 @@ export {
   type TranscriptActivity,
   type TranscriptAnsweredQuestion,
   type TranscriptDecidedPlan,
+  type TranscriptSubagentGroup,
   type TranscriptItem,
   type TranscriptToolRun,
   type TranscriptBlock,

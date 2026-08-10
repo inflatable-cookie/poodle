@@ -79,6 +79,34 @@ fn item_from(value: &Value) -> TranscriptItem {
                 .and_then(Value::as_str)
                 .map(str::to_string),
         }),
+        "subagent-group" => TranscriptItem::SubagentGroup(TranscriptSubagentGroup {
+            id: s(value, "id").to_string(),
+            subagent: poodle_headless::agent_subagent::AgentSubagentItem {
+                id: s(&value["subagent"], "id").to_string(),
+                label: s(&value["subagent"], "label").to_string(),
+                status: poodle_headless::agent_subagent::AgentSubagentStatus::from_str_or_default(
+                    s(&value["subagent"], "status"),
+                ),
+                activity_line: value["subagent"]
+                    .get("activityLine")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
+                summary: value["subagent"]
+                    .get("summary")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
+            },
+            detail_lines: value
+                .get("detailLines")
+                .and_then(Value::as_array)
+                .map(|lines| {
+                    lines
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_string)
+                        .collect()
+                }),
+        }),
         _ => TranscriptItem::Message(TranscriptMessage {
             id: s(value, "id").to_string(),
             role: match s(value, "role") {

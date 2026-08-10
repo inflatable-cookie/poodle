@@ -86,6 +86,7 @@ export { default as AgentPlan } from "./AgentPlan.svelte";
 export { default as AgentPlanRecord } from "./AgentPlanRecord.svelte";
 export { default as AgentQuestion } from "./AgentQuestion.svelte";
 export { default as AgentQuestionRecord } from "./AgentQuestionRecord.svelte";
+export { default as AgentSubagent } from "./AgentSubagent.svelte";
 export { default as AgentTranscript } from "./AgentTranscript.svelte";
 export { default as ChangedFiles } from "./ChangedFiles.svelte";
 export { default as ToolCall } from "./ToolCall.svelte";
@@ -265,6 +266,8 @@ export type {
   TranscriptRole,
   TranscriptToolCall,
   TranscriptToolRun,
+  TranscriptDecidedPlan,
+  TranscriptSubagentGroup,
   AgentPlanStatus,
   AgentPlanSettledStatus,
   AgentPlanDecision,
@@ -272,6 +275,8 @@ export type {
   AgentQuestionItem,
   AgentQuestionOutcome,
   AgentQuestionAnswer,
+  AgentSubagentStatus,
+  AgentSubagentItem,
   AnsweredQuestion,
   SelectItems,
   SelectOption,

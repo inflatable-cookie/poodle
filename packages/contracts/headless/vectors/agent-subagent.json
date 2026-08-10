@@ -1,0 +1,33 @@
+{
+  "description": "Shared conformance vectors for the Poodle agent-subagent status vocabulary. Executed by both the TypeScript core (packages/core/test/agent-subagent-conformance.test.ts) and the Rust mirror (packages/contracts/headless/tests/agent_subagent_conformance.rs). The eight statuses mirror Swallowtail's SubagentStatus exactly; unknown renders literally as Unknown and is never prettified.",
+  "labels": [
+    { "status": "unknown", "label": "Unknown" },
+    { "status": "pending", "label": "Pending" },
+    { "status": "running", "label": "Running" },
+    { "status": "waiting", "label": "Waiting" },
+    { "status": "completed", "label": "Completed" },
+    { "status": "failed", "label": "Failed" },
+    { "status": "interrupted", "label": "Interrupted" },
+    { "status": "shutdown", "label": "Shutdown" }
+  ],
+  "terminal": [
+    { "status": "unknown", "terminal": false },
+    { "status": "pending", "terminal": false },
+    { "status": "running", "terminal": false },
+    { "status": "waiting", "terminal": false },
+    { "status": "completed", "terminal": true },
+    { "status": "failed", "terminal": true },
+    { "status": "interrupted", "terminal": true },
+    { "status": "shutdown", "terminal": true }
+  ],
+  "spinning": [
+    { "status": "unknown", "spinning": false },
+    { "status": "pending", "spinning": false },
+    { "status": "running", "spinning": true },
+    { "status": "waiting", "spinning": false },
+    { "status": "completed", "spinning": false },
+    { "status": "failed", "spinning": false },
+    { "status": "interrupted", "spinning": false },
+    { "status": "shutdown", "spinning": false }
+  ]
+}

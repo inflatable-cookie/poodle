@@ -16,6 +16,7 @@ primitives and layout surfaces through higher-order application components.
 - `agent-plan.md`
 - `agent-question-record.md`
 - `agent-question.md`
+- `agent-subagent.md`
 - `agent-transcript.md`
 - `alert-dialog.md`
 - `app-header.md`

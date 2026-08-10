@@ -38,6 +38,10 @@ pub struct AgentTranscriptHandlers {
     pub on_changed_files_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with a file's path when one is chosen in a changed-files card.
     pub on_file_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires with the group id when a subagent group is expanded or collapsed.
+    pub on_subagent_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires with the group id when a subagent group's click-through is used.
+    pub on_subagent_open: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 pub fn agent_transcript(
@@ -121,6 +125,34 @@ pub fn agent_transcript(
                         .with_density(spec.density);
                     root = root.child(agent_question_record(&card, theme));
                 }
+            }
+            // A provider-owned child's work renders live in the transcript —
+            // observation-only, with the disclosure and click-through handled
+            // by the group itself.
+            TranscriptBlock::SubagentGroup(group) => {
+                let card = poodle_specs::AgentSubagentSpec::new(group.subagent.clone())
+                    .with_expanded(spec.expanded_subagent_groups.contains(&group.id))
+                    .with_detail_lines(group.detail_lines.clone().unwrap_or_default())
+                    .with_size(spec.size)
+                    .with_density(spec.density);
+
+                let group_id = group.id.clone();
+                let group_handlers = crate::agent_subagent::AgentSubagentHandlers {
+                    on_toggle: handlers.on_subagent_toggle.as_ref().map(|handler| {
+                        let handler = Arc::clone(handler);
+                        let id = group_id.clone();
+                        Arc::new(move |_expanded| handler(&id))
+                            as Arc<dyn Fn(bool) + Send + Sync>
+                    }),
+                    on_open_child: handlers.on_subagent_open.as_ref().map(|handler| {
+                        let handler = Arc::clone(handler);
+                        let id = group_id.clone();
+                        Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+                    }),
+                };
+                root = root.child(crate::agent_subagent::agent_subagent(
+                    &card, theme, group_handlers,
+                ));
             }
             // Decided plans are retained in the shared transcript contract;
             // this renderer has no plan-card primitive yet, so keep the

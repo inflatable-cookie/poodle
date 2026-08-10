@@ -489,6 +489,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "AgentPlanRecord",
       "AgentQuestion",
       "AgentQuestionRecord",
+      "AgentSubagent",
       "AgentTranscript",
       "ChangedFiles",
       "ToolCall",

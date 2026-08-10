@@ -9,6 +9,7 @@
 
 pub mod agent_plan;
 pub mod agent_question;
+pub mod agent_subagent;
 pub mod agent_transcript;
 pub mod checkbox;
 pub mod color;

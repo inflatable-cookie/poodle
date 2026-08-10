@@ -19,6 +19,7 @@ pub mod agent_plan;
 pub mod agent_plan_record;
 pub mod agent_question;
 pub mod agent_question_record;
+pub mod agent_subagent;
 pub mod agent_transcript;
 pub mod alert_dialog;
 pub mod app_header;
@@ -175,6 +176,7 @@ pub use agent_plan::{agent_plan, AgentPlanHandlers};
 pub use agent_plan_record::{agent_plan_record, AgentPlanRecordHandlers};
 pub use agent_question::{agent_question, AgentQuestionHandlers};
 pub use agent_question_record::agent_question_record;
+pub use agent_subagent::{agent_subagent, AgentSubagentHandlers};
 pub use agent_transcript::{agent_transcript, AgentTranscriptHandlers};
 pub use alert_dialog::{
     alert_dialog, alert_dialog_with_content, AlertDialogHandlers, DEFAULT_WORKING_LABEL,
