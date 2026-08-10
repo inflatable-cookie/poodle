@@ -280,14 +280,24 @@ function validateContractIndexes(errors: string[]): void {
 
 function validateOperatorGuides(errors: string[]): number {
   const guideFiles = collectMarkdownFiles(path.join(repoRoot, "docs", "guides"));
-  const extraFiles = [
-    path.join(repoRoot, "packages", "bridges", "underlay", "README.md"),
-    path.join(repoRoot, "packages", "render", "README.md"),
+  const packageReadmes = collectMarkdownFiles(path.join(repoRoot, "packages")).filter(
+    (filePath) => path.basename(filePath) === "README.md" && !filePath.includes(`${path.sep}node_modules${path.sep}`),
+  );
+  const files = [
+    path.join(repoRoot, "README.md"),
+    path.join(repoRoot, "CONTRIBUTING.md"),
+    path.join(repoRoot, "SECURITY.md"),
+    path.join(repoRoot, "docs", "README.md"),
+    ...guideFiles,
+    ...packageReadmes,
   ];
-  const files = [...guideFiles, ...extraFiles];
   const forbiddenPatterns = [
     { pattern: /<svelte:fragment\b/, description: "legacy <svelte:fragment> composition" },
+    { pattern: /<slot\b/, description: "legacy <slot> composition" },
     { pattern: /\bslot\s*=/, description: "legacy slot attributes" },
+    { pattern: /\bon:[a-z]/, description: "legacy Svelte event directives" },
+    { pattern: /^\s*export let\b/m, description: "legacy Svelte component props" },
+    { pattern: /^\s*\$:/m, description: "legacy Svelte reactive labels" },
     { pattern: /ButtonVariant::Solid\b/, description: "the removed Rust ButtonVariant::Solid variant" },
     { pattern: /\bMediaBrowseItem\b/, description: "the nonexistent MediaBrowseItem type" },
     { pattern: /\bbun run tokens:build\b/, description: "the deprecated bun token-build command" },
@@ -299,6 +309,18 @@ function validateOperatorGuides(errors: string[]): number {
 
     for (const { pattern, description } of forbiddenPatterns) {
       expect(!pattern.test(markdown), `${relativePath} uses ${description}.`, errors);
+    }
+
+    for (const match of markdown.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
+      const rawTarget = match[1].trim().replace(/^<|>$/g, "");
+      if (/^(?:https?:|mailto:|#)/.test(rawTarget)) continue;
+
+      const localTarget = decodeURIComponent(rawTarget.split("#", 1)[0]);
+      expect(
+        localTarget.length === 0 || fs.existsSync(path.resolve(path.dirname(filePath), localTarget)),
+        `${relativePath} links to missing local target ${rawTarget}.`,
+        errors,
+      );
     }
   }
 

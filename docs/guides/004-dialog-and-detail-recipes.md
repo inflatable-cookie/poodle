@@ -215,7 +215,7 @@ way `ListContainer` owns browse-page state.
 />
 ```
 
-Override state slots only when the page needs custom recovery or empty-state
+Override state snippets only when the page needs custom recovery or empty-state
 content.
 
 For host-owned detail and tab content:

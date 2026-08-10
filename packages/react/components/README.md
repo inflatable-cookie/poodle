@@ -90,9 +90,9 @@ framework idioms differ:
 | --- | --- |
 | `bind:value={x}` | controlled `value={x}` + `onValueChange`, or uncontrolled `defaultValue` |
 | Event props (`onValueChange`, `onCheckedChange`, …) | identical names |
-| `{#snippet leading()}…{/snippet}` slot | `leading={<Icon … />}` — a `ReactNode` prop |
+| `{#snippet leading()}…{/snippet}` | `leading={<Icon … />}` — a `ReactNode` prop |
 | Parameterized snippet `{#snippet item(row)}` | render-prop `item={(row) => …}` |
-| `class` / `on:click` | `className` / `onClick` |
+| `class` / `onclick` | `className` / `onClick` |
 
 Prop tables for every component are in the preview's usage docs (below) and in
 `component-docs.ts`, authored canonically in the Svelte preview and re-exported

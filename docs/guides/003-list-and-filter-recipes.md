@@ -19,7 +19,7 @@ list page without rebuilding old shell wrappers.
 ## Standard List Page
 
 Use `ListContainer` for title, actions, filters, state switching, and
-pagination placement. Render the actual list or grid in the default slot.
+pagination placement. Render the actual list or grid as default children.
 
 ```svelte
 <script lang="ts">
@@ -85,7 +85,7 @@ pagination placement. Render the actual list or grid in the default slot.
 
 ## Batch Actions
 
-Keep batch actions in the `batch` slot rather than pushing them into a custom
+Keep batch actions in the `batch` snippet rather than pushing them into a custom
 list wrapper.
 
 ```svelte
@@ -135,7 +135,7 @@ When host code owns the state region directly:
 ## FilterToolbar Rules
 
 - Use `summaryText` for result summary or active-filter summary
-- Keep refresh and similar utility actions in the `actions` slot
+- Keep refresh and similar utility actions in the `actions` snippet
 - Use `IconButton variant="ghost"` for toolbar utility actions
 - Use `secondary` rather than `ghost` for non-primary clustered actions outside
   the filter toolbar

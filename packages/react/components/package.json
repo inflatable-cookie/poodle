@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "Poodle React component pilot: styled shells over @inflatable-cookie/poodle-core machines, sharing tokens and recipes with the Svelte layer.",
+  "description": "Poodle React components over shared contracts, state machines, tokens, and styles.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inflatable-cookie/poodle.git",

@@ -181,7 +181,7 @@ Four surfaces are currently proven and policy-documented:
 |---|---|---|
 | `@underlay/ui/Button` | Button family | Variant/size translation, focus-ring parity, event-name compatibility |
 | `@underlay/ui/SearchInput` | TextInput | Query prop naming, submit/cancel behavior, result-shell composition |
-| `@underlay/ui/Panel` | Panel internals | Header slot translation, panel identity naming, workstation-only rollout |
+| `@underlay/ui/Panel` | Panel internals | Header snippet translation, panel identity naming, workstation-only rollout |
 | `@underlay/ui/NightfireBlockEditor` | BlockEditor shell | Single/multi posture mapping, opaque block envelope pass-through, grouped type picker override when subcategory menus matter |
 
 ### Wrapper implementation pattern
@@ -197,24 +197,35 @@ Underlay-owned import path. App code never sees Poodle:
 <script lang="ts">
   // Underlay-owned prop names — NOT Poodle names
   import { Button as PoodleButton } from "@inflatable-cookie/poodle-svelte";  // internal use only
-  import type { HTMLButtonAttributes } from "svelte/elements";
+  import type { Snippet } from "svelte";
 
-  // Underlay prop surface
-  export let intent: "primary" | "secondary" | "ghost" = "secondary";
-  export let scale: "sm" | "md" | "lg" = "md";
-  export let disabled: boolean = false;
+  interface Props {
+    intent?: "primary" | "secondary" | "ghost";
+    scale?: "sm" | "md" | "lg";
+    disabled?: boolean;
+    onClick?: () => void;
+    children?: Snippet;
+  }
+
+  let {
+    intent = "secondary",
+    scale = "md",
+    disabled = false,
+    onClick,
+    children,
+  }: Props = $props();
 
   // Translate to Poodle equivalents (bridge-owned mapping)
-  const variantMap = { primary: "solid", secondary: "outline", ghost: "ghost" } as const;
+  const variantMap = { primary: "primary", secondary: "secondary", ghost: "ghost" } as const;
   const sizeMap    = { sm: "sm", md: "md", lg: "lg" } as const;
 
-  $: poodleVariant = variantMap[intent];
-  $: poodleSize    = sizeMap[scale];
+  const poodleVariant = $derived(variantMap[intent]);
+  const poodleSize = $derived(sizeMap[scale]);
 </script>
 
 <!-- Poodle component is internal implementation detail -->
-<PoodleButton variant={poodleVariant} size={poodleSize} {disabled} on:click>
-  <slot />
+<PoodleButton variant={poodleVariant} size={poodleSize} {disabled} {onClick}>
+  {@render children?.()}
 </PoodleButton>
 ```
 
@@ -225,7 +236,7 @@ App code:
 <script>
   import Button from "@underlay/ui/Button";
 </script>
-<Button intent="primary" scale="md" on:click={save}>Save</Button>
+<Button intent="primary" scale="md" onClick={save}>Save</Button>
 ```
 
 ```svelte
@@ -233,7 +244,7 @@ App code:
 <script>
   import { Button } from "@inflatable-cookie/poodle-svelte";
 </script>
-<Button variant="solid" size="md" on:click={save}>Save</Button>
+<Button variant="primary" size="md" onClick={save}>Save</Button>
 ```
 
 ### Preserving accessibility
@@ -244,7 +255,7 @@ Wrappers must not drop any of these from the underlying Poodle component:
 - Keyboard event handling
 - Announcement / live region behavior
 
-If your wrapper needs to intercept an event or slot, verify the accessibility
+If your wrapper needs to intercept a callback or snippet, verify the accessibility
 semantics still flow through. When in doubt, pass remaining attributes with
 `{...$$restProps}` (Svelte) or spread.
 

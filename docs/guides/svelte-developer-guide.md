@@ -392,15 +392,7 @@ Modern Poodle Svelte components prefer callback props over dispatcher events:
 
 ### Composition patterns
 
-Compatibility note:
-
-- many current components still expose named slots because that is how the
-  shipped public surface was built
-- for new composition APIs, prefer Svelte 5 snippets over introducing new
-  legacy slot surfaces unless the component is intentionally staying on a
-  compatibility-first contract during migration
-
-Components use snippets or slots for flexible composition, depending on the surface:
+Components use Svelte 5 children and named snippets for flexible composition:
 
 ```svelte
 <!-- Button: leading/trailing snippets for icons or custom content -->
@@ -931,13 +923,13 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 ```svelte
 <script>
   import { Pagination } from "@inflatable-cookie/poodle-svelte";
-  let page = 1;
+  let page = $state(1);
 </script>
 
 <Pagination
   totalPages={20}
   currentPage={page}
-  on:pageChange={(e) => page = e.detail.page}
+  onPageChange={(nextPage) => page = nextPage}
 />
 ```
 
@@ -1001,7 +993,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   import { ToastStack } from "@inflatable-cookie/poodle-svelte";
   import type { ToastItem } from "@inflatable-cookie/poodle-svelte";
 
-  let toasts: ToastItem[] = [];
+  let toasts: ToastItem[] = $state([]);
 
   function addToast() {
     toasts = [...toasts, {
@@ -1013,7 +1005,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   }
 </script>
 
-<ToastStack {toasts} on:dismiss={(e) => toasts = toasts.filter(t => t.id !== e.detail.id)} />
+<ToastStack items={toasts} onDismiss={(id) => toasts = toasts.filter((toast) => toast.id !== id)} />
 ```
 
 ---
@@ -1280,12 +1272,12 @@ interface MenuItem {
   import { Field, TextInput, Select, Button, Stack } from "@inflatable-cookie/poodle-svelte";
   import { FormLayout } from "@inflatable-cookie/poodle-svelte";
 
-  let name = "";
-  let email = "";
-  let submitted = false;
+  let name = $state("");
+  let email = $state("");
+  let submitted = $state(false);
 
-  $: nameError = submitted && !name ? "Name is required" : null;
-  $: emailError = submitted && !email ? "Email is required" : null;
+  let nameError = $derived(submitted && !name ? "Name is required" : null);
+  let emailError = $derived(submitted && !email ? "Email is required" : null);
 </script>
 
 <FormLayout columns={1}>

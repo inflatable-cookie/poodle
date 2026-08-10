@@ -14,7 +14,7 @@ rules.
 - use app or shared helpers for `slugify`, reserved-word checks, and format
   checks
 - use `TextInput.validate` for async availability checks
-- use `validationChange` to drive form-level validity
+- use `onValidationChange` to drive form-level validity
 
 ## Basic Pattern
 
@@ -23,19 +23,19 @@ rules.
   import { Field, TextInput, type InputValidationStatus, type ValidationResult } from "@inflatable-cookie/poodle-svelte";
   import { slugify, isReservedSlug, isValidSlugFormat } from "@inflatable-cookie/underlay/patterns";
 
-  let title = "";
-  let slug = "";
-  let lastAutoSlug = "";
-  let slugStatus: InputValidationStatus = "idle";
-  let slugError: string | null = null;
+  let title = $state("");
+  let slug = $state("");
+  let lastAutoSlug = $state("");
+  let slugStatus: InputValidationStatus = $state("idle");
+  let slugError: string | null = $state(null);
 
-  $: {
+  $effect(() => {
     const nextAutoSlug = slugify(title);
     if (!slug.trim() || slug === lastAutoSlug) {
       slug = nextAutoSlug;
     }
     lastAutoSlug = nextAutoSlug;
-  }
+  });
 
   async function validateSlug(value: string): Promise<ValidationResult> {
     const normalized = value.trim();
@@ -99,7 +99,7 @@ rules.
 - do local format and reserved-word checks before async availability checks
 - pass sibling IDs or parent IDs through `validationContext` when uniqueness is
   scoped
-- use `validationChange` for form submit gating instead of hidden registries
+- use `onValidationChange` for form submit gating instead of hidden registries
 
 ## Keep Out Of Poodle
 
