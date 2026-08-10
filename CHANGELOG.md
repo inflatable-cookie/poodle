@@ -24,6 +24,8 @@ so minor releases may contain documented breaking changes.
 - Established the first documented preview baseline: framework-free core,
   Svelte and experimental React component packages, shared tokens and themes,
   Rust contracts, the shared render tree, and GPUI and Jetstream adapters.
+  This was a source/version baseline, not a registry publication or GitHub
+  release tag.
 
 ### Changed
 
@@ -31,5 +33,5 @@ so minor releases may contain documented breaking changes.
   the [full 0.1.0 release notes](docs/release-notes/0.1.0.md) for package lists,
   migration guidance, and downstream checks.
 
-[Unreleased]: https://github.com/inflatable-cookie/poodle/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/inflatable-cookie/poodle/releases/tag/v0.1.0
+[Unreleased]: https://github.com/inflatable-cookie/poodle/compare/f8fac6a6...HEAD
+[0.1.0]: docs/release-notes/0.1.0.md

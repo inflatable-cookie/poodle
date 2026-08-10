@@ -110,8 +110,8 @@ architecture, contracts, and project history.
 ## Work on Poodle Locally
 
 Poodle uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task
-runner. Bun is required for workspace hydration and web tooling; Rust 1.95 is
-required for native packages.
+runner. Install Effigy, Bun 1.3.14, and Rust 1.95 before setting up the
+repository.
 
 ```sh
 bun install
@@ -157,3 +157,10 @@ and historical traceability. They are not required reading for adopting Poodle.
 
 Poodle is available under the [MIT License](LICENSE). Report security issues
 privately according to the [security policy](SECURITY.md).
+
+## Support
+
+Use [GitHub issues](https://github.com/inflatable-cookie/poodle/issues) for
+bugs and focused feature requests. For general or private project questions,
+email [tom@inflatablecookie.com](mailto:tom@inflatablecookie.com). Report
+security issues only through the private route in [SECURITY.md](SECURITY.md).
