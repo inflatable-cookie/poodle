@@ -1,0 +1,66 @@
+name: Bug report
+description: Report reproducible incorrect behavior in Poodle.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities here. Use the private route in SECURITY.md.
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime or surface
+      options:
+        - Svelte
+        - React
+        - GPUI
+        - Jetstream
+        - Shared web core, tokens, or icons
+        - Shared Rust contracts or renderer
+        - Documentation or tooling
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or revision
+      description: Package/crate version, commit SHA, or branch.
+      placeholder: 0.1.0 or abc1234
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide the smallest example and exact steps that reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include relevant errors, screenshots, or accessibility output. Remove secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Operating system, browser, toolchain versions, or related contract links.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: This report contains no credentials, private data, or undisclosed vulnerability details.
+          required: true

@@ -1,0 +1,49 @@
+name: Feature request
+description: Propose a reusable Poodle capability or contract change.
+title: "feature: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Operator or user problem
+      description: Describe the reusable problem without assuming a particular implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed capability
+      description: Describe observable inputs, states, events, accessibility, or token needs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: runtimes
+    attributes:
+      label: Affected runtimes
+      options:
+        - label: Svelte
+        - label: React
+        - label: GPUI
+        - label: Jetstream
+        - label: Shared contracts, tokens, icons, or tooling
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Reuse boundary
+      description: Explain why this belongs in a general design system rather than one application.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing primitives, application-owned composition, or other approaches tried.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and component contracts for this capability.
+          required: true
