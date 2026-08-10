@@ -12237,13 +12237,13 @@
         "name": "cells",
         "type": "ModMatrixCell[]",
         "default": "[]",
-        "description": "Sparse or complete bipolar amount and enable values."
+        "description": "Sparse or complete values with per-cell min, max, step, and law parameters."
       },
       {
         "name": "step",
         "type": "number",
         "default": "0.01",
-        "description": "Keyboard amount step."
+        "description": "Fallback keyboard step for cells without their own step."
       },
       {
         "name": "onCellChange",
@@ -12258,7 +12258,7 @@
         "description": "Reports committed cell edits."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ModMatrixGrid } from \"@inflatable-cookie/poodle-svelte\";\n  const sources = [{ id: \"one\", label: \"Source 1\" }];\n  const destinations = [{ id: \"a\", label: \"Destination A\" }];\n</script>\n\n<ModMatrixGrid {sources} {destinations} ariaLabel=\"Routing matrix\" />"
+    "usage": "<script lang=\"ts\">\n  import { ModMatrixGrid } from \"@inflatable-cookie/poodle-svelte\";\n  const sources = [{ id: \"one\", label: \"Source 1\" }];\n  const destinations = [{ id: \"a\", label: \"Destination A\" }];\n  const cells = [{\n    sourceId: \"one\", destinationId: \"a\", amount: 0.35, enabled: true,\n    parameters: { min: 0, max: 1, step: 0.05 },\n  }];\n</script>\n\n<ModMatrixGrid {sources} {destinations} {cells} ariaLabel=\"Routing matrix\" />"
   },
   "nav-card-grid": {
     "props": [

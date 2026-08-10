@@ -41,7 +41,7 @@
     {#each sources as source, row (source.id)}
       <div class="poodle-mod-matrix-grid__row" role="row">
         {#each visualState.cells.filter((cell) => cell.sourceId === source.id) as cell, column (`${cell.sourceId}:${cell.destinationId}`)}
-          <button class="poodle-mod-matrix-grid__control" type="button" role="gridcell" disabled={disabled} aria-label={`${source.label} to ${destinations[column]?.label ?? cell.destinationId}, ${cell.enabled ? "enabled" : "disabled"}, ${formatAudioValue(cell.amount, { type: "number", decimals: 2 })}`} aria-selected={cell.enabled} tabindex={cell.focused || (row === 0 && column === 0 && !visualState.focus) ? 0 : -1} onfocus={() => send({ type: "FOCUS_CELL", row, column })}></button>
+          <button class="poodle-mod-matrix-grid__control" type="button" role="gridcell" disabled={disabled} aria-label={`${source.label} to ${destinations[column]?.label ?? cell.destinationId}, ${cell.enabled ? "enabled" : "disabled"}, ${formatAudioValue(cell.amount, { type: "number", decimals: 2 })}, range ${formatAudioValue(cell.parameters.min, { type: "number", decimals: 2 })} to ${formatAudioValue(cell.parameters.max, { type: "number", decimals: 2 })}`} aria-selected={cell.enabled} tabindex={cell.focused || (row === 0 && column === 0 && !visualState.focus) ? 0 : -1} onfocus={() => send({ type: "FOCUS_CELL", row, column })}></button>
         {/each}
       </div>
     {/each}

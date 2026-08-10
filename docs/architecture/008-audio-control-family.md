@@ -301,17 +301,21 @@ audio or peak data.
 ## Mod-matrix Model
 
 The mod matrix accepts stable source and destination IDs plus caller labels.
-Each addressable cell owns `enabled` and a bipolar amount in `-1..1`, mapped
-through the shared bipolar-center law. The core rejects duplicate IDs and
-normalizes missing cells to disabled zero values. It contains no oscillator,
-envelope, MIDI, or routing semantics.
+Each addressable cell owns `enabled`, `amount`, and its own `min`, `max`,
+`step`, and shared audio value law. Omitted parameters preserve the original
+`-1..1` zero-centered bipolar behavior. One-sided ranges provide positive or
+negative unipolar cells in the same grid. The core rejects duplicate IDs and
+invalid cell parameters, then normalizes missing cells to disabled zero values
+with default parameters. It contains no oscillator, envelope, MIDI, or routing
+semantics.
 
 Arrow keys move cell focus with clamped row and column navigation. Home/End
 move to row bounds; Control+Home/End move to grid bounds. Space toggles the
-focused cell, and Page Up/Down or modified arrows nudge amount. Adapters expose
-row and column headers plus each cell's enabled state and formatted bipolar
-amount through platform grid semantics. Renderers receive the flattened
-VisualState only.
+focused cell, and Page Up/Down or modified arrows nudge amount using that
+cell's step. Adapters expose row and column headers plus each cell's enabled
+state, formatted amount, and range through platform grid semantics. Renderers
+receive normalized value, zero anchor, and fill geometry in the flattened
+VisualState; they never infer polarity or range.
 
 ## Runtime Parity And Appearance
 

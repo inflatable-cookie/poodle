@@ -1,3 +1,5 @@
+import type { AudioValueLaw } from "./laws";
+
 export type AudioDragState = "none" | "coarse" | "fine";
 
 export type AudioAutomationState = "none" | "touched" | "latched" | "writing" | "read";
@@ -104,14 +106,31 @@ export interface WaveformVisualState {
 }
 
 export interface ModMatrixHeader { id: string; label: string }
+export interface ModMatrixCellParameters {
+  min?: number;
+  max?: number;
+  step?: number;
+  law?: AudioValueLaw;
+}
+export interface ResolvedModMatrixCellParameters {
+  min: number;
+  max: number;
+  step: number;
+  law: AudioValueLaw;
+}
 export interface ModMatrixCell {
   sourceId: string;
   destinationId: string;
   amount: number;
   enabled: boolean;
+  parameters?: ModMatrixCellParameters;
 }
-export interface ModMatrixVisualCell extends ModMatrixCell {
+export interface ModMatrixVisualCell extends Omit<ModMatrixCell, "parameters"> {
+  parameters: ResolvedModMatrixCellParameters;
   amountNorm: number;
+  zeroNorm: number;
+  fillStartNorm: number;
+  fillSpanNorm: number;
   focused: boolean;
 }
 export interface ModMatrixVisualState {

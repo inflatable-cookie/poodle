@@ -1,5 +1,6 @@
-import { denormalizeAudioValue, normalizeAudioValue } from "./laws";
-import type { AudioDragState, ModMatrixCell, ModMatrixHeader, ModMatrixVisualState } from "./types";
+import { clampAudioValue, constrainAudioValue, denormalizeAudioValue, linearValueLaw, normalizeAudioValue } from "./laws";
+import type { AudioValueLaw, ContinuousValueLaw } from "./laws";
+import type { AudioDragState, ModMatrixCell, ModMatrixHeader, ModMatrixVisualState, ResolvedModMatrixCellParameters } from "./types";
 
 const bipolarLaw = { type: "bipolar-center", center: 0 } as const;
 
@@ -42,34 +43,61 @@ function normalizeHeaders(headers: ModMatrixHeader[], axis: string): ModMatrixHe
   });
 }
 
-const clampAmount = (amount: number): number => Math.min(Math.max(Number.isFinite(amount) ? amount : 0, -1), 1);
 const cellKey = (sourceId: string, destinationId: string): string => `${sourceId}\u0000${destinationId}`;
 
+function visualLaw(law: AudioValueLaw): ContinuousValueLaw {
+  return law.type === "stepped" ? law.law ?? linearValueLaw : law;
+}
+
+export function resolveModMatrixCellParameters(
+  cell: Pick<ModMatrixCell, "parameters">,
+  fallbackStep = 0.01,
+): ResolvedModMatrixCellParameters {
+  const min = cell.parameters?.min ?? -1;
+  const max = cell.parameters?.max ?? 1;
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
+    throw new RangeError("Mod matrix cell parameters require finite min < max");
+  }
+  const law = cell.parameters?.law ?? (min < 0 && max > 0 ? bipolarLaw : linearValueLaw);
+  normalizeAudioValue(min, min, max, law);
+  const lawStep = law.type === "stepped" ? law.step : undefined;
+  const step = cell.parameters?.step ?? lawStep ?? fallbackStep;
+  if (!Number.isFinite(step) || step < 0) throw new RangeError("Mod matrix cell step must be finite and non-negative");
+  return { min, max, step, law };
+}
+
 export function normalizeModMatrixCells(
-  sources: ModMatrixHeader[], destinations: ModMatrixHeader[], cells: ModMatrixCell[],
+  sources: ModMatrixHeader[], destinations: ModMatrixHeader[], cells: ModMatrixCell[], fallbackStep = 0.01,
 ): ModMatrixCell[] {
   const sourceIds = new Set(sources.map((source) => source.id));
   const destinationIds = new Set(destinations.map((destination) => destination.id));
   const supplied = new Map<string, ModMatrixCell>();
   for (const cell of cells) {
     if (!sourceIds.has(cell.sourceId) || !destinationIds.has(cell.destinationId)) continue;
-    supplied.set(cellKey(cell.sourceId, cell.destinationId), { ...cell, amount: clampAmount(cell.amount), enabled: Boolean(cell.enabled) });
+    const parameters = resolveModMatrixCellParameters(cell, fallbackStep);
+    const fallback = clampAudioValue(0, parameters.min, parameters.max);
+    const amount = constrainAudioValue(Number.isFinite(cell.amount) ? cell.amount : fallback, parameters.min, parameters.max, parameters.law);
+    supplied.set(cellKey(cell.sourceId, cell.destinationId), { ...cell, parameters, amount, enabled: Boolean(cell.enabled) });
   }
-  return sources.flatMap((source) => destinations.map((destination) => supplied.get(cellKey(source.id, destination.id)) ?? {
-    sourceId: source.id, destinationId: destination.id, amount: 0, enabled: false,
+  return sources.flatMap((source) => destinations.map((destination) => {
+    const suppliedCell = supplied.get(cellKey(source.id, destination.id));
+    if (suppliedCell) return suppliedCell;
+    const parameters = resolveModMatrixCellParameters({}, fallbackStep);
+    return { sourceId: source.id, destinationId: destination.id, amount: 0, enabled: false, parameters };
   }));
 }
 
 export function createModMatrixContext(input: Partial<ModMatrixContext> = {}): ModMatrixContext {
   const sources = normalizeHeaders(input.sources ?? [], "source");
   const destinations = normalizeHeaders(input.destinations ?? [], "destination");
+  const step = Math.max(Number.isFinite(input.step) ? input.step ?? 0.01 : 0.01, 0);
   return {
     sources,
     destinations,
-    cells: normalizeModMatrixCells(sources, destinations, input.cells ?? []),
+    cells: normalizeModMatrixCells(sources, destinations, input.cells ?? [], step),
     focusRow: input.focusRow ?? null,
     focusColumn: input.focusColumn ?? null,
-    step: Math.max(Number.isFinite(input.step) ? input.step ?? 0.01 : 0.01, 0),
+    step,
     drag: input.drag ?? "none",
     disabled: input.disabled ?? false,
   };
@@ -92,7 +120,12 @@ function updateFocused(context: ModMatrixContext, update: (cell: ModMatrixCell) 
   const index = focusedIndex(context);
   if (index == null || !context.cells[index]) return { context, effects: [] };
   const updated = update(context.cells[index]);
-  const cell = { ...updated, amount: clampAmount(updated.amount) };
+  const parameters = resolveModMatrixCellParameters(updated, context.step);
+  const cell = {
+    ...updated,
+    parameters,
+    amount: constrainAudioValue(updated.amount, parameters.min, parameters.max, parameters.law),
+  };
   const cells = context.cells.map((candidate, candidateIndex) => candidateIndex === index ? cell : candidate);
   return { context: { ...context, cells }, effects: [
     { type: "emitCellChange", cell },
@@ -119,20 +152,27 @@ export function modMatrixTransition(context: ModMatrixContext, event: ModMatrixE
     case "TOGGLE_FOCUSED": return context.disabled ? { context, effects: [] } : updateFocused(context, (cell) => ({ ...cell, enabled: !cell.enabled }), true);
     case "NUDGE_FOCUSED": {
       if (context.disabled) return { context, effects: [] };
-      const delta = event.direction * context.step * (event.multiplier ?? 1) * (event.fine ? 0.1 : 1);
+      const index = focusedIndex(context);
+      const focused = index == null ? null : context.cells[index] ?? null;
+      if (!focused) return { context, effects: [] };
+      const delta = event.direction * resolveModMatrixCellParameters(focused, context.step).step * (event.multiplier ?? 1) * (event.fine ? 0.1 : 1);
       return updateFocused(context, (cell) => ({ ...cell, amount: cell.amount + delta }), true);
     }
     case "DRAG_BEGIN": {
       if (context.disabled) return { context, effects: [] };
       const focused = { ...context, ...boundedFocus(context, event.row, event.column), drag: event.fine ? "fine" as const : "coarse" as const };
-      const result = updateFocused(focused, (cell) => ({ ...cell, amount: denormalizeAudioValue(event.amountNorm, -1, 1, bipolarLaw) }), false);
+      const result = updateFocused(focused, (cell) => {
+        const parameters = resolveModMatrixCellParameters(cell, context.step);
+        return { ...cell, amount: denormalizeAudioValue(event.amountNorm, parameters.min, parameters.max, parameters.law) };
+      }, false);
       return { context: result.context, effects: [{ type: "beginGesture" }, ...result.effects] };
     }
     case "DRAG_MOVE": {
       if (context.disabled || context.drag === "none") return { context, effects: [] };
-      return updateFocused({ ...context, drag: event.fine ? "fine" : "coarse" }, (cell) => ({
-        ...cell, amount: denormalizeAudioValue(event.amountNorm, -1, 1, bipolarLaw),
-      }), false);
+      return updateFocused({ ...context, drag: event.fine ? "fine" : "coarse" }, (cell) => {
+        const parameters = resolveModMatrixCellParameters(cell, context.step);
+        return { ...cell, amount: denormalizeAudioValue(event.amountNorm, parameters.min, parameters.max, parameters.law) };
+      }, false);
     }
     case "DRAG_END": {
       const index = focusedIndex(context);
@@ -149,11 +189,20 @@ export function modMatrixVisualState(context: ModMatrixContext): ModMatrixVisual
   return {
     sources: context.sources,
     destinations: context.destinations,
-    cells: context.cells.map((cell, cellIndex) => ({
-      ...cell,
-      amountNorm: normalizeAudioValue(cell.amount, -1, 1, bipolarLaw),
-      focused: cellIndex === index,
-    })),
+    cells: context.cells.map((cell, cellIndex) => {
+      const parameters = resolveModMatrixCellParameters(cell, context.step);
+      const amountNorm = normalizeAudioValue(cell.amount, parameters.min, parameters.max, parameters.law);
+      const zeroNorm = normalizeAudioValue(clampAudioValue(0, parameters.min, parameters.max), parameters.min, parameters.max, visualLaw(parameters.law));
+      return {
+        ...cell,
+        parameters,
+        amountNorm,
+        zeroNorm,
+        fillStartNorm: Math.min(amountNorm, zeroNorm),
+        fillSpanNorm: Math.abs(amountNorm - zeroNorm),
+        focused: cellIndex === index,
+      };
+    }),
     focus: focusedCell == null ? null : {
       sourceId: focusedCell.sourceId,
       destinationId: focusedCell.destinationId,

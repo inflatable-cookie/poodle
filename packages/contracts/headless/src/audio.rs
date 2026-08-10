@@ -1330,7 +1330,10 @@ pub fn keyboard_retarget(
         return keyboard_release(context, input);
     }
     if let (Some(active), Some(note)) = (
-        context.active_inputs.iter_mut().find(|active| active.0 == input),
+        context
+            .active_inputs
+            .iter_mut()
+            .find(|active| active.0 == input),
         note,
     ) {
         if active.1 == note {
@@ -1582,16 +1585,49 @@ pub struct ModMatrixHeader {
     pub label: String,
 }
 #[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixCellParameters {
+    pub min: f64,
+    pub max: f64,
+    pub step: f64,
+    pub law: AudioValueLaw,
+}
+impl Default for ModMatrixCellParameters {
+    fn default() -> Self {
+        Self {
+            min: -1.0,
+            max: 1.0,
+            step: 0.01,
+            law: AudioValueLaw::BipolarCenter { center: 0.0 },
+        }
+    }
+}
+fn mod_matrix_continuous_law(law: AudioValueLaw) -> AudioValueLaw {
+    match continuous_law(law) {
+        ContinuousAudioValueLaw::Linear => AudioValueLaw::Linear,
+        ContinuousAudioValueLaw::Logarithmic => AudioValueLaw::Logarithmic,
+        ContinuousAudioValueLaw::Exponential { exponent } => {
+            AudioValueLaw::Exponential { exponent }
+        }
+        ContinuousAudioValueLaw::BipolarCenter { center } => {
+            AudioValueLaw::BipolarCenter { center }
+        }
+    }
+}
+#[derive(Clone, Debug, PartialEq)]
 pub struct ModMatrixCell {
     pub source_id: String,
     pub destination_id: String,
     pub amount: f64,
     pub enabled: bool,
+    pub parameters: ModMatrixCellParameters,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct ModMatrixVisualCell {
     pub cell: ModMatrixCell,
     pub amount_norm: f64,
+    pub zero_norm: f64,
+    pub fill_start_norm: f64,
+    pub fill_span_norm: f64,
     pub focused: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -1624,7 +1660,9 @@ impl ModMatrixContext {
                 && sources
                     .iter()
                     .enumerate()
-                    .all(|(index, header)| sources[..index].iter().all(|prior| prior.id != header.id)),
+                    .all(|(index, header)| sources[..index]
+                        .iter()
+                        .all(|prior| prior.id != header.id)),
             "mod matrix source ids must be non-empty and unique"
         );
         assert!(
@@ -1632,7 +1670,9 @@ impl ModMatrixContext {
                 && destinations
                     .iter()
                     .enumerate()
-                    .all(|(index, header)| destinations[..index].iter().all(|prior| prior.id != header.id)),
+                    .all(|(index, header)| destinations[..index]
+                        .iter()
+                        .all(|prior| prior.id != header.id)),
             "mod matrix destination ids must be non-empty and unique"
         );
         let cells = sources
@@ -1650,11 +1690,40 @@ impl ModMatrixContext {
                             destination_id: destination.id.clone(),
                             amount: 0.0,
                             enabled: false,
+                            parameters: ModMatrixCellParameters::default(),
                         })
                 })
             })
             .map(|mut cell| {
-                cell.amount = cell.amount.clamp(-1.0, 1.0);
+                assert!(
+                    cell.parameters.min.is_finite()
+                        && cell.parameters.max.is_finite()
+                        && cell.parameters.max > cell.parameters.min,
+                    "mod matrix cell parameters require finite min < max"
+                );
+                assert!(
+                    cell.parameters.step.is_finite() && cell.parameters.step >= 0.0,
+                    "mod matrix cell step must be finite and non-negative"
+                );
+                assert!(
+                    valid_law(
+                        continuous_law(cell.parameters.law),
+                        cell.parameters.min,
+                        cell.parameters.max,
+                    ),
+                    "invalid mod matrix cell law"
+                );
+                let fallback = clamp_value(0.0, cell.parameters.min, cell.parameters.max);
+                cell.amount = constrain_value(
+                    if cell.amount.is_finite() {
+                        cell.amount
+                    } else {
+                        fallback
+                    },
+                    cell.parameters.min,
+                    cell.parameters.max,
+                    cell.parameters.law,
+                );
                 cell
             })
             .collect();
@@ -1690,6 +1759,37 @@ impl ModMatrixContext {
         }
         self
     }
+    pub fn nudge(mut self, direction: f64, fine: bool) -> Self {
+        if let (Some(row), Some(column)) = (self.focus_row, self.focus_column) {
+            if !self.disabled {
+                let index = row * self.destinations.len() + column;
+                let parameters = self.cells[index].parameters.clone();
+                self.cells[index].amount = constrain_value(
+                    self.cells[index].amount
+                        + direction * parameters.step * if fine { 0.1 } else { 1.0 },
+                    parameters.min,
+                    parameters.max,
+                    parameters.law,
+                );
+            }
+        }
+        self
+    }
+    pub fn set_normalized(mut self, norm: f64) -> Self {
+        if let (Some(row), Some(column)) = (self.focus_row, self.focus_column) {
+            if !self.disabled {
+                let index = row * self.destinations.len() + column;
+                let parameters = self.cells[index].parameters.clone();
+                self.cells[index].amount = denormalize_value(
+                    norm,
+                    parameters.min,
+                    parameters.max,
+                    parameters.law,
+                );
+            }
+        }
+        self
+    }
     pub fn visual_state(&self) -> ModMatrixVisualState {
         let focused = self
             .focus_row
@@ -1702,15 +1802,28 @@ impl ModMatrixContext {
                 .cells
                 .iter()
                 .enumerate()
-                .map(|(index, cell)| ModMatrixVisualCell {
-                    cell: cell.clone(),
-                    amount_norm: normalize_value(
+                .map(|(index, cell)| {
+                    let parameters = &cell.parameters;
+                    let amount_norm = normalize_value(
                         cell.amount,
-                        -1.0,
-                        1.0,
-                        AudioValueLaw::BipolarCenter { center: 0.0 },
-                    ),
-                    focused: focused == Some(index),
+                        parameters.min,
+                        parameters.max,
+                        parameters.law,
+                    );
+                    let zero_norm = normalize_value(
+                        clamp_value(0.0, parameters.min, parameters.max),
+                        parameters.min,
+                        parameters.max,
+                        mod_matrix_continuous_law(parameters.law),
+                    );
+                    ModMatrixVisualCell {
+                        cell: cell.clone(),
+                        amount_norm,
+                        zero_norm,
+                        fill_start_norm: amount_norm.min(zero_norm),
+                        fill_span_norm: (amount_norm - zero_norm).abs(),
+                        focused: focused == Some(index),
+                    }
                 })
                 .collect(),
             focus: focused.map(|index| {
@@ -1753,7 +1866,10 @@ mod tests {
             effects,
             vec![
                 KeyboardEffect::NoteOff { note: 60 },
-                KeyboardEffect::NoteOn { note: 62, velocity: 96 },
+                KeyboardEffect::NoteOn {
+                    note: 62,
+                    velocity: 96
+                },
             ]
         );
         assert_eq!(keyboard_visual_state(&context).held_notes, vec![62]);
@@ -1774,7 +1890,10 @@ mod tests {
             };
             WAVEFORM_MAX_COLUMNS + 8
         ];
-        fine[0] = WaveformPeakPair { min: -2.0, max: 1.5 };
+        fine[0] = WaveformPeakPair {
+            min: -2.0,
+            max: 1.5,
+        };
         let context = WaveformContext {
             pyramid: WaveformPeakPyramid {
                 sample_count: fine.len(),
@@ -1795,7 +1914,13 @@ mod tests {
         };
         let columns = waveform_columns(&context);
         assert_eq!(columns.len(), WAVEFORM_MAX_COLUMNS);
-        assert_eq!(columns[0], WaveformPeakPair { min: -1.0, max: 1.0 });
+        assert_eq!(
+            columns[0],
+            WaveformPeakPair {
+                min: -1.0,
+                max: 1.0
+            }
+        );
         let selected = context.select_begin(7).select_move(2);
         assert_eq!(
             selected.selection,
@@ -1824,11 +1949,50 @@ mod tests {
     }
 
     #[test]
+    fn phase_three_matrix_supports_per_cell_unipolar_parameters() {
+        let headers = vec![ModMatrixHeader {
+            id: "a".into(),
+            label: "A".into(),
+        }];
+        let context = ModMatrixContext::new(
+            headers.clone(),
+            headers,
+            vec![ModMatrixCell {
+                source_id: "a".into(),
+                destination_id: "a".into(),
+                amount: 0.4,
+                enabled: true,
+                parameters: ModMatrixCellParameters {
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.1,
+                    law: AudioValueLaw::Linear,
+                },
+            }],
+        )
+        .move_focus(0, 0)
+        .nudge(1.0, false)
+        .set_normalized(0.75);
+        let visual = context.visual_state();
+        close(context.cells[0].amount, 0.75);
+        close(visual.cells[0].amount_norm, 0.75);
+        close(visual.cells[0].zero_norm, 0.0);
+        close(visual.cells[0].fill_start_norm, 0.0);
+        close(visual.cells[0].fill_span_norm, 0.75);
+    }
+
+    #[test]
     #[should_panic(expected = "mod matrix source ids must be non-empty and unique")]
     fn phase_three_matrix_rejects_duplicate_axis_ids() {
         let duplicates = vec![
-            ModMatrixHeader { id: "a".into(), label: "A".into() },
-            ModMatrixHeader { id: "a".into(), label: "Again".into() },
+            ModMatrixHeader {
+                id: "a".into(),
+                label: "A".into(),
+            },
+            ModMatrixHeader {
+                id: "a".into(),
+                label: "Again".into(),
+            },
         ];
         let _ = ModMatrixContext::new(duplicates, vec![], vec![]);
     }

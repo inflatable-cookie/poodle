@@ -9,8 +9,9 @@ use poodle_headless::audio::{
     format_value, switch_visual_state, AudioControlVisualState, AudioMeterVisualState,
     AudioSwitchMode, AudioValueFormat, AudioValueLaw, AutomationState, DragState,
     EnvelopeVisualPoint, EnvelopeVisualState, GainReductionVisualState, KeyboardContext,
-    KeyboardOrientation, ModMatrixCell, ModMatrixContext, ModMatrixHeader, WaveformContext,
-    WaveformPeakLevel, WaveformPeakPair, WaveformPeakPyramid, XYPadVisualState,
+    KeyboardOrientation, ModMatrixCell, ModMatrixCellParameters, ModMatrixContext,
+    ModMatrixHeader, WaveformContext, WaveformPeakLevel, WaveformPeakPair,
+    WaveformPeakPyramid, XYPadVisualState,
 };
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
@@ -1195,7 +1196,7 @@ pub fn waveform_display(theme: &dyn ThemeProvider) -> Node {
 fn matrix_spec(enabled: bool) -> ModMatrixGridSpec {
     let sources = vec![ModMatrixHeader { id: "one".into(), label: "Source 1".into() }, ModMatrixHeader { id: "two".into(), label: "Source 2".into() }, ModMatrixHeader { id: "three".into(), label: "Source 3".into() }];
     let destinations = vec![ModMatrixHeader { id: "a".into(), label: "Dest A".into() }, ModMatrixHeader { id: "b".into(), label: "Dest B".into() }, ModMatrixHeader { id: "c".into(), label: "Dest C".into() }];
-    let mut context = ModMatrixContext::new(sources, destinations, vec![ModMatrixCell { source_id: "one".into(), destination_id: "a".into(), amount: 0.75, enabled: true }, ModMatrixCell { source_id: "one".into(), destination_id: "b".into(), amount: -0.5, enabled: true }]); context.focus_row = Some(0); context.focus_column = Some(0); context.disabled = !enabled;
+    let mut context = ModMatrixContext::new(sources, destinations, vec![ModMatrixCell { source_id: "one".into(), destination_id: "a".into(), amount: 0.75, enabled: true, parameters: ModMatrixCellParameters::default() }, ModMatrixCell { source_id: "one".into(), destination_id: "b".into(), amount: -0.5, enabled: true, parameters: ModMatrixCellParameters::default() }, ModMatrixCell { source_id: "one".into(), destination_id: "c".into(), amount: 0.35, enabled: true, parameters: ModMatrixCellParameters { min: 0.0, max: 1.0, step: 0.05, law: AudioValueLaw::Linear } }]); context.focus_row = Some(0); context.focus_column = Some(0); context.disabled = !enabled;
     ModMatrixGridSpec::new(context.visual_state())
 }
 
@@ -1203,7 +1204,7 @@ pub fn mod_matrix_grid(theme: &dyn ThemeProvider) -> Node {
     let base = matrix_spec(true); let axes = axis_groups(&base, super::mod_matrix_grid, theme);
     page(vec![
         ("Sparse generic matrix", vec![super::mod_matrix_grid(&base, theme)]),
-        ("Positive / negative / zero", vec![super::mod_matrix_grid(&base, theme)]),
+        ("Bipolar / negative / unipolar", vec![super::mod_matrix_grid(&base, theme)]),
         ("Keyboard navigation and toggle", vec![super::mod_matrix_grid(&base, theme)]),
         ("Empty axes", vec![super::mod_matrix_grid(&ModMatrixGridSpec::new(ModMatrixContext::new(vec![], vec![], vec![]).visual_state()), theme)]),
         ("Disabled", vec![super::mod_matrix_grid(&matrix_spec(false), theme)]),

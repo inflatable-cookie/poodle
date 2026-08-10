@@ -4917,8 +4917,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit compact, default, or comfortable density." },
     { name: "sources", type: "ModMatrixHeader[]", default: "[]", description: "Caller-owned source IDs and labels." },
     { name: "destinations", type: "ModMatrixHeader[]", default: "[]", description: "Caller-owned destination IDs and labels." },
-    { name: "cells", type: "ModMatrixCell[]", default: "[]", description: "Sparse or complete bipolar amount and enable values." },
-    { name: "step", type: "number", default: "0.01", description: "Keyboard amount step." },
+    { name: "cells", type: "ModMatrixCell[]", default: "[]", description: "Sparse or complete values with per-cell min, max, step, and law parameters." },
+    { name: "step", type: "number", default: "0.01", description: "Fallback keyboard step for cells without their own step." },
     { name: "onCellChange", type: "((cell: ModMatrixCell) => void) | undefined", default: "undefined", description: "Reports live cell edits." },
     { name: "onCellCommit", type: "((cell: ModMatrixCell) => void) | undefined", default: "undefined", description: "Reports committed cell edits." },
   ],
@@ -4926,9 +4926,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { ModMatrixGrid } from "@inflatable-cookie/poodle-svelte";
   const sources = [{ id: "one", label: "Source 1" }];
   const destinations = [{ id: "a", label: "Destination A" }];
+  const cells = [{
+    sourceId: "one", destinationId: "a", amount: 0.35, enabled: true,
+    parameters: { min: 0, max: 1, step: 0.05 },
+  }];
 </script>
 
-<ModMatrixGrid {sources} {destinations} ariaLabel="Routing matrix" />`,
+<ModMatrixGrid {sources} {destinations} {cells} ariaLabel="Routing matrix" />`,
   },
 };
 
