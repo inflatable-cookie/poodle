@@ -19,6 +19,8 @@ component-tier claims.
   GPUI was unimplemented despite their shared `poodle-render` implementations.
 - Active contracts had no gate against retired native paths or bare execution
   backlog statements.
+- `effigy health` ran only `docs:check` despite being documented as the full
+  repository health gate.
 
 ## Changes
 
@@ -28,10 +30,16 @@ component-tier claims.
   architecture.
 - Added documentation lint rules for retired native-tier paths and execution
   status inside component contracts.
+- Expanded `effigy health` to the web, Rust, native, package-install, license,
+  and security gates. Display-dependent visual sweeps remain separate.
+- The expanded gate found and closed a native RemediationBanner event gap:
+  action and dismiss controls now reach typed shared-renderer handlers, with a
+  focused activation test.
 - Kept historical migration comments and project records intact.
 
 ## Validation
 
+- `effigy health`
 - `effigy docs:check`
 - `effigy parity:check`
 - `git diff --check`

@@ -5,6 +5,8 @@
 //!
 //! Anatomy (contract §2): icon + content (title/message/actions) + dismiss.
 
+use std::sync::Arc;
+
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{ButtonSpec, RemediationAction, RemediationBannerSpec};
@@ -13,7 +15,17 @@ use crate::button::button;
 use crate::color::mix_srgb;
 use crate::presentation::rem_to_px;
 
-pub fn remediation_banner(spec: &RemediationBannerSpec, theme: &dyn ThemeProvider) -> Node {
+#[derive(Default, Clone)]
+pub struct RemediationBannerHandlers {
+    pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+pub fn remediation_banner(
+    spec: &RemediationBannerSpec,
+    theme: &dyn ThemeProvider,
+    handlers: RemediationBannerHandlers,
+) -> Node {
     // ── Colors (all token-resolved) ──
     let tone_color = theme.resolve_color(spec.border_token());
     let panel = theme.resolve_color(spec.background_token());
@@ -101,10 +113,12 @@ pub fn remediation_banner(spec: &RemediationBannerSpec, theme: &dyn ThemeProvide
         }
 
         if let Some(ref primary) = spec.primary_action {
-            actions_row = actions_row.child(action_button(primary, theme));
+            actions_row =
+                actions_row.child(action_button(primary, theme, handlers.on_action.as_ref()));
         }
         if let Some(ref secondary) = spec.secondary_action {
-            actions_row = actions_row.child(action_button(secondary, theme));
+            actions_row =
+                actions_row.child(action_button(secondary, theme, handlers.on_action.as_ref()));
         }
 
         content = content.child(actions_row);
@@ -117,7 +131,13 @@ pub fn remediation_banner(spec: &RemediationBannerSpec, theme: &dyn ThemeProvide
         let mut dismiss = Node::icon("x", dismiss_size);
         dismiss.id = Some("remediation-banner-dismiss".to_string());
         dismiss.style.descriptor.text_color = Some(text_secondary);
-        dismiss.style.descriptor.cursor = CursorHint::Pointer;
+        dismiss.a11y.role = Some(NodeRole::Button);
+        dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        if let Some(on_dismiss) = handlers.on_dismiss {
+            dismiss.style.descriptor.cursor = CursorHint::Pointer;
+            dismiss.interaction.focusable = true;
+            dismiss.interaction.on_activate = Some(on_dismiss);
+        }
         el = el.child(dismiss);
     }
 
@@ -127,15 +147,71 @@ pub fn remediation_banner(spec: &RemediationBannerSpec, theme: &dyn ThemeProvide
 /// Build a real `button` for a `RemediationAction`, honoring its variant and
 /// disabled flag (contract §2: RemediationAction button; §3 `is_disabled`).
 /// `button` already applies the disabled-opacity token.
-fn action_button(action: &RemediationAction, theme: &dyn ThemeProvider) -> Node {
+fn action_button(
+    action: &RemediationAction,
+    theme: &dyn ThemeProvider,
+    on_action: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    let on_click = on_action.map(|handler| {
+        let handler = Arc::clone(handler);
+        let id = action.id.clone();
+        Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+    });
     let mut b = button(
         &ButtonSpec::new()
             .with_variant(action.variant)
             .with_label(action.label.clone())
             .with_disabled(action.is_disabled),
         theme,
-        None,
+        on_click,
     );
     b.id = Some(format!("remediation-action-{}", action.id));
     b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::ButtonVariant;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn action_and_dismiss_controls_reach_host_handlers() {
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let action_seen = Arc::clone(&seen);
+        let dismiss_seen = Arc::clone(&seen);
+        let spec = RemediationBannerSpec::new("Save failed", "Try again.")
+            .with_primary_action(
+                RemediationAction::new("retry", "Retry").with_variant(ButtonVariant::Primary),
+            )
+            .with_dismissible(true);
+        let node = remediation_banner(
+            &spec,
+            &theme(),
+            RemediationBannerHandlers {
+                on_action: Some(Arc::new(move |id| {
+                    action_seen.lock().unwrap().push(id.to_string())
+                })),
+                on_dismiss: Some(Arc::new(move || {
+                    dismiss_seen.lock().unwrap().push("dismiss".to_string())
+                })),
+            },
+        );
+
+        let retry = node
+            .find(&|node| node.id.as_deref() == Some("remediation-action-retry"))
+            .expect("retry action");
+        let dismiss = node
+            .find(&|node| node.id.as_deref() == Some("remediation-banner-dismiss"))
+            .expect("dismiss action");
+        (retry.interaction.on_activate.as_ref().unwrap())();
+        (dismiss.interaction.on_activate.as_ref().unwrap())();
+
+        assert_eq!(seen.lock().unwrap().as_slice(), ["retry", "dismiss"]);
+        assert_eq!(dismiss.a11y.label.as_deref(), Some("Dismiss"));
+    }
 }

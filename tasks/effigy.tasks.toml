@@ -245,5 +245,13 @@
 "parity:check" = [{ task = "docs:check" }]
 "parity:report" = [{ task = "report:parity" }]
 
-# Health check aggregator
-health = [{ task = "docs:check" }]
+# Full local release-health aggregator. Visual gates stay separate because the
+# GPUI sweep needs a window and is intentionally slow; everything headless or
+# CPU-only belongs here.
+health = [
+  { task = "ci" },
+  { task = "ci:native" },
+  { task = "test:web-pack-install" },
+  { task = "audit:licenses" },
+  { task = "audit:security" },
+]

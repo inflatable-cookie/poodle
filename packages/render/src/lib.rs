@@ -278,7 +278,7 @@ pub use rating::rating;
 pub use ref_select::ref_select;
 pub use region::region;
 pub use relation_picker::{relation_picker, RelationPickerHandlers};
-pub use remediation_banner::remediation_banner;
+pub use remediation_banner::{remediation_banner, RemediationBannerHandlers};
 pub use resize_handle::{resize_handle, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;

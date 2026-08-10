@@ -787,7 +787,11 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
 }
 
 pub fn js_remediation_banner(spec: &RemediationBannerSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::remediation_banner(spec, theme))
+    El(pr::remediation_banner(
+        spec,
+        theme,
+        pr::RemediationBannerHandlers::default(),
+    ))
 }
 
 pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider) -> El {
