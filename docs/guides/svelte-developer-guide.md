@@ -469,8 +469,9 @@ the generator before the application build.
 
 ### Pattern 2: String names from Poodle's default Lucide set
 
-Poodle ships a scoped 54-icon Lucide set for icons its own components can emit.
-These names require no application wiring:
+Poodle ships a scoped cross-runtime Lucide set for icons its own components and
+previews can emit. Its 85 canonical names and 15 compatibility aliases require
+no application wiring:
 
 ```svelte
 <Icon icon="chevron-down" sizeRole="chrome" />

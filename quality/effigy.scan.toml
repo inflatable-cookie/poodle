@@ -70,14 +70,19 @@ format = "markdown"
 out = ".effigy/reports/attention-markers.md"
 
 [scan.generated_in_src]
-# Generated token mirrors are deliberate package inputs. They live under the
-# exported source tree so source-consumed and packed installs resolve the same
-# files; drift gates verify them against the canonical token source.
+# Generated token and icon mirrors are deliberate package inputs. They live
+# under the exported source tree so source-consumed and packed installs resolve
+# the same files; drift gates verify them against their canonical sources.
 doctor = true
 fail_on_findings = false
 respect_gitignore = true
 include = ["packages/**"]
-exclude = ["packages/core/src/tokens/generated/**"]
+exclude = [
+  "packages/core/src/tokens/generated/**",
+  "packages/core/src/icons/generated.ts",
+  "packages/core/src/icons/aliases.generated.ts",
+  "packages/core/src/icons/icons/**",
+]
 format = "markdown"
 out = ".effigy/reports/generated-in-src.md"
 

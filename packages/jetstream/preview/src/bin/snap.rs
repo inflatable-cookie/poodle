@@ -262,7 +262,7 @@ fn snapshot_opts(
         if !icon_cmds.is_empty() {
             let mut icon_cache = IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../gpui/preview/assets/icons"
+                "/../../render/assets/icons"
             ));
             let mut groups: std::collections::HashMap<
                 (String, u32),

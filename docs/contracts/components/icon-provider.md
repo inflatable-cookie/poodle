@@ -1,7 +1,7 @@
 # IconProvider
 
 Status: detailed contract
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -121,10 +121,10 @@ visual output.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::components::icon_provider`
-- Context modeled as GPUI's context system or a shared `Arc<IconRegistry>`
+- native hosts own registry scope and application extensions
+- Poodle's default SVG set comes from the same canonical manifest as the web
+  default `IconSet`; it is not maintained as a second catalogue
 - No visual component; acts as a scope boundary for registry access
-- May be unnecessary in GPUI if registry is globally available
 
 ## 11. Parity Checklist
 
@@ -146,7 +146,7 @@ visual output.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | GPUI may use global registry instead of scoped context | GPUI's context model differs from Svelte | allowed | same functional result |
-| Poodle's web implementations include a scoped default Lucide set | Component-owned chrome must render without application wiring | allowed | application icon names remain provider-owned |
+| Web uses node arrays while native hosts use SVG assets | Each runtime consumes its native representation from one generated default set | allowed | names, aliases, and geometry are gated for parity |
 
 ## 13. Approval And Adoption Notes
 

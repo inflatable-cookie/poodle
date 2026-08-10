@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | web uses provider-first IconSets plus a scoped default Lucide set; native hosts own name-to-asset resolution -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | provider-first application sets remain runtime-owned; one manifest generates the shared default Lucide names and geometry -->
 # Parity: IconProvider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -21,22 +21,25 @@ IconProvider is a pure context boundary with no DOM output, no tokens, no states
   Added §9 notes for the empty-set seed + `$effect` sync, provider-first
   resolution, the scoped default Lucide set, and loud missing-name behavior.
 - [x] FIXED Removed the catalogue-wide namespace fallback. Svelte and React now
-  resolve application sets before the same 54-icon default Lucide set.
+  resolve application sets before the same scoped default Lucide set.
+- [x] FIXED The web default and native SVG directory previously came from
+  independent 1.31.0 and 0.577.0 snapshots. One pinned manifest now generates
+  100 resolvable names for both representations, including 15 aliases.
 
 ## GPUI boundary
 
-- accepted: GPUI has no npm dependency or catalogue import. The node backend
-  maps `NodeKind::Icon { name, size }` to the host-owned
-  `assets/icons/{name}.svg` path. Icon names cross the renderer boundary; the
-  host owns asset registration.
+- accepted: GPUI has no runtime npm dependency or catalogue import. The node
+  backend maps `NodeKind::Icon { name, size }` to the host-owned
+  `assets/icons/{name}.svg` path. Poodle's preview source redirects that path to
+  the shared generated Rust asset set; applications still own extensions.
 - accepted: no visual output, no tokens — nothing to resolve (contract §8).
 - accepted: no ARIA (no DOM element by design).
 
 ## Jetstream boundary
 
-- accepted: Jetstream has no npm dependency or catalogue import. Poodle emits
-  `NodeKind::Icon` names and the host renderer owns glyph resolution. No web
-  icon package crosses this boundary.
+- accepted: Jetstream has no runtime npm dependency or catalogue import.
+  Poodle emits `NodeKind::Icon` names and the preview loads the same generated
+  Rust asset set as GPUI. The host renderer owns application glyph resolution.
 - accepted: no visual output, no tokens.
 
 ## Specimen parity
@@ -53,4 +56,5 @@ inside a no-visual provider scope through host-owned registries.
 
 - This component produces no visual output and uses no tokens, so there are zero token-violation risks. Parity here is purely functional: does the provider make a registry available to descendant Icons.
 - Both Rust targets use host-owned asset/glyph resolution rather than an npm
-  icon set. The web catalogue deletion does not reach either runtime.
+  icon set. Poodle's default assets and web nodes are build-time projections of
+  one manifest; application sets remain runtime-owned.

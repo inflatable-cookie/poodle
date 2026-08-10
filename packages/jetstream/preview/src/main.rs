@@ -242,7 +242,7 @@ impl PreviewState {
             input: jetstream_input::InputSystem::new(),
             icon_cache: IconCache::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../gpui/preview/assets/icons"
+                "/../../render/assets/icons"
             )),
             icon_textures: std::collections::HashMap::new(),
         };

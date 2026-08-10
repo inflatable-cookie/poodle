@@ -175,6 +175,17 @@ Measured results:
   Soundcheck bundle.
 - `effigy ci` and `effigy test:svelte-pack-install` pass.
 
+### Cross-runtime correction — 2026-08-10
+
+The 54-name census covered web component chrome only. Native previews had a
+separate 63-file Lucide 0.577.0 directory, including names absent from web and
+omitting names emitted by shared Rust components. Poodle now owns one pinned
+manifest: 85 canonical Lucide 1.31.0 names plus 15 compatibility aliases.
+`effigy icons:build` projects it into core TypeScript modules and shared
+`poodle-render` SVG assets; `effigy audit:icons` rejects drift. GPUI and
+Jetstream previews consume the shared Rust output rather than a GPUI-owned
+copy.
+
 ## Notes
 
 Poodle predates the current agent tooling, and the catalogue was the thing that

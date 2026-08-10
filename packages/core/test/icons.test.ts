@@ -11,7 +11,7 @@ import { renderIconSetModule, selectIconSet } from "../src/icons/build.mjs";
 
 describe("icon catalogue boundary", () => {
   test("the default Lucide set contains only Poodle's component dependencies", () => {
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(54);
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(100);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);
@@ -35,14 +35,18 @@ describe("icon catalogue boundary", () => {
       "more-horizontal": "ellipsis",
       "more-vertical": "ellipsis-vertical",
       "help-circle": "circle-question-mark",
-      package: "package-icon",
       "pause-circle": "circle-pause",
+      spinner: "loader-circle",
       unlock: "lock-open",
+      "x-circle": "circle-x",
     };
 
     for (const [legacyName, canonicalName] of Object.entries(expectedAliases)) {
       const nodes = [["path", { d: canonicalName }]] as never;
       expect(resolveIconNodes(legacyName, { [canonicalName]: nodes })).toBe(nodes);
+      expect(resolveIconNodes(legacyName)).toBe(
+        defaultLucideIconSet[canonicalName],
+      );
     }
   });
 

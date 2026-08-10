@@ -36,7 +36,10 @@ struct PreviewAssets {
 
 impl AssetSource for PreviewAssets {
     fn load(&self, path: &str) -> anyhow::Result<Option<Cow<'static, [u8]>>> {
-        let full_path = self.base.join(path);
+        let full_path = path.strip_prefix("assets/icons/").map_or_else(
+            || self.base.join(path),
+            |name| self.base.join("../../render/assets/icons").join(name),
+        );
         match std::fs::read(&full_path) {
             Ok(data) => Ok(Some(Cow::Owned(data))),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
@@ -45,7 +48,11 @@ impl AssetSource for PreviewAssets {
     }
 
     fn list(&self, path: &str) -> anyhow::Result<Vec<SharedString>> {
-        let full_path = self.base.join(path);
+        let full_path = if path == "assets/icons" {
+            self.base.join("../../render/assets/icons")
+        } else {
+            self.base.join(path)
+        };
         match std::fs::read_dir(&full_path) {
             Ok(entries) => Ok(entries
                 .filter_map(|entry| {

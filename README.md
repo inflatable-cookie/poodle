@@ -116,6 +116,7 @@ required for native packages.
 ```sh
 bun install
 effigy tokens:build
+effigy icons:build
 effigy docs:dev
 ```
 

@@ -13,6 +13,7 @@ Install Bun and Rust 1.95, then run:
 ```sh
 bun install
 effigy tokens:build
+effigy icons:build
 effigy tasks
 ```
 
@@ -47,12 +48,14 @@ token use should remain aligned.
 
 ## Generated Files
 
-Do not edit generated token, parity, or accessibility artifacts by hand. Use
-the owning Effigy task. Token changes begin in `packages/tokens/schema/` and
-are regenerated with:
+Do not edit generated token, icon, parity, or accessibility artifacts by hand.
+Use the owning Effigy task. Token changes begin in `packages/tokens/schema/`;
+default icon changes begin in
+`packages/core/src/icons/default-icons.json`:
 
 ```sh
 effigy tokens:build
+effigy icons:build
 ```
 
 ## Validate

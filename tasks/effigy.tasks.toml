@@ -9,6 +9,8 @@
 
 # Token system
 "tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
+"icons:build" = "bun scripts/build-default-icons.ts"
+"audit:icons" = "bun scripts/build-default-icons.ts --check"
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
@@ -177,6 +179,7 @@
   { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
 ]
 "ci:web" = [
+  { task = "audit:icons" },
   { task = "test:core" },
   { task = "test:components" },
   { task = "check:svelte" },

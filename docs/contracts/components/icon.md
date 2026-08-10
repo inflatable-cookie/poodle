@@ -1,7 +1,7 @@
 # Icon
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -171,18 +171,18 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::components::icon`
-- Spec struct: `IconSpec` in primitives crate
-- Component struct: `PoodleIcon` in components crate
-- Icon registry is a shared resource (Arc or global)
-- SVG rendering uses GPUI's native SVG support or path rendering
-- stroke-based icons may need conversion to filled paths for GPUI
+- `IconSpec` emits a registry name through the shared node vocabulary
+- the GPUI backend resolves `assets/icons/<name>.svg` through the host asset source
+- Poodle's default SVG assets are generated from the same manifest and Lucide
+  version as the web `IconNodes`; the rendering representation alone differs
+- application icon registration remains host-owned
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
 - [ ] name resolves from registry identically
+- [ ] Poodle default names and aliases use identical geometry across runtimes
 - [ ] ariaLabel controls decorative vs accessible mode
 - [ ] size prop produces matching dimensions
 

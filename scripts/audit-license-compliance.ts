@@ -64,8 +64,8 @@ const requiredNotices = [
     markers: ["Lucide Icons 1.31.0", "ISC License", "Cole Bemis"],
   },
   {
-    path: "packages/gpui/preview/assets/icons/LICENSE.txt",
-    markers: ["Lucide Contributors 2026", "ISC License", "Cole Bemis"],
+    path: "packages/render/assets/icons/LICENSE.txt",
+    markers: ["Lucide Icons and Contributors", "ISC License", "Cole Bemis"],
   },
   {
     path: "packages/gpui/preview/assets/fonts/LICENSE.txt",
@@ -73,7 +73,7 @@ const requiredNotices = [
   },
   {
     path: "THIRD_PARTY_NOTICES.md",
-    markers: ["Lucide 0.577.0", "Lucide 1.31.0", "Inter 4.001"],
+    markers: ["Lucide 1.31.0", "canonical Poodle manifest", "Inter 4.001"],
   },
 ];
 

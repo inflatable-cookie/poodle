@@ -61,8 +61,10 @@ runtime.
 
 ## Development
 
-Token artifacts originate in `packages/tokens/schema/`. Regenerate them from
-the repository root with `effigy tokens:build` and validate documentation with
+Token artifacts originate in `packages/tokens/schema/`. Default icon names
+originate in `src/icons/default-icons.json`; `effigy icons:build` generates the
+web modules and shared Rust SVG assets from pinned Lucide data. Regenerate
+tokens with `effigy tokens:build` and validate documentation with
 `effigy docs:check`.
 
 See the [token architecture](../../docs/architecture/002-token-system-and-package-layout.md)

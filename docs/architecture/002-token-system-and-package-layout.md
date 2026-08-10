@@ -118,8 +118,11 @@ consumer repositories use workspace or file dependencies.
 ## Icons
 
 Lucide is Poodle's default icon adapter. Core includes only the icons required
-by Poodle components, not Lucide's full catalogue. Applications declare any
-additional names in their own JSON file and generate a scoped module:
+by Poodle components and previews, not Lucide's full catalogue. One pinned
+manifest generates both core `IconNodes` and the SVG assets consumed by the
+Rust renderers. `effigy audit:icons` rejects name or geometry drift between
+those outputs. Applications declare any additional names in their own JSON
+file and generate a scoped module:
 
 ```json
 ["calendar", "folder-open", "wand-sparkles"]

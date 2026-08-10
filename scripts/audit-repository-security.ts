@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
 
 const errors: string[] = [];
@@ -48,6 +48,10 @@ const paths = new TextDecoder()
   .filter(Boolean);
 
 for (const path of paths) {
+  // `git ls-files --cached` includes paths deleted in an uncommitted change.
+  // Audit the working tree that would be committed without crashing on them.
+  if (!existsSync(path)) continue;
+
   if (sensitiveName.test(path) && !environmentExample.test(path)) {
     errors.push(`${path}: credential-like filename is tracked`);
   }
