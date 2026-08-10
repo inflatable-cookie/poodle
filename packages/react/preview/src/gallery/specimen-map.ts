@@ -150,6 +150,9 @@ import { TriStateSwitchSpecimen } from "./specimens/TriStateSwitchSpecimen";
 import { UiPresentationProviderSpecimen } from "./specimens/UiPresentationProviderSpecimen";
 import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
 import { XYPadSpecimen } from "./specimens/XYPadSpecimen";
+import { KeyboardSpecimen } from "./specimens/KeyboardSpecimen";
+import { ModMatrixGridSpecimen } from "./specimens/ModMatrixGridSpecimen";
+import { WaveformDisplaySpecimen } from "./specimens/WaveformDisplaySpecimen";
 import { allComponents } from "./registry";
 
 /**
@@ -224,12 +227,14 @@ export const specimenMap: Record<string, ComponentType> = {
   "form-layout": FormLayoutSpecimen,
   "grid": GridSpecimen,
   "gain-reduction-meter": GainReductionMeterSpecimen,
+  "keyboard": KeyboardSpecimen,
   "hover-card": HoverCardSpecimen,
   "icon": IconSpecimen,
   "icon-button": IconButtonSpecimen,
   "icon-provider": IconProviderSpecimen,
   "inline-list-section": InlineListSectionSpecimen,
   "knob": KnobSpecimen,
+  "mod-matrix-grid": ModMatrixGridSpecimen,
   "list-card": ListCardSpecimen,
   "list-card-counter": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
@@ -308,6 +313,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "ui-presentation-provider": UiPresentationProviderSpecimen,
   "value-readout": ValueReadoutSpecimen,
   "video-player": VideoPlayerSpecimen,
+  "waveform-display": WaveformDisplaySpecimen,
   "xy-pad": XYPadSpecimen,
 };
 

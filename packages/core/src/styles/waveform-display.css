@@ -1,0 +1,15 @@
+.poodle-waveform-display { position: relative; display: inline-block; width: 22rem; height: 7rem; touch-action: none; border: .0625rem solid var(--poodle-recipe-waveform-display-border, var(--poodle-color-border-default)); border-radius: .375rem; background: var(--poodle-recipe-waveform-display-fill, var(--poodle-color-background-surface)); }
+.poodle-waveform-display[aria-disabled="true"] { opacity: var(--poodle-recipe-waveform-display-disabled-opacity, var(--poodle-state-opacity-disabled)); }
+.poodle-waveform-display-visual { position: absolute; inset: 0; display: flex; align-items: stretch; overflow: hidden; border-radius: inherit; }
+.poodle-waveform-display-visual::before { content: ""; position: absolute; inset: 50% 0 auto; height: .0625rem; background: var(--poodle-recipe-waveform-display-center-line, var(--poodle-color-border-default)); }
+.poodle-waveform-display-visual__column { position: relative; top: calc((1 - var(--poodle-wave-max)) * 50%); flex: 1 1 0; align-self: flex-start; height: calc((var(--poodle-wave-max) - var(--poodle-wave-min)) * 50%); min-height: .0625rem; background: var(--poodle-recipe-waveform-display-wave, var(--poodle-color-accent-base)); }
+.poodle-waveform-display-visual__selection { position: absolute; inset-block: 0; background: var(--poodle-recipe-waveform-display-selection, color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)); pointer-events: none; }
+.poodle-waveform-display-visual__cursor { position: absolute; inset-block: 0; width: .125rem; background: var(--poodle-recipe-waveform-display-cursor, var(--poodle-color-accent-base)); pointer-events: none; }
+.poodle-waveform-display-visual[data-focus="true"] { box-shadow: inset 0 0 0 .125rem var(--poodle-recipe-waveform-display-focus-ring, var(--poodle-color-accent-focusRing)); }
+.poodle-waveform-display[data-size="xs"] { width: 12rem; height: 3rem; }
+.poodle-waveform-display[data-size="sm"] { width: 17rem; height: 5rem; }
+.poodle-waveform-display[data-size="lg"] { width: 27rem; height: 9rem; }
+.poodle-waveform-display[data-size="xl"] { width: 32rem; height: 11rem; }
+.poodle-waveform-display[data-density="compact"] .poodle-waveform-display-visual__column { margin-inline: 0; }
+.poodle-waveform-display[data-density="default"] .poodle-waveform-display-visual__column { margin-inline: .015625rem; }
+.poodle-waveform-display[data-density="comfortable"] .poodle-waveform-display-visual__column { margin-inline: .03125rem; }

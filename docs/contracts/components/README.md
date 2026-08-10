@@ -102,10 +102,12 @@ primitives and layout surfaces through higher-order application components.
 - `meta-item.md`
 - `meter.md`
 - `knob.md`
+- `keyboard.md`
 - `fader.md`
 - `gain-reduction-meter.md`
 - `metric-tile.md`
 - `model-picker.md`
+- `mod-matrix-grid.md`
 - `nav-card.md`
 - `navigation-menu.md`
 - `number-input.md`
@@ -175,6 +177,7 @@ primitives and layout surfaces through higher-order application components.
 - `validation-summary.md`
 - `value-readout.md`
 - `video-player.md`
+- `waveform-display.md`
 - `xy-pad.md`
 
 ## Accessibility Rule

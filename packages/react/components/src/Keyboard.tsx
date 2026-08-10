@@ -1,0 +1,30 @@
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { createKeyboardContext, formatAudioValue, keyboardHitTest, keyboardTransition, keyboardVelocityAtPoint, keyboardVisualState, type KeyboardContext, type KeyboardEffect, type KeyboardOrientation } from "@inflatable-cookie/poodle-core";
+import "@inflatable-cookie/poodle-core/styles/keyboard.css";
+import { KeyboardVisual } from "./audio/KeyboardVisual";
+import { useAudioPresentation, type AudioPresentationProps } from "./audio/useAudioPresentation";
+
+export interface KeyboardProps extends AudioPresentationProps { firstNote?: number; lastNote?: number; orientation?: KeyboardOrientation; octaveShift?: number; computerBaseNote?: number; computerKeyMap?: Record<string, number>; externalHeldNotes?: number[]; disabled?: boolean; ariaLabel?: string | null; onNoteOn?: (note: number, velocity: number) => void; onNoteOff?: (note: number) => void; }
+export function Keyboard({ size, sizeRole, density, firstNote = 48, lastNote = 72, orientation = "horizontal", octaveShift = 0, computerBaseNote = 60, computerKeyMap, externalHeldNotes = [], disabled = false, ariaLabel = "Keyboard", onNoteOn, onNoteOff }: KeyboardProps) {
+  const presentation = useAudioPresentation({ size, sizeRole, density }); const [machine, setMachine] = useState(createKeyboardContext); const root = useRef<HTMLDivElement>(null); const activePointer = useRef<number | null>(null); const synced = useRef({ firstNote, lastNote, octaveShift, disabled });
+  const context: KeyboardContext = createKeyboardContext({ ...machine, firstNote, lastNote, orientation, octaveShift, computerBaseNote, computerKeyMap: computerKeyMap ?? machine.computerKeyMap, externalHeldNotes, disabled }); const visualState = keyboardVisualState(context);
+  function run(effects: KeyboardEffect[]) { for (const effect of effects) effect.type === "noteOn" ? onNoteOn?.(effect.note, effect.velocity) : onNoteOff?.(effect.note); }
+  function send(event: Parameters<typeof keyboardTransition>[1]) { const result = keyboardTransition(context, event); setMachine(result.context); run(result.effects); }
+  useEffect(() => {
+    const prior = synced.current; const next = { firstNote, lastNote, octaveShift, disabled };
+    if (next.firstNote === prior.firstNote && next.lastNote === prior.lastNote && next.octaveShift === prior.octaveShift && next.disabled === prior.disabled) return;
+    let current = context; const effects: KeyboardEffect[] = [];
+    if (next.firstNote !== prior.firstNote || next.lastNote !== prior.lastNote) { const result = keyboardTransition(current, { type: "SET_RANGE", firstNote: next.firstNote, lastNote: next.lastNote }); current = result.context; effects.push(...result.effects); }
+    if (next.octaveShift !== prior.octaveShift) { const result = keyboardTransition(current, { type: "SET_OCTAVE_SHIFT", value: next.octaveShift }); current = result.context; effects.push(...result.effects); }
+    if (next.disabled !== prior.disabled) { const result = keyboardTransition(current, { type: "SET_DISABLED", value: next.disabled }); current = result.context; effects.push(...result.effects); }
+    synced.current = next; if (next.disabled) activePointer.current = null; setMachine(current); run(effects);
+  }, [firstNote, lastNote, octaveShift, disabled]);
+  function down(event: PointerEvent<HTMLDivElement>) { if (event.button !== 0 || disabled || !root.current) return; const rect = root.current.getBoundingClientRect(); const note = keyboardHitTest(context, { x: event.clientX, y: event.clientY }, rect); if (note === null) return; event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); send({ type: "PRESS", inputId: `pointer:${event.pointerId}`, note, velocity: keyboardVelocityAtPoint({ x: event.clientX, y: event.clientY }, rect, orientation) }); }
+  function end(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "RELEASE", inputId: `pointer:${event.pointerId}` }); } }
+  function keyDown(event: KeyboardEvent<HTMLDivElement>) { if (event.key.toLowerCase() in context.computerKeyMap) { event.preventDefault(); send({ type: "COMPUTER_KEY_DOWN", key: event.key, repeat: event.repeat }); } }
+  function keyUp(event: KeyboardEvent<HTMLDivElement>) { if (event.key.toLowerCase() in context.computerKeyMap) { event.preventDefault(); send({ type: "COMPUTER_KEY_UP", key: event.key }); } }
+  return <div ref={root} className="poodle-keyboard" role="toolbar" tabIndex={-1} aria-orientation={orientation} aria-label={ariaLabel ?? undefined} aria-disabled={disabled} data-scope="keyboard" data-part="root" data-size={presentation.size} data-density={presentation.density} data-orientation={orientation} onPointerDown={down} onPointerUp={end} onPointerCancel={end} onKeyDown={keyDown} onKeyUp={keyUp}>
+    <KeyboardVisual visualState={visualState} />
+    {visualState.keys.map((key, index) => <button key={key.note} className="poodle-keyboard__key-control" type="button" disabled={disabled} aria-label={formatAudioValue(key.note, { type: "note" })} aria-pressed={key.held || key.externallyHeld} tabIndex={key.focused || (index === 0 && !visualState.keys.some((candidate) => candidate.focused)) ? 0 : -1} onFocus={() => send({ type: "FOCUS_NOTE", note: key.note })} onKeyDown={(event) => { if (["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowUp"].includes(event.key)) { event.preventDefault(); event.stopPropagation(); send({ type: "MOVE_FOCUS", direction: event.key === "ArrowRight" || event.key === "ArrowUp" ? 1 : -1 }); } else if ((event.key === " " || event.key === "Enter") && !event.repeat) { event.preventDefault(); event.stopPropagation(); send({ type: "PRESS", inputId: `a11y:${key.note}`, note: key.note, velocity: 100 }); } }} onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") { event.stopPropagation(); send({ type: "RELEASE", inputId: `a11y:${key.note}` }); } }} />)}
+  </div>;
+}

@@ -1210,9 +1210,580 @@ pub fn xy_pad_transition(
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum KeyboardOrientation {
+    Horizontal,
+    Vertical,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct KeyboardKeyVisualState {
+    pub note: u8,
+    pub black: bool,
+    pub start_norm: f64,
+    pub length_norm: f64,
+    pub breadth_norm: f64,
+    pub held: bool,
+    pub externally_held: bool,
+    pub velocity: Option<u8>,
+    pub focused: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct KeyboardVisualState {
+    pub orientation: KeyboardOrientation,
+    pub first_note: u8,
+    pub last_note: u8,
+    pub octave_shift: i8,
+    pub keys: Vec<KeyboardKeyVisualState>,
+    pub held_notes: Vec<u8>,
+    pub external_held_notes: Vec<u8>,
+    pub enabled: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct KeyboardContext {
+    pub first_note: u8,
+    pub last_note: u8,
+    pub orientation: KeyboardOrientation,
+    pub octave_shift: i8,
+    pub active_inputs: Vec<(String, u8, u8)>,
+    pub external_held_notes: Vec<u8>,
+    pub focused_note: Option<u8>,
+    pub disabled: bool,
+}
+
+impl Default for KeyboardContext {
+    fn default() -> Self {
+        Self {
+            first_note: 48,
+            last_note: 72,
+            orientation: KeyboardOrientation::Horizontal,
+            octave_shift: 0,
+            active_inputs: vec![],
+            external_held_notes: vec![],
+            focused_note: None,
+            disabled: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum KeyboardEffect {
+    NoteOn { note: u8, velocity: u8 },
+    NoteOff { note: u8 },
+}
+
+pub fn keyboard_press(
+    mut context: KeyboardContext,
+    input: impl Into<String>,
+    note: u8,
+    velocity: u8,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let input = input.into();
+    if context.disabled
+        || note < context.first_note
+        || note > context.last_note
+        || context.active_inputs.iter().any(|active| active.0 == input)
+    {
+        return (context, vec![]);
+    }
+    let held = context.active_inputs.iter().any(|active| active.1 == note);
+    let velocity = velocity.clamp(1, 127);
+    context.active_inputs.push((input, note, velocity));
+    context.focused_note = Some(note);
+    let effects = if held {
+        vec![]
+    } else {
+        vec![KeyboardEffect::NoteOn { note, velocity }]
+    };
+    (context, effects)
+}
+
+pub fn keyboard_release(
+    mut context: KeyboardContext,
+    input: &str,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let Some(index) = context
+        .active_inputs
+        .iter()
+        .position(|active| active.0 == input)
+    else {
+        return (context, vec![]);
+    };
+    let note = context.active_inputs.remove(index).1;
+    let effects = if context.active_inputs.iter().any(|active| active.1 == note) {
+        vec![]
+    } else {
+        vec![KeyboardEffect::NoteOff { note }]
+    };
+    (context, effects)
+}
+
+fn black_note(note: u8) -> bool {
+    matches!(note % 12, 1 | 3 | 6 | 8 | 10)
+}
+
+pub fn keyboard_velocity(depth_norm: f64) -> u8 {
+    (1.0 + depth_norm.clamp(0.0, 1.0) * 126.0).round() as u8
+}
+
+pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
+    let notes: Vec<u8> = (context.first_note..=context.last_note).collect();
+    let white: Vec<u8> = notes
+        .iter()
+        .copied()
+        .filter(|note| !black_note(*note))
+        .collect();
+    let white_length = 1.0 / white.len().max(1) as f64;
+    let keys = notes
+        .iter()
+        .map(|note| {
+            let black = black_note(*note);
+            let preceding = white.iter().filter(|candidate| **candidate < *note).count();
+            let logical_start = if black {
+                ((preceding as f64 - 0.32) * white_length).max(0.0)
+            } else {
+                white
+                    .iter()
+                    .position(|candidate| candidate == note)
+                    .unwrap_or(0) as f64
+                    * white_length
+            };
+            let length_norm = if black {
+                white_length * 0.64
+            } else {
+                white_length
+            };
+            let velocity = context
+                .active_inputs
+                .iter()
+                .filter(|active| active.1 == *note)
+                .map(|active| active.2)
+                .max();
+            KeyboardKeyVisualState {
+                note: *note,
+                black,
+                start_norm: if context.orientation == KeyboardOrientation::Vertical {
+                    1.0 - logical_start - length_norm
+                } else {
+                    logical_start
+                },
+                length_norm,
+                breadth_norm: if black { 0.62 } else { 1.0 },
+                held: velocity.is_some(),
+                externally_held: context.external_held_notes.contains(note),
+                velocity,
+                focused: context.focused_note == Some(*note),
+            }
+        })
+        .collect();
+    let mut held_notes: Vec<u8> = context
+        .active_inputs
+        .iter()
+        .map(|active| active.1)
+        .collect();
+    held_notes.sort();
+    held_notes.dedup();
+    let mut external = context.external_held_notes.clone();
+    external.sort();
+    external.dedup();
+    KeyboardVisualState {
+        orientation: context.orientation,
+        first_note: context.first_note,
+        last_note: context.last_note,
+        octave_shift: context.octave_shift,
+        keys,
+        held_notes,
+        external_held_notes: external,
+        enabled: !context.disabled,
+    }
+}
+
+pub const WAVEFORM_MAX_COLUMNS: usize = 4096;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WaveformPeakPair {
+    pub min: f64,
+    pub max: f64,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct WaveformPeakLevel {
+    pub samples_per_peak: usize,
+    pub peaks: Vec<WaveformPeakPair>,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct WaveformPeakPyramid {
+    pub sample_count: usize,
+    pub levels: Vec<WaveformPeakLevel>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct WaveformSelection {
+    pub start: usize,
+    pub end: usize,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct WaveformVisualState {
+    pub sample_count: usize,
+    pub visible_start: usize,
+    pub visible_end: usize,
+    pub columns: Vec<WaveformPeakPair>,
+    pub cursor_sample: Option<usize>,
+    pub selection: Option<WaveformSelection>,
+    pub focus: bool,
+    pub enabled: bool,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct WaveformContext {
+    pub pyramid: WaveformPeakPyramid,
+    pub visible_start: usize,
+    pub visible_end: usize,
+    pub column_count: usize,
+    pub cursor_sample: Option<usize>,
+    pub selection: Option<WaveformSelection>,
+    pub selection_anchor: Option<usize>,
+    pub selecting: bool,
+    pub focus: bool,
+    pub disabled: bool,
+}
+
+pub fn validate_peak_pyramid(pyramid: &WaveformPeakPyramid) -> bool {
+    let mut previous = 0;
+    pyramid.levels.iter().all(|level| {
+        let valid = level.samples_per_peak > previous
+            && level
+                .peaks
+                .iter()
+                .all(|peak| peak.min.is_finite() && peak.max.is_finite() && peak.min <= peak.max);
+        previous = level.samples_per_peak;
+        valid
+    })
+}
+
+pub fn waveform_columns(context: &WaveformContext) -> Vec<WaveformPeakPair> {
+    if !validate_peak_pyramid(&context.pyramid) || context.visible_end <= context.visible_start {
+        return vec![];
+    }
+    let span = context.visible_end - context.visible_start;
+    let target = context.column_count.clamp(1, WAVEFORM_MAX_COLUMNS);
+    let Some(level) = context
+        .pyramid
+        .levels
+        .iter()
+        .find(|level| span.div_ceil(level.samples_per_peak) <= target)
+        .or_else(|| context.pyramid.levels.last())
+    else {
+        return vec![];
+    };
+    let first = context.visible_start / level.samples_per_peak;
+    let last = context
+        .visible_end
+        .div_ceil(level.samples_per_peak)
+        .min(level.peaks.len());
+    let source = &level.peaks[first.min(last)..last];
+    let count = target.min(source.len());
+    (0..count)
+        .map(|column| {
+            let start = column * source.len() / count;
+            let end = ((column + 1) * source.len()).div_ceil(count).max(start + 1);
+            WaveformPeakPair {
+                min: source[start..end]
+                    .iter()
+                    .map(|peak| peak.min)
+                    .fold(f64::INFINITY, f64::min)
+                    .clamp(-1.0, 1.0),
+                max: source[start..end]
+                    .iter()
+                    .map(|peak| peak.max)
+                    .fold(f64::NEG_INFINITY, f64::max)
+                    .clamp(-1.0, 1.0),
+            }
+        })
+        .collect()
+}
+
+impl WaveformContext {
+    pub fn visual_state(&self) -> WaveformVisualState {
+        WaveformVisualState {
+            sample_count: self.pyramid.sample_count,
+            visible_start: self.visible_start,
+            visible_end: self.visible_end,
+            columns: waveform_columns(self),
+            cursor_sample: self.cursor_sample,
+            selection: self.selection,
+            focus: self.focus,
+            enabled: !self.disabled,
+        }
+    }
+    pub fn select_begin(mut self, sample: usize) -> Self {
+        if !self.disabled {
+            let sample = sample.clamp(
+                self.visible_start,
+                self.visible_end.saturating_sub(1).max(self.visible_start),
+            );
+            self.cursor_sample = Some(sample);
+            self.selection = Some(WaveformSelection {
+                start: sample,
+                end: sample,
+            });
+            self.selection_anchor = Some(sample);
+            self.selecting = true;
+        }
+        self
+    }
+    pub fn select_move(mut self, sample: usize) -> Self {
+        if self.selecting {
+            let sample = sample.clamp(
+                self.visible_start,
+                self.visible_end.saturating_sub(1).max(self.visible_start),
+            );
+            let anchor = self.selection_anchor.unwrap_or(sample);
+            self.cursor_sample = Some(sample);
+            self.selection = Some(WaveformSelection {
+                start: anchor.min(sample),
+                end: anchor.max(sample),
+            });
+        }
+        self
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModMatrixHeader {
+    pub id: String,
+    pub label: String,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixCell {
+    pub source_id: String,
+    pub destination_id: String,
+    pub amount: f64,
+    pub enabled: bool,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixVisualCell {
+    pub cell: ModMatrixCell,
+    pub amount_norm: f64,
+    pub focused: bool,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixVisualState {
+    pub sources: Vec<ModMatrixHeader>,
+    pub destinations: Vec<ModMatrixHeader>,
+    pub cells: Vec<ModMatrixVisualCell>,
+    pub focus: Option<(String, String)>,
+    pub enabled: bool,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixContext {
+    pub sources: Vec<ModMatrixHeader>,
+    pub destinations: Vec<ModMatrixHeader>,
+    pub cells: Vec<ModMatrixCell>,
+    pub focus_row: Option<usize>,
+    pub focus_column: Option<usize>,
+    pub step: f64,
+    pub disabled: bool,
+}
+
+impl ModMatrixContext {
+    pub fn new(
+        sources: Vec<ModMatrixHeader>,
+        destinations: Vec<ModMatrixHeader>,
+        supplied: Vec<ModMatrixCell>,
+    ) -> Self {
+        assert!(
+            sources.iter().all(|header| !header.id.is_empty())
+                && sources
+                    .iter()
+                    .enumerate()
+                    .all(|(index, header)| sources[..index].iter().all(|prior| prior.id != header.id)),
+            "mod matrix source ids must be non-empty and unique"
+        );
+        assert!(
+            destinations.iter().all(|header| !header.id.is_empty())
+                && destinations
+                    .iter()
+                    .enumerate()
+                    .all(|(index, header)| destinations[..index].iter().all(|prior| prior.id != header.id)),
+            "mod matrix destination ids must be non-empty and unique"
+        );
+        let cells = sources
+            .iter()
+            .flat_map(|source| {
+                destinations.iter().map(|destination| {
+                    supplied
+                        .iter()
+                        .find(|cell| {
+                            cell.source_id == source.id && cell.destination_id == destination.id
+                        })
+                        .cloned()
+                        .unwrap_or(ModMatrixCell {
+                            source_id: source.id.clone(),
+                            destination_id: destination.id.clone(),
+                            amount: 0.0,
+                            enabled: false,
+                        })
+                })
+            })
+            .map(|mut cell| {
+                cell.amount = cell.amount.clamp(-1.0, 1.0);
+                cell
+            })
+            .collect();
+        Self {
+            sources,
+            destinations,
+            cells,
+            focus_row: None,
+            focus_column: None,
+            step: 0.01,
+            disabled: false,
+        }
+    }
+    pub fn move_focus(mut self, rows: isize, columns: isize) -> Self {
+        if !self.disabled && !self.sources.is_empty() && !self.destinations.is_empty() {
+            self.focus_row = Some(
+                ((self.focus_row.unwrap_or(0) as isize + rows)
+                    .clamp(0, self.sources.len() as isize - 1)) as usize,
+            );
+            self.focus_column = Some(
+                ((self.focus_column.unwrap_or(0) as isize + columns)
+                    .clamp(0, self.destinations.len() as isize - 1)) as usize,
+            );
+        }
+        self
+    }
+    pub fn toggle(mut self) -> Self {
+        if let (Some(row), Some(column)) = (self.focus_row, self.focus_column) {
+            if !self.disabled {
+                let index = row * self.destinations.len() + column;
+                self.cells[index].enabled = !self.cells[index].enabled;
+            }
+        }
+        self
+    }
+    pub fn visual_state(&self) -> ModMatrixVisualState {
+        let focused = self
+            .focus_row
+            .zip(self.focus_column)
+            .map(|(row, column)| row * self.destinations.len() + column);
+        ModMatrixVisualState {
+            sources: self.sources.clone(),
+            destinations: self.destinations.clone(),
+            cells: self
+                .cells
+                .iter()
+                .enumerate()
+                .map(|(index, cell)| ModMatrixVisualCell {
+                    cell: cell.clone(),
+                    amount_norm: normalize_value(
+                        cell.amount,
+                        -1.0,
+                        1.0,
+                        AudioValueLaw::BipolarCenter { center: 0.0 },
+                    ),
+                    focused: focused == Some(index),
+                })
+                .collect(),
+            focus: focused.map(|index| {
+                (
+                    self.cells[index].source_id.clone(),
+                    self.cells[index].destination_id.clone(),
+                )
+            }),
+            enabled: !self.disabled,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn phase_three_keyboard_pairs_notes_and_matches_velocity() {
+        assert_eq!(keyboard_velocity(0.0), 1);
+        assert_eq!(keyboard_velocity(1.0), 127);
+        let (context, effects) = keyboard_press(KeyboardContext::default(), "pointer", 60, 64);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 60,
+                velocity: 64
+            }]
+        );
+        assert_eq!(keyboard_visual_state(&context).held_notes, vec![60]);
+        let (_, effects) = keyboard_release(context, "pointer");
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+    }
+
+    #[test]
+    fn phase_three_waveform_reduces_extrema_and_caps_columns() {
+        let mut fine = vec![
+            WaveformPeakPair {
+                min: -0.2,
+                max: 0.4
+            };
+            WAVEFORM_MAX_COLUMNS + 8
+        ];
+        fine[0] = WaveformPeakPair { min: -2.0, max: 1.5 };
+        let context = WaveformContext {
+            pyramid: WaveformPeakPyramid {
+                sample_count: fine.len(),
+                levels: vec![WaveformPeakLevel {
+                    samples_per_peak: 1,
+                    peaks: fine,
+                }],
+            },
+            visible_start: 0,
+            visible_end: WAVEFORM_MAX_COLUMNS + 8,
+            column_count: WAVEFORM_MAX_COLUMNS + 10,
+            cursor_sample: None,
+            selection: None,
+            selection_anchor: None,
+            selecting: false,
+            focus: false,
+            disabled: false,
+        };
+        let columns = waveform_columns(&context);
+        assert_eq!(columns.len(), WAVEFORM_MAX_COLUMNS);
+        assert_eq!(columns[0], WaveformPeakPair { min: -1.0, max: 1.0 });
+        let selected = context.select_begin(7).select_move(2);
+        assert_eq!(
+            selected.selection,
+            Some(WaveformSelection { start: 2, end: 7 })
+        );
+    }
+
+    #[test]
+    fn phase_three_matrix_is_row_major_and_bipolar() {
+        let headers = vec![
+            ModMatrixHeader {
+                id: "a".into(),
+                label: "A".into(),
+            },
+            ModMatrixHeader {
+                id: "b".into(),
+                label: "B".into(),
+            },
+        ];
+        let context = ModMatrixContext::new(headers.clone(), headers, vec![])
+            .move_focus(1, 1)
+            .toggle();
+        assert_eq!(context.cells.len(), 4);
+        assert!(context.cells[3].enabled);
+        assert_eq!(context.visual_state().cells[0].amount_norm, 0.5);
+    }
+
+    #[test]
+    #[should_panic(expected = "mod matrix source ids must be non-empty and unique")]
+    fn phase_three_matrix_rejects_duplicate_axis_ids() {
+        let duplicates = vec![
+            ModMatrixHeader { id: "a".into(), label: "A".into() },
+            ModMatrixHeader { id: "a".into(), label: "Again".into() },
+        ];
+        let _ = ModMatrixContext::new(duplicates, vec![], vec![]);
+    }
     fn close(a: f64, b: f64) {
         assert!((a - b).abs() < 1e-9, "{a} != {b}");
     }

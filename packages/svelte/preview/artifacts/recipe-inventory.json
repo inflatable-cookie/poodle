@@ -1,9 +1,9 @@
 {
   "summary": {
-    "components": 139,
-    "recipeHooks": 1057,
-    "hookCandidates": 3,
-    "metricVariables": 376
+    "components": 142,
+    "recipeHooks": 1085,
+    "hookCandidates": 4,
+    "metricVariables": 389
   },
   "inventory": {
     "accordion": {
@@ -158,7 +158,10 @@
       ],
       "candidates": [],
       "metric": [
+        "--poodle-audio-meter-gap",
+        "--poodle-audio-meter-length",
         "--poodle-audio-meter-peak",
+        "--poodle-audio-meter-track-size",
         "--poodle-audio-meter-value"
       ]
     },
@@ -202,6 +205,11 @@
       ],
       "candidates": [],
       "metric": [
+        "--poodle-audio-switch-body-height",
+        "--poodle-audio-switch-body-width",
+        "--poodle-audio-switch-handle-size",
+        "--poodle-audio-switch-handle-travel",
+        "--poodle-audio-switch-lamp-size",
         "--poodle-audio-switch-position"
       ]
     },
@@ -914,7 +922,11 @@
       ],
       "candidates": [],
       "metric": [
+        "--poodle-fader-cross",
         "--poodle-fader-detent",
+        "--poodle-fader-length",
+        "--poodle-fader-rail",
+        "--poodle-fader-thumb-cross",
         "--poodle-fader-value"
       ]
     },
@@ -1094,6 +1106,21 @@
       "candidates": [],
       "metric": []
     },
+    "keyboard": {
+      "recipe": [
+        "--poodle-recipe-keyboard-black-key",
+        "--poodle-recipe-keyboard-black-key-held",
+        "--poodle-recipe-keyboard-border",
+        "--poodle-recipe-keyboard-disabled-opacity",
+        "--poodle-recipe-keyboard-external-ring",
+        "--poodle-recipe-keyboard-fill",
+        "--poodle-recipe-keyboard-focus-ring",
+        "--poodle-recipe-keyboard-white-key",
+        "--poodle-recipe-keyboard-white-key-held"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "knob": {
       "recipe": [
         "--poodle-recipe-knob-arc-fill",
@@ -1107,9 +1134,12 @@
         "--poodle-recipe-knob-track-border",
         "--poodle-recipe-knob-track-fill"
       ],
-      "candidates": [],
+      "candidates": [
+        "--poodle-knob-ring"
+      ],
       "metric": [
         "--poodle-knob-indicator-rotation",
+        "--poodle-knob-size",
         "--poodle-knob-sweep"
       ]
     },
@@ -1390,6 +1420,23 @@
         "--poodle-recipe-metric-tile-theme-iceberg-fill",
         "--poodle-recipe-metric-tile-trend-text",
         "--poodle-recipe-metric-tile-up-trend-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "mod-matrix-grid": {
+      "recipe": [
+        "--poodle-recipe-mod-matrix-grid-amount-negative",
+        "--poodle-recipe-mod-matrix-grid-amount-positive",
+        "--poodle-recipe-mod-matrix-grid-border",
+        "--poodle-recipe-mod-matrix-grid-cell",
+        "--poodle-recipe-mod-matrix-grid-cell-disabled",
+        "--poodle-recipe-mod-matrix-grid-cell-enabled",
+        "--poodle-recipe-mod-matrix-grid-disabled-opacity",
+        "--poodle-recipe-mod-matrix-grid-fill",
+        "--poodle-recipe-mod-matrix-grid-focus-ring",
+        "--poodle-recipe-mod-matrix-grid-header",
+        "--poodle-recipe-mod-matrix-grid-zero"
       ],
       "candidates": [],
       "metric": []
@@ -2319,6 +2366,20 @@
         "--poodle-recipe-video-player-volume-fill",
         "--poodle-recipe-video-player-volume-thumb-fill",
         "--poodle-recipe-video-player-volume-track-fill"
+      ],
+      "candidates": [],
+      "metric": []
+    },
+    "waveform-display": {
+      "recipe": [
+        "--poodle-recipe-waveform-display-border",
+        "--poodle-recipe-waveform-display-center-line",
+        "--poodle-recipe-waveform-display-cursor",
+        "--poodle-recipe-waveform-display-disabled-opacity",
+        "--poodle-recipe-waveform-display-fill",
+        "--poodle-recipe-waveform-display-focus-ring",
+        "--poodle-recipe-waveform-display-selection",
+        "--poodle-recipe-waveform-display-wave"
       ],
       "candidates": [],
       "metric": []

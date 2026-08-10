@@ -57,10 +57,12 @@ export const allComponents: ComponentEntry[] = [
   entry("ToggleGroup", "control", "Group of mutually exclusive toggle buttons.", true),
   entry("CollapseToggle", "control", "Directional chevron toggle for collapsing/expanding regions.", true),
   entry("Knob", "control", "Audio rotary control with pluggable value laws and gesture semantics.", true),
+  entry("Keyboard", "control", "Virtual musical keyboard with pointer, computer-key, and pitch-gutter input.", true),
   entry("Fader", "control", "Audio fader with detents and explicit gesture state.", true),
   entry("EnvelopeEditor", "control", "Editable normalized envelope with curved segments and snap hooks.", true),
   entry("XYPad", "control", "Atomic two-axis audio value control with independent laws.", true),
   entry("AudioSwitch", "control", "Latch, momentary, or multi-state audio switch with lamp state.", true),
+  entry("ModMatrixGrid", "control", "Generic source-by-destination grid of bipolar enabled amounts.", true),
 
   // Input
   entry("RefSelect", "input", "Version-control ref chooser with search, a current marker and a loading footer.", true),
@@ -137,6 +139,7 @@ export const allComponents: ComponentEntry[] = [
   entry("StateTile", "display", "Static label-value tile with optional trend and host-owned sparkline.", true),
   entry("AudioMeter", "display", "Ballistic audio level meter with mono and stereo rendering.", true),
   entry("GainReductionMeter", "display", "Inverted ballistic meter for gain-reduction magnitude.", true),
+  entry("WaveformDisplay", "display", "Inspector-scale peak-pyramid display with cursor and selection.", true),
   entry("ValueReadout", "display", "Formatted audio-domain numeric readout.", true),
   entry("DetailItem", "display", "Label-value pair for metadata display.", true),
   entry("MetaBar", "display", "Inline metadata ribbon for compact header facts.", true),

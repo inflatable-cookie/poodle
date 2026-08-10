@@ -10,6 +10,9 @@ import DragNumberFieldSpecimen from "./DragNumberFieldSpecimen.svelte";
 import EnvelopeEditorSpecimen from "./EnvelopeEditorSpecimen.svelte";
 import FaderSpecimen from "./FaderSpecimen.svelte";
 import GainReductionMeterSpecimen from "./GainReductionMeterSpecimen.svelte";
+import KeyboardSpecimen from "./KeyboardSpecimen.svelte";
+import ModMatrixGridSpecimen from "./ModMatrixGridSpecimen.svelte";
+import WaveformDisplaySpecimen from "./WaveformDisplaySpecimen.svelte";
 import AlertDialogSpecimen from "./AlertDialogSpecimen.svelte";
 import BlockEditorSpecimen from "./BlockEditorSpecimen.svelte";
 import BoxSpecimen from "./BoxSpecimen.svelte";
@@ -171,9 +174,12 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "envelope-editor": EnvelopeEditorSpecimen,
   fader: FaderSpecimen,
   "gain-reduction-meter": GainReductionMeterSpecimen,
+  keyboard: KeyboardSpecimen,
   knob: KnobSpecimen,
+  "mod-matrix-grid": ModMatrixGridSpecimen,
   "value-readout": ValueReadoutSpecimen,
   "xy-pad": XYPadSpecimen,
+  "waveform-display": WaveformDisplaySpecimen,
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
   avatar: AvatarSpecimen,

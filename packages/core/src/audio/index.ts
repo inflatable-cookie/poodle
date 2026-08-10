@@ -7,3 +7,6 @@ export * from "./meter";
 export * from "./xy-pad";
 export * from "./audio-switch";
 export * from "./gain-reduction-meter";
+export * from "./keyboard";
+export * from "./waveform";
+export * from "./mod-matrix";

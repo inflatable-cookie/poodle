@@ -2,7 +2,11 @@ import { fireEvent, render } from "@testing-library/react";
 import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 import { createAudioMeterContext, createGainReductionMeterContext } from "@inflatable-cookie/poodle-core";
-import { AudioMeter, AudioSwitch, DragNumberField, EnvelopeEditor, Fader, GainReductionMeter, Knob, ValueReadout, XYPad } from "../src";
+import { AudioMeter, AudioSwitch, DragNumberField, EnvelopeEditor, Fader, GainReductionMeter, Keyboard, Knob, ModMatrixGrid, ValueReadout, WaveformDisplay, XYPad } from "../src";
+
+const waveform = { sampleCount: 4, levels: [{ samplesPerPeak: 1, peaks: [{ min: -.2, max: .3 }, { min: -.5, max: .6 }, { min: -.1, max: .2 }, { min: -.7, max: .8 }] }] };
+const matrixSources = [{ id: "one", label: "Source 1" }];
+const matrixDestinations = [{ id: "a", label: "Dest A" }];
 
 describe("audio controls (react)", () => {
   it("wires formatted knob keyboard commits", () => {
@@ -70,6 +74,29 @@ describe("audio controls (react)", () => {
     expect(view.getByRole("meter", { name: "Compression" }).getAttribute("aria-valuetext")).toBe("12 dB reduction");
   });
 
+  it("pairs computer-key notes and separates external highlights", () => {
+    const onNoteOn = vi.fn(); const onNoteOff = vi.fn();
+    const view = render(<Keyboard firstNote={48} lastNote={72} externalHeldNotes={[64]} onNoteOn={onNoteOn} onNoteOff={onNoteOff} ariaLabel="Keys" />);
+    const keyboard = view.getByRole("toolbar", { name: "Keys" });
+    fireEvent.keyDown(keyboard, { key: "a" }); fireEvent.keyUp(keyboard, { key: "a" });
+    expect(onNoteOn).toHaveBeenCalledWith(60, 100); expect(onNoteOff).toHaveBeenCalledWith(60);
+    expect(view.getByRole("button", { name: "E4" }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("moves the waveform cursor and exposes selection text", () => {
+    const onCursorChange = vi.fn();
+    const view = render(<WaveformDisplay pyramid={waveform} cursorSample={1} selection={{ start: 1, end: 2 }} onCursorChange={onCursorChange} ariaLabel="Clip" />);
+    const slider = view.getByRole("slider"); fireEvent.keyDown(slider, { key: "ArrowRight" });
+    expect(onCursorChange).toHaveBeenCalledWith(2); expect(slider.getAttribute("aria-valuetext")).toContain("selection 1 to 2");
+  });
+
+  it("navigates and toggles generic matrix cells", () => {
+    const onCellCommit = vi.fn();
+    const view = render(<ModMatrixGrid sources={matrixSources} destinations={matrixDestinations} onCellCommit={onCellCommit} ariaLabel="Routes" />);
+    const cell = view.getByRole("gridcell"); fireEvent.focus(cell); fireEvent.keyDown(cell, { key: " " });
+    expect(onCellCommit.mock.calls.at(-1)?.[0]).toMatchObject({ sourceId: "one", destinationId: "a", enabled: true });
+  });
+
   it("resolves both presentation axes across the complete family", () => {
     const view = render(<>
       <Knob size="xl" density="comfortable" ariaLabel="Gain" />
@@ -81,9 +108,12 @@ describe("audio controls (react)", () => {
       <XYPad size="xl" density="comfortable" ariaLabel="Position" />
       <AudioSwitch size="xl" density="comfortable" ariaLabel="Bypass" />
       <GainReductionMeter size="xl" density="comfortable" ariaLabel="Compression" />
+      <Keyboard size="xl" density="comfortable" ariaLabel="Keys" />
+      <WaveformDisplay size="xl" density="comfortable" pyramid={waveform} ariaLabel="Clip" />
+      <ModMatrixGrid size="xl" density="comfortable" sources={matrixSources} destinations={matrixDestinations} ariaLabel="Routes" />
     </>);
     const roots = [...view.container.querySelectorAll<HTMLElement>("[data-scope][data-part='root']")];
-    expect(roots).toHaveLength(9);
+    expect(roots).toHaveLength(12);
     expect(roots.every((root) => root.dataset.size === "xl" && root.dataset.density === "comfortable")).toBe(true);
   });
 
@@ -98,6 +128,9 @@ describe("audio controls (react)", () => {
       <XYPad x={0.25} y={0.75} ariaLabel="Position" />
       <AudioSwitch state={1} ariaLabel="Bypass" />
       <GainReductionMeter context={createGainReductionMeterContext()} ariaLabel="Compression" />
+      <Keyboard ariaLabel="Keys" />
+      <WaveformDisplay pyramid={waveform} ariaLabel="Clip" />
+      <ModMatrixGrid sources={matrixSources} destinations={matrixDestinations} ariaLabel="Routes" />
     </>);
     const results = await axe.run(view.container, {
       resultTypes: ["violations"],

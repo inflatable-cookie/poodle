@@ -458,6 +458,9 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         display_name: "GainReductionMeter",
         description: "Inverted meter for compressor and limiter gain reduction.",
     },
+    ComponentEntry { slug: "keyboard", display_name: "Keyboard", description: "Virtual musical keyboard with pointer, computer-key, and pitch-gutter input." },
+    ComponentEntry { slug: "waveform-display", display_name: "WaveformDisplay", description: "Inspector-scale peak-pyramid display with cursor and selection." },
+    ComponentEntry { slug: "mod-matrix-grid", display_name: "ModMatrixGrid", description: "Generic source-by-destination grid of bipolar enabled amounts." },
     ComponentEntry {
         slug: "spinner",
         display_name: "Spinner",

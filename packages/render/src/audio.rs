@@ -1,6 +1,6 @@
 //! Audio controls rendered exclusively from serializable visual state.
 //!
-//! Contract: `docs/architecture/008-audio-control-family.md` and the nine
+//! Contract: `docs/architecture/008-audio-control-family.md` and the twelve
 //! component contracts under `docs/contracts/components/`.
 
 use poodle_adapter::ThemeProvider;
@@ -10,8 +10,8 @@ use poodle_node::{
 };
 use poodle_specs::{
     AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, ControlDensity, ControlSize,
-    DragNumberFieldSpec, EnvelopeEditorSpec, FaderSpec, GainReductionMeterSpec, KnobSpec,
-    Orientation, ValueReadoutSpec, XYPadSpec,
+    DragNumberFieldSpec, EnvelopeEditorSpec, FaderSpec, GainReductionMeterSpec, KeyboardSpec,
+    KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
@@ -576,6 +576,93 @@ pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, theme: &dyn ThemeProv
     root
 }
 
+pub fn keyboard(spec: &KeyboardSpec, theme: &dyn ThemeProvider) -> Node {
+    let state = &spec.visual_state;
+    let size = resolve_semantic_size(spec.size, spec.size_role);
+    let horizontal = state.orientation == poodle_headless::audio::KeyboardOrientation::Horizontal;
+    let long = rem_to_px(audio_size_rem(size, [14.0, 18.0, 22.0, 26.0, 30.0]));
+    let short = rem_to_px(audio_size_rem(size, [4.0, 5.5, 7.0, 8.5, 10.0]));
+    let (width, height) = if horizontal { (long, short) } else { (short, long) };
+    let mut root = Node::container();
+    root.id = Some("keyboard-root".into());
+    root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+    root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+    root.style.descriptor.border.width = density_metric(spec.density, [0.5, 1.0, 2.0]);
+    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.a11y.role = Some(NodeRole::Toolbar); root.a11y.label = Some(spec.aria_label.clone());
+    root.interaction.disabled = !state.enabled;
+    for key in &state.keys {
+        let mut node = Node::container();
+        let held = key.held || key.externally_held;
+        node.style.descriptor.background = Some(theme.resolve_color(if held { "color.accent.base" } else if key.black { "color.background.base" } else { "color.text.primary" }));
+        node.style.descriptor.border.width = density_metric(spec.density, [0.0, 1.0, 2.0]);
+        node.style.descriptor.border.color = theme.resolve_color("color.border.default");
+        node.a11y.role = Some(NodeRole::Button); node.a11y.label = Some(format!("MIDI note {}", key.note)); node.interaction.focusable = state.enabled;
+        if horizontal { node.style.descriptor.layout.width = LayoutSizing::Fixed(key.length_norm as f32 * width); node.style.descriptor.layout.height = LayoutSizing::Fixed(key.breadth_norm as f32 * height); absolute(&mut node, key.start_norm as f32 * width, 0.0); }
+        else { node.style.descriptor.layout.width = LayoutSizing::Fixed(key.breadth_norm as f32 * width); node.style.descriptor.layout.height = LayoutSizing::Fixed(key.length_norm as f32 * height); absolute(&mut node, 0.0, key.start_norm as f32 * height); }
+        root = root.child(node);
+    }
+    root
+}
+
+pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -> Node {
+    let state = &spec.visual_state;
+    let size = resolve_semantic_size(spec.size, spec.size_role);
+    let width = rem_to_px(audio_size_rem(size, [12.0, 17.0, 22.0, 27.0, 32.0]));
+    let height = rem_to_px(audio_size_rem(size, [3.0, 5.0, 7.0, 9.0, 11.0]));
+    let mut root = Node::container(); root.id = Some("waveform-display-root".into());
+    root.style.descriptor.layout.width = LayoutSizing::Fixed(width); root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface")); root.style.descriptor.border.width = 1.0; root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.a11y.role = Some(NodeRole::Slider); root.a11y.label = Some(format!("{}: cursor {:?}, selection {:?}", spec.aria_label, state.cursor_sample, state.selection)); root.interaction.focusable = state.enabled; root.interaction.disabled = !state.enabled;
+    let gap = density_metric(spec.density, [0.0, 0.5, 1.0]);
+    let column_width = (width / state.columns.len().max(1) as f32 - gap).max(1.0);
+    for (index, peak) in state.columns.iter().enumerate() {
+        let mut column = Node::container(); let amplitude = (peak.max - peak.min).clamp(0.0, 2.0) as f32;
+        column.style.descriptor.layout.width = LayoutSizing::Fixed(column_width); column.style.descriptor.layout.height = LayoutSizing::Fixed((amplitude * height / 2.0).max(1.0)); column.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        absolute(&mut column, index as f32 * (column_width + gap), (1.0 - peak.max.clamp(-1.0, 1.0) as f32) * height / 2.0); root = root.child(column);
+    }
+    let sample_span = (state.visible_end.saturating_sub(state.visible_start)).max(1) as f32;
+    if let Some(selection) = state.selection {
+        let mut overlay = Node::container();
+        overlay.style.descriptor.layout.width = LayoutSizing::Fixed(((selection.end.saturating_sub(selection.start) + 1) as f32 / sample_span * width).max(1.0));
+        overlay.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+        overlay.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        overlay.style.descriptor.opacity = 0.22;
+        absolute(&mut overlay, selection.start.saturating_sub(state.visible_start) as f32 / sample_span * width, 0.0);
+        root = root.child(overlay);
+    }
+    if let Some(cursor) = state.cursor_sample {
+        let mut line = Node::container(); line.style.descriptor.layout.width = LayoutSizing::Fixed(2.0); line.style.descriptor.layout.height = LayoutSizing::Fixed(height); line.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        absolute(&mut line, cursor.saturating_sub(state.visible_start) as f32 / sample_span * width, 0.0); root = root.child(line);
+    }
+    root
+}
+
+pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, theme: &dyn ThemeProvider) -> Node {
+    let state = &spec.visual_state; let size = resolve_semantic_size(spec.size, spec.size_role);
+    let cell_size = rem_to_px(audio_size_rem(size, [2.5, 3.0, 3.5, 4.0, 4.5])); let gap = density_metric(spec.density, [2.0, 4.0, 8.0]);
+    let mut root = Node::container(); root.id = Some("mod-matrix-grid-root".into()); root.style.descriptor.layout.spacing.gap = gap; root.style.descriptor.background = Some(theme.resolve_color("color.background.surface")); root.style.descriptor.border.width = 1.0; root.style.descriptor.border.color = theme.resolve_color("color.border.default"); root.a11y.role = Some(NodeRole::Grid); root.a11y.label = Some(spec.aria_label.clone()); root.interaction.disabled = !state.enabled;
+    let mut header = Node::container(); header.style.descriptor.layout.direction = LayoutDirection::Row; header.style.descriptor.layout.spacing.gap = gap;
+    let mut corner = Node::text("Source"); corner.style.descriptor.layout.width = LayoutSizing::Fixed(cell_size * 1.8); header = header.child(corner);
+    for destination in &state.destinations { let mut label = Node::text(destination.label.clone()); label.style.descriptor.layout.width = LayoutSizing::Fixed(cell_size); header = header.child(label); }
+    root = root.child(header);
+    for source in &state.sources {
+        let mut row = Node::container(); row.style.descriptor.layout.direction = LayoutDirection::Row; row.style.descriptor.layout.spacing.gap = gap; row.a11y.role = Some(NodeRole::Row); row.a11y.label = Some(source.label.clone());
+        let mut label = Node::text(source.label.clone()); label.style.descriptor.layout.width = LayoutSizing::Fixed(cell_size * 1.8); row = row.child(label);
+        for cell in state.cells.iter().filter(|cell| cell.cell.source_id == source.id) {
+            let destination_label = state.destinations.iter().find(|destination| destination.id == cell.cell.destination_id).map(|destination| destination.label.as_str()).unwrap_or(cell.cell.destination_id.as_str());
+            let mut node = Node::container(); node.style.descriptor.layout.width = LayoutSizing::Fixed(cell_size); node.style.descriptor.layout.height = LayoutSizing::Fixed(cell_size); node.style.descriptor.background = Some(theme.resolve_color(if cell.cell.enabled { "color.background.elevated" } else { "color.background.base" })); node.style.descriptor.border.width = if cell.focused { 2.0 } else { 1.0 }; node.style.descriptor.border.color = theme.resolve_color("color.border.default"); node.a11y.role = Some(NodeRole::Cell); node.a11y.label = Some(format!("{} to {}, {}", source.label, destination_label, cell.cell.amount)); node.interaction.focusable = state.enabled;
+            let mut zero = Node::container(); zero.style.descriptor.layout.width = LayoutSizing::Fixed(1.0); zero.style.descriptor.layout.height = LayoutSizing::Fixed(cell_size * 0.64); zero.style.descriptor.background = Some(theme.resolve_color("color.border.default")); absolute(&mut zero, cell_size / 2.0, cell_size * 0.18); node = node.child(zero);
+            let amount_width = cell.cell.amount.abs() as f32 * cell_size / 2.0;
+            if amount_width > 0.0 { let mut amount = Node::container(); amount.style.descriptor.layout.width = LayoutSizing::Fixed(amount_width); amount.style.descriptor.layout.height = LayoutSizing::Fixed(density_metric(spec.density, [2.0, 4.0, 6.0])); amount.style.descriptor.background = Some(theme.resolve_color(if cell.cell.amount < 0.0 { "color.status.danger" } else { "color.accent.base" })); absolute(&mut amount, if cell.cell.amount < 0.0 { cell_size / 2.0 - amount_width } else { cell_size / 2.0 }, cell_size / 2.0 - 2.0); node = node.child(amount); }
+            row = row.child(node);
+        }
+        root = root.child(row);
+    }
+    root
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -624,6 +711,26 @@ mod tests {
         let mut spec = AudioMeterSpec::new(visual.clone());
         spec.channels.push(visual);
         assert_eq!(audio_meter(&spec, &Theme).children.len(), 2);
+    }
+
+    #[test]
+    fn phase_three_renderers_expose_visual_state_semantics() {
+        let keyboard_state = poodle_headless::audio::keyboard_visual_state(&poodle_headless::audio::KeyboardContext::default());
+        let keyboard_node = keyboard(&KeyboardSpec::new(keyboard_state), &Theme);
+        assert_eq!(keyboard_node.a11y.role, Some(NodeRole::Toolbar));
+        assert!(keyboard_node.children.iter().any(|child| child.a11y.role == Some(NodeRole::Button)));
+
+        let waveform_state = poodle_headless::audio::WaveformContext {
+            pyramid: poodle_headless::audio::WaveformPeakPyramid { sample_count: 1, levels: vec![poodle_headless::audio::WaveformPeakLevel { samples_per_peak: 1, peaks: vec![poodle_headless::audio::WaveformPeakPair { min: -0.5, max: 0.5 }] }] },
+            visible_start: 0, visible_end: 1, column_count: 1, cursor_sample: Some(0), selection: None, selection_anchor: None, selecting: false, focus: true, disabled: false,
+        }.visual_state();
+        assert_eq!(waveform_display(&WaveformDisplaySpec::new(waveform_state), &Theme).a11y.role, Some(NodeRole::Slider));
+
+        let matrix_state = poodle_headless::audio::ModMatrixContext::new(
+            vec![poodle_headless::audio::ModMatrixHeader { id: "s".into(), label: "Source".into() }],
+            vec![poodle_headless::audio::ModMatrixHeader { id: "d".into(), label: "Destination".into() }], vec![],
+        ).visual_state();
+        assert_eq!(mod_matrix_grid(&ModMatrixGridSpec::new(matrix_state), &Theme).a11y.role, Some(NodeRole::Grid));
     }
 
     #[test]

@@ -173,7 +173,8 @@ pub use agent_transcript::AgentTranscriptSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use audio::{
     AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, DragNumberFieldSpec, EnvelopeEditorSpec,
-    FaderSpec, GainReductionMeterSpec, KnobSpec, ValueReadoutSpec, XYPadSpec,
+    FaderSpec, GainReductionMeterSpec, KeyboardSpec, KnobSpec, ModMatrixGridSpec, ValueReadoutSpec,
+    WaveformDisplaySpec, XYPadSpec,
 };
 pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;

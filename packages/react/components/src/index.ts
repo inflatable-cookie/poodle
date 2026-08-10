@@ -53,8 +53,11 @@ export { DragNumberField, type DragNumberFieldProps } from "./DragNumberField";
 export { EnvelopeEditor, type EnvelopeEditorProps } from "./EnvelopeEditor";
 export { Fader, type FaderProps } from "./Fader";
 export { GainReductionMeter, type GainReductionMeterHandle, type GainReductionMeterProps } from "./GainReductionMeter";
+export { Keyboard, type KeyboardProps } from "./Keyboard";
 export { Knob, type KnobProps } from "./Knob";
+export { ModMatrixGrid, type ModMatrixGridProps } from "./ModMatrixGrid";
 export { ValueReadout, type ValueReadoutProps } from "./ValueReadout";
+export { WaveformDisplay, type WaveformDisplayProps } from "./WaveformDisplay";
 export { XYPad, type XYPadProps } from "./XYPad";
 export {
   BlockEditor,

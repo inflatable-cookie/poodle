@@ -8,8 +8,11 @@ import DragNumberField from "../src/DragNumberField.svelte";
 import EnvelopeEditor from "../src/EnvelopeEditor.svelte";
 import Fader from "../src/Fader.svelte";
 import GainReductionMeter from "../src/GainReductionMeter.svelte";
+import Keyboard from "../src/Keyboard.svelte";
 import Knob from "../src/Knob.svelte";
+import ModMatrixGrid from "../src/ModMatrixGrid.svelte";
 import ValueReadout from "../src/ValueReadout.svelte";
+import WaveformDisplay from "../src/WaveformDisplay.svelte";
 import XYPad from "../src/XYPad.svelte";
 
 describe("audio controls", () => {
@@ -114,5 +117,25 @@ describe("audio controls", () => {
     const { getByRole, container } = render(GainReductionMeter, { props: { context, ariaLabel: "Compression" } });
     expect(getByRole("meter", { name: "Compression" }).getAttribute("aria-valuetext")).toBe("12 dB reduction");
     expect(container.querySelector(".poodle-gain-reduction-meter-visual")?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("Keyboard pairs computer-key note effects", async () => {
+    const onNoteOn = vi.fn(); const onNoteOff = vi.fn();
+    const { getByRole } = render(Keyboard, { props: { firstNote: 48, lastNote: 72, ariaLabel: "Keys", onNoteOn, onNoteOff } });
+    const keyboard = getByRole("toolbar", { name: "Keys" });
+    await fireEvent.keyDown(keyboard, { key: "a" }); await fireEvent.keyUp(keyboard, { key: "a" });
+    expect(onNoteOn).toHaveBeenCalledWith(60, 100); expect(onNoteOff).toHaveBeenCalledWith(60);
+  });
+
+  it("WaveformDisplay owns keyboard cursor state", async () => {
+    const onCursorChange = vi.fn(); const pyramid = { sampleCount: 4, levels: [{ samplesPerPeak: 1, peaks: [{ min: -.2, max: .3 }, { min: -.5, max: .6 }, { min: -.1, max: .2 }, { min: -.7, max: .8 }] }] };
+    const { getByRole } = render(WaveformDisplay, { props: { pyramid, cursorSample: 1, ariaLabel: "Clip", onCursorChange } });
+    await fireEvent.keyDown(getByRole("slider"), { key: "ArrowRight" }); expect(onCursorChange).toHaveBeenCalledWith(2);
+  });
+
+  it("ModMatrixGrid toggles a focused generic cell", async () => {
+    const onCellCommit = vi.fn(); const { getByRole } = render(ModMatrixGrid, { props: { sources: [{ id: "one", label: "Source 1" }], destinations: [{ id: "a", label: "Dest A" }], ariaLabel: "Routes", onCellCommit } });
+    const cell = getByRole("gridcell"); await fireEvent.focus(cell); await fireEvent.keyDown(cell, { key: " " });
+    expect(onCellCommit.mock.calls.at(-1)?.[0]).toMatchObject({ sourceId: "one", destinationId: "a", enabled: true });
   });
 });

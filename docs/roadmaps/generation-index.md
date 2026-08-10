@@ -1,6 +1,18 @@
 # Roadmap Generation Index
 
+## Active Track
+
+- None.
+
 ## Latest Completed Track
+
+- `g14`
+  - Status: completed
+  - Range: `001`
+  - Notes: closes the audio family with Keyboard, inspector-scale Waveform
+    Display, and generic Mod Matrix Grid across Svelte, React, GPUI, and
+    Jetstream. Timeline waveform rendering, asset skins, and host bindings are
+    out of scope.
 
 - `g13`
   - Status: completed

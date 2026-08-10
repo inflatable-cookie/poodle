@@ -62,6 +62,66 @@ export interface GainReductionMeterVisualState extends AudioMeterVisualState {
   reductionDb: number;
 }
 
+export type KeyboardOrientation = "horizontal" | "vertical";
+
+export interface KeyboardKeyVisualState {
+  note: number;
+  kind: "white" | "black";
+  startNorm: number;
+  lengthNorm: number;
+  breadthNorm: number;
+  held: boolean;
+  externallyHeld: boolean;
+  velocity: number | null;
+  focused: boolean;
+}
+
+export interface KeyboardVisualState {
+  orientation: KeyboardOrientation;
+  firstNote: number;
+  lastNote: number;
+  octaveShift: number;
+  keys: KeyboardKeyVisualState[];
+  heldNotes: number[];
+  externalHeldNotes: number[];
+  enabled: boolean;
+}
+
+export interface WaveformPeakPair { min: number; max: number }
+export interface WaveformPeakLevel { samplesPerPeak: number; peaks: WaveformPeakPair[] }
+export interface WaveformPeakPyramid { sampleCount: number; levels: WaveformPeakLevel[] }
+export interface WaveformSelection { start: number; end: number }
+
+export interface WaveformVisualState {
+  sampleCount: number;
+  visibleStart: number;
+  visibleEnd: number;
+  columns: WaveformPeakPair[];
+  cursorSample: number | null;
+  selection: WaveformSelection | null;
+  focus: boolean;
+  enabled: boolean;
+}
+
+export interface ModMatrixHeader { id: string; label: string }
+export interface ModMatrixCell {
+  sourceId: string;
+  destinationId: string;
+  amount: number;
+  enabled: boolean;
+}
+export interface ModMatrixVisualCell extends ModMatrixCell {
+  amountNorm: number;
+  focused: boolean;
+}
+export interface ModMatrixVisualState {
+  sources: ModMatrixHeader[];
+  destinations: ModMatrixHeader[];
+  cells: ModMatrixVisualCell[];
+  focus: { sourceId: string; destinationId: string } | null;
+  enabled: boolean;
+}
+
 export interface AudioPoint {
   x: number;
   y: number;

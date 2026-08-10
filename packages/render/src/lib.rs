@@ -186,7 +186,7 @@ pub use alert_dialog::{
 pub use app_header::app_header;
 pub use audio::{
     audio_meter, audio_switch, drag_number_field, envelope_editor, fader, gain_reduction_meter,
-    knob, value_readout, xy_pad,
+    keyboard, knob, mod_matrix_grid, value_readout, waveform_display, xy_pad,
 };
 pub use audio_player::audio_player;
 pub use avatar::avatar;

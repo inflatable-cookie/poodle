@@ -352,6 +352,9 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             audio_controls::gain_reduction_meter(theme),
         ),
+        "keyboard" => specimen_card("Keyboard", theme, audio_controls::keyboard(theme)),
+        "waveform-display" => specimen_card("WaveformDisplay", theme, audio_controls::waveform_display(theme)),
+        "mod-matrix-grid" => specimen_card("ModMatrixGrid", theme, audio_controls::mod_matrix_grid(theme)),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(state, cx)),
 
         // ── Date/Time ───────────────────────────────────────────

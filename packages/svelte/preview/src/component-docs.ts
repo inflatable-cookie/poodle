@@ -4875,6 +4875,61 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <GainReductionMeter bind:context={meter} ariaLabel="Compressor gain reduction" />`,
   },
+  keyboard: {
+  props: [
+    { name: "size", type: "ControlSize | null", default: "null", description: "Explicit xs–xl size; otherwise inherited." },
+    { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit compact, default, or comfortable density." },
+    { name: "firstNote", type: "number", default: "48", description: "First visible MIDI note." },
+    { name: "lastNote", type: "number", default: "72", description: "Last visible MIDI note." },
+    { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "Keyboard or piano-roll gutter orientation." },
+    { name: "octaveShift", type: "number", default: "0", description: "Computer-key mapping shift in octaves." },
+    { name: "externalHeldNotes", type: "number[]", default: "[]", description: "Host playback highlights that emit no note effects." },
+    { name: "onNoteOn", type: "((note: number, velocity: number) => void) | undefined", default: "undefined", description: "Paired per-note gesture start." },
+    { name: "onNoteOff", type: "((note: number) => void) | undefined", default: "undefined", description: "Paired per-note gesture end." },
+  ],
+  usage: `<script lang="ts">
+  import { Keyboard } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<Keyboard firstNote={48} lastNote={72} externalHeldNotes={[60, 64, 67]} ariaLabel="Virtual MIDI keyboard" />`,
+  },
+  "waveform-display": {
+  props: [
+    { name: "size", type: "ControlSize | null", default: "null", description: "Explicit xs–xl size; otherwise inherited." },
+    { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit compact, default, or comfortable density." },
+    { name: "pyramid", type: "WaveformPeakPyramid", description: "Pre-reduced min/max peak levels; raw samples are not accepted." },
+    { name: "visibleStart", type: "number", default: "0", description: "First visible sample." },
+    { name: "visibleEnd", type: "number", description: "Exclusive visible sample bound." },
+    { name: "cursorSample", type: "number | null", default: "null", description: "Bindable sample cursor." },
+    { name: "selection", type: "WaveformSelection | null", default: "null", description: "Bindable ordered sample selection." },
+    { name: "columnCount", type: "number", default: "512", description: "Requested reduced columns, hard-capped at 4,096." },
+  ],
+  usage: `<script lang="ts">
+  import { WaveformDisplay } from "@inflatable-cookie/poodle-svelte";
+  const pyramid = { sampleCount: 2, levels: [{ samplesPerPeak: 1, peaks: [{ min: -0.5, max: 0.6 }, { min: -0.3, max: 0.4 }] }] };
+</script>
+
+<WaveformDisplay {pyramid} cursorSample={1} ariaLabel="Clip preview" />`,
+  },
+  "mod-matrix-grid": {
+  props: [
+    { name: "size", type: "ControlSize | null", default: "null", description: "Explicit xs–xl size; otherwise inherited." },
+    { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit compact, default, or comfortable density." },
+    { name: "sources", type: "ModMatrixHeader[]", default: "[]", description: "Caller-owned source IDs and labels." },
+    { name: "destinations", type: "ModMatrixHeader[]", default: "[]", description: "Caller-owned destination IDs and labels." },
+    { name: "cells", type: "ModMatrixCell[]", default: "[]", description: "Sparse or complete bipolar amount and enable values." },
+    { name: "step", type: "number", default: "0.01", description: "Keyboard amount step." },
+    { name: "onCellChange", type: "((cell: ModMatrixCell) => void) | undefined", default: "undefined", description: "Reports live cell edits." },
+    { name: "onCellCommit", type: "((cell: ModMatrixCell) => void) | undefined", default: "undefined", description: "Reports committed cell edits." },
+  ],
+  usage: `<script lang="ts">
+  import { ModMatrixGrid } from "@inflatable-cookie/poodle-svelte";
+  const sources = [{ id: "one", label: "Source 1" }];
+  const destinations = [{ id: "a", label: "Destination A" }];
+</script>
+
+<ModMatrixGrid {sources} {destinations} ariaLabel="Routing matrix" />`,
+  },
 };
 
 // Alias: nav-card-grid shares docs with nav-card

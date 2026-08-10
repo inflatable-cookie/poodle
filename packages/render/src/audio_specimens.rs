@@ -8,13 +8,15 @@ use poodle_adapter::ThemeProvider;
 use poodle_headless::audio::{
     format_value, switch_visual_state, AudioControlVisualState, AudioMeterVisualState,
     AudioSwitchMode, AudioValueFormat, AudioValueLaw, AutomationState, DragState,
-    EnvelopeVisualPoint, EnvelopeVisualState, GainReductionVisualState, XYPadVisualState,
+    EnvelopeVisualPoint, EnvelopeVisualState, GainReductionVisualState, KeyboardContext,
+    KeyboardOrientation, ModMatrixCell, ModMatrixContext, ModMatrixHeader, WaveformContext,
+    WaveformPeakLevel, WaveformPeakPair, WaveformPeakPyramid, XYPadVisualState,
 };
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, ControlDensity, ControlSize,
-    DragNumberFieldSpec, EnvelopeEditorSpec, FaderSpec, GainReductionMeterSpec, KnobSpec,
-    Orientation, ValueReadoutSpec, XYPadSpec,
+    DragNumberFieldSpec, EnvelopeEditorSpec, FaderSpec, GainReductionMeterSpec, KeyboardSpec,
+    KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
 trait AudioPresentationSpec: Clone {
@@ -41,6 +43,9 @@ impl_audio_presentation_spec!(
     XYPadSpec,
     AudioSwitchSpec,
     GainReductionMeterSpec,
+    KeyboardSpec,
+    WaveformDisplaySpec,
+    ModMatrixGridSpec,
 );
 
 fn axis_groups<S: AudioPresentationSpec>(
@@ -1146,4 +1151,61 @@ pub fn gain_reduction_meter(theme: &dyn ThemeProvider) -> Node {
         .collect(),
         theme,
     )
+}
+
+fn keyboard_spec(orientation: KeyboardOrientation, enabled: bool) -> KeyboardSpec {
+    let mut context = KeyboardContext { orientation, disabled: !enabled, external_held_notes: vec![60, 64, 67], ..Default::default() };
+    if orientation == KeyboardOrientation::Vertical { context.first_note = 48; context.last_note = 60; }
+    KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(&context))
+}
+
+pub fn keyboard(theme: &dyn ThemeProvider) -> Node {
+    let base = keyboard_spec(KeyboardOrientation::Horizontal, true);
+    let axes = axis_groups(&base, super::keyboard, theme);
+    page(vec![
+        ("Horizontal input / local chord", vec![super::keyboard(&base, theme)]),
+        ("Vertical piano-roll gutter", vec![super::keyboard(&keyboard_spec(KeyboardOrientation::Vertical, true), theme)]),
+        ("Velocity depth", vec![super::keyboard(&base, theme)]),
+        ("Computer keys / octave shift", vec![super::keyboard(&base, theme)]),
+        ("External playback highlight", vec![super::keyboard(&base, theme)]),
+        ("Disabled", vec![super::keyboard(&keyboard_spec(KeyboardOrientation::Horizontal, false), theme)]),
+    ].into_iter().chain(axes).collect(), theme)
+}
+
+fn waveform_spec_view(enabled: bool, visible_start: usize, visible_end: usize, selection: Option<poodle_headless::audio::WaveformSelection>) -> WaveformDisplaySpec {
+    let peaks: Vec<WaveformPeakPair> = (0..64).map(|index| { let value = (index as f64 * 0.31).sin().abs(); WaveformPeakPair { min: -value * 0.8, max: value * 0.9 } }).collect();
+    let context = WaveformContext { pyramid: WaveformPeakPyramid { sample_count: 64, levels: vec![WaveformPeakLevel { samples_per_peak: 1, peaks }] }, visible_start, visible_end, column_count: 64, cursor_sample: Some(24), selection, selection_anchor: None, selecting: false, focus: true, disabled: !enabled };
+    WaveformDisplaySpec::new(context.visual_state())
+}
+
+fn waveform_spec(enabled: bool) -> WaveformDisplaySpec { waveform_spec_view(enabled, 0, 64, Some(poodle_headless::audio::WaveformSelection { start: 12, end: 42 })) }
+
+pub fn waveform_display(theme: &dyn ThemeProvider) -> Node {
+    let base = waveform_spec(true); let axes = axis_groups(&base, super::waveform_display, theme);
+    page(vec![
+        ("Peak pyramid / cursor", vec![super::waveform_display(&waveform_spec_view(true, 0, 64, None), theme)]),
+        ("Zoomed viewport", vec![super::waveform_display(&waveform_spec_view(true, 16, 48, None), theme)]),
+        ("Forward and ordered selection", vec![super::waveform_display(&base, theme)]),
+        ("Empty", vec![super::waveform_display(&WaveformDisplaySpec::new(WaveformContext { pyramid: WaveformPeakPyramid { sample_count: 0, levels: vec![] }, visible_start: 0, visible_end: 0, column_count: 64, cursor_sample: None, selection: None, selection_anchor: None, selecting: false, focus: false, disabled: false }.visual_state()), theme)]),
+        ("Disabled", vec![super::waveform_display(&waveform_spec(false), theme)]),
+        ("Inspector ceiling", vec![super::waveform_display(&base, theme)]),
+    ].into_iter().chain(axes).collect(), theme)
+}
+
+fn matrix_spec(enabled: bool) -> ModMatrixGridSpec {
+    let sources = vec![ModMatrixHeader { id: "one".into(), label: "Source 1".into() }, ModMatrixHeader { id: "two".into(), label: "Source 2".into() }, ModMatrixHeader { id: "three".into(), label: "Source 3".into() }];
+    let destinations = vec![ModMatrixHeader { id: "a".into(), label: "Dest A".into() }, ModMatrixHeader { id: "b".into(), label: "Dest B".into() }, ModMatrixHeader { id: "c".into(), label: "Dest C".into() }];
+    let mut context = ModMatrixContext::new(sources, destinations, vec![ModMatrixCell { source_id: "one".into(), destination_id: "a".into(), amount: 0.75, enabled: true }, ModMatrixCell { source_id: "one".into(), destination_id: "b".into(), amount: -0.5, enabled: true }]); context.focus_row = Some(0); context.focus_column = Some(0); context.disabled = !enabled;
+    ModMatrixGridSpec::new(context.visual_state())
+}
+
+pub fn mod_matrix_grid(theme: &dyn ThemeProvider) -> Node {
+    let base = matrix_spec(true); let axes = axis_groups(&base, super::mod_matrix_grid, theme);
+    page(vec![
+        ("Sparse generic matrix", vec![super::mod_matrix_grid(&base, theme)]),
+        ("Positive / negative / zero", vec![super::mod_matrix_grid(&base, theme)]),
+        ("Keyboard navigation and toggle", vec![super::mod_matrix_grid(&base, theme)]),
+        ("Empty axes", vec![super::mod_matrix_grid(&ModMatrixGridSpec::new(ModMatrixContext::new(vec![], vec![], vec![]).visual_state()), theme)]),
+        ("Disabled", vec![super::mod_matrix_grid(&matrix_spec(false), theme)]),
+    ].into_iter().chain(axes).collect(), theme)
 }

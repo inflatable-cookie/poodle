@@ -2,7 +2,8 @@
 
 use poodle_headless::audio::{
     AudioControlVisualState, AudioMeterVisualState, AudioSwitchMode, AudioSwitchVisualState,
-    AudioValueLaw, EnvelopeVisualState, GainReductionVisualState, XYPadVisualState,
+    AudioValueLaw, EnvelopeVisualState, GainReductionVisualState, KeyboardVisualState,
+    ModMatrixVisualState, WaveformVisualState, XYPadVisualState,
 };
 
 use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
@@ -262,6 +263,66 @@ impl GainReductionMeterSpec {
             max_reduction_db,
             value_text,
             aria_label: "Gain reduction".into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct KeyboardSpec {
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
+    pub visual_state: KeyboardVisualState,
+    pub aria_label: String,
+}
+impl KeyboardSpec {
+    pub fn new(visual_state: KeyboardVisualState) -> Self {
+        Self {
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
+            visual_state,
+            aria_label: "Keyboard".into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct WaveformDisplaySpec {
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
+    pub visual_state: WaveformVisualState,
+    pub aria_label: String,
+}
+impl WaveformDisplaySpec {
+    pub fn new(visual_state: WaveformVisualState) -> Self {
+        Self {
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
+            visual_state,
+            aria_label: "Waveform".into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModMatrixGridSpec {
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
+    pub visual_state: ModMatrixVisualState,
+    pub aria_label: String,
+}
+impl ModMatrixGridSpec {
+    pub fn new(visual_state: ModMatrixVisualState) -> Self {
+        Self {
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
+            visual_state,
+            aria_label: "Modulation matrix".into(),
         }
     }
 }

@@ -3,13 +3,15 @@
 Status: reference
 Updated: 2026-08-10
 
-Roadmaps record Poodle's executable milestone work. Generations through `g13`
-are complete.
+Roadmaps record Poodle's executable milestone work. Generations through `g14`
+are complete. No generation is active.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g09`, `g10`, `g11`, `g12`, and `g13` are complete.
+- `g14` closed the audio family with Keyboard, Waveform Display, and Mod Matrix
+  Grid across every in-flight backend.
+- `g09`, `g10`, `g11`, `g12`, `g13`, and `g14` are complete.
 - The GPUI node-backend migration is complete and the duplicate GPUI component
   tier has been removed.
 - Web, native, accessibility, visual-parity, and package-consumer gates are
@@ -35,6 +37,7 @@ operator guide for the present package shape.
 - `g11` — Svelte modernization and consumer rollout
 - `g12` — React parity, verification depth, native hardening, and package consolidation
 - `g13` — audio family parity across Svelte, React, GPUI, and Jetstream
+- `g14` — audio family Phase 3 closeout
 
 ## Rules
 

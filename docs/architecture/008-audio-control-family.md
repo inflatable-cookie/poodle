@@ -104,6 +104,55 @@ interface GainReductionMeterVisualState extends AudioMeterVisualState {
 }
 ```
 
+Phase 3 closes the family with three renderer-complete shapes:
+
+```ts
+interface KeyboardVisualState {
+  orientation: "horizontal" | "vertical";
+  firstNote: number; lastNote: number; octaveShift: number;
+  keys: Array<{
+    note: number; kind: "white" | "black";
+    startNorm: number; lengthNorm: number; breadthNorm: number;
+    held: boolean; externallyHeld: boolean; velocity: number | null;
+    focused: boolean;
+  }>;
+  heldNotes: number[]; externalHeldNotes: number[];
+  enabled: boolean;
+}
+
+interface WaveformVisualState {
+  sampleCount: number; visibleStart: number; visibleEnd: number;
+  columns: Array<{ min: number; max: number }>;
+  cursorSample: number | null;
+  selection: { start: number; end: number } | null;
+  focus: boolean; enabled: boolean;
+}
+
+interface ModMatrixVisualState {
+  sources: Array<{ id: string; label: string }>;
+  destinations: Array<{ id: string; label: string }>;
+  cells: Array<{
+    sourceId: string; destinationId: string;
+    amount: number; amountNorm: number; enabled: boolean; focused: boolean;
+  }>;
+  focus: { sourceId: string; destinationId: string } | null;
+  enabled: boolean;
+}
+```
+
+Keyboard geometry is resolved by the core. Horizontal orientation runs low to
+high from left to right. Vertical orientation is the piano-roll gutter form:
+high notes are at the top and key depth runs left to right. Pointer velocity is
+the clamped depth within the key, quantized to MIDI `1..127`; renderers receive
+the result but never calculate it. Local held notes and caller-supplied external
+highlights remain distinct in VisualState so host playback does not fabricate
+input gestures.
+
+Waveform VisualState contains the exact reduced columns to draw. It never
+contains raw samples or asks a renderer to choose a pyramid level. Mod-matrix
+VisualState contains caller IDs and labels plus a row-major cell snapshot;
+renderers do not infer synthesizer meaning or inspect machine context.
+
 Envelope `curve` belongs to the segment starting at that point and is clamped
 to `-1..1`. Segment interpolation is monotonic: zero is linear; positive
 amounts use `t^(1 + 4c)`; negative amounts use
@@ -196,6 +245,70 @@ uses a 10 ms attack and 300 ms release, with zero as no reduction. Display
 normalization maps `0..maxReductionDb` to `0..1`; the standard renderer draws
 that magnitude from the zero end toward maximum reduction on an inverted
 meter axis. Gain reduction has no clip latch.
+
+## Keyboard Gestures
+
+Keyboard note numbers are integers in MIDI range `0..127`. The configured
+inclusive range is clamped to that domain. Octave shift changes computer-key
+mapping in twelve-semitone increments without moving the visible key range.
+The default map is `A W S E D F T G Y H U J K`, spanning one chromatic
+octave; callers may supply another key-to-semitone map.
+
+Pointer and computer-key press transitions emit one `noteOn` effect with the
+resolved note and velocity. Release, cancellation, range removal, disablement,
+or octave-shift removal emits one matching `noteOff`. Repeated computer-key
+keydown events are ignored while that physical key is held. A note remains in
+the local held set until every input source that holds it has released it.
+External highlights never emit effects. This paired edge contract is the
+per-note gesture lifecycle consumed by future MIDI and host adapters.
+
+## Waveform Peak-pyramid Boundary
+
+Waveform input is a peak pyramid, never raw PCM:
+
+```ts
+interface WaveformPeakPyramid {
+  sampleCount: number;
+  levels: Array<{
+    samplesPerPeak: number;
+    peaks: Array<{ min: number; max: number }>;
+  }>;
+}
+```
+
+Levels use positive integer `samplesPerPeak`, sorted from finest to coarsest.
+Pairs are finite amplitudes clamped to `-1..1` with `min <= max`. The core
+chooses the finest level that fits the requested viewport width, reduces it to
+at most `WAVEFORM_MAX_COLUMNS = 4096`, and publishes only those columns in
+VisualState. Malformed pyramids are rejected at the adapter boundary.
+
+The component is limited to inspector and preview surfaces: clip thumbnails,
+sample browsers, and plugin displays. It has no timeline tiles, streaming
+cache, background reduction, raw-sample ingestion, or GPU scene ownership.
+Timeline-scale rendering belongs to the consuming workstation's scene
+substrate. Raising the 4,096-column ceiling or adding timeline facilities is an
+architecture change, not a renderer option.
+
+Cursor and ordered selection bounds are sample indices owned by the pure
+machine. Pointer hit testing resolves a sample before transition. Arrow keys
+move the cursor, Shift extends selection, Home/End move to viewport bounds,
+and Escape clears selection. Drawing remains read-only: no transition mutates
+audio or peak data.
+
+## Mod-matrix Model
+
+The mod matrix accepts stable source and destination IDs plus caller labels.
+Each addressable cell owns `enabled` and a bipolar amount in `-1..1`, mapped
+through the shared bipolar-center law. The core rejects duplicate IDs and
+normalizes missing cells to disabled zero values. It contains no oscillator,
+envelope, MIDI, or routing semantics.
+
+Arrow keys move cell focus with clamped row and column navigation. Home/End
+move to row bounds; Control+Home/End move to grid bounds. Space toggles the
+focused cell, and Page Up/Down or modified arrows nudge amount. Adapters expose
+row and column headers plus each cell's enabled state and formatted bipolar
+amount through platform grid semantics. Renderers receive the flattened
+VisualState only.
 
 ## Runtime Parity And Appearance
 

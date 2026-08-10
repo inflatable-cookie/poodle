@@ -40,3 +40,7 @@ pub(crate) fn audio_switch(theme: &GpuiThemeProvider) -> AnyElement {
 pub(crate) fn gain_reduction_meter(theme: &GpuiThemeProvider) -> AnyElement {
     render(poodle_render::audio_specimens::gain_reduction_meter(theme))
 }
+
+pub(crate) fn keyboard(theme: &GpuiThemeProvider) -> AnyElement { render(poodle_render::audio_specimens::keyboard(theme)) }
+pub(crate) fn waveform_display(theme: &GpuiThemeProvider) -> AnyElement { render(poodle_render::audio_specimens::waveform_display(theme)) }
+pub(crate) fn mod_matrix_grid(theme: &GpuiThemeProvider) -> AnyElement { render(poodle_render::audio_specimens::mod_matrix_grid(theme)) }

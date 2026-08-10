@@ -1,0 +1,22 @@
+.poodle-keyboard { position: relative; display: inline-block; width: 22rem; height: 7rem; touch-action: none; opacity: 1; }
+.poodle-keyboard[aria-disabled="true"] { opacity: var(--poodle-recipe-keyboard-disabled-opacity, var(--poodle-state-opacity-disabled)); }
+.poodle-keyboard-visual { position: absolute; inset: 0; display: block; overflow: hidden; border: .0625rem solid var(--poodle-recipe-keyboard-border, var(--poodle-color-border-default)); border-radius: .375rem; background: var(--poodle-recipe-keyboard-fill, var(--poodle-color-background-surface)); }
+.poodle-keyboard-visual__key { position: absolute; box-sizing: border-box; border: .0625rem solid var(--poodle-recipe-keyboard-border, var(--poodle-color-border-default)); background: var(--poodle-recipe-keyboard-white-key, var(--poodle-color-text-primary)); }
+.poodle-keyboard-visual__key[data-kind="white"] { z-index: 1; }
+.poodle-keyboard-visual__key[data-kind="black"] { z-index: 2; background: var(--poodle-recipe-keyboard-black-key, var(--poodle-color-background-base)); }
+.poodle-keyboard-visual__key[data-held="true"][data-kind="white"] { background: var(--poodle-recipe-keyboard-white-key-held, color-mix(in srgb, var(--poodle-color-accent-base) 60%, white)); }
+.poodle-keyboard-visual__key[data-held="true"][data-kind="black"] { background: var(--poodle-recipe-keyboard-black-key-held, var(--poodle-color-accent-base)); }
+.poodle-keyboard-visual__key[data-external="true"] { box-shadow: inset 0 0 0 .125rem var(--poodle-recipe-keyboard-external-ring, var(--poodle-color-accent-base)); }
+.poodle-keyboard-visual__key[data-focused="true"] { outline: .125rem solid var(--poodle-recipe-keyboard-focus-ring, var(--poodle-color-accent-focusRing)); outline-offset: -.1875rem; }
+.poodle-keyboard__key-control { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.poodle-keyboard[data-orientation="vertical"] { width: 7rem; height: 22rem; }
+.poodle-keyboard[data-size="xs"] { width: 14rem; height: 4rem; }
+.poodle-keyboard[data-size="sm"] { width: 18rem; height: 5.5rem; }
+.poodle-keyboard[data-size="lg"] { width: 26rem; height: 8.5rem; }
+.poodle-keyboard[data-size="xl"] { width: 30rem; height: 10rem; }
+.poodle-keyboard[data-orientation="vertical"][data-size="xs"] { width: 4rem; height: 14rem; }
+.poodle-keyboard[data-orientation="vertical"][data-size="sm"] { width: 5.5rem; height: 18rem; }
+.poodle-keyboard[data-orientation="vertical"][data-size="lg"] { width: 8.5rem; height: 26rem; }
+.poodle-keyboard[data-orientation="vertical"][data-size="xl"] { width: 10rem; height: 30rem; }
+.poodle-keyboard[data-density="compact"] .poodle-keyboard-visual__key { border-width: 0; }
+.poodle-keyboard[data-density="comfortable"] .poodle-keyboard-visual__key { border-width: .125rem; }

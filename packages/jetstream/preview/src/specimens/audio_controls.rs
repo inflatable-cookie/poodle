@@ -36,3 +36,7 @@ pub fn audio_switch(theme: &JetstreamThemeProvider) -> El {
 pub fn gain_reduction_meter(theme: &JetstreamThemeProvider) -> El {
     El(poodle_render::audio_specimens::gain_reduction_meter(theme))
 }
+
+pub fn keyboard(theme: &JetstreamThemeProvider) -> El { El(poodle_render::audio_specimens::keyboard(theme)) }
+pub fn waveform_display(theme: &JetstreamThemeProvider) -> El { El(poodle_render::audio_specimens::waveform_display(theme)) }
+pub fn mod_matrix_grid(theme: &JetstreamThemeProvider) -> El { El(poodle_render::audio_specimens::mod_matrix_grid(theme)) }
