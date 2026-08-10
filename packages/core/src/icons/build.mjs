@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createRequire } from "node:module";
+import { realpathSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -79,6 +80,11 @@ async function main() {
   console.log(`Wrote ${Object.keys(iconSet).length} icons to ${options.out}`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+// realpathSync, because npm installs a bin as a symlink in node_modules/.bin.
+// Without it, argv[1] is the link and import.meta.url is the target, the guard
+// never matches, and `poodle-icons` exits 0 having written nothing -- which
+// reads as success. Poodle's own icons:build calls this file directly, so the
+// only way to catch it was to run the documented consumer command.
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(resolve(process.argv[1]))).href) {
   await main();
 }
