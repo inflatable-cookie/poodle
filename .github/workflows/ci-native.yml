@@ -1,7 +1,9 @@
 # Native compile-rot check — mirrors `effigy ci:native` (gpui half).
-# macOS only: gpui 0.2.2 pulls metal. Runs NIGHTLY, but the expensive macOS job
-# only fires when the default branch changed in the last 24h — a cheap ubuntu
-# guard early-exits on idle nights so no macOS runner (10x minutes) is spent.
+# macOS only: gpui 0.2.2 pulls metal, which bills at 10x the Linux rate.
+# MANUAL DISPATCH ONLY. This ran nightly behind a "did the default branch move
+# in 24h" guard, which fires every day during active development and is what
+# exhausted the org's Actions allowance. Run it before a tag, or when contract
+# or spec changes could plausibly rot the native build.
 # The native component crates have no unit tests yet; `cargo check` catches build
 # rot from contract/spec changes.
 #
@@ -11,9 +13,7 @@
 name: ci-native
 
 on:
-  schedule:
-    - cron: "0 6 * * *" # 06:00 UTC daily — guarded below
-  workflow_dispatch: {} # manual runs always proceed (guard bypassed)
+  workflow_dispatch: {}
 
 concurrency:
   group: ci-native-${{ github.ref }}
@@ -23,35 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  # Cheap ubuntu gate: did the default branch change in the last 24h?
-  # Skips the macOS job on idle nights. Manual dispatch always proceeds.
-  guard:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      run: ${{ steps.check.outputs.run }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch — proceeding."
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          last=$(git log -1 --format=%ct)   # committer date of HEAD (unix)
-          age=$(( $(date +%s) - last ))
-          if [ "$age" -lt 86400 ]; then
-            echo "HEAD is ${age}s old (< 24h) — running native check."
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No default-branch commit in last 24h (HEAD ${age}s old) — skipping."
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
   gpui:
-    needs: guard
-    if: needs.guard.outputs.run == 'true'
     runs-on: macos-latest
     timeout-minutes: 40
     # Shared target dir so the adapter, components, and preview crates reuse one

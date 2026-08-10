@@ -3,13 +3,11 @@
 # and display axis. Kept OUT of ci-web: it downloads a browser and boots two vite
 # dev servers, which that gate deliberately excludes.
 #
-# Runs NIGHTLY behind the same cheap guard as ci-native (skip when the default
-# branch has not moved in 24h), plus on demand. The axis tier is ~360 captures.
+# MANUAL DISPATCH ONLY, for the same reason as ci-native: the nightly schedule
+# fired on every day the branch moved. The axis tier is ~360 captures.
 name: ci-visual
 
 on:
-  schedule:
-    - cron: "30 6 * * *" # 06:30 UTC daily — guarded below
   workflow_dispatch:
     inputs:
       tier:
@@ -25,33 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  guard:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      run: ${{ steps.check.outputs.run }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch — proceeding."
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          last=$(git log -1 --format=%ct)
-          age=$(( $(date +%s) - last ))
-          if [ "$age" -lt 86400 ]; then
-            echo "HEAD is ${age}s old (< 24h) — running visual gate."
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No default-branch commit in last 24h (HEAD ${age}s old) — skipping."
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
   visual:
-    needs: guard
-    if: needs.guard.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

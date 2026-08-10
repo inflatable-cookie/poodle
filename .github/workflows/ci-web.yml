@@ -1,37 +1,14 @@
 # Web gate — mirrors `effigy ci:web`. Node/bun only, ubuntu (1x minutes).
-# Path-scoped: a Rust-only or docs-only change never triggers this.
 name: ci-web
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "packages/core/**"
-      - "packages/styles/**"
-      - "packages/tokens/**"
-      - "packages/svelte/**"
-      - "packages/react/**"
-      - "packages/bridges/**"
-      - "docs/contracts/**"
-      - "packages/*.json"
-      - "bun.lock"
-      - "package.json"
-      - ".github/workflows/ci-web.yml"
-  pull_request:
-    paths:
-      - "packages/core/**"
-      - "packages/styles/**"
-      - "packages/tokens/**"
-      - "packages/svelte/**"
-      - "packages/react/**"
-      - "packages/bridges/**"
-      - "docs/contracts/**"
-      - "packages/*.json"
-      - "bun.lock"
-      - "package.json"
-      - ".github/workflows/ci-web.yml"
+  # Manual dispatch only. The path-filtered push and pull_request triggers ran
+  # this on nearly every commit to the default branch; combined with the
+  # nightly macOS lanes that exhausted the org's Actions allowance and left
+  # dispatched runs queued indefinitely. Run this before a tag, and locally
+  # otherwise -- `effigy ci` is the same selector set.
+  workflow_dispatch: {}
 
-# Cancel superseded runs on the same ref — the single biggest minutes saver.
 concurrency:
   group: ci-web-${{ github.ref }}
   cancel-in-progress: true

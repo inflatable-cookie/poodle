@@ -5,15 +5,12 @@
 name: ci-rust
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "packages/contracts/**"
-      - ".github/workflows/ci-rust.yml"
-  pull_request:
-    paths:
-      - "packages/contracts/**"
-      - ".github/workflows/ci-rust.yml"
+  # Manual dispatch only. Path-filtered push and pull_request triggers ran this
+  # on nearly every commit to the default branch; combined with the nightly
+  # macOS lanes that exhausted the org's Actions allowance and left dispatched
+  # runs queued indefinitely. Run this before a tag, and locally otherwise --
+  # `effigy ci` is the same selector set.
+  workflow_dispatch: {}
 
 concurrency:
   group: ci-rust-${{ github.ref }}
