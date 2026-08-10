@@ -1,6 +1,6 @@
 # Native visual gate
 
-Screenshots every GPUI preview component and diffs it against a committed
+Screenshots every GPUI preview component and diffs it against a machine-local
 baseline. Roadmap: `docs/roadmaps/g12/014`.
 
 ## Why this is shaped differently from `test/visual/`
@@ -10,7 +10,7 @@ same DOM from the same stylesheet, so any difference is a bug by construction.
 
 The native targets have no twin. GPUI is a different renderer with its own
 shell, font stack and compositor — a diff against Svelte would be all noise. So
-this gate compares each component against **its own committed image**. It
+this gate compares each component against **its own local reference image**. It
 answers "did this edit move native rendering?", which is the question the
 structural gates cannot ask and the one that was open every time this repo
 changed a native renderer.
@@ -47,7 +47,7 @@ Jetstream needs the sibling repo.
 ## Running
 
 ```sh
-effigy test:native-visual        # diff against committed baselines
+effigy test:native-visual        # diff against local baselines
 effigy native-visual:update      # (re)write baselines after an intended change
 ```
 
@@ -74,10 +74,11 @@ component crate.
 
 ## When a baseline changes
 
-A diff is not automatically a failure — an intended rendering change should
-update the baseline. The rule is that the update lands **in the same commit as
-the change that caused it**, with the reason in the message. A baseline updated
-on its own is indistinguishable from a regression waved through.
+A diff is not automatically a regression. Inspect it first. If the rendering
+change is intended, update the local baseline while validating that change and
+record the reason in the change's commit or execution log. Baseline images do
+not enter Git; an unexplained local refresh destroys the checkpoint without
+leaving reviewable evidence.
 
 ## Skipped components
 

@@ -18,7 +18,7 @@ import {
 /**
  * Native visual gate:
  *
- *   bun test/native-visual/run.ts                 # diff against committed baselines
+ *   bun test/native-visual/run.ts                 # diff against local baselines
  *   bun test/native-visual/run.ts --update        # (re)write baselines
  *   bun test/native-visual/run.ts --slug=button   # one component
  *

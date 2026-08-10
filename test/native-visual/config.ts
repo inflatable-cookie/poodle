@@ -3,13 +3,15 @@
  *
  * The web gate (`test/visual/`) diffs Svelte against React, and can do that
  * because both emit the same DOM from the same stylesheet — any difference is a
- * bug by construction, so it needs no committed baselines.
+ * bug by construction, so it needs no baselines.
  *
  * The native targets have no such twin. GPUI is a different renderer with its
  * own shell, font stack and compositor; diffing it against Svelte would be all
- * noise. So this gate is a **baseline** gate: capture, commit, and diff against
- * the committed image on the next change. It answers "did this edit move native
- * rendering?", which is the question the structural gates cannot ask.
+ * noise. So this gate is a **local baseline** gate: capture, retain the
+ * machine-local reference, and diff against it on the next change. It answers
+ * "did this edit move native rendering?", which is the question the structural
+ * gates cannot ask. The references are deliberately gitignored because they
+ * are large and display-dependent.
  *
  * On determinism, after several wrong answers: a single capture is NOT
  * reliable. The preview waits a fixed 1.5s for its first render and captures
