@@ -1,6 +1,6 @@
 # 023 Agent Subagent Component
 
-Status: dispatched
+Status: completed
 Owner: Tom
 Created: 2026-08-10
 Repo: this one; work in the worktree on the branch below
@@ -117,3 +117,12 @@ AgentPlan precedent touches, adapted to the current layout:
 - Scope pressure toward React/GPUI/Jetstream variants → stop; natives are
   out of scope (Known Delta row in the contract doc instead)
 - PAPERCUTS.md friction goes in the batch log
+
+## Closeout
+
+Merged `bf5dc91f`. All acceptance gates re-run green on the branch before
+merge (core 373, components 32 files, contracts 24 suites, parity, both
+drift gates). Specimen verified visually in the preview app: all five status
+states plus expanded detail render as designed. React/GPUI/Jetstream
+variants remain a Known Delta in the contract doc, which stays `draft` until
+nucleus integration proves the API.
