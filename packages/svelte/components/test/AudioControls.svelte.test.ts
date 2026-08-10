@@ -127,6 +127,18 @@ describe("audio controls", () => {
     expect(onNoteOn).toHaveBeenCalledWith(60, 100); expect(onNoteOff).toHaveBeenCalledWith(60);
   });
 
+  it("Keyboard retargets a captured pointer across keys", async () => {
+    const onNoteOn = vi.fn(); const onNoteOff = vi.fn();
+    const { getByRole } = render(Keyboard, { props: { firstNote: 60, lastNote: 62, ariaLabel: "Keys", onNoteOn, onNoteOff } });
+    const keyboard = getByRole("toolbar", { name: "Keys" }) as HTMLDivElement;
+    keyboard.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    keyboard.setPointerCapture = vi.fn();
+    await fireEvent.pointerDown(keyboard, { pointerId: 1, button: 0, clientX: 10, clientY: 90 });
+    await fireEvent.pointerMove(keyboard, { pointerId: 1, clientX: 90, clientY: 90 });
+    expect(onNoteOn.mock.calls).toEqual([[60, 114], [62, 114]]);
+    expect(onNoteOff).toHaveBeenCalledWith(60);
+  });
+
   it("WaveformDisplay owns keyboard cursor state", async () => {
     const onCursorChange = vi.fn(); const pyramid = { sampleCount: 4, levels: [{ samplesPerPeak: 1, peaks: [{ min: -.2, max: .3 }, { min: -.5, max: .6 }, { min: -.1, max: .2 }, { min: -.7, max: .8 }] }] };
     const { getByRole } = render(WaveformDisplay, { props: { pyramid, cursorSample: 1, ariaLabel: "Clip", onCursorChange } });

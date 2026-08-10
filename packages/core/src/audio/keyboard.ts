@@ -30,6 +30,7 @@ export type KeyboardEffect =
 
 export type KeyboardEvent =
   | { type: "PRESS"; inputId: string; note: number; velocity: number }
+  | { type: "RETARGET"; inputId: string; note: number | null; velocity: number }
   | { type: "RELEASE"; inputId: string }
   | { type: "RELEASE_ALL" }
   | { type: "COMPUTER_KEY_DOWN"; key: string; velocity?: number; repeat?: boolean }
@@ -103,6 +104,27 @@ export function keyboardTransition(context: KeyboardContext, event: KeyboardEven
         context: { ...context, activeInputs: { ...context.activeInputs, [event.inputId]: { note, velocity } }, focusedNote: note },
         effects: alreadyHeld ? [] : [{ type: "noteOn", note, velocity }],
       };
+    }
+    case "RETARGET": {
+      if (context.disabled) return keyboardTransition(context, { type: "RELEASE", inputId: event.inputId });
+      const active = context.activeInputs[event.inputId];
+      if (active && event.note === active.note) {
+        const velocity = clampVelocity(event.velocity);
+        return {
+          context: {
+            ...context,
+            activeInputs: { ...context.activeInputs, [event.inputId]: { note: active.note, velocity } },
+            focusedNote: active.note,
+          },
+          effects: [],
+        };
+      }
+      const released = keyboardTransition(context, { type: "RELEASE", inputId: event.inputId });
+      if (event.note === null) return released;
+      const pressed = keyboardTransition(released.context, {
+        type: "PRESS", inputId: event.inputId, note: event.note, velocity: event.velocity,
+      });
+      return { context: pressed.context, effects: [...released.effects, ...pressed.effects] };
     }
     case "RELEASE": {
       const active = context.activeInputs[event.inputId];

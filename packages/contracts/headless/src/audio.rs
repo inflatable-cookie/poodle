@@ -1320,6 +1320,34 @@ pub fn keyboard_release(
     (context, effects)
 }
 
+pub fn keyboard_retarget(
+    mut context: KeyboardContext,
+    input: &str,
+    note: Option<u8>,
+    velocity: u8,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    if context.disabled {
+        return keyboard_release(context, input);
+    }
+    if let (Some(active), Some(note)) = (
+        context.active_inputs.iter_mut().find(|active| active.0 == input),
+        note,
+    ) {
+        if active.1 == note {
+            active.2 = velocity.clamp(1, 127);
+            context.focused_note = Some(note);
+            return (context, vec![]);
+        }
+    }
+    let (released, mut effects) = keyboard_release(context, input);
+    let Some(note) = note else {
+        return (released, effects);
+    };
+    let (pressed, press_effects) = keyboard_press(released, input, note, velocity);
+    effects.extend(press_effects);
+    (pressed, effects)
+}
+
 fn black_note(note: u8) -> bool {
     matches!(note % 12, 1 | 3 | 6 | 8 | 10)
 }
@@ -1715,6 +1743,26 @@ mod tests {
         assert_eq!(keyboard_visual_state(&context).held_notes, vec![60]);
         let (_, effects) = keyboard_release(context, "pointer");
         assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+    }
+
+    #[test]
+    fn phase_three_keyboard_retargets_captured_pointer_notes() {
+        let (context, _) = keyboard_press(KeyboardContext::default(), "pointer", 60, 64);
+        let (context, effects) = keyboard_retarget(context, "pointer", Some(62), 96);
+        assert_eq!(
+            effects,
+            vec![
+                KeyboardEffect::NoteOff { note: 60 },
+                KeyboardEffect::NoteOn { note: 62, velocity: 96 },
+            ]
+        );
+        assert_eq!(keyboard_visual_state(&context).held_notes, vec![62]);
+        let (context, effects) = keyboard_retarget(context, "pointer", Some(62), 110);
+        assert!(effects.is_empty());
+        assert_eq!(context.active_inputs[0].2, 110);
+        let (context, effects) = keyboard_retarget(context, "pointer", None, 1);
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 62 }]);
+        assert!(keyboard_visual_state(&context).held_notes.is_empty());
     }
 
     #[test]

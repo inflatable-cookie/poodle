@@ -52,6 +52,12 @@
     event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId);
     send({ type: "PRESS", inputId: `pointer:${event.pointerId}`, note, velocity: keyboardVelocityAtPoint({ x: event.clientX, y: event.clientY }, root.getBoundingClientRect(), orientation) });
   }
+  function pointerMove(event: PointerEvent) {
+    if (activePointer !== event.pointerId) return;
+    const rect = root.getBoundingClientRect();
+    const point = { x: event.clientX, y: event.clientY };
+    send({ type: "RETARGET", inputId: `pointer:${event.pointerId}`, note: keyboardHitTest(context, point, rect), velocity: keyboardVelocityAtPoint(point, rect, orientation) });
+  }
   function pointerEnd(event: PointerEvent) { if (activePointer === event.pointerId) { activePointer = null; send({ type: "RELEASE", inputId: `pointer:${event.pointerId}` }); } }
   function keydown(event: KeyboardEvent) { if (event.key.toLowerCase() in context.computerKeyMap) { event.preventDefault(); send({ type: "COMPUTER_KEY_DOWN", key: event.key, repeat: event.repeat }); } }
   function keyup(event: KeyboardEvent) { if (event.key.toLowerCase() in context.computerKeyMap) { event.preventDefault(); send({ type: "COMPUTER_KEY_UP", key: event.key }); } }
@@ -61,7 +67,7 @@
   }
 </script>
 
-<div bind:this={root} class="poodle-keyboard" role="toolbar" tabindex="-1" aria-orientation={orientation} aria-label={ariaLabel ?? undefined} aria-disabled={disabled} data-scope="keyboard" data-part="root" data-size={resolvedSize} data-density={resolvedDensity} data-orientation={orientation} onpointerdown={pointerDown} onpointerup={pointerEnd} onpointercancel={pointerEnd} onkeydown={keydown} onkeyup={keyup}>
+<div bind:this={root} class="poodle-keyboard" role="toolbar" tabindex="-1" aria-orientation={orientation} aria-label={ariaLabel ?? undefined} aria-disabled={disabled} data-scope="keyboard" data-part="root" data-size={resolvedSize} data-density={resolvedDensity} data-orientation={orientation} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onkeydown={keydown} onkeyup={keyup}>
   <KeyboardVisual {visualState} />
   {#each visualState.keys as key (key.note)}
     <button class="poodle-keyboard__key-control" type="button" disabled={disabled} aria-label={formatAudioValue(key.note, { type: "note" })} aria-pressed={key.held || key.externallyHeld} tabindex={key.focused || (visualState.keys[0]?.note === key.note && visualState.keys.every((candidate) => !candidate.focused)) ? 0 : -1} onfocus={() => send({ type: "FOCUS_NOTE", note: key.note })} onkeydown={(event) => noteKey(event, key.note)} onkeyup={(event) => { if (event.key === " " || event.key === "Enter") send({ type: "RELEASE", inputId: `a11y:${key.note}` }); }}></button>

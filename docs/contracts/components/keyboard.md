@@ -1,7 +1,7 @@
 # Keyboard
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -39,8 +39,11 @@ Updated: 2026-08-10
 
 Classification: machine-backed (`keyboardTransition`). Pointer hit testing
 resolves note and key depth before transition. Depth becomes MIDI velocity
-`1..127`. Computer keys use the configured map plus octave shift, ignore
-repeat keydowns, and release the exact note started by that physical key.
+`1..127`. A captured pointer retargets its physical input as it crosses keys,
+emitting the old note's release before the new note's press. Leaving all keys
+releases; re-entry presses the newly resolved key. Computer keys use the
+configured map plus octave shift, ignore repeat keydowns, and release the exact
+note started by that physical key.
 Multiple input sources may hold one note; `noteOff` occurs only on final local
 release. Range changes, disablement, and cancellation close active gestures.
 
@@ -98,8 +101,8 @@ and accessibility tree.
 
 ## 11. Parity Checklist
 
-- same range, octave map, velocity quantization, held-note accounting, and
-  paired note effects
+- same range, octave map, velocity quantization, pointer retargeting,
+  held-note accounting, and paired note effects
 - same horizontal and vertical geometry and external highlighting
 - same note names, focus order, and press semantics
 - renderer never reads machine context

@@ -83,6 +83,18 @@ describe("audio controls (react)", () => {
     expect(view.getByRole("button", { name: "E4" }).getAttribute("aria-pressed")).toBe("true");
   });
 
+  it("retargets a captured pointer across keyboard keys", () => {
+    const onNoteOn = vi.fn(); const onNoteOff = vi.fn();
+    const view = render(<Keyboard firstNote={60} lastNote={62} onNoteOn={onNoteOn} onNoteOff={onNoteOff} ariaLabel="Keys" />);
+    const keyboard = view.getByRole("toolbar", { name: "Keys" }) as HTMLDivElement;
+    keyboard.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    keyboard.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(keyboard, { pointerId: 1, button: 0, clientX: 10, clientY: 90 });
+    fireEvent.pointerMove(keyboard, { pointerId: 1, clientX: 90, clientY: 90 });
+    expect(onNoteOn.mock.calls).toEqual([[60, 114], [62, 114]]);
+    expect(onNoteOff).toHaveBeenCalledWith(60);
+  });
+
   it("moves the waveform cursor and exposes selection text", () => {
     const onCursorChange = vi.fn();
     const view = render(<WaveformDisplay pyramid={waveform} cursorSample={1} selection={{ start: 1, end: 2 }} onCursorChange={onCursorChange} ariaLabel="Clip" />);

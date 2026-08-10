@@ -30,6 +30,30 @@ describe("audio keyboard machine", () => {
     expect(result.context.octaveShift).toBe(1);
   });
 
+  test("captured pointer retargets across keys and releases outside", () => {
+    let result = keyboardTransition(createKeyboardContext({ firstNote: 60, lastNote: 72 }), {
+      type: "PRESS", inputId: "pointer:1", note: 60, velocity: 40,
+    });
+    result = keyboardTransition(result.context, {
+      type: "RETARGET", inputId: "pointer:1", note: 62, velocity: 96,
+    });
+    expect(result.effects).toEqual([
+      { type: "noteOff", note: 60 },
+      { type: "noteOn", note: 62, velocity: 96 },
+    ]);
+    expect(keyboardVisualState(result.context).heldNotes).toEqual([62]);
+    result = keyboardTransition(result.context, {
+      type: "RETARGET", inputId: "pointer:1", note: 62, velocity: 110,
+    });
+    expect(result.effects).toEqual([]);
+    expect(result.context.activeInputs["pointer:1"]?.velocity).toBe(110);
+    result = keyboardTransition(result.context, {
+      type: "RETARGET", inputId: "pointer:1", note: null, velocity: 1,
+    });
+    expect(result.effects).toEqual([{ type: "noteOff", note: 62 }]);
+    expect(keyboardVisualState(result.context).heldNotes).toEqual([]);
+  });
+
   test("external highlights stay distinct and emit nothing", () => {
     const context = keyboardTransition(createKeyboardContext(), { type: "SET_EXTERNAL_HELD", notes: [64, 60, 64] }).context;
     const visual = keyboardVisualState(context);

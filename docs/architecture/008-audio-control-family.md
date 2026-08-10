@@ -1,7 +1,7 @@
 # 008 Audio Control Family
 
 Status: accepted
-Updated: 2026-08-10
+Updated: 2026-08-11
 Depends on: `006-headless-core-and-machine-model.md`,
 `007-appearance-recipe-contract.md`
 Source: Loophole `docs/research/poodle-instrument-rfc.md`
@@ -255,9 +255,12 @@ The default map is `A W S E D F T G Y H U J K`, spanning one chromatic
 octave; callers may supply another key-to-semitone map.
 
 Pointer and computer-key press transitions emit one `noteOn` effect with the
-resolved note and velocity. Release, cancellation, range removal, disablement,
-or octave-shift removal emits one matching `noteOff`. Repeated computer-key
-keydown events are ignored while that physical key is held. A note remains in
+resolved note and velocity. While a captured pointer moves, crossing into a
+new key retargets that physical input: the old note ends before the new note
+begins. Moving outside every key ends the note; re-entry begins the resolved
+note without requiring another press. Release, cancellation, range removal,
+disablement, or octave-shift removal emits one matching `noteOff`. Repeated
+computer-key keydown events are ignored while that physical key is held. A note remains in
 the local held set until every input source that holds it has released it.
 External highlights never emit effects. This paired edge contract is the
 per-note gesture lifecycle consumed by future MIDI and host adapters.
