@@ -11,6 +11,10 @@
 "tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
 "icons:build" = "bun scripts/build-default-icons.ts"
 "audit:icons" = "bun scripts/build-default-icons.ts --check"
+# Generated token artifacts are committed so a clean clone packs a complete
+# tarball with no build step. Committing generated source is only safe when
+# something fails if the tree and the generator disagree -- this is that.
+"audit:tokens" = "bun packages/tokens/scripts/build-tokens.ts --check"
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
@@ -180,6 +184,7 @@
 ]
 "ci:web" = [
   { task = "audit:icons" },
+  { task = "audit:tokens" },
   { task = "test:core" },
   { task = "test:components" },
   { task = "svelte:surface-audit" },

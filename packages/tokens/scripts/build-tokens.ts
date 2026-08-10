@@ -2,6 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+// `--check` compares what would be written against what is committed instead
+// of overwriting it, mirroring `scripts/build-default-icons.ts --check`.
+// The generated token artifacts are committed so a clean clone packs a
+// complete tarball with no build step; committing generated source is only
+// safe when something fails if the tree and the generator disagree.
+const checkOnly = process.argv.includes("--check");
+const drift: string[] = [];
+
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
 type JsonObject = { [key: string]: JsonValue };
@@ -224,8 +232,22 @@ function jsString(value: string): string {
 
 function writeFile(relativePath: string, contents: string): void {
   const filePath = path.join(artifactDir, relativePath);
+  if (checkOnly) {
+    compare(filePath, contents);
+    return;
+  }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents);
+}
+
+function compare(filePath: string, contents: string): void {
+  let existing: string | null = null;
+  try {
+    existing = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  if (existing !== contents) drift.push(path.relative(path.resolve(tokensDir, "../.."), filePath));
 }
 
 function copyDir(sourceDir: string, destinationDir: string): void {
@@ -237,12 +259,16 @@ function copyDir(sourceDir: string, destinationDir: string): void {
       copyDir(sourcePath, destinationPath);
       continue;
     }
+    if (checkOnly) {
+      compare(destinationPath, fs.readFileSync(sourcePath, "utf8"));
+      continue;
+    }
     fs.copyFileSync(sourcePath, destinationPath);
   }
 }
 
 function syncSvelteTokenArtifacts(): void {
-  fs.rmSync(svelteTokensGeneratedDir, { recursive: true, force: true });
+  if (!checkOnly) fs.rmSync(svelteTokensGeneratedDir, { recursive: true, force: true });
   copyDir(path.join(artifactDir, "ts"), path.join(svelteTokensGeneratedDir, "ts"));
   copyDir(path.join(artifactDir, "css"), path.join(svelteTokensGeneratedDir, "css"));
 }
@@ -951,3 +977,12 @@ use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 ${buildTypedRustConstants(semanticEntries, "")}
 `,
 );
+
+if (checkOnly) {
+  if (drift.length > 0) {
+    throw new Error(
+      `Generated token artifacts are stale:\n${[...new Set(drift)].sort().join("\n")}`,
+    );
+  }
+  console.log(`Verified ${new Set(drift).size === 0 ? "all" : ""} generated token artifacts.`);
+}
