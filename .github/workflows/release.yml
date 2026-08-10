@@ -130,7 +130,15 @@ jobs:
             | xargs -0 -n1 -I{} sh -c 'n=$(grep -m1 "^name" "{}" | cut -d\" -f2); v=$(grep -m1 "^version" "{}" | cut -d\" -f2); [ -n "$v" ] && echo "$n $v"')
           exit "$status"
 
-      - name: Pack and inspect
+      # Asserts rather than prints. A listing of the first twenty entries is
+      # alphabetical CSS and proves nothing; what matters is that the generated
+      # icon and token artifacts survived into the tarball, since they are
+      # committed source that `effigy ci` checks but `files` could still miss.
+      #
+      # Do not pipe `tar -tzf` into `head`: GNU tar treats the EPIPE as an error
+      # and `set -o pipefail` fails the step. BSD tar does not, so it passes on
+      # macOS and breaks on ubuntu.
+      - name: Pack and verify contents
         run: |
           set -euo pipefail
           mkdir -p .release
@@ -138,10 +146,41 @@ jobs:
             (cd "$dir" && npm pack --pack-destination "$GITHUB_WORKSPACE/.release")
           done
           ls -l .release
+
+          status=0
+          require() { # tarball, description, pattern, minimum
+            local n
+            n=$(grep -c -- "$3" "$listing" || true)
+            if [ "$n" -lt "$4" ]; then
+              echo "  MISSING $2: $n matching '"'"'$3'"'"', expected at least $4"
+              status=1
+            else
+              echo "  ok $2: $n"
+            fi
+          }
+
+          listing=$(mktemp)
           for tarball in .release/*.tgz; do
-            echo "== $tarball"
-            tar -tzf "$tarball" | head -20
+            echo "== $tarball ($(wc -c < "$tarball") bytes)"
+            tar -tzf "$tarball" > "$listing"
+            echo "  $(wc -l < "$listing") entries"
+            require "$tarball" "licence"      "^package/LICENSE$"          1
+            require "$tarball" "readme"       "^package/README.md$"        1
+            require "$tarball" "manifest"     "^package/package.json$"     1
+            case "$tarball" in
+              *poodle-core*)
+                # Both directories are generated and committed. The counts are
+                # floors, not exact: 100 icon modules and 22 token stylesheets
+                # today, and an empty or partial generation is the thing worth
+                # catching.
+                require "$tarball" "icon modules"   "^package/src/icons/icons/.*\.ts$" 50
+                require "$tarball" "icon aliases"   "^package/src/icons/aliases\.generated\.ts$" 1
+                require "$tarball" "token css"      "^package/src/tokens/generated/css/.*\.css$" 20
+                ;;
+            esac
           done
+          rm -f "$listing"
+          exit "$status"
 
       - name: Publish
         if: ${{ !inputs.dry-run }}
