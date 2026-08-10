@@ -124,6 +124,15 @@ jobs:
               status=1
             fi
           done
+          # Lockstep spans languages, not just the published packages: the tag
+          # is the Rust distribution point too, so every crate must carry it.
+          while read -r name version; do
+            if [ "$version" != "$tag" ]; then
+              echo "crate $name is $version, tag is $tag"
+              status=1
+            fi
+          done < <(find packages -name Cargo.toml -not -path '*/target/*' -print0 \
+            | xargs -0 -n1 -I{} sh -c 'n=$(grep -m1 "^name" "{}" | cut -d\" -f2); v=$(grep -m1 "^version" "{}" | cut -d\" -f2); [ -n "$v" ] && echo "$n $v"')
           exit "$status"
 
       - name: Pack and inspect

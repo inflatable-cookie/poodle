@@ -1,7 +1,9 @@
 {
   "name": "@inflatable-cookie/poodle-svelte",
   "version": "0.1.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "type": "module",
   "description": "Poodle Svelte component library.",
