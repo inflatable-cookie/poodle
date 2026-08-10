@@ -1,7 +1,7 @@
 # Mod Matrix Grid
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -63,7 +63,11 @@ and all key translation are adapter-owned. Drawing is aria-hidden.
 
 Rows follow caller source order; columns follow caller destination order.
 VisualState is row-major and includes stable IDs, labels, focus, enabled state,
-amount, and normalized bipolar amount. No synth semantics are inferred.
+amount, and normalized bipolar amount. The default grid is intrinsic-sized and
+does not stretch when placed directly in a CSS grid; consumers may override
+that alignment when a fluid matrix is intentional. Bipolar bars share a fixed
+zero edge: positive amounts expand right and negative amounts expand left.
+No synth semantics are inferred.
 
 ## 8. Token Usage
 
