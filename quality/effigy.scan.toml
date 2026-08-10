@@ -19,13 +19,34 @@ exclude = [
   # a11y attributes that does not decompose without harming clarity.
   "**/ColorPicker.svelte", "**/Tabs.svelte", "**/RelationPicker.svelte", "**/BlockEditor.svelte", "**/DockRegion.svelte",
   "**/ListCard.svelte", "**/Select.svelte", "**/DataTable.svelte", "**/TextInput.svelte", "**/Tree.svelte",
+  "**/FilterBuilder.svelte",
+  # React carries the same cohesive component-shell posture. Helpers are local
+  # because their state and accessibility wiring are not reusable components.
+  "**/ColorPicker.tsx", "**/Tabs.tsx", "**/RelationPicker.tsx", "**/ListCard.tsx",
+  "**/Select.tsx", "**/DataTable.tsx", "**/FilterBuilder.tsx",
   # Cohesive single-expression Rust render/compose bodies (logic in poodle-specs/headless;
   # decomposing would require parameter-bag structs that reduce clarity).
   "**/data_table/render.rs", "**/jetstream/components/src/list_card.rs",
+  "**/render/src/split_button.rs", "**/render/src/presentation.rs",
+  "**/render/src/color_picker.rs", "**/render/src/filter_builder.rs",
+  "**/render/src/select.rs", "**/render/src/data_table.rs", "**/render/src/calendar.rs",
+  # Renderer-neutral spec modules: public data shape, derived helpers, and
+  # contract tests belong together. Their size reflects component semantics,
+  # not mixed runtime ownership.
+  "**/contracts/components/src/model_picker.rs", "**/contracts/components/src/filter_builder.rs",
+  "**/contracts/components/src/agent_chat_input.rs", "**/contracts/components/src/log_list.rs",
+  "**/contracts/headless/src/text_input.rs", "**/contracts/headless/tests/conformance.rs",
+  # Legacy direct-adapter catalogues. Each file is a flat set of small,
+  # backend-owned RenderComponent mappings or one token theme implementation;
+  # the manifest drift gate checks their claimed surface independently.
+  "**/jetstream/adapter/src/render_composites.rs",
+  "**/jetstream/adapter/src/render_feedback.rs",
+  "**/jetstream/adapter/src/theme.rs",
   # Type-system aggregation files: interdependent type definitions with no
   # runtime logic; splitting forces arbitrary cross-file type imports for no
   # maintainability gain.
   "**/contracts/**/types.rs", "**/contracts/**/lib.rs", "**/svelte/components/src/types.ts",
+  "**/react/components/src/types.ts",
   # Stylesheets: the god-files scanner targets code-complexity, not CSS length.
   # Component styles are cohesive and (for extracted files) already split from
   # their component.
