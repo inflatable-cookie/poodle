@@ -360,9 +360,7 @@ impl LogListSpec {
                 Some(level) if !level.is_empty() => stream.level.value() == level,
                 _ => true,
             })
-            .filter(|stream| {
-                needle.is_empty() || stream.message.to_lowercase().contains(&needle)
-            })
+            .filter(|stream| needle.is_empty() || stream.message.to_lowercase().contains(&needle))
             .collect()
     }
 
@@ -592,7 +590,11 @@ mod tests {
         assert!(!LogListSpec::new()
             .with_loading(true)
             .with_entries([LogEntry::Audit(AuditLogEntry::new(
-                "a1", "2026-01-01T00:00:00Z", "create", "project", "p-1",
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "create",
+                "project",
+                "p-1",
             ))])
             .is_loading());
         assert!(!LogListSpec::new().is_loading());
@@ -607,9 +609,15 @@ mod tests {
         ))]);
         assert!(!stream.is_audit());
 
-        let mixed = stream.clone().with_entries([LogEntry::Audit(AuditLogEntry::new(
-            "a1", "2026-01-01T00:00:00Z", "create", "project", "p-1",
-        ))]);
+        let mixed = stream
+            .clone()
+            .with_entries([LogEntry::Audit(AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "create",
+                "project",
+                "p-1",
+            ))]);
         assert!(mixed.is_audit());
         assert_eq!(mixed.entry_count(), 2);
     }
@@ -655,8 +663,13 @@ mod tests {
 
     #[test]
     fn audit_labels_replace_underscores() {
-        let entry =
-            AuditLogEntry::new("a1", "2026-01-01T00:00:00Z", "user_login", "work_space", "w-1");
+        let entry = AuditLogEntry::new(
+            "a1",
+            "2026-01-01T00:00:00Z",
+            "user_login",
+            "work_space",
+            "w-1",
+        );
         assert_eq!(entry.action_label(), "user login");
         assert_eq!(entry.resource_type_label(), "work space");
     }

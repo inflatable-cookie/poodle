@@ -71,7 +71,9 @@ fn item_from(value: &Value) -> TranscriptItem {
         "decided-plan" => TranscriptItem::DecidedPlan(TranscriptDecidedPlan {
             id: s(value, "id").to_string(),
             plan: s(value, "plan").to_string(),
-            status: poodle_headless::agent_plan::AgentPlanStatus::from_str_or_default(s(value, "status")),
+            status: poodle_headless::agent_plan::AgentPlanStatus::from_str_or_default(s(
+                value, "status",
+            )),
             decided_at: value
                 .get("decidedAt")
                 .and_then(Value::as_str)

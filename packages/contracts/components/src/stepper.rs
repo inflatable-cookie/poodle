@@ -497,7 +497,10 @@ mod tests {
         assert_eq!(spec.rail_token(StepStatus::Complete), spec.accent_token());
         assert_eq!(spec.rail_token(StepStatus::Running), spec.accent_token());
         assert_eq!(spec.rail_token(StepStatus::Failed), spec.danger_token());
-        assert_eq!(spec.rail_token(StepStatus::Pending), spec.rail_pending_token());
+        assert_eq!(
+            spec.rail_token(StepStatus::Pending),
+            spec.rail_pending_token()
+        );
     }
 
     /// …and length is position, so a complete current step is a long accent

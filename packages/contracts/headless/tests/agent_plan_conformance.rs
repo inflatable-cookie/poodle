@@ -61,7 +61,12 @@ fn status_labels_match_the_shared_vectors() {
 
     for case in vectors["labels"].as_array().expect("label cases") {
         let status = AgentPlanStatus::from_str_or_default(s(case, "status"));
-        assert_eq!(plan_status_label(status), s(case, "label"), "{}", s(case, "status"));
+        assert_eq!(
+            plan_status_label(status),
+            s(case, "label"),
+            "{}",
+            s(case, "status")
+        );
     }
 }
 
@@ -72,7 +77,10 @@ fn record_summaries_match_the_shared_vectors() {
     for case in vectors["summary"].as_array().expect("summary cases") {
         let name = s(case, "name");
         assert_eq!(
-            plan_record_summary(s(case, "plan"), case["maxLength"].as_u64().unwrap_or(0) as usize),
+            plan_record_summary(
+                s(case, "plan"),
+                case["maxLength"].as_u64().unwrap_or(0) as usize
+            ),
             s(case, "summary"),
             "{name}"
         );

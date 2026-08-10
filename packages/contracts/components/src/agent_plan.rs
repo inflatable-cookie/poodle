@@ -148,7 +148,9 @@ mod tests {
     #[test]
     fn the_badge_wording_comes_from_the_headless_core() {
         assert_eq!(
-            AgentPlanSpec::new("x").with_status(AgentPlanStatus::Revised).status_label(),
+            AgentPlanSpec::new("x")
+                .with_status(AgentPlanStatus::Revised)
+                .status_label(),
             "Revised"
         );
     }

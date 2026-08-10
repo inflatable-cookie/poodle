@@ -107,10 +107,7 @@ pub fn edit_transition(
             } else if state.head == 0 {
                 // Nothing to delete, but the key was still ours: swallow it so
                 // it cannot fall through to another handler.
-                Some(EditOutcome {
-                    value: None,
-                    state,
-                })
+                Some(EditOutcome { value: None, state })
             } else {
                 let from = state.head - 1;
                 Some(EditOutcome {
@@ -126,10 +123,7 @@ pub fn edit_transition(
                     state: EditState::collapsed(start),
                 })
             } else if state.head >= len {
-                Some(EditOutcome {
-                    value: None,
-                    state,
-                })
+                Some(EditOutcome { value: None, state })
             } else {
                 Some(EditOutcome {
                     value: Some(splice(value, state.head, state.head + 1, "")),
@@ -139,7 +133,10 @@ pub fn edit_transition(
         }
         "a" if accel => Some(EditOutcome {
             value: None,
-            state: EditState { anchor: 0, head: len },
+            state: EditState {
+                anchor: 0,
+                head: len,
+            },
         }),
         _ => {
             // A single printable character replaces the selection.
@@ -195,7 +192,11 @@ pub fn word_range_at(value: &str, index: usize) -> (usize, usize) {
     }
     let index = index.min(chars.len());
     // A caret at the very end belongs to the word before it.
-    let probe = if index == chars.len() { index - 1 } else { index };
+    let probe = if index == chars.len() {
+        index - 1
+    } else {
+        index
+    };
     let wordish = |c: char| c.is_alphanumeric() || c == '_';
     let in_word = wordish(chars[probe]);
 
@@ -352,11 +353,15 @@ mod tests {
     #[test]
     fn letters_are_swallowed_by_a_numbers_only_code() {
         assert_eq!(
-            code_transition("12", (2, 2), "a", 6, true).map(|(v, _)| v).as_deref(),
+            code_transition("12", (2, 2), "a", 6, true)
+                .map(|(v, _)| v)
+                .as_deref(),
             Some("12")
         );
         assert_eq!(
-            code_transition("12", (2, 2), "a", 6, false).map(|(v, _)| v).as_deref(),
+            code_transition("12", (2, 2), "a", 6, false)
+                .map(|(v, _)| v)
+                .as_deref(),
             Some("12a")
         );
     }
@@ -390,7 +395,9 @@ mod tests {
     #[test]
     fn escape_clears_a_filled_code_and_passes_through_an_empty_one() {
         assert_eq!(
-            code_transition("123", (3, 3), "escape", 6, true).map(|(v, _)| v).as_deref(),
+            code_transition("123", (3, 3), "escape", 6, true)
+                .map(|(v, _)| v)
+                .as_deref(),
             Some("")
         );
         assert!(code_transition("", (0, 0), "escape", 6, true).is_none());
@@ -428,7 +435,13 @@ mod tests {
     #[test]
     fn selected_text_reads_the_range_by_character() {
         assert_eq!(
-            selected_text("héllo wörld", EditState { anchor: 6, head: 11 }),
+            selected_text(
+                "héllo wörld",
+                EditState {
+                    anchor: 6,
+                    head: 11
+                }
+            ),
             "wörld"
         );
         assert_eq!(selected_text("hello", EditState::collapsed(2)), "");
@@ -473,17 +486,17 @@ mod tests {
     fn characters_insert_at_the_caret_not_at_the_end() {
         // The old stub appended unconditionally; moving left then typing proves
         // the caret is respected.
-        let (value, state) = type_keys(
-            "ac",
-            &[("left", false, false), ("b", false, false)],
-        );
+        let (value, state) = type_keys("ac", &[("left", false, false), ("b", false, false)]);
         assert_eq!(value, "abc");
         assert_eq!(state, EditState { anchor: 2, head: 2 });
     }
 
     #[test]
     fn backspace_deletes_before_the_caret() {
-        let (value, _) = type_keys("abc", &[("left", false, false), ("backspace", false, false)]);
+        let (value, _) = type_keys(
+            "abc",
+            &[("left", false, false), ("backspace", false, false)],
+        );
         assert_eq!(value, "ac");
     }
 
@@ -497,20 +510,33 @@ mod tests {
     fn backspace_at_the_start_and_delete_at_the_end_are_inert_but_consumed() {
         // Consumed matters: an unhandled key would fall through to another
         // handler. `Some` with no value change is the contract.
-        let outcome = edit_transition("abc", EditState { anchor: 0, head: 0 }, "backspace", false, false)
-            .expect("backspace is ours even with nothing to delete");
+        let outcome = edit_transition(
+            "abc",
+            EditState { anchor: 0, head: 0 },
+            "backspace",
+            false,
+            false,
+        )
+        .expect("backspace is ours even with nothing to delete");
         assert!(outcome.value.is_none());
 
-        let outcome = edit_transition("abc", EditState { anchor: 3, head: 3 }, "delete", false, false)
-            .expect("delete is ours even at the end");
+        let outcome = edit_transition(
+            "abc",
+            EditState { anchor: 3, head: 3 },
+            "delete",
+            false,
+            false,
+        )
+        .expect("delete is ours even at the end");
         assert!(outcome.value.is_none());
     }
 
     #[test]
     fn arrows_home_and_end_move_without_changing_the_value() {
         for key in ["left", "right", "home", "end"] {
-            let outcome = edit_transition("abc", EditState { anchor: 1, head: 1 }, key, false, false)
-                .unwrap_or_else(|| panic!("{key} moves the caret"));
+            let outcome =
+                edit_transition("abc", EditState { anchor: 1, head: 1 }, key, false, false)
+                    .unwrap_or_else(|| panic!("{key} moves the caret"));
             assert!(outcome.value.is_none(), "{key} must not edit");
         }
         let (_, state) = type_keys("abc", &[("home", false, false)]);
@@ -521,7 +547,11 @@ mod tests {
     fn shift_arrow_extends_a_selection_and_typing_replaces_it() {
         let (value, state) = type_keys(
             "abcd",
-            &[("home", false, false), ("right", true, false), ("right", true, false)],
+            &[
+                ("home", false, false),
+                ("right", true, false),
+                ("right", true, false),
+            ],
         );
         assert_eq!(value, "abcd", "extending must not edit");
         assert_eq!(state, EditState { anchor: 0, head: 2 });
@@ -565,9 +595,15 @@ mod tests {
     fn keys_we_do_not_own_are_left_alone() {
         // Enter, Tab and Escape belong to submit/cancel/focus, and an accel
         // shortcut we do not implement must not be swallowed as text.
-        for (key, accel) in [("enter", false), ("tab", false), ("escape", false), ("c", true)] {
+        for (key, accel) in [
+            ("enter", false),
+            ("tab", false),
+            ("escape", false),
+            ("c", true),
+        ] {
             assert!(
-                edit_transition("abc", EditState { anchor: 3, head: 3 }, key, false, accel).is_none(),
+                edit_transition("abc", EditState { anchor: 3, head: 3 }, key, false, accel)
+                    .is_none(),
                 "{key} must fall through"
             );
         }
@@ -576,14 +612,27 @@ mod tests {
     #[test]
     fn a_cursor_past_a_shortened_value_is_clamped() {
         // The host owns the value and can rewrite it between frames.
-        let outcome = edit_transition("ab", EditState { anchor: 9, head: 9 }, "backspace", false, false)
-            .unwrap();
+        let outcome = edit_transition(
+            "ab",
+            EditState { anchor: 9, head: 9 },
+            "backspace",
+            false,
+            false,
+        )
+        .unwrap();
         assert_eq!(outcome.value.as_deref(), Some("a"));
     }
 
     #[test]
     fn multibyte_text_edits_by_character_not_byte() {
-        let (value, _) = type_keys("héllo", &[("home", false, false), ("right", false, false), ("delete", false, false)]);
+        let (value, _) = type_keys(
+            "héllo",
+            &[
+                ("home", false, false),
+                ("right", false, false),
+                ("delete", false, false),
+            ],
+        );
         assert_eq!(value, "hllo");
     }
 }
@@ -667,7 +716,10 @@ pub fn code_transition(
         .take(length)
         .collect();
     let len = chars.len();
-    let (start, end) = (selection.0.min(len), selection.1.min(len).max(selection.0.min(len)));
+    let (start, end) = (
+        selection.0.min(len),
+        selection.1.min(len).max(selection.0.min(len)),
+    );
 
     let splice = |from: usize, to: usize| -> String {
         chars
