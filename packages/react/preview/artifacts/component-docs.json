@@ -71,6 +71,753 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { Accordion } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items = [\n    { value: \"one\", title: \"Section One\", content: \"Content for section one.\" },\n    { value: \"two\", title: \"Section Two\", content: \"Content for section two.\" },\n  ];\n</script>\n\n<Accordion {items} selectionMode=\"single\" collapsible onValueChange={(value) => console.log(value)}>\n  {#snippet children(item)}\n    <p>{item.label} content.</p>\n  {/snippet}\n</Accordion>"
   },
+  "agent-message": {
+    "props": [
+      {
+        "name": "markdown",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Raw markdown for one transcript message."
+      },
+      {
+        "name": "role",
+        "type": "TranscriptRole",
+        "default": "\"assistant\"",
+        "description": "Whether the message belongs to the user or assistant."
+      },
+      {
+        "name": "isStreaming",
+        "type": "boolean",
+        "default": "false",
+        "description": "Shows the non-announced streaming caret while content is arriving."
+      },
+      {
+        "name": "linkTarget",
+        "type": "string | null",
+        "default": "null",
+        "description": "Target applied to links rendered from markdown."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onLinkClick",
+        "type": "((href: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Intercepts a rendered markdown link before navigation."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentMessage } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentMessage\n  role=\"assistant\"\n  markdown=\"I updated the **theme tokens**.\"\n  onLinkClick={(href) => console.log(href)}\n/>"
+  },
+  "agent-plan": {
+    "props": [
+      {
+        "name": "plan",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Raw markdown for the proposed plan."
+      },
+      {
+        "name": "status",
+        "type": "AgentPlanStatus",
+        "default": "\"pending\"",
+        "description": "Current decision state."
+      },
+      {
+        "name": "dismissible",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether the pending plan includes a dismiss action."
+      },
+      {
+        "name": "dismissLabel",
+        "type": "string",
+        "default": "\"Dismiss plan\"",
+        "description": "Dismiss action label."
+      },
+      {
+        "name": "acceptLabel",
+        "type": "string",
+        "default": "\"Accept plan\"",
+        "description": "Accept action label."
+      },
+      {
+        "name": "reviseLabel",
+        "type": "string",
+        "default": "\"Revise\"",
+        "description": "Revision action label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onAccept",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the operator accepts the pending plan."
+      },
+      {
+        "name": "onRevise",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the operator requests revision."
+      },
+      {
+        "name": "onDismiss",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the operator dismisses the plan."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentPlan } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlan\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  onAccept={() => acceptPlan()}\n  onRevise={() => focusComposer()}\n/>"
+  },
+  "agent-plan-record": {
+    "props": [
+      {
+        "name": "plan",
+        "type": "string",
+        "required": true,
+        "description": "Raw markdown for the decided plan."
+      },
+      {
+        "name": "status",
+        "type": "AgentPlanSettledStatus",
+        "required": true,
+        "description": "Accepted, revised, or dismissed decision state."
+      },
+      {
+        "name": "decisionLabel",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Badge wording override."
+      },
+      {
+        "name": "decidedAt",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Host-formatted decision time."
+      },
+      {
+        "name": "summaryMaxLength",
+        "type": "number",
+        "default": "160",
+        "description": "Character budget for the collapsed summary, including its ellipsis."
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "default": "false",
+        "description": "Bindable disclosure state."
+      },
+      {
+        "name": "expandLabel",
+        "type": "string",
+        "default": "\"Show plan\"",
+        "description": "Collapsed disclosure label."
+      },
+      {
+        "name": "collapseLabel",
+        "type": "string",
+        "default": "\"Hide plan\"",
+        "description": "Expanded disclosure label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToggle",
+        "type": "((expanded: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the record disclosure changes."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentPlanRecord } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlanRecord\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  status=\"accepted\"\n  decidedAt=\"Today at 10:42\"\n/>"
+  },
+  "agent-question": {
+    "props": [
+      {
+        "name": "questions",
+        "type": "AgentQuestionItem[]",
+        "default": "[]",
+        "description": "Ordered questions presented to the operator."
+      },
+      {
+        "name": "activeIndex",
+        "type": "number",
+        "default": "0",
+        "description": "Bindable index of the active question."
+      },
+      {
+        "name": "selections",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable option values selected for the active question."
+      },
+      {
+        "name": "override",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Free-text answer owned by the surrounding composer."
+      },
+      {
+        "name": "dismissible",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the active question can be declined."
+      },
+      {
+        "name": "dismissLabel",
+        "type": "string",
+        "default": "\"Skip this question\"",
+        "description": "Decline action label."
+      },
+      {
+        "name": "progressLabel",
+        "type": "(current: number, total: number) => string",
+        "default": "\"{current} of {total}\"",
+        "description": "Formats batch progress."
+      },
+      {
+        "name": "showShortcuts",
+        "type": "boolean",
+        "default": "true",
+        "description": "Enables digit shortcuts for the first nine options."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onSelectionChange",
+        "type": "((values: string[]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when selected option values change."
+      },
+      {
+        "name": "onSubmit",
+        "type": "((answer: AgentQuestionAnswer) => void) | undefined",
+        "default": "undefined",
+        "description": "Called with the resolved selection, override, or decline answer."
+      },
+      {
+        "name": "onDismiss",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called with the question id before a declined answer is submitted."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentQuestion, type AgentQuestionItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const questions: AgentQuestionItem[] = [{\n    id: \"runtime\",\n    prompt: \"Which runtime should be verified first?\",\n    options: [{ value: \"web\", label: \"Web\" }, { value: \"native\", label: \"Native\" }],\n  }];\n</script>\n\n<AgentQuestion {questions} onSubmit={(answer) => sendAnswer(answer)} />"
+  },
+  "agent-question-record": {
+    "props": [
+      {
+        "name": "question",
+        "type": "AgentQuestionItem",
+        "required": true,
+        "description": "Question that was presented."
+      },
+      {
+        "name": "answer",
+        "type": "AgentQuestionAnswer",
+        "required": true,
+        "description": "Resolved answer left in the transcript."
+      },
+      {
+        "name": "showOptions",
+        "type": "boolean",
+        "default": "true",
+        "description": "Shows the option list for selected answers."
+      },
+      {
+        "name": "declinedLabel",
+        "type": "string",
+        "default": "\"Declined\"",
+        "description": "Summary shown for a declined question."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentQuestionRecord } from \"@inflatable-cookie/poodle-svelte\";\n\n  const question = {\n    id: \"runtime\",\n    prompt: \"Which runtime should be verified first?\",\n    options: [{ value: \"web\", label: \"Web\" }, { value: \"native\", label: \"Native\" }],\n  };\n  const answer = { questionId: \"runtime\", outcome: \"selected\" as const, values: [\"web\"], text: \"\" };\n</script>\n\n<AgentQuestionRecord {question} {answer} />"
+  },
+  "agent-transcript": {
+    "props": [
+      {
+        "name": "items",
+        "type": "TranscriptItem[]",
+        "default": "[]",
+        "description": "Chronological messages, tool calls, records, changed files, and activity."
+      },
+      {
+        "name": "virtualized",
+        "type": "boolean",
+        "default": "true",
+        "description": "Windows transcript blocks using measured heights."
+      },
+      {
+        "name": "estimatedBlockHeight",
+        "type": "number",
+        "default": "120",
+        "description": "Fallback block height before measurement."
+      },
+      {
+        "name": "overscan",
+        "type": "number",
+        "default": "3",
+        "description": "Extra blocks rendered around the visible window."
+      },
+      {
+        "name": "autoScroll",
+        "type": "boolean",
+        "default": "true",
+        "description": "Follows appended content while pinned to the bottom."
+      },
+      {
+        "name": "pinThreshold",
+        "type": "number",
+        "default": "32",
+        "description": "Pixel distance from the bottom that counts as pinned."
+      },
+      {
+        "name": "jumpLabel",
+        "type": "string",
+        "default": "\"Jump to latest\"",
+        "description": "Label for the return-to-bottom control."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "default": "\"Conversation\"",
+        "description": "Accessible label for the transcript region."
+      },
+      {
+        "name": "emptyLabel",
+        "type": "string",
+        "default": "\"No messages yet\"",
+        "description": "Empty transcript message."
+      },
+      {
+        "name": "expandedToolRuns",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable ids of expanded tool-call runs."
+      },
+      {
+        "name": "expandedToolCalls",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable ids of expanded individual tool calls."
+      },
+      {
+        "name": "expandedChangedFiles",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable ids of expanded changed-file cards."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToolRunToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a grouped tool run opens or closes."
+      },
+      {
+        "name": "onToolCallToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when an individual tool output opens or closes."
+      },
+      {
+        "name": "onChangedFilesToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a changed-file card opens or closes."
+      },
+      {
+        "name": "onOpenDiff",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Requests the host diff view for a changed-file card."
+      },
+      {
+        "name": "onFileSelect",
+        "type": "((path: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Requests a host action for one changed file."
+      },
+      {
+        "name": "onScrollStateChange",
+        "type": "((pinned: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Reports whether the viewport remains pinned to the latest content."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentTranscript, type TranscriptItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: TranscriptItem[] = [\n    { kind: \"message\", id: \"m1\", role: \"assistant\", markdown: \"Checking the package surface.\" },\n    { kind: \"tool-call\", id: \"t1\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<AgentTranscript {items} ariaLabel=\"Release audit conversation\" />"
+  },
+  "changed-files": {
+    "props": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Stable card id used for disclosure and host callbacks."
+      },
+      {
+        "name": "files",
+        "type": "ChangedFile[]",
+        "default": "[]",
+        "description": "Changed paths with addition, deletion, and status metadata."
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "default": "false",
+        "description": "Bindable card disclosure state."
+      },
+      {
+        "name": "expandedPaths",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable expanded directory paths in the file tree."
+      },
+      {
+        "name": "chipLimit",
+        "type": "number",
+        "default": "3",
+        "description": "Maximum file chips shown while collapsed."
+      },
+      {
+        "name": "showOpenDiff",
+        "type": "boolean",
+        "default": "true",
+        "description": "Shows the host-owned diff action."
+      },
+      {
+        "name": "openDiffLabel",
+        "type": "string",
+        "default": "\"Open diff\"",
+        "description": "Diff action label."
+      },
+      {
+        "name": "showFilesLabel",
+        "type": "string",
+        "default": "\"Show files\"",
+        "description": "Collapsed disclosure label."
+      },
+      {
+        "name": "hideFilesLabel",
+        "type": "string",
+        "default": "\"Hide files\"",
+        "description": "Expanded disclosure label."
+      },
+      {
+        "name": "countLabel",
+        "type": "(count: number) => string",
+        "default": "\"{count} changed files\"",
+        "description": "Formats the file-count label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the card disclosure changes."
+      },
+      {
+        "name": "onOpenDiff",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Requests the host diff view."
+      },
+      {
+        "name": "onFileSelect",
+        "type": "((path: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Requests a host action for one file."
+      },
+      {
+        "name": "onExpandedPathsChange",
+        "type": "((paths: string[]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when expanded directory paths change."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ChangedFiles } from \"@inflatable-cookie/poodle-svelte\";\n\n  const files = [\n    { path: \"src/app.ts\", additions: 12, deletions: 3, status: \"modified\" as const },\n  ];\n</script>\n\n<ChangedFiles id=\"release-files\" {files} onOpenDiff={(id) => openDiff(id)} />"
+  },
+  "tool-call": {
+    "props": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Stable row id used by disclosure state and callbacks."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "Human-readable work label."
+      },
+      {
+        "name": "detail",
+        "type": "string | null",
+        "default": "null",
+        "description": "Single-line command or argument detail."
+      },
+      {
+        "name": "status",
+        "type": "ToolCallStatus",
+        "default": "\"success\"",
+        "description": "Running, success, or error state."
+      },
+      {
+        "name": "icon",
+        "type": "string | null",
+        "default": "null",
+        "description": "Icon-name override; otherwise inferred from the label."
+      },
+      {
+        "name": "output",
+        "type": "string | null",
+        "default": "null",
+        "description": "Full output revealed by the row disclosure."
+      },
+      {
+        "name": "outputLanguage",
+        "type": "string | null",
+        "default": "null",
+        "description": "Language hint for output syntax highlighting."
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "default": "false",
+        "description": "Bindable output disclosure state."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when output opens or closes."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ToolCall } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ToolCall\n  id=\"check\"\n  label=\"Ran command\"\n  detail=\"effigy docs:check\"\n  output=\"Documentation checks passed.\"\n/>"
+  },
+  "tool-call-group": {
+    "props": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Stable id for the contiguous tool run."
+      },
+      {
+        "name": "calls",
+        "type": "TranscriptToolCall[]",
+        "default": "[]",
+        "description": "Tool calls in chronological order."
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "default": "false",
+        "description": "Bindable grouped-run disclosure state."
+      },
+      {
+        "name": "expandedCalls",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Bindable ids of calls whose output is expanded."
+      },
+      {
+        "name": "moreLabel",
+        "type": "(count: number) => string",
+        "default": "\"+{count} previous tool calls\"",
+        "description": "Formats the collapsed hidden-call count."
+      },
+      {
+        "name": "fewerLabel",
+        "type": "string",
+        "default": "\"Show fewer tool calls\"",
+        "description": "Expanded disclosure label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the grouped run opens or closes."
+      },
+      {
+        "name": "onCallToggle",
+        "type": "((id: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when an individual call output opens or closes."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ToolCallGroup, type TranscriptToolCall } from \"@inflatable-cookie/poodle-svelte\";\n\n  const calls: TranscriptToolCall[] = [\n    { kind: \"tool-call\", id: \"scan\", label: \"Searched\", status: \"success\", detail: \"package exports\" },\n    { kind: \"tool-call\", id: \"check\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<ToolCallGroup id=\"release-audit\" {calls} />"
+  },
   "alert-dialog": {
     "props": [
       {
@@ -7016,6 +7763,103 @@
     "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { Progress } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Progress value={65} max={100} size=\"sm\" ariaLabel=\"Upload progress\" />\n<Progress indeterminate ariaLabel=\"Loading...\" />"
+  },
+  "radio": {
+    "props": [
+      {
+        "name": "id",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Native input id."
+      },
+      {
+        "name": "name",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Native form field name used for group exclusivity."
+      },
+      {
+        "name": "value",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Native form value."
+      },
+      {
+        "name": "checked",
+        "type": "boolean | undefined",
+        "default": "undefined",
+        "description": "Bindable controlled checked state."
+      },
+      {
+        "name": "defaultChecked",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial checked state for uncontrolled mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables activation and form submission."
+      },
+      {
+        "name": "readOnly",
+        "type": "boolean",
+        "default": "false",
+        "description": "Keeps the control focusable while reverting changes."
+      },
+      {
+        "name": "label",
+        "type": "string | null",
+        "default": "null",
+        "description": "Visible label for the option."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible label used only when no visible label is present."
+      },
+      {
+        "name": "describedBy",
+        "type": "string | null",
+        "default": "null",
+        "description": "Id of descriptive content."
+      },
+      {
+        "name": "selectedColor",
+        "type": "string | null",
+        "default": "null",
+        "description": "Selected indicator color override."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onCheckedChange",
+        "type": "((checked: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the checked state changes."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Radio } from \"@inflatable-cookie/poodle-svelte\";\n\n  let selected = \"daily\";\n</script>\n\n<Radio\n  name=\"frequency\"\n  value=\"daily\"\n  label=\"Daily\"\n  checked={selected === \"daily\"}\n  onCheckedChange={(checked) => { if (checked) selected = \"daily\"; }}\n/>"
   },
   "radio-group": {
     "props": [

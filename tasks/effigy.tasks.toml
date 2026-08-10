@@ -182,6 +182,7 @@
   { task = "audit:icons" },
   { task = "test:core" },
   { task = "test:components" },
+  { task = "svelte:surface-audit" },
   { task = "check:svelte" },
   { task = "docs:lint" },
   { task = "react:docs" },
@@ -232,6 +233,7 @@
 "docs:dev" = [{ task = "svelte:run" }]
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
+  { task = "svelte:surface-audit" },
   { task = "docs:lint" },
   { task = "react:docs" },
   { task = "report:parity" },
