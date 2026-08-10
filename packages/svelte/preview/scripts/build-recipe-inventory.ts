@@ -15,7 +15,7 @@ import { join } from "node:path";
 
 const SRC = join(import.meta.dir, "..", "..", "components", "src");
 // Component stylesheets live in the shared framework-neutral package (g12.001).
-const STYLES_SRC = join(import.meta.dir, "..", "..", "..", "styles", "src");
+const STYLES_SRC = join(import.meta.dir, "..", "..", "..", "core", "src", "styles");
 const OUT_DIR = join(import.meta.dir, "..", "artifacts");
 const OUT = join(OUT_DIR, "recipe-inventory.json");
 

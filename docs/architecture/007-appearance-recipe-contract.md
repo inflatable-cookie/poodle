@@ -49,9 +49,9 @@ Two classes, machine-classified by
 
 - **Recipe hooks** (`--poodle-recipe-*`, public): the supported override
   surface. Stable: renaming or removing one is a breaking change handled
-  via the g11.001 wave process. Coverage is **library-wide** as of g11.008:
-  every appearance property in every component resolves through a hook
-  (973 hooks across 116 scanned components, `candidates` empty). Two
+  via the g11.001 wave process. The current inventory records 1,057 hooks
+  across 139 scanned components. Three pre-existing internal tone variables
+  remain classified as candidates; new audio controls add no candidates. Two
   mechanical shapes: components with local appearance variables wrap the
   variable definition; components without them hook inline at the property.
   Slot names come from the component's anatomy class parts; qualifiers from

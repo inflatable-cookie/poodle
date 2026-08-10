@@ -427,3 +427,12 @@ export type {
   WorkspaceLayoutSnapshot,
 } from "./types";
 export type { IconNodeElement, IconNodes, IconSet } from "./icon-registry";
+export { default as AudioMeter } from "./AudioMeter.svelte";
+export { default as AudioSwitch } from "./AudioSwitch.svelte";
+export { default as DragNumberField } from "./DragNumberField.svelte";
+export { default as EnvelopeEditor } from "./EnvelopeEditor.svelte";
+export { default as Fader } from "./Fader.svelte";
+export { default as GainReductionMeter } from "./GainReductionMeter.svelte";
+export { default as Knob } from "./Knob.svelte";
+export { default as ValueReadout } from "./ValueReadout.svelte";
+export { default as XYPad } from "./XYPad.svelte";

@@ -2,8 +2,14 @@ import type { Component } from "svelte";
 
 import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
+import AudioMeterSpecimen from "./AudioMeterSpecimen.svelte";
+import AudioSwitchSpecimen from "./AudioSwitchSpecimen.svelte";
 import AvatarSpecimen from "./AvatarSpecimen.svelte";
 import EditableListSpecimen from "./EditableListSpecimen.svelte";
+import DragNumberFieldSpecimen from "./DragNumberFieldSpecimen.svelte";
+import EnvelopeEditorSpecimen from "./EnvelopeEditorSpecimen.svelte";
+import FaderSpecimen from "./FaderSpecimen.svelte";
+import GainReductionMeterSpecimen from "./GainReductionMeterSpecimen.svelte";
 import AlertDialogSpecimen from "./AlertDialogSpecimen.svelte";
 import BlockEditorSpecimen from "./BlockEditorSpecimen.svelte";
 import BoxSpecimen from "./BoxSpecimen.svelte";
@@ -67,6 +73,7 @@ import MediaThumbnailSpecimen from "./MediaThumbnailSpecimen.svelte";
 import MenuSpecimen from "./MenuSpecimen.svelte";
 import MenubarSpecimen from "./MenubarSpecimen.svelte";
 import MeterSpecimen from "./MeterSpecimen.svelte";
+import KnobSpecimen from "./KnobSpecimen.svelte";
 import ModelPickerSpecimen from "./ModelPickerSpecimen.svelte";
 import RefSelectSpecimen from "./RefSelectSpecimen.svelte";
 import NavigationMenuSpecimen from "./NavigationMenuSpecimen.svelte";
@@ -114,6 +121,8 @@ import StackSpecimen from "./StackSpecimen.svelte";
 import MetricTileSpecimen from "./MetricTileSpecimen.svelte";
 import StateTileSpecimen from "./StateTileSpecimen.svelte";
 import ValidationSummarySpecimen from "./ValidationSummarySpecimen.svelte";
+import ValueReadoutSpecimen from "./ValueReadoutSpecimen.svelte";
+import XYPadSpecimen from "./XYPadSpecimen.svelte";
 import StatusIndicatorSpecimen from "./StatusIndicatorSpecimen.svelte";
 import SurfaceSpecimen from "./SurfaceSpecimen.svelte";
 import SwitchSpecimen from "./SwitchSpecimen.svelte";
@@ -156,6 +165,15 @@ import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
  * Add entries here as specimens are created.
  */
 export const specimenMap: Record<string, Component<Record<string, never>>> = {
+  "audio-meter": AudioMeterSpecimen,
+  "audio-switch": AudioSwitchSpecimen,
+  "drag-number-field": DragNumberFieldSpecimen,
+  "envelope-editor": EnvelopeEditorSpecimen,
+  fader: FaderSpecimen,
+  "gain-reduction-meter": GainReductionMeterSpecimen,
+  knob: KnobSpecimen,
+  "value-readout": ValueReadoutSpecimen,
+  "xy-pad": XYPadSpecimen,
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
   avatar: AvatarSpecimen,

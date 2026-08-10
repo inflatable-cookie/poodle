@@ -4724,6 +4724,157 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   {/snippet}
 </AppHeader>`,
   },
+
+  knob: {
+  props: [
+    { name: "value", type: "number", default: "0", description: "Current plain value." },
+    { name: "law", type: "AudioValueLaw", default: 'linear', description: "Plain-to-normalized mapping law." },
+    { name: "dragMode", type: '"vertical" | "circular"', default: '"vertical"', description: "Pointer gesture mapping." },
+    { name: "format", type: "AudioValueFormat", default: 'number', description: "Display, entry, and accessible value formatter." },
+  ],
+  usage: `<script lang="ts">
+  import { Knob } from "@inflatable-cookie/poodle-svelte";
+  let value = -12;
+</script>
+
+<Knob bind:value min={-60} max={6} format={{ type: "db" }} ariaLabel="Gain" />`,
+  },
+  fader: {
+  props: [
+    { name: "value", type: "number", default: "0", description: "Current plain value." },
+    { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"', description: "Fader axis." },
+    { name: "detents", type: "number[]", default: "[]", description: "Plain values eligible for snap." },
+  ],
+  usage: `<script lang="ts">
+  import { Fader } from "@inflatable-cookie/poodle-svelte";
+  let value = 0;
+</script>
+
+<Fader bind:value min={-60} max={12} detents={[0]} format={{ type: "db" }} ariaLabel="Gain" />`,
+  },
+  "audio-meter": {
+  props: [
+    { name: "context", type: "AudioMeterContext", description: "Left or mono meter machine context." },
+    { name: "rightContext", type: "AudioMeterContext | null", default: "null", description: "Optional right-channel machine context." },
+    { name: "style", type: '"bar" | "segments"', default: '"segments"', description: "Standard themed renderer style." },
+  ],
+  usage: `<script lang="ts">
+  import { createAudioMeterContext } from "@inflatable-cookie/poodle-core";
+  import { AudioMeter } from "@inflatable-cookie/poodle-svelte";
+  let meter = createAudioMeterContext({ mode: "ppm" });
+</script>
+
+<AudioMeter bind:context={meter} ariaLabel="Master level" />`,
+  },
+  "value-readout": {
+  props: [
+    { name: "value", type: "number", default: "0", description: "Plain value to format." },
+    { name: "format", type: "AudioValueFormat", default: 'number', description: "Shared audio value format." },
+  ],
+  usage: `<script lang="ts">
+  import { ValueReadout } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<ValueReadout value={-12} format={{ type: "db" }} ariaLabel="Gain" />`,
+  },
+  "drag-number-field": {
+  props: [
+    { name: "value", type: "number", default: "0", description: "Bindable plain value." },
+    { name: "step", type: "number", default: "1", description: "Keyboard and plain-value snap step." },
+    { name: "format", type: "AudioValueFormat", default: 'number', description: "Shared display and parse format." },
+  ],
+  usage: `<script lang="ts">
+  import { DragNumberField } from "@inflatable-cookie/poodle-svelte";
+  let value = 250;
+</script>
+
+<DragNumberField bind:value min={0} max={1000} format={{ type: "milliseconds" }} ariaLabel="Attack" />`,
+  },
+  "envelope-editor": {
+  props: [
+    { name: "points", type: "EnvelopePoint[]", default: "[]", description: "Bindable normalized point list with stable ids and outgoing curves." },
+    { name: "step", type: "number", default: "0.01", description: "Keyboard movement step." },
+    { name: "disabled", type: "boolean", default: "false", description: "Disables pointer and keyboard editing." },
+    { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible group name." },
+    { name: "snapPoint", type: "(point, points) => point", default: "identity", description: "Adapter-side snap hook applied before transitions." },
+    { name: "onPointsChange", type: "((points: EnvelopePoint[]) => void) | undefined", default: "undefined", description: "Reports live point edits." },
+    { name: "onPointsCommit", type: "((points: EnvelopePoint[]) => void) | undefined", default: "undefined", description: "Reports completed edits." },
+    { name: "onGestureBegin", type: "(() => void) | undefined", default: "undefined", description: "Reports pointer gesture start." },
+    { name: "onGestureEnd", type: "(() => void) | undefined", default: "undefined", description: "Reports pointer gesture end." },
+  ],
+  usage: `<script lang="ts">
+  import { EnvelopeEditor } from "@inflatable-cookie/poodle-svelte";
+  let points = [{ id: "a", x: 0, y: 0, curve: 0 }, { id: "b", x: 1, y: 1, curve: 0 }];
+</script>
+
+<EnvelopeEditor bind:points ariaLabel="Amplitude envelope" />`,
+  },
+  "xy-pad": {
+  props: [
+    { name: "x", type: "number", default: "0", description: "Bindable X-axis value." },
+    { name: "y", type: "number", default: "0", description: "Bindable Y-axis value." },
+    { name: "minX", type: "number", default: "0", description: "X lower bound." },
+    { name: "maxX", type: "number", default: "1", description: "X upper bound." },
+    { name: "minY", type: "number", default: "0", description: "Y lower bound." },
+    { name: "maxY", type: "number", default: "1", description: "Y upper bound." },
+    { name: "lawX", type: "AudioValueLaw", default: "linear", description: "X-axis value law." },
+    { name: "lawY", type: "AudioValueLaw", default: "linear", description: "Y-axis value law." },
+    { name: "defaultX", type: "number", default: "0", description: "X reset value." },
+    { name: "defaultY", type: "number", default: "0", description: "Y reset value." },
+    { name: "keyboardStepX", type: "number", default: "0.01", description: "X keyboard step." },
+    { name: "keyboardStepY", type: "number", default: "0.01", description: "Y keyboard step." },
+    { name: "formatX", type: "AudioValueFormat", default: "number", description: "X accessible formatter." },
+    { name: "formatY", type: "AudioValueFormat", default: "number", description: "Y accessible formatter." },
+    { name: "automation", type: "AudioAutomationState", default: '"none"', description: "Host automation display state." },
+    { name: "disabled", type: "boolean", default: "false", description: "Interaction guard." },
+    { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible group name." },
+    { name: "onValueChange", type: "((x: number, y: number) => void) | undefined", default: "undefined", description: "Reports live pair changes." },
+    { name: "onValueCommit", type: "((x: number, y: number) => void) | undefined", default: "undefined", description: "Reports committed pairs." },
+    { name: "onGestureBegin", type: "(() => void) | undefined", default: "undefined", description: "Reports pointer gesture start." },
+    { name: "onGestureEnd", type: "(() => void) | undefined", default: "undefined", description: "Reports pointer gesture end." },
+  ],
+  usage: `<script lang="ts">
+  import { XYPad } from "@inflatable-cookie/poodle-svelte";
+  let x = 0.25; let y = 0.75;
+</script>
+
+<XYPad bind:x bind:y ariaLabel="Filter position" />`,
+  },
+  "audio-switch": {
+  props: [
+    { name: "mode", type: '"latch" | "momentary" | "multi"', default: '"latch"', description: "Activation semantics." },
+    { name: "state", type: "number", default: "0", description: "Bindable discrete state." },
+    { name: "stateCount", type: "number", default: "2", description: "Number of discrete states." },
+    { name: "lampOn", type: "boolean | null", default: "null", description: "Independent lamp input; null follows active state." },
+    { name: "stateLabels", type: "string[]", default: "[]", description: "Accessible multi-state labels." },
+    { name: "disabled", type: "boolean", default: "false", description: "Interaction guard." },
+    { name: "ariaLabel", type: "string | null", default: '"Audio switch"', description: "Accessible name." },
+    { name: "onStateChange", type: "((state: number) => void) | undefined", default: "undefined", description: "Reports live state changes." },
+    { name: "onStateCommit", type: "((state: number) => void) | undefined", default: "undefined", description: "Reports completed changes." },
+  ],
+  usage: `<script lang="ts">
+  import { AudioSwitch } from "@inflatable-cookie/poodle-svelte";
+  let state = 0;
+</script>
+
+<AudioSwitch bind:state lampOn={true} ariaLabel="Power" />`,
+  },
+  "gain-reduction-meter": {
+  props: [
+    { name: "context", type: "GainReductionMeterContext", description: "Bindable gain-reduction feed state." },
+    { name: "style", type: '"bar" | "segments"', default: '"segments"', description: "Standard renderer style." },
+    { name: "orientation", type: '"horizontal" | "vertical"', default: '"vertical"', description: "Inverted display axis." },
+    { name: "segments", type: "number", default: "20", description: "Segment count." },
+    { name: "ariaLabel", type: "string | null", default: '"Gain reduction"', description: "Accessible meter name." },
+  ],
+  usage: `<script lang="ts">
+  import { createGainReductionMeterContext } from "@inflatable-cookie/poodle-core";
+  import { GainReductionMeter } from "@inflatable-cookie/poodle-svelte";
+  let meter = createGainReductionMeterContext();
+</script>
+
+<GainReductionMeter bind:context={meter} ariaLabel="Compressor gain reduction" />`,
+  },
 };
 
 // Alias: nav-card-grid shares docs with nav-card

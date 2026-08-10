@@ -59,6 +59,8 @@ contract references the rule rather than restating it:
 - `components/alert-dialog.md`
 - `components/app-header.md`
 - `components/audio-player.md`
+- `components/audio-meter.md`
+- `components/audio-switch.md`
 - `components/avatar.md`
 - `components/block-editor.md`
 - `components/box.md`
@@ -94,6 +96,8 @@ contract references the rule rather than restating it:
 - `components/dialog.md`
 - `components/dock-region.md`
 - `components/drawer.md`
+- `components/drag-number-field.md`
+- `components/envelope-editor.md`
 - `components/duration-input.md`
 - `components/editable-label.md`
 - `components/editable-list.md`
@@ -104,6 +108,8 @@ contract references the rule rather than restating it:
 - `components/eyebrow.md`
 - `components/field-set.md`
 - `components/field.md`
+- `components/fader.md`
+- `components/gain-reduction-meter.md`
 - `components/file-upload.md`
 - `components/filter-builder.md`
 - `components/filter-toolbar.md`
@@ -120,6 +126,7 @@ contract references the rule rather than restating it:
 - `components/icon.md`
 - `components/inline-list-section.md`
 - `components/inline-remediation.md`
+- `components/knob.md`
 - `components/list-card-counter.md`
 - `components/list-card.md`
 - `components/list-container.md`
@@ -203,7 +210,9 @@ contract references the rule rather than restating it:
 - `components/tri-state-switch.md`
 - `components/ui-presentation-provider.md`
 - `components/validation-summary.md`
+- `components/value-readout.md`
 - `components/video-player.md`
+- `components/xy-pad.md`
 
 This index is generated manually and must stay aligned when contract files are
 added, removed, or regrouped.

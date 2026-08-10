@@ -1,0 +1,17 @@
+.poodle-audio-meter { display: inline-flex; gap: 0.25rem; height: 10rem; }
+.poodle-audio-meter[data-orientation="horizontal"] { width: 10rem; height: auto; flex-direction: column; }
+.poodle-audio-meter-visual { display: flex; gap: 0.1875rem; height: 100%; align-items: stretch; }
+.poodle-audio-meter[data-orientation="horizontal"] .poodle-audio-meter-visual { width: 100%; height: 1rem; flex-direction: column; }
+.poodle-audio-meter-visual[data-enabled="false"] { opacity: var(--poodle-recipe-audio-meter-disabled-opacity, var(--poodle-state-opacity-disabled)); }
+.poodle-audio-meter-visual__track { position: relative; display: flex; flex-direction: column-reverse; gap: 0.125rem; width: 0.75rem; height: 100%; overflow: hidden; border: 0.0625rem solid var(--poodle-recipe-audio-meter-track-border, var(--poodle-color-border-default)); border-radius: 0.1875rem; background: var(--poodle-recipe-audio-meter-track-fill, var(--poodle-color-background-surface)); }
+.poodle-audio-meter[data-orientation="horizontal"] .poodle-audio-meter-visual__track { flex-direction: row; width: 100%; height: 0.75rem; }
+.poodle-audio-meter-visual__bar { position: absolute; bottom: 0; width: 100%; height: calc(var(--poodle-audio-meter-value) * 100%); background: var(--poodle-recipe-audio-meter-bar-fill, linear-gradient(to top, var(--poodle-color-status-success) 0 70%, var(--poodle-color-status-warning) 85%, var(--poodle-color-status-danger) 100%)); }
+.poodle-audio-meter[data-orientation="horizontal"] .poodle-audio-meter-visual__bar { left: 0; width: calc(var(--poodle-audio-meter-value) * 100%); height: 100%; background: var(--poodle-recipe-audio-meter-bar-fill, linear-gradient(to right, var(--poodle-color-status-success) 0 70%, var(--poodle-color-status-warning) 85%, var(--poodle-color-status-danger) 100%)); }
+.poodle-audio-meter-visual__segment { flex: 1; min-height: 0.125rem; background: var(--poodle-recipe-audio-meter-segment-off-fill, color-mix(in srgb, var(--poodle-color-background-surface) 82%, black)); }
+.poodle-audio-meter-visual__segment[data-active="true"] { background: var(--poodle-recipe-audio-meter-segment-on-fill, var(--poodle-color-status-success)); }
+.poodle-audio-meter-visual__segment[data-active="true"][data-warning="true"] { background: var(--poodle-recipe-audio-meter-segment-warning-fill, var(--poodle-color-status-warning)); }
+.poodle-audio-meter-visual__segment[data-active="true"][data-clip="true"] { background: var(--poodle-recipe-audio-meter-segment-clip-fill, var(--poodle-color-status-danger)); }
+.poodle-audio-meter-visual__peak { position: absolute; left: 0; bottom: calc(var(--poodle-audio-meter-peak) * 100%); width: 100%; height: 0.0625rem; background: var(--poodle-recipe-audio-meter-peak-fill, var(--poodle-color-text-primary)); }
+.poodle-audio-meter[data-orientation="horizontal"] .poodle-audio-meter-visual__peak { left: calc(var(--poodle-audio-meter-peak) * 100%); bottom: 0; width: 0.0625rem; height: 100%; }
+.poodle-audio-meter-visual__clip { width: 0.75rem; height: 0.1875rem; border-radius: 0.125rem; background: var(--poodle-recipe-audio-meter-clip-fill, var(--poodle-color-background-surface)); }
+.poodle-audio-meter-visual__clip[data-active="true"] { background: var(--poodle-recipe-audio-meter-clip-fill, var(--poodle-color-status-danger)); }

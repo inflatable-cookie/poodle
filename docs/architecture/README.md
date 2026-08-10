@@ -16,6 +16,8 @@ They explain the current system; milestone sequencing belongs in roadmaps.
    — documentation authority and implementation evidence
 4. [Underlay bridge and adapter ownership](004-underlay-bridge-and-adapter-ownership.md)
    — separation between Poodle and Underlay-facing APIs
+5. [Audio control family](008-audio-control-family.md) — audio-domain machines,
+   renderer-neutral VisualState, value laws, formatting, and meter feeds
 
 ## Additional Decisions
 

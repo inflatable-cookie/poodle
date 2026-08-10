@@ -237,6 +237,8 @@ Runway:
   through the isolated `install-smoke` consumer) now runs in `ci:web` and
   `ci-web.yml`. Added after five type errors in `Rating.svelte` were found
   from a consumer repo rather than from Poodle's own gates.
+- `024-audio-control-follow-ons.md` completes the audio family through Phase 2
+  and records Phase 3 keyboard, waveform/graph, and mod-matrix issue stubs.
 
 ## Closeout
 

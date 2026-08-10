@@ -21,6 +21,8 @@ primitives and layout surfaces through higher-order application components.
 - `alert-dialog.md`
 - `app-header.md`
 - `audio-player.md`
+- `audio-meter.md`
+- `audio-switch.md`
 - `avatar.md`
 - `block-editor.md`
 - `box.md`
@@ -56,6 +58,8 @@ primitives and layout surfaces through higher-order application components.
 - `dialog.md`
 - `dock-region.md`
 - `drawer.md`
+- `drag-number-field.md`
+- `envelope-editor.md`
 - `duration-input.md`
 - `editable-label.md`
 - `editable-list.md`
@@ -97,6 +101,9 @@ primitives and layout surfaces through higher-order application components.
 - `meta-bar.md`
 - `meta-item.md`
 - `meter.md`
+- `knob.md`
+- `fader.md`
+- `gain-reduction-meter.md`
 - `metric-tile.md`
 - `model-picker.md`
 - `nav-card.md`
@@ -166,7 +173,9 @@ primitives and layout surfaces through higher-order application components.
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
 - `validation-summary.md`
+- `value-readout.md`
 - `video-player.md`
+- `xy-pad.md`
 
 ## Accessibility Rule
 

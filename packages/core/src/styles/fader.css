@@ -1,0 +1,72 @@
+.poodle-fader {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 10rem;
+  touch-action: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.poodle-fader[data-orientation="horizontal"] { width: 10rem; height: 2rem; }
+.poodle-fader[aria-disabled="true"] { cursor: not-allowed; }
+
+.poodle-fader-visual { position: relative; display: block; width: 100%; height: 100%; }
+
+.poodle-fader-visual__track,
+.poodle-fader-visual__fill {
+  position: absolute;
+  left: calc(50% - 0.1875rem);
+  bottom: 0.5rem;
+  width: 0.375rem;
+  height: calc(100% - 1rem);
+  border-radius: 999px;
+}
+
+.poodle-fader-visual__track {
+  border: 0.0625rem solid var(--poodle-recipe-fader-track-border, var(--poodle-color-border-default));
+  background: var(--poodle-recipe-fader-track-fill, var(--poodle-color-background-surface));
+}
+
+.poodle-fader-visual__fill {
+  height: calc((100% - 1rem) * var(--poodle-fader-value));
+  background: var(--poodle-recipe-fader-fill-fill, var(--poodle-color-accent-base));
+}
+
+.poodle-fader-visual__thumb {
+  position: absolute;
+  left: 0.25rem;
+  bottom: calc(0.5rem + (100% - 1rem) * var(--poodle-fader-value) - 0.25rem);
+  width: 1.5rem;
+  height: 0.5rem;
+  border: 0.0625rem solid var(--poodle-recipe-fader-thumb-border, var(--poodle-color-border-default));
+  border-radius: 0.1875rem;
+  background: var(--poodle-recipe-fader-thumb-fill, var(--poodle-color-background-elevated));
+  box-shadow: var(--poodle-recipe-fader-thumb-shadow, 0 0.125rem 0.375rem color-mix(in srgb, black 24%, transparent));
+}
+
+.poodle-fader-visual__detent {
+  position: absolute;
+  left: 0.125rem;
+  bottom: calc(0.5rem + (100% - 1rem) * var(--poodle-fader-detent));
+  width: 1.75rem;
+  height: 0.0625rem;
+  background: var(--poodle-recipe-fader-detent-fill, var(--poodle-color-border-strong));
+}
+
+.poodle-fader[data-orientation="horizontal"] .poodle-fader-visual__track,
+.poodle-fader[data-orientation="horizontal"] .poodle-fader-visual__fill {
+  left: 0.5rem;
+  bottom: calc(50% - 0.1875rem);
+  width: calc(100% - 1rem);
+  height: 0.375rem;
+}
+
+.poodle-fader[data-orientation="horizontal"] .poodle-fader-visual__fill { width: calc((100% - 1rem) * var(--poodle-fader-value)); }
+.poodle-fader[data-orientation="horizontal"] .poodle-fader-visual__thumb { left: calc(0.5rem + (100% - 1rem) * var(--poodle-fader-value) - 0.25rem); bottom: 0.25rem; width: 0.5rem; height: 1.5rem; }
+.poodle-fader[data-orientation="horizontal"] .poodle-fader-visual__detent { left: calc(0.5rem + (100% - 1rem) * var(--poodle-fader-detent)); bottom: 0.125rem; width: 0.0625rem; height: 1.75rem; }
+
+.poodle-fader-visual[data-enabled="false"] { opacity: var(--poodle-recipe-fader-disabled-opacity, var(--poodle-state-opacity-disabled)); }
+.poodle-fader-visual[data-focus="true"] .poodle-fader-visual__thumb { box-shadow: var(--poodle-recipe-fader-focus-ring, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 36%, transparent)); }
+.poodle-fader__entry { position: absolute; z-index: 2; width: 4.5rem; padding: 0.25rem; border: 0.0625rem solid var(--poodle-recipe-fader-entry-border, var(--poodle-color-border-default)); border-radius: 0.25rem; color: var(--poodle-recipe-fader-entry-text, var(--poodle-color-text-primary)); background: var(--poodle-recipe-fader-entry-fill, var(--poodle-color-background-elevated)); text-align: center; font: inherit; }

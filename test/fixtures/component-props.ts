@@ -16,6 +16,14 @@ const menuItems = [
 
 export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Accordion: { items: [{ value: "a", label: "Alpha" }] },
+  AudioMeter: { ariaLabel: "Audio level" },
+  AudioSwitch: { ariaLabel: "Audio switch" },
+  DragNumberField: { ariaLabel: "Value" },
+  EnvelopeEditor: { ariaLabel: "Envelope" },
+  Fader: { ariaLabel: "Fader value" },
+  GainReductionMeter: { ariaLabel: "Gain reduction" },
+  Knob: { ariaLabel: "Knob value" },
+  XYPad: { ariaLabel: "XY position" },
   // Agent transcript set. AgentMessage and ChangedFiles both render nothing
   // when empty — by contract, since a turn with no prose and a turn that
   // changed no files should not reserve space — so they need real content to

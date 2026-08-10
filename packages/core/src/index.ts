@@ -477,3 +477,4 @@ export {
   type DockExternalDropEligibilityContext,
   type DockExternalDropTarget,
 } from "./dock-external-drag";
+export * from "./audio/index";

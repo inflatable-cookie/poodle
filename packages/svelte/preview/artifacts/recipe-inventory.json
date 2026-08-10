@@ -1,9 +1,9 @@
 {
   "summary": {
-    "components": 116,
-    "recipeHooks": 973,
-    "hookCandidates": 0,
-    "metricVariables": 296
+    "components": 139,
+    "recipeHooks": 1057,
+    "hookCandidates": 3,
+    "metricVariables": 376
   },
   "inventory": {
     "accordion": {
@@ -35,6 +35,90 @@
       "candidates": [],
       "metric": []
     },
+    "agent-chat-input": {
+      "recipe": [
+        "--poodle-recipe-agent-chat-input-field-fill",
+        "--poodle-recipe-agent-chat-input-placeholder-text"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-chat-input-action",
+        "--poodle-agent-chat-input-font",
+        "--poodle-agent-chat-input-gap",
+        "--poodle-agent-chat-input-pad-x",
+        "--poodle-agent-chat-input-pad-y",
+        "--poodle-agent-chat-input-thumb"
+      ]
+    },
+    "agent-message": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-message-block-gap",
+        "--poodle-agent-message-font-size",
+        "--poodle-agent-message-inset",
+        "--poodle-agent-message-list-indent",
+        "--poodle-agent-message-measure"
+      ]
+    },
+    "agent-plan": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-plan-action-gap",
+        "--poodle-agent-plan-font-size",
+        "--poodle-agent-plan-gap"
+      ]
+    },
+    "agent-plan-record": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-plan-record-font-size",
+        "--poodle-agent-plan-record-gap",
+        "--poodle-agent-plan-record-inset"
+      ]
+    },
+    "agent-question": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-question-font-size",
+        "--poodle-agent-question-gap",
+        "--poodle-agent-question-option-gap",
+        "--poodle-agent-question-option-pad-block",
+        "--poodle-agent-question-option-pad-inline",
+        "--poodle-agent-question-prompt-gap",
+        "--poodle-agent-question-prompt-size"
+      ]
+    },
+    "agent-question-record": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-question-record-font-size",
+        "--poodle-agent-question-record-gap",
+        "--poodle-agent-question-record-inset"
+      ]
+    },
+    "agent-subagent": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-subagent-font-size",
+        "--poodle-agent-subagent-gap",
+        "--poodle-agent-subagent-inset"
+      ]
+    },
+    "agent-transcript": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-agent-transcript-block-gap",
+        "--poodle-agent-transcript-font-size",
+        "--poodle-agent-transcript-inset"
+      ]
+    },
     "alert-dialog": {
       "recipe": [
         "--poodle-recipe-alert-dialog-item-detail-strong-text",
@@ -57,6 +141,25 @@
         "--poodle-app-header-region-gap",
         "--poodle-app-header-subtitle-size",
         "--poodle-app-header-title-size"
+      ]
+    },
+    "audio-meter": {
+      "recipe": [
+        "--poodle-recipe-audio-meter-bar-fill",
+        "--poodle-recipe-audio-meter-clip-fill",
+        "--poodle-recipe-audio-meter-disabled-opacity",
+        "--poodle-recipe-audio-meter-peak-fill",
+        "--poodle-recipe-audio-meter-segment-clip-fill",
+        "--poodle-recipe-audio-meter-segment-off-fill",
+        "--poodle-recipe-audio-meter-segment-on-fill",
+        "--poodle-recipe-audio-meter-segment-warning-fill",
+        "--poodle-recipe-audio-meter-track-border",
+        "--poodle-recipe-audio-meter-track-fill"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-audio-meter-peak",
+        "--poodle-audio-meter-value"
       ]
     },
     "audio-player": {
@@ -84,6 +187,22 @@
         "--poodle-audio-player-speed-y",
         "--poodle-audio-player-time-width",
         "--poodle-audio-player-volume-width"
+      ]
+    },
+    "audio-switch": {
+      "recipe": [
+        "--poodle-recipe-audio-switch-active",
+        "--poodle-recipe-audio-switch-border",
+        "--poodle-recipe-audio-switch-disabled-opacity",
+        "--poodle-recipe-audio-switch-fill",
+        "--poodle-recipe-audio-switch-focus-ring",
+        "--poodle-recipe-audio-switch-handle",
+        "--poodle-recipe-audio-switch-lamp-off",
+        "--poodle-recipe-audio-switch-lamp-on"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-audio-switch-position"
       ]
     },
     "avatar": {
@@ -287,7 +406,7 @@
         "--poodle-recipe-card-selected-hover-shadow",
         "--poodle-recipe-card-selected-shadow",
         "--poodle-recipe-card-shadow",
-        "--poodle-recipe-card-theme-light-elevated-shadow"
+        "--poodle-recipe-card-theme-iceberg-elevated-shadow"
       ],
       "candidates": [],
       "metric": [
@@ -324,6 +443,16 @@
         "--poodle-card-toggle-group-count-padding-inline",
         "--poodle-card-toggle-group-gap",
         "--poodle-card-toggle-group-min-width"
+      ]
+    },
+    "changed-files": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-changed-files-font-size",
+        "--poodle-changed-files-gap",
+        "--poodle-changed-files-icon-size",
+        "--poodle-changed-files-inset"
       ]
     },
     "checkbox": {
@@ -614,6 +743,22 @@
       "candidates": [],
       "metric": []
     },
+    "drag-number-field": {
+      "recipe": [
+        "--poodle-recipe-drag-number-field-border",
+        "--poodle-recipe-drag-number-field-disabled-opacity",
+        "--poodle-recipe-drag-number-field-drag-fill",
+        "--poodle-recipe-drag-number-field-entry-border",
+        "--poodle-recipe-drag-number-field-entry-fill",
+        "--poodle-recipe-drag-number-field-entry-text",
+        "--poodle-recipe-drag-number-field-fill",
+        "--poodle-recipe-drag-number-field-focus-ring",
+        "--poodle-recipe-drag-number-field-hover-fill",
+        "--poodle-recipe-drag-number-field-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "drawer": {
       "recipe": [
         "--poodle-recipe-drawer-backdrop-fill",
@@ -730,12 +875,48 @@
       "candidates": [],
       "metric": []
     },
+    "envelope-editor": {
+      "recipe": [
+        "--poodle-recipe-envelope-editor-border",
+        "--poodle-recipe-envelope-editor-curve",
+        "--poodle-recipe-envelope-editor-disabled-opacity",
+        "--poodle-recipe-envelope-editor-fill",
+        "--poodle-recipe-envelope-editor-focus-ring",
+        "--poodle-recipe-envelope-editor-grid",
+        "--poodle-recipe-envelope-editor-point-border",
+        "--poodle-recipe-envelope-editor-point-fill",
+        "--poodle-recipe-envelope-editor-point-selected"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "eyebrow": {
       "recipe": [
         "--poodle-recipe-eyebrow-text"
       ],
       "candidates": [],
       "metric": []
+    },
+    "fader": {
+      "recipe": [
+        "--poodle-recipe-fader-detent-fill",
+        "--poodle-recipe-fader-disabled-opacity",
+        "--poodle-recipe-fader-entry-border",
+        "--poodle-recipe-fader-entry-fill",
+        "--poodle-recipe-fader-entry-text",
+        "--poodle-recipe-fader-fill-fill",
+        "--poodle-recipe-fader-focus-ring",
+        "--poodle-recipe-fader-thumb-border",
+        "--poodle-recipe-fader-thumb-fill",
+        "--poodle-recipe-fader-thumb-shadow",
+        "--poodle-recipe-fader-track-border",
+        "--poodle-recipe-fader-track-fill"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-fader-detent",
+        "--poodle-fader-value"
+      ]
     },
     "field": {
       "recipe": [
@@ -842,6 +1023,20 @@
         "--poodle-form-layout-row-gap"
       ]
     },
+    "gain-reduction-meter": {
+      "recipe": [
+        "--poodle-recipe-gain-reduction-meter-active",
+        "--poodle-recipe-gain-reduction-meter-border",
+        "--poodle-recipe-gain-reduction-meter-disabled-opacity",
+        "--poodle-recipe-gain-reduction-meter-fill",
+        "--poodle-recipe-gain-reduction-meter-segment-off",
+        "--poodle-recipe-gain-reduction-meter-segment-on",
+        "--poodle-recipe-gain-reduction-meter-text",
+        "--poodle-recipe-gain-reduction-meter-track"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "hover-card": {
       "recipe": [
         "--poodle-recipe-hover-card-surface-fill",
@@ -899,8 +1094,29 @@
       "candidates": [],
       "metric": []
     },
+    "knob": {
+      "recipe": [
+        "--poodle-recipe-knob-arc-fill",
+        "--poodle-recipe-knob-disabled-opacity",
+        "--poodle-recipe-knob-entry-border",
+        "--poodle-recipe-knob-entry-fill",
+        "--poodle-recipe-knob-entry-text",
+        "--poodle-recipe-knob-focus-ring",
+        "--poodle-recipe-knob-indicator-fill",
+        "--poodle-recipe-knob-indicator-shadow",
+        "--poodle-recipe-knob-track-border",
+        "--poodle-recipe-knob-track-fill"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-knob-indicator-rotation",
+        "--poodle-knob-sweep"
+      ]
+    },
     "list-card": {
       "recipe": [
+        "--poodle-recipe-list-card-active-bar",
+        "--poodle-recipe-list-card-active-bar-width",
         "--poodle-recipe-list-card-active-leading-fill",
         "--poodle-recipe-list-card-context-item-fill",
         "--poodle-recipe-list-card-context-item-text",
@@ -1154,8 +1370,13 @@
         "--poodle-recipe-meter-fill-fill",
         "--poodle-recipe-meter-track-fill"
       ],
-      "candidates": [],
+      "candidates": [
+        "--poodle-meter-fill-color"
+      ],
       "metric": [
+        "--poodle-meter-percentage",
+        "--poodle-meter-ring-size",
+        "--poodle-meter-ring-thickness",
         "--poodle-meter-track-thickness"
       ]
     },
@@ -1166,7 +1387,7 @@
         "--poodle-recipe-metric-tile-flat-trend-text",
         "--poodle-recipe-metric-tile-label-text",
         "--poodle-recipe-metric-tile-sparkline-text",
-        "--poodle-recipe-metric-tile-theme-light-fill",
+        "--poodle-recipe-metric-tile-theme-iceberg-fill",
         "--poodle-recipe-metric-tile-trend-text",
         "--poodle-recipe-metric-tile-up-trend-text"
       ],
@@ -1392,7 +1613,9 @@
         "--poodle-recipe-pill-warning-fill",
         "--poodle-recipe-pill-warning-text"
       ],
-      "candidates": [],
+      "candidates": [
+        "--poodle-pill-dot-fill"
+      ],
       "metric": [
         "--poodle-pill-font-size",
         "--poodle-pill-gap",
@@ -1412,7 +1635,6 @@
       ],
       "candidates": [],
       "metric": [
-        "--poodle-popover-offset",
         "--poodle-popover-surface-max-width",
         "--poodle-popover-surface-min-width"
       ]
@@ -1509,13 +1731,24 @@
         "--poodle-relation-picker-title-size"
       ]
     },
+    "remediation-banner": {
+      "recipe": [],
+      "candidates": [
+        "--poodle-remediation-banner-tone"
+      ],
+      "metric": []
+    },
     "resize-handle": {
       "recipe": [
         "--poodle-recipe-resize-handle-dragging-hover-line-fill",
         "--poodle-recipe-resize-handle-line-fill"
       ],
       "candidates": [],
-      "metric": []
+      "metric": [
+        "--poodle-resize-handle-hit-offset",
+        "--poodle-resize-handle-hit-size",
+        "--poodle-resize-handle-thickness"
+      ]
     },
     "segmented-control": {
       "recipe": [
@@ -1676,6 +1909,8 @@
       ],
       "candidates": [],
       "metric": [
+        "--poodle-spinner-dot-size",
+        "--poodle-spinner-dots-gap",
         "--poodle-spinner-grid-gap",
         "--poodle-spinner-grid-height",
         "--poodle-spinner-grid-width",
@@ -1734,6 +1969,22 @@
       ],
       "candidates": [],
       "metric": []
+    },
+    "stepper": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-stepper-font-size",
+        "--poodle-stepper-gap",
+        "--poodle-stepper-marker-font-size",
+        "--poodle-stepper-marker-size",
+        "--poodle-stepper-pad-x",
+        "--poodle-stepper-pad-y",
+        "--poodle-stepper-rail-gap",
+        "--poodle-stepper-rail-segment-width",
+        "--poodle-stepper-rail-thickness",
+        "--poodle-stepper-row-height"
+      ]
     },
     "surface": {
       "recipe": [
@@ -1847,6 +2098,7 @@
       "candidates": [],
       "metric": [
         "--poodle-text-input-adornment-gap",
+        "--poodle-text-input-clear-inset-inline-end",
         "--poodle-text-input-control-height",
         "--poodle-text-input-control-padding-end",
         "--poodle-text-input-control-padding-start",
@@ -1857,7 +2109,8 @@
         "--poodle-text-input-multiline-padding-end",
         "--poodle-text-input-padding-block",
         "--poodle-text-input-padding-inline",
-        "--poodle-text-input-radius"
+        "--poodle-text-input-radius",
+        "--poodle-text-input-trailing-inset-inline-end"
       ]
     },
     "text-link": {
@@ -1868,6 +2121,13 @@
       ],
       "candidates": [],
       "metric": []
+    },
+    "theme-select": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-theme-select-columns"
+      ]
     },
     "time-ago": {
       "recipe": [
@@ -1938,6 +2198,30 @@
         "--poodle-token-input-radius"
       ]
     },
+    "tool-call": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-tool-call-font-size",
+        "--poodle-tool-call-gap",
+        "--poodle-tool-call-icon-size",
+        "--poodle-tool-call-inset-x",
+        "--poodle-tool-call-inset-y",
+        "--poodle-tool-call-row-height"
+      ]
+    },
+    "tool-call-group": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-tool-call-group-font-size",
+        "--poodle-tool-call-group-gap",
+        "--poodle-tool-call-group-icon-size",
+        "--poodle-tool-call-group-inset-x",
+        "--poodle-tool-call-group-pad-block",
+        "--poodle-tool-call-group-row-gap"
+      ]
+    },
     "toolbar": {
       "recipe": [
         "--poodle-recipe-toolbar-fill"
@@ -1959,6 +2243,7 @@
     "tree": {
       "recipe": [
         "--poodle-recipe-tree-before-after-row-after-fill",
+        "--poodle-recipe-tree-end-label-text",
         "--poodle-recipe-tree-focus-rename-shadow",
         "--poodle-recipe-tree-hover-row-fill",
         "--poodle-recipe-tree-hover-row-text",
@@ -1980,6 +2265,8 @@
       "metric": [
         "--poodle-tree-chevron-size",
         "--poodle-tree-indent",
+        "--poodle-tree-pad-block",
+        "--poodle-tree-pad-inline",
         "--poodle-tree-row-font",
         "--poodle-tree-row-gap",
         "--poodle-tree-row-height",
@@ -2007,6 +2294,16 @@
       "candidates": [],
       "metric": []
     },
+    "value-readout": {
+      "recipe": [
+        "--poodle-recipe-value-readout-border",
+        "--poodle-recipe-value-readout-disabled-opacity",
+        "--poodle-recipe-value-readout-fill",
+        "--poodle-recipe-value-readout-text"
+      ],
+      "candidates": [],
+      "metric": []
+    },
     "video-player": {
       "recipe": [
         "--poodle-recipe-video-player-big-play-fill",
@@ -2025,6 +2322,23 @@
       ],
       "candidates": [],
       "metric": []
+    },
+    "xy-pad": {
+      "recipe": [
+        "--poodle-recipe-xy-pad-border",
+        "--poodle-recipe-xy-pad-disabled-opacity",
+        "--poodle-recipe-xy-pad-fill",
+        "--poodle-recipe-xy-pad-focus-ring",
+        "--poodle-recipe-xy-pad-grid",
+        "--poodle-recipe-xy-pad-thumb-border",
+        "--poodle-recipe-xy-pad-thumb-fill",
+        "--poodle-recipe-xy-pad-trace"
+      ],
+      "candidates": [],
+      "metric": [
+        "--poodle-xy-pad-x",
+        "--poodle-xy-pad-y"
+      ]
     }
   }
 }
