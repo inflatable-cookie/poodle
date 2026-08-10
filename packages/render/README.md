@@ -23,7 +23,7 @@ use poodle_specs::{ButtonSpec, ButtonVariant};
 
 let spec = ButtonSpec::new()
     .with_label("Save")
-    .with_variant(ButtonVariant::Solid);
+    .with_variant(ButtonVariant::Primary);
 
 let node = poodle_render::button(&spec, &theme, on_click);
 ```

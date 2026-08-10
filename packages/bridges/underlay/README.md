@@ -275,9 +275,8 @@ const blocks = toPoodleEditorBlocks(value.blocks ?? [], {
 });
 ```
 
-Then the Underlay-owned wrapper can decide whether the built-in picker is
-enough or whether it should keep rendering `NightfireTypeSelect` through
-Poodle's `type-picker` slot:
+When `bridge.pickerMode === "slot-override"`, the Underlay-owned wrapper can
+render `NightfireTypeSelect` through Poodle's `typePicker` snippet:
 
 ```svelte
 <BlockEditor
@@ -286,22 +285,20 @@ Poodle's `type-picker` slot:
   blockTypeItems={bridge.blockTypeItems}
   mode={definition.mode}
 >
-  {#if bridge.pickerMode === "slot-override"}
-    <svelte:fragment slot="type-picker" let:block let:changeType>
-      <NightfireTypeSelect
-        value={block.type}
-        {groupedOptions}
-        typeOptions={editorTypeOptions}
-        onChange={changeType}
-      />
-    </svelte:fragment>
-  {/if}
+  {#snippet typePicker({ block, changeType })}
+    <NightfireTypeSelect
+      value={block.type}
+      {groupedOptions}
+      typeOptions={editorTypeOptions}
+      onChange={changeType}
+    />
+  {/snippet}
 </BlockEditor>
 ```
 
 Rule of thumb:
 - use Poodle's built-in picker when flat or one-level grouped menus are enough
-- keep an Underlay-owned slot override when Nightfire needs nested
+- keep an Underlay-owned snippet override when Nightfire needs nested
   category/subcategory menus
 - keep block payloads opaque; the bridge should only ensure `id` and `type`
   exist for the shell

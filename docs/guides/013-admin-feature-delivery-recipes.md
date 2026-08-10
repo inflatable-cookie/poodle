@@ -316,21 +316,25 @@ Use this when the primary task is recovering or purging soft-deleted records.
 
 <ListGrid minItemWidth={26}>
   <ListCard title={item.title} href={`/media/${item.id}`}>
-    <svelte:fragment slot="leading">
+    {#snippet leading()}
       <MediaThumbnail kind={item.kind} presentation="compact" />
-    </svelte:fragment>
+    {/snippet}
 
-    <svelte:fragment slot="trailing">
+    {#snippet trailing()}
       <Pill tone="neutral" appearance="badge">{item.kindLabel}</Pill>
       <Pill tone="danger" appearance="badge">Deleted</Pill>
-    </svelte:fragment>
+    {/snippet}
 
-    <span slot="footer">Deleted {item.deletedAtLabel}</span>
+    {#snippet footer()}
+      <span>Deleted {item.deletedAtLabel}</span>
+    {/snippet}
 
-    <div slot="actions" class="trash-actions">
-      <Button type="button" variant="ghost" size="sm">Restore</Button>
-      <Button type="button" variant="ghost" tone="danger" size="sm">Delete</Button>
-    </div>
+    {#snippet actions()}
+      <div class="trash-actions">
+        <Button type="button" variant="ghost" size="sm">Restore</Button>
+        <Button type="button" variant="ghost" tone="danger" size="sm">Delete</Button>
+      </div>
+    {/snippet}
   </ListCard>
 </ListGrid>
 

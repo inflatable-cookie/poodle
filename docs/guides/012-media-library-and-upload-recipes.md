@@ -48,22 +48,26 @@ wrapper.
 
 ```svelte
 <script lang="ts">
-  import { MediaBrowsePanel, type MediaBrowseItem } from "@inflatable-cookie/poodle-svelte";
+  import { MediaBrowsePanel, type MediaPickerItem } from "@inflatable-cookie/poodle-svelte";
   import UploadWorkflowStatus from "$lib/media/UploadWorkflowStatus.svelte";
 
-  let items: MediaBrowseItem[] = [];
+  let items: MediaPickerItem[] = [];
   let uploads = [];
-  let query = "";
+  let loading = false;
+  let error: string | null = null;
 </script>
 
 <div class="media-library-shell">
   <MediaBrowsePanel
-    title="Media"
     items={items}
-    state="ready"
-    query={query}
+    {loading}
+    {error}
+    hasMore={true}
     onSelect={(item) => {
       // host-owned selection
+    }}
+    onLoadMore={() => {
+      // host-owned pagination
     }}
   />
 
@@ -80,8 +84,15 @@ Use `MediaThumbnail` and `MediaPreview` directly for read-only media framing.
   import { MediaPreview, MediaThumbnail } from "@inflatable-cookie/poodle-svelte";
 </script>
 
-<MediaThumbnail src={media.thumbnailUrl} alt={media.title} aspectRatio="landscape" />
-<MediaPreview kind={media.kind} src={media.url} title={media.title} />
+<MediaThumbnail kind={media.kind} title={media.title} aspectRatio="landscape">
+  <img src={media.thumbnailUrl} alt={media.title} />
+</MediaThumbnail>
+
+<MediaPreview kind={media.kind} title={media.title}>
+  {#snippet mediaContent()}
+    <img src={media.url} alt={media.title} />
+  {/snippet}
+</MediaPreview>
 ```
 
 ## Media Detail Pattern

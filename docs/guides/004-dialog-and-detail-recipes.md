@@ -137,9 +137,9 @@ detail-page updates app-owned.
 </script>
 
 <PageHeader title="Marketing site rebuild" backHref="/projects" backLabel="Back to projects">
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <!-- host-owned actions -->
-  </svelte:fragment>
+  {/snippet}
 </PageHeader>
 
 <MetaBar ariaLabel="Project metadata">
@@ -193,9 +193,9 @@ page-specific action cluster into a new Poodle wrapper.
 
 ```svelte
 <DetailSection title="Billing">
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <Button variant="secondary">Edit billing</Button>
-  </svelte:fragment>
+  {/snippet}
 
   <DetailItem label="Plan" value="Pro" />
 </DetailSection>

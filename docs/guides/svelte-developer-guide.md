@@ -27,7 +27,7 @@ registry. Link them from a sibling checkout or workspace in your application's
   "dependencies": {
     "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
     "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components",
-    "lucide-static": "^1.30.0"
+    "lucide-static": "1.31.0"
   }
 }
 ```
@@ -128,9 +128,9 @@ lucide-static                               — application-owned Lucide source 
 ### Dependency graph
 
 ```
-@inflatable-cookie/poodle-core/tokens
+@inflatable-cookie/poodle-core
     ↑
-@inflatable-cookie/poodle-svelte (depends on tokens)
+@inflatable-cookie/poodle-svelte
 
 lucide-static (application dependency)
 ```
@@ -382,10 +382,10 @@ Modern Poodle Svelte components prefer callback props over dispatcher events:
 
 **Naming conventions:**
 - `onValueChange` — value-bearing controls (TextInput, Select, RadioGroup)
-- `checkedChange` — boolean toggles (Checkbox, Switch)
-- `pressedChange` — toggle buttons (Button with pressed prop)
+- `onCheckedChange` — boolean toggles (Checkbox, Switch)
+- `onPressedChange` — toggle buttons (Button with pressed prop)
 - `onOpenChange` — modern callback form for overlays and disclosures
-- `requestClose` — modal dismiss requests
+- `onRequestClose` — modal dismiss requests
 - `onSubmit` — TextInput on Enter
 - `onCancel` — TextInput on Escape
 - `onFocus`, `onBlur`, `onKeyDown` — standard DOM event passthrough callbacks
@@ -658,10 +658,10 @@ For multi-field forms, use `FormLayout` from composites:
     <TextInput id="email" type="email" />
   </Field>
 
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <Button variant="ghost">Cancel</Button>
     <Button variant="primary">Save</Button>
-  </svelte:fragment>
+  {/snippet}
 </FormLayout>
 ```
 
@@ -1147,7 +1147,9 @@ Grouped options:
   title="No projects yet"
   message="Create your first project to get started."
 >
-  <Button variant="primary" slot="actions">Create Project</Button>
+  {#snippet actions()}
+    <Button variant="primary">Create Project</Button>
+  {/snippet}
 </EmptyState>
 ```
 
@@ -1318,9 +1320,9 @@ interface MenuItem {
     />
   </Field>
 
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <Button variant="primary" onClick={() => { submitted = true; }}>Submit</Button>
-  </svelte:fragment>
+  {/snippet}
 </FormLayout>
 ```
 
@@ -1366,33 +1368,13 @@ interface MenuItem {
 
 ---
 
-## Full Component Reference
+## Component Reference
 
-### Primitives (83 components)
-
-**Action:** Button, IconButton, SplitButton
-**Input:** TextInput (including type="search"), NumberInput, CodeInput, DurationInput, ColorPicker
-**Selection:** Checkbox, Switch, RadioGroup, Select, SegmentedControl, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
-**Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, TimeInput, TimeZoneSelect
-**Layout:** Box, Grid, Stack, Spacer, Separator, Surface, Region, ScrollShell
-**Navigation:** Breadcrumbs, Pagination, PaginationSummary, Tabs, Menu, Menubar, NavigationMenu
-**Overlay:** Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, ContextMenu
-**Feedback:** Callout, Progress, Meter, Skeleton, StatusIndicator
-**Display:** Accordion, Card, Code, Pill, Icon, IconButton, IconProvider, Table, EditableLabel, Eyebrow, ListCard, ListCardCounter, NavCard, NavCardGrid, FormActions, Field, Collapsible, CollapseToggle, FileUpload, BulkActionBar, OrderBy, ResizeHandle, StatusBar, Toolbar
-
-### Composites (34 components)
-
-**Data:** DataTable, FilterToolbar, SelectionSummary, PaginationSummary
-**Detail:** DetailShell, DetailSection, DetailItem
-**Forms:** FormLayout, FormDialog, ConfirmAction, EmbedInput
-**Browse:** PageHeader, EmptyState, PageLoading
-**Media:** MediaThumbnail, MediaPreview, MediaPicker, AudioPlayer, VideoPlayer, EmbedPreview
-**Editor:** MarkdownEditor, BlockEditor, EditableList
-**Picker:** PickerShell, RelationPicker, CardRadioGroup, CardToggleGroup
-**Layout:** SplitView, DockRegion, AppHeader, StatusBar, ResizeHandle
-**Feedback:** ToastStack, LogList
-**Discovery:** CommandPalette, ActionDiscoveryPanel
-**Metric:** MetricTile
+Use the [Svelte package reference](../../packages/svelte/components/README.md)
+for the current public export surface. Use the
+[component contracts](../contracts/components/README.md) for detailed props,
+states, behavior, accessibility, and token requirements. The preview app gives
+you interactive specimens for the same surface.
 
 ---
 
@@ -1402,9 +1384,8 @@ The interactive component preview lives at `packages/svelte/preview`:
 
 ```bash
 bun install
-bun run tokens:build
-cd packages/svelte/preview
-bun run dev
+effigy tokens:build
+effigy docs:dev
 ```
 
 Use the repo-root `bun install` as the normal workspace hydration step. Do not

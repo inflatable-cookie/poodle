@@ -44,23 +44,23 @@ pagination placement. Render the actual list or grid in the default slot.
   totalItems={24}
   pageSize={3}
 >
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <Button variant="primary">Create project</Button>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="filters">
+  {#snippet filters()}
     <FilterToolbar
       summaryText="Showing 4-6 of 24"
       collapsible
       bind:collapsed
     >
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <IconButton
           icon="refresh-cw"
           variant="ghost"
           tooltip="Refresh"
         />
-      </svelte:fragment>
+      {/snippet}
 
       <Field id="project-search" label="Search">
         <TextInput id="project-search" type="search" placeholder="Search projects" />
@@ -77,7 +77,7 @@ pagination placement. Render the actual list or grid in the default slot.
         />
       </Field>
     </FilterToolbar>
-  </svelte:fragment>
+  {/snippet}
 
   <!-- Host-owned list or grid content here -->
 </ListContainer>
@@ -89,10 +89,14 @@ Keep batch actions in the `batch` slot rather than pushing them into a custom
 list wrapper.
 
 ```svelte
-<svelte:fragment slot="batch">
-  <Button variant="secondary">Archive selected</Button>
-  <Button variant="secondary" tone="danger">Delete selected</Button>
-</svelte:fragment>
+<ListContainer title="Projects">
+  {#snippet batch()}
+    <Button variant="secondary">Archive selected</Button>
+    <Button variant="secondary" tone="danger">Delete selected</Button>
+  {/snippet}
+
+  <!-- Host-owned list or grid content here -->
+</ListContainer>
 ```
 
 ## State Handling
@@ -114,9 +118,9 @@ Use state overrides only when the page truly needs a custom region:
 
 ```svelte
 <ListContainer title="Jobs" state="error" errorTitle="Unable to load jobs">
-  <svelte:fragment slot="error">
+  {#snippet error()}
     <!-- custom recovery UI -->
-  </svelte:fragment>
+  {/snippet}
 </ListContainer>
 ```
 

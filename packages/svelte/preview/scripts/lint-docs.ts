@@ -278,6 +278,56 @@ function validateContractIndexes(errors: string[]): void {
   );
 }
 
+function validateOperatorGuides(errors: string[]): number {
+  const guideFiles = collectMarkdownFiles(path.join(repoRoot, "docs", "guides"));
+  const extraFiles = [
+    path.join(repoRoot, "packages", "bridges", "underlay", "README.md"),
+    path.join(repoRoot, "packages", "render", "README.md"),
+  ];
+  const files = [...guideFiles, ...extraFiles];
+  const forbiddenPatterns = [
+    { pattern: /<svelte:fragment\b/, description: "legacy <svelte:fragment> composition" },
+    { pattern: /\bslot\s*=/, description: "legacy slot attributes" },
+    { pattern: /ButtonVariant::Solid\b/, description: "the removed Rust ButtonVariant::Solid variant" },
+    { pattern: /\bMediaBrowseItem\b/, description: "the nonexistent MediaBrowseItem type" },
+    { pattern: /\bbun run tokens:build\b/, description: "the deprecated bun token-build command" },
+  ];
+
+  for (const filePath of files) {
+    const markdown = fs.readFileSync(filePath, "utf8");
+    const relativePath = path.relative(repoRoot, filePath);
+
+    for (const { pattern, description } of forbiddenPatterns) {
+      expect(!pattern.test(markdown), `${relativePath} uses ${description}.`, errors);
+    }
+  }
+
+  const iconManifest = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, "packages", "core", "src", "icons", "default-icons.json"), "utf8"),
+  ) as { lucideVersion: string };
+  const rootPackage = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8")) as {
+    devDependencies: Record<string, string>;
+  };
+  const svelteGuide = fs.readFileSync(
+    path.join(repoRoot, "docs", "guides", "svelte-developer-guide.md"),
+    "utf8",
+  );
+  const lucideVersion = iconManifest.lucideVersion;
+
+  expect(
+    rootPackage.devDependencies["lucide-static"] === lucideVersion,
+    "package.json lucide-static version must match the default icon manifest.",
+    errors,
+  );
+  expect(
+    svelteGuide.includes(`"lucide-static": "${lucideVersion}"`),
+    "docs/guides/svelte-developer-guide.md must show the canonical exact lucide-static version.",
+    errors,
+  );
+
+  return files.length;
+}
+
 function validateSveltePackageSurface(
   packagePath: string,
   packageName: string,
@@ -3130,6 +3180,7 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
+const operatorGuideCount = validateOperatorGuides(errors);
 // Unified package — README surface validation skipped (130+ exports)
 validatePackageSurfaceCoverage("packages/svelte/components", "@inflatable-cookie/poodle-svelte", errors);
 validateDocsCatalog(errors);
@@ -3177,5 +3228,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
+  `Validated ${componentContractCount} component contracts, ${operatorGuideCount} operator guides, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
 );

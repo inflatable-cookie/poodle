@@ -38,7 +38,7 @@ let theme = GpuiThemeProvider::new()
 
 let spec = ButtonSpec::new()
     .with_label("Save changes")
-    .with_variant(ButtonVariant::Solid)
+    .with_variant(ButtonVariant::Primary)
     .with_tone(ButtonTone::Default);
 
 let node = poodle_render::button(&spec, &theme, None);
