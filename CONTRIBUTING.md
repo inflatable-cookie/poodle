@@ -5,6 +5,7 @@ public behavior, implementations, documentation, and relevant evidence agree.
 
 The project is currently a pre-1.0 source preview. Discuss large API, package,
 or component additions before investing in a full implementation.
+Participation is governed by the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Set Up the Repository
 

@@ -148,6 +148,8 @@ Use `effigy tasks` to see narrower validation and build tasks.
   component behavior
 - [Application recipes](docs/guides/README.md) — reusable composition patterns
 - [Contributing](CONTRIBUTING.md) — ownership rules and validation workflow
+- [Code of conduct](CODE_OF_CONDUCT.md) — participation expectations and
+  private reporting
 - [Security policy](SECURITY.md) — private vulnerability reporting
 
 Roadmaps, logs, specs, and research are kept in the repository for contributors
