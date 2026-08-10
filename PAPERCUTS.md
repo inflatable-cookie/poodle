@@ -7,6 +7,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-10 — `effigy graph explore` can hang after a successful index refresh
+  without progress or timeout output. Add a bounded query timeout and a clear
+  fallback diagnostic. Affects agent code-navigation workflows.
+
 - 2026-08-10 — `cargo fmt --manifest-path` follows Poodle's linked Rust
   workspaces and reformats unrelated crates, creating broad release-sweep
   churn. Add an Effigy formatter that accepts an explicit changed-file set.

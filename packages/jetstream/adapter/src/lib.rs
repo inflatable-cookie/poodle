@@ -123,7 +123,8 @@ impl JetstreamAdapter {
     }
 }
 
-/// Primitive spec type names supported by the Jetstream adapter (60 — full parity).
+/// Spec types with direct `RenderComponent` implementations in this crate.
+/// This is not the larger shared `poodle-render` preview surface.
 /// Note: AccordionItemSpec is a sub-spec of AccordionSpec, not independently rendered.
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Structural
@@ -195,7 +196,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "DateTimeRangePickerSpec",
 ];
 
-/// Composite spec type names supported by the Jetstream adapter (48 — full parity).
+/// Composite spec types with direct implementations in this crate.
 const SUPPORTED_COMPOSITES: &[&str] = &[
     // Form and validation
     "FormShellSpec",
@@ -229,7 +230,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "EmbedInputSpec",
     "EmbedPreviewSpec",
     "EditableListSpec",
-    "ReorderableListSpec",
     "BreadcrumbsSpec",
     "CardRadioGroupSpec",
     "ListCardSpec",
@@ -251,36 +251,13 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "DockRegionSpec",
 ];
 
-/// Workstation spec type names supported by the Jetstream adapter (13 — full parity).
-const SUPPORTED_WORKSTATION: &[&str] = &[
-    "ActionDiscoveryPanelSpec",
-    "AppHeaderSpec",
-    "CommandPaletteSpec",
-    "CommandPaletteShellSpec",
-    "DockRegionSpec",
-    "PanelHeaderSpec",
-    "PanelSurfaceSpec",
-    "PanelTabsSpec",
-    "ProjectHeaderSpec",
-    "ShellStatusBarSpec",
-    "SplitViewSpec",
-    "SurfaceTabsSpec",
-    "WorkspaceShellSpec",
-];
-
 fn supported_components() -> &'static [&'static str] {
     static ALL: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
         SUPPORTED_PRIMITIVES
             .iter()
             .chain(SUPPORTED_COMPOSITES)
-            .chain(SUPPORTED_WORKSTATION)
             .copied()
-            .fold(Vec::new(), |mut components, component| {
-                if !components.contains(&component) {
-                    components.push(component);
-                }
-                components
-            })
+            .collect()
     });
     ALL.as_slice()
 }
@@ -332,16 +309,12 @@ mod tests {
         assert!(color.0 >= 0.0 && color.0 <= 1.0);
     }
 
-    /// Pins the supported-component counts so a spec cannot quietly leave the
-    /// adapter's list.
-    ///
-    /// The composite count was stale by two: it went to 48 when the workstation
-    /// category was retired into composites, and nothing noticed because no gate
-    /// ran this crate's tests. `ci:native` runs them now.
+    /// Pins the direct implementation inventory. Shared-render coverage has its
+    /// own preview and parity gates.
     #[test]
-    fn full_parity_component_counts() {
+    fn direct_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 60);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 48);
-        assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 47);
+        assert_eq!(supported_components().len(), 107);
     }
 }

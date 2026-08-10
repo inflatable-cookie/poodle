@@ -96,7 +96,7 @@
         "TabStripSpec",
         "TabsSpec",
         "TextInputSpec",
-        "TimeInputSpec",
+        "TimeFieldSpec",
         "TooltipSpec"
       ],
       "focusEntryStatus": "explicit",

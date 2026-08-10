@@ -97,8 +97,8 @@ impl GpuiAdapter {
     }
 }
 
-/// Primitive spec type names supported by the GPUI adapter.
-///
+/// Spec types with direct `RenderComponent` implementations in this crate.
+/// This is not the larger shared `poodle-render` preview surface.
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // g07.002 — structural and layout
     "BoxSpec",
@@ -114,7 +114,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "FieldSpec",
     "TextInputSpec",
     "FormActionsSpec",
-    "TimeInputSpec",
+    "TimeFieldSpec",
     "EditableLabelSpec",
     "NumberInputSpec",
     "CodeInputSpec",
@@ -276,6 +276,8 @@ mod tests {
             adapter.supported_components().len(),
             SUPPORTED_PRIMITIVES.len() + SUPPORTED_COMPOSITES.len() + SUPPORTED_SHELL.len()
         );
+        assert_eq!(adapter.supported_components().len(), 100);
+        assert!(adapter.supported_components().contains(&"TimeFieldSpec"));
         assert_eq!(adapter.unsupported_components().len(), 0);
     }
 

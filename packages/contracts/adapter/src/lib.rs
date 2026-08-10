@@ -100,10 +100,11 @@ pub trait RenderComponent<Spec> {
     ) -> <Self::Target as RenderTarget>::Handle;
 }
 
-/// Describes which components an adapter supports.
+/// Describes the direct `RenderComponent` surface implemented by an adapter.
 ///
-/// Used by the parity validation tooling (g06.014) to verify that adapters
-/// implement all required components.
+/// This is runtime introspection for the legacy direct-adapter path. Shared
+/// `poodle-render` coverage is validated separately through its backends and
+/// previews; this manifest does not claim whole-runtime parity.
 pub trait AdapterManifest {
     /// The adapter's display name (e.g., "GPUI", "Jetstream").
     fn name(&self) -> &str;

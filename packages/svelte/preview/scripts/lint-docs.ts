@@ -1664,7 +1664,7 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     "SliderSpec",
     "StatusIndicatorSpec",
     "SwitchSpec",
-    "TimeInputSpec",
+    "TimeFieldSpec",
   ];
   const crateRoot = path.join(repoRoot, baseline.cratePath);
   const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");

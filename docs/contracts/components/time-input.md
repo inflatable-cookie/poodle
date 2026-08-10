@@ -192,7 +192,8 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::time_input`
-- Spec struct: `TimeInputSpec` in primitives crate
+- Spec struct: `TimeFieldSpec` in `poodle-specs`; the Rust name avoids
+  collision with the public web `TimeInput` component name
 - GPUI must provide its own time-entry editing UI since there is no native input[type="time"]
 - Must expose time value, min/max constraints, and step through accessibility tree
 - Focus ring treatment must match outline spec

@@ -35,7 +35,7 @@
     "SliderSpec",
     "StatusIndicatorSpec",
     "SwitchSpec",
-    "TimeInputSpec"
+    "TimeFieldSpec"
   ],
   "knownDeltas": [
     "The crate now freezes selection, compact feedback, and date-time value semantics as token-backed GPUI specs before mounted native widgets exist for every control family.",

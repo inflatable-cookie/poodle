@@ -132,6 +132,9 @@
 # AlertDialog rendering Confirm and Cancel that no host can wire looks finished
 # and is not. Carries a ratchet — the known-gap list can only shrink.
 "drift:events" = "bun packages/gpui/preview/scripts/inert-component-drift.ts"
+# Direct adapter manifests are independent runtime evidence, but must match the
+# RenderComponent implementations they claim exactly.
+"drift:adapter-manifests" = "bun packages/gpui/preview/scripts/adapter-manifest-drift.ts"
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
@@ -173,22 +176,21 @@
 
 # Native compile-rot check (macOS: gpui pulls metal). The preview is the only
 # GPUI crate that needs a live window; since g12.019 the components themselves
-# are `poodle-render` nodes, so their real coverage is CPU-only and runs in
-# `cargo test -p poodle-render` (109 probes) and the node backend's own tests.
+# are `poodle-render` nodes, so their real coverage is CPU-only and runs here
+# through `cargo test -p poodle-render` and the node backend's own tests.
 # The pixel gate is `test:native-visual`, which does need a window and is
 # LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
 "check:gpui" = [
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { run = "cargo test -p poodle-render --manifest-path packages/render/Cargo.toml" },
   { run = "cargo test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
 # `check:jetstream` and `test:jetstream` are gone: they drove
 # `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
 # `poodle-render` nodes. The render probes they ran live in
-# `cargo test -p poodle-render`, which `ci:rust` already runs; the click probes
-# are `drift:clicks` above.
-# The adapter crate: theme/token resolution and the layout mapping. Nothing ran
-# these, and `full_parity_component_counts` had been failing since the
-# workstation category was folded into composites.
+# `cargo test -p poodle-render`, which `check:gpui` runs.
+# The adapter crates cover theme/token resolution, layout mapping, and their
+# direct manifest claims independently of the shared renderer.
 "test:jetstream-adapter" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
 # The a11y audit belongs here rather than in ci:rust: it renders specimens, so
 # it needs the sibling jetstream repo — the same constraint that already makes
@@ -197,7 +199,9 @@
 "ci:native" = [
   { task = "drift:handlers" },
   { task = "drift:events" },
+  { task = "drift:adapter-manifests" },
   { task = "check:gpui" },
+  { task = "gpui:test" },
   { task = "test:jetstream-adapter" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
