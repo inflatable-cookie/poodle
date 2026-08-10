@@ -9,6 +9,12 @@ name: Release
 # compromised dependency to exfiltrate and nothing to rotate. Provenance
 # attestation comes with it rather than being a separate step.
 #
+# Gates run through Effigy via inflatable-cookie/setup-effigy, so this workflow
+# executes the same selectors as a local run rather than a hand-transcribed
+# copy of them that can drift. Do not reach for `bunx effigy` -- an unrelated
+# package of that name exists on npm, and fetching it inside a workflow holding
+# publish rights is the exact hazard trusted publishing exists to remove.
+#
 # Before the first run, each package needs its trusted publisher configured at
 # npmjs.com -> package -> Settings -> Trusted Publisher, naming this repository
 # and `release.yml`. Until that exists the publish step fails closed.
@@ -53,6 +59,10 @@ jobs:
         with:
           bun-version: latest
 
+      - uses: inflatable-cookie/setup-effigy@v1
+        with:
+          version: '0.9.1'
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -67,43 +77,16 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # Generated icon and token artifacts are committed, so a clean checkout
-      # already packs a complete tarball and nothing here generates anything.
-      #
-      # These check rather than regenerate, deliberately. Regenerating before
-      # packing would ship whatever the generator produced on the runner, which
-      # can differ from what was reviewed and tagged. Checking fails the release
-      # instead, and the tarball is exactly the reviewed tree.
-      - name: Generated artifacts match their generators
-        run: |
-          set -euo pipefail
-          bun scripts/build-default-icons.ts --check
-          bun packages/tokens/scripts/build-tokens.ts --check
-
-      # Inlined rather than `effigy ci`. Effigy is a local binary, not a
-      # devDependency, and `effigy` on npm is an unrelated package -- calling it
-      # through bunx in a release workflow would fetch and execute a stranger's
-      # code, which is the exact class of problem trusted publishing exists to
-      # avoid. Keep in step with tasks/effigy.tasks.toml `ci`.
-      - name: Web gate
-        run: |
-          set -euo pipefail
-          bun run --cwd packages/core test
-          bunx vitest run
-          bun install --cwd packages/svelte/install-smoke
-          bun run --cwd packages/svelte/install-smoke check --threshold error
-          bun run --cwd packages/svelte/preview docs:lint
-          bun run --cwd packages/svelte/preview accessibility:report
-
-      - name: Rust contract crates
-        run: |
-          set -euo pipefail
-          for crate in headless markdown components layout style events adapter tokens; do
-            cargo test --manifest-path "packages/contracts/$crate/Cargo.toml"
-          done
+      # `effigy ci` covers audit:icons and audit:tokens -- the generated icon and
+      # token artifacts are committed, and these fail if the tree and the
+      # generators disagree. Nothing here regenerates: packing regenerated
+      # output would ship whatever the runner produced rather than what was
+      # reviewed and tagged.
+      - name: Full CI gate
+        run: effigy ci
 
       - name: Packed-consumer install proof
-        run: bun test/package-install/web-preview.ts
+        run: effigy test:web-pack-install
 
       # Contract 012 and the lockstep decision of 2026-08-09: every Rust crate
       # and every TypeScript package across both repositories carries one
