@@ -4,7 +4,7 @@
 //! authority). Ported from:
 //! `packages/jetstream/components/src/inline_remediation.rs`.
 //!
-//! Anatomy (contract §2): Root <aside> → tone-colored **left border** →
+//! Anatomy (contract §2): Root `<aside>` → tone-colored **left border** →
 //! Content [Title?, Message] → optional Action (Button). No leading icon part
 //! exists in the contract.
 

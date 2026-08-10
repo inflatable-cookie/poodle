@@ -46,7 +46,7 @@ pub struct PageHeaderSpec {
     /// `posture="entity-detail"` behavior.
     pub entity_detail_posture: bool,
     /// Heading level for the title element (1–6). Matches HTML
-    /// <h1>–<h6> semantics. Renderers use this for both accessibility
+    /// `<h1>`–`<h6>` semantics. Renderers use this for both accessibility
     /// semantics and visual sizing hierarchy — higher levels render
     /// at smaller text sizes. Defaults to 2 (matches Svelte/contract).
     pub level: u8,

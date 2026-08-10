@@ -75,7 +75,7 @@ impl FormActionsSpec {
     }
 
     /// Inline gap between actions, in rem, when density overrides the
-    /// token default. `None` means use [`action_gap_token`]. Contract §8
+    /// token default. `None` means use [`Self::action_gap_token`]. Contract §8
     /// Density Variants: compact `0.5rem`, comfortable `0.875rem`;
     /// default inherits `--poodle-space-inline-md`.
     pub fn gap_rem(&self) -> Option<f32> {
@@ -87,7 +87,7 @@ impl FormActionsSpec {
     }
 
     /// Top separation (padding-top), in rem, when density overrides the
-    /// token default. `None` means use [`stack_separation_token`].
+    /// token default. `None` means use [`Self::stack_separation_token`].
     /// Contract §8: compact `0.375rem`, comfortable `0.75rem`; default
     /// inherits `--poodle-space-stack-sm`.
     pub fn top_separation_rem(&self) -> Option<f32> {
@@ -132,13 +132,13 @@ impl FormActionsSpec {
 
     /// Inline danger group gap (contract §8 Danger Inline: `gap =
     /// var(--poodle-form-actions-gap)`), in rem, when density overrides the
-    /// token default. Mirrors [`gap_rem`] so the danger row tracks the root.
+    /// token default. Mirrors [`Self::gap_rem`] so the danger row tracks the root.
     pub fn danger_inline_gap_rem(&self) -> Option<f32> {
         self.gap_rem()
     }
 
     /// Token backing the inline danger group gap when no density override
-    /// applies (== the root [`action_gap_token`]).
+    /// applies (the root [`Self::action_gap_token`]).
     pub fn danger_inline_gap_token(&self) -> &'static str {
         self.action_gap_token()
     }

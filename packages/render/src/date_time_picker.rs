@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/components/date-time-picker.md`
 //! Ported from: `packages/jetstream/components/src/date_time_picker.rs`.
 //!
-//! Same shell as [`crate::date_picker`]; the open surface stacks the composed
-//! calendar over a labelled time section (composed [`crate::time_field`]).
+//! Same shell as [`crate::date_picker::date_picker`]; the open surface stacks the composed
+//! calendar over a labelled time section (composed [`crate::time_field::time_field`]).
 //! Display text (contract §4): complete value → "date time"; partial → the
 //! prompt for the missing part; empty → placeholder.
 

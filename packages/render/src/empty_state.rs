@@ -2,7 +2,7 @@
 //!
 //! Contract: `docs/contracts/components/empty-state.md`
 //! Ported from: `packages/jetstream/components/src/empty_state.rs`. Actions
-//! compose [`crate::button`].
+//! compose [`crate::button::button`].
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};

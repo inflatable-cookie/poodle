@@ -4,8 +4,8 @@
 //! Ported from: `packages/jetstream/components/src/date_time_zone_picker.rs`.
 //!
 //! Same shell as the sibling pickers; the open surface stacks the composed
-//! calendar over TIME and TIME ZONE fields (composed [`crate::time_field`] +
-//! [`crate::time_zone_select`]). The trigger folds the committed date / time /
+//! calendar over TIME and TIME ZONE fields (composed [`crate::time_field::time_field`] +
+//! [`crate::time_zone_select::time_zone_select`]). The trigger folds the committed date / time /
 //! zone into one space-joined string; partial values display whichever fields
 //! are present.
 

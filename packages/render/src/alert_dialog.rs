@@ -1,5 +1,5 @@
-//! AlertDialog — composes [`crate::dialog`] with two composed
-//! [`crate::button`]s for cancel/confirm.
+//! AlertDialog — composes [`crate::dialog::dialog`] with two composed
+//! [`crate::button::button`]s for cancel/confirm.
 //!
 //! Contract: `docs/contracts/components/alert-dialog.md`
 //! Ported from: `packages/jetstream/components/src/alert_dialog.rs`. Owns only
