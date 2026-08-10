@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-10 — `effigy tasks` advertises a `distribution` built-in, but
+  `effigy distribution --help` resolves it as an undefined catalog task and
+  the general help omits it. Align discovery and command routing. Affects
+  package-publication audits.
+
 - 2026-08-10 — `effigy graph explore` can hang after a successful index refresh
   without progress or timeout output. Add a bounded query timeout and a clear
   fallback diagnostic. Affects agent code-navigation workflows.

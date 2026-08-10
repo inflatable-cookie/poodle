@@ -2,7 +2,14 @@
   "name": "@inflatable-cookie/poodle-react-preview",
   "version": "0.0.0",
   "private": true,
+  "description": "Internal React component preview and documentation harness for Poodle.",
+  "license": "MIT",
   "type": "module",
+  "poodleRelease": {
+    "publicIntent": false,
+    "channel": "internal",
+    "stability": "internal-tooling"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

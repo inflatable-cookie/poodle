@@ -71,6 +71,13 @@ For broader implementation work, inspect `effigy test --plan` and use
 `effigy ci` or the relevant native/visual task when its dependencies are
 available.
 
+For public web package, export, or dependency changes, verify the actual
+tarballs in a clean consumer:
+
+```sh
+effigy test:web-pack-install
+```
+
 ## Submit a Change
 
 Keep a pull request focused on one coherent outcome. Explain:

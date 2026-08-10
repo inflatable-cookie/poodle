@@ -729,6 +729,8 @@ function validateReleaseOperations(errors: string[]): void {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
         version?: string;
+        exports?: unknown;
+        bin?: string | Record<string, string>;
         poodleRelease?: {
           publicIntent?: boolean;
           channel?: string;
@@ -738,6 +740,50 @@ function validateReleaseOperations(errors: string[]): void {
 
       expect(packageJson.name === manifestEntry.name, `${packageJsonPath} name does not match release manifest.`, errors);
       expect(Boolean(packageJson.poodleRelease), `${packageJsonPath} is missing poodleRelease metadata.`, errors);
+
+      if (manifestEntry.publicIntent) {
+        const exportTargets: string[] = [];
+        const collectExportTargets = (value: unknown): void => {
+          if (typeof value === "string") {
+            exportTargets.push(value);
+          } else if (value && typeof value === "object") {
+            Object.values(value).forEach(collectExportTargets);
+          }
+        };
+        collectExportTargets(packageJson.exports);
+        if (typeof packageJson.bin === "string") {
+          exportTargets.push(packageJson.bin);
+        } else if (packageJson.bin) {
+          exportTargets.push(...Object.values(packageJson.bin));
+        }
+
+        expect(exportTargets.length > 0, `${packageJsonPath} must declare exports or a binary.`, errors);
+        for (const target of exportTargets) {
+          if (!target.startsWith("./")) continue;
+          const wildcardIndex = target.indexOf("*");
+          if (wildcardIndex === -1) {
+            expect(
+              fs.existsSync(path.join(repoRoot, manifestEntry.path, target)),
+              `${packageJsonPath} export target ${target} does not exist.`,
+              errors,
+            );
+            continue;
+          }
+
+          const prefix = target.slice(0, wildcardIndex);
+          const suffix = target.slice(wildcardIndex + 1);
+          const directory = path.join(
+            repoRoot,
+            manifestEntry.path,
+            prefix.endsWith("/") ? prefix : path.dirname(prefix),
+          );
+          const namePrefix = prefix.endsWith("/") ? "" : path.basename(prefix);
+          const hasMatch = fs.existsSync(directory) && fs.readdirSync(directory).some(
+            (entry) => entry.startsWith(namePrefix) && entry.endsWith(suffix),
+          );
+          expect(hasMatch, `${packageJsonPath} export target ${target} matches no files.`, errors);
+        }
+      }
 
       // Version must be present and pre-1.0 (0.x) per the version policy.
       const version = packageJson.version;
@@ -819,8 +865,9 @@ function validateReleaseOperations(errors: string[]): void {
     }
   }
 
-  // Reverse check: every JS package that declares poodleRelease must be recorded
-  // in the release manifest (the forward checks above only cover manifest entries).
+  // Reverse check: every first-party package must be recorded. Requiring
+  // release metadata before checking inventory lets new internal tooling evade
+  // the package-classification rule entirely.
   const manifestNames = new Set(releaseManifest.packages.map((p) => p.name));
   const stack = [path.join(repoRoot, "packages")];
   while (stack.length > 0) {
@@ -832,15 +879,14 @@ function validateReleaseOperations(errors: string[]): void {
         stack.push(full);
       } else if (dirent.name === "package.json") {
         const pkg = JSON.parse(fs.readFileSync(full, "utf8")) as { name?: string; poodleRelease?: unknown };
-        if (pkg.poodleRelease && pkg.name && !manifestNames.has(pkg.name)) {
-          errors.push(`${full} declares poodleRelease but is missing from packages/release-manifest.json.`);
+        if (pkg.name && !manifestNames.has(pkg.name)) {
+          errors.push(`${full} package "${pkg.name}" is missing from packages/release-manifest.json.`);
         }
       } else if (dirent.name === "Cargo.toml") {
         const cargoSource = fs.readFileSync(full, "utf8");
-        const hasMeta = cargoSource.includes("[package.metadata.poodle]") || /^public-intent\s*=/m.test(cargoSource);
         const cargoName = cargoSource.match(/^name\s*=\s*"([^"]+)"/m)?.[1];
-        if (hasMeta && cargoName && !manifestNames.has(cargoName)) {
-          errors.push(`${full} declares poodle release metadata but is missing from packages/release-manifest.json.`);
+        if (cargoName && !manifestNames.has(cargoName)) {
+          errors.push(`${full} package "${cargoName}" is missing from packages/release-manifest.json.`);
         }
       }
     }

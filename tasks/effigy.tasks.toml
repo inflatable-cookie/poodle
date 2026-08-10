@@ -54,7 +54,9 @@
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @inflatable-cookie/poodle-core machines (which test:core covers).
 "test:components" = "bunx vitest run"
-"test:svelte-pack-install" = "bun test/package-install/svelte-preview.ts"
+"test:web-pack-install" = "bun test/package-install/web-preview.ts"
+# Compatibility selector for existing downstream handoffs and historical docs.
+"test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
 "test:parity" = "bunx vitest run --project parity"

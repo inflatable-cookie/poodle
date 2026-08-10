@@ -79,6 +79,8 @@ The current release posture is:
 - `@inflatable-cookie/poodle-tokens`
 - `@inflatable-cookie/poodle-bridge-underlay`
 - `@inflatable-cookie/poodle-svelte-preview`
+- `@inflatable-cookie/poodle-react-preview`
+- `@inflatable-cookie/poodle-install-smoke`
 - `poodle-gpui-preview`
 - `poodle-jetstream-preview`
 

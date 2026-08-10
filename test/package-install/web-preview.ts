@@ -11,7 +11,7 @@ import { join, resolve } from "node:path";
 const repoRoot = resolve(import.meta.dir, "../..");
 const artifactRoot = join(repoRoot, ".artifacts");
 mkdirSync(artifactRoot, { recursive: true });
-const runRoot = mkdtempSync(join(artifactRoot, "svelte-pack-install-"));
+const runRoot = mkdtempSync(join(artifactRoot, "web-pack-install-"));
 const packRoot = join(runRoot, "packs");
 const consumerRoot = join(runRoot, "consumer");
 mkdirSync(packRoot);
@@ -28,6 +28,11 @@ const packages = [
     directory: "packages/svelte/components",
     filename: "inflatable-cookie-poodle-svelte-0.1.0.tgz",
   },
+  {
+    name: "@inflatable-cookie/poodle-react",
+    directory: "packages/react/components",
+    filename: "inflatable-cookie-poodle-react-0.1.0.tgz",
+  },
 ] as const;
 
 async function run(command: string[], cwd: string): Promise<void> {
@@ -38,9 +43,7 @@ async function run(command: string[], cwd: string): Promise<void> {
   });
   const exitCode = await process.exited;
   if (exitCode !== 0) {
-    throw new Error(
-      `Command failed (${exitCode}): ${command.join(" ")}`,
-    );
+    throw new Error(`Command failed (${exitCode}): ${command.join(" ")}`);
   }
 }
 
@@ -57,14 +60,7 @@ for (const packageEntry of packages) {
     );
   }
   await run(
-    [
-      "bun",
-      "pm",
-      "pack",
-      "--destination",
-      packRoot,
-      "--quiet",
-    ],
+    ["bun", "pm", "pack", "--destination", packRoot, "--quiet"],
     join(repoRoot, packageEntry.directory),
   );
 }
@@ -81,13 +77,17 @@ const consumerManifest = {
   type: "module",
   dependencies: {
     ...tarballDependencies,
+    react: "18.0.0",
+    "react-dom": "18.0.0",
     svelte: "5.38.6",
   },
   overrides: tarballDependencies,
   devDependencies: {
     "@sveltejs/vite-plugin-svelte": "6.2.1",
+    "@testing-library/react": "16.3.0",
     "@testing-library/svelte": "5.4.2",
     "happy-dom": "20.11.1",
+    vite: "7.3.1",
     vitest: "4.1.10",
   },
 };
@@ -107,9 +107,7 @@ for (const packageEntry of packages) {
     "package.json",
   );
   const installedRoot = realpathSync(resolve(installedManifestPath, ".."));
-  const sourceRoot = realpathSync(
-    join(repoRoot, packageEntry.directory),
-  );
+  const sourceRoot = realpathSync(join(repoRoot, packageEntry.directory));
   if (
     installedRoot === sourceRoot ||
     installedRoot.startsWith(`${sourceRoot}/`)
@@ -150,25 +148,40 @@ const artifactSetId = createHash("sha256")
   )
   .digest("hex");
 const evidence = {
-  schema: "poodle.svelte-preview-pack-install.v1",
+  schema: "poodle.web-preview-pack-install.v1",
   artifactSetId,
   generatedAt: new Date().toISOString(),
-  svelteFloor: "5.38.6",
-  sveltePeerRange: ">=5.38.6 <6",
+  frameworkFloors: {
+    react: "18.0.0",
+    svelte: "5.38.6",
+  },
+  peerRanges: {
+    react: ">=18",
+    svelte: ">=5.38.6 <6",
+  },
   consumerRoot,
   constraints: {
     viteAliases: false,
     siblingSourceResolution: false,
+    workspaceDependencies: false,
     privateDomSelectors: false,
     privateMimeKnowledge: false,
   },
   mountedProof: {
-    component: "DockRegion",
-    publicImportsOnly: true,
-    externalPayload: true,
-    sameRegionReorder: true,
-    accessibleRegionName: true,
-    overlayGeometry: true,
+    svelte: {
+      component: "DockRegion",
+      publicImportsOnly: true,
+      externalPayload: true,
+      sameRegionReorder: true,
+      accessibleRegionName: true,
+      overlayGeometry: true,
+    },
+    react: {
+      components: ["Button", "Icon", "IconProvider"],
+      publicImportsOnly: true,
+      scopedDefaultIcons: true,
+      clickHandler: true,
+    },
   },
   artifacts,
 };

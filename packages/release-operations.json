@@ -102,6 +102,15 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
+      "name": "@inflatable-cookie/poodle-react-preview",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    },
+    {
       "name": "@inflatable-cookie/poodle-bridge-underlay",
       "channel": "internal",
       "publicIntent": false,
@@ -112,6 +121,15 @@
     },
     {
       "name": "@inflatable-cookie/poodle-svelte-preview",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    },
+    {
+      "name": "@inflatable-cookie/poodle-install-smoke",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "tooling-owned",

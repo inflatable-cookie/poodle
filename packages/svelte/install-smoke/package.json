@@ -1,7 +1,15 @@
 {
   "name": "@inflatable-cookie/poodle-install-smoke",
+  "version": "0.0.0",
   "private": true,
+  "description": "Internal clean-consumer type and build proof for the Poodle Svelte packages.",
+  "license": "MIT",
   "type": "module",
+  "poodleRelease": {
+    "publicIntent": false,
+    "channel": "internal",
+    "stability": "internal-tooling"
+  },
   "scripts": {
     "check": "svelte-check --tsconfig ./tsconfig.json --tsgo",
     "build": "vite build"

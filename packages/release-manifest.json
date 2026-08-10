@@ -40,6 +40,14 @@
       "channel": "preview"
     },
     {
+      "name": "@inflatable-cookie/poodle-react-preview",
+      "path": "packages/react/preview",
+      "kind": "tooling",
+      "language": "typescript",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
       "name": "@inflatable-cookie/poodle-bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",
@@ -50,6 +58,14 @@
     {
       "name": "@inflatable-cookie/poodle-svelte-preview",
       "path": "packages/svelte/preview",
+      "kind": "tooling",
+      "language": "typescript",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
+      "name": "@inflatable-cookie/poodle-install-smoke",
+      "path": "packages/svelte/install-smoke",
       "kind": "tooling",
       "language": "typescript",
       "publicIntent": false,
