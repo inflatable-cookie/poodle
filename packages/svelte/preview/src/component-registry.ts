@@ -126,6 +126,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Code", "display", "Syntax-highlighted code display with copy button.", true),
   entry("TimeAgo", "display", "Live-updating relative timestamp display.", true),
   entry("MetricTile", "display", "Compact label-value tile for metrics and KPIs.", true),
+  entry("StateTile", "display", "Static label-value tile with optional trend and host-owned sparkline.", true),
   entry("DetailItem", "display", "Label-value pair for metadata display.", true),
   entry("MetaBar", "display", "Inline metadata ribbon for compact header facts.", true),
   entry("MetaItem", "display", "Compact labeled metadata item for inline ribbons.", true),
@@ -185,6 +186,8 @@ export const allComponents: ComponentEntry[] = [
 
   // Feedback
   entry("Callout", "feedback", "Informational block with tone and optional actions.", true),
+  entry("RemediationBanner", "feedback", "Persistent recovery message with announcement and command actions.", true),
+  entry("ValidationSummary", "feedback", "Linked summary of active form validation failures.", true),
   entry("Progress", "feedback", "Determinate or indeterminate progress indicator.", true),
   entry("Meter", "feedback", "Visual gauge for scalar values within a known range.", true),
   entry("EmptyState", "feedback", "Placeholder for empty data views with messaging.", true),

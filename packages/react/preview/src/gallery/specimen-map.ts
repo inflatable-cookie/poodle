@@ -15,6 +15,7 @@ import { BulkActionBarSpecimen } from "./specimens/BulkActionBarSpecimen";
 import { ButtonSpecimen } from "./specimens/ButtonSpecimen";
 import { CalendarSpecimen } from "./specimens/CalendarSpecimen";
 import { CalloutSpecimen } from "./specimens/CalloutSpecimen";
+import { RemediationBannerSpecimen } from "./specimens/RemediationBannerSpecimen";
 import { CardRadioGroupSpecimen } from "./specimens/CardRadioGroupSpecimen";
 import { CardSpecimen } from "./specimens/CardSpecimen";
 import { CardToggleGroupSpecimen } from "./specimens/CardToggleGroupSpecimen";
@@ -81,6 +82,8 @@ import { MeterSpecimen } from "./specimens/MeterSpecimen";
 import { ModelPickerSpecimen } from "./specimens/ModelPickerSpecimen";
 import { RefSelectSpecimen } from "./specimens/RefSelectSpecimen";
 import { MetricTileSpecimen } from "./specimens/MetricTileSpecimen";
+import { StateTileSpecimen } from "./specimens/StateTileSpecimen";
+import { ValidationSummarySpecimen } from "./specimens/ValidationSummarySpecimen";
 import { NavCardSpecimen } from "./specimens/NavCardSpecimen";
 import { NavigationMenuSpecimen } from "./specimens/NavigationMenuSpecimen";
 import { NumberInputSpecimen } from "./specimens/NumberInputSpecimen";
@@ -160,6 +163,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "button": ButtonSpecimen,
   "calendar": CalendarSpecimen,
   "callout": CalloutSpecimen,
+  "remediation-banner": RemediationBannerSpecimen,
   "card": CardSpecimen,
   "card-radio-group": CardRadioGroupSpecimen,
   "card-toggle-group": CardToggleGroupSpecimen,
@@ -228,6 +232,8 @@ export const specimenMap: Record<string, ComponentType> = {
   "model-picker": ModelPickerSpecimen,
   "ref-select": RefSelectSpecimen,
   "metric-tile": MetricTileSpecimen,
+  "state-tile": StateTileSpecimen,
+  "validation-summary": ValidationSummarySpecimen,
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,
   "number-input": NumberInputSpecimen,

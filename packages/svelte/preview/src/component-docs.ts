@@ -614,6 +614,57 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "remediation-banner": {
+    props: [
+      { name: "tone", type: "StatusTone", default: '"warning"', description: "Semantic tone for the surface and leading indicator." },
+      { name: "title", type: "string", required: true, description: "Banner heading." },
+      { name: "message", type: "string", required: true, description: "Recovery guidance." },
+      { name: "announceMode", type: "AnnouncementMode", default: '"polite"', description: "Live-region urgency: none, polite, or assertive." },
+      { name: "primaryAction", type: "RemediationAction | null", default: "null", description: "Primary recovery command." },
+      { name: "secondaryAction", type: "RemediationAction | null", default: "null", description: "Optional secondary recovery command." },
+      { name: "isDismissible", type: "boolean", default: "false", description: "Shows the dismiss control." },
+      { name: "dismissLabel", type: "string", default: '"Dismiss"', description: "Accessible dismiss-control label." },
+    ],
+    slots: [],
+    events: [
+      { name: "onAction", payload: "(id: string) => void", description: "Called with the selected remediation action ID." },
+      { name: "onDismiss", payload: "() => void", description: "Called when the dismiss control is activated." },
+    ],
+    usage: `<script lang="ts">
+  import { RemediationBanner } from "@inflatable-cookie/poodle-svelte";
+
+  const retry = { id: "retry", label: "Try again", variant: "primary", isDisabled: false } as const;
+</script>
+
+<RemediationBanner
+  title="Save failed"
+  message="Your edits are still local."
+  tone="danger"
+  primaryAction={retry}
+  onAction={(id) => console.log(id)}
+/>`,
+  },
+
+  "validation-summary": {
+    props: [
+      { name: "title", type: "string | null", default: "null", description: "Optional heading above the active entries." },
+      { name: "entries", type: "ValidationSummaryEntry[]", default: "[]", description: "Tracked fields. Valid and inactive entries are filtered out." },
+      { name: "announceMode", type: "AnnouncementMode", default: '"polite"', description: "Live-region urgency: none, polite, or assertive." },
+      { name: "includePending", type: "boolean", default: "false", description: "Includes pending entries alongside invalid entries." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { ValidationSummary } from "@inflatable-cookie/poodle-svelte";
+
+  const entries = [
+    { fieldId: "email", label: "Email", message: "Enter a valid email.", validationState: "invalid" },
+  ] as const;
+</script>
+
+<ValidationSummary title="Fix these fields" {entries} />`,
+  },
+
   card: {
     props: [
       { name: "variant", type: "CardVariant", default: '"default"', description: "Visual variant of the card." },
@@ -2646,6 +2697,25 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <MetricTile label="Revenue" value="$48,200" trend="up" trendLabel="+12.5%" sparklineData={[20, 35, 28, 42, 48]} />`,
+  },
+
+  "state-tile": {
+    props: [
+      { name: "label", type: "string", required: true, description: "Caption above the value." },
+      { name: "value", type: "string", required: true, description: "Caller-formatted value." },
+      { name: "trend", type: "string | null", default: "null", description: "Trend token. Up and down receive semantic colors." },
+      { name: "trendLabel", type: "string | null", default: "null", description: "Readable trend text shown beside the decorative indicator." },
+      { name: "hasSparkline", type: "boolean", default: "false", description: "Reserves the host-owned sparkline region." },
+    ],
+    slots: [
+      { name: "sparkline", description: "Host-rendered sparkline content. React uses the matching ReactNode prop." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { StateTile } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<StateTile label="Success rate" value="99.8%" trend="up" trendLabel="Up 1.2%" />`,
   },
 
   "nav-card": {

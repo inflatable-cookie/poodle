@@ -1,9 +1,9 @@
 # StateTile
 
-> **Implementation note**: Svelte component not yet built. Contract is complete — implementation is pending.
+> **Implementation note**: Implemented in the shared Rust renderer, Svelte, and React.
 
 Status: detailed contract
-Updated: 2026-04-11
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -52,6 +52,13 @@ Updated: 2026-04-11
 | `trendLabel` | `string \| null` | `null` | no | optional label beside the trend indicator (e.g. "+12%") |
 | `hasSparkline` | `boolean` | `false` | no | when true, host should render an inline sparkline in the Sparkline slot |
 
+### Composition
+
+- Svelte exposes a `sparkline` snippet and React exposes the equivalent
+  `ReactNode` prop. The Rust renderer reserves the same node slot.
+- `hasSparkline=true` reserves the region even when the host has not supplied
+  chart content yet.
+
 ### Controlled And Uncontrolled
 
 - Wholly static; StateTile has no internal state or event surface
@@ -73,6 +80,10 @@ Updated: 2026-04-11
 |------|-------|---------|
 | Root fill | `color.background.panel` (from `fill_token()`) | base surface |
 | Root border | `color.border.subtle` (from `border_token()`) | subtle outline |
+| Root radius | `radius.surface` | tile shape |
+| Root padding | `space.panel.x`, `space.panel.y` | internal spacing |
+| Label | `typography.label`, `color.text.secondary` | caption treatment |
+| Value | `typography.heading`, `color.text.primary` | primary reading |
 | Trend color | `color.status.success` / `color.status.danger` / `color.text.secondary` | from `trend_color_token()` |
 
 ## 6. Rust Spec

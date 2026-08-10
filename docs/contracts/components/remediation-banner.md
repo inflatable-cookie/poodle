@@ -1,9 +1,9 @@
 # RemediationBanner
 
-> **Implementation note**: Svelte component not yet built. Contract is complete — implementation is pending.
+> **Implementation note**: Implemented in the shared Rust renderer, Svelte, and React.
 
 Status: detailed contract
-Updated: 2026-04-11
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -55,6 +55,9 @@ Updated: 2026-04-11
 | `primaryAction` | `RemediationAction \| null` | `null` | no | primary recovery action |
 | `secondaryAction` | `RemediationAction \| null` | `null` | no | secondary recovery action |
 | `isDismissible` | `boolean` | `false` | no | shows dismiss close button |
+| `dismissLabel` | `string` | `"Dismiss"` | no | accessible label for the dismiss control |
+| `onAction` | `(id: string) => void` | — | no | reports the selected action id |
+| `onDismiss` | `() => void` | — | no | reports dismiss activation |
 
 ### Types
 
@@ -76,7 +79,7 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 
 ### Controlled And Uncontrolled
 
-- Dismiss state is uncontrolled; parent handles via `dismiss` event
+- The parent owns visibility and handles `onDismiss`; the banner does not hide itself
 - Actions are command-only; the component does not track which was clicked
 
 ## 4. States
@@ -106,6 +109,10 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | Root bg | `color.background.panel` (from `background_token()`) | base surface |
 | Root border | tone → `color.status.*` (from `border_token()`) | tone accent |
 | Icon | tone → `color.status.*` | tone-matched leading indicator |
+| Radius | `radius.surface` | banner shape |
+| Padding | `space.panel.x`, `space.panel.y` | internal spacing |
+| Title | `typography.label` | recovery heading |
+| Message | `typography.body`, `color.text.secondary` | recovery guidance |
 
 ## 7. Rust Spec
 

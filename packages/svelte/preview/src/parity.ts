@@ -436,6 +436,8 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Switch",
       "TokenInput",
       "TextInput",
+      "RemediationBanner",
+      "ValidationSummary",
     ],
   },
   {
@@ -694,6 +696,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "MediaBrowsePanel",
       "MediaPicker",
       "MetricTile",
+      "StateTile",
       "PageLoading",
       "SidebarNav",
       "Tree",

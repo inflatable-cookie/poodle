@@ -27,6 +27,13 @@ export type {
 export type IconProp = IconNodes | string;
 
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
+export type AnnouncementMode = "none" | "polite" | "assertive";
+export type ValidationSummaryEntry = {
+  fieldId: string;
+  label: string;
+  message: string;
+  validationState: ValidationState;
+};
 export type InputValidationStatus = "idle" | "validating" | "valid" | "invalid";
 export type TextInputValidationChange = {
   status: InputValidationStatus;
@@ -52,6 +59,12 @@ export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
 export type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type RemediationAction = {
+  id: string;
+  label: string;
+  variant: ButtonVariant;
+  isDisabled: boolean;
+};
 export type ButtonTone = "default" | "danger" | "success" | "warning";
 export type LayoutAlign = "start" | "center" | "end" | "stretch";
 export type LayoutJustify = "start" | "center" | "end" | "between";
@@ -102,7 +115,7 @@ export type FormActionDangerItem = {
   value?: string;
   disabled?: boolean;
 };
-export type CalloutAnnounceMode = "none" | "polite" | "assertive";
+export type CalloutAnnounceMode = AnnouncementMode;
 export type ColorInputMode = "hex" | "rgb" | "hsl";
 export type SkeletonShape = "line" | "block" | "circle";
 export type SkeletonPreset =

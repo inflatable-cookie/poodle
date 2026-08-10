@@ -12,7 +12,7 @@
 //!   - leading/trailing icon (external-link): icons are out of scope per the
 //!     contract; `TextLinkSpec` has no icon field.
 //!   - underline treatment + focus ring: El exposes no text-decoration or
-//!     focus-ring affordance (runtime gap, noted in `docs/parity/text-link.md`).
+//!     focus-ring affordance (runtime gap recorded by the contract).
 //!   - size variants: `TextLinkSpec` has no size prop; the link inherits the
 //!     surrounding text size.
 

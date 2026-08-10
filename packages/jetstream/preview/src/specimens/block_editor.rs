@@ -9,9 +9,8 @@
 //! placeholders, no hand-rolled boxes; all spacing/typography resolves from tokens.
 //!
 //! Note: the GPUI specimen's "Default blocks" / "Custom blocks" groups use GPUI's
-//! legacy `BlockEditor::with_child(...)` host-child API (flagged legacy in
-//! `docs/parity/block-editor.md`). Jetstream's `js_block_editor` has no host-child
-//! channel; the faithful equivalent is the spec block path, which is what these
+//! legacy `BlockEditor::with_child(...)` host-child API. Jetstream's
+//! `js_block_editor` has no host-child channel; the faithful equivalent is the spec block path, which is what these
 //! groups exercise. Editing / add / remove / reorder are preview-event-loop bound.
 
 use crate::compat::js_block_editor;

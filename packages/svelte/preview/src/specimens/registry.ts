@@ -12,6 +12,7 @@ import BulkActionBarSpecimen from "./BulkActionBarSpecimen.svelte";
 import ButtonSpecimen from "./ButtonSpecimen.svelte";
 import CalendarSpecimen from "./CalendarSpecimen.svelte";
 import CalloutSpecimen from "./CalloutSpecimen.svelte";
+import RemediationBannerSpecimen from "./RemediationBannerSpecimen.svelte";
 import CodeSpecimen from "./CodeSpecimen.svelte";
 import ColorPickerSpecimen from "./ColorPickerSpecimen.svelte";
 import CardSpecimen from "./CardSpecimen.svelte";
@@ -110,6 +111,8 @@ import SpacerSpecimen from "./SpacerSpecimen.svelte";
 import SplitButtonSpecimen from "./SplitButtonSpecimen.svelte";
 import StackSpecimen from "./StackSpecimen.svelte";
 import MetricTileSpecimen from "./MetricTileSpecimen.svelte";
+import StateTileSpecimen from "./StateTileSpecimen.svelte";
+import ValidationSummarySpecimen from "./ValidationSummarySpecimen.svelte";
 import StatusIndicatorSpecimen from "./StatusIndicatorSpecimen.svelte";
 import SurfaceSpecimen from "./SurfaceSpecimen.svelte";
 import SwitchSpecimen from "./SwitchSpecimen.svelte";
@@ -164,6 +167,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   button: ButtonSpecimen,
   calendar: CalendarSpecimen,
   callout: CalloutSpecimen,
+  "remediation-banner": RemediationBannerSpecimen,
   code: CodeSpecimen,
   "color-picker": ColorPickerSpecimen,
   card: CardSpecimen,
@@ -265,6 +269,8 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "split-button": SplitButtonSpecimen,
   stack: StackSpecimen,
   "metric-tile": MetricTileSpecimen,
+  "state-tile": StateTileSpecimen,
+  "validation-summary": ValidationSummarySpecimen,
   "status-indicator": StatusIndicatorSpecimen,
   surface: SurfaceSpecimen,
   switch: SwitchSpecimen,

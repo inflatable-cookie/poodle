@@ -67,6 +67,12 @@ export type LayoutJustify = "start" | "center" | "end" | "between";
 export type OverflowMode = "visible" | "hidden" | "clip";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type RemediationAction = {
+  id: string;
+  label: string;
+  variant: ButtonVariant;
+  isDisabled: boolean;
+};
 export type ButtonTone = "default" | "danger" | "success" | "warning";
 export type OverlayPlacement =
   | "top"
@@ -120,6 +126,13 @@ export type TriStateValue = "excluded" | "default" | "included";
 export type EditableLabelActivationMode = "doubleClick" | "enterOrSpace" | "programmatic";
 
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
+export type AnnouncementMode = "none" | "polite" | "assertive";
+export type ValidationSummaryEntry = {
+  fieldId: string;
+  label: string;
+  message: string;
+  validationState: ValidationState;
+};
 export type InputValidationStatus = "idle" | "validating" | "valid" | "invalid";
 export type TextInputValidationChange = {
   status: InputValidationStatus;
@@ -497,7 +510,7 @@ export type SplitOrientation = "horizontal" | "vertical";
 /** When a SplitView shows its collapse-toggle pill: always, or only while the
  * pointer is on the seam / a toggle holds focus. */
 export type SplitToggleVisibility = "always" | "hover";
-export type CalloutAnnounceMode = "none" | "polite" | "assertive";
+export type CalloutAnnounceMode = AnnouncementMode;
 
 export type ParsedEmbed = {
   provider: string;

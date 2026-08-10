@@ -1,0 +1,24 @@
+.poodle-validation-summary {
+  display: grid;
+  gap: var(--poodle-space-inline-md);
+  padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+  border: 0.0625rem solid var(--poodle-color-accent-base);
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-color-background-panel);
+  color: var(--poodle-color-text-primary);
+}
+.poodle-validation-summary[data-state="blocking"] { border-color: var(--poodle-color-status-danger); }
+.poodle-validation-summary__title {
+  font-family: var(--poodle-typography-label-family);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+.poodle-validation-summary__list {
+  display: grid;
+  gap: var(--poodle-space-inline-sm);
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+.poodle-validation-summary__entry { color: var(--poodle-color-text-secondary); font-size: var(--poodle-typography-body-size); }
+.poodle-validation-summary__entry a { margin-inline-end: var(--poodle-space-inline-sm); color: inherit; font-weight: 600; }
+.poodle-validation-summary__entry[data-state="invalid"] a { color: var(--poodle-color-status-danger); }

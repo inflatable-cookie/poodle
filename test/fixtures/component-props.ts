@@ -101,6 +101,13 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Pagination: { totalPages: 3, currentPage: 1 },
   TimeAgo: { datetime: "2026-01-01T00:00:00.000Z" },
   MetricTile: { label: "Streams", value: "1.2k" },
+  StateTile: { label: "Streams", value: "1.2k" },
+  RemediationBanner: { title: "Connection lost", message: "Reconnect to continue." },
+  ValidationSummary: {
+    entries: [
+      { fieldId: "name", label: "Name", message: "Name is required.", validationState: "invalid" },
+    ],
+  },
   NavCard: { title: "Nav" },
   NavigationMenu: { items: opts },
   OrderBy: { fields: [{ label: "Name", value: "name" }] },

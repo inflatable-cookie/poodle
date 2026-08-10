@@ -2,8 +2,8 @@
 //!
 //! The Jetstream popover component (`js_popover`) renders only the open surface
 //! (the panel at its current state); placement anchoring, outside-dismiss, and
-//! open/close live in the preview event loop, not the component (accepted
-//! render-only delta — see `docs/parity/popover.md`). Each group pairs a real
+//! open/close live in the preview event loop, not the component (an accepted
+//! render-only contract delta). Each group pairs a real
 //! `js_button` trigger with the real `js_popover` open surface rendered inline,
 //! so the surface anatomy (header / body / footer regions, separator, width
 //! overrides) is exercised through the real component + tokens — no hand-rolled

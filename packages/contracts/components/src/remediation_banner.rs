@@ -12,6 +12,7 @@ pub struct RemediationBannerSpec {
     pub primary_action: Option<RemediationAction>,
     pub secondary_action: Option<RemediationAction>,
     pub is_dismissible: bool,
+    pub dismiss_label: String,
 }
 
 impl RemediationBannerSpec {
@@ -24,6 +25,7 @@ impl RemediationBannerSpec {
             primary_action: None,
             secondary_action: None,
             is_dismissible: false,
+            dismiss_label: "Dismiss".to_string(),
         }
     }
 
@@ -49,6 +51,11 @@ impl RemediationBannerSpec {
 
     pub fn with_dismissible(mut self, is_dismissible: bool) -> Self {
         self.is_dismissible = is_dismissible;
+        self
+    }
+
+    pub fn with_dismiss_label(mut self, dismiss_label: impl Into<String>) -> Self {
+        self.dismiss_label = dismiss_label.into();
         self
     }
 

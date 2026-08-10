@@ -1,0 +1,28 @@
+.poodle-remediation-banner {
+  --poodle-remediation-banner-tone: var(--poodle-color-status-warning);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--poodle-space-inline-md);
+  padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+  border: 0.0625rem solid var(--poodle-remediation-banner-tone);
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-remediation-banner-tone) 10%, var(--poodle-color-background-panel));
+  color: var(--poodle-color-text-primary);
+}
+.poodle-remediation-banner[data-tone="neutral"] { --poodle-remediation-banner-tone: var(--poodle-color-border-default); }
+.poodle-remediation-banner[data-tone="info"] { --poodle-remediation-banner-tone: var(--poodle-color-status-info); }
+.poodle-remediation-banner[data-tone="success"] { --poodle-remediation-banner-tone: var(--poodle-color-status-success); }
+.poodle-remediation-banner[data-tone="danger"] { --poodle-remediation-banner-tone: var(--poodle-color-status-danger); }
+.poodle-remediation-banner[data-tone="pending"] { --poodle-remediation-banner-tone: var(--poodle-color-accent-base); }
+.poodle-remediation-banner__icon { display: inline-flex; color: var(--poodle-remediation-banner-tone); }
+.poodle-remediation-banner__content { display: grid; gap: var(--poodle-space-inline-sm); min-width: 0; }
+.poodle-remediation-banner__content strong { font-family: var(--poodle-typography-label-family); font-size: var(--poodle-typography-label-size); line-height: var(--poodle-typography-label-lineHeight); }
+.poodle-remediation-banner__content p { margin: 0; color: var(--poodle-color-text-secondary); font-size: var(--poodle-typography-body-size); }
+.poodle-remediation-banner__actions { display: flex; flex-wrap: wrap; gap: var(--poodle-space-inline-sm); }
+.poodle-remediation-banner__dismiss { display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; padding: 0; border: 0; border-radius: var(--poodle-radius-control); background: transparent; color: var(--poodle-color-text-secondary); cursor: pointer; }
+.poodle-remediation-banner__dismiss:focus-visible { outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing); outline-offset: 0.125rem; }
+@media (max-width: 45rem) {
+  .poodle-remediation-banner { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .poodle-remediation-banner__actions { grid-column: 2 / -1; }
+}

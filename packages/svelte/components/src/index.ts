@@ -9,6 +9,7 @@ export { default as Breadcrumbs } from "./Breadcrumbs.svelte";
 export { default as BulkActionBar } from "./BulkActionBar.svelte";
 export { default as Button } from "./Button.svelte";
 export { default as Callout } from "./Callout.svelte";
+export { default as RemediationBanner } from "./RemediationBanner.svelte";
 export { default as Card } from "./Card.svelte";
 export { default as Code } from "./Code.svelte";
 export { default as ColorPicker } from "./ColorPicker.svelte";
@@ -199,6 +200,8 @@ export { default as SidebarNav } from "./SidebarNav.svelte";
 export { default as Tree } from "./Tree.svelte";
 export { default as SplitView } from "./SplitView.svelte";
 export { default as MetricTile } from "./MetricTile.svelte";
+export { default as StateTile } from "./StateTile.svelte";
+export { default as ValidationSummary } from "./ValidationSummary.svelte";
 export { default as ModelPicker } from "./ModelPicker.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
@@ -212,10 +215,12 @@ export type {
   IconProp,
   AccordionItem,
   AlertDialogTone,
+  AnnouncementMode,
   CalloutAnnounceMode,
   ColorInputMode,
   ButtonTone,
   ButtonVariant,
+  RemediationAction,
   CalendarWeekStart,
   CollapseDirection,
   ControlDensity,
@@ -279,6 +284,8 @@ export type {
   SpinnerVariant,
   SpaceScale,
   StatusTone,
+  ValidationState,
+  ValidationSummaryEntry,
   SurfaceBorder,
   SurfaceTone,
   TabActivationMode,
@@ -288,7 +295,6 @@ export type {
   TabVariant,
   ToggleGroupOption,
   TriStateValue,
-  ValidationState,
   InputValidationStatus,
   InputValidator,
   ValidationResult,

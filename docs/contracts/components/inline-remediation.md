@@ -1,9 +1,10 @@
 # InlineRemediation
 
-> **Implementation note**: Svelte component not yet built. Contract is complete — implementation is pending.
+> **Implementation note**: Web callers compose this shape with `Callout` by
+> design. Native runtimes use the shared `InlineRemediation` renderer.
 
 Status: detailed contract
-Updated: 2026-04-11
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -107,4 +108,4 @@ type RemediationAction = {
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Svelte uses `Callout` primitive for inline recovery | Svelte's primitive library already handles tone + title + message + action; InlineRemediation is a shape-layer convention rather than a new primitive | allowed | GPUI side may fold into Callout in a future pass |
+| Web uses `Callout` for inline recovery | The web primitive already owns tone, title, message, and action composition; a second public component would duplicate that surface | intentional | keep the convention documented rather than adding an alias |

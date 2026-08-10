@@ -1,9 +1,9 @@
 # ValidationSummary
 
-> **Implementation note**: Svelte component not yet built. Contract is complete — implementation is pending.
+> **Implementation note**: Implemented in the shared Rust renderer, Svelte, and React.
 
 Status: detailed contract
-Updated: 2026-04-11
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -90,7 +90,8 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 
 ## 5. Accessibility
 
-- Root element: `<aside>` (or role from `announceMode`)
+- Root element: a neutral container with the live-region role derived from
+  `announceMode`. A silent host may use `<aside>` instead.
 - Each entry renders as `<li>` containing an `<a href="#field-id">` that jumps
   focus to the referenced field when activated
 - Component is typically announced once after failed submission; a subsequent
@@ -100,7 +101,12 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 
 | Part | Token | Purpose |
 |------|-------|---------|
+| Fill | `color.background.panel` | base grouped surface |
 | Border | `color.status.danger` (blocking) or `color.accent.base` (pending-only) | from `border_token()` |
+| Radius | `radius.surface` | grouped-surface shape |
+| Padding | `space.panel.x`, `space.panel.y` | internal spacing |
+| Title | `typography.label` | summary heading |
+| Entry | `typography.body`, `color.text.secondary` | linked validation copy |
 
 ## 7. Rust Spec
 

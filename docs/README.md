@@ -74,6 +74,8 @@ The remaining sections preserve decision and delivery context:
 - `logs/` — completed work and validation evidence
 - `research/` — external comparisons and early investigation
 - `handoffs/` — point-in-time continuation briefs
+- `parity/` — historical pre-consolidation parity audits; current parity is
+  generated from contracts, runtime reports, tests, and previews
 
 These records are useful to contributors, but they are not part of the operator
 learning path and may describe superseded implementation states.
