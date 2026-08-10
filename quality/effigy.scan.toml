@@ -95,3 +95,18 @@ include = ["packages/**", "test/**"]
 exclude = ["**/assets/**", "**/artifacts/**"]
 format = "markdown"
 out = ".effigy/reports/comment-ratio.md"
+
+[scan.stale_suppressions]
+# Rust `#[expect]` attributes are self-reporting: rustc emits an
+# `unfulfilled_lint_expectations` warning once the expected lint disappears.
+# Scan silent and tool-specific bypasses instead.
+warning = ["@ts-ignore", "@ts-expect-error", "type: ignore", "eslint-disable-next-line"]
+high = ["#[allow(", "rubocop:disable", "swiftlint:disable", "prettier-ignore", "stylelint-disable"]
+critical = ["nolint", "#[allow(warnings)]", "shellcheck disable=", "eslint-disable", "fmt: off"]
+doctor = true
+fail_on_findings = false
+respect_gitignore = true
+include = ["packages/**", "test/**"]
+exclude = ["**/assets/**", "**/artifacts/**"]
+format = "markdown"
+out = ".effigy/reports/stale-suppressions.md"
