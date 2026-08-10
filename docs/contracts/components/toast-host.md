@@ -1,7 +1,7 @@
 # ToastHost
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -263,17 +263,14 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 - `handleDismiss`/`handleAction` forward into `ToastStack` and invoke the optional `onDismiss`/`onAction` callbacks
 - Forwards `size`, `sizeRole`, `density`, `ariaLabel` to `ToastStack`
 
-## 10. GPUI Notes
+## 10. Native Notes
 
-- Not yet implemented
-- Fixed-position viewport anchoring requires platform-specific overlay management
-- Timer management should use platform async primitives
-
-## 10a. Jetstream Notes
-
-- `ToastHost::from_spec(spec, stack_spec, theme).on_dismiss(...).on_action(...)`,
-  forwarded to the composed `ToastStack` — the host positions, the stack owns
-  the events.
+- `packages/render/src/toast_host.rs` owns the shared positioned container and
+  composes the real `ToastStack` node.
+- GPUI and Jetstream backends interpret the same placement, accessibility, and
+  action metadata.
+- Store subscription, timer scheduling, and overlay mounting remain host-owned
+  runtime concerns.
 
 ## 11. Parity Checklist
 

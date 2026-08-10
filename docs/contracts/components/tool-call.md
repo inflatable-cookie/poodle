@@ -1,7 +1,7 @@
 # ToolCall
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -228,9 +228,9 @@ Both natives are interactive. GPUI's row carries a real click handler through
 whose handler is `Send + Sync + 'static` and so captures an `Arc` rather than
 borrowing host state.
 
-A row with no output is not clickable on either target, and on Jetstream both
-halves of that are proved by a test that drives a real click — see
-`packages/jetstream/components/src/element.rs`.
+A row with no output is not clickable on either target. The shared renderer
+attaches activation only when `ToolCallSpec::has_output()` is true; see
+`packages/render/src/tool_call.rs`.
 
 ## 12. Known Deltas
 

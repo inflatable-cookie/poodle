@@ -6,12 +6,10 @@
 //! interpret the node tree; the parity evidence for each backend lives with
 //! that backend, against fixtures this crate can generate headlessly.
 //!
-//! Started 2026-08-04 with `Select` — deliberately the hardest component
-//! (overlay anchoring, filtering, groups, a trigger with nested clickables) —
-//! so the vocabulary was proven where it was most likely to fail. The rest of
-//! the tier migrates component-by-component; each port deletes its
-//! `packages/jetstream/components` and `packages/gpui/components`
-//! predecessors once its parity fixtures are green on both backends.
+//! The g12.019 migration consolidated the former GPUI and Jetstream component
+//! tiers here after proving the node vocabulary against `Select`. Migration
+//! history and parity evidence live in
+//! `docs/roadmaps/g12/019-gpui-node-backend.md`.
 
 pub mod accordion;
 pub mod action_discovery_panel;

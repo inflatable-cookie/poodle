@@ -1,6 +1,7 @@
 # 003 - Native Accessibility
 
 Status: active
+Updated: 2026-08-10
 Owner: Poodle core
 Applies to: every contract with ARIA requirements, on the GPUI and Jetstream targets
 
@@ -30,12 +31,15 @@ this records what shipped.
 the target:
 
 - **Svelte and React** consume it, held to that by the axe sweep.
-- **Jetstream** consumes it. 108 component files call
-  `crate::aria::with_aria_label` on their root element, and the value reaches a
-  screen reader. `packages/jetstream/components/src/aria.rs` tests the whole
-  chain end to end — spec → component root → `UiTree` → AccessKit tree.
-- **GPUI** still terminates it in a struct field. 95 reads, every one a
-  forward to another spec.
+- **Jetstream** consumes it. Shared render functions attach accessibility
+  metadata to `poodle-node`; the Jetstream backend projects that metadata into
+  AccessKit. `packages/jetstream/preview/src/bin/a11y.rs` exercises the
+  rendered tree headlessly, and `effigy test:jetstream-ax` checks the mounted
+  macOS accessibility tree.
+- **GPUI** carries the metadata through the shared renderer into
+  `poodle-node`, but its node backend cannot map it to GPUI 0.2.2 accessibility
+  attributes. The backend reads the channel explicitly so the omission stays
+  visible and deliberate.
 
 So the field is no longer uniformly inert on native. Do not write "native
 targets do not consume `aria_label`" — one of them does.

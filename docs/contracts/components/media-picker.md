@@ -1,7 +1,7 @@
 # MediaPicker
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -302,15 +302,14 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 - `uploadFiles` tracked internally for two-way state with `FileUpload`
 - Uses `resolveSemanticControlSize()` to derive effective size
 
-## 10. GPUI Notes
+## 10. Native Notes
 
-Not yet implemented.
-
-## 10a. Jetstream Notes
-
-- `MediaPicker::from_spec(spec, theme).on_select(...).on_tab_change(...)`.
-- No `onUpload`: the upload tab composes `FileUpload`, whose drop zone needs
-  file drops the runtime does not raise.
+- `packages/render/src/media_picker.rs` owns the shared picker composition and
+  exposes `on_select` and `on_tab_change` handlers through the node tree.
+- Both native backends interpret the same rendered component.
+- There is no native `onUpload` path yet: the upload tab composes
+  `FileUpload`, whose drop zone needs file-drop events outside the current node
+  vocabulary.
 
 ## 11. Parity Checklist
 

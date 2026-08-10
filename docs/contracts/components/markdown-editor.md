@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -375,9 +375,13 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 - `textareaEl` bound for programmatic selection manipulation
 - Wraps content in `UiPresentationProvider` with resolved size and density
 
-## 10. GPUI Notes
+## 10. Native Notes
 
-Not yet implemented.
+- `packages/render/src/markdown_editor.rs` owns the shared native editor and
+  exposes value-change and mode-change handlers through the node tree.
+- Both native backends interpret the same rendered component.
+- The native edit pane uses the backend text-input path. Markdown toolbar
+  insertion and rendered-HTML override policy remain host-owned.
 
 ## 11. Parity Checklist
 

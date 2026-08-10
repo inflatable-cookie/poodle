@@ -228,6 +228,16 @@ function validateComponentContracts(errors: string[]): number {
     expect(/^Updated: .+/m.test(markdown), `${relativePath} is missing Updated metadata.`, errors);
     expect(/^- Component name: /m.test(markdown), `${relativePath} is missing component-name metadata.`, errors);
     expect(/^- Layer: /m.test(markdown), `${relativePath} is missing layer metadata.`, errors);
+    expect(
+      !/^\s*(?:[-*]\s+)?Not yet implemented\.?\s*$/im.test(markdown),
+      `${relativePath} contains execution status; record it in a roadmap or log instead.`,
+      errors,
+    );
+    expect(
+      !/\bjs_[a-z_]+\b/.test(markdown),
+      `${relativePath} references a retired Jetstream component entry point.`,
+      errors,
+    );
     expect(markdown.includes("## 1. Purpose"), `${relativePath} is missing a purpose section.`, errors);
     expect(
       /^##\s+\d+\.\s+Accessibility$/m.test(markdown),
@@ -248,6 +258,28 @@ function validateComponentContracts(errors: string[]): number {
   }
 
   return componentContractFiles.length;
+}
+
+function validateCurrentArchitectureReferences(errors: string[]): void {
+  const currentFiles = [
+    path.join(repoRoot, "README.md"),
+    path.join(repoRoot, "AGENTS.md"),
+    path.join(repoRoot, "CLAUDE.md"),
+    path.join(repoRoot, "CONTRIBUTING.md"),
+    ...collectMarkdownFiles(path.join(repoRoot, "docs", "architecture")),
+    ...collectMarkdownFiles(path.join(repoRoot, "docs", "contracts")),
+    ...collectMarkdownFiles(path.join(repoRoot, "docs", "guides")),
+  ];
+
+  for (const filePath of currentFiles) {
+    const markdown = fs.readFileSync(filePath, "utf8");
+    const relativePath = path.relative(repoRoot, filePath);
+    expect(
+      !/packages\/(?:gpui|jetstream)\/components/.test(markdown),
+      `${relativePath} references a retired native component tier.`,
+      errors,
+    );
+  }
 }
 
 function validateContractIndexes(errors: string[]): void {
@@ -3201,6 +3233,7 @@ function validateSharedDemoAppContract(errors: string[]): {
 
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
+validateCurrentArchitectureReferences(errors);
 validateContractIndexes(errors);
 const operatorGuideCount = validateOperatorGuides(errors);
 // Unified package — README surface validation skipped (130+ exports)

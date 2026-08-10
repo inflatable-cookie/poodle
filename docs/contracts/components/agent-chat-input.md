@@ -112,9 +112,8 @@ every other interactive part reuses a Poodle primitive.
 | `toolbar` | Svelte `Snippet`, React `ReactNode` | leading toolbar controls (canonically a `ModelPicker`, which should be passed `emphasis="subdued"` here so it does not compete with the editor) |
 | `footer` | Svelte `Snippet`, React `ReactNode` | the secondary bar under the composer (scope/branch/status rows) |
 
-Native targets take all four slots as child element vectors:
-`js_agent_chat_input(spec, theme, question_children, plan_children,
-toolbar_children, footer_children)`.
+Native targets pass all four slots as `poodle-node` child vectors to
+`poodle_render::agent_chat_input(...)`.
 
 ### Naming Rules
 
@@ -493,16 +492,17 @@ spacing — never the field's vertical padding or the action box.
 - [ ] IME handling is platform-owned
 - [ ] transition timing is platform-owned
 
-## 11a. Jetstream Notes
+## 11a. Native Notes
 
-- `AgentChatInput::from_spec(spec, theme).on_action(...).on_remove_attachment(...)`.
+- `poodle_render::agent_chat_input(...)` receives
+  `AgentChatInputHandlers::on_action` and `on_remove_attachment`.
 - One control serves submit and stop, so one press event serves both: the host
   reads the spec it already holds to know which intent a press was — the same
   derivation the control uses to pick its icon. It never fires while inert.
 - `on_remove_attachment` carries the attachment's id. `onValueChange` is typed;
   no route.
-- `js_agent_chat_input` accepts question, plan, toolbar, and footer child
-  vectors. The shared renderer selects the question or plan region from status.
+- The shared renderer accepts question, plan, toolbar, and footer child vectors
+  and selects the question or plan region from status.
 
 ## 12. Known Deltas
 

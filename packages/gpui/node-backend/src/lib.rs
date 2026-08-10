@@ -16,8 +16,7 @@
 //!
 //! Color: the vocabulary is sRGB and GPUI's `Hsla`/`Rgba` are sRGB, so the
 //! conversion at this edge is a raw passthrough — the same path the old GPUI
-//! tier used (`poodle-gpui-components::theme_ext::resolve_color`,
-//! `poodle-gpui::style_map::GpuiColor::from`). No transfer function applies;
+//! tier used. No transfer function applies;
 //! alpha is coverage and passes through. All mixing happened render-side
 //! (`poodle-render::color`); nodes carry final values.
 
@@ -554,9 +553,9 @@ where
 //
 // NodeA11y (role, label, expanded, selected, toggled, level) is intentionally
 // NOT mapped: gpui 0.2.2's fluent element API exposes no accessibility
-// attributes. The old GPUI tier recorded the same gap (see the note in
-// `poodle-gpui-components::primitives::button`), and g12.015 holds GPUI
-// accessibility upstream work deliberately. The channels are walked (read)
+// attributes. `docs/contracts/003-native-accessibility.md` records the same
+// accepted runtime gap, and g12.015 holds GPUI accessibility upstream work
+// deliberately. The channels are walked (read)
 // here so the omission is a decision, not a drift.
 
 mod ime;

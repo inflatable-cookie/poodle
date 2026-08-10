@@ -1,7 +1,7 @@
 # MediaBrowsePanel
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -287,16 +287,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Root and load-more action row both pin `width: 100%` so the panel and footer
   align consistently inside broader specimen or shell layouts
 
-## 10. GPUI Notes
+## 10. Native Notes
 
-Not yet implemented.
-
-## 10a. Jetstream Notes
-
-- `MediaBrowsePanel::from_spec(spec, theme).on_select(...)`, carrying the item's
-  id.
-- No `onLoadMore`: paging is scroll-driven on the web, and this runtime's scroll
-  events are not yet surfaced through the builder.
+- `packages/render/src/media_browse_panel.rs` owns the shared native panel and
+  reports selection with the selected item id.
+- Both native backends interpret the same rendered component.
+- There is no native `onLoadMore`: paging is scroll-driven on the web, and the
+  node vocabulary does not expose a scroll-boundary event.
 
 ## 11. Parity Checklist
 
