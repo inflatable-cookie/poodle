@@ -12,6 +12,7 @@
   import AgentMessage from "./AgentMessage.svelte";
   import AgentPlanRecord from "./AgentPlanRecord.svelte";
   import AgentQuestionRecord from "./AgentQuestionRecord.svelte";
+  import AgentSubagent from "./AgentSubagent.svelte";
   import ChangedFiles from "./ChangedFiles.svelte";
   import EmptyState from "./EmptyState.svelte";
   import Icon from "./Icon.svelte";
@@ -354,6 +355,15 @@
       plan={block.plan}
       status={block.status}
       decidedAt={block.decidedAt}
+      size={resolvedSize}
+      density={resolvedDensity}
+    />
+  {:else if block.kind === "subagent-group"}
+    <!-- The group owns its disclosure: a provider-owned child's expansion is
+         local state, not something the transcript host needs to hold. -->
+    <AgentSubagent
+      item={block.subagent}
+      detailLines={block.detailLines ?? []}
       size={resolvedSize}
       density={resolvedDensity}
     />

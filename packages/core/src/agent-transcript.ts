@@ -17,6 +17,7 @@
 
 import type { AgentPlanSettledStatus } from "./agent-plan";
 import type { AgentQuestionAnswer, AgentQuestionItem } from "./agent-question";
+import type { AgentSubagentItem } from "./agent-subagent";
 
 export type TranscriptRole = "user" | "assistant";
 
@@ -109,12 +110,31 @@ export interface TranscriptDecidedPlan {
   decidedAt?: string;
 }
 
+/**
+ * An inline group for a provider-owned child agent's work.
+ *
+ * The child renders live in the transcript — identity and status in the
+ * header, a one-line activity while it runs, an expandable detail, and a
+ * click-through to the child's work. Observation-only: there is no stop,
+ * cancel or steer affordance, because controlling a provider-owned child is
+ * not the transcript's job (Swallowtail contract 045).
+ */
+export interface TranscriptSubagentGroup {
+  kind: "subagent-group";
+  id: string;
+  /** The child work this group renders. */
+  subagent: AgentSubagentItem;
+  /** Recent activity lines shown when the group is expanded. */
+  detailLines?: string[];
+}
+
 export type TranscriptItem =
   | TranscriptMessage
   | TranscriptToolCall
   | TranscriptChangedFiles
   | TranscriptAnsweredQuestion
   | TranscriptDecidedPlan
+  | TranscriptSubagentGroup
   | TranscriptActivity;
 
 // ── Contiguous-run grouping ──
@@ -141,6 +161,7 @@ export type TranscriptBlock =
   | TranscriptChangedFiles
   | TranscriptAnsweredQuestion
   | TranscriptDecidedPlan
+  | TranscriptSubagentGroup
   | TranscriptActivity;
 
 /**

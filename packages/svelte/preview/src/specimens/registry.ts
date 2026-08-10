@@ -95,6 +95,7 @@ import AgentPlanSpecimen from "./AgentPlanSpecimen.svelte";
 import AgentPlanRecordSpecimen from "./AgentPlanRecordSpecimen.svelte";
 import AgentQuestionSpecimen from "./AgentQuestionSpecimen.svelte";
 import AgentQuestionRecordSpecimen from "./AgentQuestionRecordSpecimen.svelte";
+import AgentSubagentSpecimen from "./AgentSubagentSpecimen.svelte";
 import AgentTranscriptSpecimen from "./AgentTranscriptSpecimen.svelte";
 import ChangedFilesSpecimen from "./ChangedFilesSpecimen.svelte";
 import ToolCallSpecimen from "./ToolCallSpecimen.svelte";
@@ -253,6 +254,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "agent-plan-record": AgentPlanRecordSpecimen,
   "agent-question": AgentQuestionSpecimen,
   "agent-question-record": AgentQuestionRecordSpecimen,
+  "agent-subagent": AgentSubagentSpecimen,
   "agent-transcript": AgentTranscriptSpecimen,
   "changed-files": ChangedFilesSpecimen,
   "tool-call": ToolCallSpecimen,

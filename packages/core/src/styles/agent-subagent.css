@@ -1,0 +1,126 @@
+/*
+ * AgentSubagent — an inline group for a provider-owned child agent's work in
+ * the transcript.
+ *
+ * Contract: docs/contracts/components/agent-subagent.md.
+ *
+ * Observation-only: the only controls are the disclosure and the click-through
+ * to the child's work. There is no stop, cancel or steer affordance, because
+ * controlling a provider-owned child is not the transcript's job.
+ */
+
+.poodle-agent-subagent {
+  --poodle-agent-subagent-gap: 0.375rem;
+  --poodle-agent-subagent-inset: 0.75rem;
+  --poodle-agent-subagent-font-size: 0.8125rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--poodle-agent-subagent-gap);
+  padding: var(--poodle-agent-subagent-inset);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-background-surface);
+  font-size: var(--poodle-agent-subagent-font-size);
+}
+
+.poodle-agent-subagent[data-size="xs"] { --poodle-agent-subagent-font-size: 0.6875rem; }
+.poodle-agent-subagent[data-size="sm"] { --poodle-agent-subagent-font-size: 0.75rem; }
+.poodle-agent-subagent[data-size="md"] { --poodle-agent-subagent-font-size: 0.8125rem; }
+.poodle-agent-subagent[data-size="lg"] { --poodle-agent-subagent-font-size: 0.875rem; }
+.poodle-agent-subagent[data-size="xl"] { --poodle-agent-subagent-font-size: 0.9375rem; }
+
+.poodle-agent-subagent[data-density="compact"] { --poodle-agent-subagent-gap: 0.25rem; --poodle-agent-subagent-inset: 0.5rem; }
+.poodle-agent-subagent[data-density="comfortable"] { --poodle-agent-subagent-gap: 0.5rem; --poodle-agent-subagent-inset: 1rem; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+/* Identity + status at a glance; the badge is text, never colour alone. */
+.poodle-agent-subagent__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.poodle-agent-subagent__label {
+  color: var(--poodle-color-text-primary);
+  font-weight: var(--poodle-typography-label-weight);
+}
+
+/* The badge colour follows the status: running is the active case, failed and
+   completed carry their status colours, and everything else — including
+   `unknown`, which claims nothing — reads at meta strength. Mirrors the spec
+   crate's `badge_token`. */
+.poodle-agent-subagent__badge {
+  color: var(--poodle-color-text-secondary);
+  font-weight: var(--poodle-typography-label-weight);
+}
+
+.poodle-agent-subagent__badge[data-status="running"] {
+  color: var(--poodle-color-accent-base);
+}
+
+.poodle-agent-subagent__badge[data-status="failed"] {
+  color: var(--poodle-color-status-danger);
+}
+
+.poodle-agent-subagent__badge[data-status="completed"] {
+  color: var(--poodle-color-status-success);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+/* The live one-line activity; the spinner marks the running case only. */
+.poodle-agent-subagent__activity {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--poodle-color-text-secondary);
+}
+
+/* A settled child shows what it accomplished, at one step down from live
+   prose: this is history, not the current subject. */
+.poodle-agent-subagent__summary {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+}
+
+/* ── Expanded detail ─────────────────────────────────────────────────────── */
+
+/* Recent activity lines, as plain host-supplied strings. */
+.poodle-agent-subagent__detail {
+  margin: 0;
+  padding: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--poodle-color-text-secondary);
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+
+.poodle-agent-subagent__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.poodle-agent-subagent__action {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--poodle-color-text-tertiary);
+  font: inherit;
+  font-size: var(--poodle-agent-subagent-font-size);
+  cursor: pointer;
+}
+
+.poodle-agent-subagent__action:hover {
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-agent-subagent__action:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}

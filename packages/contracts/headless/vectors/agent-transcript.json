@@ -218,6 +218,100 @@
       ]
     },
     {
+      "name": "a subagent group passes through as its own block",
+      "items": [
+        {
+          "kind": "message",
+          "id": "m1",
+          "role": "assistant",
+          "markdown": "x"
+        },
+        {
+          "kind": "subagent-group",
+          "id": "s1",
+          "subagent": {
+            "id": "child-1",
+            "label": "Scout",
+            "status": "running",
+            "activityLine": "Searching the parser crate"
+          }
+        },
+        {
+          "kind": "message",
+          "id": "m2",
+          "role": "assistant",
+          "markdown": "x"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "message",
+          "id": "m1"
+        },
+        {
+          "kind": "subagent-group",
+          "id": "s1"
+        },
+        {
+          "kind": "message",
+          "id": "m2"
+        }
+      ]
+    },
+    {
+      "name": "a subagent group splits a run",
+      "items": [
+        {
+          "kind": "tool-call",
+          "id": "a",
+          "label": "Ran command",
+          "status": "success"
+        },
+        {
+          "kind": "subagent-group",
+          "id": "s1",
+          "subagent": {
+            "id": "child-1",
+            "label": "Scout",
+            "status": "completed",
+            "summary": "Found the drift: 3 vectors stale"
+          }
+        },
+        {
+          "kind": "tool-call",
+          "id": "b",
+          "label": "Ran command",
+          "status": "success"
+        }
+      ],
+      "blocks": [
+        {
+          "kind": "tool-run",
+          "id": "a",
+          "callIds": [
+            "a"
+          ],
+          "leadCallId": "a",
+          "hiddenCount": 0,
+          "status": "success"
+        },
+        {
+          "kind": "subagent-group",
+          "id": "s1"
+        },
+        {
+          "kind": "tool-run",
+          "id": "b",
+          "callIds": [
+            "b"
+          ],
+          "leadCallId": "b",
+          "hiddenCount": 0,
+          "status": "success"
+        }
+      ]
+    },
+    {
       "name": "the screenshot turn",
       "items": [
         {

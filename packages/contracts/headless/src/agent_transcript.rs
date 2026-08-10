@@ -135,6 +135,21 @@ pub struct TranscriptDecidedPlan {
     pub decided_at: Option<String>,
 }
 
+/// An inline group for a provider-owned child agent's work.
+///
+/// The child renders live in the transcript — identity and status in the
+/// header, a one-line activity while it runs, an expandable detail, and a
+/// click-through to the child's work. Observation-only: no stop, cancel or
+/// steer affordance (Swallowtail contract 045).
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TranscriptSubagentGroup {
+    pub id: String,
+    /// The child work this group renders.
+    pub subagent: crate::agent_subagent::AgentSubagentItem,
+    /// Recent activity lines shown when the group is expanded.
+    pub detail_lines: Option<Vec<String>>,
+}
+
 /// The live footer — "Working for 1h 1m". Present only while the turn runs.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TranscriptActivity {
@@ -152,6 +167,7 @@ pub enum TranscriptItem {
     ChangedFiles(TranscriptChangedFiles),
     AnsweredQuestion(TranscriptAnsweredQuestion),
     DecidedPlan(TranscriptDecidedPlan),
+    SubagentGroup(TranscriptSubagentGroup),
     Activity(TranscriptActivity),
 }
 
@@ -163,6 +179,7 @@ impl TranscriptItem {
             TranscriptItem::ChangedFiles(item) => &item.id,
             TranscriptItem::AnsweredQuestion(item) => &item.id,
             TranscriptItem::DecidedPlan(item) => &item.id,
+            TranscriptItem::SubagentGroup(item) => &item.id,
             TranscriptItem::Activity(item) => &item.id,
         }
     }
@@ -174,6 +191,7 @@ impl TranscriptItem {
             TranscriptItem::ChangedFiles(_) => "changed-files",
             TranscriptItem::AnsweredQuestion(_) => "answered-question",
             TranscriptItem::DecidedPlan(_) => "decided-plan",
+            TranscriptItem::SubagentGroup(_) => "subagent-group",
             TranscriptItem::Activity(_) => "activity",
         }
     }
@@ -233,6 +251,7 @@ pub enum TranscriptBlock {
     ChangedFiles(TranscriptChangedFiles),
     AnsweredQuestion(TranscriptAnsweredQuestion),
     DecidedPlan(TranscriptDecidedPlan),
+    SubagentGroup(TranscriptSubagentGroup),
     Activity(TranscriptActivity),
 }
 
@@ -244,6 +263,7 @@ impl TranscriptBlock {
             TranscriptBlock::ChangedFiles(_) => "changed-files",
             TranscriptBlock::AnsweredQuestion(_) => "answered-question",
             TranscriptBlock::DecidedPlan(_) => "decided-plan",
+            TranscriptBlock::SubagentGroup(_) => "subagent-group",
             TranscriptBlock::Activity(_) => "activity",
         }
     }
@@ -255,6 +275,7 @@ impl TranscriptBlock {
             TranscriptBlock::ChangedFiles(item) => &item.id,
             TranscriptBlock::AnsweredQuestion(item) => &item.id,
             TranscriptBlock::DecidedPlan(item) => &item.id,
+            TranscriptBlock::SubagentGroup(item) => &item.id,
             TranscriptBlock::Activity(item) => &item.id,
         }
     }
@@ -303,6 +324,10 @@ pub fn group_transcript_items(items: &[TranscriptItem]) -> Vec<TranscriptBlock> 
             TranscriptItem::DecidedPlan(item) => {
                 in_run = false;
                 blocks.push(TranscriptBlock::DecidedPlan(item.clone()));
+            }
+            TranscriptItem::SubagentGroup(item) => {
+                in_run = false;
+                blocks.push(TranscriptBlock::SubagentGroup(item.clone()));
             }
             TranscriptItem::Activity(item) => {
                 in_run = false;
