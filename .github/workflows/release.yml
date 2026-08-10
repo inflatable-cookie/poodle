@@ -43,7 +43,11 @@ concurrency:
 jobs:
   release:
     name: Publish to npm
-    runs-on: macos-latest
+    # ubuntu, not macos: `effigy ci` is ci:web + ci:rust, and ci:native -- the
+    # only macOS-bound lane, because gpui pulls metal -- is deliberately not in
+    # it. macOS runners bill at ten times the Linux rate on a private
+    # repository and queue behind everything else.
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       # Mints the OIDC token npm exchanges for publish rights. This is the
