@@ -65,6 +65,13 @@
   { run = "cargo deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
   { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
 ]
+"audit:licenses" = [
+  { run = "bun scripts/audit-license-compliance.ts" },
+  { run = "cargo deny --manifest-path packages/render/Cargo.toml check licenses" },
+  { run = "cargo deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
+  { run = "cargo deny --manifest-path packages/gpui/adapter/Cargo.toml check licenses" },
+  { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check licenses" },
+]
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
 "test:parity" = "bunx vitest run --project parity"

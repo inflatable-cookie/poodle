@@ -6,6 +6,30 @@ unmaintained = "workspace"
 unsound = "all"
 yanked = "deny"
 
+[licenses]
+# Permissive licenses present in Poodle's four public Rust dependency graphs.
+# `cargo deny check licenses` still rejects any new identifier until this policy
+# is reviewed deliberately.
+unused-allowed-license = "allow"
+allow = [
+  "0BSD",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "BSL-1.0",
+  "CC0-1.0",
+  "ISC",
+  "MIT",
+  "MIT-0",
+  "MPL-2.0",
+  "NCSA",
+  "Unicode-3.0",
+  "Unlicense",
+  "Zlib",
+]
+confidence-threshold = 0.8
+
 [sources]
 # Public crates may use crates.io and local path dependencies. Remote Git or
 # alternate registry sources require an explicit policy change.

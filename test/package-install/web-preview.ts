@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   cpSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -22,16 +23,19 @@ const packages = [
     name: "@inflatable-cookie/poodle-core",
     directory: "packages/core",
     filename: "inflatable-cookie-poodle-core-0.1.0.tgz",
+    requiredFiles: ["LICENSE", "THIRD_PARTY_NOTICES.md"],
   },
   {
     name: "@inflatable-cookie/poodle-svelte",
     directory: "packages/svelte/components",
     filename: "inflatable-cookie-poodle-svelte-0.1.0.tgz",
+    requiredFiles: ["LICENSE"],
   },
   {
     name: "@inflatable-cookie/poodle-react",
     directory: "packages/react/components",
     filename: "inflatable-cookie-poodle-react-0.1.0.tgz",
+    requiredFiles: ["LICENSE"],
   },
 ] as const;
 
@@ -121,6 +125,13 @@ for (const packageEntry of packages) {
     throw new Error(
       `${packageEntry.name} retained a workspace dependency in its tarball`,
     );
+  }
+  for (const requiredFile of packageEntry.requiredFiles) {
+    if (!existsSync(join(installedRoot, requiredFile))) {
+      throw new Error(
+        `${packageEntry.name} omitted required package file ${requiredFile}`,
+      );
+    }
   }
 }
 

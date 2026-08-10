@@ -2,6 +2,7 @@
   "name": "@inflatable-cookie/poodle-svelte-preview",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Internal preview and docs harness for Poodle.",
   "poodleRelease": {

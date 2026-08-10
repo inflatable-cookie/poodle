@@ -2,6 +2,7 @@
   "name": "@inflatable-cookie/poodle-bridge-underlay",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Internal Underlay bridge layer for token and wrapper mapping.",
   "poodleRelease": {

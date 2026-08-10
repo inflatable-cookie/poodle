@@ -1,7 +1,7 @@
 # Logs
 
 Status: active
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 Logs are dated records of completed work and validation evidence. They preserve
 why a change landed and what was true at that point in time.

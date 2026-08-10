@@ -79,11 +79,12 @@ effigy test:web-pack-install
 ```
 
 Before a public release or after dependency-source changes, run the security
-hygiene and advisory gate. It requires
+hygiene, advisory, and license gates. They require
 [`cargo-deny`](https://github.com/EmbarkStudios/cargo-deny):
 
 ```sh
 effigy audit:security
+effigy audit:licenses
 ```
 
 ## Submit a Change
