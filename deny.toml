@@ -1,0 +1,14 @@
+[advisories]
+# Fail vulnerabilities and unsoundness at any depth. GPUI 0.2.2 currently
+# carries unmaintained transitive crates with no downstream-safe upgrade;
+# direct unmaintained dependencies still fail.
+unmaintained = "workspace"
+unsound = "all"
+yanked = "deny"
+
+[sources]
+# Public crates may use crates.io and local path dependencies. Remote Git or
+# alternate registry sources require an explicit policy change.
+unknown-registry = "deny"
+unknown-git = "deny"
+required-git-spec = "rev"

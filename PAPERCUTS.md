@@ -7,6 +7,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-10 — A combined `git log -G` secret-pattern history scan ran for
+  more than 90 seconds without progress or a result. Add a bounded, cached
+  tracked-tree and history secret scanner. Affects public-release audits.
+
 - 2026-08-10 — `effigy tasks` advertises a `distribution` built-in, but
   `effigy distribution --help` resolves it as an undefined catalog task and
   the general help omits it. Align discovery and command routing. Affects

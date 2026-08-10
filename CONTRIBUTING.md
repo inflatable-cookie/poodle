@@ -78,6 +78,14 @@ tarballs in a clean consumer:
 effigy test:web-pack-install
 ```
 
+Before a public release or after dependency-source changes, run the security
+hygiene and advisory gate. It requires
+[`cargo-deny`](https://github.com/EmbarkStudios/cargo-deny):
+
+```sh
+effigy audit:security
+```
+
 ## Submit a Change
 
 Keep a pull request focused on one coherent outcome. Explain:

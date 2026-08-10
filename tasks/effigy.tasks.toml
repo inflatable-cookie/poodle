@@ -57,6 +57,14 @@
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
+"audit:security" = [
+  { run = "bun scripts/audit-repository-security.ts" },
+  { run = "bun audit" },
+  { run = "cargo deny --manifest-path packages/render/Cargo.toml check advisories sources" },
+  { run = "cargo deny --manifest-path packages/gpui/node-backend/Cargo.toml check advisories sources" },
+  { run = "cargo deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
+  { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
+]
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
 "test:parity" = "bunx vitest run --project parity"
