@@ -34,6 +34,8 @@
   const stateText = $derived(stateLabels[normalizedState] ?? `State ${normalizedState + 1} of ${normalizedStateCount}`);
   const accessibleLabel = $derived(mode === "multi" ? `${ariaLabel ?? "Audio switch"}, ${stateText}` : ariaLabel ?? "Audio switch");
 
+  let root: HTMLButtonElement;
+
   function runEffects(effects: AudioSwitchEffect[]): void {
     for (const effect of effects) {
       if (effect.type === "emitStateChange") { currentState = effect.state; onStateChange?.(effect.state); }
@@ -47,7 +49,7 @@
 
   function pointerDown(event: PointerEvent): void {
     if (event.button !== 0 || disabled) return;
-    event.preventDefault(); activePointer = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); send({ type: "PRESS" });
+    event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId); send({ type: "PRESS" });
   }
 
   function pointerUp(event: PointerEvent): void {
@@ -72,6 +74,7 @@
   aria-label={accessibleLabel}
   aria-pressed={mode === "multi" ? undefined : normalizedState > 0}
   disabled={disabled}
+  bind:this={root}
   data-scope="audio-switch"
   data-part="root"
   data-size={resolvedSize}

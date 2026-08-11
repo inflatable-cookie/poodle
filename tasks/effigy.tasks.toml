@@ -148,7 +148,14 @@
 "check:svelte" = [
   { run = "bun install --cwd packages/svelte/install-smoke" },
   { run = "bun run --cwd packages/svelte/install-smoke check --threshold error" },
+  { task = "check:svelte-components" },
 ]
+
+# Type-checks the 165 shipped components. Until this existed, `check:svelte`
+# only covered `install-smoke` -- 4 files, reported as "COMPLETED 1 FILES" --
+# so nothing in `packages/svelte/components/src` was ever type-checked, and a
+# consumer's own type-check found a Poodle error before Poodle did.
+"check:svelte-components" = "bunx svelte-check --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
@@ -212,9 +219,11 @@
 # on `audit:tokens` from 45caae82 until 5854634c while nothing pointed at the
 # cause. A checker cannot dirty the tree; only a writer can, so this catches
 # the writers without having to remove them.
-"gate:clean" = "git diff --quiet && git diff --cached --quiet || { echo 'gate dirtied the working tree -- a generated artifact disagrees with its generator; run the writer and commit the result'; git status --porcelain; exit 1; }"
+"gate:snapshot" = "bun scripts/gate-tree-guard.ts --snapshot"
+"gate:clean" = "bun scripts/gate-tree-guard.ts --compare"
 
 "ci:web" = [
+  { task = "gate:snapshot" },
   { task = "audit:icons" },
   { task = "audit:tokens" },
   { task = "drift:recipes" },
@@ -272,6 +281,7 @@
 "docs:dev" = [{ task = "svelte:run" }]
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
+  { task = "gate:snapshot" },
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
