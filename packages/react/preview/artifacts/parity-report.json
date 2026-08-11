@@ -182,10 +182,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 196,
-        "componentCount": 159,
+        "exportCount": 200,
+        "componentCount": 163,
         "helperCount": 37,
-        "previewedCount": 196,
+        "previewedCount": 200,
         "contractOnlyCount": 0
       }
     ],
@@ -1401,6 +1401,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "Keyboard",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "Knob",
         "kind": "component",
         "status": "previewed",
@@ -1609,6 +1622,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "MessageCenter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Notification suite covers transient toast delivery and durable message-centre exploration.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "MetaBar",
         "kind": "component",
         "status": "previewed",
@@ -1662,6 +1688,19 @@
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "ModelPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "ModMatrixGrid",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -2489,7 +2528,7 @@
         "exportName": "ToastStack",
         "kind": "component",
         "status": "previewed",
-        "note": "Notification suite exercises transient toast stack posture alongside banner remediation.",
+        "note": "Notification suite covers transient toast delivery and durable message-centre exploration.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -2721,6 +2760,19 @@
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "VideoPlayer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "WaveformDisplay",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

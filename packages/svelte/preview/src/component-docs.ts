@@ -196,6 +196,36 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <AgentQuestionRecord {question} {answer} />`,
   },
 
+  "agent-subagent": {
+    props: [
+      { name: "item", type: "AgentSubagentItem", required: true, description: "The child work this group renders; with no item the component renders nothing." },
+      { name: "expanded", type: "boolean", default: "false", description: "Bindable disclosure state; the detail region shows while expanded." },
+      { name: "detailLines", type: "string[]", default: "[]", description: "Recent activity lines shown when expanded." },
+      { name: "expandLabel", type: "string", default: '"Show activity"', description: "Collapsed disclosure label." },
+      { name: "collapseLabel", type: "string", default: '"Hide activity"', description: "Expanded disclosure label." },
+      { name: "openChildLabel", type: "string", default: '"Open child work"', description: "Click-through action label." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"control"', description: "Semantic size role used when size is inherited." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "onToggle", type: "((expanded: boolean) => void) | undefined", default: "undefined", description: "Called when the disclosure is used." },
+      { name: "onOpenChild", type: "(() => void) | undefined", default: "undefined", description: "Called when the click-through is used; unset hides the open action." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { AgentSubagent, type AgentSubagentItem } from "@inflatable-cookie/poodle-svelte";
+
+  const item: AgentSubagentItem = {
+    id: "child-1",
+    label: "Scout",
+    status: "running",
+    activityLine: "Searching for stale conformance vectors",
+  };
+</script>
+
+<AgentSubagent {item} detailLines={["Indexed 3 registries", "Comparing render outputs"]} onOpenChild={() => console.log("open child work")} />`,
+  },
+
   "agent-transcript": {
     props: [
       { name: "items", type: "TranscriptItem[]", default: "[]", description: "Chronological messages, tool calls, records, changed files, and activity." },

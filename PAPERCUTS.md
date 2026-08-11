@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `effigy docs:check` rewrites the committed
+  `packages/tokens/artifacts/rust/*` via `report:parity` → `tokens:build`,
+  leaving a dirty worktree, and `effigy audit:tokens` fails at HEAD: commit
+  `45caae82` rustfmt-formatted the generated Rust artifacts without updating
+  `packages/tokens/scripts/build-tokens.ts`, whose emitter writes 4-space
+  override arrays. Align the generator with the committed formatting or
+  regenerate the artifacts from it. Affects the docs gate and token drift
+  audit.
+
 - 2026-08-11 — A playbook-style detached `nohup omp -p` launch exited
   immediately with an empty log and untouched worktree under the Codex exec
   harness. Document a harness-safe detach or persistent-session recipe.
