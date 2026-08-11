@@ -202,6 +202,18 @@
   { run = "cargo test --manifest-path packages/contracts/adapter/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
 ]
+# Fails if the working tree is dirty. Belongs at the END of any gate that
+# runs a write-mode generator.
+#
+# `ci:web` and `docs:check` both do: `react:docs`, `report:parity` and
+# `report:accessibility` are writers, and `report:parity` reaches `tokens:build`
+# in write mode. So a gate can regenerate an artifact, disagree with what is
+# committed, and still exit 0 -- which is exactly how the web gate stayed red
+# on `audit:tokens` from 45caae82 until 5854634c while nothing pointed at the
+# cause. A checker cannot dirty the tree; only a writer can, so this catches
+# the writers without having to remove them.
+"gate:clean" = "git diff --quiet && git diff --cached --quiet || { echo 'gate dirtied the working tree -- a generated artifact disagrees with its generator; run the writer and commit the result'; git status --porcelain; exit 1; }"
+
 "ci:web" = [
   { task = "audit:icons" },
   { task = "audit:tokens" },
@@ -214,6 +226,7 @@
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
+  { task = "gate:clean" },
 ]
 "ci:rust" = [{ task = "test:contracts" }]
 "ci" = [
@@ -266,6 +279,7 @@
   { task = "report:parity" },
   { task = "report:accessibility" },
   { task = "docs:build" },
+  { task = "gate:clean" },
 ]
 
 # Legacy aliases for compatibility
