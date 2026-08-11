@@ -37,8 +37,15 @@ input {
   min-height: 0;
 }
 
-button:focus-visible,
-input:focus-visible {
+/* Focus ring for the docs site's own unstyled chrome only.
+   Poodle components draw their own focus treatment, and 33 of them set
+   `outline: none` to do it. A bare `input:focus-visible` is (0,1,1), which
+   outranks a component class like `.poodle-text-input__control` (0,1,0), so
+   this rule was overriding them — TextInput showed the component's rounded
+   focus border plus this square outline at once. Excluding poodle-classed
+   elements keeps the docs chrome focusable without reaching into components. */
+button:not([class*="poodle-"]):focus-visible,
+input:not([class*="poodle-"]):focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
 }

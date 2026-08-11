@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — The docs preview's global `button:focus-visible,
+  input:focus-visible` outline (`packages/svelte/preview/src/app.css`) outranked
+  every component that draws its own focus treatment: a bare element selector
+  plus pseudo-class is (0,1,1) and beats a component class at (0,1,0). 33
+  component stylesheets set `outline: none` for exactly this reason, so all of
+  them were being overridden — TextInput visibly rendered its rounded focus
+  border and the preview's square outline at the same time. Preview chrome
+  styling should not be able to reach into components; consider scoping all
+  docs-site element selectors, not just this one.
+
 - 2026-08-11 — The visual gate cannot catch a bug in a brand-new specimen:
   with no prior baseline to differ from, a new specimen reports no diff. `b013`
   added `activeOutline` specimens and the sweep showed zero tabs diffs, while
