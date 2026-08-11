@@ -7,6 +7,19 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `packages/core/src/index.ts` hard-lists every per-module
+  export (`export { historyCenterTransition, …, isForkPoint } from
+  "./history-center"`), so a card that deletes a core export (g13-023's D1
+  dropped `isForkPoint`) cannot remove it: `index.ts` is outside the card's
+  writable set. Plain bun/Node ESM validates re-export bindings at link time
+  (`export 'missing' not found`, probe-verified), so any consumer importing
+  the package index crashes until the follow-up card edits `index.ts`;
+  vitest is lenient, which is why the component gate showed only the
+  HistoryCenter suites red. Same wall recurs for any future export deletion.
+  Either make `index.ts` writable on export-deleting cards, or switch these
+  blocks to wildcard re-exports (`export * from "./history-center"`) so
+  deletions stop breaking the package index.
+
 - 2026-08-11 — `effigy docs:check` fails at HEAD once the parity reports
   regenerate: `packages/svelte/preview/artifacts/parity-report.json` reports
   201 exports / 164 components (`HistoryCenter`, from g13-b020/b021) while
