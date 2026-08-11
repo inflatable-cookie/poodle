@@ -30,6 +30,14 @@
     </div>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Success tone">
+    <div class="poodle-specimen__row">
+      <Button variant="primary" tone="success" onClick={() => log("Success primary")}>Success primary</Button>
+      <Button variant="secondary" tone="success" onClick={() => log("Success secondary")}>Success secondary</Button>
+      <Button variant="ghost" tone="success" onClick={() => log("Success ghost")}>Success ghost</Button>
+    </div>
+  </SpecimenGroup>
+
   <SpecimenGroup label="With icons">
     <div class="poodle-specimen__row">
       <Button leadingIcon="plus" onClick={() => log("Leading icon")}>Create</Button>

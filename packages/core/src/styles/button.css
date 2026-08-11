@@ -204,6 +204,36 @@
     --poodle-button-shadow: var(--poodle-recipe-button-ghost-danger-shadow, none);
   }
 
+  .poodle-button[data-tone="success"] {
+    --poodle-button-fill: var(--poodle-recipe-button-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-surface, var(--poodle-color-background-surface))));
+    --poodle-button-fill-hover: var(--poodle-recipe-button-success-fill-hover, color-mix(in srgb, var(--poodle-color-status-success) 24%, var(--poodle-surface, var(--poodle-color-background-surface))));
+    --poodle-button-fill-active: var(--poodle-recipe-button-success-fill-active, color-mix(in srgb, var(--poodle-color-status-success) 32%, var(--poodle-surface, var(--poodle-color-background-surface))));
+    --poodle-button-border: var(--poodle-recipe-button-success-border, var(--poodle-color-border-default));
+    --poodle-button-border-hover: var(--poodle-recipe-button-success-border-hover, color-mix(in srgb, var(--poodle-color-status-success) 62%, var(--poodle-color-border-default)));
+    --poodle-button-text: var(--poodle-recipe-button-success-text, var(--poodle-color-text-primary));
+  }
+
+  .poodle-button[data-variant="primary"][data-tone="success"] {
+    --poodle-button-fill: var(--poodle-recipe-button-primary-success-fill, var(--poodle-color-status-success));
+    --poodle-button-fill-hover: var(--poodle-recipe-button-primary-success-fill-hover, color-mix(in srgb, white 12%, var(--poodle-color-status-success)));
+    --poodle-button-fill-active: var(--poodle-recipe-button-primary-success-fill-active, color-mix(in srgb, var(--poodle-color-status-success) 88%, black));
+    --poodle-button-border: var(--poodle-recipe-button-primary-success-border, color-mix(in srgb, var(--poodle-color-status-success) 84%, black));
+    --poodle-button-border-hover: var(--poodle-recipe-button-primary-success-border-hover, color-mix(in srgb, var(--poodle-color-status-success) 72%, black));
+    --poodle-button-text: var(--poodle-recipe-button-primary-success-text, var(--poodle-color-text-inverse));
+    --poodle-button-shadow: var(--poodle-recipe-button-primary-success-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent));
+  }
+
+  .poodle-button[data-variant="ghost"][data-tone="success"] {
+    --poodle-button-fill: var(--poodle-recipe-button-ghost-success-fill, transparent);
+    --poodle-button-fill-hover: var(--poodle-recipe-button-ghost-success-fill-hover, color-mix(in srgb, var(--poodle-color-status-success) 12%, transparent));
+    --poodle-button-fill-active: var(--poodle-recipe-button-ghost-success-fill-active, color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent));
+    --poodle-button-border: var(--poodle-recipe-button-ghost-success-border, transparent);
+    --poodle-button-border-hover: var(--poodle-recipe-button-ghost-success-border-hover, color-mix(in srgb, var(--poodle-color-status-success) 28%, transparent));
+    --poodle-button-text: var(--poodle-recipe-button-ghost-success-text, var(--poodle-color-status-success));
+    --poodle-button-shadow: var(--poodle-recipe-button-ghost-success-shadow, none);
+  }
+
   .poodle-button[data-tone="warning"] {
     --poodle-button-fill: var(--poodle-recipe-button-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 16%, var(--poodle-surface, var(--poodle-color-background-surface))));
     --poodle-button-fill-hover: var(--poodle-recipe-button-warning-fill-hover, color-mix(in srgb, var(--poodle-color-status-warning) 24%, var(--poodle-surface, var(--poodle-color-background-surface))));

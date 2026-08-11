@@ -35,6 +35,14 @@ export function IconButtonSpecimen() {
         </div>
       </SpecimenGroup>
 
+      <SpecimenGroup label="Warning tone">
+        <div style={buttonRow}>
+          <IconButton icon="trash-2" ariaLabel="Delete" variant="primary" tone="warning" />
+          <IconButton icon="trash-2" ariaLabel="Delete" variant="secondary" tone="warning" />
+          <IconButton icon="trash-2" ariaLabel="Delete" variant="ghost" tone="warning" />
+        </div>
+      </SpecimenGroup>
+
       <SpecimenGroup label="Toggle (text editor toolbar)">
         <div style={buttonRow}>
           <IconButton icon="bold" ariaLabel="Bold" variant="ghost" pressed={bold} onPressedChange={setBold} />
