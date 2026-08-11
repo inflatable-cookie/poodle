@@ -66,3 +66,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 023](023-history-center-tree-core.md)
 - [Batch 024](024-history-center-tree-web.md)
 - [Batch 025](025-codegen-remaining-emitters.md)
+- [Batch 026](026-dismiss-on-outside-interact-prop.md)

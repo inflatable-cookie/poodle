@@ -7,7 +7,21 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-11 — `effigy docs:check` fails at HEAD once the parity reports
+- 2026-08-12 — `contract-prop-drift` only checks that documented props are
+  implemented, never that implemented props are documented, so an undocumented
+  public prop can never fail the gate. The reverse direction exists behind
+  `DRIFT_REPORT=1` but never exits non-zero and mixes snippets (`children`,
+  `footer`) in with real props. It also has a depth bug: it reports `and` and
+  `time` as props of `date-time-zone-picker`, both lifted from inside
+  `placeholder = "Select date, time, and zone"` and `defaultValue = { date:
+  null, time: null, timeZone: null }`, though the comment at
+  `contract-prop-drift.ts:51` says default values and object literals are
+  skipped. Fix the parser, separate snippets from props, then enforce.
+
+- 2026-08-11 — RESOLVED 2026-08-12 (`5854634c` regenerated the artifacts,
+  `761f81d8` added the `gate:snapshot`/`gate:clean` guard that now fails any
+  gate which rewrites a committed artifact). Original report follows.
+  `effigy docs:check` fails at HEAD once the parity reports
   regenerate: `packages/svelte/preview/artifacts/parity-report.json` reports
   201 exports / 164 components (`HistoryCenter`, from g13-b020/b021) while
   the committed report and `packages/shared-demo-app-audit.json` say
@@ -19,7 +33,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   mode wired into `docs:check`. Affects every gate run after a component
   lands.
 
-- 2026-08-11 — `packages/svelte/components` has no `tsconfig.json` and is never
+- 2026-08-11 — RESOLVED 2026-08-12 (`761f81d8`: added the tsconfig and the
+  `*.css` ambient declaration, wired `check:svelte-components` into
+  `check:svelte`; coverage went from 1 file to 449, and the two real errors it
+  exposed were fixed in AudioSwitch). Original report follows.
+  `packages/svelte/components` has no `tsconfig.json` and is never
   type-checked. `effigy check:svelte` runs `svelte-check` against
   `packages/svelte/install-smoke` — one file, 0 errors — so the 164 components
   are unchecked. A `class` prop passed to `Icon`, which accepts no such prop,
