@@ -53,3 +53,7 @@ until their migration card closes.
 
 `g13.001` freezes the authority map, measures current duplication, and captures
 the fixtures the pilot must preserve.
+
+Worker execution uses [g13 batch cards](batch-cards/README.md) and the
+orchestrator-owned [dispatch ledger](../dispatch.md). Only dependency-free,
+ready cards may be dispatched.

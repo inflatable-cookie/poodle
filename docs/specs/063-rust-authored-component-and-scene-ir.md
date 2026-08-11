@@ -57,6 +57,35 @@ Cross-runtime behavior must be represented as one of:
 
 This narrows the compiler problem enough to keep generated output dependable.
 
+## Pilot Rules
+
+- **IR-01 — Rust authority:** renderer-independent component and scene
+  declarations are authored once in Rust.
+- **IR-02 — Serializable boundary:** shared definitions contain typed,
+  serializable data and bounded expressions only.
+- **IR-03 — No function transpilation:** arbitrary Rust execution is never
+  translated into TypeScript.
+- **IR-04 — Semantic authoring layer:** the authoring IR sits above resolved
+  `poodle-node` output and preserves web-native semantics.
+- **IR-05 — Adapter ownership:** focus, IME, portals, measurement, pointer
+  capture, text systems, accessibility projection, and other environment work
+  remain runtime capabilities.
+- **IR-06 — VisualState purity:** drawing consumes serializable state and does
+  not read machine state or own hit-testing/input.
+- **IR-07 — Deterministic generation:** emitted artifacts are reproducible,
+  versioned, source-linked, and drift-checked without worktree mutation.
+- **IR-08 — Typed capability gaps:** missing runtime capabilities are declared
+  and evidenced, never silently ignored.
+- **IR-09 — Stable migration:** pilot and rollout preserve existing public
+  component contracts unless a separate contract change is approved first.
+- **IR-10 — Four-runtime proof:** registration alone is not parity; executed
+  semantic, interaction, accessibility, recipe, axis, and visual evidence is
+  required.
+- **IR-11 — Pilot gate:** broad migration cannot start before Button,
+  RangeSlider, and TextInput pass and `g13.008` records **adopt**.
+- **IR-12 — No early packages:** crate placement is decided from the g13.001
+  authority inventory before implementation packages are created.
+
 ## Component IR
 
 Each component definition carries stable identifiers for:
