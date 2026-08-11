@@ -1,24 +1,23 @@
-# Request to Longhorn: `ForkTreePage` projection and host-stamped timestamps
+# Longhorn history-tree requests — Poodle-side record
 
-Status: open
-Raised: 2026-08-11
+Status: filed upstream 2026-08-11
 Raised by: Poodle core (HistoryCenter v2, batch cards `023` / `024`)
 Blocking: no — Poodle ships a client-side stitcher meanwhile
 
-Two asks, from building HistoryCenter v2's unified history tree. Neither
-blocks Poodle; both would remove work from every host.
+The canonical request now lives on the Longhorn thread as five items from
+Loophole field use, with a field priority of **2 > 1 > 4 > 3 > 5**. Two of
+those are the ones Poodle raised: `recorded_at` (item 4) and `ForkTreePage`
+(item 5). This file records what Poodle depends on and what the agreed shapes
+mean for HistoryCenter, so the constraints are not rediscovered later.
 
-## 1. A topological `ForkTreePage` projection
+## Item 5 — `ForkTreePage`, and why Poodle stitches meanwhile
 
-v2 renders every entry in the fork graph exactly once at its true position:
-a spine (the current branch) with other branches' entries indented as runs
-where they truly diverge.
+v2 renders every entry in the fork graph exactly once at its true position: a
+spine (the current branch) with other branches' entries indented as runs where
+they truly diverge.
 
 Poodle ships the stitcher as a pure tested function so hosts do not
-reimplement it. It takes branch records plus a per-branch entry path and
-merges shared ancestor prefixes. That part is fine.
-
-**The fetching is the problem.** `ForkHistoryController` holds a single path:
+reimplement it. **Fetching** is the awkward part upstream:
 
 - `#path?: ForkPathPageSnapshot` — one, not many
   (`packages/longhorn/src/history-tree/controller.ts:15`)
@@ -26,40 +25,60 @@ merges shared ancestor prefixes. That part is fine.
   **replaces** the visible path rather than adding to a set (`:73`)
 - `refresh()` re-fetches only the current `#pathTarget` (`:58`)
 
-So a host wanting the whole tree must call `selectBranchPath` once per branch,
-accumulate the pages itself, and then keep that accumulation alive across
-refreshes that only ever refresh one of them. The accumulated set goes stale
-silently.
+So a host assembling the tree makes N calls, accumulates the pages itself, and
+watches that accumulation go stale on the next refresh.
 
-A single `ForkTreePage` projection — all reachable entries in topological
-order, each tagged with the branch that owns it — would make one request
-serve the whole view and stay coherent under refresh.
+`ForkTreePage` is last in the field priority order, which is reasonable —
+items 1–3 delete live workaround code. **The practical consequence for Poodle
+is that the client-side stitcher is the real path for some time, not a
+stopgap.** It gets its own card and its own test list accordingly.
 
-Failing that, the smaller version: let the controller hold several paths at
-once and refresh them together.
+## Item 4 — `recorded_at` is entries-only, and that changes a caption
 
-## 2. Host-stamped `recordedAtMs` on entry and branch records
+The agreed shape is an optional consumer-supplied `recorded_at` (epoch ms) on
+`HistoryEntryMetadata`, carried inert through node → persistence envelope →
+`ForkEntryRecord` → generated TS types. The tree never reads it; hosts with
+clocks stamp it at `record_applied` time.
 
-Fork-run captions want a relative time ("2m ago"). The history-tree domain has
-no clock: `ForkBranchProjection` carries `branch_id`, `head_entry_id`,
-`divergence_entry_id`, `name`, `annotation`, `pinned`, `current`, and the only
-`Instant` in the crate is in `src/bin/measure.rs`.
+**It is on entry metadata only. There is no branch-level equivalent, and none
+is proposed.**
 
-Poodle will not invent one client-side — a timestamp derived at render time
-describes when the popover opened, not when the edit happened, and would drift
-between runtimes.
+Card `023` as dispatched models `recordedAtMs` on both `HistoryEntry` and
+`HistoryBranch`. The branch field would never be populated. Correction to
+apply at review:
 
-Poodle models `recordedAtMs?: number` on both record types now and renders
-nothing when it is absent, so supplying it later is additive on both sides.
+- Keep `recordedAtMs?: number` on `HistoryEntry`.
+- Drop it from `HistoryBranch`.
+- A fork-run caption derives its relative time from **its own run's entries**
+  — the most recent entry in the run. That is derivation from supplied data,
+  not an invented clock, and it needs no field that will not exist.
 
-## Note on divergence ids
+## Item 3 — empty branch heads confirm the caption rule
+
+`ForkNavigationTarget::Checkout` requires an entry id, so empty branch heads
+(a nascent main, a root-only switch) cannot be expressed as a navigation
+target at all today.
+
+This independently confirms card `023`'s rule that **captions are focusable
+for rename but never navigate**: for an empty-head branch there is no entry to
+navigate to, and the protocol could not express the target even if the UI
+offered it. Card `023`'s "empty branch head" stitcher test is therefore load
+bearing, not an edge case.
+
+## Divergence ids — no change requested
 
 `divergence_entry_id` is documented as relative to the current branch
 (`prototypes/history-tree/src/projection.rs:108`). That is what made v1's
-fork-expander UI unreadable — several distinct forks project onto one visible
+fork-expander UI unreadable: several distinct forks project onto one visible
 entry, so the popover said "6 branches off the root edit" and described
 nothing.
 
-**No change requested.** v2 does not key off divergence ids at all; it attaches
-each run at the last entry the paths actually share. Recorded so the constraint
-is not mistaken for a defect later.
+v2 does not key off divergence ids at all — it attaches each run at the last
+entry the paths actually share. Recorded so the constraint is not mistaken for
+a defect later.
+
+## Items 1 and 2 — no Poodle surface
+
+Command-macro re-export and stale branches-page refresh are both host and
+controller concerns. Poodle takes branch records as data and has no view of
+either. Noted only so this file is a complete map of the five.
