@@ -1,6 +1,6 @@
 # 022 poodle-codegen Emitter Core
 
-Status: ready
+Status: merged (`143c63a1` → `9dab52ac`)
 Milestone: `g13.003`
 Owner: Poodle core
 Branch: `thread/g13-022-poodle-codegen-emitter-core`
