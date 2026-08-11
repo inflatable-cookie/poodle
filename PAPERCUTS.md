@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — Consumers are compensating for Poodle API gaps with `:global`
+  CSS overrides, and those fail silently when Poodle refactors: a scan found
+  `.poodle-tabs*` overrides in 9 repos, including three still targeting the
+  pre-rename `[data-variant="text"]` selector. Overrides on `__list`, `__tab`
+  and `__panel` (figmatic, soundcheck-library, nucleus, underlay,
+  loophole-legacy) are each an unmet prop. Treat the override inventory as an
+  API-gap backlog, and note that consumer migrations must audit CSS selectors
+  as well as props — a selector break produces no type error and no build
+  error, just wrong layout.
+
 - 2026-08-11 — The docs preview's global `button:focus-visible,
   input:focus-visible` outline (`packages/svelte/preview/src/app.css`) outranked
   every component that draws its own focus treatment: a bare element selector

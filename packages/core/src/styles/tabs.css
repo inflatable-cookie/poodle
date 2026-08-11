@@ -145,20 +145,29 @@
     max-width: none;
   }
 
-  /* Card: bottom border on list */
-  .poodle-tabs[data-variant="card"] .poodle-tabs__list {
-    padding-bottom: var(--poodle-space-inline-sm);
-  }
+  /* Card: bottom border on list.
 
+     The list's outer padding exists only to hold the tabs off the border line.
+     With no border there is nothing to hold them off, so it is declared
+     together with the border rather than unconditionally: a tab strip renders
+     flush to its container and the consumer owns the spacing beneath. This is
+     what a titlebar or toolbar wants, and it removes the need for consumers to
+     strip the padding with a CSS override. */
   .poodle-tabs[data-variant="card"][data-bordered="true"] .poodle-tabs__list {
+    padding-bottom: var(--poodle-space-inline-sm);
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
   .poodle-tabs[data-variant="card"][data-orientation="vertical"] .poodle-tabs__list {
     flex-direction: column;
     padding-bottom: 0;
-    padding-right: 0.5rem;
     border-bottom: 0;
+  }
+
+  /* Vertical drew border-right unconditionally, so `bordered={false}` had no
+     effect in that orientation. Same pairing as horizontal. */
+  .poodle-tabs[data-variant="card"][data-orientation="vertical"][data-bordered="true"] .poodle-tabs__list {
+    padding-right: 0.5rem;
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
