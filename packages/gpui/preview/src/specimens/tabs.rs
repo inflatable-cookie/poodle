@@ -1,13 +1,13 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{Eyebrow, TabStrip, Tabs};
+use crate::node_compat::{Eyebrow, Tabs};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, EyebrowSpec, Orientation, ActiveFill, TabDefinition,
-    TabStripItem, TabStripSpec, TabVariant, TabsSpec,
+    ActiveEdge, ControlDensity, ControlSize, EyebrowSpec, Orientation, ActiveFill, TabDefinition,
+    TabVariant, TabsSpec,
 };
 use std::sync::Arc;
 
@@ -49,6 +49,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let basic_card_spec = TabsSpec::new(basic_card_tabs)
         .with_variant(TabVariant::Card)
+        .with_bordered(true)
         .with_value(&basic_card_value)
         .with_aria_label("Section tabs");
 
@@ -149,8 +150,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-card-counts")
         .on_change(node_value_handler(state, "tabs-counts-value"));
 
-    // 2c. CARD VARIANT WITH ACTIVE OUTLINE — the former card variant's
-    // selected border, opted back in via `activeOutline`.
+    // 2c. CARD VARIANT WITH ACTIVE EDGE OUTLINE — the former card variant's
+    // selected border, opted back in via `activeEdge="outline"`.
     let outline_value = state
         .specimens
         .text
@@ -166,7 +167,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("faq", "FAQ").with_disabled(true),
     ])
     .with_variant(TabVariant::Card)
-    .with_active_outline(true)
+    .with_active_edge(ActiveEdge::Outline)
     .with_value(&outline_value)
     .with_aria_label("Outlined section tabs");
 
@@ -248,6 +249,59 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-block")
         .on_change(node_value_handler(state, "tabs-block-value"));
 
+    // 3c. BLOCK VARIANT WITH ACTIVE EDGE OUTLINE — the outline edge on block
+    // keeps the border-left separators (per-side overrides) and covers the
+    // remaining sides.
+    let block_outline_value = state
+        .specimens
+        .text
+        .get("tabs-block-outline-value")
+        .map(|s| s.as_str())
+        .unwrap_or("inbox")
+        .to_string();
+
+    let block_outline_spec = TabsSpec::new(vec![
+        TabDefinition::new("inbox", "Inbox"),
+        TabDefinition::new("archive", "Archive"),
+        TabDefinition::new("spam", "Spam"),
+        TabDefinition::new("trash", "Trash"),
+    ])
+    .with_variant(TabVariant::Block)
+    .with_active_edge(ActiveEdge::Outline)
+    .with_value(&block_outline_value)
+    .with_aria_label("Outlined mailbox");
+
+    let block_outline_component = Tabs::from_spec(block_outline_spec, theme)
+        .with_id("specimen-block-outline")
+        .on_change(node_value_handler(state, "tabs-block-outline-value"));
+
+    // 3d. BLOCK VARIANT WITH ACTIVE EDGE UNDERLINE — the former strip
+    // variant's indicator, reproduced on block (contract §13: block + each
+    // activeEdge value).
+    let underline_value = state
+        .specimens
+        .text
+        .get("tabs-underline-value")
+        .map(|s| s.as_str())
+        .unwrap_or("editor")
+        .to_string();
+
+    let underline_spec = TabsSpec::new(vec![
+        TabDefinition::new("editor", "Editor").with_icon("code"),
+        TabDefinition::new("preview", "Preview").with_icon("eye"),
+        TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        TabDefinition::new("output", "Output").with_icon("file-text"),
+    ])
+    .with_variant(TabVariant::Block)
+    .with_active_edge(ActiveEdge::Underline)
+    .with_value(&underline_value)
+    .with_reorderable(true)
+    .with_aria_label("Workspace surfaces");
+
+    let underline_component = Tabs::from_spec(underline_spec, theme)
+        .with_id("specimen-block-underline")
+        .on_change(node_value_handler(state, "tabs-underline-value"));
+
     // 4. CARD WITH ICONS (NO PANEL)
     let card_icon_tabs = vec![
         TabDefinition::new("home", "Home").with_icon("home"),
@@ -273,51 +327,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-card-icons")
         .on_change(node_value_handler(state, "tabs-card-icon-value"));
 
-    // 5. STRIP VARIANT (HORIZONTAL, CLOSABLE, REORDERABLE)
-    let strip_items = vec![
-        TabStripItem::new("main.rs", "main.rs").with_closable(true),
-        TabStripItem::new("lib.rs", "lib.rs").with_closable(true),
-        TabStripItem::new("mod.rs", "mod.rs").with_closable(true),
-        TabStripItem::new("Cargo.toml", "Cargo.toml"),
-    ];
-
-    let strip_value = state
-        .specimens
-        .text
-        .get("tabs-strip-value")
-        .map(|s| s.as_str())
-        .unwrap_or("main.rs")
-        .to_string();
-
-    let last_strip_closed = state
-        .specimens
-        .text
-        .get("tabs-strip-closed")
-        .cloned()
-        .unwrap_or_default();
-    let last_strip_reorder = state
-        .specimens
-        .text
-        .get("tabs-strip-reorder")
-        .cloned()
-        .unwrap_or_default();
-
-    let strip_spec = TabStripSpec::new(strip_items)
-        .with_value(&strip_value)
-        .with_reorderable(true)
-        .with_aria_label("File tabs");
-
-    let strip_component = TabStrip::from_spec(strip_spec, theme)
-        .with_id("specimen-strip")
-        .on_change(node_value_handler(state, "tabs-strip-value"))
-        .on_close(node_close_handler(state, "tabs-strip-closed"));
-
-    // 6. STRIP VARIANT (VERTICAL)
+    // 5. BLOCK VARIANT — VERTICAL (ICON-ONLY, ACTIVE EDGE UNDERLINE)
+    // The former strip variant's vertical look: block + underline.
     let vertical_items = vec![
-        TabStripItem::new("files", "Files"),
-        TabStripItem::new("search", "Search"),
-        TabStripItem::new("git", "Git"),
-        TabStripItem::new("extensions", "Extensions"),
+        TabDefinition::new("files", "Explorer").with_icon("folder"),
+        TabDefinition::new("search", "Search").with_icon("search"),
+        TabDefinition::new("git", "Source Control").with_icon("layers"),
+        TabDefinition::new("debug", "Debug").with_icon("terminal"),
     ];
 
     let vertical_value = state
@@ -328,22 +344,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or("files")
         .to_string();
 
-    let vertical_spec = TabStripSpec::new(vertical_items)
+    let vertical_spec = TabsSpec::new(vertical_items)
+        .with_variant(TabVariant::Block)
+        .with_active_edge(ActiveEdge::Underline)
         .with_value(&vertical_value)
         .with_orientation(Orientation::Vertical)
-        .with_aria_label("Activity bar");
+        .with_aria_label("Side panel tabs");
 
-    let vertical_component = TabStrip::from_spec(vertical_spec, theme)
-        .with_id("specimen-vertical")
+    let vertical_component = Tabs::from_spec(vertical_spec, theme)
+        .with_id("specimen-block-underline-vertical")
         .on_change(node_value_handler(state, "tabs-vertical-value"));
 
-    // 7. COLLAPSE TOGGLE
+    // 6. COLLAPSE TOGGLE (block + underline, orientation toggle)
     let panel_collapsed = state.specimens.is_on("tabs-panel-collapsed");
 
     let collapse_items = vec![
-        TabStripItem::new("editor", "Editor").with_closable(true),
-        TabStripItem::new("terminal", "Terminal").with_closable(true),
-        TabStripItem::new("output", "Output"),
+        TabDefinition::new("editor", "Editor").with_icon("code"),
+        TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        TabDefinition::new("output", "Output").with_icon("file-text"),
     ];
 
     let collapse_value = state
@@ -360,14 +378,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         Orientation::Horizontal
     };
 
-    let collapse_spec = TabStripSpec::new(collapse_items)
+    let collapse_spec = TabsSpec::new(collapse_items)
+        .with_variant(TabVariant::Block)
+        .with_active_edge(ActiveEdge::Underline)
         .with_value(&collapse_value)
         .with_orientation(collapse_orientation)
         .with_reorderable(true)
         .with_aria_label("Panel tabs");
 
-    let collapse_component = TabStrip::from_spec(collapse_spec, theme)
-        .with_id("specimen-collapse")
+    let collapse_component = Tabs::from_spec(collapse_spec, theme)
+        .with_id("specimen-block-underline-collapse")
         .on_change(node_value_handler(state, "tabs-collapse-value"));
 
     // 8. FULL-WIDTH (tabs flex to fill the row)
@@ -459,7 +479,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let drag_card = Tabs::from_spec(
         TabsSpec::new(drag_tabs())
             .with_variant(TabVariant::Card)
-            .with_active_outline(true)
+            .with_active_edge(ActiveEdge::Outline)
             .with_value("overview")
             .with_drag_value(Some("features".to_string()))
             .with_drop_target_value(Some("pricing".to_string())),
@@ -564,6 +584,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(block_component),
         )
+        // 3c. Block variant (active outline)
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Block variant (active outline)"),
+                    theme,
+                ))
+                .child(block_outline_component),
+        )
+        // 3d. Block variant (active underline — the former strip)
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Block variant (active underline — the former strip)",
+                    ),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .rounded(px(6.0))
+                        .border_1()
+                        .border_color(color_to_hsla(border))
+                        .overflow_hidden()
+                        .child(underline_component)
+                        .child(
+                            div()
+                                .p(px(16.0))
+                                .bg(color_to_hsla(bg_surface))
+                                .min_h(px(48.0))
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child("Surface content area"),
+                        ),
+                ),
+        )
         // 4. Card with icons (no panel)
         .child(
             div()
@@ -576,53 +638,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(card_icon_component),
         )
-        // 5. Strip variant (horizontal, closable, reorderable)
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content(
-                        "Strip variant (full-width bar with icons, closable, reorderable)",
-                    ),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .rounded(px(6.0))
-                        .border_1()
-                        .border_color(color_to_hsla(border))
-                        .overflow_hidden()
-                        .child(strip_component)
-                        .child(
-                            div()
-                                .p(px(16.0))
-                                .bg(color_to_hsla(bg_surface))
-                                .min_h(px(48.0))
-                                .text_sm()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child("Surface content area"),
-                        ),
-                ),
-        )
-        .when(!last_strip_closed.is_empty(), |d| {
-            d.child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last closed: {}", last_strip_closed)),
-            )
-        })
-        .when(!last_strip_reorder.is_empty(), |d| {
-            d.child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last reordered: {}", last_strip_reorder)),
-            )
-        })
-        // 6. Strip variant (vertical)
+        // 5. Block variant — vertical (icon-only, active underline)
         .child(
             div()
                 .flex()
@@ -630,7 +646,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new()
-                        .with_content("Strip variant — vertical (icon-only, collapsed panel)"),
+                        .with_content("Block variant — vertical (icon-only, collapsed panel)"),
                     theme,
                 ))
                 .child(
@@ -661,7 +677,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content(
-                        "Strip variant — collapse toggle (click to toggle orientation)",
+                        "Block variant — collapse toggle (click to toggle orientation)",
                     ),
                     theme,
                 ))

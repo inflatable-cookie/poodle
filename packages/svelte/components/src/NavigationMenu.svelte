@@ -11,6 +11,7 @@
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
+    ActiveEdge,
     ActiveFill,
     ControlDensity,
     ControlSize,
@@ -27,10 +28,12 @@
     size?: ControlSize | null;
     density?: ControlDensity | null;
     /**
-     * Opt-in outline on the open trigger — the border the trigger carried by
-     * default before g13.016. Same semantics and default as Tabs.
+     * Selection edge on the open trigger: `"none"` draws no edge, `"outline"`
+     * draws the accent border — the border the trigger carried by default
+     * before g13.016, `"underline"` draws the accent edge along the trigger's
+     * bottom. Same semantics and default as Tabs.
      */
-    activeOutline?: boolean;
+    activeEdge?: ActiveEdge;
     /**
      * Selection treatment on the open trigger: `"tint"` is the accent-tinted
      * fill; `"solid"` fills the trigger with `accent-base` and switches the
@@ -49,7 +52,7 @@
     sizeRole = "chrome",
     size = null,
     density = null,
-    activeOutline = false,
+    activeEdge = "none",
     activeFill = "tint",
     onValueChange = undefined,
     children,
@@ -159,7 +162,7 @@
   });
 </script>
 
-<div class="poodle-navigation-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity} data-active-outline={activeOutline || undefined} data-active-fill={activeFill}>
+<div class="poodle-navigation-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity} data-active-edge={activeEdge} data-active-fill={activeFill}>
   <nav
     class="poodle-navigation-menu__list"
     aria-label={ariaLabel ?? undefined}

@@ -781,13 +781,14 @@ pub enum TabVariant {
     /// Flat tabs with a bottom border on the list and a pill-shaped
     /// accent-tinted selection on the tab itself. The default. Renamed from
     /// the former `Underline`/`text` member; the former `Card` member is
-    /// deleted — its decorations moved to `activeOutline` / `activeFill`.
+    /// deleted — its decorations moved to `activeEdge` / `activeFill`.
     /// Matches Svelte `data-variant="card"`.
     Card,
     Pill,
     /// Full-width tabs with vertical separators, no radius, no outer chrome.
-    /// Selected item receives an accent-tinted surface fill. Matches Svelte
-    /// `data-variant="block"`.
+    /// Selected item receives an accent-tinted surface fill; the former
+    /// `strip` variant's look is `Block` + `activeEdge::Underline`.
+    /// Matches Svelte `data-variant="block"`.
     Block,
 }
 

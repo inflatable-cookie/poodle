@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ActiveFill, EyebrowSpec, NavigationMenuEntry, NavigationMenuSpec};
+use poodle_specs::{ActiveEdge, ActiveFill, EyebrowSpec, NavigationMenuEntry, NavigationMenuSpec};
 use std::sync::Arc;
 
 fn change_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
@@ -80,10 +80,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Active section: {}", active_value)),
                 ),
         )
-        // g13.016 switches: the default trigger is borderless; activeOutline
-        // opts the border back in, solid fill covers the open trigger with
-        // accent-base + text-inverse and must survive hover (native previews
-        // have no hover simulation — the render test proves the hover patch).
+        // g13.016 switches: the default trigger is borderless; activeEdge
+        // opts the border/underline back in, solid fill covers the open
+        // trigger with accent-base + text-inverse and must survive hover
+        // (native previews have no hover simulation — the render test proves
+        // the hover patch).
         .child(
             div()
                 .flex()
@@ -98,10 +99,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         NavigationMenuSpec::new(items.clone())
                             .with_value("components")
                             .with_aria_label("Outlined main navigation")
-                            .with_active_outline(true),
+                            .with_active_edge(ActiveEdge::Outline),
                         theme,
                     )
                     .with_id("specimen-nav-outline"),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Navigation menu (active underline)"),
+                    theme,
+                ))
+                .child(
+                    NavigationMenu::from_spec(
+                        NavigationMenuSpec::new(items.clone())
+                            .with_value("components")
+                            .with_aria_label("Underlined main navigation")
+                            .with_active_edge(ActiveEdge::Underline),
+                        theme,
+                    )
+                    .with_id("specimen-nav-underline"),
                 ),
         )
         .child(

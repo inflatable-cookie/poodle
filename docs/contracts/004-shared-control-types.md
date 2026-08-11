@@ -107,3 +107,36 @@ switches the foreground to `text-inverse` — the same token the primary Button
 uses on `accent-base`, so the filled control keeps legible contrast against
 every accent. There are exactly two members; a third value is a contract
 violation (T2), not an extension.
+
+## ActiveEdge
+
+```
+type ActiveEdge = "none" | "outline" | "underline"
+```
+
+Default: `"none"`.
+
+Consumers: `components/tabs.md`, `components/navigation-menu.md`.
+
+Rust: `ActiveEdge` in `packages/contracts/components/src/tabs.rs`,
+re-exported from `packages/contracts/components/src/lib.rs`; resolved by each
+component's renderer against its own selection state (`TabsSpec::active_edge`,
+`NavigationMenuSpec::active_edge`).
+
+TypeScript: `ActiveEdge` in `packages/svelte/components/src/types.ts` and
+`packages/react/components/src/types.ts`.
+
+### Semantics
+
+The border axis is a single enum, not booleans. `outline` and `underline` are
+both borders on the active control and conflict on the same property, so they
+cannot compose — a boolean pair would admit nonsense combinations and require
+suppression rules. `none` draws no edge. `outline` draws the accent border
+around the active control (`accent-base` 32% mixed with `border-subtle` for
+Tabs, `accent-base` 42% mixed with `border-default` for NavigationMenu).
+`underline` draws the accent edge along the inline-end side — bottom when
+horizontal, right when vertical. There are exactly three members; a fourth
+value is a contract violation (T2), not an extension.
+
+`activeEdge` (the border axis) and `activeFill` (the fill axis) are orthogonal
+and compose freely: any edge value combines with any fill value.

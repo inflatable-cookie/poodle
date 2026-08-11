@@ -41,18 +41,29 @@
     outline: none;
   }
 
-  /* activeOutline: an opt-in border on the trigger — the decoration the
-     trigger had by default before g13.016 (border-subtle@72% idle,
-     accent-42% when open). The trigger IS the chip (no item wrapper), so the
-     outline sits on it directly. A transparent border on every trigger keeps
-     the list from shifting when the open trigger's border becomes visible;
-     without `data-active-outline` there is no border at all. */
-  .poodle-navigation-menu[data-active-outline="true"] .poodle-navigation-menu__trigger {
+  /* activeEdge: an opt-in edge on the trigger. `outline` restores the
+     decoration the trigger had by default before g13.016 (border-subtle@72%
+     idle, accent-42% when open) — the trigger IS the chip (no item wrapper),
+     so the outline sits on it directly. A transparent border on every trigger
+     keeps the list from shifting when the open trigger's border becomes
+     visible; without `data-active-edge` there is no border at all. */
+  .poodle-navigation-menu[data-active-edge="outline"] .poodle-navigation-menu__trigger {
     border: 0.0625rem solid transparent;
   }
 
-  .poodle-navigation-menu[data-active-outline="true"] .poodle-navigation-menu__trigger[data-open="true"] {
+  .poodle-navigation-menu[data-active-edge="outline"] .poodle-navigation-menu__trigger[data-open="true"] {
     border-color: var(--poodle-recipe-navigation-menu-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
+  }
+
+  /* activeEdge="underline": the accent edge along the trigger's bottom. A
+     transparent reserve bottom border on every trigger keeps the list from
+     shifting when the open trigger's edge becomes visible. */
+  .poodle-navigation-menu[data-active-edge="underline"] .poodle-navigation-menu__trigger {
+    border-bottom: 0.125rem solid transparent;
+  }
+
+  .poodle-navigation-menu[data-active-edge="underline"] .poodle-navigation-menu__trigger[data-open="true"] {
+    border-bottom-color: var(--poodle-color-accent-base);
   }
 
   /* activeFill="solid": fully accent-filled open trigger. The foreground

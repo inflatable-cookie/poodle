@@ -1,5 +1,6 @@
 use poodle_tokens::semantic;
 
+use crate::tabs::ActiveEdge;
 use crate::tabs::ActiveFill;
 use crate::types::{ControlDensity, ControlSize, NavigationMenuEntry, SemanticControlSizeRole};
 
@@ -9,10 +10,9 @@ pub struct NavigationMenuSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub aria_label: Option<String>,
-    /// Opt-in outline on the open trigger — the border the trigger carried by
-    /// default before g13.016. Matches Svelte `activeOutline` (default
-    /// false).
-    pub active_outline: bool,
+    /// Selection edge on the open trigger — see `ActiveEdge`. Matches Svelte
+    /// `activeEdge` (default `"none"`).
+    pub active_edge: ActiveEdge,
     /// Selection treatment on the open trigger: tint or fully accent-filled.
     /// Matches Svelte `activeFill` (default `"tint"`).
     pub active_fill: ActiveFill,
@@ -28,7 +28,7 @@ impl Default for NavigationMenuSpec {
             value: None,
             default_value: None,
             aria_label: None,
-            active_outline: false,
+            active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
@@ -60,9 +60,9 @@ impl NavigationMenuSpec {
         self
     }
 
-    /// Opt into the outline on the open trigger (g13.016; default off).
-    pub fn with_active_outline(mut self, active_outline: bool) -> Self {
-        self.active_outline = active_outline;
+    /// Set the selection edge on the open trigger (none, outline, or underline).
+    pub fn with_active_edge(mut self, active_edge: ActiveEdge) -> Self {
+        self.active_edge = active_edge;
         self
     }
 
@@ -124,21 +124,21 @@ impl NavigationMenuSpec {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tabs::ActiveFill;
+    use crate::tabs::{ActiveEdge, ActiveFill};
 
     #[test]
-    fn defaults_have_no_outline_and_tint_fill() {
+    fn defaults_have_no_edge_and_tint_fill() {
         let spec = NavigationMenuSpec::new(vec![]);
-        assert!(!spec.active_outline);
+        assert_eq!(spec.active_edge, ActiveEdge::None);
         assert_eq!(spec.active_fill, ActiveFill::Tint);
     }
 
     #[test]
-    fn builders_set_outline_and_fill() {
+    fn builders_set_edge_and_fill() {
         let spec = NavigationMenuSpec::new(vec![])
-            .with_active_outline(true)
+            .with_active_edge(ActiveEdge::Outline)
             .with_active_fill(ActiveFill::Solid);
-        assert!(spec.active_outline);
+        assert_eq!(spec.active_edge, ActiveEdge::Outline);
         assert_eq!(spec.active_fill, ActiveFill::Solid);
     }
 }

@@ -28,11 +28,15 @@
     </NavigationMenu>
   </SpecimenGroup>
 
-  <!-- The default trigger is borderless since g13.016; activeOutline opts
-       the border back in. Solid fill covers the open trigger with
+  <!-- The default trigger is borderless since g13.016; activeEdge opts the
+       border/underline back in. Solid fill covers the open trigger with
        accent-base + text-inverse, and must survive hover. -->
   <SpecimenGroup label="Navigation menu (active outline)">
-    <NavigationMenu {items} value="components" activeOutline ariaLabel="Outlined main navigation" />
+    <NavigationMenu {items} value="components" activeEdge="outline" ariaLabel="Outlined main navigation" />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Navigation menu (active underline)">
+    <NavigationMenu {items} value="components" activeEdge="underline" ariaLabel="Underlined main navigation" />
   </SpecimenGroup>
 
   <SpecimenGroup label="Navigation menu (solid fill)">

@@ -113,7 +113,7 @@
       <SpecimenGroup label="Centred header (destination tabs in the centre)" bare>
         <AppHeader title="My Application">
           {#snippet center()}
-            <Tabs items={centerTabs} variant="strip" activeOutline defaultValue="editor" size="sm" ariaLabel="Destinations" />
+            <Tabs items={centerTabs} variant="block" activeEdge="outline" defaultValue="editor" size="sm" ariaLabel="Destinations" />
           {/snippet}
           {#snippet actions()}
             <Button sizeRole="chrome" variant="ghost">New</Button>
@@ -129,7 +129,7 @@
         <div class="poodle-app-header-specimen__narrow">
           <AppHeader title="My Application">
             {#snippet center()}
-              <Tabs items={centerTabs} variant="strip" activeOutline defaultValue="editor" size="sm" ariaLabel="Destinations" />
+              <Tabs items={centerTabs} variant="block" activeEdge="outline" defaultValue="editor" size="sm" ariaLabel="Destinations" />
             {/snippet}
             {#snippet actions()}
               <Button sizeRole="chrome" variant="ghost">New</Button>

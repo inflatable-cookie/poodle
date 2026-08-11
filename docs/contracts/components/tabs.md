@@ -11,7 +11,7 @@ Updated: 2026-07-29
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
-  (card/pill/block/strip), reorderable tabs, closable tabs, tab counts,
+  (card/pill/block), reorderable tabs, closable tabs, tab counts,
   optional visual separators, trailing actions snippet, lightweight URL query sync,
   full-width flex layout, overflow collapse into a menu
 - Out of scope: docking
@@ -54,10 +54,10 @@ Updated: 2026-07-29
 | `value` | `string \| null` | `null` | no | controlled active tab |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active tab |
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
-| `variant` | `"card" \| "pill" \| "block" \| "strip"` | `"card"` | no | visual variant; `"card"` is the default |
-| `activeOutline` | `boolean` | `false` | no | opt-in outline on the active tab — the decoration the former `card` variant had by default (selected item border `accent-base` 32% mixed with `border-subtle`) |
+| `variant` | `"card" \| "pill" \| "block"` | `"card"` | no | visual variant; `"card"` is the default |
+| `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the active tab; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the active item (the decoration the former `card` variant had by default — selected item border `accent-base` 32% mixed with `border-subtle`), `"underline"` draws the accent edge along the inline-end side (bottom horizontal, right vertical — the former `strip` variant's indicator). The edge axis is mutually exclusive by construction |
 | `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
-| `bordered` | `boolean` | `true` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
+| `bordered` | `boolean` | `false` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. `card` is a plain baseline by default — `bordered` for tabs above content, `activeEdge`/`activeFill` for selection emphasis. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -279,7 +279,7 @@ them, wrapping modulo item count), not draggable.
 | Part | Attribute | Value |
 |------|-----------|-------|
 | root | `data-scope` / `data-part` | `tabs` / `root` |
-| root | `data-orientation` / `data-variant` / `data-bordered` / `data-active-outline` / `data-active-fill` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
+| root | `data-orientation` / `data-variant` / `data-bordered` / `data-active-edge` / `data-active-fill` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
 | list | `data-part` / `role` | `list` / `"tablist"` |
 | list | `aria-label` / `aria-orientation` | `ariaLabel` / `orientation` |
 | tab | `data-part` / `role` / `id` | `trigger` / `"tab"` / `poodle-tab-{instance}-{value}` |
@@ -349,8 +349,8 @@ not shared services.
 
 - Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
-- List: `display: inline-flex`, `flex-wrap: wrap` (card), `flex-wrap: nowrap` (pill/strip/block)
-- Pill/Strip/Block overflow: `overflow-x: auto; overflow-y: hidden`
+- List: `display: inline-flex`, `flex-wrap: wrap` (card), `flex-wrap: nowrap` (pill/block)
+- Pill/Block overflow: `overflow-x: auto; overflow-y: hidden`
 - Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
 
 ### Composition
@@ -408,7 +408,7 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-bottom` | `0` |
 | `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 
-### List — Pill + Strip + Block
+### List — Pill + Block
 
 | Property | Value |
 |----------|-------|
@@ -416,7 +416,7 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `overflow-x` | `auto` |
 | `overflow-y` | `hidden` |
 
-### List — Pill + Strip + Block vertical
+### List — Pill + Block vertical
 
 | Property | Value |
 |----------|-------|
@@ -432,28 +432,31 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
-### Switches on strip: the underline is replaced, not combined
+### The edge axis: one enum, mutually exclusive by construction
 
-`activeOutline` and `activeFill` apply to all four variants. On `strip` they
-interact with the variant's own selection mechanism, and the switch wins.
+`activeEdge` and `activeFill` apply to all variants. The border axis is a single
+enum because `outline` and `underline` are both borders on the item and conflict
+on the same property — a boolean pair would need suppression rules (the former
+`strip` variant carried exactly those: the boolean outline silently destroyed
+strip's indicator and was patched with strip-specific rules). The enum makes
+the conflict unrepresentable: exactly one edge value applies.
 
-Strip marks selection with a border on the item — `border-bottom` when
-horizontal, `border-right` when vertical — pulled over the list edge by a
-negative margin. Both switches decorate that same element, so the indicator and
-the decoration cannot coexist. When either switch is on, strip **drops its
-underline** and the switch provides the selection affordance instead. The
-negative margin is cleared with it, so the item no longer overlaps the list
-edge.
+`underline` draws the accent edge along the inline-end side — the former
+`strip` variant's indicator. `block` + `activeEdge="underline"` is the
+replacement for the deleted `strip` variant: block absorbs strip's list inline
+padding, item hover background, close-button margin-end tweak, and
+vertical-orientation handling, and keeps its own separators, full-width
+behaviour, and rounded-corner handling.
 
-`block` keeps its `border-left` separators under `activeOutline`; the outline
-covers the remaining sides. Solid fill overrides block's and strip's own
-item-hover backgrounds, so the fill does not revert on hover.
+`block` keeps its `border-left` separators under `activeEdge="outline"`; the
+outline covers the remaining sides. Solid fill overrides block's own
+item-hover background, so the fill does not revert on hover.
 
-### Item (activeOutline)
+### Item (activeEdge="outline")
 
-Applies when `activeOutline` is set, on every variant. A transparent border on
-every item keeps the layout stable when the selected item's border becomes
-visible — the opt-in outline never nudges the tab bar.
+Applies when `activeEdge` is `"outline"`, on every variant. A transparent border
+on every item keeps the layout stable when the selected item's border becomes
+visible — the outline never nudges the tab bar.
 
 The border sits on the **item**, the chip that wraps both the tab button and
 the close button. The tab is a `<button>` and cannot contain another button, so
@@ -464,7 +467,7 @@ item also carries the chip radius, so the outline is correctly rounded.
 |----------|-------|
 | `border` | `0.0625rem solid transparent` |
 
-### Item (activeOutline, selected)
+### Item (activeEdge="outline", selected)
 
 | Property | Value |
 |----------|-------|
@@ -472,6 +475,40 @@ item also carries the chip radius, so the outline is correctly rounded.
 
 This is the former `card` variant's selected-border value, so opting in restores
 exactly the outline the old variant drew by default.
+
+### Item (activeEdge="underline")
+
+Applies when `activeEdge` is `"underline"`, on every variant. The former strip
+indicator: a 0.125rem accent edge on the item, pulled over the list edge by a
+negative margin so it visually replaces the list's border line. The transparent
+reserve border keeps the bar from shifting when the selected item's edge
+becomes visible.
+
+| Property | Value |
+|----------|-------|
+| `border-bottom` | `0.125rem solid transparent` |
+| `margin-bottom` | `-0.0625rem` |
+
+### Item (activeEdge="underline", selected)
+
+| Property | Value |
+|----------|-------|
+| `border-bottom-color` | `var(--poodle-color-accent-base)` |
+
+### Item (activeEdge="underline", vertical)
+
+| Property | Value |
+|----------|-------|
+| `border-bottom` | `0` |
+| `border-right` | `0.125rem solid transparent` |
+| `margin-bottom` | `0` |
+| `margin-right` | `-0.125rem` |
+
+### Item (activeEdge="underline", vertical, selected)
+
+| Property | Value |
+|----------|-------|
+| `border-right-color` | `var(--poodle-color-accent-base)` |
 
 ### Tab button (all variants)
 
@@ -497,7 +534,7 @@ exactly the outline the old variant drew by default.
 One rule, applied by every variant and both opt-in switches:
 
 - **Item** carries the *chip* — `border-radius`, `background`, and the
-  `activeOutline` border. The item wraps the tab button and the close button,
+  `activeEdge` border. The item wraps the tab button and the close button,
   so a fill placed here encloses the close affordance. Placing it on the tab
   would leave close outside the selection, and the tab is a `<button>` that
   cannot contain another button.
@@ -556,34 +593,20 @@ switches to `text-inverse`, the same token the primary Button uses on
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 
-### List — Strip variant
-
-| Property | Value |
-|----------|-------|
-| `display` | `flex` |
-| `gap` | `0` |
-| `padding` | `0 var(--poodle-space-panel-x, 0.75rem)` |
-| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)` |
-
 ### List — Block variant
 
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
-| `width` | `fit-content` |
-| `max-width` | `100%` |
+| `width` | `100%` |
 | `gap` | `0` |
-| `padding` | `0` |
+| `padding` | `0 var(--poodle-tabs-block-inline-padding)` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)` |
 
-### Item — Strip variant
-
-| Property | Value |
-|----------|-------|
-| `border-bottom` | `0.125rem solid transparent` |
-| `margin-bottom` | `-0.0625rem` |
+`--poodle-tabs-block-inline-padding` is the block-side custom property that
+inherited the former strip variant's inline padding (value unchanged) — the
+list's outer padding holding the tabs off the bar edge.
 
 ### Item — Block variant
 
@@ -593,26 +616,6 @@ switches to `text-inverse`, the same token the primary Button uses on
 | `flex` | `0 0 auto` |
 | `min-width` | `0` |
 | `separator` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` between sibling items |
-
-### Item — Strip variant (selected)
-
-| Property | Value |
-|----------|-------|
-| `border-bottom-color` | `var(--poodle-color-accent-base)` |
-
-### Item — Strip variant (hover)
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent)` |
-
-### Tab — Strip variant
-
-| Property | Value |
-|----------|-------|
-| `min-height` | `2.25rem` |
-| `padding` | `0 0.625rem` |
-| `border-radius` | `0` |
 
 ### Tab — Block variant
 
@@ -635,62 +638,55 @@ Note: In the block variant, the selected background is applied on the **item wra
 
 ### Item — Block variant (hover)
 
-Note: In the block variant, the hover background is applied on the **item wrapper**, not the tab button itself.
+Note: In the block variant, the hover background is applied on the **item wrapper**, not the tab button itself. Block absorbed the former strip variant's item hover treatment; the selected item's hover keeps the accent-tinted surface fill.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-surface-hover) 40%, transparent)` |
+| `background` (unselected) | `color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent)` |
+| `background` (selected) | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))` |
 
-### Tab — Strip variant (selected)
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
-
-### List — Strip vertical
+### Close button — Block variant
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0` |
-| `overflow` | `visible` |
-| `border-bottom` | `0` |
+| `margin-left` | `-0.25rem` |
+| `margin-right` | `var(--poodle-tabs-block-close-margin-end)` |
+
+`--poodle-tabs-block-close-margin-end` is the block-side custom property that
+inherited the former strip variant's close-button margin-end tweak (values
+unchanged).
+
+### List — Block vertical
+
+| Property | Value |
+|----------|-------|
 | `border-right` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `overflow` | `visible` |
 
-### Item — Strip vertical
+Block absorbed the former strip variant's vertical list handling: the border
+shifts to the inline-end edge and the list stops clipping so the
+negative-margin underline can overlap it.
 
-| Property | Value |
-|----------|-------|
-| `border-bottom` | `0` |
-| `border-right` | `0.125rem solid transparent` |
-| `margin-bottom` | `0` |
-| `margin-right` | `-0.125rem` |
-
-### Item — Strip vertical (selected)
-
-| Property | Value |
-|----------|-------|
-| `border-right-color` | `var(--poodle-color-accent-base)` |
-
-### Item — Strip vertical (first-child)
-
-| Property | Value |
-|----------|-------|
-| `padding-top` | `0.75rem` |
-
-### Item — Strip vertical (last-child)
-
-| Property | Value |
-|----------|-------|
-| `padding-bottom` | `0.75rem` |
-
-### Tab — Strip vertical
+### Tab — Block vertical
 
 | Property | Value |
 |----------|-------|
 | `justify-content` | `center` |
 | `min-height` | `0` |
-| `min-width` | `2.25rem` |
-| `padding` | `0.5rem` |
+| `min-width` | `var(--poodle-size-control-height)` |
+| `padding` | `var(--poodle-space-control-x)` |
+
+### Tab — Block vertical (first-child)
+
+| Property | Value |
+|----------|-------|
+| `padding-top` | `0.75rem` |
+
+### Tab — Block vertical (last-child)
+
+| Property | Value |
+|----------|-------|
+| `padding-bottom` | `0.75rem` |
 
 ### Tab — Block vertical (selected)
 
@@ -810,7 +806,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
 - `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
-- Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-outline` and `data-active-fill` carry `activeOutline` / `activeFill` on the root
+- Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-edge` and `data-active-fill` carry `activeEdge` / `activeFill` on the root
 
 ## 10. GPUI Notes
 
@@ -818,9 +814,10 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Spec struct: `TabsSpec` in primitives crate holds tab definitions + variant
 - Component struct: `PoodleTabs` in components crate renders via `IntoElement`
 - Opacity multipliers centralized in spec: `pill_border_opacity() -> 0.68`, `pill_active_bg_opacity() -> 0.18`
-- The Rust `TabVariant` enum is `Card | Pill | Block`, matching the web union minus `strip` — the strip variant renders through the separate `TabStripSpec`/`TabStrip` component on the native targets. The `TabVariant` `Strip` member is a known gap, deliberately deferred; see the g13-013 batch log.
+- The Rust `TabVariant` enum is `Card | Pill | Block`, matching the web union. The former `strip` variant rendered through the separate `TabStripSpec`/`TabStrip` component on the native targets; its look is now `Block` + `activeEdge::Underline`.
 - The renamed `Card` variant renders icon, count, and close-button accessories on every tab, with the close button wired to `on_close` (inert when unwired, so an unwired X does not bubble to the tab and select what it was closing).
-- `activeOutline` maps to a 1px border on the selected tab element: `mix_srgb(accent, border-subtle, 0.32)` — the former card selected-border value. All tabs get a transparent 1px border so selection does not shift layout.
+- `activeEdge::Outline` maps to a 1px border on the selected tab element: `mix_srgb(accent, border-subtle, 0.32)` — the former card selected-border value. All tabs get a transparent 1px border so selection does not shift layout.
+- `activeEdge::Underline` maps to a 2px accent border on the inline-end side of the selected tab element (`border-bottom` horizontal, `border-right` vertical — `border_color_bottom` / `descriptor.border.color`), with a transparent reserve border on every tab so selection does not shift layout.
 - `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
@@ -851,8 +848,8 @@ Applies when `fullWidth` is set and orientation is horizontal.
 
 ### Tier 2: Visual Parity
 
-- [ ] all four variants render with exact token/dimension match
-- [ ] color-mix percentages match (82%, 18%, 74%, 92%, 96%; activeOutline 32%)
+- [ ] all three variants render with exact token/dimension match
+- [ ] color-mix percentages match (82%, 18%, 74%, 90%, 96%; outline edge 32%)
 - [ ] font-size 0.75rem, font-weight 600, line-height 1 match
 - [ ] min-height calc expressions match per variant
 - [ ] padding values match per variant
@@ -880,7 +877,7 @@ All preview apps must render the following specimens identically.
 
 ### Card variant (default, with panel)
 
-Card tabs with associated panel content:
+Card tabs with associated panel content, passing `bordered` explicitly:
 
 | Tab label | Panel content | State |
 |-----------|--------------|-------|
@@ -902,7 +899,7 @@ Card tabs simulating file tabs, with close buttons wired to `onClose`:
 
 ### Card variant (active outline)
 
-Card tabs with `activeOutline` set. The selected tab carries the former
+Card tabs with `activeEdge="outline"`. The selected tab carries the former
 `card` variant's outline (accent 32% border); everything else is flat:
 
 | Tab label | State |
@@ -944,9 +941,11 @@ Card tabs with icons and no panel below:
 | Settings | settings | inactive |
 | Users | users | inactive |
 
-### Strip variant (full-width bar with icons, closable, reorderable)
+### Block variant (each activeEdge value)
 
-Full-width strip tabs:
+Block tabs with every `activeEdge` value: the full-width shell bar
+(`"none"`), the accent outline (`"outline"`), and the accent underline —
+the former `strip` variant's look (`"underline"`):
 
 | Tab label | Icon | State |
 |-----------|------|-------|
@@ -955,9 +954,9 @@ Full-width strip tabs:
 | Terminal | terminal | inactive, closable |
 | Output | file-text | inactive, closable |
 
-### Strip variant — vertical (icon-only, collapsed panel)
+### Block variant — vertical (icon-only, collapsed panel)
 
-Vertical strip with icon-only tabs:
+Vertical block tabs with `activeEdge="underline"`, icon-only:
 
 | Icon | aria-label | State |
 |------|------------|-------|

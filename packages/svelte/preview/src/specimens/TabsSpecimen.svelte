@@ -77,6 +77,7 @@
       <Tabs
         items={basicTabs}
         defaultValue="overview"
+        bordered
         ariaLabel="Section tabs"
       >
         {#snippet children(activeValue)}
@@ -116,7 +117,7 @@
       <Tabs
         items={basicTabs}
         variant="card"
-        activeOutline
+        activeEdge="outline"
         defaultValue="overview"
         ariaLabel="Outlined section tabs"
       />
@@ -132,14 +133,14 @@
       />
     </SpecimenGroup>
 
-    <!-- The switches are variant-agnostic, so every variant needs coverage.
-         Only card had it, which is why the strip-indicator clash and the
-         block hover revert both shipped unseen. -->
+    <!-- The edges are variant-agnostic, so every variant needs coverage.
+         Only card had it, which is why the block hover revert shipped
+         unseen. -->
     <SpecimenGroup label="Pill variant (active outline)">
       <Tabs
         items={basicTabs}
         variant="pill"
-        activeOutline
+        activeEdge="outline"
         defaultValue="overview"
         ariaLabel="Outlined pill tabs"
       />
@@ -167,26 +168,27 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Strip variant (active outline — replaces the underline)">
+    <SpecimenGroup label="Block variant (active outline)">
       <div class="poodle-specimen__frame">
         <Tabs
           items={stripTabs}
-          variant="strip"
-          activeOutline
+          variant="block"
+          activeEdge="outline"
           defaultValue="editor"
-          ariaLabel="Outlined strip tabs"
+          ariaLabel="Outlined block tabs"
         />
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Strip variant (solid fill — replaces the underline)">
+    <SpecimenGroup label="Block variant (active underline — the former strip)">
       <div class="poodle-specimen__frame">
         <Tabs
           items={stripTabs}
-          variant="strip"
+          variant="block"
+          activeEdge="underline"
           activeFill="solid"
           defaultValue="editor"
-          ariaLabel="Solid strip tabs"
+          ariaLabel="Solid underlined block tabs"
         />
       </div>
     </SpecimenGroup>
@@ -223,11 +225,12 @@
       />
     </SpecimenGroup>
 
-    <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
+    <SpecimenGroup label="Block variant (full-width bar with icons, closable, reorderable)">
       <div class="poodle-specimen__frame">
         <Tabs
           items={stripTabs}
-          variant="strip"
+          variant="block"
+          activeEdge="underline"
           defaultValue="editor"
           reorderable
           ariaLabel="Workspace surfaces"
@@ -240,11 +243,12 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
+    <SpecimenGroup label="Block variant — vertical (icon-only, collapsed panel)">
       <div class="poodle-specimen__frame poodle-specimen__frame--row">
         <Tabs
           items={panelTabs}
-          variant="strip"
+          variant="block"
+          activeEdge="underline"
           orientation="vertical"
           defaultValue="explorer"
           ariaLabel="Side panel tabs"
@@ -255,13 +259,14 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
+    <SpecimenGroup label="Block variant — collapse toggle (click to toggle orientation)">
       <div class="poodle-specimen__frame poodle-specimen__frame--row">
         {#if !panelCollapsed}
           <div class="poodle-specimen__panel-expanded">
             <Tabs
               items={panelTabs}
-              variant="strip"
+              variant="block"
+              activeEdge="underline"
               orientation="horizontal"
               defaultValue="explorer"
               reorderable
@@ -275,7 +280,8 @@
         {:else}
           <Tabs
             items={panelTabs}
-            variant="strip"
+            variant="block"
+            activeEdge="underline"
             orientation="vertical"
             defaultValue="explorer"
             ariaLabel="Side panel tabs"
@@ -295,6 +301,7 @@
         items={detailTabs}
         variant="card"
         defaultValue="details"
+        bordered
         historyKey="tab"
         ariaLabel="Detail sections"
       >

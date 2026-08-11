@@ -277,7 +277,7 @@ pub use surface::SurfaceSpec;
 pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
-pub use tabs::{ActiveFill, TabsOverflowStrategy, TabsShedPart, TabsSpec};
+pub use tabs::{ActiveEdge, ActiveFill, TabsOverflowStrategy, TabsShedPart, TabsSpec};
 pub use text::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight};
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;

@@ -18,9 +18,9 @@ use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeRole, ShadowLayer,
 };
-use poodle_specs::{ActiveFill, TabVariant, TabsSpec};
+use poodle_specs::{ActiveEdge, ActiveFill, TabVariant, TabsSpec};
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
@@ -33,6 +33,44 @@ fn rounded_all(node: &mut Node, r: f32) {
     c.top_right = r;
     c.bottom_right = r;
     c.bottom_left = r;
+}
+
+/// The selection edge (contract §8 `activeEdge`): `Outline` draws a 1px accent
+/// border around the active tab — `mix_srgb(accent, border-subtle, 0.32)`,
+/// the former card selected-border value; `Underline` draws a 2px accent
+/// border along the inline-end side — bottom horizontal, right vertical —
+/// the former strip variant's indicator. Both keep a transparent reserve
+/// border on every tab so selection never shifts layout. The edge axis is an
+/// enum, so exactly one of these can apply. Applied after separator borders
+/// (which use per-side color overrides), so block separators survive.
+fn apply_active_edge(
+    node: &mut Node,
+    is_active: bool,
+    vertical: bool,
+    spec: &TabsSpec,
+    theme: &dyn ThemeProvider,
+) {
+    match spec.active_edge {
+        ActiveEdge::None => {}
+        ActiveEdge::Outline => {
+            let accent = theme.resolve_color(spec.indicator_token());
+            let border = theme.resolve_color(spec.list_border_token());
+            let selected = mix_srgb(accent, border, 0.32);
+            node.style.descriptor.border.width = 1.0;
+            node.style.descriptor.border.color = if is_active { selected } else { TRANSPARENT };
+        }
+        ActiveEdge::Underline => {
+            let accent = theme.resolve_color(spec.indicator_token());
+            let edge = if is_active { accent } else { TRANSPARENT };
+            if vertical {
+                node.style.border_right_width = Some(rem_to_px(0.125));
+                node.style.descriptor.border.color = edge;
+            } else {
+                node.style.border_bottom_width = Some(rem_to_px(0.125));
+                node.style.border_color_bottom = Some(edge);
+            }
+        }
+    }
 }
 
 /// Icon + label + count badge, the anatomy shared by all variants.
@@ -196,11 +234,9 @@ fn render_card(
     let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
     let radius = theme.resolve_radius("radius.control");
 
-    // activeOutline: the former card selected-border value on the selected
-    // tab. A transparent 1px border on every tab keeps the bar from shifting
-    // when the selected border becomes visible.
-    let outline_selected_border = mix_srgb(accent, border, 0.32);
-
+    // activeEdge: outline/underline borders on the selected tab, with a
+    // transparent reserve border on every tab so the bar never shifts when
+    // the selected border becomes visible (see `apply_active_edge`).
     let selected = spec.current_value().map(|s| s.to_string());
     let vertical = spec.is_vertical();
     let full_width = spec.uses_full_width();
@@ -267,18 +303,11 @@ fn render_card(
                     Some(with_alpha(accent, accent.3 * 0.18))
                 };
             }
-            if spec.active_outline {
-                s.descriptor.border.width = 1.0;
-                s.descriptor.border.color = if is_active {
-                    outline_selected_border
-                } else {
-                    ColorValue(0.0, 0.0, 0.0, 0.0)
-                };
-            }
             if is_disabled {
                 s.descriptor.opacity = disabled_opacity;
             }
         }
+        apply_active_edge(&mut tab_el, is_active, vertical, spec, theme);
         rounded_all(&mut tab_el, radius);
         tab_el.interaction.focusable = true;
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
@@ -368,6 +397,7 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
                 s.descriptor.opacity = disabled_opacity;
             }
         }
+        apply_active_edge(&mut tab_el, is_active, false, spec, theme);
         rounded_all(&mut tab_el, pill_radius);
         tab_el.interaction.focusable = true;
         // Pill is always horizontal.
@@ -448,13 +478,16 @@ fn render_block(
                 s.flex_fill = true;
                 s.fill_width = true;
             }
-            // Sibling separator: left border (horizontal) / top border (vertical).
+            // Sibling separator: left border (horizontal) / top border
+            // (vertical). Per-side color overrides, so the selection edge
+            // (which owns `descriptor.border.color`) does not clobber them.
             if idx > 0 {
-                s.descriptor.border.color = separator;
                 if vertical {
                     s.border_top_width = Some(1.0);
+                    s.border_color_top = Some(separator);
                 } else {
                     s.border_left_width = Some(1.0);
+                    s.border_color_left = Some(separator);
                 }
             }
             if is_active {
@@ -464,6 +497,7 @@ fn render_block(
                 s.descriptor.opacity = disabled_opacity;
             }
         }
+        apply_active_edge(&mut tab_el, is_active, vertical, spec, theme);
         tab_el.interaction.focusable = true;
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
@@ -477,7 +511,7 @@ fn render_block(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::{ActiveFill, TabDefinition};
+    use poodle_specs::{ActiveEdge, ActiveFill, TabDefinition};
     use std::sync::Mutex;
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -553,11 +587,11 @@ mod tests {
     }
 
     #[test]
-    fn card_renderer_active_outline_borders_only_the_selected_tab() {
+    fn card_renderer_active_edge_outline_borders_only_the_selected_tab() {
         let theme = theme();
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
             .with_variant(TabVariant::Card)
-            .with_active_outline(true)
+            .with_active_edge(ActiveEdge::Outline)
             .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
@@ -589,5 +623,68 @@ mod tests {
         let root = tabs(&spec, &theme, None, None);
         assert_eq!(tab_of(&root, "a").style.descriptor.border.width, 0.0);
         assert_eq!(tab_of(&root, "b").style.descriptor.border.width, 0.0);
+    }
+
+    #[test]
+    fn block_renderer_underline_edges_only_the_selected_tab() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
+            .with_variant(TabVariant::Block)
+            .with_active_edge(ActiveEdge::Underline)
+            .with_value("a");
+
+        let root = tabs(&spec, &theme, None, None);
+        let accent = theme.resolve_color(spec.indicator_token());
+
+        let active = tab_of(&root, "a");
+        assert_eq!(active.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(active.style.border_color_bottom, Some(accent));
+
+        // Unselected tabs keep a transparent reserve edge so the underline
+        // never shifts the bar when selection moves.
+        let inactive = tab_of(&root, "b");
+        assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
+    }
+
+    #[test]
+    fn block_renderer_vertical_underline_uses_the_inline_end_edge() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
+            .with_variant(TabVariant::Block)
+            .with_orientation(poodle_specs::Orientation::Vertical)
+            .with_active_edge(ActiveEdge::Underline)
+            .with_value("a");
+
+        let root = tabs(&spec, &theme, None, None);
+        let accent = theme.resolve_color(spec.indicator_token());
+
+        let active = tab_of(&root, "a");
+        assert_eq!(active.style.border_right_width, Some(rem_to_px(0.125)));
+        assert_eq!(active.style.descriptor.border.color, accent);
+    }
+
+    #[test]
+    fn block_renderer_keeps_separators_under_outline() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
+            .with_variant(TabVariant::Block)
+            .with_active_edge(ActiveEdge::Outline)
+            .with_value("a");
+
+        let root = tabs(&spec, &theme, None, None);
+        let separator = with_alpha(
+            theme.resolve_color("color.border.subtle"),
+            theme.resolve_color("color.border.subtle").3 * 0.72,
+        );
+
+        // The second item's left separator survives the outline: per-side
+        // color override wins over the uniform outline border.
+        let second = tab_of(&root, "b");
+        assert_eq!(second.style.border_left_width, Some(1.0));
+        assert_eq!(second.style.border_color_left, Some(separator));
+        // The outline still applies to the remaining sides.
+        assert_eq!(second.style.descriptor.border.width, 1.0);
+        assert_eq!(second.style.descriptor.border.color, TRANSPARENT);
     }
 }

@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
-use poodle_specs::{ActiveFill, ControlDensity, NavigationMenuSpec};
+use poodle_specs::{ActiveEdge, ActiveFill, ControlDensity, NavigationMenuSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
@@ -65,15 +65,15 @@ pub fn navigation_menu(
     // Hover/focus trigger: background = color-mix(accent 12%, transparent).
     let hover_bg = with_alpha(accent, accent.3 * 0.12);
 
-    // Idle trigger: surface@88% fill, borderless since g13.016 (the border
-    // is opt-in via `activeOutline`).
+    // Idle trigger: surface@88% fill, borderless since g13.016 (the edge
+    // is opt-in via `activeEdge`).
     let idle_bg = with_alpha(surface, surface.3 * 0.88);
 
     // Active (open) trigger: accent@16% fill.
     let active_bg = with_alpha(accent, accent.3 * 0.16);
 
-    // activeOutline: the former default trigger border, now opt-in. Open
-    // trigger border = accent-42% ↔ border-default (the old open border
+    // activeEdge::Outline: the former default trigger border, now opt-in.
+    // Open trigger border = accent-42% ↔ border-default (the old open border
     // value); other triggers carry a transparent reserve border so selection
     // does not shift layout.
     let outline_selected_border = mix_srgb(accent, border_default, 0.42);
@@ -100,17 +100,22 @@ pub fn navigation_menu(
         let solid = is_active && spec.active_fill == ActiveFill::Solid;
         let text_color = if solid { text_inverse } else { text_primary };
 
-        let border_on = spec.active_outline;
+        // activeEdge — the border axis is an enum, so exactly one of
+        // outline/underline applies. Outline restores the former default
+        // trigger border; underline draws the accent bottom edge. Both keep a
+        // transparent reserve on every trigger so selection does not shift
+        // layout.
+        let outline_on = spec.active_edge == ActiveEdge::Outline;
         let (bg, border_color, border_width) = if is_active {
             (
                 if solid { accent } else { active_bg },
-                if border_on { outline_selected_border } else { TRANSPARENT },
-                if border_on { border_w } else { 0.0 },
+                if outline_on { outline_selected_border } else { TRANSPARENT },
+                if outline_on { border_w } else { 0.0 },
             )
         } else {
-            // Reserve a transparent border under activeOutline so the open
+            // Reserve a transparent border under the outline so the open
             // trigger's visible border does not shift the list.
-            (idle_bg, TRANSPARENT, if border_on { border_w } else { 0.0 })
+            (idle_bg, TRANSPARENT, if outline_on { border_w } else { 0.0 })
         };
 
         // Contract §3 `icon`: an entry with a leading icon composes icon +
@@ -141,6 +146,10 @@ pub fn navigation_menu(
             pad.right = pad_x;
             s.descriptor.border.width = border_width;
             s.descriptor.border.color = border_color;
+            if spec.active_edge == ActiveEdge::Underline {
+                s.border_bottom_width = Some(rem_to_px(0.125));
+                s.border_color_bottom = Some(if is_active { accent } else { TRANSPARENT });
+            }
             s.descriptor.background = Some(bg);
             s.descriptor.cursor = CursorHint::Pointer;
         }
@@ -290,11 +299,11 @@ mod tests {
     }
 
     #[test]
-    fn active_outline_reserves_transparent_border_and_marks_open_trigger() {
+    fn active_edge_outline_reserves_transparent_border_and_marks_open_trigger() {
         let theme = theme();
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
-            .with_active_outline(true);
+            .with_active_edge(ActiveEdge::Outline);
         let accent = theme.resolve_color("color.accent.base");
         let border_default = theme.resolve_color("color.border.default");
 
@@ -309,6 +318,26 @@ mod tests {
         let closed = trigger_of(&root, "B");
         assert_eq!(closed.style.descriptor.border.width, rem_to_px(0.0625));
         assert_eq!(closed.style.descriptor.border.color, TRANSPARENT);
+    }
+
+    #[test]
+    fn active_underline_edges_only_the_open_trigger() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items())
+            .with_value("a")
+            .with_active_edge(ActiveEdge::Underline);
+        let accent = theme.resolve_color("color.accent.base");
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open = trigger_of(&root, "A");
+        assert_eq!(open.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(open.style.border_color_bottom, Some(accent));
+
+        // Closed triggers keep a transparent reserve edge so the underline
+        // never shifts the list.
+        let closed = trigger_of(&root, "B");
+        assert_eq!(closed.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(closed.style.border_color_bottom, Some(TRANSPARENT));
     }
 
     #[test]

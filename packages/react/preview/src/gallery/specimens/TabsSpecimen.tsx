@@ -140,7 +140,7 @@ export function TabsSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Card variant (default, with indicator line)">
-          <Tabs items={basicTabs} defaultValue="overview" ariaLabel="Section tabs">
+          <Tabs items={basicTabs} defaultValue="overview" bordered ariaLabel="Section tabs">
             {(activeValue) => (
               <p>
                 Active tab: <strong>{activeValue}</strong>
@@ -176,18 +176,18 @@ export function TabsSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Card variant (active outline)">
-          <Tabs items={basicTabs} variant="card" activeOutline defaultValue="overview" ariaLabel="Outlined section tabs" />
+          <Tabs items={basicTabs} variant="card" activeEdge="outline" defaultValue="overview" ariaLabel="Outlined section tabs" />
         </SpecimenGroup>
 
         <SpecimenGroup label="Card variant (solid fill)">
           <Tabs items={basicTabs} variant="card" activeFill="solid" defaultValue="overview" ariaLabel="Solid section tabs" />
         </SpecimenGroup>
 
-        {/* The switches are variant-agnostic, so every variant needs coverage.
-            Only card had it, which is why the strip-indicator clash and the
-            block hover revert both shipped unseen. */}
+        {/* The edges are variant-agnostic, so every variant needs coverage.
+            Only card had it, which is why the block hover revert shipped
+            unseen. */}
         <SpecimenGroup label="Pill variant (active outline)">
-          <Tabs items={basicTabs} variant="pill" activeOutline defaultValue="overview" ariaLabel="Outlined pill tabs" />
+          <Tabs items={basicTabs} variant="pill" activeEdge="outline" defaultValue="overview" ariaLabel="Outlined pill tabs" />
         </SpecimenGroup>
 
         <SpecimenGroup label="Pill variant (solid fill)">
@@ -200,15 +200,15 @@ export function TabsSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Strip variant (active outline — replaces the underline)">
+        <SpecimenGroup label="Block variant (active outline)">
           <div style={frameStyle}>
-            <Tabs items={stripTabs} variant="strip" activeOutline defaultValue="editor" ariaLabel="Outlined strip tabs" />
+            <Tabs items={stripTabs} variant="block" activeEdge="outline" defaultValue="editor" ariaLabel="Outlined block tabs" />
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Strip variant (solid fill — replaces the underline)">
+        <SpecimenGroup label="Block variant (active underline — the former strip)">
           <div style={frameStyle}>
-            <Tabs items={stripTabs} variant="strip" activeFill="solid" defaultValue="editor" ariaLabel="Solid strip tabs" />
+            <Tabs items={stripTabs} variant="block" activeEdge="underline" activeFill="solid" defaultValue="editor" ariaLabel="Solid underlined block tabs" />
           </div>
         </SpecimenGroup>
 
@@ -229,11 +229,12 @@ export function TabsSpecimen() {
           <Tabs items={iconTabs} defaultValue="home" ariaLabel="Icon tabs" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
+        <SpecimenGroup label="Block variant (full-width bar with icons, closable, reorderable)">
           <div style={frameStyle}>
             <Tabs
               items={stripTabs}
-              variant="strip"
+              variant="block"
+              activeEdge="underline"
               defaultValue="editor"
               reorderable
               ariaLabel="Workspace surfaces"
@@ -246,11 +247,12 @@ export function TabsSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
+        <SpecimenGroup label="Block variant — vertical (icon-only, collapsed panel)">
           <div style={frameRowStyle}>
             <Tabs
               items={panelTabs}
-              variant="strip"
+              variant="block"
+              activeEdge="underline"
               orientation="vertical"
               defaultValue="explorer"
               ariaLabel="Side panel tabs"
@@ -261,13 +263,14 @@ export function TabsSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
+        <SpecimenGroup label="Block variant — collapse toggle (click to toggle orientation)">
           <div style={frameRowStyle}>
             {!panelCollapsed ? (
               <div style={panelExpandedStyle}>
                 <Tabs
                   items={panelTabs}
-                  variant="strip"
+                  variant="block"
+                  activeEdge="underline"
                   orientation="horizontal"
                   defaultValue="explorer"
                   reorderable
@@ -281,7 +284,8 @@ export function TabsSpecimen() {
             ) : (
               <Tabs
                 items={panelTabs}
-                variant="strip"
+                variant="block"
+                activeEdge="underline"
                 orientation="vertical"
                 defaultValue="explorer"
                 ariaLabel="Side panel tabs"
@@ -307,7 +311,7 @@ export function TabsSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Card variant with counts, separators, and URL sync">
-          <Tabs items={detailTabs} variant="card" defaultValue="details" historyKey="tab" ariaLabel="Detail sections">
+          <Tabs items={detailTabs} variant="card" defaultValue="details" bordered historyKey="tab" ariaLabel="Detail sections">
             {(activeValue) => (
               <p>
                 Active tab: <strong>{activeValue}</strong>

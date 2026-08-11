@@ -36,6 +36,7 @@ import {
   useUiPresentation,
 } from "./presentation";
 import type {
+  ActiveEdge,
   ActiveFill,
   ControlDensity,
   ControlSize,
@@ -55,11 +56,13 @@ export interface TabsProps {
   items?: TabItem[];
   variant?: TabVariant;
   /**
-   * Opt-in outline on the active tab — the decoration the former `card`
-   * variant had by default. Reuses the old card selected-border value so
-   * the opted-in look matches what card gave.
+   * Selection edge on the active tab: `"none"` draws no edge, `"outline"`
+   * draws the accent border around the active item (the former `card`
+   * variant's selected-border value), `"underline"` draws the accent edge
+   * along the inline-end side (the former `strip` variant's indicator).
+   * The edge axis is an enum, so outline and underline cannot both apply.
    */
-  activeOutline?: boolean;
+  activeEdge?: ActiveEdge;
   /**
    * Selection treatment on the active tab: `"tint"` is the accent-tinted
    * fill; `"solid"` fills the tab with `accent-base` and switches the
@@ -121,11 +124,11 @@ export function Tabs({
   defaultValue = null,
   items = [],
   variant = "card",
-  activeOutline = false,
+  activeEdge = "none",
   activeFill = "tint",
   orientation = "horizontal",
   activationMode = "automatic",
-  bordered = true,
+  bordered = false,
   size = null,
   sizeRole = "chrome",
   density = null,
@@ -537,7 +540,7 @@ export function Tabs({
       className="poodle-tabs"
       data-variant={variant}
       data-bordered={bordered}
-      data-active-outline={activeOutline || undefined}
+      data-active-edge={activeEdge}
       data-active-fill={activeFill}
       data-orientation={orientation}
       data-size={resolvedSize}

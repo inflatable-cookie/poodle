@@ -5,7 +5,8 @@ use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
-    ControlDensity, ControlSize, Orientation, ActiveFill, TabDefinition, TabVariant, TabsSpec,
+    ActiveEdge, ControlDensity, ControlSize, Orientation, ActiveFill, TabDefinition, TabVariant,
+    TabsSpec,
 };
 
 use crate::app_state::AppState;
@@ -95,7 +96,18 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             js_tabs(
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Card)
-                    .with_active_outline(true)
+                    .with_active_edge(ActiveEdge::Outline)
+                    .with_value("overview"),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Card — active underline",
+            secondary,
+            js_tabs(
+                &TabsSpec::new(items.clone())
+                    .with_variant(TabVariant::Card)
+                    .with_active_edge(ActiveEdge::Underline)
                     .with_value("overview"),
                 theme,
             ),
@@ -150,6 +162,28 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Block)
                     .with_value("details"),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Block — active outline",
+            secondary,
+            js_tabs(
+                &TabsSpec::new(items.clone())
+                    .with_variant(TabVariant::Block)
+                    .with_active_edge(ActiveEdge::Outline)
+                    .with_value("overview"),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Block — active underline (the former strip)",
+            secondary,
+            js_tabs(
+                &TabsSpec::new(items.clone())
+                    .with_variant(TabVariant::Block)
+                    .with_active_edge(ActiveEdge::Underline)
+                    .with_value("overview"),
                 theme,
             ),
         ))

@@ -69,7 +69,7 @@
     size = null,
     sizeRole = "chrome",
     density = null,
-    tabVariant = "strip",
+    tabVariant = "block",
     items = [],
     value = null,
     ariaLabel = null,
@@ -426,6 +426,7 @@
       {#if showTabs}
         <Tabs
           variant={tabVariant}
+          activeEdge="underline"
           orientation="vertical"
           {size}
           {sizeRole}
@@ -453,6 +454,7 @@
         <div class="poodle-dock-region__tabs" use:observeStrip>
           <Tabs
             variant={tabVariant}
+            activeEdge="underline"
             orientation="horizontal"
             {size}
             {sizeRole}
@@ -490,6 +492,7 @@
         <div class="poodle-dock-region__tabs" use:observeStrip>
           <Tabs
             variant={tabVariant}
+            activeEdge="underline"
             orientation="horizontal"
             {size}
             {sizeRole}
