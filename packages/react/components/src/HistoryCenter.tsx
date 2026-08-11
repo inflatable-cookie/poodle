@@ -269,7 +269,7 @@ export function HistoryCenter({
     <div className="poodle-history-center-popover">
       <span className="poodle-history-center__trigger">
         <IconButton
-          icon="arrow-left"
+          icon="undo"
           ariaLabel={undoLabel}
           tooltip={undoLabel}
           variant="ghost"
@@ -497,7 +497,7 @@ export function HistoryCenter({
         </Popover>
 
         <IconButton
-          icon="arrow-right"
+          icon="redo"
           ariaLabel={redoLabel}
           tooltip={redoLabel}
           variant="ghost"

@@ -30,6 +30,9 @@
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
+      <!-- Only the first group opens by default. The popover portals to the
+           theme root, so several open at once stack on top of each other
+           regardless of where their triggers sit. -->
       <SpecimenGroup label="linear">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
@@ -49,7 +52,7 @@
             totalEntries={4}
             branches={branches}
             totalBranches={2}
-            defaultOpen
+
             canUndo
             onSelectEntry={(id) => console.log("select", id)}
             onCheckout={(branchId, entryId) => console.log("checkout", branchId, entryId)}
@@ -64,7 +67,7 @@
           <HistoryCenter
             entries={rejectionEntries}
             totalEntries={2}
-            defaultOpen
+
             rejection="Branch name is already taken on the authority"
           />
         </div>
@@ -72,13 +75,13 @@
 
       <SpecimenGroup label="empty">
         <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter entries={[]} totalEntries={0} defaultOpen />
+          <HistoryCenter entries={[]} totalEntries={0} />
         </div>
       </SpecimenGroup>
 
       <SpecimenGroup label="loading">
         <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter entries={[]} totalEntries={0} status="loading" defaultOpen />
+          <HistoryCenter entries={[]} totalEntries={0} status="loading" />
         </div>
       </SpecimenGroup>
     </div>

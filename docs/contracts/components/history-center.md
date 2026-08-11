@@ -31,9 +31,9 @@ prop shapes below are structurally compatible with the authority's
 ```text
 HistoryCenter
 ├── Trigger cluster
-│   ├── IconButton undo (enabled from canUndo, busy)
+│   ├── IconButton undo (icon `undo`; enabled from canUndo, busy)
 │   ├── IconButton list (opens the popover)
-│   └── IconButton redo (enabled from canRedo, busy)
+│   └── IconButton redo (icon `redo`; enabled from canRedo, busy)
 └── Popover
     └── Surface
         ├── Header: title + totals

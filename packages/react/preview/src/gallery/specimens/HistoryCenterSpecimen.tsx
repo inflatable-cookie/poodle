@@ -51,7 +51,7 @@ export function HistoryCenterSpecimen() {
               totalEntries={4}
               branches={branches}
               totalBranches={2}
-              defaultOpen
+
               canUndo
               onSelectEntry={(id) => console.log("select", id)}
               onCheckout={(branchId, entryId) => console.log("checkout", branchId, entryId)}
@@ -66,7 +66,7 @@ export function HistoryCenterSpecimen() {
             <HistoryCenter
               entries={rejectionEntries}
               totalEntries={2}
-              defaultOpen
+
               rejection="Branch name is already taken on the authority"
             />
           </div>
@@ -74,13 +74,13 @@ export function HistoryCenterSpecimen() {
 
         <SpecimenGroup label="empty">
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter entries={[]} totalEntries={0} defaultOpen />
+            <HistoryCenter entries={[]} totalEntries={0} />
           </div>
         </SpecimenGroup>
 
         <SpecimenGroup label="loading">
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter entries={[]} totalEntries={0} status="loading" defaultOpen />
+            <HistoryCenter entries={[]} totalEntries={0} status="loading" />
           </div>
         </SpecimenGroup>
       </div>

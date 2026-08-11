@@ -77,6 +77,7 @@ import { pencil } from "./icons/pencil";
 import { play } from "./icons/play";
 import { plus } from "./icons/plus";
 import { quote } from "./icons/quote";
+import { redo } from "./icons/redo";
 import { refreshCw } from "./icons/refresh-cw";
 import { save } from "./icons/save";
 import { search } from "./icons/search";
@@ -91,6 +92,7 @@ import { trash2 } from "./icons/trash-2";
 import { trendingDown } from "./icons/trending-down";
 import { trendingUp } from "./icons/trending-up";
 import { triangleAlert } from "./icons/triangle-alert";
+import { undo } from "./icons/undo";
 import { unlock } from "./icons/unlock";
 import { upload } from "./icons/upload";
 import { user } from "./icons/user";
@@ -180,6 +182,7 @@ export {
   play,
   plus,
   quote,
+  redo,
   refreshCw,
   save,
   search,
@@ -194,6 +197,7 @@ export {
   trendingDown,
   trendingUp,
   triangleAlert,
+  undo,
   unlock,
   upload,
   user,
@@ -284,6 +288,7 @@ export const defaultLucideIconSet: IconSet = {
   "play": play,
   "plus": plus,
   "quote": quote,
+  "redo": redo,
   "refresh-cw": refreshCw,
   "save": save,
   "search": search,
@@ -298,6 +303,7 @@ export const defaultLucideIconSet: IconSet = {
   "trending-down": trendingDown,
   "trending-up": trendingUp,
   "triangle-alert": triangleAlert,
+  "undo": undo,
   "unlock": unlock,
   "upload": upload,
   "user": user,

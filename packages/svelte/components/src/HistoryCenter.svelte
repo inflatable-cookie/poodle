@@ -284,7 +284,7 @@
 <div class="poodle-history-center-popover">
   <span class="poodle-history-center__trigger">
     <IconButton
-      icon="arrow-left"
+      icon="undo"
       ariaLabel={undoLabel}
       tooltip={undoLabel}
       variant="ghost"
@@ -506,7 +506,7 @@
     </Popover>
 
     <IconButton
-      icon="arrow-right"
+      icon="redo"
       ariaLabel={redoLabel}
       tooltip={redoLabel}
       variant="ghost"
