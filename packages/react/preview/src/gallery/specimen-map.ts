@@ -4,6 +4,7 @@ import { AccordionSpecimen } from "./specimens/AccordionSpecimen";
 import { ActionDiscoveryPanelSpecimen } from "./specimens/ActionDiscoveryPanelSpecimen";
 import { AgentQuestionRecordSpecimen } from "./specimens/AgentQuestionRecordSpecimen";
 import { AgentQuestionSpecimen } from "./specimens/AgentQuestionSpecimen";
+import { AgentSubagentSpecimen } from "./specimens/AgentSubagentSpecimen";
 import { AlertDialogSpecimen } from "./specimens/AlertDialogSpecimen";
 import { AppHeaderSpecimen } from "./specimens/AppHeaderSpecimen";
 import { MessageCenterSpecimen } from "./specimens/MessageCenterSpecimen";
@@ -165,6 +166,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
   "agent-question": AgentQuestionSpecimen,
   "agent-question-record": AgentQuestionRecordSpecimen,
+  "agent-subagent": AgentSubagentSpecimen,
   "alert-dialog": AlertDialogSpecimen,
   "app-header": AppHeaderSpecimen,
   "message-center": MessageCenterSpecimen,

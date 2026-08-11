@@ -11,6 +11,7 @@ import {
 
 import { AgentMessage } from "./AgentMessage";
 import { AgentQuestionRecord } from "./AgentQuestionRecord";
+import { AgentSubagent } from "./AgentSubagent";
 import { ChangedFiles } from "./ChangedFiles";
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
@@ -45,6 +46,7 @@ export interface AgentTranscriptProps {
   onChangedFilesToggle?: (id: string) => void;
   onOpenDiff?: (id: string) => void;
   onFileSelect?: (path: string) => void;
+  onOpenChild?: (childId: string) => void;
   onScrollStateChange?: (pinned: boolean) => void;
 }
 
@@ -69,6 +71,7 @@ export function AgentTranscript({
   onChangedFilesToggle,
   onOpenDiff,
   onFileSelect,
+  onOpenChild,
   onScrollStateChange,
 }: AgentTranscriptProps) {
   const presentation = useUiPresentation();
@@ -291,6 +294,17 @@ export function AgentTranscript({
           answer={block.answer}
           size={resolvedSize}
           density={resolvedDensity}
+        />
+      );
+    }
+    if (block.kind === "subagent-group") {
+      return (
+        <AgentSubagent
+          item={block.subagent}
+          detailLines={block.detailLines ?? []}
+          size={resolvedSize}
+          density={resolvedDensity}
+          onOpenChild={onOpenChild ? () => onOpenChild(block.subagent.id) : undefined}
         />
       );
     }
