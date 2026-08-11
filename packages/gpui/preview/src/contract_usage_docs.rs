@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::{Mutex, OnceLock};
 
 use crate::component_registry::contract_doc_path;
 use serde::Deserialize;
@@ -11,6 +12,9 @@ pub struct ContractUsageDocs {
     pub slots: Vec<UsageSlot>,
     pub events: Vec<UsageEvent>,
 }
+
+static USAGE_DOCS: OnceLock<Mutex<std::collections::HashMap<String, ContractUsageDocs>>> =
+    OnceLock::new();
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UsageProp {
@@ -69,6 +73,17 @@ struct GeneratedEventDoc {
 }
 
 pub fn load_contract_usage_docs(slug: &str) -> ContractUsageDocs {
+    let cache = USAGE_DOCS.get_or_init(|| Mutex::new(std::collections::HashMap::new()));
+    if let Some(docs) = cache.lock().unwrap().get(slug).cloned() {
+        return docs;
+    }
+
+    let docs = load_contract_usage_docs_uncached(slug);
+    cache.lock().unwrap().insert(slug.to_string(), docs.clone());
+    docs
+}
+
+fn load_contract_usage_docs_uncached(slug: &str) -> ContractUsageDocs {
     if let Some(docs) = load_generated_usage_docs(slug) {
         return docs;
     }

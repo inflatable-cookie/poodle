@@ -615,10 +615,13 @@ impl AppState {
 
     /// Apply queued node-specimen events to the specimen state. Called at the
     /// top of every render so handler-triggered changes take effect in the
-    /// frame the backend's repaint request produces.
-    pub fn drain_node_events(&mut self) {
+    /// frame the backend's repaint request produces. Returns whether specimen
+    /// content changed and its virtualized page measurements must be reset.
+    pub fn drain_node_events(&mut self) -> bool {
         let events: Vec<NodeSpecimenEvent> = std::mem::take(&mut *self.node_events.lock().unwrap());
+        let mut specimen_changed = false;
         for event in events {
+            specimen_changed |= !matches!(&event, NodeSpecimenEvent::Chrome(_));
             match event {
                 NodeSpecimenEvent::Toggle(key) => {
                     self.specimens.toggle(&key);
@@ -763,6 +766,7 @@ impl AppState {
                 },
             }
         }
+        specimen_changed
     }
 
     pub fn set_theme(&mut self, preset: ThemePreset) {

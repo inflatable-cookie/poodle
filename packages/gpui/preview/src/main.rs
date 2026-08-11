@@ -83,12 +83,123 @@ actions!(poodle_preview, [Quit, CloseWindow]);
 /// Root view for the preview application.
 struct PreviewRoot {
     state: AppState,
+    catalogue_sidebar: Entity<CatalogueSidebar>,
+    component_page_list: ListState,
+    component_page_key: Option<ComponentPageKey>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct ComponentPageKey {
+    slug: &'static str,
+    theme: ThemePreset,
+    density: Density,
+    control_size: ControlSize,
+    contrast: u32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct CatalogueSidebarKey {
+    theme: ThemePreset,
+    density: Density,
+    control_size: ControlSize,
+    contrast: u32,
+    component_search: String,
+    active_component_slug: Option<String>,
+}
+
+struct CatalogueSidebar {
+    key: CatalogueSidebarKey,
+    theme: poodle_gpui::GpuiThemeProvider,
+    node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+}
+
+impl CatalogueSidebarKey {
+    fn from_state(state: &AppState) -> Self {
+        Self {
+            theme: state.theme_preset,
+            density: state.density,
+            control_size: state.control_size,
+            contrast: state.contrast.to_bits(),
+            component_search: state.component_search.clone(),
+            active_component_slug: state.active_component_slug.clone(),
+        }
+    }
+}
+
+impl CatalogueSidebar {
+    fn new(state: &AppState) -> Self {
+        Self {
+            key: CatalogueSidebarKey::from_state(state),
+            theme: state.theme.clone(),
+            node_events: std::sync::Arc::clone(&state.node_events),
+        }
+    }
+
+    fn sync(&mut self, state: &AppState, cx: &mut Context<Self>) {
+        let key = CatalogueSidebarKey::from_state(state);
+        if self.key != key {
+            self.key = key;
+            self.theme = state.theme.clone();
+            cx.notify();
+        }
+    }
+}
+
+impl Render for CatalogueSidebar {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        let border_subtle = self.theme.resolve_color("color.border.subtle");
+        let groups = grouped_components(&self.key.component_search);
+        let sidebar_groups: Vec<SidebarNavGroup> = groups
+            .iter()
+            .map(|group| {
+                SidebarNavGroup::new(
+                    group.tag.label().to_ascii_lowercase(),
+                    group
+                        .items
+                        .iter()
+                        .map(|component| {
+                            SidebarNavItem::new(component.slug, component.display_name)
+                        })
+                        .collect(),
+                )
+                .with_label(group.tag.label())
+            })
+            .collect();
+        let mut sidebar_spec = SidebarNavSpec::new(sidebar_groups)
+            .with_aria_label("Component catalogue")
+            .with_density(sidebar_nav_density(self.key.density))
+            .with_size(sidebar_nav_size(self.key.control_size))
+            .with_size_role(SemanticControlSizeRole::Chrome);
+        if let Some(active_slug) = self.key.active_component_slug.as_deref() {
+            sidebar_spec = sidebar_spec.with_value(active_slug);
+        }
+
+        div()
+            .id("catalogue-sidebar")
+            .size_full()
+            .overflow_y_scroll()
+            .border_r_1()
+            .border_color(color_to_hsla(border_subtle).opacity(0.6))
+            .child(SidebarNav::from_spec(sidebar_spec, &self.theme).on_change({
+                let queue = std::sync::Arc::clone(&self.node_events);
+                std::sync::Arc::new(move |val: &str| {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                        ChromeEvent::ActiveComponent(val.to_string()),
+                    ));
+                })
+            }))
+    }
 }
 
 impl PreviewRoot {
-    fn new() -> Self {
+    fn new(cx: &mut Context<Self>) -> Self {
+        let state = AppState::new();
+        let catalogue_sidebar = cx.new(|_| CatalogueSidebar::new(&state));
         Self {
-            state: AppState::new(),
+            state,
+            catalogue_sidebar,
+            component_page_list: ListState::new(3, ListAlignment::Top, px(256.0)),
+            component_page_key: None,
         }
     }
 }
@@ -114,7 +225,10 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // Apply interactions node-backed specimens reported since the last frame.
-        self.state.drain_node_events();
+        let specimen_changed = self.state.drain_node_events();
+        if specimen_changed {
+            self.component_page_list.reset(3);
+        }
         // Restart the backend's generated-id counter so a node that declares no
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.
@@ -555,7 +669,7 @@ impl PreviewRoot {
 
     /// Section content router.
     /// `available_h` is the pixel height remaining after top bar + controls.
-    fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+    fn render_section_content(&mut self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let section_content = match self.state.section {
             Section::Components => self.render_components_section(available_h, cx),
             Section::Tokens => self.render_tokens_section(available_h, cx),
@@ -718,59 +832,24 @@ impl PreviewRoot {
     }
 
     /// Unified component catalogue mirroring the Svelte preview information architecture.
-    fn render_components_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+    fn render_components_section(&mut self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let border_subtle = theme.resolve_color("color.border.subtle");
         let text_secondary = theme.resolve_color("color.text.secondary");
         let elevated_bg = theme.resolve_color("color.background.elevated");
-        let groups = grouped_components(&self.state.component_search);
         let active_component = self
             .state
             .active_component_slug
             .as_deref()
             .and_then(find_component);
-        let sidebar_groups: Vec<SidebarNavGroup> = groups
-            .iter()
-            .map(|group| {
-                SidebarNavGroup::new(
-                    group.tag.label().to_ascii_lowercase(),
-                    group
-                        .items
-                        .iter()
-                        .map(|component| {
-                            SidebarNavItem::new(component.slug, component.display_name)
-                        })
-                        .collect(),
-                )
-                .with_label(group.tag.label())
-            })
-            .collect();
-        let mut sidebar_spec = SidebarNavSpec::new(sidebar_groups)
-            .with_aria_label("Component catalogue")
-            .with_density(sidebar_nav_density(self.state.density))
-            .with_size(sidebar_nav_size(self.state.control_size))
-            .with_size_role(SemanticControlSizeRole::Chrome);
-        if let Some(active_slug) = self.state.active_component_slug.as_deref() {
-            sidebar_spec = sidebar_spec.with_value(active_slug);
-        }
-        let sidebar = div()
-            .id("catalogue-sidebar")
-            .w(px(224.0))
-            .h(available_h)
-            .flex_shrink_0()
-            .overflow_y_scroll()
-            .border_r_1()
-            .border_color(color_to_hsla(border_subtle).opacity(0.6))
-            .child(
-                SidebarNav::from_spec(sidebar_spec, theme).on_change({
-                    let queue = std::sync::Arc::clone(&self.state.node_events);
-                    std::sync::Arc::new(move |val: &str| {
-                        queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
-                            ChromeEvent::ActiveComponent(val.to_string()),
-                        ));
-                    })
-                }),
-            );
+        self.catalogue_sidebar
+            .update(cx, |sidebar, cx| sidebar.sync(&self.state, cx));
+        let sidebar = AnyView::from(self.catalogue_sidebar.clone()).cached(
+            StyleRefinement::default()
+                .w(px(224.0))
+                .h(available_h)
+                .flex_shrink_0(),
+        );
 
         // Outer layout: horizontal flex row with explicit height.
         let mut layout = div().w_full().h(available_h).flex().child(sidebar);
@@ -779,21 +858,50 @@ impl PreviewRoot {
             let mut hasher = DefaultHasher::new();
             component.slug.hash(&mut hasher);
             let content_id = hasher.finish();
+            let page_key = ComponentPageKey {
+                slug: component.slug,
+                theme: self.state.theme_preset,
+                density: self.state.density,
+                control_size: self.state.control_size,
+                contrast: self.state.contrast.to_bits(),
+            };
+            if self.component_page_key != Some(page_key) {
+                self.component_page_key = Some(page_key);
+                self.component_page_list.reset(3);
+            }
+            let slug = component.slug;
             layout = layout.child(
                 div()
                     .id(("specimen-content", content_id))
                     .flex_1()
                     .h(available_h)
-                    .flex()
-                    .flex_col()
-                    .gap(px(0.0))
-                    .p(px(24.0))
-                    .overflow_y_scroll()
-                    .child(self.render_component_page_header(component))
-                    .child(self.render_component_specimen(component.slug, cx))
-                    .child(self.render_component_page_support(component)),
+                    .child(
+                        list(
+                            self.component_page_list.clone(),
+                            cx.processor(move |this, index, _window, cx| {
+                                let component = find_component(slug).expect(
+                                    "active component disappeared from the static registry",
+                                );
+                                match index {
+                                    0 => this
+                                        .render_component_page_header(component)
+                                        .into_any_element(),
+                                    1 => this
+                                        .render_component_specimen(component.slug, cx)
+                                        .into_any_element(),
+                                    2 => this
+                                        .render_component_page_support(component)
+                                        .into_any_element(),
+                                    _ => Empty.into_any_element(),
+                                }
+                            }),
+                        )
+                        .size_full()
+                        .p(px(24.0)),
+                    ),
             );
         } else {
+            let groups = grouped_components(&self.state.component_search);
             layout = layout.child(self.render_catalogue_landing(
                 &groups,
                 theme,
@@ -1953,8 +2061,8 @@ fn main() {
                     schedule_frames_drawn(window, FRAMES_BEFORE_CAPTURE);
                 }
 
-                cx.new(move |_| {
-                    let mut root = PreviewRoot::new();
+                cx.new(move |cx| {
+                    let mut root = PreviewRoot::new(cx);
 
                     // Apply CLI overrides — display controls
                     // Set all values first, then rebuild once so density and

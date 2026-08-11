@@ -44,6 +44,12 @@ objc2-app-kit = { version = "0.3", features = [
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+# The preview rebuilds sizeable GPUI element trees while interacting. Keep
+# debug assertions and incremental compilation, but optimize the runtime path
+# enough for frame pacing to match the release build.
+[profile.dev]
+opt-level = 3
+
 [package.metadata.poodle]
 public-intent = false
 channel = "internal"
