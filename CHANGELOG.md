@@ -7,8 +7,40 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking — Tabs `variant`.** The five-member `TabVariant` union is now three
+  members: `"card" | "pill" | "block"`. `"text"`, `"underline"`, and `"strip"`
+  are gone. `"underline"` was never a distinct look — it aliased `"text"` and
+  had no stylesheet rules of its own.
+
+  Migrate as follows. Note that `"card"` is a **reused name, not a preserved
+  one**: the old `"card"` filled the tab chip, and the new `"card"` is the old
+  `"text"`. Applying this table before upgrading will change how your tabs look.
+
+  | Before | After |
+  |---|---|
+  | `variant="text"` | `variant="card" bordered` |
+  | `variant="underline"` | `variant="card" bordered` |
+  | `variant="strip"` | `variant="block" activeEdge="underline" activeFill="none"` |
+  | `variant="card"` | `variant="card"` — appearance changed; see `bordered`, `activeEdge`, `activeFill` |
+  | `variant="pill"`, `variant="block"` | unchanged |
+
+  `TabStrip` is a separate component and is unaffected.
+
 ### Changed
 
+- **Breaking — Tabs `bordered` now defaults to `false`.** This is a silent
+  visual change: tabs rendered above a panel lose their separating line with no
+  type or build error. Add `bordered` explicitly to any usage that draws tabs
+  over content. The old default assumed "tabs above content", a layout Tabs
+  cannot see, and every other usage paid for it in dead space.
+- **Tabs selection decoration is now two orthogonal axes.** `activeEdge`
+  (`"none" | "outline" | "underline"`, default `"none"`) and `activeFill`
+  (`"none" | "tint" | "solid"`, default `"tint"`) compose freely and replace the
+  former per-variant treatments. `NavigationMenu` takes the same two props. Both
+  types are defined once in
+  [`docs/contracts/004-shared-control-types.md`](docs/contracts/004-shared-control-types.md).
 - Prepared the repository, package documentation, licensing, security policy,
   and validation surfaces for public access.
 - Completed the shared Rust render-tree migration. GPUI and Jetstream now
