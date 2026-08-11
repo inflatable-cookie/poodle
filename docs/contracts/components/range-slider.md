@@ -523,10 +523,16 @@ so the control geometry is unchanged — only the grabbable margin grows.
 |-------|---------------|-----------------|
 | Disabled | `value=[30, 70]`, `min=0`, `max=100`, `disabled=true`, `ariaLabel="Disabled range"` | Reduced opacity; thumbs non-interactive; fill visible between 30% and 70% |
 
+### Group: Embedded unipolar control
+
+`value=[0.2, 0.75]`, `min=0`, `max=1`, `step=0.01`,
+`variant="embedded"`, and `polarity="unipolar"`.
+
 ### Group: Embedded bipolar control
 
-`value=[-0.6, 0.35]`, `min=-1`, `max=1`, `variant="embedded"`, and
-`polarity="bipolar"`. Sizes and densities use the same variant.
+`value=[-0.6, 0.35]`, `min=-1`, `max=1`, `step=0.01`,
+`variant="embedded"`, and `polarity="bipolar"`. Density specimens use the
+same variant.
 
 ## 14. Approval And Adoption Notes
 

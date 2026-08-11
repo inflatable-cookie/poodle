@@ -5,7 +5,8 @@
 
   let priceRange: [number, number] = $state([20, 80]);
   let ageRange: [number, number] = $state([23, 43]);
-  let embeddedRange: [number, number] = $state([-0.6, 0.35]);
+  let embeddedUnipolarRange: [number, number] = $state([0.2, 0.75]);
+  let embeddedBipolarRange: [number, number] = $state([-0.6, 0.35]);
 </script>
 
 <div class="poodle-range-slider-specimen">
@@ -37,8 +38,12 @@
     <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Embedded unipolar control">
+    <RangeSlider variant="embedded" polarity="unipolar" value={embeddedUnipolarRange} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation range" onValueChange={(value) => (embeddedUnipolarRange = value)} />
+  </SpecimenGroup>
+
   <SpecimenGroup label="Embedded bipolar control">
-    <RangeSlider variant="embedded" polarity="bipolar" value={embeddedRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={(value) => (embeddedRange = value)} />
+    <RangeSlider variant="embedded" polarity="bipolar" value={embeddedBipolarRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={(value) => (embeddedBipolarRange = value)} />
   </SpecimenGroup>
 
   {#snippet sizes(size)}

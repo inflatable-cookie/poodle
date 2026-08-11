@@ -93,11 +93,23 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             )),
         ))
         .child(group(
+            "Embedded unipolar control",
+            secondary,
+            row(js_range_slider(
+                &RangeSliderSpec::new(0.2, 0.75)
+                    .with_bounds(0.0, 1.0)
+                    .with_step(0.01)
+                    .with_embedded_control(SliderPolarity::Unipolar),
+                theme,
+            )),
+        ))
+        .child(group(
             "Embedded bipolar control",
             secondary,
             row(js_range_slider(
                 &RangeSliderSpec::new(-0.6, 0.35)
                     .with_bounds(-1.0, 1.0)
+                    .with_step(0.01)
                     .with_embedded_control(SliderPolarity::Bipolar),
                 theme,
             )),

@@ -24,6 +24,24 @@ fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + S
     })
 }
 
+fn range_fraction_change(
+    state: &AppState,
+    key: &'static str,
+) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |low, high| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetText {
+            key: format!("{key}-lo"),
+            value: format!("{low:.2}"),
+        });
+        events.push(NodeSpecimenEvent::SetText {
+            key: format!("{key}-hi"),
+            value: format!("{high:.2}"),
+        });
+    })
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -53,6 +71,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("range-slider-step-hi")
         .and_then(|v| v.parse::<f64>().ok())
         .unwrap_or(45.0);
+    let embedded_unipolar_lo = state
+        .specimens
+        .text
+        .get("range-slider-embedded-unipolar-lo")
+        .and_then(|v| v.parse::<f64>().ok())
+        .unwrap_or(0.2);
+    let embedded_unipolar_hi = state
+        .specimens
+        .text
+        .get("range-slider-embedded-unipolar-hi")
+        .and_then(|v| v.parse::<f64>().ok())
+        .unwrap_or(0.75);
+    let embedded_bipolar_lo = state
+        .specimens
+        .text
+        .get("range-slider-embedded-bipolar-lo")
+        .and_then(|v| v.parse::<f64>().ok())
+        .unwrap_or(-0.6);
+    let embedded_bipolar_hi = state
+        .specimens
+        .text
+        .get("range-slider-embedded-bipolar-hi")
+        .and_then(|v| v.parse::<f64>().ok())
+        .unwrap_or(0.35);
 
     let examples = div()
         .flex()
@@ -173,16 +215,47 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Embedded unipolar control"),
+                    theme,
+                ))
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(embedded_unipolar_lo, embedded_unipolar_hi)
+                            .with_bounds(0.0, 1.0)
+                            .with_step(0.01)
+                            .with_embedded_control(SliderPolarity::Unipolar)
+                            .with_aria_label("Unipolar modulation range"),
+                        theme,
+                    )
+                    .on_change(
+                        "range-slider-embedded-unipolar",
+                        range_fraction_change(state, "range-slider-embedded-unipolar"),
+                    ),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Embedded bipolar control"),
                     theme,
                 ))
-                .child(RangeSlider::from_spec(
-                    RangeSliderSpec::new(-0.6, 0.35)
-                        .with_bounds(-1.0, 1.0)
-                        .with_embedded_control(SliderPolarity::Bipolar)
-                        .with_aria_label("Bipolar modulation range"),
-                    theme,
-                )),
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(embedded_bipolar_lo, embedded_bipolar_hi)
+                            .with_bounds(-1.0, 1.0)
+                            .with_step(0.01)
+                            .with_embedded_control(SliderPolarity::Bipolar)
+                            .with_aria_label("Bipolar modulation range"),
+                        theme,
+                    )
+                    .on_change(
+                        "range-slider-embedded-bipolar",
+                        range_fraction_change(state, "range-slider-embedded-bipolar"),
+                    ),
+                ),
         )
         // --- Custom min / max + step ---
         // Bounds 0..500, [100, 350], step 50; fill from 20% to 70%.
