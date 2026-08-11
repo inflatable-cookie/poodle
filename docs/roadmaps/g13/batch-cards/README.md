@@ -27,9 +27,10 @@ and roadmap closeout.
 | `015` | deterministic emission + drift-gating research (codegen precursor) | supersedes `004` | merged (`7878c537`) |
 | `016` | shared `ActiveFill` type + NavigationMenu switches | Tabs switches merged | dispatched |
 | `017` | AppHeader centre region | `014` merged | dispatched |
-| `018` | Tabs `bordered` defaults to false | `016` merged (file conflict) | blocked |
+| `018` | Tabs `bordered` defaults to false | — | retired — folded into `020` |
 | `019` | HistoryCenter — web reference | none | dispatched |
-| `020` | HistoryCenter — native parity | `019` merged | planned |
+| `020` | ActiveEdge + strip consolidation + Tabs defaults | `016` merged | dispatched |
+| `021` | HistoryCenter — native parity | `019` merged | planned |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -58,3 +59,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 017](017-app-header-center-region.md)
 - [Batch 018](018-tabs-bordered-default-false.md)
 - [Batch 019](019-history-center-web-reference.md)
+- [Batch 020](020-tabs-active-edge-and-strip-consolidation.md)

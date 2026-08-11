@@ -1,6 +1,11 @@
 # 018 Tabs `bordered` Defaults To False
 
-Status: blocked — waiting on `g13-b016` to release the Tabs files
+Status: retired — folded into `020-tabs-active-edge-and-strip-consolidation.md`
+
+Retired rather than dispatched. `020` changes the same Tabs files for the
+`ActiveEdge` and strip-consolidation work, and three branches on one file set
+would only conflict with each other. The ruling and its reasoning are carried
+into `020` R3 unchanged.
 Milestone: side-quest (component API, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-018-tabs-bordered-default`
