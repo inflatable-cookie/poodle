@@ -64,6 +64,11 @@
     --poodle-icon-button-border: var(--poodle-recipe-icon-button-success-border, color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default)));
   }
 
+  .poodle-icon-button[data-tone="warning"] {
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 16%, var(--poodle-color-background-surface)));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 46%, var(--poodle-color-border-default)));
+  }
+
   .poodle-icon-button[data-variant="primary"][data-tone="danger"] {
     --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-danger-fill, var(--poodle-color-status-danger));
     --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 84%, black));
@@ -74,6 +79,12 @@
     --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-success-fill, var(--poodle-color-status-success));
     --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-success-border, color-mix(in srgb, var(--poodle-color-status-success) 84%, black));
     --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-success-text, var(--poodle-color-text-inverse));
+  }
+
+  .poodle-icon-button[data-variant="primary"][data-tone="warning"] {
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-warning-fill, var(--poodle-color-status-warning));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-primary-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 84%, black));
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-primary-warning-text, var(--poodle-color-text-inverse));
   }
 
   .poodle-icon-button[data-variant="ghost"][data-tone="danger"] {
@@ -88,6 +99,12 @@
     --poodle-icon-button-text: var(--poodle-recipe-icon-button-ghost-success-text, var(--poodle-color-status-success));
   }
 
+  .poodle-icon-button[data-variant="ghost"][data-tone="warning"] {
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-ghost-warning-fill, transparent);
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-warning-border, transparent);
+    --poodle-icon-button-text: var(--poodle-recipe-icon-button-ghost-warning-text, var(--poodle-color-status-warning));
+  }
+
   .poodle-icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
     --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-danger-hover-border, color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default)));
     background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
@@ -96,6 +113,11 @@
   .poodle-icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled) {
     --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-success-hover-border, color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default)));
     background: color-mix(in srgb, var(--poodle-color-status-success) 10%, transparent);
+  }
+
+  .poodle-icon-button[data-variant="ghost"][data-tone="warning"]:hover:not(:disabled) {
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-ghost-warning-hover-border, color-mix(in srgb, var(--poodle-color-status-warning) 46%, var(--poodle-color-border-default)));
+    background: color-mix(in srgb, var(--poodle-color-status-warning) 10%, transparent);
   }
 
   .poodle-icon-button[data-pressed="true"]:not([data-variant="primary"]) {

@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — Batch card 006 (button tone parity) lists `split-button.css`
+  as "implements danger", but the contract amendment it depends on
+  (`282ce489`) added a `--poodle-split-shadow` column to split-button.md §8
+  "Tone: danger" that the stylesheet never implemented — primary danger
+  resolves `none` against a mandated elevation shadow (stopped the card;
+  see `docs/logs/2026-08/11-g13-006-button-tone-parity.md` §5). Card gap
+  tables should be re-verified against amended contracts at dispatch time.
+
 - 2026-08-11 — The g13.002 generated-LOC measure globs
   `packages/core/src/tokens/generated/*` and `packages/tokens/artifacts/**`
   return 0 lines without bash `globstar`: the first matches only the

@@ -30,6 +30,14 @@
     </div>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Warning tone">
+    <div class="poodle-button-row">
+      <IconButton icon={trash2} ariaLabel="Delete" variant="primary" tone="warning" />
+      <IconButton icon={trash2} ariaLabel="Delete" variant="secondary" tone="warning" />
+      <IconButton icon={trash2} ariaLabel="Delete" variant="ghost" tone="warning" />
+    </div>
+  </SpecimenGroup>
+
   <SpecimenGroup label="Toggle (text editor toolbar)">
     <div class="poodle-button-row">
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" bind:pressed={bold} />
