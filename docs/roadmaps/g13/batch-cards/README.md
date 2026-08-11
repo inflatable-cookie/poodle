@@ -62,3 +62,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 019](019-history-center-web-reference.md)
 - [Batch 020](020-tabs-active-edge-and-strip-consolidation.md)
 - [Batch 021](021-active-fill-none.md)
+- [Batch 022](022-poodle-codegen-emitter-core.md)
