@@ -1,6 +1,6 @@
 # 021 ActiveFill Gains `none`
 
-Status: ready
+Status: merged (`239e9776` → `33a307d3`)
 Milestone: side-quest (component API, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-021-active-fill-none`
