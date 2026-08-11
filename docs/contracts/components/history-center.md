@@ -328,8 +328,8 @@ composed `Popover`), `createInstanceId` for surface ids.
 
 - Trigger cluster: three icon-sized buttons in a row, gap 0.125rem; titlebar
   space is premium, nothing else is added.
-- Surface: sized by the popover, `min(23rem, calc(100vw - 2rem))` to
-  `min(30rem, calc(100vw - 2rem))`. The panel root sets no width of its own —
+- Surface: sized by the popover, `min(28rem, calc(100vw - 2rem))` to
+  `min(38rem, calc(100vw - 2rem))`. The panel root sets no width of its own —
   the surface owns it and adds its own horizontal padding, so a width here
   would overflow the rounded edge.
 - Text: the panel root sets `typography-label-size` as its base, so rows do

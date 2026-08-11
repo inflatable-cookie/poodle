@@ -300,8 +300,8 @@
       initialFocus="first-focusable"
       triggerIsInteractive
       ariaLabel={ariaLabel ?? title}
-      surfaceMinWidth="min(23rem, calc(100vw - 2rem))"
-      surfaceMaxWidth="min(30rem, calc(100vw - 2rem))"
+      surfaceMinWidth="min(28rem, calc(100vw - 2rem))"
+      surfaceMaxWidth="min(38rem, calc(100vw - 2rem))"
       onOpenChange={handleOpenChange}
     >
       {#snippet trigger()}
