@@ -1,14 +1,24 @@
 # g13.001 Authority Inventory And Fixture Baseline
 
-Status: ready
+Status: in progress
 Owner: Poodle core
 Depends on: `docs/specs/063-rust-authored-component-and-scene-ir.md`
+Governing rules: `IR-01`–`IR-12`
 
 ## Objective
 
 Freeze what is authoritative before creating an IR crate. Measure the current
 component, specimen, registry, contract, and backend duplication and capture
 the pilot fixtures that later cards must preserve.
+
+## Execution Plan
+
+- [ ] `g13-b001` — authority inventory and inherited docs-baseline repair
+  ([dispatched](../dispatch.md))
+- [ ] `g13-b002` — pilot fixture and quantitative-metrics freeze after the
+  inventory is reviewed
+- [ ] `g13-b003` — maintainer crate-placement ruling and executable g13.002
+  handoff
 
 ## Deliverables
 
@@ -28,11 +38,11 @@ the pilot fixtures that later cards must preserve.
 
 ## Acceptance
 
-- No implementation package is created in this card.
-- Every pilot fixture has a stable identifier and owning contract.
-- Unknown authority or runtime behavior becomes a named decision, not an
+- [ ] No implementation package is created in this card.
+- [ ] Every pilot fixture has a stable identifier and owning contract.
+- [ ] Unknown authority or runtime behavior becomes a named decision, not an
   inferred compiler feature.
-- `effigy docs:check` is green before schema implementation begins.
+- [ ] `effigy docs:check` is green before schema implementation begins.
 
 ## Next
 
