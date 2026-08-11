@@ -23,6 +23,7 @@ and roadmap closeout.
 | `011` | `poodle-ir` schema core (**g13.002**) | `003` rulings | merged (`4a22c8d8`) |
 | `012` | IR bounded expression vocabulary | `011` merged | merged (`911fdfd8`) |
 | `013` | Tabs variant consolidation (side-quest) | maintainer ruling | dispatched |
+| `014` | AppHeader element access (side-quest) | maintainer ruling | dispatched |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -45,3 +46,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 011](011-poodle-ir-schema-core.md)
 - [Batch 012](012-ir-expression-vocabulary.md)
 - [Batch 013](013-tabs-variant-consolidation.md)
+- [Batch 014](014-app-header-element-access.md)
