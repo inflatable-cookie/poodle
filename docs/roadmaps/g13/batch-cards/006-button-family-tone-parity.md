@@ -1,6 +1,6 @@
 # 006 Button Family Tone Parity
 
-Status: ready
+Status: merged (Button + IconButton); SplitButton slice deferred to `008`
 Milestone: `g13.001` (contract-conformance work, not IR implementation)
 Owner: Poodle core
 Branch: `thread/g13-006-button-tone-parity`
@@ -158,19 +158,19 @@ diffs, **do not update baselines** — record the diff list and stop.
 
 ## Acceptance Criteria
 
-- [ ] All three stylesheets implement all four tones across primary, secondary,
+- [x] All three stylesheets implement all four tones across primary, secondary,
   and ghost.
-- [ ] Each added rule derives from that component's own danger rules with only
+- [x] Each added rule derives from that component's own danger rules with only
   the status color substituted; no new percentages invented.
-- [ ] Rust renderer tone delivery verified and reported for all three
+- [x] Rust renderer tone delivery verified and reported for all three
   components; no Rust edited.
-- [ ] Svelte and React specimens show all four tones for all three components,
+- [x] Svelte and React specimens show all four tones for all three components,
   and remain identical to each other.
-- [ ] No component source, props, public API, token, or baseline changed.
-- [ ] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
+- [x] No component source, props, public API, token, or baseline changed.
+- [x] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
   `git diff --check` all exit 0.
-- [ ] Only the writable paths (plus regenerated artifacts) changed.
-- [ ] Batch log records commands, exit states, and the renderer verification.
+- [x] Only the writable paths (plus regenerated artifacts) changed.
+- [x] Batch log records commands, exit states, and the renderer verification.
 
 ## Stop Conditions
 

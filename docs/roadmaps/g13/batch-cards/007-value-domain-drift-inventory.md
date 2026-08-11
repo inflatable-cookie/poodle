@@ -1,6 +1,6 @@
 # 007 Value-Domain Drift Inventory
 
-Status: ready
+Status: merged
 Milestone: `g13.001` (drift-gate work, not IR implementation)
 Owner: Poodle core
 Branch: `thread/g13-007-value-domain-drift`
@@ -102,16 +102,16 @@ be resolved from the docs rather than guessing it.
 
 ## Acceptance Criteria
 
-- [ ] `contract-value-domain-drift.ts` resolves named types and inline unions on
+- [x] `contract-value-domain-drift.ts` resolves named types and inline unions on
   all three sides.
-- [ ] The script exits 0 by default and 1 only under `VALUE_DOMAIN_ENFORCE=1`.
-- [ ] One Effigy selector added; `docs:check` unchanged.
-- [ ] The inventory lists every finding with both value sets and the symmetric
+- [x] The script exits 0 by default and 1 only under `VALUE_DOMAIN_ENFORCE=1`.
+- [x] One Effigy selector added; `docs:check` unchanged.
+- [x] The inventory lists every finding with both value sets and the symmetric
   difference, classified into the three categories.
-- [ ] The button family's `tone` prop is reported explicitly (clean or not).
-- [ ] No violation fixed; no contract, component, CSS, or Rust source edited.
-- [ ] `effigy docs:lint` and `git diff --check` exit 0.
-- [ ] Batch log records commands, exit states, and finding counts.
+- [x] The button family's `tone` prop is reported explicitly (clean or not).
+- [x] No violation fixed; no contract, component, CSS, or Rust source edited.
+- [x] `effigy docs:lint` and `git diff --check` exit 0.
+- [x] Batch log records commands, exit states, and finding counts.
 
 ## Stop Conditions
 
