@@ -18,6 +18,11 @@
      content between those bounds, which is what the min/max were for. */
   min-width: 0;
   font-family: var(--poodle-typography-body-family);
+  /* Base size for the panel. Without this the entry labels inherited the
+     document default (16px) rather than a token, because the row button sets
+     `font: inherit` and nothing above it declared a size. */
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
   color: var(--poodle-color-text-primary);
 }
 
@@ -133,6 +138,8 @@
 }
 
 .poodle-history-center__item-label {
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,7 +147,7 @@
 
 .poodle-history-center__item-meta {
   color: var(--poodle-color-text-secondary);
-  font-size: var(--poodle-typography-label-size);
+  font-size: 0.6875rem;
   line-height: var(--poodle-typography-label-lineHeight);
 }
 

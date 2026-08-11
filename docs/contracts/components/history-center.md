@@ -328,7 +328,13 @@ composed `Popover`), `createInstanceId` for surface ids.
 
 - Trigger cluster: three icon-sized buttons in a row, gap 0.125rem; titlebar
   space is premium, nothing else is added.
-- Surface: `clamp(20rem, 34vw, 26rem)`, capped at `calc(100vw - 4rem)`.
+- Surface: sized by the popover, `min(23rem, calc(100vw - 2rem))` to
+  `min(30rem, calc(100vw - 2rem))`. The panel root sets no width of its own —
+  the surface owns it and adds its own horizontal padding, so a width here
+  would overflow the rounded edge.
+- Text: the panel root sets `typography-label-size` as its base, so rows do
+  not inherit the document default. The header title is `body-size`; entry
+  meta steps down to `0.6875rem`.
 - List: bounded `max-height: min(28rem, 60vh)`, scrolls internally with
   `overscroll-behavior: contain`. No virtualisation — paging only (Tree's
   virtual scroll is Svelte-only precedent and would break the native port).
