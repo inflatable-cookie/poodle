@@ -450,6 +450,31 @@ export type MessageCenterItem = {
   icon?: IconProp | null;
 };
 
+export type HistoryEntryPosition = "past" | "current" | "future";
+
+export type HistoryEntry = {
+  id: string;
+  label: string;
+  position: HistoryEntryPosition;
+  /** Renders as a named pin when branches are supplied. */
+  checkpoint?: boolean;
+  /** > 1 marks a fork point, expandable to the supplied branch rows. */
+  branchCount?: number;
+  groupId?: string | null;
+};
+
+export type HistoryBranch = {
+  id: string;
+  /** Auto-named by the authority; null means the id is displayed. */
+  name: string | null;
+  annotation?: string | null;
+  entryCount?: number;
+  current?: boolean;
+  pinned?: boolean;
+};
+
+export type HistoryStatus = "idle" | "loading" | "failed";
+
 export interface MenubarItem {
   value: string;
   label: string;

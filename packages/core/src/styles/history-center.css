@@ -1,0 +1,330 @@
+/* Styles for HistoryCenter. Extracted from the Svelte component (g12.001
+   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+
+.poodle-history-center-popover { display: inline-flex; }
+
+.poodle-history-center__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.poodle-history-center {
+  width: clamp(20rem, 34vw, 26rem);
+  max-width: calc(100vw - 4rem);
+  font-family: var(--poodle-typography-body-family);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-history-center__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--poodle-space-stack-md);
+  padding-bottom: var(--poodle-space-stack-sm);
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-history-center__header h2,
+.poodle-history-center__header p { margin: 0; }
+
+.poodle-history-center__header h2 {
+  font-family: var(--poodle-typography-heading-family);
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+.poodle-history-center__header p {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+/* Transient rejection notice — inline, visible, never silent. */
+.poodle-history-center__rejection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--poodle-space-stack-md);
+  margin-top: var(--poodle-space-stack-sm);
+  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  border: 0.0625rem solid
+    var(--poodle-recipe-history-center-rejection-border, color-mix(in srgb, var(--poodle-color-status-danger) 45%, transparent));
+  border-radius: var(--poodle-radius-control);
+  background: var(
+    --poodle-recipe-history-center-rejection-fill,
+    color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent)
+  );
+  color: var(--poodle-recipe-history-center-rejection-text, var(--poodle-color-text-primary));
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+.poodle-history-center__rejection p { margin: 0; }
+
+.poodle-history-center__list {
+  max-height: min(28rem, 60vh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.poodle-history-center__item {
+  --poodle-history-center-item-fill: var(--poodle-recipe-history-center-item-fill, transparent);
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-history-center-item-fill);
+}
+
+.poodle-history-center__item:last-child { border-bottom: 0; }
+
+.poodle-history-center__item[data-position="current"] {
+  --poodle-history-center-item-fill: var(
+    --poodle-recipe-history-center-current-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent)
+  );
+}
+
+.poodle-history-center__item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.poodle-history-center__item-content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.poodle-history-center__item-content:hover {
+  background: var(
+    --poodle-recipe-history-center-item-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+  );
+}
+
+.poodle-history-center__item-content:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
+}
+
+.poodle-history-center__item-copy {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.poodle-history-center__item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-history-center__item-meta {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+/* Checkpoint pin — a named pin marking a checkpoint entry. */
+.poodle-history-center__pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--poodle-recipe-history-center-checkpoint-fill, var(--poodle-color-accent-base));
+}
+
+/* Current-position marker dot; past/future read muted. */
+.poodle-history-center__position-marker {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--poodle-recipe-history-center-position-marker, var(--poodle-color-text-tertiary));
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-text-tertiary) 15%, transparent);
+}
+
+.poodle-history-center__position-marker[data-position="current"] {
+  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-color-accent-base));
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-base) 15%, transparent);
+}
+
+/* Fork indicator — expandable affordance on entries with branchCount > 1. */
+.poodle-history-center__fork-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: var(--poodle-space-stack-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: var(
+    --poodle-recipe-history-center-fork-indicator-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)
+  );
+  color: var(--poodle-recipe-history-center-fork-indicator-text, var(--poodle-color-accent-base));
+  cursor: pointer;
+}
+
+.poodle-history-center__fork-indicator:hover {
+  background: var(
+    --poodle-recipe-history-center-fork-indicator-hover-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
+  );
+}
+
+.poodle-history-center__fork-indicator:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.0625rem;
+}
+
+/* Nested branch rows under an expanded fork point. */
+.poodle-history-center__branches {
+  margin: 0;
+  padding: 0 0 0 1.5rem;
+  list-style: none;
+}
+
+.poodle-history-center__branch {
+  --poodle-history-center-branch-fill: var(--poodle-recipe-history-center-branch-fill, transparent);
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-history-center-branch-fill);
+}
+
+.poodle-history-center__branch:last-child { border-bottom: 0; }
+
+.poodle-history-center__branch[data-current="true"] {
+  --poodle-history-center-branch-fill: var(
+    --poodle-recipe-history-center-branch-current-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)
+  );
+}
+
+.poodle-history-center__branch-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding-right: var(--poodle-space-stack-sm);
+}
+
+.poodle-history-center__branch-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.poodle-history-center__branch-content:hover {
+  background: var(
+    --poodle-recipe-history-center-branch-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+  );
+}
+
+.poodle-history-center__branch-content:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
+}
+
+.poodle-history-center__branch-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--poodle-typography-label-size);
+}
+
+.poodle-history-center__branch-count {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+}
+
+.poodle-history-center__branch-current-badge {
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(
+    --poodle-recipe-history-center-branch-current-badge-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
+  );
+  color: var(--poodle-recipe-history-center-branch-current-badge-text, var(--poodle-color-accent-base));
+  font-size: 0.6rem;
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.poodle-history-center__rename-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: calc(var(--poodle-space-panel-y) * 0.4) var(--poodle-space-stack-sm);
+  padding: 0.2rem 0.4rem;
+  border: 0.0625rem solid var(--poodle-color-border-default);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-background-surface);
+  color: var(--poodle-color-text-primary);
+  font: inherit;
+  font-size: var(--poodle-typography-label-size);
+}
+
+.poodle-history-center__rename-input:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.0625rem;
+}
+
+.poodle-history-center__load-more {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--poodle-space-stack-sm);
+}
+
+.poodle-history-center__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--poodle-space-stack-sm);
+  padding: var(--poodle-space-panel-y) 0;
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+}
+
+.poodle-history-center__empty {
+  padding: var(--poodle-space-stack-lg) 0;
+}
+
+.poodle-history-center[data-density="compact"] .poodle-history-center__item-content {
+  padding-block: calc(var(--poodle-space-panel-y) * 0.7);
+}
+
+.poodle-history-center[data-density="comfortable"] .poodle-history-center__item-content {
+  padding-block: calc(var(--poodle-space-panel-y) * 1.25);
+}
+
+@media (max-width: 30rem) {
+  .poodle-history-center { width: calc(100vw - 4rem); }
+}

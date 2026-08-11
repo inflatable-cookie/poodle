@@ -14,6 +14,7 @@ export {
   type ActionDiscoveryPanelHandle,
 } from "./ActionDiscoveryPanel";
 export { MessageCenter, type MessageCenterProps } from "./MessageCenter";
+export { HistoryCenter, type HistoryCenterProps } from "./HistoryCenter";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { AppHeader, type AppHeaderProps } from "./AppHeader";
 export { Breadcrumbs, type BreadcrumbsProps } from "./Breadcrumbs";
