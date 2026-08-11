@@ -35,7 +35,9 @@ Updated: 2026-07-10
 | Actions Region | no | global shell actions | gap, action roles |
 | Utility Region | no | connection/status indicators | text, status, spacing |
 
-## 3. Props
+## 3. Props And Inputs
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
@@ -46,6 +48,46 @@ Updated: 2026-07-10
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for header height, title text, subtitle text, and nested controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for shell spacing and nested controls |
+| `element` | `HTMLElement \| null` | `null` | no | **Svelte only.** bindable escape hatch: the rendered `<header>` DOM element, for hosts that need to attach behaviour to the root. Excluded from `AppHeaderSpec` — see Element Access below |
+
+### Element Access
+
+Both web runtimes expose the **raw `<header>` DOM element** — never a handle
+object — so a host can attach behaviour (for example window dragging) to the
+header root.
+
+- **Svelte**: `bind:element` — the `element` prop is `$bindable`, defaulting to
+  `null`. Use `bind:element={myHeader}` and read it inside a `$effect`.
+- **React**: `ref` — forwarded to the `<header>` via `forwardRef`
+  (`AppHeaderProps` itself is unchanged; `ref` is React's own mechanism, not a
+  prop in the type). `useRef<HTMLElement>(null)` and pass it as `<AppHeader
+  ref={myRef} />`.
+
+Intended use: the host attaches behaviour to the element. Poodle implements no
+drag gesture and imports no `@tauri-apps/*`; `data-drag-region` keeps its
+current meaning as a marker a host (or its CSS) can act on.
+
+Non-goals (deliberate, per g13-b014 rulings):
+
+- No rest-props spread (`{...rest}`): it adds no capability over element
+  access, and every `{...rest}` is an unbounded surface the IR cannot model
+  (`BTN-15` is carried as a `NEG-02` escape hatch).
+- No `action` prop: Svelte actions have no React equivalent, so an action prop
+  would be a Svelte-only API, which the Runtime Parity Authority rule forbids
+  (`docs/contracts/001-working-rules.md` §Runtime Parity Authority).
+- No additional named props (`id`, `class`, `style`, or any other): element
+  access only.
+
+#### Parity Notes
+
+- `element` (Svelte) and `ref` (React) are **web-only** and deliberately
+  absent from `AppHeaderSpec` (sanctioned `WEB_ONLY_PROPS` entry in
+  `packages/svelte/preview/scripts/contract-spec-drift.ts`).
+- GPUI and Jetstream: **`AC` (adapter capability)**. Native window dragging is
+  a platform capability the shell owns, and a native renderer has no element
+  to hand out — the host moves the window through its own titlebar/chrome
+  integration. No native escape hatch is invented; element access is a
+  web-runtime concern and must not reach the portable spec.
 
 ## 4. Snippets
 
@@ -113,6 +155,35 @@ No component-owned events. Child action behavior is host-owned.
 
 - Single-column grid: `1fr`
 - Utility region switches to `justify-content: flex-start`
+
+### Overriding Header Height
+
+The header's minimum height comes from the custom property
+`--poodle-app-header-min-height`, defaulting to `--poodle-size-panel-header`
+(declared on `.poodle-app-header`). The size ladder overrides that property per
+size at `.poodle-app-header[data-size="xs"]` … `[data-size="xl"]` — specificity
+`0,2,0` (one class + one attribute).
+
+**The specificity trap:** a plain `.poodle-app-header { … }` override from an
+app is `0,1,0` and **silently loses** to the ladder's `0,2,0`, so per-app
+heights appear to have no effect. The sanctioned route is overriding the custom
+property with a selector that matches or exceeds `0,2,0`.
+
+Worked example — a 60px header for one app, independent of `dragRegion`:
+
+```css
+/* Wins over every ladder step: ancestor scope + attribute = 0,3,0.
+   `[data-size]` is always present on the header, so this tracks the ladder
+   at every size. */
+.app-shell .poodle-app-header[data-size] {
+  --poodle-app-header-min-height: 3.75rem; /* 60px */
+}
+```
+
+A matching-`0,2,0` alternative (`.app-shell .poodle-app-header`) works only
+when the app stylesheet is loaded after Poodle's — equal specificity is a
+source-order fight, so prefer the `0,3,0` form above. The attribute selector
+does **not** require `dragRegion` to be set: `data-size` is always rendered.
 
 ### Composition
 

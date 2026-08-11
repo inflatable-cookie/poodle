@@ -18,8 +18,15 @@ const entries = Object.entries(modules)
     return [name, mod[name]] as const;
   })
   // Only PascalCase modules that actually export a component of the same name
-  // (skips helper modules like portal.tsx / presentation.tsx).
-  .filter(([name, comp]) => /^[A-Z]/.test(name) && typeof comp === "function")
+  // (skips helper modules like portal.tsx / presentation.tsx). `forwardRef` and
+  // `memo` return objects, not functions — filtering on `typeof === "function"`
+  // silently dropped those components out of this sweep while it still passed.
+  .filter(
+    ([name, comp]) =>
+      /^[A-Z]/.test(name) &&
+      (typeof comp === "function" ||
+        (typeof comp === "object" && comp !== null && "$$typeof" in comp)),
+  )
   .filter(([name]) => !(name in SMOKE_EXCLUDE) && !(name in SMOKE_EXCLUDE_REACT))
   .sort(([a], [b]) => a.localeCompare(b));
 

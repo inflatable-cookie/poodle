@@ -13,6 +13,9 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    /** Bindable escape hatch: the rendered `<header>` DOM element, so a host
+     * can attach behaviour (for example window dragging) to the root. */
+    element?: HTMLElement | null;
     identity?: Snippet;
     actions?: Snippet;
     utility?: Snippet;
@@ -26,6 +29,7 @@
     size = null,
     sizeRole = "control",
     density = null,
+    element = $bindable<HTMLElement | null>(null),
     identity,
     actions,
     utility,
@@ -39,6 +43,7 @@
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
   <header
+    bind:this={element}
     class="poodle-app-header"
     data-drag-region={dragRegion}
     data-size={resolvedSize}

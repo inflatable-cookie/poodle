@@ -23,6 +23,15 @@ function basename(file: string, ext: string): string {
   return file.split("/").pop()!.replace(ext, "");
 }
 
+// A plain function component, but also `forwardRef`/`memo`, which return
+// objects. Filtering on `typeof === "function"` silently dropped every
+// forwardRef component out of this sweep — TextInput among them, a g13 pilot
+// component — and the suite still exited 0 because fewer tests ran.
+function isReactComponent(comp: unknown): boolean {
+  if (typeof comp === "function") return true;
+  return typeof comp === "object" && comp !== null && "$$typeof" in comp;
+}
+
 const svelteByName = new Map<string, unknown>(
   Object.entries(svelteModules).map(([f, m]) => [basename(f, ".svelte"), m.default]),
 );
@@ -32,7 +41,7 @@ const reactByName = new Map<string, unknown>(
       const name = basename(f, ".tsx");
       return [name, m[name]] as const;
     })
-    .filter(([name, comp]) => /^[A-Z]/.test(name) && typeof comp === "function"),
+    .filter(([name, comp]) => /^[A-Z]/.test(name) && isReactComponent(comp)),
 );
 
 // Only components implemented in BOTH packages are parity-gated.

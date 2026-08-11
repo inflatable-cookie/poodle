@@ -105,6 +105,12 @@ const WEB_ONLY_PROPS = new Set([
   // look like renderer-neutral data.
   "externalDragSource",
   "externalDropTarget",
+  // AppHeader's bindable `element` escape hatch (g13-b014). Exposes the raw
+  // `<header>` DOM node for host-attached behaviour (e.g. window dragging);
+  // GPUI/Jetstream own window dragging as an adapter capability and have no
+  // element to hand out. The React counterpart is `ref`, documented in prose
+  // (React's own mechanism, not a member of AppHeaderProps).
+  "element",
 ]);
 
 /**
