@@ -12,7 +12,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Identifier, MetricValue};
+use crate::{Expr, Identifier, MetricValue};
 
 /// The axes a component participates in (`CROSS-07`–`CROSS-11`; spec 063
 /// "size, density, orientation, direction, and contrast axes"). Contrast is a
@@ -68,6 +68,13 @@ pub struct SizeAxis {
     /// Semantic size role consulted when no explicit override is present
     /// (`CROSS-07`, `BTN-04`).
     pub size_role: SizeRole,
+    /// Optional expression computing the effective size when `explicit` is
+    /// `None` — the expression form of axis fallback resolution (spec 063
+    /// "prop default and axis fallback resolution"; `CROSS-07` `size ??
+    /// resolveSemanticControlSize(sizeRole)`). `validate` type-checks it to
+    /// a `control-size` member (the resolved axis value's domain).
+    #[serde(default)]
+    pub fallback: Option<Expr>,
     /// Per-component size ladder metrics, one entry per rung (`CROSS-07`
     /// "per-component size ladders"; `BTN-23`, `RNG-09`, `TXT-15` size
     /// tables).

@@ -102,6 +102,7 @@ fn sample_model() -> IrModel {
                     "control-tone",
                     ["default", "danger", "warning"],
                 )),
+                default_expr: None,
             },
             Prop {
                 id: Identifier::new("loading"),
@@ -112,6 +113,7 @@ fn sample_model() -> IrModel {
                 web_only: false,
                 description: "Loading state; suppresses activation (BTN-08).".to_owned(),
                 permitted_subset: None,
+                default_expr: None,
             },
             Prop {
                 id: Identifier::new("label"),
@@ -122,6 +124,7 @@ fn sample_model() -> IrModel {
                 web_only: false,
                 description: "Content label (BTN-16).".to_owned(),
                 permitted_subset: None,
+                default_expr: None,
             },
             Prop {
                 id: Identifier::new("pressed"),
@@ -132,6 +135,7 @@ fn sample_model() -> IrModel {
                 web_only: false,
                 description: "Controlled toggle state (BTN-14).".to_owned(),
                 permitted_subset: None,
+                default_expr: None,
             },
             Prop {
                 id: Identifier::new("defaultPressed"),
@@ -142,6 +146,7 @@ fn sample_model() -> IrModel {
                 web_only: false,
                 description: "Uncontrolled toggle seed (BTN-14).".to_owned(),
                 permitted_subset: None,
+                default_expr: None,
             },
             Prop {
                 id: Identifier::new("formaction"),
@@ -152,6 +157,7 @@ fn sample_model() -> IrModel {
                 web_only: true,
                 description: "Web-only form-override family member (BTN-06, CROSS-03).".to_owned(),
                 permitted_subset: None,
+                default_expr: None,
             },
         ],
         controlled_state: vec![ControlledState {
@@ -229,6 +235,8 @@ fn sample_model() -> IrModel {
                 form: AttributeForm::PresenceOnly,
                 emission: EmissionPolicy::Always,
                 source: Some(Identifier::new("loading")),
+                condition: None,
+                value: None,
                 description: "Always emitted while loading (BTN-08, BTN-18).".to_owned(),
             },
             StateAttribute {
@@ -237,6 +245,8 @@ fn sample_model() -> IrModel {
                 form: AttributeForm::Valued,
                 emission: EmissionPolicy::OmitWhenDefault,
                 source: Some(Identifier::new("tone")),
+                condition: None,
+                value: None,
                 description: "Omitted for the default tone (BTN-18).".to_owned(),
             },
             StateAttribute {
@@ -245,6 +255,8 @@ fn sample_model() -> IrModel {
                 form: AttributeForm::Valued,
                 emission: EmissionPolicy::Always,
                 source: Some(Identifier::new("enabled")),
+                condition: None,
+                value: None,
                 description: "Synthetic computed custom property sourced from a VisualState \
                               field, following the RNG-17 fill-geometry pattern."
                     .to_owned(),
@@ -254,6 +266,7 @@ fn sample_model() -> IrModel {
             size: Some(SizeAxis {
                 explicit: None,
                 size_role: SizeRole::Control,
+                fallback: None,
                 ladder: vec![
                     SizeStep {
                         size: ControlSize::Sm,
@@ -389,12 +402,14 @@ fn sample_model() -> IrModel {
                 id: Identifier::new("snap-to-step"),
                 name: "Snap to step".to_owned(),
                 kind: VectorStepKind::Guard,
+                guard: None,
                 description: "Step snapping anchored at min (CROSS-19).".to_owned(),
             },
             VectorStep {
                 id: Identifier::new("commit-on-release"),
                 name: "Commit on release".to_owned(),
                 kind: VectorStepKind::EffectIntent,
+                guard: None,
                 description: "Change during interaction, commit on release (RNG-11).".to_owned(),
             },
         ],
